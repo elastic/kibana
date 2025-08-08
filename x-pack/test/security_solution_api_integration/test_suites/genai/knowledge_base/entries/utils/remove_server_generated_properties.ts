@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { omit, pickBy } from 'lodash';
+import { map, omit, pickBy } from 'lodash';
 import { KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common';
 
 const serverGeneratedProperties = [
@@ -29,8 +29,10 @@ export type EntryWithoutServerGeneratedProperties = Omit<
 export const removeServerGeneratedProperties = (
   entry: KnowledgeBaseEntryCreateProps
 ): EntryWithoutServerGeneratedProperties => {
-  const removedProperties = omit(entry, serverGeneratedProperties);
-
+  const removedProperties = {
+    ...omit(entry, serverGeneratedProperties),
+    users: map(entry.users, (user) => omit(user, 'id')),
+  };
   // We're only removing undefined values, so this cast correctly narrows the type
   return pickBy(removedProperties, (value) => value !== undefined) as KnowledgeBaseEntryCreateProps;
 };

@@ -6,6 +6,9 @@
  */
 
 import type { ExceptionsListPreSummaryServerExtension } from '@kbn/lists-plugin/server';
+import { stringify } from '../../../endpoint/utils/stringify';
+import { EndpointArtifactExceptionValidationError } from '../validators/errors';
+import { buildSpaceDataFilter } from '../utils';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   BlocklistValidator,
@@ -15,10 +18,11 @@ import {
   TrustedAppValidator,
 } from '../validators';
 
-type ValidatorCallback = ExceptionsListPreSummaryServerExtension['callback'];
 export const getExceptionsPreSummaryHandler = (
   endpointAppContextService: EndpointAppContextService
-): ValidatorCallback => {
+): ExceptionsListPreSummaryServerExtension['callback'] => {
+  const logger = endpointAppContextService.createLogger('listsExceptionsPreSummaryHandler');
+
   return async function ({ data, context: { request, exceptionListClient } }) {
     if (data.namespaceType !== 'agnostic') {
       return data;
@@ -26,6 +30,7 @@ export const getExceptionsPreSummaryHandler = (
 
     const { listId: maybeListId, id } = data;
     let listId: string | null | undefined = maybeListId;
+    let isEndpointArtifact = false;
 
     if (!listId && id) {
       listId = (await exceptionListClient.getExceptionList(data))?.list_id ?? null;
@@ -38,7 +43,7 @@ export const getExceptionsPreSummaryHandler = (
     // Validate Trusted Applications
     if (TrustedAppValidator.isTrustedApp({ listId })) {
       await new TrustedAppValidator(endpointAppContextService, request).validatePreGetListSummary();
-      return data;
+      isEndpointArtifact = true;
     }
 
     // Host Isolation Exceptions
@@ -47,19 +52,19 @@ export const getExceptionsPreSummaryHandler = (
         endpointAppContextService,
         request
       ).validatePreSummary();
-      return data;
+      isEndpointArtifact = true;
     }
 
     // Event Filter Exceptions
     if (EventFilterValidator.isEventFilter({ listId })) {
       await new EventFilterValidator(endpointAppContextService, request).validatePreSummary();
-      return data;
+      isEndpointArtifact = true;
     }
 
     // Validate Blocklists
     if (BlocklistValidator.isBlocklist({ listId })) {
       await new BlocklistValidator(endpointAppContextService, request).validatePreGetListSummary();
-      return data;
+      isEndpointArtifact = true;
     }
 
     // Validate Endpoint Exceptions
@@ -68,7 +73,24 @@ export const getExceptionsPreSummaryHandler = (
         endpointAppContextService,
         request
       ).validatePreGetListSummary();
-      return data;
+      isEndpointArtifact = true;
+    }
+
+    if (
+      isEndpointArtifact &&
+      endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
+    ) {
+      if (!request) {
+        throw new EndpointArtifactExceptionValidationError(`Missing HTTP Request object`);
+      }
+
+      logger.debug(`Summary request prior to adding space filter:\n${stringify(data)}`);
+
+      const spaceFilter = (await buildSpaceDataFilter(endpointAppContextService, request)).filter;
+
+      data.filter = spaceFilter + (data.filter ? ` AND (${data.filter})` : '');
+
+      logger.debug(`Summary request after adding space filter:\n${stringify(data)}`);
     }
 
     return data;

@@ -20,6 +20,7 @@ interface Props {
   fileName: string | null | undefined;
   filePath: string | null | undefined;
   fileExtOriginalPath: string | null | undefined;
+  scopeId: string;
 }
 
 export const FileDraggable = React.memo<Props>(
@@ -31,6 +32,7 @@ export const FileDraggable = React.memo<Props>(
     fileExtOriginalPath,
     fileName,
     filePath,
+    scopeId,
   }) => {
     if (
       isNillEmptyOrNotFinite(fileName) &&
@@ -49,6 +51,7 @@ export const FileDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(fileName) ? (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="file.name"
@@ -61,6 +64,7 @@ export const FileDraggable = React.memo<Props>(
         ) : !isNillEmptyOrNotFinite(endgameFileName) ? (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="endgame.file_name"
@@ -81,6 +85,7 @@ export const FileDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(filePath) ? (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="file.path"
@@ -93,6 +98,7 @@ export const FileDraggable = React.memo<Props>(
         ) : !isNillEmptyOrNotFinite(endgameFilePath) ? (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="endgame.file_path"
@@ -111,6 +117,7 @@ export const FileDraggable = React.memo<Props>(
             </TokensFlexItem>
             <TokensFlexItem grow={false} component="span">
               <DraggableBadge
+                scopeId={scopeId}
                 contextId={contextId}
                 eventId={eventId}
                 field="file.Ext.original.path"

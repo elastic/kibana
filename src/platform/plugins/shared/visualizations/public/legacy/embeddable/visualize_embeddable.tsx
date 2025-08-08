@@ -12,7 +12,7 @@ import { Subscription, ReplaySubject, mergeMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
-import { EuiLoadingChart } from '@elastic/eui';
+import { EuiLoadingChart, type UseEuiTheme } from '@elastic/eui';
 import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
@@ -22,11 +22,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { Warnings } from '@kbn/charts-plugin/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import { Adapters } from '@kbn/inspector-plugin/public';
-import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
-import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 import {
   ExpressionAstExpression,
   ExpressionLoader,
+  ExpressionRendererEvent,
   ExpressionRenderError,
   IExpressionLoaderParams,
 } from '@kbn/expressions-plugin/public';
@@ -35,6 +34,7 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { css } from '@emotion/react';
 import { isFallbackDataView } from '../../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../../components/visualization_missed_saved_object_error';
 import VisualizationError from '../../components/visualization_error';
@@ -48,7 +48,8 @@ import { toExpressionAst } from '../../embeddable/to_ast';
 import { AttributeService } from './attribute_service';
 import { VisualizationsStartDeps } from '../../plugin';
 import { Embeddable } from './embeddable';
-import { EmbeddableOutput } from './i_embeddable';
+import { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
+import { visualizeClassName, visContainerStyle } from '../../vis.styles';
 
 export interface VisualizeEmbeddableDeps {
   start: StartServicesGetter<
@@ -95,7 +96,15 @@ export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
   savedVis?: VisSavedObject;
 };
 export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
-export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeInput;
+export type VisualizeByReferenceInput = { savedObjectId: string } & VisualizeInput;
+
+const warningStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    position: 'absolute',
+    zIndex: 2,
+    right: euiTheme.size.m,
+    bottom: euiTheme.size.m,
+  });
 
 /** @deprecated
  * VisualizeEmbeddable is no longer registered with the legacy embeddable system and is only
@@ -122,11 +131,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableDeps;
   private readonly inspectorAdapters?: Adapters;
-  private attributeService?: AttributeService<
-    VisualizeSavedObjectAttributes,
-    VisualizeByValueInput,
-    VisualizeByReferenceInput
-  >;
+  private attributeService?: AttributeService;
   private expressionVariables: Record<string, unknown> | undefined;
   private readonly expressionVariablesSubject = new ReplaySubject<
     Record<string, unknown> | undefined
@@ -136,11 +141,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     timefilter: TimefilterContract,
     { vis, editPath, editUrl, indexPatterns, deps, capabilities }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
-    attributeService?: AttributeService<
-      VisualizeSavedObjectAttributes,
-      VisualizeByValueInput,
-      VisualizeByReferenceInput
-    >
+    attributeService?: AttributeService
   ) {
     super(initialInput, {
       defaultTitle: vis.title,
@@ -353,7 +354,9 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       const { core } = this.deps.start();
       render(
         <KibanaRenderContextProvider {...core}>
-          <Warnings warnings={warnings || []} />
+          <div css={warningStyles}>
+            <Warnings warnings={warnings || []} />
+          </div>
         </KibanaRenderContextProvider>,
         this.warningDomNode
       );
@@ -431,11 +434,10 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.transferCustomizationsToUiState();
 
     const div = document.createElement('div');
-    div.className = `visualize panel-content panel-content--fullWidth`;
+    div.className = `visualize panel-content panel-content--fullWidth ${visualizeClassName}`;
     domNode.appendChild(div);
 
     const warningDiv = document.createElement('div');
-    warningDiv.className = 'visPanel__warnings';
     domNode.appendChild(warningDiv);
     this.warningDomNode = warningDiv;
 
@@ -445,12 +447,26 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     render(
       <KibanaRenderContextProvider {...core}>
-        <div className="visChart__spinner">
-          <EuiLoadingChart mono size="l" />
+        <div className="visChart__spinner" css={visContainerStyle}>
+          <EuiLoadingChart size="l" />
         </div>
       </KibanaRenderContextProvider>,
       this.domNode
     );
+
+    const hasCompatibleActions = async (event: ExpressionRendererEvent) => {
+      const uiActions = getUiActions();
+      if (!uiActions?.getTriggerCompatibleActions) {
+        return false;
+      }
+      const eventName = get(VIS_EVENT_TO_TRIGGER, event.name, event.name);
+      const actions = await uiActions.getTriggerCompatibleActions(eventName, {
+        data: event.data,
+        embeddable: this,
+      });
+
+      return actions.length > 0;
+    };
 
     const expressions = getExpressions();
     this.handler = await expressions.loader(this.domNode, undefined, {
@@ -458,6 +474,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
         this.onContainerError(error);
       },
+      hasCompatibleActions,
       executionContext: this.getExecutionContext(),
     });
 

@@ -24,6 +24,7 @@ export function getElasticsearchQueryOrThrow(kuery: QuerySchema = ''): QueryDslQ
       );
     }
   } catch (err) {
-    return [] as QueryDslQueryContainer;
+    // @ts-expect-error `getElasticsearchQueryOrThrow` but it doesn't throw :shrug:
+    return [];
   }
 }

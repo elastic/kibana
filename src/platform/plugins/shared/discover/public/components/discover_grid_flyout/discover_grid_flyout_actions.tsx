@@ -11,17 +11,16 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { slice } from 'lodash';
 import { css } from '@emotion/react';
+import type { EuiContextMenuItemIcon, EuiPopoverProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
-  EuiContextMenuItemIcon,
   EuiText,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiPopoverProps,
   EuiToolTip,
   useEuiTheme,
   useResizeObserver,
@@ -164,6 +163,7 @@ function FlyoutActions({
                 content={i18n.translate('discover.grid.tableRow.moreFlyoutActionsButton', {
                   defaultMessage: 'More actions',
                 })}
+                disableScreenReaderOutput
               >
                 <EuiButtonIcon
                   size="s"

@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import './field_name.scss';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiHighlight } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { FieldIcon, FieldIconProps } from '@kbn/react-field';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiHighlight, EuiToolTip } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
 import { getFieldTypeName } from '@kbn/field-utils';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { FieldIcon, FieldIconProps } from '@kbn/react-field';
+import React from 'react';
 
 interface Props {
   fieldName: string;
+  displayNameOverride?: string;
   fieldType?: string;
   fieldMapping?: DataViewField;
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
@@ -31,13 +31,15 @@ export function FieldName({
   fieldMapping,
   fieldType,
   fieldIconProps,
+  displayNameOverride,
   scripted = false,
   highlight = '',
 }: Props) {
   const typeName = getFieldTypeName(fieldType);
-  const displayName =
-    fieldMapping && fieldMapping.displayName ? fieldMapping.displayName : fieldName;
-  const tooltip = displayName !== fieldName ? `${displayName} (${fieldName})` : fieldName;
+  const fieldMappingDisplayName = fieldMapping?.displayName ? fieldMapping.displayName : fieldName;
+  const fieldDisplayName = displayNameOverride ?? fieldMappingDisplayName;
+
+  const tooltip = fieldDisplayName !== fieldName ? `${fieldDisplayName} (${fieldName})` : fieldName;
   const subTypeMulti = fieldMapping && getDataViewFieldSubtypeMulti(fieldMapping.spec);
   const isMultiField = !!subTypeMulti?.multi;
 
@@ -50,7 +52,7 @@ export function FieldName({
           alignItems="center"
           direction="row"
           wrap={false}
-          className="kbnDocViewer__fieldIconContainer"
+          className="kbnDocViewer__fieldName_icon"
         >
           <EuiFlexItem grow={false}>
             <FieldIcon type={fieldType!} label={typeName} scripted={scripted} {...fieldIconProps} />
@@ -71,7 +73,7 @@ export function FieldName({
               delay="long"
               anchorClassName="eui-textBreakAll"
             >
-              <EuiHighlight search={highlight}>{displayName}</EuiHighlight>
+              <EuiHighlight search={highlight}>{fieldDisplayName}</EuiHighlight>
             </EuiToolTip>
           </EuiFlexItem>
 
@@ -88,7 +90,7 @@ export function FieldName({
             >
               <EuiBadge
                 title=""
-                className="kbnDocViewer__multiFieldBadge"
+                className="kbnDocViewer__fieldName_multiFieldBadge"
                 color="default"
                 data-test-subj={`tableDocViewRow-${fieldName}-multifieldBadge`}
               >

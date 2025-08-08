@@ -37,12 +37,20 @@ export const getEcsMappingNode = ({
     const response = await esqlKnowledgeBase.translate(prompt);
 
     const updatedQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';
+    if (!updatedQuery) {
+      logger.warn('Failed to apply ECS mapping to the query');
+      const summary = '## Field Mapping Summary\n\nFailed to apply ECS mapping to the query';
+      return {
+        includes_ecs_mapping: true,
+        comments: [generateAssistantComment(summary)],
+      };
+    }
+
     const ecsSummary = response.match(/## Field Mapping Summary[\s\S]*$/)?.[0] ?? '';
 
     // We set includes_ecs_mapping to true to indicate that the ecs mapping has been applied.
     // This is to ensure that the node only runs once
     return {
-      response,
       comments: [generateAssistantComment(cleanMarkdown(ecsSummary))],
       includes_ecs_mapping: true,
       elastic_rule: {

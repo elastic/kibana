@@ -5,57 +5,36 @@
  * 2.0.
  */
 
+import { uniqBy } from 'lodash';
 import objectHash from 'object-hash';
-import type { Moment } from 'moment';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 
 import type {
-  BaseFieldsLatest,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import type { ConfigType } from '../../../../config';
-import type { CompleteRule, EsqlRuleParams } from '../../rule_schema';
+import type { EsqlRuleParams } from '../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
-import type { SignalSource } from '../types';
+import type { SecuritySharedParams, SignalSource } from '../types';
 import { getSuppressionAlertFields, getSuppressionTerms } from '../utils';
 import { generateAlertId } from './utils';
 
 export const wrapSuppressedEsqlAlerts = ({
+  sharedParams,
   events,
-  spaceId,
-  completeRule,
-  mergeStrategy,
-  alertTimestampOverride,
-  ruleExecutionLogger,
-  publicBaseUrl,
-  tuple,
   isRuleAggregating,
-  primaryTimestamp,
-  secondaryTimestamp,
-  intendedTimestamp,
+  expandedFields,
 }: {
+  sharedParams: SecuritySharedParams<EsqlRuleParams>;
   isRuleAggregating: boolean;
   events: Array<estypes.SearchHit<SignalSource>>;
-  spaceId: string | null | undefined;
-  completeRule: CompleteRule<EsqlRuleParams>;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  alertTimestampOverride: Date | undefined;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  publicBaseUrl: string | undefined;
-  tuple: {
-    to: Moment;
-    from: Moment;
-    maxSignals: number;
-  };
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
-  intendedTimestamp: Date | undefined;
-}): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
-  const wrapped = events.map<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>(
+  expandedFields: string[] | undefined;
+}): Array<WrappedAlert<DetectionAlertLatest & SuppressionFieldsLatest>> => {
+  const { spaceId, completeRule, tuple, primaryTimestamp, secondaryTimestamp } = sharedParams;
+  const wrapped = events.map<WrappedAlert<DetectionAlertLatest & SuppressionFieldsLatest>>(
     (event, i) => {
       const combinedFields = { ...event?.fields, ...event._source };
 
@@ -71,25 +50,17 @@ export const wrapSuppressedEsqlAlerts = ({
         tuple,
         isRuleAggregating,
         index: i,
+        expandedFields,
       });
 
       const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 
-      const baseAlert: BaseFieldsLatest = transformHitToAlert({
-        spaceId,
-        completeRule,
+      const baseAlert: DetectionAlertLatest = transformHitToAlert({
+        sharedParams,
         doc: event,
-        mergeStrategy,
-        ignoreFields: {},
-        ignoreFieldsRegexes: [],
         applyOverrides: true,
         buildReasonMessage: buildReasonMessageForNewTermsAlert,
-        indicesToQuery: [],
-        alertTimestampOverride,
-        ruleExecutionLogger,
         alertUuid: id,
-        publicBaseUrl,
-        intendedTimestamp,
       });
 
       return {
@@ -110,5 +81,5 @@ export const wrapSuppressedEsqlAlerts = ({
     }
   );
 
-  return wrapped;
+  return uniqBy(wrapped, (alert) => alert._id);
 };

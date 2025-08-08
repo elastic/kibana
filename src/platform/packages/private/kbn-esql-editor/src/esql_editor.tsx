@@ -16,27 +16,29 @@ import {
   EuiToolTip,
   EuiButton,
   type EuiButtonColor,
+  useGeneratedHtmlId,
+  EuiFormLabel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { isEqual } from 'lodash';
+import { isEqual, memoize } from 'lodash';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
+import useObservable from 'react-use/lib/useObservable';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ILicense } from '@kbn/licensing-plugin/public';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
-import memoize from 'lodash/memoize';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
-import {
-  type ESQLRealField,
-  ESQLVariableType,
-  type ESQLControlVariable,
-} from '@kbn/esql-validation-autocomplete';
-import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
+import { FieldType } from '@kbn/esql-ast';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -49,6 +51,7 @@ import {
   onMouseDownResizeHandler,
   getEditorOverwrites,
   type MonacoMessage,
+  filterDataErrors,
 } from './helpers';
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
@@ -56,12 +59,19 @@ import {
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
+  EDITOR_MAX_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
-import type { ESQLEditorProps, ESQLEditorDeps } from './types';
+import type {
+  ESQLEditorProps as ESQLEditorPropsInternal,
+  ESQLEditorDeps,
+  ControlsContext,
+} from './types';
+import { useRestorableState, withRestorableState } from './restorable_state';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
+const DATEPICKER_WIDTH = 373;
 
 const triggerControl = async (
   queryString: string,
@@ -69,8 +79,8 @@ const triggerControl = async (
   position: monaco.Position | null | undefined,
   uiActions: ESQLEditorDeps['uiActions'],
   esqlVariables?: ESQLControlVariable[],
-  onSaveControl?: ESQLEditorProps['onSaveControl'],
-  onCancelControl?: ESQLEditorProps['onCancelControl']
+  onSaveControl?: ControlsContext['onSaveControl'],
+  onCancelControl?: ControlsContext['onCancelControl']
 ) => {
   await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
     queryString,
@@ -82,7 +92,8 @@ const triggerControl = async (
   });
 };
 
-export const ESQLEditor = memo(function ESQLEditor({
+// React.memo is applied inside the withRestorableState HOC (called below)
+const ESQLEditorInternal = function ESQLEditor({
   query,
   onTextLangQueryChange,
   onTextLangQuerySubmit,
@@ -102,12 +113,17 @@ export const ESQLEditor = memo(function ESQLEditor({
   hasOutline,
   displayDocumentationAsFlyout,
   disableAutoFocus,
-  onSaveControl,
-  onCancelControl,
-  supportsControls,
+  controlsContext,
   esqlVariables,
-}: ESQLEditorProps) {
+  expandToFitQueryOnMount,
+  dataErrorsControl,
+  formLabel,
+}: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
+  const editorModel = useRef<monaco.editor.ITextModel>();
+  const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
+  const containerRef = useRef<HTMLElement>(null);
+
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
@@ -123,17 +139,26 @@ export const ESQLEditor = memo(function ESQLEditor({
     data,
   } = kibana.services;
 
+  const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
+
+  const fixedQuery = useMemo(
+    () => fixESQLQueryWithVariables(query.esql, esqlVariables),
+    [esqlVariables, query.esql]
+  );
+
   const variablesService = kibana.services?.esql?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
-  const [code, setCode] = useState<string>(query.esql ?? '');
+  const [code, setCode] = useState<string>(fixedQuery ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
-  const [editorHeight, setEditorHeight] = useState(
+  const [editorHeight, setEditorHeight] = useRestorableState(
+    'editorHeight',
     editorIsInline ? EDITOR_INITIAL_HEIGHT_INLINE_EDITING : EDITOR_INITIAL_HEIGHT
   );
   // the resizable container is the container that holds the history component or the inline docs
   // they are never open simultaneously
-  const [resizableContainerHeight, setResizableContainerHeight] = useState(
+  const [resizableContainerHeight, setResizableContainerHeight] = useRestorableState(
+    'resizableContainerHeight',
     RESIZABLE_CONTAINER_INITIAL_HEIGHT
   );
   const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
@@ -142,7 +167,7 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   const isSpaceReduced = Boolean(editorIsInline) && measuredEditorWidth < BREAKPOINT_WIDTH;
 
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useRestorableState('isHistoryOpen', false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
@@ -212,15 +237,15 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   useEffect(() => {
     if (editor1.current) {
-      if (code !== query.esql) {
-        setCode(query.esql);
+      if (code !== fixedQuery) {
+        setCode(fixedQuery);
       }
     }
-  }, [code, query.esql]);
+  }, [code, fixedQuery]);
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
-    if (supportsControls) {
+    if (controlsContext?.supportsControls) {
       variablesService?.enableSuggestions();
 
       const variables = variablesService?.esqlVariables;
@@ -233,17 +258,13 @@ export const ESQLEditor = memo(function ESQLEditor({
     } else {
       variablesService?.disableSuggestions();
     }
-  }, [variablesService, supportsControls, esqlVariables]);
-
-  const toggleHistory = useCallback((status: boolean) => {
-    setIsHistoryOpen(status);
-  }, []);
+  }, [variablesService, controlsContext, esqlVariables]);
 
   const showSuggestionsIfEmptyQuery = useCallback(() => {
     if (editorModel.current?.getValueLength() === 0) {
-      setImmediate(() => {
+      setTimeout(() => {
         editor1.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
-      });
+      }, 0);
     }
   }, []);
 
@@ -256,8 +277,12 @@ export const ESQLEditor = memo(function ESQLEditor({
       const editorLeft = editorCoords.left;
 
       // Calculate the absolute position of the popover
-      const absoluteTop = editorTop + (editorPosition?.top ?? 0) + 20;
-      const absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
+      const absoluteTop = editorTop + (editorPosition?.top ?? 0) + 25;
+      let absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
+      if (absoluteLeft > editorCoords.width) {
+        // date picker is out of the editor
+        absoluteLeft = absoluteLeft - DATEPICKER_WIDTH;
+      }
 
       setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
       datePickerOpenStatusRef.current = true;
@@ -281,54 +306,60 @@ export const ESQLEditor = memo(function ESQLEditor({
   monaco.editor.registerCommand('esql.control.time_literal.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      query.esql,
+      fixedQuery,
       ESQLVariableType.TIME_LITERAL,
       position,
       uiActions,
       esqlVariables,
-      onSaveControl,
-      onCancelControl
+      controlsContext?.onSaveControl,
+      controlsContext?.onCancelControl
     );
   });
 
   monaco.editor.registerCommand('esql.control.fields.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      query.esql,
+      fixedQuery,
       ESQLVariableType.FIELDS,
       position,
       uiActions,
       esqlVariables,
-      onSaveControl,
-      onCancelControl
+      controlsContext?.onSaveControl,
+      controlsContext?.onCancelControl
     );
   });
 
   monaco.editor.registerCommand('esql.control.values.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      query.esql,
+      fixedQuery,
       ESQLVariableType.VALUES,
       position,
       uiActions,
       esqlVariables,
-      onSaveControl,
-      onCancelControl
+      controlsContext?.onSaveControl,
+      controlsContext?.onCancelControl
     );
   });
 
   monaco.editor.registerCommand('esql.control.functions.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      query.esql,
+      fixedQuery,
       ESQLVariableType.FUNCTIONS,
       position,
       uiActions,
       esqlVariables,
-      onSaveControl,
-      onCancelControl
+      controlsContext?.onSaveControl,
+      controlsContext?.onCancelControl
     );
   });
+
+  editor1.current?.addCommand(
+    // eslint-disable-next-line no-bitwise
+    monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+    onQuerySubmit
+  );
 
   const styles = esqlEditorStyles(
     theme.euiTheme,
@@ -339,9 +370,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     Boolean(editorIsInline),
     Boolean(hasOutline)
   );
-  const editorModel = useRef<monaco.editor.ITextModel>();
-  const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
-  const containerRef = useRef<HTMLElement>(null);
 
   const onMouseDownResize = useCallback<typeof onMouseDownResizeHandler>(
     (
@@ -392,17 +420,27 @@ export const ESQLEditor = memo(function ESQLEditor({
         }
       />
     );
-  }, [onMouseDownResize, editorHeight, onKeyDownResize]);
+  }, [onMouseDownResize, editorHeight, onKeyDownResize, setEditorHeight]);
 
   const onEditorFocus = useCallback(() => {
     setIsCodeEditorExpandedFocused(true);
     showSuggestionsIfEmptyQuery();
+    setLabelInFocus(true);
   }, [showSuggestionsIfEmptyQuery]);
 
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
     const fn = memoize(
-      (...args: [{ esql: string }, ExpressionsStart, TimeRange, AbortController?]) => ({
+      (
+        ...args: [
+          { esql: string },
+          ExpressionsStart,
+          TimeRange,
+          AbortController?,
+          string?,
+          ESQLControlVariable[]?
+        ]
+      ) => ({
         timestamp: Date.now(),
         result: fetchFieldsFromESQL(...args),
       }),
@@ -413,10 +451,18 @@ export const ESQLEditor = memo(function ESQLEditor({
   }, []);
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
-    const fn = memoize((...args: [DataViewsPublicPluginStart, CoreStart]) => ({
-      timestamp: Date.now(),
-      result: getESQLSources(...args),
-    }));
+    const fn = memoize(
+      (
+        ...args: [
+          DataViewsPublicPluginStart,
+          CoreStart,
+          (() => Promise<ILicense | undefined>) | undefined
+        ]
+      ) => ({
+        timestamp: Date.now(),
+        result: getESQLSources(...args),
+      })
+    );
 
     return { cache: fn.cache, memoizedSources: fn };
   }, []);
@@ -424,8 +470,9 @@ export const ESQLEditor = memo(function ESQLEditor({
   const esqlCallbacks: ESQLCallbacks = useMemo(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
-        clearCacheWhenOld(dataSourcesCache, query.esql);
-        const sources = await memoizedSources(dataViews, core).result;
+        clearCacheWhenOld(dataSourcesCache, fixedQuery);
+        const getLicense = kibana.services?.esql?.getLicense;
+        const sources = await memoizedSources(dataViews, core, getLicense).result;
         return sources;
       },
       getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
@@ -442,13 +489,16 @@ export const ESQLEditor = memo(function ESQLEditor({
               esqlQuery,
               expressions,
               timeRange,
-              abortController
+              abortController,
+              undefined,
+              variablesService?.esqlVariables
             ).result;
-            const columns: ESQLRealField[] =
+            const columns: ESQLFieldWithMetadata[] =
               table?.columns.map((c) => {
                 return {
                   name: c.name,
                   type: c.meta.esType as FieldType,
+                  hasConflict: c.meta.type === KBN_FIELD_TYPES.CONFLICT,
                 };
               }) || [];
 
@@ -474,20 +524,48 @@ export const ESQLEditor = memo(function ESQLEditor({
       },
       // @ts-expect-error To prevent circular type import, type defined here is partial of full client
       getFieldsMetadata: fieldsMetadata?.getClient(),
-      getVariablesByType: (type: ESQLVariableType) => {
-        return variablesService?.esqlVariables.filter((variable) => variable.type === type);
+      getVariables: () => {
+        return variablesService?.esqlVariables;
       },
       canSuggestVariables: () => {
         return variablesService?.areSuggestionsEnabled ?? false;
       },
       getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
+      getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
+      getEditorExtensions: async (queryString: string) => {
+        if (activeSolutionId) {
+          return (
+            (await kibana.services?.esql?.getEditorExtensionsAutocomplete(
+              queryString,
+              activeSolutionId
+            )) ?? { recommendedQueries: [], recommendedFields: [] }
+          );
+        }
+        return {
+          recommendedQueries: [],
+          recommendedFields: [],
+        };
+      },
+      getInferenceEndpoints: kibana.services?.esql?.getInferenceEndpointsAutocomplete,
+      getLicense: async () => {
+        const ls = await kibana.services?.esql?.getLicense();
+
+        if (!ls) {
+          return undefined;
+        }
+
+        return {
+          hasAtLeast: ls.hasAtLeast.bind(ls), // keep the original context this
+        };
+      },
+      getActiveProduct: () => core.pricing.getActiveProduct(),
     };
     return callbacks;
   }, [
     fieldsMetadata,
-    kibana.services?.esql?.getJoinIndicesAutocomplete,
+    kibana.services?.esql,
     dataSourcesCache,
-    query.esql,
+    fixedQuery,
     memoizedSources,
     dataViews,
     core,
@@ -496,10 +574,11 @@ export const ESQLEditor = memo(function ESQLEditor({
     memoizedFieldsFromESQL,
     expressions,
     abortController,
-    indexManagementApiService,
-    histogramBarTarget,
     variablesService?.esqlVariables,
     variablesService?.areSuggestionsEnabled,
+    indexManagementApiService,
+    histogramBarTarget,
+    activeSolutionId,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -569,7 +648,11 @@ export const ESQLEditor = memo(function ESQLEditor({
       const markers = [];
 
       if (parserErrors.length) {
-        markers.push(...parserErrors);
+        if (dataErrorsControl?.enabled === false) {
+          markers.push(...filterDataErrors(parserErrors));
+        } else {
+          markers.push(...parserErrors);
+        }
       }
       if (active) {
         setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
@@ -577,7 +660,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         return;
       }
     },
-    [parseMessages]
+    [parseMessages, dataErrorsControl?.enabled]
   );
 
   useDebounceWithOptions(
@@ -604,7 +687,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     },
     { skipFirstRender: false },
     256,
-    [serverErrors, serverWarning, code]
+    [serverErrors, serverWarning, code, queryValidation]
   );
 
   const suggestionProvider = useMemo(
@@ -613,11 +696,6 @@ export const ESQLEditor = memo(function ESQLEditor({
   );
 
   const hoverProvider = useMemo(() => ESQLLang.getHoverProvider?.(esqlCallbacks), [esqlCallbacks]);
-
-  const codeActionProvider = useMemo(
-    () => ESQLLang.getCodeActionProvider?.(esqlCallbacks),
-    [esqlCallbacks]
-  );
 
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editor1.current) {
@@ -656,83 +734,120 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   onLayoutChangeRef.current = onLayoutChange;
 
-  const codeEditorOptions: CodeEditorProps['options'] = {
-    hover: {
-      above: false,
-    },
-    accessibilitySupport: 'off',
-    autoIndent: 'none',
-    automaticLayout: true,
-    fixedOverflowWidgets: true,
-    folding: false,
-    fontSize: 14,
-    hideCursorInOverviewRuler: true,
-    // this becomes confusing with multiple markers, so quick fixes
-    // will be proposed only within the tooltip
-    lightbulb: {
-      enabled: false,
-    },
-    lineDecorationsWidth: 20,
-    lineNumbers: 'on',
-    lineNumbersMinChars: 3,
-    minimap: { enabled: false },
-    overviewRulerLanes: 0,
-    overviewRulerBorder: false,
-    padding: {
-      top: 8,
-      bottom: 8,
-    },
-    quickSuggestions: true,
-    readOnly: isDisabled,
-    renderLineHighlight: 'line',
-    renderLineHighlightOnlyWhenFocus: true,
-    scrollbar: {
-      horizontal: 'hidden',
-      horizontalScrollbarSize: 6,
-      vertical: 'auto',
-      verticalScrollbarSize: 6,
-    },
-    scrollBeyondLastLine: false,
-    theme: ESQL_LANG_ID,
-    wordWrap: 'on',
-    wrappingIndent: 'none',
-  };
+  const codeEditorOptions: CodeEditorProps['options'] = useMemo(
+    () => ({
+      hover: {
+        above: false,
+      },
+      accessibilitySupport: 'auto',
+      autoIndent: 'keep',
+      automaticLayout: true,
+      fixedOverflowWidgets: true,
+      folding: false,
+      fontSize: 14,
+      hideCursorInOverviewRuler: true,
+      // this becomes confusing with multiple markers, so quick fixes
+      // will be proposed only within the tooltip
+      lightbulb: {
+        enabled: false,
+      },
+      lineDecorationsWidth: 20,
+      lineNumbers: 'on',
+      lineNumbersMinChars: 3,
+      minimap: { enabled: false },
+      overviewRulerLanes: 0,
+      overviewRulerBorder: false,
+      padding: {
+        top: 8,
+        bottom: 8,
+      },
+      quickSuggestions: true,
+      readOnly: isDisabled,
+      renderLineHighlight: 'line',
+      renderLineHighlightOnlyWhenFocus: true,
+      scrollbar: {
+        horizontal: 'hidden',
+        horizontalScrollbarSize: 6,
+        vertical: 'auto',
+        verticalScrollbarSize: 6,
+      },
+      scrollBeyondLastLine: false,
+      tabSize: 2,
+      theme: ESQL_LANG_ID,
+      wordWrap: 'on',
+      wrappingIndent: 'none',
+    }),
+    [isDisabled]
+  );
 
+  const htmlId = useGeneratedHtmlId({ prefix: 'esql-editor' });
+  const [labelInFocus, setLabelInFocus] = useState(false);
   const editorPanel = (
     <>
-      {Boolean(editorIsInline) && !hideRunQueryButton && (
+      {Boolean(editorIsInline) && (
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}
-          justifyContent="flexEnd"
+          justifyContent="spaceBetween"
+          alignItems={hideRunQueryButton ? 'flexEnd' : 'center'}
           css={css`
-            padding: ${theme.euiTheme.size.s};
+            padding: ${theme.euiTheme.size.s} 0;
           `}
         >
           <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="top"
-              content={i18n.translate('esqlEditor.query.runQuery', {
-                defaultMessage: 'Run query',
-              })}
-            >
-              <EuiButton
-                color={queryRunButtonProperties.color as EuiButtonColor}
-                onClick={onQuerySubmit}
-                iconType={queryRunButtonProperties.iconType}
-                size="s"
-                isLoading={isLoading && !allowQueryCancellation}
-                isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
-                data-test-subj="ESQLEditor-run-query-button"
-                aria-label={queryRunButtonProperties.label}
+            {formLabel && (
+              <EuiFormLabel
+                isFocused={labelInFocus && !isDisabled}
+                isDisabled={isDisabled}
+                aria-invalid={Boolean(editorMessages.errors.length)}
+                isInvalid={Boolean(editorMessages.errors.length)}
+                onClick={() => {
+                  // HTML `for` doesn't correctly transfer click behavior to the code editor hint, so apply it manually
+                  const editorElement = document.getElementById(htmlId);
+                  if (editorElement) {
+                    editorElement.click();
+                  }
+                }}
+                htmlFor={htmlId}
               >
-                {queryRunButtonProperties.label}
-              </EuiButton>
-            </EuiToolTip>
+                {formLabel}
+              </EuiFormLabel>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {!hideRunQueryButton && (
+              <EuiToolTip
+                position="top"
+                content={i18n.translate('esqlEditor.query.runQuery', {
+                  defaultMessage: 'Run query',
+                })}
+              >
+                <EuiButton
+                  color={queryRunButtonProperties.color as EuiButtonColor}
+                  onClick={onQuerySubmit}
+                  iconType={queryRunButtonProperties.iconType}
+                  size="s"
+                  isLoading={isLoading && !allowQueryCancellation}
+                  isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
+                  data-test-subj="ESQLEditor-run-query-button"
+                  aria-label={queryRunButtonProperties.label}
+                >
+                  {queryRunButtonProperties.label}
+                </EuiButton>
+              </EuiToolTip>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      <EuiFlexGroup gutterSize="none" responsive={false} ref={containerRef}>
+      <EuiFlexGroup
+        gutterSize="none"
+        css={{
+          zIndex: theme.euiTheme.levels.flyout,
+          position: 'relative',
+        }}
+        responsive={false}
+        ref={containerRef}
+      >
         <EuiOutsideClickDetector
           onOutsideClick={() => {
             setIsCodeEditorExpandedFocused(false);
@@ -749,6 +864,8 @@ export const ESQLEditor = memo(function ESQLEditor({
             >
               <div css={styles.editorContainer}>
                 <CodeEditor
+                  htmlId={htmlId}
+                  aria-label={formLabel}
                   languageId={ESQL_LANG_ID}
                   classNameCss={getEditorOverwrites(theme)}
                   value={code}
@@ -763,8 +880,9 @@ export const ESQLEditor = memo(function ESQLEditor({
                       return hoverProvider?.provideHover(model, position, token);
                     },
                   }}
-                  codeActions={codeActionProvider}
                   onChange={onQueryUpdate}
+                  onFocus={() => setLabelInFocus(true)}
+                  onBlur={() => setLabelInFocus(false)}
                   editorDidMount={(editor) => {
                     editor1.current = editor;
                     const model = editor.getModel();
@@ -793,21 +911,24 @@ export const ESQLEditor = memo(function ESQLEditor({
                       onEditorFocus();
                     });
 
-                    // on CMD/CTRL + Enter submit the query
-                    editor.addCommand(
-                      // eslint-disable-next-line no-bitwise
-                      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                      onQuerySubmit
-                    );
-
                     // on CMD/CTRL + / comment out the entire line
                     editor.addCommand(
                       // eslint-disable-next-line no-bitwise
                       monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
                       onCommentLine
                     );
-
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);
+                    if (expandToFitQueryOnMount) {
+                      const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
+                      const lineCount = editor.getModel()?.getLineCount() || 1;
+                      const padding = lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical scrollbars
+                      const height = editor.getTopForLineNumber(lineCount + 1) + padding;
+                      if (height > editorHeight && height < EDITOR_MAX_HEIGHT) {
+                        setEditorHeight(height);
+                      } else if (height >= EDITOR_MAX_HEIGHT) {
+                        setEditorHeight(EDITOR_MAX_HEIGHT);
+                      }
+                    }
                     editor.onDidLayoutChange((layoutInfoEvent) => {
                       onLayoutChangeRef.current(layoutInfoEvent);
                     });
@@ -865,7 +986,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         hideTimeFilterInfo={hideTimeFilterInfo}
         {...editorMessages}
         isHistoryOpen={isHistoryOpen}
-        setIsHistoryOpen={toggleHistory}
+        setIsHistoryOpen={setIsHistoryOpen}
         isLanguageComponentOpen={isLanguageComponentOpen}
         setIsLanguageComponentOpen={setIsLanguageComponentOpen}
         measuredContainerWidth={measuredEditorWidth}
@@ -873,6 +994,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         resizableContainerButton={resizableContainerButton}
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
+        dataErrorsControl={dataErrorsControl}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (
@@ -884,6 +1006,8 @@ export const ESQLEditor = memo(function ESQLEditor({
               borderRadius: theme.euiTheme.border.radius.small,
               position: 'absolute',
               overflow: 'auto',
+              zIndex: 1001,
+              border: theme.euiTheme.border.thin,
             }}
             ref={popoverRef}
             data-test-subj="ESQLEditor-timepicker-popover"
@@ -946,4 +1070,8 @@ export const ESQLEditor = memo(function ESQLEditor({
   );
 
   return editorPanel;
-});
+};
+
+export const ESQLEditor = withRestorableState(ESQLEditorInternal);
+
+export type ESQLEditorProps = ComponentProps<typeof ESQLEditor>;

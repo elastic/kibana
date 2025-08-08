@@ -8,6 +8,7 @@ import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
 import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants/monitor_defaults';
 import {
   BROWSER_TEST_NOW_RUN,
@@ -75,6 +76,7 @@ export class SyntheticsPrivateLocation {
     newPolicyTemplate: NewPackagePolicy,
     spaceId: string,
     globalParams: Record<string, string>,
+    maintenanceWindows: MaintenanceWindow[],
     testRunId?: string,
     runOnce?: boolean
   ): Promise<NewPackagePolicy | null> {
@@ -122,7 +124,8 @@ export class SyntheticsPrivateLocation {
             : {}),
           ...(runOnce ? { run_once: runOnce } : {}),
         },
-        globalParams
+        globalParams,
+        maintenanceWindows
       );
 
       return formattedPolicy;
@@ -136,6 +139,7 @@ export class SyntheticsPrivateLocation {
     configs: PrivateConfig[],
     privateLocations: SyntheticsPrivateLocations,
     spaceId: string,
+    maintenanceWindows: MaintenanceWindow[],
     testRunId?: string,
     runOnce?: boolean
   ) {
@@ -165,6 +169,7 @@ export class SyntheticsPrivateLocation {
             newPolicyTemplate,
             spaceId,
             globalParams,
+            maintenanceWindows,
             testRunId,
             runOnce
           );
@@ -214,10 +219,12 @@ export class SyntheticsPrivateLocation {
     privateConfig,
     spaceId,
     allPrivateLocations,
+    maintenanceWindows,
   }: {
     privateConfig?: PrivateConfig;
     allPrivateLocations: PrivateLocationAttributes[];
     spaceId: string;
+    maintenanceWindows: MaintenanceWindow[];
   }) {
     if (!privateConfig) {
       return null;
@@ -238,7 +245,8 @@ export class SyntheticsPrivateLocation {
         location,
         newPolicyTemplate,
         spaceId,
-        globalParams
+        globalParams,
+        maintenanceWindows
       );
 
       const pkgPolicy = {
@@ -256,7 +264,8 @@ export class SyntheticsPrivateLocation {
   async editMonitors(
     configs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }>,
     allPrivateLocations: SyntheticsPrivateLocations,
-    spaceId: string
+    spaceId: string,
+    maintenanceWindows: MaintenanceWindow[]
   ) {
     if (configs.length === 0) {
       return {};
@@ -291,7 +300,8 @@ export class SyntheticsPrivateLocation {
               privateLocation,
               newPolicyTemplate,
               spaceId,
-              globalParams
+              globalParams,
+              maintenanceWindows
             );
 
             if (!newPolicy) {

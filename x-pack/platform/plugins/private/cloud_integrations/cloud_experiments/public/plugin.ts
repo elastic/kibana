@@ -73,7 +73,8 @@ export class CloudExperimentsPlugin
       logger: this.logger,
     });
 
-    const launchDarklyOpenFeatureProvider = this.createOpenFeatureProvider();
+    const initialFeatureFlags = core.featureFlags.getInitialFeatureFlags();
+    const launchDarklyOpenFeatureProvider = this.createOpenFeatureProvider(initialFeatureFlags);
     if (launchDarklyOpenFeatureProvider) {
       core.featureFlags.setProvider(launchDarklyOpenFeatureProvider);
     }
@@ -99,14 +100,16 @@ export class CloudExperimentsPlugin
 
   /**
    * Sets up the OpenFeature LaunchDarkly provider
-   * @private
+   * @internal
    */
-  private createOpenFeatureProvider() {
+  private createOpenFeatureProvider(initialFeatureFlags: Record<string, unknown>) {
     const { launch_darkly: ldConfig } = this.initializerContext.config.get<{
       launch_darkly?: LaunchDarklyClientConfig;
     }>();
 
     if (!ldConfig) return;
+
+    const bootstrap = Object.keys(initialFeatureFlags).length > 0 ? initialFeatureFlags : undefined;
 
     return new LaunchDarklyClientProvider(ldConfig.client_id, {
       // logger: this.logger.get('launch-darkly'),
@@ -120,6 +123,7 @@ export class CloudExperimentsPlugin
             ? this.initializerContext.env.packageInfo.buildSha
             : this.initializerContext.env.packageInfo.version,
       },
+      bootstrap,
     });
   }
 }

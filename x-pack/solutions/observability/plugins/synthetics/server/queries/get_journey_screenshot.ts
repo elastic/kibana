@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { SyntheticsEsClient } from '../lib';
 import { RefResult, FullScreenshot } from '../../common/runtime_types/ping/synthetics';
 
@@ -64,7 +64,7 @@ export const getJourneyScreenshot = async ({
     },
   };
 
-  const result = await syntheticsEsClient.search({ body });
+  const result = await syntheticsEsClient.search(body);
 
   const screenshotsOrRefs =
     (result.body.aggregations?.step.image.hits.hits as ResultType[]) ?? null;

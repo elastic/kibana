@@ -13,6 +13,7 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type {
   BulkUpsertAssetCriticalityRecordsResponse,
   AssetCriticalityUpsert,
+  AssetCriticalityUpsertForBulkUpload,
 } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
@@ -25,11 +26,11 @@ import {
 } from './constants';
 import { AssetCriticalityAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
-import { getImplicitEntityFields } from './helpers';
+import { getImplicitEntityFields, getImplicitEntityFieldsWithDeleted } from './helpers';
 import {
   getIngestPipelineName,
-  createEventIngestedFromTimestamp,
-} from '../utils/create_ingest_pipeline';
+  createEventIngestedPipeline,
+} from '../utils/event_ingested_pipeline';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;
@@ -66,7 +67,7 @@ export class AssetCriticalityDataClient {
    * Initialize asset criticality resources.
    */
   public async init() {
-    await createEventIngestedFromTimestamp(this.options.esClient, this.options.namespace);
+    await createEventIngestedPipeline(this.options.esClient, this.options.namespace);
     await this.createOrUpdateIndex();
 
     this.options.auditLogger?.log({
@@ -245,10 +246,8 @@ export class AssetCriticalityDataClient {
       id,
       index: this.getIndex(),
       refresh: refresh ?? false,
-      body: {
-        doc,
-        doc_as_upsert: true,
-      },
+      doc,
+      doc_as_upsert: true,
     });
 
     return doc;
@@ -286,7 +285,9 @@ export class AssetCriticalityDataClient {
       const processedEntities = new Set<string>();
 
       for await (const untypedRecord of recordsStream) {
-        const record = untypedRecord as unknown as AssetCriticalityUpsert | Error;
+        const record = untypedRecord as unknown as AssetCriticalityUpsert as
+          | AssetCriticalityUpsertForBulkUpload
+          | Error;
 
         stats.total++;
         if (record instanceof Error) {
@@ -321,22 +322,32 @@ export class AssetCriticalityDataClient {
       flushBytes,
       retries,
       refreshOnCompletion: this.getIndex(),
-      onDocument: ({ record }) => [
-        { update: { _id: createId(record) } },
-        {
-          doc: {
-            id_field: record.idField,
-            id_value: record.idValue,
-            criticality_level: record.criticalityLevel,
-            asset: {
-              criticality: record.criticalityLevel,
+      onDocument: ({ record }) => {
+        const criticalityLevel =
+          record.criticalityLevel === 'unassigned'
+            ? CRITICALITY_VALUES.DELETED
+            : record.criticalityLevel;
+
+        return [
+          { update: { _id: createId(record) } },
+          {
+            doc: {
+              id_field: record.idField,
+              id_value: record.idValue,
+              criticality_level: criticalityLevel,
+              asset: {
+                criticality: criticalityLevel,
+              },
+              ...getImplicitEntityFieldsWithDeleted({
+                ...record,
+                criticalityLevel,
+              }),
+              '@timestamp': new Date().toISOString(),
             },
-            ...getImplicitEntityFields(record),
-            '@timestamp': new Date().toISOString(),
+            doc_as_upsert: true,
           },
-          doc_as_upsert: true,
-        },
-      ],
+        ];
+      },
       onDrop: ({ document, error }) => {
         errors.push({
           message: error?.reason || 'Unknown error',
@@ -381,7 +392,7 @@ export class AssetCriticalityDataClient {
             criticality: CRITICALITY_VALUES.DELETED,
           },
           '@timestamp': new Date().toISOString(),
-          ...getImplicitEntityFields({
+          ...getImplicitEntityFieldsWithDeleted({
             ...idParts,
             criticalityLevel: CRITICALITY_VALUES.DELETED,
           }),

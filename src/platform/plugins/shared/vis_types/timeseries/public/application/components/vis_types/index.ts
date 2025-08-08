@@ -17,8 +17,6 @@ import { TimeseriesVisParams } from '../../../types';
 import type { TimeseriesVisData, PanelData } from '../../../../common/types';
 import { FetchedIndexPattern } from '../../../../common/types';
 
-import './_vis_types.scss';
-
 /**
  * Lazy load each visualization type, since the only one is presented on the screen at the same time.
  * Disable typescript errors since the components are not typed yet.

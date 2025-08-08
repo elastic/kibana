@@ -7,45 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
-import { Config } from './config';
 import { Build } from './build';
+import { getMockConfig } from './__mocks__/get_config';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
-const config = new Config(
-  true,
-  false,
-  {
-    version: '8.0.0',
-    engines: {
-      node: '*',
-    },
-    workspaces: {
-      packages: [],
-    },
-  } as any,
-  '1.2.3',
-  REPO_ROOT,
-  {
-    buildNumber: 1234,
-    buildSha: 'abcd1234',
-    buildShaShort: 'abcd',
-    buildVersion: '8.0.0',
-    buildDate: '2023-05-15T23:12:09+0000',
-  },
-  false,
-  false,
-  null,
-  '',
-  '',
-  false,
-  true,
-  true,
-  {}
-);
+const config = getMockConfig();
 
 const linuxPlatform = config.getPlatform('linux', 'x64');
 const linuxArmPlatform = config.getPlatform('linux', 'arm64');

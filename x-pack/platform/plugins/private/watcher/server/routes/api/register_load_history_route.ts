@@ -20,11 +20,9 @@ const paramsSchema = schema.object({
 function fetchHistoryItem(dataClient: IScopedClusterClient, watchHistoryItemId: string) {
   return dataClient.asCurrentUser.search({
     index: INDEX_NAMES.WATCHER_HISTORY,
-    body: {
-      query: {
-        bool: {
-          must: [{ term: { _id: watchHistoryItemId } }],
-        },
+    query: {
+      bool: {
+        must: [{ term: { _id: watchHistoryItemId } }],
       },
     },
   });

@@ -85,7 +85,7 @@ We are aware there are quite a few alternatives to Webpack, but our plan is to c
 
 ### Unit Testing
 
-A Bazel macro will be created to centralize the usage of Jest unit testing. The macro will, at minimum, accept a Jest configuration file, add the [Jest preset](https://github.com/elastic/kibana/blob/main/packages/kbn-test/jest-preset.js) and its dependencies as sources, then use the Jest CLI to execute tests. 
+A Bazel macro will be created to centralize the usage of Jest unit testing. The macro will, at minimum, accept a Jest configuration file, add the [Jest preset](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-test/jest-preset.js) and its dependencies as sources, then use the Jest CLI to execute tests. 
 
 Developers currently use `yarn test:jest` to efficiently run tests in a given directory without remembering the command or path. This command will continue to work as it does today, but will begin running tests through Bazel for packages or plugins which have been migrated.
 

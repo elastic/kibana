@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
-import { Logger } from '@kbn/core/server';
+import type { Subject } from 'rxjs';
+import type { Logger } from '@kbn/core/server';
 
 import minimatch from 'minimatch';
-import { TaskStore } from '../task_store';
-import { TaskClaim, TaskTiming } from '../task_events';
-import { TaskTypeDictionary } from '../task_type_dictionary';
-import { TaskClaimingBatches } from '../queries/task_claiming';
-import { ConcreteTaskInstance } from '../task';
+import type { TaskStore } from '../task_store';
+import type { TaskClaim, TaskTiming } from '../task_events';
+import type { TaskTypeDictionary } from '../task_type_dictionary';
+import type { TaskClaimingBatches } from '../queries/task_claiming';
+import type { ConcreteTaskInstance } from '../task';
 import { claimAvailableTasksUpdateByQuery } from './strategy_update_by_query';
 import { claimAvailableTasksMget } from './strategy_mget';
 import { CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET } from '../config';
-import { TaskPartitioner } from '../lib/task_partitioner';
+import type { TaskPartitioner } from '../lib/task_partitioner';
 
 export interface TaskClaimerOpts {
   getCapacity: (taskType?: string | undefined) => number;

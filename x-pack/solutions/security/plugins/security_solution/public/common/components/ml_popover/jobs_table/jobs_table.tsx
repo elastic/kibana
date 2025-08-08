@@ -19,9 +19,9 @@ import {
 } from '@elastic/eui';
 
 import styled from 'styled-components';
-import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
+import { useMlManagementHref, ML_PAGES } from '@kbn/ml-plugin/public';
 import { PopoverItems } from '../../popover_items';
-import { useBasePath, useKibana } from '../../../lib/kibana';
+import { useKibana } from '../../../lib/kibana';
 import * as i18n from './translations';
 import { JobSwitch } from './job_switch';
 import type { SecurityJob } from '../types';
@@ -39,25 +39,19 @@ interface JobNameProps {
   id: string;
   name?: string;
   description: string;
-  basePath: string;
 }
 
-const JobName = ({ id, name, description, basePath }: JobNameProps) => {
+const JobName = ({ id, name, description }: JobNameProps) => {
   const {
     services: { ml },
   } = useKibana();
 
-  const jobUrl = useMlHref(
-    ml,
-    basePath,
-    {
-      page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-      pageState: {
-        jobId: id,
-      },
+  const jobUrl = useMlManagementHref(ml, {
+    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+    pageState: {
+      jobId: id,
     },
-    [id]
-  );
+  });
 
   return (
     <JobNameWrapper>
@@ -76,8 +70,7 @@ const JobName = ({ id, name, description, basePath }: JobNameProps) => {
 };
 const getJobsTableColumns = (
   isLoading: boolean,
-  onJobStateChange: (job: SecurityJob, latestTimestampMs: number, enable: boolean) => Promise<void>,
-  basePath: string
+  onJobStateChange: (job: SecurityJob, latestTimestampMs: number, enable: boolean) => Promise<void>
 ) => [
   {
     name: i18n.COLUMN_JOB_NAME,
@@ -86,7 +79,6 @@ const getJobsTableColumns = (
         id={id}
         name={customSettings?.security_app_display_name ?? id}
         description={description}
-        basePath={basePath}
       />
     ),
   },
@@ -149,7 +141,6 @@ export const JobsTableComponent = ({
   mlNodesAvailable,
 }: JobTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
-  const basePath = useBasePath();
   const pageSize = 5;
 
   const pagination = {
@@ -166,14 +157,14 @@ export const JobsTableComponent = ({
   return (
     <EuiBasicTable
       data-test-subj="jobs-table"
-      columns={getJobsTableColumns(isLoading, onJobStateChange, basePath)}
+      columns={getJobsTableColumns(isLoading, onJobStateChange)}
       items={getPaginatedItems(
         jobs.map((j) => ({ ...j, isCompatible: mlNodesAvailable ? j.isCompatible : false })),
         pageIndex,
         pageSize
       )}
       loading={isLoading}
-      noItemsMessage={<NoItemsMessage basePath={basePath} />}
+      noItemsMessage={<NoItemsMessage />}
       pagination={pagination}
       responsiveBreakpoint={false}
       onChange={({ page }: { page: { index: number } }) => {
@@ -189,12 +180,12 @@ export const JobsTable = React.memo(JobsTableComponent);
 
 JobsTable.displayName = 'JobsTable';
 
-export const NoItemsMessage = React.memo(({ basePath }: { basePath: string }) => {
+export const NoItemsMessage = React.memo(() => {
   const {
     services: { ml },
   } = useKibana();
 
-  const createNewAnomalyDetectionJoUrl = useMlHref(ml, basePath, {
+  const createNewAnomalyDetectionJobUrl = useMlManagementHref(ml, {
     page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
   });
 
@@ -204,7 +195,7 @@ export const NoItemsMessage = React.memo(({ basePath }: { basePath: string }) =>
       titleSize="xs"
       actions={
         <EuiButton
-          href={createNewAnomalyDetectionJoUrl}
+          href={createNewAnomalyDetectionJobUrl}
           iconType="popout"
           iconSide="right"
           size="s"

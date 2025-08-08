@@ -10,19 +10,18 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import {
-  EuiErrorBoundary,
-  EuiHeaderLinks,
-  EuiHeaderLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiHeaderLinks, EuiHeaderLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import {
+  FeatureFeedbackButton,
+  HeaderMenuPortal,
+  useLinkProps,
+} from '@kbn/observability-shared-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import { MetricsSettingsPage } from './settings';
@@ -37,10 +36,15 @@ import { usePluginConfig } from '../../containers/plugin_config_context';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 import { ReloadRequestTimeProvider } from '../../hooks/use_reload_request_time';
 import { OnboardingFlow } from '../../components/shared/templates/no_data_config';
+import { SurveySection } from './inventory_view/components/survey_section';
+import { useKibanaEnvironmentContext } from '../../hooks/use_kibana';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
 });
+const HOSTS_FEEDBACK_LINK =
+  'https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';
+const METRICS_EXPLORER_FEEDBACK_URL = 'https://ela.st/survey-infra-metricsexplorer?usp=pp_url';
 
 const MetricsExplorerPage = dynamic(() =>
   import('./metrics_explorer').then((mod) => ({ default: mod.MetricsExplorerPage }))
@@ -72,7 +76,7 @@ export const InfrastructurePage = () => {
   });
 
   return (
-    <EuiErrorBoundary>
+    <KibanaErrorBoundary>
       <ReactQueryProvider>
         <AlertPrefillProvider>
           <ReloadRequestTimeProvider>
@@ -88,9 +92,11 @@ export const InfrastructurePage = () => {
                   <EuiFlexGroup responsive={false} gutterSize="s">
                     <EuiFlexItem>
                       <EuiHeaderLinks gutterSize="xs">
-                        <EuiHeaderLink color={'text'} {...settingsLinkProps}>
-                          {settingsTabTitle}
-                        </EuiHeaderLink>
+                        <Routes>
+                          <HeaderLinkFeedbackButtonRoute path="/inventory" />
+                          <HeaderLinkFeedbackButtonRoute path="/explorer" />
+                          <HeaderLinkFeedbackButtonRoute path="/hosts" />
+                        </Routes>
                         <Routes>
                           <HeaderLinkAnomalyFlyoutRoute path="/inventory" />
                           <HeaderLinkAnomalyFlyoutRoute path="/hosts" />
@@ -99,6 +105,9 @@ export const InfrastructurePage = () => {
                         {config.featureFlags.alertsAndRulesDropdownEnabled && (
                           <MetricsAlertDropdown />
                         )}
+                        <EuiHeaderLink color={'primary'} {...settingsLinkProps}>
+                          {settingsTabTitle}
+                        </EuiHeaderLink>
                         <Routes>
                           <HeaderLinkAddDataRoute
                             path="/hosts"
@@ -145,7 +154,7 @@ export const InfrastructurePage = () => {
           </ReloadRequestTimeProvider>
         </AlertPrefillProvider>
       </ReactQueryProvider>
-    </EuiErrorBoundary>
+    </KibanaErrorBoundary>
   );
 };
 
@@ -181,12 +190,51 @@ const HeaderLinkAddDataRoute = ({
       exact={exact}
       render={() => (
         <EuiHeaderLink
-          href={onboardingLocator?.getRedirectUrl({ category: onboardingFlow })}
+          href={onboardingLocator?.getRedirectUrl({
+            category: onboardingFlow === OnboardingFlow.Hosts ? 'host' : undefined,
+          })}
           color="primary"
-          iconType="indexOpen"
         >
           {ADD_DATA_LABEL}
         </EuiHeaderLink>
+      )}
+    />
+  );
+};
+
+const feedbackLinksPathMap = {
+  '/hosts': { formUrl: HOSTS_FEEDBACK_LINK, dts: 'infraHostsPageTellUsWhatYouThinkButton' },
+  '/explorer': {
+    formUrl: METRICS_EXPLORER_FEEDBACK_URL,
+    dts: 'infraMetricsExplorerFeedbackLink',
+  },
+};
+
+const HeaderLinkFeedbackButtonRoute = ({
+  path,
+  exact,
+}: {
+  path: keyof typeof feedbackLinksPathMap | '/inventory';
+  exact?: boolean;
+}) => {
+  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useKibanaEnvironmentContext();
+
+  if (path === '/inventory') {
+    return <Route path={path} exact={exact} render={() => <SurveySection />} />;
+  }
+
+  return (
+    <Route
+      path={path}
+      exact={exact}
+      render={() => (
+        <FeatureFeedbackButton
+          data-test-subj={feedbackLinksPathMap[path]?.dts ?? 'infraInventoryFeedbackLink'}
+          formUrl={feedbackLinksPathMap[path]?.formUrl}
+          kibanaVersion={kibanaVersion}
+          isCloudEnv={isCloudEnv}
+          isServerlessEnv={isServerlessEnv}
+        />
       )}
     />
   );

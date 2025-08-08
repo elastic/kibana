@@ -6,51 +6,61 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { Logger } from '@kbn/logging';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
 import { sendMessageEvent, SendMessageEventData } from './analytics/events';
 import { fetchFields } from './lib/fetch_query_source_fields';
-import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
+import { createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './lib/conversational_chain';
 import { errorHandler } from './utils/error_handler';
 import { handleStreamResponse } from './utils/handle_stream_response';
 import {
   APIRoutes,
-  SearchPlaygroundPluginStart,
-  SearchPlaygroundPluginStartDependencies,
+  DefineRoutesOptions,
+  ElasticsearchRetrieverContentField,
+  QueryTestResponse,
 } from './types';
 import { getChatParams } from './lib/get_chat_params';
 import { fetchIndices } from './lib/fetch_indices';
 import { isNotNullish } from '../common/is_not_nullish';
 import { MODELS } from '../common/models';
 import { ContextLimitError } from './lib/errors';
+import { contextDocumentHitMapper } from './utils/context_document_mapper';
+import { parseSourceFields } from './utils/parse_source_fields';
+import { getErrorMessage } from '../common/errors';
+import { defineSavedPlaygroundRoutes } from './routes/saved_playgrounds';
 
-export function createRetriever(esQuery: string) {
+const EMPTY_INDICES_ERROR_MESSAGE = i18n.translate(
+  'xpack.searchPlayground.serverErrors.emptyIndices',
+  {
+    defaultMessage: 'Indices cannot be empty',
+  }
+);
+
+export function parseElasticsearchQuery(esQuery: string) {
   return (question: string) => {
     try {
       const replacedQuery = esQuery.replace(/\"{query}\"/g, JSON.stringify(question));
       const query = JSON.parse(replacedQuery);
-      return query;
+      return query as Partial<SearchRequest>;
     } catch (e) {
-      throw Error("Failed to parse the Elasticsearch Query. Check Query to make sure it's valid.");
+      throw new Error(
+        i18n.translate('xpack.searchPlayground.serverErrors.parseRetriever', {
+          defaultMessage:
+            "Failed to parse the Elasticsearch Query. Check Query to make sure it's valid.",
+        }),
+        {
+          cause: e,
+        }
+      );
     }
   };
 }
 
-export function defineRoutes({
-  logger,
-  router,
-  getStartServices,
-}: {
-  logger: Logger;
-  router: IRouter;
-  getStartServices: StartServicesAccessor<
-    SearchPlaygroundPluginStartDependencies,
-    SearchPlaygroundPluginStart
-  >;
-}) {
+export function defineRoutes(routeOptions: DefineRoutesOptions) {
+  const { logger, router, getStartServices } = routeOptions;
+
   router.post(
     {
       path: APIRoutes.POST_QUERY_SOURCE_FIELDS,
@@ -108,45 +118,41 @@ export function defineRoutes({
       },
     },
     errorHandler(logger)(async (context, request, response) => {
-      const [{ analytics }, { actions, cloud }] = await getStartServices();
+      const [{ analytics }, { actions, cloud, inference }] = await getStartServices();
 
       const { client } = (await context.core).elasticsearch;
       const aiClient = Assist({
         es_client: client.asCurrentUser,
-      } as AssistClientOptionsWithClient);
+      });
       const { messages, data } = request.body;
-      const { chatModel, chatPrompt, questionRewritePrompt, connector } = await getChatParams(
-        {
-          connectorId: data.connector_id,
-          model: data.summarization_model,
-          citations: data.citations,
-          prompt: data.prompt,
-        },
-        { actions, logger, request }
-      );
+      const { chatModel, chatPrompt, questionRewritePrompt, connector, summarizationModel } =
+        await getChatParams(
+          {
+            connectorId: data.connector_id,
+            model: data.summarization_model,
+            citations: data.citations,
+            prompt: data.prompt,
+          },
+          { actions, inference, logger, request }
+        );
 
-      let sourceFields = {};
+      let sourceFields: ElasticsearchRetrieverContentField;
 
       try {
-        sourceFields = JSON.parse(data.source_fields);
-        sourceFields = Object.keys(sourceFields).reduce((acc, key) => {
-          // @ts-ignore
-          acc[key] = sourceFields[key][0];
-          return acc;
-        }, {});
+        sourceFields = parseSourceFields(data.source_fields);
       } catch (e) {
         logger.error('Failed to parse the source fields', e);
         throw Error(e);
       }
 
-      const model = MODELS.find((m) => m.model === data.summarization_model);
+      const model = MODELS.find((m) => m.model === summarizationModel);
       const modelPromptLimit = model?.promptTokenLimit;
 
       const chain = ConversationalChain({
         model: chatModel,
         rag: {
           index: data.indices,
-          retriever: createRetriever(data.elasticsearch_query),
+          retriever: parseElasticsearchQuery(data.elasticsearch_query),
           content_field: sourceFields,
           size: Number(data.doc_size),
           inputTokensLimit: modelPromptLimit,
@@ -162,7 +168,7 @@ export function defineRoutes({
           connectorType:
             connector.actionTypeId +
             (connector.config?.apiProvider ? `-${connector.config.apiProvider}` : ''),
-          model: data.summarization_model ?? '',
+          model: summarizationModel ?? '',
           isCitationsEnabled: data.citations,
         });
 
@@ -272,15 +278,27 @@ export function defineRoutes({
         if (indices.length === 0) {
           return response.badRequest({
             body: {
-              message: 'Indices cannot be empty',
+              message: EMPTY_INDICES_ERROR_MESSAGE,
+            },
+          });
+        }
+        let parsedElasticsearchQuery: Partial<SearchRequest>;
+        try {
+          parsedElasticsearchQuery = parseElasticsearchQuery(elasticsearchQuery)(
+            request.body.search_query
+          );
+        } catch (e) {
+          logger.error(e);
+          return response.badRequest({
+            body: {
+              message: getErrorMessage(e),
             },
           });
         }
 
-        const retriever = createRetriever(elasticsearchQuery)(request.body.search_query);
         const searchResult = await client.asCurrentUser.search({
+          ...parsedElasticsearchQuery,
           index: indices,
-          retriever: retriever.retriever,
           from,
           size,
         });
@@ -292,6 +310,7 @@ export function defineRoutes({
 
         return response.ok({
           body: {
+            executionTime: searchResult.took,
             results: searchResult.hits.hits,
             pagination: {
               from,
@@ -340,7 +359,7 @@ export function defineRoutes({
         if (indices.length === 0) {
           return response.badRequest({
             body: {
-              message: 'Indices cannot be empty',
+              message: EMPTY_INDICES_ERROR_MESSAGE,
             },
           });
         }
@@ -366,4 +385,107 @@ export function defineRoutes({
       }
     })
   );
+  router.post(
+    {
+      path: APIRoutes.POST_QUERY_TEST,
+      options: {
+        access: 'internal',
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [PLUGIN_ID],
+        },
+      },
+      validate: {
+        body: schema.object({
+          query: schema.string(),
+          elasticsearch_query: schema.string(),
+          indices: schema.arrayOf(schema.string()),
+          size: schema.maybe(schema.number({ defaultValue: 10, min: 0 })),
+          from: schema.maybe(schema.number({ defaultValue: 0, min: 0 })),
+          chat_context: schema.maybe(
+            schema.object({
+              source_fields: schema.string(),
+              doc_size: schema.number(),
+            })
+          ),
+        }),
+      },
+    },
+    errorHandler(logger)(async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const {
+        elasticsearch_query: elasticsearchQuery,
+        indices,
+        size,
+        from,
+        chat_context: chatContext,
+      } = request.body;
+
+      if (indices.length === 0) {
+        return response.badRequest({
+          body: {
+            message: EMPTY_INDICES_ERROR_MESSAGE,
+          },
+        });
+      }
+      let searchQuery: Partial<SearchRequest>;
+      try {
+        searchQuery = parseElasticsearchQuery(elasticsearchQuery)(request.body.query);
+      } catch (e) {
+        logger.error(e);
+        return response.badRequest({
+          body: {
+            message: getErrorMessage(e),
+          },
+        });
+      }
+
+      if (!chatContext) {
+        const searchResponse = await client.asCurrentUser.search({
+          ...searchQuery,
+          index: indices,
+          from,
+          size,
+        });
+        const body: QueryTestResponse = {
+          searchResponse,
+        };
+
+        return response.ok({
+          body,
+          headers: {
+            'content-type': 'application/json',
+          },
+        });
+      } else {
+        let sourceFields: ElasticsearchRetrieverContentField;
+        try {
+          sourceFields = parseSourceFields(chatContext.source_fields);
+        } catch (e) {
+          logger.error('Failed to parse the source fields', e);
+          throw Error(e);
+        }
+        const searchResponse = await client.asCurrentUser.search({
+          ...searchQuery,
+          index: indices,
+          size: chatContext.doc_size,
+        });
+        const documents = searchResponse.hits.hits.map(contextDocumentHitMapper(sourceFields));
+
+        const body: QueryTestResponse = {
+          documents,
+          searchResponse,
+        };
+        return response.ok({
+          body,
+          headers: {
+            'content-type': 'application/json',
+          },
+        });
+      }
+    })
+  );
+
+  defineSavedPlaygroundRoutes(routeOptions);
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { addons } from '@storybook/addons';
+import { addons } from '@storybook/manager-api';
 import { create } from '@storybook/theming';
 import { PANEL_ID as selectedPanel } from '@storybook/addon-actions';
 

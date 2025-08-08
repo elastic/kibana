@@ -16,6 +16,6 @@
     "target/**/*",
   ],
   "kbn_references": [
-    "@kbn/repo-info",
+    "@kbn/projects-solutions-groups",
   ]
 }

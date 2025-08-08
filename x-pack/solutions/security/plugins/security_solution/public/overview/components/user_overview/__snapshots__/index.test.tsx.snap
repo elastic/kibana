@@ -1,359 +1,746 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`User Summary Component it renders the default User Summary 1`] = `
-<UserOverview
-  anomaliesData={
-    Object {
-      "anomalies": Array [
-        Object {
-          "detectorIndex": 0,
-          "entityName": "process.name",
-          "entityValue": "du",
-          "influencers": Array [
-            Object {
-              "host.name": "zeek-iowa",
-            },
-            Object {
-              "process.name": "du",
-            },
-            Object {
-              "user.name": "root",
-            },
-          ],
-          "jobId": "job-1",
-          "rowId": "1561157194802_0",
-          "severity": 16.193669439507826,
-          "source": Object {
-            "actual": Array [
-              1,
-            ],
-            "bucket_span": 900,
-            "by_field_name": "process.name",
-            "by_field_value": "du",
-            "detector_index": 0,
-            "function": "rare",
-            "function_description": "rare",
-            "influencers": Array [
-              Object {
-                "influencer_field_name": "user.name",
-                "influencer_field_values": Array [
-                  "root",
-                ],
-              },
-              Object {
-                "influencer_field_name": "process.name",
-                "influencer_field_values": Array [
-                  "du",
-                ],
-              },
-              Object {
-                "influencer_field_name": "host.name",
-                "influencer_field_values": Array [
-                  "zeek-iowa",
-                ],
-              },
-            ],
-            "initial_record_score": 16.193669439507826,
-            "is_interim": false,
-            "job_id": "job-1",
-            "multi_bucket_impact": 0,
-            "partition_field_name": "host.name",
-            "partition_field_value": "zeek-iowa",
-            "probability": 0.024041164411288146,
-            "record_score": 16.193669439507826,
-            "result_type": "record",
-            "timestamp": 1560664800000,
-            "typical": Array [
-              0.024041164411288146,
-            ],
-          },
-          "time": 1560664800000,
-        },
-        Object {
-          "detectorIndex": 0,
-          "entityName": "process.name",
-          "entityValue": "ls",
-          "influencers": Array [
-            Object {
-              "host.name": "zeek-iowa",
-            },
-            Object {
-              "process.name": "ls",
-            },
-            Object {
-              "user.name": "root",
-            },
-          ],
-          "jobId": "job-2",
-          "rowId": "1561157194802_1",
-          "severity": 16.193669439507826,
-          "source": Object {
-            "actual": Array [
-              1,
-            ],
-            "bucket_span": 900,
-            "by_field_name": "process.name",
-            "by_field_value": "ls",
-            "detector_index": 0,
-            "function": "rare",
-            "function_description": "rare",
-            "influencers": Array [
-              Object {
-                "influencer_field_name": "user.name",
-                "influencer_field_values": Array [
-                  "root",
-                ],
-              },
-              Object {
-                "influencer_field_name": "process.name",
-                "influencer_field_values": Array [
-                  "ls",
-                ],
-              },
-              Object {
-                "influencer_field_name": "host.name",
-                "influencer_field_values": Array [
-                  "zeek-iowa",
-                ],
-              },
-            ],
-            "initial_record_score": 16.193669439507826,
-            "is_interim": false,
-            "job_id": "job-2",
-            "multi_bucket_impact": 0,
-            "partition_field_name": "host.name",
-            "partition_field_value": "zeek-iowa",
-            "probability": 0.024041164411288146,
-            "record_score": 16.193669439507826,
-            "result_type": "record",
-            "timestamp": 1560664800000,
-            "typical": Array [
-              0.024041164411288146,
-            ],
-          },
-          "time": 1560664800000,
-        },
-      ],
-      "interval": "day",
-    }
-  }
-  data={
-    Object {
-      "host": Object {
-        "ip": Array [
-          "10.142.0.7",
-          "fe80::4001:aff:fe8e:7",
-        ],
-        "os": Object {
-          "family": Array [
-            "debian",
-          ],
-          "name": Array [
-            "Debian GNU/Linux",
-          ],
-        },
-      },
-      "user": Object {
-        "domain": Array [
-          "domain",
-        ],
-        "id": Array [
-          "aa7ca589f1b8220002f2fc61c64cfbf1",
-        ],
-        "name": Array [
-          "username",
-        ],
-      },
-    }
-  }
-  endDate="2019-06-18T06:00:00.000Z"
-  id="userOverview"
-  indexPatterns={Array []}
-  isInDetailsSidePanel={false}
-  isLoadingAnomaliesData={false}
-  jobNameById={Object {}}
-  loading={false}
-  narrowDateRange={[MockFunction]}
-  startDate="2019-06-15T06:00:00.000Z"
-  userName="testUserName"
-/>
+.c0 {
+  width: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.c0 > * {
+  max-width: 100%;
+}
+
+.c0 .inspectButtonComponent {
+  pointer-events: none;
+  opacity: 0;
+  -webkit-transition: opacity 250ms ease;
+  transition: opacity 250ms ease;
+}
+
+.c0 .inspectButtonComponent:focus-visible {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.c0:hover .inspectButtonComponent {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.c1 > span.euiToolTipAnchor {
+  display: block;
+}
+
+.c1 > span.euiToolTipAnchor.eui-textTruncate {
+  display: inline-block;
+}
+
+<div
+  class="c0"
+  data-test-subj="hoverVisibilityContainer"
+>
+  <div
+    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-OverviewWrapper"
+    data-test-subj="user-overview"
+  >
+    <button
+      aria-label="Inspect"
+      class="euiButtonIcon inspectButtonComponent emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
+      data-test-subj="inspect-icon-button"
+      disabled=""
+      title="Inspect"
+      type="button"
+    >
+      <span
+        aria-hidden="true"
+        class="euiButtonIcon__icon"
+        color="inherit"
+        data-euiicon-type="inspect"
+      />
+    </button>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <dl
+        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        data-type="row"
+      >
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        >
+          User ID
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+        >
+          <span
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            data-test-subj="DefaultFieldRendererComponent"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-user_id-aa7ca589f1b8220002f2fc61c64cfbf1"
+                  tabindex="-1"
+                >
+                  <span
+                    class="c1"
+                    data-test-subj="render-content-user.id"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      aa7ca589f1b8220002f2fc61c64cfbf1
+                    </span>
+                  </span>
+                </div>
+              </div>
+               
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              />
+            </div>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        >
+          Domain
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+        >
+          <span
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            data-test-subj="DefaultFieldRendererComponent"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-user_domain-domain"
+                  tabindex="-1"
+                >
+                  <span
+                    class="c1"
+                    data-test-subj="render-content-user.domain"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      domain
+                    </span>
+                  </span>
+                </div>
+              </div>
+               
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              />
+            </div>
+          </span>
+        </dd>
+      </dl>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <dl
+        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        data-type="row"
+      >
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        >
+          First seen
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+        >
+          <span
+            aria-label="Loading"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+            data-test-subj="loading-spinner"
+            role="progressbar"
+          />
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        >
+          Last seen
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+        >
+          <span
+            aria-label="Loading"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+            data-test-subj="loading-spinner"
+            role="progressbar"
+          />
+        </dd>
+      </dl>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <dl
+        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        data-type="row"
+      >
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        >
+          Operating system
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+        >
+          <span
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            data-test-subj="DefaultFieldRendererComponent"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-host_os_name-Debian GNU/Linux"
+                  tabindex="-1"
+                >
+                  <span
+                    class="c1"
+                    data-test-subj="render-content-host.os.name"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      Debian GNU/Linux
+                    </span>
+                  </span>
+                </div>
+              </div>
+               
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              />
+            </div>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        >
+          Family
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+        >
+          <span
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            data-test-subj="DefaultFieldRendererComponent"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-host_os_family-debian"
+                  tabindex="-1"
+                >
+                  <span
+                    class="c1"
+                    data-test-subj="render-content-host.os.family"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      debian
+                    </span>
+                  </span>
+                </div>
+              </div>
+               
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              />
+            </div>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        >
+          IP addresses
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+        >
+          <span
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            data-test-subj="DefaultFieldRendererComponent"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-host_ip-10_142_0_7"
+                  tabindex="-1"
+                >
+                  <span
+                    class="c1"
+                    data-test-subj="render-content-host.ip"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      <button
+                        class="euiLink emotion-euiLink-primary"
+                        data-test-subj="securitySolutionFlyoutLink"
+                        type="button"
+                      >
+                        10.142.0.7
+                      </button>
+                    </span>
+                  </span>
+                </div>
+              </div>
+               
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  class="euiPopover emotion-euiPopover-inline-block"
+                  id="popover"
+                >
+                   ,
+                  <button
+                    class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary"
+                    data-test-subj="DefaultFieldRendererOverflow-button"
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                    >
+                      <span
+                        class="eui-textTruncate euiButtonEmpty__text"
+                      >
+                        +1 
+                        More
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </span>
+        </dd>
+      </dl>
+    </div>
+  </div>
+</div>
 `;
 
 exports[`User Summary Component it renders the panel view User Summary 1`] = `
-<UserOverview
-  anomaliesData={
-    Object {
-      "anomalies": Array [
-        Object {
-          "detectorIndex": 0,
-          "entityName": "process.name",
-          "entityValue": "du",
-          "influencers": Array [
-            Object {
-              "host.name": "zeek-iowa",
-            },
-            Object {
-              "process.name": "du",
-            },
-            Object {
-              "user.name": "root",
-            },
-          ],
-          "jobId": "job-1",
-          "rowId": "1561157194802_0",
-          "severity": 16.193669439507826,
-          "source": Object {
-            "actual": Array [
-              1,
-            ],
-            "bucket_span": 900,
-            "by_field_name": "process.name",
-            "by_field_value": "du",
-            "detector_index": 0,
-            "function": "rare",
-            "function_description": "rare",
-            "influencers": Array [
-              Object {
-                "influencer_field_name": "user.name",
-                "influencer_field_values": Array [
-                  "root",
-                ],
-              },
-              Object {
-                "influencer_field_name": "process.name",
-                "influencer_field_values": Array [
-                  "du",
-                ],
-              },
-              Object {
-                "influencer_field_name": "host.name",
-                "influencer_field_values": Array [
-                  "zeek-iowa",
-                ],
-              },
-            ],
-            "initial_record_score": 16.193669439507826,
-            "is_interim": false,
-            "job_id": "job-1",
-            "multi_bucket_impact": 0,
-            "partition_field_name": "host.name",
-            "partition_field_value": "zeek-iowa",
-            "probability": 0.024041164411288146,
-            "record_score": 16.193669439507826,
-            "result_type": "record",
-            "timestamp": 1560664800000,
-            "typical": Array [
-              0.024041164411288146,
-            ],
-          },
-          "time": 1560664800000,
-        },
-        Object {
-          "detectorIndex": 0,
-          "entityName": "process.name",
-          "entityValue": "ls",
-          "influencers": Array [
-            Object {
-              "host.name": "zeek-iowa",
-            },
-            Object {
-              "process.name": "ls",
-            },
-            Object {
-              "user.name": "root",
-            },
-          ],
-          "jobId": "job-2",
-          "rowId": "1561157194802_1",
-          "severity": 16.193669439507826,
-          "source": Object {
-            "actual": Array [
-              1,
-            ],
-            "bucket_span": 900,
-            "by_field_name": "process.name",
-            "by_field_value": "ls",
-            "detector_index": 0,
-            "function": "rare",
-            "function_description": "rare",
-            "influencers": Array [
-              Object {
-                "influencer_field_name": "user.name",
-                "influencer_field_values": Array [
-                  "root",
-                ],
-              },
-              Object {
-                "influencer_field_name": "process.name",
-                "influencer_field_values": Array [
-                  "ls",
-                ],
-              },
-              Object {
-                "influencer_field_name": "host.name",
-                "influencer_field_values": Array [
-                  "zeek-iowa",
-                ],
-              },
-            ],
-            "initial_record_score": 16.193669439507826,
-            "is_interim": false,
-            "job_id": "job-2",
-            "multi_bucket_impact": 0,
-            "partition_field_name": "host.name",
-            "partition_field_value": "zeek-iowa",
-            "probability": 0.024041164411288146,
-            "record_score": 16.193669439507826,
-            "result_type": "record",
-            "timestamp": 1560664800000,
-            "typical": Array [
-              0.024041164411288146,
-            ],
-          },
-          "time": 1560664800000,
-        },
-      ],
-      "interval": "day",
-    }
-  }
-  data={
-    Object {
-      "host": Object {
-        "ip": Array [
-          "10.142.0.7",
-          "fe80::4001:aff:fe8e:7",
-        ],
-        "os": Object {
-          "family": Array [
-            "debian",
-          ],
-          "name": Array [
-            "Debian GNU/Linux",
-          ],
-        },
-      },
-      "user": Object {
-        "domain": Array [
-          "domain",
-        ],
-        "id": Array [
-          "aa7ca589f1b8220002f2fc61c64cfbf1",
-        ],
-        "name": Array [
-          "username",
-        ],
-      },
-    }
-  }
-  endDate="2019-06-18T06:00:00.000Z"
-  id="userOverview"
-  indexPatterns={Array []}
-  isInDetailsSidePanel={true}
-  isLoadingAnomaliesData={false}
-  jobNameById={Object {}}
-  loading={false}
-  narrowDateRange={[MockFunction]}
-  startDate="2019-06-15T06:00:00.000Z"
-  userName="testUserName"
-/>
+.c0 {
+  width: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.c0 > * {
+  max-width: 100%;
+}
+
+.c0 .inspectButtonComponent {
+  pointer-events: none;
+  opacity: 0;
+  -webkit-transition: opacity 250ms ease;
+  transition: opacity 250ms ease;
+}
+
+.c0 .inspectButtonComponent:focus-visible {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.c0:hover .inspectButtonComponent {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.c1 > span.euiToolTipAnchor {
+  display: block;
+}
+
+.c1 > span.euiToolTipAnchor.eui-textTruncate {
+  display: inline-block;
+}
+
+<div
+  class="c0"
+  data-test-subj="hoverVisibilityContainer"
+>
+  <div
+    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-l-flexStart-stretch-column-OverviewWrapper"
+    data-test-subj="user-overview"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <dl
+        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        data-type="row"
+      >
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        >
+          User ID
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+        >
+          <span
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            data-test-subj="DefaultFieldRendererComponent"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-user_id-aa7ca589f1b8220002f2fc61c64cfbf1"
+                  tabindex="-1"
+                >
+                  <span
+                    class="c1"
+                    data-test-subj="render-content-user.id"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      aa7ca589f1b8220002f2fc61c64cfbf1
+                    </span>
+                  </span>
+                </div>
+              </div>
+               
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              />
+            </div>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        >
+          Domain
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+        >
+          <span
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            data-test-subj="DefaultFieldRendererComponent"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-user_domain-domain"
+                  tabindex="-1"
+                >
+                  <span
+                    class="c1"
+                    data-test-subj="render-content-user.domain"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      domain
+                    </span>
+                  </span>
+                </div>
+              </div>
+               
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              />
+            </div>
+          </span>
+        </dd>
+      </dl>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <dl
+        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        data-type="row"
+      >
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        >
+          First seen
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+        >
+          <span
+            aria-label="Loading"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+            data-test-subj="loading-spinner"
+            role="progressbar"
+          />
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        >
+          Last seen
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+        >
+          <span
+            aria-label="Loading"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+            data-test-subj="loading-spinner"
+            role="progressbar"
+          />
+        </dd>
+      </dl>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <dl
+        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        data-type="row"
+      >
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        >
+          Operating system
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+        >
+          <span
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            data-test-subj="DefaultFieldRendererComponent"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-host_os_name-Debian GNU/Linux"
+                  tabindex="-1"
+                >
+                  <span
+                    class="c1"
+                    data-test-subj="render-content-host.os.name"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      Debian GNU/Linux
+                    </span>
+                  </span>
+                </div>
+              </div>
+               
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              />
+            </div>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        >
+          Family
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+        >
+          <span
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            data-test-subj="DefaultFieldRendererComponent"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-host_os_family-debian"
+                  tabindex="-1"
+                >
+                  <span
+                    class="c1"
+                    data-test-subj="render-content-host.os.family"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      debian
+                    </span>
+                  </span>
+                </div>
+              </div>
+               
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              />
+            </div>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        >
+          IP addresses
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+        >
+          <span
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            data-test-subj="DefaultFieldRendererComponent"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-host_ip-10_142_0_7"
+                  tabindex="-1"
+                >
+                  <span
+                    class="c1"
+                    data-test-subj="render-content-host.ip"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      <button
+                        class="euiLink emotion-euiLink-primary"
+                        data-test-subj="securitySolutionFlyoutLink"
+                        type="button"
+                      >
+                        10.142.0.7
+                      </button>
+                    </span>
+                  </span>
+                </div>
+              </div>
+               
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  class="euiPopover emotion-euiPopover-inline-block"
+                  id="popover"
+                >
+                   ,
+                  <button
+                    class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary"
+                    data-test-subj="DefaultFieldRendererOverflow-button"
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                    >
+                      <span
+                        class="eui-textTruncate euiButtonEmpty__text"
+                      >
+                        +1 
+                        More
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </span>
+        </dd>
+      </dl>
+    </div>
+  </div>
+</div>
 `;

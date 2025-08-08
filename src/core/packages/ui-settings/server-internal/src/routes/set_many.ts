@@ -53,13 +53,32 @@ export function registerSetManyRoute(router: InternalUiSettingsRouter) {
       throw error;
     }
   };
-  router.post({ path: '/api/kibana/settings', validate }, async (context, request, response) => {
-    const uiSettingsClient = (await context.core).uiSettings.client;
-    return await setManyFromRequest(uiSettingsClient, context, request, response);
-  });
+  router.post(
+    {
+      path: '/api/kibana/settings',
+      validate,
+      security: {
+        authz: {
+          requiredPrivileges: ['manage_advanced_settings'],
+        },
+      },
+    },
+    async (context, request, response) => {
+      const uiSettingsClient = (await context.core).uiSettings.client;
+      return await setManyFromRequest(uiSettingsClient, context, request, response);
+    }
+  );
 
   router.post(
-    { path: '/api/kibana/global_settings', validate },
+    {
+      path: '/api/kibana/global_settings',
+      validate,
+      security: {
+        authz: {
+          requiredPrivileges: ['manage_advanced_settings'],
+        },
+      },
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
       return await setManyFromRequest(uiSettingsClient, context, request, response);

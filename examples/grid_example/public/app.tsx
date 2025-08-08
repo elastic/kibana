@@ -8,49 +8,50 @@
  */
 
 import deepEqual from 'fast-deep-equal';
+import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { combineLatest, debounceTime } from 'rxjs';
+import { Subject, combineLatest, debounceTime, map, take } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiPageTemplate,
-  EuiPopover,
-  EuiRange,
   EuiSpacer,
+  UseEuiTheme,
   transparentize,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { AddEmbeddableButton } from '@kbn/embeddable-examples-plugin/public';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { GridLayout, GridLayoutData } from '@kbn/grid-layout';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { GridLayout, GridLayoutData, GridSettings } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
+import { GridLayoutOptions } from './grid_layout_options';
 import {
   clearSerializedDashboardState,
   getSerializedDashboardState,
   setSerializedGridLayout,
 } from './serialized_grid_layout';
 import { MockSerializedDashboardState } from './types';
+import { useLayoutStyles } from './use_layout_styles';
 import { useMockDashboardApi } from './use_mock_dashboard_api';
 import { dashboardInputToGridLayout, gridLayoutToDashboardPanelMap } from './utils';
 
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
+const DASHBOARD_DRAG_TOP_OFFSET = 150;
 
 export const GridExample = ({
   coreStart,
@@ -59,52 +60,64 @@ export const GridExample = ({
   coreStart: CoreStart;
   uiActions: UiActionsStart;
 }) => {
-  const { euiTheme } = useEuiTheme();
-
+  const layoutStyles = useLayoutStyles();
   const savedState = useRef<MockSerializedDashboardState>(getSerializedDashboardState());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [currentLayout, setCurrentLayout] = useState<GridLayoutData>(
     dashboardInputToGridLayout(savedState.current)
   );
-  const [isSettingsPopoverOpen, setIsSettingsPopoverOpen] = useState(false);
-  const [gutterSize, setGutterSize] = useState<number>(DASHBOARD_MARGIN_SIZE);
-  const [rowHeight, setRowHeight] = useState<number>(DASHBOARD_GRID_HEIGHT);
+  const [gridSettings, setGridSettings] = useState<GridSettings>({
+    gutterSize: DASHBOARD_MARGIN_SIZE,
+    rowHeight: DASHBOARD_GRID_HEIGHT,
+    columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+    keyboardDragTopLimit: DASHBOARD_DRAG_TOP_OFFSET,
+  });
 
   const mockDashboardApi = useMockDashboardApi({ savedState: savedState.current });
   const [viewMode, expandedPanelId] = useBatchedPublishingSubjects(
     mockDashboardApi.viewMode$,
     mockDashboardApi.expandedPanelId$
   );
+  const layoutUpdated$ = useMemo(() => new Subject<void>(), []);
 
   useEffect(() => {
-    combineLatest([mockDashboardApi.panels$, mockDashboardApi.rows$])
-      .pipe(debounceTime(0)) // debounce to avoid subscribe being called twice when both panels$ and rows$ publish
-      .subscribe(([panels, rows]) => {
-        const panelIds = Object.keys(panels);
-        let panelsAreEqual = true;
-        for (const panelId of panelIds) {
-          if (!panelsAreEqual) break;
-          const currentPanel = panels[panelId];
-          const savedPanel = savedState.current.panels[panelId];
-          panelsAreEqual = deepEqual(
-            { row: 0, ...currentPanel.gridData },
-            { row: 0, ...savedPanel.gridData }
-          );
-        }
-
-        const hasChanges = !(panelsAreEqual && deepEqual(rows, savedState.current.rows));
+    combineLatest([mockDashboardApi.panels$, mockDashboardApi.sections$])
+      .pipe(
+        debounceTime(0), // debounce to avoid subscribe being called twice when both panels$ and rows$ publish
+        map(([panels, sections]) => {
+          const panelIds = Object.keys(panels);
+          let panelsAreEqual = true;
+          for (const panelId of panelIds) {
+            if (!panelsAreEqual) break;
+            const currentPanel = panels[panelId];
+            const savedPanel = savedState.current.panels[panelId];
+            panelsAreEqual = deepEqual(currentPanel?.gridData, savedPanel?.gridData);
+          }
+          const hasChanges = !(panelsAreEqual && deepEqual(sections, savedState.current.sections));
+          return { hasChanges, updatedLayout: dashboardInputToGridLayout({ panels, sections }) };
+        })
+      )
+      .subscribe(({ hasChanges, updatedLayout }) => {
         setHasUnsavedChanges(hasChanges);
-        setCurrentLayout(dashboardInputToGridLayout({ panels, rows }));
+        setCurrentLayout(updatedLayout);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /**
+   * On layout update, emit `layoutUpdated$` so that side effects to layout updates can
+   * happen (such as scrolling to the bottom of the screen after adding a new section)
+   */
+  useEffect(() => {
+    layoutUpdated$.next();
+  }, [currentLayout, layoutUpdated$]);
 
   const renderPanelContents = useCallback(
     (id: string, setDragHandles?: (refs: Array<HTMLElement | null>) => void) => {
       const currentPanels = mockDashboardApi.panels$.getValue();
 
       return (
-        <ReactEmbeddableRenderer
+        <EmbeddableRenderer
           key={id}
           maybeId={id}
           type={currentPanels[id].type}
@@ -122,40 +135,49 @@ export const GridExample = ({
     [mockDashboardApi]
   );
 
-  const customLayoutCss = useMemo(() => {
-    const gridColor = transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2);
-    return css`
-      .kbnGridRow--targeted {
-        background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
-          calc((var(--kbnGridGutterSize) / 2) * -1px);
-        background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
-          calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
-        background-image: linear-gradient(to right, ${gridColor} 1px, transparent 1px),
-          linear-gradient(to bottom, ${gridColor} 1px, transparent 1px);
-        background-color: ${transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.1)};
-      }
+  const onLayoutChange = useCallback(
+    (newLayout: GridLayoutData) => {
+      const { panels, sections } = gridLayoutToDashboardPanelMap(
+        mockDashboardApi.panels$.getValue(),
+        newLayout
+      );
+      mockDashboardApi.panels$.next(panels);
+      mockDashboardApi.sections$.next(sections);
+    },
+    [mockDashboardApi.panels$, mockDashboardApi.sections$]
+  );
 
-      .kbnGridPanel--dragPreview {
-        border-radius: ${euiTheme.border.radius};
-        background-color: ${transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2)};
-        transition: opacity 100ms linear;
-      }
+  const addNewSection = useCallback(() => {
+    const rows = cloneDeep(mockDashboardApi.sections$.getValue());
+    const id = uuidv4();
+    const maxY = Math.max(
+      ...Object.values({
+        ...mockDashboardApi.sections$.getValue(),
+        ...mockDashboardApi.panels$.getValue(),
+      }).map((widget) => ('gridData' in widget ? widget.gridData.y + widget.gridData.h : widget.y))
+    );
 
-      .kbnGridPanel--resizeHandle {
-        opacity: 0;
-        transition: opacity 0.2s, border 0.2s;
-        border-radius: 7px 0 7px 0;
-        border-bottom: 2px solid ${euiTheme.colors.accentSecondary};
-        border-right: 2px solid ${euiTheme.colors.accentSecondary};
-        &:hover,
-        &:focus {
-          outline-style: none !important;
-          opacity: 1;
-          background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.05)};
-        }
-      }
-    `;
-  }, [euiTheme]);
+    rows[id] = {
+      id,
+      y: maxY + 1,
+      title: i18n.translate('examples.gridExample.defaultSectionTitle', {
+        defaultMessage: 'New collapsible section',
+      }),
+      collapsed: false,
+    };
+    mockDashboardApi.sections$.next(rows);
+
+    // scroll to bottom after row is added
+    layoutUpdated$.pipe(take(1)).subscribe(() => {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    });
+  }, [mockDashboardApi.sections$, mockDashboardApi.panels$, layoutUpdated$]);
+
+  const resetUnsavedChanges = useCallback(() => {
+    const { panels, sections: rows } = savedState.current;
+    mockDashboardApi.panels$.next(panels);
+    mockDashboardApi.sections$.next(rows);
+  }, [mockDashboardApi.panels$, mockDashboardApi.sections$]);
 
   return (
     <KibanaRenderContextProvider {...coreStart}>
@@ -196,89 +218,22 @@ export const GridExample = ({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <AddEmbeddableButton pageApi={mockDashboardApi} uiActions={uiActions} />{' '}
+                  <AddEmbeddableButton pageApi={mockDashboardApi} uiActions={uiActions} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    button={
-                      <EuiButton
-                        iconType="arrowDown"
-                        iconSide="right"
-                        onClick={() => setIsSettingsPopoverOpen(!isSettingsPopoverOpen)}
-                      >
-                        {i18n.translate('examples.gridExample.settingsPopover.title', {
-                          defaultMessage: 'Layout settings',
-                        })}
-                      </EuiButton>
-                    }
-                    isOpen={isSettingsPopoverOpen}
-                    closePopover={() => setIsSettingsPopoverOpen(false)}
-                  >
-                    <>
-                      <EuiFormRow
-                        label={i18n.translate('examples.gridExample.settingsPopover.viewMode', {
-                          defaultMessage: 'View mode',
-                        })}
-                      >
-                        <EuiButtonGroup
-                          legend={i18n.translate('examples.gridExample.layoutOptionsLegend', {
-                            defaultMessage: 'Layout options',
-                          })}
-                          options={[
-                            {
-                              id: 'view',
-                              label: i18n.translate('examples.gridExample.viewOption', {
-                                defaultMessage: 'View',
-                              }),
-                              toolTipContent:
-                                'The layout adjusts when the window is resized. Panel interactivity, such as moving and resizing within the grid, is disabled.',
-                            },
-                            {
-                              id: 'edit',
-                              label: i18n.translate('examples.gridExample.editOption', {
-                                defaultMessage: 'Edit',
-                              }),
-                              toolTipContent:
-                                'The layout does not adjust when the window is resized.',
-                            },
-                          ]}
-                          idSelected={viewMode}
-                          onChange={(id) => {
-                            mockDashboardApi.viewMode$.next(id);
-                          }}
-                        />
-                      </EuiFormRow>
-                      <EuiFormRow
-                        label={i18n.translate('examples.gridExample.settingsPopover.gutterSize', {
-                          defaultMessage: 'Gutter size',
-                        })}
-                      >
-                        <EuiRange
-                          min={1}
-                          max={30}
-                          value={gutterSize}
-                          onChange={(e) => setGutterSize(parseInt(e.currentTarget.value, 10))}
-                          showLabels
-                          showValue
-                        />
-                      </EuiFormRow>
-                      <EuiFormRow
-                        label={i18n.translate('examples.gridExample.settingsPopover.rowHeight', {
-                          defaultMessage: 'Row height',
-                        })}
-                      >
-                        <EuiRange
-                          min={5}
-                          max={30}
-                          step={5}
-                          value={rowHeight}
-                          onChange={(e) => setRowHeight(parseInt(e.currentTarget.value, 10))}
-                          showLabels
-                          showValue
-                        />
-                      </EuiFormRow>
-                    </>
-                  </EuiPopover>
+                  <EuiButton onClick={addNewSection} disabled={viewMode !== 'edit'}>
+                    {i18n.translate('examples.gridExample.addRowButton', {
+                      defaultMessage: 'Add collapsible section',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <GridLayoutOptions
+                    mockDashboardApi={mockDashboardApi}
+                    gridSettings={gridSettings}
+                    setGridSettings={setGridSettings}
+                    viewMode={viewMode}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -294,13 +249,7 @@ export const GridExample = ({
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    onClick={() => {
-                      const { panels, rows } = savedState.current;
-                      mockDashboardApi.panels$.next(panels);
-                      mockDashboardApi.rows$.next(rows);
-                    }}
-                  >
+                  <EuiButtonEmpty onClick={resetUnsavedChanges}>
                     {i18n.translate('examples.gridExample.resetLayoutButton', {
                       defaultMessage: 'Reset',
                     })}
@@ -311,7 +260,7 @@ export const GridExample = ({
                     onClick={() => {
                       const newSavedState = {
                         panels: mockDashboardApi.panels$.getValue(),
-                        rows: mockDashboardApi.rows$.getValue(),
+                        sections: mockDashboardApi.sections$.getValue(),
                       };
                       savedState.current = newSavedState;
                       setHasUnsavedChanges(false);
@@ -332,21 +281,11 @@ export const GridExample = ({
             accessMode={viewMode === 'view' ? 'VIEW' : 'EDIT'}
             expandedPanelId={expandedPanelId}
             layout={currentLayout}
-            gridSettings={{
-              gutterSize,
-              rowHeight,
-              columnCount: DASHBOARD_GRID_COLUMN_COUNT,
-            }}
+            gridSettings={gridSettings}
             renderPanelContents={renderPanelContents}
-            onLayoutChange={(newLayout) => {
-              const { panels, rows } = gridLayoutToDashboardPanelMap(
-                mockDashboardApi.panels$.getValue(),
-                newLayout
-              );
-              mockDashboardApi.panels$.next(panels);
-              mockDashboardApi.rows$.next(rows);
-            }}
-            css={customLayoutCss}
+            onLayoutChange={onLayoutChange}
+            css={[layoutStyles, customLayoutStyles]}
+            useCustomDragHandle={true}
           />
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
@@ -361,4 +300,62 @@ export const renderGridExampleApp = (
   ReactDOM.render(<GridExample {...deps} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
+};
+
+const customLayoutStyles = ({ euiTheme }: UseEuiTheme) => {
+  return css({
+    // removes the extra padding that EuiPageTemplate adds in order to make it look more similar to Dashboard
+    marginLeft: `-${euiTheme.size.l}`,
+    marginRight: `-${euiTheme.size.l}`,
+
+    // styling for what the grid row header looks like when being dragged
+    '.kbnGridSectionHeader--active': {
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      outline: `${euiTheme.border.width.thick} solid
+        ${euiTheme.colors.vis.euiColorVis0}`,
+      borderRadius: `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium}`,
+      paddingLeft: '8px',
+      // hide accordian arrow + panel count text when row is being dragged
+      '& .kbnGridSectionTitle--button svg, & .kbnGridLayout--panelCount': {
+        display: 'none',
+      },
+    },
+    // styles for the area where the row will be dropped
+    '.kbnGridSection--dragPreview': {
+      backgroundColor: transparentize(euiTheme.colors.vis.euiColorVis0, 0.2),
+      borderRadius: `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium}`,
+    },
+
+    '.kbnGridSectionFooter': {
+      height: `${euiTheme.size.s}`,
+      display: `block`,
+      borderTop: `${euiTheme.border.thin}`,
+
+      '&--targeted': {
+        borderTop: `${euiTheme.border.width.thick} solid ${transparentize(
+          euiTheme.colors.vis.euiColorVis0,
+          0.5
+        )}`,
+      },
+    },
+
+    // hide border when section is being dragged
+    '&:has(.kbnGridSectionHeader--active) .kbnGridSectionHeader--active + .kbnGridSectionFooter': {
+      borderTop: `none`,
+    },
+
+    '.kbnGridSection--blocked': {
+      zIndex: 1,
+      backgroundColor: `${transparentize(euiTheme.colors.backgroundBaseSubdued, 0.5)}`,
+      // the oulines of panels extend past 100% by 1px on each side, so adjust for that
+      marginLeft: '-1px',
+      marginTop: '-1px',
+      width: `calc(100% + 2px)`,
+      height: `calc(100% + 2px)`,
+    },
+
+    '&:has(.kbnGridSection--blocked) .kbnGridSection--dragHandle': {
+      cursor: 'not-allowed !important',
+    },
+  });
 };

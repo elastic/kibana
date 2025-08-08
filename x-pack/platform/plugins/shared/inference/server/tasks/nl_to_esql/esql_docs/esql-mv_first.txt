@@ -1,6 +1,6 @@
 # MV_FIRST
 
-The MV_FIRST function converts a multivalued expression into a single valued column containing the first value.
+Converts a multivalued expression into a single-valued column containing the first value. This is particularly useful when working with functions like `SPLIT` that produce multivalued columns in a known order.
 
 ## Syntax
 
@@ -8,23 +8,22 @@ The MV_FIRST function converts a multivalued expression into a single valued col
 
 ### Parameters
 
-#### field
+#### `field`
 
-A multivalue expression.
+A multivalued expression.
 
 ## Examples
+
+Extracting the first value from a multivalued column
 
 ```esql
 ROW a="foo;bar;baz"
 | EVAL first_a = MV_FIRST(SPLIT(a, ";"))
 ```
 
-**Retrieving the first element from a multivalued field**
-```esql
-FROM bag_of_numbers
-| EVAL first = MV_FIRST(numbers)
-```
+This example splits the string `a` into multiple values using the `SPLIT` function and extracts the first value, resulting in `first_a = "foo"`.
 
 ## Notes
 
-The MV_FIRST function is particularly useful when reading from a function that emits multivalued columns in a known order, such as SPLIT. However, it's important to note that the order in which multivalued fields are read from underlying storage is not guaranteed. While it's often ascending, this should not be relied upon. If you need the minimum value, use the MV_MIN function instead of MV_FIRST. MV_MIN has optimizations for sorted values, so there isn't a performance benefit to MV_FIRST.
+- The order in which multivalued fields are read from underlying storage is not guaranteed. While it is often ascending, this behavior should not be relied upon.
+- If you need the minimum value, use `MV_MIN` instead of `MV_FIRST`. The `MV_MIN` function is optimized for sorted values and offers no performance disadvantage compared to `MV_FIRST`.

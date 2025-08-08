@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState } from 'react';
+import { isEqual } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiConfirmModal,
   EuiFieldNumber,
   EuiFlexGroup,
@@ -19,26 +18,33 @@ import {
   EuiIconTip,
   EuiSpacer,
   EuiSuperSelect,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { AgentTargetVersion } from '../../../../../../../common/types';
+import type {
+  AgentTargetVersion,
+  GetAvailableVersionsResponse,
+} from '../../../../../../../common/types';
 
 import type { AgentPolicy } from '../../../../../../../common';
 import { useGetAgentsAvailableVersionsQuery, useStartServices } from '../../../../../../hooks';
 import { checkTargetVersionsValidity } from '../../../../../../../common/services';
 import { sendUpdateAgentPolicyForRq } from '../../../../../../hooks/use_request/agent_policy';
 
+import { StatusColumn } from './status_column';
+
 export interface ManageAutoUpgradeAgentsModalProps {
   onClose: (refreshPolicy: boolean) => void;
   agentPolicy: AgentPolicy;
-  agentCount: number;
+  agentCount?: number;
 }
 
 export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
   ManageAutoUpgradeAgentsModalProps
 > = ({ onClose, agentPolicy, agentCount }) => {
+  const modalTitleId = useGeneratedHtmlId();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { notifications } = useStartServices();
   const [targetVersions, setTargetVersions] = useState(agentPolicy.required_versions || []);
@@ -48,6 +54,10 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
   const latestVersion = agentsAvailableVersions?.items[0];
   const [errors, setErrors] = useState<string[]>([]);
 
+  const targetVersionsChanged = useMemo(() => {
+    return isEqual(targetVersions, agentPolicy.required_versions || []) === false;
+  }, [targetVersions, agentPolicy.required_versions]);
+
   const submitUpdateAgentPolicy = async () => {
     setIsLoading(true);
     let isSuccess = false;
@@ -56,6 +66,8 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
         name: agentPolicy.name,
         namespace: agentPolicy.namespace,
         required_versions: targetVersions,
+        // required_versions are not sent to agents, so no need to bump revision
+        bumpRevision: false,
       });
       notifications.toasts.addSuccess(
         i18n.translate('xpack.fleet.manageAutoUpgradeAgents.successNotificationTitle', {
@@ -95,9 +107,11 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
           defaultMessage="Manage auto-upgrade agents"
         />
       }
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       onCancel={() => onClose(false)}
       onConfirm={onSubmit}
-      confirmButtonDisabled={isLoading || errors.length > 0}
+      confirmButtonDisabled={isLoading || errors.length > 0 || !targetVersionsChanged}
       cancelButtonText={
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.cancelButtonLabel"
@@ -114,49 +128,19 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
     >
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          {agentCount > 0 ? (
-            <>
-              <EuiCallOut
-                iconType="iInCircle"
-                title={i18n.translate('xpack.fleet.manageAutoUpgradeAgents.calloutTitle', {
-                  defaultMessage:
-                    'This action will update {agentCount, plural, one {# agent} other {# agents}}',
-                  values: {
-                    agentCount,
-                  },
-                })}
-              />
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
           <FormattedMessage
             id="xpack.fleet.manageAutoUpgradeAgents.descriptionText"
             defaultMessage="Add the target agent version for automatic upgrades."
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiForm isInvalid={errors.length > 0} error={errors} component="form">
-            {targetVersions.map((requiredVersion, index) => (
-              <>
-                <TargetVersionsRow
-                  agentsAvailableVersions={agentsAvailableVersions?.items || []}
-                  requiredVersion={requiredVersion}
-                  key={index}
-                  onRemove={() => {
-                    updateTargetVersions(targetVersions.filter((_, i) => i !== index));
-                  }}
-                  onUpdate={(version: string, percentage: number) => {
-                    updateTargetVersions(
-                      targetVersions.map((targetVersion, i) =>
-                        i === index ? { version, percentage } : targetVersion
-                      )
-                    );
-                  }}
-                />
-                <EuiSpacer size="s" />
-              </>
-            ))}
-          </EuiForm>
+          <TargetVersionsForm
+            targetVersions={targetVersions}
+            agentsAvailableVersions={agentsAvailableVersions}
+            errors={errors}
+            updateTargetVersions={updateTargetVersions}
+            agentPolicyId={agentPolicy.id}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow>
@@ -184,12 +168,61 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
   );
 };
 
+const TargetVersionsForm: React.FunctionComponent<{
+  targetVersions: AgentTargetVersion[];
+  agentsAvailableVersions?: GetAvailableVersionsResponse;
+  errors: string[];
+  updateTargetVersions: (versions: AgentTargetVersion[]) => void;
+  agentPolicyId: string;
+}> = ({ targetVersions, agentsAvailableVersions, errors, updateTargetVersions, agentPolicyId }) => {
+  const onRemove = useCallback(
+    (index: number) => {
+      updateTargetVersions(targetVersions.filter((_, i) => i !== index));
+    },
+    [targetVersions, updateTargetVersions]
+  );
+
+  const onUpdate = useCallback(
+    (index: number, version: string, percentage: number) => {
+      updateTargetVersions(
+        targetVersions.map((targetVersion, i) =>
+          i === index ? { version, percentage } : targetVersion
+        )
+      );
+    },
+    [targetVersions, updateTargetVersions]
+  );
+
+  return (
+    <EuiForm isInvalid={errors.length > 0} error={errors} component="form">
+      {targetVersions.map((requiredVersion, index) => {
+        return (
+          <>
+            <TargetVersionsRow
+              agentsAvailableVersions={agentsAvailableVersions?.items || []}
+              requiredVersion={requiredVersion}
+              key={requiredVersion.version}
+              onRemove={() => onRemove(index)}
+              onUpdate={(version: string, percentage: number) =>
+                onUpdate(index, version, percentage)
+              }
+              agentPolicyId={agentPolicyId}
+            />
+            <EuiSpacer size="s" />
+          </>
+        );
+      })}
+    </EuiForm>
+  );
+};
+
 const TargetVersionsRow: React.FunctionComponent<{
   agentsAvailableVersions: string[];
   requiredVersion: AgentTargetVersion;
   onRemove: () => void;
   onUpdate: (version: string, percentage: number) => void;
-}> = ({ agentsAvailableVersions, requiredVersion, onRemove, onUpdate }) => {
+  agentPolicyId: string;
+}> = ({ agentsAvailableVersions, requiredVersion, onRemove, onUpdate, agentPolicyId }) => {
   const options = agentsAvailableVersions.map((version) => ({
     value: version,
     inputDisplay: version,
@@ -208,8 +241,8 @@ const TargetVersionsRow: React.FunctionComponent<{
   };
 
   return (
-    <EuiFlexGroup direction="row" alignItems="flexEnd">
-      <EuiFlexItem>
+    <EuiFlexGroup direction="row" alignItems="stretch">
+      <EuiFlexItem grow={false}>
         <EuiFormRow
           label={
             <>
@@ -218,7 +251,7 @@ const TargetVersionsRow: React.FunctionComponent<{
                 defaultMessage="Target agent version"
               />
               <EuiIconTip
-                type="iInCircle"
+                type="info"
                 content={
                   <FormattedMessage
                     data-test-subj="targetVersionTooltip"
@@ -240,7 +273,7 @@ const TargetVersionsRow: React.FunctionComponent<{
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiFormRow
           label={
             <>
@@ -249,12 +282,13 @@ const TargetVersionsRow: React.FunctionComponent<{
                 defaultMessage="% of agents to upgrade"
               />
               <EuiIconTip
-                type="iInCircle"
+                type="info"
+                title={'Rounding Applied'}
                 content={
                   <FormattedMessage
                     data-test-subj="percentageTooltip"
                     id="xpack.fleet.manageAutoUpgradeAgents.percentageTooltip"
-                    defaultMessage="Set 100 to upgrade all agents in the policy."
+                    defaultMessage="The actual percentage of agents upgraded may vary slightly due to rounding. For example, selecting 30% of 25 agents may result in 8 agents being upgraded (32%)."
                   />
                 }
               />
@@ -276,6 +310,18 @@ const TargetVersionsRow: React.FunctionComponent<{
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.fleet.manageAutoUpgradeAgents.statusTitle"
+              defaultMessage="Status"
+            />
+          }
+        >
+          <StatusColumn agentPolicyId={agentPolicyId} version={version} percentage={percentage} />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem style={{ alignSelf: 'end' }}>
         <EuiFormRow label="">
           <EuiButton onClick={onRemove} color="text">
             <FormattedMessage

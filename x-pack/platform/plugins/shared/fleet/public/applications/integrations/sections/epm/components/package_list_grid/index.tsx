@@ -19,6 +19,7 @@ import {
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,7 +44,10 @@ import { SearchBox } from './search_box';
 
 const StickySidebar = styled(EuiFlexItem)`
   position: sticky;
-  top: 120px;
+  top: calc(
+    var(--kbn-application--sticky-headers-offset, 96px) +
+      ${(props) => props.theme.eui.euiSizeL /* 24px */}
+  );
 `;
 
 export interface PackageListGridProps {
@@ -103,7 +107,8 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   spacer = true,
   scrollElementId,
 }) => {
-  const localSearchRef = useLocalSearch(list, !!isLoading);
+  const euiTheme = useEuiTheme();
+  const localSearch = useLocalSearch(list, !!isLoading);
 
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -133,20 +138,22 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
     [selectedCategory, setSelectedSubCategory, setUrlandPushHistory]
   );
 
-  const filteredPromotedList = useMemo(() => {
+  const filteredPromotedList: IntegrationCardItem[] = useMemo(() => {
     if (isLoading) return [];
+
+    const searchResults =
+      (localSearch?.search(searchTerm) as IntegrationCardItem[]).map(
+        (match) => match[searchIdField]
+      ) ?? [];
+
     const filteredList = searchTerm
-      ? list.filter((item) =>
-          (localSearchRef.current!.search(searchTerm) as IntegrationCardItem[])
-            .map((match) => match[searchIdField])
-            .includes(item[searchIdField])
-        )
+      ? list.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
       : list;
 
     return sortByFeaturedIntegrations
       ? promoteFeaturedIntegrations(filteredList, selectedCategory)
       : filteredList;
-  }, [isLoading, list, localSearchRef, searchTerm, selectedCategory, sortByFeaturedIntegrations]);
+  }, [isLoading, list, localSearch, searchTerm, selectedCategory, sortByFeaturedIntegrations]);
   const splitSubcategories = (
     subcategories: CategoryFacet[] | undefined
   ): { visibleSubCategories?: CategoryFacet[]; hiddenSubCategories?: CategoryFacet[] } => {
@@ -194,7 +201,15 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
         </StickySidebar>
       )}
 
-      <EuiFlexItem grow={5} data-test-subj="epmList.mainColumn" style={{ alignSelf: 'stretch' }}>
+      <EuiFlexItem
+        grow={5}
+        data-test-subj="epmList.mainColumn"
+        style={{
+          position: 'relative',
+          backgroundColor: euiTheme.euiTheme.colors.backgroundBasePlain,
+          alignSelf: 'stretch',
+        }}
+      >
         {showSearchTools && (
           <EuiFlexItem grow={false}>
             <SearchBox
@@ -276,7 +291,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
             {callout}
           </>
         ) : null}
-        {spacer && <EuiSpacer size="s" />}
+        {spacer && <EuiSpacer size="m" />}
         <EuiFlexItem>
           <GridColumn
             emptyStateStyles={emptyStateStyles}

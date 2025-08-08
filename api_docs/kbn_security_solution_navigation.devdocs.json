@@ -21,41 +21,6 @@
     "functions": [
       {
         "parentPluginId": "@kbn/security-solution-navigation",
-        "id": "def-common.getNavigationPropsFromId",
-        "type": "Function",
-        "tags": [],
-        "label": "getNavigationPropsFromId",
-        "description": [
-          "\nReturns the appId, deepLinkId, and path from a given navigation id"
-        ],
-        "signature": [
-          "(id: string) => { appId: string; deepLinkId?: string | undefined; path?: string | undefined; }"
-        ],
-        "path": "x-pack/solutions/security/packages/navigation/src/navigation.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/security-solution-navigation",
-            "id": "def-common.getNavigationPropsFromId.$1",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/solutions/security/packages/navigation/src/navigation.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/security-solution-navigation",
         "id": "def-common.isAccordionLinkCategory",
         "type": "Function",
         "tags": [],
@@ -927,13 +892,11 @@
     "enums": [
       {
         "parentPluginId": "@kbn/security-solution-navigation",
-        "id": "def-common.ExternalPageName",
+        "id": "def-common.LinkCategoryType",
         "type": "Enum",
         "tags": [],
-        "label": "ExternalPageName",
-        "description": [
-          "\nExternal (non-Security) page names that need to be linked in the Security navigation.\nFormat: `<pluginId>:<deepLinkId>/<path>`.\n\n`pluginId`: is the id of the plugin that owns the deep link\n\n`deepLinkId`: is the id of the deep link inside the plugin.\nKeep empty for the root page of the plugin, e.g. `osquery:`\n\n`path`: is the path to append to the plugin and deep link.\nThis is optional and only needed if the path is not registered in the plugin's `deepLinks`. e.g. `integrations:/browse/security`\nThe path should not be used for links displayed in the main left navigation, since highlighting won't work."
-        ],
+        "label": "LinkCategoryType",
+        "description": [],
         "path": "x-pack/solutions/security/packages/navigation/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -941,11 +904,13 @@
       },
       {
         "parentPluginId": "@kbn/security-solution-navigation",
-        "id": "def-common.LinkCategoryType",
+        "id": "def-common.SecurityGroupName",
         "type": "Enum",
         "tags": [],
-        "label": "LinkCategoryType",
-        "description": [],
+        "label": "SecurityGroupName",
+        "description": [
+          "\nNavigation group names.\nThey are nodes used to group links in the navigationTree but don't have a page on their own.\nAll values need to have the \"securityGroup:\" prefix to avoid collisions with regular `SecurityPageName`\nsince they are mixed together in the navigationTree."
+        ],
         "path": "x-pack/solutions/security/packages/navigation/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

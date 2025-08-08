@@ -38,6 +38,7 @@ function createMockTimefilter() {
     getRefreshInterval: () => {},
     getRefreshIntervalDefaults: () => {},
     getAutoRefreshFetch$: () => new Observable(),
+    getAbsoluteTime: jest.fn(),
   };
 }
 

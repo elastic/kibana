@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './reference_lines.scss';
-
 import React from 'react';
 import { Position } from '@elastic/charts';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';

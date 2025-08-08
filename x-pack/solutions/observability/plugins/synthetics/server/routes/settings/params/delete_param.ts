@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { runSynPrivateLocationMonitorsTaskSoon } from '../../../tasks/sync_private_locations_monitors_task';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
@@ -35,7 +36,7 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       }),
     },
   },
-  handler: async ({ savedObjectsClient, request, response }) => {
+  handler: async ({ savedObjectsClient, request, response, server }) => {
     const { ids } = request.body ?? {};
     const { id: paramId } = request.params ?? {};
 
@@ -61,6 +62,10 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       idsToDelete.map((id) => ({ type: syntheticsParamType, id })),
       { force: true }
     );
+    await runSynPrivateLocationMonitorsTaskSoon({
+      server,
+    });
+
     return result.statuses.map(({ id, success }) => ({ id, deleted: success }));
   },
 });

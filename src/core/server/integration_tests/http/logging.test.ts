@@ -54,12 +54,15 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { authRequired: 'optional' },
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/ping').expect(200, 'pong');
@@ -95,12 +98,15 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { authRequired: 'optional' },
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/ping').expect(200, 'pong');
@@ -151,12 +157,15 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { authRequired: 'optional' },
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/ping').expect(200, 'pong');
@@ -177,6 +186,7 @@ describe('request logging', () => {
         http.createRouter('/').post(
           {
             path: '/ping',
+            security: { authz: { enabled: false, reason: '' } },
             validate: {
               body: schema.object({ message: schema.string() }),
             },
@@ -206,12 +216,15 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/a', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/a',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { authRequired: 'optional' },
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/b').expect(404);
@@ -227,12 +240,15 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { authRequired: 'optional' },
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/ping').query({ hey: 'ya' }).expect(200, 'pong');
@@ -246,12 +262,15 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { authRequired: 'optional' },
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         const response = await request.get(root, '/ping').expect(200, 'pong');
@@ -265,12 +284,15 @@ describe('request logging', () => {
           await root.preboot();
           const { http } = await root.setup();
 
-          http
-            .createRouter('/')
-            .get(
-              { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-              (context, req, res) => res.ok({ headers: { bar: 'world' }, body: 'pong' })
-            );
+          http.createRouter('/').get(
+            {
+              path: '/ping',
+              security: { authz: { enabled: false, reason: '' } },
+              validate: false,
+              options: { authRequired: 'optional' },
+            },
+            (context, req, res) => res.ok({ headers: { bar: 'world' }, body: 'pong' })
+          );
           await root.start();
 
           await request.get(root, '/ping').set('foo', 'hello').expect(200);
@@ -287,6 +309,7 @@ describe('request logging', () => {
           http.createRouter('/').post(
             {
               path: '/ping',
+              security: { authz: { enabled: false, reason: '' } },
               validate: {
                 body: schema.object({ message: schema.string() }),
               },
@@ -356,6 +379,7 @@ describe('request logging', () => {
           http.createRouter('/').post(
             {
               path: '/ping',
+              security: { authz: { enabled: false, reason: '' } },
               validate: {
                 body: schema.object({ message: schema.string() }),
               },
@@ -389,6 +413,7 @@ describe('request logging', () => {
           http.createRouter('/').post(
             {
               path: '/ping',
+              security: { authz: { enabled: false, reason: '' } },
               validate: {
                 body: schema.object({ message: schema.string() }),
               },
@@ -456,6 +481,7 @@ describe('request logging', () => {
           http.createRouter('/').post(
             {
               path: '/ping',
+              security: { authz: { enabled: false, reason: '' } },
               validate: {
                 body: schema.object({ message: schema.string() }),
               },
@@ -487,12 +513,15 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { authRequired: 'optional' },
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/ping').set('user-agent', 'world').expect(200);

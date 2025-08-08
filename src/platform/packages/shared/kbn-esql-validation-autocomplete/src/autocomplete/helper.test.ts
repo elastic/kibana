@@ -7,18 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getOverlapRange } from './helper';
+import { parse } from '@kbn/esql-ast';
+import { getQueryForFields } from './helper';
 
-describe('getOverlapRange', () => {
-  it('should return the overlap range', () => {
-    expect(getOverlapRange('IS N', 'IS NOT NULL')).toEqual({ start: 1, end: 5 });
-    expect(getOverlapRange('I', 'IS NOT NULL')).toEqual({ start: 1, end: 2 });
+describe('getQueryForFields', () => {
+  const assert = (query: string, expected: string) => {
+    const { root } = parse(query);
+
+    const result = getQueryForFields(query, root);
+
+    expect(result).toEqual(expected);
+  };
+
+  it('should return everything up till the last command', () => {
+    const query = 'FROM index | EVAL foo = 1 | STATS field1 | KEEP esql_editor_marker';
+    assert(query, 'FROM index | EVAL foo = 1 | STATS field1');
   });
 
-  it('full query', () => {
-    expect(getOverlapRange('FROM index | WHERE field IS N', 'IS NOT NULL')).toEqual({
-      start: 26,
-      end: 30,
-    });
+  it('should convert FORK branches into vanilla queries', () => {
+    const query = `FROM index
+    | EVAL foo = 1
+    | FORK (STATS field1 | EVAL esql_editor_marker)`;
+    assert(query, 'FROM index | EVAL foo = 1 | STATS field1');
+
+    const query2 = `FROM index 
+    | EVAL foo = 1
+    | FORK (STATS field1) (LIMIT 10) (WHERE field1 == 1 | EVAL esql_editor_marker)`;
+    assert(query2, 'FROM index | EVAL foo = 1 | WHERE field1 == 1');
+  });
+
+  it('should return empty string if non-FROM source command', () => {
+    assert('ROW field1 = 1', '');
+    assert('SHOW INFO', '');
   });
 });

@@ -40,8 +40,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
   data-test-subj="table-users-authentications-loading-false"
 >
   <header
-    class="toggle-expand siemHeaderSection"
-    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+    class="toggle-expand siemHeaderSection css-125xqyz-header"
     data-test-subj="header-section"
   >
     <div
@@ -129,6 +128,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
       >
         <div
           class="c1 siemSubtitle"
+          data-test-subj="header-section-subtitle"
         >
           <p
             class="siemSubtitle__item siemSubtitle__item--text"
@@ -402,7 +402,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
             class="euiPagination__item"
           >
             <button
-              aria-current="true"
+              aria-current="page"
               aria-label="Page 1 of 5"
               class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
               data-test-subj="pagination-button-0"

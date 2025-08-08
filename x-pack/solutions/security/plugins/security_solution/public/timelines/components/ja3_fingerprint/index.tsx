@@ -31,8 +31,10 @@ export const Ja3Fingerprint = React.memo<{
   contextId: string;
   fieldName: string;
   value?: string | null;
-}>(({ contextId, eventId, fieldName, value }) => (
+  scopeId: string;
+}>(({ contextId, eventId, fieldName, value, scopeId }) => (
   <DraggableBadge
+    scopeId={scopeId}
     contextId={contextId}
     data-test-subj="ja3-hash"
     eventId={eventId}

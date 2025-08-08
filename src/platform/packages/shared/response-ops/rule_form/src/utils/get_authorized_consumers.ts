@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import { RuleTypeWithDescription } from '../common/types';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { DEPRECATED_ALERTING_CONSUMERS } from '@kbn/rule-data-utils';
+import type { RuleTypeWithDescription } from '../common/types';
 
 export const getAuthorizedConsumers = ({
   ruleType,
@@ -17,8 +18,8 @@ export const getAuthorizedConsumers = ({
   ruleType: RuleTypeWithDescription;
   validConsumers: RuleCreationValidConsumer[];
 }) => {
-  return Object.entries(ruleType.authorizedConsumers).reduce<RuleCreationValidConsumer[]>(
-    (result, [authorizedConsumer, privilege]) => {
+  return Object.entries(ruleType.authorizedConsumers)
+    .reduce<RuleCreationValidConsumer[]>((result, [authorizedConsumer, privilege]) => {
       if (
         privilege.all &&
         validConsumers.includes(authorizedConsumer as RuleCreationValidConsumer)
@@ -26,7 +27,11 @@ export const getAuthorizedConsumers = ({
         result.push(authorizedConsumer as RuleCreationValidConsumer);
       }
       return result;
-    },
-    []
-  );
+    }, [])
+    .filter((consumer) => {
+      // Filter out deprecated alerting consumers
+      return !(DEPRECATED_ALERTING_CONSUMERS as RuleCreationValidConsumer[]).includes(
+        consumer as RuleCreationValidConsumer
+      );
+    });
 };

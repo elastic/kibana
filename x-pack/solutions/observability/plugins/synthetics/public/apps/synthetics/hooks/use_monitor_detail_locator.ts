@@ -8,18 +8,26 @@
 import { useEffect, useState } from 'react';
 import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { TimeRange } from '@kbn/es-query';
+import { getMonitorSpaceToAppend } from './use_edit_monitor_locator';
 import { useKibanaSpace } from '../../../hooks/use_kibana_space';
 import { ClientPluginsStart } from '../../../plugin';
+
+export interface MonitorDetailLocatorParams {
+  configId: string;
+  locationId?: string;
+  timeRange?: TimeRange;
+  spaces?: string[];
+  tabId?: string;
+}
 
 export function useMonitorDetailLocator({
   configId,
   locationId,
-  spaceId,
-}: {
-  configId: string;
-  locationId?: string;
-  spaceId?: string;
-}) {
+  spaces,
+  timeRange,
+  tabId,
+}: MonitorDetailLocatorParams) {
   const { space } = useKibanaSpace();
   const [monitorUrl, setMonitorUrl] = useState<string | undefined>(undefined);
   const locator = useKibana<ClientPluginsStart>().services?.share?.url.locators.get(
@@ -28,15 +36,17 @@ export function useMonitorDetailLocator({
 
   useEffect(() => {
     async function generateUrl() {
-      const url = await locator?.getUrl({
+      const url = locator?.getRedirectUrl({
         configId,
         locationId,
-        ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
+        timeRange,
+        tabId,
+        ...getMonitorSpaceToAppend(space, spaces),
       });
       setMonitorUrl(url);
     }
     generateUrl();
-  }, [locator, configId, locationId, spaceId, space?.id]);
+  }, [locator, configId, locationId, spaces, space?.id, space, timeRange, tabId]);
 
   return monitorUrl;
 }

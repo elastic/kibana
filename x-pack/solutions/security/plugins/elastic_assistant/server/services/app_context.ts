@@ -12,11 +12,17 @@ import { AssistantTool } from '../types';
 export type PluginName = string;
 export type RegisteredToolsStorage = Map<PluginName, Set<AssistantTool>>;
 export type RegisteredFeaturesStorage = Map<PluginName, AssistantFeatures>;
-export type GetRegisteredTools = (pluginName: string) => AssistantTool[];
+export type GetRegisteredTools = (pluginName: string | string[]) => AssistantTool[];
 export type GetRegisteredFeatures = (pluginName: string) => AssistantFeatures;
 export interface ElasticAssistantAppContext {
   logger: Logger;
 }
+export enum CallbackIds {
+  DefendInsightsPostCreate = 'defend-insights:post-create',
+  DefendInsightsPreCreate = 'defend-insights:pre-create',
+  DefendInsightsPostFetch = 'defend-insights:post-fetch',
+}
+export type RegisteredCallbacks = Map<CallbackIds, Function[]>;
 
 /**
  * Service for managing context specific to the Elastic Assistant
@@ -27,6 +33,7 @@ class AppContextService {
   private logger: Logger | undefined;
   private registeredTools: RegisteredToolsStorage = new Map<PluginName, Set<AssistantTool>>();
   private registeredFeatures: RegisteredFeaturesStorage = new Map<PluginName, AssistantFeatures>();
+  private registeredCallbacks: RegisteredCallbacks = new Map<CallbackIds, Function[]>();
 
   public start(appContext: ElasticAssistantAppContext) {
     this.logger = appContext.logger;
@@ -60,8 +67,16 @@ class AppContextService {
    *
    * @param pluginName
    */
-  public getRegisteredTools(pluginName: string): AssistantTool[] {
-    const tools = Array.from(this.registeredTools?.get(pluginName) ?? new Set<AssistantTool>());
+  public getRegisteredTools(pluginName: string | string[]): AssistantTool[] {
+    const pluginNames = Array.isArray(pluginName) ? pluginName : [pluginName];
+
+    const tools = [
+      ...new Set(
+        pluginNames
+          .map((name) => this.registeredTools?.get(name) ?? new Set<AssistantTool>())
+          .flatMap((set) => [...set])
+      ),
+    ];
 
     this.logger?.debug('AppContextService:getRegisteredTools');
     this.logger?.debug(`pluginName: ${pluginName}`);
@@ -115,6 +130,24 @@ class AppContextService {
     );
 
     return features;
+  }
+
+  /**
+   * Register a callback to a callbackId
+   * @param callbackId
+   * @param callback
+   */
+  public registerCallback(callbackId: CallbackIds, callback: Function) {
+    const callbacks = this.registeredCallbacks.get(callbackId) ?? [];
+    this.registeredCallbacks.set(callbackId, [...callbacks, callback]);
+  }
+
+  /**
+   * Get all registered callbacks for a callbackId
+   * @param callbackId
+   */
+  public getRegisteredCallbacks(callbackId: CallbackIds): Function[] {
+    return this.registeredCallbacks.get(callbackId) ?? [];
   }
 }
 

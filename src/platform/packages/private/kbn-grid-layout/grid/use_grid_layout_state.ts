@@ -7,24 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
-import { cloneDeep, pick } from 'lodash';
+import { pick } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  map,
+  merge,
+} from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 
-import {
-  ActivePanel,
+import { useEuiTheme } from '@elastic/eui';
+
+import type { ActivePanelEvent } from './grid_panel';
+import type { ActiveSectionEvent } from './grid_section';
+import type {
   GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
   GridSettings,
-  PanelInteractionEvent,
+  OrderedLayout,
   RuntimeGridSettings,
 } from './types';
+import { getGridLayout, getOrderedLayout } from './utils/conversions';
+import { isLayoutEqual } from './utils/equality_checks';
 import { shouldShowMobileView } from './utils/mobile_view';
-import { resolveGridRow } from './utils/resolve_grid_row';
 
 export const useGridLayoutState = ({
   layout,
@@ -42,8 +54,9 @@ export const useGridLayoutState = ({
   gridLayoutStateManager: GridLayoutStateManager;
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
 } => {
-  const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const panelRefs = useRef<Array<{ [id: string]: HTMLDivElement | null }>>([]);
+  const sectionRefs = useRef<{ [sectionId: string]: HTMLDivElement | null }>({});
+  const headerRefs = useRef<{ [sectionId: string]: HTMLDivElement | null }>({});
+  const panelRefs = useRef<{ [panelId: string]: HTMLDivElement | null }>({});
   const { euiTheme } = useEuiTheme();
 
   const expandedPanelId$ = useMemo(
@@ -83,35 +96,41 @@ export const useGridLayoutState = ({
   }, [gridSettings, runtimeSettings$]);
 
   const gridLayoutStateManager = useMemo(() => {
-    const resolvedLayout = cloneDeep(layout);
-    resolvedLayout.forEach((row, rowIndex) => {
-      resolvedLayout[rowIndex] = resolveGridRow(row);
-    });
-
-    const gridLayout$ = new BehaviorSubject<GridLayoutData>(resolvedLayout);
-    const proposedGridLayout$ = new BehaviorSubject<GridLayoutData | undefined>(undefined);
+    const orderedLayout = getOrderedLayout(layout);
+    const gridLayout$ = new BehaviorSubject<OrderedLayout>(orderedLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
-    const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
-    const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
-    const panelIds$ = new BehaviorSubject<string[][]>(
-      layout.map(({ panels }) => Object.keys(panels))
+    const activePanelEvent$ = new BehaviorSubject<ActivePanelEvent | undefined>(undefined);
+    const activeSectionEvent$ = new BehaviorSubject<ActiveSectionEvent | undefined>(undefined);
+
+    const layoutUpdated$: Observable<GridLayoutData> = combineLatest([
+      gridLayout$,
+      merge(activePanelEvent$, activeSectionEvent$),
+    ]).pipe(
+      // if an interaction event is happening, then ignore any "draft" layout changes
+      filter(([_, event]) => !Boolean(event)),
+      // once no interaction event, convert to the grid data format
+      map(([newLayout]) => getGridLayout(newLayout)),
+      // only emit if the layout has changed
+      distinctUntilChanged(isLayoutEqual)
     );
 
     return {
-      rowRefs,
+      layoutRef,
+      sectionRefs,
+      headerRefs,
       panelRefs,
-      panelIds$,
-      proposedGridLayout$,
       gridLayout$,
-      activePanel$,
+      activePanelEvent$,
+      activeSectionEvent$,
       accessMode$,
       gridDimensions$,
       runtimeSettings$,
-      interactionEvent$,
       expandedPanelId$,
       isMobileView$: new BehaviorSubject<boolean>(
         shouldShowMobileView(accessMode, euiTheme.breakpoint.m)
       ),
+
+      layoutUpdated$,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -146,11 +165,12 @@ export const useGridLayoutState = ({
      */
     const cssVariableSubscription = gridLayoutStateManager.runtimeSettings$
       .pipe(distinctUntilChanged(deepEqual))
-      .subscribe(({ gutterSize, columnPixelWidth, rowHeight }) => {
+      .subscribe(({ gutterSize, columnPixelWidth, rowHeight, columnCount }) => {
         if (!layoutRef.current) return;
         layoutRef.current.style.setProperty('--kbnGridGutterSize', `${gutterSize}`);
         layoutRef.current.style.setProperty('--kbnGridRowHeight', `${rowHeight}`);
         layoutRef.current.style.setProperty('--kbnGridColumnWidth', `${columnPixelWidth}`);
+        layoutRef.current.style.setProperty('--kbnGridColumnCount', `${columnCount}`);
       });
 
     return () => {

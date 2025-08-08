@@ -5,9 +5,22 @@
  * 2.0.
  */
 
+import { capitalize } from 'lodash';
 import type { IconType } from '@elastic/eui';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import { Job } from '@kbn/reporting-public';
+import type { Rrule } from '@kbn/task-manager-plugin/server/task';
+import { Frequency } from '@kbn/rrule';
+import type {
+  RecurrenceFrequency,
+  RecurringSchedule,
+} from '@kbn/response-ops-recurring-schedule-form/types';
+import {
+  RRULE_TO_ISO_WEEKDAYS,
+  RecurrenceEnd,
+} from '@kbn/response-ops-recurring-schedule-form/constants';
+import { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
+import type { ScheduledReport } from '../types';
 
 /**
  * This is not the most forward-compatible way of mapping to an {@link IconType} for an application.
@@ -35,9 +48,9 @@ export const guessAppIconTypeFromObjectType = (type: string): IconType => {
 export const getDisplayNameFromObjectType = (type: string): string => {
   switch (type) {
     case 'search':
-      return 'discover session';
+      return 'Discover';
     default:
-      return type;
+      return capitalize(type);
   }
 };
 
@@ -46,4 +59,79 @@ export const jobHasIssues = (job: Job): boolean => {
     Boolean(job.getWarnings()) ||
     [JOB_STATUS.WARNINGS, JOB_STATUS.FAILED].some((status) => job.status === status)
   );
+};
+
+const isCustomRrule = (rRule: Rrule) => {
+  const freq = rRule.freq;
+  // interval is greater than 1
+  if (rRule.interval && rRule.interval > 1) {
+    return true;
+  }
+  // frequency is daily and no weekdays are selected
+  if (freq && freq === Frequency.DAILY && !rRule.byweekday) {
+    return true;
+  }
+  // frequency is weekly and there are multiple weekdays selected
+  if (freq && freq === Frequency.WEEKLY && rRule.byweekday && rRule.byweekday.length > 1) {
+    return true;
+  }
+  // frequency is monthly and by month day is selected
+  if (freq && freq === Frequency.MONTHLY && rRule.bymonthday) {
+    return true;
+  }
+  return false;
+};
+
+export const transformScheduledReport = (report: ScheduledReportApiJSON): ScheduledReport => {
+  const { title, schedule, notification } = report;
+  const rRule = schedule.rrule;
+
+  const isCustomFrequency = isCustomRrule(rRule);
+  const frequency = rRule.freq as RecurrenceFrequency;
+
+  const recurringSchedule: RecurringSchedule = {
+    frequency: isCustomFrequency ? 'CUSTOM' : frequency,
+    interval: rRule.interval,
+    ends: RecurrenceEnd.NEVER,
+  };
+
+  if (isCustomFrequency) {
+    recurringSchedule.customFrequency = frequency;
+  }
+
+  if (frequency !== Frequency.MONTHLY && rRule.byweekday) {
+    recurringSchedule.byweekday = rRule.byweekday.reduce<Record<string, boolean>>((acc, day) => {
+      const isoWeekDay = RRULE_TO_ISO_WEEKDAYS[day];
+      if (isoWeekDay != null) {
+        acc[isoWeekDay] = true;
+      }
+      return acc;
+    }, {});
+  }
+  if (frequency === Frequency.MONTHLY) {
+    if (rRule.byweekday?.length) {
+      recurringSchedule.bymonth = 'weekday';
+      recurringSchedule.bymonthweekday = rRule.byweekday[0];
+    } else if (rRule.bymonthday?.length) {
+      recurringSchedule.bymonth = 'day';
+      recurringSchedule.bymonthday = rRule.bymonthday[0];
+    }
+  }
+
+  if (rRule.byhour?.length && rRule.byminute?.length) {
+    recurringSchedule.byhour = rRule.byhour[0];
+    recurringSchedule.byminute = rRule.byminute[0];
+  }
+
+  return {
+    title,
+    recurringSchedule,
+    // TODO dtstart should be required
+    startDate: rRule.dtstart!,
+    reportTypeId: report.jobtype as ScheduledReport['reportTypeId'],
+    timezone: rRule.tzid,
+    recurring: true,
+    sendByEmail: Boolean(notification?.email),
+    emailRecipients: [...(notification?.email?.to || [])],
+  };
 };

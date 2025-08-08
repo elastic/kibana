@@ -6,10 +6,10 @@
  */
 
 import { nanosToMillis } from '../common';
-import { IEvent, IEventLogger, IEventLogService } from '.';
+import type { IEvent, IEventLogger, IEventLogService } from '.';
 import { ECS_VERSION } from './types';
 import { EventLogService } from './event_log_service';
-import { EsContext } from './es/context';
+import type { EsContext } from './es/context';
 import { contextMock } from './es/context.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { delay } from './lib/delay';
@@ -78,6 +78,42 @@ describe('EventLogger', () => {
     const dateEnd = new Date().valueOf();
 
     expect(event).toMatchObject({
+      event: {
+        provider: 'test-provider',
+        action: 'test-action-1',
+      },
+      '@timestamp': expect.stringMatching(/.*/),
+      ecs: {
+        version: ECS_VERSION,
+      },
+      kibana: {
+        server_uuid: '424-24-2424',
+        version: '1.0.1',
+      },
+    });
+
+    const $timeStamp = event!['@timestamp']!;
+    const timeStamp = new Date($timeStamp);
+    expect(timeStamp).not.toBeNaN();
+
+    const timeStampValue = timeStamp.valueOf();
+    expect(timeStampValue).toBeGreaterThanOrEqual(dateStart);
+    expect(timeStampValue).toBeLessThanOrEqual(dateEnd);
+  });
+
+  test('method logEvent() passes through doc ID if defined', async () => {
+    service.registerProviderActions('test-provider', ['test-action-1']);
+    eventLogger = service.getLogger({
+      event: { provider: 'test-provider', action: 'test-action-1' },
+    });
+
+    const dateStart = new Date().valueOf();
+    eventLogger.logEvent({}, 'abc');
+    const event = await waitForLogEvent(systemLogger);
+    const dateEnd = new Date().valueOf();
+
+    expect(event).toMatchObject({
+      id: 'abc',
       event: {
         provider: 'test-provider',
         action: 'test-action-1',

@@ -16,7 +16,7 @@ import type {
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-
+import { errors } from '@elastic/elasticsearch';
 import type { IndicesDataStream, SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import { nodeBuilder } from '@kbn/es-query';
@@ -38,6 +38,8 @@ import type {
   InstalledPackage,
   PackageSpecManifest,
   AssetsMap,
+  PackagePolicyAssetsMap,
+  RegistryPolicyIntegrationTemplate,
 } from '../../../../common/types';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -56,6 +58,7 @@ import {
   PackageNotFoundError,
   RegistryResponseError,
   PackageInvalidArchiveError,
+  FleetUnauthorizedError,
 } from '../../../errors';
 import { appContextService } from '../..';
 import { dataStreamService } from '../../data_streams';
@@ -67,8 +70,10 @@ import { getPackagePolicySavedObjectType } from '../../package_policy';
 import { auditLoggingService } from '../../audit_logging';
 
 import { getFilteredSearchPackages } from '../filtered_packages';
-
+import { filterAssetPathForParseAndVerifyArchive } from '../archive/parse';
 import { airGappedUtils } from '../airgapped';
+
+import type { RegistryPolicyTemplate } from '../../../../common/types/models/epm';
 
 import { createInstallableFrom } from '.';
 import {
@@ -76,6 +81,8 @@ import {
   setPackageAssetsMapCache,
   getPackageInfoCache,
   setPackageInfoCache,
+  getAgentTemplateAssetsMapCache,
+  setAgentTemplateAssetsMapCache,
 } from './cache';
 
 export { getFile } from '../registry';
@@ -138,6 +145,11 @@ export async function getPackages(
               );
               return null;
             }
+            // ignoring errors of type PackageNotFoundError to avoid blocking the UI over a package not found in the registry
+            if (err instanceof PackageNotFoundError) {
+              logger.warn(`Package ${pkg.id} ${pkg.attributes.version} not found in registry`);
+              return null;
+            }
             throw err;
           }
         } else {
@@ -152,7 +164,7 @@ export async function getPackages(
   ).filter((p): p is Installable<any> => p !== null);
 
   const filteredPackages = getFilteredSearchPackages();
-  const packageList = registryItems
+  let packageList = registryItems
     .map((item) =>
       createInstallableFrom(
         item,
@@ -167,9 +179,12 @@ export async function getPackages(
     auditLoggingService.writeCustomSoAuditLog({
       action: 'get',
       id: pkg.id,
+      name: pkg.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
+
+  packageList = filterOutExcludedDataStreamTypes(packageList);
 
   if (!excludeInstallStatus) {
     return packageList;
@@ -189,6 +204,33 @@ export async function getPackages(
   return packageListWithoutStatus as PackageList;
 }
 
+function filterOutExcludedDataStreamTypes(
+  packageList: Array<Installable<any>>
+): Array<Installable<any>> {
+  const excludeDataStreamTypes =
+    appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
+  if (excludeDataStreamTypes.length > 0) {
+    // filter out packages where all data streams have excluded types e.g. metrics
+    return packageList.reduce((acc, pkg) => {
+      const shouldInclude =
+        (pkg.data_streams || [])?.length === 0 ||
+        pkg.data_streams?.some((dataStream: any) => {
+          return !excludeDataStreamTypes.includes(dataStream.type);
+        });
+      if (shouldInclude) {
+        // filter out excluded data stream types
+        const filteredDataStreams =
+          pkg.data_streams?.filter(
+            (dataStream: any) => !excludeDataStreamTypes.includes(dataStream.type)
+          ) ?? [];
+        acc.push({ ...pkg, data_streams: filteredDataStreams });
+      }
+      return acc;
+    }, []);
+  }
+  return packageList;
+}
+
 interface GetInstalledPackagesOptions {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -203,10 +245,22 @@ export async function getInstalledPackages(options: GetInstalledPackagesOptions)
   const { savedObjectsClient, esClient, showOnlyActiveDataStreams, ...otherOptions } = options;
   const { dataStreamType } = otherOptions;
 
-  const [packageSavedObjects, allFleetDataStreams] = await Promise.all([
-    getInstalledPackageSavedObjects(savedObjectsClient, otherOptions),
-    showOnlyActiveDataStreams ? dataStreamService.getAllFleetDataStreams(esClient) : undefined,
-  ]);
+  const packageSavedObjects = await getInstalledPackageSavedObjects(
+    savedObjectsClient,
+    otherOptions
+  );
+
+  let allFleetDataStreams: IndicesDataStream[] | undefined;
+
+  if (showOnlyActiveDataStreams) {
+    allFleetDataStreams = await dataStreamService.getAllFleetDataStreams(esClient).catch((err) => {
+      const isResponseError = err instanceof errors.ResponseError;
+      if (isResponseError && err?.body?.error?.type === 'security_exception') {
+        throw new FleetUnauthorizedError(`Unauthorized to query fleet datastreams: ${err.message}`);
+      }
+      throw err;
+    });
+  }
 
   const integrations = packageSavedObjects.saved_objects.map((integrationSavedObject) => {
     const {
@@ -283,6 +337,7 @@ export async function getLimitedPackages(options: {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: pkg.id,
+      name: pkg.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
@@ -304,6 +359,7 @@ export async function getPackageSavedObjects(
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
+      name: savedObject.attributes.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
@@ -334,15 +390,15 @@ export async function getInstalledPackageSavedObjects(
         `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status`,
         installationStatuses.Installed
       ),
-      // Filter for a "queryable" marker
-      buildFunctionNode(
-        'nested',
-        `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
-        nodeBuilder.is('type', 'index_template')
-      ),
-      // "Type" filter
       ...(dataStreamType
         ? [
+            // Filter for a "queryable" marker
+            buildFunctionNode(
+              'nested',
+              `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
+              nodeBuilder.is('type', 'index_template')
+            ),
+            // "Type" filter
             buildFunctionNode(
               'nested',
               `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
@@ -357,6 +413,7 @@ export async function getInstalledPackageSavedObjects(
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
+      name: savedObject.attributes.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
@@ -513,12 +570,56 @@ export async function getPackageInfo({
     licensePath: Registry.getLicensePath(paths || []),
     keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
   };
-  const updated = { ...packageInfo, ...additions };
+
+  const { filteredDataStreams, filteredPolicyTemplates } =
+    getFilteredDataStreamsAndPolicyTemplates(packageInfo);
+
+  const updated = {
+    ...packageInfo,
+    ...additions,
+    data_streams: filteredDataStreams,
+    policy_templates: filteredPolicyTemplates,
+  };
 
   const installable = createInstallableFrom(updated, savedObject);
   setPackageInfoCache(pkgName, pkgVersion, installable);
 
   return installable;
+}
+
+function getFilteredDataStreamsAndPolicyTemplates(packageInfo: ArchivePackage | RegistryPackage) {
+  const excludeDataStreamTypes =
+    appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
+  let filteredDataStreams = packageInfo.data_streams;
+  let filteredPolicyTemplates = packageInfo.policy_templates;
+
+  if (excludeDataStreamTypes.length > 0) {
+    filteredDataStreams = packageInfo.data_streams?.filter(
+      (dataStream) => !excludeDataStreamTypes.includes(dataStream.type)
+    );
+    // filter out matching types e.g. nginx/metrics
+    filteredPolicyTemplates = packageInfo.policy_templates?.reduce(
+      (acc: RegistryPolicyTemplate[], policyTemplate: RegistryPolicyTemplate) => {
+        const policyTemplateIntegrationTemplate =
+          policyTemplate as RegistryPolicyIntegrationTemplate;
+        if (policyTemplateIntegrationTemplate.inputs) {
+          const filteredInputs = policyTemplateIntegrationTemplate.inputs.filter((input: any) => {
+            const shouldInclude = !excludeDataStreamTypes.some((excludedType) =>
+              input.type.includes(excludedType)
+            );
+            return shouldInclude;
+          });
+          acc.push({ ...policyTemplate, inputs: filteredInputs ?? [] });
+        } else {
+          acc.push(policyTemplate);
+        }
+        return acc;
+      },
+      []
+    );
+  }
+
+  return { filteredDataStreams, filteredPolicyTemplates };
 }
 
 export const getPackageUsageStats = async ({
@@ -552,6 +653,7 @@ export const getPackageUsageStats = async ({
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
+        name: packagePolicy.attributes.name,
         savedObjectType: packagePolicySavedObjectType,
       });
     }
@@ -670,6 +772,7 @@ export async function getInstallationObject(options: {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'find',
     id: installation.id,
+    name: installation.attributes.name,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
@@ -691,6 +794,7 @@ async function getInstallationObjects(options: {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: installation.id,
+      name: installation.attributes.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
@@ -715,15 +819,23 @@ export async function getInstalledPackageWithAssets(options: {
   pkgName: string;
   logger?: Logger;
   ignoreUnverified?: boolean;
+  assetsFilter?: (path: string) => boolean;
 }) {
   const installation = await getInstallation(options);
   if (!installation) {
     return;
   }
+  const assetsReference =
+    (typeof options.assetsFilter !== 'undefined'
+      ? installation.package_assets?.filter(({ path }) =>
+          typeof path !== 'undefined' ? options.assetsFilter!(path) : true
+        )
+      : installation.package_assets) ?? [];
+
   const esPackage = await getEsPackage(
     installation.name,
     installation.version,
-    installation.package_assets ?? [],
+    assetsReference,
     options.savedObjectsClient
   );
 
@@ -797,6 +909,59 @@ export async function getPackageAssetsMap({
     return assetsMap;
   } catch (error) {
     logger.warn(`getPackageAssetsMap error: ${error}`);
+    throw error;
+  }
+}
+
+/**
+ * Return assets agent template assets map for package policies operation
+ */
+export async function getAgentTemplateAssetsMap({
+  savedObjectsClient,
+  packageInfo,
+  logger,
+  ignoreUnverified,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  packageInfo: PackageInfo;
+  logger: Logger;
+  ignoreUnverified?: boolean;
+}): Promise<PackagePolicyAssetsMap> {
+  const cache = getAgentTemplateAssetsMapCache(packageInfo.name, packageInfo.version);
+  if (cache) {
+    return cache;
+  }
+  const assetsFilter = (path: string) =>
+    filterAssetPathForParseAndVerifyArchive(path) || !!path.match(/\/agent\/.*\.hbs/);
+  const installedPackageWithAssets = await getInstalledPackageWithAssets({
+    savedObjectsClient,
+    pkgName: packageInfo.name,
+    logger,
+    assetsFilter,
+  });
+
+  try {
+    let assetsMap: PackagePolicyAssetsMap | undefined;
+    if (installedPackageWithAssets?.installation.version !== packageInfo.version) {
+      // Try to get from registry
+      const pkg = await Registry.getPackage(packageInfo.name, packageInfo.version, {
+        ignoreUnverified,
+        useStreaming: true,
+      });
+      assetsMap = new Map() as PackagePolicyAssetsMap;
+      await pkg.archiveIterator.traverseEntries(async (entry) => {
+        if (entry.buffer) {
+          assetsMap!.set(entry.path, entry.buffer);
+        }
+      }, assetsFilter);
+    } else {
+      assetsMap = installedPackageWithAssets.assetsMap as PackagePolicyAssetsMap;
+    }
+    setAgentTemplateAssetsMapCache(packageInfo.name, packageInfo.version, assetsMap);
+
+    return assetsMap as PackagePolicyAssetsMap;
+  } catch (error) {
+    logger.warn(`getAgentTemplateAssetsMap error: ${error}`);
     throw error;
   }
 }

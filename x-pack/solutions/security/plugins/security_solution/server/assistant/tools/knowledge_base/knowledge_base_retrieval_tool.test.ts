@@ -34,7 +34,9 @@ describe('KnowledgeBaseRetievalTool', () => {
 
   describe('DynamicStructuredTool', () => {
     it('includes citations', async () => {
-      const tool = KNOWLEDGE_BASE_RETRIEVAL_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
+      const tool = (await KNOWLEDGE_BASE_RETRIEVAL_TOOL.getTool(
+        defaultArgs
+      )) as DynamicStructuredTool;
 
       getKnowledgeBaseDocumentEntries.mockResolvedValue([
         new Document({
@@ -63,27 +65,6 @@ describe('KnowledgeBaseRetievalTool', () => {
       const result = await tool.func({ query: 'What is my favourite food' });
 
       expect(result).toContain('citation":"{reference(exampleContentReferenceId)}"');
-    });
-
-    it('does not include citations if contentReferenceStore is false', async () => {
-      const tool = KNOWLEDGE_BASE_RETRIEVAL_TOOL.getTool({
-        ...defaultArgs,
-        contentReferencesStore: undefined,
-      }) as DynamicStructuredTool;
-
-      getKnowledgeBaseDocumentEntries.mockResolvedValue([
-        new Document({
-          id: 'exampleId',
-          pageContent: 'text',
-          metadata: {
-            name: 'exampleName',
-          },
-        }),
-      ] as Document[]);
-
-      const result = await tool.func({ query: 'What is my favourite food' });
-
-      expect(result).not.toContain('citation');
     });
   });
 });

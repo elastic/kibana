@@ -61,29 +61,18 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import {
-  DashboardAppLocatorDefinition,
-  type DashboardAppLocator,
-} from './dashboard_app/locator/locator';
+import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { DashboardMountContextProps } from './dashboard_app/types';
-import {
-  DASHBOARD_APP_ID,
-  LANDING_PAGE_PATH,
-  LEGACY_DASHBOARD_APP_ID,
-  SEARCH_SESSION_ID,
-} from './plugin_constants';
+import { DASHBOARD_APP_ID, LANDING_PAGE_PATH, SEARCH_SESSION_ID } from '../common/constants';
 import {
   GetPanelPlacementSettings,
   registerDashboardPanelPlacementSetting,
-} from './dashboard_container/panel_placement';
+} from './panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
-
-export interface DashboardFeatureFlagConfig {
-  allowByValueEmbeddables: boolean;
-}
+import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -125,23 +114,10 @@ export interface DashboardStartDependencies {
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
-export interface DashboardSetup {
-  /**
-   * @deprecated
-   *
-   * Use `shareStartService.url.locators.get(DASHBOARD_APP_LOCATOR)` instead.
-   */
-  locator?: DashboardAppLocator;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface DashboardSetup {}
 
 export interface DashboardStart {
-  /**
-   * @deprecated
-   *
-   * Use `shareStartService.url.locators.get(DASHBOARD_APP_LOCATOR)` instead.
-   */
-  locator?: DashboardAppLocator;
-  dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   findDashboardsService: () => Promise<FindDashboardsService>;
   registerDashboardPanelPlacementSetting: <SerializedState extends object = object>(
     embeddableType: string,
@@ -149,36 +125,29 @@ export interface DashboardStart {
   ) => void;
 }
 
-export let resolveServicesReady: () => void;
-
 export class DashboardPlugin
   implements
     Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies>
 {
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     setLogger(initializerContext.logger.get('dashboard'));
   }
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
-  private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
-  private locator?: DashboardAppLocator;
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, embeddable, home, urlForwarding, data, contentManagement }: DashboardSetupDependencies
-  ): DashboardSetup {
-    this.dashboardFeatureFlagConfig =
-      this.initializerContext.config.get<DashboardFeatureFlagConfig>();
-
+    { share, home, data, contentManagement, urlForwarding }: DashboardSetupDependencies
+  ) {
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
       schema: {},
     });
 
     if (share) {
-      this.locator = share.url.locators.create(
+      share.url.locators.create(
         new DashboardAppLocatorDefinition({
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
@@ -256,8 +225,11 @@ export class DashboardPlugin
       mount: async (params: AppMountParameters) => {
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
-        await untilPluginStartServicesReady();
-        const { mountApp } = await import('./dashboard_app/dashboard_router');
+        const [{ mountApp }] = await Promise.all([
+          import('./dashboard_app/dashboard_router'),
+          import('./dashboard_renderer/dashboard_module'),
+          untilPluginStartServicesReady(),
+        ]);
         appMounted();
 
         const [coreStart] = await core.getStartServices();
@@ -279,24 +251,9 @@ export class DashboardPlugin
     };
 
     core.application.register(app);
-    urlForwarding.forwardApp(DASHBOARD_APP_ID, DASHBOARD_APP_ID, (path) => {
-      const [, tail] = /(\?.*)/.exec(path) || [];
-      // carry over query if it exists
-      return `#/list${tail || ''}`;
-    });
-    urlForwarding.forwardApp(LEGACY_DASHBOARD_APP_ID, DASHBOARD_APP_ID, (path) => {
-      const [, id, tail] = /dashboard\/?(.*?)($|\?.*)/.exec(path) || [];
-      if (!id && !tail) {
-        // unrecognized sub url
-        return '#/list';
-      }
-      if (!id && tail) {
-        // unsaved dashboard, but probably state in URL
-        return `#/create${tail || ''}`;
-      }
-      // persisted dashboard, probably with url state
-      return `#/view/${id}${tail || ''}`;
-    });
+
+    setupUrlForwarding(urlForwarding);
+
     const dashboardAppTitle = i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
       defaultMessage: 'Dashboard',
     });
@@ -329,24 +286,15 @@ export class DashboardPlugin
       name: dashboardAppTitle,
     });
 
-    return {
-      locator: this.locator,
-    };
+    return {};
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     setKibanaServices(core, plugins);
 
-    untilPluginStartServicesReady().then(() => {
-      registerActions({
-        plugins,
-        allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
-      });
-    });
+    untilPluginStartServicesReady().then(() => registerActions(plugins));
 
     return {
-      locator: this.locator,
-      dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       registerDashboardPanelPlacementSetting,
       findDashboardsService: async () => {
         const { getDashboardContentManagementService } = await import(

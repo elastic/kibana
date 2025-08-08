@@ -9,7 +9,7 @@
 
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
+import type { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -17,18 +17,20 @@ import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DiscoverServices } from '../../../build_services';
 import { createDataSource } from '../../../../common/data_sources';
+import type { ScopedProfilesManager } from '../../../context_awareness';
 
 export async function fetchAnchor(
   anchorId: string,
   dataView: DataView,
   searchSource: ISearchSource,
   sort: EsQuerySortValue[],
-  services: DiscoverServices
+  services: DiscoverServices,
+  scopedProfilesManager: ScopedProfilesManager
 ): Promise<{
   anchorRow: DataTableRecord;
   interceptedWarnings: SearchResponseWarning[];
 }> {
-  await services.profilesManager.resolveDataSourceProfile({
+  await scopedProfilesManager.resolveDataSourceProfile({
     dataSource: createDataSource({ dataView, query: undefined }),
     dataView,
     query: { query: '', language: 'kuery' },
@@ -63,7 +65,7 @@ export async function fetchAnchor(
   });
 
   return {
-    anchorRow: services.profilesManager.resolveDocumentProfile({
+    anchorRow: scopedProfilesManager.resolveDocumentProfile({
       record: buildDataTableRecord(doc, dataView, true),
     }),
     interceptedWarnings,

@@ -48,7 +48,7 @@ describe('MonitorCharts component', () => {
   };
 
   it('renders the component without errors', () => {
-    const { getByLabelText } = render(
+    const { getByRole } = render(
       <DurationChartComponent
         loading={false}
         anomalies={null}
@@ -72,7 +72,11 @@ describe('MonitorCharts component', () => {
         },
       }
     );
-    expect(getByLabelText(`A chart displaying the monitor's ping duration, grouped by location.`));
+    const figureElement = getByRole('figure');
+    expect(figureElement).toHaveAttribute(
+      'aria-label',
+      "A chart displaying the monitor's ping duration, grouped by location."
+    );
   });
 
   it('renders an empty state when no monitor data is present', () => {

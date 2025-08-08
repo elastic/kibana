@@ -51,11 +51,11 @@ export interface FilterContentProps {
 }
 
 export function FilterContent({ filter, valueLabel, fieldLabel, hideAlias }: FilterContentProps) {
-  if (!hideAlias && filter.meta.alias !== null) {
+  if (!hideAlias && filter.meta.alias != null) {
     return (
       <>
         <Prefix prefix={filter.meta.negate} />
-        <FilterValue value={`${filter.meta.alias}`} />
+        <FilterValue value={filter.meta.alias} />
       </>
     );
   }
@@ -98,7 +98,3 @@ export function FilterContent({ filter, valueLabel, fieldLabel, hideAlias }: Fil
       );
   }
 }
-
-// Needed for React.lazy
-// eslint-disable-next-line import/no-default-export
-export default FilterContent;

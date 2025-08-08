@@ -34,13 +34,12 @@ import {
 import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
 import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
-import { getSystemMessageFromInstructions } from '@kbn/observability-ai-assistant-plugin/server/service/util/get_system_message_from_instructions';
-import { AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { EXECUTE_CONNECTOR_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/execute_connector';
 import { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
 import { ChatFunctionClient } from '@kbn/observability-ai-assistant-plugin/server/service/chat_function_client';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { RegisterInstructionCallback } from '@kbn/observability-ai-assistant-plugin/server/service/types';
 import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 import { ALERT_STATUSES } from '../../common/constants';
@@ -254,32 +253,32 @@ async function executeAlertsChatCompletion(
     });
   });
 
-  const backgroundInstruction: AdHocInstruction = {
-    instruction_type: 'application_instruction',
-    text: dedent(
-      `You are called as a background process because alerts have changed state.
+  const backgroundInstruction = dedent(
+    `You are called as a background process because alerts have changed state.
 As a background process you are not interacting with a user. Because of that DO NOT ask for user
 input if tasked to execute actions. You can generate multiple responses in a row.
 If available, include the link of the conversation at the end of your answer.`
-    ),
-  };
+  );
+
+  functionClient.registerInstruction(backgroundInstruction);
 
   const hasSlackConnector = !!connectorsList.filter(
     (connector) => connector.actionTypeId === '.slack'
   ).length;
 
-  if (hasSlackConnector && functionClient.hasFunction(EXECUTE_CONNECTOR_FUNCTION_NAME)) {
-    const slackConnectorInstruction: AdHocInstruction = {
-      instruction_type: 'application_instruction',
-      text: dedent(
-        `The execute_connector function can be used to invoke Kibana connectors.
+  if (hasSlackConnector) {
+    const slackConnectorInstruction: RegisterInstructionCallback = ({ availableFunctionNames }) =>
+      availableFunctionNames.includes(EXECUTE_CONNECTOR_FUNCTION_NAME)
+        ? dedent(
+            `The execute_connector function can be used to invoke Kibana connectors.
         To send to the Slack connector, you need the following arguments:
         - the "id" of the connector
         - the "params" parameter that you will fill with the message
         Please include both "id" and "params.message" in the function arguments when executing the Slack connector..`
-      ),
-    };
-    functionClient.registerAdhocInstruction(slackConnectorInstruction);
+          )
+        : undefined;
+
+    functionClient.registerInstruction(slackConnectorInstruction);
   }
 
   const alertsContext = await getAlertsContext(
@@ -313,20 +312,7 @@ If available, include the link of the conversation at the end of your answer.`
       connectorId: params.connector,
       signal: new AbortController().signal,
       kibanaPublicUrl: (await resources.plugins.core.start()).http.basePath.publicBaseUrl,
-      instructions: [backgroundInstruction],
       messages: [
-        {
-          '@timestamp': new Date().toISOString(),
-          message: {
-            role: MessageRole.System,
-            content: getSystemMessageFromInstructions({
-              availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
-              applicationInstructions: functionClient.getInstructions(),
-              userInstructions: [],
-              adHocInstructions: functionClient.getAdhocInstructions(),
-            }),
-          },
-        },
         {
           '@timestamp': new Date().toISOString(),
           message: {

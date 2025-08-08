@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import { anomaliesTableData } from '../api/anomalies_table_data';
 import type { InfluencerInput, Anomalies, CriteriaFields } from '../types';
@@ -94,7 +94,7 @@ export const useAnomaliesTableData = ({
         criteriaFields,
         influencersFilterQuery: filterQuery,
         aggregationInterval,
-        threshold: getThreshold(anomalyScore, threshold),
+        threshold: [{ min: getThreshold(anomalyScore, threshold) }],
         earliestMs: startDateMs,
         latestMs: endDateMs,
         influencers,

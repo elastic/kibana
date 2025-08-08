@@ -16,7 +16,6 @@ export enum ApmFeatureFlagName {
   MigrationToFleetAvailable = 'migrationToFleetAvailable',
   SourcemapApiAvailable = 'sourcemapApiAvailable',
   StorageExplorerAvailable = 'storageExplorerAvailable',
-  ProfilingIntegrationAvailable = 'profilingIntegrationAvailable',
   RuleFormV2Enabled = 'ruleFormV2Enabled',
 }
 
@@ -47,10 +46,6 @@ const apmFeatureFlagMap = {
   },
   [ApmFeatureFlagName.StorageExplorerAvailable]: {
     default: true,
-    type: t.boolean,
-  },
-  [ApmFeatureFlagName.ProfilingIntegrationAvailable]: {
-    default: false,
     type: t.boolean,
   },
   [ApmFeatureFlagName.RuleFormV2Enabled]: {

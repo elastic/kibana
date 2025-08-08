@@ -6,6 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import {
   INSTALLATION_STATUS_API_PATH,
   INSTALL_ALL_API_PATH,
@@ -22,19 +23,42 @@ export class InstallationService {
     this.http = http;
   }
 
-  async getInstallationStatus(): Promise<InstallationStatusResponse> {
-    return await this.http.get<InstallationStatusResponse>(INSTALLATION_STATUS_API_PATH);
+  async getInstallationStatus(params: {
+    inferenceId: string;
+  }): Promise<InstallationStatusResponse> {
+    const inferenceId = params?.inferenceId ?? defaultInferenceEndpoints.ELSER;
+
+    const response = await this.http.get<InstallationStatusResponse>(INSTALLATION_STATUS_API_PATH, {
+      query: { inferenceId },
+    });
+
+    return response;
   }
 
-  async install(): Promise<PerformInstallResponse> {
-    const response = await this.http.post<PerformInstallResponse>(INSTALL_ALL_API_PATH);
+  async install(params: { inferenceId: string }): Promise<PerformInstallResponse> {
+    const inferenceId = params?.inferenceId ?? defaultInferenceEndpoints.ELSER;
+
+    const response = await this.http.post<PerformInstallResponse>(INSTALL_ALL_API_PATH, {
+      body: JSON.stringify({ inferenceId }),
+    });
+
     if (!response.installed) {
-      throw new Error('Installation did not complete successfully');
+      throw new Error(
+        `Installation did not complete successfully.${
+          response.failureReason ? `\n${response.failureReason}` : ''
+        }`
+      );
     }
     return response;
   }
 
-  async uninstall(): Promise<UninstallResponse> {
-    return await this.http.post<UninstallResponse>(UNINSTALL_ALL_API_PATH);
+  async uninstall(params: { inferenceId: string }): Promise<UninstallResponse> {
+    const inferenceId = params?.inferenceId ?? defaultInferenceEndpoints.ELSER;
+
+    const response = await this.http.post<UninstallResponse>(UNINSTALL_ALL_API_PATH, {
+      body: JSON.stringify({ inferenceId }),
+    });
+
+    return response;
   }
 }

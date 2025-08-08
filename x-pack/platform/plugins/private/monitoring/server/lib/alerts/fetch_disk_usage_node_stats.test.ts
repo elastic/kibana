@@ -91,50 +91,48 @@ describe('fetchDiskUsageNodeStats', () => {
       index:
         '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.node_stats-*,metrics-elasticsearch.stack_monitoring.node_stats-*',
       filter_path: ['aggregations'],
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { terms: { cluster_uuid: ['cluster123'] } },
-              {
-                bool: {
-                  should: [
-                    { term: { type: 'node_stats' } },
-                    { term: { 'metricset.name': 'node_stats' } },
-                    {
-                      term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.node_stats' },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-              { range: { timestamp: { gte: 'now-5m' } } },
-            ],
-          },
-        },
-        aggs: {
-          clusters: {
-            terms: { field: 'cluster_uuid', size: 10, include: ['cluster123'] },
-            aggs: {
-              nodes: {
-                terms: { field: 'node_stats.node_id', size: 10 },
-                aggs: {
-                  index: { terms: { field: '_index', size: 1 } },
-                  total_in_bytes: { max: { field: 'node_stats.fs.total.total_in_bytes' } },
-                  available_in_bytes: { max: { field: 'node_stats.fs.total.available_in_bytes' } },
-                  usage_ratio_percentile: {
-                    bucket_script: {
-                      buckets_path: {
-                        available_in_bytes: 'available_in_bytes',
-                        total_in_bytes: 'total_in_bytes',
-                      },
-                      script:
-                        '100 - Math.floor((params.available_in_bytes / params.total_in_bytes) * 100)',
-                    },
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { terms: { cluster_uuid: ['cluster123'] } },
+            {
+              bool: {
+                should: [
+                  { term: { type: 'node_stats' } },
+                  { term: { 'metricset.name': 'node_stats' } },
+                  {
+                    term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.node_stats' },
                   },
-                  name: { terms: { field: 'source_node.name', size: 1 } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            { range: { timestamp: { gte: 'now-5m' } } },
+          ],
+        },
+      },
+      aggs: {
+        clusters: {
+          terms: { field: 'cluster_uuid', size: 10, include: ['cluster123'] },
+          aggs: {
+            nodes: {
+              terms: { field: 'node_stats.node_id', size: 10 },
+              aggs: {
+                index: { terms: { field: '_index', size: 1 } },
+                total_in_bytes: { max: { field: 'node_stats.fs.total.total_in_bytes' } },
+                available_in_bytes: { max: { field: 'node_stats.fs.total.available_in_bytes' } },
+                usage_ratio_percentile: {
+                  bucket_script: {
+                    buckets_path: {
+                      available_in_bytes: 'available_in_bytes',
+                      total_in_bytes: 'total_in_bytes',
+                    },
+                    script:
+                      '100 - Math.floor((params.available_in_bytes / params.total_in_bytes) * 100)',
+                  },
                 },
+                name: { terms: { field: 'source_node.name', size: 1 } },
               },
             },
           },

@@ -20,7 +20,7 @@ export const TimeseriesexplorerNoChartData: FC<{
   entities?: Entity[];
 }> = ({ dataNotChartable, entities }) => (
   <EuiEmptyPrompt
-    iconType="iInCircle"
+    iconType="info"
     title={
       <h2>
         {i18n.translate('xpack.ml.timeSeriesExplorer.noResultsFoundLabel', {

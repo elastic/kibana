@@ -12,7 +12,7 @@ import { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { EsIndexFilesMetadataClient } from '../..';
 import { FileMetadata } from '@kbn/shared-ux-file-types';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 describe('EsIndexFilesMetadataClient', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -65,15 +65,13 @@ describe('EsIndexFilesMetadataClient', () => {
       await metaClient.update({ id: '123', metadata: generateMetadata() });
 
       expect(esClient.search).toHaveBeenCalledWith({
-        body: {
-          _source: false,
-          query: {
-            term: {
-              _id: '123',
-            },
+        _source: false,
+        query: {
+          term: {
+            _id: '123',
           },
-          size: 1,
         },
+        size: 1,
         index: 'foo',
       });
       expect(esClient.update).toHaveBeenCalledWith(expect.objectContaining({ index: 'foo-00001' }));

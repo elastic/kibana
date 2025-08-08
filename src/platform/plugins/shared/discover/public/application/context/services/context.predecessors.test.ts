@@ -11,10 +11,10 @@ import moment from 'moment';
 import { get, last } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
-import { Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import { createContextSearchSourceStub } from './_stubs';
 import { fetchSurroundingDocs, SurrDocType } from './context';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { buildDataTableRecord, buildDataTableRecordList } from '@kbn/discover-utils';
 import { discoverServiceMock } from '../../../__mocks__/services';
@@ -87,7 +87,10 @@ describe('context predecessors', function () {
           size,
           [],
           dataPluginMock,
-          discoverServiceMock
+          discoverServiceMock,
+          discoverServiceMock.profilesManager.createScopedProfilesManager({
+            scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+          })
         );
       };
     });
@@ -237,7 +240,10 @@ describe('context predecessors', function () {
           size,
           [],
           dataPluginMock,
-          discoverServiceMock
+          discoverServiceMock,
+          discoverServiceMock.profilesManager.createScopedProfilesManager({
+            scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+          })
         );
       };
     });

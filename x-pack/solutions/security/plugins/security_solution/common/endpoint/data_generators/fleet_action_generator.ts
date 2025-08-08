@@ -7,7 +7,7 @@
 
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { BaseDataGenerator } from './base_data_generator';
 import type {

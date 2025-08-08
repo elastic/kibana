@@ -8,11 +8,11 @@
 import dateMath from '@kbn/datemath';
 import type {
   IngestPipeline,
-  IngestSimulateDocument,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+  IngestDocumentSimulation,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-type Doc = IngestSimulateDocument['_source'];
+type Doc = IngestDocumentSimulation['_source'];
 
 /**
  * Returns the start and end time range in epoch milliseconds for a given set of documents

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiCommentList } from '@elastic/eui';
 import React from 'react';
+import { EuiCommentList } from '@elastic/eui';
+import { screen } from '@testing-library/react';
 import { UserActionActions } from '../../../common/types/domain';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
+import { renderWithTestingProviders } from '../../common/mock';
 import { getUserAction } from '../../containers/mock';
 import { getMockBuilderArgs } from './mock';
 import { createSettingsUserActionBuilder } from './settings';
@@ -19,10 +20,8 @@ jest.mock('../../common/navigation/hooks');
 
 describe('createStatusUserActionBuilder ', () => {
   const builderArgs = getMockBuilderArgs();
-  let appMock: AppMockRenderer;
 
   beforeEach(() => {
-    appMock = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -43,10 +42,10 @@ describe('createStatusUserActionBuilder ', () => {
       });
 
       const createdUserAction = builder.build();
-      const result = appMock.render(<EuiCommentList comments={createdUserAction} />);
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(result.getByTestId('settings-update-action-settings-update')).toBeTruthy();
-      expect(result.getByText(`${label} sync alerts`)).toBeTruthy();
+      expect(screen.getByTestId('settings-update-action-settings-update')).toBeTruthy();
+      expect(screen.getByText(`${label} sync alerts`)).toBeTruthy();
     }
   );
 });

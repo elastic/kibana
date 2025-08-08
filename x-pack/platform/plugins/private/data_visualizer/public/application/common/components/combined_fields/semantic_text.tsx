@@ -27,7 +27,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import type {
   InferenceInferenceEndpointInfo,
   MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { createSemanticTextCombinedField, getFieldNames, getNameCollisionMsg } from './utils';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import type { AddCombinedField } from './combined_fields_form';
@@ -170,6 +170,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
           error={[fieldError]}
         >
           <EuiFieldText
+            isInvalid={fieldError !== undefined}
             placeholder={i18n.translate(
               'xpack.dataVisualizer.file.semanticTextForm.copyFieldLabel.placeholder',
               {

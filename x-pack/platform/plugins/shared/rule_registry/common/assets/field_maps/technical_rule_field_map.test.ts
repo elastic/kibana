@@ -95,6 +95,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
+      "kibana.alert.pending_recovered_count": Object {
+        "array": false,
+        "required": false,
+        "type": "long",
+      },
       "kibana.alert.previous_action_group": Object {
         "array": false,
         "required": false,
@@ -318,6 +323,21 @@ it('matches snapshot', () => {
         "format": "epoch_millis||strict_date_optional_time",
         "required": false,
         "type": "date_range",
+      },
+      "kibana.alert.updated_at": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
+      },
+      "kibana.alert.updated_by.user.id": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.updated_by.user.name": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
       },
       "kibana.alert.url": Object {
         "array": false,

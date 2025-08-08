@@ -797,100 +797,6 @@
       },
       {
         "parentPluginId": "kibanaUtils",
-        "id": "def-public.RenderCompleteListener",
-        "type": "Class",
-        "tags": [],
-        "label": "RenderCompleteListener",
-        "description": [],
-        "path": "src/platform/plugins/shared/kibana_utils/public/render_complete/render_complete_listener.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-public.RenderCompleteListener.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/platform/plugins/shared/kibana_utils/public/render_complete/render_complete_listener.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaUtils",
-                "id": "def-public.RenderCompleteListener.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "element",
-                "description": [],
-                "signature": [
-                  "HTMLElement"
-                ],
-                "path": "src/platform/plugins/shared/kibana_utils/public/render_complete/render_complete_listener.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-public.RenderCompleteListener.destroy",
-            "type": "Function",
-            "tags": [],
-            "label": "destroy",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/platform/plugins/shared/kibana_utils/public/render_complete/render_complete_listener.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-public.RenderCompleteListener.setup",
-            "type": "Function",
-            "tags": [],
-            "label": "setup",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/platform/plugins/shared/kibana_utils/public/render_complete/render_complete_listener.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-public.RenderCompleteListener.disable",
-            "type": "Function",
-            "tags": [],
-            "label": "disable",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/platform/plugins/shared/kibana_utils/public/render_complete/render_complete_listener.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
         "id": "def-public.ResizeChecker",
         "type": "Class",
         "tags": [],
@@ -907,7 +813,8 @@
             "text": "ResizeChecker"
           },
           " extends ",
-          "events"
+          "events",
+          "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/kibana_utils/public/resize_checker/resize_checker.ts",
         "deprecated": false,
@@ -8813,6 +8720,38 @@
         "trackAdoption": false,
         "children": [],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
+        "id": "def-common.defaultFreeze",
+        "type": "Function",
+        "tags": [],
+        "label": "defaultFreeze",
+        "description": [],
+        "signature": [
+          "<T>(value: T) => T"
+        ],
+        "path": "src/platform/plugins/shared/kibana_utils/common/state_containers/create_state_container.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.defaultFreeze.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/plugins/shared/kibana_utils/common/state_containers/create_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

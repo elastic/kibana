@@ -6,6 +6,7 @@
  */
 import React, { memo, useMemo, useEffect, useState, useCallback, useRef } from 'react';
 import type { MouseEventHandler } from 'react';
+import { isEqual } from 'lodash';
 
 import styled from 'styled-components';
 import {
@@ -20,10 +21,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-
-import { AVCResultsBanner, useIsStillYear2025 } from '@kbn/avc-banner';
-
 import {
   isIntegrationPolicyTemplate,
   isPackagePrerelease,
@@ -35,12 +32,11 @@ import {
   useLink,
   useStartServices,
   sendGetFileByPath,
+  useConfig,
 } from '../../../../../../../hooks';
 import { isPackageUnverified } from '../../../../../../../services';
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 import { SideBarColumn } from '../../../components/side_bar_column';
-
-import type { FleetStartServices } from '../../../../../../../plugin';
 
 import {
   CloudPostureThirdPartySupportCallout,
@@ -118,6 +114,23 @@ const UnverifiedCallout: React.FC = () => {
   );
 };
 
+const LogsEssentialsCallout: React.FC = () => {
+  return (
+    <>
+      <EuiCallOut
+        data-test-subj="logsEssentialsCallout"
+        title={i18n.translate('xpack.fleet.epm.logsEssentialsCalloutTitle', {
+          defaultMessage:
+            'As this is a Logs Essentials project, these integrations will only install and configure for logs collection, even if the description mentions metrics.',
+        })}
+        iconType="info"
+        color="primary"
+      />
+      <EuiSpacer size="l" />
+    </>
+  );
+};
+
 export const PrereleaseCallout: React.FC<{
   packageName: string;
   latestGAVersion?: string;
@@ -138,7 +151,7 @@ export const PrereleaseCallout: React.FC<{
             packageTitle,
           },
         })}
-        iconType="iInCircle"
+        iconType="info"
         color="warning"
       >
         {latestGAVersion && (
@@ -166,15 +179,14 @@ export const getAnchorId = (name: string | undefined, index?: number) => {
 
 export const OverviewPage: React.FC<Props> = memo(
   ({ packageInfo, integrationInfo, latestGAVersion }) => {
+    const config = useConfig();
     const screenshots = useMemo(
       () => integrationInfo?.screenshots || packageInfo.screenshots || [],
       [integrationInfo, packageInfo.screenshots]
     );
-    const { storage } = useKibana<FleetStartServices>().services;
     const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
     const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
     const isPrerelease = isPackagePrerelease(packageInfo.version);
-    const isElasticDefend = packageInfo.name === 'endpoint';
     const [markdown, setMarkdown] = useState<string | undefined>(undefined);
     const [selectedItemId, setSelectedItem] = useState<string | undefined>(undefined);
     const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
@@ -295,14 +307,11 @@ export const OverviewPage: React.FC<Props> = memo(
     }, [h1, navItems]);
 
     const requireAgentRootPrivileges = isRootPrivilegesRequired(packageInfo);
+    const hideDashboards = config?.hideDashboards;
 
-    const [showAVCBanner, setShowAVCBanner] = useState(
-      storage.get('securitySolution.showAvcBanner') ?? true
-    );
-    const onAVCBannerDismiss = useCallback(() => {
-      setShowAVCBanner(false);
-      storage.set('securitySolution.showAvcBanner', false);
-    }, [storage]);
+    const showLogsEssentialsCallout = isEqual(config?.internal?.excludeDataStreamTypes, [
+      'metrics',
+    ]);
 
     return (
       <EuiFlexGroup alignItems="flexStart" data-test-subj="epm.OverviewPage">
@@ -318,15 +327,9 @@ export const OverviewPage: React.FC<Props> = memo(
         </SideBar>
         <EuiFlexItem grow={9} className="eui-textBreakWord">
           {isUnverified && <UnverifiedCallout />}
-          {useIsStillYear2025() && isElasticDefend && showAVCBanner && (
-            <>
-              <AVCResultsBanner onDismiss={onAVCBannerDismiss} />
-              <EuiSpacer size="s" />
-            </>
-          )}
+          {showLogsEssentialsCallout && <LogsEssentialsCallout />}
 
           <BidirectionalIntegrationsBanner integrationPackageName={packageInfo.name} />
-
           <CloudPostureThirdPartySupportCallout packageInfo={packageInfo} />
           {isPrerelease && (
             <PrereleaseCallout
@@ -351,7 +354,7 @@ export const OverviewPage: React.FC<Props> = memo(
                 <Requirements />
               </EuiFlexItem>
             ) : null}
-            {screenshots.length ? (
+            {!hideDashboards && screenshots.length ? (
               <EuiFlexItem>
                 <Screenshots
                   images={screenshots}

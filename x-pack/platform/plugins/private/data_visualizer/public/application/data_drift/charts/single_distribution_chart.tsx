@@ -8,16 +8,8 @@
 import React from 'react';
 
 import type { SeriesColorAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
-import {
-  Axis,
-  BarSeries,
-  Chart,
-  LEGACY_LIGHT_THEME,
-  Position,
-  ScaleType,
-  Settings,
-  Tooltip,
-} from '@elastic/charts';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { Histogram } from '@kbn/ml-chi2test';
@@ -44,6 +36,7 @@ export const SingleDistributionChart = ({
   fieldType?: DataDriftField['type'];
   domain?: Feature['domain'];
 }) => {
+  const chartBaseTheme = useElasticChartsTheme();
   const xAxisFormatter = useFieldFormatter(getFieldFormatType(secondaryType));
   const yAxisFormatter = useFieldFormatter(FIELD_FORMAT_IDS.NUMBER);
 
@@ -54,8 +47,10 @@ export const SingleDistributionChart = ({
       <Tooltip body={DataComparisonChartTooltipBody} />
 
       <Settings
-        // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-        baseTheme={LEGACY_LIGHT_THEME}
+        baseTheme={chartBaseTheme}
+        theme={{
+          axes: { gridLine: { horizontal: { visible: false }, vertical: { visible: false } } }, // Hide grid lines
+        }}
         locale={i18n.getLocale()}
       />
       <Axis

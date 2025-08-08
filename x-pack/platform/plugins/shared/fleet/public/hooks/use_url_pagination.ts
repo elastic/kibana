@@ -13,7 +13,7 @@ import { PAGE_SIZE_OPTIONS, usePagination } from './use_pagination';
 import type { Pagination } from './use_pagination';
 
 type SetUrlPagination = (pagination: Pagination) => void;
-interface UrlPagination {
+export interface UrlPagination {
   pagination: Pagination;
   setPagination: SetUrlPagination;
   pageSizeOptions: number[];

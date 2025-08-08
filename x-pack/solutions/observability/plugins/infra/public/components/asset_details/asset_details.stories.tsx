@@ -7,9 +7,9 @@
 
 import React, { useState } from 'react';
 import { EuiButton, EuiCallOut, EuiSelect, EuiSpacer } from '@elastic/eui';
-import type { Meta, Story } from '@storybook/react/types-6-0';
+import type { Meta, StoryFn } from '@storybook/react';
 import { MemoryRouter } from 'react-router-dom';
-import { useArgs } from '@storybook/addons';
+import { useArgs } from '@storybook/preview-api';
 import { AssetDetails } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
 import { type TabIds, type AssetDetailsProps } from './types';
@@ -42,7 +42,7 @@ const stories: Meta<AssetDetailsStoryArgs> = {
   args: { ...assetDetailsProps },
 };
 
-const PageTabTemplate: Story<AssetDetailsStoryArgs> = (args) => {
+const PageTabTemplate: StoryFn<AssetDetailsStoryArgs> = (args) => {
   return (
     <MemoryRouter initialEntries={[`/infra/metrics/hosts?assetDetails=(tabId:${args.tabId})`]}>
       <AssetDetails {...args} />
@@ -50,7 +50,7 @@ const PageTabTemplate: Story<AssetDetailsStoryArgs> = (args) => {
   );
 };
 
-const FlyoutTemplate: Story<AssetDetailsStoryArgs> = (args) => {
+const FlyoutTemplate: StoryFn<AssetDetailsStoryArgs> = (args) => {
   const [isOpen, setIsOpen] = useState(false);
   const closeFlyout = () => setIsOpen(false);
   const options = assetDetailsProps.tabs.map(({ id }) => id);
@@ -95,21 +95,33 @@ const FlyoutTemplate: Story<AssetDetailsStoryArgs> = (args) => {
   );
 };
 
-export const OverviewTab = PageTabTemplate.bind({});
-OverviewTab.args = { tabId: 'overview' };
+export const OverviewTab = {
+  render: PageTabTemplate,
+  args: { tabId: 'overview' },
+};
 
-export const MetadataTab = PageTabTemplate.bind({});
-MetadataTab.args = { tabId: 'metadata' };
+export const MetadataTab = {
+  render: PageTabTemplate,
+  args: { tabId: 'metadata' },
+};
 
-export const ProcessesTab = PageTabTemplate.bind({});
-ProcessesTab.args = { tabId: 'processes' };
+export const ProcessesTab = {
+  render: PageTabTemplate,
+  args: { tabId: 'processes' },
+};
 
-export const LogsTab = PageTabTemplate.bind({});
-LogsTab.args = { tabId: 'logs' };
+export const LogsTab = {
+  render: PageTabTemplate,
+  args: { tabId: 'logs' },
+};
 
-export const AnomaliesTab = PageTabTemplate.bind({});
-AnomaliesTab.args = { tabId: 'anomalies' };
+export const AnomaliesTab = {
+  render: PageTabTemplate,
+  args: { tabId: 'anomalies' },
+};
 
-export const Flyout = FlyoutTemplate.bind({});
+export const Flyout = {
+  render: FlyoutTemplate,
+};
 
 export default stories;

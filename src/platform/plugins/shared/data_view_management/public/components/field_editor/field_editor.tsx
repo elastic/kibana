@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import React, { PureComponent, Fragment } from 'react';
 import { intersection, union, get } from 'lodash';
 
@@ -29,6 +29,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+  htmlIdGenerator,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
@@ -654,12 +655,16 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   renderDeleteModal = () => {
     const { spec } = this.state;
 
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
+
     return this.state.showDeleteModal ? (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={i18n.translate('indexPatternManagement.deleteFieldHeader', {
           defaultMessage: "Delete field ''{fieldName}''",
           values: { fieldName: spec.name },
         })}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={this.hideDeleteModal}
         onConfirm={() => {
           this.hideDeleteModal();

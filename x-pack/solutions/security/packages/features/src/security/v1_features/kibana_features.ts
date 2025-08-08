@@ -24,8 +24,7 @@ import {
   SERVER_APP_ID,
   LEGACY_NOTIFICATIONS_ID,
   CLOUD_POSTURE_APP_ID,
-  CLOUD_DEFEND_APP_ID,
-  SECURITY_FEATURE_ID_V2,
+  SECURITY_FEATURE_ID_V3,
   TIMELINE_FEATURE_ID,
   NOTES_FEATURE_ID,
 } from '../../constants';
@@ -56,10 +55,10 @@ export const getSecurityBaseKibanaFeature = ({
     notice: i18n.translate(
       'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSecurity.deprecationMessage',
       {
-        defaultMessage: 'The {currentId} permissions are deprecated, please see {idV2}.',
+        defaultMessage: 'The {currentId} permissions are deprecated, please see {latestId}.',
         values: {
           currentId: SERVER_APP_ID,
-          idV2: SECURITY_FEATURE_ID_V2,
+          latestId: SECURITY_FEATURE_ID_V3,
         },
       }
     ),
@@ -75,7 +74,7 @@ export const getSecurityBaseKibanaFeature = ({
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-  app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
+  app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
   catalogue: [APP_ID],
   management: {
     insightsAndAlerting: ['triggersActions'],
@@ -94,15 +93,17 @@ export const getSecurityBaseKibanaFeature = ({
         default: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
-          { feature: SECURITY_FEATURE_ID_V2, privileges: ['all'] },
+          // note: overriden by product feature endpointArtifactManagement when enabled
+          { feature: SECURITY_FEATURE_ID_V3, privileges: ['all'] },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
-          { feature: SECURITY_FEATURE_ID_V2, privileges: ['minimal_all'] },
+          // note: overriden by product feature endpointArtifactManagement when enabled
+          { feature: SECURITY_FEATURE_ID_V3, privileges: ['minimal_all'] },
         ],
       },
-      app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [
         APP_ID,
@@ -118,6 +119,7 @@ export const getSecurityBaseKibanaFeature = ({
         'timeline_read',
         'notes_write',
         'notes_read',
+        'bulkGetUserProfiles',
       ],
       savedObject: {
         all: ['alert', ...savedObjects],
@@ -141,15 +143,15 @@ export const getSecurityBaseKibanaFeature = ({
         default: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
-          { feature: SECURITY_FEATURE_ID_V2, privileges: ['read'] },
+          { feature: SECURITY_FEATURE_ID_V3, privileges: ['read'] },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
-          { feature: SECURITY_FEATURE_ID_V2, privileges: ['minimal_read'] },
+          { feature: SECURITY_FEATURE_ID_V3, privileges: ['minimal_read'] },
         ],
       },
-      app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [
         APP_ID,
@@ -159,6 +161,7 @@ export const getSecurityBaseKibanaFeature = ({
         'cloud-defend-read',
         'timeline_read',
         'notes_read',
+        'bulkGetUserProfiles',
       ],
       savedObject: {
         all: [],

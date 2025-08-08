@@ -33,6 +33,7 @@ describe('When using calculateRouteAuthz()', () => {
       addFleetServers: false,
     },
     integrations: {
+      all: false,
       readPackageInfo: false,
       readInstalledPackages: false,
       installPackages: false,

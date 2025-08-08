@@ -8,7 +8,7 @@
 import React, { type FC, useMemo } from 'react';
 import { css } from '@emotion/react';
 
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -53,7 +53,12 @@ export const AboutPanel: FC<Props> = ({ onFilePickerChange, hasPermissionToImpor
 
           <EuiHorizontalRule margin="l" />
 
-          <div css={{ textAlign: 'center' }}>
+          <EuiFormRow
+            label={i18n.translate('xpack.dataVisualizer.file.aboutPanel.uploadDataLabel', {
+              defaultMessage: 'Upload data',
+            })}
+            fullWidth
+          >
             <EuiFilePicker
               id="filePicker"
               fullWidth
@@ -66,7 +71,7 @@ export const AboutPanel: FC<Props> = ({ onFilePickerChange, hasPermissionToImpor
               onChange={(files) => onFilePickerChange(files)}
               css={aboutPanelContentStyle}
             />
-          </div>
+          </EuiFormRow>
           <EuiSpacer size="l" />
         </EuiFlexItem>
       </EuiFlexGroup>

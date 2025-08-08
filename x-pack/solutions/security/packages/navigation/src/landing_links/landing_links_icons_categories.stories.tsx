@@ -89,41 +89,43 @@ const mockCore = {
   },
 } as unknown as CoreStart;
 
-export const LandingLinksIconsCategories = (params: LandingLinksIconsCategoriesProps) => (
-  <div style={{ padding: '25px' }}>
-    <NavigationProvider core={mockCore}>
-      <LandingLinksIconsCategoriesComponent {...params} />
-    </NavigationProvider>
-  </div>
-);
+export const LandingLinksIconsCategories = {
+  render: (params: LandingLinksIconsCategoriesProps) => (
+    <div style={{ padding: '25px' }}>
+      <NavigationProvider core={mockCore}>
+        <LandingLinksIconsCategoriesComponent {...params} />
+      </NavigationProvider>
+    </div>
+  ),
 
-LandingLinksIconsCategories.argTypes = {
-  links: {
-    control: 'object',
-    defaultValue: items,
+  argTypes: {
+    links: {
+      control: 'object',
+      defaultValue: items,
+    },
+    categories: {
+      control: 'object',
+      defaultValue: [
+        {
+          type: 'title',
+          label: 'First category',
+          linkIds: ['link1', 'link2', 'link3'],
+        },
+        {
+          label: 'Second category',
+          type: 'title',
+          linkIds: ['link4'],
+        },
+        {
+          label: 'Third category',
+          type: 'title',
+          linkIds: ['link5', 'link6', 'link7', 'link8'],
+        },
+      ],
+    },
   },
-  categories: {
-    control: 'object',
-    defaultValue: [
-      {
-        type: 'title',
-        label: 'First category',
-        linkIds: ['link1', 'link2', 'link3'],
-      },
-      {
-        label: 'Second category',
-        type: 'title',
-        linkIds: ['link4'],
-      },
-      {
-        label: 'Third category',
-        type: 'title',
-        linkIds: ['link5', 'link6', 'link7', 'link8'],
-      },
-    ],
-  },
-};
 
-LandingLinksIconsCategories.parameters = {
-  layout: 'fullscreen',
+  parameters: {
+    layout: 'fullscreen',
+  },
 };

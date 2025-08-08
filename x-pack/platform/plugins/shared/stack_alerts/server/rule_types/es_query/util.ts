@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { OnlyEsQueryRuleParams } from './types';
-import { EsQueryRuleParams } from './rule_type_params';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
+import type { OnlyEsQueryRuleParams } from './types';
 
 export function isEsQueryRule(searchType: EsQueryRuleParams['searchType']) {
   return searchType === 'esQuery';

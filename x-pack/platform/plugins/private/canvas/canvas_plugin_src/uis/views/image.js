@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getElasticLogo, resolveFromArgs } from '@kbn/presentation-util-plugin/common';
+import { elasticLogo, resolveFromArgs } from '../../../public/lib';
 import { ViewStrings } from '../../../i18n';
 
 const { Image: strings } = ViewStrings;
@@ -21,7 +21,6 @@ export const image = () => {
         name: 'dataurl',
         argType: 'imageUpload',
         resolve: async ({ args }) => {
-          const { elasticLogo } = await getElasticLogo();
           return { dataurl: resolveFromArgs(args, elasticLogo) };
         },
       },

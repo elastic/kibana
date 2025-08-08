@@ -32,6 +32,7 @@ export const useUserProfiles = (uids: string[], opts?: { enabled?: boolean }) =>
   const query = useQuery({
     queryKey: userProfileKeys.bulkGet(uids),
     queryFn: () => bulkGetUserProfiles(uids),
+    staleTime: Infinity,
     enabled: opts?.enabled ?? true,
   });
   return query;

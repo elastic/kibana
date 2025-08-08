@@ -12,8 +12,8 @@ import { get, last } from 'lodash';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { createContextSearchSourceStub } from './_stubs';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { Query } from '@kbn/es-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { fetchSurroundingDocs, SurrDocType } from './context';
 import { buildDataTableRecord, buildDataTableRecordList } from '@kbn/discover-utils';
 import { discoverServiceMock } from '../../../__mocks__/services';
@@ -87,7 +87,10 @@ describe('context successors', function () {
           size,
           [],
           dataPluginMock,
-          discoverServiceMock
+          discoverServiceMock,
+          discoverServiceMock.profilesManager.createScopedProfilesManager({
+            scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+          })
         );
       };
     });
@@ -239,7 +242,10 @@ describe('context successors', function () {
           size,
           [],
           dataPluginMock,
-          discoverServiceMock
+          discoverServiceMock,
+          discoverServiceMock.profilesManager.createScopedProfilesManager({
+            scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+          })
         );
       };
     });
@@ -313,7 +319,10 @@ describe('context successors', function () {
           {
             ...discoverServiceMock,
             data: dataPluginMock,
-          }
+          },
+          discoverServiceMock.profilesManager.createScopedProfilesManager({
+            scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+          })
         );
       };
     });

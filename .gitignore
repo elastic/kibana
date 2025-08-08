@@ -10,8 +10,8 @@
 node_modules
 !/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
 !/src/dev/notice/__fixtures__/node_modules
-!/packages/kbn-import-resolver/src/__fixtures__/node_modules
-!/packages/kbn-import-resolver/src/__fixtures__/packages/box/node_modules
+!/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/node_modules
+!/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/packages/box/node_modules
 trash
 /optimize
 /built_assets
@@ -19,6 +19,7 @@ target
 /build
 .jruby
 .idea
+.windsurf
 *.iml
 *.log
 types.eslint.config.js
@@ -30,11 +31,11 @@ __tmp__
 /x-pack/examples/*/build
 
 # Ignore certain functional test runner artifacts
-/test/*/failure_debug
-/test/*/screenshots/diff
-/test/*/screenshots/failure
-/test/*/screenshots/session
-/test/*/screenshots/visual_regression_gallery.html
+/src/platform/test/*/failure_debug
+/src/platform/test/*/screenshots/diff
+/src/platform/test/*/screenshots/failure
+/src/platform/test/*/screenshots/session
+/src/platform/test/*/screenshots/visual_regression_gallery.html
 
 # Ignore the same artifacts in x-pack
 /x-pack/test/*/failure_debug
@@ -63,16 +64,23 @@ webpackstats.json
 !/config/README.md
 !/config/serverless.yml
 !/config/serverless.es.yml
+!/config/serverless.chat.yml
 !/config/serverless.oblt.yml
+!/config/serverless.oblt.complete.yml
+!/config/serverless.oblt.logs_essentials.yml
 !/config/serverless.security.yml
+!/config/serverless.security.essentials.yml
+!/config/serverless.security.complete.yml
+!/config/serverless.security.search_ai_lake.yml
 !/config/node.options
 coverage
-!/test/common/fixtures/plugins/coverage
+!/src/platform/test/common/fixtures/plugins/coverage
 selenium
 .babel_register_cache.json
 .webpack.babelcache
 *.swp
 *.swo
+*.swn
 *.out
 package-lock.json
 !/.buildkite/package-lock.json
@@ -98,6 +106,8 @@ npm-debug.log*
 # transpiled cypress config
 x-pack/platform/plugins/shared/fleet/cypress.config.d.ts
 x-pack/platform/plugins/shared/fleet/cypress.config.js
+x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.d.ts
+x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.js
 x-pack/platform/plugins/shared/osquery/cypress.config.d.ts
 x-pack/platform/plugins/shared/osquery/cypress.config.js
 x-pack/solutions/search/plugins/enterprise_search/cypress.config.d.ts
@@ -121,7 +131,7 @@ report.asciidoc
 # Yarn local mirror content
 .yarn-local-mirror
 
-# Bazel
+# Bazel | TODO: Remove later
 .ijwb
 /bazel
 /bazel-*
@@ -138,7 +148,7 @@ src/platform/packages/**/package-map.json
 **/.synthetics/
 **/.journeys/
 **/.rca/
-x-pack/test/security_api_integration/plugins/audit_log/audit.log
+x-pack/platform/test/security_api_integration/plugins/audit_log/audit.log
 
 # ignore FTR temp directory
 .ftr
@@ -146,6 +156,9 @@ role_users.json
 
 # ignore Scout temp directory
 .scout
+
+# Playwright
+**/test-results/.last-run.json
 
 .devcontainer/.env
 
@@ -156,11 +169,13 @@ oas_docs/output/kibana.new.yaml
 oas_docs/output/kibana.serverless.new.yaml
 
 # Security Solution Playwright
-x-pack/test/security_solution_playwright/test-results/
-x-pack/test/security_solution_playwright/playwright-report/
-x-pack/test/security_solution_playwright/blob-report/
-x-pack/test/security_solution_playwright/playwright/.cache/
-x-pack/test/security_solution_playwright/.auth/
-x-pack/test/security_solution_playwright/.env
+x-pack/solutions/security/test/security_solution_playwright/test-results/
+x-pack/solutions/security/test/security_solution_playwright/playwright-report/
+x-pack/solutions/security/test/security_solution_playwright/blob-report/
+x-pack/solutions/security/test/security_solution_playwright/playwright/.cache/
+x-pack/solutions/security/test/security_solution_playwright/.auth/
+x-pack/solutions/security/test/security_solution_playwright/.env
 .codeql
 .dependency-graph-log.json
+
+.moon/cache

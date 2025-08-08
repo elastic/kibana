@@ -6,18 +6,19 @@
  */
 
 import { of } from 'rxjs';
-import { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { executor, getValidTimefieldSort, tryToParseAsDate } from './executor';
-import { ExecutorOptions } from './types';
-import { Comparator } from '../../../common/comparator_types';
+import type { ExecutorOptions } from './types';
+import type { Comparator } from '../../../common/comparator_types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import { EsQueryRuleParams } from './rule_type_params';
-import { FetchEsQueryOpts } from './lib/fetch_es_query';
-import { FetchSearchSourceQueryOpts } from './lib/fetch_search_source_query';
-import { FetchEsqlQueryOpts } from './lib/fetch_esql_query';
+import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
+import type { FetchEsQueryOpts } from './lib/fetch_es_query';
+import type { FetchSearchSourceQueryOpts } from './lib/fetch_search_source_query';
+import type { FetchEsqlQueryOpts } from './lib/fetch_esql_query';
+import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 
 const logger = loggerMock.create();
 const scopedClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
@@ -153,7 +154,6 @@ describe('es_query executor', () => {
         name: 'test-rule-name',
         alertLimit: 1000,
         params: defaultProps,
-        publicBaseUrl: 'https://localhost:5601',
         spacePrefix: '',
         timestamp: undefined,
         services: {
@@ -228,7 +228,6 @@ describe('es_query executor', () => {
           share: undefined,
         },
         spacePrefix: '',
-        publicBaseUrl: 'https://localhost:5601',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
       });
@@ -381,18 +380,27 @@ describe('es_query executor', () => {
               groups: [{ field: 'host.name', value: 'host-1' }],
               count: 291,
               hits: [],
+              groupingObject: {
+                ['host.name']: 'host-1',
+              },
             },
             {
               group: 'host-2',
               groups: [{ field: 'host.name', value: 'host-2' }],
               count: 477,
               hits: [],
+              groupingObject: {
+                ['host.name']: 'host-2',
+              },
             },
             {
               group: 'host-3',
               groups: [{ field: 'host.name', value: 'host-3' }],
               count: 999,
               hits: [],
+              groupingObject: {
+                ['host.name']: 'host-3',
+              },
             },
           ],
           truncated: false,
@@ -419,6 +427,11 @@ describe('es_query executor', () => {
           conditions:
             'Number of matching documents for group "host-1" is greater than or equal to 200',
           date: new Date(mockNow).toISOString(),
+          grouping: {
+            host: {
+              name: 'host-1',
+            },
+          },
           hits: [],
           link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
           message:
@@ -443,6 +456,7 @@ describe('es_query executor', () => {
           'kibana.alert.title': "rule 'test-rule-name' matched query for group host-1",
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          'kibana.alert.grouping': { host: { name: 'host-1' } },
         },
       });
       expect(mockReport).toHaveBeenNthCalledWith(2, {
@@ -451,6 +465,11 @@ describe('es_query executor', () => {
           conditions:
             'Number of matching documents for group "host-2" is greater than or equal to 200',
           date: new Date(mockNow).toISOString(),
+          grouping: {
+            host: {
+              name: 'host-2',
+            },
+          },
           hits: [],
           link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
           message:
@@ -475,6 +494,7 @@ describe('es_query executor', () => {
           'kibana.alert.title': "rule 'test-rule-name' matched query for group host-2",
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          'kibana.alert.grouping': { host: { name: 'host-2' } },
         },
       });
       expect(mockReport).toHaveBeenNthCalledWith(3, {
@@ -483,6 +503,11 @@ describe('es_query executor', () => {
           conditions:
             'Number of matching documents for group "host-3" is greater than or equal to 200',
           date: new Date(mockNow).toISOString(),
+          grouping: {
+            host: {
+              name: 'host-3',
+            },
+          },
           hits: [],
           link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
           message:
@@ -507,6 +532,7 @@ describe('es_query executor', () => {
           'kibana.alert.title': "rule 'test-rule-name' matched query for group host-3",
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          'kibana.alert.grouping': { host: { name: 'host-3' } },
         },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
@@ -677,10 +703,24 @@ describe('es_query executor', () => {
           alert: {
             getId: () => 'host-1',
           },
+          hit: {
+            [ALERT_GROUPING]: {
+              host: {
+                name: 'host-1',
+              },
+            },
+          },
         },
         {
           alert: {
             getId: () => 'host-2',
+          },
+          hit: {
+            [ALERT_GROUPING]: {
+              host: {
+                name: 'host-2',
+              },
+            },
           },
         },
       ]);
@@ -715,6 +755,11 @@ describe('es_query executor', () => {
           title: "rule 'test-rule-name' recovered",
           value: 0,
           sourceFields: [],
+          grouping: {
+            host: {
+              name: 'host-1',
+            },
+          },
         },
         payload: {
           'kibana.alert.evaluation.conditions':
@@ -740,6 +785,11 @@ describe('es_query executor', () => {
           title: "rule 'test-rule-name' recovered",
           value: 0,
           sourceFields: [],
+          grouping: {
+            host: {
+              name: 'host-2',
+            },
+          },
         },
         payload: {
           'kibana.alert.evaluation.conditions':
@@ -823,6 +873,11 @@ describe('es_query executor', () => {
                 'host.id': ['1'],
                 'host.name': ['host-1'],
               },
+              groupingObject: {
+                host: {
+                  name: 'host-1',
+                },
+              },
             },
           ],
           truncated: false,
@@ -854,6 +909,11 @@ describe('es_query executor', () => {
           conditions:
             'Number of matching documents for group "host-1" is greater than or equal to 200',
           date: new Date(mockNow).toISOString(),
+          grouping: {
+            host: {
+              name: 'host-1',
+            },
+          },
           hits: [],
           link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
           message:
@@ -877,6 +937,7 @@ describe('es_query executor', () => {
             'Number of matching documents for group "host-1" is greater than or equal to 200',
           'kibana.alert.evaluation.threshold': 200,
           'kibana.alert.evaluation.value': '291',
+          'kibana.alert.grouping': { host: { name: 'host-1' } },
           'kibana.alert.reason':
             'Document count is 291 in the last 5m for host-1. Alert when greater than or equal to 200.',
           'kibana.alert.title': "rule 'test-rule-name' matched query for group host-1",

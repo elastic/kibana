@@ -24,6 +24,7 @@ interface IndicatorDetailsProps {
   feedName: string | undefined;
   indicatorReference: string | undefined;
   indicatorType: string | undefined;
+  scopeId: string;
 }
 
 export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
@@ -32,6 +33,7 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
   feedName,
   indicatorReference,
   indicatorType,
+  scopeId,
 }) => (
   <EuiFlexGroup
     alignItems="flexStart"
@@ -44,6 +46,7 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
     {indicatorType && (
       <EuiFlexItem grow={false}>
         <DraggableBadge
+          scopeId={scopeId}
           contextId={contextId}
           data-test-subj="threat-match-indicator-details-indicator-type"
           eventId={eventId}
@@ -67,6 +70,7 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
         <EuiFlexItem grow={false}>
           <DraggableBadge
             contextId={contextId}
+            scopeId={scopeId}
             data-test-subj="threat-match-indicator-details-indicator-feedName"
             eventId={eventId}
             field={FEED_NAME}

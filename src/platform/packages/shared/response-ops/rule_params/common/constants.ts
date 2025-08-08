@@ -12,6 +12,20 @@
  */
 export const MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH = 300;
 
+export const MAX_SELECTABLE_SOURCE_FIELDS = 5;
+export const MAX_SELECTABLE_GROUP_BY_TERMS = 4;
+export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
+export const MAX_GROUPS = 1000;
+
+export enum Comparator {
+  GT = '>',
+  LT = '<',
+  GT_OR_EQ = '>=',
+  LT_OR_EQ = '<=',
+  BETWEEN = 'between',
+  NOT_BETWEEN = 'notBetween',
+}
+
 /**
  * All runtime field types.
  * @public

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/emotion.d.ts"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/usage-collection-plugin",
@@ -14,7 +14,6 @@
     "@kbn/i18n",
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/core-chrome-browser",
-    "@kbn/react-kibana-context-render",
     "@kbn/config-schema",
   ],
   "exclude": [

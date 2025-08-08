@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import {
   DETECTION_ENGINE_ALERT_ASSIGNEES_URL,
@@ -25,7 +25,7 @@ import {
   getRuleForAlertTesting,
   waitForAlertsToBePresent,
   waitForRuleSuccess,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 

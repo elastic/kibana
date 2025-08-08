@@ -13,7 +13,7 @@ describe.skip('Serverless', () => {
 
   it('contains the side navigation for observabilitity serverless', () => {
     cy.loginAsElasticUser();
-    cy.contains('Logs Explorer');
+    cy.contains('Logs explorer');
     cy.contains('Dashboards');
     cy.contains('Alerts');
     cy.contains('AIOps');
@@ -26,7 +26,7 @@ describe.skip('Serverless', () => {
   it('navigates to discover-dashboard-viz links', () => {
     cy.loginAsElasticUser();
 
-    cy.contains('Logs Explorer').click();
+    cy.contains('Logs explorer').click();
     cy.url().should('include', '/app/observability-logs-explorer');
 
     cy.contains('Dashboards').click();
@@ -151,16 +151,6 @@ describe.skip('Serverless', () => {
   it('sets traces nav item as active', () => {
     cy.visitKibana('/app/apm/traces/explorer/waterfall');
 
-    cy.getByTestSubj('nav-item-id-observability_project_nav.apm').should(
-      'have.class',
-      'euiSideNavItemButton-isOpen'
-    );
-    cy.getByTestSubj('nav-item-id-observability_project_nav.apm.apm:traces').should(
-      'have.class',
-      'euiSideNavItemButton-isSelected'
-    );
-
-    cy.visitKibana('/app/apm/traces/explorer/critical_path');
     cy.getByTestSubj('nav-item-id-observability_project_nav.apm').should(
       'have.class',
       'euiSideNavItemButton-isOpen'

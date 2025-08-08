@@ -105,7 +105,7 @@ function startEluMeasurement<T>(
           active
         )}ms out of ${Math.round(duration)}ms) and ${eluThreshold * 100}% (${Math.round(
           utilization * 100
-        )}%) `,
+        )}%). Run \`node scripts/profile.js\` to find out why.`,
         {
           labels: {
             request_path: path,
@@ -558,15 +558,22 @@ export class HttpServer {
 
       executionContext?.setRequestId(requestId);
 
-      request.app = {
-        ...(request.app ?? {}),
-        requestId,
-        requestUuid: uuidv4(),
-        measureElu: stop,
-        // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
-        // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
-        traceId: apm.currentTraceIds['trace.id'],
-      } as KibanaRequestState;
+      const app: KibanaRequestState = request.app as KibanaRequestState;
+      app.requestId = requestId;
+      app.requestUuid = uuidv4();
+      app.measureElu = stop;
+      // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
+      // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
+      app.traceId = apm.currentTraceIds['trace.id'];
+      app.span = apm.startSpan('pre-route handler middlewares');
+
+      return responseToolkit.continue;
+    });
+
+    this.server!.ext('onPreHandler', (request, responseToolkit) => {
+      (request.app as KibanaRequestState).span?.end();
+      (request.app as KibanaRequestState).span = null;
+
       return responseToolkit.continue;
     });
   }
@@ -737,7 +744,16 @@ export class HttpServer {
         },
       },
       options: {
-        app: { access: 'public' },
+        app: {
+          access: 'public',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'Route serves static assets',
+            },
+          },
+          excludeFromRateLimiter: true,
+        },
         auth: false,
         cache: {
           privacy: 'public',

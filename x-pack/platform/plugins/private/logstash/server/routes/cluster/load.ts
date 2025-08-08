@@ -14,6 +14,12 @@ export function registerClusterLoadRoute(router: LogstashPluginRouter) {
   router.get(
     {
       path: '/api/logstash/cluster',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: false,
     },
     wrapRouteWithLicenseCheck(checkLicense, async (context, request, response) => {

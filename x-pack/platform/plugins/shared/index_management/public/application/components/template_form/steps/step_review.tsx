@@ -22,6 +22,7 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DataStreamOptions } from '../../../../../common/types/data_streams';
 import { indexModeLabels } from '../../../lib/index_mode_labels';
 import { allowAutoCreateRadioIds } from '../../../../../common/constants';
 import { serializers } from '../../../../shared_imports';
@@ -61,6 +62,7 @@ const getDescriptionText = (data: Aliases | boolean | undefined) => {
 interface Props {
   template: TemplateDeserialized;
   navigateToStep: (stepId: WizardSection) => void;
+  dataStreamOptions?: DataStreamOptions;
 }
 
 const PreviewTab = ({ template }: { template: { [key: string]: any } }) => {
@@ -85,7 +87,7 @@ const PreviewTab = ({ template }: { template: { [key: string]: any } }) => {
 };
 
 export const StepReview: React.FunctionComponent<Props> = React.memo(
-  ({ template, navigateToStep }) => {
+  ({ template, navigateToStep, dataStreamOptions }) => {
     const {
       name,
       indexPatterns,
@@ -109,7 +111,8 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
       : serializeTemplate(
           stripEmptyFields(template!, {
             types: ['string'],
-          }) as TemplateDeserialized
+          }) as TemplateDeserialized,
+          dataStreamOptions
         );
 
     const serializedMappings = getTemplateParameter(serializedTemplate, 'mappings');
@@ -426,7 +429,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                 />
               }
               color="warning"
-              iconType="help"
+              iconType="question"
               data-test-subj="indexPatternsWarning"
             >
               <p data-test-subj="indexPatternsWarningDescription">

@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { customThresholdParamsSchema } from './latest';
+export { customThresholdParamsSchema, type CustomThresholdParams } from './latest';
 export { customThresholdParamsSchema as customThresholdParamsSchemaV1 } from './v1';

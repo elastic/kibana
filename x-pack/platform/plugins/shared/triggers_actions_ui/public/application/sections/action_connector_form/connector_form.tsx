@@ -19,6 +19,9 @@ import { ConnectorFormFields } from './connector_form_fields';
 import { ConnectorFormSchema } from './types';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
 
+const MIN_ALLOCATIONS = 0;
+const DEFAULT_NUM_THREADS = 1;
+
 export interface ConnectorFormState {
   isValid: boolean | undefined;
   isSubmitted: boolean;
@@ -47,6 +50,12 @@ interface Props {
   onFormModifiedChange?: (isModified: boolean) => void;
   setResetForm?: (value: ResetForm) => void;
 }
+
+interface InferenceConnectorProviderConfig {
+  [key: string]: unknown;
+  max_number_of_allocations?: number;
+  adaptive_allocations?: { max_number_of_allocations?: number };
+}
 /**
  * The serializer and deserializer are needed to transform the headers of
  * the webhook connectors. The webhook connector uses the UseArray component
@@ -61,7 +70,33 @@ interface Props {
 
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
 const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
-  if (data.actionTypeId !== '.webhook' && data.actionTypeId !== '.cases-webhook') {
+  if (
+    data.actionTypeId === '.inference' &&
+    // explicit check to see if this field exists as it only exists in serverless
+    (data.config?.providerConfig as InferenceConnectorProviderConfig)?.adaptive_allocations
+      ?.max_number_of_allocations
+  ) {
+    return {
+      ...data,
+      config: {
+        ...data.config,
+        providerConfig: {
+          ...(data.config.providerConfig as InferenceConnectorProviderConfig),
+          max_number_of_allocations: (
+            data.config.providerConfig as InferenceConnectorProviderConfig
+          ).adaptive_allocations?.max_number_of_allocations,
+          // remove the adaptive_allocations from the data config as form does not expect it
+          adaptive_allocations: undefined,
+        },
+      },
+    };
+  }
+
+  if (
+    data.actionTypeId !== '.webhook' &&
+    data.actionTypeId !== '.cases-webhook' &&
+    data.actionTypeId !== '.gen-ai'
+  ) {
     return data;
   }
 
@@ -82,7 +117,40 @@ const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
 
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
 const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
-  if (formData.actionTypeId !== '.webhook' && formData.actionTypeId !== '.cases-webhook') {
+  // Temp solution for inference - connector framework will be updated with ability for connector to add its own serializer/deserializer
+  if (
+    formData.actionTypeId === '.inference' &&
+    // explicit check to see if this field exists as it only exists in serverless
+    (formData.config?.providerConfig as InferenceConnectorProviderConfig)
+      ?.max_number_of_allocations !== undefined
+  ) {
+    const providerConfig = formData.config?.providerConfig as InferenceConnectorProviderConfig;
+    const { max_number_of_allocations: maxAllocations, ...restProviderConfig } =
+      providerConfig || {};
+
+    return {
+      ...formData,
+      config: {
+        ...formData.config,
+        providerConfig: {
+          ...restProviderConfig,
+          adaptive_allocations: {
+            enabled: true,
+            min_number_of_allocations: MIN_ALLOCATIONS,
+            ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
+          },
+          // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
+          num_threads: DEFAULT_NUM_THREADS,
+        },
+      },
+    };
+  }
+
+  if (
+    formData.actionTypeId !== '.webhook' &&
+    formData.actionTypeId !== '.cases-webhook' &&
+    formData.actionTypeId !== '.gen-ai'
+  ) {
     return formData;
   }
 
@@ -101,7 +169,11 @@ const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
     ...formData,
     config: {
       ...formData.config,
-      headers: isEmpty(headers) ? null : headers,
+      headers: isEmpty(headers)
+        ? formData.actionTypeId !== '.gen-ai'
+          ? null
+          : undefined
+        : headers,
     },
   };
 };

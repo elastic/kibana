@@ -109,9 +109,10 @@ export const formatTimelineData = async (
       }
 
       result.node.data = [];
+      const hitFieldKeys = Object.keys(hit.fields || {});
 
       for (const fieldName of uniqueFields) {
-        const nestedParentPath = getNestedParentPath(fieldName, hit.fields);
+        const nestedParentPath = getNestedParentPath(fieldName, hitFieldKeys);
         const isEcs = ECS_METADATA_FIELDS.includes(fieldName);
         if (!nestedParentPath && !has(fieldName, hit.fields) && !isEcs) {
           // eslint-disable-next-line no-continue
@@ -127,7 +128,7 @@ export const formatTimelineData = async (
         }
 
         if (ecsFieldSet.has(fieldName)) {
-          deepMerge(result.node.ecs, buildObjectRecursive(fieldName, hit.fields));
+          deepMerge(result.node.ecs, buildObjectRecursive(fieldName, hit.fields, hitFieldKeys));
         }
       }
 

@@ -29,6 +29,7 @@
  * @packageDocumentation
  */
 
+import 'reflect-metadata';
 import { Type } from '@kbn/config-schema';
 import type { AppenderConfigType } from '@kbn/core-logging-server';
 import { appendersSchema } from '@kbn/core-logging-server-internal';
@@ -110,6 +111,7 @@ export type {
   FakeRequest,
   ScopeableRequest,
   ElasticsearchClient,
+  ElasticsearchRequestLoggingOptions,
   IClusterClient,
   ICustomClusterClient,
   ElasticsearchClientConfig,
@@ -615,4 +617,6 @@ export type {
   RouteSecurityGetter,
   Privilege,
   PrivilegeSet,
+  AllRequiredCondition,
+  AnyRequiredCondition,
 } from '@kbn/core-http-server';

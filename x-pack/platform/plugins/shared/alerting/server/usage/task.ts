@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger, CoreSetup } from '@kbn/core/server';
-import {
+import type { Logger, CoreSetup } from '@kbn/core/server';
+import type {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -23,6 +23,7 @@ import {
   getExecutionsPerDayCount,
   getExecutionTimeoutsPerDayCount,
 } from './lib/get_telemetry_from_event_log';
+import { getBackfillTelemetryPerDay } from './lib/get_backfill_telemetry';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../common';
@@ -119,6 +120,7 @@ export function telemetryTaskRunner(
           getFailedAndUnrecognizedTasksPerDay({ esClient, taskManagerIndex, logger }),
           getMWTelemetry({ logger, savedObjectsClient }),
           getTotalAlertsCountAggregations({ esClient, logger }),
+          getBackfillTelemetryPerDay({ esClient, eventLogIndex, logger }),
         ])
           .then(
             ([
@@ -129,6 +131,7 @@ export function telemetryTaskRunner(
               dailyFailedAndUnrecognizedTasks,
               MWTelemetry,
               totalAlertsCountAggregations,
+              dailyBackfillCounts,
             ]) => {
               const hasErrors =
                 totalCountAggregations.hasErrors ||
@@ -137,7 +140,8 @@ export function telemetryTaskRunner(
                 dailyExecutionTimeoutCounts.hasErrors ||
                 dailyFailedAndUnrecognizedTasks.hasErrors ||
                 MWTelemetry.hasErrors ||
-                totalAlertsCountAggregations.hasErrors;
+                totalAlertsCountAggregations.hasErrors ||
+                dailyBackfillCounts.hasErrors;
 
               const errorMessages = [
                 totalCountAggregations.errorMessage,
@@ -147,6 +151,7 @@ export function telemetryTaskRunner(
                 dailyFailedAndUnrecognizedTasks.errorMessage,
                 MWTelemetry.errorMessage,
                 totalAlertsCountAggregations.errorMessage,
+                dailyBackfillCounts.errorMessage,
               ].filter((message) => message !== undefined);
 
               const updatedState: LatestTaskStateSchema = {
@@ -169,6 +174,12 @@ export function telemetryTaskRunner(
                 count_rules_by_notify_when: totalCountAggregations.count_rules_by_notify_when,
                 count_rules_snoozed: totalCountAggregations.count_rules_snoozed,
                 count_rules_muted: totalCountAggregations.count_rules_muted,
+                count_rules_snoozed_by_type: totalCountAggregations.count_rules_snoozed_by_type,
+                count_rules_muted_by_type: totalCountAggregations.count_rules_muted_by_type,
+                count_rules_with_linked_dashboards:
+                  totalCountAggregations.count_rules_with_linked_dashboards,
+                count_rules_with_investigation_guide:
+                  totalCountAggregations.count_rules_with_investigation_guide,
                 count_mw_total: MWTelemetry.count_mw_total,
                 count_mw_with_repeat_toggle_on: MWTelemetry.count_mw_with_repeat_toggle_on,
                 count_mw_with_filter_alert_toggle_on:
@@ -214,6 +225,14 @@ export function telemetryTaskRunner(
                 percentile_num_alerts_by_type_per_day: dailyExecutionCounts.alertsPercentilesByType,
                 count_alerts_total: totalAlertsCountAggregations.count_alerts_total,
                 count_alerts_by_rule_type: totalAlertsCountAggregations.count_alerts_by_rule_type,
+                count_backfill_executions: dailyBackfillCounts.countExecutions,
+                count_backfills_by_execution_status_per_day:
+                  dailyBackfillCounts.countBackfillsByExecutionStatus,
+                count_gaps: dailyBackfillCounts.countGaps,
+                total_unfilled_gap_duration_ms: dailyBackfillCounts.totalUnfilledGapDurationMs,
+                total_filled_gap_duration_ms: dailyBackfillCounts.totalFilledGapDurationMs,
+                count_ignored_fields_by_rule_type:
+                  totalAlertsCountAggregations.count_ignored_fields_by_rule_type,
               };
 
               return {

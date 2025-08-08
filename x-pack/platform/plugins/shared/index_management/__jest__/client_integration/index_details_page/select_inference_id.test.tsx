@@ -35,6 +35,7 @@ jest.mock('../../../public/application/app_context', () => ({
         },
       },
     },
+    config: { enforceAdaptiveAllocations: false },
     services: {
       notificationService: {
         toasts: {},

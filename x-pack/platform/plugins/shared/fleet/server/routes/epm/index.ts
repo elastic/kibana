@@ -9,7 +9,6 @@ import type { RouteSecurity } from '@kbn/core-http-server';
 
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { API_VERSIONS } from '../../../common/constants';
-
 import type { FleetAuthz } from '../../../common';
 
 import {
@@ -56,6 +55,16 @@ import {
   GetDataStreamsResponseSchema,
   GetBulkAssetsResponseSchema,
   ReauthorizeTransformResponseSchema,
+  BulkUpgradePackagesRequestSchema,
+  BulkUpgradePackagesResponseSchema,
+  GetOneBulkOperationPackagesRequestSchema,
+  GetOneBulkOperationPackagesResponseSchema,
+  BulkUninstallPackagesRequestSchema,
+  CustomIntegrationRequestSchema,
+  DeletePackageDatastreamAssetsRequestSchema,
+  DeletePackageDatastreamAssetsResponseSchema,
+  RollbackPackageRequestSchema,
+  RollbackPackageResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -79,12 +88,20 @@ import {
   getDataStreamsHandler,
   createCustomIntegrationHandler,
   getInputsHandler,
+  updateCustomIntegrationHandler,
+  rollbackPackageHandler,
 } from './handlers';
 import { getFileHandler } from './file_handler';
 import {
   deletePackageKibanaAssetsHandler,
   installPackageKibanaAssetsHandler,
 } from './kibana_assets_handler';
+import {
+  postBulkUpgradePackagesHandler,
+  postBulkUninstallPackagesHandler,
+  getOneBulkOperationPackagesHandler,
+} from './bulk_handler';
+import { deletePackageDatastreamAssetsHandler } from './package_datastream_assets_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
@@ -312,9 +329,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     );
 
   router.versioned
+    // @ts-ignore TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
     .get({
       path: EPM_API_ROUTES.INFO_PATTERN,
-      // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(fleetAuthz, getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN))
           .granted,
@@ -395,12 +412,66 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       installPackageFromRegistryHandler
     );
 
-  if (experimentalFeatures.useSpaceAwareness) {
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.INSTALL_KIBANA_ASSETS_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Install Kibana assets for a package`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: InstallKibanaAssetsRequestSchema,
+          response: {
+            200: {
+              body: () => InstallKibanaAssetsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      installPackageKibanaAssetsHandler
+    );
+
+  router.versioned
+    .delete({
+      path: EPM_API_ROUTES.DELETE_KIBANA_ASSETS_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Delete Kibana assets for a package`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: DeleteKibanaAssetsRequestSchema,
+          response: {
+            200: {
+              body: () => InstallKibanaAssetsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      deletePackageKibanaAssetsHandler
+    );
+
+  if (experimentalFeatures.installedIntegrationsTabularUI) {
     router.versioned
       .post({
-        path: EPM_API_ROUTES.INSTALL_KIBANA_ASSETS_PATTERN,
+        path: EPM_API_ROUTES.BULK_UPGRADE_PATTERN,
         security: INSTALL_PACKAGES_SECURITY,
-        summary: `Install Kibana assets for a package`,
+        summary: `Bulk upgrade packages`,
         options: {
           tags: ['oas-tag:Elastic Package Manager (EPM)'],
         },
@@ -409,10 +480,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         {
           version: API_VERSIONS.public.v1,
           validate: {
-            request: InstallKibanaAssetsRequestSchema,
+            request: BulkUpgradePackagesRequestSchema,
             response: {
               200: {
-                body: () => InstallKibanaAssetsResponseSchema,
+                body: () => BulkUpgradePackagesResponseSchema,
               },
               400: {
                 body: genericErrorResponse,
@@ -420,14 +491,14 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             },
           },
         },
-        installPackageKibanaAssetsHandler
+        postBulkUpgradePackagesHandler
       );
 
     router.versioned
-      .delete({
-        path: EPM_API_ROUTES.DELETE_KIBANA_ASSETS_PATTERN,
+      .post({
+        path: EPM_API_ROUTES.BULK_UNINSTALL_PATTERN,
         security: INSTALL_PACKAGES_SECURITY,
-        summary: `Delete Kibana assets for a package`,
+        summary: `Bulk uninstall packages`,
         options: {
           tags: ['oas-tag:Elastic Package Manager (EPM)'],
         },
@@ -436,10 +507,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         {
           version: API_VERSIONS.public.v1,
           validate: {
-            request: DeleteKibanaAssetsRequestSchema,
+            request: BulkUninstallPackagesRequestSchema,
             response: {
               200: {
-                body: () => InstallKibanaAssetsResponseSchema,
+                body: () => BulkUpgradePackagesResponseSchema,
               },
               400: {
                 body: genericErrorResponse,
@@ -447,7 +518,61 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             },
           },
         },
-        deletePackageKibanaAssetsHandler
+        postBulkUninstallPackagesHandler
+      );
+
+    router.versioned
+      .get({
+        path: EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN,
+        security: INSTALL_PACKAGES_SECURITY,
+        summary: `Get Bulk uninstall packages details`,
+        options: {
+          tags: ['oas-tag:Elastic Package Manager (EPM)'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: GetOneBulkOperationPackagesRequestSchema,
+            response: {
+              200: {
+                body: () => GetOneBulkOperationPackagesResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        getOneBulkOperationPackagesHandler
+      );
+
+    router.versioned
+      .get({
+        path: EPM_API_ROUTES.BULK_UPGRADE_INFO_PATTERN,
+        security: INSTALL_PACKAGES_SECURITY,
+        summary: `Get Bulk upgrade packages details`,
+        options: {
+          tags: ['oas-tag:Elastic Package Manager (EPM)'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: GetOneBulkOperationPackagesRequestSchema,
+            response: {
+              200: {
+                body: () => GetOneBulkOperationPackagesResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        getOneBulkOperationPackagesHandler
       );
   }
 
@@ -657,9 +782,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
   // Update transforms with es-secondary-authorization headers,
   // append authorized_by to transform's _meta, and start transforms
   router.versioned
+    // @ts-ignore TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
     .post({
       path: EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS,
-      // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
       fleetAuthz: {
         ...INSTALL_PACKAGES_AUTHZ,
         packagePrivileges: {
@@ -694,4 +819,96 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       reauthorizeTransformsHandler
     );
+
+  router.versioned
+    .put({
+      path: EPM_API_ROUTES.UPDATE_CUSTOM_INTEGRATIONS_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+            FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
+          ],
+        },
+      },
+      summary: `Update a custom integration`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: CustomIntegrationRequestSchema,
+          response: {
+            200: {},
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      updateCustomIntegrationHandler
+    );
+
+  router.versioned
+    .delete({
+      path: EPM_API_ROUTES.PACKAGES_DATASTREAM_ASSETS,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Delete assets for an input package`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: DeletePackageDatastreamAssetsRequestSchema,
+          response: {
+            200: {
+              body: () => DeletePackageDatastreamAssetsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      deletePackageDatastreamAssetsHandler
+    );
+
+  if (experimentalFeatures.enablePackageRollback) {
+    router.versioned
+      .post({
+        path: EPM_API_ROUTES.ROLLBACK_PATTERN,
+        security: INSTALL_PACKAGES_SECURITY,
+        summary: `Rollback a package to previous version`,
+        options: {
+          tags: ['oas-tag:Elastic Package Manager (EPM)'],
+          availability: {
+            since: '9.1.0',
+            stability: 'experimental',
+          },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: RollbackPackageRequestSchema,
+            response: {
+              200: {
+                body: () => RollbackPackageResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        rollbackPackageHandler
+      );
+  }
 };

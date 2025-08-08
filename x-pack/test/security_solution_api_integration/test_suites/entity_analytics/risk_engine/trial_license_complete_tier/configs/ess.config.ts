@@ -15,12 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...functionalConfig.getAll(),
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'),
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'serviceEntityStoreEnabled',
-        ])}`,
-      ],
+      serverArgs: [...functionalConfig.get('kbnTestServer.serverArgs')],
     },
     testFiles: [require.resolve('..')],
     junit: {

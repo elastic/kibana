@@ -6,7 +6,9 @@
  */
 
 import DateMath from '@kbn/datemath';
+import type { Query } from '@kbn/es-query';
 import { useCallback, useEffect } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import type {
   MetricsExplorerChartOptions,
   MetricsExplorerOptions,
@@ -35,6 +37,7 @@ export const useMetricsExplorerState = ({ enabled }: { enabled: boolean } = { en
     timestamps,
     setTimestamps,
   } = useMetricsExplorerOptionsContainerContext();
+  const { onPageRefreshStart } = usePerformanceContext();
 
   const refreshTimestamps = useCallback(() => {
     const fromTimestamp = DateMath.parse(timeRange.from)!.valueOf();
@@ -45,7 +48,8 @@ export const useMetricsExplorerState = ({ enabled }: { enabled: boolean } = { en
       fromTimestamp,
       toTimestamp,
     });
-  }, [setTimestamps, timeRange]);
+    onPageRefreshStart();
+  }, [setTimestamps, timeRange, onPageRefreshStart]);
 
   const { data, error, fetchNextPage, isLoading } = useMetricsExplorerData({
     options,
@@ -77,10 +81,10 @@ export const useMetricsExplorerState = ({ enabled }: { enabled: boolean } = { en
   );
 
   const handleFilterQuerySubmit = useCallback(
-    (query: string) => {
+    (payload: { query?: Query }) => {
       setOptions({
         ...options,
-        filterQuery: query,
+        filterQuery: payload.query?.query as string,
       });
     },
     [options, setOptions]

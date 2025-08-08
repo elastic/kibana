@@ -19,7 +19,11 @@ import {
 
 import { inputsFormat } from '../../../common/constants';
 
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICIES_MAPPINGS } from '../../constants';
+import {
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICIES_MAPPINGS,
+} from '../../constants';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
 
@@ -37,7 +41,7 @@ export const GetPackagePoliciesRequestSchema = {
         validate: (value: string) => {
           const validationObj = validateKuery(
             value,
-            [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+            [LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE],
             PACKAGE_POLICIES_MAPPINGS,
             true
           );
@@ -214,7 +218,7 @@ export const DryRunPackagePoliciesResponseBodySchema = schema.arrayOf(
                 schema.arrayOf(
                   schema
                     .object({
-                      id: schema.string(),
+                      id: schema.maybe(schema.string()),
                       data_stream: schema.object({
                         dataset: schema.string(),
                         type: schema.maybe(schema.string()),

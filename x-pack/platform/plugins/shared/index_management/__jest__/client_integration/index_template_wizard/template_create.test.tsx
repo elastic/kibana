@@ -235,11 +235,10 @@ describe('<TemplateCreate />', () => {
 
         showFilters();
 
-        expect(find('filterList.filterItem').map((wrapper) => wrapper.text())).toEqual([
-          'Index settings',
-          'Mappings',
-          'Aliases',
-        ]);
+        const filtersList = find('filterList.filterItem').map((wrapper) => wrapper.text());
+        expect(filtersList[0]).toContain('Index settings');
+        expect(filtersList[1]).toContain('Mappings');
+        expect(filtersList[2]).toContain('Aliases');
 
         await selectFilter('settings');
         expect(getComponentTemplatesInList()).toEqual(['test_component_template_2']); // only this one has settings

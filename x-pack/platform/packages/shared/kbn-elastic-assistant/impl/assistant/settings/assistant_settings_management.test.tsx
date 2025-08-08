@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertConvo, welcomeConvo } from '../../mock/conversation';
+import { welcomeConvo } from '../../mock/conversation';
 import { useAssistantContext } from '../../assistant_context';
 import { fireEvent, render } from '@testing-library/react';
 
@@ -24,21 +24,7 @@ import {
   QUICK_PROMPTS_TAB,
   SYSTEM_PROMPTS_TAB,
 } from './const';
-import { mockSystemPrompts } from '../../mock/system_prompt';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-
-const mockConversations = {
-  [alertConvo.title]: alertConvo,
-  [welcomeConvo.title]: welcomeConvo,
-};
-const saveSettings = jest.fn();
-
-const mockValues = {
-  conversationSettings: mockConversations,
-  saveSettings,
-  systemPromptSettings: mockSystemPrompts,
-  quickPromptSettings: [],
-};
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
@@ -48,6 +34,7 @@ const mockContext = {
   assistantFeatures: { assistantModelEvaluation: true },
   assistantAvailability: {
     isAssistantEnabled: true,
+    isAssistantManagementEnabled: true,
   },
 };
 
@@ -91,14 +78,6 @@ jest.mock('../../data_anonymization/settings/anonymization_settings_management',
 jest.mock('.', () => {
   return {
     EvaluationSettings: () => <span data-test-subj="evaluation-tab" />,
-  };
-});
-
-jest.mock('./use_settings_updater/use_settings_updater', () => {
-  const original = jest.requireActual('./use_settings_updater/use_settings_updater');
-  return {
-    ...original,
-    useSettingsUpdater: jest.fn().mockImplementation(() => mockValues),
   };
 });
 

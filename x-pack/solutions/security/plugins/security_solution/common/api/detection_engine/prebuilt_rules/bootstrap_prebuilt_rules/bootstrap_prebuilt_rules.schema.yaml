@@ -25,6 +25,9 @@ paths:
                     description: The list of packages that were installed or upgraded
                     items:
                       $ref: '#/components/schemas/PackageInstallStatus'
+                  rules:
+                    description: The list of rules that were installed or upgraded
+                    $ref: '#/components/schemas/RuleBootstrapResults'
                 required:
                   - packages
 
@@ -49,3 +52,53 @@ components:
         - name
         - version
         - status
+
+    RuleBootstrapResults:
+      type: object
+      properties:
+        total:
+          type: number
+          description: The total number of rules to be processed. This is a dynamic value and depends on the number of integrations installed that have bootstrappable rules
+        installed:
+          type: number
+          description: The number of rules that were installed
+        updated:
+          type: number
+          description: The number of rules that were updated
+        deleted:
+          type: number
+          description: The number of rules that were deleted
+        skipped:
+          type: number
+          description: The number of rules that were skipped (already installed rules with no updates)
+        errors:
+          type: array
+          description: The list of bootstrap errors
+          items:
+            $ref: '#/components/schemas/RuleBootstrapError'
+      required:
+        - installed
+        - updated
+        - deleted
+        - errors
+
+    RuleBootstrapError:
+      type: object
+      properties:
+        rules:
+          type: array
+          description: The list of rules that failed to bootstrap
+          items:
+            type: object
+            properties:
+              rule_id:
+                type: string
+                description: The ID of the rule that failed to bootstrap
+            required:
+              - rule_id
+        message:
+          type: string
+          description: The error message
+      required:
+        - rules
+        - message

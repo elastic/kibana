@@ -24,7 +24,7 @@ import {
   deleteExceptionList,
   deleteExceptionListItem,
 } from '@kbn/lists-plugin/server/services/exception_lists';
-import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
+import { getAgentPolicySavedObjectType } from '@kbn/fleet-plugin/server/services/agent_policy';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 import { packagePolicyService } from '@kbn/fleet-plugin/server/services';
@@ -150,7 +150,7 @@ export function getTelemetryTask(
 export async function createMockedEndpointAlert(esClient: ElasticsearchClient) {
   const index = `${DEFAULT_DIAGNOSTIC_INDEX_PATTERN.replace('-*', '')}-001`;
 
-  await esClient.indices.create({ index, body: { settings: { hidden: true } } });
+  await esClient.indices.create({ index, settings: { hidden: true } });
 
   if (mockEndpointAlert['event']) {
     mockEndpointAlert['event']['ingested'] = new Date().toISOString();
@@ -242,10 +242,8 @@ export async function cleanupMockedAlerts(
   await esClient
     .deleteByQuery({
       index: alias[0],
-      body: {
-        query: {
-          match_all: {},
-        },
+      query: {
+        match_all: {},
       },
     })
     .catch(() => {
@@ -289,9 +287,10 @@ export async function createAgentPolicy(
     ],
   };
 
-  await soClient.get<unknown>(LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, id).catch(async (e) => {
+  const agentPolicyType = await getAgentPolicySavedObjectType();
+  await soClient.get<unknown>(agentPolicyType, id).catch(async (e) => {
     try {
-      return await soClient.create<unknown>(LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, {}, { id });
+      return await soClient.create<unknown>(agentPolicyType, {}, { id });
     } catch {
       logger.error(`>> Error searching for agent: ${e}`);
       throw Error(`>> Error searching for agent: ${e}`);

@@ -12,6 +12,7 @@ import { PostInitState, PostDocInitState, OutdatedDocumentsSearchState } from '.
 export const createPostInitState = (): PostInitState => ({
   controlState: 'INIT',
   retryDelay: 0,
+  skipRetryReset: false,
   retryCount: 0,
   logs: [],
   currentIndex: '.kibana_1',

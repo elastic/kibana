@@ -9,8 +9,8 @@ import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 
 export const journey = new Journey({
-  kbnArchives: ['test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb'],
-  esArchives: ['test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb'],
+  kbnArchives: ['src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb'],
+  esArchives: ['src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb'],
 })
   .step('Go to Data Visualizer', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(kbnUrl.get(`app/ml/datavisualizer`));

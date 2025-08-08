@@ -6,7 +6,7 @@
  */
 
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
-import { ActionTypeRegistry } from '../action_type_registry';
+import type { ActionTypeRegistry } from '../action_type_registry';
 import { setupTestServers } from './lib';
 import { connectorTypes } from './mocks/connector_types';
 import { actionsConfigMock } from '../actions_config.mock';
@@ -72,6 +72,10 @@ describe('Connector type config checks', () => {
             tenantId: 'foo-foo',
             oAuthServerUrl: 'https://_fake_auth.com/',
             oAuthScope: 'some-scope',
+            apiUrl: 'https://_face_api_.com',
+          };
+        } else if (connectorTypeId === '.bedrock') {
+          connectorConfig = {
             apiUrl: 'https://_face_api_.com',
           };
         }

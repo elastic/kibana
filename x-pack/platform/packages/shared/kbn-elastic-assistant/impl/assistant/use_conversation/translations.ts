@@ -13,16 +13,3 @@ export const WELCOME_CONVERSATION_TITLE = i18n.translate(
     defaultMessage: 'Welcome',
   }
 );
-export const DEFAULT_CONVERSATION_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.useConversation.defaultConversationTitle',
-  {
-    defaultMessage: 'Default',
-  }
-);
-
-export const ELASTIC_AI_ASSISTANT_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.useConversation.elasticAiAssistantTitle',
-  {
-    defaultMessage: 'Elastic AI Assistant',
-  }
-);

@@ -8,8 +8,8 @@
  */
 
 import { omit } from 'lodash';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { pipe } from 'fp-ts/lib/function';
+import * as TaskEither from 'fp-ts/TaskEither';
+import { pipe } from 'fp-ts/function';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { IndexMapping, VirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 import { diffMappings } from '../core/diff_mappings';

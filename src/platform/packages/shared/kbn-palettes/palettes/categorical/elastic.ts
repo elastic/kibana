@@ -20,6 +20,7 @@ export const elasticPalette = new KbnColorFnPalette({
   id: KbnPalette.Default,
   type: 'categorical',
   aliases: [
+    KbnPalette.Default, // needed when switching between new and old themes
     'elastic_borealis', // placeholder - not yet used
     KbnPalette.Amsterdam, // to assign to existing default palettes
   ],

@@ -212,7 +212,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
     ) : null;
 
     return (
-      <EuiPanel data-test-subj="loginForm">
+      <EuiPanel data-test-subj="loginForm" color="transparent">
         <form onSubmit={this.submitLoginForm}>
           <EuiFormRow
             label={
@@ -263,9 +263,10 @@ export class LoginForm extends Component<LoginFormProps, State> {
           <EuiSpacer />
 
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem>
               <EuiButton
                 fill
+                fullWidth
                 type="submit"
                 color="primary"
                 onClick={this.submitLoginForm}

@@ -7,13 +7,14 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { EmbeddableApiContext, apiHasAppContext } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
-import type { LensPluginStartDependencies } from '../../plugin';
-import type { EditorFrameService } from '../../editor_frame_service';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { ACTION_CREATE_ESQL_CHART } from './constants';
-import { executeCreateAction, isCreateActionCompatible } from '../../async_services';
+import { generateId } from '../../id_generator';
+import type { LensApi } from '../../react_embeddable/types';
+import { mountInlinePanel } from '../../react_embeddable/mount';
 
 export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CREATE_ESQL_CHART;
@@ -22,11 +23,7 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
 
   public grouping = [ADD_PANEL_VISUALIZATION_GROUP];
 
-  constructor(
-    protected readonly startDependencies: LensPluginStartDependencies,
-    protected readonly core: CoreStart,
-    protected readonly getEditorFrameService: () => Promise<EditorFrameService>
-  ) {}
+  constructor(protected readonly core: CoreStart) {}
 
   public getDisplayName(): string {
     return i18n.translate('xpack.lens.app.createVisualizationLabel', {
@@ -40,18 +37,40 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    return apiIsPresentationContainer(embeddable) && isCreateActionCompatible(this.core);
+    return apiIsPresentationContainer(embeddable) && this.core.uiSettings.get(ENABLE_ESQL);
   }
 
-  public async execute({ embeddable }: EmbeddableApiContext) {
-    if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
-    const editorFrameService = await this.getEditorFrameService();
+  public async execute({ embeddable: api }: EmbeddableApiContext) {
+    if (!apiIsPresentationContainer(api)) throw new IncompatibleActionError();
+    if (!api || !apiHasAppContext(api)) {
+      return;
+    }
+    const uuid = generateId();
 
-    executeCreateAction({
-      deps: this.startDependencies,
+    mountInlinePanel({
       core: this.core,
-      api: embeddable,
-      editorFrameService,
+      api,
+      loadContent: async ({ closeFlyout } = { closeFlyout: () => {} }) => {
+        const embeddable = await api.addNewPanel<object, LensApi>({
+          maybePanelId: uuid,
+          panelType: 'lens',
+          serializedState: {
+            rawState: {
+              id: uuid,
+              isNewPanel: true,
+              attributes: { references: [] },
+            },
+          },
+        });
+        if (!embeddable) {
+          throw new IncompatibleActionError();
+        }
+        return embeddable.getEditPanel?.({
+          closeFlyout,
+          showOnly: true,
+        });
+      },
+      options: { uuid },
     });
   }
 }

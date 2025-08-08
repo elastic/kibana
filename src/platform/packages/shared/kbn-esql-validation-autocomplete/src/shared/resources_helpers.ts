@@ -7,58 +7,99 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAst } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLCallbacks } from './types';
-import type { ESQLRealField } from '../validation/types';
-import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
+import { getFieldsFromES, getCurrentQueryAvailableFields } from './helpers';
+import { removeLastPipe, processPipes, toSingleLine } from './query_string_utils';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
 
-export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string) {
-  const prevCommand = ast[Math.max(ast.length - 2, 0)];
-  return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
+const cache = new Map<string, ESQLFieldWithMetadata[]>();
+
+// Function to check if a key exists in the cache, ignoring case
+function checkCacheInsensitive(keyToCheck: string) {
+  for (const key of cache.keys()) {
+    if (key.toLowerCase() === keyToCheck.toLowerCase()) {
+      return true; // Or return the value associated with the key if needed: return cache.get(key);
+    }
+  }
+  return false;
+}
+
+// Function to get a value from the cache, ignoring case
+function getValueInsensitive(keyToCheck: string) {
+  for (const key of cache.keys()) {
+    if (key.toLowerCase() === keyToCheck.toLowerCase()) {
+      return cache.get(key);
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Given a query, this function will compute the available fields and cache them
+ * for the next time the same query is used.
+ * @param queryText
+ */
+async function cacheFieldsForQuery(queryText: string) {
+  const existsInCache = checkCacheInsensitive(queryText);
+  if (existsInCache) {
+    // this is already in the cache
+    return;
+  }
+  const queryTextWithoutLastPipe = removeLastPipe(queryText);
+  // retrieve the user defined fields from the query without an extra call
+  const fieldsAvailableAfterPreviousCommand = getValueInsensitive(queryTextWithoutLastPipe);
+  if (fieldsAvailableAfterPreviousCommand && fieldsAvailableAfterPreviousCommand?.length) {
+    const { root } = parse(queryText);
+    const availableFields = await getCurrentQueryAvailableFields(
+      queryText,
+      root.commands,
+      fieldsAvailableAfterPreviousCommand
+    );
+    cache.set(queryText, availableFields);
+  }
 }
 
 export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
-  const cacheFields = new Map<string, ESQLRealField>();
-
-  const getEcsMetadata = async () => {
-    if (!resourceRetriever?.getFieldsMetadata) {
-      return undefined;
-    }
-    const client = await resourceRetriever?.getFieldsMetadata;
-    if (client.find) {
-      // Fetch full list of ECS field
-      // This list should be cached already by fieldsMetadataClient
-      const results = await client.find({ attributes: ['type'] });
-      return results?.fields;
-    }
-  };
-
   const getFields = async () => {
-    const metadata = await getEcsMetadata();
-    if (!cacheFields.size && queryText) {
-      const fieldsOfType = await resourceRetriever?.getColumnsFor?.({ query: queryText });
-      const fieldsWithMetadata = enrichFieldsWithECSInfo(fieldsOfType || [], metadata);
-      for (const field of fieldsWithMetadata || []) {
-        cacheFields.set(field.name, field);
-      }
+    // in some cases (as in the case of ROW or SHOW) the query is not set
+    if (!queryText) {
+      return;
+    }
+
+    const [sourceCommand, ...partialQueries] = processPipes(queryText);
+
+    // retrieve the index fields from ES ONLY if the source command is not in the cache
+    const existsInCache = getValueInsensitive(sourceCommand);
+    if (!existsInCache) {
+      const fieldsWithMetadata = await getFieldsFromES(sourceCommand, resourceRetriever);
+      cache.set(sourceCommand, fieldsWithMetadata);
+    }
+
+    // build fields cache for every partial query
+    for (const query of partialQueries) {
+      await cacheFieldsForQuery(query);
     }
   };
 
   return {
     getFieldsByType: async (
-      expectedType: string | string[] = 'any',
+      expectedType: Readonly<string> | Readonly<string[]> = 'any',
       ignored: string[] = []
-    ): Promise<ESQLRealField[]> => {
+    ): Promise<ESQLFieldWithMetadata[]> => {
       const types = Array.isArray(expectedType) ? expectedType : [expectedType];
       await getFields();
+      const queryTextForCacheSearch = toSingleLine(queryText);
+      const cachedFields = getValueInsensitive(queryTextForCacheSearch);
       return (
-        Array.from(cacheFields.values())?.filter(({ name, type }) => {
+        cachedFields?.filter(({ name, type }) => {
           const ts = Array.isArray(type) ? type : [type];
           return (
             !ignored.includes(name) &&
-            ts.some((t) => types[0] === 'any' || types.includes(t)) &&
+            (types[0] === 'any' || // if the type is 'any' we don't need to check the type
+              ts.some((t) => types.includes(t))) &&
             !NOT_SUGGESTED_TYPES.includes(type)
           );
         }) || []
@@ -66,8 +107,10 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
     },
     getFieldsMap: async () => {
       await getFields();
-      const cacheCopy = new Map<string, ESQLRealField>();
-      cacheFields.forEach((value, key) => cacheCopy.set(key, value));
+      const queryTextForCacheSearch = toSingleLine(queryText);
+      const cachedFields = getValueInsensitive(queryTextForCacheSearch);
+      const cacheCopy = new Map<string, ESQLFieldWithMetadata>();
+      cachedFields?.forEach((field) => cacheCopy.set(field.name, field));
       return cacheCopy;
     },
   };

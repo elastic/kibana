@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
+import * as Either from 'fp-ts/Either';
+import * as TaskEither from 'fp-ts/TaskEither';
 import type { Conflicts, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
@@ -27,6 +27,7 @@ export interface DeleteByQueryParams {
 
 /** @internal */
 export interface DeleteByQueryResponse {
+  type: 'delete_by_query_response';
   taskId: string;
 }
 
@@ -51,7 +52,7 @@ export const deleteByQuery =
         wait_for_completion: false,
       })
       .then(({ task: taskId }) => {
-        return Either.right({ taskId: String(taskId!) });
+        return Either.right({ type: 'delete_by_query_response' as const, taskId: String(taskId!) });
       })
       .catch(catchRetryableEsClientErrors);
   };

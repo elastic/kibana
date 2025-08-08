@@ -10,83 +10,115 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiPanel,
-  EuiSelect,
-  EuiSuperSelect,
   EuiText,
-  EuiCallOut,
+  EuiButtonGroup,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useController } from 'react-hook-form';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { ChatForm, ChatFormFields } from '../../types';
+import { PlaygroundForm, PlaygroundFormFields } from '../../types';
 import { AnalyticsEvents } from '../../analytics/constants';
+import { ContextFieldsSelect } from './context_fields_select';
 
 export const EditContextPanel: React.FC = () => {
+  const idPrefix = 'playground_context_doc_number';
   const usageTracker = useUsageTracker();
   const { fields } = useSourceIndicesFields();
 
   const {
     field: { onChange: onChangeSize, value: docSize },
   } = useController({
-    name: ChatFormFields.docSize,
+    name: PlaygroundFormFields.docSize,
   });
 
   const {
     field: { onChange: onChangeSourceFields, value: sourceFields },
-  } = useController<ChatForm, ChatFormFields.sourceFields>({
-    name: ChatFormFields.sourceFields,
+  } = useController<PlaygroundForm, PlaygroundFormFields.sourceFields>({
+    name: PlaygroundFormFields.sourceFields,
   });
 
-  const updateSourceField = (index: string, field: string) => {
-    onChangeSourceFields({
-      ...sourceFields,
-      [index]: [field],
-    });
-    usageTracker?.click(AnalyticsEvents.editContextFieldToggled);
-  };
+  const updateSourceField = useCallback(
+    (index: string, contextFields: string[]) => {
+      onChangeSourceFields({
+        ...sourceFields,
+        [index]: contextFields,
+      });
+      usageTracker?.click(AnalyticsEvents.editContextFieldToggled);
+    },
+    [onChangeSourceFields, sourceFields, usageTracker]
+  );
 
-  const handleDocSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleDocSizeButtonGroupChange = (value: number) => {
     usageTracker?.click(AnalyticsEvents.editContextDocSizeChanged);
-    onChangeSize(Number(e.target.value));
+    onChangeSize(value);
   };
 
   return (
     <EuiPanel data-test-subj="editContextPanel">
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexItem grow={false}>
-          <EuiFormRow
-            label={i18n.translate('xpack.searchPlayground.editContext.docsRetrievedCount', {
-              defaultMessage: 'Number of documents sent to LLM',
-            })}
-            fullWidth
-          >
-            <EuiSelect
-              options={[
-                {
-                  value: 1,
-                  text: '1',
-                },
-                {
-                  value: 3,
-                  text: '3',
-                },
-                {
-                  value: 5,
-                  text: '5',
-                },
-                {
-                  value: 10,
-                  text: '10',
-                },
-              ]}
-              value={docSize}
-              onChange={handleDocSizeChange}
-              fullWidth
-            />
-          </EuiFormRow>
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexItem>
+              <EuiText>
+                <h5>
+                  <FormattedMessage
+                    id="xpack.searchPlayground.documentsSize.table.title"
+                    defaultMessage="Documents"
+                  />
+                </h5>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
+              <EuiFlexItem>
+                <EuiText size="xs">
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.searchPlayground.editContext.docsRetrievedCount"
+                      defaultMessage="Number of documents sent"
+                    />
+                  </strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButtonGroup
+                  data-test-subj="documentSizeButtonGroup"
+                  legend="Number of documents sent"
+                  isFullWidth={true}
+                  buttonSize="compressed"
+                  options={[
+                    {
+                      id: `${idPrefix}-1`,
+                      label: '1',
+                      value: 1,
+                      'data-test-subj': `${idPrefix}-1`,
+                    },
+                    {
+                      id: `${idPrefix}-3`,
+                      label: '3',
+                      value: 3,
+                      'data-test-subj': `${idPrefix}-3`,
+                    },
+                    {
+                      id: `${idPrefix}-5`,
+                      label: '5',
+                      value: 5,
+                      'data-test-subj': `${idPrefix}-5`,
+                    },
+                    {
+                      id: `${idPrefix}-10`,
+                      label: '10',
+                      value: 10,
+                      'data-test-subj': `${idPrefix}-10`,
+                    },
+                  ]}
+                  idSelected={`${idPrefix}-${docSize}`}
+                  onChange={(_, value) => handleDocSizeButtonGroupChange(value)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="m">
@@ -100,32 +132,15 @@ export const EditContextPanel: React.FC = () => {
                 </h5>
               </EuiText>
             </EuiFlexItem>
-            {Object.entries(fields).map(([index, group], indexNum) => (
+            {Object.entries(fields).map(([index, group]) => (
               <EuiFlexItem grow={false} key={index}>
                 <EuiFormRow label={index} fullWidth>
-                  {!!group.source_fields?.length ? (
-                    <EuiSuperSelect
-                      data-test-subj={`contextFieldsSelectable-${indexNum}`}
-                      options={group.source_fields.map((field) => ({
-                        value: field,
-                        inputDisplay: field,
-                        'data-test-subj': 'contextField',
-                      }))}
-                      valueOfSelected={sourceFields[index]?.[0]}
-                      onChange={(value) => updateSourceField(index, value)}
-                      fullWidth
-                    />
-                  ) : (
-                    <EuiCallOut
-                      title={i18n.translate(
-                        'xpack.searchPlayground.editContext.noSourceFieldWarning',
-                        { defaultMessage: 'No source fields found' }
-                      )}
-                      color="warning"
-                      iconType="warning"
-                      size="s"
-                    />
-                  )}
+                  <ContextFieldsSelect
+                    indexName={index}
+                    indexFields={group}
+                    selectedContextFields={sourceFields[index] ?? []}
+                    updateSelectedContextFields={updateSourceField}
+                  />
                 </EuiFormRow>
               </EuiFlexItem>
             ))}

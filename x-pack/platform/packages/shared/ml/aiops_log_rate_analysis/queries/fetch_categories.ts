@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { get, omit } from 'lodash';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -91,7 +91,7 @@ export const getCategoryRequest = (
   // In this case we're only interested in the aggregation which
   // `createCategoryRequest` returns, so we're re-applying the original
   // query we create via `getQueryWithParams` here.
-  request.body.query = query;
+  request.query = query;
 
   return request;
 };
@@ -119,8 +119,7 @@ export const fetchCategories = async (
 
   const searches: estypes.MsearchRequestItem[] = fieldNames.flatMap((fieldName) => [
     { index: params.index },
-    getCategoryRequest(params, fieldName, randomSamplerWrapper)
-      .body as estypes.MsearchMultisearchBody,
+    omit(getCategoryRequest(params, fieldName, randomSamplerWrapper), ['index']),
   ]);
 
   let mSearchResponse;

@@ -7,10 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import {
-  TimeSeriesQuery,
-  TIME_SERIES_BUCKET_SELECTOR_FIELD,
-} from '@kbn/triggers-actions-ui-plugin/server';
+import type { TimeSeriesQuery } from '@kbn/triggers-actions-ui-plugin/server';
+import { TIME_SERIES_BUCKET_SELECTOR_FIELD } from '@kbn/triggers-actions-ui-plugin/server';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import {
   ALERT_EVALUATION_VALUE,
@@ -18,12 +16,14 @@ import {
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import { type Params, ParamsSchema } from '@kbn/response-ops-rule-params/index_threshold';
+import { ComparatorFns } from '@kbn/response-ops-rule-params/common';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE, STACK_ALERTS_AAD_CONFIG } from '..';
-import { ComparatorFns, getComparatorScript, getHumanReadableComparator } from '../../../common';
-import { ActionContext, BaseActionContext, addMessages } from './action_context';
-import { Params, ParamsSchema } from './rule_type_params';
-import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
-import { StackAlertType } from '../types';
+import { getComparatorScript, getHumanReadableComparator } from '../../../common';
+import type { ActionContext, BaseActionContext } from './action_context';
+import { addMessages } from './action_context';
+import type { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
+import type { StackAlertType } from '../types';
 
 export const ID = '.index-threshold';
 export const ActionGroupId = 'threshold met';
@@ -214,6 +214,7 @@ export function getRuleType(
     executor,
     category: DEFAULT_APP_CATEGORIES.management.id,
     producer: STACK_ALERTS_FEATURE_ID,
+    solution: 'stack',
     doesSetRecoveryContext: true,
     alerts: STACK_ALERTS_AAD_CONFIG,
   };

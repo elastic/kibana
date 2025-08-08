@@ -18,8 +18,10 @@
       "dataViews",
       "dataViewEditor",
       "unifiedSearch",
+      "taskManager",
       "fieldFormats",
-      "licensing"
+      "licensing",
+      "fieldsMetadata"
     ],
     "optionalPlugins": ["spaces"]
   }

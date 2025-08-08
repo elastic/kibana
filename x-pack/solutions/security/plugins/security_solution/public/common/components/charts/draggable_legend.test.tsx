@@ -7,9 +7,6 @@
 
 import { screen, render } from '@testing-library/react';
 import React from 'react';
-import { matchers } from '@emotion/jest';
-
-expect.extend(matchers);
 
 import '../../mock/react_beautiful_dnd';
 import { TestProviders } from '../../mock';

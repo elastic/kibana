@@ -10,7 +10,6 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { BaseDataGenerator } from '../../../../common/endpoint/data_generators/base_data_generator';
 import type { NewTrustedApp } from '../../../../common/endpoint/types';
 import { stringify } from '../../../../server/endpoint/utils/stringify';
-import { EndpointExceptionsGenerator } from '../../../../common/endpoint/data_generators/endpoint_exceptions_generator';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,
@@ -276,7 +275,7 @@ export const createEndpointExceptions = async ({
   reportProgress,
   throttler,
 }: ArtifactCreationOptions): Promise<void> => {
-  const generate = new EndpointExceptionsGenerator();
+  const generate = new ExceptionsListItemGenerator();
   let doneCount = 0;
   let errorCount = 0;
 

@@ -30,6 +30,7 @@ import {
   mockUserSettingsService,
   mockSecurityService,
   mockUserProfileService,
+  mockInjectionService,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
@@ -133,6 +134,7 @@ test('sets up services on "setup"', async () => {
   expect(mockSecurityService.setup).not.toHaveBeenCalled();
   expect(mockSecurityService.setup).not.toHaveBeenCalled();
   expect(mockUserProfileService.setup).not.toHaveBeenCalled();
+  expect(mockInjectionService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
@@ -153,6 +155,7 @@ test('sets up services on "setup"', async () => {
   expect(mockUserSettingsService.setup).toHaveBeenCalledTimes(1);
   expect(mockSecurityService.setup).toHaveBeenCalledTimes(1);
   expect(mockUserProfileService.setup).toHaveBeenCalledTimes(1);
+  expect(mockInjectionService.setup).toHaveBeenCalledTimes(1);
 });
 
 test('injects legacy dependency to context#setup()', async () => {
@@ -207,6 +210,7 @@ test('runs services on "start"', async () => {
   expect(mockCustomBrandingService.start).not.toHaveBeenCalled();
   expect(mockSecurityService.start).not.toHaveBeenCalled();
   expect(mockUserProfileService.start).not.toHaveBeenCalled();
+  expect(mockInjectionService.start).not.toHaveBeenCalled();
 
   await server.start();
 
@@ -221,6 +225,7 @@ test('runs services on "start"', async () => {
   expect(mockSecurityService.start).toHaveBeenCalledTimes(1);
   expect(mockUserProfileService.start).toHaveBeenCalledTimes(1);
   expect(mockUserSettingsService.start).toHaveBeenCalledTimes(1);
+  expect(mockInjectionService.start).toHaveBeenCalledTimes(1);
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {
@@ -287,6 +292,76 @@ test(`doesn't preboot core services if config validation fails`, async () => {
   expect(mockLoggingService.preboot).not.toHaveBeenCalled();
   expect(mockPluginsService.preboot).not.toHaveBeenCalled();
   expect(mockPrebootService.preboot).not.toHaveBeenCalled();
+});
+
+describe('stripUnknownsWorkaround', () => {
+  beforeEach(async () => {
+    mockEnsureValidConfiguration.mockImplementation(() => {
+      throw new Error('Unknown configuration keys');
+    });
+  });
+
+  test(`aborts on the first validation attempt if enableStripUnknownConfigWorkaround is not true`, async () => {
+    mockConfigService.atPath.mockReturnValue(
+      new BehaviorSubject({ lifecycle: { disablePreboot: true } })
+    );
+    const server = new Server(rawConfigService, env, logger);
+    await server.preboot();
+    await expect(server.setup()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unknown configuration keys"`
+    );
+    expect(mockEnsureValidConfiguration).toHaveBeenCalledTimes(1);
+  });
+
+  test(`tries again with stripUnknownKeys: true when enableStripUnknownConfigWorkaround is true`, async () => {
+    mockConfigService.atPath.mockReturnValue(
+      new BehaviorSubject({
+        lifecycle: { disablePreboot: true },
+        enableStripUnknownConfigWorkaround: true,
+      })
+    );
+
+    const server = new Server(rawConfigService, env, logger);
+    await server.preboot();
+    await expect(server.setup()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unknown configuration keys"`
+    );
+    expect(mockEnsureValidConfiguration).toHaveBeenCalledTimes(2);
+    expect(mockEnsureValidConfiguration).toHaveBeenNthCalledWith(
+      2,
+      expect.anything(),
+      expect.objectContaining({ stripUnknownKeys: true })
+    );
+    expect(logger.get('config-validation').error).toHaveBeenCalledTimes(0); // No error logged as it lets the validation fail
+  });
+
+  test(`if the 2nd validation succeeds, it logs an error to highlight that it's running in compat mode`, async () => {
+    mockEnsureValidConfiguration.mockImplementation(() => ({})); // Success by default
+    mockEnsureValidConfiguration.mockRejectedValueOnce(new Error('Unknown configuration keys')); // Fail the first time
+
+    mockConfigService.atPath.mockReturnValue(
+      new BehaviorSubject({
+        lifecycle: { disablePreboot: true },
+        enableStripUnknownConfigWorkaround: true,
+      })
+    );
+
+    const server = new Server(rawConfigService, env, logger);
+    await server.preboot();
+    await expect(server.setup()).resolves.toBeDefined();
+    expect(mockEnsureValidConfiguration).toHaveBeenCalledTimes(2);
+    expect(mockEnsureValidConfiguration).toHaveBeenNthCalledWith(
+      2,
+      expect.anything(),
+      expect.objectContaining({ stripUnknownKeys: true })
+    );
+    expect(logger.get('config-validation').error).toHaveBeenCalledTimes(1);
+    expect(logger.get('config-validation').error).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Strict config validation failed! Extra unknown keys removed in Serverless-compatible mode. Original error'
+      )
+    );
+  });
 });
 
 test('migrator-only node throws exception during start', async () => {

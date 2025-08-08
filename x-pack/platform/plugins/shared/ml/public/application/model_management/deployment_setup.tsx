@@ -37,6 +37,7 @@ import {
   EuiSwitch,
   EuiText,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
@@ -53,13 +54,13 @@ import {
   type TrainedModelDeploymentStatsResponse,
 } from '../../../common/types/trained_models';
 import { type CloudInfo, getNewJobLimits } from '../services/ml_server_info';
-import type { MlStartTrainedModelDeploymentRequestNew } from './deployment_params_mapper';
 import { DeploymentParamsMapper } from './deployment_params_mapper';
 
 import type { HttpService } from '../services/http_service';
 import { ModelStatusIndicator } from './model_status_indicator';
 import type { TrainedModelsService } from './trained_models_service';
 import { useMlKibana } from '../contexts/kibana';
+import type { MlCapabilitiesService } from '../capabilities/check_capabilities';
 
 interface DeploymentSetupProps {
   config: DeploymentParamsUI;
@@ -244,7 +245,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.cloudAutoscaling.lowCpuAdaptiveHelp',
               {
                 defaultMessage:
-                  'This level limits resources to the minimum required for ELSER to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
+                  'This level limits resources to the minimum required for the model to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
               }
             );
           case 'medium':
@@ -275,7 +276,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.cloudAutoscaling.lowCpuStaticHelp',
               {
                 defaultMessage:
-                  'This level sets resources to the minimum required for ELSER to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
+                  'This level sets resources to the minimum required for the model to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
               }
             );
           case 'medium':
@@ -342,7 +343,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.lowCpuStaticHelp',
               {
                 defaultMessage:
-                  'This level sets resources to the minimum required for ELSER to run. It may not be sufficient for a production application.',
+                  'This level sets resources to the minimum required for the model to run. It may not be sufficient for a production application.',
               }
             );
           case 'medium':
@@ -732,6 +733,8 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
       : defaultParams;
   }, [deploymentParamsMapper, isModelNotDownloaded, model, modelId, showNodeInfo]);
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const [config, setConfig] = useState<DeploymentParamsUI>(initialParams ?? getDefaultParams());
 
   const deploymentIdValidator = useMemo(() => {
@@ -773,12 +776,17 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
     (model?.state === MODEL_STATE.DOWNLOADING || model?.state === MODEL_STATE.DOWNLOADED);
 
   return (
-    <EuiModal onClose={onClose} data-test-subj="mlModelsStartDeploymentModal" maxWidth={640}>
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      onClose={onClose}
+      data-test-subj="mlModelsStartDeploymentModal"
+      maxWidth={640}
+    >
       {/* Override padding to allow progress bar to take full width */}
       <EuiModalHeader css={{ paddingInline: `${euiTheme.size.l} 0px` }}>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem css={{ paddingInline: `0px ${euiTheme.size.xxl}` }}>
-            <EuiModalHeaderTitle size="s">
+            <EuiModalHeaderTitle id={modalTitleId} size="s">
               {isUpdate ? (
                 <FormattedMessage
                   id="xpack.ml.trainedModels.modelsList.updateDeployment.modalTitle"
@@ -818,7 +826,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           errors={errors}
           isUpdate={isUpdate}
           disableAdaptiveResourcesControl={
-            showNodeInfo ? false : !nlpSettings.modelDeployment.allowStaticAllocations
+            !showNodeInfo || nlpSettings.modelDeployment?.allowStaticAllocations === false
           }
           deploymentsParams={
             isModelNotDownloaded || !isNLPModelItem(model)
@@ -918,18 +926,17 @@ export const getUserInputModelDeploymentParamsProvider =
     showNodeInfo: boolean,
     nlpSettings: NLPSettings,
     httpService: HttpService,
-    trainedModelsService: TrainedModelsService
+    trainedModelsService: TrainedModelsService,
+    mlCapabilities: MlCapabilitiesService
   ) =>
   (
     modelId: string,
     initialParams?: TrainedModelDeploymentStatsResponse,
     deploymentIds?: string[]
-  ): Promise<MlStartTrainedModelDeploymentRequestNew | void> => {
+  ): Promise<DeploymentParamsUI | void> => {
     const deploymentParamsMapper = new DeploymentParamsMapper(
-      modelId,
       getNewJobLimits(),
       cloudInfo,
-      showNodeInfo,
       nlpSettings
     );
 
@@ -941,7 +948,9 @@ export const getUserInputModelDeploymentParamsProvider =
       try {
         const modalSession = overlays.openModal(
           toMountPoint(
-            <KibanaContextProvider services={{ mlServices: { httpService, trainedModelsService } }}>
+            <KibanaContextProvider
+              services={{ mlServices: { httpService, trainedModelsService, mlCapabilities } }}
+            >
               <StartUpdateDeploymentModal
                 nlpSettings={nlpSettings}
                 showNodeInfo={showNodeInfo}
@@ -953,7 +962,8 @@ export const getUserInputModelDeploymentParamsProvider =
                 modelId={modelId}
                 onConfigChange={(config) => {
                   modalSession.close();
-                  resolve(deploymentParamsMapper.mapUiToApiDeploymentParams(config));
+
+                  resolve(config);
                 }}
                 onClose={() => {
                   modalSession.close();

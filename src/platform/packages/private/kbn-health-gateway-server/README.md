@@ -28,9 +28,9 @@ server:
   ssl:
     enabled: true
     # Using Kibana test certs
-    key: /path/to/packages/kbn-dev-utils/certs/kibana.key
-    certificate: /path/to/packages/kbn-dev-utils/certs/kibana.crt
-    certificateAuthorities: /path/to/packages/kbn-dev-utils/certs/ca.crt
+    key: /path/to/src/platform/packages/shared/kbn-dev-utils/certs/kibana.key
+    certificate: /path/to/src/platform/packages/shared/kbn-dev-utils/certs/kibana.crt
+    certificateAuthorities: /path/to/src/platform/packages/shared/kbn-dev-utils/certs/ca.crt
  
 kibana:
   hosts:
@@ -38,8 +38,8 @@ kibana:
     - 'https://localhost:5606'
   ssl:
     # Using Kibana test certs
-    certificate: /path/to/packages/kbn-dev-utils/certs/kibana.crt
-    certificateAuthorities: /path/to/packages/kbn-dev-utils/certs/ca.crt
+    certificate: /path/to/src/platform/packages/shared/kbn-dev-utils/certs/kibana.crt
+    certificateAuthorities: /path/to/src/platform/packages/shared/kbn-dev-utils/certs/ca.crt
     verificationMode: certificate
 
 logging:

@@ -11,3 +11,4 @@ export { AgentTableHeader } from './table_header';
 export { SearchAndFilterBar } from './search_and_filter_bar';
 export { TableRowActions } from './table_row_actions';
 export { TagsAddRemove } from './tags_add_remove';
+export { AgentMigrateFlyout } from './migrate_agent_flyout';

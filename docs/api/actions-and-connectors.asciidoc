@@ -1,7 +1,0 @@
-[[actions-and-connectors-api]]
-== Action and connector APIs
-
-For information about the actions and connectors that {kib} supports, refer to
-<<action-types>>.
-
-For the latest API details, refer to {api-kibana}/group/endpoint-connectors[connector APIs].

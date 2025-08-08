@@ -11,6 +11,7 @@ import { useGetAppInfo } from './use_get_app_info';
 import { getAppInfo } from './api';
 import { ServiceNowActionConnector } from './types';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { CORSError } from './cors_error';
 
 jest.mock('./api');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -100,8 +101,8 @@ describe('useGetAppInfo', () => {
     ).rejects.toThrow('An error occurred');
   });
 
-  it('it throws an error when fetch fails', async () => {
-    expect.assertions(1);
+  it('it throws a CORS error on CORS errors', async () => {
+    expect.assertions(2);
     getAppInfoMock.mockImplementation(() => {
       const error = new Error('An error occurred');
       error.name = 'TypeError';
@@ -115,12 +116,15 @@ describe('useGetAppInfo', () => {
       })
     );
 
-    await expect(() =>
-      act(async () => {
+    try {
+      await act(async () => {
         await result.current.fetchAppInfo(actionConnector);
-      })
-    ).rejects.toThrow(
-      'Failed to fetch. Check the URL or the CORS configuration of your ServiceNow instance.'
-    );
+      });
+    } catch (e) {
+      expect(e).toBeInstanceOf(CORSError);
+      expect(e.message).toBe(
+        'Failed to fetch. Check the URL or the CORS configuration of your ServiceNow instance.'
+      );
+    }
   });
 });

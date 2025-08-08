@@ -21,7 +21,6 @@ interface RequestData {
 }
 
 type Callback<T> = (error?: any, result?: T) => void;
-type ModuleFactory = (data: RequestData, callback: Callback<BundleRemoteModule>) => void;
 
 export class BundleRemotesPlugin {
   private allowedBundleIds = new Set<string>();
@@ -40,34 +39,33 @@ export class BundleRemotesPlugin {
       // hook into the creation of NormalModule instances in webpack, if the import
       // statement leading to the creation of the module is pointing to a bundleRef
       // entry then create a BundleRefModule instead of a NormalModule.
-      compilationParams.normalModuleFactory.hooks.factory.tap(
-        'BundleRefsPlugin/normalModuleFactory/factory',
-        (wrappedFactory: ModuleFactory): ModuleFactory =>
-          (data, callback) => {
-            const { request } = data.dependencies[0];
+      compilationParams.normalModuleFactory.hooks.factorize.tapAsync(
+        'BundleRefsPlugin/normalModuleFactory/factorize',
+        (data: RequestData, callback: Callback<BundleRemoteModule>) => {
+          const { request } = data.dependencies[0];
 
-            const cached = moduleCache.get(request);
-            if (cached === null) {
-              return wrappedFactory(data, callback);
-            }
-            if (cached !== undefined) {
-              return callback(null, cached);
-            }
-
-            this.resolve(request, (error, result) => {
-              if (error || result === undefined) {
-                return callback(error);
-              }
-
-              moduleCache.set(request, result);
-
-              if (result === null) {
-                return wrappedFactory(data, callback);
-              }
-
-              callback(null, result);
-            });
+          const cached = moduleCache.get(request);
+          if (cached === null) {
+            return callback();
           }
+          if (cached !== undefined) {
+            return callback(null, cached);
+          }
+
+          this.resolve(request, (error, result) => {
+            if (error || result === undefined) {
+              return callback(error);
+            }
+
+            moduleCache.set(request, result);
+
+            if (result === null) {
+              return callback();
+            }
+
+            callback(null, result);
+          });
+        }
       );
     });
 
@@ -87,7 +85,7 @@ export class BundleRemotesPlugin {
       compilation.hooks.finishModules.tapPromise(
         'BundleRefsPlugin/finishModules',
         async (modules) => {
-          const usedBundleIds = (modules as any[])
+          const usedBundleIds = (Array.from(modules) as any[])
             .filter((m: any): m is BundleRemoteModule => m instanceof BundleRemoteModule)
             .map((m) => m.remote.bundleId);
 
@@ -96,7 +94,7 @@ export class BundleRemotesPlugin {
             .join(', ');
 
           if (unusedBundleIds) {
-            const error = new Error(
+            const error = new webpack.WebpackError(
               `Bundle for [${this.bundle.id}] lists [${unusedBundleIds}] as a required bundle, but does not use it. Please remove it.`
             );
             (error as any).file = manifestPath;
@@ -108,7 +106,9 @@ export class BundleRemotesPlugin {
   }
 
   public resolve(request: string, cb: (error?: Error, bundle?: null | BundleRemoteModule) => void) {
-    if (request.endsWith('.json')) {
+    // NOTE: previously on webpack v4 ?raw files did not reach this phase and were excluded
+    // which is not the case anymore in webpack v5 so we need to do exclude them from being resolved
+    if (request.endsWith('.json') || request.endsWith('?raw')) {
       return cb(undefined, null);
     }
 

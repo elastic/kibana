@@ -7,7 +7,7 @@
 
 import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 import { agentPolicyService, appContextService } from '../../services';
-import * as fleetServerService from '../../services/fleet_server_host';
+import { fleetServerHostService } from '../../services/fleet_server_host';
 import { withDefaultErrorHandler } from '../../services/security/fleet_router';
 
 import { postFleetServerHost, putFleetServerHostHandler } from './handler';
@@ -32,13 +32,9 @@ describe('fleet server hosts handler', () => {
 
   beforeEach(() => {
     jest.spyOn(appContextService, 'getLogger').mockReturnValue({ error: jest.fn() } as any);
-    jest
-      .spyOn(fleetServerService, 'createFleetServerHost')
-      .mockResolvedValue({ id: 'host1' } as any);
-    jest
-      .spyOn(fleetServerService, 'updateFleetServerHost')
-      .mockResolvedValue({ id: 'host1' } as any);
-    jest.spyOn(fleetServerService, 'getFleetServerHost').mockResolvedValue({
+    jest.spyOn(fleetServerHostService, 'create').mockResolvedValue({ id: 'host1' } as any);
+    jest.spyOn(fleetServerHostService, 'update').mockResolvedValue({ id: 'host1' } as any);
+    jest.spyOn(fleetServerHostService, 'get').mockResolvedValue({
       id: SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
       host_urls: ['http://elasticsearch:9200'],
     } as any);
@@ -88,6 +84,54 @@ describe('fleet server hosts handler', () => {
     );
 
     expect(res).toEqual({ body: { item: { id: 'host1' } } });
+  });
+
+  it('should return error if both ssl.key and secrets.ssl.key are provided', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
+
+    const res = await postFleetServerHostWithErrorHandler(
+      mockContext,
+      {
+        body: {
+          id: 'host1',
+          host_urls: ['http://localhost:8080'],
+          ssl: { key: 'token1' },
+          secrets: { ssl: { key: 'token1' } },
+        },
+      } as any,
+      mockResponse as any
+    );
+
+    expect(res).toEqual({
+      body: { message: 'Cannot specify both ssl.key and secrets.ssl.key' },
+      statusCode: 400,
+    });
+  });
+
+  it('should return error if both ssl.es_key and secrets.ssl.es_key are provided', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
+
+    const res = await postFleetServerHostWithErrorHandler(
+      mockContext,
+      {
+        body: {
+          id: 'host1',
+          host_urls: ['http://localhost:8080'],
+          ssl: { es_key: 'token1' },
+          secrets: { ssl: { es_key: 'token1' } },
+        },
+      } as any,
+      mockResponse as any
+    );
+
+    expect(res).toEqual({
+      body: { message: 'Cannot specify both ssl.es_key and secrets.ssl.es_key' },
+      statusCode: 400,
+    });
   });
 
   it('should return error on put in serverless if host url is different from default', async () => {

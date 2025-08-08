@@ -27,9 +27,9 @@
         "label": "DocumentList",
         "description": [],
         "signature": [
-          "({ dataTelemetryIdPrefix, docs, docsPerPage, isLoading, mappings, meta, onPaginate, setDocsPerPage, onDocumentClick, resultProps, }: DocumentListProps) => React.JSX.Element"
+          "({ executionTime, dataTelemetryIdPrefix, docs, docsPerPage, isLoading, mappings, meta, onPaginate, setDocsPerPage, onDocumentClick, resultProps, }: DocumentListProps) => React.JSX.Element"
         ],
-        "path": "x-pack/solutions/search/packages/kbn-search-index-documents/components/document_list.tsx",
+        "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/document_list.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,12 +38,12 @@
             "id": "def-common.DocumentList.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  dataTelemetryIdPrefix,\n  docs,\n  docsPerPage,\n  isLoading,\n  mappings,\n  meta,\n  onPaginate,\n  setDocsPerPage,\n  onDocumentClick,\n  resultProps = {},\n}",
+            "label": "{\n  executionTime,\n  dataTelemetryIdPrefix,\n  docs,\n  docsPerPage,\n  isLoading,\n  mappings,\n  meta,\n  onPaginate,\n  setDocsPerPage,\n  onDocumentClick,\n  resultProps = {},\n}",
             "description": [],
             "signature": [
               "DocumentListProps"
             ],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/components/document_list.tsx",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/document_list.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -62,7 +62,7 @@
         "signature": [
           "({ accessControlSwitch, dataTelemetryIdPrefix, documentComponent, searchQueryCallback, }: DocumentsProps) => React.JSX.Element"
         ],
-        "path": "x-pack/solutions/search/packages/kbn-search-index-documents/components/documents_overview.tsx",
+        "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/documents_overview.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -76,7 +76,42 @@
             "signature": [
               "DocumentsProps"
             ],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/components/documents_overview.tsx",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/documents_overview.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-index-documents",
+        "id": "def-common.EditableResult",
+        "type": "Function",
+        "tags": [],
+        "label": "EditableResult",
+        "description": [],
+        "signature": [
+          "({ leftSideItem, hasIndexSelector, onIndexSelectorChange, onIdSelectorChange, onDeleteDocument, onExpand, indices, fields, initialDocId, initialIndex, error, isLoading, }: ",
+          "EditableResultProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/editable_result.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.EditableResult.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  leftSideItem,\n  hasIndexSelector,\n  onIndexSelectorChange,\n  onIdSelectorChange,\n  onDeleteDocument,\n  onExpand,\n  indices = [],\n  fields = [],\n  initialDocId = '',\n  initialIndex = '',\n  error,\n  isLoading = false,\n}",
+            "description": [],
+            "signature": [
+              "EditableResultProps"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/editable_result.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -95,7 +130,7 @@
         "signature": [
           "(client: ",
           "ElasticsearchClient",
-          ", indexName: string, query?: string | undefined, from?: number, size?: number, trackTotalHits?: boolean) => Promise<",
+          ", indexName: string, query?: string | undefined, from?: number, size?: number, trackTotalHits?: boolean | undefined) => Promise<",
           {
             "pluginId": "@kbn/search-index-documents",
             "scope": "common",
@@ -107,7 +142,7 @@
           "SearchHit",
           "<unknown>>>"
         ],
-        "path": "x-pack/solutions/search/packages/kbn-search-index-documents/lib/fetch_search_results.ts",
+        "path": "x-pack/platform/packages/shared/kbn-search-index-documents/lib/fetch_search_results.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -121,7 +156,7 @@
             "signature": [
               "ElasticsearchClient"
             ],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/lib/fetch_search_results.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/lib/fetch_search_results.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -136,7 +171,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/lib/fetch_search_results.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/lib/fetch_search_results.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -151,7 +186,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/lib/fetch_search_results.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/lib/fetch_search_results.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -166,7 +201,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/lib/fetch_search_results.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/lib/fetch_search_results.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -181,7 +216,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/lib/fetch_search_results.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/lib/fetch_search_results.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -189,17 +224,17 @@
           {
             "parentPluginId": "@kbn/search-index-documents",
             "id": "def-common.fetchSearchResults.$6",
-            "type": "boolean",
+            "type": "CompoundType",
             "tags": [],
             "label": "trackTotalHits",
             "description": [],
             "signature": [
-              "boolean"
+              "boolean | undefined"
             ],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/lib/fetch_search_results.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/lib/fetch_search_results.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -215,7 +250,7 @@
         "signature": [
           "(page: { from: number; size: number; total: number; }) => { pageIndex: number; pageSize: number; totalItemCount: number; }"
         ],
-        "path": "x-pack/solutions/search/packages/kbn-search-index-documents/types/pagination.ts",
+        "path": "x-pack/platform/packages/shared/kbn-search-index-documents/types/pagination.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -226,7 +261,7 @@
             "tags": [],
             "label": "page",
             "description": [],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/types/pagination.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/types/pagination.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -237,7 +272,7 @@
                 "tags": [],
                 "label": "from",
                 "description": [],
-                "path": "x-pack/solutions/search/packages/kbn-search-index-documents/types/pagination.ts",
+                "path": "x-pack/platform/packages/shared/kbn-search-index-documents/types/pagination.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -248,7 +283,7 @@
                 "tags": [],
                 "label": "size",
                 "description": [],
-                "path": "x-pack/solutions/search/packages/kbn-search-index-documents/types/pagination.ts",
+                "path": "x-pack/platform/packages/shared/kbn-search-index-documents/types/pagination.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -259,7 +294,7 @@
                 "tags": [],
                 "label": "total",
                 "description": [],
-                "path": "x-pack/solutions/search/packages/kbn-search-index-documents/types/pagination.ts",
+                "path": "x-pack/platform/packages/shared/kbn-search-index-documents/types/pagination.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -285,7 +320,7 @@
           "FieldProps",
           "[]"
         ],
-        "path": "x-pack/solutions/search/packages/kbn-search-index-documents/components/result/result_metadata.ts",
+        "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/result_metadata.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -302,7 +337,7 @@
               "FieldProps",
               "[]"
             ],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/components/result/result_metadata.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/result_metadata.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -325,7 +360,7 @@
           "ResultProps",
           ") => React.JSX.Element"
         ],
-        "path": "x-pack/solutions/search/packages/kbn-search-index-documents/components/result/result.tsx",
+        "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/result.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -339,7 +374,7 @@
             "signature": [
               "ResultProps"
             ],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/components/result/result.tsx",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/result.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -361,7 +396,7 @@
           "<unknown>) => ",
           "MetaDataProps"
         ],
-        "path": "x-pack/solutions/search/packages/kbn-search-index-documents/components/result/result_metadata.ts",
+        "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/result_metadata.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -376,7 +411,7 @@
               "SearchHit",
               "<unknown>"
             ],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/components/result/result_metadata.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/result_metadata.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -401,7 +436,7 @@
           "FieldProps",
           "[]"
         ],
-        "path": "x-pack/solutions/search/packages/kbn-search-index-documents/components/result/result_metadata.ts",
+        "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/result_metadata.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -416,7 +451,7 @@
               "SearchHit",
               "<unknown>"
             ],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/components/result/result_metadata.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/result_metadata.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -432,7 +467,7 @@
               "IndicesGetMappingResponse",
               " | undefined"
             ],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/components/result/result_metadata.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/result_metadata.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -457,7 +492,7 @@
           "FieldProps",
           "[]"
         ],
-        "path": "x-pack/solutions/search/packages/kbn-search-index-documents/components/result/result_metadata.ts",
+        "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/result_metadata.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -472,7 +507,7 @@
               "SearchHit",
               "<unknown>"
             ],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/components/result/result_metadata.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/result_metadata.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -489,7 +524,7 @@
               "MappingProperty",
               "> | undefined"
             ],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/components/result/result_metadata.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/result_metadata.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -517,7 +552,7 @@
           },
           "<T>"
         ],
-        "path": "x-pack/solutions/search/packages/kbn-search-index-documents/types/pagination.ts",
+        "path": "x-pack/platform/packages/shared/kbn-search-index-documents/types/pagination.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -531,7 +566,7 @@
             "signature": [
               "Meta"
             ],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/types/pagination.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/types/pagination.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -545,7 +580,7 @@
             "signature": [
               "T[]"
             ],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/types/pagination.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/types/pagination.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -565,7 +600,7 @@
         "signature": [
           "25"
         ],
-        "path": "x-pack/solutions/search/packages/kbn-search-index-documents/types/index.ts",
+        "path": "x-pack/platform/packages/shared/kbn-search-index-documents/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -579,7 +614,7 @@
         "tags": [],
         "label": "INDEX_DOCUMENTS_META_DEFAULT",
         "description": [],
-        "path": "x-pack/solutions/search/packages/kbn-search-index-documents/types/index.ts",
+        "path": "x-pack/platform/packages/shared/kbn-search-index-documents/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -590,7 +625,7 @@
             "tags": [],
             "label": "pageIndex",
             "description": [],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/types/index.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -601,7 +636,7 @@
             "tags": [],
             "label": "pageSize",
             "description": [],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/types/index.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -612,7 +647,7 @@
             "tags": [],
             "label": "totalItemCount",
             "description": [],
-            "path": "x-pack/solutions/search/packages/kbn-search-index-documents/types/index.ts",
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -8,7 +8,7 @@
  */
 
 import { Walker } from '../../../walker';
-import { ESQLAstQueryExpression, ESQLColumn, ESQLCommandOption } from '../../../types';
+import { ESQLAstQueryExpression, ESQLColumn, ESQLCommand, ESQLCommandOption } from '../../../types';
 import { Visitor } from '../../../visitor';
 import { cmpArr, findByPredicate } from '../../util';
 import * as generic from '../../generic';
@@ -23,12 +23,12 @@ import type { Predicate } from '../../types';
  * @returns A collection of [column, option] pairs for each metadata field found.
  */
 export const list = (
-  ast: ESQLAstQueryExpression
+  ast: ESQLAstQueryExpression | ESQLCommand<'from'>
 ): IterableIterator<[ESQLColumn, ESQLCommandOption]> => {
   type ReturnExpression = IterableIterator<ESQLColumn>;
   type ReturnCommand = IterableIterator<[ESQLColumn, ESQLCommandOption]>;
 
-  return new Visitor()
+  const visitor = new Visitor()
     .on('visitExpression', function* (): ReturnExpression {})
     .on('visitColumnExpression', function* (ctx): ReturnExpression {
       yield ctx.node;
@@ -53,8 +53,13 @@ export const list = (
       for (const command of ctx.visitCommands()) {
         yield* command;
       }
-    })
-    .visitQuery(ast);
+    });
+
+  if (ast.type === 'command') {
+    return visitor.visitCommand(ast);
+  } else {
+    return visitor.visitQuery(ast);
+  }
 };
 
 /**

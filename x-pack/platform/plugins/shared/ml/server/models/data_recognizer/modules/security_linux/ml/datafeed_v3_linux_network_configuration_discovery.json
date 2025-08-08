@@ -33,7 +33,7 @@
                   }
                 }
               },
-               {
+              {
                 "match": {
                   "host.os.family": {
                     "query": "redhat",
@@ -41,7 +41,7 @@
                   }
                 }
               },
-                 {
+              {
                 "match": {
                   "host.os.family": {
                     "query": "suse",
@@ -49,7 +49,7 @@
                   }
                 }
               },
-               {
+              {
                 "match": {
                   "host.os.family": {
                     "query": "ubuntu",
@@ -101,7 +101,16 @@
             ]
           }
         }
-      ]
+      ],
+      "must_not": {
+        "terms": {
+          "process.name": [
+            "elastic-agent.exe", "elastic-agent", "metricbeat.exe", "metricbeat", 
+            "filebeat.exe", "filebeat", "packetbeat.exe", "packetbeat", 
+            "winlogbeat.exe", "winlogbeat"
+          ]
+        }
+      }
     }
   }
 }

@@ -29,7 +29,7 @@
         "description": [
           "\n Helper for starting and managing processes. In many ways it resembles the\n API from `grunt_run`, processes are named and can be started, waited for,\n backgrounded once they log something matching a RegExp...\n"
         ],
-        "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+        "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+            "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -63,7 +63,7 @@
                     "text": "ToolingLog"
                   }
                 ],
-                "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+                "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -83,7 +83,7 @@
             "signature": [
               "(name: string, options: RunOptions) => Promise<void>"
             ],
-            "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+            "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -97,7 +97,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+                "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -112,7 +112,7 @@
                 "signature": [
                   "RunOptions"
                 ],
-                "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+                "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -132,7 +132,7 @@
             "signature": [
               "(name: string, signal?: NodeJS.Signals) => Promise<void>"
             ],
-            "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+            "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -146,7 +146,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+                "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -161,7 +161,7 @@
                 "signature": [
                   "NodeJS.Signals"
                 ],
-                "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+                "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -183,7 +183,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+            "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -203,7 +203,7 @@
             "signature": [
               "(signal?: \"exit\" | NodeJS.Signals) => Promise<void>"
             ],
-            "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+            "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -217,7 +217,7 @@
                 "signature": [
                   "\"exit\" | NodeJS.Signals"
                 ],
-                "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+                "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -260,7 +260,7 @@
           },
           ") => Promise<T>) => Promise<void>"
         ],
-        "path": "packages/kbn-dev-proc-runner/src/with_proc_runner.ts",
+        "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/with_proc_runner.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -280,7 +280,7 @@
                 "text": "ToolingLog"
               }
             ],
-            "path": "packages/kbn-dev-proc-runner/src/with_proc_runner.ts",
+            "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/with_proc_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -303,7 +303,7 @@
               },
               ") => Promise<T>"
             ],
-            "path": "packages/kbn-dev-proc-runner/src/with_proc_runner.ts",
+            "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/with_proc_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

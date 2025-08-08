@@ -8,7 +8,7 @@
 import { EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { css } from '@emotion/react/dist/emotion-react.cjs';
+import { css } from '@emotion/react';
 
 export const EmptyList = ({ addDatabaseButton }: { addDatabaseButton: JSX.Element }) => {
   return (

@@ -21,7 +21,10 @@ import {
   EuiRadioGroup,
   EuiSwitch,
   EuiSwitchEvent,
+  withEuiTheme,
+  WithEuiThemeProps,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { format as formatUrl, parse as parseUrl } from 'url';
 
@@ -53,6 +56,7 @@ export interface UrlPanelContentProps {
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   urlService: BrowserUrlService;
   snapshotShareWarning?: string;
+  theme: WithEuiThemeProps['theme'];
 }
 
 export enum ExportUrlAsType {
@@ -79,7 +83,7 @@ interface State {
   showWarningButton: boolean;
 }
 
-export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
+class UrlPanelContentComponent extends Component<UrlPanelContentProps, State, WithEuiThemeProps> {
   private mounted?: boolean;
   private shortUrlCache?: string;
 
@@ -149,10 +153,10 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
   }
 
   public render() {
+    const { theme } = this.props;
     const shortUrlSwitch = this.renderShortUrlSwitch();
     const publicUrlSwitch = this.renderPublicUrlSwitch();
     const copyButton = this.renderCopyButton();
-
     const urlRow = (!!shortUrlSwitch || !!publicUrlSwitch) && (
       <EuiFormRow
         label={<FormattedMessage id="share.urlPanel.urlGroupTitle" defaultMessage="URL" />}
@@ -167,7 +171,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
 
     return (
       <I18nProvider>
-        <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
+        <EuiForm css={css({ padding: theme.euiTheme.size.base })} data-test-subj="shareUrlForm">
           {this.renderExportAsRadioGroup()}
           {this.renderUrlParamExtensions()}
           {urlRow}
@@ -407,7 +411,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     <EuiCopy
       beforeMessage={this.state.showWarningButton ? this.props.snapshotShareWarning : undefined}
       textToCopy={this.state.url || ''}
-      anchorClassName="eui-displayBlock"
+      tooltipProps={{ anchorClassName: 'eui-displayBlock' }}
     >
       {(copy) => (
         <EuiButton
@@ -612,3 +616,6 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     );
   };
 }
+
+export const UrlPanelContent = withEuiTheme(UrlPanelContentComponent);
+UrlPanelContent.displayName = 'UrlPanelContent';

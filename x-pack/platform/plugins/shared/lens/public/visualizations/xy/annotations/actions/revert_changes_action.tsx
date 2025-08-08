@@ -19,7 +19,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CoreStart } from '@kbn/core/public';
-import { cloneDeep } from 'lodash';
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
 import type { LayerAction, StateSetter } from '../../../../types';
@@ -98,7 +97,7 @@ export const revert = ({
 
     indexPatternId: layer.__lastSaved.indexPatternId,
     ignoreGlobalFilters: layer.__lastSaved.ignoreGlobalFilters,
-    annotations: cloneDeep(layer.__lastSaved.annotations),
+    annotations: structuredClone(layer.__lastSaved.annotations),
     __lastSaved: layer.__lastSaved,
   };
   setState({

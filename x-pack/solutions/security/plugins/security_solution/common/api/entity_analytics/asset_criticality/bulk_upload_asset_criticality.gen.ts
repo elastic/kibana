@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { CreateAssetCriticalityRecord } from './common.gen';
+import { AssetCriticalityRecordIdParts } from './common.gen';
 
 export type AssetCriticalityBulkUploadErrorItem = z.infer<
   typeof AssetCriticalityBulkUploadErrorItem
@@ -33,11 +33,37 @@ export const AssetCriticalityBulkUploadStats = z.object({
   total: z.number().int(),
 });
 
+/**
+ * The criticality level of the asset for bulk upload. The value `unassigned` is used to indicate that the criticality level is not assigned and is only used for bulk upload.
+ */
+export type AssetCriticalityLevelsForBulkUpload = z.infer<
+  typeof AssetCriticalityLevelsForBulkUpload
+>;
+export const AssetCriticalityLevelsForBulkUpload = z.enum([
+  'low_impact',
+  'medium_impact',
+  'high_impact',
+  'extreme_impact',
+  'unassigned',
+]);
+export type AssetCriticalityLevelsForBulkUploadEnum =
+  typeof AssetCriticalityLevelsForBulkUpload.enum;
+export const AssetCriticalityLevelsForBulkUploadEnum = AssetCriticalityLevelsForBulkUpload.enum;
+
 export type BulkUpsertAssetCriticalityRecordsRequestBody = z.infer<
   typeof BulkUpsertAssetCriticalityRecordsRequestBody
 >;
 export const BulkUpsertAssetCriticalityRecordsRequestBody = z.object({
-  records: z.array(CreateAssetCriticalityRecord).min(1).max(1000),
+  records: z
+    .array(
+      AssetCriticalityRecordIdParts.merge(
+        z.object({
+          criticality_level: AssetCriticalityLevelsForBulkUpload,
+        })
+      )
+    )
+    .min(1)
+    .max(1000),
 });
 export type BulkUpsertAssetCriticalityRecordsRequestBodyInput = z.input<
   typeof BulkUpsertAssetCriticalityRecordsRequestBody

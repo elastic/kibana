@@ -8,7 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Map, StyleSpecification, MapOptions } from '@kbn/mapbox-gl';
+import type {
+  Map,
+  StyleSpecification,
+  MapOptions,
+  AttributionControlOptions,
+} from '@kbn/mapbox-gl';
 
 import { View, parse, expressionFunction } from 'vega';
 
@@ -20,7 +25,6 @@ import { getThemeService } from '../../services';
 
 import { defaultMapConfig, defaultMabBoxStyle, vegaLayerId } from './constants';
 import { validateZoomSettings, injectMapPropsIntoSpec } from './utils';
-import './vega_map_view.scss';
 import { TMS_IN_YML_ID } from './service_settings/service_settings_types';
 
 async function updateVegaView(mapBoxInstance: Map, vegaView: View) {
@@ -108,7 +112,7 @@ export class VegaMapView extends VegaBaseView {
 
   private async initMapContainer(vegaView: View) {
     let style: StyleSpecification = defaultMabBoxStyle;
-    let customAttribution: MapOptions['customAttribution'] = [];
+    let customAttribution: AttributionControlOptions['customAttribution'] = [];
     const zoomSettings = {
       minZoom: defaultMapConfig.minZoom,
       maxZoom: defaultMapConfig.maxZoom,
@@ -143,7 +147,7 @@ export class VegaMapView extends VegaBaseView {
     return new Promise((resolve) => {
       const mapBoxInstance = new maplibregl.Map({
         style,
-        customAttribution,
+        attributionControl: { customAttribution },
         container: this._container,
         ...this.getMapParams({ ...zoomSettings }),
       });

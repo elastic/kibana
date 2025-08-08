@@ -23,7 +23,7 @@ import {
   getAlertsById,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '../../../../../../../../common/utils/security_solution';
+} from '../../../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -34,11 +34,15 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@serverless @serverlessQA @ess Rule exception operators for data type ip', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/ip');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/ip'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/ip');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/ip'
+      );
     });
 
     beforeEach(async () => {

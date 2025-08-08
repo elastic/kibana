@@ -7,6 +7,8 @@
 
 import { get } from 'lodash/fp';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 import { render, screen, within } from '@testing-library/react';
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { TestProviders } from '../../../common/mock/test_providers';
@@ -59,6 +61,7 @@ import {
   NETWORK_TRANSPORT_FIELD_NAME,
 } from '../../../explore/network/components/source_destination/field_names';
 import { getMockNetflowData } from '../../../common/mock/netflow';
+import { CellActionsWrapper } from '../../../common/components/drag_and_drop/cell_actions_wrapper';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -70,8 +73,19 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+  return {
+    CellActionsWrapper: jest.fn(),
+  };
+});
+
+const MockedCellActionsWrapper = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+});
+
 const getNetflowInstance = () => (
   <Netflow
+    scopeId="some_scope"
     contextId="test"
     destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, getMockNetflowData()))}
     destinationGeoContinentName={asArrayIfExists(
@@ -134,6 +148,10 @@ const getNetflowInstance = () => (
 jest.mock('../../../common/components/links/link_props');
 
 describe('Netflow', () => {
+  beforeEach(() => {
+    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+  });
+
   test('renders correctly against snapshot', () => {
     const { asFragment } = render(<TestProviders>{getNetflowInstance()}</TestProviders>);
     expect(asFragment()).toMatchSnapshot();
@@ -367,5 +385,16 @@ describe('Netflow', () => {
     render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(screen.getByText('first.last')).toBeInTheDocument();
+  });
+
+  test('should passing correct scopeId to cell actions', () => {
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
+
+    expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopeId: 'some_scope',
+      }),
+      {}
+    );
   });
 });

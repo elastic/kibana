@@ -78,70 +78,76 @@ const updateRuntimeFieldRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public', description }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .post({
+        path,
+        access: 'public',
+        description,
         security: {
           authz: {
             requiredPrivileges: ['indexPatterns:manage'],
           },
         },
-        validate: {
-          request: {
-            params: schema.object({
-              id: schema.string({
-                minLength: 1,
-                maxLength: 1_000,
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {
+              params: schema.object({
+                id: schema.string({
+                  minLength: 1,
+                  maxLength: 1_000,
+                }),
+                name: schema.string({
+                  minLength: 1,
+                  maxLength: 1_000,
+                }),
               }),
-              name: schema.string({
-                minLength: 1,
-                maxLength: 1_000,
+              body: schema.object({
+                name: schema.never(),
+                runtimeField: runtimeFieldSchemaUpdate,
               }),
-            }),
-            body: schema.object({
-              name: schema.never(),
-              runtimeField: runtimeFieldSchemaUpdate,
-            }),
-          },
-          response: {
-            200: {
-              body: runtimeResponseSchema,
+            },
+            response: {
+              200: {
+                body: runtimeResponseSchema,
+              },
             },
           },
         },
-      },
-      handleErrors(async (ctx, req, res) => {
-        const core = await ctx.core;
-        const savedObjectsClient = core.savedObjects.client;
-        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-        const [, , { dataViewsServiceFactory }] = await getStartServices();
-        const dataViewsService = await dataViewsServiceFactory(
-          savedObjectsClient,
-          elasticsearchClient,
-          req
-        );
-        const id = req.params.id;
-        const name = req.params.name;
-        const runtimeField = req.body.runtimeField as Partial<RuntimeField>;
+        handleErrors(async (ctx, req, res) => {
+          const core = await ctx.core;
+          const savedObjectsClient = core.savedObjects.client;
+          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+          const [, , { dataViewsServiceFactory }] = await getStartServices();
+          const dataViewsService = await dataViewsServiceFactory(
+            savedObjectsClient,
+            elasticsearchClient,
+            req
+          );
+          const id = req.params.id;
+          const name = req.params.name;
+          const runtimeField = req.body.runtimeField as Partial<RuntimeField>;
 
-        const { dataView, fields } = await updateRuntimeField({
-          dataViewsService,
-          usageCollection,
-          counterName: `${req.route.method} ${path}`,
-          id,
-          name,
-          runtimeField,
-        });
+          const { dataView, fields } = await updateRuntimeField({
+            dataViewsService,
+            usageCollection,
+            counterName: `${req.route.method} ${path}`,
+            id,
+            name,
+            runtimeField,
+          });
 
-        const response: RuntimeResponseType = await responseFormatter({
-          serviceKey,
-          dataView,
-          fields,
-        });
+          const response: RuntimeResponseType = await responseFormatter({
+            serviceKey,
+            dataView,
+            fields,
+          });
 
-        return res.ok(response);
-      })
-    );
+          return res.ok(response);
+        })
+      );
   };
 
 export const registerUpdateRuntimeFieldRoute = updateRuntimeFieldRouteFactory(

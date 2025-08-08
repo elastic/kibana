@@ -223,3 +223,142 @@ describe('#extendsDeep', () => {
     });
   });
 });
+
+describe('nested unknowns', () => {
+  // we don't allow strip unknowns in oneOf for now because joi
+  // doesn't allow it in joi.alternatives and we use that for oneOf
+  test('cant strip unknown keys in oneOf so it should throw an error', () => {
+    const type = schema.mapOf(
+      schema.oneOf([schema.literal('a'), schema.literal('b')]),
+      schema.string()
+    );
+
+    expect(() =>
+      type.validate(
+        {
+          a: 'abc',
+          x: 'def',
+        },
+        void 0,
+        void 0,
+        { stripUnknownKeys: true }
+      )
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[key(\\"x\\")]: types that failed validation:
+      - [0]: expected value to equal [a]
+      - [1]: expected value to equal [b]"
+    `);
+  });
+
+  test('should strip unknown nested keys if stripUnkownKeys is true in validate', () => {
+    const type = schema.mapOf(
+      schema.string(),
+      schema.object({
+        a: schema.string(),
+      })
+    );
+
+    const value = {
+      x: {
+        a: '123',
+        b: 'should be stripped',
+      },
+    };
+    const expected = new Map([['x', { a: '123' }]]);
+
+    expect(type.validate(value, void 0, void 0, { stripUnknownKeys: true })).toStrictEqual(
+      expected
+    );
+  });
+
+  test('should strip unknown nested keys if unknowns is ignore in the schema', () => {
+    const type = schema.mapOf(
+      schema.string(),
+      schema.object({
+        a: schema.string(),
+      }),
+      { unknowns: 'ignore' }
+    );
+
+    const value = {
+      x: {
+        a: '123',
+        b: 'should be stripped',
+      },
+    };
+    const expected = new Map([['x', { a: '123' }]]);
+
+    expect(type.validate(value, void 0, void 0, {})).toStrictEqual(expected);
+  });
+
+  test('should strip unknown keys in object inside record inside map when stripUnkownKeys is true', () => {
+    const type = schema.mapOf(
+      schema.string(),
+      schema.recordOf(
+        schema.string(),
+        schema.object({
+          a: schema.string(),
+        })
+      )
+    );
+
+    const value = new Map([
+      [
+        'key1',
+        {
+          record1: { a: '123', b: 'should be stripped' },
+          record2: { a: '456', extra: 'remove this' },
+        },
+      ],
+    ]);
+
+    const expected = new Map([
+      [
+        'key1',
+        {
+          record1: { a: '123' },
+          record2: { a: '456' },
+        },
+      ],
+    ]);
+
+    expect(type.validate(value, void 0, void 0, { stripUnknownKeys: true })).toStrictEqual(
+      expected
+    );
+  });
+
+  test('should strip unknown keys in object inside record inside map when unkowns is ignore', () => {
+    const type = schema.mapOf(
+      schema.string(),
+      schema.recordOf(
+        schema.string(),
+        schema.object({
+          a: schema.string(),
+        })
+      ),
+      { unknowns: 'ignore' }
+    );
+
+    const value = new Map([
+      [
+        'key1',
+        {
+          record1: { a: '123', b: 'should be stripped' },
+          record2: { a: '456', extra: 'remove this' },
+        },
+      ],
+    ]);
+
+    const expected = new Map([
+      [
+        'key1',
+        {
+          record1: { a: '123' },
+          record2: { a: '456' },
+        },
+      ],
+    ]);
+
+    expect(type.validate(value, void 0, void 0, {})).toStrictEqual(expected);
+  });
+});

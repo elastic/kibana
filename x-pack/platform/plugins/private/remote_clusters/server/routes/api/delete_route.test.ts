@@ -132,19 +132,17 @@ describe('DELETE remote clusters', () => {
       expect(getSettingsMockFn).toHaveBeenCalledWith();
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
       expect(putSettingsMockFn).toHaveBeenCalledWith({
-        body: {
-          persistent: {
-            cluster: {
-              remote: {
-                test: {
-                  seeds: null,
-                  skip_unavailable: null,
-                  mode: null,
-                  proxy_address: null,
-                  proxy_socket_connections: null,
-                  server_name: null,
-                  node_connections: null,
-                },
+        persistent: {
+          cluster: {
+            remote: {
+              test: {
+                seeds: null,
+                skip_unavailable: null,
+                mode: null,
+                proxy_address: null,
+                proxy_socket_connections: null,
+                server_name: null,
+                node_connections: null,
               },
             },
           },
@@ -279,19 +277,17 @@ describe('DELETE remote clusters', () => {
       expect(getSettingsMockFn).toHaveBeenCalledWith();
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
       expect(putSettingsMockFn).toHaveBeenCalledWith({
-        body: {
-          persistent: {
-            cluster: {
-              remote: {
-                test: {
-                  seeds: null,
-                  skip_unavailable: null,
-                  mode: null,
-                  node_connections: null,
-                  proxy_address: null,
-                  proxy_socket_connections: null,
-                  server_name: null,
-                },
+        persistent: {
+          cluster: {
+            remote: {
+              test: {
+                seeds: null,
+                skip_unavailable: null,
+                mode: null,
+                node_connections: null,
+                proxy_address: null,
+                proxy_socket_connections: null,
+                server_name: null,
               },
             },
           },

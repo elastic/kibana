@@ -39,7 +39,13 @@ export { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './embeddables/constants';
 export { CONTROLLED_BY_SWIM_LANE_FILTER } from './ui_actions/constants';
 
 export type { MlLocator } from './locator';
-export { useMlHref, ML_PAGES, MlLocatorDefinition } from './locator';
+export {
+  useMlHref,
+  useMlManagementHref,
+  ML_PAGES,
+  MlLocatorDefinition,
+  MlManagementLocatorInternal,
+} from './locator';
 
 export { MLJobsAwaitingNodeWarning } from './application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared';
 export { MlNodeAvailableWarningShared } from './application/components/node_available_warning';

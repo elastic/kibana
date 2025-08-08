@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './space_result_details.scss';
-
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -16,7 +14,9 @@ import {
   EuiSwitch,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 
@@ -59,9 +59,15 @@ const isAmbiguousConflictError = (
 export const SpaceCopyResultDetails = (props: Props) => {
   const { destinationMap, onDestinationMapChange, summarizedCopyResult } = props;
   const { objects } = summarizedCopyResult;
+  const { euiTheme } = useEuiTheme();
 
   return (
-    <div className="spcCopyToSpaceResultDetails">
+    <div
+      css={css`
+        margin-top: ${euiTheme.size.s};
+        padding-left: ${euiTheme.size.l};
+      `}
+    >
       {objects.map((object, index) => {
         const { type, id, name, icon, conflict } = object;
         const pendingObjectRetry = props.retries.find((r) => r.type === type && r.id === id);
@@ -124,10 +130,17 @@ export const SpaceCopyResultDetails = (props: Props) => {
             props.onRetriesChange([...filtered, retry]);
           },
         };
-        const selectContainerClass =
-          selectProps.options.length > 0 && isOverwritePending
-            ? ' spcCopyToSpaceResultDetails__selectControl-isOpen'
-            : '';
+
+        const childWrapperStyles = (isOpen: boolean) => css`
+          overflow: hidden;
+          transform: translateZ(0);
+          transition: height ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
+            ${euiTheme.animation.normal} ${euiTheme.animation.resistance};
+
+          visibility: ${isOpen ? 'visible' : 'hidden'};
+          opacity: ${isOpen ? 1 : 0};
+          height: ${isOpen ? 'auto' : 0};
+        `;
 
         return (
           <Fragment key={index}>
@@ -136,14 +149,21 @@ export const SpaceCopyResultDetails = (props: Props) => {
               key={index}
               alignItems="center"
               gutterSize="s"
-              className="spcCopyToSpaceResultDetails__row"
+              css={css`
+                margin-bottom: ${euiTheme.size.xs};
+              `}
             >
               <EuiFlexItem grow={false}>
                 <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
                   <EuiIcon aria-label={getSavedObjectLabel(type)} type={icon} size="s" />
                 </EuiToolTip>
               </EuiFlexItem>
-              <EuiFlexItem grow={5} className="spcCopyToSpaceResultDetails__savedObjectName">
+              <EuiFlexItem
+                grow={5}
+                css={css`
+                  min-width: 0;
+                `}
+              >
                 <EuiText size="s">
                   <p className="eui-textTruncate" title={name}>
                     {name}
@@ -161,7 +181,7 @@ export const SpaceCopyResultDetails = (props: Props) => {
                   />
                 </EuiFlexItem>
               )}
-              <EuiFlexItem className="spcCopyToSpaceResultDetails__statusIndicator" grow={false}>
+              <EuiFlexItem grow={false}>
                 <div className="eui-textRight">
                   <CopyStatusIndicator
                     summarizedCopyResult={props.summarizedCopyResult}
@@ -174,8 +194,12 @@ export const SpaceCopyResultDetails = (props: Props) => {
                 </div>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <div className={'spcCopyToSpaceResultDetails__selectControl' + selectContainerClass}>
-              <div className="spcCopyToSpaceResultDetails__selectControl__childWrapper">
+            <div
+              css={css`
+                margin-left: ${euiTheme.size.l};
+              `}
+            >
+              <div css={childWrapperStyles(selectProps.options.length > 0 && isOverwritePending)}>
                 <EuiSuperSelect
                   options={selectProps.options}
                   valueOfSelected={destinationMap.get(`${type}:${id}`)}

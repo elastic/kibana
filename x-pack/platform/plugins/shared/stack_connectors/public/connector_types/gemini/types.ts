@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import { SUB_ACTION } from '../../../common/gemini/constants';
-import { RunActionParams } from '../../../common/gemini/types';
+import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SUB_ACTION } from '../../../common/gemini/constants';
+import type { RunActionParams } from '../../../common/gemini/types';
 
 export interface GeminiActionParams {
   subAction: SUB_ACTION.RUN | SUB_ACTION.TEST | SUB_ACTION.DASHBOARD;

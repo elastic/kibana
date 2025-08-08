@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { dataStreamReindexServiceFactory } from './data_stream_reindex_service';
+export { dataStreamMigrationServiceFactory } from './data_stream_migration_service';

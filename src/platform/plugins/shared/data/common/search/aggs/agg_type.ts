@@ -14,7 +14,7 @@ import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { ISearchSource } from '../../../public';
 import { initParams } from './agg_params';
@@ -253,7 +253,7 @@ export class AggType<
    * Used to create the values exposed by the agg_types module.
    *
    * @class AggType
-   * @private
+   * @internal
    * @param {object} config - used to set the properties of the AggType
    */
   constructor(config: AggTypeConfig<TAggConfig>) {

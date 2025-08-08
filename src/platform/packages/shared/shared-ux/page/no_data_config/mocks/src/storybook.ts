@@ -31,20 +31,20 @@ export class NoDataConfigPageStorybookMock extends AbstractStorybookMock<
 > {
   propArguments = {
     solution: {
-      control: 'text',
+      control: { control: 'text' },
       defaultValue: 'Observability',
     },
     logo: {
-      control: { type: 'radio' },
+      control: { control: 'radio' },
       options: ['logoElastic', 'logoKibana', 'logoCloud', undefined],
       defaultValue: undefined,
     },
     docsLink: {
-      control: 'text',
+      control: { control: 'text' },
       defaultValue: 'docs/link',
     },
     pageTitle: {
-      control: 'text',
+      control: { control: 'text' },
       defaultValue: '',
     },
   };

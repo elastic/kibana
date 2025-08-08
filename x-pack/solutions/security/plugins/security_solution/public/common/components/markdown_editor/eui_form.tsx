@@ -13,7 +13,6 @@ import { getFieldValidityAndErrorMessage } from '../../../shared_imports';
 import type { MarkdownEditorRef } from './editor';
 import { MarkdownEditor } from './editor';
 
-/* eslint-disable react/no-unused-prop-types */
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   field: FieldHook;
   dataTestSubj: string;
@@ -21,11 +20,10 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   isDisabled?: boolean;
   includePlugins?: boolean;
 };
-/* eslint-enable react/no-unused-prop-types */
 
 export const MarkdownEditorForm = React.memo(
   forwardRef<MarkdownEditorRef, MarkdownEditorFormProps>(
-    ({ field, dataTestSubj, idAria, includePlugins }, ref) => {
+    ({ field, dataTestSubj, idAria, includePlugins, placeholder }, ref) => {
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
       const [isMarkdownInvalid, setIsMarkdownInvalid] = useState(false);
 
@@ -48,6 +46,7 @@ export const MarkdownEditorForm = React.memo(
             data-test-subj={`${dataTestSubj}-markdown-editor`}
             setIsMarkdownInvalid={setIsMarkdownInvalid}
             includePlugins={includePlugins}
+            placeholder={placeholder}
           />
         </EuiFormRow>
       );

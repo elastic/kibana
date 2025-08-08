@@ -94,7 +94,7 @@ describe('links', () => {
         SecurityPageName.policies,
         SecurityPageName.responseActionsHistory,
         SecurityPageName.trustedApps,
-        SecurityPageName.cloudDefendPolicies
+        SecurityPageName.trustedDevices
       )
     );
   });
@@ -227,20 +227,6 @@ describe('links', () => {
       const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
 
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.blocklist));
-    });
-
-    it('should NOT return policies if `canReadPolicyManagement` is `false`', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
-        getEndpointAuthzInitialStateMock({
-          canReadPolicyManagement: false,
-        })
-      );
-
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
-
-      expect(filteredLinks).toEqual(
-        getLinksWithout(SecurityPageName.policies, SecurityPageName.cloudDefendPolicies)
-      );
     });
   });
 

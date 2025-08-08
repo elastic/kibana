@@ -17,9 +17,9 @@ import { ObservabilityAIAssistantClient } from './client';
 import { KnowledgeBaseService } from './knowledge_base_service';
 import type { RegistrationCallback, RespondFunctionResources } from './types';
 import { ObservabilityAIAssistantConfig } from '../config';
-import { setupConversationAndKbIndexAssets } from './setup_conversation_and_kb_index_assets';
+import { createOrUpdateConversationIndexAssets } from './index_assets/create_or_update_conversation_index_assets';
 
-function getResourceName(resource: string) {
+export function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
 }
 
@@ -28,7 +28,7 @@ export const resourceNames = {
     conversations: getResourceName('component-template-conversations'),
     kb: getResourceName('component-template-kb'),
   },
-  aliases: {
+  writeIndexAlias: {
     conversations: getResourceName('conversations'),
     kb: getResourceName('kb'),
   },
@@ -40,11 +40,15 @@ export const resourceNames = {
     conversations: getResourceName('index-template-conversations'),
     kb: getResourceName('index-template-kb'),
   },
+  concreteWriteIndexName: {
+    conversations: getResourceName('conversations-000001'),
+    kb: getResourceName('kb-000001'),
+  },
 };
 
-const createIndexAssetsOnce = once(
+const createConversationIndexAssetsOnce = once(
   (logger: Logger, core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>) =>
-    pRetry(() => setupConversationAndKbIndexAssets({ logger, core }))
+    pRetry(() => createOrUpdateConversationIndexAssets({ logger, core }))
 );
 
 export class ObservabilityAIAssistantService {
@@ -82,13 +86,14 @@ export class ObservabilityAIAssistantService {
 
     const [[coreStart, plugins]] = await Promise.all([
       this.core.getStartServices(),
-      createIndexAssetsOnce(this.logger, this.core),
+      createConversationIndexAssetsOnce(this.logger, this.core),
     ]);
 
     // user will not be found when executed from system connector context
     const user = plugins.security.authc.getCurrentUser(request);
 
     const soClient = coreStart.savedObjects.getScopedClient(request);
+    const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
 
     const basePath = coreStart.http.basePath.get(request);
 
@@ -96,6 +101,7 @@ export class ObservabilityAIAssistantService {
     const inferenceClient = plugins.inference.getClient({ request });
 
     const { asInternalUser } = coreStart.elasticsearch.client;
+    const { asCurrentUser } = coreStart.elasticsearch.client.asScoped(request);
 
     const kbService = new KnowledgeBaseService({
       core: this.core,
@@ -110,11 +116,11 @@ export class ObservabilityAIAssistantService {
       core: this.core,
       config: this.config,
       actionsClient: await plugins.actions.getActionsClientWithRequest(request),
-      uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
+      uiSettingsClient,
       namespace: spaceId,
       esClient: {
         asInternalUser,
-        asCurrentUser: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+        asCurrentUser,
       },
       inferenceClient,
       logger: this.logger,

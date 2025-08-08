@@ -21,6 +21,9 @@ export const ResponseActionTypes = z.enum(['.osquery', '.endpoint']);
 export type ResponseActionTypesEnum = typeof ResponseActionTypes.enum;
 export const ResponseActionTypesEnum = ResponseActionTypes.enum;
 
+/**
+ * Map Osquery results columns or static values to Elastic Common Schema (ECS) fields. Example: "ecs_mapping": {"process.pid": {"field": "pid"}}
+ */
 export type EcsMapping = z.infer<typeof EcsMapping>;
 export const EcsMapping = z.object({}).catchall(
   z.object({
@@ -51,11 +54,23 @@ export const OsqueryQuery = z.object({
 
 export type OsqueryParams = z.infer<typeof OsqueryParams>;
 export const OsqueryParams = z.object({
+  /**
+   * To run a single query, use the query field and enter a SQL query. Example: "query": "SELECT * FROM processes;"
+   */
   query: z.string().optional(),
   ecs_mapping: EcsMapping.optional(),
   queries: z.array(OsqueryQuery).optional(),
+  /**
+   * To specify a query pack, use the packId field. Example: "packId": "processes_elastic"
+   */
   pack_id: z.string().optional(),
+  /**
+   * To run a saved query, use the saved_query_id field and specify the saved query ID. Example: "saved_query_id": "processes_elastic"
+   */
   saved_query_id: z.string().optional(),
+  /**
+   * A timeout period, in seconds, after which the query will stop running. Overwriting the default timeout allows you to support queries that require more time to complete. The default and minimum supported value is 60. The maximum supported value is 900. Example: "timeout": 120.
+   */
   timeout: z.number().optional(),
 });
 
@@ -89,7 +104,13 @@ export const DefaultParams = z.object({
 
 export type ProcessesParams = z.infer<typeof ProcessesParams>;
 export const ProcessesParams = z.object({
+  /**
+   * To run an endpoint response action, specify a value for the command field. Example: "command": "isolate"
+   */
   command: z.enum(['kill-process', 'suspend-process']),
+  /**
+   * Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"
+   */
   comment: z.string().optional(),
   config: z.object({
     /**

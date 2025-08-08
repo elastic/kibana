@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 import { identifyDependencyUsageWithCruiser as identifyDependencyUsage } from './cruiser.ts';
 import { cruise } from 'dependency-cruiser';
 
@@ -113,12 +114,16 @@ describe('identifyDependencyUsage', () => {
     const [, configWithDepth2] = (cruise as jest.Mock).mock.calls[0];
     const [, configWithDepth1] = (cruise as jest.Mock).mock.calls[1];
 
+    const solutionsFolders = KIBANA_SOLUTIONS.flatMap((solution) => [
+      `x-pack/solutions/${solution}/plugins`,
+      `x-pack/solutions/${solution}/packages`,
+    ]).join('|');
     expect(configWithDepth2.collapse).toMatchInlineSnapshot(
-      `"^(x-pack/plugins|x-pack/packages|src/plugins|packages|src|x-pack/test|x-pack/test_serverless)/([^/]+)/([^/]+)"`
+      `"^(${solutionsFolders}|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|x-pack/test|x-pack/test_serverless|test)/([^/]+)/([^/]+)"`
     );
 
     expect(configWithDepth1.collapse).toMatchInlineSnapshot(
-      `"^(x-pack/plugins|x-pack/packages|src/plugins|packages|src|x-pack/test|x-pack/test_serverless)/([^/]+)|^node_modules/(@[^/]+/[^/]+|[^/]+)"`
+      `"^(${solutionsFolders}|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|x-pack/test|x-pack/test_serverless|test)/([^/]+)|^node_modules/(@[^/]+/[^/]+|[^/]+)"`
     );
   });
 

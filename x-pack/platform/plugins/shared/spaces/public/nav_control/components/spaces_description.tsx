@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import './spaces_description.scss';
-
-import { EuiContextMenuPanel, EuiText } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React from 'react';
 
@@ -26,9 +25,13 @@ interface Props {
 }
 
 export const SpacesDescription: FC<Props> = (props: Props) => {
+  const { euiTheme } = useEuiTheme();
+
   const panelProps = {
     id: props.id,
-    className: 'spcDescription',
+    css: css`
+      max-width: calc(${euiTheme.size.l} * 10);
+    `,
     title: 'Spaces',
   };
 
@@ -38,13 +41,22 @@ export const SpacesDescription: FC<Props> = (props: Props) => {
 
   return (
     <EuiContextMenuPanel {...panelProps}>
-      <EuiText className="spcDescription__text">
+      <EuiText
+        css={css`
+          padding: ${euiTheme.size.m};
+        `}
+      >
         <p>{props.isLoading ? spacesLoadingMessage : getSpacesFeatureDescription()}</p>
       </EuiText>
-      <div key="manageSpacesButton" className="spcDescription__manageButtonWrapper">
+      <div
+        key="manageSpacesButton"
+        css={css`
+          padding: ${euiTheme.size.m};
+        `}
+      >
         <ManageSpacesButton
           size="s"
-          style={{ width: `100%` }}
+          fullWidth
           onClick={props.onClickManageSpaceBtn}
           capabilities={props.capabilities}
           navigateToApp={props.navigateToApp}

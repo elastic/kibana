@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { type LogThresholdParams } from '@kbn/response-ops-rule-params/log_threshold';
 import type { CountCriteria, Criterion, ExecutionTimeRange } from '.';
 import { Comparator } from '.';

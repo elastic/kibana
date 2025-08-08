@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { EuiIconProps, IconColor } from '@elastic/eui';
 import { EuiIcon, EuiPopover, keys } from '@elastic/eui';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../common/translations';
 
 interface PopoverTooltipProps {
   columnName: string;
@@ -59,7 +59,7 @@ const PopoverTooltipComponent = ({
           onClick={onClick}
           onKeyDown={onKeyDown}
           color={anchorColor}
-          type="questionInCircle"
+          type="question"
         />
       }
     >

@@ -9,10 +9,9 @@
 
 import { SavedObjectReference } from '@kbn/core/types';
 import {
-  EmbeddableInput,
   EmbeddablePersistableStateService,
   EmbeddableStateWithType,
-} from '@kbn/embeddable-plugin/common/types';
+} from '@kbn/embeddable-plugin/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 
 import type { ControlPanelsState, SerializedControlState } from '../../common';
@@ -22,7 +21,7 @@ import {
 } from './control_group_migrations';
 import { SerializableControlGroupState } from './types';
 
-const getPanelStatePrefix = (state: SerializedControlState) => `${state.explicitInput.id}:`;
+const getPanelStatePrefix = (panelId: string) => `${panelId}:`;
 
 export const createControlGroupInject = (
   persistableStateService: EmbeddablePersistableStateService
@@ -39,7 +38,7 @@ export const createControlGroupInject = (
           ...panel,
         };
         // Find the references for this panel
-        const prefix = getPanelStatePrefix(panel);
+        const prefix = getPanelStatePrefix(key);
 
         const filteredReferences = references
           .filter((reference) => reference.name.indexOf(prefix) === 0)
@@ -51,7 +50,7 @@ export const createControlGroupInject = (
           { ...workingPanels[key].explicitInput, type: workingPanels[key].type },
           panelReferences
         );
-        workingPanels[key].explicitInput = injectedState as EmbeddableInput;
+        workingPanels[key].explicitInput = injectedState;
       }
     }
     return { ...workingState, panels: workingPanels } as unknown as EmbeddableStateWithType;
@@ -70,7 +69,7 @@ export const createControlGroupExtract = (
 
       // Run every panel through the state service to get the nested references
       for (const [key, panel] of Object.entries(workingState.panels)) {
-        const prefix = getPanelStatePrefix(panel);
+        const prefix = getPanelStatePrefix(key);
 
         const { state: panelState, references: panelReferences } = persistableStateService.extract({
           ...panel.explicitInput,
@@ -87,7 +86,7 @@ export const createControlGroupExtract = (
 
         const { type, ...restOfState } = panelState;
         (workingState.panels as ControlPanelsState<SerializedControlState>)[key].explicitInput =
-          restOfState as EmbeddableInput;
+          restOfState;
       }
     }
     return { state: workingState as EmbeddableStateWithType, references };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ExistsFilter, isExistsFilter } from '@kbn/es-query';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ESFilter } from '@kbn/es-types';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
 import { useValuesList } from '@kbn/observability-shared-plugin/public';

@@ -71,7 +71,7 @@ export class SessionManagementService {
     taskManager.registerTaskDefinitions({
       [SESSION_INDEX_CLEANUP_TASK_NAME]: {
         title: 'Cleanup expired or invalid user sessions',
-        createTaskRunner: () => ({ run: () => this.sessionIndex.cleanUp() }),
+        createTaskRunner: (context) => ({ run: () => this.sessionIndex.cleanUp(context) }),
       },
     });
   }

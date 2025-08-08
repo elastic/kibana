@@ -66,6 +66,7 @@ const buildIngestPipeline = ({
     {
       set: {
         field: 'entity.name',
+        override: false,
         value: `{{${description.identityField}}}`,
       },
     },
@@ -101,21 +102,22 @@ const buildIngestPipeline = ({
     ...(description.dynamic
       ? [dynamicNewestRetentionSteps(description.fields.map((field) => field.destination))]
       : []),
-    ...(!debugMode
-      ? [
+    ...(Array.isArray(description.pipeline) ? description.pipeline : []),
+    ...(debugMode
+      ? [debugDeepCopyContextStep()]
+      : [
           {
             remove: {
               ignore_failure: true,
               field: ENRICH_FIELD,
             },
           },
-        ]
-      : []),
+        ]),
   ];
 
-  return typeof description.pipeline === 'function'
-    ? description.pipeline(processors)
-    : [...(debugMode ? [debugDeepCopyContextStep()] : []), ...processors];
+  // if the pipeline is a function, we call it with the default processors
+  // this allows the entity definition to add custom processors to the pipeline or modify the default ones
+  return typeof description.pipeline === 'function' ? description.pipeline(processors) : processors;
 };
 
 // developing the pipeline is a bit tricky, so we have a debug mode
@@ -138,20 +140,18 @@ export const createPlatformPipeline = async ({
 
   const pipeline = {
     id: getPlatformPipelineId(description.id),
-    body: {
-      _meta: {
-        managed_by: 'entity_store',
-        managed: true,
-      },
-      description: `Ingest pipeline for entity definition ${description.id}`,
-      processors: buildIngestPipeline({
-        namespace: options.namespace,
-        description,
-        version: description.version,
-        allEntityFields,
-        debugMode,
-      }),
+    _meta: {
+      managed_by: 'entity_store',
+      managed: true,
     },
+    description: `Ingest pipeline for entity definition ${description.id}`,
+    processors: buildIngestPipeline({
+      namespace: options.namespace,
+      description,
+      version: description.version,
+      allEntityFields,
+      debugMode,
+    }),
   };
 
   logger.debug(`Attempting to create pipeline: ${JSON.stringify(pipeline)}`);

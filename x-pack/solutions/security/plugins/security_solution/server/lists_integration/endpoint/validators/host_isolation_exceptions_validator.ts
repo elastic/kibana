@@ -12,6 +12,7 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { BaseValidator, BasicEndpointExceptionDataSchema } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
 import type { ExceptionItemLikeOptions } from '../types';
@@ -78,32 +79,39 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
     await this.validateHasWritePrivilege();
     await this.validateHostIsolationData(item);
     await this.validateByPolicyItem(item);
+    await this.validateCanCreateGlobalArtifacts(item);
+    await this.validateCreateOwnerSpaceIds(item);
 
     return item;
   }
 
   async validatePreUpdateItem(
-    _updatedItem: UpdateExceptionListItemOptions
+    _updatedItem: UpdateExceptionListItemOptions,
+    currentItem: ExceptionListItemSchema
   ): Promise<UpdateExceptionListItemOptions> {
     const updatedItem = _updatedItem as ExceptionItemLikeOptions;
 
     await this.validateHasWritePrivilege();
     await this.validateHostIsolationData(updatedItem);
-    await this.validateByPolicyItem(updatedItem);
+    await this.validateByPolicyItem(updatedItem, currentItem);
+    await this.validateUpdateOwnerSpaceIds(_updatedItem, currentItem);
+    await this.validateCanUpdateItemInActiveSpace(_updatedItem, currentItem);
 
     return _updatedItem;
   }
 
-  async validatePreGetOneItem(): Promise<void> {
+  async validatePreGetOneItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasReadPrivilege();
+    await this.validateCanReadItemInActiveSpace(currentItem);
   }
 
   async validatePreSummary(): Promise<void> {
     await this.validateHasReadPrivilege();
   }
 
-  async validatePreDeleteItem(): Promise<void> {
+  async validatePreDeleteItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasDeletePrivilege();
+    await this.validateCanDeleteItemInActiveSpace(currentItem);
   }
 
   async validatePreExport(): Promise<void> {

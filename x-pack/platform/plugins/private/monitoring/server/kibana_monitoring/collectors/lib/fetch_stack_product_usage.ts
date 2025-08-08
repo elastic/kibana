@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { MonitoringConfig } from '../../../config';
 import { StackProductUsage } from '../types';
 

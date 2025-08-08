@@ -35,7 +35,7 @@ export type ThemeTags = readonly ThemeTag[];
  * An array of theme tags available in Kibana by default when not customized
  * using KBN_OPTIMIZER_THEMES environment variable.
  */
-export const DEFAULT_THEME_TAGS: ThemeTags = SUPPORTED_THEME_TAGS;
+export const DEFAULT_THEME_TAGS: ThemeTags = ThemeBorealisTags;
 
 export const FALLBACK_THEME_TAG: ThemeTag = 'borealislight';
 
@@ -44,12 +44,6 @@ const isValidTag = (tag: unknown) =>
 
 export function parseThemeTags(input?: unknown): ThemeTags {
   if (!input || input === '*') {
-    return DEFAULT_THEME_TAGS;
-  }
-
-  // TODO: remove when Borealis is in public beta
-  // This is left here for backwards compatibility during Borealis testing.
-  if (input === 'experimental') {
     return DEFAULT_THEME_TAGS;
   }
 

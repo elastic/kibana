@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/core-plugin-route-timeouts-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "corePluginRouteTimeouts",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "core_plugin_route_timeouts"
+    ]
+  }
+}

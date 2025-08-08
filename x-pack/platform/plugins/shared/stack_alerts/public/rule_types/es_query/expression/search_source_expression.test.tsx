@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
+import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { EsQueryRuleParams, SearchType } from '../types';
 import { SearchSourceExpression } from './search_source_expression';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { act } from 'react-dom/test-utils';
 import { Subject } from 'rxjs';
 import { ISearchSource } from '@kbn/data-plugin/common';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { copyToClipboard, EuiLoadingSpinner } from '@elastic/eui';
+import { copyToClipboard } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
-import { ReactWrapper } from 'enzyme';
 import { DataPlugin } from '@kbn/data-plugin/public';
 
 jest.mock('@elastic/eui', () => {
@@ -147,6 +145,11 @@ describe('SearchSourceAlertTypeExpression', () => {
   let dataMock: jest.Mocked<ReturnType<DataPlugin['start']>>;
   let searchSourceMock: ISearchSource;
   let mockSearchResult: Subject<unknown>;
+
+  const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
+    <I18nProvider>{children}</I18nProvider>
+  ));
+
   beforeEach(() => {
     mockSearchResult = new Subject();
     searchSourceMock = {
@@ -250,7 +253,7 @@ describe('SearchSourceAlertTypeExpression', () => {
     };
     const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
 
-    return mountWithIntl(
+    return render(
       <KibanaContextProvider
         services={{
           dataViews: dataViewPluginMock,
@@ -277,108 +280,85 @@ describe('SearchSourceAlertTypeExpression', () => {
           metadata={{ adHocDataViewList: [] }}
           onChangeMetaData={jest.fn()}
         />
-      </KibanaContextProvider>
+      </KibanaContextProvider>,
+      {
+        wrapper: AppWrapper,
+      }
     );
   };
   test('should render correctly', async () => {
-    let wrapper = setup(defaultSearchSourceExpressionParams);
+    const result = setup(defaultSearchSourceExpressionParams);
 
-    expect(wrapper.find(EuiLoadingSpinner).exists()).toBeTruthy();
+    await waitFor(() =>
+      expect(result.getByTestId('searchSourceLoadingSpinner')).toBeInTheDocument()
+    );
 
-    await act(async () => {
-      await nextTick();
-    });
-    wrapper = await wrapper.update();
-    expect(findTestSubject(wrapper, 'thresholdExpression')).toBeTruthy();
+    expect(result.getByTestId('thresholdPopover')).toBeInTheDocument();
+    expect(result.getByTestId('excludeHitsFromPreviousRunExpression')).toBeChecked();
+  });
 
-    const excludeHitsCheckbox = findTestSubject(wrapper, 'excludeHitsFromPreviousRunExpression');
-    expect(excludeHitsCheckbox).toBeTruthy();
-    expect(excludeHitsCheckbox.prop('checked')).toBeTruthy();
+  test('should render chosen size field', async () => {
+    const result = await act(async () =>
+      setup({
+        ...defaultSearchSourceExpressionParams,
+        size: 0,
+      })
+    );
+
+    expect(result.getByTestId('sizeValueExpression')).toHaveTextContent('Size 0');
   });
 
   test('should disable Test Query button if data view is not selected yet', async () => {
-    let wrapper = setup({ ...defaultSearchSourceExpressionParams, searchConfiguration: undefined });
-    await act(async () => {
-      await nextTick();
-    });
-    wrapper = await wrapper.update();
+    const result = await act(async () =>
+      setup({
+        ...defaultSearchSourceExpressionParams,
+        searchConfiguration: undefined,
+      })
+    );
 
-    const testButton = findTestSubject(wrapper, 'testQuery');
-    expect(testButton.prop('disabled')).toBeTruthy();
+    expect(result.getByTestId('testQuery')).toBeDisabled();
   });
 
   test('should show success message if ungrouped Test Query is successful', async () => {
-    let wrapper = setup(defaultSearchSourceExpressionParams);
-    await act(async () => {
-      await nextTick();
-    });
-    wrapper = await wrapper.update();
-    await act(async () => {
-      const testButton = findTestSubject(wrapper, 'testQuery');
-      expect(testButton.prop('disabled')).toBeFalsy();
-      testButton.simulate('click');
-      wrapper.update();
-    });
-    wrapper = await wrapper.update();
+    await act(async () => setup(defaultSearchSourceExpressionParams));
 
-    await act(async () => {
+    fireEvent.click(screen.getByTestId('testQuery'));
+    await waitFor(() => {
       mockSearchResult.next(testResultPartial);
       mockSearchResult.next(testResultComplete);
       mockSearchResult.complete();
-      await nextTick();
-      wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="testQuerySuccess"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="testQueryError"]').exists()).toBeFalsy();
-    expect(wrapper.find('EuiText[data-test-subj="testQuerySuccess"]').text()).toEqual(
-      `Query matched 1234 documents in the last 15s.`
-    );
+    expect(screen.getByTestId('testQuerySuccess')).toBeInTheDocument();
+    expect(screen.getByText('Query matched 1234 documents in the last 15s.')).toBeInTheDocument();
+    expect(screen.queryByTestId('testQueryError')).not.toBeInTheDocument();
   });
 
   test('should show success message if grouped Test Query is successful', async () => {
-    let wrapper = setup({
-      ...defaultSearchSourceExpressionParams,
-      termField: 'the-term',
-      termSize: 10,
-    });
-    await act(async () => {
-      await nextTick();
-    });
-    wrapper = await wrapper.update();
-    await act(async () => {
-      const testButton = findTestSubject(wrapper, 'testQuery');
-      expect(testButton.prop('disabled')).toBeFalsy();
-      testButton.simulate('click');
-      wrapper.update();
-    });
-    wrapper = await wrapper.update();
+    await act(async () =>
+      setup({
+        ...defaultSearchSourceExpressionParams,
+        termField: 'the-term',
+        termSize: 10,
+      })
+    );
 
-    await act(async () => {
+    fireEvent.click(screen.getByTestId('testQuery'));
+    await waitFor(() => {
       mockSearchResult.next(testResultPartial);
       mockSearchResult.next(testResultGroupedComplete);
       mockSearchResult.complete();
-      await nextTick();
-      wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="testQuerySuccess"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="testQueryError"]').exists()).toBeFalsy();
-    expect(wrapper.find('EuiText[data-test-subj="testQuerySuccess"]').text()).toEqual(
-      `Grouped query matched 5 groups in the last 15s.`
-    );
+    expect(screen.getByTestId('testQuerySuccess')).toBeInTheDocument();
+    expect(screen.getByText('Grouped query matched 5 groups in the last 15s.')).toBeInTheDocument();
+    expect(screen.queryByTestId('testQueryError')).not.toBeInTheDocument();
   });
 
   it('should call copyToClipboard with the serialized query when the copy query button is clicked', async () => {
-    let wrapper = null as unknown as ReactWrapper;
-    await act(async () => {
-      wrapper = setup(defaultSearchSourceExpressionParams);
-    });
-    wrapper.update();
-    await act(async () => {
-      findTestSubject(wrapper, 'copyQuery').simulate('click');
-    });
-    wrapper.update();
+    await act(async () => setup(defaultSearchSourceExpressionParams));
+
+    fireEvent.click(screen.getByTestId('copyQuery'));
     expect(copyToClipboard).toHaveBeenCalledWith(`{
   \"fields\": [
     {
@@ -450,16 +430,13 @@ describe('SearchSourceAlertTypeExpression', () => {
     (dataMock.search.searchSource.create as jest.Mock).mockImplementationOnce(() =>
       Promise.reject(new Error('Cant find searchSource'))
     );
-    let wrapper = setup(defaultSearchSourceExpressionParams);
+    const result = setup(defaultSearchSourceExpressionParams);
 
-    expect(wrapper.find(EuiLoadingSpinner).exists()).toBeTruthy();
-    expect(wrapper.text().includes('Cant find searchSource')).toBeFalsy();
-
-    await act(async () => {
-      await nextTick();
+    await waitFor(() => {
+      expect(screen.queryByText('Cant find searchSource')).not.toBeInTheDocument();
+      expect(result.getByTestId('searchSourceLoadingSpinner')).toBeInTheDocument();
     });
-    wrapper = await wrapper.update();
 
-    expect(wrapper.text().includes('Cant find searchSource')).toBeTruthy();
+    expect(screen.getByText('Cant find searchSource')).toBeInTheDocument();
   });
 });

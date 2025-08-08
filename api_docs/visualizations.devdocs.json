@@ -686,7 +686,8 @@
             "text": "PersistedState"
           },
           " extends ",
-          "events"
+          "events",
+          "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/visualizations/public/persisted_state/persisted_state.ts",
         "deprecated": false,
@@ -1426,13 +1427,7 @@
                 "description": [],
                 "signature": [
                   "AttributeService",
-                  "<",
-                  "VisualizeSavedObjectAttributes",
-                  ", ",
-                  "VisualizeByValueInput",
-                  ", ",
-                  "VisualizeByReferenceInput",
-                  ", unknown> | undefined"
+                  " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/visualize_embeddable.tsx",
                 "deprecated": false,
@@ -2193,6 +2188,8 @@
             "text": "Datatable"
           },
           ", dimensions: ",
+          "LayerDimension",
+          "[] | ",
           {
             "pluginId": "visualizations",
             "scope": "common",
@@ -2200,7 +2197,7 @@
             "section": "def-common.Dimension",
             "text": "Dimension"
           },
-          "[], removeUnmappedColumns?: boolean) => { columns: { meta: { dimensionName: string | undefined; type: ",
+          "[], removeUnmappedColumns?: boolean) => { columns: { meta: { dimensionType?: string | undefined; dimensionName: string | undefined; type: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -2272,11 +2269,13 @@
           {
             "parentPluginId": "visualizations",
             "id": "def-public.prepareLogTable.$2",
-            "type": "Array",
+            "type": "CompoundType",
             "tags": [],
             "label": "dimensions",
             "description": [],
             "signature": [
+              "LayerDimension",
+              "[] | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -3525,7 +3524,13 @@
             "description": [],
             "signature": [
               "string | ",
-              "Reference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/types.ts",
@@ -4087,7 +4092,15 @@
             "label": "timefilter",
             "description": [],
             "signature": [
-              "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
+              "{ readonly useTimefilter: () => ",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.TimefilterHook",
+                "text": "TimefilterHook"
+              },
+              "; isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
               "Observable",
               "<boolean>; getTimeUpdate$: () => ",
               "Observable",
@@ -4103,7 +4116,7 @@
                 "section": "def-public.AutoRefreshDoneFn",
                 "text": "AutoRefreshDoneFn"
               },
-              ">; getFetch$: () => ",
+              ">; triggerFetch: () => void; getFetch$: () => ",
               "Observable",
               "<void>; getTime: () => ",
               {
@@ -4123,23 +4136,7 @@
               },
               "; setTime: (time: ",
               "InputTimeRange",
-              ") => void; getRefreshInterval: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              "; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              ">) => void; createFilter: (indexPattern: ",
+              ") => void; getRefreshInterval: () => Readonly<{} & { value: number; pause: boolean; }>; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<Readonly<{} & { value: number; pause: boolean; }>>) => void; createFilter: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4247,15 +4244,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              "; getRefreshIntervalDefaults: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              "; }"
+              "; getRefreshIntervalDefaults: () => Readonly<{} & { value: number; pause: boolean; }>; }"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/types.ts",
             "deprecated": false,
@@ -5968,13 +5957,7 @@
             "text": "VisualizeInput"
           },
           " extends ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          }
+          "EmbeddableInput"
         ],
         "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/visualize_embeddable.tsx",
         "deprecated": false,
@@ -6468,6 +6451,18 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-public.visContainerClassName",
+        "type": "string",
+        "tags": [],
+        "label": "visContainerClassName",
+        "description": [],
+        "path": "src/platform/plugins/shared/visualizations/public/vis.styles.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-public.VisToExpressionAst",
         "type": "Type",
         "tags": [],
@@ -6923,8 +6918,37 @@
             "path": "src/platform/plugins/shared/visualizations/public/embeddable/events.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VIS_EVENT_TO_TRIGGER.alertRule",
+            "type": "string",
+            "tags": [],
+            "label": "alertRule",
+            "description": [],
+            "signature": [
+              "\"alertRule\""
+            ],
+            "path": "src/platform/plugins/shared/visualizations/public/embeddable/events.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.visContainerStyle",
+        "type": "Object",
+        "tags": [],
+        "label": "visContainerStyle",
+        "description": [],
+        "signature": [
+          "SerializedStyles"
+        ],
+        "path": "src/platform/plugins/shared/visualizations/public/vis.styles.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -8617,6 +8641,8 @@
             "text": "Datatable"
           },
           ", dimensions: ",
+          "LayerDimension",
+          "[] | ",
           {
             "pluginId": "visualizations",
             "scope": "common",
@@ -8624,7 +8650,7 @@
             "section": "def-common.Dimension",
             "text": "Dimension"
           },
-          "[], removeUnmappedColumns?: boolean) => { columns: { meta: { dimensionName: string | undefined; type: ",
+          "[], removeUnmappedColumns?: boolean) => { columns: { meta: { dimensionType?: string | undefined; dimensionName: string | undefined; type: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -8696,11 +8722,13 @@
           {
             "parentPluginId": "visualizations",
             "id": "def-common.prepareLogTable.$2",
-            "type": "Array",
+            "type": "CompoundType",
             "tags": [],
             "label": "dimensions",
             "description": [],
             "signature": [
+              "LayerDimension",
+              "[] | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -9018,7 +9046,7 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"custom\" | \"full\" | \"dataBounds\""
+              "\"full\" | \"custom\" | \"dataBounds\""
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -11709,7 +11737,7 @@
             "label": "shape",
             "description": [],
             "signature": [
-              "\"treemap\" | \"mosaic\" | \"waffle\" | \"pie\" | \"donut\""
+              "\"pie\" | \"donut\" | \"treemap\" | \"mosaic\" | \"waffle\""
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -11751,7 +11779,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined"
+              "<Record<string, unknown>> | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -12211,7 +12239,13 @@
             "description": [],
             "signature": [
               "string | ",
-              "Reference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/types.ts",
@@ -12572,7 +12606,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }>"
+              "<Record<string, unknown>>"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -12934,7 +12968,7 @@
             "label": "attributes",
             "description": [],
             "signature": [
-              "{ title: string; description?: string | undefined; kibanaSavedObjectMeta?: { searchSourceJSON?: string | undefined; } | undefined; version?: string | undefined; visState?: string | undefined; uiStateJSON?: string | undefined; savedSearchRefName?: string | undefined; }"
+              "{ title: string; description?: string | undefined; kibanaSavedObjectMeta?: { searchSourceJSON?: string | undefined; } | undefined; version?: string | undefined; visState?: string | undefined; uiStateJSON?: string | undefined; savedSearchRefName?: string | undefined; typeName?: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,
@@ -12948,7 +12982,13 @@
             "label": "references",
             "description": [],
             "signature": [
-              "Reference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[]"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/content_management/v1/types.ts",
@@ -13339,7 +13379,7 @@
             "label": "yLeftScale",
             "description": [],
             "signature": [
-              "\"log\" | \"sqrt\" | \"time\" | \"linear\" | undefined"
+              "\"log\" | \"time\" | \"linear\" | \"sqrt\" | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13353,7 +13393,7 @@
             "label": "yRightScale",
             "description": [],
             "signature": [
-              "\"log\" | \"sqrt\" | \"time\" | \"linear\" | undefined"
+              "\"log\" | \"time\" | \"linear\" | \"sqrt\" | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13581,7 +13621,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13665,7 +13705,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined"
+              "<Record<string, unknown>> | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13911,7 +13951,7 @@
             "label": "iconPosition",
             "description": [],
             "signature": [
-              "\"right\" | \"auto\" | \"left\" | \"above\" | \"below\" | undefined"
+              "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\" | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -14931,7 +14971,7 @@
         "label": "GaugeCentralMajorMode",
         "description": [],
         "signature": [
-          "\"none\" | \"auto\" | \"custom\""
+          "\"none\" | \"custom\" | \"auto\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
@@ -14961,7 +15001,7 @@
         "label": "GaugeLabelMajorMode",
         "description": [],
         "signature": [
-          "\"none\" | \"auto\" | \"custom\""
+          "\"none\" | \"custom\" | \"auto\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
@@ -15377,7 +15417,7 @@
         "label": "Operation",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"terms\" | \"range\" | \"average\" | \"date_histogram\" | \"percentile\" | \"last_value\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"date_histogram\" | \"average\" | \"percentile\" | \"counter_rate\" | \"differences\" | \"moving_average\" | \"formula\" | \"static_value\" | \"standard_deviation\" | \"unique_count\" | \"percentile_rank\" | \"last_value\" | \"normalize_by_unit\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,
@@ -15392,7 +15432,7 @@
         "label": "OperationWithReferences",
         "description": [],
         "signature": [
-          "\"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
+          "\"cumulative_sum\" | \"counter_rate\" | \"differences\" | \"moving_average\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,
@@ -15407,7 +15447,7 @@
         "label": "OperationWithSourceField",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"terms\" | \"range\" | \"average\" | \"date_histogram\" | \"percentile\" | \"last_value\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"terms\" | \"date_histogram\" | \"average\" | \"percentile\" | \"standard_deviation\" | \"unique_count\" | \"percentile_rank\" | \"last_value\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,
@@ -15452,7 +15492,7 @@
         "label": "PartitionChartType",
         "description": [],
         "signature": [
-          "\"treemap\" | \"mosaic\" | \"waffle\" | \"pie\" | \"donut\""
+          "\"pie\" | \"donut\" | \"treemap\" | \"mosaic\" | \"waffle\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
@@ -15691,7 +15731,7 @@
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+          "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
@@ -15927,7 +15967,7 @@
         "label": "VisualizationSavedObjectAttributes",
         "description": [],
         "signature": [
-          "{ title: string; description?: string | undefined; kibanaSavedObjectMeta?: { searchSourceJSON?: string | undefined; } | undefined; version?: string | undefined; visState?: string | undefined; uiStateJSON?: string | undefined; savedSearchRefName?: string | undefined; }"
+          "{ title: string; description?: string | undefined; kibanaSavedObjectMeta?: { searchSourceJSON?: string | undefined; } | undefined; version?: string | undefined; visState?: string | undefined; uiStateJSON?: string | undefined; savedSearchRefName?: string | undefined; typeName?: string | undefined; }"
         ],
         "path": "src/platform/plugins/shared/visualizations/common/content_management/v1/types.ts",
         "deprecated": false,
@@ -16009,7 +16049,7 @@
         "label": "YAxisMode",
         "description": [],
         "signature": [
-          "\"right\" | \"bottom\" | \"auto\" | \"left\""
+          "\"right\" | \"bottom\" | \"left\" | \"auto\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,

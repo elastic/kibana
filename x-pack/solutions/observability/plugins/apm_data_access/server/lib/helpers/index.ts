@@ -14,11 +14,7 @@ export {
   type APMLogEventESSearchRequest,
 } from './create_es_client/create_apm_event_client';
 
-export {
-  callAsyncWithDebug,
-  getDebugBody,
-  getDebugTitle,
-} from './create_es_client/call_async_with_debug';
+export { callAsyncWithDebug } from './create_es_client/call_async_with_debug';
 
 export { cancelEsRequestOnAbort } from './create_es_client/cancel_es_request_on_abort';
 

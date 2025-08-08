@@ -23,7 +23,7 @@ import { ProcessorsDispatch, State as ProcessorsReducerState } from './processor
  */
 export type ProcessorSelector = string[];
 
-/** @private */
+/** @internal */
 export interface ProcessorInternal<CustomProcessorOptions = {}> {
   id: string;
   type: string;

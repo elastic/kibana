@@ -115,11 +115,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       groupBy: ruleParams.groupBy ?? DEFAULT_VALUES.GROUP_BY,
       termSize: ruleParams.termSize ?? DEFAULT_VALUES.TERM_SIZE,
       termField: ruleParams.termField,
-      size: ruleParams.size
-        ? ruleParams.size
-        : isServerless
-        ? SERVERLESS_DEFAULT_VALUES.SIZE
-        : DEFAULT_VALUES.SIZE,
+      size:
+        ruleParams.size ?? (isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE),
       excludeHitsFromPreviousRun:
         ruleParams.excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
       sourceFields: ruleParams.sourceFields,
@@ -165,9 +162,12 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   // Saved query
   const onSavedQuery = useCallback((newSavedQuery: SavedQuery) => {
     setSavedQuery(newSavedQuery);
-    const newFilters = newSavedQuery.attributes.filters;
+    const { filters: newFilters, query: newQuery } = newSavedQuery.attributes;
     if (newFilters) {
       dispatch({ type: 'filter', payload: newFilters });
+    }
+    if (newQuery) {
+      dispatch({ type: 'query', payload: newQuery });
     }
   }, []);
 

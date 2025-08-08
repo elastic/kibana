@@ -9,7 +9,7 @@
 
 import { isEmpty } from 'lodash';
 
-import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import {
   initializeControlGroupTelemetry,
   type ControlGroupTelemetry,
@@ -40,6 +40,9 @@ export interface DashboardCollectorData {
     };
   };
   controls: ControlGroupTelemetry;
+  sections: {
+    total: number;
+  };
 }
 
 export const getEmptyDashboardData = (): DashboardCollectorData => ({
@@ -50,6 +53,9 @@ export const getEmptyDashboardData = (): DashboardCollectorData => ({
     by_type: {},
   },
   controls: initializeControlGroupTelemetry({}),
+  sections: {
+    total: 0,
+  },
 });
 
 export const getEmptyPanelTypeData = () => ({
@@ -85,12 +91,19 @@ export const collectPanelsByType = (
     collectorData.panels.by_type[type].details = embeddableService.telemetry(
       {
         ...panel.embeddableConfig,
-        id: panel.id || '',
         type: panel.type,
       },
       collectorData.panels.by_type[type].details
     );
   }
+};
+
+export const collectDashboardSections = (
+  attributes: DashboardSavedObjectAttributes,
+  collectorData: DashboardCollectorData
+) => {
+  collectorData.sections.total += attributes.sections?.length ?? 0;
+  return collectorData;
 };
 
 export const controlsCollectorFactory =
@@ -100,8 +113,7 @@ export const controlsCollectorFactory =
       collectorData.controls = embeddableService.telemetry(
         {
           ...attributes.controlGroupInput,
-          type: CONTROL_GROUP_TYPE,
-          id: `DASHBOARD_${CONTROL_GROUP_TYPE}`,
+          type: CONTROLS_GROUP_TYPE,
         },
         collectorData.controls
       ) as ControlGroupTelemetry;

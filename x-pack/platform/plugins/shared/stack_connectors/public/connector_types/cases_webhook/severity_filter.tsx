@@ -35,23 +35,19 @@ export const SeverityFilter: React.FC<Props> = ({ selectedSeverity, onSeverityCh
 
   const severities = {
     [CaseSeverity.LOW]: {
-      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.vis.euiColorSeverity5,
+      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.severity.neutral,
       label: i18n.SEVERITY_LOW_LABEL,
     },
     [CaseSeverity.MEDIUM]: {
-      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis5 : euiTheme.colors.vis.euiColorSeverity7,
+      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis5 : euiTheme.colors.severity.warning,
       label: i18n.SEVERITY_MEDIUM_LABEL,
     },
     [CaseSeverity.HIGH]: {
-      color: isAmsterdam
-        ? euiTheme.colors.vis.euiColorVis7
-        : euiTheme.colors.vis.euiColorSeverity10,
+      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis7 : euiTheme.colors.severity.risk,
       label: i18n.SEVERITY_HIGH_LABEL,
     },
     [CaseSeverity.CRITICAL]: {
-      color: isAmsterdam
-        ? euiTheme.colors.vis.euiColorVis9
-        : euiTheme.colors.vis.euiColorSeverity14,
+      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.severity.danger,
       label: i18n.SEVERITY_CRITICAL_LABEL,
     },
   };

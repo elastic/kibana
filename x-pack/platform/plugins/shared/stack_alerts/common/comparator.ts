@@ -7,8 +7,6 @@
 
 import { Comparator } from './comparator_types';
 
-export type ComparatorFn = (value: number, threshold: number[]) => boolean;
-
 const humanReadableComparators = new Map<Comparator, string>([
   [Comparator.LT, 'less than'],
   [Comparator.LT_OR_EQ, 'less than or equal to'],
@@ -16,21 +14,6 @@ const humanReadableComparators = new Map<Comparator, string>([
   [Comparator.GT, 'greater than'],
   [Comparator.BETWEEN, 'between'],
   [Comparator.NOT_BETWEEN, 'not between'],
-]);
-
-export const ComparatorFns = new Map<Comparator, ComparatorFn>([
-  [Comparator.LT, (value: number, threshold: number[]) => value < threshold[0]],
-  [Comparator.LT_OR_EQ, (value: number, threshold: number[]) => value <= threshold[0]],
-  [Comparator.GT_OR_EQ, (value: number, threshold: number[]) => value >= threshold[0]],
-  [Comparator.GT, (value: number, threshold: number[]) => value > threshold[0]],
-  [
-    Comparator.BETWEEN,
-    (value: number, threshold: number[]) => value >= threshold[0] && value <= threshold[1],
-  ],
-  [
-    Comparator.NOT_BETWEEN,
-    (value: number, threshold: number[]) => value < threshold[0] || value > threshold[1],
-  ],
 ]);
 
 export const getComparatorScript = (
@@ -71,8 +54,6 @@ export const getComparatorScript = (
       )} || ${fieldName} > ${getThresholdString(threshold[1])}`;
   }
 };
-
-export const ComparatorFnNames = new Set(ComparatorFns.keys());
 
 export function getHumanReadableComparator(comparator: Comparator) {
   return humanReadableComparators.has(comparator)

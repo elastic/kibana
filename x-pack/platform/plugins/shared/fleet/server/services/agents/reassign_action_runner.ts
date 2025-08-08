@@ -13,6 +13,8 @@ import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from
 
 import { appContextService } from '../app_context';
 
+import { agentPolicyService } from '../agent_policy';
+
 import { ActionRunner } from './action_runner';
 
 import { bulkUpdateAgents } from './crud';
@@ -74,6 +76,8 @@ export async function reassignBatch(
     throw new AgentReassignmentError('No agents to reassign, already assigned or hosted agents');
   }
 
+  const newAgentPolicy = await agentPolicyService.get(soClient, options.newAgentPolicyId);
+
   await bulkUpdateAgents(
     esClient,
     agentsToUpdate.map((agent) => ({
@@ -81,6 +85,7 @@ export async function reassignBatch(
       data: {
         policy_id: options.newAgentPolicyId,
         policy_revision: null,
+        ...(newAgentPolicy?.space_ids ? { namespaces: newAgentPolicy.space_ids } : {}),
       },
     })),
     errors

@@ -7,9 +7,9 @@
 
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import type { FieldsUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import {
   FieldUpgradeStateEnum,
+  type FieldsUpgradeState,
   type RuleUpgradeState,
   type SetRuleFieldResolvedValueFn,
 } from '../../../../model/prebuilt_rule_upgrade';
@@ -18,6 +18,7 @@ import { RuleUpgradeInfoBar } from './rule_upgrade_info_bar';
 import { RuleUpgradeCallout } from './rule_upgrade_callout';
 import { FieldUpgrade } from './field_upgrade';
 import { FieldUpgradeContextProvider } from './field_upgrade_context';
+import { RuleHasMissingBaseVersionCallout } from './missing_base_version_callout';
 
 interface RuleUpgradeProps {
   ruleUpgradeState: RuleUpgradeState;
@@ -45,6 +46,12 @@ export const RuleUpgrade = memo(function RuleUpgrade({
         targetVersionNumber={ruleUpgradeState.target_rule.version}
       />
       <EuiSpacer size="s" />
+      {!ruleUpgradeState.has_base_version && (
+        <>
+          <RuleHasMissingBaseVersionCallout />
+          <EuiSpacer size="s" />
+        </>
+      )}
       <RuleUpgradeCallout
         numOfSolvableConflicts={numOfSolvableConflicts}
         numOfNonSolvableConflicts={numOfNonSolvableConflicts}

@@ -72,7 +72,13 @@ export async function getSettingsOrUndefined(
 
 export async function settingsSetup(soClient: SavedObjectsClientContract) {
   try {
-    await getSettings(soClient);
+    const config = appContextService.getConfig();
+    const settings = await getSettings(soClient);
+    if (config?.prereleaseEnabledByDefault && !settings.prerelease_integrations_enabled) {
+      await saveSettings(soClient, {
+        prerelease_integrations_enabled: config?.prereleaseEnabledByDefault,
+      });
+    }
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
       const defaultSettings = createDefaultSettings();
@@ -166,5 +172,14 @@ function getConfigFleetServerHosts() {
 }
 
 export function createDefaultSettings(): BaseSettings {
-  return { prerelease_integrations_enabled: false };
+  const config = appContextService.getConfig();
+  const settings: BaseSettings = {
+    prerelease_integrations_enabled: !!config?.prereleaseEnabledByDefault,
+  };
+
+  if (appContextService.getExperimentalFeatures().useSpaceAwareness) {
+    settings.use_space_awareness_migration_status = 'success';
+  }
+
+  return settings;
 }

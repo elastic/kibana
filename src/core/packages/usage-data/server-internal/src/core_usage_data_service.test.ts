@@ -11,7 +11,6 @@ import type { ConfigPath } from '@kbn/config';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 
-// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
 import { HotObservable } from 'rxjs/internal/testing/HotObservable';
 
 import { configServiceMock } from '@kbn/config-mocks';
@@ -307,6 +306,7 @@ describe('CoreUsageDataService', () => {
                 },
                 "keepaliveTimeout": 120000,
                 "maxPayloadInBytes": 1048576,
+                "protocol": "http1",
                 "requestId": Object {
                   "allowFromAnyIp": false,
                   "ipAllowlistConfigured": false,

@@ -21,8 +21,10 @@ import {
   EuiButtonEmpty,
   EuiBadge,
   EuiPageTemplate,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,7 +36,7 @@ import {
   hasExecuteActionsCapability,
 } from '../../../lib/capabilities';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
-import './actions_connectors_list.scss';
+
 import {
   ActionConnector,
   ActionConnectorTableItem,
@@ -92,6 +94,7 @@ const ActionsConnectorsList = ({
     docLinks,
   } = useKibana().services;
 
+  const { euiTheme } = useEuiTheme();
   const { connectorId } = useParams<{ connectorId?: string }>();
   const history = useHistory();
   const location = useLocation();
@@ -104,6 +107,19 @@ const ActionsConnectorsList = ({
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
   const [showWarningText, setShowWarningText] = useState<boolean>(false);
+
+  const disabledActConnectorCss = css`
+    .actConnectorsList__tableRowDisabled {
+      background-color: ${euiTheme.colors.lightestShade};
+
+      .actConnectorsList__tableCellDisabled {
+        color: ${euiTheme.colors.darkShade};
+      }
+      .euiLink + .euiToolTipAnchor {
+        margin-left: ${euiTheme.size.xs};
+      }
+    }
+  `;
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -252,11 +268,7 @@ const ActionsConnectorsList = ({
         ) : (
           <>
             {link}
-            <EuiIconTip
-              type="questionInCircle"
-              content={checkEnabledResult.message}
-              position="right"
-            />
+            <EuiIconTip type="question" content={checkEnabledResult.message} position="right" />
           </>
         );
       },
@@ -364,6 +376,7 @@ const ActionsConnectorsList = ({
       sorting={true}
       itemId="id"
       columns={actionsTableColumns}
+      css={disabledActConnectorCss}
       rowProps={(item: ActionConnectorTableItem) => ({
         className:
           !item.isPreconfigured &&

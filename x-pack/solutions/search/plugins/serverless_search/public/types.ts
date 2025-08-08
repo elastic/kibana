@@ -18,6 +18,10 @@ import type {
   SearchIndicesPluginSetup,
   SearchIndicesPluginStart,
 } from '@kbn/search-indices/public';
+import type {
+  SearchHomepagePluginSetup,
+  SearchHomepagePluginStart,
+} from '@kbn/search-homepage/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessSearchPluginSetup {}
@@ -31,6 +35,7 @@ export interface ServerlessSearchPluginSetupDependencies {
   serverless: ServerlessPluginSetup;
   discover: DiscoverSetup;
   searchIndices: SearchIndicesPluginSetup;
+  searchHomepage?: SearchHomepagePluginSetup;
 }
 
 export interface ServerlessSearchPluginStartDependencies {
@@ -43,4 +48,5 @@ export interface ServerlessSearchPluginStartDependencies {
   share: SharePluginStart;
   indexManagement?: IndexManagementPluginStart;
   searchIndices: SearchIndicesPluginStart;
+  searchHomepage?: SearchHomepagePluginStart;
 }

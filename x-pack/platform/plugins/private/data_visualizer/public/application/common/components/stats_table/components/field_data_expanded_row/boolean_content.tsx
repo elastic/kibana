@@ -9,7 +9,8 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
-import { Axis, BarSeries, Chart, Settings, ScaleType, LEGACY_LIGHT_THEME } from '@elastic/charts';
+import { Axis, BarSeries, Chart, Settings, ScaleType } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { roundToDecimalPlace } from '@kbn/ml-number-utils';
@@ -48,10 +49,10 @@ const BOOLEAN_DISTRIBUTION_CHART_HEIGHT = 70;
 
 export const BooleanContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
   const barColor = useBarColor();
-
+  const chartBaseTheme = useElasticChartsTheme();
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
   const formattedPercentages = useMemo(() => getTFPercentage(config), [config]);
-  const theme = useDataVizChartTheme();
+  const theme = useDataVizChartTheme({ disableGridLines: true });
   if (!formattedPercentages) return null;
 
   const { count } = formattedPercentages;
@@ -84,8 +85,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
           />
 
           <Settings
-            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-            baseTheme={LEGACY_LIGHT_THEME}
+            baseTheme={chartBaseTheme}
             showLegend={false}
             theme={theme}
             locale={i18n.getLocale()}

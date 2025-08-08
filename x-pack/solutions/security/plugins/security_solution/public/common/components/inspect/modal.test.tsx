@@ -162,6 +162,48 @@ describe('Modal Inspect', () => {
         track_total_hits: false,
       });
     });
+
+    test('should request Tab content with esql query correctly', () => {
+      const esqlQuery = 'FROM tets-index* | WHERE field IS NOT NULL';
+      renderModal({
+        ...defaultProps,
+        request: JSON.stringify({ index: ['tets-index*'], body: esqlQuery }),
+      });
+
+      fireEvent.click(screen.getByTestId('modal-inspect-request-tab'));
+      expect(screen.getByTestId('modal-inspect-request-tab')).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+
+      const requestTextContent = screen.getByRole('tabpanel').textContent ?? '';
+
+      expect(requestTextContent).toMatch(esqlQuery);
+    });
+
+    test('should request Tab content without body correctly', () => {
+      const requestWithoutBody = {
+        index: ['tets-index*'],
+        query: {
+          bool: {
+            filter: [{ range: { '@timestamp': { gte: 1562290224506, lte: 1562376624506 } } }],
+          },
+        },
+        size: 0,
+      };
+      const requestString = JSON.stringify(requestWithoutBody, null, 2);
+      renderModal({ ...defaultProps, request: requestString });
+
+      fireEvent.click(screen.getByTestId('modal-inspect-request-tab'));
+      expect(screen.getByTestId('modal-inspect-request-tab')).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+
+      const requestTextContent = screen.getByRole('tabpanel').textContent ?? '';
+
+      expect(requestTextContent).toMatch(requestString);
+    });
   });
 
   describe('events', () => {

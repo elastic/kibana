@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { Lifecycle } from '@hapi/hapi';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -23,7 +23,7 @@ import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
-import type { VersionedRouteConfig } from '@kbn/core-http-server';
+import type { VersionedRouteConfig, RouteSecurity } from '@kbn/core-http-server';
 import type { MetricsDataPluginSetup } from '../../../types';
 
 export interface InfraServerPluginSetupDeps {
@@ -173,8 +173,8 @@ export interface InfraFieldDef {
 
 export type InfraRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
   method: RouteMethod;
-} & RouteConfig<Params, Query, Body, Method>;
+} & Omit<RouteConfig<Params, Query, Body, Method>, 'security'> & { security?: RouteSecurity };
 
 export type InfraVersionedRouteConfig<Method extends RouteMethod> = {
   method: RouteMethod;
-} & VersionedRouteConfig<Method>;
+} & Omit<VersionedRouteConfig<Method>, 'security'> & { security?: RouteSecurity };

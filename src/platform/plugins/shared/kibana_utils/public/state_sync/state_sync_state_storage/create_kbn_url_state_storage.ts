@@ -108,7 +108,7 @@ export const createKbnUrlStateStorage = (
       }
     },
     change$: <State>(key: string) =>
-      new Observable((observer) => {
+      new Observable<void>((observer) => {
         const unlisten = url.listen(() => {
           observer.next();
         });

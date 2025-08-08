@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export type { EmbeddableTransforms } from './types';
+
 export type {
-  EmbeddableInput,
-  CommonEmbeddableStartContract,
-  EmbeddableStateWithType,
-  PanelState,
-  EmbeddablePersistableStateService,
   EmbeddableRegistryDefinition,
-} from './types';
-export { ViewMode } from './types';
-export type { SavedObjectEmbeddableInput } from './lib';
-export { isSavedObjectEmbeddableInput } from './lib';
+  EmbeddableStateWithType,
+  EmbeddablePersistableStateService,
+} from '../server';

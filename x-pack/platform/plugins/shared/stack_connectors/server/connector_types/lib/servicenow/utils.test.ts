@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   prepareIncident,

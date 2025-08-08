@@ -7,13 +7,13 @@
 
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { MLCATEGORY, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { CREATED_BY_LABEL, DEFAULT_BUCKET_SPAN } from '../../../../../common/constants/new_job';
 import { type CreateState, QuickJobCreatorBase } from '../job_from_dashboard/quick_create_job_base';
 import type { MlApi } from '../../../services/ml_api_service';
@@ -34,11 +34,11 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
     dataViews: DataViewsContract,
     kibanaConfig: IUiSettingsClient,
     timeFilter: TimefilterContract,
-    dashboardService: DashboardStart,
+    share: SharePluginStart,
     private data: DataPublicPluginStart,
     mlApi: MlApi
   ) {
-    super(dataViews, kibanaConfig, timeFilter, dashboardService, mlApi);
+    super(dataViews, kibanaConfig, timeFilter, share, mlApi);
   }
 
   public async createAndSaveJob(

@@ -13,7 +13,7 @@ import {
 import type { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import { createLicenseServiceMock } from '../../../license/mocks';
-import type { EndpointAuthzKeyList } from '../../types/authz';
+import type { EndpointAuthz, EndpointAuthzKeyList } from '../../types/authz';
 import {
   CONSOLE_RESPONSE_ACTION_COMMANDS,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL,
@@ -169,6 +169,8 @@ describe('Endpoint Authz service', () => {
       ['canWriteFileOperations', 'writeFileOperations'],
       ['canWriteTrustedApplications', 'writeTrustedApplications'],
       ['canReadTrustedApplications', 'readTrustedApplications'],
+      ['canWriteTrustedDevices', 'writeTrustedDevices'],
+      ['canReadTrustedDevices', 'readTrustedDevices'],
       ['canWriteHostIsolationExceptions', 'writeHostIsolationExceptions'],
       ['canAccessHostIsolationExceptions', 'accessHostIsolationExceptions'],
       ['canReadHostIsolationExceptions', 'readHostIsolationExceptions'],
@@ -179,6 +181,7 @@ describe('Endpoint Authz service', () => {
       ['canReadEventFilters', 'readEventFilters'],
       ['canReadWorkflowInsights', 'readWorkflowInsights'],
       ['canWriteWorkflowInsights', 'writeWorkflowInsights'],
+      ['canManageGlobalArtifacts', 'writeGlobalArtifacts'],
     ])('%s should be true if `packagePrivilege.%s` is `true`', (auth) => {
       const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles);
       expect(authz[auth]).toBe(true);
@@ -210,6 +213,8 @@ describe('Endpoint Authz service', () => {
       ['canWriteFileOperations', ['writeFileOperations']],
       ['canWriteTrustedApplications', ['writeTrustedApplications']],
       ['canReadTrustedApplications', ['readTrustedApplications']],
+      ['canWriteTrustedDevices', ['writeTrustedDevices']],
+      ['canReadTrustedDevices', ['readTrustedDevices']],
       ['canWriteHostIsolationExceptions', ['writeHostIsolationExceptions']],
       ['canAccessHostIsolationExceptions', ['accessHostIsolationExceptions']],
       ['canReadHostIsolationExceptions', ['readHostIsolationExceptions']],
@@ -220,6 +225,7 @@ describe('Endpoint Authz service', () => {
       ['canReadEventFilters', ['readEventFilters']],
       ['canWriteWorkflowInsights', ['writeWorkflowInsights']],
       ['canReadWorkflowInsights', ['readWorkflowInsights']],
+      ['canManageGlobalArtifacts', ['writeGlobalArtifacts']],
       // all dependent privileges are false and so it should be false
       ['canAccessResponseConsole', responseConsolePrivileges],
     ])('%s should be false if `packagePrivilege.%s` is `false`', (auth, privileges) => {
@@ -262,6 +268,8 @@ describe('Endpoint Authz service', () => {
       ['canWriteFileOperations', ['writeFileOperations']],
       ['canWriteTrustedApplications', ['writeTrustedApplications']],
       ['canReadTrustedApplications', ['readTrustedApplications']],
+      ['canWriteTrustedDevices', ['writeTrustedDevices']],
+      ['canReadTrustedDevices', ['readTrustedDevices']],
       ['canWriteHostIsolationExceptions', ['writeHostIsolationExceptions']],
       ['canAccessHostIsolationExceptions', ['accessHostIsolationExceptions']],
       ['canReadHostIsolationExceptions', ['readHostIsolationExceptions']],
@@ -271,6 +279,7 @@ describe('Endpoint Authz service', () => {
       ['canReadEventFilters', ['readEventFilters']],
       ['canWriteWorkflowInsights', ['writeWorkflowInsights']],
       ['canReadWorkflowInsights', ['readWorkflowInsights']],
+      ['canManageGlobalArtifacts', ['writeGlobalArtifacts']],
       // all dependent privileges are false and so it should be false
       ['canAccessResponseConsole', responseConsolePrivileges],
     ])(
@@ -308,6 +317,23 @@ describe('Endpoint Authz service', () => {
         }
       }
     );
+
+    it.each`
+      privilege              | expectedResult | roles                      | description
+      ${'canReadAdminData'}  | ${true}        | ${['superuser', 'role-2']} | ${'user has superuser role'}
+      ${'canWriteAdminData'} | ${true}        | ${['superuser', 'role-2']} | ${'user has superuser role'}
+      ${'canReadAdminData'}  | ${false}       | ${['role-2']}              | ${'user does NOT have superuser role'}
+      ${'canWriteAdminData'} | ${false}       | ${['role-2']}              | ${'user does NOT superuser role'}
+    `(
+      'should set `$privilege` to `$expectedResult` when $description',
+      ({ privilege, expectedResult, roles }) => {
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, roles)[
+            privilege as keyof EndpointAuthz
+          ]
+        ).toEqual(expectedResult);
+      }
+    );
   });
 
   describe('getEndpointAuthzInitialState()', () => {
@@ -339,9 +365,12 @@ describe('Endpoint Authz service', () => {
         canWriteExecuteOperations: false,
         canWriteScanOperations: false,
         canWriteFileOperations: false,
+        canManageGlobalArtifacts: false,
         canWriteTrustedApplications: false,
-        canWriteWorkflowInsights: false,
         canReadTrustedApplications: false,
+        canWriteTrustedDevices: false,
+        canReadTrustedDevices: false,
+        canWriteWorkflowInsights: false,
         canReadWorkflowInsights: false,
         canWriteHostIsolationExceptions: false,
         canAccessHostIsolationExceptions: false,
@@ -352,6 +381,8 @@ describe('Endpoint Authz service', () => {
         canReadEventFilters: false,
         canReadEndpointExceptions: false,
         canWriteEndpointExceptions: false,
+        canReadAdminData: false,
+        canWriteAdminData: false,
       });
     });
   });

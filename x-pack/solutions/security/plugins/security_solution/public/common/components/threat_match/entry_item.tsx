@@ -6,31 +6,31 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiSuperSelect } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { EsFieldSelector } from '@kbn/securitysolution-autocomplete';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import type { FormattedEntry, Entry } from './types';
+import type { ThreatMappingEntry } from '../../../../common/api/detection_engine/model/rule_schema';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import type { FormattedEntry } from './types';
 import * as i18n from './translations';
-import { getEntryOnFieldChange, getEntryOnThreatFieldChange } from './helpers';
+import {
+  getEntryOnFieldChange,
+  getEntryOnThreatFieldChange,
+  getEntryOnMatchChange,
+} from './helpers';
 
 interface EntryItemProps {
   entry: FormattedEntry;
   indexPattern: DataViewBase;
   threatIndexPatterns: DataViewBase;
   showLabel: boolean;
-  onChange: (arg: Entry, i: number) => void;
+  onChange: (arg: ThreatMappingEntry, i: number) => void;
+  doesNotMatchDisabled?: boolean;
 }
 
-const FlexItemWithLabel = styled(EuiFlexItem)`
-  padding-top: 20px;
-  text-align: center;
-`;
-
-const FlexItemWithoutLabel = styled(EuiFlexItem)`
-  text-align: center;
-`;
+const LABEL_PADDING = 20;
 
 export const EntryItem: React.FC<EntryItemProps> = ({
   entry,
@@ -38,7 +38,12 @@ export const EntryItem: React.FC<EntryItemProps> = ({
   threatIndexPatterns,
   showLabel,
   onChange,
+  doesNotMatchDisabled,
 }): JSX.Element => {
+  const isDoesNotMatchForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
+    'doesNotMatchForIndicatorMatchRuleEnabled'
+  );
+
   const handleFieldChange = useCallback(
     ([newField]: DataViewFieldBase[]): void => {
       const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
@@ -55,66 +60,83 @@ export const EntryItem: React.FC<EntryItemProps> = ({
     [onChange, entry]
   );
 
+  const handleMatchChange = useCallback(
+    (negate: boolean): void => {
+      const { updatedEntry, index } = getEntryOnMatchChange(entry, negate);
+      onChange(updatedEntry, index);
+    },
+    [onChange, entry]
+  );
+
   const renderFieldInput = useMemo(() => {
     const comboBox = (
-      <EsFieldSelector
-        placeholder={i18n.FIELD_PLACEHOLDER}
-        indexPattern={indexPattern}
-        selectedField={entry.field}
-        isClearable={false}
-        isLoading={false}
-        isDisabled={indexPattern == null}
-        onChange={handleFieldChange}
-        data-test-subj="entryField"
-        fieldInputWidth={360}
-      />
+      <EuiToolTip display="block" position="top" content={entry.field?.name}>
+        <EsFieldSelector
+          placeholder={i18n.FIELD_PLACEHOLDER}
+          indexPattern={indexPattern}
+          selectedField={entry.field}
+          isClearable={false}
+          isLoading={false}
+          isDisabled={indexPattern == null}
+          onChange={handleFieldChange}
+          data-test-subj="entryField"
+        />
+      </EuiToolTip>
     );
 
-    if (showLabel) {
-      return (
-        <EuiFormRow label={i18n.FIELD} data-test-subj="entryItemFieldInputFormRow">
-          {comboBox}
-        </EuiFormRow>
-      );
-    } else {
-      return (
-        <EuiFormRow label={''} data-test-subj="entryItemFieldInputFormRow">
-          {comboBox}
-        </EuiFormRow>
-      );
-    }
+    const label = showLabel ? i18n.FIELD : '';
+    return (
+      <EuiFormRow label={label} data-test-subj="entryItemFieldInputFormRow">
+        {comboBox}
+      </EuiFormRow>
+    );
   }, [handleFieldChange, indexPattern, entry, showLabel]);
+
+  const renderMatchInput = useMemo(() => {
+    const options = [
+      { value: 'MATCHES', inputDisplay: i18n.MATCHES },
+      {
+        value: 'DOES_NOT_MATCH',
+        inputDisplay: i18n.DOES_NOT_MATCH,
+        disabled: doesNotMatchDisabled,
+      },
+    ];
+    return (
+      <EuiFormRow data-test-subj="entryItemMatchInputFormRow">
+        <EuiSuperSelect
+          options={options}
+          valueOfSelected={entry.negate ? 'DOES_NOT_MATCH' : 'MATCHES'}
+          onChange={(value) => handleMatchChange(value === 'DOES_NOT_MATCH')}
+        />
+      </EuiFormRow>
+    );
+  }, [handleMatchChange, entry, doesNotMatchDisabled]);
 
   const renderThreatFieldInput = useMemo(() => {
     const comboBox = (
-      <EsFieldSelector
-        placeholder={i18n.FIELD_PLACEHOLDER}
-        indexPattern={threatIndexPatterns}
-        selectedField={entry.value}
-        isClearable={false}
-        isLoading={false}
-        isDisabled={threatIndexPatterns == null}
-        onChange={handleThreatFieldChange}
-        data-test-subj="threatEntryField"
-        fieldInputWidth={360}
-      />
+      <EuiToolTip display="block" position="top" content={entry.value?.name}>
+        <EsFieldSelector
+          placeholder={i18n.FIELD_PLACEHOLDER}
+          indexPattern={threatIndexPatterns}
+          selectedField={entry.value}
+          isClearable={false}
+          isLoading={false}
+          isDisabled={threatIndexPatterns == null}
+          onChange={handleThreatFieldChange}
+          data-test-subj="threatEntryField"
+        />
+      </EuiToolTip>
     );
 
-    if (showLabel) {
-      return (
-        <EuiFormRow label={i18n.THREAT_FIELD} data-test-subj="threatFieldInputFormRow">
-          {comboBox}
-        </EuiFormRow>
-      );
-    } else {
-      return (
-        <EuiFormRow label={''} data-test-subj="threatFieldInputFormRow">
-          {comboBox}
-        </EuiFormRow>
-      );
-    }
+    const label = showLabel ? i18n.THREAT_FIELD : '';
+    return (
+      <EuiFormRow label={label} data-test-subj="threatFieldInputFormRow">
+        {comboBox}
+      </EuiFormRow>
+    );
   }, [handleThreatFieldChange, threatIndexPatterns, entry, showLabel]);
 
+  const matchOperatorLabel = entry.negate ? i18n.DOES_NOT_MATCH : i18n.MATCHES;
   return (
     <EuiFlexGroup
       direction="row"
@@ -123,17 +145,17 @@ export const EntryItem: React.FC<EntryItemProps> = ({
       justifyContent="spaceAround"
       data-test-subj="itemEntryContainer"
     >
-      <EuiFlexItem grow={false}>{renderFieldInput}</EuiFlexItem>
-      <EuiFlexItem grow={true}>
-        <EuiFlexGroup justifyContent="spaceAround" alignItems="center">
-          {showLabel ? (
-            <FlexItemWithLabel grow={true}>{i18n.MATCHES}</FlexItemWithLabel>
-          ) : (
-            <FlexItemWithoutLabel grow={true}>{i18n.MATCHES}</FlexItemWithoutLabel>
-          )}
-        </EuiFlexGroup>
+      <EuiFlexItem grow={3}>{renderFieldInput}</EuiFlexItem>
+      <EuiFlexItem
+        grow={2}
+        className="eui-textCenter"
+        css={css`
+          padding-top: ${showLabel ? LABEL_PADDING : 0}px;
+        `}
+      >
+        {isDoesNotMatchForIndicatorMatchRuleEnabled ? renderMatchInput : matchOperatorLabel}
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{renderThreatFieldInput}</EuiFlexItem>
+      <EuiFlexItem grow={3}>{renderThreatFieldInput}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };

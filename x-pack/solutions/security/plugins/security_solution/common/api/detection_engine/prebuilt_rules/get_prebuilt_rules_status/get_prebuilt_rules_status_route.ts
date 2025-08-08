@@ -8,6 +8,18 @@
 export interface GetPrebuiltRulesStatusResponseBody {
   /** Aggregated info about all prebuilt rules */
   stats: PrebuiltRulesStatusStats;
+
+  /**
+   * Aggregated info about upgradeable prebuilt rules. This fields is optional
+   * for backward compatibility. After one serverless release cycle, it can be
+   * made required.
+   * */
+  aggregated_fields?: {
+    upgradeable_rules: {
+      /** List of all tags of the current versions of upgradeable rules */
+      tags: string[];
+    };
+  };
 }
 
 export interface PrebuiltRulesStatusStats {

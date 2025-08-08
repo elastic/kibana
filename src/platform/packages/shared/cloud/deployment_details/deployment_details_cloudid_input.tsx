@@ -46,7 +46,7 @@ const Label: FC<{ learnMoreUrl: string }> = ({ learnMoreUrl }) => {
         <EuiPopover
           button={
             <EuiButtonIcon
-              iconType="questionInCircle"
+              iconType="question"
               onClick={() => {
                 setIsPopoverOpen(true);
               }}

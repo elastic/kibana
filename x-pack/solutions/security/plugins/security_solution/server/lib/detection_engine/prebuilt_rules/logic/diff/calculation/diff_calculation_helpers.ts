@@ -15,11 +15,12 @@ import { MissingVersion } from '../../../../../../../common/api/detection_engine
 
 export const calculateFieldsDiffFor = <TObject extends object>(
   ruleVersions: ThreeVersionsOf<TObject>,
-  fieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<TObject>
+  fieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<TObject>,
+  isRuleCustomized: boolean
 ): FieldsDiff<TObject> => {
   const result = mapValues(fieldsDiffAlgorithms, (calculateFieldDiff, fieldName) => {
     const fieldVersions = pickField(fieldName as keyof TObject, ruleVersions);
-    const fieldDiff = calculateFieldDiff(fieldVersions);
+    const fieldDiff = calculateFieldDiff(fieldVersions, isRuleCustomized);
     return fieldDiff;
   });
 

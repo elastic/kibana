@@ -22,11 +22,11 @@
       "discover",
       "share",
       "fleet",
-      "customIntegrations"
+      "customIntegrations",
     ],
     "optionalPlugins": [
       "cloud",
-      "usageCollection"
+      "usageCollection",
     ],
     "requiredBundles": [
       "kibanaReact"

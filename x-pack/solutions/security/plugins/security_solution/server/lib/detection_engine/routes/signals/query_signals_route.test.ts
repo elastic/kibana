@@ -25,7 +25,7 @@ describe('query for signal', () => {
   context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise(getEmptySignalsResponse())
   );
-  const ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts-');
+  const ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts');
 
   beforeEach(() => {
     server = serverMock.create();
@@ -47,9 +47,7 @@ describe('query for signal', () => {
 
       expect(response.status).toEqual(200);
       expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          body: typicalSignalsQuery(),
-        })
+        expect.objectContaining(typicalSignalsQuery())
       );
     });
 
@@ -75,7 +73,7 @@ describe('query for signal', () => {
 
       expect(response.status).toEqual(200);
       expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
-        expect.objectContaining({ body: typicalSignalsQueryAggs(), ignore_unavailable: true })
+        expect.objectContaining({ ...typicalSignalsQueryAggs(), ignore_unavailable: true })
       );
     });
 
@@ -88,10 +86,8 @@ describe('query for signal', () => {
       expect(response.status).toEqual(200);
       expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: {
-            ...typicalSignalsQuery(),
-            ...typicalSignalsQueryAggs(),
-          },
+          ...typicalSignalsQuery(),
+          ...typicalSignalsQueryAggs(),
         })
       );
     });

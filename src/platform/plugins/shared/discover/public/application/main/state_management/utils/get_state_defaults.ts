@@ -8,23 +8,25 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { getChartHidden } from '@kbn/unified-histogram-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getChartHidden } from '@kbn/unified-histogram';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
+  getDefaultSort,
+  getSortArray,
 } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { DiscoverAppState } from '../discover_app_state_container';
-import { DiscoverServices } from '../../../../build_services';
-import { getDefaultSort, getSortArray } from '../../../../utils/sorting';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DiscoverAppState } from '../discover_app_state_container';
+import type { DiscoverServices } from '../../../../build_services';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 
-function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClient) {
-  if (savedSearch.columns && savedSearch.columns.length > 0) {
+function getDefaultColumns(savedSearch: SavedSearch | undefined, uiSettings: IUiSettingsClient) {
+  if (savedSearch?.columns && savedSearch.columns.length > 0) {
     return [...savedSearch.columns];
   }
   return [...uiSettings.get(DEFAULT_COLUMNS_SETTING)];
@@ -32,17 +34,19 @@ function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClie
 
 export function getStateDefaults({
   savedSearch,
+  overrideDataView,
   services,
 }: {
-  savedSearch: SavedSearch;
+  savedSearch: SavedSearch | undefined;
+  overrideDataView?: DataView;
   services: DiscoverServices;
 }) {
-  const { searchSource } = savedSearch;
+  const searchSource = savedSearch?.searchSource;
   const { data, uiSettings, storage } = services;
-  const dataView = searchSource.getField('index');
-  const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
+  const dataView = overrideDataView ?? searchSource?.getField('index');
+  const query = searchSource?.getField('query') || data.query.queryString.getDefaultQuery();
   const isEsqlQuery = isOfAggregateQueryType(query);
-  const sort = getSortArray(savedSearch.sort ?? [], dataView!, isEsqlQuery);
+  const sort = getSortArray(savedSearch?.sort ?? [], dataView!, isEsqlQuery);
   const columns = getDefaultColumns(savedSearch, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
   const dataSource = isEsqlQuery
@@ -64,8 +68,8 @@ export function getStateDefaults({
     columns,
     dataSource,
     interval: 'auto',
-    filters: cloneDeep(searchSource.getOwnField('filter')) as DiscoverAppState['filters'],
-    hideChart: typeof chartHidden === 'boolean' ? chartHidden : undefined,
+    filters: cloneDeep(searchSource?.getOwnField('filter')) as DiscoverAppState['filters'],
+    hideChart: chartHidden,
     viewMode: undefined,
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
@@ -78,37 +82,37 @@ export function getStateDefaults({
     density: undefined,
   };
 
-  if (savedSearch.grid) {
+  if (savedSearch?.grid) {
     defaultState.grid = savedSearch.grid;
   }
-  if (savedSearch.hideChart !== undefined) {
+  if (savedSearch?.hideChart !== undefined) {
     defaultState.hideChart = savedSearch.hideChart;
   }
-  if (savedSearch.rowHeight !== undefined) {
+  if (savedSearch?.rowHeight !== undefined) {
     defaultState.rowHeight = savedSearch.rowHeight;
   }
-  if (savedSearch.headerRowHeight !== undefined) {
+  if (savedSearch?.headerRowHeight !== undefined) {
     defaultState.headerRowHeight = savedSearch.headerRowHeight;
   }
-  if (savedSearch.viewMode) {
+  if (savedSearch?.viewMode) {
     defaultState.viewMode = getValidViewMode({
       viewMode: savedSearch.viewMode,
       isEsqlMode: isEsqlQuery,
     });
   }
-  if (savedSearch.hideAggregatedPreview) {
+  if (savedSearch?.hideAggregatedPreview) {
     defaultState.hideAggregatedPreview = savedSearch.hideAggregatedPreview;
   }
-  if (savedSearch.rowsPerPage) {
+  if (savedSearch?.rowsPerPage) {
     defaultState.rowsPerPage = savedSearch.rowsPerPage;
   }
-  if (savedSearch.sampleSize) {
+  if (savedSearch?.sampleSize) {
     defaultState.sampleSize = savedSearch.sampleSize;
   }
-  if (savedSearch.breakdownField) {
+  if (savedSearch?.breakdownField) {
     defaultState.breakdownField = savedSearch.breakdownField;
   }
-  if (savedSearch.density) {
+  if (savedSearch?.density) {
     defaultState.density = savedSearch.density;
   }
 

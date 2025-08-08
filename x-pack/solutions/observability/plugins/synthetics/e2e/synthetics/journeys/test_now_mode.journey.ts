@@ -53,7 +53,7 @@ journeySkip(`TestNowMode`, async ({ page, params }) => {
       }
     });
 
-    await services.cleaUp();
+    await services.cleanUp();
     await services.enableMonitorManagedViaApi();
     await services.addTestMonitor('Test Monitor', {
       type: 'http',
@@ -65,7 +65,7 @@ journeySkip(`TestNowMode`, async ({ page, params }) => {
   });
 
   after(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
   });
 
   step('Go to monitors page', async () => {

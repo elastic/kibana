@@ -13,6 +13,7 @@ describe('suggestions in comments', () => {
   it('does not suggest in single-line comments', async () => {
     const { assertSuggestions } = await setup('^');
     await assertSuggestions('FROM index | EVAL // hey there ^', []);
+    await assertSuggestions('FROM index // I^', [], { triggerCharacter: ' ' });
   });
 
   it('does not suggest in multi-line comments', async () => {
@@ -29,6 +30,7 @@ describe('suggestions in comments', () => {
   test('suggests next to comments', async () => {
     const { suggest } = await setup('^');
     expect((await suggest('FROM index | EVAL ^/* */')).length).toBeGreaterThan(0);
+    expect((await suggest('FROM index | EVAL /* */ ^')).length).toBeGreaterThan(0);
     expect((await suggest('FROM index | EVAL /* */^')).length).toBeGreaterThan(0);
     expect((await suggest('FROM index | EVAL ^// a comment')).length).toBeGreaterThan(0);
     expect((await suggest('FROM index | EVAL // a comment\n^')).length).toBeGreaterThan(0);

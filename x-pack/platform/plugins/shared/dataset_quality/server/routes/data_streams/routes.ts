@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import {
   CheckAndLoadIntegrationResponse,
   DataStreamDetails,
@@ -13,6 +14,7 @@ import {
   DataStreamRolloverResponse,
   DataStreamSettings,
   DataStreamStat,
+  DatasetTypesPrivileges,
   DatasetUserPrivileges,
   DegradedFieldAnalysis,
   DegradedFieldResponse,
@@ -27,7 +29,7 @@ import { createDatasetQualityServerRoute } from '../create_datasets_quality_serv
 import { checkAndLoadIntegration } from './check_and_load_integration';
 import { failedDocsRouteRepository } from './failed_docs/routes';
 import { getDataStreamDetails } from './get_data_stream_details';
-import { getDataStreams } from './get_data_streams';
+import { getDataStreams, getDatasetTypesPrivileges } from './get_data_streams';
 import { getDataStreamsMeteringStats } from './get_data_streams_metering_stats';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getAggregatedDatasetPaginatedResults } from './get_dataset_aggregated_paginated_results';
@@ -38,15 +40,49 @@ import { getDegradedFieldValues } from './get_degraded_field_values';
 import { getDegradedFields } from './get_degraded_fields';
 import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_streams';
 import { updateFieldLimit } from './update_field_limit';
+import { getDataStreamsCreationDate } from './get_data_streams_creation_date';
+
+const datasetTypesPrivilegesRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/types_privileges',
+  params: t.type({
+    query: t.type({ types: typesRt }),
+  }),
+  options: {
+    tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
+  async handler(resources): Promise<{
+    datasetTypesPrivileges: DatasetTypesPrivileges;
+  }> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+
+    // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    const { datasetsPrivilages } = await getDatasetTypesPrivileges({
+      esClient,
+      ...params.query,
+    });
+
+    return {
+      datasetTypesPrivileges: datasetsPrivilages,
+    };
+  },
+});
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
   params: t.type({
     query: t.intersection([
-      t.type({ types: typesRt }),
-      t.partial({
-        datasetQuery: t.string,
-      }),
+      t.union([t.type({ types: typesRt }), t.type({ datasetQuery: t.string })]),
+      t.partial({ includeCreationDate: toBooleanRt }),
     ]),
   }),
   options: {
@@ -81,15 +117,25 @@ const statsRoute = createDatasetQualityServerRoute({
       return dataStream.userPrivileges.canMonitor;
     });
 
-    const dataStreamsStats = isServerless
-      ? await getDataStreamsMeteringStats({
-          esClient: esClientAsSecondaryAuthUser,
-          dataStreams: privilegedDataStreams.map((stream) => stream.name),
-        })
-      : await getDataStreamsStats({
-          esClient,
-          dataStreams: privilegedDataStreams.map((stream) => stream.name),
-        });
+    const dataStreamsNames = privilegedDataStreams.map((stream) => stream.name);
+    const [dataStreamsStats, dataStreamsCreationDate] = await Promise.all([
+      isServerless
+        ? getDataStreamsMeteringStats({
+            esClient: esClientAsSecondaryAuthUser,
+            dataStreams: dataStreamsNames,
+          })
+        : getDataStreamsStats({
+            esClient,
+            dataStreams: dataStreamsNames,
+          }),
+
+      params.query.includeCreationDate
+        ? getDataStreamsCreationDate({
+            esClient: esClientAsSecondaryAuthUser,
+            dataStreams: dataStreamsNames,
+          })
+        : ({} as Record<string, number | undefined>),
+    ]);
 
     return {
       datasetUserPrivileges,
@@ -97,6 +143,7 @@ const statsRoute = createDatasetQualityServerRoute({
         dataStream.size = dataStreamsStats[dataStream.name]?.size;
         dataStream.sizeBytes = dataStreamsStats[dataStream.name]?.sizeBytes;
         dataStream.totalDocs = dataStreamsStats[dataStream.name]?.totalDocs;
+        dataStream.creationDate = dataStreamsCreationDate[dataStream.name];
 
         return dataStream;
       }),
@@ -536,6 +583,7 @@ const rolloverDataStream = createDatasetQualityServerRoute({
 });
 
 export const dataStreamsRouteRepository = {
+  ...datasetTypesPrivilegesRoute,
   ...statsRoute,
   ...degradedDocsRoute,
   ...totalDocsRoute,

@@ -167,7 +167,7 @@ export const UX_MESSAGES = Object.freeze({
     host: i18n.translate(
       'xpack.securitySolution.responseActionsList.list.item.hosts.unenrolled.host',
       {
-        defaultMessage: 'Host unenrolled',
+        defaultMessage: 'Host name unavailable',
       }
     ),
   },

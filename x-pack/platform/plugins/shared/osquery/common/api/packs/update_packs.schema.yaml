@@ -7,11 +7,13 @@ components:
   schemas:
     UpdatePacksRequestBody:
       type: object
+      example:
+        name: 'updated_my_pack_name'
       properties:
-        id:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
+        name:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackName'
         description:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DescriptionOrUndefined'
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackDescriptionOrUndefined'
         enabled:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/EnabledOrUndefined'
         policy_ids:
@@ -20,3 +22,31 @@ components:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Shards'
         queries:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ObjectQueries'
+    UpdatePacksResponse:
+        type: object
+        properties: { }
+        example:
+          data:
+            name: updated_my_pack_name
+            description: My pack
+            queries:
+              ports:
+                interval: 60
+                snapshot: true
+                removed: false
+                timeout: 120
+                query: SELECT * FROM listening_ports;
+                ecs_mapping:
+                  client.port:
+                    field: port
+            enabled: true
+            created_at: "2025-02-26T13:37:30.452Z"
+            created_by: elastic
+            updated_at: "2025-02-26T13:40:16.297Z"
+            updated_by: elastic
+            shards:
+              - key: 47638692-7c4c-4053-aa3e-7186f28df349
+                value: 35
+              - key: 5e267651-fe50-443e-8d3f-3bbc9171b618
+                value: 58
+            saved_object_id: 1c266590-381f-428c-878f-c80c1334f856

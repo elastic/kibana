@@ -38,7 +38,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
   const { ruleParams, errors, setRuleProperty, setRuleParams } = props;
   const isSearchSource = isSearchSourceRule(ruleParams);
   const isEsqlQuery = isEsqlQueryRule(ruleParams);
-  // metadata provided only when open alert from Discover page
+  // metadata provided only when the user opens the alert from the Discover page or a dashboard
   const isManagementPage = props.metadata?.isManagementPage ?? true;
 
   const formTypeSelected = useCallback(
@@ -60,10 +60,19 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
     }
   );
 
-  const errorParam = ALL_EXPRESSION_ERROR_KEYS.find((errorKey) => {
-    // @ts-expect-error upgrade typescript v5.1.6
-    return errors[errorKey]?.length >= 1 && ruleParams[errorKey] !== undefined;
-  });
+  const errorParam =
+    ALL_EXPRESSION_ERROR_KEYS.find((errorKey) => {
+      return (
+        // @ts-expect-error upgrade typescript v5.1.6
+        errors[errorKey]?.length >= 1 && ruleParams[errorKey] !== undefined
+      );
+    }) ||
+    // For search source alerts, if the only error is timeField, show this error even if the param is undefined
+    // timeField is inherently a part of the selectable data view, so if the user selects a data view with no
+    // timeField, this data view is incompatible with the rule.
+    (isSearchSource && !!errors.timeField?.length && !errors.searchConfiguration?.length
+      ? 'timeField'
+      : undefined);
 
   const expressionError = !!errorParam && (
     <>

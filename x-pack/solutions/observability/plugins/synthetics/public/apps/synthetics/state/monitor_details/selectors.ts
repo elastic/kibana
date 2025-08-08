@@ -19,6 +19,7 @@ export const selectSelectedLocationId = createSelector(
 );
 
 export const selectLastRunMetadata = createSelector(getState, (state) => state.lastRun);
+export const selectLastErrorRunMetadata = createSelector(getState, (state) => state.lastErrorRun);
 
 export const selectPingsLoading = createSelector(getState, (state) => state.pings.loading);
 

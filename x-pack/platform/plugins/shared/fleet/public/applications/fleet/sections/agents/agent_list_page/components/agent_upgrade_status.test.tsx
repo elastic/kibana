@@ -339,7 +339,10 @@ describe('AgentUpgradeStatus', () => {
               error_msg: 'Something went wrong',
             },
           },
+          local_metadata: { elastic: { agent: { version: '8.11.0', upgradeable: true } } },
         },
+        isAgentUpgradable: true,
+        latestAgentVersion: '8.12.0',
       });
 
       expectUpgradeStatusBadgeLabel(results, 'Upgrade failed');
@@ -406,9 +409,7 @@ describe('AgentUpgradeStatus', () => {
         latestAgentVersion: '8.12.0',
       });
       expectNoUpgradeStatusBadges(results);
-      expect(
-        results.container.querySelector('[data-euiicon-type="iInCircle"]')
-      ).not.toBeInTheDocument();
+      expect(results.container.querySelector('[data-euiicon-type="info"]')).not.toBeInTheDocument();
     });
   });
 });

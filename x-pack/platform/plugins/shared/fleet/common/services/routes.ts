@@ -25,6 +25,7 @@ import {
   FLEET_PROXY_API_ROUTES,
   UNINSTALL_TOKEN_ROUTES,
   FLEET_DEBUG_ROUTES,
+  REMOTE_SYNCED_INTEGRATIONS_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -42,6 +43,10 @@ export const epmRouteService = {
 
   getListLimitedPath: () => {
     return EPM_API_ROUTES.LIMITED_LIST_PATTERN;
+  },
+
+  getDatastreamsPath: () => {
+    return EPM_API_ROUTES.DATA_STREAMS_PATTERN;
   },
 
   getInfoPath: (pkgName: string, pkgVersion?: string) => {
@@ -80,6 +85,22 @@ export const epmRouteService = {
 
   getBulkInstallPath: () => {
     return EPM_API_ROUTES.BULK_INSTALL_PATTERN;
+  },
+
+  getBulkUpgradePath: () => {
+    return EPM_API_ROUTES.BULK_UPGRADE_PATTERN;
+  },
+
+  getBulkUninstallPath: () => {
+    return EPM_API_ROUTES.BULK_UNINSTALL_PATTERN;
+  },
+
+  getOneBulkUpgradePath: (taskId: string) => {
+    return EPM_API_ROUTES.BULK_UPGRADE_INFO_PATTERN.replace('{taskId}', taskId);
+  },
+
+  getOneBulkUninstallPath: (taskId: string) => {
+    return EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN.replace('{taskId}', taskId);
   },
 
   getRemovePath: (pkgName: string, pkgVersion?: string) => {
@@ -121,6 +142,15 @@ export const epmRouteService = {
       pkgVersion
     );
   },
+  getUpdateCustomIntegrationsPath: (pkgName: string) => {
+    return EPM_API_ROUTES.UPDATE_CUSTOM_INTEGRATIONS_PATTERN.replace('{pkgName}', pkgName);
+  },
+  getDeletePackageDatastreamAssets: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.PACKAGES_DATASTREAM_ASSETS.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
+  },
 };
 
 export const packagePolicyRouteService = {
@@ -155,6 +185,10 @@ export const packagePolicyRouteService = {
   getOrphanedIntegrationPoliciesPath: () => {
     return PACKAGE_POLICY_API_ROUTES.ORPHANED_INTEGRATION_POLICIES;
   },
+
+  getBulkGetPath: (): string => {
+    return PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN;
+  },
 };
 
 export const agentPolicyRouteService = {
@@ -168,6 +202,13 @@ export const agentPolicyRouteService = {
 
   getInfoPath: (agentPolicyId: string) => {
     return AGENT_POLICY_API_ROUTES.INFO_PATTERN.replace('{agentPolicyId}', agentPolicyId);
+  },
+
+  getAutoUpgradeAgentsStatusPath: (agentPolicyId: string) => {
+    return AGENT_POLICY_API_ROUTES.AUTO_UPGRADE_AGENTS_STATUS_PATTERN.replace(
+      '{agentPolicyId}',
+      agentPolicyId
+    );
   },
 
   getCreatePath: () => {
@@ -269,6 +310,9 @@ export const agentRouteService = {
   getAgentFileDeletePath: (fileId: string) =>
     AGENT_API_ROUTES.DELETE_UPLOAD_FILE_PATTERN.replace('{fileId}', fileId),
   getAgentsByActionsPath: () => AGENT_API_ROUTES.LIST_PATTERN,
+  postMigrateSingleAgent: (agentId: string) =>
+    AGENT_API_ROUTES.MIGRATE_PATTERN.replace('{agentId}', agentId),
+  postBulkMigrateAgents: () => AGENT_API_ROUTES.BULK_MIGRATE_PATTERN,
 };
 
 export const outputRoutesService = {
@@ -282,6 +326,8 @@ export const outputRoutesService = {
   getCreateLogstashApiKeyPath: () => OUTPUT_API_ROUTES.LOGSTASH_API_KEY_PATTERN,
   getOutputHealthPath: (outputId: string) =>
     OUTPUT_API_ROUTES.GET_OUTPUT_HEALTH_PATTERN.replace('{outputId}', outputId),
+  getRemoteSyncedIntegrationsStatusPath: (outputId: string) =>
+    REMOTE_SYNCED_INTEGRATIONS_API_ROUTES.INFO_PATTERN.replace('{outputId}', outputId),
 };
 
 export const fleetProxiesRoutesService = {
@@ -311,6 +357,7 @@ export const settingsRoutesService = {
   getUpdatePath: () => SETTINGS_API_ROUTES.UPDATE_PATTERN,
   getEnrollmentInfoPath: () => SETTINGS_API_ROUTES.ENROLLMENT_INFO_PATTERN,
   getSpaceInfoPath: () => SETTINGS_API_ROUTES.SPACE_INFO_PATTERN,
+  postSpaceAwarenessMigrationPath: () => APP_API_ROUTES.SPACE_AWARENESS_MIGRATION,
 };
 
 export const appRoutesService = {

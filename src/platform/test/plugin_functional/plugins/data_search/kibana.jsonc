@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/data-search-plugin",
+  "owner": "@elastic/kibana-data-discovery",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "dataSearchPlugin",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "data_search_test_plugin"
+    ],
+    "requiredPlugins": [
+      "data"
+    ]
+  }
+}

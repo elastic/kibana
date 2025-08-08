@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import Handlebars from 'handlebars';
+import Handlebars from '@kbn/handlebars';
 import { load, dump } from 'js-yaml';
 import type { Logger } from '@kbn/core/server';
 
@@ -15,14 +15,33 @@ import { toCompiledSecretRef } from '../../secrets';
 import { PackageInvalidArchiveError } from '../../../errors';
 import { appContextService } from '../..';
 
+import {
+  getHandlebarsCompiledTemplateCache,
+  setHandlebarsCompiledTemplateCache,
+} from '../packages/cache';
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../common/constants';
+
 const handlebars = Handlebars.create();
 
-export function compileTemplate(variables: PackagePolicyConfigRecord, templateStr: string) {
+export function compileTemplate(
+  variables: PackagePolicyConfigRecord,
+  templateStr: string,
+  inputType?: string,
+  otelcolSuffixId?: string
+) {
   const logger = appContextService.getLogger();
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+
   const { vars, yamlValues } = buildTemplateVariables(logger, variables);
   let compiledTemplate: string;
   try {
-    const template = handlebars.compile(templateStr, { noEscape: true });
+    let template = getHandlebarsCompiledTemplateCache(templateStr);
+
+    if (!template) {
+      template = handlebars.compileAST(templateStr, { noEscape: true });
+      setHandlebarsCompiledTemplateCache(templateStr, template);
+    }
+
     compiledTemplate = template(vars);
   } catch (err) {
     throw new PackageInvalidArchiveError(`Error while compiling agent template: ${err.message}`);
@@ -32,9 +51,18 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
   try {
     const yamlFromCompiledTemplate = load(compiledTemplate, {});
 
+    let patchedYaml = yamlFromCompiledTemplate;
+    if (
+      experimentalFeature.enableOtelIntegrations &&
+      inputType === OTEL_COLLECTOR_INPUT_TYPE &&
+      otelcolSuffixId
+    ) {
+      patchedYaml = patchYamlForOtelcol(yamlFromCompiledTemplate, otelcolSuffixId);
+    }
+
     // Hack to keep empty string ('') values around in the end yaml because
     // `load` replaces empty strings with null
-    const patchedYamlFromCompiledTemplate = Object.entries(yamlFromCompiledTemplate).reduce(
+    const patchedYamlFromCompiledTemplate = Object.entries(patchedYaml).reduce(
       (acc, [key, value]) => {
         if (value === null && typeof vars[key] === 'string' && vars[key].trim() === '') {
           acc[key] = '';
@@ -50,6 +78,52 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
   } catch (error) {
     throw new PackagePolicyValidationError(error);
   }
+}
+// Patch YAML for OTEL Collector
+function patchYamlForOtelcol(yaml: any, otelcolSuffixId: string): string | undefined {
+  const parentKeys = ['receivers', 'processors', 'extensions'];
+
+  const updatedYaml = replaceKeyByParent(yaml, parentKeys, otelcolSuffixId);
+
+  return updatedYaml;
+}
+
+// Recursive function, appends suffix to the first key under the keys specified in targetParents.
+export function replaceKeyByParent(
+  obj: any,
+  targetParents: string[],
+  suffix: string,
+  parentKey: string | null = null
+): any {
+  if (Array.isArray(obj)) {
+    const oldKey = obj[0];
+    if (parentKey && targetParents.includes(parentKey)) {
+      return obj.map((item) =>
+        item === oldKey
+          ? `${oldKey}/${suffix}`
+          : replaceKeyByParent(item, targetParents, suffix, parentKey)
+      );
+    } else {
+      return obj.map((item) => replaceKeyByParent(item, targetParents, suffix, parentKey));
+    }
+  } else if (typeof obj === 'object' && obj !== null) {
+    const newObj: any = {};
+
+    for (const key in obj) {
+      if (Object.hasOwn(obj, key)) {
+        const value = obj[key];
+        if (parentKey && targetParents.includes(parentKey)) {
+          const oldKey = Object.keys(obj)[0];
+          const updatedKey = key === oldKey ? `${oldKey}/${suffix}` : key;
+          newObj[updatedKey] = replaceKeyByParent(value, targetParents, suffix, key);
+        } else {
+          newObj[key] = replaceKeyByParent(value, targetParents, suffix, key);
+        }
+      }
+    }
+    return newObj;
+  }
+  return obj;
 }
 
 function isValidKey(key: string) {
@@ -79,7 +153,6 @@ function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRe
     // support variables with . like key.patterns
     const keyParts = key.split('.');
     const lastKeyPart = keyParts.pop();
-    logger.debug(`Building agent template variables`);
 
     if (!lastKeyPart || !isValidKey(lastKeyPart)) {
       throw new PackageInvalidArchiveError(
@@ -105,7 +178,11 @@ function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRe
       varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
       yamlValues[yamlKeyPlaceholder] = recordEntry.value ? load(recordEntry.value) : null;
     } else if (recordEntry.value && recordEntry.value.isSecretRef) {
-      varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
+      if (recordEntry.value.ids) {
+        varPart[lastKeyPart] = recordEntry.value.ids.map((id: string) => toCompiledSecretRef(id));
+      } else {
+        varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
+      }
     } else {
       varPart[lastKeyPart] = recordEntry.value;
     }

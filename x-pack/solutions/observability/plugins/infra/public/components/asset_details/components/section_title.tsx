@@ -28,19 +28,22 @@ export const TitleWithTooltip = ({
   'data-test-subj': dataTestSubject,
   tooltipTestSubj,
   tooltipContent,
+  tooltipAriaLabel,
 }: {
   title: string;
   tooltipContent: ReactNode;
   'data-test-subj'?: string;
   tooltipTestSubj?: string;
+  tooltipAriaLabel?: string;
 }) => {
+  const ariaLabel = tooltipAriaLabel ?? title;
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <SectionTitle title={title} data-test-subj={dataTestSubject} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <Popover icon="iInCircle" data-test-subj={tooltipTestSubj}>
+        <Popover icon="info" data-test-subj={tooltipTestSubj} aria-label={ariaLabel}>
           {tooltipContent}
         </Popover>
       </EuiFlexItem>

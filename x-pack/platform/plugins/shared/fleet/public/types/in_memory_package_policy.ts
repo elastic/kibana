@@ -12,5 +12,6 @@ export interface InMemoryPackagePolicy extends PackagePolicy {
   packageName?: string;
   packageTitle?: string;
   packageVersion?: string;
+  type?: string;
   hasUpgrade: boolean;
 }

@@ -14,7 +14,7 @@ import { encode, decode } from '@kbn/cbor';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ContentStream, ContentStreamEncoding, ContentStreamParameters } from './content_stream';
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { FileDocument } from '../../../../file_client/file_metadata_client/adapters/es_index';
 import { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 
@@ -85,15 +85,13 @@ describe('ContentStream', () => {
         const data = await new Promise((resolve) => stream.once('data', resolve));
 
         expect(client.search).toHaveBeenCalledWith({
-          body: {
-            _source: false,
-            query: {
-              term: {
-                _id: 'something.0',
-              },
+          _source: false,
+          query: {
+            term: {
+              _id: 'something.0',
             },
-            size: 1,
           },
+          size: 1,
           index: 'somewhere',
         });
         expect(data).toEqual(Buffer.from('some content'));

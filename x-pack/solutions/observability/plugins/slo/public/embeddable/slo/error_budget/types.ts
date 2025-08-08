@@ -25,7 +25,7 @@ export interface EmbeddableSloProps {
   onRenderComplete?: () => void;
 }
 
-interface ErrorBudgetCustomInput {
+export interface ErrorBudgetCustomInput {
   sloId: string | undefined;
   sloInstanceId: string | undefined;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { SyntheticsEsClient } from '../lib';
 import { Ping } from '../../common/runtime_types/ping';
 
@@ -19,7 +19,7 @@ export const getLastSuccessfulStepParams = ({
   monitorId,
   timestamp,
   location,
-}: GetStepScreenshotParams): estypes.SearchRequest['body'] => {
+}: GetStepScreenshotParams): estypes.SearchRequest => {
   return {
     size: 1,
     sort: [
@@ -94,17 +94,16 @@ export const getLastSuccessfulCheck = async ({
     location,
   });
 
-  const { body: result } = await syntheticsEsClient.search({ body: lastSuccessCheckParams });
+  const { body: result } = await syntheticsEsClient.search(lastSuccessCheckParams);
 
   if (result.hits.total.value < 1) {
     return null;
   }
 
-  const check = result.hits.hits[0]._source as Ping & { '@timestamp': string };
+  const check = result.hits.hits[0]._source as Ping;
 
   return {
     ...check,
-    timestamp: check['@timestamp'],
     docId: result.hits.hits[0]._id!,
   };
 };

@@ -6,11 +6,18 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiButtonEmpty,
+  EuiIcon,
+  EuiLink,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { NO_PERMISSION_LABEL } from '../../../../../common/custom_link';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { LegacyAPMLink } from '../../links/apm/apm_link';
 
 export function CustomLinkToolbar({
   onClickCreate,
@@ -21,6 +28,7 @@ export function CustomLinkToolbar({
 }) {
   const { core } = useApmPluginContext();
   const canSave = !!core.application.capabilities.apm.save;
+  const { link } = useApmRouter();
 
   return (
     <EuiFlexGroup>
@@ -33,15 +41,28 @@ export function CustomLinkToolbar({
                 defaultMessage: 'Manage custom links',
               })}
             >
-              <LegacyAPMLink path={`/settings/custom-links`}>
-                <EuiIcon type="gear" color="text" aria-label="Custom links settings page" />
-              </LegacyAPMLink>
+              <EuiLink
+                data-test-subj="apmCustomLinksSettingsPage"
+                href={link('/settings/custom-links')}
+              >
+                <EuiIcon
+                  type="gear"
+                  color="text"
+                  aria-label={i18n.translate(
+                    'xpack.apm.customLinkToolbar.euiIcon.customLinksSettingsPageLabel',
+                    { defaultMessage: 'Custom links settings page' }
+                  )}
+                />
+              </EuiLink>
             </EuiToolTip>
           </EuiFlexItem>
           {showCreateButton && (
             <EuiToolTip content={!canSave && NO_PERMISSION_LABEL}>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  aria-label={i18n.translate('xpack.apm.customLinkToolbar.createButton.ariaLabel', {
+                    defaultMessage: 'Create',
+                  })}
                   data-test-subj="apmCustomLinkToolbarCreateButton"
                   isDisabled={!canSave}
                   iconType="plusInCircle"

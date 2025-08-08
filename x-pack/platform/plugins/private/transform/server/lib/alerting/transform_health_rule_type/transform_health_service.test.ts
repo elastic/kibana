@@ -16,7 +16,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { transformHealthServiceProvider } from './transform_health_service';
-import type { TransformHealthRuleParams } from './schema';
+import type { TransformHealthRuleParams } from '@kbn/response-ops-rule-params/transform_health';
 
 describe('transformHealthServiceProvider', () => {
   let esClient: jest.Mocked<ElasticsearchClient>;

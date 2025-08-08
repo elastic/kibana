@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import type { ResolvedSimpleSavedObject, SavedObjectReference } from '@kbn/core/public';
+import type {
+  SavedObjectsResolveResponse,
+  SavedObjectReference,
+} from '@kbn/core-saved-objects-api-server';
 import type { MapAttributes } from '../../../../common/content_management';
 import { getMapClient } from '../../../content_management';
 import { injectReferences } from '../../../../common/migrations/references';
 
 export interface SharingSavedObjectProps {
-  outcome?: ResolvedSimpleSavedObject['outcome'];
-  aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
-  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+  outcome?: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
   sourceId?: string;
 }
 

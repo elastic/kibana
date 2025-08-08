@@ -1,0 +1,46 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "stripInternal": true,
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.js",
+    "src/jest/jest_flags.json",
+  ],
+  "exclude": [
+    "types/**/*",
+    "**/__fixtures__/**/*",
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/dev-utils",
+    "@kbn/std",
+    "@kbn/tooling-log",
+    "@kbn/get-repo-files",
+    "@kbn/peggy",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/ci-stats-reporter",
+    "@kbn/repo-info",
+    "@kbn/es",
+    "@kbn/dev-proc-runner",
+    "@kbn/jest-serializers",
+    "@kbn/stdio-dev-helpers",
+    "@kbn/babel-register",
+    "@kbn/repo-packages",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/mock-idp-utils",
+    "@kbn/code-owners",
+    "@kbn/scout-reporting",
+    "@kbn/scout-info",
+    "@kbn/react-mute-legacy-root-warning",
+    "@kbn/babel-preset",
+    "@kbn/dot-text",
+  ]
+}

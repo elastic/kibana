@@ -42,24 +42,22 @@ export async function getServicesCounts({
       // This is an edge case that only effects the count preview label.
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: 0,
-      size: 0,
-      query: {
-        bool: {
-          filter: rangeQuery(start, end),
-        },
+    track_total_hits: 0,
+    size: 0,
+    query: {
+      bool: {
+        filter: rangeQuery(start, end),
       },
-      aggs: {
-        service_groups: {
-          filters: {
-            filters: serviceGroupsKueryMap,
-          },
-          aggs: {
-            services_count: {
-              cardinality: {
-                field: SERVICE_NAME,
-              },
+    },
+    aggs: {
+      service_groups: {
+        filters: {
+          filters: serviceGroupsKueryMap,
+        },
+        aggs: {
+          services_count: {
+            cardinality: {
+              field: SERVICE_NAME,
             },
           },
         },

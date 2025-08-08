@@ -14,8 +14,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { GLOBAL_CALENDAR } from '../../../../../../common/constants/calendars';
-import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
+import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
+import { MANAGEMENT_SECTION_IDS } from '../../../../management';
 
 export const CalendarsListTable = ({
   calendarsList,
@@ -28,8 +29,9 @@ export const CalendarsListTable = ({
   itemsSelected,
   isDst,
 }) => {
-  const redirectToNewCalendarPage = useCreateAndNavigateToMlLink(
-    isDst ? ML_PAGES.CALENDARS_DST_NEW : ML_PAGES.CALENDARS_NEW
+  const redirectToNewCalendarPage = useCreateAndNavigateToManagementMlLink(
+    isDst ? ML_PAGES.CALENDARS_DST_NEW : ML_PAGES.CALENDARS_NEW,
+    MANAGEMENT_SECTION_IDS.AD_SETTINGS
   );
 
   const sorting = {

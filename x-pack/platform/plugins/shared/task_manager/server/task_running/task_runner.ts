@@ -15,9 +15,20 @@ import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
-import { ExecutionContextStart, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { Middleware } from '../lib/middleware';
+import type {
+  ExecutionContextStart,
+  FakeRawRequest,
+  Headers,
+  IBasePath,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-utils';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { Middleware } from '../lib/middleware';
+import type { Result } from '../lib/result_type';
 import {
   asErr,
   asOk,
@@ -26,35 +37,32 @@ import {
   mapErr,
   mapOk,
   promiseResult,
-  Result,
   unwrap,
 } from '../lib/result_type';
+import type { TaskMarkRunning, TaskRun, TaskTiming, TaskManagerStat } from '../task_events';
 import {
   asTaskMarkRunningEvent,
   asTaskRunEvent,
   asTaskManagerStatEvent,
   startTaskTimerWithEventLoopMonitoring,
-  TaskMarkRunning,
   TaskPersistence,
-  TaskRun,
-  TaskTiming,
-  TaskManagerStat,
 } from '../task_events';
-import { intervalFromDate } from '../lib/intervals';
+import { intervalFromDate, parseIntervalAsMillisecond } from '../lib/intervals';
 import { createWrappedLogger } from '../lib/wrapped_logger';
-import {
+import type {
   CancelFunction,
   CancellableTask,
   ConcreteTaskInstance,
   FailedRunResult,
   FailedTaskResult,
-  isFailedRunResult,
+  IntervalSchedule,
   PartialConcreteTaskInstance,
+  RruleSchedule,
   SuccessfulRunResult,
   TaskDefinition,
-  TaskStatus,
 } from '../task';
-import { TaskTypeDictionary } from '../task_type_dictionary';
+import { isFailedRunResult, TaskStatus } from '../task';
+import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError, isUserError } from './errors';
 import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
 import { TaskValidator } from '../task_validator';
@@ -106,6 +114,7 @@ export interface Updatable {
 }
 
 type Opts = {
+  basePathService: IBasePath;
   logger: Logger;
   definitions: TaskTypeDictionary;
   instance: ConcreteTaskInstance;
@@ -165,6 +174,7 @@ export class TaskManagerRunner implements TaskRunner {
   private onTaskEvent: (event: TaskRun | TaskMarkRunning | TaskManagerStat) => void;
   private defaultMaxAttempts: number;
   private uuid: string;
+  private readonly basePathService: IBasePath;
   private readonly executionContext: ExecutionContextStart;
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
@@ -183,6 +193,7 @@ export class TaskManagerRunner implements TaskRunner {
    * @memberof TaskManagerRunner
    */
   constructor({
+    basePathService,
     instance,
     definitions,
     logger,
@@ -198,6 +209,7 @@ export class TaskManagerRunner implements TaskRunner {
     strategy,
     getPollInterval,
   }: Opts) {
+    this.basePathService = basePathService;
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
     this.logger = logger;
@@ -377,7 +389,12 @@ export class TaskManagerRunner implements TaskRunner {
     );
 
     try {
-      this.task = definition.createTaskRunner(modifiedContext);
+      const sanitizedTaskInstance = omit(modifiedContext.taskInstance, ['apiKey', 'userScope']);
+      const fakeRequest = this.getFakeKibanaRequest(
+        modifiedContext.taskInstance.apiKey,
+        modifiedContext.taskInstance.userScope?.spaceId
+      );
+      this.task = definition.createTaskRunner({ taskInstance: sanitizedTaskInstance, fakeRequest });
 
       const ctx = {
         type: 'task manager',
@@ -594,6 +611,18 @@ export class TaskManagerRunner implements TaskRunner {
     return this.instance.task.attempts < this.getMaxAttempts();
   }
 
+  private shouldUpdateExpiredTask(): boolean {
+    if (!this.instance.task.schedule || !this.instance.task.schedule.interval) {
+      // if the task does not have a schedule interval, we will not update it on timeout
+      return false;
+    }
+
+    const timeoutDuration = parseIntervalAsMillisecond(this.timeout);
+    const scheduleDuration = parseIntervalAsMillisecond(this.instance.task.schedule.interval);
+
+    return scheduleDuration > timeoutDuration;
+  }
+
   private rescheduleFailedRun = (
     failureResult: FailedRunResult
   ): Result<SuccessfulRunResult, FailedTaskResult> => {
@@ -603,19 +632,20 @@ export class TaskManagerRunner implements TaskRunner {
     if (this.shouldTryToScheduleRetry() && !isUnrecoverableError(error)) {
       // if we're retrying, keep the number of attempts
 
-      const reschedule = failureResult.runAt
-        ? { runAt: failureResult.runAt }
-        : failureResult.schedule
-        ? { schedule: failureResult.schedule }
-        : schedule
-        ? { schedule }
-        : // when result.error is truthy, then we're retrying because it failed
-          {
-            runAt: getRetryDate({
-              attempts,
-              error,
-            }),
-          };
+      let reschedule:
+        | { runAt?: Date; schedule?: never }
+        | { schedule?: IntervalSchedule | RruleSchedule; runAt?: never } = {};
+
+      if (failureResult.runAt) {
+        reschedule = { runAt: failureResult.runAt };
+      } else if (failureResult.schedule) {
+        reschedule = { schedule: failureResult.schedule };
+      } else if (schedule) {
+        reschedule = { schedule };
+      } else {
+        // when result.error is truthy, then we're retrying because it failed
+        reschedule = { runAt: getRetryDate({ attempts, error }) };
+      }
 
       if (reschedule.runAt || reschedule.schedule) {
         return asOk({
@@ -661,7 +691,8 @@ export class TaskManagerRunner implements TaskRunner {
                   startedAt: this.instance.task.startedAt,
                   schedule: updatedTaskSchedule,
                 },
-                this.getPollInterval()
+                this.getPollInterval(),
+                this.logger
               ),
             state,
             schedule: updatedTaskSchedule,
@@ -673,13 +704,7 @@ export class TaskManagerRunner implements TaskRunner {
       unwrap
     )(result);
 
-    if (this.isExpired) {
-      this.usageCounter?.incrementCounter({
-        counterName: `taskManagerUpdateSkippedDueToTaskExpiration`,
-        counterType: 'taskManagerTaskRunner',
-        incrementBy: 1,
-      });
-    } else if (
+    if (
       fieldUpdates.status === TaskStatus.Failed ||
       fieldUpdates.status === TaskStatus.ShouldDelete
     ) {
@@ -689,22 +714,54 @@ export class TaskManagerRunner implements TaskRunner {
     } else {
       const { shouldValidate = true } = unwrap(result);
 
-      const partialTask = {
-        ...fieldUpdates,
-        // reset fields that track the lifecycle of the concluded `task run`
-        startedAt: null,
-        retryAt: null,
-        ownerId: null,
+      let shouldUpdateTask: boolean = false;
+      let partialTask: PartialConcreteTaskInstance = {
         id: this.instance.task.id,
         version: this.instance.task.version,
       };
 
-      this.instance = asRan(
-        await this.bufferedTaskStore.partialUpdate(partialTask, {
-          validate: shouldValidate,
-          doc: this.instance.task,
-        })
-      );
+      if (this.isExpired) {
+        this.usageCounter?.incrementCounter({
+          counterName: `taskManagerUpdateSkippedDueToTaskExpiration`,
+          counterType: 'taskManagerTaskRunner',
+          incrementBy: 1,
+        });
+
+        if (this.shouldUpdateExpiredTask()) {
+          shouldUpdateTask = true;
+
+          partialTask = {
+            ...partialTask,
+            // excluding updated task state from the update
+            // because the execution ended in failure due to timeout, we do not update the state
+            status: TaskStatus.Idle,
+            runAt: fieldUpdates.runAt,
+            // reset fields that track the lifecycle of the concluded `task run`
+            startedAt: null,
+            retryAt: null,
+            ownerId: null,
+          };
+        }
+      } else {
+        shouldUpdateTask = true;
+        partialTask = {
+          ...partialTask,
+          ...fieldUpdates,
+          // reset fields that track the lifecycle of the concluded `task run`
+          startedAt: null,
+          retryAt: null,
+          ownerId: null,
+        };
+      }
+
+      if (shouldUpdateTask) {
+        this.instance = asRan(
+          await this.bufferedTaskStore.partialUpdate(partialTask, {
+            validate: shouldValidate,
+            doc: this.instance.task,
+          })
+        );
+      }
     }
 
     return fieldUpdates.status === TaskStatus.Failed
@@ -803,7 +860,7 @@ export class TaskManagerRunner implements TaskRunner {
               task,
               persistence: task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring,
               result: await this.processResultForRecurringTask(result),
-              isExpired: this.isExpired,
+              isExpired: taskHasExpired,
               error,
             }),
             taskTiming
@@ -827,6 +884,25 @@ export class TaskManagerRunner implements TaskRunner {
 
   private getMaxAttempts() {
     return this.definition?.maxAttempts ?? this.defaultMaxAttempts;
+  }
+
+  private getFakeKibanaRequest(apiKey?: string, spaceId?: string): KibanaRequest | undefined {
+    if (apiKey) {
+      const requestHeaders: Headers = {};
+
+      requestHeaders.authorization = `ApiKey ${apiKey}`;
+      const path = addSpaceIdToPath('/', spaceId || 'default');
+
+      const fakeRawRequest: FakeRawRequest = {
+        headers: requestHeaders,
+        path: '/',
+      };
+
+      const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+      this.basePathService.set(fakeRequest, path);
+
+      return fakeRequest;
+    }
   }
 }
 

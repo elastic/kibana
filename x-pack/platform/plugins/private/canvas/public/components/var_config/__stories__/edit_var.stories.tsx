@@ -6,7 +6,6 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 
 import { CanvasVariable } from '../../../../types';
@@ -31,36 +30,58 @@ const variables: CanvasVariable[] = [
   },
 ];
 
-storiesOf('components/Variables/EditVar', module)
-  .add('new variable', () => (
+export default {
+  title: 'components/Variables/EditVar',
+};
+
+export const NewVariable = {
+  render: () => (
     <EditVar
       variables={variables}
       selectedVar={null}
       onSave={action('onSave')}
       onCancel={action('onCancel')}
     />
-  ))
-  .add('edit variable (string)', () => (
+  ),
+
+  name: 'new variable',
+};
+
+export const EditVariableString = {
+  render: () => (
     <EditVar
       variables={variables}
       selectedVar={variables[0]}
       onSave={action('onSave')}
       onCancel={action('onCancel')}
     />
-  ))
-  .add('edit variable (number)', () => (
+  ),
+
+  name: 'edit variable (string)',
+};
+
+export const EditVariableNumber = {
+  render: () => (
     <EditVar
       variables={variables}
       selectedVar={variables[1]}
       onSave={action('onSave')}
       onCancel={action('onCancel')}
     />
-  ))
-  .add('edit variable (boolean)', () => (
+  ),
+
+  name: 'edit variable (number)',
+};
+
+export const EditVariableBoolean = {
+  render: () => (
     <EditVar
       variables={variables}
       selectedVar={variables[2]}
       onSave={action('onSave')}
       onCancel={action('onCancel')}
     />
-  ));
+  ),
+
+  name: 'edit variable (boolean)',
+};

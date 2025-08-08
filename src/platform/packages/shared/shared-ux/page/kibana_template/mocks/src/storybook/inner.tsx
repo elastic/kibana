@@ -33,24 +33,24 @@ const noDataConfigMock = new NoDataConfigPageStorybookMock();
 
 export const pageHeaderArguments: ArgumentParams<PropArguments> = {
   isEmptyState: {
-    control: 'boolean',
+    control: { control: 'boolean' },
     defaultValue: false,
   },
   iconType: {
-    control: { type: 'radio' },
+    control: { control: 'radio' },
     options: ['logoElastic', 'logoKibana', 'logoCloud', undefined],
     defaultValue: undefined,
   },
   pageTitle: {
-    control: 'text',
+    control: { control: 'text' },
     defaultValue: 'Page title',
   },
   description: {
-    control: 'text',
+    control: { control: 'text' },
     defaultValue: 'Page description',
   },
   rightSideItems: {
-    control: 'boolean',
+    control: { control: 'boolean' },
     defaultValue: true,
   },
 };

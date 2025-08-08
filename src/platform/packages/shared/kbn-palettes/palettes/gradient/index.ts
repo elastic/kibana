@@ -15,3 +15,4 @@ export * from './warm';
 export * from './temperature';
 export * from './complementary';
 export * from './status';
+export * from './compare_to';

@@ -10,9 +10,8 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { connector } from '../mock';
 import { useGetSeverity } from './use_get_severity';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import * as api from './api';
+import { TestProviders } from '../../../common/mock';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./api');
@@ -21,10 +20,8 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('useGetSeverity', () => {
   const { http } = useKibanaMock().services;
-  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -36,7 +33,7 @@ describe('useGetSeverity', () => {
           http,
           connector,
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => result.current.isSuccess);
@@ -55,7 +52,7 @@ describe('useGetSeverity', () => {
         useGetSeverity({
           http,
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     expect(spy).not.toHaveBeenCalledWith();
@@ -76,7 +73,7 @@ describe('useGetSeverity', () => {
           http,
           connector,
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => {
@@ -101,7 +98,7 @@ describe('useGetSeverity', () => {
           http,
           connector,
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => {

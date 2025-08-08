@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import type { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { Gap } from '../gap';
-import { StringInterval } from '../types';
+import type { StringInterval } from '../types';
 
 type PotentialInterval = { lte?: string; gte?: string } | undefined;
 
@@ -31,7 +31,10 @@ export const transformToGap = (events: Pick<QueryEventsBySavedObjectResult, 'dat
   return events?.data
     ?.map((doc) => {
       const gap = doc?.kibana?.alert?.rule?.gap;
-      if (!gap) return null;
+      // Filter out deleted gaps in the event that we request them by id.
+      // Due to a race condition when we update gaps, we could end up requesting a deleted gap by id
+      // Deleted gaps should not be used by Kibana at all because it means that the rule they are associated with has been deleted
+      if (!gap || gap.deleted) return null;
 
       const range = validateInterval(gap.range);
 

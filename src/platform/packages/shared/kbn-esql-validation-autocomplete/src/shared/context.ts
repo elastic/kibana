@@ -8,68 +8,39 @@
  */
 
 import {
-  type ESQLAstItem,
-  type ESQLSingleAstItem,
-  type ESQLAst,
-  type ESQLFunction,
-  type ESQLCommand,
-  type ESQLCommandOption,
-  type ESQLCommandMode,
+  ESQLCommandOption,
   Walker,
   isIdentifier,
+  isOptionNode,
+  isSource,
+  isColumn,
+  isList,
+  type ESQLAst,
+  type ESQLAstItem,
+  type ESQLCommand,
+  type ESQLFunction,
+  type ESQLSingleAstItem,
 } from '@kbn/esql-ast';
-import { ENRICH_MODES } from '../definitions/settings';
-import { EDITOR_MARKER } from './constants';
-import {
-  isOptionItem,
-  isColumnItem,
-  isSourceItem,
-  isSettingItem,
-  pipePrecedesCurrentWord,
-  getFunctionDefinition,
-} from './helpers';
-
-function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {
-  for (const node of nodes) {
-    if (Array.isArray(node)) {
-      const ret = findNode(node, offset);
-      if (ret) {
-        return ret;
-      }
-    } else {
-      if (node && node.location && node.location.min <= offset && node.location.max >= offset) {
-        if ('args' in node) {
-          const ret = findNode(node.args, offset);
-          // if the found node is the marker, then return its parent
-          if (ret?.text === EDITOR_MARKER) {
-            return node;
-          }
-          if (ret) {
-            return ret;
-          }
-        }
-        return node;
-      }
-    }
-  }
-}
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
+import { pipePrecedesCurrentWord } from '@kbn/esql-ast/src/definitions/utils';
+import { within } from '@kbn/esql-ast/src/definitions/utils/autocomplete/helpers';
+import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
 
 function findCommand(ast: ESQLAst, offset: number) {
   const commandIndex = ast.findIndex(
     ({ location }) => location.min <= offset && location.max >= offset
   );
-  return ast[commandIndex] || ast[ast.length - 1];
+
+  const command = ast[commandIndex] || ast[ast.length - 1];
+
+  return command;
 }
 
 function findOption(nodes: ESQLAstItem[], offset: number): ESQLCommandOption | undefined {
-  return findCommandSubType(nodes, offset, isOptionItem);
+  return findCommandSubType(nodes, offset, isOptionNode);
 }
 
-function findSetting(nodes: ESQLAstItem[], offset: number): ESQLCommandMode | undefined {
-  return findCommandSubType(nodes, offset, isSettingItem);
-}
-
-function findCommandSubType<T extends ESQLCommandMode | ESQLCommandOption>(
+function findCommandSubType<T extends ESQLCommandOption>(
   nodes: ESQLAstItem[],
   offset: number,
   isOfTypeFn: (node: ESQLAstItem) => node is T
@@ -86,10 +57,14 @@ function findCommandSubType<T extends ESQLCommandMode | ESQLCommandOption>(
   }
 }
 
-export function isMarkerNode(node: ESQLSingleAstItem | undefined): boolean {
+export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
+  if (Array.isArray(node)) {
+    return false;
+  }
+
   return Boolean(
     node &&
-      (isColumnItem(node) || isIdentifier(node) || isSourceItem(node)) &&
+      (isColumn(node) || isIdentifier(node) || isSource(node)) &&
       node.name.endsWith(EDITOR_MARKER)
   );
 }
@@ -121,27 +96,62 @@ export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLCo
   return node;
 }
 
+const removeMarkerNode = (node: ESQLAstExpression) => {
+  Walker.walk(node, {
+    visitAny: (current) => {
+      if ('args' in current) {
+        current.args = current.args.filter((n) => !isMarkerNode(n));
+      } else if ('values' in current) {
+        current.values = current.values.filter((n) => !isMarkerNode(n));
+      }
+    },
+  });
+};
+
 function findAstPosition(ast: ESQLAst, offset: number) {
   const command = findCommand(ast, offset);
   if (!command) {
-    return { command: undefined, node: undefined, option: undefined, setting: undefined };
+    return { command: undefined, node: undefined };
   }
+
+  let containingFunction: ESQLFunction | undefined;
+  let node: ESQLSingleAstItem | undefined;
+
+  Walker.walk(command, {
+    visitSource: (_node, parent, walker) => {
+      if (_node.location.max >= offset && _node.text !== EDITOR_MARKER) {
+        node = _node as ESQLSingleAstItem;
+        walker.abort();
+      }
+    },
+    visitAny: (_node) => {
+      if (
+        _node.type === 'function' &&
+        _node.subtype === 'variadic-call' &&
+        _node.location?.max >= offset
+      ) {
+        containingFunction = _node;
+      }
+
+      if (
+        _node.location.max >= offset &&
+        _node.text !== EDITOR_MARKER &&
+        (!isList(_node) || _node.subtype !== 'tuple')
+      ) {
+        node = _node as ESQLSingleAstItem;
+      }
+    },
+  });
+
+  if (node) removeMarkerNode(node);
+
   return {
     command: removeMarkerArgFromArgsList(command)!,
+    containingFunction: removeMarkerArgFromArgsList(containingFunction),
     option: removeMarkerArgFromArgsList(findOption(command.args, offset)),
-    node: removeMarkerArgFromArgsList(cleanMarkerNode(findNode(command.args, offset))),
-    setting: removeMarkerArgFromArgsList(findSetting(command.args, offset)),
+    node: removeMarkerArgFromArgsList(cleanMarkerNode(node)),
   };
 }
-
-function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
-  return node.name !== '=' && command.name !== 'enrich';
-}
-
-function isBuiltinFunction(node: ESQLFunction) {
-  return getFunctionDefinition(node.name)?.type === 'builtin';
-}
-
 /**
  * Given a ES|QL query string, its AST and the cursor position,
  * it returns the type of context for the position ("list", "function", "option", "setting", "expression", "newCommand")
@@ -150,8 +160,6 @@ function isBuiltinFunction(node: ESQLFunction) {
  * Type details:
  * * "list": the cursor is inside a "in" list of values (i.e. `a in (1, 2, <here>)`)
  * * "function": the cursor is inside a function call (i.e. `fn(<here>)`)
- * * "option": the cursor is inside a command option (i.e. `command ... by <here>`)
- * * "setting": the cursor is inside a setting (i.e. `command _<here>`)
  * * "expression": the cursor is inside a command expression (i.e. `command ... <here>` or `command a = ... <here>`)
  * * "newCommand": the cursor is at the beginning of a new command (i.e. `command1 | command2 | <here>`)
  */
@@ -159,7 +167,15 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
   let inComment = false;
 
   Walker.visitComments(ast, (node) => {
-    if (node.location && node.location.min <= offset && node.location.max > offset) {
+    // if the cursor (offset) is within the range of a comment node
+    if (within(offset, node.location)) {
+      inComment = true;
+      // or if the cursor (offset) is right after a single-line comment (which means there was no newline)
+    } else if (
+      node.subtype === 'single-line' &&
+      node.location &&
+      offset === node.location.max + 1
+    ) {
       inComment = true;
     }
   });
@@ -170,53 +186,23 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
     };
   }
 
-  const { command, option, setting, node } = findAstPosition(ast, offset);
-  if (node) {
-    if (node.type === 'literal' && node.literalType === 'keyword') {
-      // command ... "<here>"
-      return { type: 'value' as const, command, node, option, setting };
-    }
-    if (node.type === 'function') {
-      if (['in', 'not_in'].includes(node.name) && Array.isArray(node.args[1])) {
-        // command ... a in ( <here> )
-        return { type: 'list' as const, command, node, option, setting };
-      }
-      if (
-        isNotEnrichClauseAssigment(node, command) &&
-        // Temporarily mangling the logic here to let operators
-        // be handled as functions for the stats command.
-        // I expect this to simplify once https://github.com/elastic/kibana/issues/195418
-        // is complete
-        !(isBuiltinFunction(node) && command.name !== 'stats')
-      ) {
-        // command ... fn( <here> )
-        return { type: 'function' as const, command, node, option, setting };
-      }
-    }
-    // for now it's only an enrich thing
-    if (node.type === 'source' && node.text === ENRICH_MODES.prefix) {
-      // command _<here>
-      return { type: 'setting' as const, command, node, option, setting };
-    }
-  }
-  if (!command || (queryString.length <= offset && pipePrecedesCurrentWord(queryString))) {
+  const { command, option, node, containingFunction } = findAstPosition(ast, offset);
+  if (
+    !command ||
+    (queryString.length <= offset &&
+      pipePrecedesCurrentWord(queryString) &&
+      command.location.max < queryString.length)
+  ) {
     //   // ... | <here>
-    return { type: 'newCommand' as const, command: undefined, node, option, setting };
-  }
-
-  // TODO — remove this option branch once https://github.com/elastic/kibana/issues/195418 is complete
-  if (command && isOptionItem(command.args[command.args.length - 1]) && command.name !== 'stats') {
-    if (option) {
-      return { type: 'option' as const, command, node, option, setting };
-    }
+    return { type: 'newCommand' as const, command: undefined, node, option, containingFunction };
   }
 
   // command a ... <here> OR command a = ... <here>
   return {
     type: 'expression' as const,
     command,
+    containingFunction,
     option,
     node,
-    setting,
   };
 }

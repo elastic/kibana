@@ -16,7 +16,8 @@
     ],
     "optionalPlugins": [
       "home",
-      "usageCollection"
+      "usageCollection",
+      "spaces",
     ],
     "requiredBundles": []
   }

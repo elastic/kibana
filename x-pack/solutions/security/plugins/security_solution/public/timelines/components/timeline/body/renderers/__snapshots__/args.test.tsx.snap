@@ -13,6 +13,7 @@ exports[`Args rendering it renders against shallow snapshot 1`] = `
       field="process.args"
       fieldType="keyword"
       isAggregatable={true}
+      scopeId="some_scope"
       value="arg1"
     />
   </TokensFlexItem>
@@ -27,6 +28,7 @@ exports[`Args rendering it renders against shallow snapshot 1`] = `
       field="process.args"
       fieldType="keyword"
       isAggregatable={true}
+      scopeId="some_scope"
       value="arg2"
     />
   </TokensFlexItem>
@@ -41,6 +43,7 @@ exports[`Args rendering it renders against shallow snapshot 1`] = `
       field="process.args"
       fieldType="keyword"
       isAggregatable={true}
+      scopeId="some_scope"
       value="arg3"
     />
   </TokensFlexItem>
@@ -54,6 +57,7 @@ exports[`Args rendering it renders against shallow snapshot 1`] = `
       field="process.title"
       fieldType="keyword"
       isAggregatable={true}
+      scopeId="some_scope"
       value="process-title-1"
     />
   </TokensFlexItem>

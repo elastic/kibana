@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export * from './src/kbn_zod_types';
 export * from './src/array_from_string';
-export * from './src/boolean_from_string';
 export * from './src/expect_parse_error';
 export * from './src/expect_parse_success';
 export * from './src/is_valid_date_math';

@@ -6,8 +6,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { RuleParamsV1 } from '@kbn/response-ops-rule-params';
-import {
+import type { RuleParamsV1 } from '@kbn/response-ops-rule-params';
+import type {
   ruleResponseSchemaV1,
   ruleSnoozeScheduleSchemaV1,
   ruleLastRunSchemaV1,
@@ -54,4 +54,5 @@ export interface RuleResponse<Params extends RuleParamsV1 = never> {
   view_in_app_relative_url?: RuleResponseSchemaType['view_in_app_relative_url'];
   alert_delay?: RuleResponseSchemaType['alert_delay'];
   flapping?: RuleResponseSchemaType['flapping'];
+  artifacts?: RuleResponseSchemaType['artifacts'];
 }

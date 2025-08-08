@@ -28,7 +28,8 @@ import {
   type Action,
 } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { CONTROL_GROUP_TYPE } from '../../common';
+import { map } from 'rxjs';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import { CanClearSelections, isClearableControl } from '../types';
 
 import { ACTION_CLEAR_CONTROL } from './constants';
@@ -45,7 +46,7 @@ const compatibilityCheck = (api: unknown | null): api is ClearControlActionApi =
       isClearableControl(api) &&
       apiHasParentApi(api) &&
       apiCanAccessViewMode(api.parentApi) &&
-      apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
+      apiIsOfType(api.parentApi, CONTROLS_GROUP_TYPE) &&
       apiIsPresentationContainer(api.parentApi)
   );
 
@@ -60,7 +61,7 @@ export class ClearControlAction
 
   public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
     return (
-      <EuiToolTip content={this.getDisplayName(context)}>
+      <EuiToolTip content={this.getDisplayName(context)} disableScreenReaderOutput>
         <EuiButtonIcon
           data-test-subj={`control-action-${(context.embeddable as HasUniqueId).uuid}-erase`}
           aria-label={this.getDisplayName(context)}
@@ -89,15 +90,10 @@ export class ClearControlAction
     return isClearableControl(embeddable);
   }
 
-  public subscribeToCompatibilityChanges(
-    { embeddable }: EmbeddableApiContext,
-    onChange: (isCompatible: boolean, action: ClearControlAction) => void
-  ) {
-    if (!isClearableControl(embeddable)) return;
-
-    return embeddable.hasSelections$.subscribe((selection) => {
-      onChange(Boolean(selection), this);
-    });
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
+    return isClearableControl(embeddable)
+      ? embeddable.hasSelections$.pipe(map(() => undefined))
+      : undefined;
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {

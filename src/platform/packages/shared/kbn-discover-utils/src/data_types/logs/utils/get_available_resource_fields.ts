@@ -7,17 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ResourceFields } from '../../..';
-import * as constants from '../constants';
+import type { ResourceFields } from '../../..';
 
-export const getAvailableResourceFields = (resourceDoc: ResourceFields) => {
-  const resourceFields: Array<keyof ResourceFields> = [
-    constants.SERVICE_NAME_FIELD,
-    constants.CONTAINER_NAME_FIELD,
-    constants.HOST_NAME_FIELD,
-    constants.ORCHESTRATOR_NAMESPACE_FIELD,
-    constants.CLOUD_INSTANCE_ID_FIELD,
-  ];
+// Use first available field from each group
+const AVAILABLE_RESOURCE_FIELDS: Array<Array<keyof ResourceFields>> = [
+  ['service.name'],
+  ['kubernetes.container.name', 'k8s.container.name', 'container.name'],
+  ['kubernetes.node.name', 'k8s.node.name', 'host.name'],
+  ['orchestrator.cluster.name', 'k8s.cluster.name'],
+  ['kubernetes.namespace', 'k8s.namespace.name'],
+  ['kubernetes.pod.name', 'k8s.pod.name'],
+  // Only one of these will be present in a single doc
+  [
+    'kubernetes.deployment.name',
+    'k8s.deployment.name',
+    'kubernetes.replicaset.name',
+    'k8s.replicaset.name',
+    'kubernetes.statefulset.name',
+    'k8s.statefulset.name',
+    'kubernetes.daemonset.name',
+    'k8s.daemonset.name',
+    'kubernetes.job.name',
+    'k8s.job.name',
+    'kubernetes.cronjob.name',
+    'k8s.cronjob.name',
+  ],
+];
 
-  return resourceFields.filter((fieldName) => Boolean(resourceDoc[fieldName]));
-};
+export const getAvailableResourceFields = (resourceDoc: ResourceFields) =>
+  AVAILABLE_RESOURCE_FIELDS.reduce((acc, fields) => {
+    const field = fields.find((fieldName) => resourceDoc[fieldName]);
+    if (field) {
+      acc.push(field);
+    }
+    return acc;
+  }, []);

@@ -1,149 +1,1077 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NetworkTopNFlow Table Component rendering it renders the default NetworkTopNFlow table 1`] = `
-<Memo(NetworkDnsTableComponent)
-  data={
-    Array [
-      Object {
-        "cursor": Object {
-          "value": "nflxvideo.net",
-        },
-        "node": Object {
-          "_id": "nflxvideo.net",
-          "dnsBytesIn": 2964,
-          "dnsBytesOut": 12546,
-          "dnsName": "nflxvideo.net",
-          "queryCount": 52,
-          "uniqueDomains": 21,
-        },
-      },
-      Object {
-        "cursor": Object {
-          "value": "apple.com",
-        },
-        "node": Object {
-          "_id": "apple.com",
-          "dnsBytesIn": 2680,
-          "dnsBytesOut": 31687,
-          "dnsName": "apple.com",
-          "queryCount": 75,
-          "uniqueDomains": 20,
-        },
-      },
-      Object {
-        "cursor": Object {
-          "value": "googlevideo.com",
-        },
-        "node": Object {
-          "_id": "googlevideo.com",
-          "dnsBytesIn": 1890,
-          "dnsBytesOut": 16292,
-          "dnsName": "googlevideo.com",
-          "queryCount": 38,
-          "uniqueDomains": 19,
-        },
-      },
-      Object {
-        "cursor": Object {
-          "value": "netflix.com",
-        },
-        "node": Object {
-          "_id": "netflix.com",
-          "dnsBytesIn": 60525,
-          "dnsBytesOut": 218193,
-          "dnsName": "netflix.com",
-          "queryCount": 1532,
-          "uniqueDomains": 12,
-        },
-      },
-      Object {
-        "cursor": Object {
-          "value": "samsungcloudsolution.com",
-        },
-        "node": Object {
-          "_id": "samsungcloudsolution.com",
-          "dnsBytesIn": 1480,
-          "dnsBytesOut": 11702,
-          "dnsName": "samsungcloudsolution.com",
-          "queryCount": 31,
-          "uniqueDomains": 8,
-        },
-      },
-      Object {
-        "cursor": Object {
-          "value": "doubleclick.net",
-        },
-        "node": Object {
-          "_id": "doubleclick.net",
-          "dnsBytesIn": 1505,
-          "dnsBytesOut": 14372,
-          "dnsName": "doubleclick.net",
-          "queryCount": 35,
-          "uniqueDomains": 7,
-        },
-      },
-      Object {
-        "cursor": Object {
-          "value": "digitalocean.com",
-        },
-        "node": Object {
-          "_id": "digitalocean.com",
-          "dnsBytesIn": 2035,
-          "dnsBytesOut": 4111,
-          "dnsName": "digitalocean.com",
-          "queryCount": 35,
-          "uniqueDomains": 6,
-        },
-      },
-      Object {
-        "cursor": Object {
-          "value": "samsungelectronics.com",
-        },
-        "node": Object {
-          "_id": "samsungelectronics.com",
-          "dnsBytesIn": 3916,
-          "dnsBytesOut": 36592,
-          "dnsName": "samsungelectronics.com",
-          "queryCount": 89,
-          "uniqueDomains": 6,
-        },
-      },
-      Object {
-        "cursor": Object {
-          "value": "google.com",
-        },
-        "node": Object {
-          "_id": "google.com",
-          "dnsBytesIn": 896,
-          "dnsBytesOut": 8072,
-          "dnsName": "google.com",
-          "queryCount": 23,
-          "uniqueDomains": 5,
-        },
-      },
-      Object {
-        "cursor": Object {
-          "value": "samsungcloudsolution.net",
-        },
-        "node": Object {
-          "_id": "samsungcloudsolution.net",
-          "dnsBytesIn": 1490,
-          "dnsBytesOut": 11518,
-          "dnsName": "samsungcloudsolution.net",
-          "queryCount": 30,
-          "uniqueDomains": 5,
-        },
-      },
-    ]
+.c1 .siemSubtitle__item {
+  color: #7a7f89;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.c0 {
+  position: relative;
+}
+
+.c2 tbody th,
+.c2 tbody td {
+  vertical-align: top;
+}
+
+.c2 tbody .euiTableCellContent {
+  display: block;
+}
+
+.c3 {
+  margin-top: 4px;
+}
+
+@media only screen and (min-width:575px) {
+  .c1 .siemSubtitle__item {
+    display: inline-block;
+    margin-right: 16px;
   }
-  fakeTotalCount={50}
-  id="dns"
-  isInspect={false}
-  loadPage={[MockFunction]}
-  loading={false}
-  setQuerySkip={[MockFunction]}
-  showMorePagesIndicator={true}
-  totalCount={80}
-  type="page"
-/>
+
+  .c1 .siemSubtitle__item:last-child {
+    margin-right: 0;
+  }
+}
+
+@media only screen and (min-width:768px) {
+  .c4 .euiButtonIcon:last-child {
+    margin-left: 28px;
+  }
+
+  .c4 .euiPagination {
+    position: relative;
+  }
+
+  .c4 .euiPagination::before {
+    bottom: 0;
+    color: #515761;
+    content: '\\2026';
+    font-size: 14px;
+    padding: 5px 8px;
+    position: absolute;
+    right: 24px;
+  }
+}
+
+<div
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium c0 emotion-euiPanel-grow-m-m-plain-hasBorder"
+  data-test-subj="table-dns-loading-false"
+>
+  <header
+    class="toggle-expand siemHeaderSection css-125xqyz-header"
+    data-test-subj="header-section"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-stretch-column"
+      data-test-subj="headerSectionOuterFlexGroup"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
+          data-test-subj="headerSectionInnerFlexGroup"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
+          >
+            <div
+              class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-grow-1"
+              >
+                <div
+                  class="euiFlexGroup header-section-titles emotion-euiFlexGroup-none-flexStart-stretch-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <button
+                      aria-label="Open"
+                      class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
+                      data-test-subj="query-toggle-header"
+                      title="Open"
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="arrowDown"
+                      />
+                    </button>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-grow-1"
+                  >
+                    <h2
+                      class="euiTitle emotion-euiTitle-l"
+                      data-test-subj="header-section-title"
+                    >
+                      <span
+                        class="eui-textBreakNormal"
+                      >
+                        Top DNS domains
+                      </span>
+                      <span
+                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      >
+                        <span
+                          color="subdued"
+                          data-euiicon-type="info"
+                          data-test-subj="header-section-tooltip-icon"
+                          tabindex="0"
+                        >
+                          Info
+                        </span>
+                      </span>
+                    </h2>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <button
+                  aria-label="Inspect"
+                  class="euiButtonIcon inspectButtonComponent emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
+                  data-test-subj="inspect-icon-button"
+                  disabled=""
+                  title="Inspect"
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    color="inherit"
+                    data-euiicon-type="inspect"
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+            data-test-subj="header-section-supplements"
+          >
+            <div
+              class="euiSwitch emotion-euiSwitch"
+            >
+              <button
+                aria-checked="false"
+                aria-labelledby="generated-id"
+                class="euiSwitch__button emotion-euiSwitch__button"
+                id="generated-id"
+                name="switch-ptr-included"
+                role="switch"
+                type="button"
+              >
+                <span
+                  class="euiSwitch__body emotion-euiSwitch__body-off"
+                >
+                  <span
+                    class="euiSwitch__icons emotion-euiSwitch__icons-off-enabled"
+                  >
+                    <span
+                      data-euiicon-type="check"
+                    />
+                    <span
+                      data-euiicon-type="cross"
+                    />
+                  </span>
+                </span>
+                <span
+                  class="euiSwitch__thumb emotion-euiSwitch__thumb-off"
+                />
+              </button>
+              <span
+                class="euiSwitch__label emotion-euiSwitch__label"
+                id="generated-id"
+              >
+                Include PTR records
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <div
+          class="c1 siemSubtitle"
+          data-test-subj="header-section-subtitle"
+        >
+          <p
+            class="siemSubtitle__item siemSubtitle__item--text"
+            data-test-subj="header-panel-subtitle"
+          >
+            Showing: 80 domains
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div
+    class="euiBasicTable c2"
+    data-test-subj="paginated-basic-table"
+  >
+    <table
+      class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+      id="__table_generated-id"
+      tabindex="-1"
+    >
+      <caption
+        class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+      />
+      <thead>
+        <tr>
+          <th
+            aria-sort="none"
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_node.dnsName_0"
+            role="columnheader"
+            scope="col"
+          >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+            >
+              <button
+                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                data-test-subj="tableHeaderSortButton"
+                type="button"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="Registered domain"
+                  >
+                    Registered domain
+                  </span>
+                  <span
+                    class="euiTableSortIcon euiTableSortIcon--sortable"
+                    color="subdued"
+                    data-euiicon-type="sortable"
+                  />
+                </div>
+              </button>
+            </span>
+          </th>
+          <th
+            aria-sort="descending"
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_node.queryCount_1"
+            role="columnheader"
+            scope="col"
+          >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+            >
+              <button
+                class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                data-test-subj="tableHeaderSortButton"
+                type="button"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="Total queries"
+                  >
+                    Total queries
+                  </span>
+                  <span
+                    class="euiTableSortIcon"
+                    data-euiicon-type="sortDown"
+                  />
+                </div>
+              </button>
+            </span>
+          </th>
+          <th
+            aria-sort="none"
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_node.uniqueDomains_2"
+            role="columnheader"
+            scope="col"
+          >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+            >
+              <button
+                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                data-test-subj="tableHeaderSortButton"
+                type="button"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="Unique domains"
+                  >
+                    Unique domains
+                  </span>
+                  <span
+                    class="euiTableSortIcon euiTableSortIcon--sortable"
+                    color="subdued"
+                    data-euiicon-type="sortable"
+                  />
+                </div>
+              </button>
+            </span>
+          </th>
+          <th
+            aria-sort="none"
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_node.dnsBytesIn_3"
+            role="columnheader"
+            scope="col"
+          >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+            >
+              <button
+                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                data-test-subj="tableHeaderSortButton"
+                type="button"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="DNS bytes in"
+                  >
+                    DNS bytes in
+                  </span>
+                  <span
+                    class="euiTableSortIcon euiTableSortIcon--sortable"
+                    color="subdued"
+                    data-euiicon-type="sortable"
+                  />
+                </div>
+              </button>
+            </span>
+          </th>
+          <th
+            aria-sort="none"
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_node.dnsBytesOut_4"
+            role="columnheader"
+            scope="col"
+          >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+            >
+              <button
+                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                data-test-subj="tableHeaderSortButton"
+                type="button"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="DNS bytes out"
+                  >
+                    DNS bytes out
+                  </span>
+                  <span
+                    class="euiTableSortIcon euiTableSortIcon--sortable"
+                    color="subdued"
+                    data-euiicon-type="sortable"
+                  />
+                </div>
+              </button>
+            </span>
+          </th>
+        </tr>
+      </thead>
+      <tbody
+        class="css-0"
+      >
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              nflxvideo.net
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              52
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              21
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              2.9KB
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              12.3KB
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              apple.com
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              75
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              20
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              2.6KB
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              30.9KB
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              googlevideo.com
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              38
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              19
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              1.8KB
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              15.9KB
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              netflix.com
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              1532
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              12
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              59.1KB
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              213.1KB
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              samsungcloudsolution.com
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              31
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              8
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              1.4KB
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              11.4KB
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              doubleclick.net
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              35
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              7
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              1.5KB
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              14KB
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              digitalocean.com
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              35
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              6
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              2KB
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              4KB
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              samsungelectronics.com
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              89
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              6
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              3.8KB
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              35.7KB
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              google.com
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              23
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              5
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              896B
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              7.9KB
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              samsungcloudsolution.net
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              30
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              5
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              1.5KB
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              11.2KB
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div
+    class="euiFlexGroup c3 emotion-euiFlexGroup-l-spaceBetween-center-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiPopover emotion-euiPopover-inline-block"
+        data-test-subj="loadingMoreSizeRowPopover"
+        id="customizablePagination"
+      >
+        <button
+          class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
+          type="button"
+        >
+          <span
+            class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+          >
+            <span
+              class="eui-textTruncate euiButtonEmpty__text"
+            >
+              Rows per page: 10
+            </span>
+            <span
+              color="inherit"
+              data-euiicon-type="arrowDown"
+            />
+          </span>
+        </button>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem c4 emotion-euiFlexItem-growZero"
+    >
+      <nav
+        class="euiPagination emotion-euiPagination"
+        data-test-subj="numberedPagination"
+      >
+        <span
+          aria-atomic="true"
+          aria-relevant="additions text"
+          class="emotion-euiScreenReaderOnly"
+          role="status"
+        >
+          Page 1 of 5
+        </span>
+        <button
+          aria-label="Previous page"
+          class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
+          data-test-subj="pagination-button-previous"
+          disabled=""
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="arrowLeft"
+          />
+        </button>
+        <ul
+          class="euiPagination__list emotion-euiPagination__list"
+        >
+          <li
+            class="euiPagination__item"
+          >
+            <button
+              aria-current="page"
+              aria-label="Page 1 of 5"
+              class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
+              data-test-subj="pagination-button-0"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  1
+                </span>
+              </span>
+            </button>
+          </li>
+          <li
+            class="euiPagination__item"
+          >
+            <button
+              aria-label="Page 2 of 5"
+              class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-euiPaginationButton"
+              data-test-subj="pagination-button-1"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  2
+                </span>
+              </span>
+            </button>
+          </li>
+          <li
+            class="euiPagination__item"
+          >
+            <button
+              aria-label="Page 3 of 5"
+              class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-euiPaginationButton"
+              data-test-subj="pagination-button-2"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  3
+                </span>
+              </span>
+            </button>
+          </li>
+          <li
+            class="euiPagination__item"
+          >
+            <button
+              aria-label="Page 4 of 5"
+              class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-euiPaginationButton"
+              data-test-subj="pagination-button-3"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  4
+                </span>
+              </span>
+            </button>
+          </li>
+          <li
+            class="euiPagination__item"
+          >
+            <button
+              aria-label="Page 5 of 5"
+              class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-euiPaginationButton"
+              data-test-subj="pagination-button-4"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  5
+                </span>
+              </span>
+            </button>
+          </li>
+        </ul>
+        <button
+          aria-label="Next page"
+          class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-text-euiPaginationButton"
+          data-test-subj="pagination-button-next"
+          title="Next page"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="arrowRight"
+          />
+        </button>
+      </nav>
+    </div>
+  </div>
+</div>
 `;

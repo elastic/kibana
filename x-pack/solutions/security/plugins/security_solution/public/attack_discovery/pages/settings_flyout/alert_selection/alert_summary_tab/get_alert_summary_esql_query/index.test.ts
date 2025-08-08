@@ -16,8 +16,8 @@ describe('getAlertSummaryEsqlQuery', () => {
     });
 
     expect(query).toBe(
-      `FROM alerts-* METADATA _id, _index, _version
-| WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.rule.building_block_type IS NULL
+      `FROM alerts-* METADATA _id, _index, _version, _ignored
+| WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.building_block_type IS NULL
 | SORT kibana.alert.risk_score DESC, @timestamp DESC
 | LIMIT 100
 | STATS Count = count() by \`kibana.alert.rule.name\`
@@ -35,8 +35,8 @@ describe('getAlertSummaryEsqlQuery', () => {
     });
 
     expect(query).toBe(
-      `FROM alerts-* METADATA _id, _index, _version
-| WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.rule.building_block_type IS NULL
+      `FROM alerts-* METADATA _id, _index, _version, _ignored
+| WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.building_block_type IS NULL
 | SORT kibana.alert.risk_score DESC, @timestamp DESC
 | LIMIT 100
 | STATS Count = count() by \`kibana.alert.severity\`

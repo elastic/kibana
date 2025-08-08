@@ -33,11 +33,13 @@ export {
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
   apiPublishesSavedSearch,
   type PublishesSavedSearch,
+  type PublishesWritableSavedSearch,
   type HasTimeRange,
   type SearchEmbeddableSerializedState,
   type SearchEmbeddableRuntimeState,
   type SearchEmbeddableApi,
   type NonPersistedDisplayOptions,
 } from './embeddable';
-export { loadSharingDataHelpers } from './utils';
 export type { DiscoverServices } from './build_services';
+
+export const loadSharingDataHelpers = () => import('./utils/get_sharing_data');

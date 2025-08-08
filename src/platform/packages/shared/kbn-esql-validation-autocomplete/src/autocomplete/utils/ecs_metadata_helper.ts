@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLRealField } from '../../validation/types';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 
 const removeKeywordSuffix = (name: string) => {
   return name.endsWith('.keyword') ? name.slice(0, -8) : name;
@@ -29,9 +29,9 @@ export interface ECSMetadata {
  * @returns
  */
 export function enrichFieldsWithECSInfo(
-  columns: Array<Omit<ESQLRealField, 'metadata'>>,
+  columns: Array<Omit<ESQLFieldWithMetadata, 'metadata'>>,
   ecsMetadataCache?: ECSMetadata
-): ESQLRealField[] {
+): ESQLFieldWithMetadata[] {
   if (!ecsMetadataCache) return columns;
 
   try {

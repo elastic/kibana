@@ -36,42 +36,40 @@ export async function getHostDetails({
     getIndicesStats({ client: client.getEsClient(), indices: allIndices }),
     client.search('profiling_events_metrics_details', {
       index: ['profiling-events-*', 'profiling-metrics'],
-      body: {
-        query: {
-          bool: {
-            filter: [
-              ...kqlQuery(kuery),
-              {
-                range: {
-                  [ProfilingESField.Timestamp]: {
-                    gte: String(timeFrom),
-                    lt: String(timeTo),
-                    format: 'epoch_second',
-                  },
+      query: {
+        bool: {
+          filter: [
+            ...kqlQuery(kuery),
+            {
+              range: {
+                [ProfilingESField.Timestamp]: {
+                  gte: String(timeFrom),
+                  lt: String(timeTo),
+                  format: 'epoch_second',
                 },
               },
-              ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-                ? termQuery('_tier', indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
-                : []),
-            ],
-          },
-        },
-        aggs: {
-          hosts: {
-            terms: {
-              field: ProfilingESField.HostID,
             },
-            aggs: {
-              projectIds: {
-                terms: {
-                  field: 'profiling.project.id',
-                },
-                aggs: {
-                  indices: {
-                    terms: {
-                      field: '_index',
-                      size: 500,
-                    },
+            ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+              ? termQuery('_tier', indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
+              : []),
+          ],
+        },
+      },
+      aggs: {
+        hosts: {
+          terms: {
+            field: ProfilingESField.HostID,
+          },
+          aggs: {
+            projectIds: {
+              terms: {
+                field: 'profiling.project.id',
+              },
+              aggs: {
+                indices: {
+                  terms: {
+                    field: '_index',
+                    size: 500,
                   },
                 },
               },

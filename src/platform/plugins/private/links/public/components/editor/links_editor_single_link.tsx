@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import classNames from 'classnames';
 import React, { useMemo } from 'react';
 
 import {
@@ -19,7 +18,10 @@ import {
   EuiFlexGroup,
   EuiButtonIcon,
   DraggableProvidedDragHandleProps,
+  UseEuiTheme,
+  transparentize,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { LinkInfo } from './constants';
 import { LinksStrings } from '../links_strings';
@@ -53,11 +55,7 @@ export const LinksEditorSingleLink = ({
           />
         </EuiFlexItem>
 
-        <EuiFlexItem
-          className={classNames('linksPanelEditorLinkText', {
-            'linksPanelEditorLinkText--noLabel': !link.label,
-          })}
-        >
+        <EuiFlexItem className={'linksPanelEditorLinkText'}>
           <EuiText size="s" color={'default'} className="eui-textTruncate">
             {link.label || link.title}
           </EuiText>
@@ -85,10 +83,11 @@ export const LinksEditorSingleLink = ({
   return (
     <EuiPanel
       hasBorder
+      css={styles}
       hasShadow={false}
       color={link.error ? 'warning' : 'plain'}
       className={`linksPanelEditorLink ${link.error ? 'linkError' : ''}`}
-      data-test-subj={`panelEditorLink''}`}
+      data-test-subj={`panelEditorLink`}
     >
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">
         <EuiFlexItem grow={false}>
@@ -135,3 +134,28 @@ export const LinksEditorSingleLink = ({
     </EuiPanel>
   );
 };
+
+const styles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
+    color: euiTheme.colors.textParagraph,
+    '.linksPanelEditorLinkText': {
+      flex: 1,
+      minWidth: 0,
+    },
+    '&.linkError': {
+      border: `1px solid ${transparentize(euiTheme.colors.textWarning, 0.3)}`,
+      color: euiTheme.colors.textWarning,
+    },
+    '& .links_hoverActions': {
+      position: 'absolute',
+      right: euiTheme.size.l,
+      opacity: 0,
+      visibility: 'hidden',
+      transition: `visibility ${euiTheme.animation.normal}, opacity ${euiTheme.animation.normal}`,
+    },
+    '&:hover .links_hoverActions, &:focus-within .links_hoverActions ': {
+      opacity: 1,
+      visibility: 'visible',
+    },
+  });

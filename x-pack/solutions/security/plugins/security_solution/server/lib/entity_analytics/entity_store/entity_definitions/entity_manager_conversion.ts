@@ -34,6 +34,7 @@ export const convertToEntityManagerDefinition = (
         frequency: description.settings.frequency,
         timeout: description.settings.timeout,
         docsPerSecond: description.settings.docsPerSecond,
+        maxPageSearchSize: description.settings.maxPageSearchSize,
       },
     },
     version: description.version,

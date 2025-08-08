@@ -19,7 +19,7 @@ describe('PackagePolicyInputConfig', () => {
     const utils = renderer.render(
       <PackagePolicyInputConfig
         hasInputStreams={false}
-        inputVarsValidationResults={{}}
+        inputValidationResults={{}}
         packagePolicyInput={{
           enabled: true,
           type: 'input',

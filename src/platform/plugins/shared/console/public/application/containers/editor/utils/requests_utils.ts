@@ -9,6 +9,7 @@
 
 import { monaco, ParsedRequest } from '@kbn/monaco';
 import { parse } from 'hjson';
+import { i18n } from '@kbn/i18n';
 import { constructUrl } from '../../../../lib/es';
 import type { MetricsTracker } from '../../../../types';
 import type { DevToolsVariable } from '../../../components';
@@ -131,6 +132,36 @@ export const getRequestEndLineNumber = ({
   return endLineNumber;
 };
 
+export const TRIPLE_QUOTE_STRINGS_MARKER = '"{tripleQuoteString}"';
+
+/**
+ * This function replaces all triple-quote strings with {@link TRIPLE_QUOTE_STRINGS_MARKER}
+ */
+export function collapseTripleQuoteStrings(data: string) {
+  const splitData = data.split(`"""`);
+  const tripleQuoteStrings = [];
+  for (let i = 1; i < splitData.length - 1; i += 2) {
+    tripleQuoteStrings.push('"""' + splitData[i] + '"""');
+    splitData[i] = TRIPLE_QUOTE_STRINGS_MARKER;
+  }
+  return { collapsedTripleQuotesData: splitData.join(''), tripleQuoteStrings };
+}
+
+/**
+ * This function replaces all {@link TRIPLE_QUOTE_STRINGS_MARKER}s in the provided text with the corresponding provided triple-quote strings.
+ */
+export function expandTripleQuoteStrings(data: string, tripleQuoteStrings: string[]) {
+  const splitData = data.split(TRIPLE_QUOTE_STRINGS_MARKER);
+  const allData = [];
+  for (let i = 0; i < splitData.length; i++) {
+    allData.push(splitData[i]);
+    if (i < tripleQuoteStrings.length) {
+      allData.push(tripleQuoteStrings[i]);
+    }
+  }
+  return allData.join('');
+}
+
 /**
  * This function takes a string containing unformatted Console requests and
  * returns a text in which the requests are auto-indented.
@@ -141,7 +172,8 @@ export const getRequestEndLineNumber = ({
 export const getAutoIndentedRequests = (
   requests: AdjustedParsedRequest[],
   selectedText: string,
-  allText: string
+  allText: string,
+  addToastWarning: (text: string) => void
 ): string => {
   const selectedTextLines = selectedText.split(`\n`);
   const allTextLines = allText.split(`\n`);
@@ -162,16 +194,31 @@ export const getAutoIndentedRequests = (
       const firstLine = cleanUpWhitespaces(requestLines[0]);
       formattedTextLines.push(firstLine);
       const dataLines = requestLines.slice(1);
-      if (dataLines.some((line) => containsComments(line))) {
+      if (containsComments(dataLines.join(''))) {
         // If data has comments, add it as it is - without formatting
         // TODO: Format requests with comments https://github.com/elastic/kibana/issues/182138
         formattedTextLines.push(...dataLines);
+        addToastWarning(
+          i18n.translate('console.notification.monaco.warning.nonSupportedAutoindentation', {
+            defaultMessage:
+              'Auto-indentation is currently not supported for requests containing comments. Please remove comments to enable formatting.',
+          })
+        );
       } else {
         // If no comments, indent data
         if (requestLines.length > 1) {
           const dataString = dataLines.join('\n');
           const dataJsons = splitDataIntoJsonObjects(dataString);
-          formattedTextLines.push(...dataJsons.map(indentData));
+          formattedTextLines.push(
+            ...dataJsons.map((data) => {
+              // Since triple-quote strings are not a valid JSON syntax, we need to first collapse them before indenting the data
+              const { collapsedTripleQuotesData, tripleQuoteStrings } =
+                collapseTripleQuoteStrings(data);
+              const indentedData = indentData(collapsedTripleQuotesData);
+              // Return any collapsed triple-quote strings
+              return expandTripleQuoteStrings(indentedData, tripleQuoteStrings);
+            })
+          );
         }
       }
 
@@ -224,8 +271,27 @@ export const getRequestFromEditor = (
   return { method: upperCaseMethod, url, data };
 };
 
-export const containsComments = (text: string) => {
-  return text.indexOf('//') >= 0 || text.indexOf('/*') >= 0;
+export const containsComments = (requestData: string) => {
+  let insideString = false;
+  let prevChar = '';
+  for (let i = 0; i < requestData.length; i++) {
+    const char = requestData[i];
+    const nextChar = requestData[i + 1];
+
+    if (!insideString && char === '"') {
+      insideString = true;
+    } else if (insideString && char === '"' && prevChar !== '\\') {
+      insideString = false;
+    } else if (!insideString) {
+      if (char === '/' && (nextChar === '/' || nextChar === '*')) {
+        return true;
+      }
+    }
+
+    prevChar = char;
+  }
+
+  return false;
 };
 
 export const indentData = (dataString: string): string => {
@@ -292,17 +358,28 @@ const splitDataIntoJsonObjects = (dataString: string): string[] => {
   let currentObject = '';
   // Tracks whether the current position is inside a string
   let insideString = false;
+  // Tracks whether the current position is inside a triple-quote string
+  let insideTripleQuoteString = false;
 
+  let i = 0;
   // Iterate through each character in the input string
-  for (let i = 0; i < dataString.length; i++) {
+  while (i < dataString.length) {
     const char = dataString[i];
     // Append the character to the current JSON object string
     currentObject += char;
 
-    // If the character is a double quote and it is not escaped, toggle the `insideString` state
-    if (char === '"' && dataString[i - 1] !== '\\') {
+    if (char === '"' && dataString.substring(i + 1, i + 3) === '""') {
+      // If the character is a quote and the next two characters are also quotes,
+      // toggle the `insideString` state
+      insideTripleQuoteString = !insideTripleQuoteString;
+      currentObject += '""';
+      // Skip the next two quotes
+      i += 2;
+    } else if (!insideTripleQuoteString && char === '"' && dataString[i - 1] !== '\\') {
+      // If the character is a quote, it is not escaped, and it's not inside a triple-quote string,
+      // toggle the `insideString` state
       insideString = !insideString;
-    } else if (!insideString) {
+    } else if (!insideTripleQuoteString && !insideString) {
       // Only modify depth if not inside a string
 
       if (char === '{') {
@@ -317,6 +394,7 @@ const splitDataIntoJsonObjects = (dataString: string): string[] => {
         currentObject = '';
       }
     }
+    i++;
   }
 
   // If there's remaining data in currentObject, add it as the last JSON object

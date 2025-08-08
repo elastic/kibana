@@ -13,18 +13,3 @@ export const ATTACK_DISCOVERY_PAGE_TITLE = i18n.translate(
     defaultMessage: 'Attack discovery',
   }
 );
-
-export const BETA = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.pages.pageTitle.betaBadge',
-  {
-    defaultMessage: 'Technical preview',
-  }
-);
-
-export const BETA_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.pages.pageTitle.betaTooltip',
-  {
-    defaultMessage:
-      'This functionality is in technical preview and is subject to change. Please use Attack Discovery with caution in production environments.',
-  }
-);

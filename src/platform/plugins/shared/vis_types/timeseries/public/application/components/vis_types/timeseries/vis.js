@@ -20,13 +20,13 @@ import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { checkIfSeriesHaveSameFormatters } from '../../lib/check_if_series_have_same_formatters';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
 import { Markdown } from '@kbn/shared-ux-markdown';
-import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
 import { replaceVars } from '../../lib/replace_vars';
 import { getInterval } from '../../lib/get_interval';
 import { createIntervalBasedFormatter } from '../../lib/create_interval_based_formatter';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
 import { getCoreStart } from '../../../../services';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
+import { visStyles } from '../_vis_types';
 
 class TimeseriesVisualization extends Component {
   static propTypes = {
@@ -258,7 +258,7 @@ class TimeseriesVisualization extends Component {
     });
 
     return (
-      <div className="tvbVis">
+      <div className="tvbVis" css={visStyles}>
         <div className="tvbVisTimeSeries">
           <TimeSeries
             series={series}
@@ -281,7 +281,6 @@ class TimeseriesVisualization extends Component {
             palettesService={palettesService}
             interval={interval}
             initialRender={initialRender}
-            useLegacyTimeAxis={getConfig(LEGACY_TIME_AXIS, false)}
             isLastBucketDropped={Boolean(
               model.drop_last_bucket ||
                 model.series.some((series) => series.series_drop_last_bucket)

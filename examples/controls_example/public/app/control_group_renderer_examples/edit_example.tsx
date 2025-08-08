@@ -22,11 +22,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import {
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-  type ControlGroupRuntimeState,
-} from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
+import type { ControlGroupRuntimeState } from '@kbn/controls-plugin/common';
 import {
   ACTION_DELETE_CONTROL,
   ACTION_EDIT_CONTROL,
@@ -34,7 +31,6 @@ import {
   ControlGroupRendererApi,
   type ControlStateTransform,
 } from '@kbn/controls-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
 
@@ -69,7 +65,7 @@ export const EditExample = () => {
     localStorage.setItem(
       INPUT_KEY,
       JSON.stringify({
-        ...controlGroupAPI.snapshotRuntimeState(),
+        ...controlGroupAPI.getInput(),
         disabledActions: controlGroupAPI.disabledActionIds$.getValue(), // not part of runtime
       })
     );
@@ -210,7 +206,7 @@ export const EditExample = () => {
               },
             };
           }}
-          viewMode={ViewMode.EDIT}
+          viewMode={'edit'}
         />
       </EuiPanel>
     </>

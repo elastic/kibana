@@ -9,11 +9,13 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
+import semverGte from 'semver/functions/gte';
 
 import {
   getRecentUpgradeInfoForAgent,
   getNotUpgradeableMessage,
   isAgentUpgradeableToVersion,
+  AGENT_UPGARDE_DETAILS_SUPPORTED_VERSION,
 } from '../../../common/services';
 
 import type { Agent } from '../../types';
@@ -39,7 +41,7 @@ export class UpgradeActionRunner extends ActionRunner {
       agents,
       {},
       this.actionParams! as any,
-      this.actionParams?.spaceId
+      this.actionParams?.spaceId ? [this.actionParams?.spaceId] : undefined
     );
   }
 
@@ -70,10 +72,11 @@ export async function upgradeBatch(
     upgradeDurationSeconds?: number;
     startTime?: string;
     total?: number;
+    isAutomatic?: boolean;
   },
-  spaceId?: string
+  spaceIds?: string[]
 ): Promise<{ actionId: string }> {
-  const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+  const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceIds?.[0]);
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
@@ -167,6 +170,10 @@ export async function upgradeBatch(
       data: {
         upgraded_at: null,
         upgrade_started_at: now,
+        ...(options.isAutomatic &&
+        semverGte(agent.agent?.version ?? '0.0.0', AGENT_UPGARDE_DETAILS_SUPPORTED_VERSION)
+          ? { upgrade_attempts: [now, ...(agent.upgrade_attempts ?? [])] }
+          : {}),
       },
     })),
     errors
@@ -174,7 +181,7 @@ export async function upgradeBatch(
 
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
-  const namespaces = spaceId ? [spaceId] : [];
+  const namespaces = spaceIds ? spaceIds : [];
 
   await createAgentAction(esClient, {
     id: actionId,
@@ -186,6 +193,8 @@ export async function upgradeBatch(
     agents: agentsToUpdate.map((agent) => agent.id),
     ...rollingUpgradeOptions,
     namespaces,
+    is_automatic: options.isAutomatic,
+    policyId: agentsToUpdate[0]?.policy_id,
   });
 
   await createErrorActionResults(

@@ -62,7 +62,7 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
     const isButtonDisabled = showLoader || macrosToUpload.length === 0;
 
     return (
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiFormRow
             helpText={
@@ -74,6 +74,7 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
             fullWidth
           >
             <EuiFilePicker
+              isInvalid={error != null}
               id="macrosFilePicker"
               ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
               fullWidth

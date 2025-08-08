@@ -60,11 +60,15 @@ const OPTIONS: Option[] = [
   },
 ];
 
+// Set this to true to test the feature
+export const SHOW_RECOVERY_STRATEGY_SWITCH = false;
+
 export const DEFAULT_CONDITION = {
   window: { numberOfChecks: 5 },
   groupBy: 'locationId',
   downThreshold: 3,
   locationsThreshold: 1,
+  ...(SHOW_RECOVERY_STRATEGY_SWITCH ? { recoveryStrategy: 'firstUp' as const } : {}),
 };
 const getCheckedOption = (option: Option, condition?: StatusRuleCondition) => {
   const { useTimeWindow, isLocationBased } = getConditionType(condition);
@@ -139,16 +143,12 @@ export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
             case 'checksWindow':
               setRuleParams('condition', {
                 ...ruleParams.condition,
-                downThreshold: 5,
-                locationsThreshold: 1,
                 window: { numberOfChecks: 5 },
               });
               break;
             case 'timeWindow':
               setRuleParams('condition', {
                 ...ruleParams.condition,
-                downThreshold: 5,
-                locationsThreshold: 1,
                 window: { time: { unit: 'm', size: 5 } },
               });
               break;

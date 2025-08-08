@@ -134,6 +134,61 @@ test('"visitFunctionCallExpression" takes over all literal visits', () => {
   expect(text).toBe('FROM E | STATS E, E, E, <FUNCTION> | LIMIT E');
 });
 
+test('"visitMapExpression" takes over expression visiting', () => {
+  const { ast } = parse(`
+    ROW fn(1, {"a": 2})
+  `);
+  const visitor = new Visitor()
+    .on('visitMapExpression', (ctx) => {
+      return '<MAP>';
+    })
+    .on('visitFunctionCallExpression', (ctx) => {
+      return `${ctx.node.name}(${[...ctx.visitArguments(undefined)].join(', ')})`;
+    })
+    .on('visitExpression', (ctx) => {
+      return '<EXPRESSION>';
+    })
+    .on('visitCommand', (ctx) => {
+      const args = [...ctx.visitArguments()].join(', ');
+      return `${ctx.name()}${args ? ` ${args}` : ''}`;
+    })
+    .on('visitQuery', (ctx) => {
+      return [...ctx.visitCommands()].join(' | ');
+    });
+  const text = visitor.visitQuery(ast);
+
+  expect(text).toBe('ROW fn(<EXPRESSION>, <MAP>)');
+});
+
+test('"visitMapEntryExpression" takes over expression visiting', () => {
+  const { ast } = parse(`
+    ROW fn(1, {"a": 2, "b": "3"})
+  `);
+  const visitor = new Visitor()
+    .on('visitMapEntryExpression', (ctx) => {
+      return '<ENTRY>';
+    })
+    .on('visitMapExpression', (ctx) => {
+      return `{${[...ctx.visitArguments(undefined)].join(', ')}}`;
+    })
+    .on('visitFunctionCallExpression', (ctx) => {
+      return `${ctx.node.name}(${[...ctx.visitArguments(undefined)].join(', ')})`;
+    })
+    .on('visitExpression', (ctx) => {
+      return '<EXPRESSION>';
+    })
+    .on('visitCommand', (ctx) => {
+      const args = [...ctx.visitArguments()].join(', ');
+      return `${ctx.name()}${args ? ` ${args}` : ''}`;
+    })
+    .on('visitQuery', (ctx) => {
+      return [...ctx.visitCommands()].join(' | ');
+    });
+  const text = visitor.visitQuery(ast);
+
+  expect(text).toBe('ROW fn(<EXPRESSION>, {<ENTRY>, <ENTRY>})');
+});
+
 test('"visitLiteral" takes over all literal visits', () => {
   const { ast } = parse(`
     FROM index

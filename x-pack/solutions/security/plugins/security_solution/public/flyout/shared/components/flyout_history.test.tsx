@@ -6,17 +6,21 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
+import type { FlyoutPanelHistory } from '@kbn/expandable-flyout';
 import { TestProviders } from '../../../common/mock';
 import {
-  FLYOUT_HISTORY_TEST_ID,
   FLYOUT_HISTORY_BUTTON_TEST_ID,
   FLYOUT_HISTORY_CONTEXT_PANEL_TEST_ID,
+  FLYOUT_HISTORY_TEST_ID,
   NO_DATA_HISTORY_ROW_TEST_ID,
 } from './test_ids';
 import { FlyoutHistory } from './flyout_history';
 
-const mockedHistory = [{ id: '1' }, { id: '2' }];
+const mockedHistory: FlyoutPanelHistory[] = [
+  { lastOpen: Date.now(), panel: { id: '1' } },
+  { lastOpen: Date.now(), panel: { id: '2' } },
+];
 
 describe('FlyoutHistory', () => {
   it('renders', () => {

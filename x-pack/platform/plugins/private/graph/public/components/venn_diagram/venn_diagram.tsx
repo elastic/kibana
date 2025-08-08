@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
+import { type UseEuiTheme } from '@elastic/eui';
 import { distanceFromIntersectArea } from './vennjs';
 
 export interface VennDiagramProps {
@@ -45,15 +47,30 @@ export function VennDiagram({ leftValue, rightValue, overlap }: VennDiagramProps
             cy={maxRadius}
             r={leftRadius}
             className="gphVennDiagram__left"
+            css={styles.left}
           />
           <circle
             cx={rightCenter + padding}
             cy={maxRadius}
             r={rightRadius}
             className="gphVennDiagram__right"
+            css={styles.right}
           />
         </g>
       </svg>
     </div>
   );
 }
+
+const styles = {
+  left: ({ euiTheme }: UseEuiTheme) =>
+    css`
+      fill: ${euiTheme.colors.danger};
+      fill-opacity: 0.5;
+    `,
+
+  right: ({ euiTheme }: UseEuiTheme) => css`
+    fill: ${euiTheme.colors.primary};
+    fill-opacity: 0.5;
+  `,
+};

@@ -7,8 +7,7 @@
 import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { BulkGetAgentPoliciesResponse } from '@kbn/fleet-plugin/common';
-import { type GetInfoResponse } from '@kbn/fleet-plugin/common';
+import { type GetInfoResponse, type BulkGetAgentPoliciesResponse } from '@kbn/fleet-plugin/common';
 import { firstValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY } from '../../../../common/endpoint/constants';
@@ -19,7 +18,9 @@ import type { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
 import type { ServerApiError } from '../../../common/types';
 
-// FIXME:PT move to `hooks` folder
+/**
+ * @deprecated use `useFetchIntegrationPolicyList()` hook instead
+ */
 export function useGetEndpointSpecificPolicies(
   {
     onError,

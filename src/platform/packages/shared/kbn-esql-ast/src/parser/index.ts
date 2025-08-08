@@ -8,16 +8,14 @@
  */
 
 export {
-  getLexer,
-  getParser,
   createParser,
   parse,
   parseErrors,
+  Parser,
   type ParseOptions,
   type ParseResult,
-
-  /** @deprecated Use `parse` instead. */
-  parse as getAstAndSyntaxErrors,
 } from './parser';
+
+export { TIME_SPAN_UNITS } from './constants';
 
 export { ESQLErrorListener } from './esql_error_listener';

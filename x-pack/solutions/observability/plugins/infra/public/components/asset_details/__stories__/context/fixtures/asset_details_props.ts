@@ -43,14 +43,14 @@ const tabs: Tab[] = [
 ];
 
 export const assetDetailsProps: AssetDetailsProps = {
-  assetName: 'host1',
-  assetId: 'host1',
+  entityName: 'host1',
+  entityId: 'host1',
   overrides: {
     metadata: {
       showActionsColumn: true,
     },
   },
-  assetType: 'host',
+  entityType: 'host',
   renderMode: {
     mode: 'page',
   },

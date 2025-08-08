@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
+import type { estypes } from '@elastic/elasticsearch';
+import type { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 
 export interface InputOverrides {
   [key: string]: string | undefined;
 }
 
 export type FormattedOverrides = InputOverrides & {
-  column_names: string[];
-  has_header_row: boolean;
-  should_trim_fields: boolean;
+  column_names?: string[] | string;
+  has_header_row?: boolean | string;
+  should_trim_fields?: boolean | string;
 };
 
 export interface AnalysisResult {
@@ -98,10 +98,19 @@ export interface HasImportPermission {
 
 export type InputData = any[];
 
-export interface ImportResponse {
+export interface InitializeImportResponse {
   success: boolean;
   id: string;
-  index?: string;
+  index: string;
+  pipelineIds: Array<string | undefined>;
+  error?: {
+    error: estypes.ErrorCause;
+  };
+}
+
+export interface ImportResponse {
+  success: boolean;
+  index: string;
   pipelineId?: string;
   docCount: number;
   failures: ImportFailure[];

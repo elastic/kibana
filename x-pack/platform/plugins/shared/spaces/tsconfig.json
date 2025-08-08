@@ -1,9 +1,9 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
     "@kbn/features-plugin",
     "@kbn/licensing-plugin",
@@ -33,7 +33,6 @@
     "@kbn/config",
     "@kbn/shared-ux-avatar-solution",
     "@kbn/core-http-server",
-    "@kbn/react-kibana-context-render",
     "@kbn/utility-types-jest",
     "@kbn/security-plugin-types-public",
     "@kbn/cloud-plugin",
@@ -56,8 +55,8 @@
     "@kbn/core-chrome-browser",
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-browser-mocks",
+    "@kbn/spaces-utils",
+    "@kbn/css-utils"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

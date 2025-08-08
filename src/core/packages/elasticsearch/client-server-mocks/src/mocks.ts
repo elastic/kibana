@@ -19,6 +19,7 @@ const omittedProps = [
   'transport',
   'serializer',
   'helpers',
+  'acceptedParams',
 ] as Array<PublicKeys<Client>>;
 
 export type DeeplyMockedApi<T> = {

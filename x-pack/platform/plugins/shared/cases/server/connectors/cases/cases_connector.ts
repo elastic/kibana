@@ -22,8 +22,8 @@ import {
   isCasesConnectorError,
 } from './cases_connector_error';
 import { CasesConnectorExecutor } from './cases_connector_executor';
-import { CaseConnectorRetryService } from './retry_service';
-import { fullJitterBackoffFactory } from './full_jitter_backoff';
+import { CasesConnectorRetryService } from './cases_connector_retry_service';
+import { fullJitterBackoffFactory } from '../../common/retry_service';
 import { CASE_RULES_SAVED_OBJECT, CASES_CONNECTOR_SUB_ACTION } from '../../../common/constants';
 
 interface CasesConnectorParams {
@@ -43,7 +43,7 @@ export class CasesConnector extends SubActionConnector<
   CasesConnectorSecrets
 > {
   private readonly casesService: CasesService;
-  private readonly retryService: CaseConnectorRetryService;
+  private readonly retryService: CasesConnectorRetryService;
   private readonly casesParams: CasesConnectorParams['casesParams'];
 
   constructor({ connectorParams, casesParams }: CasesConnectorParams) {
@@ -55,7 +55,7 @@ export class CasesConnector extends SubActionConnector<
      * We should wait at least 5ms before retrying and no more that 2sec
      */
     const backOffFactory = fullJitterBackoffFactory({ baseDelay: 5, maxBackoffTime: 2000 });
-    this.retryService = new CaseConnectorRetryService(this.logger, backOffFactory);
+    this.retryService = new CasesConnectorRetryService(this.logger, backOffFactory);
 
     this.casesParams = casesParams;
 

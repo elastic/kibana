@@ -103,7 +103,7 @@
             "tags": [],
             "label": "node",
             "description": [
-              "to get a mount point for"
+              "React node to get a mount point for"
             ],
             "signature": [
               "React.ReactNode"
@@ -116,10 +116,12 @@
           {
             "parentPluginId": "@kbn/react-kibana-mount",
             "id": "def-common.toMountPoint.$2",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
-            "description": [],
+            "description": [
+              "services needed for rendering fully-featured React nodes in Kibana"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/react-kibana-mount",
@@ -178,11 +180,12 @@
             "signature": [
               "(mountPoint: ",
               "MountPoint",
-              "<HTMLElement> | undefined) => void"
+              "<HTMLElement> | undefined) => void | UnsetMountPointFn"
             ],
             "path": "src/platform/packages/shared/react/kibana_mount/mount_point_portal.tsx",
             "deprecated": false,
             "trackAdoption": false,
+            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/react-kibana-mount",
@@ -197,11 +200,9 @@
                 ],
                 "path": "src/platform/packages/shared/react/kibana_mount/mount_point_portal.tsx",
                 "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
+                "trackAdoption": false
               }
-            ],
-            "returnComment": []
+            ]
           },
           {
             "parentPluginId": "@kbn/react-kibana-mount",
@@ -231,21 +232,8 @@
         "label": "ToMountPointParams",
         "description": [],
         "signature": [
-          "{ i18n: ",
-          "I18nStart",
-          "; analytics?: Pick<",
-          "AnalyticsServiceStart",
-          ", \"reportEvent\"> | undefined; theme: ",
-          {
-            "pluginId": "@kbn/react-kibana-context-common",
-            "scope": "common",
-            "docId": "kibKbnReactKibanaContextCommonPluginApi",
-            "section": "def-common.ThemeServiceStart",
-            "text": "ThemeServiceStart"
-          },
-          "; userProfile?: Pick<",
-          "UserProfileService",
-          ", \"getUserProfile$\"> | undefined; }"
+          "RenderingService",
+          " | ToMountPointParamsDeprecated"
         ],
         "path": "src/platform/packages/shared/react/kibana_mount/to_mount_point.tsx",
         "deprecated": false,

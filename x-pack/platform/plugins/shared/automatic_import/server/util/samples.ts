@@ -153,20 +153,46 @@ export function generateFields(mergedDocs: string): string {
   return dump(fieldsStructure, { sortKeys: false });
 }
 
+export function isObject(value: any): boolean {
+  return typeof value === 'object' && value !== null;
+}
+
+export function isEmptyValue(value: unknown): boolean {
+  if (value == null) return true;
+  if (isObject(value)) {
+    if (Array.isArray(value)) return value.length === 0;
+    return value && Object.keys(value).length === 0;
+  }
+  return false;
+}
+
+export function isUnsafeProperty(key: string, obj: Record<string, any>): boolean {
+  return (
+    key === '__proto__' || key === 'constructor' || key === 'prototype' || !Object.hasOwn(obj, key)
+  );
+}
+
 export function merge(
   target: Record<string, any>,
   source: Record<string, any>
 ): Record<string, unknown> {
-  const filteredTarget = filterOwnProperties(target);
+  const filteredTarget = Object.create(null);
+
+  for (const [key, targetValue] of Object.entries(target)) {
+    if (!isUnsafeProperty(key, target)) {
+      filteredTarget[key] = targetValue;
+    }
+  }
+
   for (const [key, sourceValue] of Object.entries(source)) {
-    if (!isBuiltInProperties(key, source)) {
+    if (!isUnsafeProperty(key, source)) {
       const targetValue = filteredTarget[key];
+
       if (Array.isArray(sourceValue)) {
-        // Directly assign arrays
-        filteredTarget[key] = sourceValue;
-      } else if (isObject(sourceValue) && !Array.isArray(targetValue)) {
+        filteredTarget[key] = [...sourceValue];
+      } else if (isObject(sourceValue) && !Array.isArray(sourceValue)) {
         if (!isObject(targetValue) || isEmptyValue(targetValue)) {
-          filteredTarget[key] = merge({}, sourceValue);
+          filteredTarget[key] = merge(Object.create(null), sourceValue);
         } else {
           filteredTarget[key] = merge(targetValue, sourceValue);
         }
@@ -178,36 +204,8 @@ export function merge(
       }
     }
   }
+
   return filteredTarget;
-}
-
-function isEmptyValue(value: unknown): boolean {
-  if (value == null) return true;
-  if (isObject(value)) {
-    if (Array.isArray(value)) return value.length === 0;
-    return value && Object.keys(value).length === 0;
-  }
-  return false;
-}
-
-function isObject(value: any): boolean {
-  return typeof value === 'object' && value !== null;
-}
-
-function isBuiltInProperties(key: string, obj: Record<string, any>): boolean {
-  return key === 'constructor' || !Object.prototype.hasOwnProperty.call(obj, key);
-}
-
-function filterOwnProperties(obj: Record<string, any>): Record<string, any> {
-  const ownProps: Record<string, any> = {};
-
-  for (const key of Object.getOwnPropertyNames(obj)) {
-    if (!isBuiltInProperties(key, obj)) {
-      ownProps[key] = (obj as any)[key];
-    }
-  }
-
-  return ownProps;
 }
 
 export function mergeSamples(objects: any[]): string {

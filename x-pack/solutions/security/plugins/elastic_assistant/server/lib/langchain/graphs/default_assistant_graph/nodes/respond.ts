@@ -29,7 +29,7 @@ export async function respond({
   if (state?.agentOutcome && 'returnValues' in state.agentOutcome) {
     const userMessage = [
       'user',
-      `Respond exactly with
+      `Your role is to respond with the exact text:
     ${state.agentOutcome?.returnValues?.output}
 
     Do not verify, confirm or anything else. Just reply with the same content as provided above.`,

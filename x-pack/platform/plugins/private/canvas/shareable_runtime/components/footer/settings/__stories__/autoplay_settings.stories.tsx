@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { ExampleContext } from '../../../../test/context_example';
@@ -20,13 +19,22 @@ const style = {
   background: '#fff',
 };
 
-storiesOf('shareables/Footer/Settings/AutoplaySettings', module)
-  .add('contextual', () => (
+export default {
+  title: 'shareables/Footer/Settings/AutoplaySettings',
+};
+
+export const Contextual = {
+  render: () => (
     <ExampleContext {...{ style }}>
       <AutoplaySettings />
     </ExampleContext>
-  ))
-  .add('component: off, 2s', () => (
+  ),
+
+  name: 'contextual',
+};
+
+export const ComponentOff2S = {
+  render: () => (
     <ExampleContext {...{ style }}>
       <AutoplaySettingsComponent
         isEnabled={false}
@@ -35,8 +43,13 @@ storiesOf('shareables/Footer/Settings/AutoplaySettings', module)
         onSetInterval={action('onSetInterval')}
       />
     </ExampleContext>
-  ))
-  .add('component: on, 5s', () => (
+  ),
+
+  name: 'component: off, 2s',
+};
+
+export const ComponentOn5S = {
+  render: () => (
     <ExampleContext {...{ style }}>
       <AutoplaySettingsComponent
         isEnabled={true}
@@ -45,4 +58,7 @@ storiesOf('shareables/Footer/Settings/AutoplaySettings', module)
         onSetInterval={action('onSetInterval')}
       />
     </ExampleContext>
-  ));
+  ),
+
+  name: 'component: on, 5s',
+};

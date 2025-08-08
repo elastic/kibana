@@ -8,7 +8,11 @@
 import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  elasticsearchServiceMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
 
 import {
   ASSETS_SAVED_OBJECT_TYPE,
@@ -24,17 +28,39 @@ import { PackageNotFoundError } from '../../../errors';
 
 import { getSettings } from '../../settings';
 import { auditLoggingService } from '../../audit_logging';
-
 import * as Registry from '../registry';
-
+import { getEsPackage } from '../archive/storage';
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 
-import { getInstalledPackages, getPackageInfo, getPackages, getPackageUsageStats } from './get';
+import {
+  getAgentTemplateAssetsMap,
+  getInstalledPackages,
+  getPackageInfo,
+  getPackages,
+  getPackageUsageStats,
+} from './get';
+
+const mockPackagePolicySavedObjectType = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
 jest.mock('../registry');
 jest.mock('../../settings');
 jest.mock('../../audit_logging');
 jest.mock('../../data_streams');
+jest.mock('../archive/storage', () => {
+  return {
+    ...jest.requireActual('../archive/storage'),
+    getEsPackage: jest
+      .fn()
+      .mockImplementation((...args) =>
+        jest.requireActual('../archive/storage').getEsPackage(...args)
+      ),
+  };
+});
+jest.mock('../../package_policy', () => {
+  return {
+    getPackagePolicySavedObjectType: () => mockPackagePolicySavedObjectType,
+  };
+});
 
 const MockRegistry = jest.mocked(Registry);
 
@@ -490,6 +516,7 @@ owner: elastic`,
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'get',
         id: 'elasticsearch',
+        name: 'elasticsearch',
         savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
       });
     });
@@ -592,6 +619,76 @@ owner: elastic`,
         savedObjectsClient: soClient,
       });
       expect(packages.find((item) => item.id === 'nginx')).toBeUndefined();
+    });
+
+    it('should filter packages containing only data streams in xpack.fleet.internal.excludeDataStreamTypes', async () => {
+      MockRegistry.fetchList.mockResolvedValue([
+        {
+          name: 'nginx',
+          version: '1.0.0',
+          title: 'Nginx',
+          data_streams: [
+            {
+              dataset: 'nginx.access',
+              type: 'logs',
+              namespace: 'default',
+            },
+            {
+              dataset: 'nginx.stubstatus',
+              type: 'metrics',
+              namespace: 'default',
+            },
+          ],
+        } as any,
+        {
+          id: 'fleet_server',
+          name: 'fleet_server',
+          version: '1.0.0',
+          title: 'Fleet Server',
+        } as any,
+        {
+          name: 'apache_spark',
+          version: '1.0.0',
+          title: 'Apache Spark',
+          data_streams: [
+            {
+              dataset: 'apache_spark.metrics',
+              type: 'metrics',
+              namespace: 'default',
+            },
+          ],
+        } as any,
+      ]);
+      const mockContract = createAppContextStartContractMock({
+        internal: {
+          excludeDataStreamTypes: ['metrics'],
+        },
+      } as any);
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [],
+      } as any);
+      const packages = await getPackages({
+        savedObjectsClient: soClient,
+      });
+      expect(packages.find((item) => item.id === 'apache_spark')).toBeUndefined();
+      expect(packages.find((item) => item.id === 'nginx')).toEqual({
+        data_streams: [
+          {
+            dataset: 'nginx.access',
+            namespace: 'default',
+            type: 'logs',
+          },
+        ],
+        id: 'nginx',
+        name: 'nginx',
+        status: 'not_installed',
+        title: 'Nginx',
+        version: '1.0.0',
+      });
+      expect(packages.find((item) => item.id === 'fleet_server')).toBeDefined();
     });
   });
 
@@ -951,6 +1048,138 @@ owner: elastic`,
       expect(MockRegistry.getPackage).not.toHaveBeenCalled();
     });
 
+    it('should remove excluded data stream types and policy templates', async () => {
+      const mockContract = createAppContextStartContractMock({
+        internal: {
+          excludeDataStreamTypes: ['metrics'],
+        },
+      } as any);
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
+        name: 'nginx',
+        version: '1.0.0',
+      } as RegistryPackage);
+      const packageInfo = {
+        name: 'nginx',
+        version: '1.0.0',
+        assets: [],
+        data_streams: [
+          {
+            dataset: 'nginx.access',
+            type: 'logs',
+            namespace: 'default',
+          },
+          {
+            dataset: 'nginx.stubstatus',
+            type: 'metrics',
+            namespace: 'default',
+          },
+        ],
+        policy_templates: [
+          {
+            name: 'nginx',
+            inputs: [
+              {
+                type: 'nginx/metrics',
+              },
+              {
+                type: 'logfile',
+              },
+            ],
+          },
+        ],
+      } as unknown as RegistryPackage;
+      MockRegistry.fetchInfo.mockResolvedValue(packageInfo);
+      MockRegistry.getPackage.mockResolvedValue({
+        paths: [],
+        assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
+        packageInfo,
+      });
+
+      await expect(
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'nginx',
+          pkgVersion: '1.0.0',
+        })
+      ).resolves.toMatchObject({
+        latestVersion: '1.0.0',
+        status: 'not_installed',
+        data_streams: [
+          {
+            dataset: 'nginx.access',
+            type: 'logs',
+            namespace: 'default',
+          },
+        ],
+        policy_templates: [
+          {
+            name: 'nginx',
+            inputs: [
+              {
+                type: 'logfile',
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('should do nothing if no excluded data streams', async () => {
+      const mockContract = createAppContextStartContractMock({
+        internal: {
+          excludeDataStreamTypes: ['metrics'],
+        },
+      } as any);
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
+        name: 'pkg',
+        version: '1.0.0',
+      } as RegistryPackage);
+      const packageInfo = {
+        name: 'pkg',
+        version: '1.0.0',
+        assets: [],
+        policy_templates: [
+          {
+            name: 'pkg',
+            inputs: [],
+          },
+        ],
+      } as unknown as RegistryPackage;
+      MockRegistry.fetchInfo.mockResolvedValue(packageInfo);
+      MockRegistry.getPackage.mockResolvedValue({
+        paths: [],
+        assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
+        packageInfo,
+      });
+
+      await expect(
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'pkg',
+          pkgVersion: '1.0.0',
+        })
+      ).resolves.toMatchObject({
+        latestVersion: '1.0.0',
+        status: 'not_installed',
+        policy_templates: [
+          {
+            name: 'pkg',
+            inputs: [],
+          },
+        ],
+      });
+    });
+
     describe('installation status', () => {
       it('should be not_installed when no package SO exists', async () => {
         const soClient = savedObjectsClientMock.create();
@@ -1148,6 +1377,142 @@ owner: elastic`,
 
         expect(MockRegistry.getPackage).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('getAgentTemplateAssetsMap', () => {
+    const assetsMap = new Map([
+      ['test-1.0.0/LICENSE.txt', Buffer.from('')],
+      ['test-1.0.0/changelog.yml', Buffer.from('')],
+      ['test-1.0.0/manifest.yml', Buffer.from('')],
+      ['test-1.0.0/docs/README.md', Buffer.from('')],
+      ['test-1.0.0/img/logo_nginx.svg', Buffer.from('')],
+      ['test-1.0.0/img/nginx-logs-access-error.png', Buffer.from('')],
+      ['test-1.0.0/img/nginx-logs-overview.png', Buffer.from('')],
+      ['test-1.0.0/img/nginx-metrics-overview.png', Buffer.from('')],
+      ['test-1.0.0/data_stream/access/manifest.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/access/sample_event.json', Buffer.from('')],
+      ['test-1.0.0/data_stream/error/manifest.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/error/sample_event.json', Buffer.from('')],
+      ['test-1.0.0/data_stream/stubstatus/manifest.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/stubstatus/sample_event.json', Buffer.from('')],
+      [
+        'test-1.0.0/kibana/dashboard/nginx-023d2930-f1a5-11e7-a9ef-93c69af7b129.json',
+        Buffer.from(''),
+      ],
+      [
+        'test-1.0.0/kibana/dashboard/nginx-046212a0-a2a1-11e7-928f-5dbe6f6f5519.json',
+        Buffer.from(''),
+      ],
+      [
+        'test-1.0.0/kibana/dashboard/nginx-55a9e6e0-a29e-11e7-928f-5dbe6f6f5519.json',
+        Buffer.from(''),
+      ],
+      ['test-1.0.0/kibana/ml_module/nginx-Logs-ml.json', Buffer.from('')],
+      ['test-1.0.0/data_stream/access/fields/agent.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/access/fields/base-fields.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/access/fields/fields.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/error/fields/agent.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/error/fields/base-fields.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/error/fields/fields.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/stubstatus/fields/agent.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/stubstatus/fields/base-fields.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/stubstatus/fields/ecs.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/stubstatus/fields/fields.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/access/agent/stream/httpjson.yml.hbs', Buffer.from('')],
+      ['test-1.0.0/data_stream/access/agent/stream/stream.yml.hbs', Buffer.from('')],
+      ['test-1.0.0/data_stream/access/elasticsearch/ingest_pipeline/default.yml', Buffer.from('')],
+      [
+        'test-1.0.0/data_stream/access/elasticsearch/ingest_pipeline/third-party.yml',
+        Buffer.from(''),
+      ],
+      ['test-1.0.0/data_stream/error/agent/stream/httpjson.yml.hbs', Buffer.from('')],
+      ['test-1.0.0/data_stream/error/agent/stream/stream.yml.hbs', Buffer.from('')],
+      ['test-1.0.0/data_stream/error/elasticsearch/ingest_pipeline/default.yml', Buffer.from('')],
+      [
+        'test-1.0.0/data_stream/error/elasticsearch/ingest_pipeline/third-party.yml',
+        Buffer.from(''),
+      ],
+      ['test-1.0.0/data_stream/stubstatus/agent/stream/stream.yml.hbs', Buffer.from('')],
+    ]);
+
+    beforeEach(() => {
+      MockRegistry.getPackage.mockResolvedValue({
+        paths: [],
+        assetsMap,
+        archiveIterator: createArchiveIteratorFromMap(assetsMap),
+        packageInfo: {
+          name: 'test',
+          version: '1.0.0',
+        } as RegistryPackage,
+      });
+    });
+
+    it('should work with not installed package', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+
+      savedObjectsClient.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('not found')
+      );
+      const packagePolicyAssetsMap = await getAgentTemplateAssetsMap({
+        savedObjectsClient,
+        logger: loggingSystemMock.createLogger(),
+        packageInfo: {
+          name: 'test',
+          version: '1.0.0',
+        } as any,
+      });
+
+      expect([...packagePolicyAssetsMap.keys()]).toMatchInlineSnapshot(`
+        Array [
+          "test-1.0.0/manifest.yml",
+          "test-1.0.0/data_stream/access/manifest.yml",
+          "test-1.0.0/data_stream/error/manifest.yml",
+          "test-1.0.0/data_stream/stubstatus/manifest.yml",
+          "test-1.0.0/data_stream/access/agent/stream/httpjson.yml.hbs",
+          "test-1.0.0/data_stream/access/agent/stream/stream.yml.hbs",
+          "test-1.0.0/data_stream/error/agent/stream/httpjson.yml.hbs",
+          "test-1.0.0/data_stream/error/agent/stream/stream.yml.hbs",
+          "test-1.0.0/data_stream/stubstatus/agent/stream/stream.yml.hbs",
+        ]
+      `);
+    });
+
+    it('should work installed package', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      jest.mocked(getEsPackage).mockResolvedValueOnce({
+        assets_path: [...assetsMap.keys()].map((path) => ({ id: path, path, type: 'test' })),
+      } as any);
+
+      savedObjectsClient.get.mockResolvedValue({
+        attributes: [
+          {
+            assets_path: [...assetsMap.keys()].map((path) => ({ id: path, path, type: 'test' })),
+          },
+        ],
+      } as any);
+      const packagePolicyAssetsMap = await getAgentTemplateAssetsMap({
+        savedObjectsClient,
+        logger: loggingSystemMock.createLogger(),
+        packageInfo: {
+          name: 'test',
+          version: '1.0.0',
+        } as any,
+      });
+
+      expect([...packagePolicyAssetsMap.keys()]).toMatchInlineSnapshot(`
+        Array [
+          "test-1.0.0/manifest.yml",
+          "test-1.0.0/data_stream/access/manifest.yml",
+          "test-1.0.0/data_stream/error/manifest.yml",
+          "test-1.0.0/data_stream/stubstatus/manifest.yml",
+          "test-1.0.0/data_stream/access/agent/stream/httpjson.yml.hbs",
+          "test-1.0.0/data_stream/access/agent/stream/stream.yml.hbs",
+          "test-1.0.0/data_stream/error/agent/stream/httpjson.yml.hbs",
+          "test-1.0.0/data_stream/error/agent/stream/stream.yml.hbs",
+          "test-1.0.0/data_stream/stubstatus/agent/stream/stream.yml.hbs",
+        ]
+      `);
     });
   });
 });

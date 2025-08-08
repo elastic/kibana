@@ -49,37 +49,35 @@ export async function getServiceNodeMetadata({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...serviceNodeNameQuery(serviceNodeName),
-          ],
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...serviceNodeNameQuery(serviceNodeName),
+        ],
+      },
+    },
+    aggs: {
+      nodes: {
+        terms: {
+          field: SERVICE_NODE_NAME,
         },
       },
-      aggs: {
-        nodes: {
-          terms: {
-            field: SERVICE_NODE_NAME,
-          },
+      host: {
+        terms: {
+          field: HOST_NAME,
+          size: 1,
         },
-        host: {
-          terms: {
-            field: HOST_NAME,
-            size: 1,
-          },
-        },
-        containerId: {
-          terms: {
-            field: CONTAINER_ID,
-            size: 1,
-          },
+      },
+      containerId: {
+        terms: {
+          field: CONTAINER_ID,
+          size: 1,
         },
       },
     },

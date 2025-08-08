@@ -7,9 +7,18 @@
 
 import React from 'react';
 
-import { EuiCard, EuiText, EuiFlexGroup, EuiFlexItem, EuiTourStep } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTourStep,
+  EuiTextColor,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WorkflowId, workflows } from '../../code_examples/workflows';
+import { WorkflowId } from '@kbn/search-shared-ui';
+import { workflows } from '../../code_examples/workflows';
 import { useGuideTour } from './hooks/use_guide_tour';
 
 interface GuideSelectorProps {
@@ -28,6 +37,7 @@ export const GuideSelector: React.FC<GuideSelectorProps> = ({
 
   return showTour ? (
     <EuiTourStep
+      data-test-subj="searchIngestTour"
       content={
         <EuiText>
           <p>
@@ -46,6 +56,19 @@ export const GuideSelector: React.FC<GuideSelectorProps> = ({
         defaultMessage: 'New guides available!',
       })}
       anchorPosition="rightUp"
+      footerAction={
+        <EuiButtonEmpty
+          data-test-subj="searchIngestTourCloseButton"
+          color="text"
+          flush="right"
+          onClick={() => setTourIsOpen(false)}
+          size="xs"
+        >
+          {i18n.translate('xpack.searchIndices.closeTourAction', {
+            defaultMessage: 'Close tour',
+          })}
+        </EuiButtonEmpty>
+      }
     >
       <GuideSelectorTiles selectedWorkflowId={selectedWorkflowId} onChange={onChange} />
     </EuiTourStep>
@@ -68,11 +91,7 @@ const GuideSelectorTiles: React.FC<Pick<GuideSelectorProps, 'selectedWorkflowId'
               title={workflow.title}
               hasBorder={!isSelected}
               titleSize="xs"
-              description={
-                <EuiText color="subdued" size="s">
-                  {workflow.summary}
-                </EuiText>
-              }
+              description={<EuiTextColor color="subdued">{workflow.summary}</EuiTextColor>}
               selectable={{
                 onClick: () => onChange(workflow.id),
                 isSelected,

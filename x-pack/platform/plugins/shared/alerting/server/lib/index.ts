@@ -41,11 +41,15 @@ export { isRuleSnoozed, getRuleSnoozeEndTime } from './is_rule_snoozed';
 export { convertRuleIdsToKueryNode } from './convert_rule_ids_to_kuery_node';
 export { convertEsSortToEventLogSort } from './convert_es_sort_to_event_log_sort';
 export * from './snooze';
-export { setFlapping } from './set_flapping';
-export { determineAlertsToReturn } from './determine_alerts_to_return';
-export { updateFlappingHistory, isFlapping } from './flapping_utils';
-export { getAlertsForNotification } from './get_alerts_for_notification';
-export { trimRecoveredAlerts } from './trim_recovered_alerts';
+export { toRawAlertInstances } from './to_raw_alert_instances';
 export { createGetAlertIndicesAliasFn } from './create_get_alert_indices_alias';
 export type { GetAlertIndicesAlias } from './create_get_alert_indices_alias';
 export { getEsRequestTimeout } from './get_es_request_timeout';
+export { spaceIdToNamespace } from './space_id_to_namespace';
+export type { AlertAuditEventParams } from './alert_audit_events';
+export {
+  AlertAuditAction,
+  operationAlertAuditActionMap,
+  alertAuditEvent,
+  alertAuditSystemEvent,
+} from './alert_audit_events';

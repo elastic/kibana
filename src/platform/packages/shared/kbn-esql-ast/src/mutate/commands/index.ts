@@ -13,5 +13,6 @@ import * as sort from './sort';
 import * as stats from './stats';
 import * as where from './where';
 import * as join from './join';
+import * as rerank from './rerank';
 
-export { from, limit, sort, stats, where, join };
+export { from, limit, sort, stats, where, join, rerank };

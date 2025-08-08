@@ -14,6 +14,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { AlertTableCellContextProvider } from '../../../../detections/configurations/security_solution_detections/cell_value_context';
 import { StatefulEventsViewer } from '../../../../common/components/events_viewer';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import * as i18n from './translations';
@@ -27,7 +28,7 @@ import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import { PreviewRenderCellValue } from './preview_table_cell_renderer';
 import { getPreviewTableControlColumn } from './preview_table_control_columns';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import type { TimeframePreviewOptions } from '../../../../detections/pages/detection_engine/rules/types';
+import type { TimeframePreviewOptions } from '../../../common/types';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getRulePreviewLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/rule_preview';
@@ -37,8 +38,6 @@ import { INSPECT_ACTION } from '../../../../common/components/visualization_acti
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
-  flex: 1 1 auto;
-  display: flex;
   width: 100%;
 `;
 
@@ -98,11 +97,11 @@ const PreviewHistogramComponent = ({
   const previousPreviewId = usePrevious(previewId);
   const previewQueryId = `${ID}-${previewId}`;
   const previewEmbeddableId = `${previewQueryId}-embeddable`;
-  const { responses: visualizationResponses } = useVisualizationResponse({
+  const { tables } = useVisualizationResponse({
     visualizationId: previewEmbeddableId,
   });
 
-  const totalCount = visualizationResponses?.[0]?.hits?.total ?? 0;
+  const totalCount = (tables && tables.meta.statistics.totalCount) ?? 0;
 
   useEffect(() => {
     if (previousPreviewId !== previewId && totalCount > 0) {
@@ -142,7 +141,10 @@ const PreviewHistogramComponent = ({
   }, [config, indexPattern, previewId]);
 
   return (
-    <>
+    <AlertTableCellContextProvider
+      tableId={TableId.rulePreview}
+      sourcererScope={SourcererScopeName.detections}
+    >
       <Panel height={DEFAULT_HISTOGRAM_HEIGHT} data-test-subj={'preview-histogram-panel'}>
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem grow={1}>
@@ -199,7 +201,7 @@ const PreviewHistogramComponent = ({
           bulkActions={false}
         />
       </FullScreenContainer>
-    </>
+    </AlertTableCellContextProvider>
   );
 };
 

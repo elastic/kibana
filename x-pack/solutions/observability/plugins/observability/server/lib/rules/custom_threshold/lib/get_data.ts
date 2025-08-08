@@ -6,7 +6,7 @@
  */
 
 import type { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
@@ -26,6 +26,7 @@ export type GetDataResponse = Record<
     trigger: boolean;
     value: number | null;
     bucketKey: BucketKey;
+    flattenGrouping?: Record<string, string>;
   } & AdditionalContext
 >;
 
@@ -140,12 +141,18 @@ export const getData = async (
         const bucketHits = additionalContext?.hits?.hits;
         const additionalContextSource =
           bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
+        const flattenGrouping: Record<string, string> = {};
+        const groups: string[] = typeof groupBy === 'string' ? [groupBy] : groupBy ?? [];
+        groups.map((group: string, groupIndex) => {
+          flattenGrouping[group] = bucket.key[`groupBy${groupIndex}`];
+        });
 
         if (missingGroup && missingGroup.value > 0) {
           previous[key] = {
             trigger: false,
             value: null,
             bucketKey: bucket.key,
+            flattenGrouping,
           };
         } else {
           const value = aggregatedValue ? aggregatedValue.value : null;
@@ -154,6 +161,7 @@ export const getData = async (
             trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
             value,
             bucketKey: bucket.key,
+            flattenGrouping,
             container: containerList,
             ...additionalContextSource,
           };
@@ -204,7 +212,7 @@ export const getData = async (
     index,
     allow_no_indices: true,
     ignore_unavailable: true,
-    body: getElasticsearchMetricQuery(
+    ...getElasticsearchMetricQuery(
       params,
       timeframe,
       timeFieldName,

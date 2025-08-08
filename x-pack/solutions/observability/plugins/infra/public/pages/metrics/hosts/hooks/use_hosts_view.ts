@@ -15,17 +15,18 @@
 import { useMemo } from 'react';
 import createContainer from 'constate';
 import type { BoolQuery } from '@kbn/es-query';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search';
 import type {
   GetInfraMetricsRequestBodyPayloadClient,
   GetInfraMetricsResponsePayload,
-  InfraAssetMetricType,
+  InfraEntityMetricType,
 } from '../../../../../common/http_api';
 import type { StringDateRange } from './use_unified_search_url_state';
 
-const HOST_TABLE_METRICS: InfraAssetMetricType[] = [
+const HOST_TABLE_METRICS: InfraEntityMetricType[] = [
   'cpuV2',
   'diskSpaceUsage',
   'memory',
@@ -50,9 +51,10 @@ export const useHostsView = () => {
           dateRange: parsedDateRange,
           esQuery: buildQuery(),
           limit: searchCriteria.limit,
+          schema: searchCriteria?.preferredSchema || 'ecs',
         })
       ),
-    [buildQuery, parsedDateRange, searchCriteria.limit]
+    [buildQuery, parsedDateRange, searchCriteria.limit, searchCriteria.preferredSchema]
   );
 
   const { data, error, status } = useFetcher(
@@ -95,14 +97,20 @@ const createInfraMetricsRequest = ({
   esQuery,
   dateRange,
   limit,
+  schema,
 }: {
   esQuery: { bool: BoolQuery };
   dateRange: StringDateRange;
   limit: number;
+  schema?: DataSchemaFormat;
 }): GetInfraMetricsRequestBodyPayloadClient => ({
   query: esQuery,
   from: dateRange.from,
   to: dateRange.to,
-  metrics: HOST_TABLE_METRICS,
+  metrics:
+    schema === 'ecs'
+      ? HOST_TABLE_METRICS
+      : HOST_TABLE_METRICS.filter((metric) => !['rxV2', 'txV2'].includes(metric)),
   limit,
+  schema,
 });

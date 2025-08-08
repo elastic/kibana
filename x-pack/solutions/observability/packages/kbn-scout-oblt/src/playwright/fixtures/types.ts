@@ -5,22 +5,31 @@
  * 2.0.
  */
 
-import {
+import type {
+  ApiServicesFixture,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
 } from '@kbn/scout';
 import { ObltPageObjects } from '../page_objects';
+import { SloDataFixture } from './worker';
 
 export interface ObltTestFixtures extends ScoutTestFixtures {
   pageObjects: ObltPageObjects;
 }
 
-export type ObltWorkerFixtures = ScoutWorkerFixtures;
+export type ObltApiServicesFixture = ApiServicesFixture;
+
+export interface ObltWorkerFixtures extends ScoutWorkerFixtures {
+  apiServices: ObltApiServicesFixture;
+  sloData: SloDataFixture;
+}
 
 export interface ObltParallelTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: ObltPageObjects;
 }
 
-export type ObltParallelWorkerFixtures = ScoutParallelWorkerFixtures;
+export interface ObltParallelWorkerFixtures extends ScoutParallelWorkerFixtures {
+  apiServices: ObltApiServicesFixture;
+}

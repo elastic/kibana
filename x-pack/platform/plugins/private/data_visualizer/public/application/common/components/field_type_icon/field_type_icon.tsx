@@ -11,7 +11,6 @@ import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import { getFieldTypeName } from '@kbn/field-utils';
-import './_index.scss';
 
 interface FieldTypeIconProps {
   tooltipEnabled: boolean;
@@ -28,7 +27,12 @@ export const FieldTypeIcon: FC<FieldTypeIconProps> = ({ tooltipEnabled = false, 
   if (tooltipEnabled === true) {
     return (
       <EuiToolTip
-        anchorClassName="dvFieldTypeIcon__anchor"
+        anchorProps={{
+          css: {
+            display: 'flex',
+            alignItems: 'center',
+          },
+        }}
         content={label}
         data-test-subj="dvFieldTypeTooltip"
         position="left"

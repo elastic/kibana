@@ -8,7 +8,6 @@
  */
 
 /* eslint-disable no-console */
-const originalConsoleError = console.error;
 
 /**
  * After we upgrade to React 18, we will see a warning in the console that we are using the legacy ReactDOM.render API.
@@ -16,6 +15,7 @@ const originalConsoleError = console.error;
  * However, it is very noisy and we want to mute it for now.
  */
 export function muteLegacyRootWarning() {
+  const originalConsoleError = console.error;
   console.error = (message, ...args) => {
     if (
       typeof message === 'string' &&
@@ -27,5 +27,10 @@ export function muteLegacyRootWarning() {
     }
 
     originalConsoleError.call(console, message, ...args);
+  };
+
+  /* unmute */
+  return () => {
+    console.error = originalConsoleError;
   };
 }

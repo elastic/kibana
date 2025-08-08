@@ -6,7 +6,8 @@
  */
 
 import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '@kbn/maps-plugin/common';
-import { ML_SEVERITY_COLOR_RAMP } from '@kbn/ml-anomaly-utils';
+import { getMlSeverityColorRampValue } from '@kbn/ml-anomaly-utils';
+import type { EuiThemeComputed } from '@elastic/eui';
 import type { AnomaliesTableData } from '../explorer_utils';
 
 const FEATURE = 'Feature';
@@ -87,7 +88,7 @@ export const getMLAnomaliesTypicalLayer = (anomalies: AnomaliesTableData['anomal
   };
 };
 
-export const getMLAnomaliesActualLayer = (anomalies: any) => {
+export const getMLAnomaliesActualLayer = (anomalies: any, euiTheme: EuiThemeComputed) => {
   return {
     id: 'anomalies_actual_layer',
     label: 'Actual',
@@ -112,7 +113,7 @@ export const getMLAnomaliesActualLayer = (anomalies: any) => {
         fillColor: {
           type: STYLE_TYPE.DYNAMIC,
           options: {
-            customColorRamp: ML_SEVERITY_COLOR_RAMP,
+            customColorRamp: getMlSeverityColorRampValue(euiTheme),
             field: {
               name: 'record_score',
               origin: FIELD_ORIGIN.SOURCE,

@@ -57,7 +57,7 @@ Object {
         "metricColorMode": "None",
         "palette": Object {
           "colors": Array [
-            "rgb(0, 0, 0, 0)",
+            "rgba(0, 0, 0, 0)",
             "rgb(112, 38, 231)",
           ],
           "gradient": false,

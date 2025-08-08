@@ -49,7 +49,8 @@ describe('MetricVisValue', () => {
         labelConfig={labelConfig}
       />
     );
-    expect(component.find('button').exists()).toBe(true);
+
+    expect(component.find('[data-test-subj="metric_value_button"]').exists()).toBe(true);
   });
 
   it('should not be wrapped in button without having a click listener', () => {

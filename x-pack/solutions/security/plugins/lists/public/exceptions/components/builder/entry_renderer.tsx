@@ -21,6 +21,7 @@ import {
 import styled from 'styled-components';
 import {
   ExceptionListType,
+  ExceptionListTypeEnum,
   ListSchema,
   ListOperatorTypeEnum as OperatorTypeEnum,
   OsTypeArray,
@@ -322,12 +323,13 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   );
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {
-    // for event filters forms
-    // show extra operators for wildcards when field supports matches
+    // Extra operators for wildcards will be removed if the field does not support matches
     const doesFieldSupportMatches = entry.field !== undefined && fieldSupportsMatches(entry.field);
-    const isEventFilterList = listType === 'endpoint_events';
+    const isEventFilterList = listType === ExceptionListTypeEnum.ENDPOINT_EVENTS;
+    const isTrustedAppsList = listType === ExceptionListTypeEnum.ENDPOINT_TRUSTED_APPS;
+
     const augmentedOperatorsList =
-      operatorsList && doesFieldSupportMatches && isEventFilterList
+      operatorsList && doesFieldSupportMatches && (isEventFilterList || isTrustedAppsList)
         ? operatorsList
         : operatorsList?.filter((operator) => operator.type !== OperatorTypeEnum.WILDCARD);
 
@@ -384,7 +386,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           id="xpack.lists.exceptions.builder.exceptionIsOperator.warningMessage.incorrectWildCardUsage"
           defaultMessage="Change the operator to 'matches' to ensure wildcards run properly."
         />{' '}
-        <EuiIconTip type="iInCircle" content={i18n.WILDCARD_WITH_IS_OPERATOR_TOOLTIP} />
+        <EuiIconTip type="info" content={i18n.WILDCARD_WITH_IS_OPERATOR_TOOLTIP} />
       </EuiText>
     );
   };
@@ -395,7 +397,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       <p>
         {precedingWarning}{' '}
         <EuiIconTip
-          type="iInCircle"
+          type="info"
           content={
             <FormattedMessage
               id="xpack.lists.exceptions.builder.exceptionMatchesOperator.warningMessage.wildcardInFilepath"

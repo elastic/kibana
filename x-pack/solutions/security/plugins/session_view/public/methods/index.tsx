@@ -20,24 +20,17 @@ const queryClient = new QueryClient();
 const SessionViewLazy = lazy(() => import('../components/session_view'));
 
 export const ELASTIC_DEFEND_DATA_SOURCE = 'endpoint';
-export const CLOUD_DEFEND_DATA_SOURCE = 'cloud_defend';
 export const AUDITBEAT_DATA_SOURCE = 'auditbeat';
 
-const SUPPORTED_PACKAGES = [
-  ELASTIC_DEFEND_DATA_SOURCE,
-  CLOUD_DEFEND_DATA_SOURCE,
-  AUDITBEAT_DATA_SOURCE,
-];
+const SUPPORTED_PACKAGES = [ELASTIC_DEFEND_DATA_SOURCE, AUDITBEAT_DATA_SOURCE];
 const INDEX_REGEX = new RegExp(`([a-z0-9_-]+\:)?[a-z0-9-.]*(${SUPPORTED_PACKAGES.join('|')})`, 'i');
 
 export const DEFAULT_INDEX = 'logs-*';
-export const CLOUD_DEFEND_INDEX = 'logs-cloud_defend.*';
 export const ENDPOINT_INDEX = 'logs-endpoint.events.process*';
 export const AUDITBEAT_INDEX = 'auditbeat-*';
 
 const sessionViewIntegrationIndices: Record<string, SessionViewIndex> = {
   endpoint: ENDPOINT_INDEX,
-  cloud_defend: CLOUD_DEFEND_INDEX,
   auditbeat: AUDITBEAT_INDEX,
 };
 

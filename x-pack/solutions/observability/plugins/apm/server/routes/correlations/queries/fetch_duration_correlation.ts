@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { SPAN_DURATION, TRANSACTION_DURATION } from '../../../../common/es_fields/apm';
 import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
@@ -40,45 +40,43 @@ export const fetchDurationCorrelation = async ({
     apm: {
       events: [eventType],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: getCommonCorrelationsQuery({
-        start,
-        end,
-        environment,
-        kuery,
-        query,
-      }),
-      aggs: {
-        latency_ranges: {
-          range: {
-            field: eventType === ProcessorEvent.span ? SPAN_DURATION : TRANSACTION_DURATION,
-            ranges,
-          },
+    track_total_hits: false,
+    size: 0,
+    query: getCommonCorrelationsQuery({
+      start,
+      end,
+      environment,
+      kuery,
+      query,
+    }),
+    aggs: {
+      latency_ranges: {
+        range: {
+          field: eventType === ProcessorEvent.span ? SPAN_DURATION : TRANSACTION_DURATION,
+          ranges,
         },
-        // Pearson correlation value
-        duration_correlation: {
-          bucket_correlation: {
-            buckets_path: 'latency_ranges>_count',
-            function: {
-              count_correlation: {
-                indicator: {
-                  fractions,
-                  expectations,
-                  doc_count: totalDocCount,
-                },
+      },
+      // Pearson correlation value
+      duration_correlation: {
+        bucket_correlation: {
+          buckets_path: 'latency_ranges>_count',
+          function: {
+            count_correlation: {
+              indicator: {
+                fractions,
+                expectations,
+                doc_count: totalDocCount,
               },
             },
           },
         },
-        // KS test p value = ks_test.less
-        ks_test: {
-          bucket_count_ks_test: {
-            fractions,
-            buckets_path: 'latency_ranges>_count',
-            alternative: ['less', 'greater', 'two_sided'],
-          },
+      },
+      // KS test p value = ks_test.less
+      ks_test: {
+        bucket_count_ks_test: {
+          fractions,
+          buckets_path: 'latency_ranges>_count',
+          alternative: ['less', 'greater', 'two_sided'],
         },
       },
     },

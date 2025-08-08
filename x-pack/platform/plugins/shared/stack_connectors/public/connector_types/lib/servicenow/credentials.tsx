@@ -48,6 +48,7 @@ const CredentialsComponent: React.FC<Props> = ({ readOnly, isLoading, isOAuth })
           euiFieldProps: {
             label: i18n.IS_OAUTH,
             disabled: readOnly,
+            'data-test-subj': 'use-oauth-switch',
           },
         }}
       />

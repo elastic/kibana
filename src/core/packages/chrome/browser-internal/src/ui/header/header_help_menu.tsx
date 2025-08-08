@@ -156,7 +156,7 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
         })}
         onClick={this.onMenuButtonClick}
       >
-        <EuiIcon type="help" size="m" />
+        <EuiIcon type="question" size="m" />
       </EuiHeaderSectionItemButton>
     );
 
@@ -183,7 +183,7 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
             {!this.props.isServerless && (
               <EuiFlexItem
                 grow={false}
-                className="chrHeaderHelpMenu__version"
+                css={{ textTransform: 'none' }}
                 data-test-subj="kbnVersionString"
               >
                 <FormattedMessage

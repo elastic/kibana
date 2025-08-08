@@ -161,7 +161,7 @@ describe('EsqlStarredQueriesService', () => {
 
     await service.addStarredQuery(query);
     const buttonWithTooltip = service.renderStarredButton(query);
-    const button = buttonWithTooltip.props.children;
+    const button = buttonWithTooltip.props.children.props.children;
     expect(button.props.title).toEqual('Remove ES|QL query from Starred');
     expect(button.props.iconType).toEqual('starFilled');
   });
@@ -176,7 +176,7 @@ describe('EsqlStarredQueriesService', () => {
 
     await service.addStarredQuery(query);
     const buttonWithTooltip = service.renderStarredButton(query);
-    const button = buttonWithTooltip.props.children;
+    const button = buttonWithTooltip.props.children.props.children;
     expect(button.props.title).toEqual('Remove ES|QL query from Starred');
     button.props.onClick();
 
@@ -194,7 +194,7 @@ describe('EsqlStarredQueriesService', () => {
 
     await service.addStarredQuery(query);
     const buttonWithTooltip = service.renderStarredButton(query);
-    const button = buttonWithTooltip.props.children;
+    const button = buttonWithTooltip.props.children.props.children;
     button.props.onClick();
 
     expect(service.discardModalVisibility$.value).toEqual(false);

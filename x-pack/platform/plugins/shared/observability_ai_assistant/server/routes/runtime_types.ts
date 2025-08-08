@@ -7,9 +7,7 @@
 import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import {
-  type Conversation,
   type ConversationCreateRequest,
-  type ConversationRequestBase,
   type ConversationUpdateRequest,
   type Message,
   MessageRole,
@@ -17,7 +15,52 @@ import {
   type StarterPrompt,
 } from '../../common/types';
 
+export const deanonymizationRt = t.type({
+  start: t.number,
+  end: t.number,
+  entity: t.type({
+    class_name: t.string,
+    value: t.string,
+    mask: t.string,
+  }),
+});
+
 export const messageRt: t.Type<Message> = t.type({
+  '@timestamp': t.string,
+  message: t.intersection([
+    t.type({
+      role: t.union([
+        t.literal(MessageRole.System),
+        t.literal(MessageRole.Assistant),
+        t.literal(MessageRole.Function),
+        t.literal(MessageRole.User),
+        t.literal(MessageRole.Elastic),
+      ]),
+    }),
+    t.partial({
+      content: t.string,
+      name: t.string,
+      event: t.string,
+      data: t.string,
+      function_call: t.intersection([
+        t.type({
+          name: t.string,
+          trigger: t.union([
+            t.literal(MessageRole.Assistant),
+            t.literal(MessageRole.User),
+            t.literal(MessageRole.Elastic),
+          ]),
+        }),
+        t.partial({
+          arguments: t.string,
+        }),
+      ]),
+      deanonymizations: t.array(deanonymizationRt),
+    }),
+  ]),
+});
+
+export const publicMessageRt: t.Type<Omit<Message, 'unredactions'>> = t.type({
   '@timestamp': t.string,
   message: t.intersection([
     t.type({
@@ -57,21 +100,22 @@ const tokenCountRt = t.type({
   total: t.number,
 });
 
-export const baseConversationRt: t.Type<ConversationRequestBase> = t.type({
-  '@timestamp': t.string,
-  conversation: t.intersection([
-    t.type({
+export const conversationCreateRt: t.Type<ConversationCreateRequest> = t.intersection([
+  t.type({
+    '@timestamp': t.string,
+    conversation: t.type({
       title: t.string,
     }),
-    t.partial({
-      token_count: tokenCountRt,
-    }),
-  ]),
-  messages: t.array(messageRt),
-  labels: t.record(t.string, t.string),
-  numeric_labels: t.record(t.string, t.number),
-  public: toBooleanRt,
-});
+    messages: t.array(messageRt),
+    labels: t.record(t.string, t.string),
+    numeric_labels: t.record(t.string, t.number),
+    public: toBooleanRt,
+  }),
+  t.partial({
+    systemMessage: t.string,
+    archived: toBooleanRt,
+  }),
+]);
 
 export const assistantScopeType = t.union([
   t.literal('observability'),
@@ -79,17 +123,8 @@ export const assistantScopeType = t.union([
   t.literal('all'),
 ]);
 
-export const conversationCreateRt: t.Type<ConversationCreateRequest> = t.intersection([
-  baseConversationRt,
-  t.type({
-    conversation: t.type({
-      title: t.string,
-    }),
-  }),
-]);
-
 export const conversationUpdateRt: t.Type<ConversationUpdateRequest> = t.intersection([
-  baseConversationRt,
+  conversationCreateRt,
   t.type({
     conversation: t.intersection([
       t.type({
@@ -97,31 +132,10 @@ export const conversationUpdateRt: t.Type<ConversationUpdateRequest> = t.interse
         title: t.string,
       }),
       t.partial({
-        token_count: tokenCountRt,
+        token_count: tokenCountRt, // deprecated, but kept for backwards compatibility
       }),
     ]),
   }),
-]);
-
-export const conversationRt: t.Type<Conversation> = t.intersection([
-  baseConversationRt,
-  t.intersection([
-    t.type({
-      namespace: t.string,
-      conversation: t.intersection([
-        t.type({
-          id: t.string,
-          last_updated: t.string,
-        }),
-        t.partial({
-          token_count: tokenCountRt,
-        }),
-      ]),
-    }),
-    t.partial({
-      user: t.intersection([t.type({ name: t.string }), t.partial({ id: t.string })]),
-    }),
-  ]),
 ]);
 
 export const functionRt = t.intersection([

@@ -10,26 +10,108 @@ components:
       type: string
       format: nonempty
       minLength: 1
-      description: A string that does not contain only whitespace characters
+      description: A string that does not contain only whitespace characters.
+      example: "I am a string"
+
+
+    NonEmptyTimestamp:
+      type: string
+      format: nonempty
+      minLength: 1
+      description: A string that represents a timestamp in ISO 8601 format and does not contain only whitespace characters.
+      example: "2023-10-31T12:00:00Z"
 
     UUID:
       type: string
       format: uuid
-      description: A universally unique identifier
+      description: A universally unique identifier.
+      example: "123e4567-e89b-12d3-a456-426614174000"
 
     User:
       type: object
-      description: Could be any string, not necessarily a UUID
+      description: Could be any string, not necessarily a UUID.
       properties:
         id:
           type: string
-          description: User id
+          description: User id.
+          example: "user123"
         name:
           type: string
-          description: User name
+          description: User name.
+          example: "John Doe"
 
     SortOrder:
       type: string
       enum:
         - 'asc'
         - 'desc'
+      description: The order in which results are sorted.
+      example: "asc"
+
+    ScreenContext:
+      description: User screen context.
+      type: object
+      properties:
+        timeZone:
+          description: The local timezone of the user.
+          type: string
+          example: "America/New_York"
+
+    BulkCrudActionSummary:
+      type: object
+      properties:
+        failed:
+          type: integer
+          description: The number of failed actions.
+          example: 0
+        skipped:
+          type: integer
+          description: The number of skipped actions.
+          example: 1
+        succeeded:
+          type: integer
+          description: The number of successfully performed actions.
+          example: 10
+        total:
+          type: integer
+          description: The total number of actions attempted.
+          example: 12
+      required:
+        - failed
+        - skipped
+        - succeeded
+        - total
+
+    BulkActionBase:
+      x-inline: true
+      type: object
+      properties:
+        query:
+          type: string
+          description: Query to filter the bulk action.
+          example: "status: 'inactive'"
+        ids:
+          type: array
+          description: Array of IDs to apply the action to.
+          minItems: 1
+          items:
+            type: string
+          example:
+            - "1234"
+            - "5678"
+
+    PromptIds:
+      description: IDs for a specific prompt within a group of prompts.
+      type: object
+      required:
+        - promptId
+        - promptGroupId
+      properties:
+        promptId:
+          type: string
+          description: The unique identifier for a specific prompt.
+          example: "chatTitle"
+        promptGroupId:
+          type: string
+          description: The unique identifier for a group of prompts.
+          example: "aiAssistant"

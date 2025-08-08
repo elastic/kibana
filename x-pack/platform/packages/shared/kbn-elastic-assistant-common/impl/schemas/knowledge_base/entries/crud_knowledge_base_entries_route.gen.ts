@@ -19,7 +19,7 @@ import { z } from '@kbn/zod';
 import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
-  KnowledgeBaseEntryUpdateProps,
+  KnowledgeBaseEntryUpdateRouteProps,
   DeleteResponseFields,
 } from './common_attributes.gen';
 import { NonEmptyString } from '../../common_attributes.gen';
@@ -40,7 +40,7 @@ export type DeleteKnowledgeBaseEntryRequestParams = z.infer<
 >;
 export const DeleteKnowledgeBaseEntryRequestParams = z.object({
   /**
-   * The Knowledge Base Entry's `id` value
+   * The unique identifier (`id`) of the Knowledge Base Entry to delete.
    */
   id: NonEmptyString,
 });
@@ -56,7 +56,7 @@ export type ReadKnowledgeBaseEntryRequestParams = z.infer<
 >;
 export const ReadKnowledgeBaseEntryRequestParams = z.object({
   /**
-   * The Knowledge Base Entry's `id` value.
+   * The unique identifier (`id`) of the Knowledge Base Entry to retrieve.
    */
   id: NonEmptyString,
 });
@@ -72,7 +72,7 @@ export type UpdateKnowledgeBaseEntryRequestParams = z.infer<
 >;
 export const UpdateKnowledgeBaseEntryRequestParams = z.object({
   /**
-   * The Knowledge Base Entry's `id` value
+   * The unique identifier (`id`) of the Knowledge Base Entry to update.
    */
   id: NonEmptyString,
 });
@@ -83,7 +83,7 @@ export type UpdateKnowledgeBaseEntryRequestParamsInput = z.input<
 export type UpdateKnowledgeBaseEntryRequestBody = z.infer<
   typeof UpdateKnowledgeBaseEntryRequestBody
 >;
-export const UpdateKnowledgeBaseEntryRequestBody = KnowledgeBaseEntryUpdateProps;
+export const UpdateKnowledgeBaseEntryRequestBody = KnowledgeBaseEntryUpdateRouteProps;
 export type UpdateKnowledgeBaseEntryRequestBodyInput = z.input<
   typeof UpdateKnowledgeBaseEntryRequestBody
 >;

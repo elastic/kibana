@@ -43,14 +43,14 @@ describe('updateIndices', () => {
 
     expect(esClient.indices.putSettings).toHaveBeenCalledWith({
       index: indexName,
-      body: { 'index.mapping.total_fields.limit': totalFieldsLimit },
+      settings: { 'index.mapping.total_fields.limit': totalFieldsLimit },
     });
     expect(esClient.indices.simulateIndexTemplate).toHaveBeenCalledWith({
       name: indexName,
     });
     expect(esClient.indices.putMapping).toHaveBeenCalledWith({
       index: indexName,
-      body: simulateIndexTemplateResponse.template.mappings,
+      ...simulateIndexTemplateResponse.template.mappings,
     });
   });
 
@@ -151,14 +151,14 @@ describe('createOrUpdateIndex', () => {
 
     expect(esClient.indices.putSettings).toHaveBeenCalledWith({
       index: name,
-      body: { 'index.mapping.total_fields.limit': totalFieldsLimit },
+      settings: { 'index.mapping.total_fields.limit': totalFieldsLimit },
     });
     expect(esClient.indices.simulateIndexTemplate).toHaveBeenCalledWith({
       name,
     });
     expect(esClient.indices.putMapping).toHaveBeenCalledWith({
       index: name,
-      body: simulateIndexTemplateResponse.template.mappings,
+      ...simulateIndexTemplateResponse.template.mappings,
     });
   });
 });

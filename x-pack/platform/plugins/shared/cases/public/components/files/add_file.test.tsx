@@ -12,13 +12,11 @@ import type { FileUploadProps } from '@kbn/shared-ux-file-upload';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { AppMockRenderer } from '../../common/mock';
-
 import * as api from '../../containers/api';
 import {
   buildCasesPermissions,
-  createAppMockRenderer,
   mockedTestProvidersOwner,
+  renderWithTestingProviders,
 } from '../../common/mock';
 import { AddFile } from './add_file';
 import { useToasts } from '../../common/lib/kibana';
@@ -77,8 +75,6 @@ jest.mock('@kbn/shared-ux-file-upload', () => {
 });
 
 describe('AddFile', () => {
-  let appMockRender: AppMockRenderer;
-
   const successMock = jest.fn();
   const errorMock = jest.fn();
 
@@ -98,27 +94,26 @@ describe('AddFile', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders correctly', async () => {
-    appMockRender.render(<AddFile caseId={'foobar'} />);
+    renderWithTestingProviders(<AddFile caseId={'foobar'} />);
 
     expect(await screen.findByTestId('cases-files-add')).toBeInTheDocument();
   });
 
   it('AddFile is not rendered if user has no createComment permission', async () => {
-    appMockRender = createAppMockRenderer({
-      permissions: buildCasesPermissions({ createComment: false }),
+    renderWithTestingProviders(<AddFile caseId={'foobar'} />, {
+      wrapperProps: {
+        permissions: buildCasesPermissions({ createComment: false }),
+      },
     });
-
-    appMockRender.render(<AddFile caseId={'foobar'} />);
 
     expect(screen.queryByTestId('cases-files-add')).not.toBeInTheDocument();
   });
 
   it('clicking button renders modal', async () => {
-    appMockRender.render(<AddFile caseId={'foobar'} />);
+    renderWithTestingProviders(<AddFile caseId={'foobar'} />);
 
     await userEvent.click(await screen.findByTestId('cases-files-add'));
 
@@ -126,7 +121,7 @@ describe('AddFile', () => {
   });
 
   it('createAttachments called with right parameters', async () => {
-    appMockRender.render(<AddFile caseId={'foobar'} />);
+    renderWithTestingProviders(<AddFile caseId={'foobar'} />);
 
     await userEvent.click(await screen.findByTestId('cases-files-add'));
 
@@ -168,7 +163,7 @@ describe('AddFile', () => {
   });
 
   it('failed upload displays error toast', async () => {
-    appMockRender.render(<AddFile caseId={'foobar'} />);
+    renderWithTestingProviders(<AddFile caseId={'foobar'} />);
 
     await userEvent.click(await screen.findByTestId('cases-files-add'));
 
@@ -187,7 +182,7 @@ describe('AddFile', () => {
   it('correct metadata is passed to FileUpload component', async () => {
     const caseId = 'foobar';
 
-    appMockRender.render(<AddFile caseId={caseId} />);
+    renderWithTestingProviders(<AddFile caseId={caseId} />);
 
     await userEvent.click(await screen.findByTestId('cases-files-add'));
 
@@ -210,7 +205,7 @@ describe('AddFile', () => {
       throw new Error();
     });
 
-    appMockRender.render(<AddFile caseId={basicCaseId} />);
+    renderWithTestingProviders(<AddFile caseId={basicCaseId} />);
 
     await userEvent.click(await screen.findByTestId('cases-files-add'));
 

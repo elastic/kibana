@@ -13,19 +13,15 @@ import type { HttpServiceSetup } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/logging';
 
-import { CONTENT_ID } from '../../common/content_management';
-import {
-  PUBLIC_API_PATH,
-  PUBLIC_API_VERSION,
-  PUBLIC_API_CONTENT_MANAGEMENT_VERSION,
-} from './constants';
+import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
+import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
 import {
   dashboardAttributesSchema,
   dashboardGetResultSchema,
   dashboardCreateResultSchema,
   dashboardSearchResultsSchema,
   referenceSchema,
-} from '../content_management/v3';
+} from '../content_management/v1';
 
 interface RegisterAPIRoutesArgs {
   http: HttpServiceSetup;
@@ -34,8 +30,31 @@ interface RegisterAPIRoutesArgs {
   logger: Logger;
 }
 
-const TECHNICAL_PREVIEW_WARNING =
-  'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
+const commonRouteConfig = {
+  // This route is in development and not yet intended for public use.
+  access: 'internal',
+  /**
+   * `enableQueryVersion` is a temporary solution for testing internal endpoints.
+   * Requests to these internal endpoints from Kibana Dev Tools or external clients
+   * should include the ?apiVersion=1 query parameter.
+   * This will be removed when the API is finalized and moved to a stable version.
+   */
+  enableQueryVersion: true,
+  description:
+    'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  options: {
+    tags: ['oas-tag:Dashboards'],
+    availability: {
+      stability: 'experimental',
+    },
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'Relies on Content Client for authorization',
+    },
+  },
+} as const;
 
 export function registerAPIRoutes({
   http,
@@ -48,20 +67,13 @@ export function registerAPIRoutes({
   // Create API route
   const createRoute = versionedRouter.post({
     path: `${PUBLIC_API_PATH}/{id?}`,
-    access: 'public',
     summary: 'Create a dashboard',
-    description: TECHNICAL_PREVIEW_WARNING,
-    options: {
-      tags: ['oas-tag:Dashboards'],
-      availability: {
-        stability: 'experimental',
-      },
-    },
+    ...commonRouteConfig,
   });
 
   createRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: INTERNAL_API_VERSION,
       validate: {
         request: {
           params: schema.object({
@@ -89,7 +101,7 @@ export function registerAPIRoutes({
       const { attributes, references, spaces: initialNamespaces } = req.body;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+        .for(CONTENT_ID, LATEST_VERSION);
       let result;
       try {
         ({ result } = await client.create(attributes, {
@@ -121,20 +133,13 @@ export function registerAPIRoutes({
 
   const updateRoute = versionedRouter.put({
     path: `${PUBLIC_API_PATH}/{id}`,
-    access: 'public',
     summary: `Update an existing dashboard`,
-    description: TECHNICAL_PREVIEW_WARNING,
-    options: {
-      tags: ['oas-tag:Dashboards'],
-      availability: {
-        stability: 'experimental',
-      },
-    },
+    ...commonRouteConfig,
   });
 
   updateRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: INTERNAL_API_VERSION,
       validate: {
         request: {
           params: schema.object({
@@ -158,7 +163,7 @@ export function registerAPIRoutes({
       const { attributes, references } = req.body;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+        .for(CONTENT_ID, LATEST_VERSION);
       let result;
       try {
         ({ result } = await client.update(req.params.id, attributes, { references }));
@@ -175,28 +180,20 @@ export function registerAPIRoutes({
         }
         return res.badRequest(e.message);
       }
-
-      return res.created({ body: result });
+      return res.ok({ body: result });
     }
   );
 
   // List API route
   const listRoute = versionedRouter.get({
     path: `${PUBLIC_API_PATH}`,
-    access: 'public',
     summary: `Get a list of dashboards`,
-    description: TECHNICAL_PREVIEW_WARNING,
-    options: {
-      tags: ['oas-tag:Dashboards'],
-      availability: {
-        stability: 'experimental',
-      },
-    },
+    ...commonRouteConfig,
   });
 
   listRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: INTERNAL_API_VERSION,
       validate: {
         request: {
           query: schema.object({
@@ -205,17 +202,15 @@ export function registerAPIRoutes({
               min: 1,
               defaultValue: 1,
             }),
-            perPage: schema.maybe(
-              schema.number({
-                meta: {
-                  description:
-                    'The number of dashboards to display on each page (max 1000). Default is "20".',
-                },
-                defaultValue: 20,
-                min: 1,
-                max: 1000,
-              })
-            ),
+            perPage: schema.number({
+              meta: {
+                description:
+                  'The number of dashboards to display on each page (max 1000). Default is "20".',
+              },
+              defaultValue: 20,
+              min: 1,
+              max: 1000,
+            }),
           }),
         },
         response: {
@@ -233,11 +228,19 @@ export function registerAPIRoutes({
       const { page, perPage: limit } = req.query;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+        .for(CONTENT_ID, LATEST_VERSION);
       let result;
       try {
         // TODO add filtering
-        ({ result } = await client.search({ cursor: page.toString(), limit }));
+        ({ result } = await client.search(
+          {
+            cursor: page.toString(),
+            limit,
+          },
+          {
+            fields: ['title', 'description', 'timeRestore'],
+          }
+        ));
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();
@@ -257,20 +260,13 @@ export function registerAPIRoutes({
   // Get API route
   const getRoute = versionedRouter.get({
     path: `${PUBLIC_API_PATH}/{id}`,
-    access: 'public',
     summary: `Get a dashboard`,
-    description: TECHNICAL_PREVIEW_WARNING,
-    options: {
-      tags: ['oas-tag:Dashboards'],
-      availability: {
-        stability: 'experimental',
-      },
-    },
+    ...commonRouteConfig,
   });
 
   getRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: INTERNAL_API_VERSION,
       validate: {
         request: {
           params: schema.object({
@@ -291,7 +287,7 @@ export function registerAPIRoutes({
     async (ctx, req, res) => {
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+        .for(CONTENT_ID, LATEST_VERSION);
       let result;
       try {
         ({ result } = await client.get(req.params.id));
@@ -318,20 +314,13 @@ export function registerAPIRoutes({
   // Delete API route
   const deleteRoute = versionedRouter.delete({
     path: `${PUBLIC_API_PATH}/{id}`,
-    access: 'public',
     summary: `Delete a dashboard`,
-    description: TECHNICAL_PREVIEW_WARNING,
-    options: {
-      tags: ['oas-tag:Dashboards'],
-      availability: {
-        stability: 'experimental',
-      },
-    },
+    ...commonRouteConfig,
   });
 
   deleteRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: INTERNAL_API_VERSION,
       validate: {
         request: {
           params: schema.object({
@@ -347,7 +336,7 @@ export function registerAPIRoutes({
     async (ctx, req, res) => {
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+        .for(CONTENT_ID, LATEST_VERSION);
       try {
         await client.delete(req.params.id);
       } catch (e) {

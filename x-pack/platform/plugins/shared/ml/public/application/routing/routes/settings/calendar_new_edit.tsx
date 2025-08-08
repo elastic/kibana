@@ -10,11 +10,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import {
+  type NavigateToApp,
+  getADSettingsBreadcrumbs,
+  getMlManagementBreadcrumb,
+} from '../../breadcrumbs';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { getMlNodeCount } from '../../../ml_nodes_check';
 
@@ -32,20 +35,15 @@ const NewCalendar = dynamic(async () => ({
   default: (await import('../../../settings/calendars')).NewCalendar,
 }));
 
-export const newCalendarRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
+export const newCalendarRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   path: createPath(ML_PAGES.CALENDARS_NEW),
   title: i18n.translate('xpack.ml.settings.createCalendar.docTitle', {
     defaultMessage: 'Create Calendar',
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.NEW} isDst={false} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB', navigateToPath, basePath),
+    ...getADSettingsBreadcrumbs(navigateToApp),
+    getMlManagementBreadcrumb('CALENDAR_LISTS_MANAGEMENT_BREADCRUMB', navigateToApp),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.createLabel', {
         defaultMessage: 'Create',
@@ -54,19 +52,15 @@ export const newCalendarRouteFactory = (
   ],
 });
 
-export const editCalendarRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
+export const editCalendarRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   path: createPath(ML_PAGES.CALENDARS_EDIT, '/:calendarId'),
   title: i18n.translate('xpack.ml.settings.editCalendar.docTitle', {
     defaultMessage: 'Edit Calendar',
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.EDIT} isDst={false} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB', navigateToPath, basePath),
+    ...getADSettingsBreadcrumbs(navigateToApp),
+    getMlManagementBreadcrumb('CALENDAR_LISTS_MANAGEMENT_BREADCRUMB', navigateToApp),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.editLabel', {
         defaultMessage: 'Edit',
@@ -75,20 +69,15 @@ export const editCalendarRouteFactory = (
   ],
 });
 
-export const newCalendarDstRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
+export const newCalendarDstRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   path: createPath(ML_PAGES.CALENDARS_DST_NEW),
   title: i18n.translate('xpack.ml.settings.createCalendarDst.docTitle', {
     defaultMessage: 'Create DST Calendar',
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.NEW} isDst={true} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('CALENDAR_DST_MANAGEMENT_BREADCRUMB', navigateToPath, basePath),
+    ...getADSettingsBreadcrumbs(navigateToApp),
+    getMlManagementBreadcrumb('CALENDAR_DST_LISTS_MANAGEMENT_BREADCRUMB', navigateToApp),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.createLabel', {
         defaultMessage: 'Create',
@@ -97,19 +86,15 @@ export const newCalendarDstRouteFactory = (
   ],
 });
 
-export const editCalendarDstRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
+export const editCalendarDstRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   path: createPath(ML_PAGES.CALENDARS_DST_EDIT, '/:calendarId'),
   title: i18n.translate('xpack.ml.settings.editCalendarDst.docTitle', {
     defaultMessage: 'Edit DST Calendar',
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.EDIT} isDst={true} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('CALENDAR_DST_MANAGEMENT_BREADCRUMB', navigateToPath, basePath),
+    ...getADSettingsBreadcrumbs(navigateToApp),
+    getMlManagementBreadcrumb('CALENDAR_DST_LISTS_MANAGEMENT_BREADCRUMB', navigateToApp),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.editLabel', {
         defaultMessage: 'Edit',

@@ -14,7 +14,6 @@ import { Setup as InspectorSetup, Start as InspectorStart } from '@kbn/inspector
 import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { getExpressionsInspectorViewDescription } from './inspector';
 import { NAVIGATE_TRIGGER_ID, navigateTrigger } from './actions/navigate_trigger';
-import { ACTION_NAVIGATE, createNavigateAction } from './actions/navigate_action';
 import { getButtonRenderer } from './renderers/button';
 import { buttonFn } from './functions/button';
 
@@ -38,8 +37,10 @@ export class ExpressionsExplorerPlugin implements Plugin<void, void, SetupDeps, 
 
     // register custom actions
     deps.uiActions.registerTrigger(navigateTrigger);
-    deps.uiActions.registerAction(createNavigateAction());
-    deps.uiActions.attachAction(NAVIGATE_TRIGGER_ID, ACTION_NAVIGATE);
+    deps.uiActions.addTriggerActionAsync(NAVIGATE_TRIGGER_ID, 'ACTION_NAVIGATE', async () => {
+      const { createNavigateAction } = await import('./actions/navigate_action');
+      return createNavigateAction();
+    });
 
     // register custom functions and renderers
     deps.expressions.registerRenderer(getButtonRenderer(core));

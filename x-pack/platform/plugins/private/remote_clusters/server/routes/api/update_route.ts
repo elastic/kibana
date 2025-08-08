@@ -74,9 +74,9 @@ export const register = (deps: RouteDependencies): void => {
         previousClusterConfig[name].mode
       );
 
-      const updateClusterResponse = await clusterClient.asCurrentUser.cluster.putSettings({
-        body: updateClusterPayload,
-      });
+      const updateClusterResponse = await clusterClient.asCurrentUser.cluster.putSettings(
+        updateClusterPayload
+      );
 
       const acknowledged = get(updateClusterResponse, 'acknowledged');
       const cluster = get(

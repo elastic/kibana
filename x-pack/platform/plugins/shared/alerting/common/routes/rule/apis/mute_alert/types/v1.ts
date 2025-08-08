@@ -5,6 +5,6 @@
  * 2.0.
  */
 import type { TypeOf } from '@kbn/config-schema';
-import { muteAlertParamsSchemaV1 } from '..';
+import type { muteAlertParamsSchemaV1 } from '..';
 
 export type MuteAlertRequestParams = TypeOf<typeof muteAlertParamsSchemaV1>;

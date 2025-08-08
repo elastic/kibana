@@ -8,19 +8,24 @@
  */
 
 import {
-  binaryExpressionGroup,
   isBinaryExpression,
   isColumn,
   isDoubleLiteral,
   isIntegerLiteral,
   isLiteral,
   isProperNode,
-} from '../ast/helpers';
-import { ESQLAstBaseItem, ESQLAstCommand, ESQLAstQueryExpression } from '../types';
+} from '../ast/is';
+import { BinaryExpressionGroup, binaryExpressionGroup } from '../ast/grouping';
 import { ESQLAstExpressionNode, Visitor } from '../visitor';
 import { resolveItem } from '../visitor/utils';
 import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
 import { LeafPrinter } from './leaf_printer';
+import type {
+  ESQLAstBaseItem,
+  ESQLAstCommand,
+  ESQLAstQueryExpression,
+  ESQLProperNode,
+} from '../types';
 
 export interface BasicPrettyPrinterOptions {
   /**
@@ -69,11 +74,14 @@ export class BasicPrettyPrinter {
    * @returns A single-line string representation of the query.
    */
   public static readonly print = (
-    query: ESQLAstQueryExpression,
+    node: ESQLProperNode,
     opts?: BasicPrettyPrinterOptions
   ): string => {
-    const printer = new BasicPrettyPrinter(opts);
-    return printer.print(query);
+    return node.type === 'query'
+      ? BasicPrettyPrinter.query(node, opts)
+      : node.type === 'command'
+      ? BasicPrettyPrinter.command(node, opts)
+      : BasicPrettyPrinter.expression(node, opts);
   };
 
   /**
@@ -87,8 +95,17 @@ export class BasicPrettyPrinter {
   public static readonly multiline = (
     query: ESQLAstQueryExpression,
     opts?: BasicPrettyPrinterMultilineOptions
+  ): string => BasicPrettyPrinter.print(query, { ...opts, multiline: true });
+
+  /**
+   * @param query ES|QL query AST to print.
+   * @returns A single-line string representation of the query.
+   */
+  public static readonly query = (
+    query: ESQLAstQueryExpression,
+    opts?: BasicPrettyPrinterOptions
   ): string => {
-    const printer = new BasicPrettyPrinter({ ...opts, multiline: true });
+    const printer = new BasicPrettyPrinter(opts);
     return printer.print(query);
   };
 
@@ -243,11 +260,6 @@ export class BasicPrettyPrinter {
       return this.decorateWithComments(ctx.node, formatted);
     })
 
-    .on('visitTimeIntervalLiteralExpression', (ctx) => {
-      const formatted = LeafPrinter.timeInterval(ctx.node);
-      return this.decorateWithComments(ctx.node, formatted);
-    })
-
     .on('visitInlineCastExpression', (ctx) => {
       const value = ctx.value();
       const wrapInBrackets =
@@ -274,7 +286,27 @@ export class BasicPrettyPrinter {
         elements += (elements ? ', ' : '') + arg;
       }
 
-      const formatted = `[${elements}]`;
+      const formatted = ctx.node.subtype === 'tuple' ? '(' + elements + ')' : '[' + elements + ']';
+
+      return this.decorateWithComments(ctx.node, formatted);
+    })
+
+    .on('visitMapEntryExpression', (ctx) => {
+      const key = ctx.visitKey();
+      const value = ctx.visitValue();
+      const formatted = key + ': ' + value;
+
+      return this.decorateWithComments(ctx.node, formatted);
+    })
+
+    .on('visitMapExpression', (ctx) => {
+      let entriesFormatted = '';
+
+      for (const entry of ctx.visitEntries()) {
+        entriesFormatted += (entriesFormatted ? ', ' : '') + entry;
+      }
+
+      const formatted = '{' + entriesFormatted + '}';
 
       return this.decorateWithComments(ctx.node, formatted);
     })
@@ -324,11 +356,17 @@ export class BasicPrettyPrinter {
           let leftFormatted = ctx.visitArgument(0);
           let rightFormatted = ctx.visitArgument(1);
 
-          if (groupLeft && groupLeft < group) {
+          const shouldGroupLeftExpressions =
+            groupLeft && (groupLeft === BinaryExpressionGroup.unknown || groupLeft < group);
+
+          if (shouldGroupLeftExpressions) {
             leftFormatted = `(${leftFormatted})`;
           }
 
-          if (groupRight && groupRight < group) {
+          const shouldGroupRightExpressions =
+            groupRight && (groupRight === BinaryExpressionGroup.unknown || groupRight < group);
+
+          if (shouldGroupRightExpressions) {
             rightFormatted = `(${rightFormatted})`;
           }
 
@@ -352,12 +390,6 @@ export class BasicPrettyPrinter {
           return this.decorateWithComments(ctx.node, formatted);
         }
       }
-    })
-
-    .on('visitRenameExpression', (ctx) => {
-      const formatted = `${ctx.visitArgument(0)} ${this.keyword('AS')} ${ctx.visitArgument(1)}`;
-
-      return this.decorateWithComments(ctx.node, formatted);
     })
 
     .on('visitOrderExpression', (ctx) => {
@@ -400,6 +432,27 @@ export class BasicPrettyPrinter {
         ? ''
         : (opts.lowercaseCommands ? node.commandType : node.commandType.toUpperCase()) + ' ';
 
+      if (cmd === 'FORK') {
+        const branches = node.args
+          .map((branch) => {
+            if (Array.isArray(branch) || branch.type !== 'query') {
+              return undefined;
+            }
+
+            return ctx.visitSubQuery(branch);
+          })
+          .filter(Boolean) as string[];
+
+        const spaces = (n: number) => ' '.repeat(n);
+
+        const branchSeparator = opts.multiline ? `)\n${spaces(4)}(` : `) (`;
+
+        return this.decorateWithComments(
+          ctx.node,
+          `FORK${opts.multiline ? `\n${spaces(4)}` : ' '}(${branches.join(branchSeparator)})`
+        );
+      }
+
       let args = '';
       let options = '';
 
@@ -423,7 +476,16 @@ export class BasicPrettyPrinter {
 
     .on('visitQuery', (ctx) => {
       const opts = this.opts;
-      const cmdSeparator = opts.multiline ? `\n${opts.pipeTab ?? '  '}| ` : ' | ';
+
+      let parentNode;
+      if (ctx.parent?.node && !Array.isArray(ctx.parent.node)) {
+        parentNode = ctx.parent.node;
+      }
+
+      const useMultiLine =
+        opts.multiline && !Array.isArray(parentNode) && parentNode?.name !== 'fork';
+
+      const cmdSeparator = useMultiLine ? `\n${opts.pipeTab ?? '  '}| ` : ' | ';
       let text = '';
 
       for (const cmd of ctx.visitCommands()) {

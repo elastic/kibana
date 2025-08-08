@@ -16,7 +16,6 @@ import {
   withLatestFrom,
   filter,
 } from 'rxjs';
-import { withoutTokenCountEvents } from './without_token_count_events';
 import {
   type ChatCompletionChunkEvent,
   ChatEvent,
@@ -47,6 +46,11 @@ function mergeWithEditedMessage(
           '@timestamp': new Date().toISOString(),
           ...message,
         },
+        // Preserve deanonymization data if present in the chunk event
+        ...(chunkEvent.deanonymized_input && { deanonymized_input: chunkEvent.deanonymized_input }),
+        ...(chunkEvent.deanonymized_output && {
+          deanonymized_output: chunkEvent.deanonymized_output,
+        }),
       };
       return next;
     })
@@ -69,15 +73,12 @@ export function emitWithConcatenatedMessage<T extends ChatEvent>(
   return (source$) => {
     const shared = source$.pipe(shareReplay());
 
-    const withoutTokenCount$ = shared.pipe(filterChunkEvents());
-
     const response$ = concat(
       shared,
       shared.pipe(
-        withoutTokenCountEvents(),
         concatenateChatCompletionChunks(),
         last(),
-        withLatestFrom(withoutTokenCount$),
+        withLatestFrom(shared.pipe(filterChunkEvents())),
         mergeMap(([message, chunkEvent]) => {
           return mergeWithEditedMessage(message, chunkEvent, callback);
         })

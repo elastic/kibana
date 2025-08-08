@@ -51,9 +51,10 @@ export const OverviewStatusMetaDataCodec = t.intersection([
   t.partial({
     projectId: t.string,
     updated_at: t.string,
-    ping: OverviewPingCodec,
     timestamp: t.string,
-    spaceId: t.string,
+    spaces: t.array(t.string),
+    urls: t.string,
+    maintenanceWindows: t.array(t.string),
   }),
 ]);
 

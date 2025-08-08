@@ -7,10 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
+import { noop } from 'lodash';
 import type { LensPluginStartDependencies } from '../../../plugin';
+import type { VisualizationMap, DatasourceMap } from '../../../types';
 import type { InlineEditLensEmbeddableContext } from './types';
-
-const ACTION_EDIT_LENS_EMBEDDABLE = 'ACTION_EDIT_LENS_EMBEDDABLE';
+import { ACTION_EDIT_LENS_EMBEDDABLE } from '../constants';
+import { mountInlinePanel } from '../../../react_embeddable/mount';
 
 export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddableContext> {
   public type = ACTION_EDIT_LENS_EMBEDDABLE;
@@ -18,8 +20,11 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
   public order = 50;
 
   constructor(
-    protected readonly startDependencies: LensPluginStartDependencies,
-    protected readonly core: CoreStart
+    protected readonly core: CoreStart,
+    protected readonly dependencies: LensPluginStartDependencies & {
+      visualizationMap: VisualizationMap;
+      datasourceMap: DatasourceMap;
+    }
   ) {}
 
   public getDisplayName(): string {
@@ -45,18 +50,25 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
     onApply,
     onCancel,
   }: InlineEditLensEmbeddableContext) {
-    const { executeEditEmbeddableAction } = await import('../../../async_services');
-    if (attributes) {
-      executeEditEmbeddableAction({
-        deps: this.startDependencies,
-        core: this.core,
-        attributes,
-        lensEvent,
-        container,
-        onUpdate,
-        onApply,
-        onCancel,
-      });
-    }
+    mountInlinePanel({
+      core: this.core,
+      loadContent: async ({ closeFlyout } = { closeFlyout: noop }) => {
+        const { getEditEmbeddableFlyout } = await import('../../../async_services');
+        if (attributes) {
+          return await getEditEmbeddableFlyout({
+            core: this.core,
+            deps: this.dependencies,
+            attributes,
+            lensEvent,
+            container,
+            onUpdate,
+            onApply,
+            onCancel,
+            closeFlyout,
+          });
+        }
+      },
+      options: { container },
+    });
   }
 }

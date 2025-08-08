@@ -292,7 +292,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`logoEnterpriseSearch`} />}
+            icon={<EuiIcon size="xxl" type={`logoElasticsearch`} />}
             data-test-subj="fileDataVisFilebeatConfigLink"
             title={
               <FormattedMessage

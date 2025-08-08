@@ -227,7 +227,7 @@ export const bulkDeleteArtifacts = async (
     if (res.errors) {
       errors = res.items.reduce<Error[]>((acc, item) => {
         if (item.delete?.error) {
-          acc.push(new Error(item.delete.error.reason));
+          acc.push(new Error(item.delete.error.reason ?? undefined)); // reason can be null and it's not a valid parameter for Error
         }
         return acc;
       }, []);
@@ -253,9 +253,7 @@ export const listArtifacts = async (
       size: perPage,
       track_total_hits: true,
       rest_total_hits_as_int: true,
-      body: {
-        sort: [{ [sortField]: { order: sortOrder } }],
-      },
+      sort: [{ [sortField]: { order: sortOrder } }],
     });
 
     return {

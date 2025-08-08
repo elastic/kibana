@@ -31,10 +31,15 @@ const createSAMLResponseSchema = schema.object({
   roles: schema.arrayOf(schema.string()),
 });
 
+// BOOKMARK - List of Kibana project types
 const projectToAlias = new Map<string, string>([
   ['observability', 'oblt'],
   ['security', 'security'],
   ['search', 'es'],
+  // TODO add new 'chat' solution
+  // https://elastic.slack.com/archives/C04HT4P1YS3/p1741690997400059
+  // https://github.com/elastic/kibana/issues/213469
+  // requires update of config/serverless.chat.yml (currently uses projectType 'search')
 ]);
 
 const readServerlessRoles = (projectType: string) => {
@@ -67,6 +72,7 @@ export const plugin: PluginInitializer<
         path: MOCK_IDP_LOGIN_PATH,
         validate: false,
         options: { authRequired: false },
+        security: { authz: { enabled: false, reason: '' } },
       },
       async (context, request, response) => {
         return response.renderAnonymousCoreApp();
@@ -81,6 +87,7 @@ export const plugin: PluginInitializer<
         path: '/mock_idp/supported_roles',
         validate: false,
         options: { authRequired: false },
+        security: { authz: { enabled: false, reason: '' } },
       },
       (context, request, response) => {
         try {
@@ -106,6 +113,7 @@ export const plugin: PluginInitializer<
           body: createSAMLResponseSchema,
         },
         options: { authRequired: false },
+        security: { authz: { enabled: false, reason: '' } },
       },
       async (context, request, response) => {
         const { protocol, hostname, port } = core.http.getServerInfo();
@@ -130,6 +138,7 @@ export const plugin: PluginInitializer<
         path: MOCK_IDP_LOGOUT_PATH,
         validate: false,
         options: { authRequired: false },
+        security: { authz: { enabled: false, reason: '' } },
       },
       async (context, request, response) => {
         return response.redirected({ headers: { location: '/' } });

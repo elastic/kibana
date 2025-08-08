@@ -6,24 +6,26 @@
  */
 
 import { Search as LocalSearch, PrefixIndexStrategy } from 'js-search';
-import { useRef } from 'react';
+import { useMemo } from 'react';
 
-import type { IntegrationCardItem } from '../sections/epm/screens/home';
+import type { PackageListItem } from '../types';
 
 export const searchIdField = 'id';
 export const fieldsToSearch = ['name', 'title', 'description'];
 
-export function useLocalSearch(packageList: IntegrationCardItem[], isLoading: boolean) {
-  const localSearchRef = useRef<LocalSearch>(new LocalSearch(searchIdField));
-  if (isLoading) {
-    return localSearchRef;
-  }
+export function useLocalSearch(
+  packageList: Array<Pick<PackageListItem, 'id' | 'name' | 'title' | 'description'>>,
+  isInitialLoading: boolean
+) {
+  return useMemo(() => {
+    if (isInitialLoading) {
+      return null;
+    }
+    const localSearch = new LocalSearch(searchIdField);
+    localSearch.indexStrategy = new PrefixIndexStrategy();
+    fieldsToSearch.forEach((field) => localSearch.addIndex(field));
+    localSearch.addDocuments(packageList);
 
-  const localSearch = new LocalSearch(searchIdField);
-  localSearch.indexStrategy = new PrefixIndexStrategy();
-  fieldsToSearch.forEach((field) => localSearch.addIndex(field));
-  localSearch.addDocuments(packageList);
-  localSearchRef.current = localSearch;
-
-  return localSearchRef;
+    return localSearch;
+  }, [isInitialLoading, packageList]);
 }

@@ -11,6 +11,7 @@ import { ManualTestRun } from '../../../state/manual_test_runs';
 import { BrowserTestRunResult } from './browser_test_results';
 import { SimpleTestResults } from './simple_test_results';
 import { Locations } from '../../../../../../common/runtime_types';
+import { useMonitorById } from '../../../hooks/use_monitor_by_id';
 
 export function ManualTestRunMode({
   manualTestRun,
@@ -19,21 +20,23 @@ export function ManualTestRunMode({
   manualTestRun: ManualTestRun;
   onDone: (testRunId: string) => void;
 }) {
+  const monitor = useMonitorById(manualTestRun.configId);
+
   const { expectPings } = useRunOnceErrors({
     testRunId: manualTestRun.testRunId!,
-    locations: (manualTestRun.monitor!.locations ?? []) as Locations,
+    locations: (monitor?.locations ?? []) as Locations,
     errors: manualTestRun.errors ?? [],
   });
 
-  if (!manualTestRun.testRunId || !manualTestRun.monitor) return null;
+  if (!manualTestRun.testRunId || !monitor) return null;
 
-  const isBrowserMonitor = manualTestRun.monitor.type === 'browser';
+  const isBrowserMonitor = monitor.type === 'browser';
 
   return (
     <Fragment key={manualTestRun.testRunId}>
       {isBrowserMonitor ? (
         <BrowserTestRunResult
-          name={manualTestRun.monitor.name}
+          name={monitor.name}
           expectPings={expectPings}
           onDone={onDone}
           testRunId={manualTestRun.testRunId}
@@ -41,7 +44,7 @@ export function ManualTestRunMode({
         />
       ) : (
         <SimpleTestResults
-          name={manualTestRun.monitor.name}
+          name={monitor.name}
           expectPings={expectPings}
           onDone={onDone}
           testRunId={manualTestRun.testRunId}

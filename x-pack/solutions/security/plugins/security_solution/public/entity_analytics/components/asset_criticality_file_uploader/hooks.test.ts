@@ -17,7 +17,7 @@ const mockedUseKibana = mockUseKibana();
 const mockedTelemetry = createTelemetryServiceMock();
 
 jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useEnableExperimental: () => ({ ...mockedExperimentalFeatures, serviceEntityStoreEnabled: true }),
+  useEnableExperimental: () => ({ ...mockedExperimentalFeatures }),
 }));
 
 jest.mock('../../../common/lib/kibana', () => {

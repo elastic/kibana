@@ -1,0 +1,1 @@
+This export path is for utility functions that might be necessary both for plugins that import from `@kbn/response-ops-rule-form` or from `@kbn/response-ops-rule-form/flyout` to keep their bundle size down.

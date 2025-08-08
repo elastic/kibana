@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import './selectable_spaces_control.scss';
-
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiIconTip, EuiLoadingSpinner, EuiSelectable } from '@elastic/eui';
+import { EuiIconTip, EuiLoadingSpinner, EuiSelectable, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { lazy, Suspense } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,6 +32,7 @@ interface Props {
 type SpaceOption = EuiSelectableOption & { ['data-space-id']: string };
 
 export const SelectableSpacesControl = (props: Props) => {
+  const { euiTheme } = useEuiTheme();
   if (props.spaces.length === 0) {
     return <EuiLoadingSpinner />;
   }
@@ -46,7 +46,7 @@ export const SelectableSpacesControl = (props: Props) => {
         />
       }
       position="left"
-      type="iInCircle"
+      type="info"
     />
   );
 
@@ -81,7 +81,9 @@ export const SelectableSpacesControl = (props: Props) => {
         listProps={{
           bordered: true,
           rowHeight: 40,
-          className: 'spcCopyToSpace__spacesList',
+          css: css`
+            margin-top: ${euiTheme.size.xs};
+          `,
           'data-test-subj': 'cts-form-space-selector',
         }}
         searchable={options.length > SPACE_SEARCH_COUNT_THRESHOLD}

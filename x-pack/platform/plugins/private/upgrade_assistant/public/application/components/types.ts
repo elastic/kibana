@@ -25,7 +25,10 @@ export type DeprecationTableColumns =
   | 'index'
   | 'message'
   | 'correctiveAction'
-  | 'isCritical';
+  | 'level'
+  | 'actions';
+
+export type DeprecationSortableTableColumns = Exclude<DeprecationTableColumns, 'actions'>;
 
 export type Status = 'in_progress' | 'complete' | 'idle' | 'error';
 export interface DeprecationLoggingPreviewProps {
@@ -43,3 +46,5 @@ export interface OverviewStepProps {
   isComplete: boolean;
   setIsComplete: (isComplete: boolean) => void;
 }
+
+export type IndexRecommendedOptions = 'readonly' | 'reindex' | 'unfreeze';

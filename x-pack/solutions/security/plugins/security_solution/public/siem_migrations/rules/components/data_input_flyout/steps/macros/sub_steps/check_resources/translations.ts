@@ -15,6 +15,6 @@ export const RULES_DATA_INPUT_CHECK_RESOURCES_TITLE = i18n.translate(
 export const RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.checkResources.description',
   {
-    defaultMessage: `For best translation results, we will automatically review your rules for macros and lookups and ask you to upload them. Once uploaded, we'll be able to deliver a more complete rule translation for all rules using those macros or lookups.`,
+    defaultMessage: `For best translation results, we will review the data for macros and lookups. If found, we will ask you to upload them next.`,
   }
 );

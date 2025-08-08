@@ -7,12 +7,18 @@
 
 import { EuiTourStep } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
-import { isEmpty, throttle } from 'lodash';
+import { throttle } from 'lodash';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { Conversation } from '../../assistant_context/types';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
 import { anonymizedValuesAndCitationsTourStep1 } from './step_config';
 import { TourState } from '../knowledge_base';
+import {
+  conversationContainsAnonymizedValues,
+  conversationContainsContentReferences,
+} from '../../assistant/conversations/utils';
+import { useTourStorageKey } from '../common/hooks/use_tour_storage_key';
+import { EISUsageCostTourState, tourDefaultConfig } from '../elastic_llm/step_config';
 
 interface Props {
   conversation: Conversation | undefined;
@@ -21,8 +27,8 @@ interface Props {
 // Throttles reads from local storage to 1 every 5 seconds.
 // This is to prevent excessive reading from local storage. It acts
 // as a cache.
-const getKnowledgeBaseTourStateThrottled = throttle(() => {
-  const value = localStorage.getItem(NEW_FEATURES_TOUR_STORAGE_KEYS.KNOWLEDGE_BASE);
+const getKnowledgeBaseTourStateThrottled = throttle((tourStorageKey) => {
+  const value = localStorage.getItem(tourStorageKey);
   if (value) {
     return JSON.parse(value) as TourState;
   }
@@ -30,9 +36,19 @@ const getKnowledgeBaseTourStateThrottled = throttle(() => {
 }, 5000);
 
 export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation }) => {
-  const [tourCompleted, setTourCompleted] = useLocalStorage<boolean>(
-    NEW_FEATURES_TOUR_STORAGE_KEYS.ANONYMIZED_VALUES_AND_CITATIONS,
-    false
+  const kbTourStorageKey = useTourStorageKey(NEW_FEATURES_TOUR_STORAGE_KEYS.KNOWLEDGE_BASE);
+
+  const tourStorageKey = useTourStorageKey(
+    NEW_FEATURES_TOUR_STORAGE_KEYS.ANONYMIZED_VALUES_AND_CITATIONS
+  );
+  const [tourCompleted, setTourCompleted] = useLocalStorage<boolean>(tourStorageKey, false);
+
+  const eisLLMUsageCostTourStorageKey = useTourStorageKey(
+    NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ASSISTANT_HEADER
+  );
+  const [eisLLMUsageCostTourState] = useLocalStorage<EISUsageCostTourState>(
+    eisLLMUsageCostTourStorageKey,
+    tourDefaultConfig
   );
 
   const [showTour, setShowTour] = useState(false);
@@ -42,19 +58,20 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
       return;
     }
 
-    const knowledgeBaseTourState = getKnowledgeBaseTourStateThrottled();
+    const knowledgeBaseTourState = getKnowledgeBaseTourStateThrottled(kbTourStorageKey);
 
-    // If the knowledge base tour is active on this page (i.e. step 1), don't show this tour to prevent overlap.
-    if (knowledgeBaseTourState?.isTourActive && knowledgeBaseTourState?.currentTourStep === 1) {
+    // If the knowledge base tour or EIS tour is active on this page (i.e. step 1), don't show this tour to prevent overlap.
+    if (
+      (knowledgeBaseTourState?.isTourActive && knowledgeBaseTourState?.currentTourStep === 1) ||
+      (eisLLMUsageCostTourState?.isTourActive && eisLLMUsageCostTourState?.currentTourStep === 1)
+    ) {
       return;
     }
 
-    const containsContentReferences = conversation.messages.some(
-      (message) => !isEmpty(message.metadata?.contentReferences)
-    );
-    const containsReplacements = !isEmpty(conversation.replacements);
+    const containsContentReferences = conversationContainsContentReferences(conversation);
+    const containsAnonymizedValues = conversationContainsAnonymizedValues(conversation);
 
-    if (containsContentReferences || containsReplacements) {
+    if (containsContentReferences || containsAnonymizedValues) {
       const timer = setTimeout(() => {
         setShowTour(true);
       }, 1000);
@@ -63,7 +80,15 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
         clearTimeout(timer);
       };
     }
-  }, [conversation, tourCompleted, showTour]);
+  }, [
+    conversation,
+    tourCompleted,
+    showTour,
+    kbTourStorageKey,
+    eisLLMUsageCostTourStorageKey,
+    eisLLMUsageCostTourState?.isTourActive,
+    eisLLMUsageCostTourState?.currentTourStep,
+  ]);
 
   const finishTour = useCallback(() => {
     setTourCompleted(true);

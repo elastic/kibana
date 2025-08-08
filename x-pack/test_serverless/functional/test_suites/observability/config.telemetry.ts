@@ -36,12 +36,11 @@ export default createTestConfig({
   services,
 
   // include settings from project controller
-  // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml
-  esServerArgs: ['xpack.ml.dfa.enabled=false'],
+  esServerArgs: [],
   kbnServerArgs: [
     `--plugin-path=${resolve(
       __dirname,
-      '../../../../../test/analytics/plugins/analytics_ftr_helpers'
+      '../../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
     )}`,
   ],
 });

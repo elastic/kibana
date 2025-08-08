@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { Logger } from '@kbn/core/server';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { ActionTypeRegistry } from '../action_type_registry';
-import { ActionTypeConfig, ActionTypeSecrets } from '../types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { Logger } from '@kbn/core/server';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import type { ActionTypeRegistry } from '../action_type_registry';
+import type { ActionTypeConfig, ActionTypeSecrets } from '../types';
 import { buildExecutor } from './executor';
-import { ExecutorParams, SubActionConnectorType } from './types';
+import type { ExecutorParams, SubActionConnectorType } from './types';
 import { buildValidators } from './validators';
 
 export const register = <Config extends ActionTypeConfig, Secrets extends ActionTypeSecrets>({

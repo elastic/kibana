@@ -9,7 +9,7 @@ import type {
   AggregationsExtendedStatsAggregation,
   AggregationsPercentilesAggregation,
   AggregationsTermsAggregation,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { DataView } from '@kbn/data-plugin/common';
 import { IESAggSource } from '../../sources/es_agg_source';
 import { IVectorSource } from '../../sources/vector_source';

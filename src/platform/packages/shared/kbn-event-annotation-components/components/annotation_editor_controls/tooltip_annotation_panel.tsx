@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexItem, EuiPanel, EuiText, htmlIdGenerator } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiText, UseEuiTheme, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import fastIsEqual from 'fast-deep-equal';
@@ -42,6 +42,10 @@ function removeNewEmptyField(v: string) {
 }
 
 const generateId = htmlIdGenerator();
+
+const NewBucketButtonStyles = ({ euiTheme }: UseEuiTheme) => `
+ margin-top: ${euiTheme.size.xs};
+`;
 
 interface LocalFieldEntry {
   name: string;
@@ -78,7 +82,7 @@ export function TooltipSection({ currentConfig, setConfig, dataView }: FieldInpu
 
   const addFieldButton = (
     <NewBucketButton
-      className="lnsConfigPanelAnnotations__addButton"
+      css={NewBucketButtonStyles}
       data-test-subj={`lnsXY-annotation-tooltip-add_field`}
       onClick={() => {
         setFields([...currentFields, { name: '', id: generateId() }]);

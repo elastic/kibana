@@ -57,6 +57,7 @@ export interface JobSelectorFlyoutProps {
   withTimeRangeSelector?: boolean;
   applyTimeRangeConfig?: boolean;
   onTimeRangeConfigChange?: (v: boolean) => void;
+  flyoutTitleId?: string;
 }
 
 export interface MlJobGroupWithTimeRange {
@@ -73,9 +74,10 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   onJobsFetched,
   onSelectionConfirmed,
   onFlyoutClose,
-  applyTimeRangeConfig,
+  applyTimeRangeConfig: initialApplyTimeRangeConfig,
   onTimeRangeConfigChange,
   withTimeRangeSelector = true,
+  flyoutTitleId = 'flyoutTitle',
 }) => {
   const {
     services: {
@@ -85,6 +87,9 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   } = useMlKibana();
 
   const [newSelection, setNewSelection] = useState(selectedIds);
+  const [applyTimeRangeConfig, setApplyTimeRangeConfig] = useState(
+    initialApplyTimeRangeConfig ?? false
+  );
 
   const [isLoading, setIsLoading] = useState(true);
   const [showAllBadges, setShowAllBadges] = useState(false);
@@ -113,6 +118,10 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
     const finalSelection = [...selectedGroupIds, ...standaloneJobs];
     const time = applyTimeRangeConfig ? getTimeRangeFromSelection(jobs, finalSelection) : undefined;
 
+    if (onTimeRangeConfigChange && initialApplyTimeRangeConfig !== applyTimeRangeConfig) {
+      onTimeRangeConfigChange(applyTimeRangeConfig);
+    }
+
     onSelectionConfirmed({
       newSelection: finalSelection,
       jobIds: finalSelection,
@@ -126,9 +135,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   }
 
   function toggleTimerangeSwitch() {
-    if (onTimeRangeConfigChange) {
-      onTimeRangeConfigChange(!applyTimeRangeConfig);
-    }
+    setApplyTimeRangeConfig((prev) => !prev);
   }
 
   function clearSelection() {
@@ -189,7 +196,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="flyoutTitle">
+          <h2 id={flyoutTitleId}>
             {i18n.translate('xpack.ml.jobSelector.flyoutTitle', {
               defaultMessage: 'Job selection',
             })}
@@ -197,7 +204,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody className="mlJobSelectorFlyoutBody" data-test-subj={'mlJobSelectorFlyoutBody'}>
+      <EuiFlyoutBody data-test-subj={'mlJobSelectorFlyoutBody'}>
         <EuiResizeObserver onResize={handleResize}>
           {(resizeRef) => (
             <div
@@ -242,9 +249,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
                             </EuiButtonEmpty>
                           )}
                         </EuiFlexItem>
-                        {withTimeRangeSelector &&
-                        applyTimeRangeConfig !== undefined &&
-                        jobs.length !== 0 ? (
+                        {withTimeRangeSelector && jobs.length !== 0 ? (
                           <EuiFlexItem grow={false}>
                             <EuiSwitch
                               label={i18n.translate(

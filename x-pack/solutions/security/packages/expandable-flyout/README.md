@@ -46,6 +46,10 @@ The ExpandableFlyout [React component](https://github.com/elastic/kibana/tree/ma
 
 To retrieve the flyout's layout (left, right and preview panels), you can utilize [useExpandableFlyoutState](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/packages/expandable-flyout/src/hooks/use_expandable_flyout_state.ts).
 
+The flyout also stores a history of all the opened panels (we push values via the `openPanelsAction` action only) for
+the current session. That history can be retrieved
+using [useExpandableFlyoutHistory](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/packages/expandable-flyout/src/hooks/use_expandable_flyout_history.ts).
+
 To control (or mutate) flyout's layout, you can utilize [useExpandableFlyoutApi](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/packages/expandable-flyout/src/hooks/use_expandable_flyout_api.ts).
 
 **Expandable Flyout API** exposes the following methods:

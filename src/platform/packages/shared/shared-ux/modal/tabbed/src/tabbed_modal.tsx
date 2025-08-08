@@ -127,21 +127,29 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
   );
 
   const renderTabs = useCallback(() => {
-    return tabs.map((tab, index) => {
-      return (
-        <EuiTab
-          key={index}
-          onClick={() => onSelectedTabChanged(tab.id)}
-          isSelected={tab.id === selectedTabId}
-          disabled={tab.disabled}
-          prepend={tab.prepend}
-          append={tab.append}
-          data-test-subj={tab.id}
-        >
-          {tab.name}
-        </EuiTab>
-      );
-    });
+    if (tabs.length === 1) {
+      return null;
+    }
+
+    return (
+      <EuiTabs>
+        {tabs.map((tab, index) => {
+          return (
+            <EuiTab
+              key={index}
+              onClick={() => onSelectedTabChanged(tab.id)}
+              isSelected={tab.id === selectedTabId}
+              disabled={tab.disabled}
+              prepend={tab.prepend}
+              append={tab.append}
+              data-test-subj={tab.id}
+            >
+              {tab.name}
+            </EuiTab>
+          );
+        })}
+      </EuiTabs>
+    );
   }, [onSelectedTabChanged, selectedTabId, tabs]);
 
   const modalPositionOverrideStyles: React.CSSProperties = {
@@ -170,17 +178,24 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
       </EuiModalHeader>
       <EuiModalBody>
         <Fragment>
-          <EuiTabs>{renderTabs()}</EuiTabs>
+          <Fragment>{renderTabs()}</Fragment>
           <EuiSpacer size="m" />
           {React.createElement(function RenderSelectedTabContent() {
-            useLayoutEffect(onTabContentRender, []);
+            useLayoutEffect(() => {
+              requestAnimationFrame(onTabContentRender);
+            }, []);
             return (
-              <SelectedTabContent
-                {...{
-                  state: selectedTabState,
-                  dispatch,
-                }}
-              />
+              <div
+                css={{ display: 'contents' }}
+                data-test-subj={`tabbedModal-${selectedTabId}-content`}
+              >
+                <SelectedTabContent
+                  {...{
+                    state: selectedTabState,
+                    dispatch,
+                  }}
+                />
+              </div>
             );
           })}
         </Fragment>

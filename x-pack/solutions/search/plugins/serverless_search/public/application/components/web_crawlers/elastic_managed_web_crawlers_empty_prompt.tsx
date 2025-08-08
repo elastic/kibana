@@ -7,8 +7,9 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SearchEmptyPrompt, DecorativeHorizontalStepper, EuiIconWeb } from '@kbn/search-shared-ui';
+import { SearchEmptyPrompt } from '@kbn/search-shared-ui';
 import { SERVERLESS_ES_WEB_CRAWLERS_ID } from '@kbn/deeplinks-search/constants';
+import { DecorativeHorizontalStepper } from '@kbn/search-connectors';
 import { BACK_LABEL, COMING_SOON_LABEL } from '../../../../common/i18n_string';
 import { useKibanaServices } from '../../hooks/use_kibana';
 
@@ -23,7 +24,7 @@ export const ElasticManagedWebCrawlersEmptyPrompt = () => {
         label: BACK_LABEL,
         onClickBack: () => navigateToApp(SERVERLESS_ES_WEB_CRAWLERS_ID),
       }}
-      icon={EuiIconWeb}
+      icon="web"
       title={i18n.translate('xpack.serverlessSearch.elasticManagedWebCrawlerEmpty.title', {
         defaultMessage: 'Elastic managed web crawlers',
       })}
@@ -87,7 +88,7 @@ export const ElasticManagedWebCrawlersEmptyPrompt = () => {
                         justifyContent="center"
                       >
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type={EuiIconWeb} />
+                          <EuiIcon color="primary" size="l" type="web" />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <EuiIcon color="primary" size="l" type="logoElastic" />

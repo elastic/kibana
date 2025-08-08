@@ -10,8 +10,9 @@
 import type { Serializable } from '@kbn/utility-types';
 import { SavedObjectReference } from '@kbn/core/server';
 
-import type { GridData } from '../../../content_management';
-import type { DashboardSavedObjectAttributes } from '../../schema';
+import type { DashboardAttributes as DashboardAttributesV1 } from '../../schema/v1';
+
+import type { GridData } from '../../schema/v2';
 
 interface KibanaAttributes {
   kibanaSavedObjectMeta: {
@@ -43,7 +44,7 @@ interface DashboardAttributesTo720 extends KibanaAttributes {
   optionsJSON?: string;
 }
 
-export type DashboardDoc730ToLatest = Doc<DashboardSavedObjectAttributes>;
+export type DashboardDoc730ToLatest = Doc<DashboardAttributesV1>;
 
 export type DashboardDoc700To720 = Doc<DashboardAttributesTo720>;
 

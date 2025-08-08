@@ -196,7 +196,7 @@ export const BUILDING_BLOCK_LABEL = i18n.translate(
 export const BUILDING_BLOCK_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.buildingBlockDescription',
   {
-    defaultMessage: 'All generated alerts will be marked as "building block" alerts',
+    defaultMessage: 'All generated alerts will be marked as building block alerts',
   }
 );
 

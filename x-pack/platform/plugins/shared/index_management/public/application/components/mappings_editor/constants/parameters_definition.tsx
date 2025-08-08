@@ -1109,18 +1109,6 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.referenceFieldHelpText', {
         defaultMessage: 'Reference field for model inference.',
       }),
-      validations: [
-        {
-          validator: emptyField(
-            i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.validations.referenceFieldIsRequiredErrorMessage',
-              {
-                defaultMessage: 'Reference field is required.',
-              }
-            )
-          ),
-        },
-      ],
     },
     schema: t.string,
   },

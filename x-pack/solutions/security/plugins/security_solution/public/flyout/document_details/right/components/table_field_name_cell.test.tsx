@@ -37,6 +37,6 @@ describe('TableFieldNameCell', () => {
 
     expect(
       getByTestId(FLYOUT_TABLE_FIELD_NAME_CELL_ICON_TEST_ID).querySelector('span')
-    ).toHaveAttribute('data-euiicon-type', 'questionInCircle');
+    ).toHaveAttribute('data-euiicon-type', 'question');
   });
 });

@@ -9,11 +9,12 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { IEsSearchRequest } from '@kbn/search-types';
 import { useQuery } from '@tanstack/react-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { useSelector } from 'react-redux';
 import { createFetchData } from '../utils/fetch_data';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
-import { isActiveTimeline } from '../../../../helpers';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { sourcererSelectors } from '../../../../sourcerer/store';
 
 const QUERY_KEY = 'useFetchFieldValuePairWithAggregation';
 
@@ -103,9 +104,20 @@ export const useFetchPrevalence = ({
   } = useKibana();
 
   // retrieves detections and non-detections indices (for example, the alert security index from the current space and 'logs-*' indices)
-  const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(SourcererScopeName.default));
+  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const oldSecurityDefaultPatterns =
+    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
+  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
+  const securityDefaultPatterns = newDataViewPickerEnabled
+    ? experimentalSecurityDefaultIndexPatterns
+    : oldSecurityDefaultPatterns;
 
-  const searchRequest = buildSearchRequest(highlightedFieldsFilters, from, to, selectedPatterns);
+  const searchRequest = buildSearchRequest(
+    highlightedFieldsFilters,
+    from,
+    to,
+    securityDefaultPatterns
+  );
 
   const { data, isLoading, isError } = useQuery(
     [QUERY_KEY, highlightedFieldsFilters, from, to],
@@ -163,50 +175,48 @@ const buildAggregationSearchRequest = (
 ): IEsSearchRequest => ({
   params: {
     index: selectedPatterns,
-    body: {
-      query,
-      aggs: {
-        // with this aggregation, we can in a single call retrieve all the values for each field/value pairs
-        [FIELD_NAMES_AGG_KEY]: {
-          filters: {
-            filters: highlightedFieldsFilters,
-          },
-          aggs: {
-            // this sub aggregation allows us to retrieve all the hosts which have the field/value pair
-            [HOST_NAME_AGG_KEY]: {
-              cardinality: {
-                field: 'host.name',
-              },
-            },
-            // this sub aggregation allows us to retrieve all the users which have the field/value pair
-            [USER_NAME_AGG_KEY]: {
-              cardinality: {
-                field: 'user.name',
-              },
-            },
-            // we use this sub aggregation to differentiate between alerts (event.kind === 'signal') and documents (event.kind !== 'signal')
-            [EVENT_KIND_AGG_KEY]: {
-              terms: {
-                field: 'event.kind',
-                size: 10, // there should be only 8 different value for the event.kind field
-              },
-            },
-          },
+    query,
+    aggs: {
+      // with this aggregation, we can in a single call retrieve all the values for each field/value pairs
+      [FIELD_NAMES_AGG_KEY]: {
+        filters: {
+          filters: highlightedFieldsFilters,
         },
-        // retrieve all the unique hosts in the environment
-        [HOSTS_AGG_KEY]: {
-          cardinality: {
-            field: 'host.name',
+        aggs: {
+          // this sub aggregation allows us to retrieve all the hosts which have the field/value pair
+          [HOST_NAME_AGG_KEY]: {
+            cardinality: {
+              field: 'host.name',
+            },
           },
-        },
-        // retrieve all the unique users in the environment
-        [USERS_AGG_KEY]: {
-          cardinality: {
-            field: 'user.name',
+          // this sub aggregation allows us to retrieve all the users which have the field/value pair
+          [USER_NAME_AGG_KEY]: {
+            cardinality: {
+              field: 'user.name',
+            },
+          },
+          // we use this sub aggregation to differentiate between alerts (event.kind === 'signal') and documents (event.kind !== 'signal')
+          [EVENT_KIND_AGG_KEY]: {
+            terms: {
+              field: 'event.kind',
+              size: 10, // there should be only 8 different value for the event.kind field
+            },
           },
         },
       },
-      size: 0,
+      // retrieve all the unique hosts in the environment
+      [HOSTS_AGG_KEY]: {
+        cardinality: {
+          field: 'host.name',
+        },
+      },
+      // retrieve all the unique users in the environment
+      [USERS_AGG_KEY]: {
+        cardinality: {
+          field: 'user.name',
+        },
+      },
     },
+    size: 0,
   },
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { EndpointOf, ReturnOf, ServerRouteRepository } from '@kbn/server-route-repository';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 
 import {
   ObservabilityServerRouteRepository,
@@ -21,6 +21,7 @@ export interface ObservabilityRouteHandlerResources {
   dependencies: RegisterRoutesDependencies;
   logger: Logger;
   request: KibanaRequest;
+  response: KibanaResponseFactory;
 }
 
 export interface ObservabilityRouteCreateOptions {

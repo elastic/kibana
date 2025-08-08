@@ -9,12 +9,11 @@
 
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { EqlSearchRequest as EqlSearchRequestWithBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 
 export const EQL_SEARCH_STRATEGY = 'eql';
 
-export type EqlRequestParams = EqlSearchRequest | EqlSearchRequestWithBody;
+export type EqlRequestParams = EqlSearchRequest;
 
 export interface EqlSearchStrategyRequest extends IKibanaSearchRequest<EqlRequestParams> {
   /**

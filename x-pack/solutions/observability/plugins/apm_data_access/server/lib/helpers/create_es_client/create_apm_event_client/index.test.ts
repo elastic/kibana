@@ -5,17 +5,16 @@
  * 2.0.
  */
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
-import { contextServiceMock, executionContextServiceMock } from '@kbn/core/server/mocks';
 import { createHttpService } from '@kbn/core-http-server-mocks';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   TermsEnumRequest,
-  MsearchMultisearchBody,
+  SearchSearchRequestBody,
 } from '@elastic/elasticsearch/lib/api/types';
 import supertest from 'supertest';
 import { APMEventClient, type APMEventESSearchRequest, type APMEventFieldCapsRequest } from '.';
-import type { APMIndices } from '../../../..';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 
 import * as cancelEsRequestOnAbortModule from '../cancel_es_request_on_abort';
 import * as observabilityPluginModule from '@kbn/observability-plugin/server';
@@ -37,13 +36,8 @@ describe('APMEventClient', () => {
     });
 
     it('cancels a search when a request is aborted', async () => {
-      await server.preboot({
-        context: contextServiceMock.createPrebootContract(),
-      });
-      const { server: innerServer, createRouter } = await server.setup({
-        context: contextServiceMock.createSetupContract(),
-        executionContext: executionContextServiceMock.createInternalSetupContract(),
-      });
+      await server.preboot();
+      const { server: innerServer, createRouter } = await server.setup();
       const router = createRouter('/');
 
       let abortSignal: AbortSignal | undefined;
@@ -81,7 +75,8 @@ describe('APMEventClient', () => {
             apm: {
               events: [],
             },
-            body: { size: 0, track_total_hits: false },
+            size: 0,
+            track_total_hits: false,
           });
 
           return res.ok({ body: 'ok' });
@@ -173,16 +168,14 @@ describe('APMEventClient', () => {
 
       await apmEventClient.search('testOperation', {
         apm: { events: [] },
-        body: {
-          size: 0,
-          track_total_hits: false,
-          query: { bool: { filter: [{ match_all: {} }] } },
-        },
+        size: 0,
+        track_total_hits: false,
+        query: { bool: { filter: [{ match_all: {} }] } },
       });
 
       const searchParams = esClientMock.search.mock.calls[0][0] as APMEventESSearchRequest;
 
-      expect(searchParams.body.query?.bool).toEqual({
+      expect(searchParams.query?.bool).toEqual({
         filter: [
           { terms: { 'processor.event': [] } },
           { bool: { must_not: [{ terms: { _tier: ['data_warm', 'data_cold'] } }] } },
@@ -196,15 +189,13 @@ describe('APMEventClient', () => {
 
       await apmEventClient.msearch('testOperation', {
         apm: { events: [] },
-        body: {
-          size: 0,
-          track_total_hits: false,
-          query: { bool: { filter: [{ match_all: {} }] } },
-        },
+        size: 0,
+        track_total_hits: false,
+        query: { bool: { filter: [{ match_all: {} }] } },
       });
 
       const msearchParams = esClientMock.msearch.mock.calls[0][0] as {
-        searches: MsearchMultisearchBody[];
+        searches: SearchSearchRequestBody[];
       };
 
       expect(msearchParams.searches[1].query?.bool).toEqual({

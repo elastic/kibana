@@ -17,4 +17,5 @@ export {
   DATA_QUALITY_URL_STATE_KEY,
   datasetQualityUrlSchemaV1,
   datasetQualityDetailsUrlSchemaV1,
+  datasetQualityDetailsUrlSchemaV2,
 } from './url_schema';

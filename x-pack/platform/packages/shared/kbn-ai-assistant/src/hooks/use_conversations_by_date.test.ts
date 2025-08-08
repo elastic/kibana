@@ -15,12 +15,16 @@ jest.mock('../utils/date', () => ({
   isValidDateMath: jest.fn(),
 }));
 
-const getDisplayedConversation = (conversation: Conversation) => {
+jest.unmock('./use_conversations_by_date');
+
+export const getDisplayedConversation = (conversation: Conversation) => {
   return {
     id: conversation.conversation.id,
     label: conversation.conversation.title,
     lastUpdated: conversation.conversation.last_updated,
     href: `/conversation/${conversation.conversation.id}`,
+    public: conversation.public,
+    conversation,
   };
 };
 

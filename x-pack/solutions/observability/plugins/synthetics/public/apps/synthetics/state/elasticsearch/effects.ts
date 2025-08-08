@@ -8,6 +8,8 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
 
 import { Action } from 'redux-actions';
+import { i18n } from '@kbn/i18n';
+import { kibanaService } from '../../../../utils/kibana_service';
 import { serializeHttpFetchError } from '../utils/http_error';
 import { EsActionPayload, EsActionResponse, executeEsQueryAction } from './actions';
 import { executeEsQueryAPI } from './api';
@@ -30,8 +32,19 @@ export function* executeEsQueryEffect() {
         }
       } catch (e) {
         inProgressRequests.delete(action.payload.name);
-        yield put(executeEsQueryAction.fail(serializeHttpFetchError(e, action.payload)));
+        const serializedError = serializeHttpFetchError(e, action.payload);
+        kibanaService.coreSetup.notifications.toasts.addError(
+          { ...e, message: serializedError.body?.message ?? e.message },
+          {
+            title: ES_QUERY_FAIL_MESSAGE,
+          }
+        );
+        yield put(executeEsQueryAction.fail(serializedError));
       }
     }
   );
 }
+
+const ES_QUERY_FAIL_MESSAGE = i18n.translate('xpack.synthetics.esQuery.failed', {
+  defaultMessage: 'ES query failed.',
+});

@@ -83,6 +83,9 @@ export function createStandardWorkflowTest({
       ...getBaseMigratorParams(),
       logFilePath,
       types: [typeA, typeB],
+      // if this is removed, the migration algorithm will skip the CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK
+      // state since there's nothing to delete
+      removedTypes: ['removedType'],
     });
 
     await runMigrations();

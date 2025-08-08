@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import {
   getTransformStatsQuerySchema,
@@ -29,6 +29,13 @@ export function registerRoute({ router, getLicense }: RouteDependencies) {
     .get({
       path: addInternalBasePath('transforms/_stats'),
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+        },
+      },
     })
     .addVersion<
       estypes.TransformGetTransformStatsResponse,
@@ -37,13 +44,6 @@ export function registerRoute({ router, getLicense }: RouteDependencies) {
     >(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch',
-          },
-        },
         validate: {
           request: {
             query: getTransformStatsQuerySchema,

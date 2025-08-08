@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { useAllCasesNavigation } from '../../common/navigation';
-import { LinkIcon } from '../link_icon';
 import { Title } from './title';
-import * as i18n from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface HeaderProps {
@@ -22,7 +19,6 @@ interface HeaderProps {
 }
 
 export interface HeaderPageProps extends HeaderProps {
-  showBackButton?: boolean;
   children?: React.ReactNode;
   title: string | React.ReactNode;
   titleNode?: React.ReactElement;
@@ -42,7 +38,6 @@ const getHeaderCss = (euiTheme: EuiThemeComputed<{}>, border?: boolean) => css`
 `;
 
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({
-  showBackButton = false,
   border,
   children,
   isLoading,
@@ -51,19 +46,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const { releasePhase } = useCasesContext();
-  const { navigateToAllCases } = useAllCasesNavigation();
   const { euiTheme } = useEuiTheme();
-  const xsFontSize = useEuiFontSize('xs').fontSize;
-
-  const navigateToAllCasesClick = useCallback(
-    (e: React.SyntheticEvent) => {
-      if (e) {
-        e.preventDefault();
-      }
-      navigateToAllCases();
-    },
-    [navigateToAllCases]
-  );
 
   return (
     <header css={getHeaderCss(euiTheme, border)} data-test-subj={dataTestSubj}>
@@ -74,24 +57,6 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
             display: block;
           `}
         >
-          {showBackButton && (
-            <div
-              className="casesHeaderPage__linkBack"
-              css={css`
-                font-size: ${xsFontSize};
-                margin-bottom: ${euiTheme.size.s};
-              `}
-            >
-              <LinkIcon
-                dataTestSubj="backToCases"
-                onClick={navigateToAllCasesClick}
-                iconType="arrowLeft"
-              >
-                {i18n.BACK_TO_ALL}
-              </LinkIcon>
-            </div>
-          )}
-
           {titleNode || <Title title={title} releasePhase={releasePhase} />}
 
           {border && isLoading && <EuiProgress size="xs" color="accent" />}

@@ -5,14 +5,14 @@
  * 2.0.
  */
 import {
-  isDetectionsPages,
-  getQueryStringFromLocation,
-  getParamFromQueryString,
-  getObjectFromQueryString,
-  useGetInitialUrlParamValue,
-  encodeQueryString,
-  useReplaceUrlParams,
   createHistoryEntry,
+  encodeQueryString,
+  getObjectFromQueryString,
+  getParamFromQueryString,
+  getQueryStringFromLocation,
+  isDetectionsPages,
+  useGetInitialUrlParamValue,
+  useReplaceUrlParams,
 } from './helpers';
 import { renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -22,7 +22,7 @@ import React from 'react';
 
 const flyoutString =
   "(left:(id:document-details-left,params:(id:'04cf6ea970ab702721f17755b718c1296b5f8b5fcf7b74b053eab9bc885ceb9c',indexName:.internal.alerts-security.alerts-default-000001,scopeId:alerts-page)),right:(id:document-details-right,params:(id:'04cf6ea970ab702721f17755b718c1296b5f8b5fcf7b74b053eab9bc885ceb9c',indexName:.internal.alerts-security.alerts-default-000001,scopeId:alerts-page)))";
-const testString = `sourcerer=(default:(id:security-solution-default,selectedPatterns:!(.alerts-security.alerts-default)))&timerange=(global:(linkTo:!(),timerange:(from:%272024-05-14T23:00:00.000Z%27,fromStr:now%2Fd,kind:relative,to:%272024-05-15T22:59:59.999Z%27,toStr:now%2Fd)),timeline:(linkTo:!(),timerange:(from:%272024-05-14T09:32:36.347Z%27,kind:absolute,to:%272024-05-15T09:32:36.347Z%27)))&timeline=(activeTab:query,graphEventId:%27%27,isOpen:!f)&pageFilters=!((exclude:!f,existsSelected:!f,fieldName:kibana.alert.workflow_status,hideActionBar:!t,selectedOptions:!(open),title:Status),(exclude:!f,existsSelected:!f,fieldName:kibana.alert.severity,hideActionBar:!t,selectedOptions:!(),title:Severity),(exclude:!f,existsSelected:!f,fieldName:user.name,hideActionBar:!f,selectedOptions:!(),title:User),(exclude:!f,existsSelected:!f,fieldName:host.name,hideActionBar:!f,selectedOptions:!(),title:Host))&flyout=${flyoutString}&timelineFlyout=()`;
+const testString = `sourcerer=(default:(id:security-solution-default,selectedPatterns:!(.alerts-security.alerts-default)))&timerange=(global:(linkTo:!(),timerange:(from:%272024-05-14T23:00:00.000Z%27,fromStr:now%2Fd,kind:relative,to:%272024-05-15T22:59:59.999Z%27,toStr:now%2Fd)),timeline:(linkTo:!(),timerange:(from:%272024-05-14T09:32:36.347Z%27,kind:absolute,to:%272024-05-15T09:32:36.347Z%27)))&timeline=(activeTab:query,isOpen:!f)&pageFilters=!((exclude:!f,existsSelected:!f,fieldName:kibana.alert.workflow_status,hideActionBar:!t,selectedOptions:!(open),title:Status),(exclude:!f,existsSelected:!f,fieldName:kibana.alert.severity,hideActionBar:!t,selectedOptions:!(),title:Severity),(exclude:!f,existsSelected:!f,fieldName:user.name,hideActionBar:!f,selectedOptions:!(),title:User),(exclude:!f,existsSelected:!f,fieldName:host.name,hideActionBar:!f,selectedOptions:!(),title:Host))&flyout=${flyoutString}&timelineFlyout=()`;
 
 const flyoutObject = {
   left: {

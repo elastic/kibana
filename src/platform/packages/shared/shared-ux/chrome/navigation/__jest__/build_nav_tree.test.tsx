@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+
 import './setup_jest_mocks';
 import { of } from 'rxjs';
 import type {
@@ -207,7 +209,7 @@ describe('builds navigation tree', () => {
               children: [
                 {
                   ...panelOpenerNode,
-                  href: '/foo/bar', // Panel opener with a link should not be converted to accordion
+                  href: '/foo/bar', // Panel opener with a link should also be converted to accordion when side nav is collapsed
                 },
               ],
             },
@@ -218,7 +220,7 @@ describe('builds navigation tree', () => {
 
       const accordionButtonLabel = queryAllByTestId('accordionToggleBtn').map((c) => c.textContent);
 
-      expect(accordionButtonLabel).toEqual(['Group 1']); // Only 1 accordion button (top level)
+      expect(accordionButtonLabel).toEqual(['Group 1', 'Nested Group 1']);
       unmount();
     }
   });
@@ -258,6 +260,7 @@ describe('builds navigation tree', () => {
       href: undefined,
       href_prev: undefined,
       id: 'item1',
+      path: 'group1.item1',
     });
   });
 
@@ -338,6 +341,96 @@ describe('builds navigation tree', () => {
     // Check the DOM
     expect(queryByTestId(/nav-group-root.group1/)).toBeNull();
     expect(queryByTestId(/nav-item-root.group2.item1/)).toBeVisible();
+  });
+
+  test('should allow ChromeProjectNavigationNode title to be missing', () => {
+    const navTree: NavigationTreeDefinitionUI = {
+      id: 'es',
+      body: [
+        {
+          id: 'root',
+          path: 'root',
+          children: [
+            {
+              id: 'item1',
+              title: 'Item 1',
+              href: '/app/item1',
+              path: 'root.item1',
+            },
+          ],
+        },
+      ],
+    };
+
+    const renderComponent = () => {
+      renderNavigation({ navTreeDef: of(navTree) });
+    };
+
+    expect(renderComponent).not.toThrow();
+  });
+
+  test('should allow ChromeProjectNavigationNode to use renderItem at sub-level', () => {
+    const navTree: NavigationTreeDefinitionUI = {
+      id: 'es',
+      body: [
+        {
+          id: 'root',
+          path: 'root',
+          children: [
+            {
+              id: 'item1',
+              path: 'root.item1',
+              renderItem: () => <>This is a renderItem</>,
+            },
+          ],
+        },
+      ],
+    };
+
+    const renderComponent = () => {
+      renderNavigation({ navTreeDef: of(navTree) });
+    };
+
+    expect(renderComponent).not.toThrow();
+  });
+
+  test('should error for ChromeProjectNavigationNode missing both title and children', () => {
+    const navTree: NavigationTreeDefinitionUI = {
+      id: 'es',
+      body: [
+        {
+          id: 'root',
+          path: 'root',
+          children: [],
+        },
+      ],
+    };
+
+    const renderComponent = () => {
+      renderNavigation({ navTreeDef: of(navTree) });
+    };
+
+    expect(renderComponent).toThrow('Invalid EuiCollapsibleNavItem props for node root');
+  });
+
+  test('should error for using renderItem in ChromeProjectNavigationNode at the top level', () => {
+    const navTree: NavigationTreeDefinitionUI = {
+      id: 'es',
+      body: [
+        {
+          id: 'root',
+          path: 'root',
+          title: `You can't see me`,
+          renderItem: () => <>This is a renderItem</>,
+        },
+      ],
+    };
+
+    const renderComponent = () => {
+      renderNavigation({ navTreeDef: of(navTree) });
+    };
+
+    expect(renderComponent).toThrow('Invalid EuiCollapsibleNavItem props for node root');
   });
 
   test('should render recently accessed items', async () => {

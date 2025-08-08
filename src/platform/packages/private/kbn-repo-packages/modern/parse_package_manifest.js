@@ -262,15 +262,16 @@ function validatePackageManifest(parsed, repoRoot, path) {
     );
   }
 
+  // BOOKMARK - List of Kibana Solutions
   if (
     group !== undefined &&
     (!isSomeString(group) ||
-      !['platform', 'search', 'security', 'observability', 'common'].includes(group))
+      !['platform', 'search', 'security', 'observability', 'chat'].includes(group))
   ) {
     throw err(
       `plugin.group`,
       group,
-      `must have a valid value ("platform" | "search" | "security" | "observability" | "common")`
+      `must have a valid value ("platform" | "search" | "security" | "observability" | "chat")`
     );
   }
 

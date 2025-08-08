@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization';
+import type { AlertingAuthorization } from '../../../../authorization';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -24,7 +24,8 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import { ConstructorOptions, RulesClient } from '../../../../rules_client';
+import type { ConstructorOptions } from '../../../../rules_client';
+import { RulesClient } from '../../../../rules_client';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -159,7 +160,7 @@ describe('getGapsSummaryByRuleIds', () => {
     );
 
     expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledWith('alert', ruleIds, {
-      filter: `event.action: gap AND event.provider: alerting AND kibana.alert.rule.gap.range <= "2023-11-16T09:00:00.000Z" AND kibana.alert.rule.gap.range >= "2023-11-16T08:00:00.000Z"`,
+      filter: `event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true AND kibana.alert.rule.gap.range <= "2023-11-16T09:00:00.000Z" AND kibana.alert.rule.gap.range >= "2023-11-16T08:00:00.000Z"`,
       aggs: {
         unique_rule_ids: {
           terms: {

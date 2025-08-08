@@ -195,7 +195,7 @@ Here is some context for you to reference your task, review it carefully as you 
   ],
   [
     'human',
-    `Please update the following CEL program for the OpenAPI Header authentication information specified in the context.
+    `Please update the following CEL program for the OpenAPI authentication information specified in the context.
 
 <context>
 <cel_program>

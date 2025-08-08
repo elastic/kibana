@@ -409,6 +409,70 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     });
   });
 
+  it('Add additional_datastream_permissions', async () => {
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-uuid-test-123',
+        name: 'test-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'test-logs',
+            enabled: true,
+            streams: [
+              {
+                id: 'test-logs',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'some-logs' },
+              },
+            ],
+          },
+          {
+            type: 'test-metrics',
+            enabled: false,
+            streams: [
+              {
+                id: 'test-logs',
+                enabled: false,
+                data_stream: { type: 'metrics', dataset: 'some-metrics' },
+              },
+            ],
+          },
+        ],
+        additional_datastreams_permissions: ['logs-test-default', 'metrics-test-default'],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    expect(permissions).toMatchObject({
+      'package-policy-uuid-test-123': {
+        indices: [
+          {
+            names: ['logs-some-logs-test'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+          {
+            names: ['logs-test-default', 'metrics-test-default'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+        ],
+      },
+    });
+  });
+
   it('Returns the dataset for the compiled data_streams', async () => {
     const packagePolicies: PackagePolicy[] = [
       {

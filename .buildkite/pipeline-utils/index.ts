@@ -13,3 +13,4 @@ export * as CiStats from './ci-stats';
 export * from './github';
 export * as TestFailures from './test-failures';
 export * from './utils';
+export * from './pr_labels';

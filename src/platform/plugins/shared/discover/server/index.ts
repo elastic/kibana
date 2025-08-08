@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaRequest, PluginInitializerContext } from '@kbn/core/server';
-import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import {
+import type { KibanaRequest, PluginInitializerContext } from '@kbn/core/server';
+import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import type {
   ColumnsFromLocatorFn,
   SearchSourceFromLocatorFn,
   TitleFromLocatorFn,

@@ -73,7 +73,7 @@ type CompleteFunction = (params: CompleteFunctionParams) => Promise<{
 }>;
 
 export interface ChatClient {
-  chat: (message: StringOrMessageList) => Promise<InnerMessage>;
+  chat: (message: StringOrMessageList, system: string) => Promise<InnerMessage>;
   complete: CompleteFunction;
   evaluate: (
     {}: { conversationId?: string; messages: InnerMessage[]; errors: ChatCompletionErrorEvent[] },
@@ -169,6 +169,10 @@ export class KibanaClient {
       async () => {
         const response = await this.callKibana<{}>('POST', {
           pathname: '/internal/observability_ai_assistant/kb/setup',
+          query: {
+            inference_id: '.elser-2-elasticsearch',
+            wait_until_complete: true,
+          },
         });
         this.log.info('Knowledge base is ready');
         return response.data;
@@ -328,10 +332,10 @@ export class KibanaClient {
               }
 
               if (error.message.includes('Status code: 429')) {
-                that.log.info(`429, backing off 20s`);
-
-                return timer(20000);
+                that.log.info(`429, backing off 30s`);
+                return timer(30000);
               }
+
               that.log.info(`Retrying in 5s`);
               return timer(5000);
             },
@@ -349,11 +353,13 @@ export class KibanaClient {
     async function chat(
       name: string,
       {
+        systemMessage,
         messages,
         functions,
         functionCall,
         connectorIdOverride,
       }: {
+        systemMessage: string;
         messages: Message[];
         functions: FunctionDefinition[];
         functionCall?: string;
@@ -367,6 +373,7 @@ export class KibanaClient {
         const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
           {
             name,
+            systemMessage,
             messages,
             connectorId: connectorIdOverride || connectorId,
             functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
@@ -403,14 +410,14 @@ export class KibanaClient {
     const results: EvaluationResult[] = [];
 
     return {
-      chat: async (message) => {
+      chat: async (message, systemMessage) => {
         const messages = [
           ...this.getMessages(message).map((msg) => ({
             message: msg,
             '@timestamp': new Date().toISOString(),
           })),
         ];
-        return chat('chat', { messages, functions: [] });
+        return chat('chat', { systemMessage, messages, functions: [] });
       },
       complete: async ({
         messages: messagesArg,
@@ -513,22 +520,26 @@ export class KibanaClient {
         };
       },
       evaluate: async ({ messages, conversationId, errors }, criteria) => {
+        const criteriaCount = criteria.length;
+
         const message = await chat('evaluate', {
           connectorIdOverride: evaluationConnectorId,
-          messages: [
-            {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.System,
-                content: `You are a critical assistant for evaluating conversations with the Elastic Observability AI Assistant,
+          systemMessage: `You are a critical assistant for evaluating conversations with the Elastic Observability AI Assistant,
                 which helps our users make sense of their Observability data.
 
                 Your goal is to verify whether a conversation between the user and the assistant matches the given criteria.
 
                 For each criterion, calculate a score. Explain your score, by describing what the assistant did right, and describing and quoting what the
-                assistant did wrong, where it could improve, and what the root cause was in case of a failure.`,
-              },
-            },
+                assistant did wrong, where it could improve, and what the root cause was in case of a failure.
+                
+                ### Scoring Contract
+
+                * You MUST call the function "scores" exactly once.  
+                * The "criteria" array in the arguments MUST contain **one object for EVERY criterion**.  
+                  * If a criterion cannot be satisfied, still include it with \`"score": 0\` and a short \`"reasoning"\`.  
+                * Do NOT omit, merge, or reorder indices.  
+                * Do NOT place the scores in normal text; only in the "scores" function call.`,
+          messages: [
             {
               '@timestamp': new Date().toString(),
               message: {
@@ -557,12 +568,14 @@ export class KibanaClient {
                 properties: {
                   criteria: {
                     type: 'array',
+                    minLength: criteriaCount,
+                    maxLength: criteriaCount,
                     items: {
                       type: 'object',
                       properties: {
                         index: {
                           type: 'number',
-                          description: 'The number of the criterion',
+                          description: 'The index number of the criterion',
                         },
                         score: {
                           type: 'number',
@@ -593,28 +606,35 @@ export class KibanaClient {
           }
         ).criteria;
 
-        const scores = scoredCriteria
-          .map(({ index, score, reasoning }) => {
-            return {
-              criterion: criteria[index],
-              score,
-              reasoning,
-            };
-          })
-          .concat({
-            score: errors.length === 0 ? 1 : 0,
-            criterion: 'The conversation did not encounter any errors',
-            reasoning: errors.length
-              ? `The following errors occurred: ${errors.map((error) => error.error.message)}`
-              : 'No errors occurred',
-          });
+        const scoredMap = new Map(scoredCriteria.map((c) => [c.index, c] as const));
+
+        // Although very rare, the LLM judge can sometimes skip evaluation of certain criteria.
+        // The fallback default score is 0, with self-explanatory reasoning.
+        const scores = criteria.map((criterion, idx) => {
+          const criterionScore = scoredMap.get(idx);
+          return {
+            criterion,
+            score: criterionScore?.score ?? 0,
+            reasoning: criterionScore
+              ? criterionScore.reasoning
+              : 'No score returned by LLM judge, defaulting to 0.',
+          };
+        });
+
+        scores.push({
+          score: errors.length === 0 ? 1 : 0,
+          criterion: 'The conversation did not encounter any errors',
+          reasoning: errors.length
+            ? `The following errors occurred: ${errors.map((error) => error.error.message)}`
+            : 'No errors occurred',
+        });
 
         const result: EvaluationResult = {
           name: currentTitle,
           category: firstSuiteName,
           conversationId,
           messages,
-          passed: scoredCriteria.every(({ score }) => score >= 1),
+          passed: scores.every(({ score }) => score === 1),
           scores,
           errors,
         };

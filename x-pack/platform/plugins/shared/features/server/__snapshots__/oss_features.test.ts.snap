@@ -479,7 +479,9 @@ Array [
                   },
                 ],
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -570,7 +572,9 @@ Array [
                 },
                 "name": "Generate CSV reports",
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -646,7 +650,9 @@ Array [
                   },
                 ],
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -706,7 +712,9 @@ Array [
                 "minimumLicense": "gold",
                 "name": "Generate PDF or PNG reports",
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -822,7 +830,9 @@ Array [
                   },
                 ],
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -850,7 +860,9 @@ Array [
                   },
                 ],
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -942,7 +954,9 @@ Array [
                 "minimumLicense": "gold",
                 "name": "Generate PDF or PNG reports",
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -962,7 +976,9 @@ Array [
                 },
                 "name": "Generate CSV reports from Discover session panels",
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -1010,6 +1026,9 @@ exports[`buildOSSFeatures with a basic license returns the advancedSettings feat
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "manage_advanced_settings",
+      ],
       "app": Array [
         "kibana",
       ],
@@ -1144,6 +1163,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -1212,6 +1232,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -1283,6 +1304,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -1319,6 +1341,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -2140,6 +2163,9 @@ exports[`buildOSSFeatures with a enterprise license returns the advancedSettings
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "manage_advanced_settings",
+      ],
       "app": Array [
         "kibana",
       ],
@@ -2274,6 +2300,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -2342,6 +2369,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -2413,6 +2441,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -2449,6 +2478,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",

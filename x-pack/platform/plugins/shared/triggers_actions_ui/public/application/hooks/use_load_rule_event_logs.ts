@@ -8,11 +8,13 @@ import { useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import datemath from '@kbn/datemath';
 import { useKibana } from '../../common/lib/kibana';
+import type {
+  LoadExecutionLogAggregationsProps,
+  LoadGlobalExecutionLogAggregationsProps,
+} from '../lib/rule_api/load_execution_log_aggregations';
 import {
   loadExecutionLogAggregations,
   loadGlobalExecutionLogAggregations,
-  LoadExecutionLogAggregationsProps,
-  LoadGlobalExecutionLogAggregationsProps,
 } from '../lib/rule_api/load_execution_log_aggregations';
 
 const getParsedDate = (date: string) => {

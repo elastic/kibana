@@ -6,18 +6,47 @@
  */
 
 import React from 'react';
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 
 import { useAgentPoliciesSpaces } from '../../../../../../hooks/use_request/spaces';
+import { useStartServices } from '../../../../../../hooks/use_core';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
-import { SpaceSelector } from './space_selector';
+import { SpaceSelectorComponent as SpaceSelector, type SpaceSelectorProps } from './space_selector';
 
 jest.mock('../../../../../../hooks/use_request/spaces');
+jest.mock('../../../../../../hooks/use_core', () => ({
+  ...jest.requireActual('../../../../../../hooks/use_core'),
+  useStartServices: jest.fn(),
+}));
 
 describe('Space Selector', () => {
   beforeEach(() => {
+    jest.mocked(useStartServices).mockImplementation(
+      () =>
+        ({
+          ...jest.requireActual('../../../../../../hooks/use_core').useStartServices(),
+          spaces: {
+            getActiveSpace: () => ({
+              id: 'default',
+            }),
+            ui: {
+              useSpaces: () => ({
+                spacesManager: {
+                  getSpaces: async () => [
+                    {
+                      id: 'test2',
+                      name: 'Test2Name',
+                      color: 'blue',
+                    },
+                  ],
+                },
+              }),
+            },
+          },
+        } as any)
+    );
     jest.mocked(useAgentPoliciesSpaces).mockReturnValue({
       data: {
         items: [
@@ -33,12 +62,16 @@ describe('Space Selector', () => {
       },
     } as any);
   });
-  function render() {
+  function render(defaultValue = [] as SpaceSelectorProps['value']) {
     const renderer = createFleetTestRendererMock();
     const onChange = jest.fn();
     const setInvalidSpaceError = jest.fn();
     const result = renderer.render(
-      <SpaceSelector setInvalidSpaceError={setInvalidSpaceError} onChange={onChange} value={[]} />
+      <SpaceSelector
+        setInvalidSpaceError={setInvalidSpaceError}
+        onChange={onChange}
+        value={defaultValue}
+      />
     );
 
     return {
@@ -86,5 +119,12 @@ describe('Space Selector', () => {
     expect(result.container).not.toHaveTextContent('test is not a valid space.');
     expect(onChange).toBeCalledWith(['test']);
     expect(setInvalidSpaceError).not.toBeCalledWith(true);
+  });
+
+  it('render spaces with readonly access', async () => {
+    const { result } = render(['test2']);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+    const res = result.queryByText('Test2Name');
+    expect(res).not.toBeNull();
   });
 });

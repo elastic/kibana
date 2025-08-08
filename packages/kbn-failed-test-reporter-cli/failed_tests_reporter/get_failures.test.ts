@@ -16,7 +16,7 @@ it('discovers failures in ftr report', async () => {
   expect(failures).toMatchInlineSnapshot(`
     Array [
       Object {
-        "classname": "Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps/sample_data·js",
+        "classname": "Chrome X-Pack UI Functional Tests.x-pack/platform/test/functional/apps/maps/sample_data·js",
         "commandLine": "node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts",
         "failure": "
             Error: retry.try timeout: TimeoutError: Waiting for element to be located By(css selector, [data-test-subj~=\\"layerTocActionsPanelToggleButtonRoad_Map_-_Bright\\"])
@@ -39,7 +39,7 @@ it('discovers failures in ftr report', async () => {
         "time": "154.378",
       },
       Object {
-        "classname": "Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps",
+        "classname": "Chrome X-Pack UI Functional Tests.x-pack/platform/test/functional/apps/maps",
         "commandLine": "node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts",
         "failure": "
             { NoSuchSessionError: This driver instance does not have a valid session ID (did you call WebDriver.quit()?) and may no longer be used.
@@ -115,7 +115,7 @@ it('discovers failures in mocha report', async () => {
     </body>
     </html>
 
-        at Function.getSnapshot (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/packages/kbn-es/src/artifact.js:95:13)
+        at Function.getSnapshot (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/src/platform/packages/shared/kbn-es/src/artifact.js:95:13)
         at process._tickCallback (internal/process/next_tick.js:68:7)
           ",
         "likelyIrrelevant": true,

@@ -9,7 +9,10 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import type { IndicesPutIndexTemplateIndexTemplateMapping } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesPutIndexTemplateIndexTemplateMapping,
+  IngestProcessorContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import { TELEMETRY_LOCAL_EBT_INDICES } from '../../common/local_shipper';
 
 export async function registerIndexMappings(
@@ -38,25 +41,80 @@ export async function registerIndexMappings(
 
 async function registerIngestPipeline(getElasticsearchClient: () => Promise<ElasticsearchClient>) {
   const esClient = await getElasticsearchClient();
-  await esClient.ingest.putPipeline({
-    id: 'ebt-kibana-browser',
-    processors: [
-      {
-        user_agent: {
-          target_field: 'context.parsed_user_agent',
-          field: 'context.user_agent',
-          ignore_missing: true,
-          ignore_failure: true,
-        },
+
+  // Generate key and value processors programmatically
+  const keyProcessors: IngestProcessorContainer[] = Array.from({ length: 9 }, (_, i) => ({
+    set: {
+      field: `key${i + 1}`,
+      value: `{{properties.key${i + 1}}}`,
+      ignore_empty_value: true,
+    },
+  }));
+  const valueProcessors: IngestProcessorContainer[] = Array.from({ length: 9 }, (_, i) => ({
+    set: {
+      field: `value${i + 1}`,
+      value: `{{properties.value${i + 1}}}`,
+      ignore_empty_value: true,
+    },
+  }));
+  const valueConvertProcessors: IngestProcessorContainer[] = Array.from({ length: 9 }, (_, i) => ({
+    convert: {
+      field: `value${i + 1}`,
+      type: 'double',
+      ignore_missing: true,
+    },
+  }));
+
+  const processors: IngestProcessorContainer[] = [
+    ...keyProcessors,
+    ...valueProcessors,
+    ...valueConvertProcessors,
+    {
+      set: {
+        field: 'duration',
+        value: '{{properties.duration}}',
+        ignore_empty_value: true,
       },
-    ],
-    on_failure: [
-      { set: { field: 'original-error', value: '{{ _ingest.on_failure_message }}' } },
-      { set: { field: 'original-index', value: '{{ _index }}' } },
-      { set: { field: 'original-body', value: '{{ _ingest }}' } },
-      { set: { field: '_index', value: 'failed-docs' } },
-    ],
-  });
+    },
+    {
+      set: {
+        field: 'eventName',
+        value: '{{properties.eventName}}',
+        ignore_empty_value: true,
+      },
+    },
+    {
+      convert: {
+        field: 'duration',
+        type: 'double',
+        ignore_missing: true,
+      },
+    },
+    {
+      user_agent: {
+        target_field: 'context.parsed_user_agent',
+        field: 'context.user_agent',
+        ignore_missing: true,
+        ignore_failure: true,
+      },
+    },
+  ];
+
+  try {
+    await esClient.ingest.putPipeline({
+      id: 'ebt-kibana-browser',
+      processors,
+      on_failure: [
+        { set: { field: 'original-error', value: '{{ _ingest.on_failure_message }}' } },
+        { set: { field: 'original-index', value: '{{ _index }}' } },
+        { set: { field: 'original-body', value: '{{ _ingest }}' } },
+        { set: { field: '_index', value: 'failed-docs' } },
+      ],
+    });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('Error creating pipeline:', err);
+  }
 }
 
 const MAPPINGS: Record<string, IndicesPutIndexTemplateIndexTemplateMapping> = {
@@ -113,6 +171,26 @@ const MAPPINGS: Record<string, IndicesPutIndexTemplateIndexTemplateMapping> = {
         event_type: { type: 'keyword' },
         // Using "flattened" for flexibility
         properties: { type: 'flattened' },
+        eventName: { type: 'keyword' },
+        duration: { type: 'double' },
+        key1: { type: 'keyword' },
+        key2: { type: 'keyword' },
+        key3: { type: 'keyword' },
+        key4: { type: 'keyword' },
+        key5: { type: 'keyword' },
+        key6: { type: 'keyword' },
+        key7: { type: 'keyword' },
+        key8: { type: 'keyword' },
+        key9: { type: 'keyword' },
+        value1: { type: 'double' },
+        value2: { type: 'double' },
+        value3: { type: 'double' },
+        value4: { type: 'double' },
+        value5: { type: 'double' },
+        value6: { type: 'double' },
+        value7: { type: 'double' },
+        value8: { type: 'double' },
+        value9: { type: 'double' },
         context: {
           properties: {
             cluster_uuid: { type: 'keyword' },

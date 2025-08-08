@@ -6,12 +6,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useIsMutating } from '@tanstack/react-query';
 import dedent from 'dedent';
 import { groupBy as _groupBy, mapValues } from 'lodash';
 import React, { useEffect } from 'react';
+import { usePageReady } from '@kbn/ebt-tools';
 import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
@@ -20,7 +20,6 @@ import { ToggleSLOView } from './toggle_slo_view';
 import { UngroupedView } from './ungrouped_slos/ungrouped_view';
 
 export function SloList() {
-  const { onPageReady } = usePerformanceContext();
   const { observabilityAIAssistant } = useKibana().services;
   const { state, onStateChange } = useUrlSearchState();
   const { view, page, perPage, kqlQuery, filters, tagsFilter, statusFilter, groupBy } = state;
@@ -80,11 +79,17 @@ export function SloList() {
     });
   }, [sloList, observabilityAIAssistant]);
 
-  useEffect(() => {
-    if (!isLoading && sloList !== undefined) {
-      onPageReady();
-    }
-  }, [isLoading, sloList, onPageReady]);
+  usePageReady({
+    isReady: !isLoading && sloList !== undefined,
+    isRefreshing: isLoading,
+    customMetrics: {
+      key1: 'slo_list_count',
+      value1: sloList?.total ?? 0,
+    },
+    meta: {
+      description: '[ttfmp_slos] The SLOs list has finished loading.',
+    },
+  });
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">

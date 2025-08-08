@@ -7,14 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
+import type { KibanaGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
 import type { Package } from './package';
 import type { PLUGIN_CATEGORY } from './plugin_category_info';
 
-/**
- * Simple parsed representation of a package.json file, validated
- * by `assertParsedPackageJson()` and extensible as needed in the future
- */
+type ExportTarget = string | ConditionalExports | Array<string | ConditionalExports>;
+
+interface ConditionalExports {
+  [condition: string]: ExportTarget;
+}
+
+interface SubpathExports {
+  [subpath: string]: ExportTarget;
+}
+
+export type PackageExports = ExportTarget | SubpathExports | null;
+
 export interface ParsedPackageJson {
   /** The name of the package, usually `@kbn/`+something */
   name: string;
@@ -31,6 +39,7 @@ export interface ParsedPackageJson {
   scripts?: {
     [key: string]: string | undefined;
   };
+  exports?: PackageExports;
   /** All other fields in the package.json are typed as unknown as we don't care what they are */
   [key: string]: unknown;
 }
@@ -95,7 +104,7 @@ export interface PackageManifestBaseFields {
   /**
    * Specifies the group to which this package belongs
    */
-  group?: ModuleGroup;
+  group?: KibanaGroup;
   /**
    * Specifies the package visibility, i.e. whether it can be accessed by everybody or only packages in the same group
    */
@@ -181,6 +190,10 @@ export interface PluginSelector {
    * When set to true, only select plugins which have browser-side components
    */
   browser?: boolean;
+  /**
+   * When defined, only select plugins that belong to the specified groups
+   */
+  allowlistPluginGroups?: readonly KibanaGroup[];
 }
 
 export interface KbnImportReq {

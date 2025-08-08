@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ThemeProvider, css } from '@emotion/react';
-import { Story } from '@storybook/react';
+import type { StoryObj, Meta } from '@storybook/react';
 import { Writable } from '@kbn/utility-types';
 import { GlobalStylesStorybookDecorator } from '../../.storybook/decorators';
 import type {
@@ -19,20 +19,36 @@ import type {
 } from '.';
 import { Graph } from '.';
 
-export default {
+type GraphPropsAndCustomArgs = React.ComponentProps<typeof Graph> & {};
+
+const meta = {
+  render: ({ nodes, edges, interactive }: Partial<GraphPropsAndCustomArgs>) => {
+    return (
+      <ThemeProvider theme={{ darkMode: false }}>
+        <Graph
+          css={css`
+            height: 100%;
+            width: 100%;
+          `}
+          nodes={nodes ?? []}
+          edges={edges ?? []}
+          interactive={interactive ?? false}
+        />
+      </ThemeProvider>
+    );
+  },
   title: 'Components/Graph Components/Graph Layout',
-  description: 'CDR - Graph visualization',
   argTypes: {
-    interactive: { control: 'boolean', defaultValue: true },
+    interactive: { control: { type: 'boolean' } },
+  },
+  args: {
+    interactive: true,
   },
   decorators: [GlobalStylesStorybookDecorator],
-};
+} satisfies Meta<Partial<GraphPropsAndCustomArgs>>;
 
-interface GraphData {
-  nodes: NodeViewModel[];
-  edges: EdgeViewModel[];
-  interactive: boolean;
-}
+export default meta;
+type Story = StoryObj<typeof Graph>;
 
 type EnhancedNodeViewModel =
   | EntityNodeViewModel
@@ -162,167 +178,239 @@ const extractEdges = (
   return { nodes: Object.values(nodes).reverse(), edges };
 };
 
-const Template: Story<GraphData> = ({ nodes, edges, interactive }: GraphData) => {
-  return (
-    <ThemeProvider theme={{ darkMode: false }}>
-      <Graph
-        css={css`
-          height: 100%;
-          width: 100%;
-        `}
-        nodes={nodes}
-        edges={edges}
-        interactive={interactive ?? true}
-      />
-    </ThemeProvider>
-  );
+export const SimpleAPIMock: Story = {
+  args: {
+    interactive: false,
+    nodes: [
+      {
+        id: 'admin@example.com',
+        label: 'admin@example.com',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'projects/your-project-id/roles/customRole',
+        label: 'projects/your-project-id/roles/customRole',
+        color: 'primary',
+        shape: 'hexagon',
+        icon: 'question',
+      },
+      {
+        id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
+        label: 'google.iam.admin.v1.CreateRole',
+        source: 'admin@example.com',
+        target: 'projects/your-project-id/roles/customRole',
+        color: 'primary',
+        shape: 'label',
+      },
+    ],
+    edges: [
+      {
+        id: 'a(admin@example.com)-b(a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole))',
+        source: 'admin@example.com',
+        sourceShape: 'ellipse',
+        target:
+          'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
+        targetShape: 'label',
+        color: 'primary',
+      },
+      {
+        id: 'a(a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole))-b(projects/your-project-id/roles/customRole)',
+        source:
+          'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
+        sourceShape: 'label',
+        target: 'projects/your-project-id/roles/customRole',
+        targetShape: 'hexagon',
+        color: 'primary',
+      },
+    ],
+  },
 };
 
-export const SimpleAPIMock = Template.bind({});
-SimpleAPIMock.args = {
-  nodes: [
-    {
-      id: 'admin@example.com',
-      label: 'admin@example.com',
-      color: 'primary',
-      shape: 'ellipse',
-      icon: 'user',
-    },
-    {
-      id: 'projects/your-project-id/roles/customRole',
-      label: 'projects/your-project-id/roles/customRole',
-      color: 'primary',
-      shape: 'hexagon',
-      icon: 'questionInCircle',
-    },
-    {
-      id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
-      label: 'google.iam.admin.v1.CreateRole',
-      source: 'admin@example.com',
-      target: 'projects/your-project-id/roles/customRole',
-      color: 'primary',
-      shape: 'label',
-    },
-  ],
-  edges: [
-    {
-      id: 'a(admin@example.com)-b(a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole))',
-      source: 'admin@example.com',
-      sourceShape: 'ellipse',
-      target:
-        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
-      targetShape: 'label',
-      color: 'primary',
-    },
-    {
-      id: 'a(a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole))-b(projects/your-project-id/roles/customRole)',
-      source:
-        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
-      sourceShape: 'label',
-      target: 'projects/your-project-id/roles/customRole',
-      targetShape: 'hexagon',
-      color: 'primary',
-    },
-  ],
+export const GroupWithWarningAPIMock: Story = {
+  args: {
+    ...meta.args,
+    nodes: [
+      {
+        id: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+        shape: 'group',
+      },
+      {
+        id: 'admin3@example.com',
+        label: 'admin3@example.com',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'projects/your-project-id/roles/customRole',
+        label: 'projects/your-project-id/roles/customRole',
+        color: 'primary',
+        shape: 'hexagon',
+        icon: 'question',
+      },
+      {
+        id: 'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed)',
+        label: 'google.iam.admin.v1.CreateRole',
+        source: 'admin3@example.com',
+        target: 'projects/your-project-id/roles/customRole',
+        color: 'warning',
+        shape: 'label',
+        parentId: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+      },
+      {
+        id: 'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)',
+        label: 'google.iam.admin.v1.CreateRole',
+        source: 'admin3@example.com',
+        target: 'projects/your-project-id/roles/customRole',
+        color: 'primary',
+        shape: 'label',
+        parentId: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+      },
+    ],
+    edges: [
+      {
+        id: 'a(admin3@example.com)-b(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))',
+        source: 'admin3@example.com',
+        sourceShape: 'ellipse',
+        target: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+        targetShape: 'group',
+        color: 'primary',
+      },
+      {
+        id: 'a(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))-b(projects/your-project-id/roles/customRole)',
+        source: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+        sourceShape: 'group',
+        target: 'projects/your-project-id/roles/customRole',
+        targetShape: 'hexagon',
+        color: 'primary',
+      },
+      {
+        id: 'a(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))-b(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed))',
+        source: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+        sourceShape: 'group',
+        target:
+          'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed)',
+        targetShape: 'label',
+        color: 'warning',
+      },
+      {
+        id: 'a(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed))-b(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))',
+        source:
+          'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed)',
+        sourceShape: 'label',
+        target: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+        targetShape: 'group',
+        color: 'warning',
+      },
+      {
+        id: 'a(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))-b(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success))',
+        source: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+        sourceShape: 'group',
+        target:
+          'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)',
+        targetShape: 'label',
+        color: 'primary',
+      },
+      {
+        id: 'a(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success))-b(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))',
+        source:
+          'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)',
+        sourceShape: 'label',
+        target: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+        targetShape: 'group',
+        color: 'primary',
+      },
+    ],
+  },
 };
 
-export const GroupWithWarningAPIMock = Template.bind({});
-GroupWithWarningAPIMock.args = {
-  nodes: [
-    {
-      id: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-      shape: 'group',
-    },
-    {
-      id: 'admin3@example.com',
-      label: 'admin3@example.com',
-      color: 'primary',
-      shape: 'ellipse',
-      icon: 'user',
-    },
-    {
-      id: 'projects/your-project-id/roles/customRole',
-      label: 'projects/your-project-id/roles/customRole',
-      color: 'primary',
-      shape: 'hexagon',
-      icon: 'questionInCircle',
-    },
-    {
-      id: 'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed)',
-      label: 'google.iam.admin.v1.CreateRole',
-      source: 'admin3@example.com',
-      target: 'projects/your-project-id/roles/customRole',
-      color: 'warning',
-      shape: 'label',
-      parentId: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-    },
-    {
-      id: 'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)',
-      label: 'google.iam.admin.v1.CreateRole',
-      source: 'admin3@example.com',
-      target: 'projects/your-project-id/roles/customRole',
-      color: 'primary',
-      shape: 'label',
-      parentId: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-    },
-  ],
-  edges: [
-    {
-      id: 'a(admin3@example.com)-b(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))',
-      source: 'admin3@example.com',
-      sourceShape: 'ellipse',
-      target: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-      targetShape: 'group',
-      color: 'primary',
-    },
-    {
-      id: 'a(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))-b(projects/your-project-id/roles/customRole)',
-      source: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-      sourceShape: 'group',
-      target: 'projects/your-project-id/roles/customRole',
-      targetShape: 'hexagon',
-      color: 'primary',
-    },
-    {
-      id: 'a(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))-b(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed))',
-      source: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-      sourceShape: 'group',
-      target:
-        'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed)',
-      targetShape: 'label',
-      color: 'warning',
-    },
-    {
-      id: 'a(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed))-b(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))',
-      source:
-        'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed)',
-      sourceShape: 'label',
-      target: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-      targetShape: 'group',
-      color: 'warning',
-    },
-    {
-      id: 'a(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))-b(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success))',
-      source: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-      sourceShape: 'group',
-      target:
-        'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)',
-      targetShape: 'label',
-      color: 'primary',
-    },
-    {
-      id: 'a(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success))-b(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))',
-      source:
-        'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)',
-      sourceShape: 'label',
-      target: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-      targetShape: 'group',
-      color: 'primary',
-    },
-  ],
+export const GroupWithAlertAPIMock: Story = {
+  args: {
+    ...meta.args,
+    nodes: [
+      {
+        id: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        shape: 'group',
+      },
+      {
+        id: 'admin@example.com',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'projects/your-project-id/roles/customRole',
+        color: 'primary',
+        shape: 'hexagon',
+      },
+      {
+        id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
+        label: 'google.iam.admin.v1.CreateRole',
+        color: 'danger',
+        shape: 'label',
+        parentId: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+      },
+      {
+        id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole)',
+        label: 'google.iam.admin.v1.UpdateRole',
+        color: 'primary',
+        shape: 'label',
+        parentId: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+      },
+    ],
+    edges: [
+      {
+        id: 'a(admin@example.com)-b(grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole)))',
+        source: 'admin@example.com',
+        target: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        color: 'danger',
+        type: 'solid',
+      },
+      {
+        id: 'a(grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole)))-b(projects/your-project-id/roles/customRole)',
+        source: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        target: 'projects/your-project-id/roles/customRole',
+        color: 'danger',
+        type: 'solid',
+      },
+      {
+        id: 'a(grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole)))-b(a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole))',
+        source: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        target:
+          'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
+        color: 'danger',
+        type: 'solid',
+      },
+      {
+        id: 'a(a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole))-b(grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole)))',
+        source:
+          'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
+        target: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        color: 'danger',
+        type: 'solid',
+      },
+      {
+        id: 'a(grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole)))-b(a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole))',
+        source: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        target:
+          'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole)',
+        color: 'subdued',
+        type: 'solid',
+      },
+      {
+        id: 'a(a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole))-b(grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole)))',
+        source:
+          'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole)',
+        target: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        color: 'subdued',
+        type: 'solid',
+      },
+    ],
+  },
 };
 
-export const LargeGraph = Template.bind({});
 const baseGraph: EnhancedNodeViewModel[] = [
   {
     id: 'siem-windows',
@@ -330,6 +418,10 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'danger',
     shape: 'hexagon',
     icon: 'storage',
+    ips: ['213.180.204.3'],
+    countryCodes: ['RU'],
+    tag: 'Host',
+    count: 3,
   },
   {
     id: '213.180.204.3',
@@ -344,6 +436,10 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'danger',
     shape: 'ellipse',
     icon: 'user',
+    ips: ['213.180.204.3'],
+    countryCodes: ['RU'],
+    tag: 'Host',
+    count: 3,
   },
   {
     id: 'oktauser',
@@ -446,89 +542,200 @@ const baseGraph: EnhancedNodeViewModel[] = [
   },
 ];
 
-LargeGraph.args = {
-  ...extractEdges(baseGraph),
+const entitiesData = [
+  { name: 'Suspicious ip' },
+  { name: 'Admin User' },
+  { name: 'Suspicious User' },
+];
+
+export const LargeGraph: Story = {
+  args: {
+    ...meta.args,
+    ...extractEdges(baseGraph),
+  },
 };
 
-export const GraphLabelOverlayCases = Template.bind({});
-
-GraphLabelOverlayCases.args = {
-  ...extractEdges([
-    ...baseGraph,
-    {
-      id: 'newnode',
-      label: 'New Node',
-      color: 'primary',
-      shape: 'ellipse',
-      icon: 'user',
-    },
-    {
-      id: 'a(newnode)-b(hackeruser)',
-      source: 'newnode',
-      target: 'hackeruser',
-      label: 'Overlay Label',
-      color: 'danger',
-      shape: 'label',
-    },
-    {
-      id: 'a(newnode)-b(s3)',
-      source: 'newnode',
-      target: 's3',
-      label: 'Overlay Label',
-      color: 'danger',
-      shape: 'label',
-    },
-  ]),
+export const GraphLabelOverlayCases: Story = {
+  args: {
+    ...meta.args,
+    ...extractEdges([
+      ...baseGraph,
+      {
+        id: 'newnode',
+        label: 'New Node',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'a(newnode)-b(hackeruser)',
+        source: 'newnode',
+        target: 'hackeruser',
+        label: 'Overlay Label',
+        color: 'danger',
+        shape: 'label',
+      },
+      {
+        id: 'a(newnode)-b(s3)',
+        source: 'newnode',
+        target: 's3',
+        label: 'Overlay Label',
+        color: 'danger',
+        shape: 'label',
+      },
+    ]),
+  },
 };
 
-export const GraphStackedEdgeCases = Template.bind({});
-
-GraphStackedEdgeCases.args = {
-  ...extractEdges([
-    ...baseGraph,
-    {
-      id: 'a(oktauser)-b(hackeruser)',
-      source: 'oktauser',
-      target: 'hackeruser',
-      label: 'CreateUser2',
-      color: 'primary',
-      shape: 'label',
-    },
-    {
-      id: 'a(siem-windows)-b(user)',
-      source: 'siem-windows',
-      target: 'user',
-      label: 'User login to OKTA2',
-      color: 'danger',
-      shape: 'label',
-    },
-  ]),
-};
-
-export const GraphLargeStackedEdgeCases = Template.bind({});
-
-GraphLargeStackedEdgeCases.args = {
-  ...extractEdges([
-    ...baseGraph,
-    ...Array(10)
-      .fill(0)
-      .map<EnhancedNodeViewModel>((_v, idx) => ({
+export const GraphStackedEdgeCases: Story = {
+  args: {
+    ...meta.args,
+    ...extractEdges([
+      ...baseGraph,
+      {
         id: 'a(oktauser)-b(hackeruser)',
         source: 'oktauser',
         target: 'hackeruser',
-        label: `CreateUser${idx}`,
+        label: 'CreateUser2',
         color: 'primary',
         shape: 'label',
-      })),
-    ...Array(10)
-      .fill(0)
-      .map<EnhancedNodeViewModel>((_v, idx) => ({
+      },
+      {
         id: 'a(siem-windows)-b(user)',
         source: 'siem-windows',
         target: 'user',
-        label: `User login to OKTA${idx}`,
+        label: 'User login to OKTA2',
         color: 'danger',
         shape: 'label',
-      })),
-  ]),
+      },
+    ]),
+  },
+};
+
+export const GraphLargeStackedEdgeCases: Story = {
+  args: {
+    ...meta.args,
+    ...extractEdges([
+      ...baseGraph,
+      ...Array(10)
+        .fill(0)
+        .map<EnhancedNodeViewModel>((_v, idx) => ({
+          id: 'a(oktauser)-b(hackeruser)',
+          source: 'oktauser',
+          target: 'hackeruser',
+          label: `CreateUser${idx}`,
+          color: 'primary',
+          shape: 'label',
+        })),
+      ...Array(10)
+        .fill(0)
+        .map<EnhancedNodeViewModel>((_v, idx) => ({
+          id: 'a(siem-windows)-b(user)',
+          source: 'siem-windows',
+          target: 'user',
+          label: `User login to OKTA${idx}`,
+          color: 'danger',
+          shape: 'label',
+        })),
+    ]),
+  },
+};
+
+const VARIANT_STACK_SIZES_NODES = 8;
+
+export const VariantStackSizes: Story = {
+  args: {
+    ...meta.args,
+    ...extractEdges([
+      ...(Array(VARIANT_STACK_SIZES_NODES)
+        .fill(0)
+        .map((id, idx) => ({
+          id: String.fromCharCode(97 + idx), // 'a', 'b', 'c', ...
+          label: String.fromCharCode(97 + idx).toUpperCase(),
+          color: 'primary',
+          shape: 'ellipse',
+        })) satisfies EnhancedNodeViewModel[]),
+      ...Array(VARIANT_STACK_SIZES_NODES - 1)
+        .fill(0)
+        .map<EnhancedNodeViewModel[]>((_v, idx) =>
+          Array(idx + 1)
+            .fill(0)
+            .map<EnhancedNodeViewModel>((_, idx2) => ({
+              id: `${String.fromCharCode(97 + idx)}-${String.fromCharCode(97 + idx + 1)}`,
+              source: String.fromCharCode(97 + idx),
+              target: String.fromCharCode(97 + idx + 1),
+              label: `${idx2}`,
+              color: 'primary',
+              shape: 'label',
+            }))
+        )
+        .flat(),
+    ]),
+  },
+};
+
+export const GraphWithAssetInventoryData: Story = {
+  args: {
+    ...meta.args,
+    ...extractEdges([
+      ...baseGraph.map((node, index) => {
+        // Add asset data to specific nodes
+        if (index === 1) {
+          return {
+            ...node,
+            label: entitiesData[0].name,
+            icon: 'globe',
+            documentsData: [
+              {
+                id: node.id,
+                type: 'event' as 'event' | 'alert',
+              },
+            ],
+          };
+        } else if (index === 2) {
+          return {
+            ...node,
+            label: entitiesData[1].name,
+            icon: 'user',
+            documentsData: [
+              {
+                id: node.id,
+                type: 'event' as 'event' | 'alert',
+              },
+            ],
+          };
+        } else if (index === 6) {
+          return {
+            ...node,
+            label: entitiesData[2].name,
+            icon: 'storage',
+            documentsData: [
+              {
+                id: node.id,
+                type: 'event' as 'event' | 'alert',
+              },
+            ],
+          };
+        }
+        return node;
+      }),
+      // Add the same additional nodes as GraphStackedEdgeCases
+      {
+        id: 'a(oktauser)-b(hackeruser)',
+        source: 'oktauser',
+        target: 'hackeruser',
+        label: 'CreateUser2',
+        color: 'primary',
+        shape: 'label',
+      },
+      {
+        id: 'a(siem-windows)-b(user)',
+        source: 'siem-windows',
+        target: 'user',
+        label: 'User login to OKTA2',
+        color: 'danger',
+        shape: 'label',
+      },
+    ]),
+  },
 };

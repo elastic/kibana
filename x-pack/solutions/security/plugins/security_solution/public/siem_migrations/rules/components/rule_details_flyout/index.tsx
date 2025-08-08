@@ -28,7 +28,7 @@ import {
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
 import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   RuleOverviewTab,
@@ -70,7 +70,7 @@ export const TabContentPadding: FC<PropsWithChildren<unknown>> = ({ children }) 
 );
 
 interface MigrationRuleDetailsFlyoutProps {
-  ruleMigration: RuleMigration;
+  migrationRule: RuleMigrationRule;
   ruleActions?: React.ReactNode;
   matchedPrebuiltRule?: RuleResponse;
   size?: EuiFlyoutProps['size'];
@@ -82,7 +82,7 @@ interface MigrationRuleDetailsFlyoutProps {
 export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProps> = React.memo(
   ({
     ruleActions,
-    ruleMigration,
+    migrationRule,
     matchedPrebuiltRule,
     size = 'm',
     extraTabs = [],
@@ -93,7 +93,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
 
     const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
-    const { mutateAsync: updateMigrationRule } = useUpdateMigrationRule(ruleMigration);
+    const { mutateAsync: updateMigrationRule } = useUpdateMigrationRule(migrationRule);
 
     const [isUpdating, setIsUpdating] = useState(false);
     const isLoading = isDataLoading || isUpdating;
@@ -106,7 +106,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         setIsUpdating(true);
         try {
           await updateMigrationRule({
-            id: ruleMigration.id,
+            id: migrationRule.id,
             elastic_rule: {
               title: ruleName,
               query: ruleQuery,
@@ -119,16 +119,16 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
           setIsUpdating(false);
         }
       },
-      [isLoading, updateMigrationRule, ruleMigration, addError]
+      [isLoading, updateMigrationRule, migrationRule, addError]
     );
 
     const ruleDetailsToOverview = useMemo(() => {
-      const elasticRule = ruleMigration?.elastic_rule;
+      const elasticRule = migrationRule?.elastic_rule;
       if (isMigrationCustomRule(elasticRule)) {
         return convertMigrationCustomRuleToSecurityRulePayload(elasticRule, false);
       }
       return matchedPrebuiltRule;
-    }, [ruleMigration, matchedPrebuiltRule]);
+    }, [migrationRule, matchedPrebuiltRule]);
 
     const translationTab: EuiTabbedContentTab = useMemo(
       () => ({
@@ -137,14 +137,14 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         content: (
           <TabContentPadding>
             <TranslationTab
-              ruleMigration={ruleMigration}
+              migrationRule={migrationRule}
               matchedPrebuiltRule={matchedPrebuiltRule}
               onTranslationUpdate={handleTranslationUpdate}
             />
           </TabContentPadding>
         ),
       }),
-      [ruleMigration, handleTranslationUpdate, matchedPrebuiltRule]
+      [migrationRule, handleTranslationUpdate, matchedPrebuiltRule]
     );
 
     const overviewTab: EuiTabbedContentTab = useMemo(
@@ -167,14 +167,14 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
             )}
           </TabContentPadding>
         ),
-        disabled: ruleMigration.translation_result === RuleTranslationResult.UNTRANSLATABLE,
+        disabled: migrationRule.translation_result === RuleTranslationResult.UNTRANSLATABLE,
       }),
       [
         ruleDetailsToOverview,
         size,
         expandedOverviewSections,
         toggleOverviewSection,
-        ruleMigration.translation_result,
+        migrationRule.translation_result,
       ]
     );
 
@@ -184,11 +184,11 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         name: i18n.SUMMARY_TAB_LABEL,
         content: (
           <TabContentPadding>
-            <SummaryTab ruleMigration={ruleMigration} />
+            <SummaryTab migrationRule={migrationRule} />
           </TabContentPadding>
         ),
       }),
-      [ruleMigration]
+      [migrationRule]
     );
 
     const tabs = useMemo(() => {
@@ -237,12 +237,12 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
           <EuiTitle size="m">
             <h2 id={migrationsRulesFlyoutTitleId}>
               {ruleDetailsToOverview?.name ??
-                ruleMigration.original_rule.title ??
+                migrationRule.original_rule.title ??
                 i18n.UNKNOWN_MIGRATION_RULE_TITLE}
             </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <UpdatedByLabel ruleMigration={ruleMigration} />
+          <UpdatedByLabel migrationRule={migrationRule} />
         </EuiFlyoutHeader>
         <EuiFlyoutBody
           // EUI TODO: We need to set transform to 'none' to avoid drag/drop issues in the flyout caused by the

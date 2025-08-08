@@ -11,7 +11,6 @@ import {
   BufferFlushEvent,
   StreamingChatResponseEventType,
   StreamingChatResponseEventWithoutError,
-  TokenCountEvent,
 } from '../../../common/conversation_complete';
 
 // The Cloud proxy currently buffers 4kb or 8kb of data until flushing.
@@ -19,7 +18,7 @@ import {
 // so we manually insert some data every 250ms if needed to force it
 // to flush.
 
-export function flushBuffer<T extends StreamingChatResponseEventWithoutError | TokenCountEvent>(
+export function flushBuffer<T extends StreamingChatResponseEventWithoutError>(
   isCloud: boolean
 ): OperatorFunction<T, T | BufferFlushEvent> {
   return (source: Observable<T>) =>

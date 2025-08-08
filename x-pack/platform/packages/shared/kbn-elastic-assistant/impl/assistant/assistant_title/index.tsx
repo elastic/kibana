@@ -23,7 +23,12 @@ export const AssistantTitle: React.FC<{
   title?: string;
   selectedConversation: Conversation | undefined;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
-}> = ({ title, selectedConversation, refetchCurrentUserConversations, isDisabled = false }) => {
+}> = ({
+  title = NEW_CHAT,
+  selectedConversation,
+  refetchCurrentUserConversations,
+  isDisabled = false,
+}) => {
   const [newTitle, setNewTitle] = useState(title);
   const [newTitleError, setNewTitleError] = useState(false);
   const { updateConversationTitle } = useConversation();
@@ -62,10 +67,10 @@ export const AssistantTitle: React.FC<{
           data-test-subj="conversationTitle"
           heading="h2"
           inputAriaLabel="Edit text inline"
-          value={newTitle ?? NEW_CHAT}
+          value={newTitle}
           size="xs"
           isInvalid={!!newTitleError}
-          isReadOnly={isDisabled || selectedConversation?.isDefault}
+          isReadOnly={isDisabled}
           onChange={(e) => setNewTitle(e.currentTarget.nodeValue || '')}
           onCancel={() => setNewTitle(title)}
           onSave={handleUpdateTitle}

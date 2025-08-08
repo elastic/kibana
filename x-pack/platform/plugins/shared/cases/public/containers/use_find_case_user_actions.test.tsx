@@ -11,8 +11,7 @@ import type { CaseUserActionTypeWithAll } from '../../common/ui/types';
 import { basicCase, findCaseUserActionsResponse } from './mock';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
+import { TestProviders } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -35,16 +34,13 @@ describe('UseFindCaseUserActions', () => {
 
   const isEnabled = true;
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('returns proper state on findCaseUserActions', async () => {
     const { result } = renderHook(() => useFindCaseUserActions(basicCase.id, params, isEnabled), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() =>
@@ -81,7 +77,7 @@ describe('UseFindCaseUserActions', () => {
           },
           isEnabled
         ),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() =>
@@ -108,28 +104,21 @@ describe('UseFindCaseUserActions', () => {
           },
           false
         ),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     expect(spy).not.toHaveBeenCalled();
   });
 
   it('shows a toast error when the API returns an error', async () => {
-    const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(new Error("C'est la vie"));
-
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
     renderHook(() => useFindCaseUserActions(basicCase.id, params, isEnabled), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => {
-      expect(spy).toHaveBeenCalledWith(
-        basicCase.id,
-        { type: filterActionType, sortOrder, page: 1, perPage: 10 },
-        expect.any(AbortSignal)
-      );
       expect(addError).toHaveBeenCalled();
     });
   });

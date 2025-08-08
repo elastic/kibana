@@ -124,6 +124,8 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                 "order": undefined,
                 "requiresPageReload": false,
                 "savedValue": true,
+                "solutionViews": undefined,
+                "technicalPreview": undefined,
                 "type": "boolean",
                 "unsavedFieldId": "Usage collection-unsaved",
               }
@@ -318,6 +320,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       },
       "isScreenshotMode": false,
       "notifications": Object {
+        "coordinator": [MockFunction],
         "toasts": Object {
           "add": [MockFunction],
           "addDanger": [MockFunction],

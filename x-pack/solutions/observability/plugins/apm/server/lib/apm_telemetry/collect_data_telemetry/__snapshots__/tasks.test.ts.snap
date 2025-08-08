@@ -254,99 +254,7 @@ Object {
         },
       },
     },
-    "opentelemetry/android": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "opentelemetry/cpp": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "opentelemetry/dotnet": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "opentelemetry/erlang": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "opentelemetry/go": Object {
+    "opentelemetry/dotnet/elastic": Object {
       "agent": Object {
         "activation_method": Array [],
         "version": Array [],
@@ -459,7 +367,7 @@ Object {
         },
       },
     },
-    "opentelemetry/nodejs": Object {
+    "opentelemetry/nodejs/elastic": Object {
       "agent": Object {
         "activation_method": Array [],
         "version": Array [],
@@ -482,7 +390,7 @@ Object {
         },
       },
     },
-    "opentelemetry/php": Object {
+    "opentelemetry/php/elastic": Object {
       "agent": Object {
         "activation_method": Array [],
         "version": Array [],
@@ -505,99 +413,7 @@ Object {
         },
       },
     },
-    "opentelemetry/python": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "opentelemetry/ruby": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "opentelemetry/rust": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "opentelemetry/swift": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "opentelemetry/webjs": Object {
+    "opentelemetry/python/elastic": Object {
       "agent": Object {
         "activation_method": Array [],
         "version": Array [],
@@ -662,121 +478,6 @@ Object {
           "version": Array [
             "17.0.12",
           ],
-        },
-      },
-    },
-    "otlp/android": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "otlp/cpp": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "otlp/dotnet": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "otlp/erlang": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "otlp/go": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
         },
       },
     },
@@ -867,167 +568,6 @@ Object {
           "version": Array [
             "17.0.12",
           ],
-        },
-      },
-    },
-    "otlp/nodejs": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "otlp/php": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "otlp/python": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "otlp/ruby": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "otlp/rust": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "otlp/swift": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
-    "otlp/webjs": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
         },
       },
     },
@@ -1757,35 +1297,15 @@ Object {
     "js-base": 0,
     "nodejs": 0,
     "opentelemetry": 4,
-    "opentelemetry/android": 0,
-    "opentelemetry/cpp": 0,
-    "opentelemetry/dotnet": 0,
-    "opentelemetry/erlang": 0,
-    "opentelemetry/go": 0,
+    "opentelemetry/dotnet/elastic": 10,
     "opentelemetry/java": 5,
     "opentelemetry/java/elastic": 6,
-    "opentelemetry/nodejs": 0,
-    "opentelemetry/php": 0,
-    "opentelemetry/python": 0,
-    "opentelemetry/ruby": 0,
-    "opentelemetry/rust": 0,
-    "opentelemetry/swift": 0,
-    "opentelemetry/webjs": 0,
+    "opentelemetry/nodejs/elastic": 7,
+    "opentelemetry/php/elastic": 9,
+    "opentelemetry/python/elastic": 8,
     "otlp": 1,
-    "otlp/android": 0,
-    "otlp/cpp": 0,
-    "otlp/dotnet": 0,
-    "otlp/erlang": 0,
-    "otlp/go": 0,
     "otlp/java": 2,
     "otlp/java/elastic": 3,
-    "otlp/nodejs": 0,
-    "otlp/php": 0,
-    "otlp/python": 0,
-    "otlp/ruby": 0,
-    "otlp/rust": 0,
-    "otlp/swift": 0,
-    "otlp/webjs": 0,
     "php": 0,
     "python": 0,
     "ruby": 0,

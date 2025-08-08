@@ -11,6 +11,7 @@
     "@kbn/data-views-plugin",
     "@kbn/expressions-plugin",
     "@kbn/core-execution-context-common",
-    "@kbn/content-management-utils"
+    "@kbn/content-management-utils",
+    "@kbn/utility-types"
   ]
 }

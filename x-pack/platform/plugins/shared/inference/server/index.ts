@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/server';
-import type { InferenceConfig } from './config';
+import type {
+  PluginConfigDescriptor,
+  PluginInitializer,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import { InferenceConfig, configSchema } from './config';
 import type {
   InferenceServerSetup,
   InferenceServerStart,
@@ -15,10 +19,13 @@ import type {
 } from './types';
 import { InferencePlugin } from './plugin';
 
-export type { InferenceClient, BoundInferenceClient } from './inference_client';
 export type { InferenceServerSetup, InferenceServerStart };
 
-export { naturalLanguageToEsql } from './tasks/nl_to_esql';
+export {
+  naturalLanguageToEsql,
+  EsqlDocumentBase,
+  runAndValidateEsqlQuery,
+} from './tasks/nl_to_esql';
 
 export const plugin: PluginInitializer<
   InferenceServerSetup,
@@ -27,3 +34,7 @@ export const plugin: PluginInitializer<
   InferenceStartDependencies
 > = async (pluginInitializerContext: PluginInitializerContext<InferenceConfig>) =>
   new InferencePlugin(pluginInitializerContext);
+
+export const config: PluginConfigDescriptor<InferenceConfig> = {
+  schema: configSchema,
+};

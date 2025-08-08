@@ -23,6 +23,7 @@ import { init as initUiMetric } from '../public/application/services/ui_metric';
 import { indexLifecycleTab } from '../public/extend_index_management/components/index_lifecycle_summary';
 import { Index } from '@kbn/index-management-plugin/common';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { useEuiTheme } from '@elastic/eui';
 
 const { httpSetup } = init();
 
@@ -33,6 +34,26 @@ jest.mock('@kbn/index-management-plugin/public', async () => {
   const { indexManagementMock } = await import('@kbn/index-management-plugin/public/mocks');
   return indexManagementMock.createSetup();
 });
+
+// Mock useEuiTheme to return the desired theme
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useEuiTheme: () => ({
+    euiTheme: {
+      themeName: 'EUI_THEME_BOREALIS',
+      colors: {
+        vis: {
+          euiColorVis1: '#6092C0',
+          euiColorVis2: '#D36086',
+          euiColorVis4: '#CA8EAE',
+          euiColorVis5: '#D6BF57',
+          euiColorVis6: '#B9A888',
+          euiColorVis9: '#E7664C',
+        },
+      },
+    },
+  }),
+}));
 
 const indexWithoutLifecyclePolicy: Index = {
   health: 'yellow',
@@ -141,7 +162,6 @@ const indexWithLifecyclePhaseDefinition: Index = {
     step_time_millis: 1544187776208,
     phase_execution: {
       policy: 'testy',
-      // @ts-expect-error ILM type is incorrect https://github.com/elastic/elasticsearch-specification/issues/2326
       phase_definition: { min_age: '0s', actions: { rollover: { max_size: '1gb' } } },
       version: 1,
       modified_date_in_millis: 1544031699844,
@@ -181,6 +201,32 @@ const indexWithLifecycleWaitingStep: Index = {
     },
   },
 };
+const indexWithNonExistentPolicyError: Index = {
+  health: 'yellow',
+  status: 'open',
+  name: 'testy3',
+  uuid: 'XL11TLa3Tvq298_dMUzLHQ',
+  primary: 1,
+  replica: 1,
+  documents: 2,
+  documents_deleted: 0,
+  size: '6.5kb',
+  primary_size: '6.5kb',
+  aliases: 'none',
+  isFrozen: false,
+  hidden: false,
+  ilm: {
+    index: 'testy3',
+    managed: true,
+    policy: 'testy',
+    index_creation_date_millis: 1753074916462,
+    step: 'ERROR',
+    step_info: {
+      type: 'illegal_argument_exception',
+      reason: 'policy [testy] does not exist',
+    },
+  },
+};
 
 moment.tz.setDefault('utc');
 
@@ -197,21 +243,26 @@ describe('extend index management', () => {
       expect(extension).toBeNull();
     });
 
-    test('should return null when no index has lifecycle errors', () => {
+    test('should return null when no index has failed step lifecycle errors', () => {
       const extension = retryLifecycleActionExtension({
         indices: [indexWithLifecyclePolicy, indexWithLifecyclePolicy],
       });
       expect(extension).toBeNull();
     });
 
-    test('should return null when not all indices have lifecycle errors', () => {
+    test('should return extension with only indices that have failed step lifecycle errors', () => {
       const extension = retryLifecycleActionExtension({
-        indices: [indexWithLifecyclePolicy, indexWithLifecycleError],
+        indices: [
+          indexWithLifecyclePolicy,
+          indexWithLifecycleError,
+          indexWithNonExistentPolicyError,
+        ],
       });
-      expect(extension).toBeNull();
+      expect(extension).toBeDefined();
+      expect(extension).toMatchSnapshot();
     });
 
-    test('should return extension when all indices have lifecycle errors', () => {
+    test('should return extension when all indices have failed step lifecycle errors', () => {
       const extension = retryLifecycleActionExtension({
         indices: [indexWithLifecycleError, indexWithLifecycleError],
       });
@@ -303,11 +354,12 @@ describe('extend index management', () => {
       expect(extension).toMatchSnapshot();
     });
 
-    test('should return action definition when any index has lifecycle error', () => {
+    test('should return action definition when any index has failed step lifecycle error', () => {
       const extension = ilmBannerExtension([
         indexWithoutLifecyclePolicy,
         indexWithLifecyclePolicy,
         indexWithLifecycleError,
+        indexWithNonExistentPolicyError,
       ]);
       const { requestMethod, successMessage, buttonLabel } =
         retryLifecycleActionExtension({
@@ -320,6 +372,15 @@ describe('extend index management', () => {
         indexNames: [indexWithLifecycleError.name],
       });
     });
+
+    test('should not return action definition when index has lifecycle error other than failed step', () => {
+      const extension = ilmBannerExtension([
+        indexWithoutLifecyclePolicy,
+        indexWithLifecyclePolicy,
+        indexWithNonExistentPolicyError,
+      ]);
+      expect(extension?.action).toBeUndefined();
+    });
   });
 
   describe('ilm summary extension', () => {
@@ -328,6 +389,11 @@ describe('extend index management', () => {
     const policyStepPanel = 'policyStepPanel';
     const policyErrorPanel = 'policyErrorPanel';
     const phaseDefinitionPanel = 'phaseDefinitionPanel';
+
+    const IlmContentComponent = ({ index }: { index: Index }) => {
+      const { euiTheme } = useEuiTheme();
+      return <IlmComponent index={index} getUrlForApp={getUrlForApp} euiTheme={euiTheme} />;
+    };
 
     test('should not render the tab when index has no index lifecycle policy', () => {
       const shouldRenderTab =
@@ -345,10 +411,7 @@ describe('extend index management', () => {
           index: indexWithLifecyclePolicy,
         });
       expect(shouldRenderTab).toBeTruthy();
-      const ilmContent = (
-        <IlmComponent index={indexWithLifecyclePolicy} getUrlForApp={getUrlForApp} />
-      );
-      const rendered = mountWithIntl(ilmContent);
+      const rendered = mountWithIntl(<IlmContentComponent index={indexWithLifecyclePolicy} />);
       expect(rendered.render()).toMatchSnapshot();
       expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
       expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeFalsy();
@@ -357,10 +420,7 @@ describe('extend index management', () => {
     });
 
     test('should render an error panel when index has lifecycle error', () => {
-      const ilmContent = (
-        <IlmComponent index={indexWithLifecycleError} getUrlForApp={getUrlForApp} />
-      );
-      const rendered = mountWithIntl(ilmContent);
+      const rendered = mountWithIntl(<IlmContentComponent index={indexWithLifecycleError} />);
       expect(rendered.render()).toMatchSnapshot();
       expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
       expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeFalsy();
@@ -369,10 +429,9 @@ describe('extend index management', () => {
     });
 
     test('should render a phase definition panel when lifecycle has phase definition', () => {
-      const ilmContent = (
-        <IlmComponent index={indexWithLifecyclePhaseDefinition} getUrlForApp={getUrlForApp} />
+      const rendered = mountWithIntl(
+        <IlmContentComponent index={indexWithLifecyclePhaseDefinition} />
       );
-      const rendered = mountWithIntl(ilmContent);
       expect(rendered.render()).toMatchSnapshot();
       expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
       expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeTruthy();
@@ -381,10 +440,7 @@ describe('extend index management', () => {
     });
 
     test('should render a step info panel when lifecycle is waiting for a step completion', () => {
-      const ilmContent = (
-        <IlmComponent index={indexWithLifecycleWaitingStep} getUrlForApp={getUrlForApp} />
-      );
-      const rendered = mountWithIntl(ilmContent);
+      const rendered = mountWithIntl(<IlmContentComponent index={indexWithLifecycleWaitingStep} />);
       expect(rendered.render()).toMatchSnapshot();
       expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
       expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeFalsy();

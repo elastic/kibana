@@ -159,7 +159,7 @@ export const EnrichmentSection = memo(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={tooltip}>
-                  <EuiIcon type="iInCircle" size="m" />
+                  <EuiIcon type="info" size="m" />
                 </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -377,7 +377,7 @@ describe('CsvGenerator', () => {
 
       expect(mockDataClient.search).toHaveBeenCalledTimes(10);
       expect(mockDataClient.search).toBeCalledWith(
-        { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
+        { params: { max_concurrent_shard_requests: 5 } },
         {
           abortSignal: expect.any(AbortSignal),
           strategy: 'es',
@@ -402,7 +402,7 @@ describe('CsvGenerator', () => {
 
       expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledTimes(1);
       expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledWith({
-        body: { id: mockCursorId },
+        id: mockCursorId,
       });
     });
 
@@ -676,7 +676,7 @@ describe('CsvGenerator', () => {
       );
 
       expect(mockDataClientSearchFn).toBeCalledWith(
-        { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
+        { params: { max_concurrent_shard_requests: 5 } },
         {
           abortSignal: expect.any(AbortSignal),
           strategy: 'es',
@@ -762,7 +762,7 @@ describe('CsvGenerator', () => {
       );
 
       expect(mockDataClientSearchFn).toBeCalledWith(
-        { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
+        { params: { max_concurrent_shard_requests: 5 } },
         {
           abortSignal: expect.any(AbortSignal),
           strategy: 'es',
@@ -1424,7 +1424,7 @@ describe('CsvGenerator', () => {
     expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
       {
         ignore_unavailable: true,
-        ignore_throttled: false,
+        querystring: { ignore_throttled: false },
         index: 'logstash-*',
         keep_alive: '30s',
       },
@@ -1439,7 +1439,6 @@ describe('CsvGenerator', () => {
     expect(mockDataClient.search).toBeCalledWith(
       {
         params: {
-          body: {},
           max_concurrent_shard_requests: 5,
         },
       },

@@ -6,7 +6,15 @@
  */
 
 import React, { MouseEvent } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import {
   Axis,
   Chart,
@@ -21,7 +29,7 @@ import {
 import { AlertStatus } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { AlertCounts } from './alert_counts';
-import { ALL_ALERT_COLOR, WIDGET_TITLE } from './constants';
+import { WIDGET_TITLE } from './constants';
 import { Alert, ChartProps, DependencyProps } from '../types';
 
 export interface AlertSummaryWidgetCompactProps {
@@ -43,6 +51,8 @@ export const AlertSummaryWidgetCompact = ({
   onClick,
   dependencyProps: { baseTheme, sparklineTheme },
 }: AlertSummaryWidgetCompactProps) => {
+  const { euiTheme } = useEuiTheme();
+
   const handleClick = (
     event: MouseEvent<HTMLAnchorElement | HTMLDivElement>,
     status?: AlertStatus
@@ -111,6 +121,7 @@ export const AlertSummaryWidgetCompact = ({
                 />
                 <LineSeries
                   id={'activeAlertsChart'}
+                  // Defaults to multi layer time axis as of Elastic Charts v70
                   xScaleType={ScaleType.Time}
                   yScaleType={ScaleType.Linear}
                   xAccessor="key"
@@ -119,7 +130,7 @@ export const AlertSummaryWidgetCompact = ({
                   lineSeriesStyle={{
                     line: {
                       strokeWidth: 2,
-                      stroke: ALL_ALERT_COLOR,
+                      stroke: euiTheme.colors.vis.euiColorVis0,
                     },
                   }}
                   curve={CurveType.CURVE_MONOTONE_X}

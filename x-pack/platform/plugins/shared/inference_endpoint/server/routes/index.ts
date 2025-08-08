@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import {
   InferenceInferenceEndpointInfo,
   InferenceTaskType,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { InferenceServicesGetResponse } from '../types';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '../../common';
@@ -38,6 +38,12 @@ export const getInferenceServicesRoute = (
     .get({
       access: 'internal',
       path: '/internal/_inference/_services',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to es client',
+        },
+      },
     })
     .addVersion(
       {
@@ -74,6 +80,12 @@ export const getInferenceServicesRoute = (
     .post({
       access: 'internal',
       path: '/internal/_inference/_add',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to es client',
+        },
+      },
     })
     .addVersion(
       {
@@ -125,6 +137,12 @@ export const getInferenceServicesRoute = (
     .get({
       access: 'internal',
       path: '/internal/_inference/_exists/{inferenceId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to es client',
+        },
+      },
     })
     .addVersion(
       {
@@ -164,6 +182,12 @@ export const getInferenceServicesRoute = (
     .put({
       access: 'internal',
       path: '/internal/_inference/_update',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to es client',
+        },
+      },
     })
     .addVersion(
       {

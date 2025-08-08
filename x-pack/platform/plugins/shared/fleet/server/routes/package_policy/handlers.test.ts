@@ -123,6 +123,7 @@ jest.mock(
             : Promise.resolve(packagePolicy)
         ),
         upgrade: jest.fn(),
+        bulkUpgrade: jest.fn(),
         getUpgradeDryRunDiff: jest.fn(),
         enrichPolicyWithDefaultsFromPackage: jest
           .fn()
@@ -174,6 +175,7 @@ describe('When calling package policy', () => {
   beforeEach(async () => {
     appContextService.start(createAppContextStartContractMock());
     context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>;
     response = httpServerMock.createResponseFactory();
     testPackagePolicy = {
@@ -809,7 +811,7 @@ describe('When calling package policy', () => {
           },
         },
       ];
-      packagePolicyServiceMock.upgrade.mockResolvedValue(responseBody);
+      packagePolicyServiceMock.bulkUpgrade.mockResolvedValue(responseBody);
       const request = httpServerMock.createKibanaRequest({
         body: {
           packagePolicyIds: ['1'],

@@ -293,182 +293,369 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
 `;
 
 exports[`LoginPage page renders as expected 1`] = `
-<div
-  className="loginWelcome login-form"
->
-  <header
-    className="loginWelcome__header"
-  >
-    <div
-      className="loginWelcome__content eui-textCenter"
-    >
-      <EuiSpacer
-        size="xxl"
-      />
-      <span
-        className="loginWelcome__logo"
-        style={Object {}}
-      >
-        <EuiIcon
-          size="xxl"
-          type="logoElastic"
-        />
-      </span>
-      <EuiTitle
-        className="loginWelcome__title"
-        data-test-subj="loginWelcomeTitle"
-        size="m"
-      >
-        <h1>
-          <MemoizedFormattedMessage
-            defaultMessage="Welcome to Elastic"
-            id="xpack.security.loginPage.welcomeTitle"
-          />
-        </h1>
-      </EuiTitle>
-      <EuiSpacer
-        size="xl"
-      />
-    </div>
-  </header>
+<div>
   <div
-    className="loginWelcome__content loginWelcome-body"
+    class="loginWelcome login-form css-vvcdom-kbnFullScreenBgCss"
   >
-    <EuiFlexGroup
-      gutterSize="l"
+    <header
+      class="loginWelcome__header"
     >
-      <EuiFlexItem>
-        <LoginForm
-          http={
-            Object {
-              "addLoadingCountSource": [MockFunction],
-              "get": [MockFunction],
-            }
-          }
-          loginAssistanceMessage=""
-          notifications={
-            Object {
-              "showErrorDialog": [MockFunction],
-              "toasts": Object {
-                "add": [MockFunction],
-                "addDanger": [MockFunction],
-                "addError": [MockFunction],
-                "addInfo": [MockFunction],
-                "addSuccess": [MockFunction],
-                "addWarning": [MockFunction],
-                "get$": [MockFunction],
-                "remove": [MockFunction],
-              },
-            }
-          }
-          selector={
-            Object {
-              "enabled": false,
-              "providers": Array [
-                Object {
-                  "name": "basic1",
-                  "type": "basic",
-                  "usesLoginForm": true,
-                },
-              ],
-            }
-          }
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <div
+        class="loginWelcome__content eui-textCenter"
+      >
+        <span
+          class="loginWelcome__logo"
+        >
+          <span
+            data-euiicon-type="logoElastic"
+          />
+        </span>
+        <h1
+          class="euiTitle loginWelcome__title emotion-euiTitle-m"
+          data-test-subj="loginWelcomeTitle"
+        >
+          Welcome to Elastic
+        </h1>
+      </div>
+    </header>
+    <div
+      class="loginWelcome__content loginWelcome-body"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+        >
+          <div
+            class="euiPanel euiPanel--transparent euiPanel--paddingMedium emotion-euiPanel-grow-m-m-transparent"
+            data-test-subj="loginForm"
+          >
+            <form>
+              <div
+                class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+                id="generated-id-row"
+              >
+                <div
+                  class="euiFormRow__labelWrapper"
+                >
+                  <label
+                    aria-invalid="false"
+                    class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel-focused"
+                    for="generated-id"
+                    id="generated-id-label"
+                  >
+                    Username
+                  </label>
+                </div>
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <div
+                    class="euiFormControlLayout emotion-euiFormControlLayout"
+                  >
+                    <div
+                      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+                    >
+                      <input
+                        aria-required="true"
+                        autocomplete="off"
+                        class="euiFieldText emotion-euiFieldText"
+                        data-test-subj="loginUsername"
+                        id="generated-id"
+                        name="username"
+                        type="text"
+                        value=""
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+                id="generated-id-row"
+              >
+                <div
+                  class="euiFormRow__labelWrapper"
+                >
+                  <label
+                    aria-invalid="false"
+                    class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+                    for="generated-id"
+                    id="generated-id-label"
+                  >
+                    Password
+                  </label>
+                </div>
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <div
+                    class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-group"
+                  >
+                    <div
+                      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-appendOnly"
+                      style="--euiFormControlLeftIconsCount: 1;"
+                    >
+                      <div
+                        class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-left"
+                      >
+                        <span
+                          class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+                        >
+                          <span
+                            aria-hidden="true"
+                            class="euiFormControlLayoutCustomIcon__icon"
+                            data-euiicon-type="lock"
+                          />
+                        </span>
+                      </div>
+                      <input
+                        aria-required="true"
+                        autocomplete="off"
+                        class="euiFieldPassword emotion-euiFieldPassword-inGroup-withToggle"
+                        data-test-subj="loginPassword"
+                        id="generated-id"
+                        name="password"
+                        type="password"
+                        value=""
+                      />
+                    </div>
+                    <div
+                      class="euiFormControlLayout__append emotion-euiFormControlLayout__side-append"
+                    >
+                      <button
+                        aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
+                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                        title="Show password as plain text. Note: this will visually expose your password on the screen."
+                        type="button"
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="eye"
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+              />
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
+                  <button
+                    class="euiButton emotion-euiButtonDisplay-m-fullWidth-defaultMinWidth-fill-primary"
+                    data-test-subj="loginSubmit"
+                    type="submit"
+                  >
+                    <span
+                      class="emotion-euiButtonDisplayContent"
+                    >
+                      Log in
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 `;
 
 exports[`LoginPage page renders with custom branding 1`] = `
-<div
-  className="loginWelcome login-form"
->
-  <header
-    className="loginWelcome__header"
-  >
-    <div
-      className="loginWelcome__content eui-textCenter"
-    >
-      <EuiSpacer
-        size="xxl"
-      />
-      <span
-        className="loginWelcome__logo"
-        style={
-          Object {
-            "padding": 0,
-          }
-        }
-      >
-        <EuiImage
-          alt="logo"
-          size={40}
-          src="logo"
-        />
-      </span>
-      <EuiTitle
-        className="loginWelcome__title"
-        data-test-subj="loginWelcomeTitle"
-        size="m"
-      >
-        <h1>
-          <MemoizedFormattedMessage
-            defaultMessage="Welcome to Elastic"
-            id="xpack.security.loginPage.welcomeTitle"
-          />
-        </h1>
-      </EuiTitle>
-      <EuiSpacer
-        size="xl"
-      />
-    </div>
-  </header>
+<div>
   <div
-    className="loginWelcome__content loginWelcome-body"
+    class="loginWelcome login-form css-vvcdom-kbnFullScreenBgCss"
   >
-    <EuiFlexGroup
-      gutterSize="l"
+    <header
+      class="loginWelcome__header"
     >
-      <EuiFlexItem>
-        <LoginForm
-          http={
-            Object {
-              "addLoadingCountSource": [MockFunction],
-              "get": [MockFunction],
-            }
-          }
-          loginAssistanceMessage=""
-          notifications={
-            Object {
-              "showErrorDialog": [MockFunction],
-              "toasts": Object {
-                "add": [MockFunction],
-                "addDanger": [MockFunction],
-                "addError": [MockFunction],
-                "addInfo": [MockFunction],
-                "addSuccess": [MockFunction],
-                "addWarning": [MockFunction],
-                "get$": [MockFunction],
-                "remove": [MockFunction],
-              },
-            }
-          }
-          selector={
-            Object {
-              "enabled": false,
-              "providers": Array [
-                Object {
-                  "name": "basic1",
-                  "type": "basic",
-                  "usesLoginForm": true,
-                },
-              ],
-            }
-          }
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <div
+        class="loginWelcome__content eui-textCenter"
+      >
+        <span
+          class="loginWelcome__logo"
+          style="padding: 0px;"
+        >
+          <figure
+            class="euiImageWrapper emotion-euiImageWrapper"
+          >
+            <img
+              alt="logo"
+              class="euiImage emotion-euiImage-customSize"
+              src="logo"
+              style="max-width: 40px; max-height: 40px;"
+            />
+          </figure>
+        </span>
+        <h1
+          class="euiTitle loginWelcome__title emotion-euiTitle-m"
+          data-test-subj="loginWelcomeTitle"
+        >
+          Welcome to Elastic
+        </h1>
+      </div>
+    </header>
+    <div
+      class="loginWelcome__content loginWelcome-body"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+        >
+          <div
+            class="euiPanel euiPanel--transparent euiPanel--paddingMedium emotion-euiPanel-grow-m-m-transparent"
+            data-test-subj="loginForm"
+          >
+            <form>
+              <div
+                class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+                id="generated-id-row"
+              >
+                <div
+                  class="euiFormRow__labelWrapper"
+                >
+                  <label
+                    aria-invalid="false"
+                    class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel-focused"
+                    for="generated-id"
+                    id="generated-id-label"
+                  >
+                    Username
+                  </label>
+                </div>
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <div
+                    class="euiFormControlLayout emotion-euiFormControlLayout"
+                  >
+                    <div
+                      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+                    >
+                      <input
+                        aria-required="true"
+                        autocomplete="off"
+                        class="euiFieldText emotion-euiFieldText"
+                        data-test-subj="loginUsername"
+                        id="generated-id"
+                        name="username"
+                        type="text"
+                        value=""
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+                id="generated-id-row"
+              >
+                <div
+                  class="euiFormRow__labelWrapper"
+                >
+                  <label
+                    aria-invalid="false"
+                    class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+                    for="generated-id"
+                    id="generated-id-label"
+                  >
+                    Password
+                  </label>
+                </div>
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <div
+                    class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-group"
+                  >
+                    <div
+                      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-appendOnly"
+                      style="--euiFormControlLeftIconsCount: 1;"
+                    >
+                      <div
+                        class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-left"
+                      >
+                        <span
+                          class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+                        >
+                          <span
+                            aria-hidden="true"
+                            class="euiFormControlLayoutCustomIcon__icon"
+                            data-euiicon-type="lock"
+                          />
+                        </span>
+                      </div>
+                      <input
+                        aria-required="true"
+                        autocomplete="off"
+                        class="euiFieldPassword emotion-euiFieldPassword-inGroup-withToggle"
+                        data-test-subj="loginPassword"
+                        id="generated-id"
+                        name="password"
+                        type="password"
+                        value=""
+                      />
+                    </div>
+                    <div
+                      class="euiFormControlLayout__append emotion-euiFormControlLayout__side-append"
+                    >
+                      <button
+                        aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
+                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                        title="Show password as plain text. Note: this will visually expose your password on the screen."
+                        type="button"
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="eye"
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+              />
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
+                  <button
+                    class="euiButton emotion-euiButtonDisplay-m-fullWidth-defaultMinWidth-fill-primary"
+                    data-test-subj="loginSubmit"
+                    type="submit"
+                  >
+                    <span
+                      class="emotion-euiButtonDisplayContent"
+                    >
+                      Log in
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 `;

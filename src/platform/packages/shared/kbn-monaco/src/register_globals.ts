@@ -7,40 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { XJsonLang } from './xjson';
-import { PainlessLang } from './painless';
-import { SQLLang } from './sql';
+import { XJSON_LANG_ID, PAINLESS_LANG_ID, CONSOLE_LANG_ID, YAML_LANG_ID } from './languages';
 import { monaco } from './monaco_imports';
-import { ESQLLang } from './esql';
-import { YAML_LANG_ID } from './yaml';
-import { registerLanguage } from './helpers';
-import { ConsoleLang, ConsoleOutputLang } from './console';
 
-export const DEFAULT_WORKER_ID = 'default';
+export const DEFAULT_WORKER_ID = 'default' as const;
+
 const langSpecificWorkerIds = [
-  XJsonLang.ID,
-  PainlessLang.ID,
-  ESQLLang.ID,
   monaco.languages.json.jsonDefaults.languageId,
+  XJSON_LANG_ID,
+  PAINLESS_LANG_ID,
   YAML_LANG_ID,
-  ConsoleLang.ID,
-  ConsoleOutputLang.ID,
-];
+  CONSOLE_LANG_ID,
+] as const;
 
-/**
- * Register languages and lexer rules
- */
-registerLanguage(XJsonLang);
-registerLanguage(PainlessLang);
-registerLanguage(SQLLang);
-registerLanguage(ESQLLang);
-registerLanguage(ConsoleLang);
-registerLanguage(ConsoleOutputLang);
+// exported for use in webpack config to build workers
+export type LangSpecificWorkerIds = [typeof DEFAULT_WORKER_ID, ...typeof langSpecificWorkerIds];
+
+declare module 'monaco-editor/esm/vs/editor/editor.api' {
+  export interface Environment {
+    // add typing for exposing monaco on the MonacoEnvironment property
+    monaco: typeof monaco;
+  }
+}
 
 const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
 
 window.MonacoEnvironment = {
-  // @ts-expect-error needed for functional tests so that we can get value from 'editor'
+  // passed for use in functional and unit tests so that we can verify values from 'editor'
   monaco,
   getWorkerUrl: monacoBundleDir
     ? (_: string, languageId: string) => {

@@ -16,14 +16,15 @@ import {
   FLYOUT_HISTORY_BUTTON_TEST_ID,
   HEADER_ACTIONS_TEST_ID,
 } from './test_ids';
-import type { ExpandableFlyoutState, FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
-  useExpandableFlyoutApi,
   type ExpandableFlyoutApi,
-  useExpandableFlyoutState,
+  type ExpandableFlyoutState,
+  type FlyoutPanelHistory,
+  useExpandableFlyoutApi,
   useExpandableFlyoutHistory,
+  useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 const expandDetails = jest.fn();
 
@@ -49,7 +50,7 @@ describe('<FlyoutNavigation />', () => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
     jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
     jest.mocked(useExpandableFlyoutHistory).mockReturnValue([]);
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
+    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
   });
 
   describe('when flyout is expandable', () => {
@@ -132,14 +133,14 @@ describe('<FlyoutNavigation />', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  const flyoutHistory = [
-    { id: 'id1', params: {} },
-    { id: 'id2', params: {} },
-  ] as unknown as FlyoutPanelProps[];
+  const flyoutHistory: FlyoutPanelHistory[] = [
+    { lastOpen: Date.now(), panel: { id: 'id1', params: {} } },
+    { lastOpen: Date.now(), panel: { id: 'id2', params: {} } },
+  ];
 
-  describe('when flyout history is enabled', () => {
+  describe('when newExpandableFlyoutNavigationDisabled is false', () => {
     beforeEach(() => {
-      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
       jest.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
     });
 
@@ -165,7 +166,7 @@ describe('<FlyoutNavigation />', () => {
     it('should not render history button if in rule preview', () => {
       const { container } = render(
         <ExpandableFlyoutTestProviders>
-          <FlyoutNavigation flyoutIsExpandable={false} isPreview={true} />
+          <FlyoutNavigation flyoutIsExpandable={false} isRulePreview={true} />
         </ExpandableFlyoutTestProviders>
       );
       expect(container).toBeEmptyDOMElement();

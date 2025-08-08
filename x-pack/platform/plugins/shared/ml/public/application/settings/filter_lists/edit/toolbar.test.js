@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { EditFilterListToolbar } from './toolbar';
 
@@ -29,9 +29,9 @@ describe('EditFilterListToolbar', () => {
       selectedItemCount: 0,
     };
 
-    const component = shallowWithIntl(<EditFilterListToolbar {...props} />);
+    const { container } = renderWithI18n(<EditFilterListToolbar {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders the toolbar with one item selected', () => {
@@ -40,8 +40,8 @@ describe('EditFilterListToolbar', () => {
       selectedItemCount: 1,
     };
 
-    const component = shallowWithIntl(<EditFilterListToolbar {...props} />);
+    const { container } = renderWithI18n(<EditFilterListToolbar {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

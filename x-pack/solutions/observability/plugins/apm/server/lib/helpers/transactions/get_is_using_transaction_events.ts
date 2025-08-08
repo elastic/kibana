@@ -70,13 +70,11 @@ async function getHasTransactions({
         },
       ],
     },
-    body: {
-      track_total_hits: 1,
-      size: 0,
-      query: {
-        bool: {
-          filter: [...(start && end ? rangeQuery(start, end) : []), ...kqlQuery(kuery)],
-        },
+    track_total_hits: 1,
+    size: 0,
+    query: {
+      bool: {
+        filter: [...(start && end ? rangeQuery(start, end) : []), ...kqlQuery(kuery)],
       },
     },
     terminate_after: 1,

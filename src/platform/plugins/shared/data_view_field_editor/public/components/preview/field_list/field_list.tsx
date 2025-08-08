@@ -7,11 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { FixedSizeList as VirtualList, areEqual } from 'react-window';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { get, isEqual } from 'lodash';
-import { EuiButtonEmpty, EuiButton, EuiSpacer, EuiEmptyPrompt, EuiTextColor } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButton,
+  EuiSpacer,
+  EuiEmptyPrompt,
+  EuiTextColor,
+  type UseEuiTheme,
+} from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import { useFieldEditorContext } from '../../field_editor_context';
 import { useFieldPreviewContext } from '../field_preview_context';
@@ -19,12 +28,8 @@ import type { FieldPreview, PreviewState } from '../types';
 import { PreviewListItem } from './field_list_item';
 import type { PreviewListItemProps } from './field_list_item';
 import { useStateSelector } from '../../../state_utils';
-
-import './field_list.scss';
-
-const ITEM_HEIGHT = 40;
-const SHOW_MORE_HEIGHT = 40;
-const INITIAL_MAX_NUMBER_OF_FIELDS = 7;
+import { getPositionAfterToggling } from './get_item_position';
+import { ITEM_HEIGHT, SHOW_MORE_HEIGHT, INITIAL_MAX_NUMBER_OF_FIELDS } from './constants';
 
 export type DocumentField = FieldPreview & {
   isPinned?: boolean;
@@ -73,8 +78,10 @@ const Row = React.memo<RowProps>(({ data, index, style }) => {
 }, areEqual);
 
 export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchValue = '' }) => {
+  const styles = useMemoCss(componentStyles);
   const { dataView } = useFieldEditorContext();
   const { controller } = useFieldPreviewContext();
+  const virtualListRef = useRef<VirtualList>(null);
   const pinnedFields = useStateSelector(controller.state$, pinnedFieldsSelector, isEqual);
   const currentDocument = useStateSelector(controller.state$, currentDocumentSelector);
   const fieldMap = useStateSelector(controller.state$, fieldMapSelector);
@@ -159,7 +166,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
           iconType="search"
           title={
             <EuiTextColor color="subdued">
-              <h3 className="indexPatternFieldEditor__previewEmptySearchResult__title">
+              <h3 css={styles.emptySearchResult}>
                 {i18n.translate(
                   'indexPatternFieldEditor.fieldPreview.searchResult.emptyPromptTitle',
                   {
@@ -188,7 +195,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
 
   const renderToggleFieldsButton = () =>
     totalFields <= INITIAL_MAX_NUMBER_OF_FIELDS ? null : (
-      <div className="indexPatternFieldEditor__previewFieldList__showMore">
+      <div css={styles.showMore}>
         <EuiButtonEmpty onClick={toggleShowAllFields} flush="left">
           {showAllFields
             ? i18n.translate('indexPatternFieldEditor.fieldPreview.showLessFieldsButtonLabel', {
@@ -201,9 +208,31 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
       </div>
     );
 
+  const toggleIsPinnedItem = useCallback(
+    (fieldName: string, keyboardEvent: { isKeyboardEvent: boolean; buttonId: string }) => {
+      controller.togglePinnedField(fieldName);
+
+      if (!keyboardEvent.isKeyboardEvent) return;
+      const newIndex = getPositionAfterToggling(fieldName, pinnedFields, fieldList);
+      // If the field is currently pinned and it goes over the limit of the fields to show we need to show all of them
+      if (newIndex >= INITIAL_MAX_NUMBER_OF_FIELDS && !showAllFields) toggleShowAllFields();
+      requestAnimationFrame(() => {
+        virtualListRef.current?.scrollToItem(newIndex, 'smart');
+        // We need to wait for the scroll to finish so the element is in the DOM before focusing it
+        requestAnimationFrame(() => {
+          document.getElementById(keyboardEvent.buttonId)?.focus();
+        });
+      });
+    },
+    [controller, showAllFields, pinnedFields, fieldList, toggleShowAllFields]
+  );
+
   const itemData = useMemo(
-    () => ({ filteredFields, toggleIsPinned: controller.togglePinnedField }),
-    [filteredFields, controller.togglePinnedField]
+    () => ({
+      filteredFields,
+      toggleIsPinned: toggleIsPinnedItem,
+    }),
+    [filteredFields, toggleIsPinnedItem]
   );
 
   if (currentDocument === undefined || height === -1) {
@@ -211,7 +240,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
   }
 
   return (
-    <div className="indexPatternFieldEditor__previewFieldList">
+    <div className="indexPatternFieldEditor__previewFieldList" css={styles.previewFieldList}>
       {isEmptySearchResultVisible ? (
         renderEmptyResult()
       ) : (
@@ -219,6 +248,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
           className="eui-scrollBar"
           style={{ overflowX: 'hidden' }}
           width="100%"
+          ref={virtualListRef}
           height={listHeight}
           itemData={itemData}
           itemCount={filteredFields.length}
@@ -231,4 +261,22 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
       {renderToggleFieldsButton()}
     </div>
   );
+};
+
+const componentStyles = {
+  emptySearchResult: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      fontWeight: euiTheme.font.weight.medium,
+    }),
+  previewFieldList: css({
+    position: 'relative',
+  }),
+  showMore: css({
+    position: 'absolute',
+    width: '100%',
+    height: SHOW_MORE_HEIGHT,
+    bottom: -SHOW_MORE_HEIGHT,
+    display: 'flex',
+    alignItems: 'flex-end',
+  }),
 };

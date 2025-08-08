@@ -8,7 +8,7 @@
 import { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
 import { ALL_VALUE, Paginated, Pagination, sloDefinitionSchema } from '@kbn/slo-schema';
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 import { merge } from 'lodash';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import { SLODefinition, StoredSLODefinition } from '../domain/models';
@@ -16,31 +16,23 @@ import { SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 
 export interface SLORepository {
-  exists(id: string): Promise<boolean>;
   create(slo: SLODefinition): Promise<SLODefinition>;
   update(slo: SLODefinition): Promise<SLODefinition>;
   findAllByIds(ids: string[]): Promise<SLODefinition[]>;
   findById(id: string): Promise<SLODefinition>;
-  deleteById(id: string, ignoreNotFound?: boolean): Promise<void>;
+  deleteById(id: string, options?: { ignoreNotFound?: boolean }): Promise<void>;
   search(
     search: string,
     pagination: Pagination,
-    options?: { includeOutdatedOnly?: boolean }
+    options?: {
+      includeOutdatedOnly: boolean;
+      tags: string[];
+    }
   ): Promise<Paginated<SLODefinition>>;
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
   constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
-
-  async exists(id: string) {
-    const findResponse = await this.soClient.find<StoredSLODefinition>({
-      type: SO_SLO_TYPE,
-      perPage: 0,
-      filter: `slo.attributes.id:(${id})`,
-    });
-
-    return findResponse.total > 0;
-  }
 
   async create(slo: SLODefinition): Promise<SLODefinition> {
     await this.soClient.create<StoredSLODefinition>(SO_SLO_TYPE, toStoredSLO(slo));
@@ -87,7 +79,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     return slo;
   }
 
-  async deleteById(id: string, ignoreNotFound = false): Promise<void> {
+  async deleteById(id: string, { ignoreNotFound = false }): Promise<void> {
     const response = await this.soClient.find<StoredSLODefinition>({
       type: SO_SLO_TYPE,
       page: 1,
@@ -123,17 +115,30 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   async search(
     search: string,
     pagination: Pagination,
-    options: { includeOutdatedOnly?: boolean } = { includeOutdatedOnly: false }
+    options: {
+      includeOutdatedOnly?: boolean;
+      tags: string[];
+    } = { tags: [] }
   ): Promise<Paginated<SLODefinition>> {
+    const { includeOutdatedOnly, tags } = options;
+    const filter = [];
+    if (tags.length > 0) {
+      filter.push(`slo.attributes.tags: (${tags.join(' OR ')})`);
+    }
+
+    if (!!includeOutdatedOnly) {
+      filter.push(`slo.attributes.version < ${SLO_MODEL_VERSION}`);
+    }
+
     const response = await this.soClient.find<StoredSLODefinition>({
       type: SO_SLO_TYPE,
       page: pagination.page,
       perPage: pagination.perPage,
       search,
       searchFields: ['name'],
-      ...(!!options.includeOutdatedOnly && {
-        filter: `slo.attributes.version < ${SLO_MODEL_VERSION}`,
-      }),
+      ...(filter.length && { filter: filter.join(' AND ') }),
+      sortField: 'id',
+      sortOrder: 'asc',
     });
 
     return {
@@ -166,7 +171,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     });
 
     if (isLeft(result)) {
-      this.logger.error(`Invalid stored SLO with id [${storedSLO.id}]`);
+      this.logger.debug(`Invalid stored SLO with id [${storedSLO.id}]`);
       return undefined;
     }
 

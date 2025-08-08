@@ -166,7 +166,6 @@ describe('state_helpers', () => {
         isBucketed: false,
         label: 'Part of 5 + moving_average(sum(bytes), window=5)',
         operationType: 'sum' as const,
-        scale: 'ratio' as const,
         sourceField: 'bytes',
       };
       const movingAvg = {
@@ -1290,7 +1289,6 @@ describe('state_helpers', () => {
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
-                  scale: 'ratio',
                   params: { isFormulaBroken: false, formula: 'average(bytes)' },
                   references: [],
                 } as FormulaIndexPatternColumn,
@@ -1319,7 +1317,6 @@ describe('state_helpers', () => {
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
-                  scale: 'ratio',
                   params: { isFormulaBroken: false, formula: 'average(bytes)' },
                   references: [],
                 } as FormulaIndexPatternColumn,
@@ -1348,7 +1345,6 @@ describe('state_helpers', () => {
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
-                  scale: 'ratio',
                   params: { isFormulaBroken: false, formula: 'average(bytes)' },
                   references: [],
                 } as FormulaIndexPatternColumn,
@@ -1376,7 +1372,6 @@ describe('state_helpers', () => {
                   dataType: 'number',
                   operationType: 'counter_rate',
                   isBucketed: false,
-                  scale: 'ratio',
                   references: ['col2'],
                   timeScale: 's',
                   timeShift: '',
@@ -1387,7 +1382,6 @@ describe('state_helpers', () => {
                   label: 'Max of bytes',
                   dataType: 'number',
                   operationType: 'max',
-                  scale: 'ratio',
                   sourceField: indexPattern.fields[2].displayName,
                 } as MaxIndexPatternColumn,
               },
@@ -2008,7 +2002,6 @@ describe('state_helpers', () => {
               isBucketed: false,
               label: 'formulaX0',
               operationType: 'sum' as const,
-              scale: 'ratio' as const,
               sourceField: 'bytes',
             },
             formulaX1: {
@@ -2307,7 +2300,6 @@ describe('state_helpers', () => {
                 dataType: 'number',
                 operationType: 'formula',
                 isBucketed: false,
-                scale: 'ratio',
                 params: {
                   isFormulaBroken: false,
                   formula: 'average(bytes)',
@@ -2785,7 +2777,6 @@ describe('state_helpers', () => {
               dataType: 'number',
               operationType: 'count',
               isBucketed: false,
-              scale: 'ratio',
               sourceField: '___records___',
               customLabel: true,
             },
@@ -2795,7 +2786,6 @@ describe('state_helpers', () => {
               operationType: 'date_histogram',
               sourceField: 'timestamp',
               isBucketed: true,
-              scale: 'interval',
               params: {
                 interval: 'auto',
               },
@@ -2805,7 +2795,6 @@ describe('state_helpers', () => {
               dataType: 'number',
               operationType: 'formula',
               isBucketed: false,
-              scale: 'ratio',
               params: {
                 formula: 'count() + count()',
                 isFormulaBroken: false,
@@ -2817,7 +2806,6 @@ describe('state_helpers', () => {
               dataType: 'number',
               operationType: 'count',
               isBucketed: false,
-              scale: 'ratio',
               sourceField: '___records___',
               customLabel: true,
             },
@@ -2826,7 +2814,6 @@ describe('state_helpers', () => {
               dataType: 'number',
               operationType: 'math',
               isBucketed: false,
-              scale: 'ratio',
               params: {
                 tinymathAst: {
                   type: 'function',
@@ -2959,7 +2946,6 @@ describe('state_helpers', () => {
             dataType: 'number',
             operationType: 'moving_average',
             isBucketed: false,
-            scale: 'ratio',
             references: ['col2'],
             timeScale: undefined,
             filter: undefined,
@@ -3496,7 +3482,6 @@ describe('state_helpers', () => {
             isBucketed: false,
             label: 'formulaX0',
             operationType: 'sum' as const,
-            scale: 'ratio' as const,
             sourceField: 'bytes',
           },
           formulaX1: {

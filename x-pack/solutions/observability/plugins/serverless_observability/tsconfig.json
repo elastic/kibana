@@ -22,14 +22,13 @@
     "@kbn/observability-shared-plugin",
     "@kbn/i18n",
     "@kbn/management-cards-navigation",
-    "@kbn/data-plugin",
     "@kbn/observability-plugin",
-    "@kbn/io-ts-utils",
     "@kbn/serverless-observability-settings",
     "@kbn/core-chrome-browser",
     "@kbn/discover-plugin",
     "@kbn/security-plugin",
-    "@kbn/search-types",
     "@kbn/streams-plugin",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/cases-plugin",
   ]
 }

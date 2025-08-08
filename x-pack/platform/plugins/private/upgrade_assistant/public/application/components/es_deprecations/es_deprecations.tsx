@@ -27,7 +27,7 @@ const getDeprecationCountByLevel = (deprecations: EnrichedDeprecationInfo[]) => 
   const warningDeprecations: EnrichedDeprecationInfo[] = [];
 
   deprecations.forEach((deprecation) => {
-    if (deprecation.isCritical) {
+    if (deprecation.level === 'critical') {
       criticalDeprecations.push(deprecation);
       return;
     }
@@ -177,7 +177,7 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
               <EuiCallOut
                 title={i18nTexts.remoteClustersDetectedTitle}
                 color="warning"
-                iconType="help"
+                iconType="question"
                 data-test-subj="remoteClustersWarningCallout"
               >
                 <p>

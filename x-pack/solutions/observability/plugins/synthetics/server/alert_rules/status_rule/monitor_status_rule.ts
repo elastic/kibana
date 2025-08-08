@@ -8,14 +8,13 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { GetViewInAppRelativeUrlFnOpts, AlertsClientError } from '@kbn/alerting-plugin/server';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { observabilityFeatureId, observabilityPaths } from '@kbn/observability-plugin/common';
 import apm from 'elastic-apm-node';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
 import { syntheticsMonitorStatusRuleParamsSchema } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { SyntheticsEsClient } from '../../lib';
 import { AlertOverviewStatus } from '../../../common/runtime_types/alert_rules/common';
 import { StatusRuleExecutorOptions } from './types';
-import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { StatusRuleExecutor } from './status_rule_executor';
 import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
@@ -44,6 +43,7 @@ export const registerSyntheticsStatusCheckRule = (
     id: SYNTHETICS_ALERT_RULE_TYPES.MONITOR_STATUS,
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'uptime',
+    solution: observabilityFeatureId,
     name: STATUS_RULE_NAME,
     validate: {
       params: syntheticsMonitorStatusRuleParamsSchema,
@@ -82,12 +82,19 @@ export const registerSyntheticsStatusCheckRule = (
 
       const statusRule = new StatusRuleExecutor(esClient, server, syntheticsMonitorClient, options);
 
-      const { downConfigs, staleDownConfigs, upConfigs } = await statusRule.getDownChecks(
-        ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs']
-      );
+      const { downConfigs, staleDownConfigs, upConfigs, pendingConfigs, stalePendingConfigs } =
+        await statusRule.getConfigs({
+          prevDownConfigs: ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs'],
+          prevPendingConfigs: ruleState.meta
+            ?.pendingConfigs as AlertOverviewStatus['pendingConfigs'],
+        });
 
       statusRule.handleDownMonitorThresholdAlert({
         downConfigs,
+      });
+
+      statusRule.handlePendingMonitorAlert({
+        pendingConfigs,
       });
 
       setRecoveredAlertsContext({
@@ -99,15 +106,18 @@ export const registerSyntheticsStatusCheckRule = (
         params,
         groupByLocation,
         staleDownConfigs,
+        stalePendingConfigs,
         upConfigs,
       });
 
       return {
-        state: updateState(ruleState, !isEmpty(downConfigs), { downConfigs }),
+        state: updateState(ruleState, !isEmpty(downConfigs) || !isEmpty(pendingConfigs), {
+          downConfigs,
+          pendingConfigs,
+        }),
       };
     },
     alerts: SyntheticsRuleTypeAlertDefinition,
-    fieldsForAAD: Object.keys(syntheticsRuleFieldMap),
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

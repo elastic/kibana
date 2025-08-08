@@ -7,36 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import type { ObservedSize } from 'use-resize-observer/polyfilled';
+import type { ActivePanelEvent, GridPanelData } from './grid_panel';
+import type {
+  ActiveSectionEvent,
+  CollapsibleSection,
+  GridSectionData,
+  MainSection,
+} from './grid_section';
 
-export interface GridCoordinate {
-  column: number;
-  row: number;
-}
-export interface GridRect extends GridCoordinate {
-  width: number;
-  height: number;
-}
-
-export interface GridPanelData extends GridRect {
-  id: string;
-}
-
-export interface GridRowData {
-  title: string;
-  isCollapsed: boolean;
-  panels: {
-    [key: string]: GridPanelData;
-  };
-}
-
-export type GridLayoutData = GridRowData[];
-
+/**
+ * The settings for how the grid should be rendered
+ */
 export interface GridSettings {
   gutterSize: number;
   rowHeight: number;
   columnCount: number;
+  keyboardDragTopLimit: number;
 }
 
 /**
@@ -46,79 +34,64 @@ export interface GridSettings {
  */
 export type RuntimeGridSettings = GridSettings & { columnPixelWidth: number };
 
-export interface ActivePanel {
-  id: string;
-  position: {
-    top: number;
-    left: number;
-    bottom: number;
-    right: number;
-  };
+/**
+ * A grid layout can be a mix of panels and sections, and we call these "widgets" as a general term
+ */
+export type GridLayoutWidget =
+  | (GridPanelData & { type: 'panel' })
+  | (GridSectionData & { type: 'section' });
+
+export interface GridLayoutData {
+  [key: string]: GridLayoutWidget;
 }
 
+/**
+ * This represents `GridLayoutData` where every panel exists in an ordered section;
+ * i.e. panels and sections are no longer mixed on the same level
+ */
+export interface OrderedLayout {
+  [key: string]: MainSection | CollapsibleSection;
+}
+
+/**
+ * The GridLayoutStateManager is used for all state management
+ */
 export interface GridLayoutStateManager {
-  gridLayout$: BehaviorSubject<GridLayoutData>;
-  proposedGridLayout$: BehaviorSubject<GridLayoutData | undefined>; // temporary state for layout during drag and drop operations
+  gridLayout$: BehaviorSubject<OrderedLayout>;
   expandedPanelId$: BehaviorSubject<string | undefined>;
   isMobileView$: BehaviorSubject<boolean>;
   accessMode$: BehaviorSubject<GridAccessMode>;
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
-  activePanel$: BehaviorSubject<ActivePanel | undefined>;
-  interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
-  rowRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
-  panelRefs: React.MutableRefObject<Array<{ [id: string]: HTMLDivElement | null }>>;
+  activePanelEvent$: BehaviorSubject<ActivePanelEvent | undefined>;
+  activeSectionEvent$: BehaviorSubject<ActiveSectionEvent | undefined>;
+  layoutUpdated$: Observable<GridLayoutData>;
+
+  layoutRef: React.MutableRefObject<HTMLDivElement | null>;
+  sectionRefs: React.MutableRefObject<{ [sectionId: string]: HTMLDivElement | null }>;
+  headerRefs: React.MutableRefObject<{ [sectionId: string]: HTMLDivElement | null }>;
+  panelRefs: React.MutableRefObject<{ [panelId: string]: HTMLDivElement | null }>;
 }
 
 /**
- * The information required to start a panel interaction.
+ * This type is used to conditionally change the type of `renderPanelContents` depending
+ * on the value of `useCustomDragHandle`
  */
-export interface PanelInteractionEvent {
-  /**
-   * The type of interaction being performed.
-   */
-  type: 'drag' | 'resize';
+export type UseCustomDragHandle =
+  | {
+      useCustomDragHandle: true;
+      renderPanelContents: (
+        panelId: string,
+        setDragHandles: (refs: Array<HTMLElement | null>) => void
+      ) => React.ReactNode;
+    }
+  | {
+      useCustomDragHandle?: false;
+      renderPanelContents: (panelId: string) => React.ReactNode;
+    };
 
-  /**
-   * The id of the panel being interacted with.
-   */
-  id: string;
-
-  /**
-   * The index of the grid row this panel interaction is targeting.
-   */
-  targetRowIndex: number;
-
-  /**
-   * The pixel rect of the panel being interacted with.
-   */
-  panelDiv: HTMLDivElement;
-
-  /**
-   * The pixel offsets from where the mouse was at drag start to the
-   * edges of the panel
-   */
-  pointerOffsets: {
-    top: number;
-    left: number;
-    right: number;
-    bottom: number;
-  };
-}
-
-// TODO: Remove from Dashboard plugin as part of https://github.com/elastic/kibana/issues/190446
-export enum PanelPlacementStrategy {
-  /** Place on the very top of the grid layout, add the height of this panel to all other panels. */
-  placeAtTop = 'placeAtTop',
-  /** Look for the smallest y and x value where the default panel will fit. */
-  findTopLeftMostOpenSpace = 'findTopLeftMostOpenSpace',
-}
-
-export interface PanelPlacementSettings {
-  strategy?: PanelPlacementStrategy;
-  height: number;
-  width: number;
-}
-
+/**
+ * Controls whether the resize + drag handles are visible and functioning
+ */
 export type GridAccessMode = 'VIEW' | 'EDIT';

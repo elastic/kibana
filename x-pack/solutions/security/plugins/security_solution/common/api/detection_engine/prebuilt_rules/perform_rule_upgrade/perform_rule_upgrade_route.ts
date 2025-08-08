@@ -8,8 +8,9 @@
 import { z } from '@kbn/zod';
 import { mapValues } from 'lodash';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
-import { AggregatedPrebuiltRuleError, DiffableAllFields } from '../model';
+import { AggregatedPrebuiltRuleError, DiffableAllFields, ThreeWayDiffConflict } from '../model';
 import { RuleSignatureId, RuleVersion } from '../../model';
+import { PrebuiltRulesFilter } from '../common/prebuilt_rules_filter';
 
 export type Mode = z.infer<typeof Mode>;
 export const Mode = z.enum(['ALL_RULES', 'SPECIFIC_RULES']);
@@ -111,29 +112,52 @@ export const RuleUpgradeSpecifier = z.object({
   fields: RuleFieldsToUpgrade.optional(),
 });
 
+export type UpgradeConflictResolution = z.infer<typeof UpgradeConflictResolution>;
+export const UpgradeConflictResolution = z.enum(['SKIP', 'UPGRADE_SOLVABLE']);
+export type UpgradeConflictResolutionEnum = typeof UpgradeConflictResolution.enum;
+export const UpgradeConflictResolutionEnum = UpgradeConflictResolution.enum;
+
 export type UpgradeSpecificRulesRequest = z.infer<typeof UpgradeSpecificRulesRequest>;
 export const UpgradeSpecificRulesRequest = z.object({
   mode: z.literal('SPECIFIC_RULES'),
   rules: z.array(RuleUpgradeSpecifier).min(1),
   pick_version: PickVersionValues.optional(),
+  on_conflict: UpgradeConflictResolution.optional(),
+  dry_run: z.boolean().optional(),
 });
 
 export type UpgradeAllRulesRequest = z.infer<typeof UpgradeAllRulesRequest>;
 export const UpgradeAllRulesRequest = z.object({
   mode: z.literal('ALL_RULES'),
   pick_version: PickVersionValues.optional(),
+  filter: PrebuiltRulesFilter.optional(),
+  on_conflict: UpgradeConflictResolution.optional(),
+  dry_run: z.boolean().optional(),
 });
 
 export type SkipRuleUpgradeReason = z.infer<typeof SkipRuleUpgradeReason>;
-export const SkipRuleUpgradeReason = z.enum(['RULE_UP_TO_DATE']);
+export const SkipRuleUpgradeReason = z.enum(['RULE_UP_TO_DATE', 'CONFLICT']);
 export type SkipRuleUpgradeReasonEnum = typeof SkipRuleUpgradeReason.enum;
 export const SkipRuleUpgradeReasonEnum = SkipRuleUpgradeReason.enum;
 
-export type SkippedRuleUpgrade = z.infer<typeof SkippedRuleUpgrade>;
-export const SkippedRuleUpgrade = z.object({
+export type RuleUpToDateSkipReason = z.infer<typeof RuleUpToDateSkipReason>;
+export const RuleUpToDateSkipReason = z.object({
+  reason: z.literal(SkipRuleUpgradeReasonEnum.RULE_UP_TO_DATE),
   rule_id: z.string(),
-  reason: SkipRuleUpgradeReason,
 });
+
+export type UpgradeConflictSkipReason = z.infer<typeof UpgradeConflictSkipReason>;
+export const UpgradeConflictSkipReason = z.object({
+  reason: z.literal(SkipRuleUpgradeReasonEnum.CONFLICT),
+  rule_id: z.string(),
+  conflict: z.nativeEnum(ThreeWayDiffConflict),
+});
+
+export type SkippedRuleUpgrade = z.infer<typeof SkippedRuleUpgrade>;
+export const SkippedRuleUpgrade = z.discriminatedUnion('reason', [
+  RuleUpToDateSkipReason,
+  UpgradeConflictSkipReason,
+]);
 
 export type PerformRuleUpgradeResponseBody = z.infer<typeof PerformRuleUpgradeResponseBody>;
 export const PerformRuleUpgradeResponseBody = z.object({

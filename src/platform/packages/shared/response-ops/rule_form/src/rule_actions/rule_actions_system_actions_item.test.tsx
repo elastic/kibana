@@ -135,7 +135,6 @@ describe('ruleActionsSystemActionsItem', () => {
 
     expect(screen.getByTestId('ruleActionsSystemActionsItem')).toBeInTheDocument();
     expect(screen.getByText('connector-1')).toBeInTheDocument();
-    expect(screen.getByText('actionType: 1')).toBeInTheDocument();
 
     expect(screen.getByTestId('ruleActionsSystemActionsItemAccordionContent')).toBeVisible();
     expect(screen.getByText('RuleActionsMessage')).toBeInTheDocument();

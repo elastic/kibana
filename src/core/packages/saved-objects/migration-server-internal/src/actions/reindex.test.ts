@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Option from 'fp-ts/lib/Option';
+import * as Option from 'fp-ts/Option';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -73,22 +73,21 @@ describe('reindex', () => {
       /** ignore */
     }
     expect(client.reindex).toHaveBeenCalledTimes(1);
-    expect(client.reindex).toHaveBeenCalledWith(
-      expect.objectContaining({
-        body: {
-          conflicts: 'proceed',
-          source: {
-            index: 'my_source_index',
-            size: 99,
-            query: { match_all: {} },
-          },
-          dest: {
-            index: 'my_target_index',
-            op_type: 'create',
-          },
-          script: { lang: 'painless', source: 'my script' },
-        },
-      })
-    );
+    expect(client.reindex).toHaveBeenCalledWith({
+      conflicts: 'proceed',
+      source: {
+        index: 'my_source_index',
+        size: 99,
+        query: { match_all: {} },
+      },
+      dest: {
+        index: 'my_target_index',
+        op_type: 'create',
+      },
+      script: { lang: 'painless', source: 'my script' },
+      refresh: true,
+      require_alias: false,
+      wait_for_completion: false,
+    });
   });
 });

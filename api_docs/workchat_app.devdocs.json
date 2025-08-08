@@ -1,0 +1,137 @@
+{
+  "id": "workchatApp",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "workchatApp",
+      "id": "def-public.WorkChatAppPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "WorkChatAppPluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/workchat-app/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "workchatApp",
+          "id": "def-public.WorkChatAppPluginSetup.integrations",
+          "type": "Object",
+          "tags": [],
+          "label": "integrations",
+          "description": [],
+          "signature": [
+            "{ register: (integration: ",
+            {
+              "pluginId": "@kbn/wci-browser",
+              "scope": "public",
+              "docId": "kibKbnWciBrowserPluginApi",
+              "section": "def-public.IntegrationComponentDescriptor",
+              "text": "IntegrationComponentDescriptor"
+            },
+            ") => void; }"
+          ],
+          "path": "x-pack/solutions/chat/plugins/workchat-app/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "workchatApp",
+      "id": "def-public.WorkChatAppPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "WorkChatAppPluginStart",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/workchat-app/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "workchatApp",
+      "id": "def-server.WorkChatAppPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "WorkChatAppPluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/workchat-app/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "workchatApp",
+          "id": "def-server.WorkChatAppPluginSetup.integrations",
+          "type": "Object",
+          "tags": [],
+          "label": "integrations",
+          "description": [],
+          "signature": [
+            "{ register: (tool: ",
+            {
+              "pluginId": "@kbn/wci-server",
+              "scope": "server",
+              "docId": "kibKbnWciServerPluginApi",
+              "section": "def-server.WorkchatIntegrationDefinition",
+              "text": "WorkchatIntegrationDefinition"
+            },
+            "<",
+            {
+              "pluginId": "@kbn/wci-common",
+              "scope": "common",
+              "docId": "kibKbnWciCommonPluginApi",
+              "section": "def-common.IntegrationConfiguration",
+              "text": "IntegrationConfiguration"
+            },
+            ">) => void; }"
+          ],
+          "path": "x-pack/solutions/chat/plugins/workchat-app/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "workchatApp",
+      "id": "def-server.WorkChatAppPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "WorkChatAppPluginStart",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/workchat-app/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

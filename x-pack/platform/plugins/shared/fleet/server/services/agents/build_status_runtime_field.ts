@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 
@@ -26,9 +26,17 @@ const _buildInactiveCondition = (opts: {
   inactivityTimeouts: InactivityTimeouts;
   maxAgentPoliciesWithInactivityTimeout: number;
   field: (path: string) => string;
+  fieldPath: (path: string) => string;
   logger?: Logger;
 }): string | null => {
-  const { now, inactivityTimeouts, maxAgentPoliciesWithInactivityTimeout, field, logger } = opts;
+  const {
+    now,
+    inactivityTimeouts,
+    maxAgentPoliciesWithInactivityTimeout,
+    field,
+    fieldPath,
+    logger,
+  } = opts;
   // if there are no policies with inactivity timeouts, then no agents are inactive
   if (inactivityTimeouts.length === 0) {
     return null;
@@ -70,7 +78,9 @@ const _buildInactiveCondition = (opts: {
     })
     .join(' || ');
 
-  return `lastCheckinMillis > 0 && ${field('policy_id')}.size() > 0 && ${policyClauses}`;
+  return `lastCheckinMillis > 0 && doc.containsKey(${fieldPath('policy_id')}) && ${field(
+    'policy_id'
+  )}.size() > 0 && (${policyClauses})`;
 };
 
 function _buildSource(
@@ -81,24 +91,30 @@ function _buildSource(
 ) {
   const normalizedPrefix = pathPrefix ? `${pathPrefix}${pathPrefix.endsWith('.') ? '' : '.'}` : '';
   const field = (path: string) => `doc['${normalizedPrefix + path}']`;
+  const fieldPath = (path: string) => `'${normalizedPrefix + path}'`;
   const now = Date.now();
   const agentIsInactiveCondition = _buildInactiveCondition({
     now,
     inactivityTimeouts,
     maxAgentPoliciesWithInactivityTimeout,
     field,
+    fieldPath,
     logger,
   });
 
   return `
-    long lastCheckinMillis = ${field('last_checkin')}.size() > 0
+    long lastCheckinMillis = doc.containsKey(${fieldPath('last_checkin')}) && ${field(
+    'last_checkin'
+  )}.size() > 0
       ? ${field('last_checkin')}.value.toInstant().toEpochMilli()
       : (
           ${field('enrolled_at')}.size() > 0
           ? ${field('enrolled_at')}.value.toInstant().toEpochMilli()
           : -1
         );
-    if (${field('active')}.size() > 0 && ${field('active')}.value == false) {
+    if (!doc.containsKey(${fieldPath('active')}) || (${field('active')}.size() > 0 && ${field(
+    'active'
+  )}.value == false)) {
       emit('unenrolled');
     }
     ${agentIsInactiveCondition ? `else if (${agentIsInactiveCondition}) {emit('inactive');}` : ''}

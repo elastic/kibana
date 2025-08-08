@@ -42,7 +42,7 @@ export const buildOSSFeatures = ({
       deprecated: {
         notice: i18n.translate('xpack.features.visualizeFeatureDeprecationNotice', {
           defaultMessage:
-            'The Visualize Library V1 privilege has been deprecated and replaced with a Visualize Library V2 privilege in order to improve saved query management. See {link} for more details.',
+            'The Visualize library V1 privilege has been deprecated and replaced with a Visualize library V2 privilege in order to improve saved query management. See {link} for more details.',
           values: { link: 'https://github.com/elastic/kibana/pull/202863' },
         }),
         replacedBy: ['visualize_v2'],
@@ -136,6 +136,7 @@ export const buildOSSFeatures = ({
             read: [],
           },
           ui: ['save'],
+          api: ['manage_advanced_settings'],
         },
         read: {
           app: ['kibana'],
@@ -517,7 +518,7 @@ const getBaseVisualizeFeature = ({
 
   return {
     name: i18n.translate('xpack.features.visualizeFeatureName', {
-      defaultMessage: 'Visualize Library',
+      defaultMessage: 'Visualize library',
     }),
     management: {
       ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
@@ -624,6 +625,7 @@ const getBaseDashboardFeature = ({
     'search',
     'visualization',
     'canvas-workpad',
+    'event-annotation-group',
     'lens',
     'links',
     'map',
@@ -662,6 +664,7 @@ const getBaseDashboardFeature = ({
             'search',
             'visualization',
             'canvas-workpad',
+            'event-annotation-group',
             'lens',
             'links',
             'map',
@@ -800,7 +803,7 @@ const reportingFeatures: {
               defaultMessage: 'Generate CSV reports',
             }),
             includeIn: 'all',
-            savedObject: { all: [], read: [] },
+            savedObject: { all: ['scheduled_report'], read: [] },
             management: { insightsAndAlerting: ['reporting'] },
             api: ['generateReport'],
             ui: ['generateCsv'],
@@ -828,7 +831,7 @@ const reportingFeatures: {
             ),
             includeIn: 'all',
             minimumLicense: 'gold',
-            savedObject: { all: [], read: [] },
+            savedObject: { all: ['scheduled_report'], read: [] },
             management: { insightsAndAlerting: ['reporting'] },
             api: ['generateReport'],
             ui: ['generateScreenshot'],
@@ -842,7 +845,7 @@ const reportingFeatures: {
               defaultMessage: 'Generate CSV reports from Discover session panels',
             }),
             includeIn: 'all',
-            savedObject: { all: [], read: [] },
+            savedObject: { all: ['scheduled_report'], read: [] },
             management: { insightsAndAlerting: ['reporting'] },
             api: ['downloadCsv'],
             ui: ['downloadCsv'],
@@ -870,7 +873,7 @@ const reportingFeatures: {
             ),
             includeIn: 'all',
             minimumLicense: 'gold',
-            savedObject: { all: [], read: [] },
+            savedObject: { all: ['scheduled_report'], read: [] },
             management: { insightsAndAlerting: ['reporting'] },
             api: ['generateReport'],
             ui: ['generateScreenshot'],

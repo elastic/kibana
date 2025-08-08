@@ -63,10 +63,11 @@ export const calculateEndpointAuthz = (
   productFeaturesService?: ProductFeaturesService // only exists on the server side
 ): EndpointAuthz => {
   const hasAuth = hasAuthFactory(fleetAuthz, productFeaturesService);
+  const hasSuperuserRole = userRoles.includes('superuser');
 
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
   const isEnterpriseLicense = licenseService.isEnterprise();
-  const hasEndpointManagementAccess = userRoles.includes('superuser');
+  const hasEndpointManagementAccess = hasSuperuserRole;
 
   const canWriteSecuritySolution = hasAuth('writeSecuritySolution', { action: 'ui:crud' });
   const canReadSecuritySolution = hasAuth('readSecuritySolution', { action: 'ui:show' });
@@ -81,6 +82,8 @@ export const calculateEndpointAuthz = (
   const canWriteProcessOperations = hasAuth('writeProcessOperations');
   const canWriteTrustedApplications = hasAuth('writeTrustedApplications');
   const canReadTrustedApplications = hasAuth('readTrustedApplications');
+  const canWriteTrustedDevices = hasAuth('writeTrustedDevices');
+  const canReadTrustedDevices = hasAuth('readTrustedDevices');
   const canWriteHostIsolationExceptions = hasAuth('writeHostIsolationExceptions');
   const canReadHostIsolationExceptions = hasAuth('readHostIsolationExceptions');
   const canAccessHostIsolationExceptions = hasAuth('accessHostIsolationExceptions');
@@ -97,8 +100,14 @@ export const calculateEndpointAuthz = (
   const canReadEndpointExceptions = hasAuth('showEndpointExceptions');
   const canWriteEndpointExceptions = hasAuth('crudEndpointExceptions');
 
+  const canManageGlobalArtifacts = hasAuth('writeGlobalArtifacts');
+
   const canReadWorkflowInsights = hasAuth('readWorkflowInsights');
   const canWriteWorkflowInsights = hasAuth('writeWorkflowInsights');
+
+  // These are currently tied to the superuser role
+  const canReadAdminData = hasSuperuserRole;
+  const canWriteAdminData = hasSuperuserRole;
 
   const authz: EndpointAuthz = {
     canWriteSecuritySolution,
@@ -146,6 +155,8 @@ export const calculateEndpointAuthz = (
     // ---------------------------------------------------------
     canWriteTrustedApplications,
     canReadTrustedApplications,
+    canWriteTrustedDevices: canWriteTrustedDevices && isEnterpriseLicense,
+    canReadTrustedDevices: canReadTrustedDevices && isEnterpriseLicense,
     canWriteHostIsolationExceptions: canWriteHostIsolationExceptions && isPlatinumPlusLicense,
     canAccessHostIsolationExceptions: canAccessHostIsolationExceptions && isPlatinumPlusLicense,
     canReadHostIsolationExceptions,
@@ -156,6 +167,13 @@ export const calculateEndpointAuthz = (
     canReadEventFilters,
     canReadEndpointExceptions,
     canWriteEndpointExceptions,
+    canManageGlobalArtifacts,
+
+    // ---------------------------------------------------------
+    // Special Purpose
+    // ---------------------------------------------------------
+    canReadAdminData,
+    canWriteAdminData,
   };
 
   // Response console is only accessible when license is Enterprise and user has access to any
@@ -202,6 +220,8 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canWriteScanOperations: false,
     canWriteTrustedApplications: false,
     canReadTrustedApplications: false,
+    canWriteTrustedDevices: false,
+    canReadTrustedDevices: false,
     canWriteHostIsolationExceptions: false,
     canAccessHostIsolationExceptions: false,
     canReadHostIsolationExceptions: false,
@@ -212,8 +232,11 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canReadEventFilters: false,
     canReadEndpointExceptions: false,
     canWriteEndpointExceptions: false,
+    canManageGlobalArtifacts: false,
     canReadWorkflowInsights: false,
     canWriteWorkflowInsights: false,
+    canReadAdminData: false,
+    canWriteAdminData: false,
   };
 };
 

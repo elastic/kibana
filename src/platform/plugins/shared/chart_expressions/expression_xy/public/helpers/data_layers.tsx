@@ -25,11 +25,16 @@ import { Datatable } from '@kbn/expressions-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
-import { SPECIAL_TOKENS_STRING_CONVERSION } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { KbnPalettes } from '@kbn/palettes';
+import { RawValue } from '@kbn/data-plugin/common';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
-import { CommonXYDataLayerConfig, CommonXYLayerConfig, XScaleType } from '../../common';
+import {
+  CommonXYDataLayerConfig,
+  CommonXYLayerConfig,
+  XScaleType,
+  PointVisibility,
+} from '../../common';
 import { AxisModes, SeriesTypes } from '../../common/constants';
 import { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
@@ -40,6 +45,7 @@ import { getFormat } from './format';
 import { getColorSeriesAccessorFn } from './color/color_mapping_accessor';
 
 type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
+export type InvertedRawValueMap = Map<string, Map<string, RawValue>>;
 
 type GetSeriesPropsFn = (config: {
   layer: CommonXYDataLayerConfig;
@@ -65,6 +71,7 @@ type GetSeriesPropsFn = (config: {
   singleTable?: boolean;
   multipleLayersWithSplits: boolean;
   isDarkMode: boolean;
+  pointVisibility?: PointVisibility;
 }) => SeriesSpec;
 
 type GetSeriesNameFn = (
@@ -98,6 +105,7 @@ type GetPointConfigFn = (config: {
   xAccessor: string | undefined;
   markSizeAccessor: string | undefined;
   showPoints?: boolean;
+  pointVisibility?: PointVisibility;
   pointsRadius?: number;
 }) => Partial<AreaSeriesStyle['point']>;
 
@@ -109,6 +117,10 @@ type GetLineConfigFn = (config: {
 export interface DatatableWithFormatInfo {
   table: Datatable;
   formattedColumns: Record<string, true>;
+  /**
+   * Inverse map per column to link formatted string to complex values (i.e. `RangeKey`).
+   */
+  invertedRawValueMap: InvertedRawValueMap;
 }
 
 export type DatatablesWithFormatInfo = Record<string, DatatableWithFormatInfo>;
@@ -124,7 +136,8 @@ export const getFormattedRow = (
   xAccessor: string | undefined,
   splitColumnAccessor: string | undefined,
   splitRowAccessor: string | undefined,
-  xScaleType: XScaleType
+  xScaleType: XScaleType,
+  invertedRawValueMap: InvertedRawValueMap
 ): { row: Datatable['rows'][number]; formattedColumns: Record<string, true> } =>
   columns.reduce(
     (formattedInfo, { id }) => {
@@ -137,8 +150,10 @@ export const getFormattedRow = (
           id === splitColumnAccessor ||
           id === splitRowAccessor)
       ) {
+        const formattedValue = columnsFormatters[id]?.convert(record) ?? '';
+        invertedRawValueMap.get(id)?.set(formattedValue, record);
         return {
-          row: { ...formattedInfo.row, [id]: columnsFormatters[id]!.convert(record) },
+          row: { ...formattedInfo.row, [id]: formattedValue },
           formattedColumns: { ...formattedInfo.formattedColumns, [id]: true },
         };
       }
@@ -155,7 +170,7 @@ export const getFormattedTable = (
   splitRowAccessor: string | ExpressionValueVisDimension | undefined,
   accessors: Array<string | ExpressionValueVisDimension>,
   xScaleType: XScaleType
-): { table: Datatable; formattedColumns: Record<string, true> } => {
+): DatatableWithFormatInfo => {
   const columnsFormatters = table.columns.reduce<Record<string, IFieldFormat>>(
     (formatters, { id, meta }) => {
       const accessor: string | ExpressionValueVisDimension | undefined = accessors.find(
@@ -170,6 +185,9 @@ export const getFormattedTable = (
     {}
   );
 
+  const invertedRawValueMap: InvertedRawValueMap = new Map(
+    table.columns.map((c) => [c.id, new Map<string, RawValue>()])
+  );
   const formattedTableInfo: {
     rows: Datatable['rows'];
     formattedColumns: Record<string, true>;
@@ -185,7 +203,8 @@ export const getFormattedTable = (
       xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined,
       splitColumnAccessor ? getAccessorByDimension(splitColumnAccessor, table.columns) : undefined,
       splitRowAccessor ? getAccessorByDimension(splitRowAccessor, table.columns) : undefined,
-      xScaleType
+      xScaleType,
+      invertedRawValueMap
     );
     formattedTableInfo.rows.push(formattedRowInfo.row);
     formattedTableInfo.formattedColumns = {
@@ -195,6 +214,7 @@ export const getFormattedTable = (
   }
 
   return {
+    invertedRawValueMap,
     table: { ...table, rows: formattedTableInfo.rows },
     formattedColumns: formattedTableInfo.formattedColumns,
   };
@@ -293,9 +313,14 @@ export const getSeriesName: GetSeriesNameFn = (
   return splitValues.length > 0 ? splitValues.join(' - ') : yAccessorTitle;
 };
 
-const getPointConfig: GetPointConfigFn = ({ markSizeAccessor, showPoints, pointsRadius }) => {
+const getPointConfig: GetPointConfigFn = ({
+  markSizeAccessor,
+  showPoints,
+  pointVisibility,
+  pointsRadius,
+}) => {
   return {
-    visible: showPoints || markSizeAccessor ? 'always' : 'auto',
+    visible: pointVisibility ?? (showPoints || markSizeAccessor ? 'always' : 'auto'),
     radius: pointsRadius,
     fill: markSizeAccessor ? ColorVariant.Series : undefined,
   };
@@ -404,6 +429,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   singleTable,
   multipleLayersWithSplits,
   isDarkMode,
+  pointVisibility,
 }): SeriesSpec => {
   const { table, isStacked, markSizeAccessor } = layer;
   const isPercentage = layer.isPercentage;
@@ -438,10 +464,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     markSizeAccessor ? getFormat(table.columns, markSizeAccessor) : undefined
   );
 
-  // what if row values are not primitive? That is the case of, for instance, Ranges
-  // remaps them to their serialized version with the formatHint metadata
-  // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
-  const { table: formattedTable, formattedColumns } = formattedDatatableInfo;
+  const { table: formattedTable, formattedColumns, invertedRawValueMap } = formattedDatatableInfo;
 
   // For date histogram chart type, we're getting the rows that represent intervals without data.
   // To not display them in the legend, they need to be filtered out.
@@ -488,14 +511,14 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     layer.colorMapping && splitColumnIds.length > 0
       ? getColorSeriesAccessorFn(
           JSON.parse(layer.colorMapping), // the color mapping is at this point just a stringified JSON
+          invertedRawValueMap,
           palettes,
           isDarkMode,
           {
             type: 'categories',
             categories: getColorCategories(table.rows, splitColumnIds[0]),
           },
-          splitColumnIds[0],
-          SPECIAL_TOKENS_STRING_CONVERSION
+          splitColumnIds[0]
         )
       : (series) =>
           getColor(
@@ -540,6 +563,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
         xAccessor: xColumnId,
         markSizeAccessor: markSizeColumnId,
         showPoints: layer.showPoints,
+        pointVisibility,
         pointsRadius: layer.pointsRadius,
       }),
       ...(fillOpacity && { area: { opacity: fillOpacity } }),
@@ -556,6 +580,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
         xAccessor: xColumnId,
         markSizeAccessor: markSizeColumnId,
         showPoints: layer.showPoints,
+        pointVisibility,
         pointsRadius: layer.pointsRadius,
       }),
       ...(emphasizeFitting && { fit: { line: getFitLineConfig() } }),

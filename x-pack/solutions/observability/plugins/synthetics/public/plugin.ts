@@ -59,9 +59,15 @@ import {
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import { DashboardStart, DashboardSetup } from '@kbn/dashboard-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
@@ -82,12 +88,12 @@ export interface ClientPluginsSetup {
   observabilityShared: ObservabilitySharedPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   share: SharePluginSetup;
+  security: SecurityPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cloud?: CloudSetup;
   embeddable: EmbeddableSetup;
   serverless?: ServerlessPluginSetup;
   uiActions: UiActionsSetup;
-  dashboard: DashboardSetup;
 }
 
 export interface ClientPluginsStart {
@@ -97,14 +103,17 @@ export interface ClientPluginsStart {
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
   embeddable: EmbeddableStart;
+  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   exploratoryView: ExploratoryViewPublicStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   share: SharePluginStart;
+  security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  cases: CasesPublicStart;
+  cases?: CasesPublicStart;
   dataViews: DataViewsPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   spaces?: SpacesPluginStart;
   cloud?: CloudStart;
   appName: string;
@@ -117,11 +126,14 @@ export interface ClientPluginsStart {
   usageCollection: UsageCollectionStart;
   serverless: ServerlessPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
+  licensing: LicensingPluginStart;
   slo?: SLOPublicStart;
   presentationUtil: PresentationUtilPluginStart;
   dashboard: DashboardStart;
   charts: ChartsPluginStart;
   uiActions: UiActionsStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
+  settings: SettingsStart;
 }
 
 export interface SyntheticsPluginServices extends Partial<CoreStart> {

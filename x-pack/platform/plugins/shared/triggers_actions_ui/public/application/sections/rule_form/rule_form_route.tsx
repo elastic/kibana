@@ -27,6 +27,7 @@ export const RuleFormRoute = () => {
     docLinks,
     ruleTypeRegistry,
     actionTypeRegistry,
+    contentManagement,
     chrome,
     setBreadcrumbs,
     ...startServices
@@ -73,8 +74,11 @@ export const RuleFormRoute = () => {
           docLinks,
           ruleTypeRegistry,
           actionTypeRegistry,
+          contentManagement,
           ...startServices,
         }}
+        id={id}
+        ruleTypeId={ruleTypeId}
         onCancel={() => {
           if (returnApp && returnPath) {
             application.navigateToApp(returnApp, { path: returnPath });

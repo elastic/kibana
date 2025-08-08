@@ -22,15 +22,22 @@ import {
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
 
-import { agentPolicyService, packagePolicyService } from '.';
+import { type AgentPolicyServiceInterface, appContextService, packagePolicyService } from '.';
 import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 import { agentlessAgentService } from './agents/agentless_agent';
 
 async function getFleetServerAgentPolicyId(
-  soClient: SavedObjectsClientContract
+  soClient: SavedObjectsClientContract,
+  agentPolicyService: AgentPolicyServiceInterface
 ): Promise<string | undefined> {
+  const logger = appContextService.getLogger().get('getFleetServerAgentPolicyId');
+
+  logger.debug(
+    `Retrieving fleet server agent policy id using soClient scoped to [${soClient.getCurrentNamespace()}]`
+  );
+
   let agentPolicyId;
   // creating first fleet server policy with id '(space-)?fleet-server-policy'
   let agentPolicy;
@@ -48,12 +55,16 @@ async function getFleetServerAgentPolicyId(
   if (!agentPolicy) {
     agentPolicyId = getDefaultFleetServerpolicyId(soClient.getCurrentNamespace());
   }
+
+  logger.debug(`Returning agent policy id [${agentPolicyId}]`);
+
   return agentPolicyId;
 }
 
 async function createPackagePolicy(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
+  agentPolicyService: AgentPolicyServiceInterface,
   agentPolicy: AgentPolicy,
   packageToInstall: string,
   options: {
@@ -78,8 +89,10 @@ async function createPackagePolicy(
 
   newPackagePolicy.policy_id = agentPolicy.id;
   newPackagePolicy.policy_ids = [agentPolicy.id];
-  newPackagePolicy.namespace = agentPolicy.namespace;
   newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall);
+  if (agentPolicy.supports_agentless) {
+    newPackagePolicy.supports_agentless = agentPolicy.supports_agentless;
+  }
 
   await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
     spaceId: options.spaceId,
@@ -93,6 +106,7 @@ async function createPackagePolicy(
 interface CreateAgentPolicyParams {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
+  agentPolicyService: AgentPolicyServiceInterface;
   newPolicy: NewAgentPolicy;
   hasFleetServer?: boolean;
   withSysMonitoring: boolean;
@@ -106,6 +120,7 @@ interface CreateAgentPolicyParams {
 export async function createAgentPolicyWithPackages({
   soClient,
   esClient,
+  agentPolicyService,
   newPolicy,
   hasFleetServer,
   withSysMonitoring,
@@ -115,12 +130,22 @@ export async function createAgentPolicyWithPackages({
   authorizationHeader,
   force,
 }: CreateAgentPolicyParams) {
+  const logger = appContextService.getLogger().get('createAgentPolicyWithPackages');
+
+  logger.debug(
+    `creating policy [${
+      newPolicy.name
+    }] for space [${spaceId}] using soClient scoped to [${soClient.getCurrentNamespace()}]`
+  );
+
   let agentPolicyId = newPolicy.id;
-  const packagesToInstall = [];
+  const packagesToInstall: string[] = [];
   if (hasFleetServer) {
     packagesToInstall.push(FLEET_SERVER_PACKAGE);
 
-    agentPolicyId = agentPolicyId || (await getFleetServerAgentPolicyId(soClient));
+    agentPolicyId =
+      agentPolicyId || (await getFleetServerAgentPolicyId(soClient, agentPolicyService));
+
     if (agentPolicyId === getDefaultFleetServerpolicyId(spaceId)) {
       // setting first fleet server policy to default, so that fleet server can enroll without setting policy_id
       newPolicy.is_default_fleet_server = true;
@@ -133,6 +158,8 @@ export async function createAgentPolicyWithPackages({
     packagesToInstall.push(FLEET_ELASTIC_AGENT_PACKAGE);
   }
   if (packagesToInstall.length > 0) {
+    logger.debug(() => `Installing packages [${packagesToInstall.join(', ')}]`);
+
     await bulkInstallPackages({
       savedObjectsClient: soClient,
       esClient,
@@ -149,27 +176,42 @@ export async function createAgentPolicyWithPackages({
     user,
     id: agentPolicyId,
     authorizationHeader,
+    hasFleetServer,
     skipDeploy: true, // skip deploying the policy until package policies are added
   });
 
   // Create the fleet server package policy and add it to agent policy.
   if (hasFleetServer) {
-    await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SERVER_PACKAGE, {
-      spaceId,
-      user,
-      authorizationHeader,
-      force,
-    });
+    await createPackagePolicy(
+      soClient,
+      esClient,
+      agentPolicyService,
+      agentPolicy,
+      FLEET_SERVER_PACKAGE,
+      {
+        spaceId,
+        user,
+        authorizationHeader,
+        force,
+      }
+    );
   }
 
   // Create the system monitoring package policy and add it to agent policy.
   if (withSysMonitoring) {
-    await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SYSTEM_PACKAGE, {
-      spaceId,
-      user,
-      authorizationHeader,
-      force,
-    });
+    await createPackagePolicy(
+      soClient,
+      esClient,
+      agentPolicyService,
+      agentPolicy,
+      FLEET_SYSTEM_PACKAGE,
+      {
+        spaceId,
+        user,
+        authorizationHeader,
+        force,
+      }
+    );
   }
 
   await ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id);
@@ -177,7 +219,16 @@ export async function createAgentPolicyWithPackages({
 
   // Create the agentless agent
   if (agentPolicy.supports_agentless) {
-    await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
+    try {
+      await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
+    } catch (err) {
+      await agentPolicyService.delete(soClient, esClient, agentPolicy.id).catch(() => {
+        appContextService
+          .getLogger()
+          .error(`Error deleting agentless policy`, { error: agentPolicy });
+      });
+      throw err;
+    }
   }
 
   return agentPolicy;

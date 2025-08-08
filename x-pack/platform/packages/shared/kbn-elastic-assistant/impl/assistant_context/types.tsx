@@ -37,30 +37,38 @@ export interface Conversation {
   id: string;
   title: string;
   messages: ClientMessage[];
-  updatedAt?: Date;
-  createdAt?: Date;
+  updatedAt?: string;
+  createdAt?: string;
   replacements: Replacements;
-  isDefault?: boolean;
   excludeFromLastConversationStorage?: boolean;
 }
 
 export interface AssistantTelemetry {
-  reportAssistantInvoked: (params: { invokedBy: string; conversationId: string }) => void;
+  reportAssistantInvoked: (params: { invokedBy: string }) => void;
   reportAssistantMessageSent: (params: {
-    conversationId: string;
     role: string;
     actionTypeId: string;
     model?: string;
     provider?: string;
     isEnabledKnowledgeBase: boolean;
   }) => void;
-  reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
-  reportAssistantSettingToggled: (params: { assistantStreamingEnabled?: boolean }) => void;
+  reportAssistantQuickPrompt: (params: { promptTitle: string }) => void;
+  reportAssistantStarterPrompt: (params: { promptTitle: string }) => void;
+  reportAssistantSettingToggled: (params: {
+    assistantStreamingEnabled?: boolean;
+    alertsCountUpdated?: boolean;
+  }) => void;
 }
 
 export interface AssistantAvailability {
+  // True when searchAiLake configurations is available
+  hasSearchAILakeConfigurations: boolean;
   // True when user is Enterprise, or Security Complete PLI for serverless. When false, the Assistant is disabled and unavailable
   isAssistantEnabled: boolean;
+  // True when the Assistant is visible, i.e. the Assistant is available and the Assistant is visible in the UI
+  isAssistantVisible: boolean;
+  // When true, user has `All` privilege for `Management > AI Assistant`
+  isAssistantManagementEnabled: boolean;
   // When true, the Assistant is hidden and unavailable
   hasAssistantPrivilege: boolean;
   // When true, user has `All` privilege for `Connectors and Actions` (show/execute/delete/save ui capabilities)
@@ -83,6 +91,5 @@ export type GetAssistantMessages = (commentArgs: {
   currentUserAvatar?: UserAvatar;
   setIsStreaming: (isStreaming: boolean) => void;
   systemPromptContent?: string;
-  contentReferencesVisible?: boolean;
-  contentReferencesEnabled?: boolean;
+  contentReferencesVisible: boolean;
 }) => EuiCommentProps[];

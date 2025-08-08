@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { useMlManageJobsHref } from '../../../hooks/use_ml_manage_jobs_href';
-import { useAPMHref } from '../links/apm/apm_link';
+import { useAPMHref } from '../links/apm/apm_link_hooks';
 
 export function shouldDisplayMlCallout(anomalyDetectionSetupState: AnomalyDetectionSetupState) {
   return (
@@ -72,7 +72,7 @@ export function MLCallout({
         text: i18n.translate('xpack.apm.mlCallout.noJobsCalloutText', {
           defaultMessage: `Pinpoint anomalous transactions and see the health of upstream and downstream services with APM's anomaly detection integration. Get started in just a few minutes.`,
         }),
-        icon: 'iInCircle',
+        icon: 'info',
         color: 'primary',
         primaryAction: isOnSettingsPage ? (
           <EuiButton
@@ -134,7 +134,7 @@ export function MLCallout({
           defaultMessage:
             'We have discovered legacy Machine Learning jobs from our previous integration which are no longer being used in the APM app',
         }),
-        icon: 'iInCircle',
+        icon: 'info',
         color: 'primary',
         primaryAction: (
           <EuiButton data-test-subj="apmMLCalloutReviewJobsButton" href={mlManageJobsHref}>

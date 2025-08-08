@@ -80,4 +80,12 @@ describe('OpsMetricsCollector', () => {
       expect(mockServerCollector.reset).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe('#registerMetrics', () => {
+    it('call registerMetrics on the underlying collectors', () => {
+      collector.registerMetrics();
+
+      expect(mockProcessCollector.registerMetrics).toHaveBeenCalledTimes(1);
+    });
+  });
 });

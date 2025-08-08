@@ -5,51 +5,62 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
-import type { CSSProperties } from 'react';
-import React, { Component } from 'react';
+import { EuiButton, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   isDisabled?: boolean;
-  className?: string;
   size?: 's' | 'm';
-  style?: CSSProperties;
+  fullWidth?: boolean;
   onClick?: () => void;
   capabilities: Capabilities;
   navigateToApp: ApplicationStart['navigateToApp'];
 }
 
-export class ManageSpacesButton extends Component<Props, {}> {
-  public render() {
-    if (!this.props.capabilities.spaces.manage) {
-      return null;
+export const ManageSpacesButton: React.FC<Props> = ({
+  isDisabled,
+  size,
+  fullWidth,
+  onClick,
+  capabilities,
+  navigateToApp,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const navigateToManageSpaces = () => {
+    if (onClick) {
+      onClick();
     }
 
-    return (
-      <EuiButton
-        size={this.props.size || 's'}
-        className={this.props.className}
-        isDisabled={this.props.isDisabled}
-        onClick={this.navigateToManageSpaces}
-        style={this.props.style}
-        data-test-subj="manageSpaces"
-      >
-        <FormattedMessage
-          id="xpack.spaces.manageSpacesButton.manageSpacesButtonLabel"
-          defaultMessage="Manage spaces"
-        />
-      </EuiButton>
-    );
+    navigateToApp('management', { path: 'kibana/spaces' });
+  };
+
+  if (!capabilities.spaces.manage) {
+    return null;
   }
 
-  private navigateToManageSpaces = () => {
-    if (this.props.onClick) {
-      this.props.onClick();
-    }
-
-    this.props.navigateToApp('management', { path: 'kibana/spaces' });
-  };
-}
+  return (
+    <EuiButton
+      size={size || 's'}
+      isDisabled={isDisabled}
+      onClick={navigateToManageSpaces}
+      data-test-subj="manageSpaces"
+      css={
+        fullWidth
+          ? { width: `100%` }
+          : css`
+              margin: ${euiTheme.size.m};
+              width: calc(100% - ${euiTheme.size.m} * 2);
+            `
+      }
+    >
+      <FormattedMessage
+        id="xpack.spaces.manageSpacesButton.manageSpacesButtonLabel"
+        defaultMessage="Manage spaces"
+      />
+    </EuiButton>
+  );
+};

@@ -7,7 +7,7 @@
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { OWNER_INFO } from '../constants';
-import type { Owner } from '../constants/types';
+import type { ServerlessProjectType, Owner } from '../constants/types';
 
 export const isValidOwner = (owner: string): owner is keyof typeof OWNER_INFO =>
   Object.keys(OWNER_INFO).includes(owner);
@@ -18,16 +18,21 @@ export const getCaseOwnerByAppId = (currentAppId?: string) =>
 export const getOwnerFromRuleConsumerProducer = ({
   consumer,
   producer,
-  isServerlessSecurity,
+  serverlessProjectType,
 }: {
   consumer?: string;
   producer?: string;
-  isServerlessSecurity?: boolean;
+  serverlessProjectType?: ServerlessProjectType;
 }): Owner => {
   // This is a workaround for a very specific bug with the cases action in serverless security
+  // This same bug was later encountered in o11y as well
   // More info here: https://github.com/elastic/kibana/issues/186270
-  if (isServerlessSecurity) {
-    return OWNER_INFO.securitySolution.id;
+  if (serverlessProjectType) {
+    const foundOwner = Object.entries(OWNER_INFO).find(([, info]) => {
+      return info.serverlessProjectType === serverlessProjectType;
+    });
+
+    return foundOwner ? foundOwner[1].id : OWNER_INFO.cases.id;
   }
 
   // Fallback to producer if the consumer is alerts

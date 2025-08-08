@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import { useContext, useMemo } from 'react';
-import type { RuleAddProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import React from 'react';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
+import { useContext, useMemo } from 'react';
+import type { InfraClientStartDeps } from '../../../types';
 import { TriggerActionsContext } from '../../../containers/triggers_actions_context';
 
 interface Props {
-  onClose: RuleAddProps['onClose'];
+  onClose: () => void;
 }
 
 export function AlertFlyout({ onClose }: Props) {
+  const { services } = useKibana<CoreStart & InfraClientStartDeps>();
   const { triggersActionsUI } = useContext(TriggerActionsContext);
 
   const addAlertFlyout = useMemo(() => {
@@ -22,22 +27,27 @@ export function AlertFlyout({ onClose }: Props) {
       return null;
     }
 
-    return triggersActionsUI.getAddRuleFlyout({
-      consumer: 'infrastructure',
-      onClose,
-      canChangeTrigger: false,
-      ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-      metadata: {
-        currentOptions: {
-          /*
+    const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUI;
+
+    return (
+      <RuleFormFlyout
+        plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
+        consumer={'infrastructure'}
+        onCancel={onClose}
+        onSubmit={onClose}
+        ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
+        initialMetadata={{
+          currentOptions: {
+            /*
           Setting the groupBy is currently required in custom threshold
           rule for it to populate the rule with additional host context.
           */
-          groupBy: 'host.name',
-        },
-      },
-    });
-  }, [onClose, triggersActionsUI]);
+            groupBy: 'host.name',
+          },
+        }}
+      />
+    );
+  }, [onClose, triggersActionsUI, services]);
 
   return addAlertFlyout;
 }

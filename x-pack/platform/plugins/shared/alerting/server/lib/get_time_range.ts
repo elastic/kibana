@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { parseDuration } from '../../common';
 
 export interface GetTimeRangeResult {
@@ -22,7 +22,7 @@ interface GetTimeRangeOpts {
 }
 
 const getWindowDurationInMs = (window?: string): number => {
-  let durationInMs: number = 0;
+  let durationInMs = 0;
   if (window) {
     try {
       durationInMs = parseDuration(window);

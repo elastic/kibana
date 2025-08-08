@@ -7,6 +7,7 @@
 
 import type { ResponseActionsClientOptions } from '../lib/base_response_actions_client';
 import type { ResponseActionsClient } from '../../..';
+import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
 import { EndpointActionsClient } from '../../..';
 import { endpointActionClientMock } from './mocks';
 import { responseActionsClientMock } from '../mocks';
@@ -19,6 +20,18 @@ import { BaseDataGenerator } from '../../../../../../common/endpoint/data_genera
 import { Readable } from 'stream';
 import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import type { ResponseActionsRequestBody } from '../../../../../../common/api/endpoint';
+import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
+import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
+
+jest.mock('../../action_details_by_id', () => {
+  const originalMod = jest.requireActual('../../action_details_by_id');
+  return {
+    ...originalMod,
+    getActionDetailsById: jest.fn(originalMod.getActionDetailsById),
+  };
+});
+
+const getActionDetailsByIdMock = _getActionDetailsById as jest.Mock;
 
 describe('EndpointActionsClient', () => {
   let classConstructorOptions: ResponseActionsClientOptions;
@@ -37,6 +50,11 @@ describe('EndpointActionsClient', () => {
   beforeEach(() => {
     classConstructorOptions = endpointActionClientMock.createConstructorOptions();
     endpointActionsClient = new EndpointActionsClient(classConstructorOptions);
+
+    (
+      classConstructorOptions.endpointService.getInternalFleetServices()
+        .ensureInCurrentSpace as jest.Mock
+    ).mockResolvedValue(undefined);
   });
 
   it('should validate endpoint ids and log those that are invalid', async () => {
@@ -111,7 +129,17 @@ describe('EndpointActionsClient', () => {
           },
           agent: {
             id: ['1-2-3'],
+            policy: [
+              {
+                agentId: '1-2-3',
+                agentPolicyId: expect.any(String),
+                elasticAgentId: '1-2-3',
+                integrationPolicyId: expect.any(String),
+              },
+            ],
           },
+          originSpaceId: 'default',
+          tags: [],
           user: {
             id: 'foo',
           },
@@ -149,7 +177,17 @@ describe('EndpointActionsClient', () => {
           },
           agent: {
             id: ['1-2-3'],
+            policy: [
+              {
+                agentId: '1-2-3',
+                agentPolicyId: expect.any(String),
+                elasticAgentId: '1-2-3',
+                integrationPolicyId: expect.any(String),
+              },
+            ],
           },
+          originSpaceId: 'default',
+          tags: [],
           user: {
             id: 'foo',
           },
@@ -186,7 +224,17 @@ describe('EndpointActionsClient', () => {
           },
           agent: {
             id: ['1-2-3'],
+            policy: [
+              {
+                agentId: '1-2-3',
+                agentPolicyId: expect.any(String),
+                elasticAgentId: '1-2-3',
+                integrationPolicyId: expect.any(String),
+              },
+            ],
           },
+          originSpaceId: 'default',
+          tags: [],
           user: {
             id: 'foo',
           },
@@ -320,7 +368,7 @@ describe('EndpointActionsClient', () => {
 
     // NOTE: checking only the keys in order to avoid confusion - because the use of Mocks would
     // have returned a action details that would not match the request sent in this test.
-    await expect(Object.keys(actionResponse)).toEqual([
+    expect(Object.keys(actionResponse)).toEqual([
       'action',
       'id',
       'agentType',
@@ -347,8 +395,7 @@ describe('EndpointActionsClient', () => {
 
   type ResponseActionsMethodsOnly = keyof Omit<
     ResponseActionsClient,
-    // TODO: not yet implemented
-    'processPendingActions' | 'getFileDownload' | 'getFileInfo' | 'runscript'
+    'processPendingActions' | 'getFileDownload' | 'getFileInfo' | 'runscript' | 'getCustomScripts'
   >;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -524,6 +571,113 @@ describe('EndpointActionsClient', () => {
         size: 45632,
         status: 'READY',
       });
+    });
+  });
+
+  describe('and Space Awareness is enabled', () => {
+    beforeEach(() => {
+      // @ts-expect-error assign to readonly property
+      classConstructorOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
+        true;
+
+      getActionDetailsByIdMock.mockResolvedValue({});
+    });
+
+    afterEach(() => {
+      getActionDetailsByIdMock.mockReset();
+    });
+
+    it('should write action request with agent policy info when space awareness is enabled', async () => {
+      await endpointActionsClient.isolate(
+        responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
+      );
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            agent: {
+              id: ['1-2-3'],
+              policy: [
+                {
+                  agentId: '1-2-3',
+                  agentPolicyId: '6f12b025-fcb0-4db4-99e5-4927e3502bb8',
+                  elasticAgentId: '1-2-3',
+                  integrationPolicyId: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+                },
+              ],
+            },
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it.each(responseActionsClientMock.getClientSupportedResponseActionMethodNames('endpoint'))(
+      'should error when %s is called with agents not valid for active space',
+      async (methodName) => {
+        (
+          classConstructorOptions.endpointService.getInternalFleetServices().agent
+            .getByIds as jest.Mock
+        ).mockImplementation(async () => {
+          throw new AgentNotFoundError('Agent some-id not found');
+        });
+        const options = responseActionsClientMock.getOptionsForResponseActionMethod(methodName);
+
+        // @ts-expect-error `options` type is too broad because we're getting it from a helper
+        await expect(endpointActionsClient[methodName](options)).rejects.toThrow(
+          'Agent some-id not found'
+        );
+        expect(
+          (await classConstructorOptions.endpointService.getFleetActionsClient()).create
+        ).not.toHaveBeenCalled();
+      }
+    );
+
+    it('should create failed action request for automated response actions', async () => {
+      classConstructorOptions.isAutomated = true;
+      // @ts-expect-error mocking this for testing purposes
+      endpointActionsClient.checkAgentIds = jest.fn().mockResolvedValueOnce({
+        isValid: false,
+        valid: [],
+        invalid: ['invalid-id'],
+        hosts: [{ agent: { id: 'invalid-id', name: '' }, host: { hostname: '' } }],
+      });
+
+      await endpointActionsClient.isolate(
+        responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
+      );
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            agent: { id: [], policy: [] },
+            tags: [ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted],
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should return action details for failed automated response actions even when no valid agents', async () => {
+      classConstructorOptions.isAutomated = true;
+      // @ts-expect-error mocking this for testing purposes
+      endpointActionsClient.checkAgentIds = jest.fn().mockResolvedValueOnce({
+        isValid: false,
+        valid: [],
+        invalid: ['invalid-id'],
+        hosts: [{ agent: { id: 'invalid-id', name: '' }, host: { hostname: '' } }],
+      });
+
+      await endpointActionsClient.isolate(
+        responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
+      );
+
+      expect(getActionDetailsByIdMock).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        { bypassSpaceValidation: true }
+      );
     });
   });
 });

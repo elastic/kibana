@@ -89,6 +89,17 @@ describe('customize panel editor', () => {
       expect(titleInput).toHaveValue('Default title');
     });
 
+    // Even if the input value matches defaultTitle on apply, we expect setTitle(undefined) to be called,  meaning the title is treated as "not customized".
+    it('should not set panel custom title if it matches default title on apply', async () => {
+      api.defaultTitle$ = new BehaviorSubject<string | undefined>('Default title');
+      renderPanelEditor();
+      const titleInput = screen.getByTestId('customEmbeddablePanelTitleInput');
+      expect(titleInput).toHaveValue('Default title');
+      await userEvent.click(screen.getByTestId('saveCustomizePanelButton'));
+      expect(setTitle).toHaveBeenCalledWith(undefined);
+      expect(api.title$?.getValue()).toBeUndefined();
+    });
+
     it('should use title even when empty string', () => {
       api.defaultTitle$ = new BehaviorSubject<string | undefined>('Default title');
       setTitle('');

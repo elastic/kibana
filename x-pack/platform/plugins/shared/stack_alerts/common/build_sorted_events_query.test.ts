@@ -30,44 +30,42 @@ describe('buildSortedEventsQuery', () => {
       size: 100,
       ignore_unavailable: true,
       track_total_hits: false,
-      body: {
-        docvalue_fields: [
-          {
-            field: 'timefield',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                bool: {
-                  filter: [
-                    {
-                      range: {
-                        timefield: {
-                          gte: '2021-01-01T00:00:10.123Z',
-                          lte: '2021-01-23T12:00:50.321Z',
-                          format: 'strict_date_optional_time',
-                        },
+      docvalue_fields: [
+        {
+          field: 'timefield',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      query: {
+        bool: {
+          filter: [
+            {},
+            {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      timefield: {
+                        gte: '2021-01-01T00:00:10.123Z',
+                        lte: '2021-01-23T12:00:50.321Z',
+                        format: 'strict_date_optional_time',
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
-            ],
+            },
+          ],
+        },
+      },
+      sort: [
+        {
+          timefield: {
+            format: 'strict_date_optional_time||epoch_millis',
+            order: 'asc',
           },
         },
-        sort: [
-          {
-            timefield: {
-              format: 'strict_date_optional_time||epoch_millis',
-              order: 'asc',
-            },
-          },
-        ],
-      },
+      ],
     });
   });
 
@@ -79,44 +77,42 @@ describe('buildSortedEventsQuery', () => {
       size: 100,
       ignore_unavailable: true,
       track_total_hits: false,
-      body: {
-        docvalue_fields: [
-          {
-            field: 'timefield',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                bool: {
-                  filter: [
-                    {
-                      range: {
-                        timefield: {
-                          gte: '2021-01-01T00:00:10.123Z',
-                          lte: '2021-01-23T12:00:50.321Z',
-                          format: 'strict_date_optional_time',
-                        },
+      docvalue_fields: [
+        {
+          field: 'timefield',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      query: {
+        bool: {
+          filter: [
+            {},
+            {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      timefield: {
+                        gte: '2021-01-01T00:00:10.123Z',
+                        lte: '2021-01-23T12:00:50.321Z',
+                        format: 'strict_date_optional_time',
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
-            ],
+            },
+          ],
+        },
+      },
+      sort: [
+        {
+          timefield: {
+            format: 'strict_date_optional_time||epoch_millis',
+            order: 'asc',
           },
         },
-        sort: [
-          {
-            timefield: {
-              format: 'strict_date_optional_time||epoch_millis',
-              order: 'asc',
-            },
-          },
-        ],
-      },
+      ],
     });
   });
 
@@ -129,45 +125,43 @@ describe('buildSortedEventsQuery', () => {
       size: 100,
       ignore_unavailable: true,
       track_total_hits: false,
-      body: {
-        docvalue_fields: [
-          {
-            field: 'timefield',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                bool: {
-                  filter: [
-                    {
-                      range: {
-                        timefield: {
-                          gte: '2021-01-01T00:00:10.123Z',
-                          lte: '2021-01-23T12:00:50.321Z',
-                          format: 'strict_date_optional_time',
-                        },
+      docvalue_fields: [
+        {
+          field: 'timefield',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      query: {
+        bool: {
+          filter: [
+            {},
+            {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      timefield: {
+                        gte: '2021-01-01T00:00:10.123Z',
+                        lte: '2021-01-23T12:00:50.321Z',
+                        format: 'strict_date_optional_time',
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
-            ],
+            },
+          ],
+        },
+      },
+      sort: [
+        {
+          timefield: {
+            format: 'strict_date_optional_time||epoch_millis',
+            order: 'asc',
           },
         },
-        sort: [
-          {
-            timefield: {
-              format: 'strict_date_optional_time||epoch_millis',
-              order: 'asc',
-            },
-          },
-        ],
-        search_after: [sortId],
-      },
+      ],
+      search_after: [sortId],
     });
   });
 
@@ -180,45 +174,43 @@ describe('buildSortedEventsQuery', () => {
       size: 100,
       ignore_unavailable: true,
       track_total_hits: false,
-      body: {
-        docvalue_fields: [
-          {
-            field: 'timefield',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                bool: {
-                  filter: [
-                    {
-                      range: {
-                        timefield: {
-                          gte: '2021-01-01T00:00:10.123Z',
-                          lte: '2021-01-23T12:00:50.321Z',
-                          format: 'strict_date_optional_time',
-                        },
+      docvalue_fields: [
+        {
+          field: 'timefield',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      query: {
+        bool: {
+          filter: [
+            {},
+            {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      timefield: {
+                        gte: '2021-01-01T00:00:10.123Z',
+                        lte: '2021-01-23T12:00:50.321Z',
+                        format: 'strict_date_optional_time',
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
-            ],
+            },
+          ],
+        },
+      },
+      sort: [
+        {
+          timefield: {
+            format: 'strict_date_optional_time||epoch_millis',
+            order: 'asc',
           },
         },
-        sort: [
-          {
-            timefield: {
-              format: 'strict_date_optional_time||epoch_millis',
-              order: 'asc',
-            },
-          },
-        ],
-        search_after: [sortId],
-      },
+      ],
+      search_after: [sortId],
     });
   });
 
@@ -236,51 +228,49 @@ describe('buildSortedEventsQuery', () => {
       size: 100,
       ignore_unavailable: true,
       track_total_hits: false,
-      body: {
-        docvalue_fields: [
-          {
-            field: 'timefield',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                bool: {
-                  filter: [
-                    {
-                      range: {
-                        timefield: {
-                          gte: '2021-01-01T00:00:10.123Z',
-                          lte: '2021-01-23T12:00:50.321Z',
-                          format: 'strict_date_optional_time',
-                        },
+      docvalue_fields: [
+        {
+          field: 'timefield',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      query: {
+        bool: {
+          filter: [
+            {},
+            {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      timefield: {
+                        gte: '2021-01-01T00:00:10.123Z',
+                        lte: '2021-01-23T12:00:50.321Z',
+                        format: 'strict_date_optional_time',
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
-            ],
-          },
-        },
-        aggs: {
-          tags: {
-            terms: {
-              field: 'tag',
             },
-          },
+          ],
         },
-        sort: [
-          {
-            timefield: {
-              format: 'strict_date_optional_time||epoch_millis',
-              order: 'asc',
-            },
-          },
-        ],
       },
+      aggs: {
+        tags: {
+          terms: {
+            field: 'tag',
+          },
+        },
+      },
+      sort: [
+        {
+          timefield: {
+            format: 'strict_date_optional_time||epoch_millis',
+            order: 'asc',
+          },
+        },
+      ],
     });
   });
 
@@ -292,44 +282,42 @@ describe('buildSortedEventsQuery', () => {
       size: 100,
       ignore_unavailable: true,
       track_total_hits: false,
-      body: {
-        docvalue_fields: [
-          {
-            field: 'timefield',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                bool: {
-                  filter: [
-                    {
-                      range: {
-                        timefield: {
-                          gte: '2021-01-01T00:00:10.123Z',
-                          lte: '2021-01-23T12:00:50.321Z',
-                          format: 'strict_date_optional_time',
-                        },
+      docvalue_fields: [
+        {
+          field: 'timefield',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      query: {
+        bool: {
+          filter: [
+            {},
+            {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      timefield: {
+                        gte: '2021-01-01T00:00:10.123Z',
+                        lte: '2021-01-23T12:00:50.321Z',
+                        format: 'strict_date_optional_time',
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
-            ],
+            },
+          ],
+        },
+      },
+      sort: [
+        {
+          timefield: {
+            format: 'strict_date_optional_time||epoch_millis',
+            order: 'desc',
           },
         },
-        sort: [
-          {
-            timefield: {
-              format: 'strict_date_optional_time||epoch_millis',
-              order: 'desc',
-            },
-          },
-        ],
-      },
+      ],
     });
   });
 
@@ -341,44 +329,42 @@ describe('buildSortedEventsQuery', () => {
       size: 100,
       ignore_unavailable: true,
       track_total_hits: true,
-      body: {
-        docvalue_fields: [
-          {
-            field: 'timefield',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                bool: {
-                  filter: [
-                    {
-                      range: {
-                        timefield: {
-                          gte: '2021-01-01T00:00:10.123Z',
-                          lte: '2021-01-23T12:00:50.321Z',
-                          format: 'strict_date_optional_time',
-                        },
+      docvalue_fields: [
+        {
+          field: 'timefield',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      query: {
+        bool: {
+          filter: [
+            {},
+            {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      timefield: {
+                        gte: '2021-01-01T00:00:10.123Z',
+                        lte: '2021-01-23T12:00:50.321Z',
+                        format: 'strict_date_optional_time',
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
-            ],
+            },
+          ],
+        },
+      },
+      sort: [
+        {
+          timefield: {
+            format: 'strict_date_optional_time||epoch_millis',
+            order: 'asc',
           },
         },
-        sort: [
-          {
-            timefield: {
-              format: 'strict_date_optional_time||epoch_millis',
-              order: 'asc',
-            },
-          },
-        ],
-      },
+      ],
     });
   });
 });

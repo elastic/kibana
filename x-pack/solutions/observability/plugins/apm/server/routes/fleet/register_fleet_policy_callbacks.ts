@@ -14,7 +14,7 @@ import type {
   PutPackagePolicyUpdateCallback,
 } from '@kbn/fleet-plugin/server';
 import { get } from 'lodash';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { decoratePackagePolicyWithAgentConfigAndSourceMap } from './merge_package_policy_with_apm';
 import { addApiKeysToPackagePolicyIfMissing } from './api_keys/add_api_keys_to_policies_if_missing';
 import {
@@ -100,7 +100,8 @@ function onPackagePolicyDelete({
 
       try {
         await internalESClient.security.invalidateApiKey({
-          body: { ids: [agentConfigApiKeyId, sourceMapApiKeyId], owner: true },
+          ids: [agentConfigApiKeyId, sourceMapApiKeyId],
+          owner: true,
         });
       } catch (e) {
         logger.error(

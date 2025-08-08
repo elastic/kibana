@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { pick, transform, uniq } from 'lodash';
 
 import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
@@ -109,16 +109,14 @@ export function checkPrivilegesFactory(
 
       const clusterClient = await getClusterClient();
       const body = await clusterClient.asScoped(request).asCurrentUser.security.hasPrivileges({
-        body: {
-          cluster: privileges.elasticsearch?.cluster as estypes.SecurityClusterPrivilege[],
-          index: Object.entries(privileges.elasticsearch?.index ?? {}).map(
-            ([name, indexPrivileges]) => ({
-              names: [name],
-              privileges: indexPrivileges as estypes.SecurityIndexPrivilege[],
-            })
-          ),
-          application: [applicationPrivilegesCheck],
-        },
+        cluster: privileges.elasticsearch?.cluster as estypes.SecurityClusterPrivilege[],
+        index: Object.entries(privileges.elasticsearch?.index ?? {}).map(
+          ([name, indexPrivileges]) => ({
+            names: [name],
+            privileges: indexPrivileges as estypes.SecurityIndexPrivilege[],
+          })
+        ),
+        application: [applicationPrivilegesCheck],
       });
 
       const hasPrivilegesResponse: HasPrivilegesResponse = body;

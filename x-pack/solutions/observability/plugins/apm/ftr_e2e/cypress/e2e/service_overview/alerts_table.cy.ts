@@ -17,7 +17,7 @@ const serviceOverviewHref = url.format({
   query: { rangeFrom: start, rangeTo: end },
 });
 
-describe('Errors table', () => {
+describe('Alerts table', () => {
   before(() => {
     synthtrace.index(
       opbeans({
@@ -36,14 +36,19 @@ describe('Errors table', () => {
   });
 
   it('Alerts table with the search bar is populated', () => {
+    const expectedControls = ['Statusactive 1', 'Rule', 'Group', 'Tags'];
+
     cy.visitKibana(serviceOverviewHref);
     cy.contains('opbeans-java');
-    cy.get('[data-test-subj="environmentFilter"] [data-test-subj="comboBoxSearchInput"]').should(
-      'have.value',
-      'All'
-    );
-    cy.contains('Active');
-    cy.contains('Recovered');
+    cy.get('[data-test-subj="control-frame-title"]')
+      .should('have.length', 4)
+      .each(($el, index) => {
+        cy.wrap($el)
+          .invoke('text')
+          .then((text) => {
+            expect(text.trim()).to.equal(expectedControls[index]);
+          });
+      });
     cy.getByTestSubj('globalQueryBar').should('exist');
   });
 });

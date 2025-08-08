@@ -174,7 +174,7 @@ describe('SearchBar', () => {
 
 describe('getFieldSpecs', () => {
   it('returns fieldSpecs for Fleet agents', () => {
-    expect(getFieldSpecs(AGENTS_INDEX, AGENTS_PREFIX)).toHaveLength(73);
+    expect(getFieldSpecs(AGENTS_INDEX, AGENTS_PREFIX)).toHaveLength(74);
   });
 
   it('returns fieldSpecs for Fleet enrollment tokens', () => {
@@ -234,6 +234,13 @@ describe('getFieldSpecs', () => {
         name: 'updated_at',
         searchable: true,
         type: 'date',
+      },
+      {
+        aggregatable: true,
+        esTypes: ['boolean'],
+        name: 'hidden',
+        searchable: true,
+        type: 'boolean',
       },
     ]);
   });
@@ -401,6 +408,13 @@ describe('getFieldSpecs', () => {
           name: 'ingest-agent-policies.updated_by',
           searchable: true,
           type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['boolean'],
+          name: 'ingest-agent-policies.supports_agentless',
+          searchable: true,
+          type: 'boolean',
         },
       ]
     );

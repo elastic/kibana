@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 
 import { FormProvider, useForm } from 'react-hook-form';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
@@ -19,7 +19,7 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: SearchBarProps) => {
+const Template: StoryFn<typeof Component> = (props: SearchBarProps) => {
   const methods = useForm({ defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES });
   return (
     <FormProvider {...methods}>
@@ -35,5 +35,7 @@ const defaultProps = {
   placeholder: 'Enter something if you dare',
 };
 
-export const QueryBuilder = Template.bind({});
-QueryBuilder.args = defaultProps;
+export const QueryBuilder = {
+  render: Template,
+  args: defaultProps,
+};

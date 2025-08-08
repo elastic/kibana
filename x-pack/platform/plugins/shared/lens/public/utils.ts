@@ -5,13 +5,14 @@
  * 2.0.
  */
 import { set } from '@kbn/safer-lodash-set';
-import { uniq, cloneDeep } from 'lodash';
+import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import type { Serializable } from '@kbn/utility-types';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { emptyTitleText } from '@kbn/visualization-ui-components';
@@ -20,7 +21,7 @@ import { ISearchStart } from '@kbn/data-plugin/public';
 import type { DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { DateRange } from '../common/types';
-import type { LensDocument } from './persistence/saved_object_store';
+import type { LensDocument } from './persistence';
 import {
   Datasource,
   DatasourceMap,
@@ -39,7 +40,6 @@ import {
 import type { DatasourceStates, VisualizationState } from './state_management';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../common/constants';
-import type { RangeTypeLens } from './datasources/form_based/operations/definitions/ranges';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
@@ -48,32 +48,21 @@ export function getVisualizeGeoFieldMessage(fieldType: string) {
   });
 }
 
-export const isLensRange = (range: unknown = {}): range is RangeTypeLens => {
-  if (!range || typeof range !== 'object') return false;
-  const { from, to, label } = range as RangeTypeLens;
-
-  return (
-    label !== undefined &&
-    (typeof from === 'number' || from === null) &&
-    (typeof to === 'number' || to === null)
-  );
-};
-
-export const getResolvedDateRange = function (timefilter: TimefilterContract) {
+export function getResolvedDateRange(timefilter: TimefilterContract) {
   const { from, to } = timefilter.getTime();
   return { fromDate: from, toDate: to };
-};
+}
 
-export const getAbsoluteDateRange = function (timefilter: TimefilterContract) {
+export function getAbsoluteDateRange(timefilter: TimefilterContract) {
   const { from, to } = timefilter.getTime();
   const { min, max } = timefilter.calculateBounds({
     from,
     to,
   });
   return { fromDate: min?.toISOString() || from, toDate: max?.toISOString() || to };
-};
+}
 
-export const convertToAbsoluteDateRange = function (dateRange: DateRange, now: Date) {
+export function convertToAbsoluteDateRange(dateRange: DateRange, now: Date) {
   const absRange = getAbsoluteTimeRange(
     {
       from: dateRange.fromDate as string,
@@ -86,7 +75,7 @@ export const convertToAbsoluteDateRange = function (dateRange: DateRange, now: D
     fromDate: absRange.from,
     toDate: absRange.to,
   };
-};
+}
 
 export function containsDynamicMath(dateMathString: string) {
   return dateMathString.includes('now');
@@ -116,9 +105,9 @@ export function getActiveVisualizationIdFromDoc(doc?: LensDocument) {
   return doc.visualizationType || null;
 }
 
-export const getInitialDatasourceId = (datasourceMap: DatasourceMap, doc?: LensDocument) => {
+export function getInitialDatasourceId(datasourceMap: DatasourceMap, doc?: LensDocument) {
   return (doc && getActiveDatasourceIdFromDoc(doc)) || Object.keys(datasourceMap)[0] || null;
-};
+}
 
 export function getInitialDataViewsObject(
   indexPatterns: IndexPatternMap,
@@ -161,41 +150,52 @@ export async function refreshIndexPatternsList({
 }
 
 export function extractReferencesFromState({
+  activeDatasourceId,
   activeDatasources,
   datasourceStates,
   visualizationState,
   activeVisualization,
 }: {
-  activeDatasources: Record<string, Datasource>;
+  activeDatasourceId: string | null;
+  activeDatasources: DatasourceMap;
   datasourceStates: DatasourceStates;
   visualizationState: unknown;
   activeVisualization?: Visualization;
-}): SavedObjectReference[] {
-  const references: SavedObjectReference[] = [];
+}): Reference[] {
+  const references: Reference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
-    const { savedObjectReferences } = datasource.getPersistableState(datasourceStates[id].state);
-    references.push(...savedObjectReferences);
+    const { references: persistableReferences } = datasource.getPersistableState(
+      datasourceStates[id].state
+    );
+    references.push(...persistableReferences);
   });
 
   if (activeVisualization?.getPersistableState) {
-    const { savedObjectReferences } = activeVisualization.getPersistableState(visualizationState);
-    references.push(...savedObjectReferences);
+    const { references: persistableReferences } = activeVisualization.getPersistableState(
+      visualizationState,
+      activeDatasourceId ? activeDatasources[activeDatasourceId] : undefined,
+      activeDatasourceId ? datasourceStates[activeDatasourceId] : undefined
+    );
+    references.push(...persistableReferences);
   }
   return references;
 }
 
 export function getIndexPatternsIds({
+  activeDatasourceId,
   activeDatasources,
   datasourceStates,
   visualizationState,
   activeVisualization,
 }: {
+  activeDatasourceId: string | null;
   activeDatasources: Record<string, Datasource>;
   datasourceStates: DatasourceStates;
   visualizationState: unknown;
   activeVisualization?: Visualization;
 }): string[] {
-  const references: SavedObjectReference[] = extractReferencesFromState({
+  const references = extractReferencesFromState({
+    activeDatasourceId,
     activeDatasources,
     datasourceStates,
     visualizationState,
@@ -290,7 +290,7 @@ export function renewIDs<T = unknown>(
   forRenewIds: string[],
   getNewId: (id: string) => string | undefined
 ): T {
-  obj = cloneDeep(obj);
+  obj = structuredClone(obj);
   const recursiveFn = (
     item: Serializable,
     parent?: Record<string, Serializable> | Serializable[],

@@ -92,15 +92,13 @@ export class ContentStream extends Duplex {
   private async getChunkRealIndex(id: string): Promise<string> {
     const chunkDocMeta = await this.client.search({
       index: this.index,
-      body: {
-        size: 1,
-        query: {
-          term: {
-            _id: id,
-          },
+      size: 1,
+      query: {
+        term: {
+          _id: id,
         },
-        _source: false, // suppress the document content
       },
+      _source: false, // suppress the document content
     });
 
     const docIndex = chunkDocMeta.hits.hits?.[0]?._index;

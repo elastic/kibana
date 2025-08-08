@@ -15,7 +15,7 @@ import {
 import type { RouteMethod, VersionedRouterRoute } from '@kbn/core-http-server';
 import type { OpenAPIV3 } from 'openapi-types';
 import { extractAuthzDescription } from './extract_authz_description';
-import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
+import type { Env, GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { OasConverter } from './oas_converter';
 import {
   prepareRoutes,
@@ -31,13 +31,23 @@ import {
   GetOpId,
 } from './util';
 import { isReferenceObject } from './oas_converter/common';
+import { mergeOperation } from './merge_operation';
 
-export const processVersionedRouter = (
-  appRouter: CoreVersionedRouter,
-  converter: OasConverter,
-  getOpId: GetOpId,
-  filters: GenerateOpenApiDocumentOptionsFilters
-) => {
+export interface ProcessVersionedRouterOptions {
+  appRouter: CoreVersionedRouter;
+  converter: OasConverter;
+  getOpId: GetOpId;
+  filters: GenerateOpenApiDocumentOptionsFilters;
+  env?: Env;
+}
+
+export const processVersionedRouter = async ({
+  appRouter,
+  converter,
+  getOpId,
+  filters,
+  env = { serverless: false },
+}: ProcessVersionedRouterOptions) => {
   const routes = prepareRoutes(appRouter.getRoutes(), filters);
   const paths: OpenAPIV3.PathsObject = {};
   for (const route of routes) {
@@ -128,7 +138,11 @@ export const processVersionedRouter = (
         operationId: getOpId({ path: route.path, method: route.method }),
       };
 
-      setXState(route.options.options?.availability, operation);
+      setXState(route.options.options?.availability, operation, env);
+
+      if (handler.options.options?.oasOperationObject) {
+        await mergeOperation(handler.options.options.oasOperationObject(), operation);
+      }
 
       const path: OpenAPIV3.PathItemObject = {
         [route.method]: operation,

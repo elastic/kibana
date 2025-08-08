@@ -9,11 +9,11 @@ import fs from 'fs';
 import axios from 'axios';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import {
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-  TaskStatus,
 } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
   CONNECTOR_USAGE_REPORTING_SOURCE_ID,
@@ -23,8 +23,8 @@ import {
   ConnectorUsageReportingTask,
 } from './connector_usage_reporting_task';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
-import { ActionsPluginsStart } from '../plugin';
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ActionsPluginsStart } from '../plugin';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('axios');
 const mockedAxiosPost = jest.spyOn(axios, 'post');
@@ -61,10 +61,14 @@ describe('ConnectorUsageReportingTask', () => {
     lastReportedUsageDate,
     projectId,
     attempts = 0,
+    enabled = true,
+    url,
   }: {
     lastReportedUsageDate: Date;
     projectId?: string;
     attempts?: number;
+    enabled?: boolean;
+    url?: string;
   }) => {
     const timestamp = new Date(new Date().setMinutes(-15));
     const task = new ConnectorUsageReportingTask({
@@ -74,7 +78,8 @@ describe('ConnectorUsageReportingTask', () => {
       core: mockCore,
       taskManager: mockTaskManagerSetup,
       config: {
-        url: 'usage-api',
+        enabled,
+        url,
         ca: {
           path: './ca.crt',
         },
@@ -117,6 +122,7 @@ describe('ConnectorUsageReportingTask', () => {
       core: createSetup(),
       taskManager: mockTaskManagerSetup,
       config: {
+        enabled: true,
         url: 'usage-api',
         ca: {
           path: './ca.crt',
@@ -146,6 +152,7 @@ describe('ConnectorUsageReportingTask', () => {
       core,
       taskManager: mockTaskManagerSetup,
       config: {
+        enabled: true,
         url: 'usage-api',
         ca: {
           path: './ca.crt',
@@ -179,6 +186,7 @@ describe('ConnectorUsageReportingTask', () => {
       core,
       taskManager: mockTaskManagerSetup,
       config: {
+        enabled: true,
         url: 'usage-api',
         ca: {
           path: './ca.crt',
@@ -207,6 +215,7 @@ describe('ConnectorUsageReportingTask', () => {
       core,
       taskManager: mockTaskManagerSetup,
       config: {
+        enabled: true,
         url: 'usage-api',
         ca: {
           path: './ca.crt',
@@ -273,6 +282,58 @@ describe('ConnectorUsageReportingTask', () => {
     });
   });
 
+  it('returns the existing state and logs a warning when the usage API is disabled', async () => {
+    const lastReportedUsageDateStr = '2024-01-01T00:00:00.000Z';
+    const lastReportedUsageDate = new Date(lastReportedUsageDateStr);
+
+    const taskRunner = await createTaskRunner({
+      lastReportedUsageDate,
+      projectId: 'test-id',
+      enabled: false,
+    });
+
+    const response = await taskRunner.run();
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Usage API is disabled, actions:connector_usage_reporting will be skipped'
+    );
+
+    expect(response).toEqual({
+      state: {
+        attempts: 0,
+        lastReportedUsageDate,
+      },
+    });
+  });
+
+  it('returns the existing state and logs a warning when the usage API url is not defined', async () => {
+    readFileSpy.mockImplementationOnce(() => '---CA CERTIFICATE---');
+    const lastReportedUsageDateStr = '2024-01-01T00:00:00.000Z';
+    const lastReportedUsageDate = new Date(lastReportedUsageDateStr);
+
+    const taskRunner = await createTaskRunner({
+      lastReportedUsageDate,
+      projectId: 'test-id',
+    });
+
+    const response = await taskRunner.run();
+
+    expect(logger.error).toHaveBeenCalledTimes(1);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Missing required Usage API url while running actions:connector_usage_reporting'
+    );
+
+    expect(response).toEqual({
+      state: {
+        attempts: 0,
+        lastReportedUsageDate,
+      },
+    });
+  });
+
   it('runs the task', async () => {
     readFileSpy.mockImplementationOnce(() => '---CA CERTIFICATE---');
     mockEsClient.search.mockResolvedValueOnce({
@@ -284,7 +345,11 @@ describe('ConnectorUsageReportingTask', () => {
     const lastReportedUsageDateStr = '2024-01-01T00:00:00.000Z';
     const lastReportedUsageDate = new Date(lastReportedUsageDateStr);
 
-    const taskRunner = await createTaskRunner({ lastReportedUsageDate, projectId: 'test-project' });
+    const taskRunner = await createTaskRunner({
+      lastReportedUsageDate,
+      projectId: 'test-project',
+      url: 'usage-api',
+    });
 
     const response = await taskRunner.run();
 
@@ -327,7 +392,11 @@ describe('ConnectorUsageReportingTask', () => {
 
     const lastReportedUsageDate = new Date('2024-01-01T00:00:00.000Z');
 
-    const taskRunner = await createTaskRunner({ lastReportedUsageDate, projectId: 'test-project' });
+    const taskRunner = await createTaskRunner({
+      lastReportedUsageDate,
+      projectId: 'test-project',
+      url: 'usage-api',
+    });
 
     const response = await taskRunner.run();
 
@@ -350,7 +419,11 @@ describe('ConnectorUsageReportingTask', () => {
 
     const lastReportedUsageDate = new Date('2024-01-01T00:00:00.000Z');
 
-    const taskRunner = await createTaskRunner({ lastReportedUsageDate, projectId: 'test-project' });
+    const taskRunner = await createTaskRunner({
+      lastReportedUsageDate,
+      projectId: 'test-project',
+      url: 'usage-api',
+    });
 
     const response = await taskRunner.run();
 
@@ -377,6 +450,7 @@ describe('ConnectorUsageReportingTask', () => {
       lastReportedUsageDate,
       projectId: 'test-project',
       attempts: 4,
+      url: 'usage-api',
     });
 
     const response = await taskRunner.run();

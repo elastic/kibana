@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { SavedObject } from '@kbn/core/server';
+import type { TaskPriority } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { SavedObject } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import {
+import type {
   Rule,
   RuleTypeParams,
-  RecoveredActionGroup,
   RuleMonitoring,
-  RuleLastRunOutcomeOrderMap,
   RuleLastRunOutcomes,
   SanitizedRule,
   SanitizedRuleAction,
 } from '../../common';
+import { RecoveredActionGroup, RuleLastRunOutcomeOrderMap } from '../../common';
 import { getDefaultMonitoring } from '../lib/monitoring';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { AlertHit, RawRule } from '../types';
+import type { AlertHit, RawRule } from '../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 interface GeneratorParams {
@@ -154,6 +154,7 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   executor: jest.fn(),
   category: 'test',
   producer: 'alerts',
+  solution: 'stack',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
   autoRecoverAlerts: true,
@@ -220,6 +221,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
   },
   monitoring: getDefaultMonitoring('2020-08-20T19:23:38Z'),
   revision: 0,
+  scheduledTaskId: '1',
 };
 
 export const mockedRawRuleSO: SavedObject<RawRule> = {
@@ -275,6 +277,7 @@ export const mockedRawRuleSO: SavedObject<RawRule> = {
     },
     monitoring: getDefaultMonitoring('2020-08-20T19:23:38Z'),
     revision: 0,
+    scheduledTaskId: '1',
   },
 };
 
@@ -297,10 +300,20 @@ export const mockedRule: SanitizedRule<typeof mockedRawRuleSO.attributes.params>
     } as SanitizedRuleAction;
   }),
   isSnoozedUntil: undefined,
+  artifacts: {
+    dashboards: [
+      {
+        id: 'dashboard-1',
+      },
+    ],
+    investigation_guide: {
+      blob: '## Summary',
+    },
+  },
 };
 
 export const mockTaskInstance = () => ({
-  id: '',
+  id: '1',
   attempts: 0,
   status: TaskStatus.Running,
   version: '123',
@@ -327,7 +340,7 @@ export const generateAlertOpts = ({
   maintenanceWindowIds,
 }: GeneratorParams = {}) => {
   id = id ?? '1';
-  let message: string = '';
+  let message = '';
   switch (action) {
     case EVENT_LOG_ACTIONS.newInstance:
       message = `test:1: 'rule-name' created new alert: '${id}'`;
@@ -368,30 +381,9 @@ export const generateRunnerResult = ({
   alertRecoveredInstances = {},
   summaryActions = {},
   taskRunError,
+  trackedExecutions = ['5f6aa57d-3e22-484e-bae8-cbed868f4d28'],
 }: GeneratorParams = {}) => {
   return {
-    monitoring: {
-      run: {
-        calculated_metrics: {
-          success_ratio: successRatio,
-        },
-        // @ts-ignore
-        history: history.map((success) => ({ success, timestamp: 0 })),
-        last_run: {
-          metrics: {
-            duration: 0,
-            gap_duration_s: null,
-            // TODO: uncomment after intermidiate release
-            // gap_range: null,
-            total_alerts_created: null,
-            total_alerts_detected: null,
-            total_indexing_duration_ms: null,
-            total_search_duration_ms: null,
-          },
-          timestamp: '1970-01-01T00:00:00.000Z',
-        },
-      },
-    },
     schedule: {
       interval,
     },
@@ -401,6 +393,7 @@ export const generateRunnerResult = ({
       ...(state && { alertTypeState: {} }),
       ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z').toISOString() }),
       ...(state && { summaryActions }),
+      ...(state && { trackedExecutions }),
     },
     taskRunError,
   };

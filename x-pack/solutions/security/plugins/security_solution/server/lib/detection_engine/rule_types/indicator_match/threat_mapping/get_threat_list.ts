@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { getQueryFilter } from '../../utils/get_query_filter';
 import type {
   GetThreatListOptions,
@@ -20,53 +20,55 @@ import type {
 export const INDICATOR_PER_PAGE = 1000;
 
 export const getThreatList = async ({
+  sharedParams,
   esClient,
-  index,
-  language,
   perPage,
-  query,
-  ruleExecutionLogger,
   searchAfter,
   threatFilters,
   threatListConfig,
   pitId,
   reassignPitId,
-  runtimeMappings,
-  listClient,
-  exceptionFilter,
   indexFields,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
+  const {
+    exceptionFilter,
+    listClient,
+    runtimeMappings,
+    ruleExecutionLogger,
+    completeRule: {
+      ruleParams: { threatQuery, threatLanguage, threatIndex },
+    },
+  } = sharedParams;
   const calculatedPerPage = perPage ?? INDICATOR_PER_PAGE;
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
   const queryFilter = getQueryFilter({
-    query,
-    language: language ?? 'kuery',
+    query: threatQuery,
+    language: threatLanguage ?? 'kuery',
     filters: threatFilters,
-    index,
+    index: threatIndex,
+    // Exceptions shouldn't apply to threat list??
     exceptionFilter,
     fields: indexFields,
   });
 
   ruleExecutionLogger.debug(
-    `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
+    `Querying the indicator items from the index: "${threatIndex}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
   );
 
   const response = await esClient.search<
     ThreatListDoc,
     Record<string, estypes.AggregationsAggregate>
   >({
-    body: {
-      ...threatListConfig,
-      query: queryFilter,
-      search_after: searchAfter,
-      runtime_mappings: runtimeMappings,
-      sort: getSortForThreatList({
-        index,
-        listItemIndex: listClient.getListItemName(),
-      }),
-    },
+    ...threatListConfig,
+    query: queryFilter,
+    search_after: searchAfter,
+    runtime_mappings: runtimeMappings,
+    sort: getSortForThreatList({
+      index: threatIndex,
+      listItemIndex: listClient.getListItemName(),
+    }),
     track_total_hits: false,
     size: calculatedPerPage,
     pit: { id: pitId },
@@ -109,9 +111,7 @@ export const getThreatListCount = async ({
     fields: indexFields,
   });
   const response = await esClient.count({
-    body: {
-      query: queryFilter,
-    },
+    query: queryFilter,
     ignore_unavailable: true,
     index,
   });

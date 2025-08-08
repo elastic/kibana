@@ -7,18 +7,16 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
-import { createAppMockRenderer } from '../../../common/mock';
 import { useIsAddToCaseOpen } from './use_is_add_to_case_open';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
+import { TestProviders } from '../../../common/mock';
 
 jest.mock('../../../common/use_cases_toast');
 const useCasesToastMock = useCasesToast as jest.Mock;
 useCasesToastMock.mockReturnValue({
   showInfoToast: jest.fn(),
 });
-
-const { AppWrapper } = createAppMockRenderer();
 
 describe('use is add to existing case modal open hook', () => {
   beforeEach(() => {
@@ -32,7 +30,7 @@ describe('use is add to existing case modal open hook', () => {
   });
 
   it('should return false when the add to case modal and flyout are not open', async () => {
-    const { result } = renderHook(useIsAddToCaseOpen, { wrapper: AppWrapper });
+    const { result } = renderHook(useIsAddToCaseOpen, { wrapper: TestProviders });
     expect(result.current).toEqual(false);
   });
 
@@ -44,7 +42,7 @@ describe('use is add to existing case modal open hook', () => {
           isOpen: useIsAddToCaseOpen(),
         };
       },
-      { wrapper: AppWrapper }
+      { wrapper: TestProviders }
     );
 
     expect(result.current.isOpen).toEqual(false);
@@ -63,7 +61,7 @@ describe('use is add to existing case modal open hook', () => {
           isOpen: useIsAddToCaseOpen(),
         };
       },
-      { wrapper: AppWrapper }
+      { wrapper: TestProviders }
     );
 
     expect(result.current.isOpen).toEqual(false);

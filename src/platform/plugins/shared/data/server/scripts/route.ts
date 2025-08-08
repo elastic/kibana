@@ -16,16 +16,16 @@ export function registerScriptsRoute(router: IRouter) {
     .get({
       path: '/internal/scripts/languages',
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
     })
     .addVersion(
       {
         version: SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION,
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: {
           response: {
             '200': {

@@ -7,66 +7,72 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiListGroup,
-  EuiListGroupItem,
   EuiText,
   EuiTitle,
-  EuiToolTip,
+  type EuiListGroupProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MenuItemGroup } from '../types';
 
 export function Group({ group }: { group: MenuItemGroup }) {
+  const listItems: EuiListGroupProps['listItems'] = useMemo(
+    () =>
+      group.items.map((item) => ({
+        key: item.id,
+        size: 's',
+        toolTipText: item.description,
+        toolTipProps: {
+          position: 'right',
+        },
+        showToolTip: true,
+        label: !item.isDeprecated ? (
+          item.name
+        ) : (
+          <EuiFlexGroup wrap responsive={false} gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{item.name}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="warning">
+                <FormattedMessage
+                  id="dashboard.editorMenu.deprecatedTag"
+                  defaultMessage="Deprecated"
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        onClick: item.onClick,
+        iconType: item.icon,
+        isDisabled: item.isDisabled,
+        'data-test-subj': item['data-test-subj'],
+        role: 'menuitem',
+      })),
+    [group.items]
+  );
+
+  const titleId = `${group.id}-group`;
+
   return (
     <>
-      <EuiTitle id={`${group.id}-group`} size="xxs">
-        <h3>{group.title}</h3>
+      <EuiTitle size="xxs">
+        <h3 id={titleId}>{group.title}</h3>
       </EuiTitle>
       <EuiListGroup
-        aria-labelledby={`${group.id}-group`}
+        aria-labelledby={titleId}
         size="s"
         gutterSize="none"
         maxWidth={false}
         flush
-      >
-        {group.items.map((item) => {
-          return (
-            <EuiListGroupItem
-              key={item.id}
-              label={
-                <EuiToolTip position="right" content={item.description}>
-                  {!item.isDeprecated ? (
-                    <EuiText size="s">{item.name}</EuiText>
-                  ) : (
-                    <EuiFlexGroup wrap responsive={false} gutterSize="s">
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="s">{item.name}</EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color="warning">
-                          <FormattedMessage
-                            id="dashboard.editorMenu.deprecatedTag"
-                            defaultMessage="Deprecated"
-                          />
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  )}
-                </EuiToolTip>
-              }
-              onClick={item.onClick}
-              iconType={item.icon}
-              data-test-subj={item['data-test-subj']}
-              isDisabled={item.isDisabled}
-            />
-          );
-        })}
-      </EuiListGroup>
+        listItems={listItems}
+        role="menu"
+      />
     </>
   );
 }

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export * from './group_stats';
-export * from './group_panel_renderers';
-export * from './group_take_action_items';
+export * from './default_grouping_options';
+export * from './default_group_stats_aggregations';
+export * from './default_group_stats_renderers';
+export * from './default_group_title_renderers';
 export * from './query_builder';

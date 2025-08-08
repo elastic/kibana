@@ -6,7 +6,7 @@
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { TLSParamsType } from '../../../../../../common/runtime_types/alerts/tls';
 

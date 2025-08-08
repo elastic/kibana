@@ -33,7 +33,14 @@ paths:
                   minItems: 1
                   maxItems: 1000
                   items:
-                    $ref: './common.schema.yaml#/components/schemas/CreateAssetCriticalityRecord'
+                    allOf:
+                      - $ref: './common.schema.yaml#/components/schemas/AssetCriticalityRecordIdParts'
+                      - type: object
+                        properties:
+                          criticality_level:
+                            $ref: '#/components/schemas/AssetCriticalityLevelsForBulkUpload'
+                        required:
+                          - criticality_level
               required:
                 - records
       responses:
@@ -90,3 +97,13 @@ components:
         - successful
         - failed
         - total
+    
+    AssetCriticalityLevelsForBulkUpload:
+      type: string
+      description: The criticality level of the asset for bulk upload. The value `unassigned` is used to indicate that the criticality level is not assigned and is only used for bulk upload.
+      enum:
+        - low_impact
+        - medium_impact
+        - high_impact
+        - extreme_impact
+        - unassigned

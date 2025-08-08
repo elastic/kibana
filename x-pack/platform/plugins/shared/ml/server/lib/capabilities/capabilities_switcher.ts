@@ -24,15 +24,19 @@ export const setupCapabilitiesSwitcher = (
   enabledFeatures: MlFeatures,
   logger: Logger
 ) => {
-  coreSetup.capabilities.registerSwitcher(getSwitcher(license$, logger, enabledFeatures), {
-    capabilityPath: 'ml.*',
-  });
+  coreSetup.capabilities.registerSwitcher(
+    getSwitcher(license$, logger, enabledFeatures, coreSetup.getStartServices),
+    {
+      capabilityPath: 'ml.*',
+    }
+  );
 };
 
 function getSwitcher(
   license$: Observable<ILicense>,
   logger: Logger,
-  enabledFeatures: MlFeatures
+  enabledFeatures: MlFeatures,
+  getStartServices: CoreSetup['getStartServices']
 ): CapabilitiesSwitcher {
   return async (request, capabilities) => {
     const isAnonymousRequest = !request.route.options.authRequired;
@@ -41,15 +45,23 @@ function getSwitcher(
     }
 
     try {
-      const license = await firstValueFrom(license$);
+      const [license, [coreStart]] = await Promise.all([
+        firstValueFrom(license$),
+        getStartServices(),
+      ]);
+      const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
       const mlEnabled = isMlEnabled(license);
 
       const originalCapabilities = capabilities.ml as MlCapabilities;
       const mlCaps = cloneDeep(originalCapabilities);
 
+      if (capabilities.aiops.enabled === false) {
+        mlCaps.canUseAiops = false;
+      }
+
       // full license, leave capabilities as they were
       if (mlEnabled && isFullLicense(license)) {
-        return { ml: applyEnabledFeatures(mlCaps, enabledFeatures) };
+        return { ml: applyEnabledFeatures(mlCaps, enabledFeatures, isServerless) };
       }
 
       // not full license, switch off all capabilities
@@ -70,11 +82,15 @@ function getSwitcher(
   };
 }
 
-function applyEnabledFeatures(mlCaps: MlCapabilities, { ad, dfa, nlp }: MlFeatures) {
+function applyEnabledFeatures(
+  mlCaps: MlCapabilities,
+  { ad, dfa, nlp }: MlFeatures,
+  isServerless: boolean
+) {
   mlCaps.isADEnabled = ad;
   mlCaps.isDFAEnabled = dfa;
   mlCaps.isNLPEnabled = nlp;
-  mlCaps.canViewMlNodes = mlCaps.canViewMlNodes && ad && dfa && nlp;
+  mlCaps.canViewMlNodes = mlCaps.canViewMlNodes && isServerless === false;
 
   if (ad === false) {
     for (const c of featureCapabilities.ad) {

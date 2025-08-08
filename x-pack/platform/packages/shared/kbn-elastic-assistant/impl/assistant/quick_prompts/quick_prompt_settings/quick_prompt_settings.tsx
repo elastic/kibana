@@ -8,20 +8,21 @@
 import React from 'react';
 import { EuiTitle, EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
-import {
-  PromptResponse,
-  PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
 import * as i18n from './translations';
 import { QuickPromptSettingsEditor } from './quick_prompt_editor';
+import { PromptContextTemplate } from '../../../..';
 
 interface Props {
-  onSelectedQuickPromptChange: (quickPrompt?: PromptResponse) => void;
-  quickPromptSettings: PromptResponse[];
+  onPromptContentChange: (newValue: string) => void;
+  onQuickPromptColorChange: EuiSetColorMethod;
+  onQuickPromptContextChange: (promptContexts: PromptContextTemplate[]) => void;
+  onQuickPromptDelete: (id: string) => void;
+  onQuickPromptSelect: (quickPrompt?: PromptResponse | string) => void;
+  resetSettings?: () => void;
   selectedQuickPrompt: PromptResponse | undefined;
-  setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
-  promptsBulkActions: PromptsPerformBulkActionRequestBody;
-  setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
+  quickPromptSettings: PromptResponse[];
 }
 
 /**
@@ -29,12 +30,14 @@ interface Props {
  */
 export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
   ({
-    onSelectedQuickPromptChange,
-    quickPromptSettings,
+    onPromptContentChange,
+    onQuickPromptColorChange,
+    onQuickPromptContextChange,
+    onQuickPromptDelete,
+    onQuickPromptSelect,
+    resetSettings,
     selectedQuickPrompt,
-    setUpdatedQuickPromptSettings,
-    promptsBulkActions,
-    setPromptsBulkActions,
+    quickPromptSettings,
   }) => {
     return (
       <>
@@ -46,12 +49,14 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
         <EuiHorizontalRule margin={'s'} />
 
         <QuickPromptSettingsEditor
-          onSelectedQuickPromptChange={onSelectedQuickPromptChange}
-          quickPromptSettings={quickPromptSettings}
+          onPromptContentChange={onPromptContentChange}
+          onQuickPromptColorChange={onQuickPromptColorChange}
+          onQuickPromptContextChange={onQuickPromptContextChange}
+          onQuickPromptDelete={onQuickPromptDelete}
+          onQuickPromptSelect={onQuickPromptSelect}
+          resetSettings={resetSettings}
           selectedQuickPrompt={selectedQuickPrompt}
-          setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
-          promptsBulkActions={promptsBulkActions}
-          setPromptsBulkActions={setPromptsBulkActions}
+          quickPromptSettings={quickPromptSettings}
         />
       </>
     );

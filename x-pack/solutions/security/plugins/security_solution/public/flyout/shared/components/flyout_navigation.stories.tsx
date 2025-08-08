@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { FlyoutNavigation } from './flyout_navigation';
@@ -18,7 +18,7 @@ export default {
   title: 'Flyout/Navigation',
 };
 
-export const Expand: Story<void> = () => {
+export const Expand: StoryFn = () => {
   return (
     <TestProvider>
       <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
@@ -26,14 +26,14 @@ export const Expand: Story<void> = () => {
   );
 };
 
-export const Collapse: Story<void> = () => {
+export const Collapse: StoryFn = () => {
   return (
     <TestProvider>
       <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
     </TestProvider>
   );
 };
-export const CollapsableWithAction: Story<void> = () => {
+export const CollapsableWithAction: StoryFn = () => {
   return (
     <TestProvider>
       <FlyoutNavigation
@@ -45,7 +45,7 @@ export const CollapsableWithAction: Story<void> = () => {
   );
 };
 
-export const NonCollapsableWithAction: Story<void> = () => {
+export const NonCollapsableWithAction: StoryFn = () => {
   return (
     <TestProvider>
       <FlyoutNavigation flyoutIsExpandable={false} actions={<EuiButtonIcon iconType="share" />} />
@@ -53,7 +53,7 @@ export const NonCollapsableWithAction: Story<void> = () => {
   );
 };
 
-export const Empty: Story<void> = () => {
+export const Empty: StoryFn = () => {
   return (
     <TestProvider>
       <FlyoutNavigation flyoutIsExpandable={false} />

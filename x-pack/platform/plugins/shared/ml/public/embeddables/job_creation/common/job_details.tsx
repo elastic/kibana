@@ -9,7 +9,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { useState, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -234,6 +234,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
               isInvalid={jobIdValidationError !== ''}
             >
               <EuiFieldText
+                isInvalid={jobIdValidationError !== ''}
                 data-test-subj={`mlLensLayerJobIdInput_${layerIndex}`}
                 value={jobId}
                 onChange={(e) => {
@@ -266,6 +267,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
                 isInvalid={bucketSpanValidationError !== ''}
               >
                 <EuiFieldText
+                  isInvalid={bucketSpanValidationError !== ''}
                   data-test-subj={`mlLensLayerBucketSpanInput_${layerIndex}`}
                   value={bucketSpan}
                   onChange={(e) => {

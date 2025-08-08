@@ -6,7 +6,7 @@
  */
 
 import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
-import type { RequiredField, RequiredFieldInput } from '../../api/detection_engine';
+import type { RequiredField, RequiredFieldInput, RuleResponse } from '../../api/detection_engine';
 
 /*
   Computes the boolean "ecs" property value for each required field based on the ECS field map.
@@ -23,3 +23,6 @@ export const addEcsToRequiredFields = (requiredFields?: RequiredFieldInput[]): R
       ecs: isEcsField,
     };
   });
+
+export const isRuleCustomized = (rule: RuleResponse) =>
+  rule.rule_source.type === 'external' && rule.rule_source.is_customized === true;

@@ -43,8 +43,11 @@ import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import type { Setup as InspectorPublicPluginSetup } from '@kbn/inspector-plugin/public/plugin';
 import type { DiscoverAppLocator } from '../common';
-import { type DiscoverContainerProps } from './components/discover_container';
+import type { DiscoverContainerProps } from './components/discover_container';
 
 /**
  * @public
@@ -115,6 +118,11 @@ export interface DiscoverStart {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
+  /**
+   * @deprecated
+   * Embedding Discover in other applications is discouraged and will be removed in the future.
+   * Use the Discover context awareness framework instead to register a custom Discover profile.
+   */
   readonly DiscoverContainer: ComponentType<DiscoverContainerProps>;
 }
 
@@ -128,6 +136,7 @@ export interface DiscoverSetupPlugins {
   expressions: ExpressionsSetup;
   globalSearch?: GlobalSearchPluginSetup;
   home?: HomePublicPluginSetup;
+  inspector: InspectorPublicPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
@@ -168,4 +177,6 @@ export interface DiscoverStartPlugins {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionSetup;
+  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+  apmSourcesAccess?: ApmSourceAccessPluginStart;
 }

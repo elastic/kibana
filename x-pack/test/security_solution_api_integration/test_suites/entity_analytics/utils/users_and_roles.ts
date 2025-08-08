@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SecurityService } from '@kbn/ftr-common-functional-ui-services';
+import type { SecurityService } from '@kbn/ftr-common-functional-services';
 
 export const usersAndRolesFactory = (security: SecurityService) => ({
   createRole: async ({ name, privileges }: { name: string; privileges: any }) => {
@@ -26,5 +26,11 @@ export const usersAndRolesFactory = (security: SecurityService) => ({
       full_name: username.replace('_', ' '),
       email: `${username}@elastic.co`,
     });
+  },
+  deleteUser: async (username: string) => {
+    return await security.user.delete(username);
+  },
+  deleteRole: async (name: string) => {
+    return await security.role.delete(name);
   },
 });

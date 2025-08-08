@@ -73,6 +73,23 @@ describe('addObservable', () => {
     );
   });
 
+  it('should throw an error if the value is not valid', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+
+    await expect(
+      addObservable(
+        'case-id',
+        { observable: { typeKey: OBSERVABLE_TYPE_IPV4.key, value: 'not an ip', description: '' } },
+        mockClientArgs,
+        mockCasesClient
+      )
+    ).rejects.toThrow(
+      Boom.forbidden(
+        'Failed to add observable: Error: Observable value "not an ip" is not valid for selected observable type observable-type-ipv4.'
+      )
+    );
+  });
+
   it('should throw an error if observable type is invalid', async () => {
     mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
 
@@ -148,6 +165,28 @@ describe('updateObservable', () => {
       LICENSING_CASE_OBSERVABLES_FEATURE
     );
     expect(result).toBeDefined();
+  });
+
+  it('should not update an observable when the provided value is not valid', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    await expect(
+      updateObservable(
+        'case-id',
+        mockObservable.id,
+        {
+          observable: {
+            value: 'not an ip',
+            description: 'Updated description',
+          },
+        },
+        mockClientArgs,
+        mockCasesClient
+      )
+    ).rejects.toThrow(
+      Boom.forbidden(
+        'Failed to update observable: Error: Observable value "not an ip" is not valid for selected observable type observable-type-ipv4.'
+      )
+    );
   });
 
   it('should throw an error if license is not platinum', async () => {

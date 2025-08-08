@@ -85,28 +85,3 @@ const mockFiniding = (postureType: string, isBillableAsset?: boolean) => {
 
   throw new Error('Invalid posture type');
 };
-
-export const getMockDefendForContainersHeartbeats = ({
-  isBlockActionEnables,
-  numberOfHearbeats,
-}: {
-  isBlockActionEnables: boolean;
-  numberOfHearbeats: number;
-}) => {
-  return Array.from({ length: numberOfHearbeats }, () =>
-    mockDefendForContainersHeartbeats(isBlockActionEnables)
-  );
-};
-const mockDefendForContainersHeartbeats = (isBlockActionEnabled: boolean) => {
-  return {
-    agent: {
-      id: chance.guid(),
-    },
-    cloud_defend: {
-      block_action_enabled: isBlockActionEnabled,
-    },
-    event: {
-      ingested: new Date().toISOString(),
-    },
-  };
-};

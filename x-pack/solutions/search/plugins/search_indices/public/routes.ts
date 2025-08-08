@@ -18,3 +18,4 @@ export const CREATE_INDEX_PATH = `${ROOT_PATH}create`;
 export const SearchIndexDetailsTabValues: string[] = Object.values(SearchIndexDetailsTabs);
 export const START_APP_BASE = '/app/elasticsearch/start';
 export const INDICES_APP_BASE = '/app/elasticsearch/indices';
+export const SEARCH_INDEX_MANAGEMENT_APP_BASE = '/app/elasticsearch/index_management';

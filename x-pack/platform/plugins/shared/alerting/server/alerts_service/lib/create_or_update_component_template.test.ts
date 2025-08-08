@@ -8,12 +8,13 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { createOrUpdateComponentTemplate } from './create_or_update_component_template';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 const randomDelayMultiplier = 0.01;
 const logger = loggingSystemMock.createLogger();
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-const ComponentTemplate = {
+const ComponentTemplate: ClusterPutComponentTemplateRequest = {
   name: 'test-mappings',
   _meta: {
     managed: true,
@@ -176,17 +177,105 @@ describe('createOrUpdateComponentTemplate', () => {
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
       name: existingIndexTemplate.name,
-      body: {
-        ...existingIndexTemplate.index_template,
-        template: {
-          ...existingIndexTemplate.index_template.template,
-          settings: {
-            ...existingIndexTemplate.index_template.template?.settings,
-            'index.mapping.total_fields.limit': 2500,
-          },
+      ...existingIndexTemplate.index_template,
+      template: {
+        ...existingIndexTemplate.index_template.template,
+        settings: {
+          ...existingIndexTemplate.index_template.template?.settings,
+          'index.mapping.total_fields.limit': 2500,
+          'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
         },
       },
     });
+  });
+
+  it(`should flatten ignore_missing_component_templates when ignore_missing_component_templates is provided`, async () => {
+    clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(
+      new EsErrors.ResponseError(
+        elasticsearchClientMock.createApiResponse({
+          statusCode: 400,
+          body: {
+            error: {
+              root_cause: [
+                {
+                  type: 'illegal_argument_exception',
+                  reason:
+                    'updating component template [.alerts-ecs-mappings] results in invalid composable template [.alerts-security.alerts-default-index-template] after templates are merged',
+                },
+              ],
+              type: 'illegal_argument_exception',
+              reason:
+                'updating component template [.alerts-ecs-mappings] results in invalid composable template [.alerts-security.alerts-default-index-template] after templates are merged',
+              caused_by: {
+                type: 'illegal_argument_exception',
+                reason:
+                  'composable template [.alerts-security.alerts-default-index-template] template after composition with component templates [.alerts-ecs-mappings, .alerts-security.alerts-mappings, .alerts-technical-mappings] is invalid',
+                caused_by: {
+                  type: 'illegal_argument_exception',
+                  reason:
+                    'invalid composite mappings for [.alerts-security.alerts-default-index-template]',
+                  caused_by: {
+                    type: 'illegal_argument_exception',
+                    reason: 'Limit of total fields [2500] has been exceeded',
+                  },
+                },
+              },
+            },
+          },
+        })
+      )
+    );
+    const existingIndexTemplate = {
+      name: 'test-template',
+      index_template: {
+        index_patterns: ['test*'],
+        composed_of: ['test-mappings'],
+        ignore_missing_component_templates: ['test-mappings', 'test-mappings-2'],
+        template: {
+          settings: {
+            auto_expand_replicas: '0-1',
+            hidden: true,
+            'index.lifecycle': {
+              name: '.alerts-ilm-policy',
+              rollover_alias: `.alerts-empty-default`,
+            },
+            'index.mapping.total_fields.limit': 1800,
+          },
+          mappings: {
+            dynamic: false,
+          },
+        },
+      },
+    };
+
+    clusterClient.indices.getIndexTemplate.mockResolvedValueOnce({
+      index_templates: [existingIndexTemplate],
+    });
+
+    await createOrUpdateComponentTemplate({
+      logger,
+      esClient: clusterClient,
+      template: ComponentTemplate,
+      totalFieldsLimit: 2500,
+    });
+
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
+      name: existingIndexTemplate.name,
+      ...existingIndexTemplate.index_template,
+      template: {
+        ...existingIndexTemplate.index_template.template,
+        settings: {
+          ...existingIndexTemplate.index_template.template?.settings,
+          'index.mapping.total_fields.limit': 2500,
+          'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+        },
+      },
+      ignore_missing_component_templates: ['test-mappings', 'test-mappings-2'],
+    });
+
+    expect(logger.info).toHaveBeenCalledWith(
+      'The total number of fields defined by the templates cannot exceed the limit [2500]. if you want to add more fields, please increase the limit'
+    );
   });
 
   it(`should update index template field limit and retry if putTemplate throws error with field limit error when there are malformed index templates`, async () => {
@@ -282,14 +371,13 @@ describe('createOrUpdateComponentTemplate', () => {
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
       name: existingIndexTemplate.name,
-      body: {
-        ...existingIndexTemplate.index_template,
-        template: {
-          ...existingIndexTemplate.index_template.template,
-          settings: {
-            ...existingIndexTemplate.index_template.template?.settings,
-            'index.mapping.total_fields.limit': 2500,
-          },
+      ...existingIndexTemplate.index_template,
+      template: {
+        ...existingIndexTemplate.index_template.template,
+        settings: {
+          ...existingIndexTemplate.index_template.template?.settings,
+          'index.mapping.total_fields.limit': 2500,
+          'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
         },
       },
     });

@@ -5,27 +5,22 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 import { AgentMarker } from './agent_marker';
+import { renderWithTheme } from '../../../../../utils/test_helpers';
 
 describe('AgentMarker', () => {
-  const mark = {
-    id: 'agent',
-    offset: 1000,
-    type: 'agentMark',
-    verticalLine: true,
-  } as AgentMark;
+  it('renders correctly', () => {
+    const mark: AgentMark = {
+      id: 'agent',
+      offset: 1000,
+      type: 'agentMark',
+      verticalLine: true,
+    };
 
-  it('renders', () => {
-    const component = shallow(
-      <EuiThemeProvider>
-        <AgentMarker mark={mark} />
-      </EuiThemeProvider>
-    );
+    const { container } = renderWithTheme(<AgentMarker mark={mark} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 });

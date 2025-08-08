@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   FindSLOGroupsParams,
   FindSLOGroupsResponse,
@@ -12,7 +12,7 @@ import {
   Pagination,
   sloGroupWithSummaryResponseSchema,
 } from '@kbn/slo-schema';
-import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
+import { getSummaryIndices, getSloSettings } from './slo_settings';
 import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../common/constants';
 import { IllegalArgumentError } from '../errors';
 import { typedSearch } from '../utils/queries';
@@ -38,7 +38,7 @@ function toPagination(params: FindSLOGroupsParams): Pagination {
 
 export class FindSLOGroups {
   constructor(
-    private esClient: ElasticsearchClient,
+    private scopedClusterClient: IScopedClusterClient,
     private soClient: SavedObjectsClientContract,
     private logger: Logger,
     private spaceId: string
@@ -53,11 +53,11 @@ export class FindSLOGroups {
     const parsedFilters = parseStringFilters(filters, this.logger);
 
     const settings = await getSloSettings(this.soClient);
-    const { indices } = await getListOfSummaryIndices(this.esClient, settings);
+    const { indices } = await getSummaryIndices(this.scopedClusterClient.asInternalUser, settings);
 
     const hasSelectedTags = groupBy === 'slo.tags' && groupsFilter.length > 0;
 
-    const response = await typedSearch(this.esClient, {
+    const response = await typedSearch(this.scopedClusterClient.asCurrentUser, {
       index: indices,
       size: 0,
       query: {
@@ -70,82 +70,80 @@ export class FindSLOGroups {
           must_not: [...(parsedFilters.must_not ?? [])],
         },
       },
-      body: {
-        aggs: {
-          groupBy: {
-            terms: {
-              field: groupBy,
-              size: 10000,
-              ...(hasSelectedTags && { include: groupsFilter }),
+      aggs: {
+        groupBy: {
+          terms: {
+            field: groupBy,
+            size: 10000,
+            ...(hasSelectedTags && { include: groupsFilter }),
+          },
+          aggs: {
+            worst: {
+              top_hits: {
+                sort: {
+                  errorBudgetRemaining: {
+                    order: 'asc',
+                  },
+                },
+                _source: {
+                  includes: [
+                    'sliValue',
+                    'status',
+                    'slo.id',
+                    'slo.instanceId',
+                    'slo.name',
+                    'slo.groupings',
+                  ],
+                },
+                size: 1,
+              },
             },
-            aggs: {
-              worst: {
-                top_hits: {
-                  sort: {
-                    errorBudgetRemaining: {
+            violated: {
+              filter: {
+                term: {
+                  status: 'VIOLATED',
+                },
+              },
+            },
+            healthy: {
+              filter: {
+                term: {
+                  status: 'HEALTHY',
+                },
+              },
+            },
+            degrading: {
+              filter: {
+                term: {
+                  status: 'DEGRADING',
+                },
+              },
+            },
+            noData: {
+              filter: {
+                term: {
+                  status: 'NO_DATA',
+                },
+              },
+            },
+            bucket_sort: {
+              bucket_sort: {
+                sort: [
+                  {
+                    _key: {
                       order: 'asc',
                     },
                   },
-                  _source: {
-                    includes: [
-                      'sliValue',
-                      'status',
-                      'slo.id',
-                      'slo.instanceId',
-                      'slo.name',
-                      'slo.groupings',
-                    ],
-                  },
-                  size: 1,
-                },
-              },
-              violated: {
-                filter: {
-                  term: {
-                    status: 'VIOLATED',
-                  },
-                },
-              },
-              healthy: {
-                filter: {
-                  term: {
-                    status: 'HEALTHY',
-                  },
-                },
-              },
-              degrading: {
-                filter: {
-                  term: {
-                    status: 'DEGRADING',
-                  },
-                },
-              },
-              noData: {
-                filter: {
-                  term: {
-                    status: 'NO_DATA',
-                  },
-                },
-              },
-              bucket_sort: {
-                bucket_sort: {
-                  sort: [
-                    {
-                      _key: {
-                        order: 'asc',
-                      },
-                    },
-                  ],
-                  from: (pagination.page - 1) * pagination.perPage,
-                  size: pagination.perPage,
-                },
+                ],
+                from: (pagination.page - 1) * pagination.perPage,
+                size: pagination.perPage,
               },
             },
           },
-          distinct_items: {
-            cardinality: {
-              field: groupBy,
-            },
+        },
+        distinct_items: {
+          cardinality: {
+            field: groupBy,
           },
         },
       },

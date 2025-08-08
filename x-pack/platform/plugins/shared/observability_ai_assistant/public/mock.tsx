@@ -13,7 +13,7 @@ import type {
   ChatCompletionChunkEvent,
   StreamingChatResponseEventWithoutError,
 } from '../common/conversation_complete';
-import { MessageRole, ScreenContextActionDefinition } from '../common/types';
+import { ScreenContextActionDefinition } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type {
   ObservabilityAIAssistantChatService,
@@ -40,13 +40,7 @@ export const mockChatService: ObservabilityAIAssistantChatService = {
   ),
   hasFunction: () => true,
   hasRenderFunction: () => true,
-  getSystemMessage: () => ({
-    '@timestamp': new Date().toISOString(),
-    message: {
-      role: MessageRole.System,
-      content: 'System',
-    },
-  }),
+  getSystemMessage: () => 'System',
   getScopes: jest.fn(),
 };
 

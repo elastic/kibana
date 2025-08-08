@@ -131,7 +131,7 @@ function TimeIntervalParamEditor({
         />{' '}
         <EuiIconTip
           position="right"
-          type="questionInCircle"
+          type="question"
           content={interval.scale <= 1 ? tooManyBucketsTooltip : tooLargeBucketsTooltip}
         />
       </strong>

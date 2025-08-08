@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 
-import { ALERTS, DISCOVERIES, LAST_GENERATED } from './translations';
+import { Separator } from '../separator';
+import { ALERTS, PLUS_ALERTS, DISCOVERIES, LAST_GENERATED } from './translations';
 
 export const EMPTY_LAST_UPDATED_DATE = '--';
+
+/** We don't know the exact count above this threshold */
+const EXACT_COUNT_THRESHOLD = 1000;
 
 interface Props {
   alertsCount: number;
@@ -25,7 +29,6 @@ const SummaryCountComponent: React.FC<Props> = ({
   attackDiscoveriesCount,
   lastUpdated,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const [formattedDate, setFormattedDate] = useState<string>(EMPTY_LAST_UPDATED_DATE);
 
   useEffect(() => {
@@ -44,28 +47,6 @@ const SummaryCountComponent: React.FC<Props> = ({
     return () => clearInterval(intervalId);
   }, [lastUpdated]);
 
-  const Separator = useMemo(
-    () => (
-      <EuiText
-        css={css`
-          color: ${euiTheme.colors.lightShade};
-        `}
-        size="s"
-      >
-        <EuiFlexItem
-          css={css`
-            margin-left: ${euiTheme.size.s};
-            margin-right: ${euiTheme.size.s};
-          `}
-          grow={false}
-        >
-          {'|'}
-        </EuiFlexItem>
-      </EuiText>
-    ),
-    [euiTheme.colors.lightShade, euiTheme.size.s]
-  );
-
   return (
     <EuiText
       css={css`
@@ -74,20 +55,20 @@ const SummaryCountComponent: React.FC<Props> = ({
       data-test-subj="summaryCount"
       size="xs"
     >
-      <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
         <EuiFlexItem data-test-subj="discoveriesCount" grow={false}>
           {DISCOVERIES(attackDiscoveriesCount)}
         </EuiFlexItem>
 
-        {Separator}
+        <Separator />
 
         <EuiFlexItem data-test-subj="alertsCount" grow={false}>
-          {ALERTS(alertsCount)}
+          {alertsCount >= EXACT_COUNT_THRESHOLD ? PLUS_ALERTS(alertsCount) : ALERTS(alertsCount)}
         </EuiFlexItem>
 
         {lastUpdated != null && (
           <>
-            {Separator}
+            <Separator />
 
             <EuiFlexItem data-test-subj="lastGenerated" grow={false}>
               {LAST_GENERATED}

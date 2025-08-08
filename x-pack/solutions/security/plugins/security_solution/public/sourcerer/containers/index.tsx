@@ -16,10 +16,13 @@ import { getDataViewStateFromIndexFields } from '../../common/containers/source/
 import { useFetchIndex } from '../../common/containers/source';
 import type { State } from '../../common/store/types';
 import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export const useSourcererDataView = (
   scopeId: SourcererScopeName = SourcererScopeName.default
 ): SelectedDataView => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
   const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
@@ -64,13 +67,24 @@ export const useSourcererDataView = (
   );
 
   useEffect(() => {
+    if (newDataViewPickerEnabled) {
+      return;
+    }
+
     if (selectedDataView == null || missingPatterns.length > 0) {
       // old way of fetching indices, legacy timeline
       setLegacyPatterns(selectedPatterns);
-    } else {
+    } else if (legacyPatterns.length > 0) {
+      // Only create a new array reference if legacyPatterns is not empty
       setLegacyPatterns([]);
     }
-  }, [missingPatterns, selectedDataView, selectedPatterns]);
+  }, [
+    legacyPatterns.length,
+    newDataViewPickerEnabled,
+    missingPatterns,
+    selectedDataView,
+    selectedPatterns,
+  ]);
 
   const sourcererDataView = useMemo(() => {
     const _dv =

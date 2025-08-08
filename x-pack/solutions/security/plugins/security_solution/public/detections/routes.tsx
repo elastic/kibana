@@ -6,11 +6,18 @@
  */
 
 import React from 'react';
-import type { RouteProps, RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps, RouteProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
-import { ALERTS_PATH, DETECTIONS_PATH } from '../../common/constants';
+import { AlertSummaryContainer } from './pages/alert_summary';
+import {
+  ALERT_SUMMARY_PATH,
+  ALERTS_PATH,
+  DETECTIONS_PATH,
+  SecurityPageName,
+} from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { Alerts } from './pages/alerts';
+import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 const AlertsRoutes = () => (
   <PluginTemplateWrapper>
@@ -28,10 +35,14 @@ const DetectionsRedirects = ({ location }: RouteComponentProps) =>
 export const routes: RouteProps[] = [
   {
     path: DETECTIONS_PATH,
-    render: DetectionsRedirects,
+    component: withSecurityRoutePageWrapper(DetectionsRedirects, SecurityPageName.detections),
   },
   {
     path: ALERTS_PATH,
-    component: AlertsRoutes,
+    component: withSecurityRoutePageWrapper(AlertsRoutes, SecurityPageName.alerts),
+  },
+  {
+    path: ALERT_SUMMARY_PATH,
+    component: withSecurityRoutePageWrapper(AlertSummaryContainer, SecurityPageName.alertSummary),
   },
 ];

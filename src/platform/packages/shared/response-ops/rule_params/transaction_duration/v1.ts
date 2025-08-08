@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { searchConfigurationSchema } from '../common/search_configuration_schema';
 
 export enum AggregationType {
@@ -17,20 +18,59 @@ export enum AggregationType {
 }
 
 export const transactionDurationParamsSchema = schema.object({
-  serviceName: schema.maybe(schema.string()),
-  transactionType: schema.maybe(schema.string()),
-  transactionName: schema.maybe(schema.string()),
-  windowSize: schema.number(),
-  windowUnit: schema.string(),
-  threshold: schema.number(),
-  aggregationType: schema.oneOf([
-    schema.literal(AggregationType.Avg),
-    schema.literal(AggregationType.P95),
-    schema.literal(AggregationType.P99),
-  ]),
-  environment: schema.string(),
-  groupBy: schema.maybe(schema.arrayOf(schema.string())),
-  useKqlFilter: schema.maybe(schema.boolean()),
+  serviceName: schema.maybe(
+    schema.string({ meta: { description: 'Filter the rule to apply to a specific service.' } })
+  ),
+  transactionType: schema.maybe(
+    schema.string({
+      meta: { description: 'Filter the rule to apply to a specific transaction type.' },
+    })
+  ),
+  transactionName: schema.maybe(
+    schema.string({
+      meta: { description: 'Filter the rule to apply to a specific transaction name.' },
+    })
+  ),
+  windowSize: schema.number({
+    meta: {
+      description:
+        'The size of the time window (in `windowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.',
+    },
+  }),
+  windowUnit: schema.string({
+    meta: {
+      description: 'The type of units for the time window. For example: minutes, hours, or days.',
+    },
+  }),
+  threshold: schema.number({ meta: { description: 'The latency threshold value.' } }),
+  aggregationType: schema.oneOf(
+    [
+      schema.literal(AggregationType.Avg),
+      schema.literal(AggregationType.P95),
+      schema.literal(AggregationType.P99),
+    ],
+    { meta: { description: 'The type of aggregation to perform.' } }
+  ),
+  environment: schema.string({
+    meta: { description: 'Filter the rule to apply to a specific environment.' },
+  }),
+  groupBy: schema.maybe(
+    schema.arrayOf(
+      schema.string({
+        meta: {
+          description:
+            'Perform a composite aggregation against the selected fields. When any of these groups match the selected rule conditions, an alert is triggered per group.',
+        },
+      })
+    )
+  ),
+  useKqlFilter: schema.maybe(
+    schema.boolean({
+      meta: {
+        description: 'A Kibana Query Language (KQL) expression thats limits the scope of alerts.',
+      },
+    })
+  ),
   searchConfiguration: schema.maybe(searchConfigurationSchema),
 });
 

@@ -183,7 +183,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
               {!!data?.apiKeys && (
                 <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon size="s" type="iInCircle" color="subdued" />
+                    <EuiIcon size="s" type="info" color="subdued" />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="xs" color="subdued">

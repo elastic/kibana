@@ -40,13 +40,6 @@ export interface InferenceProvider {
   logo?: string;
   configurations: FieldsConfiguration;
 }
-export interface Config {
-  taskType: string;
-  taskTypeConfig?: Record<string, unknown>;
-  inferenceId: string;
-  provider: string;
-  providerConfig?: Record<string, unknown>;
-}
 
 export interface Secrets {
   providerSecrets?: Record<string, unknown>;

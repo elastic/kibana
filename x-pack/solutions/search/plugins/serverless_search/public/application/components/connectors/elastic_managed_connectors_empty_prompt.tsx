@@ -9,12 +9,9 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiIcon, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ConnectorIcon } from '@kbn/search-shared-ui';
-import {
-  SearchEmptyPrompt,
-  DecorativeHorizontalStepper,
-  EuiIconPlugs,
-} from '@kbn/search-shared-ui';
+import { SearchEmptyPrompt } from '@kbn/search-shared-ui';
 import { SERVERLESS_ES_CONNECTORS_ID } from '@kbn/deeplinks-search/constants';
+import { DecorativeHorizontalStepper } from '@kbn/search-connectors';
 import { BACK_LABEL, COMING_SOON_LABEL } from '../../../../common/i18n_string';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
@@ -35,7 +32,7 @@ export const ElasticManagedConnectorsEmptyPrompt: React.FC = () => {
         label: BACK_LABEL,
         onClickBack: () => navigateToApp(SERVERLESS_ES_CONNECTORS_ID),
       }}
-      icon={EuiIconPlugs}
+      icon="plugs"
       title={i18n.translate('xpack.serverlessSearch.elasticManagedConnectorEmpty.title', {
         defaultMessage: 'Elastic managed connectors',
       })}
@@ -114,7 +111,7 @@ export const ElasticManagedConnectorsEmptyPrompt: React.FC = () => {
                         justifyContent="center"
                       >
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type={EuiIconPlugs} />
+                          <EuiIcon color="primary" size="l" type="plugs" />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <EuiIcon color="primary" size="l" type="logoElastic" />

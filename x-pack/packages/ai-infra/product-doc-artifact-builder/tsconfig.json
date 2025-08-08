@@ -17,5 +17,6 @@
     "@kbn/tooling-log",
     "@kbn/repo-info",
     "@kbn/product-doc-common",
+    "@kbn/inference-common",
   ]
 }

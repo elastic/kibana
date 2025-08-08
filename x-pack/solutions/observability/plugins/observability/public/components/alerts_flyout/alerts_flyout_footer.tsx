@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { ComponentProps, useMemo } from 'react';
-import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
+import React, { ComponentProps, useMemo } from 'react';
+import { paths } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
-import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 import { useKibana } from '../../utils/kibana_react';
-import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
+import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 
 export type AlertsFlyoutFooterProps = Pick<
   ComponentProps<GetObservabilityAlertsTableProp<'renderFlyoutFooter'>>,
@@ -30,7 +29,7 @@ export function AlertsFlyoutFooter({
       basePath: { prepend },
     },
   } = useKibana().services;
-  const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
+
   const parsedAlert = parseAlert(observabilityRuleTypeRegistry)(alert);
   const viewInAppUrl = useMemo(() => {
     if (!parsedAlert.hasBasePath) {
@@ -42,7 +41,7 @@ export function AlertsFlyoutFooter({
   return (
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="flexEnd">
-        {!parsedAlert.link || (isSLODetailsPage && tableId === SLO_ALERTS_TABLE_ID) ? null : (
+        {!parsedAlert.link || tableId === SLO_ALERTS_TABLE_ID ? null : (
           <EuiFlexItem grow={false}>
             <EuiButton data-test-subj="alertsFlyoutViewInAppButton" fill href={viewInAppUrl}>
               {i18n.translate('xpack.observability.alertsFlyout.viewInAppButtonText', {

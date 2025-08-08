@@ -269,12 +269,10 @@ describe('experimental_datastream_features', () => {
       expect(esClient.cluster.getComponentTemplate).toHaveBeenCalled();
       expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            template: expect.objectContaining({
-              settings: expect.objectContaining({
-                index: expect.objectContaining({
-                  mapping: expect.objectContaining({ source: { mode: 'synthetic' } }),
-                }),
+          template: expect.objectContaining({
+            settings: expect.objectContaining({
+              index: expect.objectContaining({
+                mapping: expect.objectContaining({ source: { mode: 'synthetic' } }),
               }),
             }),
           }),
@@ -296,15 +294,13 @@ describe('experimental_datastream_features', () => {
       expect(esClient.cluster.getComponentTemplate).toHaveBeenCalled();
       expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            template: expect.objectContaining({
-              mappings: expect.objectContaining({
-                properties: expect.objectContaining({
-                  sequence: {
-                    type: 'long',
-                    index: false,
-                  },
-                }),
+          template: expect.objectContaining({
+            mappings: expect.objectContaining({
+              properties: expect.objectContaining({
+                sequence: {
+                  type: 'long',
+                  index: false,
+                },
               }),
             }),
           }),
@@ -326,15 +322,13 @@ describe('experimental_datastream_features', () => {
       expect(esClient.cluster.getComponentTemplate).toHaveBeenCalled();
       expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            template: expect.objectContaining({
-              mappings: expect.objectContaining({
-                properties: expect.objectContaining({
-                  name: {
-                    type: 'keyword',
-                    index: false,
-                  },
-                }),
+          template: expect.objectContaining({
+            mappings: expect.objectContaining({
+              properties: expect.objectContaining({
+                name: {
+                  type: 'keyword',
+                  index: false,
+                },
               }),
             }),
           }),
@@ -356,14 +350,12 @@ describe('experimental_datastream_features', () => {
       expect(esClient.cluster.getComponentTemplate).toHaveBeenCalled();
       expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            template: expect.objectContaining({
-              mappings: expect.objectContaining({
-                properties: expect.objectContaining({
-                  '@timestamp': {
-                    type: 'date',
-                  },
-                }),
+          template: expect.objectContaining({
+            mappings: expect.objectContaining({
+              properties: expect.objectContaining({
+                '@timestamp': {
+                  type: 'date',
+                },
               }),
             }),
           }),
@@ -385,11 +377,9 @@ describe('experimental_datastream_features', () => {
       expect(esClient.indices.getIndexTemplate).toHaveBeenCalled();
       expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            template: expect.objectContaining({
-              settings: expect.objectContaining({
-                index: { mode: 'time_series' },
-              }),
+          template: expect.objectContaining({
+            settings: expect.objectContaining({
+              index: { mode: 'time_series' },
             }),
           }),
           _meta: { has_experimental_data_stream_indexing_features: true },
@@ -485,12 +475,10 @@ describe('experimental_datastream_features', () => {
         expect(esClient.cluster.getComponentTemplate).toHaveBeenCalled();
         expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: expect.objectContaining({
-              template: expect.objectContaining({
-                settings: expect.objectContaining({
-                  index: expect.objectContaining({
-                    mapping: expect.objectContaining({ source: { mode: 'synthetic' } }),
-                  }),
+            template: expect.objectContaining({
+              settings: expect.objectContaining({
+                index: expect.objectContaining({
+                  mapping: expect.objectContaining({ source: { mode: 'synthetic' } }),
                 }),
               }),
             }),
@@ -512,15 +500,13 @@ describe('experimental_datastream_features', () => {
         expect(esClient.cluster.getComponentTemplate).toHaveBeenCalled();
         expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: expect.objectContaining({
-              template: expect.objectContaining({
-                mappings: expect.objectContaining({
-                  properties: expect.objectContaining({
-                    sequence: {
-                      type: 'long',
-                      index: false,
-                    },
-                  }),
+            template: expect.objectContaining({
+              mappings: expect.objectContaining({
+                properties: expect.objectContaining({
+                  sequence: {
+                    type: 'long',
+                    index: false,
+                  },
                 }),
               }),
             }),
@@ -542,15 +528,13 @@ describe('experimental_datastream_features', () => {
         expect(esClient.cluster.getComponentTemplate).toHaveBeenCalled();
         expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: expect.objectContaining({
-              template: expect.objectContaining({
-                mappings: expect.objectContaining({
-                  properties: expect.objectContaining({
-                    name: {
-                      type: 'keyword',
-                      index: false,
-                    },
-                  }),
+            template: expect.objectContaining({
+              mappings: expect.objectContaining({
+                properties: expect.objectContaining({
+                  name: {
+                    type: 'keyword',
+                    index: false,
+                  },
                 }),
               }),
             }),
@@ -588,11 +572,9 @@ describe('experimental_datastream_features', () => {
         expect(esClient.indices.getIndexTemplate).toHaveBeenCalled();
         expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: expect.objectContaining({
-              template: expect.objectContaining({
-                settings: expect.objectContaining({
-                  index: { mode: 'time_series' },
-                }),
+            template: expect.objectContaining({
+              settings: expect.objectContaining({
+                index: { mode: 'time_series' },
               }),
             }),
             _meta: { has_experimental_data_stream_indexing_features: true },

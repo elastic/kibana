@@ -48,7 +48,7 @@ const useStyles = (shouldShowQueryBuilder: boolean) => {
     display: block;
     max-height: ${shouldShowQueryBuilder ? '300px' : '0'};
     visibility: ${shouldShowQueryBuilder ? 'visible' : 'hidden'};
-    margin-block-start: ${shouldShowQueryBuilder ? '0' : -euiTheme.size.s};
+    margin-block-start: ${shouldShowQueryBuilder ? '0' : `calc(-1 * ${euiTheme.size.s})`};
 
     . ${IS_DRAGGING_CLASS_NAME} & {
       display: block;

@@ -1,7 +1,7 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
@@ -9,7 +9,7 @@
     "server/**/*",
     "../../../../../typings/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
-    "public/**/*.json",
+    "public/**/*.json"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -79,9 +79,10 @@
     "@kbn/json-schemas",
     "@kbn/ml-field-stats-flyout",
     "@kbn/ml-validators",
-    "@kbn/core-user-profile-browser-mocks"
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/response-ops-rule-form",
+    "@kbn/response-ops-rule-params",
+    "@kbn/fields-metadata-plugin"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

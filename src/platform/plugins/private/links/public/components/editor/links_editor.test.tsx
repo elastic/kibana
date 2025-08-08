@@ -10,20 +10,13 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, screen, waitFor } from '@testing-library/react';
-import LinksEditor from './links_editor';
+import { EuiThemeProvider } from '@elastic/eui';
+import LinksEditor, { LinksEditorProps } from './links_editor';
 import { LinksStrings } from '../links_strings';
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { ResolvedLink } from '../../types';
 
 describe('LinksEditor', () => {
-  const defaultProps = {
-    onSaveToLibrary: jest.fn().mockImplementation(() => Promise.resolve()),
-    onAddToDashboard: jest.fn(),
-    onClose: jest.fn(),
-    isByReference: false,
-    flyoutId: 'test-id',
-  };
-
   const someLinks: ResolvedLink[] = [
     {
       id: 'foo',
@@ -60,8 +53,24 @@ describe('LinksEditor', () => {
     jest.clearAllMocks();
   });
 
+  const renderEditor = (overrides?: Partial<LinksEditorProps>) => {
+    const defaultProps = {
+      onSaveToLibrary: jest.fn().mockImplementation(() => Promise.resolve()),
+      onAddToDashboard: jest.fn(),
+      onClose: jest.fn(),
+      isByReference: false,
+      flyoutId: 'test-id',
+    };
+    return render(
+      <EuiThemeProvider>
+        <LinksEditor {...defaultProps} {...overrides} />
+      </EuiThemeProvider>
+    );
+  };
+
   test('shows empty state with no links', async () => {
-    render(<LinksEditor {...defaultProps} />);
+    const onClose = jest.fn();
+    renderEditor({ onClose });
     expect(screen.getByTestId('links--panelEditor--title')).toHaveTextContent(
       LinksStrings.editor.panelEditor.getCreateFlyoutTitle()
     );
@@ -69,12 +78,13 @@ describe('LinksEditor', () => {
     expect(screen.getByTestId('links--panelEditor--saveBtn')).toBeDisabled();
 
     await userEvent.click(screen.getByTestId('links--panelEditor--closeBtn'));
-    expect(defaultProps.onClose).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   test('shows links in order', async () => {
     const expectedLinkIds = [...someLinks].sort((a, b) => a.order - b.order).map(({ id }) => id);
-    render(<LinksEditor {...defaultProps} initialLinks={someLinks} />);
+    renderEditor({ initialLinks: someLinks });
+
     expect(screen.getByTestId('links--panelEditor--title')).toHaveTextContent(
       LinksStrings.editor.panelEditor.getEditFlyoutTitle()
     );
@@ -88,19 +98,23 @@ describe('LinksEditor', () => {
 
   test('saving by reference panels calls onSaveToLibrary', async () => {
     const orderedLinks = [...someLinks].sort((a, b) => a.order - b.order);
-    render(<LinksEditor {...defaultProps} initialLinks={someLinks} isByReference />);
+    const onSaveToLibrary = jest.fn().mockImplementation(() => Promise.resolve());
+    renderEditor({ initialLinks: someLinks, onSaveToLibrary, isByReference: true });
+
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
-    await waitFor(() => expect(defaultProps.onSaveToLibrary).toHaveBeenCalledTimes(1));
-    expect(defaultProps.onSaveToLibrary).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
+    await waitFor(() => expect(onSaveToLibrary).toHaveBeenCalledTimes(1));
+    expect(onSaveToLibrary).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
   });
 
   test('saving by value panel calls onAddToDashboard', async () => {
     const orderedLinks = [...someLinks].sort((a, b) => a.order - b.order);
-    render(<LinksEditor {...defaultProps} initialLinks={someLinks} isByReference={false} />);
+    const onAddToDashboard = jest.fn();
+    renderEditor({ initialLinks: someLinks, onAddToDashboard, isByReference: false });
+
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
-    expect(defaultProps.onAddToDashboard).toHaveBeenCalledTimes(1);
-    expect(defaultProps.onAddToDashboard).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
+    expect(onAddToDashboard).toHaveBeenCalledTimes(1);
+    expect(onAddToDashboard).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
   });
 });

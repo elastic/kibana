@@ -105,7 +105,7 @@ describe('getKibanaUpgradeStatus', () => {
   });
 
   it('returns totalCriticalDeprecations === 0 when only critical API deprecations', async () => {
-    deprecationsClient.getAllDeprecations.mockResolvedValue([
+    const apiDeprecations = [
       {
         title: 'mock-deprecation-title',
         correctiveActions: {
@@ -142,11 +142,50 @@ describe('getKibanaUpgradeStatus', () => {
         message: 'testMessage',
         domainId: 'security',
       },
-    ]);
+    ] as DomainDeprecationDetails[];
+
+    deprecationsClient.getAllDeprecations.mockResolvedValue(apiDeprecations);
 
     await expect(getKibanaUpgradeStatus(deprecationsClient)).resolves.toHaveProperty(
       'totalCriticalDeprecations',
       0
     );
+  });
+
+  it('returns apiDeprecations with all API deprecations', async () => {
+    const apiDeprecations = [
+      {
+        title: 'mock-deprecation-title',
+        correctiveActions: {
+          manualSteps: [],
+        },
+        apiId: 'foo',
+        deprecationType: 'api',
+        documentationUrl: 'testDocUrl',
+        level: 'warning',
+        message: 'testMessage',
+        domainId: 'security',
+      },
+      {
+        title: 'mock-deprecation-title',
+        correctiveActions: {
+          manualSteps: [],
+        },
+        apiId: 'bar',
+        deprecationType: 'api',
+        documentationUrl: 'testDocUrl',
+        level: 'critical',
+        message: 'testMessage',
+        domainId: 'security',
+      },
+    ] as DomainDeprecationDetails[];
+
+    deprecationsClient.getAllDeprecations.mockResolvedValue([
+      ...mockKibanaDeprecations(),
+      ...apiDeprecations,
+    ]);
+
+    const result = await getKibanaUpgradeStatus(deprecationsClient);
+    expect(result.apiDeprecations).toEqual(apiDeprecations);
   });
 });

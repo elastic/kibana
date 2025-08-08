@@ -26,7 +26,9 @@ import { getSloBurnRates } from './get_slo_burn_rates';
 import { getSLOSuggestionsRoute } from './get_suggestions';
 import { putSloSettings } from './put_slo_settings';
 import { resetSLORoute } from './reset_slo';
-import { getSLOsOverview } from './get_slos_overview';
+import { getSLOStatsOverview } from './get_slo_stats_overview';
+import { bulkDeleteSLORoute, getBulkDeleteStatusRoute } from './bulk_delete';
+import { bulkPurgeRollupRoute } from './purge_rollup_data';
 
 export const getSloRouteRepository = (isServerless?: boolean) => {
   return {
@@ -37,6 +39,7 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...inspectSLORoute,
     ...deleteSLORoute,
     ...deleteSloInstancesRoute,
+    ...bulkPurgeRollupRoute,
     ...disableSLORoute,
     ...enableSLORoute,
     ...fetchHistoricalSummary,
@@ -51,6 +54,8 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...resetSLORoute,
     ...findSLOGroupsRoute,
     ...getSLOSuggestionsRoute,
-    ...getSLOsOverview,
+    ...getSLOStatsOverview,
+    ...bulkDeleteSLORoute,
+    ...getBulkDeleteStatusRoute,
   };
 };

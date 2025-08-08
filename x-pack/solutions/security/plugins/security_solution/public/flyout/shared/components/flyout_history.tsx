@@ -7,30 +7,40 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiFlexItem,
   EuiButtonEmpty,
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiText,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPopover,
+  EuiText,
   EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import type { FlyoutPanelHistory } from '@kbn/expandable-flyout';
 import { FlyoutHistoryRow } from './flyout_history_row';
 import {
-  FLYOUT_HISTORY_TEST_ID,
   FLYOUT_HISTORY_BUTTON_TEST_ID,
   FLYOUT_HISTORY_CONTEXT_PANEL_TEST_ID,
+  FLYOUT_HISTORY_TEST_ID,
   NO_DATA_HISTORY_ROW_TEST_ID,
 } from './test_ids';
+
+const flyoutHistoryButtonTooltip = i18n.translate(
+  'xpack.securitySolution.flyout.right.header.flyoutHistoryButton',
+  {
+    defaultMessage: 'Flyout history',
+  }
+);
 
 export interface HistoryProps {
   /**
    * A list of flyouts that have been opened
    */
-  history: FlyoutPanelProps[];
+  history: FlyoutPanelHistory[];
 }
 
 /**
@@ -62,7 +72,12 @@ export const FlyoutHistory: FC<HistoryProps> = memo(({ history }) => {
     () =>
       history.length > 0
         ? history.map((item, index) => {
-            return <FlyoutHistoryRow item={item} index={index} />;
+            return (
+              <>
+                <EuiHorizontalRule margin="none" />
+                <FlyoutHistoryRow item={item} index={index} />
+              </>
+            );
           })
         : [emptyHistoryMessage],
     [history, emptyHistoryMessage]
@@ -72,12 +87,14 @@ export const FlyoutHistory: FC<HistoryProps> = memo(({ history }) => {
     <EuiFlexItem grow={false} data-test-subj={FLYOUT_HISTORY_TEST_ID}>
       <EuiPopover
         button={
-          <EuiButtonEmpty
-            onClick={togglePopover}
-            size="m"
-            iconType={'clockCounter'}
-            data-test-subj={FLYOUT_HISTORY_BUTTON_TEST_ID}
-          />
+          <EuiToolTip content={flyoutHistoryButtonTooltip}>
+            <EuiButtonEmpty
+              onClick={togglePopover}
+              size="m"
+              iconType={'clockCounter'}
+              data-test-subj={FLYOUT_HISTORY_BUTTON_TEST_ID}
+            />
+          </EuiToolTip>
         }
         isOpen={isPopoverOpen}
         closePopover={togglePopover}

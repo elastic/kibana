@@ -9,16 +9,16 @@ import React from 'react';
 import { ThemeProvider } from '@emotion/react';
 import { pick } from 'lodash';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
-import { Story } from '@storybook/react';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { NodeViewModel } from '../types';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode, LabelNode } from '.';
 
 import '@xyflow/react/dist/style.css';
+import { GlobalGraphStyles } from '../graph/styles';
 
-export default {
-  title: 'Components/Graph Components',
-  description: 'CDR - Graph visualization',
+const meta: Meta<NodeViewModel> = {
+  title: 'Components/Graph Components/Node',
   argTypes: {
     color: {
       options: ['primary', 'danger', 'warning'],
@@ -30,8 +30,29 @@ export default {
     },
     expandButtonClick: { action: 'expandButtonClick' },
   },
+  args: {
+    id: 'siem-windows',
+    label: 'tin-mpb-pro-15',
+    tag: 'Host',
+    ips: [
+      '10.200.0.202',
+      '192.14.29.80',
+      '192.14.29.80',
+      '74.25.14.20',
+      '192.14.29.80',
+      '10.200.0.202',
+    ],
+    countryCodes: ['us', 'ru', 'es', 'us', 'us'],
+    count: 5,
+    color: 'primary',
+    shape: 'hexagon',
+    icon: 'aws',
+    interactive: true,
+  },
   decorators: [GlobalStylesStorybookDecorator],
 };
+
+export default meta;
 
 const nodeTypes = {
   hexagon: HexagonNode,
@@ -42,7 +63,7 @@ const nodeTypes = {
   label: LabelNode,
 };
 
-const Template: Story<NodeViewModel> = (args: NodeViewModel) => (
+const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
   <ThemeProvider theme={{ darkMode: false }}>
     <ReactFlow
       fitView
@@ -52,7 +73,19 @@ const Template: Story<NodeViewModel> = (args: NodeViewModel) => (
         {
           id: args.id,
           type: args.shape,
-          data: pick(args, ['id', 'label', 'color', 'icon', 'interactive', 'expandButtonClick']),
+          data: pick(args, [
+            'id',
+            'tag',
+            'label',
+            'color',
+            'icon',
+            'count',
+            'ips',
+            'oss',
+            'countryCodes',
+            'interactive',
+            'expandButtonClick',
+          ]),
           position: { x: 0, y: 0 },
         },
       ]}
@@ -60,16 +93,10 @@ const Template: Story<NodeViewModel> = (args: NodeViewModel) => (
       <Controls />
       <Background />
     </ReactFlow>
+    <GlobalGraphStyles />
   </ThemeProvider>
 );
 
-export const Node = Template.bind({});
-
-Node.args = {
-  id: 'siem-windows',
-  label: '',
-  color: 'primary',
-  shape: 'hexagon',
-  icon: 'okta',
-  interactive: true,
+export const Node: StoryObj<NodeViewModel> = {
+  render: Template,
 };

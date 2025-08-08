@@ -10,6 +10,7 @@
 import { indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { flatten } from 'lodash';
+import { escapeKuery } from '@kbn/es-query';
 import { sortPrefixFirst } from './sort_prefix_first';
 import { QuerySuggestionField, QuerySuggestionTypes } from '../query_suggestion_provider';
 import { KqlQuerySuggestionProvider } from './types';
@@ -56,7 +57,6 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
       }
     });
     const sortedFields = sortPrefixFirst(matchingFields.sort(keywordComparator), search, 'name');
-    const { escapeKuery } = await import('@kbn/es-query');
     const suggestions: QuerySuggestionField[] = sortedFields.map((field) => {
       const isNested = field.subType && field.subType.nested;
       const isSuggestionsAbstractionOn = !!suggestionsAbstraction?.fields?.[field.name];

@@ -7,7 +7,10 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import { useFetchSyntheticsSuggestions } from '../hooks/use_fetch_synthetics_suggestions';
+import {
+  FetchSyntheticsSuggestionsFilters,
+  useFetchSyntheticsSuggestions,
+} from '../hooks/use_fetch_synthetics_suggestions';
 import { StatusRuleParamsProps } from '../status_rule_ui';
 import { LocationsField, MonitorField, MonitorTypeField, ProjectsField, TagsField } from './fields';
 
@@ -16,9 +19,10 @@ type FieldKeys = 'monitorIds' | 'projects' | 'tags' | 'locations' | 'monitorType
 interface Props {
   ruleParams: StatusRuleParamsProps['ruleParams'];
   setRuleParams: StatusRuleParamsProps['setRuleParams'];
+  filters?: FetchSyntheticsSuggestionsFilters;
 }
 
-export const FieldFilters = ({ ruleParams, setRuleParams }: Props) => {
+export const FieldFilters = ({ ruleParams, setRuleParams, filters }: Props) => {
   const [search, setSearch] = useState<string>('');
   const [selectedField, setSelectedField] = useState<string>();
 
@@ -29,6 +33,7 @@ export const FieldFilters = ({ ruleParams, setRuleParams }: Props) => {
   } = useFetchSyntheticsSuggestions({
     search,
     fieldName: selectedField,
+    filters,
   });
 
   const onFieldChange = useCallback(

@@ -13,13 +13,18 @@ export enum OnboardingTopicId {
 
 export enum OnboardingCardId {
   integrations = 'integrations',
+  integrationsSearchAILake = 'integrations_search_ai_lake',
+  knowledgeSource = 'knowledge_source',
+  searchAiLakeLLM = 'search_ai_lake_llm',
   dashboards = 'dashboards',
   rules = 'rules',
   alerts = 'alerts',
   assistant = 'assistant',
+  assistantExternalDetections = 'assistant_external_detections',
   attackDiscovery = 'attack_discovery',
 
   // siem_migrations topic cards
   siemMigrationsAiConnectors = 'ai_connectors',
-  siemMigrationsStart = 'start',
+  siemMigrationsRules = 'migrate_rules',
+  siemMigrationIntegrations = 'migration_integrations',
 }

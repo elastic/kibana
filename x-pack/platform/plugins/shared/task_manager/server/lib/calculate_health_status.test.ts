@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { set } from '@kbn/safer-lodash-set';
-import { HealthStatus, RawMonitoringStats } from '../monitoring';
+import type { RawMonitoringStats } from '../monitoring';
+import { HealthStatus } from '../monitoring';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { calculateHealthStatus } from './calculate_health_status';
 import { cloneDeep } from 'lodash';

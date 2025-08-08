@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { EuiPageSection, EuiSpacer } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useMaintenanceWindowsNavigation } from '../../hooks/use_navigation';
@@ -24,7 +24,8 @@ export const MaintenanceWindowsEditPage = React.memo(() => {
   useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsEdit);
 
   const { maintenanceWindowId } = useParams<{ maintenanceWindowId: string }>();
-  const { maintenanceWindow, isLoading, isError } = useGetMaintenanceWindow(maintenanceWindowId);
+  const { maintenanceWindow, showMultipleSolutionsWarning, isLoading, isError } =
+    useGetMaintenanceWindow(maintenanceWindowId);
 
   if (isError) {
     navigateToMaintenanceWindows();
@@ -38,6 +39,18 @@ export const MaintenanceWindowsEditPage = React.memo(() => {
     <EuiPageSection restrictWidth={true}>
       <PageHeader showBackButton={true} title={i18n.EDIT_MAINTENANCE_WINDOW} />
       <EuiSpacer size="xl" />
+      {showMultipleSolutionsWarning && (
+        <>
+          <EuiCallOut
+            data-test-subj="maintenanceWindowMultipleSolutionsWarning"
+            title={i18n.SOLUTION_CONFIG_REMOVAL_WARNING_TITLE}
+            color="warning"
+          >
+            <p>{i18n.SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE}</p>
+          </EuiCallOut>
+          <EuiSpacer size="xl" />
+        </>
+      )}
       <CreateMaintenanceWindowForm
         initialValue={maintenanceWindow}
         maintenanceWindowId={maintenanceWindowId}

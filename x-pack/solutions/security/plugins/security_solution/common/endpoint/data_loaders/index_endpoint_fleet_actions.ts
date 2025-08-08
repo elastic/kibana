@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Client, estypes } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ResponseActionsApiCommandNames } from '../service/response_actions/constants';
@@ -152,6 +151,17 @@ export const buildIEndpointAndFleetActionsBulkOperations = ({
     for (let i = 0; i < count; i++) {
       // start with endpoint action
       const logsEndpointAction: LogsEndpointAction = endpointActionGenerator.generate({
+        agent: {
+          id: [agentId],
+          policy: [
+            {
+              agentId,
+              elasticAgentId: agentId,
+              integrationPolicyId: endpoint.Endpoint.policy.applied.id,
+              agentPolicyId: '',
+            },
+          ],
+        },
         EndpointActions: {
           data: {
             comment: 'data generator: this host is bad',
@@ -340,13 +350,11 @@ export const deleteIndexedEndpointAndFleetActions = async (
         .deleteByQuery({
           index: `${indexedData.actionsIndex}-*`,
           wait_for_completion: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  { terms: { action_id: indexedData.actions.map((action) => action.action_id) } },
-                ],
-              },
+          query: {
+            bool: {
+              filter: [
+                { terms: { action_id: indexedData.actions.map((action) => action.action_id) } },
+              ],
             },
           },
         })
@@ -355,13 +363,11 @@ export const deleteIndexedEndpointAndFleetActions = async (
         .deleteByQuery({
           index: `${indexedData.endpointActionsIndex}-*`,
           wait_for_completion: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  { terms: { action_id: indexedData.actions.map((action) => action.action_id) } },
-                ],
-              },
+          query: {
+            bool: {
+              filter: [
+                { terms: { action_id: indexedData.actions.map((action) => action.action_id) } },
+              ],
             },
           },
         })
@@ -375,17 +381,15 @@ export const deleteIndexedEndpointAndFleetActions = async (
         .deleteByQuery({
           index: `${indexedData.responsesIndex}-*`,
           wait_for_completion: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      action_id: indexedData.actionResponses.map((action) => action.action_id),
-                    },
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    action_id: indexedData.actionResponses.map((action) => action.action_id),
                   },
-                ],
-              },
+                },
+              ],
             },
           },
         })
@@ -394,17 +398,15 @@ export const deleteIndexedEndpointAndFleetActions = async (
         .deleteByQuery({
           index: `${indexedData.endpointActionResponsesIndex}-*`,
           wait_for_completion: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      action_id: indexedData.actionResponses.map((action) => action.action_id),
-                    },
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    action_id: indexedData.actionResponses.map((action) => action.action_id),
                   },
-                ],
-              },
+                },
+              ],
             },
           },
         })

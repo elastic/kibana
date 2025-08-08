@@ -27,28 +27,26 @@ export function useErrorFailedTests() {
   const { data, loading } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
-        size: 10000,
-        query: {
-          bool: {
-            filter: [
-              SUMMARY_FILTER,
-              EXCLUDE_RUN_ONCE_FILTER,
-              {
-                term: {
-                  'state.id': errorStateId,
-                },
+      size: 10000,
+      query: {
+        bool: {
+          filter: [
+            SUMMARY_FILTER,
+            EXCLUDE_RUN_ONCE_FILTER,
+            {
+              term: {
+                'state.id': errorStateId,
               },
-              {
-                term: {
-                  config_id: monitorId,
-                },
+            },
+            {
+              term: {
+                config_id: monitorId,
               },
-            ],
-          },
+            },
+          ],
         },
-        sort: [{ '@timestamp': 'desc' }],
       },
+      sort: [{ '@timestamp': 'desc' }],
     },
     [lastRefresh, monitorId, dateRangeStart, dateRangeEnd],
     { name: 'getMonitorErrorFailedTests' }

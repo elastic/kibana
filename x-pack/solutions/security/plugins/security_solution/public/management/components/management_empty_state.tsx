@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { MouseEvent, CSSProperties } from 'react';
+import type { MouseEvent } from 'react';
 import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
 import type { EuiSelectableProps } from '@elastic/eui';
 import {
   EuiText,
@@ -33,14 +34,14 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import onboardingLogo from '../images/security_administration_onboarding.svg';
 import { useAppUrl, useKibana } from '../../common/lib/kibana';
 
-const TEXT_ALIGN_CENTER: CSSProperties = Object.freeze({
-  textAlign: 'center',
-});
+const TEXT_ALIGN_CENTER = css`
+  text-align: center;
+`;
 
-const MAX_SIZE_ONBOARDING_LOGO: CSSProperties = Object.freeze({
+const MAX_SIZE_ONBOARDING_LOGO = {
   maxWidth: 550,
   maxHeight: 420,
-});
+};
 
 interface ManagementStep {
   title: string;
@@ -166,7 +167,7 @@ const PolicyEmptyState = React.memo<{
           </EuiFlexItem>
 
           <EuiFlexItem grow={2}>
-            <EuiIcon type={onboardingLogo} size="original" style={MAX_SIZE_ONBOARDING_LOGO} />
+            <EuiIcon type={onboardingLogo} size="original" css={MAX_SIZE_ONBOARDING_LOGO} />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
@@ -203,7 +204,7 @@ const EndpointsEmptyState = React.memo<{
             <EuiSpacer size="xl" />
             <EuiCallOut
               color="primary"
-              iconType="iInCircle"
+              iconType="info"
               title={i18n.translate(
                 'xpack.securitySolution.endpoint.list.notAddedIntegrations.title',
                 {
@@ -414,7 +415,7 @@ const ManagementEmptyState = React.memo<{
         <>
           <EuiSpacer size="xxl" />
           <EuiTitle size="m">
-            <h2 style={TEXT_ALIGN_CENTER}>{headerComponent}</h2>
+            <h2 css={TEXT_ALIGN_CENTER}>{headerComponent}</h2>
           </EuiTitle>
           <EuiSpacer size="xxl" />
           <EuiText textAlign="center" color="subdued" size="m">

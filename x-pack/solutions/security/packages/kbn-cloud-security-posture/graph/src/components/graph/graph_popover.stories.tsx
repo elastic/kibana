@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ThemeProvider, css } from '@emotion/react';
-import { Story } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import type { EntityNodeViewModel, LabelNodeViewModel, NodeProps } from '..';
 import { Graph } from '..';
@@ -19,10 +19,9 @@ import { ExpandPopoverListItem } from '../styles';
 
 export default {
   title: 'Components/Graph Components/Graph Popovers',
-  description: 'CDR - Graph visualization',
   argTypes: {},
   decorators: [GlobalStylesStorybookDecorator],
-};
+} satisfies Meta<typeof Graph>;
 
 const useExpandButtonPopover = () => {
   const { id, state, actions } = useGraphPopover('node-expand-popover');
@@ -153,7 +152,7 @@ const useNodePopover = () => {
   );
 };
 
-const Template: Story = () => {
+const Template = () => {
   const expandNodePopover = useExpandButtonPopover();
   const nodePopover = useNodePopover();
   const popovers = [expandNodePopover, nodePopover];
@@ -221,4 +220,6 @@ const Template: Story = () => {
   );
 };
 
-export const GraphPopovers = Template.bind({});
+export const GraphPopovers: StoryObj = {
+  render: Template,
+};

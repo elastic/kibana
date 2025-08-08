@@ -139,8 +139,9 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
+import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '../../../../../../services/setup_technology_selector';
+
 import { CreatePackagePolicySinglePage } from '.';
-import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from './components/setup_technology_selector';
 
 // mock console.debug to prevent noisy logs from console.debugs in ./index.tsx
 let consoleDebugMock: any;
@@ -167,6 +168,8 @@ describe('When on the package policy create page', () => {
           from="package"
           queryParamsPolicyId={queryParamsPolicyId}
           prerelease={false}
+          pkgName={'nginx'}
+          pkgVersion={'1.3.0'}
         />
       </Route>
     ));
@@ -464,7 +467,7 @@ describe('When on the package policy create page', () => {
         await setupSaveNavigate(routeState, queryParamsPolicyId);
 
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
-          path: '/policies/agent-policy-1?openEnrollmentFlyout=true',
+          path: '/save/url/here?openEnrollmentFlyout=true',
         });
       });
 

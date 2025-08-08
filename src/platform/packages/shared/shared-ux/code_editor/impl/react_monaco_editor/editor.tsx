@@ -27,7 +27,12 @@
  * THE SOFTWARE.
  */
 
-import { monaco as monacoEditor, monaco, defaultThemesResolvers } from '@kbn/monaco';
+import {
+  monaco as monacoEditor,
+  monaco,
+  defaultThemesResolvers,
+  initializeSupportedLanguages,
+} from '@kbn/monaco';
 import { useEuiTheme } from '@elastic/eui';
 import * as React from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
@@ -117,6 +122,9 @@ export interface MonacoEditorProps {
   onChange?: ChangeHandler;
 }
 
+// initialize supported languages
+initializeSupportedLanguages();
+
 export function MonacoEditor({
   width = '100%',
   height = '100%',
@@ -184,7 +192,7 @@ export function MonacoEditor({
     monaco.languages.getLanguages().forEach(({ id: languageId }) => {
       let languageThemeResolver;
       if (Boolean((languageThemeResolver = monaco.editor.getLanguageThemeResolver(languageId)))) {
-        monaco.editor.defineTheme(languageId, languageThemeResolver(euiTheme));
+        monaco.editor.defineTheme(languageId, languageThemeResolver!(euiTheme));
       }
     });
   }, [euiTheme]);
@@ -203,6 +211,27 @@ export function MonacoEditor({
         ...(className ? { extraEditorClassName: className } : {}),
         ...finalOptions,
         ...(theme ? { theme } : {}),
+      });
+
+      monaco.editor.onDidChangeMarkers(() => {
+        let currentEditorModel: monaco.editor.ITextModel | null;
+
+        if (!editor.current || (currentEditorModel = editor.current?.getModel()) === null) {
+          return;
+        }
+
+        const markers = monaco.editor.getModelMarkers({
+          resource: currentEditorModel.uri,
+        });
+
+        const hasErrors = markers.some((m) => m.severity === monaco.MarkerSeverity.Error);
+
+        const $editor = editor.current.getDomNode();
+
+        if ($editor) {
+          const textbox = $editor.querySelector('textarea[aria-roledescription="editor"]');
+          textbox?.setAttribute('aria-invalid', hasErrors ? 'true' : 'false');
+        }
       });
       // After initializing monaco editor
       handleEditorDidMount();

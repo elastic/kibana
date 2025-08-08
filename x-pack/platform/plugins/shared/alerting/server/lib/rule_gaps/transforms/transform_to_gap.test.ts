@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import type { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { transformToGap } from './transform_to_gap';
 import { Gap } from '../gap';
 
@@ -151,5 +151,30 @@ describe('transformToGap', () => {
     expect(result).toHaveLength(1);
     expect(result[0].filledIntervals).toHaveLength(1);
     expect(result[0].inProgressIntervals).toHaveLength(1);
+  });
+
+  it('should filter out soft deleted gaps', () => {
+    const events = createMockEvent({
+      kibana: {
+        alert: {
+          rule: {
+            gap: {
+              range: validInterval,
+              filled_intervals: [
+                validInterval,
+                { gte: undefined, lte: '2023-01-01T01:00:00.000Z' },
+              ],
+              in_progress_intervals: [
+                validInterval,
+                { gte: '2023-01-01T00:00:00.000Z', lte: undefined },
+              ],
+              deleted: true,
+            },
+          },
+        },
+      },
+    });
+    const result = transformToGap(events);
+    expect(result).toHaveLength(0);
   });
 });

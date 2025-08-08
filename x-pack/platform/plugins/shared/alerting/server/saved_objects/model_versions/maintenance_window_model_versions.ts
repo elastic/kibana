@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import { rawMaintenanceWindowSchemaV1 } from '../schemas/raw_maintenance_window';
 
 export const maintenanceWindowModelVersions: SavedObjectsModelVersionMap = {

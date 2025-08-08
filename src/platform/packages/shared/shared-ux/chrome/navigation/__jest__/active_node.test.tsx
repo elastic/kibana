@@ -31,7 +31,7 @@ describe('Active node', () => {
             title: 'Item 1',
             path: 'group1.item1',
           },
-        ],
+        ] as ChromeProjectNavigationNode[],
       ]);
 
       return activeNodes$;

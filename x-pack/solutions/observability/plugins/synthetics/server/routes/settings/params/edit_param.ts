@@ -8,6 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
+import { runSynPrivateLocationMonitorsTaskSoon } from '../../../tasks/sync_private_locations_monitors_task';
 import { validateRouteSpaceName } from '../../common';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SyntheticsParamRequest, SyntheticsParams } from '../../../../common/runtime_types';
@@ -82,6 +83,10 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         paramId,
         newParam
       )) as SavedObject<SyntheticsParams>;
+
+      await runSynPrivateLocationMonitorsTaskSoon({
+        server,
+      });
 
       return { id: responseId, key, tags, description, namespaces, value };
     } catch (getErr) {

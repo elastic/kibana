@@ -12,6 +12,7 @@ import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SLOS_BASE_PATH, SLO_SETTINGS_PATH } from '../../../common/locators/paths';
+import { FeedbackButton } from '../../pages/slos/components/common/feedback_button';
 
 export function HeaderMenu(): React.ReactElement | null {
   const { http, theme, docLinks } = useKibana().services;
@@ -24,44 +25,34 @@ export function HeaderMenu(): React.ReactElement | null {
     >
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
-          <EuiHeaderLinks>
+          <EuiHeaderLinks gutterSize="xs">
+            <FeedbackButton />
             <EuiHeaderLink
               color="primary"
-              href={docLinks.links.observability.slo}
-              iconType="documentation"
-              target="_blank"
+              href={http.basePath.prepend('/app/observability/annotations')}
             >
-              {i18n.translate('xpack.slo.headerMenu.documentation', {
-                defaultMessage: 'SLO documentation',
+              {i18n.translate('xpack.slo.home.annotations', {
+                defaultMessage: 'Annotations',
               })}
             </EuiHeaderLink>
-            <EuiHeaderLink
-              color="primary"
-              href={http.basePath.prepend('/app/observabilityOnboarding')}
-              iconType="indexOpen"
-            >
-              {i18n.translate('xpack.slo.headerMenu.addData', {
-                defaultMessage: 'Add data',
+            <EuiHeaderLink color="primary" href={docLinks.links.observability.slo} target="_blank">
+              {i18n.translate('xpack.slo.headerMenu.documentation', {
+                defaultMessage: 'SLO documentation',
               })}
             </EuiHeaderLink>
             {!isServerless && (
               <EuiHeaderLink
                 color="primary"
                 href={http.basePath.prepend(`${SLOS_BASE_PATH}${SLO_SETTINGS_PATH}`)}
-                iconType="gear"
               >
                 {i18n.translate('xpack.slo.headerMenu.settings', {
                   defaultMessage: 'Settings',
                 })}
               </EuiHeaderLink>
             )}
-            <EuiHeaderLink
-              color="primary"
-              href={http.basePath.prepend('/app/observability/annotations')}
-              iconType="brush"
-            >
-              {i18n.translate('xpack.slo.home.annotations', {
-                defaultMessage: 'Annotations',
+            <EuiHeaderLink color="primary" href={http.basePath.prepend('/app/slos/management')}>
+              {i18n.translate('xpack.slo.home.manage', {
+                defaultMessage: 'Manage SLOs',
               })}
             </EuiHeaderLink>
           </EuiHeaderLinks>

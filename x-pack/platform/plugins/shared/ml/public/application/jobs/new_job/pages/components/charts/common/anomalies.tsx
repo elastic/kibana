@@ -8,7 +8,8 @@
 import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
-import { getSeverityColor, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
+import { getThemeResolvedSeverityColor, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
+import { useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import type { Anomaly } from '../../../../common/results_loader';
 
 interface Props {
@@ -24,10 +25,10 @@ interface Severities {
   low: any[];
 }
 
-function getAnomalyStyle(threshold: number) {
+function getAnomalyStyle(threshold: number, euiTheme: EuiThemeComputed) {
   return {
     line: {
-      stroke: getSeverityColor(threshold),
+      stroke: getThemeResolvedSeverityColor(threshold, euiTheme),
       strokeWidth: 3,
       opacity: 1,
     },
@@ -54,6 +55,7 @@ function splitAnomalySeverities(anomalies: Anomaly[]) {
 export const Anomalies: FC<Props> = ({ anomalyData }) => {
   const anomalies = anomalyData === undefined ? [] : anomalyData;
   const severities: Severities = splitAnomalySeverities(anomalies);
+  const { euiTheme } = useEuiTheme();
 
   return (
     <Fragment>
@@ -61,35 +63,35 @@ export const Anomalies: FC<Props> = ({ anomalyData }) => {
         id="low"
         domainType={AnnotationDomainType.XDomain}
         dataValues={severities.low}
-        style={getAnomalyStyle(ML_ANOMALY_THRESHOLD.LOW)}
+        style={getAnomalyStyle(ML_ANOMALY_THRESHOLD.LOW, euiTheme)}
         hideTooltips={true}
       />
       <LineAnnotation
         id="warning"
         domainType={AnnotationDomainType.XDomain}
         dataValues={severities.warning}
-        style={getAnomalyStyle(ML_ANOMALY_THRESHOLD.WARNING)}
+        style={getAnomalyStyle(ML_ANOMALY_THRESHOLD.WARNING, euiTheme)}
         hideTooltips={true}
       />
       <LineAnnotation
         id="minor"
         domainType={AnnotationDomainType.XDomain}
         dataValues={severities.minor}
-        style={getAnomalyStyle(ML_ANOMALY_THRESHOLD.MINOR)}
+        style={getAnomalyStyle(ML_ANOMALY_THRESHOLD.MINOR, euiTheme)}
         hideTooltips={true}
       />
       <LineAnnotation
         id="major"
         domainType={AnnotationDomainType.XDomain}
         dataValues={severities.major}
-        style={getAnomalyStyle(ML_ANOMALY_THRESHOLD.MAJOR)}
+        style={getAnomalyStyle(ML_ANOMALY_THRESHOLD.MAJOR, euiTheme)}
         hideTooltips={true}
       />
       <LineAnnotation
         id="critical"
         domainType={AnnotationDomainType.XDomain}
         dataValues={severities.critical}
-        style={getAnomalyStyle(ML_ANOMALY_THRESHOLD.CRITICAL)}
+        style={getAnomalyStyle(ML_ANOMALY_THRESHOLD.CRITICAL, euiTheme)}
         hideTooltips={true}
       />
     </Fragment>

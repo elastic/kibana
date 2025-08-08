@@ -6,7 +6,7 @@
  */
 
 import type { Logger, LogMeta } from '@kbn/core/server';
-import { LogLevelId, LogMessageSource, LogRecord } from '@kbn/logging';
+import type { LogLevelId, LogMessageSource, LogRecord } from '@kbn/logging';
 
 interface TaskRunnerLoggerOpts {
   logger: Logger;

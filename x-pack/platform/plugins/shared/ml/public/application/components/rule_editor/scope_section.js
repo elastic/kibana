@@ -19,17 +19,14 @@ import { checkPermission } from '../../capabilities/check_capabilities';
 import { getScopeFieldDefaults } from './utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../../common/constants/locator';
-import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { MANAGEMENT_SECTION_IDS } from '../../management';
+import { useCreateAndNavigateToManagementMlLink } from '../../contexts/kibana';
 
 function NoFilterListsCallOut() {
-  const mlLocator = useMlLocator();
-  const navigateToPath = useNavigateToPath();
-  const redirectToFilterManagementPage = async () => {
-    const path = await mlLocator.getUrl({
-      page: ML_PAGES.FILTER_LISTS_MANAGE,
-    });
-    await navigateToPath(path, true);
-  };
+  const redirectToFilterManagementPage = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.FILTER_LISTS_MANAGE,
+    MANAGEMENT_SECTION_IDS.AD_SETTINGS
+  );
 
   return (
     <EuiCallOut

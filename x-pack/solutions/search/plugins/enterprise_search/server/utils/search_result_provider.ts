@@ -8,15 +8,10 @@
 import { takeUntil, of, map } from 'rxjs';
 
 import { GlobalSearchResultProvider } from '@kbn/global-search-plugin/server';
-import { i18n } from '@kbn/i18n';
 import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
 
 import { ConfigType } from '..';
-import {
-  ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
-  AI_SEARCH_PLUGIN,
-} from '../../common/constants';
+import { ENTERPRISE_SEARCH_DATA_PLUGIN } from '../../common/constants';
 
 type ServiceDefinition =
   | ConnectorServerSideDefinition
@@ -31,33 +26,21 @@ type ServiceDefinition =
 
 export function toSearchResult({
   iconPath,
-  isCloud,
-  isNative,
   name,
   score,
   serviceType,
   url,
 }: {
   iconPath?: string;
-  isCloud: boolean;
-  isNative?: boolean;
   name: string;
   score: number;
   serviceType: string;
   url?: string;
 }) {
-  const isCrawler = serviceType === ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE;
-  const connectorTypeParam = !isCrawler
-    ? isCloud && isNative
-      ? 'native'
-      : 'connector_client'
-    : null;
-  const newUrl = isCrawler
-    ? `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/crawlers/new_crawler`
-    : `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector?connector_type=${connectorTypeParam}&service_type=${serviceType}`;
+  const newUrl = `${ENTERPRISE_SEARCH_DATA_PLUGIN.URL}/connectors/select_connector`;
 
   return {
-    icon: iconPath || 'logoEnterpriseSearch',
+    icon: iconPath || 'logoElasticsearch',
     id: serviceType,
     score,
     title: name,
@@ -71,8 +54,7 @@ export function toSearchResult({
 
 export function getSearchResultProvider(
   config: ConfigType,
-  connectorTypes: ConnectorServerSideDefinition[],
-  isCloud: boolean
+  connectorTypes: ConnectorServerSideDefinition[]
 ): GlobalSearchResultProvider {
   return {
     find: ({ term, types, tags }, { aborted$, maxResults }, { core: { capabilities } }) => {
@@ -89,22 +71,10 @@ export function getSearchResultProvider(
           if (!caps.catalogue.enterpriseSearch) {
             return [];
           }
-          const selfManagedConnectors = connectorTypes.filter((connector) => !connector.isNative);
-          const services: ServiceDefinition[] = [
-            ...(config.hasConnectors ? selfManagedConnectors : []),
-
-            {
-              keywords: ['esre', 'search'],
-              name: i18n.translate('xpack.enterpriseSearch.searchProvider.aiSearch.name', {
-                defaultMessage: 'Search AI',
-              }),
-              serviceType: 'ai_search',
-              url: AI_SEARCH_PLUGIN.URL,
-            },
-          ];
+          const services: ServiceDefinition[] = [...(config.hasConnectors ? connectorTypes : [])];
           const result = services
             .map((service) => {
-              const { isNative, iconPath, name, keywords, serviceType } = service;
+              const { iconPath, name, keywords, serviceType } = service;
               const url = 'url' in service ? service.url : undefined;
               let score = 0;
               const searchTerm = (term || '').toLowerCase();
@@ -124,8 +94,6 @@ export function getSearchResultProvider(
               }
               return toSearchResult({
                 iconPath,
-                isCloud,
-                isNative,
                 name,
                 score,
                 serviceType,

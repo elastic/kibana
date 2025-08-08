@@ -10,7 +10,7 @@ import type {
   SavedObjectsBulkResponse,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { isSOError } from '../../../common/error';
 import { decodeOrThrow } from '../../../common/runtime_types';
@@ -249,7 +249,7 @@ export class AttachmentGetter {
     }
   }
 
-  public async getCaseCommentStats({
+  public async getCaseAttatchmentStats({
     caseIds,
   }: {
     caseIds: string[];

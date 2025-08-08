@@ -12,7 +12,7 @@ import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
-import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
+import type { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({
@@ -253,5 +253,40 @@ describe('getRuleRoute', () => {
         uuid: '123-456',
       },
     ]);
+  });
+
+  it('does not return the artifacts', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getRuleRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    // TODO (http-versioning): Remove this cast, this enables us to move forward
+    // without fixing all of other solution types
+    rulesClient.get.mockResolvedValueOnce({
+      ...mockedAlert,
+      artifacts: {
+        dashboards: [
+          {
+            id: '123',
+          },
+        ],
+      },
+    });
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: { id: '1' },
+      },
+      ['ok']
+    );
+
+    const routeRes = await handler(context, req, res);
+
+    // @ts-expect-error: body exists
+    expect(routeRes.body.artifacts).toBeUndefined();
   });
 });

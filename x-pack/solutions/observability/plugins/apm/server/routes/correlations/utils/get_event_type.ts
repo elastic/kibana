@@ -10,6 +10,7 @@ import { LatencyDistributionChartType } from '../../../../common/latency_distrib
 
 const {
   transactionLatency,
+  spanLatency,
   latencyCorrelations,
   failedTransactionsCorrelations,
   dependencyLatency,
@@ -30,6 +31,7 @@ export function getEventType(
     case failedTransactionsCorrelations:
       return ProcessorEvent.transaction;
     case dependencyLatency:
+    case spanLatency:
       return ProcessorEvent.span;
     default:
       return ProcessorEvent.transaction;

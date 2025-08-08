@@ -287,10 +287,8 @@ const defaultLegendTitle = i18n.translate('xpack.lens.xyChart.legendTitle', {
   defaultMessage: 'Legend',
 });
 
-export const XyToolbar = memo(function XyToolbar(
-  props: VisualizationToolbarProps<State> & { useLegacyTimeAxis?: boolean }
-) {
-  const { state, setState, frame, useLegacyTimeAxis } = props;
+export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<State>) {
+  const { state, setState, frame } = props;
   const dataLayers = getDataLayers(state?.layers);
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
   const axisGroups = getAxesConfiguration(dataLayers, shouldRotate, frame.activeData);
@@ -584,9 +582,7 @@ export const XyToolbar = memo(function XyToolbar(
             setCurrentTimeMarkerVisibility={onChangeCurrentTimeMarkerVisibility}
             hasBarOrAreaOnAxis={false}
             hasPercentageAxis={false}
-            useMultilayerTimeAxis={
-              isTimeHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate
-            }
+            useMultilayerTimeAxis={isTimeHistogramModeEnabled && !shouldRotate}
             extent={hasNumberHistogram ? state?.xExtent || { mode: 'dataBounds' } : undefined}
             setExtent={setExtentFn('xExtent')}
             dataBounds={xDataBounds}

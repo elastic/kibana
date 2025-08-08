@@ -21,4 +21,8 @@ import { DateRange } from '../common/common.gen';
 export type ReadRiskEngineSettingsResponse = z.infer<typeof ReadRiskEngineSettingsResponse>;
 export const ReadRiskEngineSettingsResponse = z.object({
   range: DateRange.optional(),
+  /**
+   * Include closed alerts in the risk score calculation
+   */
+  includeClosedAlerts: z.boolean().optional(),
 });

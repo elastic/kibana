@@ -24,10 +24,13 @@ export const putSloSettings = (isServerless?: boolean) =>
       },
     },
     params: isServerless ? putSLOServerlessSettingsParamsSchema : putSLOSettingsParamsSchema,
-    handler: async ({ context, params, plugins }) => {
+    handler: async ({ request, logger, params, plugins, getScopedClients }) => {
       await assertPlatinumLicense(plugins);
+      const { soClient } = await getScopedClients({
+        request,
+        logger,
+      });
 
-      const soClient = (await context.core).savedObjects.client;
       return await storeSloSettings(soClient, params.body as PutSLOSettingsParams);
     },
   });
