@@ -28,6 +28,8 @@ import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { useKibana } from '../hooks/use_kibana';
 import { GoToSpacesButton } from './go_to_spaces_button';
+import { useGenAiConnectors } from '../hooks/use_genai_connectors';
+import { getElasticManagedLlmConnector } from '../utils/get_elastic_managed_llm_connector';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -40,6 +42,8 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   const { euiTheme } = useEuiTheme();
 
   const canManageSpaces = application.capabilities.management.kibana.spaces;
+  const connectors = useGenAiConnectors();
+  const hasElasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
 
   useEffect(() => {
     const breadcrumbs = [
@@ -109,48 +113,57 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
               </EuiFlexGroup>
             }
             description={
-              <p>
-                <FormattedMessage
-                  id="genAiSettings.aiConnectorDescriptionWithLink"
-                  defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {elasticManagedLlm} connector ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${
-                    showSpacesIntegration && canManageSpaces
-                      ? ' Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
-                      : ''
-                  }`}
-                  values={{
-                    link: (
-                      <EuiLink
-                        href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          id="genAiSettings.additionalCostsLink"
-                          defaultMessage="additional costs incur"
-                        />
-                      </EuiLink>
-                    ),
-                    elasticManagedLlm: (
-                      <strong>
-                        <FormattedMessage
-                          id="genAiSettings.elasticManagedLlm"
-                          defaultMessage="Elastic Managed LLM"
-                        />
-                      </strong>
-                    ),
-                    ...(showSpacesIntegration &&
-                      canManageSpaces && {
-                        aiFeatureVisibility: (
-                          <strong>
-                            <FormattedMessage
-                              id="genAiSettings.aiFeatureVisibilityText"
-                              defaultMessage="AI feature visibility"
-                            />
-                          </strong>
-                        ),
-                      }),
-                  }}
-                />
-              </p>
+              !!hasElasticManagedLlm ? (
+                <p>
+                  <FormattedMessage
+                    id="genAiSettings.aiConnectorDescriptionWithLink"
+                    defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {elasticManagedLlm} connector ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${
+                      showSpacesIntegration && canManageSpaces
+                        ? ' Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
+                        : ''
+                    }`}
+                    values={{
+                      link: (
+                        <EuiLink
+                          href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
+                          target="_blank"
+                        >
+                          <FormattedMessage
+                            id="genAiSettings.additionalCostsLink"
+                            defaultMessage="additional costs incur"
+                          />
+                        </EuiLink>
+                      ),
+                      elasticManagedLlm: (
+                        <strong>
+                          <FormattedMessage
+                            id="genAiSettings.elasticManagedLlm"
+                            defaultMessage="Elastic Managed LLM"
+                          />
+                        </strong>
+                      ),
+                      ...(showSpacesIntegration &&
+                        canManageSpaces && {
+                          aiFeatureVisibility: (
+                            <strong>
+                              <FormattedMessage
+                                id="genAiSettings.aiFeatureVisibilityText"
+                                defaultMessage="AI feature visibility"
+                              />
+                            </strong>
+                          ),
+                        }),
+                    }}
+                  />
+                </p>
+              ) : (
+                <p>
+                  <FormattedMessage
+                    id="genAiSettings.aiConnectorDescription"
+                    defaultMessage="A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. In order to use the AI Assistant you must set up a Generative AI connector."
+                  />
+                </p>
+              )
             }
           >
             <EuiFormRow fullWidth>

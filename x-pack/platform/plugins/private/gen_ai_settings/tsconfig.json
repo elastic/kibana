@@ -14,7 +14,12 @@
     "@kbn/spaces-plugin",
     "@kbn/shared-ux-router",
     "@kbn/config-schema",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/actions-plugin",
+    "@kbn/inference-plugin",
+    "@kbn/server-route-repository",
+    "@kbn/server-route-repository-utils",
+    "@kbn/server-route-repository-client"
   ],
   "exclude": ["target/**/*"]
 }

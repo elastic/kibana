@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { PluginInitializerContext } from '@kbn/core/server';
 import { GenAiSettingsPlugin } from './plugin';
 import { config } from '../common/config';
 
-export function plugin() {
-  return new GenAiSettingsPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new GenAiSettingsPlugin(initializerContext);
 }
 
 export { config };
 
 export type { GenAiSettingsPluginSetup, GenAiSettingsPluginStart } from './plugin';
 export type { GenAiSettingsConfigType } from '../common/config';
+export type { GenAiSettingsServerRouteRepository } from './routes/get_global_gen_ai_settings_route_repository';
