@@ -55,7 +55,7 @@ export const useSearchHomePageRedirect = () => {
       return;
     }
     setRedirectChecked(true);
-  }, [application, indicesStatus, userPrivileges, skipGlobalEmptyState]);
+  }, [application, indicesStatus, userPrivileges, skipGlobalEmptyState, error]);
 
   return {
     isLoading: redirectChecked ? isLoading : true,
