@@ -80,7 +80,6 @@ const getOAuth2AxiosConfig = async ({
 
   const headersWithAuth = {
     ...headers,
-    'Content-Type': 'application/json',
     Authorization: accessToken,
   };
 
