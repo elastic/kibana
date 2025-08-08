@@ -34,9 +34,7 @@ jest.mock('../../../lib/capabilities', () => ({
 jest.mock('../../../../common/lib/kibana');
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks');
-const { useGetRuleTypesPermissions } = jest.requireMock(
-  '@kbn/alerts-ui-shared/src/common/hooks'
-);
+const { useGetRuleTypesPermissions } = jest.requireMock('@kbn/alerts-ui-shared/src/common/hooks');
 
 const mockedRuleTypeIndex = new Map(
   Object.entries({
