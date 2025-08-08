@@ -55,6 +55,7 @@ import {
   POST_EXCLUDE_INDICES,
   PRE_EXCLUDE_INDICES,
   PRIVILEGE_MONITORING_ENGINE_STATUS,
+  PRIVMON_MAX_USERS_ALLOWED,
 } from './constants';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import { PrivilegeMonitoringEngineActions } from './auditing/actions';
@@ -317,10 +318,27 @@ export class PrivilegeMonitoringDataClient {
     return getPrivilegedMonitorUsersIndex(this.opts.namespace);
   }
 
+  public async getCountOfPrivilegeMonitoringUsers() {
+    const currentUsers = await this.esClient.count({
+      index: this.getIndex(),
+      query: {
+        term: {
+          'user.is_privileged': true,
+        },
+      },
+    });
+    return currentUsers.count;
+  }
+
   public async createUser(
     user: CreatePrivMonUserRequestBody,
     source: PrivMonUserSource
   ): Promise<CreatePrivMonUserResponse> {
+    const currentPrivUsersCount = await this.getCountOfPrivilegeMonitoringUsers();
+    this.log('info', `Current privileged users count: ${currentPrivUsersCount}`);
+    if (currentPrivUsersCount > PRIVMON_MAX_USERS_ALLOWED) {
+      throw new Error(`Maximum number of privileged users reached: ${PRIVMON_MAX_USERS_ALLOWED}`);
+    }
     const doc = merge(user, {
       user: {
         is_privileged: true,
