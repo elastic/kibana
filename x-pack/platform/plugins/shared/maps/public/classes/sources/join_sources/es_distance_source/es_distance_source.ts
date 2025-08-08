@@ -34,12 +34,15 @@ export const DEFAULT_WITHIN_DISTANCE = 5;
 type ESDistanceSourceSyncMeta = ESAggsSourceSyncMeta &
   Pick<ESDistanceSourceDescriptor, 'distance' | 'geoField'>;
 
+type NormalizedESDistanceSourceDescriptor = ESDistanceSourceDescriptor &
+  Required<Pick<ESDistanceSourceDescriptor, 'distance' | 'metrics'>>;
+
 export class ESDistanceSource extends AbstractESAggSource implements IJoinSource, IESAggSource {
   static type = SOURCE_TYPES.ES_DISTANCE_SOURCE;
 
   static createDescriptor(
     descriptor: Partial<ESDistanceSourceDescriptor>
-  ): ESDistanceSourceDescriptor {
+  ): NormalizedESDistanceSourceDescriptor {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
     if (!isValidStringConfig(descriptor.geoField)) {
       throw new Error('Cannot create an ESDistanceSource without a geoField property');
@@ -53,7 +56,7 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
     };
   }
 
-  readonly _descriptor: ESDistanceSourceDescriptor;
+  readonly _descriptor: NormalizedESDistanceSourceDescriptor;
 
   constructor(descriptor: Partial<ESDistanceSourceDescriptor>) {
     const sourceDescriptor = ESDistanceSource.createDescriptor(descriptor);

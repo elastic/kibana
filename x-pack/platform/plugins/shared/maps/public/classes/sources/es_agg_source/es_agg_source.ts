@@ -30,7 +30,7 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
 
   static createDescriptor(
     descriptor: Partial<AbstractESAggSourceDescriptor>
-  ): AbstractESAggSourceDescriptor {
+  ): AbstractESAggSourceDescriptor & Required<Pick<AbstractESAggSourceDescriptor, 'metrics'>> {
     const normalizedDescriptor = AbstractESSource.createDescriptor(descriptor);
     return {
       ...normalizedDescriptor,

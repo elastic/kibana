@@ -40,7 +40,7 @@ import {
 } from '../../../../common/constants';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { buildGeoGridFilter } from '../../../../common/elasticsearch_util';
-import { AbstractESAggSource, DEFAULT_METRIC, ESAggsSourceSyncMeta } from '../es_agg_source';
+import { AbstractESAggSource, ESAggsSourceSyncMeta } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
@@ -85,7 +85,7 @@ export const heatmapTitle = i18n.translate('xpack.maps.source.esGridHeatmapTitle
 export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSource {
   static createDescriptor(
     descriptor: Partial<ESGeoGridSourceDescriptor>
-  ): ESGeoGridSourceDescriptor {
+  ): ESGeoGridSourceDescriptor & Required<Pick<ESGeoGridSourceDescriptor, 'metrics'>> {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(
       descriptor
     ) as AbstractESAggSourceDescriptor & Partial<ESGeoGridSourceDescriptor>;
@@ -98,10 +98,11 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       geoField: normalizedDescriptor.geoField!,
       requestType: descriptor.requestType || RENDER_AS.POINT,
       resolution: descriptor.resolution ? descriptor.resolution : GRID_RESOLUTION.COARSE,
-    } as ESGeoGridSourceDescriptor;
+    } as ESGeoGridSourceDescriptor & Required<Pick<ESGeoGridSourceDescriptor, 'metrics'>>;
   }
 
-  readonly _descriptor: ESGeoGridSourceDescriptor;
+  readonly _descriptor: ESGeoGridSourceDescriptor &
+    Required<Pick<ESGeoGridSourceDescriptor, 'metrics'>>;
 
   constructor(descriptor: Partial<ESGeoGridSourceDescriptor>) {
     const sourceDescriptor = ESGeoGridSource.createDescriptor(descriptor);
@@ -167,7 +168,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
         geoFieldName={this.getGeoFieldName()}
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
-        metrics={this._descriptor.metrics ?? [DEFAULT_METRIC]}
+        metrics={this._descriptor.metrics}
         renderAs={this._descriptor.requestType}
         resolution={this._descriptor.resolution}
       />

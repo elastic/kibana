@@ -61,7 +61,9 @@ export function extractPropertiesMap(rawEsData: any, countPropertyName: string):
 export class ESTermSource extends AbstractESAggSource implements ITermJoinSource, IESAggSource {
   static type = SOURCE_TYPES.ES_TERM_SOURCE;
 
-  static createDescriptor(descriptor: Partial<ESTermSourceDescriptor>): ESTermSourceDescriptor {
+  static createDescriptor(
+    descriptor: Partial<ESTermSourceDescriptor>
+  ): ESTermSourceDescriptor & Required<Pick<ESTermSourceDescriptor, 'metrics'>> {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
     if (!isValidStringConfig(descriptor.term)) {
       throw new Error('Cannot create an ESTermSource without a term');
@@ -74,7 +76,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
   }
 
   private readonly _termField: ESDocField;
-  readonly _descriptor: ESTermSourceDescriptor;
+  readonly _descriptor: ESTermSourceDescriptor & Required<Pick<ESTermSourceDescriptor, 'metrics'>>;
 
   constructor(descriptor: Partial<ESTermSourceDescriptor>) {
     const sourceDescriptor = ESTermSource.createDescriptor(descriptor);

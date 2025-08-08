@@ -23,7 +23,7 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
-import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
+import { AbstractESAggSource } from '../es_agg_source';
 import { turfBboxToBounds } from '../../../../common/elasticsearch_util';
 import { DataRequestAbortError } from '../../util/data_request';
 import { mergeExecutionContext } from '../execution_context_utils';
@@ -44,9 +44,12 @@ export const sourceTitle = i18n.translate('xpack.maps.source.pewPewTitle', {
 });
 
 export class ESPewPewSource extends AbstractESAggSource {
-  readonly _descriptor: ESPewPewSourceDescriptor;
+  readonly _descriptor: ESPewPewSourceDescriptor &
+    Required<Pick<ESPewPewSourceDescriptor, 'metrics'>>;
 
-  static createDescriptor(descriptor: Partial<ESPewPewSourceDescriptor>): ESPewPewSourceDescriptor {
+  static createDescriptor(
+    descriptor: Partial<ESPewPewSourceDescriptor>
+  ): ESPewPewSourceDescriptor & Required<Pick<ESPewPewSourceDescriptor, 'metrics'>> {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
     if (!isValidStringConfig(descriptor.sourceGeoField)) {
       throw new Error('Cannot create ESPewPewSourceDescriptor, sourceGeoField is not provided');
@@ -63,8 +66,9 @@ export class ESPewPewSource extends AbstractESAggSource {
   }
 
   constructor(descriptor: ESPewPewSourceDescriptor) {
-    super(descriptor);
-    this._descriptor = descriptor;
+    const normalizedDescriptor = ESPewPewSource.createDescriptor(descriptor);
+    super(normalizedDescriptor);
+    this._descriptor = normalizedDescriptor;
   }
 
   getBucketsName() {
@@ -79,7 +83,7 @@ export class ESPewPewSource extends AbstractESAggSource {
         bucketsName={this.getBucketsName()}
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
-        metrics={this._descriptor.metrics ?? [DEFAULT_METRIC]}
+        metrics={this._descriptor.metrics}
       />
     );
   }

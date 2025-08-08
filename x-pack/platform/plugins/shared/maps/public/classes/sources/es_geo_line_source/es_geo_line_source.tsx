@@ -27,7 +27,7 @@ import {
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
-import { AbstractESAggSource, DEFAULT_METRIC, ESAggsSourceSyncMeta } from '../es_agg_source';
+import { AbstractESAggSource, ESAggsSourceSyncMeta } from '../es_agg_source';
 import { DataRequest } from '../../util/data_request';
 import { convertToGeoJson } from './convert_to_geojson';
 import { ESDocField } from '../../fields/es_doc_field';
@@ -66,10 +66,15 @@ export const REQUIRES_GOLD_LICENSE_MSG = i18n.translate(
   }
 );
 
+type NormalizedGeoLineDescriptor = ESGeoLineSourceDescriptor &
+  Required<
+    Pick<ESGeoLineSourceDescriptor, 'groupByTimeseries' | 'lineSimplificationSize' | 'metrics'>
+  >;
+
 export class ESGeoLineSource extends AbstractESAggSource {
   static createDescriptor(
     descriptor: Partial<ESGeoLineSourceDescriptor>
-  ): ESGeoLineSourceDescriptor {
+  ): NormalizedGeoLineDescriptor {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(
       descriptor
     ) as ESGeoLineSourceDescriptor;
@@ -94,10 +99,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
       geoField: normalizedDescriptor.geoField!,
       splitField: normalizedDescriptor.splitField,
       sortField: normalizedDescriptor.sortField,
-    };
+    } as NormalizedGeoLineDescriptor;
   }
 
-  readonly _descriptor: ESGeoLineSourceDescriptor;
+  readonly _descriptor: NormalizedGeoLineDescriptor;
 
   constructor(descriptor: Partial<ESGeoLineSourceDescriptor>) {
     const sourceDescriptor = ESGeoLineSource.createDescriptor(descriptor);
@@ -121,11 +126,9 @@ export class ESGeoLineSource extends AbstractESAggSource {
         bucketsName={this.getBucketsName()}
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
-        metrics={this._descriptor.metrics ?? [DEFAULT_METRIC]}
-        groupByTimeseries={this._descriptor.groupByTimeseries ?? false}
-        lineSimplificationSize={
-          this._descriptor.lineSimplificationSize ?? DEFAULT_LINE_SIMPLIFICATION_SIZE
-        }
+        metrics={this._descriptor.metrics}
+        groupByTimeseries={this._descriptor.groupByTimeseries}
+        lineSimplificationSize={this._descriptor.lineSimplificationSize}
         splitField={this._descriptor.splitField ?? ''}
         sortField={this._descriptor.sortField ?? ''}
       />
