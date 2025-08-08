@@ -15,6 +15,7 @@ import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common/constants';
 import moment from 'moment';
+import pRetry from 'p-retry';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../helpers';
@@ -128,31 +129,22 @@ export default function (providerContext: FtrProviderContext) {
       });
     };
 
-    const cleanupAgents = async (attempt: number = 0) => {
-      const maxAttempts = 3;
-
-      try {
-        await es.deleteByQuery({
-          index: AGENTS_INDEX,
-          refresh: true,
-          query: {
-            match_all: {},
-          },
-        });
-      } catch (err) {
-        if (!(err?.meta?.statusCode === 409)) {
-          // index doesn't exist
-          return;
+    const cleanupAgents = async () =>
+      await pRetry(async () => {
+        try {
+          await es.deleteByQuery({
+            index: AGENTS_INDEX,
+            refresh: true,
+            query: {
+              match_all: {},
+            },
+          });
+        } catch (err) {
+          if (err?.meta?.statusCode === 409) {
+            throw err;
+          }
         }
-        // agent_status_change task may apply conflicting update during deletion - reattempt 409 conflict
-        if (attempt < maxAttempts) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          await cleanupAgents(attempt + 1);
-        } else {
-          throw new Error(`Exceeded max attempts ${maxAttempts} for deleting agents`);
-        }
-      }
-    };
+      });
 
     const cleanupSecrets = async () => {
       try {
