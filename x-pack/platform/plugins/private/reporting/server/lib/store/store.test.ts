@@ -13,10 +13,12 @@ import { Report, ReportingStore, SavedReport } from '.';
 import { ReportingCore } from '../..';
 import { createMockReportingCore } from '../../test_helpers';
 
+type MockEsClient = ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+
 describe('ReportingStore', () => {
   const mockLogger = loggingSystemMock.createLogger();
   let mockCore: ReportingCore;
-  let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let mockEsClient: MockEsClient;
 
   beforeEach(async () => {
     const reportingConfig = {
@@ -455,6 +457,7 @@ describe('ReportingStore', () => {
     it('creates an ILM policy for managing reporting indices if there is not already one', async () => {
       mockEsClient.ilm.getLifecycle.mockRejectedValue({ statusCode: 404 });
       mockEsClient.ilm.putLifecycle.mockResponse({} as any);
+      mockCallsForApplyingMapping(mockEsClient);
 
       const store = new TestReportingStore(mockCore, mockLogger);
       const createIlmPolicySpy = jest.spyOn(store, 'createIlmPolicy');
@@ -478,6 +481,7 @@ describe('ReportingStore', () => {
 
     it('does not create an ILM policy for managing reporting indices if one already exists', async () => {
       mockEsClient.ilm.getLifecycle.mockResponse({});
+      mockCallsForApplyingMapping(mockEsClient);
 
       const store = new TestReportingStore(mockCore, mockLogger);
       const createIlmPolicySpy = jest.spyOn(store, 'createIlmPolicy');
@@ -493,6 +497,7 @@ describe('ReportingStore', () => {
         statefulSettings: { enabled: false },
       };
       mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
+      mockCallsForApplyingMapping(mockEsClient);
 
       const store = new TestReportingStore(mockCore, mockLogger);
       const createIlmPolicySpy = jest.spyOn(store, 'createIlmPolicy');
@@ -502,3 +507,26 @@ describe('ReportingStore', () => {
     });
   });
 });
+
+function mockCallsForApplyingMapping(mockEsClient: MockEsClient) {
+  mockEsClient.indices.exists.mockResponse(true);
+  mockEsClient.indices.getIndexTemplate.mockResponse({
+    index_templates: [
+      {
+        name: '.kibana-reporting',
+        index_template: {
+          template: {
+            mappings: {
+              properties: {
+                foo: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+      },
+    ],
+  } as any);
+  mockEsClient.indices.putMapping.mockResponse(undefined as any);
+}

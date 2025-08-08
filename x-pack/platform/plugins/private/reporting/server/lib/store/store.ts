@@ -17,6 +17,7 @@ import type {
 import {
   REPORTING_DATA_STREAM_ALIAS,
   REPORTING_DATA_STREAM_COMPONENT_TEMPLATE,
+  REPORTING_DATA_STREAM_INDEX_TEMPLATE,
 } from '@kbn/reporting-server';
 import moment from 'moment';
 import type { Report } from '.';
@@ -170,10 +171,64 @@ export class ReportingStore {
         await this.createIlmPolicy();
       }
     } catch (e) {
-      this.logger.error('Error in start phase');
-      this.logger.error(e);
+      this.logger.error(`Error creating ILM policy: ${e.message}`, {
+        error: { stack_trace: e.stack },
+      });
       throw e;
     }
+
+    try {
+      await this.reapplyMappings();
+    } catch (e) {
+      this.logger.error(`Error applying mappings: ${e.message}`, {
+        error: { stack_trace: e.stack },
+      });
+      throw e;
+    }
+  }
+
+  private async reapplyMappings(): Promise<void> {
+    const client = await this.getClient();
+
+    const exists = await client.indices.exists({
+      index: REPORTING_DATA_STREAM_ALIAS,
+    });
+
+    if (!exists) {
+      this.logger.info(
+        `Mappings not applied to ${REPORTING_DATA_STREAM_ALIAS} since it does not exist.`
+      );
+      return;
+    }
+
+    const gotTemplate = await client.indices.getIndexTemplate({
+      name: REPORTING_DATA_STREAM_INDEX_TEMPLATE,
+    });
+    if (gotTemplate.index_templates.length === 0) {
+      throw new Error(`No index template found for ${REPORTING_DATA_STREAM_INDEX_TEMPLATE}`);
+    }
+
+    const template = gotTemplate.index_templates.find(
+      (t) => t.name === REPORTING_DATA_STREAM_INDEX_TEMPLATE
+    );
+    if (!template) {
+      throw new Error(
+        `No matching index template found for ${REPORTING_DATA_STREAM_INDEX_TEMPLATE}`
+      );
+    }
+
+    const mappings = template.index_template.template?.mappings?.properties;
+    if (!mappings) {
+      throw new Error(`No mappings found for ${REPORTING_DATA_STREAM_INDEX_TEMPLATE}`);
+    }
+
+    await client.indices.putMapping({
+      index: REPORTING_DATA_STREAM_ALIAS,
+      properties: mappings,
+      write_index_only: true,
+    });
+
+    this.logger.info(`Mappings applied to ${REPORTING_DATA_STREAM_ALIAS}`);
   }
 
   public async addReport(report: Report): Promise<SavedReport> {

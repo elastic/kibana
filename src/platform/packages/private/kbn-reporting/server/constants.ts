@@ -21,6 +21,8 @@ export const REPORTING_DATA_STREAM_WILDCARD = '.kibana-reporting*';
 export const REPORTING_LEGACY_INDICES = '.reporting-*';
 // Used to search for all reports and check for managing privileges
 export const REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY = '.reporting-*,.kibana-reporting*';
+// Name of index template
+export const REPORTING_DATA_STREAM_INDEX_TEMPLATE = '.kibana-reporting';
 // Name of component template which Kibana overrides for lifecycle settings
 export const REPORTING_DATA_STREAM_COMPONENT_TEMPLATE = 'kibana-reporting@custom';
 
