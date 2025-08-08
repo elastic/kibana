@@ -33,7 +33,7 @@ export interface DynamicActionManagerParams {
   storage: ActionStorage;
   uiActions: Pick<
     StartContract,
-    | 'registerAction'
+    | 'registerActionAsync'
     | 'attachAction'
     | 'unregisterAction'
     | 'detachAction'
@@ -89,7 +89,7 @@ export class DynamicActionManager {
     const factory = uiActions.getActionFactory(event.action.factoryId);
     const actionDefinition: ActionDefinition = factory.create(action as SerializedAction);
 
-    uiActions.registerAction({
+    uiActions.registerActionAsync(actionId, async () => ({
       ...actionDefinition,
       id: actionId,
       grouping: dynamicActionGrouping,
@@ -98,7 +98,7 @@ export class DynamicActionManager {
         if (!actionDefinition.isCompatible) return true;
         return actionDefinition.isCompatible(context);
       },
-    });
+    }));
 
     const supportedTriggers = factory.supportedTriggers();
     for (const trigger of triggers) {

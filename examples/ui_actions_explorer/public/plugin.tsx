@@ -46,21 +46,43 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
 
     const startServices = core.getStartServices();
 
-    deps.uiActions.addTriggerAction(
-      USER_TRIGGER,
+    deps.uiActions.addTriggerActionAsync(USER_TRIGGER, 'TRIGGER_PHONE_TRIGGER_ACTION', async () =>
       createTriggerPhoneTriggerAction(async () => (await startServices)[1].uiActions)
     );
-    deps.uiActions.addTriggerAction(
-      USER_TRIGGER,
+    deps.uiActions.addTriggerActionAsync(USER_TRIGGER, 'EDIT_USER_ACTION', async () =>
       createEditUserAction(async () => (await startServices)[0])
     );
 
-    deps.uiActions.addTriggerAction(COUNTRY_TRIGGER, viewInMapsAction);
-    deps.uiActions.addTriggerAction(COUNTRY_TRIGGER, lookUpWeatherAction);
-    deps.uiActions.addTriggerAction(COUNTRY_TRIGGER, showcasePluggability);
-    deps.uiActions.addTriggerAction(PHONE_TRIGGER, makePhoneCallAction);
-    deps.uiActions.addTriggerAction(PHONE_TRIGGER, showcasePluggability);
-    deps.uiActions.addTriggerAction(USER_TRIGGER, showcasePluggability);
+    deps.uiActions.addTriggerActionAsync(
+      COUNTRY_TRIGGER,
+      'VIEW_IN_MAPS_ACTION',
+      async () => viewInMapsAction
+    );
+    deps.uiActions.addTriggerActionAsync(
+      COUNTRY_TRIGGER,
+      'LOOK_UP_WEATHER_ACTION',
+      async () => lookUpWeatherAction
+    );
+    deps.uiActions.addTriggerActionAsync(
+      COUNTRY_TRIGGER,
+      'SHOWCASE_PLUGGABILITY_ACTION_COUNTRY',
+      async () => showcasePluggability
+    );
+    deps.uiActions.addTriggerActionAsync(
+      PHONE_TRIGGER,
+      'MAKE_PHONE_CALL_ACTION',
+      async () => makePhoneCallAction
+    );
+    deps.uiActions.addTriggerActionAsync(
+      PHONE_TRIGGER,
+      'SHOWCASE_PLUGGABILITY_ACTION_PHONE',
+      async () => showcasePluggability
+    );
+    deps.uiActions.addTriggerActionAsync(
+      USER_TRIGGER,
+      'SHOWCASE_PLUGGABILITY_ACTION_USER',
+      async () => showcasePluggability
+    );
 
     core.application.register({
       id: 'uiActionsExplorer',

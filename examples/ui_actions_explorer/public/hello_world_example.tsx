@@ -87,7 +87,11 @@ export const HelloWorldExample = ({
                   );
                 },
               });
-              uiActionsStartService.addTriggerAction(HELLO_WORLD_TRIGGER_ID, dynamicAction);
+              uiActionsStartService.addTriggerActionAsync(
+                HELLO_WORLD_TRIGGER_ID,
+                DYNAMIC_ACTION_ID,
+                async () => dynamicAction
+              );
             } else {
               uiActionsStartService.detachAction(HELLO_WORLD_TRIGGER_ID, DYNAMIC_ACTION_ID);
             }

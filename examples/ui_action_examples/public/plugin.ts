@@ -30,11 +30,9 @@ export class UiActionExamplesPlugin
   ) {
     uiActions.registerTrigger(helloWorldTrigger);
 
-    const helloWorldAction = createHelloWorldActionDefinition(
-      async () => (await core.getStartServices())[0]
+    uiActions.addTriggerActionAsync(helloWorldTrigger.id, 'HELLO_WORLD_ACTION', async () =>
+      createHelloWorldActionDefinition(async () => (await core.getStartServices())[0])
     );
-
-    uiActions.addTriggerAction(helloWorldTrigger.id, helloWorldAction);
   }
 
   public start(_core: CoreStart, _plugins: UiActionExamplesStartDependencies) {}

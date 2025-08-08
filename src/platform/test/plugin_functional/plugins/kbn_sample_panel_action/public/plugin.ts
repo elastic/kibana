@@ -20,8 +20,16 @@ export class SampelPanelActionTestPlugin
     const samplePanelAction = createSamplePanelAction(core.getStartServices);
     const samplePanelLink = createSamplePanelLink();
 
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, samplePanelAction);
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, samplePanelLink);
+    uiActions.addTriggerActionAsync(
+      CONTEXT_MENU_TRIGGER,
+      'SAMPLE_PANEL_ACTION',
+      async () => samplePanelAction
+    );
+    uiActions.addTriggerActionAsync(
+      CONTEXT_MENU_TRIGGER,
+      'SAMPLE_PANEL_LINK',
+      async () => samplePanelLink
+    );
 
     return {};
   }
