@@ -20,7 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
+  const archive = 'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/default';
 
   describe('security feature controls', function () {
     this.tags(['skipFirefox']);

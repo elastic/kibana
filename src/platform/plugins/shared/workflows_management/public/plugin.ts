@@ -8,15 +8,20 @@
  */
 
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type {
-  WorkflowsPluginSetup,
-  WorkflowsPluginStart,
-  AppPluginStartDependencies,
-} from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { getWorkflowsConnectorType } from './connectors/workflows';
+import type {
+  AppPluginStartDependencies,
+  WorkflowsPluginSetup,
+  WorkflowsPluginSetupDependencies,
+  WorkflowsPluginStart,
+} from './types';
 
 export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
-  public setup(core: CoreSetup): WorkflowsPluginSetup {
+  public setup(core: CoreSetup, plugins: WorkflowsPluginSetupDependencies): WorkflowsPluginSetup {
+    // Register workflows connector UI component
+    plugins.triggersActionsUi.actionTypeRegistry.register(getWorkflowsConnectorType());
+
     // Register an application into the side navigation menu
     // TODO: add icon
     core.application.register({

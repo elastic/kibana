@@ -162,9 +162,12 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   // Saved query
   const onSavedQuery = useCallback((newSavedQuery: SavedQuery) => {
     setSavedQuery(newSavedQuery);
-    const newFilters = newSavedQuery.attributes.filters;
+    const { filters: newFilters, query: newQuery } = newSavedQuery.attributes;
     if (newFilters) {
       dispatch({ type: 'filter', payload: newFilters });
+    }
+    if (newQuery) {
+      dispatch({ type: 'query', payload: newQuery });
     }
   }, []);
 
