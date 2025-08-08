@@ -109,7 +109,6 @@ export async function migrationStateActionMachine({
         };
       }
     } else if (finalState.controlState === 'FATAL') {
-      logger.error(`Reached FATAL state after: ${cstDiag.prettyPrint()}`);
       try {
         await abort(finalState);
       } catch (e) {
