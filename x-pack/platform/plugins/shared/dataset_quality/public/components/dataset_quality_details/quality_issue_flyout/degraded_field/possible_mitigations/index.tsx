@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import { FieldMappingLimit } from './field_limit/field_mapping_limit';
 import { useDatasetQualityDetailsState, useQualityIssues } from '../../../../../hooks';
 import { ManualMitigations } from './manual';
@@ -22,7 +22,7 @@ export function PossibleDegradedFieldMitigations() {
   return (
     !isAnalysisInProgress && (
       <div>
-        <EuiSpacer size="s" />
+        <EuiHorizontalRule margin="m" />
         <PossibleMitigationTitle />
         <EuiSpacer size="m" />
         {degradedFieldAnalysis?.isFieldLimitIssue && (

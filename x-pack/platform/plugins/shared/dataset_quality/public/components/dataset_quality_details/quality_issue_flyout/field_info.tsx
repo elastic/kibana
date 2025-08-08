@@ -6,13 +6,17 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle, formatNumber } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, formatNumber, useEuiTheme } from '@elastic/eui';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { ScaleType, Settings, Tooltip, Chart, BarSeries } from '@elastic/charts';
 
 import { NUMBER_FORMAT } from '../../../../common/constants';
-import { countColumnName, lastOccurrenceColumnName } from '../../../../common/translations';
+import {
+  flyoutDocsCountTotalText,
+  lastOccurrenceColumnName,
+  flyoutIssueDetailsTitle,
+} from '../../../../common/translations';
 import { useQualityIssues } from '../../../hooks';
-import { SparkPlot } from '../../common/spark_plot';
 import { QualityIssue } from '../../../../common/api_types';
 
 export const QualityIssueFieldInfo = ({
@@ -22,48 +26,66 @@ export const QualityIssueFieldInfo = ({
   fieldList?: QualityIssue;
   children?: React.ReactNode;
 }) => {
-  const { fieldFormats, isDegradedFieldsLoading } = useQualityIssues();
+  const { fieldFormats } = useQualityIssues();
+  const { euiTheme } = useEuiTheme();
 
   const dateFormatter = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [
     ES_FIELD_TYPES.DATE,
   ]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexGroup data-test-subj={`datasetQualityDetailsDegradedFieldFlyoutFieldsList-docCount`}>
-        <EuiFlexItem grow={1}>
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem>
+        <EuiTitle size="xs">
+          <span>{flyoutIssueDetailsTitle}</span>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
           <EuiTitle size="xxs">
-            <span>{countColumnName}</span>
+            <span>{flyoutDocsCountTotalText}</span>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem
-          data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-docCount"
-          grow={2}
+          data-test-subj={`datasetQualityDetailsDegradedFieldFlyoutFieldsList-docCount`}
+          grow={false}
         >
-          <SparkPlot
-            series={fieldList?.timeSeries}
-            valueLabel={formatNumber(fieldList?.count, NUMBER_FORMAT)}
-            isLoading={isDegradedFieldsLoading}
-          />
+          <span>{formatNumber(fieldList?.count, NUMBER_FORMAT)}</span>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiHorizontalRule margin="s" />
+      <EuiFlexItem data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-docCount">
+        {fieldList?.timeSeries && (
+          <Chart size={{ height: 100, width: '100%' }}>
+            <Settings showLegend={false} />
+            <Tooltip type="none" />
+            <BarSeries
+              id="barseries"
+              xScaleType={ScaleType.Linear}
+              yScaleType={ScaleType.Linear}
+              xAccessor="x"
+              yAccessors={['y']}
+              data={fieldList?.timeSeries}
+              color={euiTheme.colors.vis.euiColorVis6}
+            />
+          </Chart>
+        )}
+      </EuiFlexItem>
       <EuiFlexGroup
+        alignItems="center"
         data-test-subj={`datasetQualityDetailsDegradedFieldFlyoutFieldsList-lastOccurrence`}
       >
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem>
           <EuiTitle size="xxs">
             <span>{lastOccurrenceColumnName}</span>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem
           data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-lastOccurrence"
-          grow={2}
+          grow={false}
         >
           <span>{dateFormatter.convert(fieldList?.lastOccurrence)}</span>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiHorizontalRule margin="s" />
       {children}
     </EuiFlexGroup>
   );
