@@ -140,12 +140,17 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
       } catch (err) {
-        // agent_status_change task may apply conflicting update during deletion
-        if (attempt < maxAttempts && err?.meta?.statusCode === 409) {
+        if (!(err?.meta?.statusCode === 409)) {
+          // index doesn't exist
+          return;
+        }
+        // agent_status_change task may apply conflicting update during deletion - reattempt 409 conflict
+        if (attempt < maxAttempts) {
           await new Promise((resolve) => setTimeout(resolve, 1000));
           await cleanupAgents(attempt + 1);
+        } else {
+          throw new Error(`Exceeded max attempts ${maxAttempts} for deleting agents`);
         }
-        // index doesn't exist
       }
     };
 
