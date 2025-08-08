@@ -10,6 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { ToolType } from '@kbn/onechat-common';
 import type { ExecutableTool } from '@kbn/onechat-server';
 import { createToolIdMappings, toolToLangchain } from './tools';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const createTool = (
   toolId: string,
@@ -46,16 +47,18 @@ describe('toolToLangchain', () => {
     const tool = createTool('toolA', {
       description: 'desc',
       schema: z.object({ hello: z.string() }),
-      execute: jest.fn().mockResolvedValue({ result: 'foo' }),
+      execute: jest
+        .fn()
+        .mockResolvedValue({ results: [{ type: ToolResultType.other, data: 'foo' }] }),
     });
 
     const langchainTool = toolToLangchain({ tool, toolId: tool.id, logger });
-    const result = await langchainTool.invoke({ hello: 'world' });
+    const results = await langchainTool.invoke({ hello: 'world' });
 
     expect(tool.execute).toHaveBeenCalledTimes(1);
     expect(tool.execute).toHaveBeenCalledWith({ toolParams: { hello: 'world' } });
 
-    expect(result).toEqual('foo');
+    expect(JSON.parse(results).results).toEqual([{ type: ToolResultType.other, data: 'foo' }]);
   });
 });
 

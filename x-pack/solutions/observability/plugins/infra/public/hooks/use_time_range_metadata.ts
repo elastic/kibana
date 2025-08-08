@@ -24,7 +24,7 @@ export const useTimeRangeMetadata = ({
   start: string;
   end: string;
 }): FetcherResult<GetTimeRangeMetadataResponse> => {
-  const fetcherResult = useFetcher(
+  return useFetcher(
     async (callApi) => {
       const response = await callApi('/api/metrics/source/time_range_metadata', {
         method: 'GET',
@@ -40,8 +40,6 @@ export const useTimeRangeMetadata = ({
     },
     [start, end, kuery, dataSource]
   );
-
-  return fetcherResult;
 };
 
 export const [TimeRangeMetadataProvider, useTimeRangeMetadataContext] =

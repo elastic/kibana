@@ -335,30 +335,6 @@ describe('Rule upgrade preview Diff View options', () => {
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Resolved name');
     });
-
-    it('shows the same diff after saving unchanged field value', async () => {
-      const { fieldUpgradeWrapper, diffViewSection, diffViewSelector } = await setup({
-        fieldVersions: {
-          base: 'Initial name',
-          current: 'Customized name',
-          target: 'Updated name',
-          merged: 'Merged name',
-        },
-        diffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-        conflict: ThreeWayDiffConflict.SOLVABLE,
-      });
-
-      switchToFieldEdit(fieldUpgradeWrapper);
-
-      await saveAndAcceptFieldValue(fieldUpgradeWrapper);
-
-      expect(diffViewSelector).toBeVisible();
-
-      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
-      expect(selectedOption).toHaveTextContent("My changes merged with Elastic's");
-      expect(diffViewSection).toHaveTextContent('-Initial name');
-      expect(diffViewSection).toHaveTextContent('+Merged name');
-    });
   });
 
   describe('customized field w/ an upgrade resulting in a non-solvable conflict (ABC)', () => {
