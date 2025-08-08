@@ -72,6 +72,8 @@
               "HttpSetupMock",
               "; i18n: jest.Mocked<",
               "I18nStart",
+              ">; injection: jest.MockedObjectDeep<",
+              "CoreDiServiceStart",
               ">; notifications: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
@@ -116,7 +118,9 @@
               "PricingServiceStart",
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }, any, any]>, [], any>; http: ",
               "HttpSetupMock",
-              "; notifications: ",
+              "; injection: jest.MockedObjectDeep<",
+              "CoreDiServiceSetup",
+              ">; notifications: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
                 "scope": "common",
@@ -199,6 +203,8 @@
               "HttpSetupMock",
               "; i18n: jest.Mocked<",
               "I18nStart",
+              ">; injection: jest.MockedObjectDeep<",
+              "CoreDiServiceStart",
               ">; notifications: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
