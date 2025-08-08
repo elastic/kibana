@@ -153,7 +153,22 @@
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "workflowsManagement",
+          "id": "def-server.WorkflowsPluginSetup.management",
+          "type": "Object",
+          "tags": [],
+          "label": "management",
+          "description": [],
+          "signature": [
+            "WorkflowsManagementApi"
+          ],
+          "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
