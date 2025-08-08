@@ -20,6 +20,10 @@ export const TRUSTED_APPS_TAB = i18n.translate('xpack.securitySolution.trustedAp
   defaultMessage: 'Trusted applications',
 });
 
+export const TRUSTED_DEVICES_TAB = i18n.translate('xpack.securitySolution.trustedDevicesTab', {
+  defaultMessage: 'Trusted devices',
+});
+
 export const EVENT_FILTERS_TAB = i18n.translate('xpack.securitySolution.eventFiltersTab', {
   defaultMessage: 'Event filters',
 });
