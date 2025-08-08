@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import * as i18n from './translations';
 import type { GetLensAttributes } from '../../../common/components/visualization_actions/types';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
@@ -56,6 +57,8 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
         timerange={timerange}
         id={`${ID}-area-embeddable`}
         height={300}
+        // need for timerange to be applied correctly to valueReport scope
+        inputsModelId={InputsModelId.valueReport}
         inspectTitle={i18n.COST_SAVINGS_TREND}
         scopeId={SourcererScopeName.detections}
         withActions={[
