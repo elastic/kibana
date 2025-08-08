@@ -120,6 +120,16 @@ The helper will spin up one `local` project per available connector so results a
 node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts --project azure-gpt4o
 ```
 
+### Dev mode (local servers config)
+
+When `DEV_MODE` is set, the evaluation suite will connect to your local Kibana and Elasticsearch instances (using `config/kibana.dev.yml`) instead of the Scout server. This requires you to have Kibana and Elasticsearch running locally.
+
+Example (zsh):
+
+```bash
+DEV_MODE=1 node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
+```
+
 ## Regenerating Phoenix GraphQL types
 
 ```bash

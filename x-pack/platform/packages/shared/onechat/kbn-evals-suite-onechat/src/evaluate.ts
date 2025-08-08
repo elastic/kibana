@@ -17,16 +17,19 @@ export const evaluate = base.extend<
   onechatSetup: [
     async ({ fetch, log }, use) => {
       // Enable OneChat API before running the evaluation
-      await fetch('/internal/kibana/settings', {
-        method: 'POST',
-        body: JSON.stringify({
-          changes: {
-            'onechat:api:enabled': true,
-          },
-        }),
-      });
-
-      log.info('OneChat API enabled for the evaluation');
+      try {
+        await fetch('/internal/kibana/settings', {
+          method: 'POST',
+          body: JSON.stringify({
+            changes: {
+              'onechat:api:enabled': true,
+            },
+          }),
+        });
+        log.info('OneChat API enabled for the evaluation');
+      } catch (error) {
+        log.error(`Failed to enable OneChat API: ${error.message}.`);
+      }
 
       await use();
     },
