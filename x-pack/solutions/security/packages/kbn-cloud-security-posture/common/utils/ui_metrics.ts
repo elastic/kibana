@@ -63,7 +63,8 @@ export const ASSET_INVENTORY_SEARCH_QUERY_PERFORMED = 'search_query_performed' a
 export const ASSET_INVENTORY_COLUMN_ADDED = 'column_added' as const;
 export const ASSET_INVENTORY_COLUMN_REMOVED = 'column_removed' as const;
 export const ASSET_INVENTORY_GROUP_BY_OPENED = 'group_by_opened' as const;
-export const ASSET_INVENTORY_GROUP_BY_SELECTED_FIELD = 'group_by_selected_field' as const;
+export const ASSET_INVENTORY_GROUP_BY_SELECTED_FIELD = 'group_by_selected_field_' as const;
+export type ASSET_INVENTORY_COLUMN_ADDED_PREFIX = `group_by_selected_field_${string}`;
 export const ASSET_INVENTORY_CRITICALITY_ASSIGNED_MANUAL = 'criticality_assigned_manual' as const;
 export const ASSET_INVENTORY_CRITICALITY_ASSIGNED_BULK = 'criticality_assigned_bulk' as const;
 export const ASSET_INVENTORY_CRITICALITY_ASSIGNED_UPLOAD = 'criticality_assigned_upload' as const;
@@ -101,7 +102,7 @@ export type CloudSecurityUiCounters =
   | typeof ASSET_INVENTORY_COLUMN_ADDED
   | typeof ASSET_INVENTORY_COLUMN_REMOVED
   | typeof ASSET_INVENTORY_GROUP_BY_OPENED
-  | typeof ASSET_INVENTORY_GROUP_BY_SELECTED_FIELD
+  | ASSET_INVENTORY_COLUMN_ADDED_PREFIX
   | typeof ASSET_INVENTORY_CRITICALITY_ASSIGNED_MANUAL
   | typeof ASSET_INVENTORY_CRITICALITY_ASSIGNED_BULK
   | typeof ASSET_INVENTORY_CRITICALITY_ASSIGNED_UPLOAD;
