@@ -5,9 +5,6 @@
  * 2.0.
  */
 import React, { useEffect, useRef } from 'react';
-import semverLt from 'semver/functions/lt';
-import semverCoerce from 'semver/functions/coerce';
-import semverValid from 'semver/functions/valid';
 import { css } from '@emotion/react';
 import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { type NewPackagePolicy } from '@kbn/fleet-plugin/public';
@@ -281,7 +278,7 @@ export const GcpCredentialsForm = ({
   isEditPage,
   hasInvalidRequiredVars,
 }: GcpFormProps) => {
-  const { gcpMinShowVersion, gcpPolicyType, gcpOverviewPath } = useCloudSetup();
+  const { gcpEnabled, gcpPolicyType, gcpOverviewPath } = useCloudSetup();
   /* Create a subset of properties from GcpField to use for hiding value of credentials json and credentials file when user switch from Manual to Cloud Shell, we wanna keep Project and Organization ID */
   const { 'gcp.credentials.file': file, 'gcp.credentials.json': json } = gcpField.fields;
   const subsetOfGcpField = {
@@ -291,9 +288,6 @@ export const GcpCredentialsForm = ({
 
   const fieldsToHide = getGcpInputVarsFields(input, subsetOfGcpField);
   const fields = getGcpInputVarsFields(input, gcpField.fields);
-  const validSemantic = semverValid(packageInfo.version);
-  const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
-  const isInvalid = semverLt(integrationVersionNumberOnly, gcpMinShowVersion || '');
   const fieldsSnapshot = useRef({});
   const lastCredentialsType = useRef<string | undefined>(undefined);
   const setupFormat = getSetupFormatFromInput(input);
@@ -341,7 +335,7 @@ export const GcpCredentialsForm = ({
     }
   };
 
-  if (isInvalid) {
+  if (!gcpEnabled) {
     return (
       <>
         <EuiSpacer size="l" />

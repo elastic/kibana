@@ -14,7 +14,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import semverGte from 'semver/functions/gte';
-import semverCompare from 'semver/functions/compare';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
 import {
@@ -74,10 +73,27 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
   }) => {
     const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '2.0.0-preview01';
     const CLOUD_CREDENTIALS_PACKAGE_VERSION = '1.11.0-preview13';
+    const GCP_MINIMUM_ORGANIZATION_VERSION = '1.6.0';
+    const GCP_MINIMUM_PACKAGE_VERSION = '1.5.2';
+    const AWS_MINIMUM_ORGANIZATION_VERSION = '1.5.0-preview20';
+    const AZURE_MINIMUM_PACKAGE_VERSION = '1.6.0';
+    const AZURE_MINIMUM_ORGANIZATION_VERSION = '1.7.0';
+    const AZURE_MANUAL_FIELDS_PACKAGE_VERSION = '1.7.0';
 
     const showCloudConnectors = semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS);
-    const showCloudTemplates =
-      semverCompare(packageInfo.version, CLOUD_CREDENTIALS_PACKAGE_VERSION) >= 0;
+    const showCloudTemplates = semverGte(packageInfo.version, CLOUD_CREDENTIALS_PACKAGE_VERSION);
+    const enableGcpOrganization = semverGte(packageInfo.version, GCP_MINIMUM_ORGANIZATION_VERSION);
+    const enableAwsOrganization = semverGte(packageInfo.version, AWS_MINIMUM_ORGANIZATION_VERSION);
+    const enableAzureOrganization = semverGte(
+      packageInfo.version,
+      AZURE_MINIMUM_ORGANIZATION_VERSION
+    );
+    const enableAzure = semverGte(packageInfo.version, AZURE_MINIMUM_PACKAGE_VERSION);
+    const enableGcp = semverGte(packageInfo.version, GCP_MINIMUM_PACKAGE_VERSION);
+    const azureManualFieldsEnabled = semverGte(
+      packageInfo.version,
+      AZURE_MANUAL_FIELDS_PACKAGE_VERSION
+    );
 
     const CLOUD_SETUP_MAPPING: CloudSetupConfig = {
       policyTemplate: CSPM_POLICY_TEMPLATE,
@@ -96,20 +112,21 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       providers: {
         aws: {
           type: CLOUDBEAT_AWS,
-          organizationMinimumVersion: '1.5.0-preview20',
+          enableOrganization: enableAwsOrganization,
           getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started.html`,
         },
         gcp: {
           type: CLOUDBEAT_GCP,
-
-          organizationMinimumVersion: '1.6.0',
+          enableOrganization: enableGcpOrganization,
           getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-gcp.html`,
-          minShowVersion: '1.5.2',
+          enabled: enableGcp,
         },
         azure: {
           type: CLOUDBEAT_AZURE,
-          organizationMinimumVersion: '1.7.0',
+          enabled: enableAzure,
+          enableOrganization: enableAzureOrganization,
           getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-azure.html`,
+          manualFieldsEnabled: azureManualFieldsEnabled,
         },
       },
     };

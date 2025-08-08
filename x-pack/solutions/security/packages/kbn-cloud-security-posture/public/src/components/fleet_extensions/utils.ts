@@ -13,9 +13,6 @@ import type {
   RegistryVarsEntry,
 } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import semverValid from 'semver/functions/valid';
-import semverCoerce from 'semver/functions/coerce';
-import semverLt from 'semver/functions/lt';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
@@ -315,6 +312,7 @@ export const getDefaultGcpHiddenVars = (
   }
 
   const hasCloudShellUrl = !!getCloudShellDefaultValue(packageInfo, templateName);
+
   if (hasCloudShellUrl) {
     return {
       'gcp.credentials.type': {
@@ -358,7 +356,7 @@ export const getInputHiddenVars = (
         },
       };
     case GCP_PROVIDER:
-      return getDefaultGcpHiddenVars(packageInfo, setupTechnology);
+      return getDefaultGcpHiddenVars(packageInfo, templateName, setupTechnology);
     default:
       return undefined;
   }
@@ -371,9 +369,11 @@ export const getCloudShellDefaultValue = (
   if (!packageInfo.policy_templates) return '';
 
   const policyTemplate = packageInfo.policy_templates.find((p) => p.name === templateName);
+
   if (!policyTemplate) return '';
 
   const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
+
   if (!policyTemplateInputs) return '';
 
   const cloudShellUrl = policyTemplateInputs.reduce((acc, input): string => {
@@ -421,12 +421,6 @@ export const getDefaultAzureCredentialsType = (
   }
 
   return AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY;
-};
-
-export const isBelowMinVersion = (version: string, minVersion: string) => {
-  const semanticVersion = semverValid(version);
-  const versionNumberOnly = semverCoerce(semanticVersion) || '';
-  return semverLt(versionNumberOnly, minVersion);
 };
 
 /**
