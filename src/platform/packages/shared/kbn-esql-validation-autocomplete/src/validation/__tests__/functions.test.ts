@@ -368,6 +368,10 @@ describe('function validation', () => {
                 description: '',
                 locationsAvailable: [Location.EVAL],
                 signatures: [
+                  // the order of these signatures is important.
+                  // the shorter one is first so that if they aren't
+                  // filtered down properly, the 2 arguments in the invocation
+                  // will run off the 1 argument signature
                   {
                     params: [{ name: 'arg1', type: 'keyword' }],
                     returnType: 'keyword',
