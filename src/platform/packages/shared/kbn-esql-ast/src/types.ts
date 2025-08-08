@@ -125,7 +125,7 @@ export interface ESQLAstChangePointCommand extends ESQLCommand<'change_point'> {
 
 export interface ESQLAstCompletionCommand extends ESQLCommand<'completion'> {
   prompt: ESQLAstExpression;
-  inferenceId: ESQLIdentifierOrParam;
+  inferenceId: ESQLLiteral;
   targetField?: ESQLColumn;
 }
 
