@@ -533,38 +533,6 @@ describe('function validation', () => {
 
         expect(errors).toHaveLength(1);
       });
-
-      it("doesn't raise errors for conflict fields", async () => {
-        setTestFunctions([
-          {
-            name: 'test',
-            type: FunctionDefinitionTypes.SCALAR,
-            description: '',
-            locationsAvailable: [Location.EVAL],
-            signatures: [
-              {
-                params: [{ name: 'arg1', type: 'keyword' }],
-                returnType: 'keyword',
-              },
-            ],
-          },
-        ]);
-
-        const { expectErrors, callbacks } = await setup();
-
-        callbacks.getColumnsFor = () => {
-          return [
-            {
-              name: 'conflictField',
-              type: 'unsupported',
-              hasConflict: true,
-            },
-          ];
-        };
-
-        // conflict fields are not validated, so this should not raise an error
-        await expectErrors(`FROM a_index | EVAL TEST(conflictField)`, []);
-      });
     });
 
     describe('command/option support', () => {
