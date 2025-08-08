@@ -119,25 +119,7 @@ describe('functions arg suggestions', () => {
     setTestFunctions([
       {
         type: FunctionDefinitionTypes.SCALAR,
-        name: 'func_with_accepted_values',
-        description: '',
-        signatures: [
-          {
-            params: [
-              {
-                name: 'arg',
-                type: 'keyword',
-                suggestedValues: ['value1', 'value2', 'value3'],
-              },
-            ],
-            returnType: 'double',
-          },
-        ],
-        locationsAvailable: [Location.EVAL],
-      },
-      {
-        type: FunctionDefinitionTypes.SCALAR,
-        name: 'func_with_suggested_literals',
+        name: 'func_with_suggested_values',
         description: '',
         signatures: [
           {
@@ -157,12 +139,11 @@ describe('functions arg suggestions', () => {
 
     const { assertSuggestions } = await setup();
 
-    await assertSuggestions('FROM index | EVAL FUNC_WITH_ACCEPTED_VALUES(/)', [
+    await assertSuggestions('FROM index | EVAL FUNC_WITH_SUGGESTED_VALUES(/)', [
       '"value1"',
       '"value2"',
       '"value3"',
     ]);
-    await assertSuggestions('FROM index | EVAL FUNC_WITH_SUGGESTED_LITERALS(/)', ['"value1"']);
   });
 
   it('respects constant-only', async () => {
