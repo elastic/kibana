@@ -25,7 +25,6 @@
       "inspector",
       "kibanaReact",
       "kibanaUtils",
-      "observabilityAIAssistant"
     ],
     "extraPublicDirs": [
       "common"
