@@ -7,7 +7,7 @@
 
 import { SavedObjectReference } from '@kbn/core/types';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
-import { SerializedAction, SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
+import { SerializedAction, SerializedEvent } from '@kbn/ui-actions-enhanced-dynamic-actions-common';
 import { DashboardDrilldownConfig } from './types';
 
 type DashboardDrilldownPersistableState = PersistableStateService<SerializedEvent>;

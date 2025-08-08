@@ -8252,6 +8252,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ui-actions-enhanced-dynamic-actions-common@link:src/platform/packages/shared/ui-actions-enhanced/dynamic_actions/dynamic_actions_common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-actions-enhanced-dynamic-actions-public@link:src/platform/packages/shared/ui-actions-enhanced/dynamic_actions/dynamic_actions_public":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ui-actions-enhanced-examples-plugin@link:x-pack/examples/ui_actions_enhanced_examples":
   version "0.0.0"
   uid ""

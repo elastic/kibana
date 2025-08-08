@@ -13,6 +13,7 @@ import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { SavedObjectReference } from '@kbn/core/types';
 import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import { DynamicActionsState } from '@kbn/ui-actions-enhanced-dynamic-actions-common';
 import { DrilldownDefinition } from '../drilldowns';
 import {
   ActionFactory,
@@ -22,8 +23,6 @@ import {
   SerializedEvent,
 } from '../dynamic_actions';
 import { ActionFactoryRegistry } from '../types';
-
-import { DynamicActionsState } from '../../common/types';
 
 export type { DynamicActionsState };
 

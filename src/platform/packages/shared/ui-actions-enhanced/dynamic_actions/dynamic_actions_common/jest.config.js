@@ -7,17 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  SerializedAction,
-  SerializedEvent,
-  BaseActionConfig,
-} from '@kbn/ui-actions-enhanced-dynamic-actions-common';
-
-export type { SerializedAction, SerializedEvent, BaseActionConfig };
-
-/**
- * Action factory context passed into ActionFactories' CollectConfig, getDisplayName, getIconType
- */
-export interface BaseActionFactoryContext {
-  triggers: string[];
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../../../..',
+  roots: [
+    '<rootDir>/x-pack/platform/packages/shared/ui-actions-enhanced/dynamic_actions/dynamic_actions_common',
+  ],
+};

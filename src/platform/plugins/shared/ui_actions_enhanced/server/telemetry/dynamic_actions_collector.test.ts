@@ -8,7 +8,7 @@
  */
 
 import { dynamicActionsCollector } from './dynamic_actions_collector';
-import { DynamicActionsState } from '../../common';
+import { DynamicActionsState } from '@kbn/ui-actions-enhanced-dynamic-actions-common';
 
 const state: DynamicActionsState = {
   events: [

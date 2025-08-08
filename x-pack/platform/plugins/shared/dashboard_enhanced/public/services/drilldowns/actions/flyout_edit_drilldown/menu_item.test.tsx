@@ -7,7 +7,7 @@
 
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
-import { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
+import { SerializedEvent } from '@kbn/ui-actions-enhanced-dynamic-actions-common';
 import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
 import { act, render } from '@testing-library/react';
 import React from 'react';
