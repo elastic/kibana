@@ -176,7 +176,7 @@ export interface GetMetadataParams {
   /**
    * The comments for a case
    */
-  theComments: Attachment[];
+  comments: Attachment[];
 }
 
 /**
@@ -185,10 +185,10 @@ export interface GetMetadataParams {
  * @ignore
  */
 export const getMetadata = async (
-  { theComments }: GetMetadataParams,
+  { comments }: GetMetadataParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseMetadata> => {
-  return getAlertMetadataFromComments(theComments, clientArgs);
+  return getAlertMetadataFromComments(comments, clientArgs);
 };
 
 /**
