@@ -64,7 +64,7 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
 
       // TODO: remove this once we have a proper connector executor/step for console
       if (step.type === 'console.log' || step.type === 'console') {
-        this.workflowLogger.logInfo(`Console log from step ${step.name}: \n${withInputs.message}`, {
+        this.workflowLogger.logInfo(`Log from step ${step.name}: \n${withInputs.message}`, {
           event: { action: 'log', outcome: 'success' },
           tags: ['console', 'log'],
         });
