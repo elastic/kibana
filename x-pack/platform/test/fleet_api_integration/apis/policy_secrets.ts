@@ -17,7 +17,7 @@ import {
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry, waitForAgents } from '../helpers';
+import { skipIfNoDockerRegistry } from '../helpers';
 
 const secretVar = (id: string) => `$co.elastic.secret{${id}}`;
 
@@ -128,7 +128,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     };
 
-    const cleanupAgents = async () => {
+    const cleanupAgents = async (attempt: number = 0) => {
+      const maxAttempts = 3;
       const { body: agentsResponse } = await supertest
         .get(`/api/fleet/agents?showInactive=true`)
         .set('kbn-xsrf', 'xxxx')
@@ -139,7 +140,6 @@ export default function (providerContext: FtrProviderContext) {
         const response = await es.deleteByQuery({
           index: AGENTS_INDEX,
           refresh: true,
-          conflicts: 'proceed',
           query: {
             match_all: {},
           },
@@ -149,9 +149,13 @@ export default function (providerContext: FtrProviderContext) {
       } catch (err) {
         // index doesn't exist
         console.log(`Cleanup agents deleteByQuery error:`, JSON.stringify(err, null, 2));
-      }
 
-      await waitForAgents(supertest, 0, 20);
+        // agent_status_change task may apply conflicting update during deletion
+        if (attempt < maxAttempts && err?.meta?.statusCode === 409) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await cleanupAgents(attempt + 1);
+        }
+      }
     };
 
     const cleanupSecrets = async () => {
