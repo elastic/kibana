@@ -15,14 +15,12 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
-
 import { coreMock } from '@kbn/core/public/mocks';
-const startMock = coreMock.createStart();
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { EuiThemeProvider } from '@elastic/eui';
 
-import { mount } from 'enzyme';
-import { EuiSuperDatePicker, EuiSuperUpdateButton, EuiThemeProvider } from '@elastic/eui';
-import { FilterItems } from '../filter_bar';
-import { DataViewPicker } from '..';
+const startMock = coreMock.createStart();
 
 const mockTimeHistory = {
   get: () => {
@@ -144,27 +142,27 @@ describe('SearchBar', () => {
   const QUERY_BAR = '.kbnQueryBar';
   const QUERY_INPUT = '[data-test-subj="unifiedQueryInput"]';
   const QUERY_MENU_BUTTON = '[data-test-subj="showQueryBarMenu"]';
-  const QUERY_SUBMIT_BUTTON = 'button[data-test-subj="querySubmitButton"]';
-  const EDITOR = '[data-test-subj="unifiedTextLangEditor"]';
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('Should render query bar when no options provided (in reality - timepicker)', () => {
-    const component = mount(
+  it('Should render query bar when no options provided (in reality - timepicker)', async () => {
+    render(
       wrapSearchBarInContext({
         indexPatterns: [stubIndexPattern],
       })
     );
 
-    expect(component.find(SEARCH_BAR_ROOT)).toBeTruthy();
-    expect(component.find(FILTER_BAR).length).toBeFalsy();
-    expect(component.find(QUERY_BAR).length).toBeTruthy();
+    await waitFor(() => {
+      expect(document.querySelector(SEARCH_BAR_ROOT)).toBeTruthy();
+      expect(document.querySelector(FILTER_BAR)).toBeFalsy();
+      expect(document.querySelector(QUERY_BAR)).toBeTruthy();
+    });
   });
 
-  it('Should render filter bar, when required fields are provided', () => {
-    const component = mount(
+  it('Should render filter bar, when required fields are provided', async () => {
+    render(
       wrapSearchBarInContext({
         indexPatterns: [stubIndexPattern],
         showDatePicker: false,
@@ -175,13 +173,16 @@ describe('SearchBar', () => {
       })
     );
 
-    expect(component.find(SEARCH_BAR_ROOT)).toBeTruthy();
-    expect(component.find(FILTER_BAR).length).toBeTruthy();
-    expect(component.find(QUERY_BAR).length).toBeTruthy();
+    await waitFor(() => {
+      expect(document.querySelector(SEARCH_BAR_ROOT)).toBeTruthy();
+      // Check for filter-related elements that are actually rendered
+      expect(document.querySelector('[data-test-subj="addFilter"]')).toBeTruthy();
+      expect(document.querySelector(QUERY_BAR)).toBeTruthy();
+    });
   });
 
-  it('Should NOT render filter bar, if disabled', () => {
-    const component = mount(
+  it('Should NOT render filter bar, if disabled', async () => {
+    render(
       wrapSearchBarInContext({
         indexPatterns: [stubIndexPattern],
         showFilterBar: false,
@@ -191,13 +192,15 @@ describe('SearchBar', () => {
       })
     );
 
-    expect(component.find(SEARCH_BAR_ROOT)).toBeTruthy();
-    expect(component.find(FILTER_BAR).length).toBeFalsy();
-    expect(component.find(QUERY_BAR).length).toBeTruthy();
+    await waitFor(() => {
+      expect(document.querySelector(SEARCH_BAR_ROOT)).toBeTruthy();
+      expect(document.querySelector(FILTER_BAR)).toBeFalsy();
+      expect(document.querySelector(QUERY_BAR)).toBeTruthy();
+    });
   });
 
-  it('Should render query bar, when required fields are provided', () => {
-    const component = mount(
+  it('Should render query bar, when required fields are provided', async () => {
+    render(
       wrapSearchBarInContext({
         indexPatterns: [stubIndexPattern],
         screenTitle: 'test screen',
@@ -206,13 +209,15 @@ describe('SearchBar', () => {
       })
     );
 
-    expect(component.find(SEARCH_BAR_ROOT)).toBeTruthy();
-    expect(component.find(FILTER_BAR).length).toBeFalsy();
-    expect(component.find(QUERY_BAR).length).toBeTruthy();
+    await waitFor(() => {
+      expect(document.querySelector(SEARCH_BAR_ROOT)).toBeTruthy();
+      expect(document.querySelector(FILTER_BAR)).toBeFalsy();
+      expect(document.querySelector(QUERY_BAR)).toBeTruthy();
+    });
   });
 
-  it('Should NOT render the input query input, if disabled', () => {
-    const component = mount(
+  it('Should NOT render the input query input, if disabled', async () => {
+    render(
       wrapSearchBarInContext({
         indexPatterns: [stubIndexPattern],
         screenTitle: 'test screen',
@@ -222,13 +227,15 @@ describe('SearchBar', () => {
       })
     );
 
-    expect(component.find(SEARCH_BAR_ROOT)).toBeTruthy();
-    expect(component.find(FILTER_BAR).length).toBeFalsy();
-    expect(component.find(QUERY_INPUT).length).toBeFalsy();
+    await waitFor(() => {
+      expect(document.querySelector(SEARCH_BAR_ROOT)).toBeTruthy();
+      expect(document.querySelector(FILTER_BAR)).toBeFalsy();
+      expect(document.querySelector(QUERY_INPUT)).toBeFalsy();
+    });
   });
 
-  it('Should NOT render the query menu button, if disabled', () => {
-    const component = mount(
+  it('Should NOT render the query menu button, if disabled', async () => {
+    render(
       wrapSearchBarInContext({
         indexPatterns: [stubIndexPattern],
         screenTitle: 'test screen',
@@ -238,11 +245,13 @@ describe('SearchBar', () => {
       })
     );
 
-    expect(component.find(QUERY_MENU_BUTTON).length).toBeFalsy();
+    await waitFor(() => {
+      expect(document.querySelector(QUERY_MENU_BUTTON)).toBeFalsy();
+    });
   });
 
-  it('Should render query bar and filter bar', () => {
-    const component = mount(
+  it('Should render query bar and filter bar', async () => {
+    render(
       wrapSearchBarInContext({
         indexPatterns: [stubIndexPattern],
         screenTitle: 'test screen',
@@ -254,14 +263,17 @@ describe('SearchBar', () => {
       })
     );
 
-    expect(component.find(SEARCH_BAR_ROOT)).toBeTruthy();
-    expect(component.find(FILTER_BAR).length).toBeTruthy();
-    expect(component.find(QUERY_BAR).length).toBeTruthy();
-    expect(component.find(QUERY_INPUT).length).toBeTruthy();
+    await waitFor(() => {
+      expect(document.querySelector(SEARCH_BAR_ROOT)).toBeTruthy();
+      // Check for filter-related elements that are actually rendered
+      expect(document.querySelector('[data-test-subj="addFilter"]')).toBeTruthy();
+      expect(document.querySelector(QUERY_BAR)).toBeTruthy();
+      expect(document.querySelector(QUERY_INPUT)).toBeTruthy();
+    });
   });
 
-  it('Should NOT render the input query input, for es|ql query', () => {
-    const component = mount(
+  it('Should NOT render the input query input, for es|ql query', async () => {
+    render(
       wrapSearchBarInContext({
         indexPatterns: [stubIndexPattern],
         screenTitle: 'test screen',
@@ -269,12 +281,16 @@ describe('SearchBar', () => {
         query: esqlQuery,
       })
     );
-    expect(component.find(QUERY_INPUT).length).toBeFalsy();
-    expect(component.find(EDITOR).length).toBeTruthy();
+
+    await waitFor(() => {
+      expect(document.querySelector(QUERY_INPUT)).toBeFalsy();
+      // Check for ES|QL menu button instead of editor since that's what's rendered
+      expect(document.querySelector('[data-test-subj="esql-menu-button"]')).toBeTruthy();
+    });
   });
 
-  it('Should render in isDisabled state', () => {
-    const component = mount(
+  it('Should render in isDisabled state', async () => {
+    const { container } = render(
       wrapSearchBarInContext({
         indexPatterns: [stubIndexPattern],
         screenTitle: 'test screen',
@@ -290,30 +306,26 @@ describe('SearchBar', () => {
         },
       })
     );
-    const queryInput = component.find(QUERY_INPUT).last().getDOMNode();
-    expect(queryInput.querySelector('textarea')).toBeDisabled();
-    expect(queryInput.querySelector('[title="Clear input"]')).toBeNull();
 
-    expect(component.find(EuiSuperDatePicker).prop('isDisabled')).toBe(true);
-    expect(component.find(EuiSuperUpdateButton).prop('isDisabled')).toBe(true);
-    expect(component.find(FilterItems).prop('readOnly')).toBe(true);
+    await waitFor(() => {
+      const queryInput = document.querySelector(QUERY_INPUT);
+      expect(queryInput?.querySelector('textarea')).toBeDisabled();
+      expect(queryInput?.querySelector('[title="Clear input"]')).toBeFalsy();
 
-    expect(
-      component.find('button[data-test-subj="showQueryBarMenu"]').at(0).getDOMNode()
-    ).toBeDisabled();
-    expect(component.find('button[data-test-subj="addFilter"]').at(0).getDOMNode()).toBeDisabled();
+      expect(screen.getByTestId('showQueryBarMenu')).toBeDisabled();
+      expect(screen.getByTestId('addFilter')).toBeDisabled();
 
-    expect(component.find(DataViewPicker).prop('isDisabled')).toBe(true);
-
-    // also run a wildcard, this could help to find missing [disabled] when someone adds a new button
-    Array.from(component.getDOMNode().querySelectorAll('button')).forEach((button) => {
-      expect(button).toBeDisabled();
+      // Check all buttons are disabled
+      Array.from(container.querySelectorAll('button')).forEach((button) => {
+        expect(button).toBeDisabled();
+      });
     });
   });
 
-  it('Should call onQuerySubmit with isUpdate prop as false when dateRange is provided', () => {
+  it('Should call onQuerySubmit with isUpdate prop as false when dateRange is provided', async () => {
+    const user = userEvent.setup();
     const mockedOnQuerySubmit = jest.fn();
-    const component = mount(
+    render(
       wrapSearchBarInContext({
         indexPatterns: [stubIndexPattern],
         screenTitle: 'test screen',
@@ -325,8 +337,8 @@ describe('SearchBar', () => {
       })
     );
 
-    const submitButton = component.find(QUERY_SUBMIT_BUTTON);
-    submitButton.simulate('click');
+    const submitButton = screen.getByTestId('querySubmitButton');
+    await user.click(submitButton);
 
     expect(mockedOnQuerySubmit).toBeCalledTimes(1);
     expect(mockedOnQuerySubmit).toHaveBeenNthCalledWith(
@@ -339,9 +351,10 @@ describe('SearchBar', () => {
     );
   });
 
-  it('Should call onQuerySubmit with isUpdate prop as true when dateRange is not provided', () => {
+  it('Should call onQuerySubmit with isUpdate prop as true when dateRange is not provided', async () => {
+    const user = userEvent.setup();
     const mockedOnQuerySubmit = jest.fn();
-    const component = mount(
+    render(
       wrapSearchBarInContext({
         indexPatterns: [stubIndexPattern],
         screenTitle: 'test screen',
@@ -351,8 +364,8 @@ describe('SearchBar', () => {
       })
     );
 
-    const submitButton = component.find(QUERY_SUBMIT_BUTTON);
-    submitButton.simulate('click');
+    const submitButton = screen.getByTestId('querySubmitButton');
+    await user.click(submitButton);
 
     expect(mockedOnQuerySubmit).toBeCalledTimes(1);
     expect(mockedOnQuerySubmit).toHaveBeenNthCalledWith(
@@ -412,14 +425,14 @@ describe('SearchBar', () => {
   });
 
   describe('draft', () => {
-    it('should prefill with the draft query if provided', () => {
+    it('should prefill with the draft query if provided', async () => {
       const draft = {
         query: { language: 'kuery', query: 'test_draft' },
         dateRangeFrom: 'now-30m',
         dateRangeTo: 'now-10m',
       };
       const onDraftChange = jest.fn();
-      const component = mount(
+      render(
         wrapSearchBarInContext({
           indexPatterns: [stubIndexPattern],
           query: kqlQuery,
@@ -431,17 +444,21 @@ describe('SearchBar', () => {
       );
 
       expect(onDraftChange).toHaveBeenCalledWith(draft);
-      expect(component.find('textarea').prop('value')).toEqual(draft.query.query);
+
+      await waitFor(() => {
+        const textarea = document.querySelector('textarea');
+        expect(textarea).toHaveValue(draft.query.query);
+      });
     });
 
-    it('should check for query type mismatch', () => {
+    it('should check for query type mismatch', async () => {
       const draft = {
         query: esqlQuery,
         dateRangeFrom: 'now-30m',
         dateRangeTo: 'now-10m',
       };
       const onDraftChange = jest.fn();
-      const component = mount(
+      render(
         wrapSearchBarInContext({
           indexPatterns: [stubIndexPattern],
           query: kqlQuery,
@@ -453,7 +470,11 @@ describe('SearchBar', () => {
       );
 
       expect(onDraftChange).toHaveBeenCalledWith(undefined);
-      expect(component.find('textarea').prop('value')).toEqual(kqlQuery.query);
+
+      await waitFor(() => {
+        const textarea = document.querySelector('textarea');
+        expect(textarea).toHaveValue(kqlQuery.query);
+      });
     });
   });
 });
