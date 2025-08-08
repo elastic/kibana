@@ -17,6 +17,7 @@ import { BulkPurgeConfirmationContainer } from '../components/slo/purge_confirma
 import { PurgeConfirmationContainer } from '../components/slo/purge_confirmation_modal/purge_modal_container';
 import { SloResetConfirmationModal } from '../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { useCloneSlo } from '../hooks/use_clone_slo';
+import { ManageLinkedDashboardsContainer } from '../components/manage_linked_dashboards/manage_linked_dashboards_container';
 
 type Action = SingleAction | BulkAction;
 
@@ -26,7 +27,15 @@ interface BaseAction {
 }
 
 interface SingleAction extends BaseAction {
-  type: 'clone' | 'delete' | 'reset' | 'enable' | 'disable' | 'purge' | 'add_to_case';
+  type:
+    | 'clone'
+    | 'delete'
+    | 'reset'
+    | 'enable'
+    | 'disable'
+    | 'purge'
+    | 'add_to_case'
+    | 'add_dashboards';
   item: SLODefinitionResponse | SLOWithSummaryResponse;
 }
 
@@ -126,6 +135,15 @@ export function ActionModalProvider({ children }: { children: ReactNode }) {
             onConfirm={handleOnConfirm}
           />
         );
+      case 'add_dashboards': {
+        return (
+          <ManageLinkedDashboardsContainer
+            slo={action.item}
+            onCancel={handleOnCancel}
+            onConfirm={handleOnConfirm}
+          />
+        );
+      }
       default:
         return null;
     }

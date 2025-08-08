@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGrid, EuiPanel, EuiText, useIsWithinBreakpoints } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiPanel, EuiText, useIsWithinBreakpoints } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -16,6 +16,7 @@ import {
 } from '@kbn/slo-schema';
 import { isEmpty } from 'lodash';
 import React from 'react';
+import { SloTagsBadge } from '../../../../components/slo/slo_badges/slo_tags_badge';
 import { useKibana } from '../../../../hooks/use_kibana';
 import {
   BUDGETING_METHOD_OCCURRENCES,
@@ -99,7 +100,22 @@ export function Definition({ slo }: Props) {
             )
           }
         />
-
+        <DefinitionItem
+          title={i18n.translate('xpack.slo.sloDetails.overview.descriptionTitle', {
+            defaultMessage: 'Description',
+          })}
+          content={<EuiText size="s">{!!slo.description ? slo.description : '-'}</EuiText>}
+        />
+        <DefinitionItem
+          title={i18n.translate('xpack.slo.sloDetails.overview.tagsTitle', {
+            defaultMessage: 'Tags',
+          })}
+          content={
+            <EuiFlexGroup direction="row" gutterSize="s" wrap responsive={false}>
+              <SloTagsBadge slo={slo} />
+            </EuiFlexGroup>
+          }
+        />
         {IndicatorOverview}
         {'index' in slo.indicator.params && (
           <DefinitionItem
