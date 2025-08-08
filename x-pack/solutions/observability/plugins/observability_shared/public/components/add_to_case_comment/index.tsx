@@ -8,14 +8,11 @@
 import React from 'react';
 import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { NotificationsStart } from '@kbn/core/public';
 
 interface AddToCaseCommentProps {
   comment: string;
   onCommentChange: React.Dispatch<React.SetStateAction<string>>;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   notifications: NotificationsStart;
 }
 

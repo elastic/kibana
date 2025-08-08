@@ -88,12 +88,10 @@ export function AddPageAttachmentToCaseModal({
 function AddToCaseButtonContent({
   pageAttachmentState,
   cases,
-  observabilityAIAssistant,
   notifications,
   onCloseModal,
 }: AddPageAttachmentToCaseModalProps) {
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(true);
-  const [isCommentLoading, setIsCommentLoading] = useState(true);
   const [comment, setComment] = useState<string>('');
   const useCasesAddToExistingCaseModal = cases.hooks.useCasesAddToExistingCaseModal!;
   const casesModal = useCasesAddToExistingCaseModal();
@@ -142,7 +140,6 @@ function AddToCaseButtonContent({
               defaultMessage: 'Cancel',
             }
           )}
-          isLoading={isCommentLoading}
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle>
@@ -155,8 +152,6 @@ function AddToCaseButtonContent({
             <AddToCaseComment
               onCommentChange={setComment}
               comment={comment}
-              setIsLoading={setIsCommentLoading}
-              observabilityAIAssistant={observabilityAIAssistant}
               notifications={notifications}
             />
           </EuiModalBody>
