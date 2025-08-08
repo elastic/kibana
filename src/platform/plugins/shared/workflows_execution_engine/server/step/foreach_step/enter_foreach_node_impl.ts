@@ -32,7 +32,11 @@ export class EnterForeachNodeImpl implements StepImplementation {
         this.workflowLogger.logDebug(
           `Foreach step "${this.step.id}" has no items to iterate over. Skipping execution.`
         );
-        this.wfExecutionRuntimeManager.finishStep(this.step.id);
+        await this.wfExecutionRuntimeManager.setStepState(this.step.id, {
+          items: [],
+          total: 0,
+        });
+        await this.wfExecutionRuntimeManager.finishStep(this.step.id);
         this.wfExecutionRuntimeManager.goToStep(this.step.exitNodeId);
         return;
       }
