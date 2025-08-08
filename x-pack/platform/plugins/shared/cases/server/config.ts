@@ -31,7 +31,7 @@ export const ConfigSchema = schema.object({
     /**
      * Whether the incremental id service should be enabled
      */
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
     /**
      * The interval that the task should be scheduled at
      */
