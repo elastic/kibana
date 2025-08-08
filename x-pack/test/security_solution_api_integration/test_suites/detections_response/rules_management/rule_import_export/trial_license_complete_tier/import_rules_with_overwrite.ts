@@ -8,7 +8,7 @@
 import expect from 'expect';
 
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
-import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
+import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
 import { combineToNdJson, getCustomQueryRuleParams, fetchRule } from '../../../utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
