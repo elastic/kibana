@@ -28,6 +28,7 @@ import { postCaseConfigureRoute } from './configure/post_configure';
 import { getAllAlertsAttachedToCaseRoute } from './comments/get_alerts';
 import { findUserActionsRoute } from './user_actions/find_user_actions';
 import { postFileRoute } from './files/post_file';
+import { getCaseMetadataRoute } from './cases/get_case_metadata';
 
 export const getExternalRoutes = () =>
   [
@@ -54,4 +55,5 @@ export const getExternalRoutes = () =>
     postCaseConfigureRoute,
     getAllAlertsAttachedToCaseRoute,
     postFileRoute,
+    getCaseMetadataRoute(),
   ] as CaseRoute[];
