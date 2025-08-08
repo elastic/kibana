@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { BottomBarActions, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
 import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
@@ -32,9 +33,45 @@ import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_ap
 import { FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { saveConfig } from './save_config';
 import { SettingFormRow } from './setting_form_row';
+import type { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
+import type { ApmPluginStartDeps, ApmServices } from '../../../../../../plugin';
+import type {
+  AgentConfigurationChangedParams,
+  ITelemetryClient,
+} from '../../../../../../services/telemetry';
 
 function removeEmpty(obj: { [key: string]: any }) {
   return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v != null && v !== ''));
+}
+
+export function reportTelemetry({
+  telemetry,
+  config,
+  settingsDefinitions,
+}: {
+  telemetry: ITelemetryClient;
+  config: AgentConfigurationIntake;
+  settingsDefinitions: SettingDefinition[];
+}) {
+  const predefinedSettingsKeys = new Set();
+  settingsDefinitions.forEach((setting) => {
+    predefinedSettingsKeys.add(setting.key);
+  });
+  const predefinedSettings: AgentConfigurationChangedParams['predefinedSettings'] = [];
+  const advancedSettings: AgentConfigurationChangedParams['advancedSettings'] = [];
+  Object.entries(config.settings).forEach(([key, value]) => {
+    if (predefinedSettingsKeys.has(key)) {
+      predefinedSettings.push({ key, value });
+    } else {
+      advancedSettings.push({ key, value });
+    }
+  });
+  telemetry.reportAgentConfigurationChanged({
+    agentName: config.agent_name || 'all',
+    environment: config.service.environment || 'all',
+    predefinedSettings,
+    advancedSettings,
+  });
 }
 
 export function SettingsPage({
@@ -59,8 +96,15 @@ export function SettingsPage({
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
+  const { telemetry } = services;
+
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
   const isLoading = status === FETCH_STATUS.LOADING;
+
+  const settingsDefinitionsByAgent = useMemo(() => {
+    return settingDefinitions.filter(filterByAgent(newConfig.agent_name as AgentName));
+  }, [newConfig.agent_name]);
 
   const isFormValid = useMemo(() => {
     return (
@@ -85,6 +129,7 @@ export function SettingsPage({
 
     setIsSaving(true);
     await saveConfig({ config, isEditMode, toasts });
+    reportTelemetry({ telemetry, config, settingsDefinitions: settingsDefinitionsByAgent });
     setIsSaving(false);
 
     // go back to overview
@@ -189,7 +234,7 @@ export function SettingsPage({
               <EuiLoadingSpinner size="m" />
             </div>
           ) : (
-            renderSettings({ unsavedChanges, newConfig, setNewConfig })
+            renderSettings({ unsavedChanges, newConfig, setNewConfig, settingsDefinitionsByAgent })
           )}
         </form>
       </EuiForm>
@@ -216,33 +261,28 @@ function renderSettings({
   newConfig,
   unsavedChanges,
   setNewConfig,
+  settingsDefinitionsByAgent,
 }: {
   newConfig: AgentConfigurationIntake;
   unsavedChanges: Record<string, string>;
+  settingsDefinitionsByAgent: SettingDefinition[];
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
 }) {
-  return (
-    settingDefinitions
-
-      // filter out agent specific items that are not applicable
-      // to the selected service
-      .filter(filterByAgent(newConfig.agent_name as AgentName))
-      .map((setting) => (
-        <SettingFormRow
-          isUnsaved={Object.hasOwn(unsavedChanges, setting.key)}
-          key={setting.key}
-          setting={setting}
-          value={newConfig.settings[setting.key]}
-          onChange={(key, value) => {
-            setNewConfig((prev) => ({
-              ...prev,
-              settings: {
-                ...prev.settings,
-                [key]: value,
-              },
-            }));
-          }}
-        />
-      ))
-  );
+  return settingsDefinitionsByAgent.map((setting) => (
+    <SettingFormRow
+      isUnsaved={Object.hasOwn(unsavedChanges, setting.key)}
+      key={setting.key}
+      setting={setting}
+      value={newConfig.settings[setting.key]}
+      onChange={(key, value) => {
+        setNewConfig((prev) => ({
+          ...prev,
+          settings: {
+            ...prev.settings,
+            [key]: value,
+          },
+        }));
+      }}
+    />
+  ));
 }

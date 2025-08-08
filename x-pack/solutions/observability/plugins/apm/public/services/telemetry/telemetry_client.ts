@@ -6,7 +6,11 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type { ITelemetryClient, SearchQuerySubmittedParams } from './types';
+import type {
+  AgentConfigurationChangedParams,
+  ITelemetryClient,
+  SearchQuerySubmittedParams,
+} from './types';
 import { TelemetryEventTypes } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
@@ -22,5 +26,9 @@ export class TelemetryClient implements ITelemetryClient {
       timerange,
       action,
     });
+  };
+
+  public reportAgentConfigurationChanged = (params: AgentConfigurationChangedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AGENT_CONFIGURATION_CHANGED, params);
   };
 }

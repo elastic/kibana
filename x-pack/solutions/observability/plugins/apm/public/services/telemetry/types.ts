@@ -21,14 +21,23 @@ export interface SearchQuerySubmittedParams {
   action: SearchQueryActions;
 }
 
-export type TelemetryEventParams = SearchQuerySubmittedParams;
+export interface AgentConfigurationChangedParams {
+  agentName: string;
+  environment: string;
+  predefinedSettings: Array<{ key: string; value: string }>;
+  advancedSettings: Array<{ key: string; value: string }>;
+}
+
+export type TelemetryEventParams = SearchQuerySubmittedParams | AgentConfigurationChangedParams;
 
 export interface ITelemetryClient {
   reportSearchQuerySubmitted(params: SearchQuerySubmittedParams): void;
+  reportAgentConfigurationChanged(params: AgentConfigurationChangedParams): void;
 }
 
 export enum TelemetryEventTypes {
   SEARCH_QUERY_SUBMITTED = 'Search Query Submitted',
+  AGENT_CONFIGURATION_CHANGED = 'Agent Configuration Changed',
 }
 
 export interface TelemetryEvent {
