@@ -171,7 +171,8 @@ export async function getUnifiedTraceItems({
         parentId: event.parent?.id,
         serviceName: event.service.name,
         spanType: event.span?.subtype || event.span?.type,
-        kind: event?.kind,
+        type: event.span?.subtype || event.span?.type || event.kind,
+        kind: event.kind,
       } as TraceItem;
     })
     .filter((_) => _) as TraceItem[];

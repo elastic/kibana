@@ -24,9 +24,7 @@ export function useTraceWaterfall({ traceItems }: { traceItems: TraceItem[] }) {
     const colorBy =
       legends.filter(({ type }) => type === WaterfallLegendType.ServiceName).length > 1
         ? WaterfallLegendType.ServiceName
-        : legends.some(({ type }) => type === WaterfallLegendType.Kind)
-        ? WaterfallLegendType.Kind
-        : WaterfallLegendType.SpanType;
+        : WaterfallLegendType.Type;
     const colorMap = createColorLookupMap(legends);
     const traceParentChildrenMap = getTraceParentChildrenMap(traceItems);
     const rootItem = traceParentChildrenMap.root?.[0];
@@ -49,13 +47,10 @@ export function useTraceWaterfall({ traceItems }: { traceItems: TraceItem[] }) {
 
 export function getLegends(traceItems: TraceItem[]): IWaterfallLegend[] {
   const serviceNames = Array.from(new Set(traceItems.map((item) => item.serviceName)));
-  const spanTypes = Array.from(new Set(traceItems.map((item) => item.spanType ?? '')));
-  const kinds = traceItems.some((item) => item.kind)
-    ? Array.from(new Set(traceItems.map((item) => item.kind).filter(Boolean)))
-    : [];
+  const types = Array.from(new Set(traceItems.map((item) => item.type ?? '')));
 
   const palette = euiPaletteColorBlind({
-    rotations: Math.ceil((serviceNames.length + spanTypes.length + kinds.length) / 10),
+    rotations: Math.ceil((serviceNames.length + types.length) / 10),
   });
 
   let colorIndex = 0;
@@ -69,22 +64,13 @@ export function getLegends(traceItems: TraceItem[]): IWaterfallLegend[] {
     });
   });
 
-  spanTypes.forEach((spanType) => {
+  types.forEach((type) => {
     legends.push({
-      type: WaterfallLegendType.SpanType,
-      value: spanType || '',
+      type: WaterfallLegendType.Type,
+      value: type,
       color: palette[colorIndex++],
     });
   });
-
-  kinds.forEach((kind) => {
-    legends.push({
-      type: WaterfallLegendType.Kind,
-      value: kind,
-      color: palette[colorIndex++],
-    });
-  });
-
   return legends;
 }
 
@@ -121,9 +107,7 @@ export function getTraceWaterfall(
     const color =
       colorBy === WaterfallLegendType.ServiceName && item.serviceName
         ? colorMap.get(`${WaterfallLegendType.ServiceName}:${item.serviceName}`)!
-        : item.kind
-        ? colorMap.get(`${WaterfallLegendType.Kind}:${item.kind}`)!
-        : colorMap.get(`${WaterfallLegendType.SpanType}:${item.spanType ?? ''}`)!;
+        : colorMap.get(`${WaterfallLegendType.Type}:${item.type ?? ''}`)!;
     const traceWaterfallItem: TraceWaterfallItem = {
       ...item,
       depth,

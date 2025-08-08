@@ -22,6 +22,5 @@ export interface TraceItem {
   };
   parentId?: string;
   serviceName: string;
-  spanType?: string;
-  kind?: string;
+  type?: string;
 }

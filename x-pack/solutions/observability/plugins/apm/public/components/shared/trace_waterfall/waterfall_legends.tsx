@@ -24,14 +24,8 @@ const LEGEND_LABELS = {
   [WaterfallLegendType.ServiceName]: i18n.translate('xpack.apm.transactionDetails.servicesTitle', {
     defaultMessage: 'Services',
   }),
-  [WaterfallLegendType.SpanType]: i18n.translate(
-    'xpack.apm.transactionDetails.spanTypeLegendTitle',
-    {
-      defaultMessage: 'Type',
-    }
-  ),
-  [WaterfallLegendType.Kind]: i18n.translate('xpack.apm.transactionDetails.kindLegendTitle', {
-    defaultMessage: 'Kind',
+  [WaterfallLegendType.Type]: i18n.translate('xpack.apm.transactionDetails.typeLegendTitle', {
+    defaultMessage: 'Type',
   }),
 };
 export function WaterfallLegends({ serviceName, legends, type }: Props) {

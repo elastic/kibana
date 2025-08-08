@@ -39,12 +39,12 @@ describe('WaterfallLegends', () => {
   it('renders legends based on type span', () => {
     const legends: IWaterfallLegend[] = [
       createLegend({ type: WaterfallLegendType.ServiceName, value: undefined, color: '#FF0000' }),
-      createLegend({ type: WaterfallLegendType.SpanType, value: 'http', color: '#00FF00' }),
+      createLegend({ type: WaterfallLegendType.Type, value: 'http', color: '#00FF00' }),
     ];
 
     const { getByText } = render(
       <EuiThemeProvider>
-        <WaterfallLegends legends={legends} type={WaterfallLegendType.SpanType} />
+        <WaterfallLegends legends={legends} type={WaterfallLegendType.Type} />
       </EuiThemeProvider>
     );
 
@@ -52,25 +52,10 @@ describe('WaterfallLegends', () => {
     expect(getByText('http')).toBeInTheDocument();
   });
 
-  it('renders legends based on kind', () => {
-    const legends: IWaterfallLegend[] = [
-      createLegend({ type: WaterfallLegendType.Kind, value: 'kind', color: '#00FF00' }),
-    ];
-
-    const { getByText } = render(
-      <EuiThemeProvider>
-        <WaterfallLegends legends={legends} type={WaterfallLegendType.Kind} />
-      </EuiThemeProvider>
-    );
-
-    expect(getByText('kind')).toBeInTheDocument();
-  });
-
   it('filters legends based on type', () => {
     const legends: IWaterfallLegend[] = [
       createLegend({ type: WaterfallLegendType.ServiceName, value: 'service-a' }),
-      createLegend({ type: WaterfallLegendType.SpanType, value: 'http' }),
-      createLegend({ type: WaterfallLegendType.Kind, value: 'kind' }),
+      createLegend({ type: WaterfallLegendType.Type, value: 'http' }),
     ];
 
     const { queryByText } = render(
