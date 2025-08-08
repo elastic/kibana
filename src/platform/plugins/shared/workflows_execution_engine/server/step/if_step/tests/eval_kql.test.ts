@@ -79,10 +79,48 @@ describe('evaluateKql', () => {
       });
     });
 
-    it('should correctly evaluate a simple "exists" KQL expression with number', () => {
-      const kql = 'matchesCount:*'; // TODO: Figure out how to do "exist" operation in KQL
-      expect(evaluateKql(kql, { matchesCount: 2339 })).toBe(true);
-      expect(evaluateKql(kql, { nothing: 0 })).toBe(false);
+    describe('wildcard expressions', () => {
+      it('should correctly evaluate when checking if field exists using wildcard', () => {
+        const kql = 'matchesCount:*'; // TODO: Figure out how to do "exist" operation in KQL
+        expect(evaluateKql(kql, { matchesCount: 2339 })).toBe(true);
+        expect(evaluateKql(kql, { nothing: 0 })).toBe(false);
+      });
+
+      it('should evaluate term* wildcard correctly', () => {
+        const kql = 'user.name: "John*"';
+        expect(evaluateKql(kql, { user: { name: 'John Doe' } })).toBe(true);
+        expect(evaluateKql(kql, { user: { name: 'Jane Doe' } })).toBe(false);
+      });
+
+      it('should match escaped asterisk', () => {
+        const kql = 'user.name:"John\\*"';
+        expect(evaluateKql(kql, { user: { name: 'John*' } })).toBe(true);
+        expect(evaluateKql(kql, { user: { name: 'John Doe' } })).toBe(false);
+      });
+
+      it('should evaluate *term wildcard correctly', () => {
+        const kql = 'user.name: "*Doe"';
+        expect(evaluateKql(kql, { user: { name: 'John Doe' } })).toBe(true);
+        expect(evaluateKql(kql, { user: { name: 'John Smith' } })).toBe(false);
+      });
+
+      it('should evaluate *term* wildcard correctly', () => {
+        const kql = 'txt: "*psu*"';
+        expect(evaluateKql(kql, { txt: 'Lorem ipsum dolor' })).toBe(true);
+        expect(evaluateKql(kql, { txt: 'Lorem ipsm dolor' })).toBe(false);
+      });
+
+      it('should evaluate a?c wildcard correctly', () => {
+        const kql = 'user.name: "J??n Doe"';
+        expect(evaluateKql(kql, { user: { name: 'John Doe' } })).toBe(true);
+        expect(evaluateKql(kql, { user: { name: 'Jane Doe' } })).toBe(false);
+      });
+
+      it('should evaluate complex wildcard correctly', () => {
+        const kql = 'user.name: "J??n D*"';
+        expect(evaluateKql(kql, { user: { name: 'John Doe' } })).toBe(true);
+        expect(evaluateKql(kql, { user: { name: 'Jane Doe' } })).toBe(false);
+      });
     });
   });
 
@@ -103,6 +141,13 @@ describe('evaluateKql', () => {
       const kql = 'not status: inactive';
       expect(evaluateKql(kql, { status: 'active' })).toBe(true);
       expect(evaluateKql(kql, { status: 'inactive' })).toBe(false);
+    });
+
+    it('should evaluate complex expressions with AND, OR, and NOT', () => {
+      const kql = 'status: active and (isActive: true or isActive: false)';
+      expect(evaluateKql(kql, { status: 'active', isActive: true })).toBe(true);
+      expect(evaluateKql(kql, { status: 'active', isActive: false })).toBe(true);
+      expect(evaluateKql(kql, { status: 'inactive', isActive: true })).toBe(false);
     });
   });
 });
