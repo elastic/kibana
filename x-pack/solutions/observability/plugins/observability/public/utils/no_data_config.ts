@@ -30,9 +30,9 @@ export function getNoDataConfig({
               'Use Beats and APM agents to send observability data to Elasticsearch. We make it easy with support for many popular systems, apps, and languages.',
           }),
           href: basePath.prepend(`/app/integrations/browse`),
+          docsLink,
         },
       },
-      docsLink,
     };
   }
 }
