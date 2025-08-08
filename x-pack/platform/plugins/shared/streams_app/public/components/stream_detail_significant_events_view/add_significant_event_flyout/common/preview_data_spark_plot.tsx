@@ -20,10 +20,12 @@ export function PreviewDataSparkPlot({
   query,
   definition,
   timeRange,
+  isQueryValid,
 }: {
   definition: Streams.all.Definition;
   query: StreamQueryKql;
   timeRange: TimeRange;
+  isQueryValid: boolean;
 }) {
   const {
     timeState: { start, end },
@@ -31,8 +33,9 @@ export function PreviewDataSparkPlot({
 
   const previewFetch = useSignificantEventPreviewFetch({
     name: definition.name,
-    kqlQuery: query.kql?.query ?? '',
+    kqlQuery: query.kql.query,
     timeRange,
+    isQueryValid,
   });
 
   const xFormatter = useMemo(() => {
