@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
+import {
+  type GetLensAttributes,
+  VisualizationContextMenuActions,
+} from '../../../common/components/visualization_actions/types';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { getTimeSavedMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/time_saved_metric';
 import * as i18n from './translations';
@@ -31,7 +34,10 @@ const TimeSavedMetricComponent: React.FC<Props> = ({ from, to, minutesPerAlert }
     euiTheme: { colors },
   } = useEuiTheme();
   const timerange = useMemo(() => ({ from, to }), [from, to]);
-
+  const getLensAttributes = useCallback<GetLensAttributes>(
+    (args) => getTimeSavedMetricLensAttributes({ ...args, minutesPerAlert }),
+    [minutesPerAlert]
+  );
   return (
     <div
       data-test-subj="time-saved-metric-container"
@@ -50,7 +56,7 @@ const TimeSavedMetricComponent: React.FC<Props> = ({ from, to, minutesPerAlert }
     >
       <VisualizationEmbeddable
         data-test-subj="time-saved-metric"
-        getLensAttributes={(args) => getTimeSavedMetricLensAttributes({ ...args, minutesPerAlert })}
+        getLensAttributes={getLensAttributes}
         timerange={timerange}
         id={`${ID}-metric`}
         inspectTitle={i18n.TIME_SAVED}

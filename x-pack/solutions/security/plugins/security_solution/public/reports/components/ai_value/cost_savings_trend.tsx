@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import * as i18n from './translations';
+import type { GetLensAttributes } from '../../../common/components/visualization_actions/types';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
@@ -35,7 +36,11 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
   to,
 }) => {
   const timerange = useMemo(() => ({ from, to }), [from, to]);
-
+  const getLensAttributes = useCallback<GetLensAttributes>(
+    (args) =>
+      getCostSavingsTrendAreaLensAttributes({ ...args, minutesPerAlert, analystHourlyRate }),
+    [analystHourlyRate, minutesPerAlert]
+  );
   return (
     <EuiPanel paddingSize="l" hasBorder hasShadow={false} data-test-subj="cost-savings-trend-panel">
       <EuiTitle size="s">
@@ -47,9 +52,7 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
       <EuiSpacer size="l" />
       <VisualizationEmbeddable
         data-test-subj="embeddable-area-chart"
-        getLensAttributes={(args) =>
-          getCostSavingsTrendAreaLensAttributes({ ...args, minutesPerAlert, analystHourlyRate })
-        }
+        getLensAttributes={getLensAttributes}
         timerange={timerange}
         id={`${ID}-area-embeddable`}
         height={300}
