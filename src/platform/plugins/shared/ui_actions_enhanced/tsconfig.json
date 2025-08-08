@@ -22,8 +22,8 @@
     "@kbn/rison",
     "@kbn/datemath",
     "@kbn/monaco",
-    "@kbn/presentation-publishing",
     "@kbn/ui-actions-enhanced-dynamic-actions-common",
+    "@kbn/ui-actions-enhanced-dynamic-actions-public",
   ],
   "exclude": [
     "target/**/*",

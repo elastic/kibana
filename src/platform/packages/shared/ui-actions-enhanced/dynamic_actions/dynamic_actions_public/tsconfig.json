@@ -1,0 +1,29 @@
+{
+  "extends": "../../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/kibana-utils-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/ui-actions-browser",
+    "@kbn/ui-actions-enhanced-dynamic-actions-common",
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/presentation-publishing",
+    "@kbn/utility-types",
+    "@kbn/embeddable-plugin",
+    "@kbn/ui-actions-enhanced-plugin",
+  ]
+}

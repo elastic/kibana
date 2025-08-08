@@ -9,8 +9,11 @@
 
 import React from 'react';
 import { SerializableRecord } from '@kbn/utility-types';
+import {
+  ActionFactory,
+  BaseActionFactoryContext,
+} from '@kbn/ui-actions-enhanced-dynamic-actions-public';
 import { Demo, dashboardFactory, urlFactory } from './test_data';
-import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
 
 const dashboard = dashboardFactory as unknown as ActionFactory<
   SerializableRecord,

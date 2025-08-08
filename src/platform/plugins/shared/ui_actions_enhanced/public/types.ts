@@ -8,7 +8,7 @@
  */
 
 import { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
-import { ActionFactory } from './dynamic_actions';
+import { ActionFactory } from '../../../../packages/shared/ui-actions-enhanced/dynamic_actions/dynamic_actions_public/src';
 
 export interface CommonlyUsedRange {
   from: string;

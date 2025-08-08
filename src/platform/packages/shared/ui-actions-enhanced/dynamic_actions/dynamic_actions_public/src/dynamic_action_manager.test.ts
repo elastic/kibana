@@ -12,9 +12,10 @@ import { ActionStorage, MemoryActionStorage } from './dynamic_action_storage';
 import { UiActionsService } from '@kbn/ui-actions-plugin/public';
 import { ActionRegistry } from '@kbn/ui-actions-plugin/public/types';
 import { of } from '@kbn/kibana-utils-plugin/common';
-import { UiActionsServiceEnhancements } from '../services';
+// TODO can we go without this export? a mock maybe?
+import { UiActionsServiceEnhancements } from '@kbn/ui-actions-enhanced-plugin/public';
 import { ActionFactoryDefinition } from './action_factory_definition';
-import { SerializedAction, SerializedEvent } from './types';
+import { SerializedAction, SerializedEvent } from '@kbn/ui-actions-enhanced-dynamic-actions-common';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { dynamicActionGrouping } from './dynamic_action_grouping';
 

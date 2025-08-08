@@ -12,12 +12,14 @@ import type { LicenseType } from '@kbn/licensing-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import type {
-  ActionFactoryDefinition,
   BaseActionConfig,
-  BaseActionFactoryContext,
   SerializedAction,
   SerializedEvent,
-} from '../dynamic_actions';
+} from '@kbn/ui-actions-enhanced-dynamic-actions-common';
+import type {
+  ActionFactoryDefinition,
+  BaseActionFactoryContext,
+} from '@kbn/ui-actions-enhanced-dynamic-actions-public';
 
 /**
  * This is a convenience interface to register a drilldown. Drilldown has

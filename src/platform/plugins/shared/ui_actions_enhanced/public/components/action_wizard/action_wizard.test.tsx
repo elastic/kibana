@@ -17,7 +17,10 @@ import {
   urlFactory,
   urlDrilldownActionFactory,
 } from './test_data';
-import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
+import {
+  ActionFactory,
+  BaseActionFactoryContext,
+} from '@kbn/ui-actions-enhanced-dynamic-actions-public';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { SerializableRecord } from '@kbn/utility-types';
 import { EuiThemeProvider } from '@elastic/eui';

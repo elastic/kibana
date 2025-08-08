@@ -29,6 +29,7 @@
     "@kbn/utility-types",
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-mount",
-    "@kbn/dashboard-plugin"
+    "@kbn/dashboard-plugin",
+    "@kbn/ui-actions-enhanced-dynamic-actions-public"
   ]
 }

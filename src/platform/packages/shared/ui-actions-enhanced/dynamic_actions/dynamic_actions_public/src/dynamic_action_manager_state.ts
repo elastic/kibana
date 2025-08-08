@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedEvent } from './types';
+import type { SerializedEvent } from '@kbn/ui-actions-enhanced-dynamic-actions-common';
 
 /**
  * This interface represents the state of @type {DynamicActionManager} at every

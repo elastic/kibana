@@ -7,19 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Configurable } from '@kbn/kibana-utils-plugin/public';
-import { LicenseType } from '@kbn/licensing-plugin/public';
-import {
-  UiActionsActionDefinition as ActionDefinition,
-  UiActionsPresentable as Presentable,
-} from '@kbn/ui-actions-plugin/public';
-import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import {
+import type { Configurable } from '@kbn/kibana-utils-plugin/public';
+import type { LicenseType } from '@kbn/licensing-plugin/public';
+import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { Presentable } from '@kbn/ui-actions-browser';
+import type { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import type {
   BaseActionConfig,
-  BaseActionFactoryContext,
   SerializedAction,
   SerializedEvent,
-} from './types';
+} from '@kbn/ui-actions-enhanced-dynamic-actions-common';
+import type { BaseActionFactoryContext } from './types';
 
 /**
  * This is a convenience interface for registering new action factories.

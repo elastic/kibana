@@ -10,7 +10,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { Observable, Subject } from 'rxjs';
-import { SerializedEvent } from './types';
+import type { SerializedEvent } from '@kbn/ui-actions-enhanced-dynamic-actions-common';
 
 /**
  * This CRUD interface needs to be implemented by dynamic action users if they

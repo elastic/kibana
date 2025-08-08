@@ -28,6 +28,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Trigger } from '@kbn/ui-actions-plugin/public';
 import { css } from '@emotion/react';
+import { BaseActionConfig } from '@kbn/ui-actions-enhanced-dynamic-actions-common';
+import {
+  ActionFactory,
+  BaseActionFactoryContext,
+} from '@kbn/ui-actions-enhanced-dynamic-actions-public';
+
 import {
   txtBetaActionFactoryLabel,
   txtBetaActionFactoryTooltip,
@@ -36,7 +42,6 @@ import {
   txtTriggerPickerLabel,
   txtTriggerPickerHelpTooltip,
 } from './i18n';
-import { ActionFactory, BaseActionConfig, BaseActionFactoryContext } from '../../dynamic_actions';
 
 export interface ActionWizardProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
