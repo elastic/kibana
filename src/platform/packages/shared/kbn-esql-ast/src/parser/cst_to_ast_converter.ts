@@ -1313,10 +1313,6 @@ export class CstToAstConverter {
 
   // -------------------------------------------------------------- expressions
 
-  private toExpression(): ast.ESQLAstExpression {
-    throw new Error('Method not implemented.');
-  }
-
   private toColumnsFromCommand(
     ctx:
       | cst.KeepCommandContext
