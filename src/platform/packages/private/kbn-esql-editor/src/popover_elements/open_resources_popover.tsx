@@ -14,8 +14,9 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { Parser } from '@kbn/esql-ast/src/parser/parser';
 import type { AggregateQuery } from '@kbn/es-query';
+import type { ESQLSourceResult } from '@kbn/esql-types';
 import { PopoverWrapper } from './popover_wrapper';
-import { ResourcesArea, type ESQLSourceResult, RESOURCES_AREA_WIDTH } from './resources_area';
+import { ResourcesArea, RESOURCES_AREA_WIDTH } from './resources_area';
 import { findFromStringPosition } from './utils';
 
 /**
@@ -23,6 +24,7 @@ import { findFromStringPosition } from './utils';
  * @param editorRef
  * @param editorModel
  * @param query
+ * @param getSources
  */
 export const useResourcesCommand = (
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>,
@@ -33,6 +35,7 @@ export const useResourcesCommand = (
   const { euiTheme } = useEuiTheme();
   const popoverRef = useRef<HTMLDivElement>(null);
   const resourcesOpenStatusRef = useRef<boolean>(false);
+  const [isPopoverHovered, setIsPopoverHovered] = useState<boolean>(false);
   const [popoverPosition, setPopoverPosition] = useState<{
     top?: number;
     left?: number;
@@ -65,28 +68,23 @@ export const useResourcesCommand = (
 
   const openPopover = useCallback(() => {
     // Open popover
-    if (resourcesOpenStatusRef.current) {
-      setPopoverPosition({});
-      resourcesOpenStatusRef.current = false;
-    } else {
-      const currentCursorPosition = editorRef.current?.getPosition();
-      const editorCoords = editorRef.current?.getDomNode()!.getBoundingClientRect();
-      if (currentCursorPosition && editorCoords) {
-        const editorPosition = editorRef.current!.getScrolledVisiblePosition(currentCursorPosition);
-        const editorTop = editorCoords.top;
-        const editorLeft = editorCoords.left;
+    const currentCursorPosition = editorRef.current?.getPosition();
+    const editorCoords = editorRef.current?.getDomNode()!.getBoundingClientRect();
+    if (currentCursorPosition && editorCoords) {
+      const editorPosition = editorRef.current!.getScrolledVisiblePosition(currentCursorPosition);
+      const editorTop = editorCoords.top;
+      const editorLeft = editorCoords.left;
 
-        // Calculate the absolute position of the popover
-        const absoluteTop = editorTop + (editorPosition?.top ?? 0) + 25;
-        let absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
-        if (absoluteLeft > editorCoords.width) {
-          // date picker is out of the editor
-          absoluteLeft = absoluteLeft - RESOURCES_AREA_WIDTH;
-        }
-
-        setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
-        resourcesOpenStatusRef.current = true;
+      // Calculate the absolute position of the popover
+      const absoluteTop = editorTop + (editorPosition?.top ?? 0) + 25;
+      let absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
+      if (absoluteLeft > editorCoords.width) {
+        // date picker is out of the editor
+        absoluteLeft = absoluteLeft - RESOURCES_AREA_WIDTH;
       }
+
+      setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
+      resourcesOpenStatusRef.current = true;
     }
   }, [editorRef, resourcesOpenStatusRef]);
 
@@ -154,6 +152,13 @@ export const useResourcesCommand = (
     [query.esql, addResourcesDecorator]
   );
 
+  const closeResourcesPopover = useCallback(() => {
+    if (!isPopoverHovered) {
+      setPopoverPosition({});
+      resourcesOpenStatusRef.current = false;
+    }
+  }, [isPopoverHovered]);
+
   const resourcesLabelClickHandler = useCallback(
     (e: monaco.editor.IEditorMouseEvent) => {
       const mousePosition = e.target.position;
@@ -170,9 +175,11 @@ export const useResourcesCommand = (
         currentWord.endColumn <= fromStringPosition.max
       ) {
         openPopover();
+      } else {
+        closeResourcesPopover();
       }
     },
-    [editorModel, openPopover, query.esql]
+    [closeResourcesPopover, editorModel, openPopover, query.esql]
   );
 
   const resourcesLabelKeyDownHandler = useCallback(
@@ -214,6 +221,14 @@ export const useResourcesCommand = (
         }
       }, []);
 
+      const handleMouseEnter = useCallback(() => {
+        setIsPopoverHovered(true);
+      }, []);
+
+      const handleMouseLeave = useCallback(() => {
+        setIsPopoverHovered(false);
+      }, []);
+
       useEffect(() => {
         document.addEventListener('keydown', handleKeydown, true);
         return () => {
@@ -226,11 +241,14 @@ export const useResourcesCommand = (
           popoverRef.current.focus();
         }
       }, []);
+
       return (
         <PopoverWrapper
           position={popoverPosition}
           popoverRef={popoverRef}
           dataTestSubj="ESQLEditor-resources-popover"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
           <ResourcesArea
             editorRef={editorRef}
@@ -251,5 +269,6 @@ export const useResourcesCommand = (
     resourcesLabelKeyDownHandler,
     ResourcesPopover: MemoizedResourcesPopover,
     resourcesOpenStatusRef,
+    closeResourcesPopover,
   };
 };

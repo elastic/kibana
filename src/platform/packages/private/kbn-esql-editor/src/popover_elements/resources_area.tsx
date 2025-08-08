@@ -14,18 +14,11 @@ import React, { useCallback, useRef, useState } from 'react';
 import { EuiFieldSearch, EuiListGroup, EuiListGroupItem, EuiText } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { css } from '@emotion/react';
+import type { ESQLSourceResult } from '@kbn/esql-types';
 import type { ESQLSource } from '@kbn/esql-ast';
 import { Parser } from '@kbn/esql-ast/src/parser/parser';
 
 export const RESOURCES_AREA_WIDTH = 320;
-// temporary
-export interface ESQLSourceResult {
-  name: string;
-  hidden: boolean;
-  title?: string;
-  dataStreams?: Array<{ name: string; title?: string }>;
-  type?: string;
-}
 
 function insertSubstring(mainString: string, subString: string, index: number): string {
   if (index < 0 || index > mainString.length) {

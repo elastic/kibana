@@ -16,11 +16,15 @@ export function PopoverWrapper({
   position,
   popoverRef,
   dataTestSubj = 'ESQLEditor-popover',
+  onMouseEnter,
+  onMouseLeave,
 }: {
   children: React.ReactNode;
   position: Record<string, number>;
   popoverRef: React.RefObject<HTMLDivElement>;
   dataTestSubj?: string;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }) {
   const theme = useEuiTheme();
 
@@ -43,8 +47,9 @@ export function PopoverWrapper({
             ref={popoverRef}
             data-test-subj={dataTestSubj}
             tabIndex={-1} // Make the popover div focusable
-            role="dialog" // Indicate it's a dialog for accessibility
-            aria-modal="true"
+            role="button" // Make it interactive for mouse events
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
           >
             {children}
           </div>

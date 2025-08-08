@@ -587,6 +587,7 @@ const ESQLEditorInternal = function ESQLEditor({
     resourcesLabelClickHandler,
     resourcesLabelKeyDownHandler,
     addResourcesDecorator,
+    closeResourcesPopover,
     ResourcesPopover,
     resourcesOpenStatusRef,
   } = useResourcesCommand(
@@ -866,6 +867,7 @@ const ESQLEditorInternal = function ESQLEditor({
       >
         <EuiOutsideClickDetector
           onOutsideClick={() => {
+            closeResourcesPopover();
             setIsCodeEditorExpandedFocused(false);
           }}
         >
