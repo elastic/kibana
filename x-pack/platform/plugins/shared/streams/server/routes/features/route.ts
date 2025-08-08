@@ -57,7 +57,10 @@ const listFeaturesRoute = createServerRoute({
       path: { name: streamName },
     } = params;
 
-    const featureLinks = await assetClient.getAssetLinks(streamName, ['feature']);
+    const { [streamName]: featureLinks } = await assetClient.getAssetLinks(
+      [streamName],
+      ['feature']
+    );
 
     return {
       features: featureLinks.map((link) => ({ ...link.feature })),
