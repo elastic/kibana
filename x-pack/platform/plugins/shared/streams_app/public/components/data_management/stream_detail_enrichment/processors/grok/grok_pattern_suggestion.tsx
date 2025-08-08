@@ -75,9 +75,6 @@ export const GrokPatternAISuggestions = ({
               ),
               { shouldValidate: true }
             );
-            setValue('pattern_definitions', suggestion.grokProcessor.pattern_definitions, {
-              shouldValidate: true,
-            });
           }
           refreshSuggestions(null);
         }}
