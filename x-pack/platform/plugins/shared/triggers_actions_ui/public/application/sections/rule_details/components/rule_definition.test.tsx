@@ -13,7 +13,6 @@ import { ActionTypeModel, Rule, RuleTypeModel } from '../../../../types';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as capabilities from '../../../lib/capabilities';
-import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 
 jest.mock('./rule_actions', () => ({
   RuleActions: () => {
@@ -34,9 +33,10 @@ jest.mock('../../../lib/capabilities', () => ({
 }));
 jest.mock('../../../../common/lib/kibana');
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
-  useGetRuleTypesPermissions: jest.fn(),
-}));
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks');
+const { useGetRuleTypesPermissions } = jest.requireMock(
+  '@kbn/alerts-ui-shared/src/common/hooks'
+);
 
 const mockedRuleTypeIndex = new Map(
   Object.entries({
@@ -128,7 +128,7 @@ describe('Rule Definition', () => {
       { id: '.index', iconClass: 'indexOpen' },
     ] as ActionTypeModel[]);
 
-    (useGetRuleTypesPermissions as jest.Mock).mockReturnValue({
+    useGetRuleTypesPermissions.mockReturnValue({
       ruleTypesState: { data: mockedRuleTypeIndex },
     });
 
