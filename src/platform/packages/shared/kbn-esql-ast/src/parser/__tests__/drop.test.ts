@@ -78,7 +78,7 @@ describe('DROP', () => {
           {
             type: 'literal',
             literalType: 'param',
-            paramType: 'positional',
+            paramType: 'named',
           },
         ],
       });

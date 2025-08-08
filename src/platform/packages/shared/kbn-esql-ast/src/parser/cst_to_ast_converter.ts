@@ -728,10 +728,8 @@ export class CstToAstConverter {
   // --------------------------------------------------------------------- DROP
 
   private fromDropCommand(ctx: cst.DropCommandContext): ast.ESQLCommand<'drop'> {
-    const command = this.createCommand('drop', ctx);
-    const identifiers = this.toColumnsFromCommand(ctx);
-
-    command.args.push(...identifiers);
+    const args = this.fromQualifiedNamePatterns(ctx.qualifiedNamePatterns());
+    const command = this.createCommand('drop', ctx, { args });
 
     return command;
   }
