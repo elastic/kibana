@@ -6566,7 +6566,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/metrics-experience-plugin@link:x-pack/platform/plugins/shared/metrics_experience":
+"@kbn/metrics-experience-plugin@link:src/platform/plugins/shared/metrics_experience":
   version "0.0.0"
   uid ""
 
