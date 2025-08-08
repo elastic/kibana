@@ -19,7 +19,9 @@
     "@kbn/inference-plugin",
     "@kbn/server-route-repository",
     "@kbn/server-route-repository-utils",
-    "@kbn/server-route-repository-client"
+    "@kbn/server-route-repository-client",
+    "@kbn/inference-common",
+    "@kbn/logging"
   ],
   "exclude": ["target/**/*"]
 }
