@@ -47,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
       return res.body.length >= length; // wait until we have at least one user
     });
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
+  describe('@ess Entity Privilege Monitoring APIs', () => {
     before(async () => {
       await enablePrivmonSetting(kibanaServer);
     });
