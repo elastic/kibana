@@ -127,10 +127,14 @@ export const JobSetupScreen = (props: Props) => {
   );
 
   const getFilterForHosts = useCallback(
-    (baseQuery: estypes.QueryDslQueryContainer): estypes.QueryDslQueryContainer[] => {
+    (baseQuery: estypes.QueryDslQueryContainer): estypes.QueryDslQueryContainer => {
       const inventoryModel = findInventoryModel('host');
 
-      return [...[baseQuery], ...(inventoryModel.nodeFilter?.({ schema: 'ecs' }) ?? [])];
+      return {
+        bool: {
+          filter: [...[baseQuery], ...(inventoryModel.nodeFilter?.({ schema: 'ecs' }) ?? [])],
+        },
+      };
     },
     []
   );
@@ -147,7 +151,7 @@ export const JobSetupScreen = (props: Props) => {
     );
 
     const filterQuery = JSON.stringify(
-      props.jobType === 'hosts' ? getFilterForHosts(baseQuery) : [baseQuery]
+      props.jobType === 'hosts' ? getFilterForHosts(baseQuery) : baseQuery
     );
 
     const date = moment(startDate).toDate();
