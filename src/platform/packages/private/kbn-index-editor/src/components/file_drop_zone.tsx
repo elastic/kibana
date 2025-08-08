@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { type FC, PropsWithChildren, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import { getOverrideConfirmation } from './modals/override_warning_modal';
 import { EmptyPrompt } from './empty_prompt';
 import { FilesPreview } from './file_preview';
@@ -52,11 +53,18 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   const { indexUpdateService } = services;
   const { fileUploadManager, filesStatus, uploadStatus } = useFileUploadContext();
 
+  const isProcessingImportedFiles = useObservable(
+    indexUpdateService.isProcessingImportedFiles$,
+    false
+  );
+
   const isAnalyzing =
     uploadStatus.analysisStatus === STATUS.STARTED &&
     uploadStatus.overallImportStatus === STATUS.NOT_STARTED;
 
-  const isUploading = uploadStatus.overallImportStatus === STATUS.STARTED;
+  const isUploading =
+    uploadStatus.overallImportStatus === STATUS.STARTED ||
+    (uploadStatus.overallImportStatus === STATUS.COMPLETED && isProcessingImportedFiles);
   const overallImportProgress = uploadStatus.overallImportProgress;
 
   const onFilesSelected = useCallback(
@@ -156,13 +164,14 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   );
 
   const showFilePreview =
-    !isDragActive &&
-    filesStatus.length > 0 &&
-    uploadStatus.overallImportStatus !== STATUS.COMPLETED;
+    isProcessingImportedFiles ||
+    (!isDragActive &&
+      filesStatus.length > 0 &&
+      uploadStatus.overallImportStatus !== STATUS.COMPLETED);
 
   let content: React.ReactNode = children;
 
-  if (noResults && !showFilePreview) {
+  if (noResults && !showFilePreview && !isProcessingImportedFiles) {
     content = (
       <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
         <EuiFlexItem grow={false}>{content}</EuiFlexItem>

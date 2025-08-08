@@ -114,6 +114,12 @@ export class IndexUpdateService {
   private readonly _isFetching$ = new BehaviorSubject<boolean>(false);
   public readonly isFetching$: Observable<boolean> = this._isFetching$.asObservable();
 
+  private readonly _isProcessingImprtedFiles = new BehaviorSubject<boolean>(false);
+  public readonly isProcessingImportedFiles$: Observable<boolean> =
+    this._isProcessingImprtedFiles.asObservable();
+
+  private readonly _fileImported$ = new Subject<void>();
+
   private readonly _exitAttemptWithUnsavedFields$ = new BehaviorSubject<boolean>(false);
   public readonly exitAttemptWithUnsavedFields$ =
     this._exitAttemptWithUnsavedFields$.asObservable();
@@ -295,6 +301,7 @@ export class IndexUpdateService {
   public readonly dataTableColumns$: Observable<DatatableColumn[]> = combineLatest([
     this.dataView$,
     this.pendingColumnsToBeSaved$.pipe(startWith([])),
+    this._fileImported$.pipe(startWith(undefined)),
   ]).pipe(
     map(([dataView, pendingColumnsToBeSaved]) => {
       const unsavedFields = pendingColumnsToBeSaved
@@ -354,7 +361,6 @@ export class IndexUpdateService {
     }
 
     return await this.data.dataViews.create({
-      id: indexName,
       title: indexName,
       name: indexName,
       // The index might not exist yet
@@ -564,6 +570,30 @@ export class IndexUpdateService {
     });
   }
 
+  public async fileImported(indexName: string) {
+    this.setIsImportingFile(true);
+
+    if (this.isIndexCreated()) {
+      // tmp fix, shall we do a polling on the index?
+      setTimeout(async () => {
+        this.refresh();
+        const dataView = await firstValueFrom(this.dataView$);
+        await this.data.dataViews.refreshFields(dataView, false, true);
+        this._fileImported$.next();
+        this.setIsImportingFile(false);
+      }, 3000);
+    } else {
+      this.setIndexName(indexName);
+      this.setIndexCreated(true);
+
+      // tmp fix, shall we do a polling on the index?
+      setTimeout(() => {
+        this.refresh();
+        this.setIsImportingFile(false);
+      }, 3000);
+    }
+  }
+
   public refresh() {
     this._isFetching$.next(true);
     this._refreshSubject$.next(Date.now());
@@ -571,6 +601,10 @@ export class IndexUpdateService {
 
   public setIsFetching(isFetching: boolean) {
     this._isFetching$.next(isFetching);
+  }
+
+  public setIsImportingFile(isImporting: boolean) {
+    this._isProcessingImprtedFiles.next(isImporting);
   }
 
   public setIndexName(indexName: string) {
@@ -681,11 +715,8 @@ export class IndexUpdateService {
     this._qstr$.complete();
     this._refreshSubject$.complete();
     this._exitAttemptWithUnsavedFields$.complete();
-
-    const indexName = this.getIndexName();
-    if (indexName) {
-      this.data.dataViews.clearInstanceCache(indexName);
-    }
+    this._fileImported$.complete();
+    this.data.dataViews.clearInstanceCache();
     this._indexName$.complete();
   }
 
