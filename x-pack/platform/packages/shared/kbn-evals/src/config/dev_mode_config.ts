@@ -7,23 +7,32 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { parse } from 'url';
+import { discoverKibanaUrl } from '@kbn/kibana-api-cli';
+import { ToolingLog } from '@kbn/tooling-log';
 
-export function createDevModeConfig(baseServersConfigDir: string): string {
+export async function createDevModeConfig(
+  log: ToolingLog,
+  baseServersConfigDir: string
+): Promise<string> {
   const evalsDir = path.join(baseServersConfigDir, 'evals');
   fs.mkdirSync(evalsDir, { recursive: true });
 
   const localJsonPath = path.join(evalsDir, 'local.json');
   if (!fs.existsSync(localJsonPath)) {
+    const discoveredKibanaUrl = await discoverKibanaUrl({ log });
+
+    const defaultAuth = parse(discoveredKibanaUrl).auth!;
+
     const localConfig = {
       serverless: false,
       isCloud: false,
       hosts: {
-        kibana: 'http://elastic:changeme@localhost:5601/nry',
-        elasticsearch: 'http://elastic:changeme@localhost:9200',
+        kibana: discoveredKibanaUrl,
       },
       auth: {
-        username: 'elastic',
-        password: 'changeme',
+        username: defaultAuth.split(':')[0],
+        password: defaultAuth.split(':')[1],
       },
     };
     fs.writeFileSync(localJsonPath, JSON.stringify(localConfig, null, 2));

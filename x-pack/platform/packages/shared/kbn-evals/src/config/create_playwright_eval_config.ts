@@ -28,11 +28,11 @@ function getLogLevel() {
 /**
  * Exports a Playwright configuration specifically for offline evals
  */
-export function createPlaywrightEvalsConfig({
+export async function createPlaywrightEvalsConfig({
   testDir,
 }: {
   testDir: string;
-}): PlaywrightTestConfig<{}, EvaluationTestOptions> {
+}): Promise<PlaywrightTestConfig<{}, EvaluationTestOptions>> {
   const log = new ToolingLog({
     level: getLogLevel(),
     writeTo: process.stdout,
@@ -92,7 +92,7 @@ export function createPlaywrightEvalsConfig({
 
   if (process.env.DEV_MODE) {
     try {
-      serversConfigDirOverride = createDevModeConfig(baseServersConfigDir);
+      serversConfigDirOverride = await createDevModeConfig(log, baseServersConfigDir);
       log.info(`DEV_MODE active: serversConfigDir overridden to ${serversConfigDirOverride}`);
     } catch (err) {
       log.warning(`DEV_MODE setup failed: ${err instanceof Error ? err.message : String(err)}`);
