@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type {
   CustomCellRenderer,
   DataGridDensity,
@@ -50,6 +50,19 @@ export interface PaginationConfigExtension {
    * @returns paginationMode - which mode to use for loading Pagination toolbar
    */
   paginationMode: DataGridPaginationMode;
+}
+
+/**
+ * Support exposing additional fields for the Field List API
+ */
+
+export interface FieldListExtension {
+  /**
+   * Adds additional fields to the field list
+   * @param recommendedFields The field list
+   * @returns The updated field list
+   */
+  recommendedFields: DataViewField[];
 }
 
 /**
@@ -438,4 +451,10 @@ export interface Profile {
    * Example use case is to overwrite the column header display name or to add icons to the column headers.
    */
   getColumnsConfiguration: () => CustomGridColumnsConfiguration;
+
+  /**
+   * Allows passing additional fields (recommended fields) to the field list area.
+   * @returns The additional fields to display in the Field List
+   */
+  getRecommendedFields: (fields?: DataViewField[] | null) => FieldListExtension;
 }
