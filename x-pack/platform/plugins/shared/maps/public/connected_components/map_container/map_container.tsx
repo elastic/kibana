@@ -191,7 +191,10 @@ export class MapContainer extends Component<Props, State> {
       // If flyout is opening for the first time, remember the button used to open it
       if (!this._flyoutOpenTrigger)
         this._flyoutOpenTrigger = (document.activeElement as HTMLButtonElement) ?? null;
-      if (this._flyoutRef.current) focusFirstFocusable(this._flyoutRef.current);
+      if (this._flyoutRef.current) {
+        // Shift focus to the first focusable item inside the flyout
+        focusFirstFocusable(this._flyoutRef.current);
+      }
     }
   };
 
