@@ -135,11 +135,13 @@ export function ActionModalProvider({ children }: { children: ReactNode }) {
           />
         );
       case 'add_dashboards': {
-        <ManageLinkedDashboardsContainer
-          slo={action.item}
-          onCancel={handleOnCancel}
-          onConfirm={handleOnConfirm}
-        />;
+        return (
+          <ManageLinkedDashboardsContainer
+            slo={action.item}
+            onCancel={handleOnCancel}
+            onConfirm={handleOnConfirm}
+          />
+        );
       }
       default:
         return null;

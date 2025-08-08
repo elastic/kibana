@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { Assets } from '@kbn/slo-schema';
 import { isEmpty } from 'lodash';

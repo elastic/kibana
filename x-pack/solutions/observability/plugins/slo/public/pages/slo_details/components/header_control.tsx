@@ -229,13 +229,8 @@ export function HeaderControl({ slo }: Props) {
     triggerAction({
       type: 'add_dashboards',
       item: slo,
-      onCancel: () => {
-        setIsPopoverOpen(false);
-      },
-      onConfirm: () => {
-        setIsPopoverOpen(false);
-      },
     });
+    setIsPopoverOpen(false);
     // TODO: handle removeAddDashboardsQueryParam();
   };
 

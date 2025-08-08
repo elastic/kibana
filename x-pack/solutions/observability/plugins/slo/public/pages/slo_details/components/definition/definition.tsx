@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGrid, EuiPanel, EuiText, useIsWithinBreakpoints } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiPanel, EuiText, useIsWithinBreakpoints } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import {
@@ -16,6 +16,7 @@ import {
 } from '@kbn/slo-schema';
 import { isEmpty } from 'lodash';
 import React from 'react';
+import { SloTagsBadge } from '../../../../components/slo/slo_badges/slo_tags_badge';
 import { useKibana } from '../../../../hooks/use_kibana';
 import {
   BUDGETING_METHOD_OCCURRENCES,
@@ -126,7 +127,11 @@ export function Definition({ slo }: Props) {
           title={i18n.translate('xpack.slo.sloDetails.overview.tagsTitle', {
             defaultMessage: 'Tags',
           })}
-          content={<TagsList tags={slo.tags} />}
+          content={
+            <EuiFlexGroup direction="row" gutterSize="s" wrap responsive={false}>
+              <SloTagsBadge slo={slo} />
+            </EuiFlexGroup>
+          }
         />
         {IndicatorOverview}
         {'index' in slo.indicator.params && (

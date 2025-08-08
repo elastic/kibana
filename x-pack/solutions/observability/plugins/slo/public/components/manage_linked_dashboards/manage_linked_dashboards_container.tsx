@@ -18,7 +18,7 @@ export interface Props {
 }
 
 export function ManageLinkedDashboardsContainer({ slo, onCancel, onConfirm }: Props) {
-  const { mutateAsync: updateSlo, isLoading: isUpdateSloLoading } = useUpdateSlo();
+  const { mutateAsync: updateSlo } = useUpdateSlo();
   return (
     <ManageLinkedDashboardsFlyout
       assets={slo.assets}
