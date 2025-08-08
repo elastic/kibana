@@ -114,7 +114,7 @@ export interface LensEmbeddableComponentProps {
   getLensAttributes?: GetLensAttributes;
   height?: number; // px
   id: string;
-  inputsModelId?: InputsModelId;
+  inputsModelId?: InputsModelId.global | InputsModelId.timeline;
   inspectTitle?: React.ReactNode;
   lensAttributes?: LensAttributes;
   onLoad?: OnEmbeddableLoaded;
