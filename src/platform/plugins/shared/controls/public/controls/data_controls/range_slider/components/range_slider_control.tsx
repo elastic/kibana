@@ -178,7 +178,7 @@ export const RangeSliderControl: FC<Props> = ({
       testSubj: 'lowerBoundFieldNumber',
       placeholder: String(min ?? -Infinity),
       ariaLabel: RangeSliderStrings.control.getLowerBoundAriaLabel(fieldName),
-      id: uuid,
+      id: `${uuid}-lowerBound`,
     });
   }, [getCommonInputProps, displayedValue, min, fieldName, uuid]);
 
@@ -188,7 +188,8 @@ export const RangeSliderControl: FC<Props> = ({
       testSubj: 'upperBoundFieldNumber',
       placeholder: String(max ?? Infinity),
       ariaLabel: RangeSliderStrings.control.getUpperBoundAriaLabel(fieldName),
-      id: uuid,
+      id: `${uuid}-upperBound`,
+
     });
   }, [getCommonInputProps, displayedValue, max, fieldName, uuid]);
 
@@ -251,13 +252,13 @@ export const RangeSliderControl: FC<Props> = ({
         minInputProps={minInputProps}
         maxInputProps={maxInputProps}
         value={[displayedValue[0] || displayedMin, displayedValue[1] || displayedMax]}
-        onChange={([minSelection, maxSelection]: [number | string, number | string], _, ev) => {
-          const originatingInput = ev?.currentTarget.getAttribute('data-test-subj');
+        onChange={([minSelection, maxSelection]: [number | string, number | string],_,ev) => {
+          const originatingInputId = ev?.currentTarget.getAttribute('id')
 
-          if (originatingInput === 'rangeSlider__lowerBoundFieldNumber') {
+          if (originatingInputId?.includes('lowerBound')) {
             // preserve original upper bound selection if only lower bound number field changed
             maxSelection = displayedValue[1];
-          } else if (originatingInput === 'rangeSlider__upperBoundFieldNumber') {
+          } else if (originatingInputId?.includes('upperBound')) {
             // preserve original lower bound selection if only upper bound number field changed
             minSelection = displayedValue[0];
           }

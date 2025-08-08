@@ -192,9 +192,11 @@ export const getRangesliderControlFactory = (): DataControlFactory<
         dataControlManager.api.dataViews$,
         dataControlManager.api.fieldName$,
         selections.value$,
+        min$,
+        max$,
       ])
         .pipe(debounceTime(0))
-        .subscribe(([dataViews, fieldName, value]) => {
+        .subscribe(([dataViews, fieldName, value, min, max]) => {
           const dataView = dataViews?.[0];
           const dataViewField =
             dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
@@ -202,10 +204,10 @@ export const getRangesliderControlFactory = (): DataControlFactory<
           const lte = parseFloat(value?.[1] ?? '');
 
           let rangeFilter: Filter | undefined;
-          if (value && dataView && dataViewField && !isNaN(gte) && !isNaN(lte)) {
+          if (value && dataView && dataViewField && (!isNaN(gte) || !isNaN(lte))) {
             const params = {
-              gte,
-              lte,
+              gte: !isNaN(gte) ? gte : -Infinity,
+              lte: !isNaN(lte) ? lte : Infinity,
             } as RangeFilterParams;
 
             rangeFilter = buildRangeFilter(dataViewField, params, dataView);
