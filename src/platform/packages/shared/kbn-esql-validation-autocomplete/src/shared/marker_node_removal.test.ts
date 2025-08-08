@@ -73,6 +73,10 @@ describe('it should remove marker nodes from the AST', () => {
     assertMarkerRemoved(`FROM employees | EVAL total = salary + `);
     assertMarkerRemoved(`FROM employees | EVAL total = salary + bonus, `);
 
+    // After assignment
+    // @TODO reenable when fixed...
+    // assertMarkerRemoved(`FROM employees | EVAL total = `);
+
     // STATS command with binary operator and comma
     assertMarkerRemoved(`FROM employees | STATS avg(salary), `);
 

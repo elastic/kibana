@@ -108,6 +108,10 @@ export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig
     subFeatureIds: [SecuritySubFeatureId.endpointList],
   },
 
+  [ProductFeatureSecurityKey.endpointTrustedDevices]: {
+    subFeatureIds: [SecuritySubFeatureId.trustedDevices],
+  },
+
   [ProductFeatureSecurityKey.endpointPolicyManagement]: {
     subFeatureIds: [SecuritySubFeatureId.policyManagement],
   },

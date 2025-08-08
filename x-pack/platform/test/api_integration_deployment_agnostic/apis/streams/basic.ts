@@ -509,8 +509,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: Object.keys(expectedIndexCounts).join(','),
         });
         const actualIndexCounts = Object.fromEntries(
-          dataStreams.data_streams.map((stream) => [stream.name, stream.indices.length])
+          dataStreams.data_streams.map((stream) => [
+            stream.name,
+            stream.indices.length + (stream.rollover_on_write ? 1 : 0),
+          ])
         );
+
         expect(actualIndexCounts).to.eql(expectedIndexCounts);
       });
 
