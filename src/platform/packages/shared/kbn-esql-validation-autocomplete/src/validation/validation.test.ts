@@ -257,16 +257,12 @@ describe('validation logic', () => {
       },
     });
 
-    describe('ESQL query cannot be empty', () => {
-      testErrorsAndWarnings('', [
-        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}",
-      ]);
-      testErrorsAndWarnings(' ', [
-        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}",
-      ]);
-      testErrorsAndWarnings('     ', [
-        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}",
-      ]);
+    // The following block tests a case that is allowed in Kibana
+    // by suppressing the parser error in src/platform/packages/shared/kbn-esql-ast/src/ast_parser.ts
+    describe('EMPTY query does NOT produce syntax error', () => {
+      testErrorsAndWarnings('', []);
+      testErrorsAndWarnings(' ', []);
+      testErrorsAndWarnings('     ', []);
     });
 
     describe('ESQL query should start with a source command', () => {
@@ -545,16 +541,7 @@ describe('validation logic', () => {
     });
 
     describe('shadowing', () => {
-      testErrorsAndWarnings(
-        'from a_index | eval textField = 5',
-        [],
-        ['Column [textField] of type text has been overwritten as new type: integer']
-      );
-      testErrorsAndWarnings(
-        'from a_index | eval doubleField = "5"',
-        [],
-        ['Column [doubleField] of type double has been overwritten as new type: keyword']
-      );
+      // fields shadowing validation removed
     });
 
     describe('quoting and escaping expressions', () => {

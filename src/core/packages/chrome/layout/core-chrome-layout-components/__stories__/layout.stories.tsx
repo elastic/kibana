@@ -30,7 +30,6 @@ interface StoryArgs {
   footerHeight: number;
   headerHeight: number;
   navigationWidth: number;
-  navigationPanelWidth: number;
   sidebarPanelWidth: number;
   sidebarWidth: number;
   applicationTopBarHeight: number;
@@ -39,7 +38,6 @@ interface StoryArgs {
   includeSidebarPanel: boolean;
   includeBanner: boolean;
   includeFooter: boolean;
-  includeNavigationPanel: boolean;
   includeNavigation: boolean;
   includeHeader: boolean;
   includeApplicationTopBar: boolean;
@@ -70,7 +68,6 @@ const LayoutExample = ({
   includeFooter,
   includeSidebar,
   includeSidebarPanel,
-  includeNavigationPanel,
   includeNavigation,
   includeHeader,
   includeApplicationBottomBar,
@@ -123,35 +120,6 @@ const LayoutExample = ({
                   transform: translate(-50%, -50%) rotate(-90deg);
                 `}
               />
-            ) : null
-          }
-          navigationPanel={
-            includeNavigationPanel ? (
-              <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
-                <EuiFlexItem
-                  grow={false}
-                  style={{ height: props.headerHeight }}
-                  css={css`
-                    white-space: nowrap;
-                  `}
-                >
-                  <Box
-                    label="Nav Header"
-                    color={colors.textPrimary}
-                    backgroundColor={colors.primary}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={true}>
-                  <Box
-                    label="Navigation Panel"
-                    color={colors.textPrimary}
-                    backgroundColor={colors.primary}
-                    labelCSS={css`
-                      text-align: center;
-                    `}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
             ) : null
           }
           sidebar={
@@ -223,7 +191,6 @@ export const Layout: StoryObj<PropsAndArgs> = {
     debug: false,
     includeBanner: true,
     includeFooter: true,
-    includeNavigationPanel: true,
     includeNavigation: true,
     includeHeader: true,
     includeSidebar: true,
@@ -234,7 +201,6 @@ export const Layout: StoryObj<PropsAndArgs> = {
     footerHeight: 48,
     headerHeight: 48,
     navigationWidth: 48,
-    navigationPanelWidth: 240,
     sidebarPanelWidth: 368,
     sidebarWidth: 48,
     applicationTopBarHeight: 48,
@@ -252,10 +218,6 @@ export const Layout: StoryObj<PropsAndArgs> = {
     includeFooter: {
       control: 'boolean',
       description: 'Whether to include the footer in the layout',
-    },
-    includeNavigationPanel: {
-      control: 'boolean',
-      description: 'Whether to include the navigation panel in the layout',
     },
     includeSidebar: {
       control: 'boolean',
@@ -285,7 +247,6 @@ export const Layout: StoryObj<PropsAndArgs> = {
     footerHeight: { control: 'number', description: 'Height of the footer' },
     headerHeight: { control: 'number', description: 'Height of the header' },
     navigationWidth: { control: 'number', description: 'Width of the navigation' },
-    navigationPanelWidth: { control: 'number', description: 'Width of the navigation panel' },
     sidebarPanelWidth: { control: 'number', description: 'Width of the sidebar panel' },
     sidebarWidth: { control: 'number', description: 'Width of the sidebar' },
     applicationTopBarHeight: {

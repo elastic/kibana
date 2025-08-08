@@ -9,7 +9,7 @@
 
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
+import { SCOUT_REPORT_OUTPUT_ROOT, SCOUT_TARGET_MODE, SCOUT_TARGET_TYPE } from '@kbn/scout-info';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
   datasources,
@@ -18,7 +18,6 @@ import {
   type ScoutTestRunInfo,
   generateTestRunId,
   getTestIDForTitle,
-  uploadScoutReportEvents,
   ScoutFileInfo,
 } from '@kbn/scout-reporting';
 import {
@@ -68,6 +67,10 @@ export class ScoutFTRReporter {
     this.codeOwnersEntries = getCodeOwnersEntries();
     this.baseTestRunInfo = {
       id: this.runId,
+      target: {
+        type: SCOUT_TARGET_TYPE,
+        mode: SCOUT_TARGET_MODE,
+      },
       config: {
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.path)),
         category: config.get('testConfigCategory'),
@@ -194,7 +197,7 @@ export class ScoutFTRReporter {
     });
   };
 
-  onRunEnd = async () => {
+  onRunEnd = () => {
     /**
      * Root suite execution has ended
      */
@@ -217,7 +220,6 @@ export class ScoutFTRReporter {
     // Save & conclude the report
     try {
       this.report.save(this.reportRootPath);
-      await uploadScoutReportEvents(this.report.eventLogPath, this.log);
     } catch (e) {
       // Log the error but don't propagate it
       this.log.error(e);

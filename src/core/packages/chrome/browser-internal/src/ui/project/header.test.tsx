@@ -36,9 +36,7 @@ describe('Header', () => {
     navControlsCenter$: Rx.of([]),
     navControlsRight$: Rx.of([]),
     customBranding$: Rx.of({}),
-    isSideNavCollapsed$: Rx.of(false),
     prependBasePath: (str) => `hello/world/${str}`,
-    toggleSideNav: jest.fn(),
     isServerless: false,
   };
 
@@ -49,7 +47,6 @@ describe('Header', () => {
       </ProjectHeader>
     );
 
-    expect(await screen.findByTestId('euiCollapsibleNavButton')).toBeVisible();
     expect(await screen.findByText('Hello, world!')).toBeVisible();
     expect(screen.queryByTestId(/customLogo/)).toBeNull();
   });

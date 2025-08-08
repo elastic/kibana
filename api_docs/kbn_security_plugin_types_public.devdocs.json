@@ -948,6 +948,14 @@
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.ts"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/public/plugin.tsx"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/public/plugin.tsx"
+              },
+              {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.test.ts"
               },

@@ -52,7 +52,7 @@ import { SCOPE_ID } from '../../constants';
 
 const COLUMN_WIDTHS = { actions: '5%', '@timestamp': '20%', privileged_user: '15%' };
 
-const getPrivilegedUserColumn = (fieldName: string) => ({
+const getPrivilegedUserColumn = () => ({
   field: 'user.name',
   name: (
     <FormattedMessage
@@ -65,7 +65,7 @@ const getPrivilegedUserColumn = (fieldName: string) => ({
     user != null
       ? getRowItemsWithActions({
           values: isArray(user) ? user : [user],
-          fieldName,
+          fieldName: 'user.name',
           idPrefix: 'privileged-user-monitoring-privileged-user',
           render: (item) => <UserName userName={item} scopeId={SCOPE_ID} />,
           displayCount: 1,
@@ -185,6 +185,26 @@ const getAssetCriticalityColumn = () => ({
   render: (record: TableItemType) => (
     <AssetCriticalityCell criticalityLevel={record.criticality_level} />
   ),
+});
+
+const getLabelColumn = () => ({
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.columns.label"
+      defaultMessage="Label"
+    />
+  ),
+  render: (record: TableItemType) => {
+    const labels = record.eaLabels;
+
+    return labels ? (
+      <EuiText size="s" data-test-subj="privileged-user-monitoring-label">
+        {(isArray(labels) ? labels : [labels]).join(', ')}
+      </EuiText>
+    ) : (
+      getEmptyTagValue()
+    );
+  },
 });
 
 function dataSourcesIsArray(dataSources: string | string[]): dataSources is string[] {
@@ -321,9 +341,10 @@ export const buildPrivilegedUsersTableColumns = (
   euiTheme: EuiThemeComputed
 ): Array<EuiBasicTableColumn<TableItemType>> => [
   getActionsColumn(openUserFlyout),
-  getPrivilegedUserColumn('user.name'),
+  getPrivilegedUserColumn(),
   getRiskScoreColumn(euiTheme),
   getAssetCriticalityColumn(),
+  getLabelColumn(),
   getDataSourceColumn(),
   getAlertDistributionColumn(),
 ];

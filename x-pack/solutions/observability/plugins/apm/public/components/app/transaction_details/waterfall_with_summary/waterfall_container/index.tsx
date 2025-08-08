@@ -15,7 +15,7 @@ import { Waterfall } from './waterfall';
 import { OrphanTraceItemsWarning } from './waterfall/orphan_trace_items_warning';
 import { WaterfallFlyout } from './waterfall/waterfall_flyout';
 import type { IWaterfall, IWaterfallItem } from './waterfall/waterfall_helpers/waterfall_helpers';
-import { WaterfallLegends } from './waterfall_legends';
+import { WaterfallLegends } from '../../../../shared/trace_waterfall/waterfall_legends';
 
 interface Props {
   waterfallItemId?: string;

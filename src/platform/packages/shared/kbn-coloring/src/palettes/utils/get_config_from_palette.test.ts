@@ -88,7 +88,7 @@ describe('getConfigFromPalette', () => {
           id: KbnPalette.Complementary,
           steps: [
             { ...commonStep, colorIndex: 8 },
-            { touched: false, type: 'colorCode' as const, colorCode: '#ebeff5' },
+            { touched: false, type: 'colorCode' as const, colorCode: '#f6f9fc' },
             { ...commonStep, colorIndex: 2 },
           ],
         },

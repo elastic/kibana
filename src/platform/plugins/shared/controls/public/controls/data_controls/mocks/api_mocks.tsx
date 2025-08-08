@@ -46,7 +46,7 @@ export const getOptionsListContextMock = () => {
       fieldFormatter: new BehaviorSubject((value: string | number) => String(value)),
       makeSelection: jest.fn(),
       loadMoreSubject: new Subject<void>(),
-    } as unknown as OptionsListComponentApi,
+    } as unknown as Required<OptionsListComponentApi>,
     displaySettings: {} as OptionsListDisplaySettings,
     testOnlyMethods: {
       setField: (next: DataViewField | undefined) => {

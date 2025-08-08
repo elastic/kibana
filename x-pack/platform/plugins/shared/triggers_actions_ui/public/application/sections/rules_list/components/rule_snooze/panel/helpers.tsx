@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { useState } from 'react';
 
-import { parseInterval } from '../../../../../../../common';
+import { parseInterval } from '../../../../../../../common/parse_interval';
 import { RecurrenceSchedule, SnoozeSchedule } from '../../../../../../types';
 import { recurrenceSummary } from '../recurrence_scheduler/helpers';
 import { SnoozeUnit } from './constants';

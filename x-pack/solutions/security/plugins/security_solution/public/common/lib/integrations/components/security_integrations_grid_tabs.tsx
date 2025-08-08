@@ -214,7 +214,7 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
               showControls={false}
               showSearchTools={selectedTab.showSearchTools}
               sortByFeaturedIntegrations={selectedTab.sortByFeaturedIntegrations}
-              spacer={false}
+              spacer={TopCallout ? true : false}
             />
           </Suspense>
         </EuiFlexItem>

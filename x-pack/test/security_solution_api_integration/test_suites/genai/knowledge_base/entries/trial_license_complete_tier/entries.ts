@@ -18,7 +18,7 @@ import {
 } from '../utils/helpers';
 import { removeServerGeneratedProperties } from '../utils/remove_server_generated_properties';
 import { documentEntry, indexEntry, globalDocumentEntry } from './mocks/entries';
-import { secOnlySpacesAll, secOnlySpacesAllAssistantMinimalAll } from '../utils/auth/users';
+import { secOnlySpacesAll, secOnlySpacesAllAssistantMinimalAll } from '../../../utils/auth/users';
 import {
   bulkActionKnowledgeBaseEntries,
   bulkActionKnowledgeBaseEntriesForUser,

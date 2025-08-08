@@ -6,18 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export const useSourceNotifier = () => {
-  const { notifications } = useKibana();
+  const {
+    services: { notifications },
+  } = useKibanaContextForPlugin();
 
   const updateFailure = (message?: string) => {
-    notifications.toasts.danger({
+    notifications.toasts.addDanger({
       toastLifeTimeMs: 3000,
       title: i18n.translate('xpack.infra.sourceConfiguration.updateFailureTitle', {
         defaultMessage: 'Configuration update failed',
       }),
-      body: [
+      text: [
         i18n.translate('xpack.infra.sourceConfiguration.updateFailureBody', {
           defaultMessage:
             "We couldn't apply the changes to the Metrics configuration. Try again later.",
@@ -30,7 +32,7 @@ export const useSourceNotifier = () => {
   };
 
   const updateSuccess = () => {
-    notifications.toasts.success({
+    notifications.toasts.addSuccess({
       toastLifeTimeMs: 3000,
       title: i18n.translate('xpack.infra.sourceConfiguration.updateSuccessTitle', {
         defaultMessage: 'Metrics settings successfully updated',

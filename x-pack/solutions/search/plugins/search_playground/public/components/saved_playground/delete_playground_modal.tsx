@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { PLUGIN_ID } from '../../../common';
 import { getErrorMessage } from '../../../common/errors';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDeleteSavedPlayground } from '../../hooks/use_delete_saved_playground';
@@ -19,19 +18,17 @@ export interface DeletePlaygroundModalProps {
   playgroundId: string;
   playgroundName: string;
   onClose: () => void;
+  onDeleteSuccess: () => void;
 }
 
 export const DeletePlaygroundModal = ({
   playgroundId,
   playgroundName,
   onClose,
+  onDeleteSuccess,
 }: DeletePlaygroundModalProps) => {
-  const { application, notifications } = useKibana().services;
+  const { notifications } = useKibana().services;
   const { deleteSavedPlayground, isLoading } = useDeleteSavedPlayground();
-  const onDeleteSuccess = useCallback(() => {
-    onClose();
-    application.navigateToApp(PLUGIN_ID);
-  }, [application, onClose]);
   const onDeleteError = useCallback(
     (error: unknown) => {
       onClose();

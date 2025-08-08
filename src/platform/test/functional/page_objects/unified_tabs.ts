@@ -59,6 +59,10 @@ export class UnifiedTabsPageObject extends FtrService {
     return numberOfTabs.length;
   }
 
+  public async hideTabPreview() {
+    await this.testSubjects.moveMouseTo('breadcrumbs');
+  }
+
   public async createNewTab() {
     const numberOfTabs = await this.getNumberOfTabs();
     await this.testSubjects.click('unifiedTabs_tabsBar_newTabBtn');
@@ -69,6 +73,7 @@ export class UnifiedTabsPageObject extends FtrService {
         (await this.getSelectedTab())?.index === newNumberOfTabs - 1
       );
     });
+    await this.hideTabPreview();
   }
 
   public async selectTab(index: number) {
@@ -80,6 +85,7 @@ export class UnifiedTabsPageObject extends FtrService {
     await this.retry.waitFor('the selected tab to change', async () => {
       return (await this.getSelectedTab())?.index === index;
     });
+    await this.hideTabPreview();
   }
 
   public async closeTab(index: number) {

@@ -44,7 +44,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
               page: schema.number({ defaultValue: 1, min: 1 }),
               size: schema.number({ defaultValue: 10, min: 1, max: 1000 }),
               sortField: schema.string({
-                defaultValue: 'created_at',
+                defaultValue: 'updated_at',
               }),
               sortOrder: schema.oneOf([schema.literal('desc'), schema.literal('asc')], {
                 defaultValue: 'desc',

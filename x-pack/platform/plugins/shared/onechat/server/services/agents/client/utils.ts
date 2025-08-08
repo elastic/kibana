@@ -17,7 +17,7 @@ const idRegexp = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
 
 export const ensureValidId = (id: string) => {
   if (!idRegexp.test(id)) {
-    throw createBadRequestError(`Invalid profile id: ${id}`);
+    throw createBadRequestError(`Invalid agent id: ${id}`);
   }
 };
 

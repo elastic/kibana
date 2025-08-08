@@ -73,6 +73,7 @@ describe('flashAPIErrors', () => {
   it('displays a generic error message and re-throws non-API errors', () => {
     try {
       flashAPIErrors(Error('whatever') as any);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       expect(FlashMessagesLogic.actions.setFlashMessages).toHaveBeenCalledWith([
         { type: 'error', message: expect.any(String) },

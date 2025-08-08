@@ -13,6 +13,8 @@ import {
   ProcessorDefinitionWithId,
   ProcessorType,
   getProcessorType,
+  isSchema,
+  processorDefinitionSchema,
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
 import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
@@ -231,8 +233,8 @@ export const convertFormStateToProcessor = (
         grok: {
           if: formState.if,
           patterns: patterns
-            .map((pattern) => pattern.getExpression())
-            .filter((pattern): pattern is string => pattern !== undefined),
+            .map((pattern) => pattern.getExpression().trim())
+            .filter((pattern) => !isEmpty(pattern)),
           field,
           pattern_definitions,
           ignore_failure,
@@ -371,6 +373,17 @@ export const dataSourceConverter = {
   toUrlSchema: dataSourceToUrlSchema,
 };
 
+export const getDefaultGrokProcessor = ({ sampleDocs }: { sampleDocs: FlattenRecord[] }) => ({
+  grok: {
+    field: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
+    patterns: [''],
+    pattern_definitions: {},
+    ignore_failure: true,
+    ignore_missing: true,
+    if: ALWAYS_CONDITION,
+  },
+});
+
 export const recalcColumnWidths = ({
   columnId,
   width,
@@ -391,3 +404,6 @@ export const recalcColumnWidths = ({
 
   return next;
 };
+
+export const isValidProcessor = (processor: ProcessorDefinitionWithUIAttributes) =>
+  isSchema(processorDefinitionSchema, processorConverter.toAPIDefinition(processor));

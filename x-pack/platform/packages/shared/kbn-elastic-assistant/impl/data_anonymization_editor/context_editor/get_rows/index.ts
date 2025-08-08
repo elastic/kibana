@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common';
 import { ContextEditorRow } from '../types';
+import type { FindAnonymizationFieldsClientResponse } from '../selection/types';
 
 export const getRows = ({
   anonymizationFields,
   rawData,
 }: {
-  anonymizationFields?: FindAnonymizationFieldsResponse;
+  anonymizationFields?: FindAnonymizationFieldsClientResponse;
   rawData: Record<string, string[]> | null;
 }): ContextEditorRow[] => {
   if (rawData !== null && typeof rawData === 'object') {

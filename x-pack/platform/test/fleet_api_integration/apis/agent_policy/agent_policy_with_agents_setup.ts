@@ -84,14 +84,14 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       await fleetAndAgents.setup();
     });
     after(async () => {
       // Wait before agent status is updated
       await new Promise((resolve) => setTimeout(resolve, AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS));
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
     });
 
     describe('In default space', () => {
@@ -100,7 +100,7 @@ export default function (providerContext: FtrProviderContext) {
           const name = `test-${Date.now()}`;
 
           const res = await supertest
-            .post(`/s/test/api/fleet/agent_policies?sys_monitoring=true`)
+            .post(`/api/fleet/agent_policies?sys_monitoring=true`)
             .set('kbn-xsrf', 'xxxx')
             .send({
               name,

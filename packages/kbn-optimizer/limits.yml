@@ -21,7 +21,7 @@ pageLoadAssetSize:
   contentConnectors: 33036
   contentManagement: 8350
   controls: 13000
-  core: 533948
+  core: 602071
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
@@ -39,7 +39,7 @@ pageLoadAssetSize:
   discover: 25000
   discoverEnhanced: 10290
   discoverShared: 2322
-  elasticAssistant: 279115
+  elasticAssistant: 294308
   elasticAssistantSharedState: 4881
   embeddable: 18810
   embeddableAlertsTable: 6596
@@ -105,14 +105,14 @@ pageLoadAssetSize:
   navigation: 13598
   newsfeed: 12371
   noDataPage: 1749
-  observability: 107869
+  observability: 160191
   observabilityAIAssistant: 46941
   observabilityAIAssistantApp: 18553
   observabilityAiAssistantManagement: 6438
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 82382
-  onechat: 12203
+  onechat: 14281
   osquery: 47588
   painlessLab: 6299
   presentationPanel: 11484
@@ -120,10 +120,12 @@ pageLoadAssetSize:
   productDocBase: 3058
   productIntercept: 9860
   profiling: 20716
+  reindexService: 2781
   remoteClusters: 10170
   reporting: 58600
   rollup: 12709
   runtimeFields: 11828
+  sampleDataIngest: 17496
   savedObjects: 11735
   savedObjectsFinder: 4319
   savedObjectsManagement: 22426
@@ -196,3 +198,4 @@ pageLoadAssetSize:
   wciSalesforce: 8506
   workchatApp: 12411
   workchatFramework: 5706
+  workflowsManagement: 5768

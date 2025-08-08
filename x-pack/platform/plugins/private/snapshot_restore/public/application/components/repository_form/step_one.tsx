@@ -115,6 +115,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFieldText
+          isInvalid={Boolean(hasValidationErrors && validation.errors.name)}
           defaultValue={repository.name}
           fullWidth
           onChange={(e) => {

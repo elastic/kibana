@@ -29,12 +29,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const unzipPromisify = promisify(unzip);
   const comboBox = getService('comboBox');
   const toasts = getService('toasts');
-  const MINUTES = 60 * 1000 * 10;
+  const MINUTE = 60 * 1000;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/219624
-  describe.skip('Endpoint Exceptions', function () {
+  describe('Endpoint Exceptions', function () {
     targetTags(this, ['@ess', '@serverless']);
-    this.timeout(10 * MINUTES);
+    this.timeout(10 * MINUTE);
 
     let clearPrefilledEntries: () => Promise<void>;
 
@@ -94,7 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     const checkArtifact = (expectedArtifact: object) => {
-      return retry.tryForTime(2 * MINUTES, async () => {
+      return retry.tryForTime(2 * MINUTE, async () => {
         const artifacts = await endpointArtifactTestResources.getArtifactsFromUnifiedManifestSO();
 
         const foundArtifactId = artifacts
@@ -120,13 +119,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     let indexedData: IndexedHostsAndAlertsResponse;
     before(async () => {
+      await pageObjects.common.navigateToUrlWithBrowserHistory('security');
+
       indexedData = await endpointTestResources.loadEndpointData();
 
       const waitForAlertsToAppear = async () => {
         await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
         await pageObjects.header.waitUntilLoadingHasFinished();
         await pageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
-        await retry.waitForWithTimeout('alerts to appear', 10 * MINUTES, async () => {
+        await retry.waitForWithTimeout('alerts to appear', 10 * MINUTE, async () => {
           await queryBar.clickQuerySubmitButton();
           return testSubjects.exists('timeline-context-menu-button');
         });
@@ -140,7 +141,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      this.timeout(MINUTES);
+      this.timeout(2 * MINUTE);
 
       const deleteEndpointExceptions = async () => {
         const { body } = await supertest

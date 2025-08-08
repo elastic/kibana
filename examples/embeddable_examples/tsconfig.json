@@ -38,6 +38,11 @@
     "@kbn/unified-data-table",
     "@kbn/kibana-utils-plugin",
     "@kbn/shared-ux-router",
-    "@kbn/presentation-util"
+    "@kbn/presentation-util",
+    "@kbn/content-management-plugin",
+    "@kbn/object-versioning",
+    "@kbn/logging",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/config-schema"
   ]
 }

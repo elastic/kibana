@@ -19,7 +19,7 @@ import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_saf
 /**
  * Returns renderers to be used in the `buttonContent` property of the EuiAccordion component used within the kbn-grouping package.
  * It handles custom renders for the following fields:
- * - signal.rule.id
+ * - signal.rule.rule_id
  * - kibana.alert.rule.name
  * - host.name
  * - user.name
@@ -34,7 +34,7 @@ export const groupTitleRenderers: GroupPanelRenderer<AlertsGroupingAggregation> 
   nullGroupMessage
 ) => {
   switch (selectedGroup) {
-    case 'signal.rule.id':
+    case 'signal.rule.rule_id':
       return <IntegrationNameGroupContent title={bucket.key} />;
     case 'kibana.alert.rule.name':
       return isArray(bucket.key) ? (

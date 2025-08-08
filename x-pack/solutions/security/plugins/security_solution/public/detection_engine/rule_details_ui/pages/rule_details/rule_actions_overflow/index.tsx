@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { usePrebuiltRuleBaseVersionContext } from '../../../../rule_management/components/rule_details/base_version_diff/base_version_context';
+import { useRuleCustomizationsContext } from '../../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { isCustomizedPrebuiltRule } from '../../../../../../common/api/detection_engine';
 import { useScheduleRuleRun } from '../../../../rule_gaps/logic/use_schedule_rule_run';
 import type { TimeRange } from '../../../../rule_gaps/types';
@@ -91,7 +91,7 @@ const RuleActionsOverflowComponent = ({
   const {
     actions: { openCustomizationsRevertFlyout },
     state: { doesBaseVersionExist },
-  } = usePrebuiltRuleBaseVersionContext();
+  } = useRuleCustomizationsContext();
 
   const actions = useMemo(
     () =>

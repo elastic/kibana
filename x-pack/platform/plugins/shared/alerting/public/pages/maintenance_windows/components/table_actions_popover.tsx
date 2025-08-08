@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import * as i18n from '../translations';
 import type { MaintenanceWindowStatus } from '../../../../common';
@@ -37,6 +38,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [modalType, setModalType] = useState<ModalType>();
+    const modalTitleId = useGeneratedHtmlId();
 
     const {
       notifications: { toasts },
@@ -128,6 +130,8 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
             onCancel={closeModal}
             defaultFocusedButton="confirm"
             buttonColor="danger"
+            aria-labelledby={modalTitleId}
+            titleProps={{ id: modalTitleId }}
           >
             <p>{modalProps.subtitle}</p>
           </EuiConfirmModal>
@@ -143,6 +147,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
       onCancel,
       onCancelAndArchive,
       onDelete,
+      modalTitleId,
     ]);
 
     const items = useMemo(() => {

@@ -21,7 +21,10 @@ export function mountManagementSection(
 ) {
   const { element, setBreadcrumbs } = params;
 
-  apiService.setup(dependencies.services.core.http);
+  apiService.setup(
+    dependencies.services.core.http,
+    dependencies.plugins.reindexService.reindexService
+  );
   breadcrumbService.setup(setBreadcrumbs);
 
   render(<RootComponent {...dependencies} />, element);

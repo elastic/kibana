@@ -47,7 +47,6 @@ export const mockKibanaValues = {
   },
   getChromeStyle$: jest.fn().mockReturnValue(of('classic')),
   getNavLinks: jest.fn().mockReturnValue([]),
-  guidedOnboarding: {},
   history: mockHistory,
   indexMappingComponent: null,
   isAgentlessEnabled: false,
