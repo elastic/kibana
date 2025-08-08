@@ -162,7 +162,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
           />
         </EuiTextColor>
       }
-      initialIsOpen={true}
+      initialIsOpen={false}
     >
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>

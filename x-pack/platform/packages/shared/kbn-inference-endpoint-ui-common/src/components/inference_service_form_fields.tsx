@@ -551,33 +551,43 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             isInternalProvider={isInternalProvider}
           />
           <EuiSpacer size="s" />
-          <MoreOptionsFields
-            optionalProviderFormFields={optionalProviderFormFields}
-            onSetProviderConfigEntry={onSetProviderConfigEntry}
-            isEdit={isEdit}
-          />
-          <EuiHorizontalRule margin="m" />
-          {/* AUTHENTICATION */}
-          <EuiTitle size="xxs" data-test-subj="authentication-label">
-            <h4>
-              <FormattedMessage
-                id="xpack.inferenceEndpointUICommon.components.authenticationLabel"
-                defaultMessage="Authentication"
+          {optionalProviderFormFields.length > 0 ? (
+            <>
+              <MoreOptionsFields
+                optionalProviderFormFields={optionalProviderFormFields}
+                onSetProviderConfigEntry={onSetProviderConfigEntry}
+                isEdit={isEdit}
               />
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <ConfigurationFormItems
-            isLoading={false}
-            direction="column"
-            descriptionLinks={serviceProviderLinkComponents[config.provider as ServiceProviderKeys]}
-            items={authenticationFormFields}
-            setConfigEntry={onSetProviderConfigEntry}
-            isEdit={isEdit}
-            isPreconfigured={isPreconfigured}
-            isInternalProvider={isInternalProvider}
-          />
-          <EuiHorizontalRule margin="m" />
+              <EuiHorizontalRule margin="m" />
+            </>
+          ) : null}
+          {/* AUTHENTICATION */}
+          {authenticationFormFields.length > 0 ? (
+            <>
+              <EuiTitle size="xxs" data-test-subj="authentication-label">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.inferenceEndpointUICommon.components.authenticationLabel"
+                    defaultMessage="Authentication"
+                  />
+                </h4>
+              </EuiTitle>
+              <EuiSpacer size="m" />
+              <ConfigurationFormItems
+                isLoading={false}
+                direction="column"
+                descriptionLinks={
+                  serviceProviderLinkComponents[config.provider as ServiceProviderKeys]
+                }
+                items={authenticationFormFields}
+                setConfigEntry={onSetProviderConfigEntry}
+                isEdit={isEdit}
+                isPreconfigured={isPreconfigured}
+                isInternalProvider={isInternalProvider}
+              />
+              <EuiHorizontalRule margin="m" />
+            </>
+          ) : null}
           {/* ADDITIONAL OPTIONS */}
           <AdditionalOptionsFields
             config={config}
@@ -586,7 +596,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             selectedTaskType={selectedTaskType}
             isEdit={isEdit}
           />
-          <EuiHorizontalRule margin="m" />
           {/* HIDDEN VALIDATION */}
           <ProviderSecretHiddenField
             requiredProviderFormFields={[
