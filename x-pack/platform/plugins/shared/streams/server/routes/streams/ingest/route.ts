@@ -10,7 +10,7 @@ import { z } from '@kbn/zod';
 import { StreamQuery, Streams } from '@kbn/streams-schema';
 import { Ingest } from '@kbn/streams-schema/src/models/ingest';
 import { WiredIngest } from '@kbn/streams-schema/src/models/ingest/wired';
-import { UnwiredIngest } from '@kbn/streams-schema/src/models/ingest/unwired';
+import { ClassicIngest } from '@kbn/streams-schema/src/models/ingest/classic';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { ASSET_ID, ASSET_TYPE } from '../../../lib/streams/assets/fields';
@@ -80,7 +80,7 @@ async function updateWiredIngest({
   });
 }
 
-async function updateUnwiredIngest({
+async function updateClassicIngest({
   streamsClient,
   assetClient,
   name,
@@ -89,7 +89,7 @@ async function updateUnwiredIngest({
   streamsClient: StreamsClient;
   assetClient: AssetClient;
   name: string;
-  ingest: UnwiredIngest;
+  ingest: ClassicIngest;
 }) {
   const { dashboards, queries } = await getAssets({
     name,
@@ -98,13 +98,13 @@ async function updateUnwiredIngest({
 
   const definition = await streamsClient.getStream(name);
 
-  if (!Streams.UnwiredStream.Definition.is(definition)) {
-    throw badData(`Can't update unwired capabilities of a non-unwired stream`);
+  if (!Streams.ClassicStream.Definition.is(definition)) {
+    throw badData(`Can't update classic capabilities of a non-classic stream`);
   }
 
   const { name: _name, ...stream } = definition;
 
-  const upsertRequest: Streams.UnwiredStream.UpsertRequest = {
+  const upsertRequest: Streams.ClassicStream.UpsertRequest = {
     dashboards,
     queries,
     stream: {
@@ -213,7 +213,7 @@ const upsertIngestRoute = createServerRoute({
       return await updateWiredIngest({ streamsClient, assetClient, name, ingest });
     }
 
-    return await updateUnwiredIngest({ streamsClient, assetClient, name, ingest });
+    return await updateClassicIngest({ streamsClient, assetClient, name, ingest });
   },
 });
 

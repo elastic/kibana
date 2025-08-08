@@ -10,12 +10,11 @@ import { z } from '@kbn/zod';
 import {
   ContentPack,
   ContentPackStream,
-  ROOT_STREAM_ID,
   contentPackIncludedObjectsSchema,
-  isIncludeAll,
 } from '@kbn/content-packs-schema';
 import { FieldDefinition, Streams, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
 import { omit } from 'lodash';
+import { QueryLink } from '../../../common/assets';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
@@ -23,10 +22,11 @@ import { generateArchive, parseArchive } from '../../lib/content';
 import {
   prepareStreamsForExport,
   prepareStreamsForImport,
-  resolveAncestors,
-  withRootPrefix,
+  scopeContentPackStreams,
+  scopeIncludedObjects,
 } from '../../lib/content/stream';
 import { baseFields } from '../../lib/streams/component_templates/logs_layer';
+import { asTree } from '../../lib/content/stream/tree';
 
 const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
 
@@ -61,7 +61,7 @@ const exportContentRoute = createServerRoute({
     },
   },
   async handler({ params, request, response, getScopedClients }) {
-    const { streamsClient } = await getScopedClients({ request });
+    const { assetClient, streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -73,25 +73,25 @@ const exportContentRoute = createServerRoute({
       streamsClient.getDescendants(params.path.name),
     ]);
 
-    const exportedDescendants = isIncludeAll(params.body.include)
-      ? descendants
-      : resolveAncestors(params.body.include.objects.streams).map((name) => {
-          const descendant = descendants.find((d) => d.name === withRootPrefix(root.name, name));
-          if (!descendant) {
-            throw new StatusError(
-              `Could not find [${name}] as a descendant of [${root.name}]`,
-              400
-            );
-          }
-          return descendant;
-        });
-
+    const queryLinks = await assetClient.getAssetLinks(
+      [params.path.name, ...descendants.map((stream) => stream.name)],
+      ['query']
+    );
     const inheritedFields = getInheritedFieldsFromAncestors(ancestors);
-    const streamObjects = prepareStreamsForExport({
-      root: await asContentPackEntry({ stream: root }),
-      descendants: await Promise.all(
-        exportedDescendants.map((stream) => asContentPackEntry({ stream }))
+
+    const exportedTree = asTree({
+      root: params.path.name,
+      include: scopeIncludedObjects({
+        root: params.path.name,
+        include: params.body.include,
+      }),
+      streams: [root, ...descendants].map((stream) =>
+        asContentPackEntry({ stream, queryLinks: queryLinks[stream.name] })
       ),
+    });
+
+    const streamObjects = prepareStreamsForExport({
+      tree: exportedTree,
       inheritedFields: Object.keys(inheritedFields)
         .filter((field) => !baseFields[field])
         .reduce((fields, field) => {
@@ -112,15 +112,21 @@ const exportContentRoute = createServerRoute({
   },
 });
 
-async function asContentPackEntry({
+function asContentPackEntry({
   stream,
+  queryLinks,
 }: {
   stream: Streams.WiredStream.Definition;
-}): Promise<ContentPackStream> {
+  queryLinks: QueryLink[];
+}): ContentPackStream {
   return {
     type: 'stream' as const,
     name: stream.name,
-    request: { stream: { ...omit(stream, ['name']) }, dashboards: [], queries: [] },
+    request: {
+      stream: { ...omit(stream, ['name']) },
+      queries: queryLinks.map(({ query }) => query),
+      dashboards: [],
+    },
   };
 }
 
@@ -160,7 +166,7 @@ const importContentRoute = createServerRoute({
     },
   },
   async handler({ params, request, getScopedClients }) {
-    const { streamsClient } = await getScopedClients({ request });
+    const { assetClient, streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -168,33 +174,36 @@ const importContentRoute = createServerRoute({
     }
 
     const contentPack = await parseArchive(params.body.content);
-    const rootEntry = contentPack.entries.find(
-      (entry): entry is ContentPackStream =>
-        entry.type === 'stream' && entry.name === ROOT_STREAM_ID
+
+    const descendants = await streamsClient.getDescendants(params.path.name);
+    const queryLinks = await assetClient.getAssetLinks(
+      [params.path.name, ...descendants.map(({ name }) => name)],
+      ['query']
     );
-    if (!rootEntry) {
-      throw new StatusError(`[${ROOT_STREAM_ID}] definition not found`, 400);
-    }
 
-    const importedStreamEntries = isIncludeAll(params.body.include)
-      ? contentPack.entries.filter((entry): entry is ContentPackStream => entry.type === 'stream')
-      : [
-          rootEntry,
-          ...resolveAncestors(params.body.include.objects.streams).map((name) => {
-            const descendant = contentPack.entries.find(
-              (entry): entry is ContentPackStream => entry.type === 'stream' && entry.name === name
-            );
-            if (!descendant) {
-              throw new StatusError(`Could not find definition for stream [${name}]`, 400);
-            }
-            return descendant;
-          }),
-        ];
-
-    const streams = prepareStreamsForImport({
-      root: await asContentPackEntry({ stream: root }),
-      entries: importedStreamEntries,
+    const existingTree = asTree({
+      root: params.path.name,
+      include: { objects: { all: {} } },
+      streams: [root, ...descendants].map((stream) =>
+        asContentPackEntry({ stream, queryLinks: queryLinks[stream.name] })
+      ),
     });
+
+    const incomingTree = asTree({
+      root: params.path.name,
+      include: scopeIncludedObjects({
+        root: params.path.name,
+        include: params.body.include,
+      }),
+      streams: scopeContentPackStreams({
+        root: params.path.name,
+        streams: contentPack.entries.filter(
+          (entry): entry is ContentPackStream => entry.type === 'stream'
+        ),
+      }),
+    });
+
+    const streams = prepareStreamsForImport({ existing: existingTree, incoming: incomingTree });
 
     return await streamsClient.bulkUpsert(streams);
   },
