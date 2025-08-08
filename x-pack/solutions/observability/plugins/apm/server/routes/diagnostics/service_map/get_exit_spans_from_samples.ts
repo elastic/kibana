@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { termQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { termQuery, rangeQuery, termsQuery, existsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -13,38 +13,40 @@ import {
   PARENT_ID,
   SERVICE_NAME,
   SPAN_NAME,
+  TRACE_ID,
 } from '@kbn/apm-types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 
-export async function getExitSpansFromSourceNode({
+export async function getExitSpans({
   apmEventClient,
   start,
   end,
-  sourceNode,
   destinationNode,
+  ids,
 }: {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
   sourceNode: string;
   destinationNode: string;
+  ids: string[];
 }) {
   const response = await apmEventClient.search('diagnostics_get_exit_spans_from_source_node', {
     apm: {
-      events: [ProcessorEvent.span],
+      events: [ProcessorEvent.transaction],
     },
     track_total_hits: false,
     size: 0,
     query: {
       bool: {
-        filter: [...rangeQuery(start, end), ...termQuery(SERVICE_NAME, sourceNode)],
+        filter: [...rangeQuery(start, end), ...termsQuery(PARENT_ID, ...ids)],
       },
     },
     aggs: {
       matching_destination_resources: {
         filter: {
           term: {
-            [SPAN_DESTINATION_SERVICE_RESOURCE]: destinationNode,
+            [SERVICE_NAME]: destinationNode,
           },
         },
         aggs: {
@@ -55,9 +57,9 @@ export async function getExitSpansFromSourceNode({
           },
         },
       },
-      destination_resources: {
+      destination_services: {
         terms: {
-          field: SPAN_DESTINATION_SERVICE_RESOURCE,
+          field: SERVICE_NAME,
           size: 50,
         },
         aggs: {
@@ -72,10 +74,10 @@ export async function getExitSpansFromSourceNode({
   });
 
   const apmExitSpans =
-    response?.aggregations?.destination_resources?.buckets?.map((item: any) => {
+    response?.aggregations?.destination_services?.buckets?.map((item: any) => {
       const doc = item?.sample_docs?.hits?.hits?.[0]?._source;
       return {
-        destinationService: doc?.span?.destination?.service?.resource ?? '',
+        destinationService: doc?.service?.name ?? '',
         spanSubType: doc?.span?.subtype ?? '',
         spanId: doc?.span?.id ?? '',
         spanType: doc?.span?.type ?? '',
@@ -97,18 +99,21 @@ export async function getExitSpansFromSourceNode({
     hasMatchingDestinationResources: matchingCount > 0,
   };
 }
+
 export async function getSourceSpanIds({
   apmEventClient,
   start,
   end,
   sourceNode,
+  traceIds,
 }: {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
   sourceNode: string;
+  traceIds: string[];
 }) {
-  const response = await apmEventClient.search('diagnostics_get_source_node_span_ids', {
+  const response = await apmEventClient.search('diagnostics_get_source_node_span_samples', {
     apm: {
       events: [ProcessorEvent.span],
     },
@@ -116,7 +121,11 @@ export async function getSourceSpanIds({
     size: 0,
     query: {
       bool: {
-        filter: [...rangeQuery(start, end), ...termsQuery(SERVICE_NAME, sourceNode)],
+        filter: [
+          ...rangeQuery(start, end),
+          ...termsQuery(SERVICE_NAME, sourceNode),
+          ...termsQuery(TRACE_ID, ...traceIds),
+        ],
       },
     },
     aggs: {
@@ -167,7 +176,6 @@ export async function getDestinationParentIds({
     },
     track_total_hits: false,
     size: 1,
-    terminate_after: 1,
     query: {
       bool: {
         filter: [
@@ -175,6 +183,44 @@ export async function getDestinationParentIds({
           ...(ids ? termsQuery(PARENT_ID, ...ids) : []),
           ...termQuery(SERVICE_NAME, destinationNode),
         ],
+      },
+    },
+    aggs: {
+      sample_docs: {
+        top_hits: {
+          size: 5,
+          _source: {
+            includes: [PARENT_ID, SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE],
+          },
+        },
+      },
+    },
+  });
+
+  return { rawResponse: response, hasParent: response.hits.hits.length > 0 };
+}
+
+export async function getExitSpansFromSamples({
+  apmEventClient,
+  start,
+  end,
+  ids,
+}: {
+  apmEventClient: APMEventClient;
+  start: number;
+  end: number;
+  ids: string[] | undefined;
+}) {
+  const response = await apmEventClient.search('diagnostics_get_exit_spans_from_samples', {
+    apm: {
+      events: [ProcessorEvent.span],
+    },
+    track_total_hits: false,
+    size: 1,
+    terminate_after: 1,
+    query: {
+      bool: {
+        filter: [...rangeQuery(start, end), ...(ids ? termsQuery(SPAN_ID, ...ids) : [])],
       },
     },
     aggs: {

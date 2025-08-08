@@ -22,14 +22,15 @@ import { getDiagnosticsBundle } from './get_diagnostics_bundle';
 import { getFleetPackageInfo } from './get_fleet_package_info';
 import {
   getDestinationParentIds,
-  getExitSpansFromSourceNode,
   getSourceSpanIds,
-} from './service_map/get_exit_spans_from_node';
+  getExitSpans,
+} from './service_map/get_exit_spans_from_samples';
 import { getTraceCorrelation } from './service_map/get_trace_correlation';
 import { rangeRt } from '../default_api_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import type { ServiceMapDiagnosticResponse } from '../../../common/service_map_diagnostic_types';
-
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { getTraceSampleIds } from '../service_map/get_trace_sample_ids';
 export interface IndiciesItem {
   index: string;
   fieldMappings: {
@@ -106,19 +107,22 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
     const { start, end, destinationNode, traceId, sourceNode } = resources.params.body;
     const apmEventClient = await getApmEventClient(resources);
 
-    const [exitSpans, sourceSpanIds, traceCorrelation] = await Promise.all([
-      getExitSpansFromSourceNode({
-        apmEventClient,
-        start,
-        end,
-        sourceNode,
-        destinationNode,
-      }),
+    const { traceIds } = await getTraceSampleIds({
+      config: resources.config,
+      apmEventClient,
+      serviceName: sourceNode,
+      environment: ENVIRONMENT_ALL.value,
+      start,
+      end,
+    });
+
+    const [sourceSpanIds, traceCorrelation] = await Promise.all([
       getSourceSpanIds({
         apmEventClient,
         start,
         end,
         sourceNode,
+        traceIds,
       }),
       getTraceCorrelation({
         apmEventClient,
@@ -130,13 +134,23 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
       }),
     ]);
 
-    const destinationParentIds = await getDestinationParentIds({
-      apmEventClient,
-      start,
-      end,
-      ids: sourceSpanIds.spanIds,
-      destinationNode,
-    });
+    const [exitSpans, destinationParentIds] = await Promise.all([
+      getExitSpans({
+        apmEventClient,
+        start,
+        end,
+        sourceNode,
+        destinationNode,
+        ids: sourceSpanIds.spanIds,
+      }),
+      getDestinationParentIds({
+        apmEventClient,
+        start,
+        end,
+        ids: sourceSpanIds.spanIds,
+        destinationNode,
+      }),
+    ]);
 
     return {
       analysis: {
