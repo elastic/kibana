@@ -1903,7 +1903,24 @@ export class CstToAstConverter {
 
   // ----------------------------------------------------- expression: "column"
 
-  private fromQualifiedNamePattern(ctx: cst.QualifiedNamePatternContext): ast.ESQLColumn {
+  private fromQualifiedNamePattern(ctx: cst.QualifiedNamePatternContext): ast.ESQLAstExpression {
+    const patterns = ctx.identifierPattern_list();
+
+    // Special case: a single parameter is returned as a param literal
+    if (patterns.length === 1) {
+      const only = patterns[0];
+
+      if (!only.ID_PATTERN()) {
+        const paramCtx = only.parameter?.() || only.doubleParameter?.();
+
+        if (paramCtx) {
+          const param = this.toParam(paramCtx);
+
+          if (param) return param;
+        }
+      }
+    }
+
     return this.toColumn(ctx);
   }
 
@@ -1923,7 +1940,9 @@ export class CstToAstConverter {
 
           args.push(node);
         } else {
-          const parameter = this.toParam(identifierPattern.parameter());
+          // Support single and double parameters inside identifierPattern
+          const paramCtx = identifierPattern.parameter?.() || identifierPattern.doubleParameter?.();
+          const parameter = paramCtx ? this.toParam(paramCtx) : undefined;
 
           if (parameter) {
             args.push(parameter);
