@@ -50,7 +50,6 @@ export const registerSiemRuleMigrationsUpdateRoute = (
             const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
             await siemMigrationAuditLogger.logUpdateMigration({
               migrationId,
-              field: 'name',
             });
             await ruleMigrationsClient.data.migrations.update(migrationId, req.body);
 
@@ -60,7 +59,6 @@ export const registerSiemRuleMigrationsUpdateRoute = (
             await siemMigrationAuditLogger.logUpdateMigration({
               migrationId,
               error,
-              field: 'name',
             });
             return res.badRequest({ body: error.message });
           }

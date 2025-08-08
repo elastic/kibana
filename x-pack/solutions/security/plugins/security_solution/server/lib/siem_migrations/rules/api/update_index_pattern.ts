@@ -57,9 +57,9 @@ export const registerSiemRuleMigrationsUpdateIndexPatternRoute = (
               const ctx = await context.resolve(['securitySolution']);
               const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
 
-              await siemMigrationAuditLogger.logUpdateMigration({
+              await siemMigrationAuditLogger.logUpdateRules({
                 migrationId,
-                field: 'indexPattern',
+                ids: ids ?? [],
               });
 
               const stats = await ruleMigrationsClient.data.rules.updateIndexPattern(
@@ -71,9 +71,9 @@ export const registerSiemRuleMigrationsUpdateIndexPatternRoute = (
               return res.ok({ body: { updated: stats ?? 0 } });
             } catch (err) {
               logger.error(err);
-              await siemMigrationAuditLogger.logUpdateMigration({
+              await siemMigrationAuditLogger.logUpdateRules({
                 migrationId,
-                field: 'indexPattern',
+                ids: ids ?? [],
                 error: err,
               });
               return res.badRequest({ body: err.message });
