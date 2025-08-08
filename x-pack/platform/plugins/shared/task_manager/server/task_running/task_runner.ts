@@ -730,9 +730,6 @@ export class TaskManagerRunner implements TaskRunner {
         ...fieldUpdates,
         // reset fields that track the lifecycle of the concluded `task run`
         enabled,
-        startedAt: null,
-        retryAt: null,
-        ownerId: null,
         id: this.instance.task.id,
         version: this.instance.task.version,
       };
