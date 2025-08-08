@@ -160,7 +160,7 @@ include::CHANGELOG.asciidoc[tag=known-issue-230275]
 ====
 *Details* +
 
-After creating a report in a non-default {kib} space, the document exists in the `.kibana-reporting` index but can't be retrieved by the jobs or list API.
+After creating a report in a non-default {kib} space, the document exists in the `.kibana-reporting` index but isn't shown in the Reporting UI.
 
 ====
 // end::known-issue-2462[]
