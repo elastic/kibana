@@ -15,13 +15,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StreamQueryKql, Streams } from '@kbn/streams-schema';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
-import { useSignificantEventValidation } from './use_significant_event_validation';
+import { validateQuery } from '../common/validate_query';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -58,29 +58,10 @@ export function ManualFlowForm({
     });
   }, [data.dataViews, definition.name]);
 
-  const validation = useSignificantEventValidation(query);
-
-  const validationMessages = useMemo(() => {
-    return {
-      title:
-        validation.title && touched.title
-          ? {
-              isInvalid: true,
-              error: validation.title,
-            }
-          : {},
-      kql:
-        validation.kql && touched.kql
-          ? {
-              isInvalid: true,
-              error: validation.kql,
-            }
-          : {},
-    };
-  }, [validation, touched]);
+  const validation = validateQuery(query);
 
   useEffect(() => {
-    const isValid = !validation.title && !validation.kql;
+    const isValid = !validation.title.isInvalid && !validation.kql.isInvalid;
     const isTouched = touched.title || touched.kql;
     setCanSave(isValid && isTouched);
   }, [validation, setCanSave, touched.title, touched.kql]);
@@ -99,7 +80,7 @@ export function ManualFlowForm({
 
       <EuiForm fullWidth>
         <EuiFormRow
-          {...validationMessages.title}
+          {...(touched.title && { ...validation.title })}
           label={
             <EuiFormLabel>
               {i18n.translate(
@@ -135,7 +116,7 @@ export function ManualFlowForm({
               )}
             </EuiFormLabel>
           }
-          {...validationMessages.kql}
+          {...(touched.kql && { ...validation.kql })}
         >
           <UncontrolledStreamsAppSearchBar
             query={
@@ -170,7 +151,13 @@ export function ManualFlowForm({
           />
         </EuiFormRow>
       </EuiForm>
-      <PreviewDataSparkPlot definition={definition} query={query} timeRange={timeRange} />
+
+      <PreviewDataSparkPlot
+        definition={definition}
+        query={query}
+        timeRange={timeRange}
+        isQueryValid={!validation.kql.isInvalid}
+      />
     </EuiFlexGroup>
   );
 }

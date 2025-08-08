@@ -14,6 +14,7 @@ import moment from 'moment';
 import { Observable } from 'rxjs';
 import { v4 } from 'uuid';
 import { verifyQueries } from './helpers/verify_queries';
+import { isKqlQueryValid } from '../../routes/internal/esql/query_helpers';
 import INSTRUCTION from './prompts/generate_queries_instruction.text';
 import KQL_GUIDE from './prompts/kql_guide.text';
 import type { AssetClient } from '../streams/assets/asset_client';
@@ -164,8 +165,7 @@ Quality over quantity - aim for queries that have high signal-to-noise ratio.
           } as const,
         });
 
-        const queries = output.queries;
-
+        const queries = output.queries.filter((query) => isKqlQueryValid(query.kql));
         if (!queries.length) {
           return;
         }
@@ -241,6 +241,7 @@ ${JSON.stringify(
           if (!query) {
             return [];
           }
+
           return { title: query.title, kql: query.kql, count: query.count };
         });
 

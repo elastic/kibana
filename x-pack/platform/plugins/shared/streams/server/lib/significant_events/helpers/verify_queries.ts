@@ -62,7 +62,10 @@ export async function verifyQueries(
                 },
               },
             })
-            .then((response) => ({ ...query, count: response.hits.total.value }));
+            .then((response) => ({ ...query, count: response.hits.total.value }))
+            .catch(() => {
+              return { ...query, count: 0 };
+            });
         })
       )
     ),

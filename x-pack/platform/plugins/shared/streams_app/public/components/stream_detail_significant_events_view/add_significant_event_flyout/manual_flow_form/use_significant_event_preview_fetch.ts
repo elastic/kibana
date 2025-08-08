@@ -18,10 +18,12 @@ export function useSignificantEventPreviewFetch({
   name,
   kqlQuery,
   timeRange,
+  isQueryValid,
 }: {
   name: string;
   kqlQuery: string;
   timeRange: TimeRange;
+  isQueryValid: boolean;
 }): AbortableAsyncState<Promise<SignificantEventsPreviewResponse>> {
   const {
     dependencies: {
@@ -31,6 +33,10 @@ export function useSignificantEventPreviewFetch({
 
   const previewFetch = useStreamsAppFetch(
     ({ signal }) => {
+      if (!isQueryValid) {
+        return Promise.resolve(undefined);
+      }
+
       const { from, to } = getAbsoluteTimeRange(timeRange);
 
       const bucketSize = calculateAuto
@@ -59,7 +65,7 @@ export function useSignificantEventPreviewFetch({
         }
       );
     },
-    [timeRange, name, kqlQuery, streams.streamsRepositoryClient]
+    [timeRange, name, kqlQuery, streams.streamsRepositoryClient, isQueryValid]
   );
 
   return previewFetch;
