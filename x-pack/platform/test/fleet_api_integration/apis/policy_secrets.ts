@@ -129,16 +129,25 @@ export default function (providerContext: FtrProviderContext) {
     };
 
     const cleanupAgents = async () => {
+      const { body: agentsResponse } = await supertest
+        .get(`/api/fleet/agents?showInactive=true`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+      console.log(`Agents before deletion`, JSON.stringify(agentsResponse, null, 2));
+
       try {
-        await es.deleteByQuery({
+        const response = await es.deleteByQuery({
           index: AGENTS_INDEX,
           refresh: true,
           query: {
             match_all: {},
           },
         });
+
+        console.log(`Cleanup agents deleteByQuery response:`, JSON.stringify(response, null, 2));
       } catch (err) {
         // index doesn't exist
+        console.log(`Cleanup agents deleteByQuery error:`, JSON.stringify(err, null, 2));
       }
 
       await waitForAgents(supertest, 0, 20);

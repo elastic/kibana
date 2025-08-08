@@ -244,6 +244,10 @@ export async function waitForAgents(
     .set('kbn-xsrf', 'xxxx')
     .expect(200);
 
+  console.log(
+    `Waiting for ${expectedAgentCount} agents, attempt: ${_attemptsMade}. Query response: `,
+    JSON.stringify(apiResponse, null, 2)
+  );
   if (apiResponse.items.length === expectedAgentCount) {
     return apiResponse;
   }
