@@ -74,13 +74,6 @@ export const useQueryState: UseQueryState = <T extends NonNullable<Primitive> | 
     }
   }, [state, clearQueryParam]);
 
-  useEffect(() => {
-    const subscription = urlStateRef.current.change$<T>(key).subscribe((value) => {
-      setState(value);
-    });
-    return () => subscription.unsubscribe();
-  }, [key, defaultValue]);
-
   const setQueryState = useCallback<SetQueryState<T | null>>(
     async (nextValue, setOptions) => {
       setState(nextValue);
