@@ -95,7 +95,7 @@ export function getSystemPrompt({
           isFunctionAvailable(CONTEXT_FUNCTION_NAME)
             ? ' first attempt to retrieve it using the `context` tool response. If the context does not provide it,'
             : ''
-        } assume a default time range of **start='now-15m'** and **end='now'**. When you use a default time range, *always inform the user* which range was used in your response (e.g., "Based on the last 15 minutes...").`;
+        } **ALWAYS** assume a default time range of **start='now-15m'** and **end='now'**. **DO NOT** ask the user for a time range. When you use a default time range, *always inform the user* which range was used in your response (e.g., "Based on the last 15 minutes...").`;
     }
     corePrinciples.push(firstCorePrinciple);
 
