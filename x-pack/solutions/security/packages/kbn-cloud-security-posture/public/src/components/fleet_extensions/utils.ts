@@ -312,6 +312,7 @@ export const getDefaultGcpHiddenVars = (
   }
 
   const hasCloudShellUrl = !!getCloudShellDefaultValue(packageInfo, templateName);
+
   if (hasCloudShellUrl) {
     return {
       'gcp.credentials.type': {
@@ -368,9 +369,11 @@ export const getCloudShellDefaultValue = (
   if (!packageInfo.policy_templates) return '';
 
   const policyTemplate = packageInfo.policy_templates.find((p) => p.name === templateName);
+
   if (!policyTemplate) return '';
 
   const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
+
   if (!policyTemplateInputs) return '';
 
   const cloudShellUrl = policyTemplateInputs.reduce((acc, input): string => {
