@@ -572,22 +572,18 @@ export class KnowledgeBaseService {
           `Inference ID has changed from "${currentInferenceId}" to "${nextInferenceId}". Re-indexing knowledge base.`
         );
 
-        const productDocStatus = await productDoc.getStatus({
-          inferenceId: nextInferenceId,
-        });
-        if (productDocStatus.status !== 'installed') {
+        try {
           logger.info(`Installing product document with inference ID: ${nextInferenceId}.`);
-          productDoc
-            .install({
-              force: false,
-              wait: true,
-              inferenceId: nextInferenceId,
-            })
-            .catch((e) => {
-              logger.error(
-                `Failed to install product documentation with inference ID: ${nextInferenceId}. Error: ${e.message}`
-              );
-            });
+          // explicitly set force to false - it won't reinstall product document if already present.
+          // will not wait for the installation to complete / but will wait to the task to be scheduled.
+          await productDoc.install({
+            force: false,
+            wait: false,
+            inferenceId: nextInferenceId,
+          });
+        } catch (e) {
+          logger.error(`Failed to install product documentation: ${e.message}`);
+          logger.debug(e);
         }
 
         await reIndexKnowledgeBaseWithLock({

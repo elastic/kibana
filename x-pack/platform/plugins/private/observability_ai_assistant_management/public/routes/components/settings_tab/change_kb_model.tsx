@@ -65,7 +65,7 @@ export function ChangeKbModel({
   const isKnowledgeBaseInLoadingState =
     knowledgeBase.isInstalling ||
     knowledgeBase.isWarmingUpModel ||
-    knowledgeBase.isPolling ||
+    knowledgeBase.status.value?.inferenceModelState === InferenceModelState.DEPLOYING_MODEL ||
     knowledgeBase.status?.value?.isReIndexing;
 
   useEffect(() => {

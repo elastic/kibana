@@ -15,6 +15,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from './use_kibana';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';
+import { useProductDoc } from './use_product_doc';
 
 export interface UseKnowledgeBaseResult {
   status: AbortableAsyncState<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>;
@@ -23,12 +24,16 @@ export interface UseKnowledgeBaseResult {
   warmupModel: (inferenceId: string) => Promise<void>;
   isWarmingUpModel: boolean;
   isInstalling: boolean;
+  isProductDocInstalling: boolean;
+  isProductDocUninstalling: boolean;
+  installProductDoc: (inferenceId: string) => Promise<void>;
+  uninstallProductDoc: (inferenceId: string) => Promise<void>;
 }
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
   const { notifications, ml } = useKibana().services;
   const service = useAIAssistantAppService();
-
+  const productDoc = useProductDoc();
   const [isWarmingUpModel, setIsWarmingUpModel] = useState(false);
   const [installingInferenceId, setInstallingInferenceId] = useState<string>();
 
@@ -46,10 +51,14 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   // Poll if either:
   // 1. The model is currently being deployed to ML nodes
   // 2. The knowledge base is being reindexed (e.g., during model updates)
+  // 3. The product documentation is being installed or uninstalled
   if (
     statusRequest.value?.inferenceModelState === InferenceModelState.DEPLOYING_MODEL ||
     statusRequest.value?.isReIndexing ||
-    statusRequest.value?.productDocStatus === 'installing'
+    statusRequest.value?.productDocStatus === 'installing' ||
+    statusRequest.value?.productDocStatus === 'uninstalling' ||
+    productDoc.isInstalling ||
+    productDoc.isUninstalling
   ) {
     isPolling = true;
   }
@@ -182,5 +191,9 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     isPolling,
     warmupModel,
     isWarmingUpModel,
+    isProductDocInstalling: productDoc.isInstalling,
+    isProductDocUninstalling: productDoc.isUninstalling,
+    installProductDoc: productDoc.installProductDoc,
+    uninstallProductDoc: productDoc.uninstallProductDoc,
   };
 }
