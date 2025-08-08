@@ -18,11 +18,13 @@ import {
   createSystemLogsDataSourceProfileProvider,
   createWindowsLogsDataSourceProfileProvider,
 } from './sub_profiles';
+import { createMetricsDataSourceProfileProvider } from '../metrics_data_source_profile/profile';
 
 export const createObservabilityLogsDataSourceProfileProviders = (
   providerServices: ProfileProviderServices
 ) => {
   const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(providerServices);
+  const metricsDataSourceProfileProvider = createMetricsDataSourceProfileProvider(providerServices);
 
   return [
     createSystemLogsDataSourceProfileProvider(logsDataSourceProfileProvider),
@@ -33,5 +35,6 @@ export const createObservabilityLogsDataSourceProfileProviders = (
     createNginxAccessLogsDataSourceProfileProvider(logsDataSourceProfileProvider),
     createApacheErrorLogsDataSourceProfileProvider(logsDataSourceProfileProvider),
     logsDataSourceProfileProvider,
+    metricsDataSourceProfileProvider,
   ];
 };

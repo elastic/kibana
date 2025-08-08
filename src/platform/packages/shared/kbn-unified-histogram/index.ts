@@ -13,7 +13,11 @@ export type {
   UnifiedHistogramAdapters,
   UnifiedHistogramVisContext,
 } from './types';
-export { UnifiedHistogramFetchStatus, UnifiedHistogramExternalVisContextStatus } from './types';
+export {
+  UnifiedHistogramFetchStatus,
+  UnifiedHistogramExternalVisContextStatus,
+  UnifiedHistogramMode,
+} from './types';
 
 export {
   UnifiedBreakdownFieldSelector,
