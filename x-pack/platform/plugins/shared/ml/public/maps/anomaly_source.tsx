@@ -39,11 +39,11 @@ import type { MlApi } from '../application/services/ml_api_service';
 
 const RESULT_LIMIT = 1000;
 
-export interface AnomalySourceDescriptor {
+export type AnomalySourceDescriptor = SerializableRecord & {
   jobId: string;
   typicalActual: MlAnomalyLayersType;
   type: SOURCE_TYPES.ES_ML_ANOMALIES;
-}
+};
 
 export class AnomalySource implements IVectorSource {
   static mlResultsService: MlApi['results'];
