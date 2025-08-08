@@ -29,7 +29,6 @@ import type {
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { validateClassicFields } from '../../helpers/validate_fields';
 import { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
-import { hasRemovedFields } from './has_removed_fields';
 
 interface ClassicStreamChanges extends StreamChanges {
   processing: boolean;
@@ -296,7 +295,6 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         request: {
           name: this._definition.name,
           mappings,
-          forceRollover: this.fieldOverridesRemoved(startingState),
         },
       });
     }
@@ -307,20 +305,6 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     });
 
     return actions;
-  }
-
-  private fieldOverridesRemoved(startingState: State): boolean {
-    const startingStateStreamDefinition = startingState.get(this._definition.name)?.definition;
-    if (
-      !startingStateStreamDefinition ||
-      !Streams.ClassicStream.Definition.is(startingStateStreamDefinition)
-    ) {
-      return false;
-    }
-    return hasRemovedFields(
-      startingStateStreamDefinition.ingest.classic.field_overrides,
-      this._definition.ingest.classic.field_overrides
-    );
   }
 
   private async createUpsertPipelineActions(): Promise<ElasticsearchAction[]> {

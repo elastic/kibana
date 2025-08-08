@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { extractErrorMessage } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { NodeViewModel, NodeDocumentDataViewModel } from './types';
+
+export const isStackNode = (node: NodeViewModel) => node.shape === 'group';
+export const isLabelNode = (node: NodeViewModel) => node.shape === 'label';
 
 export const isEntityNode = (node: NodeViewModel) =>
   node.shape === 'ellipse' ||
@@ -59,3 +65,21 @@ export function hasNodeDocumentsData(node: NodeViewModel): node is NodeViewModel
 } {
   return Array.isArray(node.documentsData) && node.documentsData.length > 0;
 }
+
+const FETCH_GRAPH_FAILED_TEXT = i18n.translate(
+  'securitySolutionPackages.csp.graph.investigation.errorFetchingGraphData',
+  {
+    defaultMessage: 'Error fetching graph data',
+  }
+);
+
+export const showErrorToast = (
+  toasts: CoreStart['notifications']['toasts'],
+  error: unknown
+): void => {
+  if (error instanceof Error) {
+    toasts.addError(error, { title: FETCH_GRAPH_FAILED_TEXT });
+  } else {
+    toasts.addDanger(extractErrorMessage(error, FETCH_GRAPH_FAILED_TEXT));
+  }
+};

@@ -16,8 +16,9 @@ import {
   deleteDataStream,
   updateDataStreamsLifecycle,
   updateDataStreamsMappings,
-  updateOrRolloverDataStream,
+  rolloverDataStream,
   upsertDataStream,
+  updateDefaultIngestPipeline,
 } from '../../data_streams/manage_data_streams';
 import { deleteTemplate, upsertTemplate } from '../../index_templates/manage_index_templates';
 import {
@@ -46,7 +47,8 @@ import type {
   UpsertDotStreamsDocumentAction,
   UpsertIndexTemplateAction,
   UpsertIngestPipelineAction,
-  UpsertWriteIndexOrRolloverAction,
+  RolloverAction,
+  UpdateDefaultIngestPipelineAction,
 } from './types';
 
 /**
@@ -73,7 +75,8 @@ export class ExecutionPlan {
       delete_processor_from_ingest_pipeline: [],
       upsert_datastream: [],
       update_lifecycle: [],
-      upsert_write_index_or_rollover: [],
+      update_default_ingest_pipeline: [],
+      rollover: [],
       delete_datastream: [],
       upsert_dot_streams_document: [],
       delete_dot_streams_document: [],
@@ -159,7 +162,8 @@ export class ExecutionPlan {
         delete_processor_from_ingest_pipeline,
         upsert_datastream,
         update_lifecycle,
-        upsert_write_index_or_rollover,
+        rollover,
+        update_default_ingest_pipeline,
         delete_datastream,
         upsert_dot_streams_document,
         delete_dot_streams_document,
@@ -186,9 +190,10 @@ export class ExecutionPlan {
       ]);
       await this.upsertDatastreams(upsert_datastream);
       await Promise.all([
-        this.upsertWriteIndexOrRollover(upsert_write_index_or_rollover),
+        this.rollover(rollover),
         this.updateLifecycle(update_lifecycle),
         this.updateDataStreamMappingsAndRollover(update_data_stream_mappings),
+        this.updateDefaultIngestPipeline(update_default_ingest_pipeline),
       ]);
 
       await this.upsertIngestPipelines(upsert_ingest_pipeline);
@@ -248,14 +253,25 @@ export class ExecutionPlan {
     );
   }
 
-  private async upsertWriteIndexOrRollover(actions: UpsertWriteIndexOrRolloverAction[]) {
+  private async rollover(actions: RolloverAction[]) {
     return Promise.all(
       actions.map((action) =>
-        updateOrRolloverDataStream({
+        rolloverDataStream({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
-          forceRollover: action.request.forceRollover,
           name: action.request.name,
+        })
+      )
+    );
+  }
+
+  private async updateDefaultIngestPipeline(actions: UpdateDefaultIngestPipelineAction[]) {
+    return Promise.all(
+      actions.map((action) =>
+        updateDefaultIngestPipeline({
+          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          name: action.request.name,
+          pipeline: action.request.pipeline,
         })
       )
     );
@@ -283,7 +299,6 @@ export class ExecutionPlan {
           logger: this.dependencies.logger,
           name: action.request.name,
           mappings: action.request.mappings,
-          forceRollover: action.request.forceRollover,
         })
       )
     );

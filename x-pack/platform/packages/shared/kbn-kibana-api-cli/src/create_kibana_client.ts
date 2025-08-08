@@ -12,12 +12,16 @@ import { KibanaClient } from './client';
 export async function createKibanaClient({
   log,
   signal,
+  baseUrl,
 }: {
   log: ToolingLog;
   signal: AbortSignal;
+  baseUrl?: string;
 }) {
-  const baseUrl = await discoverKibanaUrl({
-    log,
-  });
-  return new KibanaClient({ baseUrl, signal });
+  const kibanaUrl = baseUrl
+    ? baseUrl
+    : await discoverKibanaUrl({
+        log,
+      });
+  return new KibanaClient({ baseUrl: kibanaUrl, signal });
 }
