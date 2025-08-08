@@ -30,7 +30,7 @@ export const untilPluginStartServicesReady = () => {
 };
 
 let isDarkMode = false;
-export let coreStart: CoreStart;
+let coreStart: CoreStart;
 let pluginsStart: MapsPluginStartDependencies;
 let mapsEms: MapsEmsPluginPublicStart;
 let emsSettings: EMSSettings;

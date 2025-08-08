@@ -7,7 +7,7 @@
 
 import '../../_index.scss';
 import React, { Component } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCallOut, EuiFlyoutResizable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { Filter } from '@kbn/es-query';
@@ -15,14 +15,13 @@ import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { Observable } from 'rxjs';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { css } from '@emotion/react';
-import { openLazyFlyout } from '@kbn/presentation-util';
-import { Provider, ReactReduxContext, ReactReduxContextValue } from 'react-redux';
-import { OverlayRef } from '@kbn/core/public';
+import { ReactReduxContext, ReactReduxContextValue } from 'react-redux';
+import { focusFirstFocusable } from '@kbn/presentation-util/src/focus_helpers';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
 import { Timeslider } from '../timeslider';
 import { ToolbarOverlay } from '../toolbar_overlay';
-import { isScreenshotMode, coreStart, untilPluginStartServicesReady } from '../../kibana_services';
+import { isScreenshotMode } from '../../kibana_services';
 import { RawValue, RENDER_TIMEOUT } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettings } from '../../../common/descriptor_types';
@@ -30,6 +29,9 @@ import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { ILayer } from '../../classes/layers/layer';
 import { setSelectedLayer, updateFlyout } from '../../actions';
 import { MapStoreState } from '../../reducers/store';
+import { AddLayerPanel } from '../add_layer_panel';
+import { EditLayerPanel } from '../edit_layer_panel';
+import { MapSettingsPanel } from '../map_settings_panel';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -77,7 +79,7 @@ export class MapContainer extends Component<Props, State> {
   private _isMounted: boolean = false;
   private _isInitalLoadRenderTimerStarted: boolean = false;
 
-  private _flyoutRef: OverlayRef | null = null;
+  private _flyoutRef: React.RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
   private _flyoutOpenTrigger: HTMLButtonElement | null = null;
 
   state: State = {
@@ -159,54 +161,8 @@ export class MapContainer extends Component<Props, State> {
   }
 
   _updateFlyout = async (flyoutDisplay: FLYOUT_STATE) => {
-    await this._flyoutRef?.close();
-
+    // If the flyout has just closed
     if (flyoutDisplay === FLYOUT_STATE.NONE) {
-      return;
-    }
-
-    // Ensure coreStart is defined
-    await untilPluginStartServicesReady();
-
-    // If flyout is opening for the first time, remember the button used to open it
-    if (!this._flyoutOpenTrigger)
-      this._flyoutOpenTrigger = (document.activeElement as HTMLButtonElement) ?? null;
-
-    this._flyoutRef = openLazyFlyout({
-      core: coreStart,
-      loadContent: async () => {
-        let flyoutPanel = null;
-        switch (flyoutDisplay) {
-          case FLYOUT_STATE.ADD_LAYER_WIZARD:
-            const { AddLayerPanel } = await import('../add_layer_panel');
-            flyoutPanel = <AddLayerPanel />;
-            break;
-          case FLYOUT_STATE.LAYER_PANEL:
-            const { EditLayerPanel } = await import('../edit_layer_panel');
-            flyoutPanel = <EditLayerPanel />;
-            break;
-          case FLYOUT_STATE.MAP_SETTINGS_PANEL:
-            const { MapSettingsPanel } = await import('../map_settings_panel');
-            flyoutPanel = <MapSettingsPanel />;
-            break;
-        }
-        return <Provider store={this.context.store}>{flyoutPanel}</Provider>;
-      },
-      flyoutProps: {
-        outsideClickCloses: false,
-        onClose: () => {
-          // When X button is pressed
-          const { dispatch } = this.context.store;
-          dispatch(updateFlyout(FLYOUT_STATE.NONE));
-          dispatch(setSelectedLayer(null));
-        },
-      },
-    });
-
-    this._flyoutRef.onClose.then(() => {
-      // Check to make sure the flyout has actually closed, instead of switching from Add to Edit
-      if (this.props.flyoutDisplay !== FLYOUT_STATE.NONE) return;
-
       const triggerElement = this._flyoutOpenTrigger;
       this._flyoutOpenTrigger = null;
       // Return focus to the button used to open this flyout
@@ -219,16 +175,30 @@ export class MapContainer extends Component<Props, State> {
               .closest('[data-layerid]')
               ?.querySelector('button.mapTocEntry__layerName') as HTMLButtonElement) ?? null;
 
-        if (nextTarget === triggerElement) {
-          triggerElement?.focus();
-        } else {
-          // First focus the enclosing layerName
-          nextTarget?.focus();
-          // Wait for the original edit button to reappear, then shift focus to it
-          requestAnimationFrame(() => triggerElement?.focus());
-        }
+        // Wait for rendering to finish to ensure focusable elements are all re-enabled
+        requestAnimationFrame(() => {
+          if (nextTarget === triggerElement) {
+            triggerElement?.focus();
+          } else {
+            // First focus the enclosing layerName
+            nextTarget?.focus();
+            // Wait for the original edit button to reappear, then shift focus to it
+            requestAnimationFrame(() => triggerElement?.focus());
+          }
+        });
       }
-    });
+    } else {
+      // If flyout is opening for the first time, remember the button used to open it
+      if (!this._flyoutOpenTrigger)
+        this._flyoutOpenTrigger = (document.activeElement as HTMLButtonElement) ?? null;
+      if (this._flyoutRef.current) focusFirstFocusable(this._flyoutRef.current);
+    }
+  };
+
+  _onClickCloseFlyout = () => {
+    const { dispatch } = this.context.store;
+    dispatch(updateFlyout(FLYOUT_STATE.NONE));
+    dispatch(setSelectedLayer(null));
   };
 
   _startInitialLoadRenderTimer = () => {
@@ -314,8 +284,46 @@ export class MapContainer extends Component<Props, State> {
           )}
           <RightSideControls />
         </EuiFlexItem>
+        <FlyoutPanelWrapper
+          panelRef={this._flyoutRef}
+          flyoutDisplay={this.props.flyoutDisplay}
+          onClose={this._onClickCloseFlyout}
+        />
         {exitFullScreenButton}
       </EuiFlexGroup>
     );
   }
 }
+
+const FlyoutPanelWrapper = ({
+  flyoutDisplay,
+  onClose,
+  panelRef,
+}: {
+  flyoutDisplay: FLYOUT_STATE;
+  onClose: () => void;
+  panelRef: React.RefObject<HTMLDivElement>;
+}) => {
+  let flyoutPanel = null;
+  if (flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD) {
+    flyoutPanel = <AddLayerPanel />;
+  } else if (flyoutDisplay === FLYOUT_STATE.LAYER_PANEL) {
+    flyoutPanel = <EditLayerPanel />;
+  } else if (flyoutDisplay === FLYOUT_STATE.MAP_SETTINGS_PANEL) {
+    flyoutPanel = <MapSettingsPanel />;
+  }
+  if (!flyoutPanel) return null;
+  return (
+    <EuiFlyoutResizable
+      ref={panelRef}
+      type="push"
+      size="s"
+      maxWidth={800}
+      paddingSize="m"
+      outsideClickCloses={false}
+      onClose={onClose}
+    >
+      {flyoutPanel}
+    </EuiFlyoutResizable>
+  );
+};
