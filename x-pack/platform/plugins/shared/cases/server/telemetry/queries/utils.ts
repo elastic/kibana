@@ -28,7 +28,7 @@ import type {
   AttachmentFrameworkAggsResult,
   CustomFieldsTelemetry,
   AlertBuckets,
-  AlertsTelemetryAggregationsByOwnerResults,
+  CasesTelemetryWithAlertsAggsByOwnerResults,
 } from '../types';
 import { buildFilter } from '../../client/utils';
 import type { Owner } from '../../../common/constants/types';
@@ -290,13 +290,13 @@ export const getSolutionValues = ({
   caseAggregations,
   attachmentAggregations,
   filesAggregations,
-  totalWithAlertsAggregationsByOwner,
+  casesTotalWithAlerts,
   owner,
 }: {
   caseAggregations?: CaseAggregationResult;
   attachmentAggregations?: AttachmentAggregationResult;
   filesAggregations?: FileAttachmentAggregationResults;
-  totalWithAlertsAggregationsByOwner?: AlertsTelemetryAggregationsByOwnerResults;
+  casesTotalWithAlerts?: CasesTelemetryWithAlertsAggsByOwnerResults;
   owner: Owner;
 }): SolutionTelemetry => {
   const aggregationsBuckets = getAggregationsBuckets({
@@ -306,7 +306,7 @@ export const getSolutionValues = ({
   const totalCasesForOwner = findValueInBuckets(aggregationsBuckets.totalsByOwner, owner);
   const attachmentsAggsForOwner = attachmentAggregations?.[owner];
   const fileAttachmentsForOwner = filesAggregations?.[owner];
-  const totalWithAlerts = processWithAlertsByOwner(totalWithAlertsAggregationsByOwner);
+  const totalWithAlerts = processWithAlertsByOwner(casesTotalWithAlerts);
   return {
     total: totalCasesForOwner,
     ...getCountsFromBuckets(aggregationsBuckets[`${owner}.counts`]),
@@ -496,29 +496,18 @@ const emptyFileAttachment = (): FileAttachmentStats => ({
   topMimeTypes: [],
 });
 
-export const getTotalWithAlerts = (
-  aggregations?: AlertsTelemetryAggregationsByOwnerResults
-): number => {
-  return (aggregations?.by_owner?.buckets || []).reduce(
-    (sum, item) => sum + (item.doc_count || 0),
-    0
-  );
-};
-
 export const processWithAlertsByOwner = (
-  aggregations?: AlertsTelemetryAggregationsByOwnerResults
+  aggregations?: CasesTelemetryWithAlertsAggsByOwnerResults
 ): Record<Owner, number> => {
   const result: Record<Owner, number> = {
     securitySolution: 0,
     observability: 0,
     cases: 0,
   };
-
   if (aggregations) {
     aggregations.by_owner?.buckets.forEach((item) => {
-      result[item.key as Owner] = item.doc_count;
+      result[item.key as Owner] = item.references.referenceType.referenceAgg.value;
     });
   }
-
   return result;
 };

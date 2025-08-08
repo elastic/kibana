@@ -22,7 +22,7 @@ import type {
   CaseAggregationResult,
   AttachmentAggregationResult,
   FileAttachmentAggregationResults,
-  AlertsTelemetryAggregationsByOwnerResults,
+  CasesTelemetryWithAlertsAggsByOwnerResults,
 } from '../types';
 import {
   findValueInBuckets,
@@ -35,7 +35,6 @@ import {
   getOnlyConnectorsFilter,
   getReferencesAggregationQuery,
   getSolutionValues,
-  getTotalWithAlerts,
 } from './utils';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { CasePersistedStatus } from '../../common/types/case';
@@ -72,15 +71,23 @@ export const getCasesTelemetryData = async ({
   logger,
 }: CollectTelemetryDataParams): Promise<CasesTelemetry['cases']> => {
   try {
-    const [casesRes, commentsRes, totalAlertsRes, totalConnectorsRes, latestDates, filesRes] =
-      await Promise.all([
-        getCasesSavedObjectTelemetry(savedObjectsClient),
-        getCommentsSavedObjectTelemetry(savedObjectsClient),
-        getAlertsTelemetry(savedObjectsClient),
-        getConnectorsTelemetry(savedObjectsClient),
-        getLatestCasesDates({ savedObjectsClient, logger }),
-        getFilesTelemetry(savedObjectsClient),
-      ]);
+    const [
+      casesRes,
+      casesWithAlertsRes,
+      commentsRes,
+      totalAlertsRes,
+      totalConnectorsRes,
+      latestDates,
+      filesRes,
+    ] = await Promise.all([
+      getCasesSavedObjectTelemetry(savedObjectsClient),
+      getCasesWithAlertsByOwner(savedObjectsClient),
+      getCommentsSavedObjectTelemetry(savedObjectsClient),
+      getAlertsTelemetry(savedObjectsClient),
+      getConnectorsTelemetry(savedObjectsClient),
+      getLatestCasesDates({ savedObjectsClient, logger }),
+      getFilesTelemetry(savedObjectsClient),
+    ]);
 
     const aggregationsBuckets = getAggregationsBuckets({
       aggs: casesRes.aggregations,
@@ -110,7 +117,8 @@ export const getCasesTelemetryData = async ({
         totalUsers: casesRes.aggregations?.users?.value ?? 0,
         totalParticipants: commentsRes.aggregations?.participants?.value ?? 0,
         totalTags: casesRes.aggregations?.tags?.value ?? 0,
-        totalWithAlerts: getTotalWithAlerts(totalAlertsRes.aggregations),
+        totalWithAlerts:
+          totalAlertsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
         totalWithConnectors:
           totalConnectorsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
         latestDates,
@@ -126,21 +134,21 @@ export const getCasesTelemetryData = async ({
         caseAggregations: casesRes.aggregations,
         attachmentAggregations: commentsRes.aggregations,
         filesAggregations: filesRes.aggregations,
-        totalWithAlertsAggregationsByOwner: totalAlertsRes.aggregations,
+        casesTotalWithAlerts: casesWithAlertsRes.aggregations,
         owner: 'securitySolution',
       }),
       obs: getSolutionValues({
         caseAggregations: casesRes.aggregations,
         attachmentAggregations: commentsRes.aggregations,
         filesAggregations: filesRes.aggregations,
-        totalWithAlertsAggregationsByOwner: totalAlertsRes.aggregations,
+        casesTotalWithAlerts: casesWithAlertsRes.aggregations,
         owner: 'observability',
       }),
       main: getSolutionValues({
         caseAggregations: casesRes.aggregations,
         attachmentAggregations: commentsRes.aggregations,
         filesAggregations: filesRes.aggregations,
-        totalWithAlertsAggregationsByOwner: totalAlertsRes.aggregations,
+        casesTotalWithAlerts: casesWithAlertsRes.aggregations,
         owner: 'cases',
       }),
     };
@@ -347,28 +355,19 @@ const getFilesTelemetry = async (
 
 const getAlertsTelemetry = async (
   savedObjectsClient: TelemetrySavedObjectsClient
-): Promise<SavedObjectsFindResponse<unknown, AlertsTelemetryAggregationsByOwnerResults>> => {
-  return savedObjectsClient.find<unknown, AlertsTelemetryAggregationsByOwnerResults>({
+): Promise<SavedObjectsFindResponse<unknown, ReferencesAggregation>> => {
+  return savedObjectsClient.find<unknown, ReferencesAggregation>({
     page: 0,
     perPage: 0,
     type: CASE_COMMENT_SAVED_OBJECT,
     namespaces: ['*'],
     filter: getOnlyAlertsCommentsFilter(),
     aggs: {
-      by_owner: {
-        terms: {
-          field: 'cases.owner',
-          size: 3,
-          include: ['securitySolution', 'observability', 'cases'],
-        },
-        aggs: {
-          ...getReferencesAggregationQuery({
-            savedObjectType: CASE_COMMENT_SAVED_OBJECT,
-            referenceType: 'cases',
-            agg: 'cardinality',
-          }),
-        },
-      },
+      ...getReferencesAggregationQuery({
+        savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+        referenceType: 'cases',
+        agg: 'cardinality',
+      }),
     },
   });
 };
@@ -388,6 +387,34 @@ const getConnectorsTelemetry = async (
         referenceType: 'cases',
         agg: 'cardinality',
       }),
+    },
+  });
+};
+
+const getCasesWithAlertsByOwner = async (
+  savedObjectsClient: TelemetrySavedObjectsClient
+): Promise<SavedObjectsFindResponse<unknown, CasesTelemetryWithAlertsAggsByOwnerResults>> => {
+  return savedObjectsClient.find<unknown, CasesTelemetryWithAlertsAggsByOwnerResults>({
+    page: 0,
+    perPage: 0,
+    type: CASE_COMMENT_SAVED_OBJECT,
+    namespaces: ['*'],
+    filter: getOnlyAlertsCommentsFilter(),
+    aggs: {
+      by_owner: {
+        terms: {
+          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.owner`,
+          size: 3,
+          include: ['securitySolution', 'observability', 'cases'],
+        },
+        aggs: {
+          ...getReferencesAggregationQuery({
+            savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+            referenceType: 'cases',
+            agg: 'cardinality',
+          }),
+        },
+      },
     },
   });
 };

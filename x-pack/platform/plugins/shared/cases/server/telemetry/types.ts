@@ -72,9 +72,15 @@ export interface FileAttachmentAggsResult {
   };
   topMimeTypes: Buckets<string>;
 }
-export interface AlertsTelemetryAggregationsByOwnerResults {
+
+export interface CasesTelemetryWithAlertsAggsByOwnerResults {
   by_owner: {
-    buckets: Array<Bucket<Owner>>;
+    buckets: Array<
+      ReferencesAggregation & {
+        key: string;
+        doc_count: number;
+      }
+    >;
   };
 }
 
