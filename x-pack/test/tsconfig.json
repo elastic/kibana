@@ -72,7 +72,6 @@
     "@kbn/scout-info",
     "@kbn/test-suites-xpack-platform",
     "@kbn/dev-proc-runner",
-    "@kbn/logging",
     "@kbn/response-ops-rule-params",
     "@kbn/ml-string-hash",
     "@kbn/uptime-plugin",
