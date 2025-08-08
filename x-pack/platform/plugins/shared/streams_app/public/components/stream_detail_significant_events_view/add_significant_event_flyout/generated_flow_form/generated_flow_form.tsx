@@ -7,10 +7,11 @@
 
 import {
   EuiButton,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiLink,
   EuiLoadingSpinner,
-  EuiSwitch,
+  EuiPopover,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -20,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import { v4 } from 'uuid';
+import { useFeaturesFetch } from '../../../../hooks/use_features_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../../hooks/use_significant_events_api';
 import { useAIFeatures } from '../../common/use_ai_features';
@@ -38,13 +40,79 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
   } = useKibana();
   const aiFeatures = useAIFeatures();
   const { generate } = useSignificantEventsApi({ name: definition.name });
+  const featuresFetch = useFeaturesFetch({ name: definition.name });
 
-  const toggleMethodSwitchId = useGeneratedHtmlId();
+  const contextMenuPopoverId = useGeneratedHtmlId();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const closePopover = () => setIsPopoverOpen(false);
+  const onButtonClick = () => setIsPopoverOpen((prev) => !prev);
 
-  const [method, setMethod] = useState<'log_patterns' | 'zero_shot'>('log_patterns');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
   const [selectedQueries, setSelectedQueries] = useState<StreamQueryKql[]>([]);
+
+  const onGenerateClick = (method: 'zero_shot' | 'log_patterns') => {
+    setIsGenerating(true);
+    setGeneratedQueries([]);
+    setSelectedQueries([]);
+    setIsPopoverOpen(false);
+
+    const generation$ = generate(aiFeatures?.selectedConnector!, method);
+
+    generation$.subscribe({
+      next: (result) => {
+        setGeneratedQueries((prev) => [
+          ...prev,
+          { id: v4(), kql: { query: result.query.kql }, title: result.query.title },
+        ]);
+      },
+      error: (error) => {
+        notifications.showErrorDialog({
+          title: i18n.translate(
+            'xpack.streams.addSignificantEventFlyout.aiFlow.generateErrorToastTitle',
+            { defaultMessage: `Could not generate significant events queries` }
+          ),
+          error,
+        });
+        setIsGenerating(false);
+      },
+      complete: () => {
+        notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.streams.addSignificantEventFlyout.aiFlow.generateSuccessToastTitle',
+            { defaultMessage: `Generated significant events queries successfully` }
+          ),
+        });
+        setIsGenerating(false);
+      },
+    });
+  };
+
+  const panels = [
+    {
+      id: 0,
+      title: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.chooseMethod', {
+        defaultMessage: 'Choose a method',
+      }),
+      items: [
+        {
+          name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.featuresBased', {
+            defaultMessage: 'Features based',
+          }),
+          icon: 'sparkles',
+          onClick: () => onGenerateClick('zero_shot'),
+          disabled: !featuresFetch.value?.length,
+        },
+        {
+          name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.logPatternsBased', {
+            defaultMessage: 'Log patterns based',
+          }),
+          icon: 'securitySignalDetected',
+          onClick: () => onGenerateClick('log_patterns'),
+        },
+      ],
+    },
+  ];
 
   const onSelectionChange = (selectedItems: StreamQueryKql[]) => {
     setSelectedQueries(selectedItems);
@@ -103,77 +171,35 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
       )}
 
       {!aiFeatures.loading && aiFeatures.enabled && (
-        <>
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiSwitch
-              label={
-                method === 'log_patterns'
-                  ? 'Use log patterns'
-                  : 'Use zero shot based on identified system features'
-              }
-              checked={method === 'log_patterns'}
-              onChange={() => setMethod(method === 'log_patterns' ? 'zero_shot' : 'log_patterns')}
-              aria-describedby={toggleMethodSwitchId}
-              compressed
-            />
-            <EuiButton
-              isLoading={isGenerating}
-              disabled={
-                isSubmitting ||
-                isGenerating ||
-                !aiFeatures ||
-                !aiFeatures.enabled ||
-                !aiFeatures.selectedConnector
-              }
-              iconType="sparkles"
-              onClick={() => {
-                setIsGenerating(true);
-                setGeneratedQueries([]);
-                setSelectedQueries([]);
-
-                const generation$ = generate(aiFeatures?.selectedConnector!, method);
-                generation$.subscribe({
-                  next: (result) => {
-                    setGeneratedQueries((prev) => [
-                      ...prev,
-                      { id: v4(), kql: { query: result.query.kql }, title: result.query.title },
-                    ]);
-                  },
-                  error: (error) => {
-                    notifications.showErrorDialog({
-                      title: i18n.translate(
-                        'xpack.streams.addSignificantEventFlyout.aiFlow.generateErrorToastTitle',
-                        { defaultMessage: `Could not generate significant events queries` }
-                      ),
-                      error,
-                    });
-                    setIsGenerating(false);
-                  },
-                  complete: () => {
-                    notifications.toasts.addSuccess({
-                      title: i18n.translate(
-                        'xpack.streams.addSignificantEventFlyout.aiFlow.generateSuccessToastTitle',
-                        { defaultMessage: `Generated significant events queries successfully` }
-                      ),
-                    });
-                    setIsGenerating(false);
-                  },
-                });
-              }}
-            >
-              {isGenerating
-                ? i18n.translate(
-                    'xpack.streams.addSignificantEventFlyout.aiFlow.generatingButtonLabel',
-                    { defaultMessage: 'Generating...' }
-                  )
-                : i18n.translate(
-                    'xpack.streams.addSignificantEventFlyout.aiFlow.generateButtonLabel',
-                    {
-                      defaultMessage: 'Generate',
-                    }
-                  )}
-            </EuiButton>
-          </EuiFlexGroup>
+        <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
+          <EuiPopover
+            id={contextMenuPopoverId}
+            button={
+              <EuiButton
+                disabled={isGenerating || isSubmitting}
+                isLoading={isGenerating}
+                iconType="arrowDown"
+                iconSide="left"
+                onClick={onButtonClick}
+              >
+                {isGenerating
+                  ? i18n.translate(
+                      'xpack.streams.addSignificantEventFlyout.aiFlow.generatingButtonLabel',
+                      { defaultMessage: 'Generating...' }
+                    )
+                  : i18n.translate(
+                      'xpack.streams.addSignificantEventFlyout.aiFlow.generateButtonLabel',
+                      { defaultMessage: 'Generate' }
+                    )}
+              </EuiButton>
+            }
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenu initialPanelId={0} panels={panels} />
+          </EuiPopover>
 
           <SignificantEventsGeneratedTable
             isSubmitting={isSubmitting}
@@ -182,7 +208,7 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
             onSelectionChange={onSelectionChange}
             definition={definition}
           />
-        </>
+        </EuiFlexGroup>
       )}
     </EuiFlexGroup>
   );
