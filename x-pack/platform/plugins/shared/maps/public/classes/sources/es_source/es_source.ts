@@ -48,10 +48,6 @@ export function isSearchSourceAbortError(error: Error) {
   return error.name === 'AbortError';
 }
 
-const DEFAULT_APPLY_GLOBAL_QUERY = true;
-const DEFAULT_APPLY_GLOBAL_TIME = true;
-const DEFAULT_APPLY_FORCE_REFRESH = true;
-
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
   indexPattern?: DataView;
 
@@ -69,18 +65,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       ...descriptor,
       id: isValidStringConfig(descriptor.id) ? descriptor.id! : uuidv4(),
       indexPatternId: descriptor.indexPatternId!,
-      applyGlobalQuery:
-        typeof descriptor.applyGlobalQuery !== 'undefined'
-          ? descriptor.applyGlobalQuery
-          : DEFAULT_APPLY_GLOBAL_QUERY,
-      applyGlobalTime:
-        typeof descriptor.applyGlobalTime !== 'undefined'
-          ? descriptor.applyGlobalTime
-          : DEFAULT_APPLY_GLOBAL_TIME,
-      applyForceRefresh:
-        typeof descriptor.applyForceRefresh !== 'undefined'
-          ? descriptor.applyForceRefresh
-          : DEFAULT_APPLY_FORCE_REFRESH,
     } as AbstractESSourceDescriptor;
   }
 
@@ -98,15 +82,15 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   getApplyGlobalQuery(): boolean {
-    return this._descriptor.applyGlobalQuery ?? DEFAULT_APPLY_GLOBAL_QUERY;
+    return this._descriptor.applyGlobalQuery ?? true;
   }
 
   getApplyGlobalTime(): boolean {
-    return this._descriptor.applyGlobalTime ?? DEFAULT_APPLY_GLOBAL_TIME;
+    return this._descriptor.applyGlobalTime ?? true;
   }
 
   getApplyForceRefresh(): boolean {
-    return this._descriptor.applyForceRefresh ?? DEFAULT_APPLY_FORCE_REFRESH;
+    return this._descriptor.applyForceRefresh ?? true;
   }
 
   isQueryAware(): boolean {
