@@ -31,7 +31,7 @@ import {
   createRule,
   deleteAllRules,
   deleteAllAlerts,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../config/services/detections_response';
 import {
   getAlerts,
   getPreviewAlerts,
