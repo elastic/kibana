@@ -5972,6 +5972,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/failure-store-modal@link:x-pack/platform/packages/shared/kbn-failure-store-modal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/feature-controls-examples-plugin@link:examples/feature_control_examples":
   version "0.0.0"
   uid ""

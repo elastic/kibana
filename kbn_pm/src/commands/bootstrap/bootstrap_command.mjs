@@ -49,6 +49,7 @@ export const command = {
     --no-vscode          By default bootstrap updates the .vscode directory to include commonly useful vscode
                           settings for local development. Disable this process either pass this flag or set
                           the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
+    --allow-root         Required supplementary flag if you're running bootstrap as root.
     --quiet              Prevent logging more than basic success/error messages
   `,
   reportTimings: {
@@ -61,6 +62,7 @@ export const command = {
     const quiet = args.getBooleanValue('quiet') ?? false;
     const vscodeConfig =
       !IS_CI && (args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE);
+    const allowRoot = args.getBooleanValue('allow-root') ?? false;
     const forceInstall = args.getBooleanValue('force-install');
     const shouldInstall =
       forceInstall || !(await areNodeModulesPresent()) || !(await checkYarnIntegrity(log));
@@ -109,7 +111,8 @@ export const command = {
         'yarn',
         ['kbn', 'build-shared']
           .concat(quiet ? ['--quiet'] : [])
-          .concat(forceInstall ? ['--no-cache'] : []),
+          .concat(forceInstall ? ['--no-cache'] : [])
+          .concat(allowRoot ? ['--allow-root'] : []),
         {
           pipe: true,
         }
