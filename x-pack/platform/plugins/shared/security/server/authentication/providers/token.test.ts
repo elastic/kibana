@@ -15,6 +15,7 @@ import type { MockAuthenticationProviderOptions } from './base.mock';
 import { mockAuthenticationProviderOptions } from './base.mock';
 import { TokenAuthenticationProvider } from './token';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { InvalidGrantError } from '../../errors';
 import { securityMock } from '../../mocks';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -277,7 +278,9 @@ describe('TokenAuthenticationProvider', () => {
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      mockOptions.tokens.refresh.mockResolvedValue(null);
+      mockOptions.tokens.refresh.mockRejectedValue(
+        InvalidGrantError.expiredOrInvalidRefreshToken()
+      );
 
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
         AuthenticationResult.redirectTo(
@@ -308,7 +311,9 @@ describe('TokenAuthenticationProvider', () => {
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      mockOptions.tokens.refresh.mockResolvedValue(null);
+      mockOptions.tokens.refresh.mockRejectedValue(
+        InvalidGrantError.expiredOrInvalidRefreshToken()
+      );
 
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
         AuthenticationResult.failed(Boom.badRequest('Both access and refresh tokens are expired.'))
@@ -339,8 +344,9 @@ describe('TokenAuthenticationProvider', () => {
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      mockOptions.tokens.refresh.mockResolvedValue(null);
-
+      mockOptions.tokens.refresh.mockRejectedValue(
+        InvalidGrantError.expiredOrInvalidRefreshToken()
+      );
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
         AuthenticationResult.failed(Boom.badRequest('Both access and refresh tokens are expired.'))
       );

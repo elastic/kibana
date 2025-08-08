@@ -23,6 +23,7 @@ import { securityMock } from '../../mocks';
 import { mockSamlResponses } from '../__fixtures__/mock_saml_responses';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
+import { InvalidGrantError } from '../../errors';
 
 describe('SAMLAuthenticationProvider', () => {
   let provider: SAMLAuthenticationProvider;
@@ -1296,10 +1297,10 @@ describe('SAMLAuthenticationProvider', () => {
         new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
 
-      mockOptions.tokens.refresh.mockResolvedValue(null);
+      mockOptions.tokens.refresh.mockRejectedValue(InvalidGrantError.expiredOrInvalidRefreshToken());
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(
-        AuthenticationResult.failed(Boom.badRequest('Both access and refresh tokens are expired.'))
+        AuthenticationResult.failed(Boom.badRequest('Your session has expired because your refresh token is no longer valid. Please log in again.'))
       );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
@@ -1325,10 +1326,10 @@ describe('SAMLAuthenticationProvider', () => {
         new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
 
-      mockOptions.tokens.refresh.mockResolvedValue(null);
+       mockOptions.tokens.refresh.mockRejectedValue(InvalidGrantError.expiredOrInvalidRefreshToken());
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(
-        AuthenticationResult.failed(Boom.badRequest('Both access and refresh tokens are expired.'))
+        AuthenticationResult.failed(Boom.badRequest('Your session has expired because your refresh token is no longer valid. Please log in again.'))
       );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
@@ -1355,7 +1356,7 @@ describe('SAMLAuthenticationProvider', () => {
         new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
 
-      mockOptions.tokens.refresh.mockResolvedValue(null);
+       mockOptions.tokens.refresh.mockRejectedValue(InvalidGrantError.expiredOrInvalidRefreshToken());
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(
         AuthenticationResult.redirectTo(
