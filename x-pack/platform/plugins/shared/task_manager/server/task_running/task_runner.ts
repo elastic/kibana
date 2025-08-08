@@ -140,8 +140,6 @@ export enum TaskRunResult {
   Failed = 'Failed',
   // Task deleted
   Deleted = 'Deleted',
-  // Task disabled
-  Disabled = 'Disabled',
 }
 
 // A ConcreteTaskInstance which we *know* has a `startedAt` Date on it
@@ -788,7 +786,7 @@ export class TaskManagerRunner implements TaskRunner {
       : fieldUpdates.status === TaskStatus.ShouldDelete
       ? TaskRunResult.Deleted
       : fieldUpdates.status === TaskStatus.ShouldDisable
-      ? TaskRunResult.Disabled
+      ? TaskRunResult.Failed
       : hasTaskRunFailed
       ? TaskRunResult.SuccessRescheduled
       : TaskRunResult.RetryScheduled;
