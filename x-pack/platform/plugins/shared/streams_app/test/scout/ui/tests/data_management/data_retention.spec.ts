@@ -47,7 +47,7 @@ test.describe(
       await expect(
         page.getByTestId('streamsAppRetentionMetadataRetentionPeriod').getByText('7d')
       ).toBeVisible();
-      await pageObjects.streams.closeToast();
+      await pageObjects.streams.closeToasts();
     });
 
     test('should reset a stream data retention policy successfully', async ({
@@ -64,7 +64,7 @@ test.describe(
       await expect(
         page.getByTestId('streamsAppRetentionMetadataRetentionPeriod').getByText('7d')
       ).toBeVisible();
-      await pageObjects.streams.closeToast();
+      await pageObjects.streams.closeToasts();
 
       // Reset the retention policy
       await page.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton').click();
@@ -76,7 +76,7 @@ test.describe(
       await expect(
         page.getByTestId('streamsAppRetentionMetadataRetentionPeriod').getByText('∞')
       ).toBeVisible();
-      await pageObjects.streams.closeToast();
+      await pageObjects.streams.closeToasts();
     });
   }
 );

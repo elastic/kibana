@@ -12,6 +12,7 @@ import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import { getFormattedError } from '../../../../../util/errors';
 import { StreamEnrichmentServiceDependencies } from './types';
 import { processorConverter } from '../../utils';
 
@@ -72,11 +73,12 @@ export const createUpsertStreamFailureNofitier =
   ({ toasts }: { toasts: IToasts }) =>
   (params: { event: unknown }) => {
     const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
-    toasts.addError(new Error(event.error.body.message), {
+    const formattedError = getFormattedError(event.error);
+    toasts.addError(formattedError, {
       title: i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.saveChangesError',
         { defaultMessage: "An issue occurred saving processors' changes." }
       ),
-      toastMessage: event.error.body.message,
+      toastMessage: formattedError.message,
     });
   };
