@@ -2177,6 +2177,10 @@
               "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts"
             },
             {
+              "plugin": "reindexService",
+              "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/reindex_service.ts"
+            },
+            {
               "plugin": "remoteClusters",
               "path": "x-pack/platform/plugins/private/remote_clusters/server/plugin.ts"
             },
@@ -2206,10 +2210,6 @@
             },
             {
               "plugin": "upgradeAssistant",
-              "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/reindex_service.ts"
-            },
-            {
-              "plugin": "upgradeAssistant",
               "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/data_streams/data_stream_migration_service.ts"
             },
             {
@@ -2233,12 +2233,12 @@
               "path": "x-pack/platform/plugins/shared/spaces/server/usage_collection/spaces_usage_collector.test.ts"
             },
             {
-              "plugin": "upgradeAssistant",
-              "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/reindex_service.test.ts"
+              "plugin": "reindexService",
+              "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/reindex_service.test.ts"
             },
             {
-              "plugin": "upgradeAssistant",
-              "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/reindex_service.test.ts"
+              "plugin": "reindexService",
+              "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/reindex_service.test.ts"
             },
             {
               "plugin": "securitySolution",
