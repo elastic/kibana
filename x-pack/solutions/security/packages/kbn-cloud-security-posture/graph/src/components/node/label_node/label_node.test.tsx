@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ReactFlow, Position } from '@xyflow/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { NodeProps } from '../../types';
@@ -74,7 +75,7 @@ describe('LabelNode', () => {
       </ReactFlow>
     );
 
-    fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_CONTAINER));
+    await userEvent.hover(screen.getByTestId(TEST_SUBJ_CONTAINER));
 
     await waitFor(() => {
       expect(screen.queryByTestId(TEST_SUBJ_EXPAND_BTN)).toBeInTheDocument();
@@ -97,7 +98,7 @@ describe('LabelNode', () => {
       </ReactFlow>
     );
 
-    fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_CONTAINER));
+    await userEvent.hover(screen.getByTestId(TEST_SUBJ_CONTAINER));
 
     await waitFor(() => {
       expect(screen.queryByTestId(TEST_SUBJ_EXPAND_BTN)).not.toBeInTheDocument();
@@ -171,7 +172,7 @@ describe('LabelNode', () => {
         </ReactFlow>
       );
 
-      fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_CONTAINER));
+      await userEvent.hover(screen.getByTestId(TEST_SUBJ_CONTAINER));
 
       await waitFor(() => {
         expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toBeInTheDocument();
@@ -193,7 +194,7 @@ describe('LabelNode', () => {
         </ReactFlow>
       );
 
-      fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_CONTAINER));
+      await userEvent.hover(screen.getByTestId(TEST_SUBJ_CONTAINER));
 
       await waitFor(() => {
         expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toBeInTheDocument();
@@ -215,7 +216,7 @@ describe('LabelNode', () => {
         </ReactFlow>
       );
 
-      fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_CONTAINER));
+      await userEvent.hover(screen.getByTestId(TEST_SUBJ_CONTAINER));
 
       await waitFor(() => {
         expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toBeInTheDocument();
@@ -229,7 +230,7 @@ describe('LabelNode', () => {
         </ReactFlow>
       );
 
-      fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_CONTAINER));
+      await userEvent.hover(screen.getByTestId(TEST_SUBJ_CONTAINER));
 
       await waitFor(() => {
         expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).not.toBeInTheDocument();
