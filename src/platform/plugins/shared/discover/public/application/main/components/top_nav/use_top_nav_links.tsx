@@ -242,6 +242,22 @@ export const useTopNavLinks = ({
       entries.unshift(esqLDataViewTransitionToggle);
     }
 
+    entries.push({
+      id: 'backgroundSearch',
+      iconType: 'clock',
+      iconOnly: true,
+      label: i18n.translate('discover.localMenu.searchSessionIndicatorLabel', {
+        defaultMessage: 'Background search',
+      }),
+      description: i18n.translate('discover.localMenu.searchSessionIndicatorDescription', {
+        defaultMessage: 'Manage background searches',
+      }),
+      testId: 'discoverBackgroundSearch',
+      run: () => {
+        services.data.search.showSearchSessionsFlyout();
+      },
+    });
+
     if (services.capabilities.discover_v2.save && !defaultMenu?.saveItem?.disabled) {
       const saveSearch = {
         id: 'save',

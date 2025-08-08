@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../../common';
-import { ACTION } from './components/actions';
+import { Action } from './components/table/actions';
 
 export const DATE_STRING_FORMAT = 'D MMM, YYYY, HH:mm:ss';
 
@@ -35,11 +36,18 @@ export interface UISession {
   status: UISearchSessionState;
   idMapping: SearchSessionSavedObjectAttributes['idMapping'];
   numSearches: number;
-  actions?: ACTION[];
+  actions?: Action[];
   reloadUrl: string;
   restoreUrl: string;
   initialState: Record<string, unknown>;
   restoreState: Record<string, unknown>;
   version: string;
   errors?: string[];
+}
+
+export type LocatorsStart = SharePluginStart['url']['locators'];
+
+export interface SearchSessionSavedObject {
+  id: string;
+  attributes: PersistedSearchSessionSavedObjectAttributes;
 }

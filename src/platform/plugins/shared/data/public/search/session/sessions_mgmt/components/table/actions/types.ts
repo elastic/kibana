@@ -6,7 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import extendSessionIcon from './icons/extend_session.svg';
 
-export const SEARCH_SESSIONS_MANAGEMENT_ID = 'search_sessions';
-export const BACKGROUND_SEARCH_ENABLED =
-  window.localStorage.getItem('backgroundSearchEnabled') === 'true' || true;
+export type OnActionComplete = () => void;
+export type OnActionDismiss = () => void;
+
+export type Action = 'inspect' | 'extend' | 'delete' | 'rename';
+
+export interface IClickActionDescriptor {
+  label: React.ReactNode;
+  iconType: 'trash' | 'cancel' | typeof extendSessionIcon;
+  onClick: () => Promise<void> | void;
+}

@@ -42,6 +42,7 @@ export interface SearchSessionDependencies {
 
 export interface SearchSessionStatusDependencies extends SearchSessionDependencies {
   internalElasticsearchClient: ElasticsearchClient;
+  asCurrentUserElasticsearchClient: ElasticsearchClient;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -161,7 +162,11 @@ export class SearchSessionService implements ISearchSessionService {
   };
 
   public find = async (
-    { savedObjectsClient, internalElasticsearchClient }: SearchSessionStatusDependencies,
+    {
+      savedObjectsClient,
+      internalElasticsearchClient,
+      asCurrentUserElasticsearchClient,
+    }: SearchSessionStatusDependencies,
     user: AuthenticatedUser | null,
     options: Omit<SavedObjectsFindOptions, 'type'>
   ): Promise<SearchSessionsFindResponse> => {
@@ -191,9 +196,13 @@ export class SearchSessionService implements ISearchSessionService {
     const sessionStatuses = await Promise.all(
       findResponse.saved_objects.map(async (so) => {
         const sessionStatus = await getSessionStatus(
-          { internalClient: internalElasticsearchClient },
+          {
+            internalClient: internalElasticsearchClient,
+            asUserClient: asCurrentUserElasticsearchClient,
+          },
           so.attributes,
-          this.sessionConfig
+          this.sessionConfig,
+          this.logger
         );
 
         return sessionStatus;
@@ -370,9 +379,13 @@ export class SearchSessionService implements ISearchSessionService {
     const session = await this.get(deps, user, sessionId);
 
     const sessionStatus = await getSessionStatus(
-      { internalClient: deps.internalElasticsearchClient },
+      {
+        internalClient: deps.internalElasticsearchClient,
+        asUserClient: deps.asCurrentUserElasticsearchClient,
+      },
       session.attributes,
-      this.sessionConfig
+      this.sessionConfig,
+      this.logger
     );
 
     return { status: sessionStatus.status, errors: sessionStatus.errors };
@@ -423,7 +436,12 @@ export class SearchSessionService implements ISearchSessionService {
       });
 
       const internalElasticsearchClient = elasticsearch.client.asScoped(request).asInternalUser;
-      const deps = { savedObjectsClient, internalElasticsearchClient };
+      const asCurrentUserElasticsearchClient = elasticsearch.client.asScoped(request).asCurrentUser;
+      const deps = {
+        savedObjectsClient,
+        internalElasticsearchClient,
+        asCurrentUserElasticsearchClient,
+      };
       return {
         getId: this.getId.bind(this, deps, user),
         trackId: this.trackId.bind(this, deps, user),
