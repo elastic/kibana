@@ -105,7 +105,7 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
 
       return (
         <Join
-          key={(joinDescriptor?.right as { id?: string })?.id ?? index}
+        key={joinDescriptor?.right?.id ?? index}
           join={joinDescriptor}
           onChange={handleOnChange}
           onRemove={handleOnRemove}
