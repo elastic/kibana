@@ -93,7 +93,7 @@ export async function createPlaywrightEvalsConfig({
   if (process.env.DEV_MODE) {
     try {
       serversConfigDirOverride = await createDevModeConfig(log, baseServersConfigDir);
-      log.info(`DEV_MODE active: serversConfigDir overridden to ${serversConfigDirOverride}`);
+      log.debug(`DEV_MODE active: serversConfigDir overridden to ${serversConfigDirOverride}`);
     } catch (err) {
       log.warning(`DEV_MODE setup failed: ${err instanceof Error ? err.message : String(err)}`);
     }
