@@ -602,6 +602,11 @@
     "version",
     "wsState"
   ],
+  "index-pattern": [
+    "name",
+    "title",
+    "type"
+  ],
   "infra-custom-dashboards": [
     "assetType",
     "dashboardFilterAssetIdEnabled",
