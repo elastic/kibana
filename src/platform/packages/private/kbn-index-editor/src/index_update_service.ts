@@ -170,10 +170,12 @@ export class IndexUpdateService {
       fromCmd.args.push(
         Builder.option({
           name: 'metadata',
-          args: [Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] })],
-        }),
-        Builder.expression.column({
-          args: [Builder.identifier({ name: '_source' })],
+          args: [
+            Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] }),
+            Builder.expression.column({
+              args: [Builder.identifier({ name: '_source' })],
+            }),
+          ],
         })
       );
     }
