@@ -150,7 +150,7 @@ export function getTraceWaterfall({
   rootItem: TraceItem;
   parentChildMap: Record<string, TraceItem[]>;
   orphans: TraceItem[];
-  serviceColorsMap: Record<string, string>
+  serviceColorsMap: Record<string, string>;
 }): TraceWaterfallItem[] {
   const rootStartMicroseconds = rootItem.timestampUs;
 
