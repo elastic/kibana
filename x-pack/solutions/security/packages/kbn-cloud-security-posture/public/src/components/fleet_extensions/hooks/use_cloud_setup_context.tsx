@@ -16,7 +16,6 @@ import {
   GCP_PROVIDER_TEST_ID,
 } from '../constants';
 import { CloudSetupContext } from '../cloud_setup_context';
-
 interface ICloudSetupProviderOptions {
   type: CloudProviders;
   name: string;
@@ -104,6 +103,27 @@ export function useCloudSetup() {
     [getCloudSetupProviders, CloudSetupProviderOptions]
   );
 
+  // To reduce repetition and improve maintainability, extract provider-specific logic into a helper function.
+  const getProviderDetails = React.useCallback(
+    (provider: CloudProviders) => {
+      const providerConfig = config.providers[provider];
+      return {
+        enabled: providerConfig.enabled !== undefined ? providerConfig.enabled : true,
+        organizationEnabled:
+          providerConfig.enableOrganization !== undefined
+            ? providerConfig.enableOrganization
+            : true,
+        manualFieldsEnabled:
+          providerConfig.manualFieldsEnabled !== undefined
+            ? providerConfig.manualFieldsEnabled
+            : true,
+        policyType: providerConfig.type,
+        overviewPath: providerConfig.getStartedPath,
+      };
+    },
+    [config.providers]
+  );
+
   return React.useMemo(
     () => ({
       getCloudSetupProviderByInputType,
@@ -113,18 +133,25 @@ export function useCloudSetup() {
       showCloudTemplates: config.showCloudTemplates,
       defaultProvider: config.defaultProvider,
       defaultProviderType: config.providers[config.defaultProvider].type,
-      awsPolicyType: config.providers[AWS_PROVIDER].type,
-      awsOrganizationMinimumVersion: config.providers[AWS_PROVIDER].organizationMinimumVersion,
-      awsOverviewPath: config.providers[AWS_PROVIDER].getStartedPath,
-      azurePolicyType: config.providers[AZURE_PROVIDER].type,
-      azureOrganizationMinimumVersion: config.providers[AZURE_PROVIDER].organizationMinimumVersion,
-      azureOverviewPath: config.providers[AZURE_PROVIDER].getStartedPath,
-      gcpMinShowVersion: config.providers[GCP_PROVIDER].minShowVersion,
-      gcpPolicyType: config.providers[GCP_PROVIDER].type,
-      gcpOrganizationMinimumVersion: config.providers[GCP_PROVIDER].organizationMinimumVersion,
-      gcpOverviewPath: config.providers[GCP_PROVIDER].getStartedPath,
+      awsPolicyType: getProviderDetails(AWS_PROVIDER).policyType,
+      awsOrganizationEnabled: getProviderDetails(AWS_PROVIDER).organizationEnabled,
+      awsOverviewPath: getProviderDetails(AWS_PROVIDER).overviewPath,
+      azurePolicyType: getProviderDetails(AZURE_PROVIDER).policyType,
+      azureEnabled: getProviderDetails(AZURE_PROVIDER).enabled,
+      azureManualFieldsEnabled: getProviderDetails(AZURE_PROVIDER).manualFieldsEnabled,
+      azureOrganizationEnabled: getProviderDetails(AZURE_PROVIDER).organizationEnabled,
+      azureOverviewPath: getProviderDetails(AZURE_PROVIDER).overviewPath,
+      gcpEnabled: getProviderDetails(GCP_PROVIDER).enabled,
+      gcpPolicyType: getProviderDetails(GCP_PROVIDER).policyType,
+      gcpOrganizationEnabled: getProviderDetails(GCP_PROVIDER).organizationEnabled,
+      gcpOverviewPath: getProviderDetails(GCP_PROVIDER).overviewPath,
       templateName: config.policyTemplate,
     }),
-    [config, getCloudSetupProviderByInputType, getCloudSetupTemplateInputOptions]
+    [
+      config,
+      getCloudSetupProviderByInputType,
+      getCloudSetupTemplateInputOptions,
+      getProviderDetails,
+    ]
   );
 }

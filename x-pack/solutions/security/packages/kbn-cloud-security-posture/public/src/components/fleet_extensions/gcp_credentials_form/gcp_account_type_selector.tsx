@@ -6,9 +6,6 @@
  */
 import React, { useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import semverValid from 'semver/functions/valid';
-import semverCoerce from 'semver/functions/coerce';
-import semverLt from 'semver/functions/lt';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
@@ -69,17 +66,11 @@ export const GcpAccountTypeSelect = ({
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
-  const { gcpOrganizationMinimumVersion, gcpPolicyType } = useCloudSetup();
-  // This will disable the gcp org option for any version below 1.6.0 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
-  const validSemantic = semverValid(packageInfo.version);
-  const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
-  const isGcpOrgDisabled =
-    !gcpOrganizationMinimumVersion ||
-    semverLt(integrationVersionNumberOnly, gcpOrganizationMinimumVersion);
+  const { gcpOrganizationEnabled, gcpPolicyType } = useCloudSetup();
 
   const gcpAccountTypeOptions = useMemo(
-    () => getGcpAccountTypeOptions(isGcpOrgDisabled),
-    [isGcpOrgDisabled]
+    () => getGcpAccountTypeOptions(!gcpOrganizationEnabled),
+    [gcpOrganizationEnabled]
   );
   /* Create a subset of properties from GcpField to use for hiding value of Organization ID when switching account type from Organization to Single */
   const subsetOfGcpField = (({ 'gcp.organization_id': a }) => ({ 'gcp.organization_id': a }))(
@@ -127,7 +118,7 @@ export const GcpAccountTypeSelect = ({
       updatePolicy({
         updatedPolicy: updatePolicyWithInputs(newPolicy, gcpPolicyType, {
           'gcp.account_type': {
-            value: isGcpOrgDisabled ? GCP_SINGLE_ACCOUNT : GCP_ORGANIZATION_ACCOUNT,
+            value: gcpOrganizationEnabled ? GCP_ORGANIZATION_ACCOUNT : GCP_SINGLE_ACCOUNT,
             type: 'text',
           },
         }),
@@ -145,7 +136,7 @@ export const GcpAccountTypeSelect = ({
         />
       </EuiText>
       <EuiSpacer size="l" />
-      {isGcpOrgDisabled && (
+      {!gcpOrganizationEnabled && (
         <>
           <EuiCallOut color="warning">
             <FormattedMessage

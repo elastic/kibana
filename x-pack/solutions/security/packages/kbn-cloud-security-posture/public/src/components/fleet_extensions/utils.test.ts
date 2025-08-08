@@ -11,7 +11,6 @@ import {
   getInputHiddenVars,
   updatePolicyWithInputs,
   getCloudShellDefaultValue,
-  isBelowMinVersion,
   findVariableDef,
   getDefaultAwsCredentialsType,
   getDefaultAzureCredentialsType,
@@ -167,33 +166,6 @@ describe('getCspmCloudShellDefaultValue', () => {
     const result = getCloudShellDefaultValue(packagePolicy, TEMPLATE_NAME);
 
     expect(result).toBe('URL');
-  });
-});
-
-describe('isBelowMinVersion', () => {
-  test.each([
-    ['1.2.3', '2.0.0', true], // Version '1.2.3' is below '2.0.0', expect true
-    ['1.2.3-preview20', '2.0.0', true], // Version '1.2.3-preview20' is below '2.0.0', expect true
-    ['2.0.0', '1.2.3', false], // Version '2.0.0' is not below '1.2.3', expect false
-    ['1.2.3', '1.2.3', false], // Version '1.2.3' is not below itself, expect false
-  ])('returns expected boolean for version and minVersion', (version, minVersion, expected) => {
-    const result = isBelowMinVersion(version, minVersion);
-
-    expect(result).toBe(expected);
-  });
-
-  test.each([
-    ['invalid', '1.0.0'], // Invalid version, expect error
-    ['1.2', '1.0.0'], // Invalid version, expect error
-    ['', '1.0.0'], // Empty version, expect error
-    ['1.0.0', ''], // Empty minVersion, expect error
-    ['', ''], // Empty version and minVersion, expect error
-  ])('semver return errors when invalid versions are used', (version, minVersion) => {
-    try {
-      isBelowMinVersion(version, minVersion);
-    } catch (error) {
-      expect(error).toBeDefined();
-    }
   });
 });
 

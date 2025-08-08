@@ -24,9 +24,10 @@ export type CloudProviders = typeof AWS_PROVIDER | typeof GCP_PROVIDER | typeof 
 
 export interface CloudProviderConfig {
   type: string;
-  organizationMinimumVersion?: string;
+  enableOrganization?: boolean;
   getStartedPath: string;
-  minShowVersion?: string;
+  enabled?: boolean;
+  manualFieldsEnabled?: boolean;
 }
 export interface CloudSetupConfig {
   policyTemplate: string;

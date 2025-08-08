@@ -10,7 +10,7 @@ import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { type NewPackagePolicy, SetupTechnology } from '@kbn/fleet-plugin/public';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { updatePolicyWithInputs, isBelowMinVersion } from '../utils';
+import { updatePolicyWithInputs } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../../csp_boxed_radio_group';
 import { AzureAccountType, UpdatePolicy } from '../types';
 import {
@@ -73,18 +73,15 @@ export const AzureAccountTypeSelect = ({
   packageInfo,
   setupTechnology,
 }: AzureAccountTypeSelectProps) => {
-  const { azurePolicyType, azureOrganizationMinimumVersion } = useCloudSetup();
-  const isAzureOrganizationDisabled =
-    !azureOrganizationMinimumVersion ||
-    isBelowMinVersion(packageInfo.version, azureOrganizationMinimumVersion);
-  const azureAccountTypeOptions = getAzureAccountTypeOptions(isAzureOrganizationDisabled);
+  const { azurePolicyType, azureOrganizationEnabled } = useCloudSetup();
+  const azureAccountTypeOptions = getAzureAccountTypeOptions(!azureOrganizationEnabled);
   const isAgentless = setupTechnology === SetupTechnology.AGENTLESS;
 
   if (!getAzureAccountType(input)) {
     updatePolicy({
       updatedPolicy: updatePolicyWithInputs(newPolicy, azurePolicyType, {
         'azure.account_type': {
-          value: isAzureOrganizationDisabled ? AZURE_SINGLE_ACCOUNT : AZURE_ORGANIZATION_ACCOUNT,
+          value: azureOrganizationEnabled ? AZURE_ORGANIZATION_ACCOUNT : AZURE_SINGLE_ACCOUNT,
           type: 'text',
         },
         'azure.credentials.type': {

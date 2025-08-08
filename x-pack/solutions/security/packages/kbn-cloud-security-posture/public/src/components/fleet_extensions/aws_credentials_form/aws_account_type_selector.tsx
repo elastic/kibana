@@ -7,8 +7,6 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import semverCompare from 'semver/functions/compare';
-import semverValid from 'semver/functions/valid';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
@@ -67,17 +65,11 @@ export const AwsAccountTypeSelect = ({
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
-  const { awsOrganizationMinimumVersion, awsPolicyType } = useCloudSetup();
-  // This will disable the aws org option for any version below 1.5.0-preview20 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
-  const isValidSemantic = semverValid(packageInfo.version);
-  const isAwsOrgDisabled =
-    isValidSemantic && awsOrganizationMinimumVersion
-      ? semverCompare(packageInfo.version, awsOrganizationMinimumVersion) < 0
-      : true;
+  const { awsOrganizationEnabled, awsPolicyType } = useCloudSetup();
 
   const awsAccountTypeOptions = useMemo(
-    () => getAwsAccountTypeOptions(isAwsOrgDisabled),
-    [isAwsOrgDisabled]
+    () => getAwsAccountTypeOptions(!awsOrganizationEnabled),
+    [awsOrganizationEnabled]
   );
 
   useEffect(() => {
@@ -89,7 +81,7 @@ export const AwsAccountTypeSelect = ({
 
           {
             'aws.account_type': {
-              value: isAwsOrgDisabled ? AWS_SINGLE_ACCOUNT : AWS_ORGANIZATION_ACCOUNT,
+              value: awsOrganizationEnabled ? AWS_SINGLE_ACCOUNT : AWS_ORGANIZATION_ACCOUNT,
               type: 'text',
             },
           }
@@ -108,7 +100,7 @@ export const AwsAccountTypeSelect = ({
         />
       </EuiText>
       <EuiSpacer size="l" />
-      {isAwsOrgDisabled && (
+      {!awsOrganizationEnabled && (
         <>
           <EuiCallOut color="warning">
             <FormattedMessage

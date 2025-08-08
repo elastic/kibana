@@ -11,9 +11,6 @@ import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import semverValid from 'semver/functions/valid';
-import semverCoerce from 'semver/functions/coerce';
-import semverLt from 'semver/functions/lt';
 import { getAzureCredentialsFormManualOptions } from './get_azure_credentials_form_options';
 import { useAzureCredentialsForm } from './azure_hooks';
 import { updatePolicyWithInputs } from '../utils';
@@ -192,9 +189,6 @@ const TemporaryManualSetup = ({ documentationLink }: { documentationLink: string
   );
 };
 
-const AZURE_MINIMUM_PACKAGE_VERSION = '1.6.0';
-const AZURE_MANUAL_FIELDS_PACKAGE_VERSION = '1.7.0';
-
 interface AzureCredentialsFormProps {
   newPolicy: NewPackagePolicy;
   input: NewPackagePolicyInput;
@@ -230,34 +224,23 @@ export const AzureCredentialsForm = ({
     updatePolicy,
     isValid,
   });
-  const { azurePolicyType } = useCloudSetup();
+  const { azurePolicyType, azureEnabled, azureManualFieldsEnabled } = useCloudSetup();
 
   if (!setupFormat) {
     onSetupFormatChange(AZURE_SETUP_FORMAT.ARM_TEMPLATE);
   }
 
-  const packageSemanticVersion = semverValid(packageInfo.version);
-  const cleanPackageVersion = semverCoerce(packageSemanticVersion) || '';
-  const isPackageVersionValidForAzure = !semverLt(
-    cleanPackageVersion,
-    AZURE_MINIMUM_PACKAGE_VERSION
-  );
-  const isPackageVersionValidForManualFields = !semverLt(
-    cleanPackageVersion,
-    AZURE_MANUAL_FIELDS_PACKAGE_VERSION
-  );
-
   if (
     isValidAzureRef.current &&
     isValid &&
-    !isPackageVersionValidForAzure &&
+    !azureEnabled &&
     setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE
   ) {
     isValidAzureRef.current = false;
     updatePolicy({ updatedPolicy: newPolicy, isValid: false });
   }
 
-  if (!isPackageVersionValidForAzure) {
+  if (!azureEnabled) {
     return (
       <>
         <EuiSpacer size="l" />
@@ -289,10 +272,10 @@ export const AzureCredentialsForm = ({
       {setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && (
         <ArmTemplateSetup hasArmTemplateUrl={hasArmTemplateUrl} input={input} />
       )}
-      {setupFormat === AZURE_SETUP_FORMAT.MANUAL && !isPackageVersionValidForManualFields && (
+      {setupFormat === AZURE_SETUP_FORMAT.MANUAL && !azureManualFieldsEnabled && (
         <TemporaryManualSetup documentationLink={documentationLink} />
       )}
-      {setupFormat === AZURE_SETUP_FORMAT.MANUAL && isPackageVersionValidForManualFields && (
+      {setupFormat === AZURE_SETUP_FORMAT.MANUAL && azureManualFieldsEnabled && (
         <>
           <AzureCredentialTypeSelector
             type={azureCredentialsType}
