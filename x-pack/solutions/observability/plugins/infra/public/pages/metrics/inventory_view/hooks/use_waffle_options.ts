@@ -114,10 +114,12 @@ export const useWaffleOptions = () => {
   const previousViewId = useRef<string | undefined>(currentView?.id);
   useEffect(() => {
     if (currentView && currentView.id !== previousViewId.current) {
-      setUrlState(mapInventoryViewToState(currentView));
+      const state = mapInventoryViewToState(currentView);
+      updateTopbarMenuVisibilityBySchema(state.preferredSchema);
+      setUrlState(state);
       previousViewId.current = currentView.id;
     }
-  }, [currentView, setUrlState]);
+  }, [currentView, setUrlState, updateTopbarMenuVisibilityBySchema]);
 
   const changeMetric = useCallback(
     (metric: SnapshotMetricInput) => setUrlState((previous) => ({ ...previous, metric })),

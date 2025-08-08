@@ -181,6 +181,8 @@ export const useUnifiedSearch = () => {
       queryStringService.setQuery(searchCriteria.query);
     }
 
+    updateTopbarMenuVisibilityBySchema(searchCriteria.preferredSchema);
+
     try {
       // Validates the "query" object from the URL state
       if (searchCriteria.query) {
