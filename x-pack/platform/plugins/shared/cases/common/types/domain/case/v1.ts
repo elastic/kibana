@@ -138,8 +138,6 @@ export const CaseAttributesRt = rt.intersection([
   ),
 ]);
 
-const CaseMetadataRt = rt.record(rt.string, rt.unknown);
-
 export const CaseRt = rt.intersection([
   CaseAttributesRt,
   rt.strict({
@@ -151,11 +149,6 @@ export const CaseRt = rt.intersection([
   rt.exact(
     rt.partial({
       comments: rt.array(AttachmentRt),
-    })
-  ),
-  rt.exact(
-    rt.partial({
-      metadata: CaseMetadataRt,
     })
   ),
 ]);
@@ -196,4 +189,4 @@ export type AttachmentTotals = rt.TypeOf<typeof AttachmentTotalsRt>;
 export type CaseBaseOptionalFields = rt.TypeOf<typeof CaseBaseOptionalFieldsRt>;
 export type SimilarCase = rt.TypeOf<typeof SimilarCaseRt>;
 export type SimilarCases = SimilarCase[];
-export type CaseMetadata = rt.TypeOf<typeof CaseMetadataRt>;
+export type CaseMetadata = Record<string, string[]>;

@@ -55,24 +55,26 @@ export const getAlertMetadataFromComments = async (
     return [];
   });
 
-  const metadata: { tags: Set<string>; [key: string]: Set<unknown> } = { tags: new Set() };
-
   const alertsDocs = await getAlerts(alertInfo, clientArgs);
 
-  for (const alert of alertsDocs) {
-    (alert[TAGS] ?? []).forEach((tag) => metadata.tags.add(tag));
-    const grouping = alert[ALERT_GROUPING];
-    if (grouping) {
-      const flat = flattenObject(grouping);
-      for (const [key, value] of Object.entries(flat)) {
-        if (!(key in metadata)) {
-          metadata[key] = new Set([value]);
-        } else {
-          metadata[key].add(value);
-        }
+  const metadata = alertsDocs.reduce<Record<string, Set<string>>>(
+    (acc, alert) => {
+      const { [TAGS]: tags = [], [ALERT_GROUPING]: grouping } = alert;
+
+      tags.forEach((t) => {
+        acc.tags.add(t);
+      });
+
+      if (grouping) {
+        Object.entries(flattenObject(grouping)).forEach(([k, v]) => {
+          if (typeof v !== 'string') return;
+          (acc[k] ??= new Set()).add(v);
+        });
       }
-    }
-  }
+      return acc;
+    },
+    { tags: new Set() }
+  );
 
   return Object.fromEntries(
     Object.entries(metadata).map(([key, value]) => [key, Array.from(value)])
