@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { termQuery, rangeQuery, termsQuery, existsQuery } from '@kbn/observability-plugin/server';
+import { termQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_ID,
-  PARENT_ID,
   SERVICE_NAME,
-  SPAN_NAME,
+  SPAN_ID,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
   TRACE_ID,
+  TRANSACTION_ID,
+  SPAN_NAME,
+  SERVICE_NODE_NAME,
+  AGENT_NAME,
+  PARENT_ID,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '@kbn/apm-types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 
@@ -71,20 +76,31 @@ export async function getExitSpans({
         },
       },
     },
+    fields: [
+      SERVICE_NAME,
+      SPAN_ID,
+      SPAN_TYPE,
+      SPAN_SUBTYPE,
+      TRACE_ID,
+      TRANSACTION_ID,
+      SPAN_NAME,
+      SERVICE_NODE_NAME,
+      AGENT_NAME,
+    ],
   });
 
   const apmExitSpans =
     response?.aggregations?.destination_services?.buckets?.map((item: any) => {
-      const doc = item?.sample_docs?.hits?.hits?.[0]?._source;
+      const fields = item?.sample_docs?.hits?.hits?.[0]?.fields;
       return {
-        destinationService: doc?.service?.name ?? '',
-        spanSubType: doc?.span?.subtype ?? '',
-        spanId: doc?.span?.id ?? '',
-        spanType: doc?.span?.type ?? '',
-        transactionId: doc?.transaction?.id ?? '',
-        serviceNodeName: doc?.service?.node?.name ?? '',
-        traceId: doc?.trace?.id ?? '',
-        agentName: doc?.agent?.name ?? '',
+        destinationService: fields[SERVICE_NAME] ?? '',
+        spanSubType: fields[SPAN_SUBTYPE] ?? '',
+        spanId: fields[SPAN_ID] ?? '',
+        spanType: fields[SPAN_TYPE] ?? '',
+        transactionId: fields[TRANSACTION_ID] ?? '',
+        serviceNodeName: fields[SERVICE_NODE_NAME] ?? '',
+        traceId: fields[TRACE_ID] ?? '',
+        agentName: fields[AGENT_NAME] ?? '',
         docCount: item?.doc_count ?? 0,
         isOtel: false,
       };
@@ -112,7 +128,10 @@ export async function getSourceSpanIds({
   end: number;
   sourceNode: string;
   traceIds: string[];
-}) {
+}): Promise<{
+  spanIds: string[];
+  sourceSpanIdsRawResponse: ESSearchResponse<unknown, ESSearchRequest>;
+}> {
   const response = await apmEventClient.search('diagnostics_get_source_node_span_samples', {
     apm: {
       events: [ProcessorEvent.span],
@@ -138,21 +157,19 @@ export async function getSourceSpanIds({
           top_span_ids: {
             top_hits: {
               size: 10,
-              _source: {
-                include: [SPAN_ID],
-              },
             },
           },
         },
       },
     },
+    fields: [SPAN_ID],
   });
 
   return {
     sourceSpanIdsRawResponse: response,
     spanIds:
       response.aggregations?.sample_docs?.buckets?.flatMap((bucket) =>
-        bucket.top_span_ids.hits.hits.map((hit) => hit._source.span.id)
+        bucket.top_span_ids.hits.hits.flatMap((hit) => hit.fields?.[SPAN_ID] ?? [])
       ) ?? [],
   };
 }
@@ -189,12 +206,10 @@ export async function getDestinationParentIds({
       sample_docs: {
         top_hits: {
           size: 5,
-          _source: {
-            includes: [PARENT_ID, SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE],
-          },
         },
       },
     },
+    fields: [PARENT_ID, SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE],
   });
 
   return { rawResponse: response, hasParent: response.hits.hits.length > 0 };
