@@ -14,7 +14,7 @@ import moment from 'moment';
 import pLimit from 'p-limit';
 import { Observable } from 'rxjs';
 import { v4 } from 'uuid';
-import { kqlQuery, rangeQuery } from '../../routes/internal/esql/query_helpers';
+import { kqlQuery, rangeQuery, isKqlQueryValid } from '../../routes/internal/esql/query_helpers';
 import INSTRUCTION from './prompts/generate_queries_instruction.text';
 import KQL_GUIDE from './prompts/kql_guide.text';
 
@@ -163,8 +163,7 @@ Quality over quantity - aim for queries that have high signal-to-noise ratio.
           } as const,
         });
 
-        const queries = output.queries;
-
+        const queries = output.queries.filter((query) => isKqlQueryValid(query.kql));
         if (!queries.length) {
           return [];
         }
@@ -187,7 +186,10 @@ Quality over quantity - aim for queries that have high signal-to-noise ratio.
                       },
                     },
                   })
-                  .then((response) => ({ ...query, count: response.hits.total.value }));
+                  .then((response) => ({ ...query, count: response.hits.total.value }))
+                  .catch(() => {
+                    return { ...query, count: 0 };
+                  });
               })
             )
           ),
@@ -201,11 +203,11 @@ Quality over quantity - aim for queries that have high signal-to-noise ratio.
             .then((response) => response.hits.total.value),
         ]);
 
-        if (queries.length) {
+        if (queriesWithCounts.length) {
           logger.debug(() => {
-            return `Ran queries:
-      
-      ${queriesWithCounts.map((query) => `- ${query.kql}: ${query.count}`).join('\n')}`;
+            return `Ran queries: ${queriesWithCounts
+              .map((query) => `- ${query.kql}: ${query.count}`)
+              .join('\n')}`;
           });
         }
 
@@ -275,14 +277,12 @@ ${JSON.stringify(
           if (!query) {
             return [];
           }
+
           return { title: query.title, kql: query.kql, count: query.count };
         });
 
         logger.debug(() => {
-          return `Selected queries:
-    
-    ${selected.map((query) => `- ${query.kql}`).join('\n')}
-    `;
+          return `Selected queries: ${selected.map((query) => `- ${query.kql}`).join('\n')}`;
         });
 
         subscriber.next(selected);

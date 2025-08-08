@@ -80,7 +80,7 @@ export function ManualFlowForm({
 
       <EuiForm fullWidth>
         <EuiFormRow
-          {...validation.title}
+          {...(touched.title && { ...validation.title })}
           label={
             <EuiFormLabel>
               {i18n.translate(
@@ -116,7 +116,7 @@ export function ManualFlowForm({
               )}
             </EuiFormLabel>
           }
-          {...validation.kql}
+          {...(touched.kql && { ...validation.kql })}
         >
           <UncontrolledStreamsAppSearchBar
             query={
