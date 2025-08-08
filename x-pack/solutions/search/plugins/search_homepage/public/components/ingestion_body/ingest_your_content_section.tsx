@@ -97,12 +97,14 @@ export const IngestYourContentSection = () => {
             <EuiFlexItem>
               <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
                 <EuiText size="s">
-                  <strong>
-                    <FormattedMessage
-                      id="xpack.xpack.searchHomepage.ingestContentSection.sampleData.label"
-                      defaultMessage="Want to try sample data?"
-                    />
-                  </strong>
+                  <p>
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.xpack.searchHomepage.ingestContentSection.sampleData.label"
+                        defaultMessage="Want to try sample data?"
+                      />
+                    </strong>
+                  </p>
                 </EuiText>
                 <SampleDataActionButton
                   clickEvent={AnalyticsEvents.ingestVariantInstallSampleDataClick}
