@@ -63,7 +63,6 @@ export const POLICY_SELECT_DESCRIPTION = i18n.translate(
   }
 );
 
-// Field definitions (mirroring TA structure)
 export const CONDITION_FIELD_TITLE: { [K in TrustedDeviceConditionEntryField]: string } = {
   [TrustedDeviceConditionEntryField.USERNAME]: i18n.translate(
     'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.username',
@@ -130,7 +129,6 @@ export const CONDITION_FIELD_DESCRIPTION: { [K in TrustedDeviceConditionEntryFie
   ),
 };
 
-// Operator definitions (mirroring TA structure)
 export const OPERATOR_TITLES = {
   is: i18n.translate('xpack.securitySolution.trustedDevices.card.operator.is', {
     defaultMessage: 'is',
@@ -190,7 +188,6 @@ export const INPUT_ERRORS = {
   ),
 };
 
-// Validation warnings
 export const VALIDATION_WARNINGS = {
   performanceWildcard: i18n.translate(
     'xpack.securitySolution.trustedDevices.form.warnings.performanceWildcard',
