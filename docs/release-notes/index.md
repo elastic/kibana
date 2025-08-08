@@ -329,8 +329,8 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 
 **Dashboards and Visualizations**:
 * Fixes an issue with the plus sign `+` not being properly encoded when it's part of a date math expression [#230469]({{kib-pull}}230469).
-* Fixes an issue in Firefox preventing from scrolling in the Lens editor flyout [#228625]({{kib-pull}}228625).
-* Fixes an issue preventing from saving linked TSVB visualizations when changing data view [#228685]({{kib-pull}}228685).
+* Fixes an issue in Firefox preventing you from scrolling in the Lens editor flyout [#228625]({{kib-pull}}228625).
+* Fixes an issue preventing you from saving linked TSVB visualizations when changing data views [#228685]({{kib-pull}}228685).
 * Fixes a console error occurring when adding a Region map visualization to a dashboard [#228669]({{kib-pull}}228669).
 * Fixes an issue with the dashboard toolbar header not correctly staying visible when opening the Dashboards app from some specific sections of the Classic navigation [#229621]({{kib-pull}}229621).
 * Fixes an issue in reports where a PNG or PDF export would offset and clip part of the visualization in Lens [#228603]({{kib-pull}}228603).
