@@ -10,6 +10,7 @@ import * as path from 'path';
 import { parse } from 'url';
 import { discoverKibanaUrl } from '@kbn/kibana-api-cli';
 import { ToolingLog } from '@kbn/tooling-log';
+import type { ScoutTestConfig } from '@kbn/scout';
 
 export async function createDevModeConfig(
   log: ToolingLog,
@@ -24,11 +25,12 @@ export async function createDevModeConfig(
 
     const defaultAuth = parse(discoveredKibanaUrl).auth!;
 
-    const localConfig = {
+    const localConfig: Omit<ScoutTestConfig, 'license' | 'cloudUsersFilePath'> = {
       serverless: false,
       isCloud: false,
       hosts: {
         kibana: discoveredKibanaUrl,
+        elasticsearch: '', // Not used in evals but required for config validation
       },
       auth: {
         username: defaultAuth.split(':')[0],

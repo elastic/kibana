@@ -25,7 +25,6 @@ export const evaluate = base.extend<
       if (isOnechatEnabled) {
         log.info('OneChat API is already enabled');
       } else {
-        // Enable OneChat API only if it's not already enabled
         await fetch('/internal/kibana/settings', {
           method: 'POST',
           body: JSON.stringify({
