@@ -230,7 +230,7 @@ export class WorkflowExecutionRuntimeManager {
     await this.updateWorkflowState(error);
   }
 
-  private async updateWorkflowState(error: any): Promise<void> {
+  private async updateWorkflowState(error?: any): Promise<void> {
     const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
       id: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
