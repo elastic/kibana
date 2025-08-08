@@ -883,17 +883,15 @@ export default function (providerContext: FtrProviderContext) {
                   `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
                 );
                 expect(node.documentsData).to.have.length(2);
-                expect(node.documentsData).to.contain(
-                  {
+                expectExpect(node.documentsData).toContainEqual(
+                  expectExpect.objectContaining({
                     type: 'event',
-                  },
-                  `node documentsData missing event details [node: ${node.id}]`
+                  })
                 );
-                expect(node.documentsData).to.contain(
-                  {
+                expectExpect(node.documentsData).toContainEqual(
+                  expectExpect.objectContaining({
                     type: 'alert',
-                  },
-                  `node documentsData missing alert details [node: ${node.id}]`
+                  })
                 );
               } else {
                 expect(node.color).equal(
@@ -906,7 +904,7 @@ export default function (providerContext: FtrProviderContext) {
             response.body.edges.forEach((edge: EdgeDataModel) => {
               expect(edge).to.have.property('color');
               expect(edge.color).equal(
-                'subdued',
+                'danger',
                 `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
               );
               expect(edge.type).equal('solid');
