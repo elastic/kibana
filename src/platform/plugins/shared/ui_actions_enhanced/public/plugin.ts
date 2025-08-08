@@ -13,9 +13,9 @@ import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { ILicense, LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { createStartServicesGetter, Storage } from '@kbn/kibana-utils-plugin/public';
+import { dynamicActionEnhancement } from '@kbn/ui-actions-enhanced-dynamic-actions-public/src/dynamic_action_enhancement';
 import { UiActionsServiceEnhancements } from './services';
 import { createPublicDrilldownManager, PublicDrilldownManagerComponent } from './drilldowns';
-import { dynamicActionEnhancement } from '../../../../packages/shared/ui-actions-enhanced/dynamic_actions/dynamic_actions_public/src/dynamic_action_enhancement';
 
 interface SetupDependencies {
   embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
