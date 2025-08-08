@@ -25,7 +25,7 @@ const getContainer = () => screen.getByTestId('markdownRenderer');
 // Common malicious patterns for testing
 const MALICIOUS_PATTERNS = {
   SCRIPT_TAG: '<script>alert("XSS")</script>',
-  JAVASCRIPT_PROTOCOL: 'javascript:alert("XSS")',
+  JAVASCRIPT_PROTOCOL: 'javascript:alert("XSS")', // eslint-disable-line no-script-url
   VBSCRIPT_PROTOCOL: 'vbscript:msgbox("XSS")',
   DATA_URL_SCRIPT: 'data:text/html,<script>alert("XSS")</script>',
   ONERROR_ATTRIBUTE: '<img src="x" onerror="alert(\'XSS\')" />',
@@ -61,7 +61,7 @@ describe('Markdown Security', () => {
       renderMarkdown(MALICIOUS_PATTERNS.STYLE_JAVASCRIPT);
 
       const container = getContainer();
-      expect(container.innerHTML).not.toContain('javascript:');
+      expect(container.innerHTML).not.toContain('javascript:'); // eslint-disable-line no-script-url
       expect(container.innerHTML).not.toContain('alert');
     });
   });
@@ -173,7 +173,7 @@ describe('Markdown Security', () => {
 
       const container = getContainer();
       // The javascript: protocol gets URL encoded but is still present
-      expect(container.innerHTML).toContain('javascript:alert(%22XSS%22)');
+      expect(container.innerHTML).toContain('javascript:alert(%22XSS%22)'); // eslint-disable-line no-script-url
       // Verify it doesn't execute by checking no actual script tags exist
       expect(container.querySelectorAll('script')).toHaveLength(0);
     });
