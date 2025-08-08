@@ -65,6 +65,12 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       ...descriptor,
       id: isValidStringConfig(descriptor.id) ? descriptor.id! : uuidv4(),
       indexPatternId: descriptor.indexPatternId!,
+      applyGlobalQuery:
+        typeof descriptor.applyGlobalQuery !== 'undefined' ? descriptor.applyGlobalQuery : true,
+      applyGlobalTime:
+        typeof descriptor.applyGlobalTime !== 'undefined' ? descriptor.applyGlobalTime : true,
+      applyForceRefresh:
+        typeof descriptor.applyForceRefresh !== 'undefined' ? descriptor.applyForceRefresh : true,
     } as AbstractESSourceDescriptor;
   }
 
