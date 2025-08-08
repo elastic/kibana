@@ -7,19 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ILicense } from '@kbn/licensing-types';
 import { setup } from './helpers';
 
 describe('Command license validation', () => {
   it('Should allows licensed commands when user has required license', async () => {
     const { expectErrors, callbacks } = await setup();
 
-    callbacks.getLicense = jest.fn(
-      async () =>
-        ({
-          hasAtLeast: (license?: string) => license?.toLowerCase() === 'platinum',
-        } as ILicense)
-    );
+    callbacks.getLicense = jest.fn(async () => ({
+      hasAtLeast: (license?: string) => license?.toLowerCase() === 'platinum',
+    }));
 
     await expectErrors('FROM a_index | CHANGE_POINT doubleField', []);
   });
@@ -27,12 +23,9 @@ describe('Command license validation', () => {
   it('should blocks licensed commands when user lacks required license', async () => {
     const { expectErrors, callbacks } = await setup();
 
-    callbacks.getLicense = jest.fn(
-      async () =>
-        ({
-          hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
-        } as ILicense)
-    );
+    callbacks.getLicense = jest.fn(async () => ({
+      hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
+    }));
 
     await expectErrors('FROM a_index | CHANGE_POINT doubleField', [
       'CHANGE_POINT requires a PLATINUM license.',

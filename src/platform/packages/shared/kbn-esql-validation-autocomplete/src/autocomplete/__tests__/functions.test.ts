@@ -12,7 +12,6 @@ import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_funct
 import { getFunctionSignaturesByReturnType, setup, createCustomCallbackMocks } from './helpers';
 import { uniq } from 'lodash';
 import { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { ILicense } from '@kbn/licensing-types';
 
 describe('functions arg suggestions', () => {
   afterEach(() => {
@@ -343,7 +342,7 @@ describe('functions arg suggestions', () => {
         getLicense: jest.fn(async () =>
           Promise.resolve({
             hasAtLeast: (license: string) => license.toLowerCase() !== 'platinum',
-          } as ILicense)
+          })
         ),
       };
 
@@ -367,7 +366,7 @@ describe('functions arg suggestions', () => {
         getLicense: jest.fn(async () =>
           Promise.resolve({
             hasAtLeast: (license: string) => license.toLowerCase() === 'platinum',
-          } as ILicense)
+          })
         ),
       };
 
@@ -391,7 +390,7 @@ describe('functions arg suggestions', () => {
         getLicense: jest.fn(async () =>
           Promise.resolve({
             hasAtLeast: (license: string) => license.toLowerCase() !== 'platinum',
-          } as ILicense)
+          })
         ),
       };
 
@@ -418,7 +417,7 @@ describe('functions arg suggestions', () => {
         getLicense: jest.fn(async () =>
           Promise.resolve({
             hasAtLeast: (license: string) => license.toLowerCase() === 'platinum',
-          } as ILicense)
+          })
         ),
       };
 
@@ -446,7 +445,7 @@ describe('functions arg suggestions', () => {
         getLicense: jest.fn(async () =>
           Promise.resolve({
             hasAtLeast: (license: string) => license.toLowerCase() === 'platinum',
-          } as ILicense)
+          })
         ),
         getActiveProduct: jest.fn(
           () => ({ type: 'observability', tier: 'complete' } as PricingProduct)
@@ -469,7 +468,7 @@ describe('functions arg suggestions', () => {
         getLicense: jest.fn(async () =>
           Promise.resolve({
             hasAtLeast: (license: string) => license.toLowerCase() === 'basic',
-          } as ILicense)
+          })
         ),
         getActiveProduct: jest.fn(
           () => ({ type: 'observability', tier: 'complete' } as PricingProduct)
@@ -492,7 +491,7 @@ describe('functions arg suggestions', () => {
         getLicense: jest.fn(async () =>
           Promise.resolve({
             hasAtLeast: (license: string) => license.toLowerCase() === 'platinum',
-          } as ILicense)
+          })
         ),
         getActiveProduct: jest.fn(
           () => ({ type: 'observability', tier: 'logs_essentials' } as PricingProduct)
@@ -516,7 +515,7 @@ describe('functions arg suggestions', () => {
         getLicense: jest.fn(async () =>
           Promise.resolve({
             hasAtLeast: (license: string) => license.toLowerCase() === 'platinum',
-          } as ILicense)
+          })
         ),
         getActiveProduct: jest.fn(
           () =>
