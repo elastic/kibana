@@ -19,26 +19,25 @@ export async function createDevModeConfig(
   const evalsDir = path.join(baseServersConfigDir, 'evals');
   fs.mkdirSync(evalsDir, { recursive: true });
 
-  const localJsonPath = path.join(evalsDir, 'local.json');
-  if (!fs.existsSync(localJsonPath)) {
-    const discoveredKibanaUrl = await discoverKibanaUrl({ log });
+  const kibanaBaseUrl = process.env.KIBANA_BASE_URL;
 
-    const defaultAuth = parse(discoveredKibanaUrl).auth!;
+  const discoveredKibanaUrl = await discoverKibanaUrl({ baseUrl: kibanaBaseUrl, log });
 
-    const localConfig: Omit<ScoutTestConfig, 'license' | 'cloudUsersFilePath'> = {
-      serverless: false,
-      isCloud: false,
-      hosts: {
-        kibana: discoveredKibanaUrl,
-        elasticsearch: '', // Not used in evals but required for config validation
-      },
-      auth: {
-        username: defaultAuth.split(':')[0],
-        password: defaultAuth.split(':')[1],
-      },
-    };
-    fs.writeFileSync(localJsonPath, JSON.stringify(localConfig, null, 2));
-  }
+  const defaultAuth = parse(discoveredKibanaUrl).auth!;
+
+  const localConfig: Omit<ScoutTestConfig, 'license' | 'cloudUsersFilePath'> = {
+    serverless: false,
+    isCloud: false,
+    hosts: {
+      kibana: discoveredKibanaUrl,
+      elasticsearch: '', // Not used in evals but required for config validation
+    },
+    auth: {
+      username: defaultAuth.split(':')[0],
+      password: defaultAuth.split(':')[1],
+    },
+  };
+  fs.writeFileSync(path.join(evalsDir, 'local.json'), JSON.stringify(localConfig, null, 2));
 
   return evalsDir;
 }
