@@ -7,4 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MUSTACHE_REGEX = /\{\{\s*(.*?)\s*\}\}/g;
+export interface StepContext<T extends Record<string, any> = Record<string, any>> {
+  output: T;
+}
+
+export interface CurrentStepContext<
+  T extends Record<string, any> = Record<string, any>,
+  S extends Record<string, any> = Record<string, any>
+> {
+  foreach?: {
+    item: T;
+  };
+  consts: Record<string, string | number | boolean | any[] | Record<string, any> | {}>;
+  steps: Record<string, StepContext<S>>;
+}
