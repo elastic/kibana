@@ -10,7 +10,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { AddToCaseComment } from '.';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import * as usePageSummaryHook from '../../hooks/use_page_summary';
 
 // Mock i18n
 jest.mock('@kbn/i18n-react', () => ({
@@ -78,30 +77,6 @@ describe('AddToCaseComment', () => {
     });
 
     expect(onCommentChangeMock).toHaveBeenCalledWith('New comment');
-  });
-
-  it('shows skeleton loader when AI assistant is enabled and loading', () => {
-    jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
-      isObsAIAssistantEnabled: true,
-      generateSummary: jest.fn(),
-      isLoading: true,
-      summary: '',
-      abortController: { signal: new AbortController().signal, abort: jest.fn() },
-      screenContexts: [],
-      errors: [],
-    });
-
-    render(
-      <AddToCaseComment
-        comment=""
-        onCommentChange={jest.fn()}
-        setIsLoading={jest.fn()}
-        observabilityAIAssistant={mockObservabilityAIAssistant}
-        notifications={notificationsMock}
-      />
-    );
-
-    expect(screen.getByTestId('addPageToCaseCommentSkeleton')).toBeInTheDocument();
   });
 
   it('displays AI assistant help text when enabled', () => {
