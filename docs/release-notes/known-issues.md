@@ -14,7 +14,7 @@ Applies to: {{stack}} 9.1.0, 9.1.1
 
 **Details**
 
-After creating a report in a non-default {{kib}} space, the document exists in the `.kibana-reporting` index but can't be retrieved by the jobs or list API.
+After creating a report in a non-default {{kib}} space, the document exists in the `.kibana-reporting` index but isn't shown in the Reporting UI.
 
 ::::
 
