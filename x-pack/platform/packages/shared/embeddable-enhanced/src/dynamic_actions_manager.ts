@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import {
-  apiHasUniqueId,
+import type {
   EmbeddableApiContext,
   SerializedPanelState,
   StateComparators,
 } from '@kbn/presentation-publishing';
-import {
+import type {
   AdvancedUiActionsStart,
-  UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   DynamicActionsState,
 } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { apiHasUniqueId } from '@kbn/presentation-publishing';
+import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, map } from 'rxjs';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { DynamicActionStorage, type DynamicActionStorageApi } from './dynamic_action_storage';
+
+import type { DynamicActionStorageApi } from './dynamic_action_storage';
+import type { DynamicActionsSerializedState, EmbeddableDynamicActionsManager } from './types';
+import { DynamicActionStorage } from './dynamic_action_storage';
 import { getDynamicActionsState } from './get_dynamic_actions_state';
-import { DynamicActionsSerializedState, EmbeddableDynamicActionsManager } from './types';
 
 export interface EmbeddableDynamicActionsServices {
   embeddable: EmbeddableStart;
