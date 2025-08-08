@@ -11,7 +11,7 @@ import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } 
 import { Subject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiDelayRender, EuiSpacer } from '@elastic/eui';
+import { EuiDelayRender, EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableComponentProps,
@@ -31,19 +31,20 @@ import { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import { Histogram } from './histogram';
 import {
-  UnifiedHistogramSuggestionContext,
   UnifiedHistogramBreakdownContext,
+  UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
   UnifiedHistogramInput$,
   UnifiedHistogramInputMessage,
+  UnifiedHistogramMode,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
-  UnifiedHistogramBucketInterval,
+  UnifiedHistogramSuggestionContext,
+  UnifiedHistogramSuggestionType,
 } from '../../types';
-import { UnifiedHistogramSuggestionType } from '../../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { TimeIntervalSelector } from './time_interval_selector';
 import { useTotalHits } from './hooks/use_total_hits';
@@ -60,6 +61,7 @@ import { useStableCallback } from '../../hooks/use_stable_callback';
 import { buildBucketInterval } from './utils/build_bucket_interval';
 
 export interface UnifiedHistogramChartProps {
+  mode?: UnifiedHistogramMode;
   abortController?: AbortController;
   isChartAvailable: boolean;
   hiddenPanel?: boolean;
@@ -95,6 +97,7 @@ const RequestStatusError: typeof RequestStatus.ERROR = 2;
 const HistogramMemoized = memo(Histogram);
 
 export function UnifiedHistogramChart({
+  mode = UnifiedHistogramMode.default,
   isChartAvailable,
   services,
   dataView,
@@ -148,11 +151,12 @@ export function UnifiedHistogramChart({
   });
 
   useTotalHits({
+    // keep this hook if we want to support the new metrics view in KQL mode too
     services,
     dataView,
     request,
     hits,
-    chartVisible,
+    chartVisible: mode === UnifiedHistogramMode.metrics ? false : chartVisible, // `false` for metrics mode here will trigger the fetch of total hits in a separate request
     filters,
     query,
     getTimeRange,
@@ -304,6 +308,8 @@ export function UnifiedHistogramChart({
     });
   }
 
+  // TODO: modify and possibly split this component to allow for metrics mode
+
   return (
     <EuiFlexGroup
       {...a11yCommonProps}
@@ -349,11 +355,17 @@ export function UnifiedHistogramChart({
                   />
                 )}
               </EuiFlexItem>
-              {chartVisible && !isPlainRecord && !!onTimeIntervalChange && (
-                <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-                  <TimeIntervalSelector chart={chart} onTimeIntervalChange={onTimeIntervalChange} />
-                </EuiFlexItem>
-              )}
+              {mode === UnifiedHistogramMode.default &&
+                chartVisible &&
+                !isPlainRecord &&
+                !!onTimeIntervalChange && (
+                  <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+                    <TimeIntervalSelector
+                      chart={chart}
+                      onTimeIntervalChange={onTimeIntervalChange}
+                    />
+                  </EuiFlexItem>
+                )}
               <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
                 <div>
                   {chartVisible && breakdown && (
@@ -368,7 +380,7 @@ export function UnifiedHistogramChart({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {chartVisible && actions.length > 0 && (
+          {mode === UnifiedHistogramMode.default && chartVisible && actions.length > 0 && (
             <EuiFlexItem grow={false}>
               <IconButtonGroup
                 legend={i18n.translate('unifiedHistogram.chartActionsGroupLegend', {
@@ -403,7 +415,7 @@ export function UnifiedHistogramChart({
                 <EuiProgress size="xs" color="accent" position="absolute" />
               </EuiDelayRender>
             )}
-            {lensPropsContext && (
+            {mode === UnifiedHistogramMode.default && lensPropsContext && (
               <HistogramMemoized
                 services={services}
                 dataView={dataView}
@@ -416,31 +428,39 @@ export function UnifiedHistogramChart({
                 {...lensPropsContext}
               />
             )}
+            {
+              mode === UnifiedHistogramMode.metrics &&
+                'metrics charts here' /* TODO: include metrics components here  */
+            }
           </section>
           <EuiSpacer size="s" />
         </EuiFlexItem>
       )}
-      {canSaveVisualization && isSaveModalVisible && visContext.attributes && (
-        <LensSaveModalComponent
-          initialInput={removeTablesFromLensAttributes(visContext.attributes)}
-          onSave={() => {}}
-          onClose={() => setIsSaveModalVisible(false)}
-          isSaveable={false}
-        />
-      )}
-      {isFlyoutVisible && !!visContext && !!lensVisServiceCurrentSuggestionContext && (
-        <ChartConfigPanel
-          services={services}
-          visContext={visContext}
-          lensAdapters={lensAdapters}
-          dataLoading$={dataLoading$}
-          isFlyoutVisible={isFlyoutVisible}
-          setIsFlyoutVisible={setIsFlyoutVisible}
-          isPlainRecord={isPlainRecord}
-          query={query}
-          currentSuggestionContext={lensVisServiceCurrentSuggestionContext}
-          onSuggestionContextEdit={onSuggestionContextEdit}
-        />
+      {mode === UnifiedHistogramMode.default && (
+        <>
+          {canSaveVisualization && isSaveModalVisible && visContext.attributes && (
+            <LensSaveModalComponent
+              initialInput={removeTablesFromLensAttributes(visContext.attributes)}
+              onSave={() => {}}
+              onClose={() => setIsSaveModalVisible(false)}
+              isSaveable={false}
+            />
+          )}
+          {isFlyoutVisible && !!visContext && !!lensVisServiceCurrentSuggestionContext && (
+            <ChartConfigPanel
+              services={services}
+              visContext={visContext}
+              lensAdapters={lensAdapters}
+              dataLoading$={dataLoading$}
+              isFlyoutVisible={isFlyoutVisible}
+              setIsFlyoutVisible={setIsFlyoutVisible}
+              isPlainRecord={isPlainRecord}
+              query={query}
+              currentSuggestionContext={lensVisServiceCurrentSuggestionContext}
+              onSuggestionContextEdit={onSuggestionContextEdit}
+            />
+          )}
+        </>
       )}
     </EuiFlexGroup>
   );

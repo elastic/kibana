@@ -177,3 +177,8 @@ export interface UnifiedHistogramVisContext {
   requestData: LensRequestData;
   suggestionType: UnifiedHistogramSuggestionType;
 }
+
+export enum UnifiedHistogramMode {
+  default = 'default',
+  metrics = 'metrics',
+}
