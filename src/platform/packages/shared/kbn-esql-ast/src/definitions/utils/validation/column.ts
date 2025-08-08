@@ -36,13 +36,13 @@ export class ColumnValidator {
   }
 
   private get exists(): boolean {
-    if (this.commandName === 'row') {
-      if (!this.context.userDefinedColumns.has(this.column.name) && !isParametrized(this.column)) {
-        return false;
-      }
-    } else if (!getColumnExists(this.column, this.context) && !isParametrized(this.column)) {
+    if (
+      !isParametrized(this.column) &&
+      !getColumnExists(this.column, this.context, this.commandName === 'row')
+    ) {
       return false;
     }
+
     return true;
   }
 }
