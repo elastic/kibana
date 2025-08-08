@@ -11,11 +11,20 @@ import { countBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useToolsPreferences } from '../../../context/tools_preferences_provider';
 import { useToolTags } from '../../../hooks/tools/use_tool_tags';
-import { useToasts } from '../../../hooks/use_toasts';
-import { labels } from '../../../utils/i18n';
-import { ToolFilterOption } from './tools_table_filter_option';
 import { useOnechatTools } from '../../../hooks/tools/use_tools';
 import { useQueryState } from '../../../hooks/use_query_state';
+import { labels } from '../../../utils/i18n';
+import { ToolFilterOption } from './tools_table_filter_option';
+
+const toValidSearchQuery = (query: string | null): string => {
+  try {
+    const queryString = query ?? '';
+    EuiSearchBar.Query.parse(queryString);
+    return queryString;
+  } catch (error) {
+    return '';
+  }
+};
 
 const getToolsTableSearchConfig = ({
   includeSystemTools,
@@ -86,12 +95,14 @@ export interface ToolsTableSearch {
 }
 
 export const useToolsTableSearch = (): ToolsTableSearch => {
-  const { addErrorToast } = useToasts();
   const { includeSystemTools } = useToolsPreferences();
   const { tools } = useOnechatTools({ includeSystemTools });
   const { tags } = useToolTags({ includeSystemTools });
   const [results, setResults] = useState<ToolDefinitionWithSchema[]>(tools);
-  const [searchQuery, setSearchQuery] = useQueryState('search', { defaultValue: '' });
+  const [searchQuery, setSearchQuery] = useQueryState('search', {
+    defaultValue: '',
+    parse: toValidSearchQuery,
+  });
 
   useEffect(() => {
     setResults(tools);
@@ -100,10 +111,6 @@ export const useToolsTableSearch = (): ToolsTableSearch => {
   const handleChange = useCallback(
     ({ query, queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {
       if (searchError) {
-        addErrorToast({
-          title: labels.tools.searchToolsErrorToast,
-          text: searchError.message,
-        });
         return;
       }
 
@@ -116,7 +123,7 @@ export const useToolsTableSearch = (): ToolsTableSearch => {
       setSearchQuery(queryText);
       setResults(newItems);
     },
-    [tools, addErrorToast, setSearchQuery]
+    [tools, setSearchQuery]
   );
 
   const matchesByType = useMemo(() => {

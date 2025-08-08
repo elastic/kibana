@@ -13,16 +13,14 @@ import { Primitive } from 'utility-types';
 export interface UseQueryStateOptions<T> {
   defaultValue?: T;
   historyMode?: 'replace' | 'push';
+  parse?: (value: T | null) => T;
 }
 
 export interface SetQueryStateOptions {
   historyMode?: 'replace' | 'push';
 }
 
-export type SetQueryState<T> = (
-  nextValue: T | ((previousValue: T) => T),
-  setOptions?: SetQueryStateOptions
-) => Promise<void>;
+export type SetQueryState<T> = (nextValue: T, setOptions?: SetQueryStateOptions) => Promise<void>;
 
 export interface UseQueryState {
   <T>(key: string, options?: UseQueryStateOptions<T> & { defaultValue: undefined }): [
@@ -39,11 +37,12 @@ export interface UseQueryState {
  * @param key - The query parameter key
  * @param options.defaultValue - Default value when no state exists in URL
  * @param options.historyMode - 'replace' or 'push' for URL updates (default: 'replace')
+ * @param options.parse - Function to parse the value from the URL
  * @returns [state, setState]
  */
-export const useQueryState: UseQueryState = <T extends Primitive | object>(
+export const useQueryState: UseQueryState = <T extends NonNullable<Primitive> | object>(
   key: string,
-  { defaultValue = null, historyMode = 'replace' } = {}
+  { defaultValue, historyMode = 'replace', parse }: UseQueryStateOptions<T> = {}
 ) => {
   const history = useHistory();
   const urlStateRef = useRef<IKbnUrlStateStorage>(
@@ -55,10 +54,11 @@ export const useQueryState: UseQueryState = <T extends Primitive | object>(
   );
 
   const readFromUrl = useCallback(() => {
-    return urlStateRef.current.get<T>(key);
-  }, [key]);
+    const value = urlStateRef.current.get<T>(key);
+    return (parse ? parse(value) : value) ?? defaultValue ?? null;
+  }, [key, parse, defaultValue]);
 
-  const [state, setState] = useState(readFromUrl() ?? defaultValue);
+  const [state, setState] = useState(() => readFromUrl());
 
   const clearQueryParam = useCallback(() => {
     const searchParams = new URLSearchParams(history.location.search);
@@ -69,27 +69,29 @@ export const useQueryState: UseQueryState = <T extends Primitive | object>(
   }, [history, key]);
 
   useEffect(() => {
+    if (!state) {
+      clearQueryParam();
+    }
+  }, [state, clearQueryParam]);
+
+  useEffect(() => {
     const subscription = urlStateRef.current.change$<T>(key).subscribe((value) => {
-      setState(value ?? defaultValue);
+      setState(value);
     });
     return () => subscription.unsubscribe();
   }, [key, defaultValue]);
 
   const setQueryState = useCallback<SetQueryState<T | null>>(
     async (nextValue, setOptions) => {
-      const resolvedValue =
-        typeof nextValue === 'function' ? nextValue(readFromUrl() ?? defaultValue) : nextValue;
-      setState(resolvedValue);
+      setState(nextValue);
 
-      await urlStateRef.current.set(key, resolvedValue, {
-        replace: (setOptions?.historyMode ?? historyMode) !== 'push',
-      });
-
-      if (!resolvedValue) {
-        clearQueryParam();
+      if (nextValue) {
+        await urlStateRef.current.set(key, nextValue, {
+          replace: (setOptions?.historyMode ?? historyMode) !== 'push',
+        });
       }
     },
-    [readFromUrl, clearQueryParam, defaultValue, historyMode, key]
+    [historyMode, key]
   );
 
   return [state, setQueryState] as const;
