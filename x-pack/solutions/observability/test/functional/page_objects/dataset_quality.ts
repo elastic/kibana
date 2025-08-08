@@ -117,8 +117,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     showFullDatasetNamesSwitch: 'button[aria-label="Show full data set names"]',
     showInactiveDatasetsNamesSwitch: 'button[aria-label="Show inactive data sets"]',
     superDatePickerApplyButton: '[data-test-subj="superDatePickerQuickSelectApplyButton"]',
-    qualityIssueDegradedChart: '.euiButtonGroupButton[data-test-subj="degraded"]',
-    qualityIssueFailedChart: '.euiButtonGroupButton[data-test-subj="failed"]',
   };
 
   const testSubjectSelectors = {
@@ -151,6 +149,9 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityDetailsEmptyPromptBody: 'datasetQualityDetailsEmptyPromptBody',
     datasetQualityDatasetHealthKpi: 'datasetQualityDatasetHealthKpi',
     datasetQualityDetailsSummaryKpiValue: 'datasetQualityDetailsSummaryKpiValue',
+    datasetQualityDetailsDegradedSummaryCard:
+      'datasetQualityDetailsSummaryKpiCard-Degraded documents',
+    datasetQualityDetailsFailedSummaryCard: 'datasetQualityDetailsSummaryKpiCard-Failed documents',
     datasetQualityDetailsIntegrationRowIntegration: 'datasetQualityDetailsFieldsList-integration',
     datasetQualityDetailsIntegrationRowVersion: 'datasetQualityDetailsFieldsList-version',
     datasetQualityDetailsLinkToDiscover: 'datasetQualityDetailsLinkToDiscover',
@@ -170,8 +171,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       'datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist',
     datasetQualityDetailsOverviewDegradedFieldToggleSwitch:
       'datasetQualityDetailsOverviewDegradedFieldToggleSwitch',
-    datasetQualityDetailsActionsDropdown: 'datasetQualityDetailsActionsDropdown',
-    openInDiscover: 'openInDiscover',
   };
 
   return {
@@ -440,12 +439,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       return testSubjects.find(testSubjectSelectors.datasetQualityDetailsHeaderButton);
     },
 
-    openDatasetQualityDetailsActionsButton() {
-      return testSubjects.click(testSubjectSelectors.datasetQualityDetailsActionsDropdown);
-    },
-
     getOpenInDiscoverButton() {
-      return testSubjects.find(testSubjectSelectors.openInDiscover);
+      return testSubjects.find(testSubjectSelectors.datasetQualityDetailsLinkToDiscover);
     },
 
     openIntegrationActionsMenu() {
@@ -509,9 +504,9 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     async selectQualityIssueChart(type: 'degraded' | 'failed') {
       const chartSelector =
         type === 'degraded'
-          ? selectors.qualityIssueDegradedChart
-          : selectors.qualityIssueFailedChart;
-      return find.clickByCssSelector(chartSelector);
+          ? testSubjectSelectors.datasetQualityDetailsDegradedSummaryCard
+          : testSubjectSelectors.datasetQualityDetailsFailedSummaryCard;
+      return testSubjects.click(chartSelector);
     },
 
     async openDegradedFieldFlyout(fieldName: string) {

@@ -43,6 +43,7 @@ export function Card({
           justify-content: flex-start;
         `,
       }}
+      data-test-subj={`datasetQualityDetailsSummaryKpiCard-${title}`}
     >
       <EuiText textAlign="left">{title}</EuiText>
       <EuiSpacer size="xs" />
