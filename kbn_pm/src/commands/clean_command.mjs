@@ -22,6 +22,7 @@ export const command = {
     id: 'total',
   },
   flagsHelp: `
+    --allow-root         Required supplementary flag if you're running this command as root.
     --quiet              Prevent logging more than basic success/error messages
   `,
   async run({ log }) {
