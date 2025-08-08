@@ -16,7 +16,7 @@ import type {
 } from '@kbn/discover-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
-import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import { type SavedSearch, toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { SavedSearchComponentProps } from '../types';
 import { SavedSearchComponentErrorContent } from './error';
@@ -68,16 +68,21 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
           searchSource.setField('filter', filters);
           const { searchSourceJSON, references } = searchSource.serialize();
           // By-value saved object structure
-          const attributes: Partial<SavedSearchAttributes> = {
+          const savedSearch: SavedSearch = {
+            searchSource,
             kibanaSavedObjectMeta: {
               searchSourceJSON,
             },
             columns,
             sort: getDefaultSort(dataView, undefined, undefined, isOfAggregateQueryType(query)),
+            managed: false,
           };
           setInitialSerializedState({
             rawState: {
-              attributes: { ...attributes, references },
+              attributes: {
+                ...toSavedSearchAttributes(savedSearch, searchSourceJSON),
+                references,
+              },
               timeRange,
               nonPersistedDisplayOptions: {
                 solutionNavIdOverride,
