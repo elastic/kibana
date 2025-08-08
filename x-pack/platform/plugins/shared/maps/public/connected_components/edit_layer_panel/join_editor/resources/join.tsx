@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import React, { Component } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,6 +23,7 @@ import {
   ESDistanceSourceDescriptor,
   ESTermSourceDescriptor,
   JoinDescriptor,
+  JoinSourceDescriptor,
 } from '../../../../../common/descriptor_types';
 
 import { getIndexPatternService } from '../../../../kibana_services';
@@ -60,7 +62,7 @@ export class Join extends Component<Props, State> {
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadRightFields((this.props.join?.right as { indexPatternId?: string })?.indexPatternId);
+    this._loadRightFields(_.get(this.props.join, 'right.indexPatternId'));
   }
 
   componentWillUnmount() {
@@ -102,8 +104,9 @@ export class Join extends Component<Props, State> {
     });
   };
 
-  _onRightSourceDescriptorChange = (sourceDescriptor: JoinDescriptor['right']) => {
-    const indexPatternId = (sourceDescriptor as { indexPatternId?: string }).indexPatternId;
+  _onRightSourceDescriptorChange = (sourceDescriptor: Partial<JoinSourceDescriptor>) => {
+    const indexPatternId = (sourceDescriptor as Partial<AbstractESJoinSourceDescriptor>)
+      .indexPatternId;
     if (this.state.indexPattern?.id !== indexPatternId) {
       this.setState({
         indexPattern: undefined,
@@ -129,7 +132,7 @@ export class Join extends Component<Props, State> {
       right: {
         ...this.props.join.right,
         metrics,
-      },
+      } as Partial<JoinSourceDescriptor>,
     });
   };
 
@@ -139,7 +142,7 @@ export class Join extends Component<Props, State> {
       right: {
         ...this.props.join.right,
         whereQuery,
-      },
+      } as Partial<JoinSourceDescriptor>,
     });
   };
 
@@ -149,7 +152,7 @@ export class Join extends Component<Props, State> {
       right: {
         ...this.props.join.right,
         applyGlobalQuery,
-      },
+      } as Partial<JoinSourceDescriptor>,
     });
   };
 
@@ -159,7 +162,7 @@ export class Join extends Component<Props, State> {
       right: {
         ...this.props.join.right,
         applyGlobalTime,
-      },
+      } as Partial<JoinSourceDescriptor>,
     });
   };
 

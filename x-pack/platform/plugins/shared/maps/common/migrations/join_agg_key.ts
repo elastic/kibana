@@ -118,7 +118,7 @@ export function migrateJoinAggKey({ attributes }: { attributes: MapAttributes })
             style.options.field.name = getJoinAggKey({
               aggType,
               aggFieldName,
-              rightSourceId: (joinDescriptor?.right as { id: string }).id,
+              rightSourceId: joinDescriptor?.right.id,
             });
           }
         }

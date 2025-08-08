@@ -32,5 +32,6 @@ export type {
   XYZTMSSourceDescriptor,
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
+  JoinSourceDescriptor,
   SourceDescriptor,
 } from '../../server';

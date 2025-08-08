@@ -31,6 +31,7 @@ export type {
   XYZTMSSourceDescriptor,
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
+  JoinSourceDescriptor,
   SourceDescriptor,
 } from './content_management';
 export { MapsStorage } from './content_management';

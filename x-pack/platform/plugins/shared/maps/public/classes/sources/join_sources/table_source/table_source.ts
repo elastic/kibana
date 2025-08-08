@@ -24,7 +24,7 @@ import { DataRequest } from '../../../util/data_request';
 import { InlineField } from '../../../fields/inline_field';
 import { ITooltipProperty, TooltipProperty } from '../../../tooltips/tooltip_property';
 
-interface TableSourceDescriptor {
+export interface TableSourceDescriptor {
   id: string;
   type: SOURCE_TYPES.TABLE_SOURCE;
   __rows: Array<{ [key: string]: string | number }>;

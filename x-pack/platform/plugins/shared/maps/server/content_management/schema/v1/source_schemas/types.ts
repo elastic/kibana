@@ -19,6 +19,7 @@ import {
   ESDistanceSourceSchema,
   ESJoinSourceSchema,
   ESTermSourceSchema,
+  joinSourceSchema,
 } from './es_join_source_schemas';
 import { BaseESSourceSchema, ESQLSourceSchema, ESSearchSourceSchema } from './es_source_schemas';
 import {
@@ -56,4 +57,5 @@ export type MVTFieldDescriptor = TypeOf<typeof MVTFieldSchema>;
 export type TiledSingleLayerVectorSourceDescriptor = TypeOf<
   typeof TiledSingleLayerVectorSourceSchema
 >;
+export type JoinSourceDescriptor = TypeOf<typeof joinSourceSchema>;
 export type SourceDescriptor = TypeOf<typeof sourceSchema>;

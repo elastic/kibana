@@ -55,3 +55,17 @@ export const ESTermSourceSchema = ESJoinSourceSchema.extends(
     unknowns: 'forbid',
   }
 );
+
+export const joinSourceSchema = schema.oneOf([
+  schema.object(
+    {
+      id: schema.string(),
+      type: schema.string(),
+    },
+    {
+      unknowns: 'allow',
+    }
+  ),
+  ESDistanceSourceSchema,
+  ESTermSourceSchema,
+]);
