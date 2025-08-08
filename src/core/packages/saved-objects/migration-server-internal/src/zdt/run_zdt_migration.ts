@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/logging';
+import type { Logger, LogMessageSource } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type {
@@ -23,6 +23,7 @@ import type {
   MigrationResult,
   IDocumentMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { MigrationLog } from '../types';
 import { buildMigratorConfigs } from './utils';
 import { migrateIndex } from './migrate_index';
 
@@ -61,10 +62,56 @@ export const runZeroDowntimeMigration = async (
 
   return await Promise.all(
     migratorConfigs.map((migratorConfig) => {
-      return migrateIndex({
+      const logger = createCustomLogger(options.logger);
+      const dumpLogs = () => {
+        logger.dump();
+      };
+      process.on('uncaughtExceptionMonitor', dumpLogs);
+      const promise = migrateIndex({
         ...options,
         ...migratorConfig,
+        logger,
       });
+      promise.finally(() => {
+        process.removeListener('uncaughtExceptionMonitor', dumpLogs);
+      });
+
+      return promise;
     })
   );
 };
+
+function createCustomLogger(logger: Logger): Logger & { dump: () => void } {
+  const migrationLogs: MigrationLog[] = [];
+
+  return {
+    ...logger,
+    dump(): void {
+      migrationLogs.forEach((log) => {
+        const level = log.level === 'warning' ? 'warn' : log.level;
+        logger[level](log.message);
+      });
+    },
+    error(errorOrMessage: LogMessageSource | Error): void {
+      migrationLogs.push({
+        level: 'error',
+        message: errorOrMessage.toString(),
+      });
+    },
+    get(...childContextPaths: string[]): Logger {
+      return createCustomLogger(logger.get(...childContextPaths));
+    },
+    info(message: LogMessageSource): void {
+      migrationLogs.push({
+        level: 'info',
+        message: message.toString(),
+      });
+    },
+    warn(errorOrMessage: LogMessageSource | Error): void {
+      migrationLogs.push({
+        level: 'warning',
+        message: errorOrMessage.toString(),
+      });
+    },
+  };
+}
