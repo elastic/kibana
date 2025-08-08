@@ -149,6 +149,7 @@
     "@kbn/visualizations-plugin",
     "@kbn/datemath",
     "@kbn/global-search-plugin",
-    "@kbn/global-search-test-plugin"
+    "@kbn/global-search-test-plugin",
+    "@kbn/remote-clusters-plugin"
   ]
 }

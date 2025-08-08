@@ -12,3 +12,6 @@ The maximum number of spaces that you can use with the {kib} instance. Some {kib
 return all spaces using a single `_search` from {es}, so you must
 configure this setting lower than the `index.max_result_window` in {es}.
 The default is `1000`.
+
+`xpack.spaces.defaultSolution`::
+Sets the solution view for your default space.

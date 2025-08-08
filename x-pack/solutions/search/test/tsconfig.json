@@ -31,5 +31,6 @@
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/inference-common",
+    "@kbn/test-suites-src",
   ]
 }
