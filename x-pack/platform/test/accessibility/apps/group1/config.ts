@@ -11,7 +11,7 @@ import { pageObjects } from '../../page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
-    require.resolve('../../../functional/config.base.js')
+    require.resolve('../../../functional/config.base.ts')
   );
 
   return {
@@ -23,7 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     services,
 
     junit: {
-      reportName: 'X-Pack Accessibility Tests - Group 2',
+      reportName: 'X-Pack Patform Accessibility Tests - Group 1',
     },
   };
 }

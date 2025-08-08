@@ -58,6 +58,7 @@ components:
       properties:
         signal_ids:
           type: array
+          description: 'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
           items:
             $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
           minItems: 1

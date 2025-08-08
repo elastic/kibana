@@ -6,12 +6,22 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { services } from './services';
+import { pageObjects } from './page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../config.base.js'));
+  const functionalConfig = await readConfigFile(require.resolve('../functional_search/config.ts'));
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
+
+    testFiles: [require.resolve('./apps')],
+
+    pageObjects,
+    services,
+
+    junit: {
+      reportName: 'X-Pack Search Accessibility Tests',
+    },
   };
 }
