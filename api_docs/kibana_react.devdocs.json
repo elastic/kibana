@@ -2203,6 +2203,8 @@
           "FeatureFlagsStart",
           " | undefined; http?: ",
           "HttpSetup",
+          " | undefined; injection?: ",
+          "CoreDiServiceStart",
           " | undefined; savedObjects?: ",
           "SavedObjectsStart",
           " | undefined; i18n?: ",
