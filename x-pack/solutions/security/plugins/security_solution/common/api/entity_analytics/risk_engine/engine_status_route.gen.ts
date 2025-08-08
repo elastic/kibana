@@ -28,7 +28,6 @@ export const RiskEngineTaskStatusValues = z.enum([
   'running',
   'failed',
   'should_delete',
-  'should_disable',
   'unrecognized',
   'dead_letter',
 ]);
