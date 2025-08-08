@@ -8,12 +8,12 @@
  */
 
 import { EnterIfNode, EnterConditionBranchNode } from '@kbn/workflows';
+import { KQLSyntaxError } from '@kbn/es-query';
 import { StepImplementation } from '../step_base';
 import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import { evaluateKql } from './eval_kql';
 import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import { KQLSyntaxError } from '@kbn/es-query';
 
 export class EnterIfNodeImpl implements StepImplementation {
   constructor(
