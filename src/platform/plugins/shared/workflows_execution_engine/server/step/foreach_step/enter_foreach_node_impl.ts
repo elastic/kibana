@@ -10,19 +10,37 @@
 import { EnterForeachNode } from '@kbn/workflows';
 import { StepImplementation } from '../step_base';
 import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 
 export class EnterForeachNodeImpl implements StepImplementation {
   constructor(
     private step: EnterForeachNode,
-    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
+    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
+    private contextManager: WorkflowContextManager,
+    private workflowLogger: IWorkflowEventLogger
   ) {}
 
   public async run(): Promise<void> {
     const foreachState = this.wfExecutionRuntimeManager.getStepState(this.step.id);
 
     if (!foreachState) {
-      const evaluatedItems = this.getItems();
       await this.wfExecutionRuntimeManager.startStep(this.step.id);
+      const evaluatedItems = this.getItems();
+
+      if (evaluatedItems.length === 0) {
+        this.workflowLogger.logDebug(
+          `Foreach step "${this.step.id}" has no items to iterate over. Skipping execution.`
+        );
+        this.wfExecutionRuntimeManager.finishStep(this.step.id);
+        this.wfExecutionRuntimeManager.goToStep(this.step.exitNodeId);
+        return;
+      }
+
+      this.workflowLogger.logDebug(
+        `Foreach step "${this.step.id}" will iterate over ${evaluatedItems.length} items.`
+      );
+
       // Initialize foreach state
       await this.wfExecutionRuntimeManager.setStepState(this.step.id, {
         items: evaluatedItems,
@@ -48,8 +66,27 @@ export class EnterForeachNodeImpl implements StepImplementation {
   }
 
   private getItems(): any[] {
-    return Array.isArray(this.step.configuration.foreach)
-      ? this.step.configuration.foreach
-      : JSON.parse(this.step.configuration.foreach); // must be real items from step definition
+    let items: any[] = [];
+
+    if (!this.step.configuration.foreach) {
+      throw new Error('Foreach configuration is required');
+    }
+
+    try {
+      items = JSON.parse(this.step.configuration.foreach);
+    } catch (error) {
+      const { value } = this.contextManager.readContextPath(this.step.configuration.foreach);
+      items = value;
+
+      if (!Array.isArray(items)) {
+        items = JSON.parse(items);
+      }
+    }
+
+    if (!Array.isArray(items)) {
+      throw new Error('Foreach configuration must be an array');
+    }
+
+    return items;
   }
 }
