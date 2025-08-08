@@ -24,7 +24,7 @@ describe('No data screen', () => {
 
     it('shows no data screen instead of service inventory', () => {
       cy.visitKibana('/app/apm/');
-      cy.contains('Welcome to Elastic Observability!');
+      cy.contains('Add the APM integration');
     });
 
     it('shows settings page', () => {

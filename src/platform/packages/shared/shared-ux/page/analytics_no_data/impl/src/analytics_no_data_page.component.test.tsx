@@ -18,8 +18,13 @@ import { AnalyticsNoDataPageProvider } from './services';
 import { getAnalyticsNoDataPageServicesMock } from '@kbn/shared-ux-page-analytics-no-data-mocks';
 
 describe('AnalyticsNoDataPageComponent', () => {
-  const services = getAnalyticsNoDataPageServicesMock();
-  services.kibanaGuideDocLink = 'http://www.test.com';
+  // Always mock no ES data and no user data views for no-data UI
+  const services = {
+    ...getAnalyticsNoDataPageServicesMock(),
+    hasESData: async () => false,
+    hasUserDataView: async () => false,
+    kibanaGuideDocLink: 'http://www.test.com',
+  };
   const onDataViewCreated = jest.fn();
 
   it('renders correctly', async () => {
