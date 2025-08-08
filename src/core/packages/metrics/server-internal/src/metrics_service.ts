@@ -7,18 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  BehaviorSubject,
-  catchError,
-  exhaustMap,
-  firstValueFrom,
-  map,
-  ReplaySubject,
-  Subject,
-  takeUntil,
-  timer,
-  zip,
-} from 'rxjs';
+import { BehaviorSubject, firstValueFrom, map, ReplaySubject, zip } from 'rxjs';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
@@ -60,10 +49,10 @@ export type InternalMetricsServiceStart = MetricsServiceStart;
 export class MetricsService
   implements CoreService<InternalMetricsServiceSetup, InternalMetricsServiceStart>
 {
-  private readonly stop$ = new Subject<void>();
   private readonly logger: Logger;
   private readonly opsMetricsLogger: Logger;
   private metricsCollector?: OpsMetricsCollector;
+  private collectInterval?: NodeJS.Timeout;
   private metrics$ = new ReplaySubject<OpsMetrics>(1);
   private elu$ = new BehaviorSubject<EluMetrics>({
     long: 0,
@@ -97,16 +86,11 @@ export class MetricsService
 
     this.metricsCollector.registerMetrics();
 
-    timer(0, collectionInterval)
-      .pipe(
-        exhaustMap(() => this.refreshMetrics()),
-        catchError(async (error) => {
-          this.logger.error(`Failed to refresh operational metrics`, error);
-          return;
-        }),
-        takeUntil(this.stop$)
-      )
-      .subscribe();
+    await this.refreshMetrics();
+
+    this.collectInterval = setInterval(() => {
+      this.refreshMetrics();
+    }, collectionInterval);
 
     this.metrics$
       .pipe(
@@ -149,8 +133,9 @@ export class MetricsService
   }
 
   public async stop() {
-    this.stop$.next();
-    this.stop$.complete();
+    if (this.collectInterval) {
+      clearInterval(this.collectInterval);
+    }
     this.metrics$.complete();
   }
 }
