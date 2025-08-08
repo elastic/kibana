@@ -1138,9 +1138,9 @@ The 8.17.10 release includes the following fixes.
 === Fixes
 Dashboards and Visualizations::
 * Fixes an issue with the plus sign `+` not being properly encoded when it's part of a date math expression ({kibana-pull}230469[#230469]).
-* Fixes an issue in Firefox preventing from scrolling in the Lens editor flyout ({kibana-pull}228625[#228625]).
+* Fixes an issue in Firefox preventing you from scrolling in the Lens editor flyout ({kibana-pull}228625[#228625]).
 * Fixes an issue in reports where a PNG or PDF export would offset and clip part of the visualization in Lens ({kibana-pull}228603[#228603]).
-* Fixes an issue preventing from saving linked TSVB visualizations when changing data view ({kibana-pull}228685[#228685]).
+* Fixes an issue preventing you from saving linked TSVB visualizations when changing data views ({kibana-pull}228685[#228685]).
 Data ingestion and Fleet::
 * Fixes an issue that could cause some SSL configurations set using the UI to be overridden ({kibana-pull}230758[#230758]).
 * Fixes an issue where the SSL configuration isn't properly added to agent policies with pre-configured output types ({kibana-pull}230211[#230211]).
@@ -1148,7 +1148,7 @@ Discover::
 * Fixes the field being picked for fetching stats in the sidebar popover ({kibana-pull}228969[#228969]).
 Elastic Observability solution::
 * Fixes an issue with column sorting in the **Services** Errors table ({kibana-pull}229199[#229199]).
-* Fixes an issue with dependencies infinite loading when no data exists ({kibana-pull}228094[#228094]).
+* Fixes an issue with dependencies infinitely loading when no data exists ({kibana-pull}228094[#228094]).
 Kibana platform::
 * Fixes a display issue with counter indicators on toast messages ({kibana-pull}229300[#229300]).
 * Fixes an issue leading to some features not being visible when updating a space solution view to Classic ({kibana-pull}230385[#230385]).
