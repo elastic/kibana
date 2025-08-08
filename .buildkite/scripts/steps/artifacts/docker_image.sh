@@ -114,6 +114,7 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   node scripts/licenses_csv_report "--csv=target/dependencies-$GIT_ABBREV_COMMIT.csv"
 
   echo "--- Upload archives"
+  cd target
   buildkite-agent artifact upload "kibana-serverless*-$BASE_VERSION-linux-x86_64.tar.gz"
   buildkite-agent artifact upload "kibana-serverless*-$BASE_VERSION-linux-aarch64.tar.gz"
   buildkite-agent artifact upload "kibana-serverless*-$BASE_VERSION-docker-image-amd64.tar.gz"
@@ -123,7 +124,6 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   buildkite-agent artifact upload "dependencies-$GIT_ABBREV_COMMIT.csv"
 
   echo "--- Upload CDN assets"
-  cd target
   gcloud auth activate-service-account --key-file <(echo "$GCS_SA_CDN_KEY")
 
   CDN_ASSETS_FOLDER=$(mktemp -d)
