@@ -804,11 +804,6 @@ export class PrivilegeMonitoringDataClient {
       name: sourceName,
     });
 
-    this.log(
-      'info',
-      `Found ${existingSources.saved_objects.length} existing index sources with name "${sourceName}"`
-    );
-
     if (existingSources.saved_objects.length > 0) {
       this.log('info', 'Default index source already exists, updating it.');
       const existingSource = existingSources.saved_objects[0];
@@ -852,11 +847,6 @@ export class PrivilegeMonitoringDataClient {
         );
       }
     }
-    this.log('info', 'Default index source for privilege monitoring is set up successfully.');
-    this.log(
-      'info',
-      `Default index source for privilege monitoring: ${JSON.stringify(defaultIndexSource)}`
-    );
   };
 
   public async disable() {
