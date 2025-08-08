@@ -11,7 +11,7 @@ import {
   RuleResponse,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import {
   binaryToString,
   createPrebuiltRuleAssetSavedObjects,
