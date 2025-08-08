@@ -27,8 +27,9 @@ import {
   InferenceStartDependencies,
 } from './types';
 import { uiSettings } from '../common/ui_settings';
-import { getConnectorList } from '../common/utils/get_connector_list';
-import { loadDefaultConnector } from '../common/utils/get_default_connector';
+import { getConnectorList } from './util/get_connector_list';
+import { loadDefaultConnector } from './util/load_default_connector';
+import { getConnectorById } from './util/get_connector_by_id';
 
 export class InferencePlugin
   implements
@@ -117,6 +118,9 @@ export class InferencePlugin
       },
       getDefaultConnector: async (request: KibanaRequest) => {
         return loadDefaultConnector({ actions: pluginsStart.actions, request });
+      },
+      getConnectorById: async (id: string, request: KibanaRequest) => {
+        return getConnectorById({ connectorId: id, actions: pluginsStart.actions, request });
       },
     };
   }

@@ -13,6 +13,7 @@ const createStartContractMock = (): jest.Mocked<InferenceServerStart> => {
     getChatModel: jest.fn(),
     getConnectorList: jest.fn(),
     getDefaultConnector: jest.fn(),
+    getConnectorById: jest.fn(),
   };
 };
 

@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
-import { getConnectorList } from '../../common/utils/get_connector_list';
+import { getConnectorList } from '../util/get_connector_list';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
 
 export function registerConnectorsRoute({

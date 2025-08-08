@@ -117,6 +117,7 @@ export interface InferenceServerStart {
 
   getConnectorList: (request: KibanaRequest) => Promise<InferenceConnector[]>;
   getDefaultConnector: (request: KibanaRequest) => Promise<InferenceConnector>;
+  getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
 }
 
 /**
