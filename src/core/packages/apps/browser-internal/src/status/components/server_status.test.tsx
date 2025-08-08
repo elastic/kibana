@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { ServerStatus } from './server_status';
 import { StatusState } from '../lib';
 
@@ -23,9 +23,11 @@ const getStatus = (parts: Partial<StatusState> = {}): StatusState => ({
 describe('ServerStatus', () => {
   it('renders correctly for green state', () => {
     const status = getStatus();
-    const component = mountWithIntl(<ServerStatus serverState={status} name="My Computer" />);
-    expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(`"Kibana status is Green"`);
-    expect(component.find('EuiBadge').render()).toMatchSnapshot();
+    const { container, getByText } = renderWithI18n(
+      <ServerStatus serverState={status} name="My Computer" />
+    );
+    expect(getByText('Kibana status is Green')).toBeInTheDocument();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('renders correctly for yellow state', () => {
@@ -33,9 +35,11 @@ describe('ServerStatus', () => {
       id: 'degraded',
       title: 'Yellow',
     });
-    const component = mountWithIntl(<ServerStatus serverState={status} name="My Computer" />);
-    expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(`"Kibana status is Yellow"`);
-    expect(component.find('EuiBadge').render()).toMatchSnapshot();
+    const { container, getByText } = renderWithI18n(
+      <ServerStatus serverState={status} name="My Computer" />
+    );
+    expect(getByText('Kibana status is Yellow')).toBeInTheDocument();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('renders correctly for red state', () => {
@@ -43,16 +47,22 @@ describe('ServerStatus', () => {
       id: 'unavailable',
       title: 'Red',
     });
-    const component = mountWithIntl(<ServerStatus serverState={status} name="My Computer" />);
-    expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(`"Kibana status is Red"`);
-    expect(component.find('EuiBadge').render()).toMatchSnapshot();
+    const { container, getByText } = renderWithI18n(
+      <ServerStatus serverState={status} name="My Computer" />
+    );
+    expect(getByText('Kibana status is Red')).toBeInTheDocument();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('displays the correct `name`', () => {
-    let component = mountWithIntl(<ServerStatus serverState={getStatus()} name="Localhost" />);
-    expect(component.find('EuiText').text()).toMatchInlineSnapshot(`"Localhost"`);
+    const { getByText } = renderWithI18n(
+      <ServerStatus serverState={getStatus()} name="Localhost" />
+    );
+    expect(getByText('Localhost')).toBeInTheDocument();
 
-    component = mountWithIntl(<ServerStatus serverState={getStatus()} name="Kibana" />);
-    expect(component.find('EuiText').text()).toMatchInlineSnapshot(`"Kibana"`);
+    const { getByText: getByTextKibana } = renderWithI18n(
+      <ServerStatus serverState={getStatus()} name="Kibana" />
+    );
+    expect(getByTextKibana('Kibana')).toBeInTheDocument();
   });
 });

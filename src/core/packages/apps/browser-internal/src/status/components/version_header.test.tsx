@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+
 import type { ServerVersion } from '@kbn/core-status-common';
 import { VersionHeader } from './version_header';
 
@@ -25,25 +26,25 @@ const buildServerVersion = (parts: Partial<ServerVersion> = {}): ServerVersion =
 describe('VersionHeader', () => {
   it('displays the version', () => {
     const version = buildServerVersion({ number: '8.42.13' });
-    const component = mountWithIntl(<VersionHeader version={version} />);
+    const { getByTestId } = renderWithI18n(<VersionHeader version={version} />);
 
-    const versionNode = findTestSubject(component, 'statusBuildVersion');
-    expect(versionNode.text()).toEqual('VERSION: 8.42.13');
+    const versionNode = getByTestId('statusBuildVersion');
+    expect(versionNode).toHaveTextContent('VERSION: 8.42.13');
   });
 
   it('displays the build number', () => {
     const version = buildServerVersion({ build_number: 42 });
-    const component = mountWithIntl(<VersionHeader version={version} />);
+    const { getByTestId } = renderWithI18n(<VersionHeader version={version} />);
 
-    const buildNumberNode = findTestSubject(component, 'statusBuildNumber');
-    expect(buildNumberNode.text()).toEqual('BUILD: 42');
+    const buildNumberNode = getByTestId('statusBuildNumber');
+    expect(buildNumberNode).toHaveTextContent('BUILD: 42');
   });
 
   it('displays the build hash', () => {
     const version = buildServerVersion({ build_hash: 'some_hash' });
-    const component = mountWithIntl(<VersionHeader version={version} />);
+    const { getByTestId } = renderWithI18n(<VersionHeader version={version} />);
 
-    const buildHashNode = findTestSubject(component, 'statusBuildHash');
-    expect(buildHashNode.text()).toEqual('COMMIT: some_hash');
+    const buildHashNode = getByTestId('statusBuildHash');
+    expect(buildHashNode).toHaveTextContent('COMMIT: some_hash');
   });
 });
