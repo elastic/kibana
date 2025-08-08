@@ -11,6 +11,7 @@ import type {
   IndexAutocompleteItem,
   InferenceEndpointAutocompleteItem,
   ESQLControlVariable,
+  ESQLSourceResult,
 } from '@kbn/esql-types';
 import { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
@@ -226,14 +227,6 @@ export enum Location {
    * In the COMPLETION command
    */
   COMPLETION = 'completion',
-}
-
-export interface ESQLSourceResult {
-  name: string;
-  hidden: boolean;
-  title?: string;
-  dataStreams?: Array<{ name: string; title?: string }>;
-  type?: string;
 }
 
 const commandOptionNameToLocation: Record<string, Location> = {

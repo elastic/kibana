@@ -23,6 +23,7 @@ export {
 export {
   type IndicesAutocompleteResult,
   type IndexAutocompleteItem,
+  type ESQLSourceResult,
 } from './src/sources_autocomplete_types';
 
 export {
