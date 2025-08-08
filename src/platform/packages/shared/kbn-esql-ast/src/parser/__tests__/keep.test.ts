@@ -43,6 +43,8 @@ describe('KEEP', () => {
             type: 'literal',
             literalType: 'param',
             paramType: 'named',
+            paramKind: '??',
+            value: 'keep',
           },
         ],
       });
@@ -64,6 +66,8 @@ describe('KEEP', () => {
             type: 'literal',
             literalType: 'param',
             paramType: 'named',
+            paramKind: '?',
+            value: 'keep',
           },
         ],
       });
@@ -81,7 +85,12 @@ describe('KEEP', () => {
         expect(keep).toMatchObject({
           type: 'command',
           name: 'keep',
-          args: [{}],
+          args: [
+            {
+              type: 'column',
+              name: 'h*',
+            },
+          ],
         });
       });
 
@@ -96,7 +105,16 @@ describe('KEEP', () => {
         expect(keep).toMatchObject({
           type: 'command',
           name: 'keep',
-          args: [{}, {}],
+          args: [
+            {
+              type: 'column',
+              name: 'h*',
+            },
+            {
+              type: 'column',
+              name: '*',
+            },
+          ],
         });
       });
 
@@ -111,7 +129,20 @@ describe('KEEP', () => {
         expect(keep).toMatchObject({
           type: 'command',
           name: 'keep',
-          args: [{}, {}, {}],
+          args: [
+            {
+              type: 'column',
+              name: 'first_name',
+            },
+            {
+              type: 'column',
+              name: 'last_name',
+            },
+            {
+              type: 'column',
+              name: 'first_name*',
+            },
+          ],
         });
       });
 
@@ -126,7 +157,20 @@ describe('KEEP', () => {
         expect(keep).toMatchObject({
           type: 'command',
           name: 'keep',
-          args: [{}, {}, {}],
+          args: [
+            {
+              type: 'column',
+              name: 'first_name*',
+            },
+            {
+              type: 'column',
+              name: 'last_name',
+            },
+            {
+              type: 'column',
+              name: 'first_na*',
+            },
+          ],
         });
       });
 
@@ -141,7 +185,16 @@ describe('KEEP', () => {
         expect(keep).toMatchObject({
           type: 'command',
           name: 'keep',
-          args: [{}, {}],
+          args: [
+            {
+              type: 'column',
+              name: '*',
+            },
+            {
+              type: 'column',
+              name: 'first_name',
+            },
+          ],
         });
       });
     });

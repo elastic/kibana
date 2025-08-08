@@ -23,7 +23,12 @@ describe('DROP', () => {
       expect(drop).toMatchObject({
         type: 'command',
         name: 'drop',
-        args: [{}],
+        args: [
+          {
+            type: 'column',
+            name: 'height',
+          },
+        ],
       });
     });
 
@@ -38,7 +43,24 @@ describe('DROP', () => {
       expect(drop).toMatchObject({
         type: 'command',
         name: 'drop',
-        args: [{}, {}, {}, {}],
+        args: [
+          {
+            type: 'column',
+            name: 'emp_no',
+          },
+          {
+            type: 'column',
+            name: 'first_name',
+          },
+          {
+            type: 'column',
+            name: 'last_name',
+          },
+          {
+            type: 'column',
+            name: 'height',
+          },
+        ],
       });
     });
 
@@ -58,6 +80,8 @@ describe('DROP', () => {
             type: 'literal',
             literalType: 'param',
             paramType: 'named',
+            paramKind: '??',
+            value: 'drop',
           },
         ],
       });
@@ -79,6 +103,64 @@ describe('DROP', () => {
             type: 'literal',
             literalType: 'param',
             paramType: 'named',
+            paramKind: '?',
+            value: 'drop',
+          },
+        ],
+      });
+    });
+
+    it('nested column, param parts', () => {
+      const src = `
+        FROM employees
+        | DROP nested.?drop.column, ??another.nested.column`;
+      const { ast, errors } = EsqlQuery.fromSrc(src);
+      const drop = Walker.match(ast, { type: 'command', name: 'drop' });
+
+      expect(errors.length).toBe(0);
+      expect(drop).toMatchObject({
+        type: 'command',
+        name: 'drop',
+        args: [
+          {
+            type: 'column',
+            args: [
+              {
+                type: 'identifier',
+                name: 'nested',
+              },
+              {
+                type: 'literal',
+                literalType: 'param',
+                paramType: 'named',
+                paramKind: '?',
+                value: 'drop',
+              },
+              {
+                type: 'identifier',
+                name: 'column',
+              },
+            ],
+          },
+          {
+            type: 'column',
+            args: [
+              {
+                type: 'literal',
+                literalType: 'param',
+                paramType: 'named',
+                paramKind: '??',
+                value: 'another',
+              },
+              {
+                type: 'identifier',
+                name: 'nested',
+              },
+              {
+                type: 'identifier',
+                name: 'column',
+              },
+            ],
           },
         ],
       });
@@ -96,7 +178,12 @@ describe('DROP', () => {
         expect(drop).toMatchObject({
           type: 'command',
           name: 'drop',
-          args: [{}],
+          args: [
+            {
+              type: 'column',
+              name: 'h*',
+            },
+          ],
         });
       });
 
@@ -111,7 +198,12 @@ describe('DROP', () => {
         expect(drop).toMatchObject({
           type: 'command',
           name: 'drop',
-          args: [{}],
+          args: [
+            {
+              type: 'column',
+              name: 'height*',
+            },
+          ],
         });
       });
 
@@ -126,7 +218,16 @@ describe('DROP', () => {
         expect(drop).toMatchObject({
           type: 'command',
           name: 'drop',
-          args: [{}, {}],
+          args: [
+            {
+              type: 'column',
+              name: 'h*',
+            },
+            {
+              type: 'column',
+              name: '*',
+            },
+          ],
         });
       });
 
@@ -141,7 +242,20 @@ describe('DROP', () => {
         expect(drop).toMatchObject({
           type: 'command',
           name: 'drop',
-          args: [{}, {}, {}],
+          args: [
+            {
+              type: 'column',
+              name: 'first_name',
+            },
+            {
+              type: 'column',
+              name: 'last_name',
+            },
+            {
+              type: 'column',
+              name: 'first_name*',
+            },
+          ],
         });
       });
 
@@ -156,7 +270,20 @@ describe('DROP', () => {
         expect(drop).toMatchObject({
           type: 'command',
           name: 'drop',
-          args: [{}, {}, {}],
+          args: [
+            {
+              type: 'column',
+              name: 'first_name*',
+            },
+            {
+              type: 'column',
+              name: 'last_name',
+            },
+            {
+              type: 'column',
+              name: 'first_na*',
+            },
+          ],
         });
       });
 
@@ -171,7 +298,16 @@ describe('DROP', () => {
         expect(drop).toMatchObject({
           type: 'command',
           name: 'drop',
-          args: [{}, {}],
+          args: [
+            {
+              type: 'column',
+              name: '*',
+            },
+            {
+              type: 'column',
+              name: 'first_name',
+            },
+          ],
         });
       });
     });
