@@ -8,7 +8,6 @@
  */
 
 import { BarSeries, Chart, ScaleType, Settings } from '@elastic/charts';
-import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -23,10 +22,11 @@ import {
   toSentenceCase,
   useEuiTheme,
 } from '@elastic/eui';
+import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ExecutionStatus, WorkflowListItemDto } from '@kbn/workflows';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { useWorkflowActions } from '../../../entities/workflows/model/useWorkflowActions';
 import { useWorkflows } from '../../../entities/workflows/model/useWorkflows';
 
@@ -155,7 +155,7 @@ export function WorkflowList() {
         name: 'Triggers',
         field: 'triggers',
         render: (value, item) => {
-          if (!item.definition.workflow?.triggers?.length) {
+          if (!item.definition?.triggers?.length) {
             return (
               <EuiText size="s" color="subdued">
                 No triggers
@@ -164,9 +164,7 @@ export function WorkflowList() {
           }
           return (
             <EuiText size="s" color="subdued">
-              {item?.definition?.workflow?.triggers
-                .map((trigger) => toSentenceCase(trigger.type))
-                .join(', ')}
+              {item?.definition?.triggers.map((trigger) => toSentenceCase(trigger.type)).join(', ')}
             </EuiText>
           );
         },

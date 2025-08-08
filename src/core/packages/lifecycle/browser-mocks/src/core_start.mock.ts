@@ -10,6 +10,7 @@
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
@@ -39,6 +40,7 @@ export function createCoreStartMock({ basePath = '' } = {}) {
     featureFlags: coreFeatureFlagsMock.createStart(),
     http: httpServiceMock.createStartContract({ basePath }),
     i18n: i18nServiceMock.createStartContract(),
+    injection: injectionServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
