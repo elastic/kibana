@@ -21,6 +21,7 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { buildDiscoverParams } from '../../utils/discover_helpers';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
+import { validateQuery } from '../common/validate_query';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -50,6 +51,7 @@ export function SignificantEventsGeneratedTable({
 
   const toggleDetails = (query: StreamQueryKql) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+    const validation = validateQuery(query);
 
     if (itemIdToExpandedRowMapValues[query.id]) {
       delete itemIdToExpandedRowMapValues[query.id];
@@ -59,6 +61,7 @@ export function SignificantEventsGeneratedTable({
           definition={definition}
           query={query}
           timeRange={timeState.timeRange}
+          isQueryValid={!validation.kql.isInvalid}
         />
       );
     }

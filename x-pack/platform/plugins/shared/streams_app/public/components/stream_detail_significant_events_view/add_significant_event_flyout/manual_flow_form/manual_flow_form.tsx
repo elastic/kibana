@@ -21,7 +21,7 @@ import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
-import { validateQuery } from './validate_query';
+import { validateQuery } from '../common/validate_query';
 
 interface Props {
   definition: Streams.all.Definition;

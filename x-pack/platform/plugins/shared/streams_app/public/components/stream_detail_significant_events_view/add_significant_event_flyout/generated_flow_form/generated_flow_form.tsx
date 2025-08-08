@@ -22,6 +22,7 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../../hooks/use_significant_events_api';
 import { SignificantEventsGeneratedTable } from './significant_events_generated_table';
 import { useAIFeatures } from './use_ai_features';
+import { validateQuery } from '../common/validate_query';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -118,10 +119,17 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
                 const generation$ = generate(aiFeatures?.selectedConnector!);
                 generation$.subscribe({
                   next: (result) => {
-                    setGeneratedQueries((prev) => [
-                      ...prev,
-                      { id: v4(), kql: { query: result.query.kql }, title: result.query.title },
-                    ]);
+                    const validation = validateQuery({
+                      title: result.query.title,
+                      kql: { query: result.query.kql },
+                    });
+
+                    if (!validation.kql.isInvalid) {
+                      setGeneratedQueries((prev) => [
+                        ...prev,
+                        { id: v4(), kql: { query: result.query.kql }, title: result.query.title },
+                      ]);
+                    }
                   },
                   error: (error) => {
                     notifications.showErrorDialog({
