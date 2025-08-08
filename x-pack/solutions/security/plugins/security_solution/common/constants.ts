@@ -119,6 +119,7 @@ export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;
 export const ENDPOINT_EXCEPTIONS_PATH = `${MANAGEMENT_PATH}/endpoint_exceptions` as const;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
+export const TRUSTED_DEVICES_PATH = `${MANAGEMENT_PATH}/trusted_devices` as const;
 export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;

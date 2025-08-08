@@ -74,6 +74,7 @@ export enum SecurityPageName {
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
+  trustedDevices = 'trusted_devices',
   users = 'users',
   usersAll = 'users-all',
   usersAnomalies = 'users-anomalies',
