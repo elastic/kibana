@@ -402,25 +402,23 @@ export const mockConfig: CloudSetupConfig = {
   overviewPath: '/overview',
   getStartedPath: '/get-started',
   showCloudConnectors: true,
+  showCloudTemplates: true,
   providers: {
     aws: {
       type: 'aws-input-type',
       organizationMinimumVersion: '1.0.0',
       getStartedPath: '/aws/start',
-      showCloudTemplate: true,
     },
     gcp: {
       type: 'gcp-input-type',
       minShowVersion: '2.0.0',
       organizationMinimumVersion: '2.1.0',
       getStartedPath: '/gcp/start',
-      showCloudTemplate: true,
     },
     azure: {
       type: 'azure-input-type',
       organizationMinimumVersion: '3.0.0',
       getStartedPath: '/azure/start',
-      showCloudTemplate: false,
     },
   },
 };

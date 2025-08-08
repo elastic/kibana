@@ -44,7 +44,7 @@ export const GcpCredentialsFormAgentless = ({
   packageInfo,
   hasInvalidRequiredVars,
 }: GcpFormAgentlessProps) => {
-  const { gcpShowCloudTemplate, templateName, gcpPolicyType, gcpOverviewPath } = useCloudSetup();
+  const { showCloudTemplates, templateName, gcpPolicyType, gcpOverviewPath } = useCloudSetup();
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
   const isOrganization = accountType === ORGANIZATION_ACCOUNT;
   const organizationFields = ['gcp.organization_id', 'gcp.credentials.json'];
@@ -76,7 +76,7 @@ export const GcpCredentialsFormAgentless = ({
     <>
       <GCPSetupInfoContent isAgentless={true} />
       <EuiSpacer size="m" />
-      {!gcpShowCloudTemplate && (
+      {!showCloudTemplates && (
         <>
           <EuiCallOut color="warning">
             <FormattedMessage
@@ -87,7 +87,7 @@ export const GcpCredentialsFormAgentless = ({
           <EuiSpacer size="m" />
         </>
       )}
-      {gcpShowCloudTemplate && (
+      {showCloudTemplates && (
         <>
           <EuiSpacer size="m" />
           <EuiAccordion
