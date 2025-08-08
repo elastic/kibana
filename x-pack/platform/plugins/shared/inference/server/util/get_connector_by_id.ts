@@ -6,7 +6,6 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import {
   createInferenceRequestError,
   connectorToInference,
@@ -23,18 +22,17 @@ export const getConnectorById = async ({
   actionsClient: ActionsClient;
   connectorId: string;
 }): Promise<InferenceConnector> => {
-  let connectors: ConnectorWithExtraFindData[] | undefined;
+  let connector;
   try {
-    connectors = await actionsClient.getAll();
+    connector = await actionsClient.get({ id: connectorId });
+    if (!connector) {
+      throw createInferenceRequestError(`No connector found for id '${connectorId}'`, 400);
+    }
   } catch (error) {
     throw createInferenceRequestError(
       `An error occur fetching connectors for id '${connectorId}'\n${error.message}`,
       400
     );
-  }
-  const connector = (connectors ?? []).find((c) => c.id === connectorId);
-  if (!connector) {
-    throw createInferenceRequestError(`No connector found for id '${connectorId}'`, 400);
   }
 
   return connectorToInference(connector);
