@@ -187,6 +187,7 @@ describe('QueryBar ', () => {
 
   describe('SavedQueryManagementComponent state', () => {
     test('onSavedQuery gets called when the user clicks on the "save query" button', async () => {
+      const QUERY_BAR_MENU_PANEL_TEST_ID = 'queryBarMenuPanel';
       const { findByTestId } = render(
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
@@ -206,19 +207,19 @@ describe('QueryBar ', () => {
         />
       );
 
-      expect(screen.queryByTestId('queryBarMenuPanel')).toBeNull();
+      expect(screen.queryByTestId(QUERY_BAR_MENU_PANEL_TEST_ID)).toBeNull();
 
       const btn = await findByTestId('showQueryBarMenu');
       fireEvent.click(btn);
 
       await waitFor(() => {
-        expect(screen.queryByTestId('queryBarMenuPanel')).toBeVisible();
+        expect(screen.queryByTestId(QUERY_BAR_MENU_PANEL_TEST_ID)).toBeVisible();
       });
 
       fireEvent.click(await findByTestId('saved-query-management-save-button'));
 
       await waitFor(() => {
-        expect(screen.queryByTestId('queryBarMenuPanel')).toBeVisible();
+        expect(screen.queryByTestId(QUERY_BAR_MENU_PANEL_TEST_ID)).toBeVisible();
       });
 
       fireEvent.change(await findByTestId('saveQueryFormTitle'), {
@@ -229,7 +230,9 @@ describe('QueryBar ', () => {
       fireEvent.click(await findByTestId('savedQueryFormSaveButton'));
 
       await waitFor(() => {
-        expect(mockOnSavedQuery).toHaveBeenCalled();
+        expect(mockOnSavedQuery).toHaveBeenCalledWith({
+          attributes: { title: 'hello' },
+        });
       });
     });
   });
