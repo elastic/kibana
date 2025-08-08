@@ -135,6 +135,6 @@ export const inlineSourceFormatter: FormatterFn = (fields, key) => {
   return escapeTemplateLiterals(value).trim();
 };
 
-export const handeleMultilineStringFormatter = (value: string) => {
+export const handleMultilineStringFormatter = (value: string) => {
   return value.replace(/(\n+)/g, '$1\n');
 };

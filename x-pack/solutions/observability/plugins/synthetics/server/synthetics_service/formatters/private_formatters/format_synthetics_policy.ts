@@ -14,7 +14,7 @@ import { ConfigKey, MonitorTypeEnum, MonitorFields } from '../../../../common/ru
 import { throttlingFormatter } from './browser_formatters';
 import {
   formatMWs,
-  handeleMultilineStringFormatter,
+  handleMultilineStringFormatter,
   replaceStringWithParams,
 } from '../formatting_utils';
 import { syntheticsPolicyFormatters } from './formatters';
@@ -77,7 +77,7 @@ export const formatSyntheticsPolicy = (
       }
       // if value contains a new line we need to add extra \n to escape it
       if (typeof configItem.value === 'string' && configItem.value.includes('\n')) {
-        configItem.value = handeleMultilineStringFormatter(configItem.value);
+        configItem.value = handleMultilineStringFormatter(configItem.value);
       }
     }
   });

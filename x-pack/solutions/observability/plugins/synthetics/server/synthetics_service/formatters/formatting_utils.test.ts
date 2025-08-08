@@ -5,7 +5,7 @@
  * 2.0.
  */
 import {
-  handeleMultilineStringFormatter,
+  handleMultilineStringFormatter,
   inlineSourceFormatter,
   replaceStringWithParams,
 } from './formatting_utils';
@@ -255,14 +255,14 @@ describe('replaceStringWithParams', () => {
   });
 });
 
-describe('handeleMultilineStringFormatter', () => {
+describe('handleMultilineStringFormatter', () => {
   it('should handle multiline strings', () => {
-    const value = handeleMultilineStringFormatter("const a = 'line1\nline2';");
+    const value = handleMultilineStringFormatter("const a = 'line1\nline2';");
     expect(value).toEqual(`const a = 'line1\n\nline2';`);
   });
 
   it('should handle multiline strings with template literals', () => {
-    const value = handeleMultilineStringFormatter(
+    const value = handleMultilineStringFormatter(
       `-----BEGIN CERTIFICATE-----\nMIICMJBgNV\n\npAqElJlQND\n-----END CERTIFICATE-----`
     );
     expect(value).toEqual(
