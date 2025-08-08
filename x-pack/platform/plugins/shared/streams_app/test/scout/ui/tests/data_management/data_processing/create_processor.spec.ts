@@ -112,6 +112,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     await pageObjects.streams.clickSaveProcessor();
 
     await pageObjects.streams.saveProcessorsListChanges();
+    expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
   });
 
   test('should handle insufficient privileges gracefully', async ({
