@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiText, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
+import { EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import styled from '@emotion/styled';
-import type { DocumentAnalysisOutput } from './analyze_documents';
 import { RoundedBadge } from '../styles';
+import type { DocumentAnalysisOutput } from './analyze_documents';
 
 export const TEST_SUBJ_ALERT_ICON = 'label-node-alert-icon';
 export const TEST_SUBJ_ALERT_COUNT = 'label-node-alert-count';
@@ -18,19 +17,6 @@ export const TEST_SUBJ_EVENT_COUNT = 'label-node-event-count';
 
 export const LIMIT = 99;
 export const displayCount = (count: number) => (count > LIMIT ? `+${LIMIT}` : count);
-
-export const Badge = styled.div<{ euiTheme: EuiThemeComputed; bgColor: string }>`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: ${({ euiTheme }) => `${euiTheme.size.xxs} ${euiTheme.size.xs}`};
-  background-color: ${(props) => props.bgColor};
-  border-radius: ${({ euiTheme }) => euiTheme.border.radius.small};
-  border: ${({ euiTheme }) => euiTheme.border.thin};
-  border-color: ${({ euiTheme }) => euiTheme.colors.borderBasePlain};
-`;
 
 interface LabelNodeBadgesProps {
   analysis: DocumentAnalysisOutput;

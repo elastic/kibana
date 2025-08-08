@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiText, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { RoundedBadge } from '../styles';
 import type { DocumentAnalysisOutput } from './analyze_documents';
-import { Badge } from './label_node_badges';
 
 const alertedEventsText = i18n.translate(
   'securitySolutionPackages.csp.graph.labelNode.tooltip.alertedEvents',
@@ -51,13 +51,7 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
             gap: ${euiTheme.size.s};
           `}
         >
-          <Badge
-            euiTheme={euiTheme}
-            bgColor={euiTheme.colors.danger}
-            css={css`
-              gap: ${euiTheme.size.xxs};
-            `}
-          >
+          <RoundedBadge euiTheme={euiTheme} bgColor={euiTheme.colors.danger}>
             <EuiIcon
               type="warningFilled"
               color="ghost"
@@ -76,7 +70,7 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
                 {analysis.alertsCount}
               </EuiText>
             )}
-          </Badge>
+          </RoundedBadge>
           <EuiText
             size="s"
             css={css`
@@ -97,7 +91,7 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
             gap: ${euiTheme.size.s};
           `}
         >
-          <Badge euiTheme={euiTheme} bgColor={euiTheme.colors.backgroundBasePlain}>
+          <RoundedBadge euiTheme={euiTheme} bgColor={euiTheme.colors.backgroundBasePlain}>
             <EuiText
               data-test-subj="label-node-tooltip-event-count"
               size="m"
@@ -108,7 +102,7 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
             >
               {analysis.eventsCount}
             </EuiText>
-          </Badge>
+          </RoundedBadge>
           <EuiText
             size="s"
             css={css`
