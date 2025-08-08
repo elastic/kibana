@@ -26,7 +26,6 @@ import {
   Position,
   RectAnnotation,
   ScaleType,
-  SeriesNameFn,
   Settings,
   SmallMultiples,
   VerticalAlignment,

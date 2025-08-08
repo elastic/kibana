@@ -6,11 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import React from 'react';
-import { shallow } from 'enzyme';
-
-import { LineSeries, SeriesNameFn } from '@elastic/charts';
 import { type Datatable } from '@kbn/expressions-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
@@ -18,8 +13,6 @@ import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/
 import { chartsActiveCursorService, chartsThemeService, paletteService } from '../__mocks__';
 import { createArgsWithLayers } from '../../common/__mocks__';
 import { XYChart, type XYChartRenderProps } from './xy_chart';
-import { XYProps } from '../../common/types';
-import { DataLayers } from './data_layers';
 import type { LayerCellValueActions } from '../types';
 import {
   setupResizeObserverMock,
@@ -86,20 +79,8 @@ const defaultProps: Omit<XYChartRenderProps, 'args'> = {
   setChartSize: jest.fn(),
   onCreateAlertRule: jest.fn(),
 };
-const getRenderedComponent = (args: XYProps) => {
-  return shallow(<XYChart {...defaultProps} args={args} />);
-};
 
 describe('provides correct series naming', () => {
-  const nameFnArgs = {
-    seriesKeys: [],
-    key: '',
-    specId: 'a',
-    xAccessor: '',
-    yAccessor: '',
-    splitAccessors: new Map(),
-  };
-
   beforeAll(() => {
     setupResizeObserverMock();
     jest.useFakeTimers();
