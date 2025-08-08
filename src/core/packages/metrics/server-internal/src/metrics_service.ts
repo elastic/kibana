@@ -99,12 +99,12 @@ export class MetricsService
 
     timer(0, collectionInterval)
       .pipe(
-        takeUntil(this.stop$),
         exhaustMap(() => this.refreshMetrics()),
         catchError(async (error) => {
           this.logger.error(`Failed to refresh operational metrics`, error);
           return;
-        })
+        }),
+        takeUntil(this.stop$)
       )
       .subscribe();
 
@@ -149,8 +149,8 @@ export class MetricsService
   }
 
   public async stop() {
-    this.metrics$.complete();
     this.stop$.next();
     this.stop$.complete();
+    this.metrics$.complete();
   }
 }
