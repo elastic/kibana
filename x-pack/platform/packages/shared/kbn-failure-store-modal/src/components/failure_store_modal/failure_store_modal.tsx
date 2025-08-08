@@ -197,25 +197,22 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
 
       <EuiModalBody>
         <Form form={form} data-test-subj="editFailureStoreForm">
-          <EuiFormRow
+          <UseField
+            path="failureStore"
+            component={ToggleField}
             label={
               <FormattedMessage
                 id="xpack.failureStoreModal.form.failureStoreLabel"
                 defaultMessage="Failure store"
               />
             }
-          >
-            <UseField
-              path="failureStore"
-              component={ToggleField}
-              euiFieldProps={{
-                label: i18n.translate('xpack.failureStoreModal.form.switchLabel', {
-                  defaultMessage: 'Store failed documents in a secondary index',
-                }),
-                'data-test-subj': 'enableFailureStoreToggle',
-              }}
-            />
-          </EuiFormRow>
+            euiFieldProps={{
+              label: i18n.translate('xpack.failureStoreModal.form.switchLabel', {
+                defaultMessage: 'Store failed documents in a secondary index',
+              }),
+              'data-test-subj': 'enableFailureStoreToggle',
+            }}
+          />
           {failureStore && (
             <>
               <UseField
