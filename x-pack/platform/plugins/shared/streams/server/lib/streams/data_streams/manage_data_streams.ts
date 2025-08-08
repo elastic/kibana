@@ -142,7 +142,9 @@ export async function updateDataStreamsMappings({
       `Error updating data stream mappings for ${name}: ${response.data_streams[0].error}`
     );
   }
-  await retryTransientEsErrors(() => esClient.indices.rollover({ alias: name }), { logger });
+  await retryTransientEsErrors(() => esClient.indices.rollover({ alias: name, lazy: true }), {
+    logger,
+  });
 }
 
 export async function updateDataStreamsLifecycle({

@@ -230,17 +230,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(putResponse.status).to.eql(200);
-
-        // Verify the field override is set via field caps
-        const fieldCapsResponse = await esClient.fieldCaps({
-          index: TEST_STREAM_NAME,
-          fields: 'foo.bar',
-        });
-        expect(fieldCapsResponse.fields).to.have.property('foo.bar');
-        expect(fieldCapsResponse.fields['foo.bar']).to.have.property('keyword');
       });
 
-      it('Does not roll over on compatible changes', async () => {
+      it('Does a lazy rollover on field change', async () => {
         const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
           params: {
             path: { name: TEST_STREAM_NAME },
@@ -269,103 +261,38 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(putResponse.status).to.eql(200);
-
-        // Verify the field override is set via field caps
-        const fieldCapsResponse = await esClient.fieldCaps({
-          index: TEST_STREAM_NAME,
-          fields: 'foo.baz',
-        });
-        expect(fieldCapsResponse.fields).to.have.property('foo.baz');
-        expect(fieldCapsResponse.fields['foo.baz']).to.have.property('keyword');
 
         // Verify the stream did not roll over
         const getResponse = await esClient.indices.getDataStream({
           name: TEST_STREAM_NAME,
         });
         expect(getResponse.data_streams[0].indices).to.have.length(1);
-      });
 
-      it('Does roll over on incompatible changes', async () => {
-        const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
-          params: {
-            path: { name: TEST_STREAM_NAME },
-            body: {
-              queries: [],
-              dashboards: [],
-              stream: {
-                description: '',
-                ingest: {
-                  lifecycle: { inherit: {} },
-                  processing: [],
-                  classic: {
-                    field_overrides: {
-                      'foo.bar': {
-                        type: 'double',
-                      },
-                      'foo.baz': {
-                        type: 'keyword',
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
+        // Send a document to trigger the rollover
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          message: '2023-01-01T00:00:10.000Z error test',
+          'foo.bar': 'bar_value',
+          'foo.baz': 'baz_value',
+        };
+        const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
+        expect(response.result).to.eql('created');
+
+        // Verify the rollover happened
+        const getResponseAfterIndexing = await esClient.indices.getDataStream({
+          name: TEST_STREAM_NAME,
         });
-
-        expect(putResponse.status).to.eql(200);
+        expect(getResponseAfterIndexing.data_streams[0].indices).to.have.length(2);
 
         // Verify the field override is set via field caps
         const fieldCapsResponse = await esClient.fieldCaps({
           index: TEST_STREAM_NAME,
-          fields: 'foo.bar',
+          fields: ['foo.baz', 'foo.bar'],
         });
         expect(fieldCapsResponse.fields).to.have.property('foo.bar');
-        expect(fieldCapsResponse.fields['foo.bar']).to.have.property('double');
-
-        // Verify the stream did not roll over
-        const getResponse = await esClient.indices.getDataStream({
-          name: TEST_STREAM_NAME,
-        });
-        expect(getResponse.data_streams[0].indices).to.have.length(2);
-      });
-
-      it('Does roll over on removing field overrides', async () => {
-        const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
-          params: {
-            path: { name: TEST_STREAM_NAME },
-            body: {
-              queries: [],
-              dashboards: [],
-              stream: {
-                description: '',
-                ingest: {
-                  lifecycle: { inherit: {} },
-                  processing: [],
-                  classic: {
-                    field_overrides: {},
-                  },
-                },
-              },
-            },
-          },
-        });
-        expect(putResponse.status).to.eql(200);
-        // Verify the stream rolled over
-        const getResponse = await esClient.indices.getDataStream({
-          name: TEST_STREAM_NAME,
-        });
-        expect(getResponse.data_streams[0].indices).to.have.length(3);
-
-        // get the current write index
-        const writeIndex = getResponse.data_streams[0].indices[2];
-        // Verify the field override is removed via field caps
-        const fieldCapsResponse = await esClient.fieldCaps({
-          index: writeIndex.index_name,
-          fields: ['foo.bar', 'foo.baz'],
-        });
-        expect(fieldCapsResponse.fields).to.not.have.property('foo.bar');
-        expect(fieldCapsResponse.fields).to.not.have.property('foo.baz');
+        expect(fieldCapsResponse.fields['foo.bar']).to.have.property('keyword');
+        expect(fieldCapsResponse.fields).to.have.property('foo.baz');
+        expect(fieldCapsResponse.fields['foo.baz']).to.have.property('keyword');
       });
     });
 
