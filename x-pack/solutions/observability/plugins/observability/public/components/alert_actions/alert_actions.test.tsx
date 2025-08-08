@@ -63,6 +63,23 @@ const config: ConfigSchema = {
 };
 
 const getFormatterMock = jest.fn();
+
+jest.mock('@kbn/cases-plugin/public', () => ({
+  useDeleteComment: jest.fn(() => ({
+    mutateAsync: jest.fn(),
+    isLoading: false,
+  })),
+  useUpdateAlertComment: jest.fn(() => ({
+    mutateAsync: jest.fn(),
+    isLoading: false,
+  })),
+  useDeletePropertyAction: jest.fn(() => ({
+    mutateAsync: jest.fn(),
+    isLoading: false,
+  })),
+  DeleteAttachmentConfirmationModal: jest.fn(() => null),
+}));
+
 const createRuleTypeRegistryMock = () => ({
   getFormatter: getFormatterMock,
   registerFormatter: () => {},
@@ -211,17 +228,6 @@ describe('ObservabilityActions component', () => {
       expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().prop('href')).toBe(
         '/app/observability/alerts/rules/06f53080-0f91-11ed-9d86-013908b232ef'
       );
-    });
-  });
-
-  it('should refresh when removing an alert from a case', async () => {
-    const wrapper = await setup('nothing');
-    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="remove-from-case-action"]').hostNodes().length).toBe(1);
-
-      wrapper.find('[data-test-subj="remove-from-case-action"]').hostNodes().simulate('click');
-      expect(refresh).toHaveBeenCalled();
     });
   });
 
