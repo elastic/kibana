@@ -36,6 +36,56 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
+  // Helper function to install package and create mock knowledge base content
+  const installPackageWithKnowledgeBase = async (name: string, version: string) => {
+    // First install the package normally
+    await installPackage(name, version);
+
+    // Then add mock knowledge base content to ES directly for testing
+    await es.index({
+      index: '.integration_knowledge',
+      id: `${name}-overview.md`,
+      document: {
+        package_name: name,
+        filename: 'overview.md',
+        content: `# ${name} Integration Overview\n\nThis is an overview of the ${name} integration for testing purposes.\n\n## Features\n- Log collection\n- Metric collection\n- Error monitoring`,
+        version,
+        path: 'docs/knowledge_base/overview.md',
+        installed_at: new Date().toISOString(),
+      },
+      refresh: 'wait_for',
+    });
+
+    await es.index({
+      index: '.integration_knowledge',
+      id: `${name}-troubleshooting.md`,
+      document: {
+        package_name: name,
+        filename: 'troubleshooting.md',
+        content: `# ${name} Troubleshooting Guide\n\n## Common Issues\n\n### Configuration Problems\nCheck your configuration files...\n\n### Connection Issues\nVerify network connectivity...`,
+        version,
+        path: 'docs/knowledge_base/troubleshooting.md',
+        installed_at: new Date().toISOString(),
+      },
+      refresh: 'wait_for',
+    });
+  };
+
+  // Helper function to clean up knowledge base content
+  const cleanupKnowledgeBase = async (name: string) => {
+    try {
+      await es.deleteByQuery({
+        index: '.integration_knowledge',
+        query: {
+          term: { 'package_name.keyword': name },
+        },
+        refresh: true,
+      });
+    } catch (error) {
+      // Ignore errors if index doesn't exist or documents aren't found
+    }
+  };
+
   const testPkgArchiveZip = path.join(
     path.dirname(__filename),
     '../fixtures/direct_upload_packages/apache_0.1.4.zip'
@@ -305,10 +355,15 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('Knowledge Base', () => {
+      afterEach(async () => {
+        // Clean up knowledge base content after each test to avoid conflicts
+        await cleanupKnowledgeBase(testPkgName);
+      });
+
       it('returns knowledge base content for an installed package', async function () {
-        await installPackage(testPkgName, testPkgVersion);
+        await installPackageWithKnowledgeBase(testPkgName, testPkgVersion);
         const res = await supertest
-          .get(`internal/fleet/api/fleet/epm/packages/${testPkgName}/knowledge_base`)
+          .get(`/internal/fleet/epm/packages/${testPkgName}/knowledge_base`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
@@ -318,32 +373,36 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.body).to.have.property('knowledge_base_content');
         expect(res.body.package_name).to.equal(testPkgName);
         expect(res.body.knowledge_base_content).to.be.an('array');
+        expect(res.body.knowledge_base_content).to.have.length(2);
+
+        // Verify the content structure
+        const overviewDoc = res.body.knowledge_base_content.find(
+          (item: any) => item.filename === 'overview.md'
+        );
+        const troubleshootingDoc = res.body.knowledge_base_content.find(
+          (item: any) => item.filename === 'troubleshooting.md'
+        );
+
+        expect(overviewDoc).to.not.be(undefined);
+        expect(troubleshootingDoc).to.not.be(undefined);
+        expect(overviewDoc.content).to.contain('Integration Overview');
+        expect(troubleshootingDoc.content).to.contain('Troubleshooting Guide');
 
         await uninstallPackage(testPkgName, testPkgVersion);
+        await cleanupKnowledgeBase(testPkgName);
       });
 
       it('returns 404 for knowledge base of non-existent package', async function () {
         await supertest
-          .get(
-            `internal/fleet/api/fleet/epm/packages/nonexistent/knowledge_base?pkgName=nonexistent`
-          )
+          .get(`/internal/fleet/epm/packages/nonexistent/knowledge_base`)
           .set('kbn-xsrf', 'xxxx')
           .expect(404);
       });
 
-      it('returns 400 for knowledge base request without pkgName query parameter', async function () {
-        await supertest
-          .get(`internal/fleet/api/fleet/epm/packages/${testPkgName}/knowledge_base`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(400);
-      });
-
       it('validates knowledge base content structure', async function () {
-        await installPackage(testPkgName, testPkgVersion);
+        await installPackageWithKnowledgeBase(testPkgName, testPkgVersion);
         const res = await supertest
-          .get(
-            `internal/fleet/api/fleet/epm/packages/${testPkgName}/knowledge_base?pkgName=${testPkgName}`
-          )
+          .get(`/internal/fleet/epm/packages/${testPkgName}/knowledge_base`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
@@ -362,30 +421,29 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         await uninstallPackage(testPkgName, testPkgVersion);
+        await cleanupKnowledgeBase(testPkgName);
       });
 
       it('allows user with integrations read permission to access knowledge base', async () => {
-        await installPackage(testPkgName, testPkgVersion);
+        await installPackageWithKnowledgeBase(testPkgName, testPkgVersion);
         await supertestWithoutAuth
-          .get(
-            `internal/fleet/api/fleet/epm/packages/${testPkgName}/knowledge_base?pkgName=${testPkgName}`
-          )
+          .get(`/internal/fleet/epm/packages/${testPkgName}/knowledge_base`)
           .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
         await uninstallPackage(testPkgName, testPkgVersion);
+        await cleanupKnowledgeBase(testPkgName);
       });
 
       it('allows user with fleet permission to access knowledge base', async () => {
-        await installPackage(testPkgName, testPkgVersion);
+        await installPackageWithKnowledgeBase(testPkgName, testPkgVersion);
         await supertestWithoutAuth
-          .get(
-            `internal/fleet/api/fleet/epm/packages/${testPkgName}/knowledge_base?pkgName=${testPkgName}`
-          )
+          .get(`/internal/fleet/epm/packages/${testPkgName}/knowledge_base`)
           .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
         await uninstallPackage(testPkgName, testPkgVersion);
+        await cleanupKnowledgeBase(testPkgName);
       });
     });
   });

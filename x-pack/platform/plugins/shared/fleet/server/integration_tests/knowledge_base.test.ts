@@ -153,11 +153,13 @@ describe('Knowledge Base End-to-End Integration Test', () => {
           filename: 'setup-guide.md',
           content: expect.stringContaining('Setup Guide'),
           path: 'docs/knowledge_base/setup-guide.md',
+          installed_at: expect.any(String),
         },
         {
           filename: 'troubleshooting.md',
           content: expect.stringContaining('Troubleshooting'),
           path: 'docs/knowledge_base/troubleshooting.md',
+          installed_at: expect.any(String),
         },
       ],
     });

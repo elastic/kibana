@@ -1530,16 +1530,19 @@ owner: elastic`,
     });
 
     it('should return knowledge base content when found', async () => {
+      const mockInstalledAt = '2023-01-01T00:00:00.000Z';
       const mockKnowledgeBaseItems = [
         {
           filename: 'setup.md',
           content: 'Setup instructions for nginx package',
           path: 'docs/knowledge_base/setup.md',
+          installed_at: mockInstalledAt,
         },
         {
           filename: 'troubleshooting.md',
           content: 'Common troubleshooting steps',
           path: 'docs/knowledge_base/troubleshooting.md',
+          installed_at: mockInstalledAt,
         },
       ];
 
@@ -1562,20 +1565,22 @@ owner: elastic`,
       expect(result).toEqual({
         package_name: 'nginx',
         version: '1.0.0',
-        installed_at: expect.any(String),
+        installed_at: mockInstalledAt,
         knowledge_base_content: mockKnowledgeBaseItems,
       });
 
-      // Validate that installed_at is a valid ISO string
-      expect(new Date(result!.installed_at).toISOString()).toBe(result!.installed_at);
+      // Validate that installed_at matches the expected timestamp
+      expect(result!.installed_at).toBe(mockInstalledAt);
     });
 
     it('should return knowledge base content with latest version when pkgVersion is not provided', async () => {
+      const mockInstalledAt = '2023-01-01T00:00:00.000Z';
       const mockKnowledgeBaseItems = [
         {
           filename: 'setup.md',
           content: 'Setup instructions for nginx package',
           path: 'docs/knowledge_base/setup.md',
+          installed_at: mockInstalledAt,
         },
       ];
 
@@ -1597,7 +1602,7 @@ owner: elastic`,
       expect(result).toEqual({
         package_name: 'nginx',
         version: 'latest',
-        installed_at: expect.any(String),
+        installed_at: mockInstalledAt,
         knowledge_base_content: mockKnowledgeBaseItems,
       });
     });

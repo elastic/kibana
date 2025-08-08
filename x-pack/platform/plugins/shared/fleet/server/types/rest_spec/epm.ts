@@ -332,6 +332,8 @@ export const GetKnowledgeBaseResponseSchema = schema.object({
     schema.object({
       filename: schema.string(),
       content: schema.string(),
+      path: schema.maybe(schema.string()),
+      installed_at: schema.maybe(schema.string()),
     })
   ),
 });

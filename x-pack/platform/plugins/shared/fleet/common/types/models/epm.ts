@@ -805,6 +805,8 @@ export interface IndexTemplateEntry {
 export interface KnowledgeBaseItem {
   filename: string;
   content: string;
+  path?: string;
+  installed_at?: string;
 }
 
 export interface PackageKnowledgeBase {

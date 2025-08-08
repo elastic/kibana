@@ -993,10 +993,14 @@ export async function getPackageKnowledgeBase(options: {
       return undefined;
     }
 
+    // Use the installed_at timestamp from the first knowledge base item
+    // All items for the same package should have the same installation timestamp
+    const installedAt = knowledgeBaseItems[0]?.installed_at || new Date().toISOString();
+
     return {
       package_name: pkgName,
       version: pkgVersion || 'latest',
-      installed_at: new Date().toISOString(), // TODO: This should be the installation date from the package, not the date its being fetched. Need to make sure we're storing it
+      installed_at: installedAt,
       knowledge_base_content: knowledgeBaseItems,
     };
   } catch (error) {

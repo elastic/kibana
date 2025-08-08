@@ -23,6 +23,7 @@ export const INTEGRATION_KNOWLEDGE_INDEX_TEMPLATE = {
         content: { type: 'semantic_text' as const },
         version: { type: 'version' as const },
         package_name: { type: 'keyword' as const },
+        installed_at: { type: 'date' as const },
       },
     },
   },
@@ -96,6 +97,7 @@ export async function saveKnowledgeBaseContentToIndex({
 
   // Index each knowledge base file as a separate document
   const operations = [];
+  const installedAt = new Date().toISOString();
 
   for (const item of knowledgeBaseContent) {
     const docId = `${pkgName}-${item.filename}`;
@@ -107,6 +109,7 @@ export async function saveKnowledgeBaseContentToIndex({
         filename: item.filename,
         content: item.content,
         version: pkgVersion,
+        installed_at: installedAt,
       }
     );
   }
@@ -146,6 +149,7 @@ export async function getPackageKnowledgeBaseFromIndex(
       filename: hit._source.filename,
       content: hit._source.content,
       path: `docs/knowledge_base/${hit._source.filename}`,
+      installed_at: hit._source.installed_at,
     }));
   } catch (error) {
     if (error.statusCode === 404) {
@@ -205,6 +209,7 @@ export async function updatePackageKnowledgeBaseVersion({
 
   // Index the new knowledge base content with the new version
   const operations = [];
+  const installedAt = new Date().toISOString();
 
   for (const item of knowledgeBaseContent) {
     const docId = `${pkgName}-${item.filename}`;
@@ -216,6 +221,7 @@ export async function updatePackageKnowledgeBaseVersion({
         filename: item.filename,
         content: item.content,
         version: newVersion,
+        installed_at: installedAt,
       }
     );
   }

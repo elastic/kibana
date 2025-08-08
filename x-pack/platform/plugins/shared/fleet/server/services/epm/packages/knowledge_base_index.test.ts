@@ -42,6 +42,7 @@ describe('knowledge_base_index', () => {
               content: { type: 'semantic_text' },
               version: { type: 'version' },
               package_name: { type: 'keyword' },
+              installed_at: { type: 'date' },
             },
           },
         },
@@ -130,12 +131,16 @@ describe('knowledge_base_index', () => {
     });
 
     it('should save knowledge base content successfully', async () => {
+      const beforeCall = new Date().toISOString();
+
       await saveKnowledgeBaseContentToIndex({
         esClient: mockEsClient,
         pkgName: 'test-package',
         pkgVersion: '1.0.0',
         knowledgeBaseContent: mockKnowledgeBaseContent,
       });
+
+      const afterCall = new Date().toISOString();
 
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
         index: INTEGRATION_KNOWLEDGE_INDEX,
@@ -158,6 +163,7 @@ describe('knowledge_base_index', () => {
             filename: 'test1.md',
             content: 'Test content 1',
             version: '1.0.0',
+            installed_at: expect.any(String),
           },
           { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: 'test-package-test2.md' } },
           {
@@ -165,10 +171,23 @@ describe('knowledge_base_index', () => {
             filename: 'test2.md',
             content: 'Test content 2',
             version: '1.0.0',
+            installed_at: expect.any(String),
           },
         ],
         refresh: 'wait_for',
       });
+
+      // Verify the installed_at timestamp is reasonable (between before and after the call)
+      const bulkCall = (mockEsClient.bulk as jest.Mock).mock.calls[0][0];
+      const installedAt1 = bulkCall.operations[1].installed_at;
+      const installedAt2 = bulkCall.operations[3].installed_at;
+
+      expect(installedAt1).toBe(installedAt2); // Should be the same timestamp for all docs in same operation
+      expect(installedAt1).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/); // ISO format
+      expect(new Date(installedAt1).getTime()).toBeGreaterThanOrEqual(
+        new Date(beforeCall).getTime()
+      );
+      expect(new Date(installedAt1).getTime()).toBeLessThanOrEqual(new Date(afterCall).getTime());
     });
 
     it('should return early when no knowledge base content provided', async () => {
@@ -373,6 +392,7 @@ describe('knowledge_base_index', () => {
             filename: 'updated.md',
             content: 'Updated content',
             version: '2.0.0',
+            installed_at: expect.any(String),
           },
         ],
         refresh: 'wait_for',
@@ -404,6 +424,7 @@ describe('knowledge_base_index', () => {
             filename: 'updated.md',
             content: 'Updated content',
             version: '1.0.0',
+            installed_at: expect.any(String),
           },
         ],
         refresh: 'wait_for',
