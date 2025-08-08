@@ -17,35 +17,35 @@ const LanguageIcons = [
   {
     id: 'python',
     icon: 'python.svg',
-    title: i18n.translate('xpack.xpack.searchHomepage.exploreLanguageClients.python.title', {
+    title: i18n.translate('xpack.searchHomepage.exploreLanguageClients.python.title', {
       defaultMessage: 'Python logo',
     }),
   },
   {
     id: 'javascript',
     icon: 'javascript.svg',
-    title: i18n.translate('xpack.xpack.searchHomepage.exploreLanguageClients.js.title', {
+    title: i18n.translate('xpack.searchHomepage.exploreLanguageClients.js.title', {
       defaultMessage: 'Javascript logo',
     }),
   },
   {
     id: 'php',
     icon: 'php.svg',
-    title: i18n.translate('xpack.xpack.searchHomepage.exploreLanguageClients.php.title', {
+    title: i18n.translate('xpack.searchHomepage.exploreLanguageClients.php.title', {
       defaultMessage: 'PHP logo',
     }),
   },
   {
     id: 'golang',
     icon: 'go.svg',
-    title: i18n.translate('xpack.xpack.searchHomepage.exploreLanguageClients.golang.title', {
+    title: i18n.translate('xpack.searchHomepage.exploreLanguageClients.golang.title', {
       defaultMessage: 'Go language logo',
     }),
   },
   {
     id: 'ruby',
     icon: 'ruby.svg',
-    title: i18n.translate('xpack.xpack.searchHomepage.exploreLanguageClients.ruby.title', {
+    title: i18n.translate('xpack.searchHomepage.exploreLanguageClients.ruby.title', {
       defaultMessage: 'Ruby logo',
     }),
   },
@@ -94,7 +94,7 @@ export const ExploreLanguageClients = () => {
           target="_blank"
           data-test-subj="exploreLangClientsLink"
         >
-          {i18n.translate('xpack.xpack.searchHomepage.exploreLanguageClients.link', {
+          {i18n.translate('xpack.searchHomepage.exploreLanguageClients.link', {
             defaultMessage: 'Explore our language clients',
           })}
         </EuiLink>
