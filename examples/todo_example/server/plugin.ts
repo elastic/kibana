@@ -18,6 +18,7 @@ import type {
   SavedObjectModelTransformationDoc,
   SavedObjectsModelVersionMap,
 } from '@kbn/core-saved-objects-server';
+import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 export interface Todo {
@@ -58,11 +59,32 @@ const savedObjectToTodo = (so: SavedObject<Omit<Todo, 'id'>>) => ({
 });
 
 export class ToDoPlugin implements Plugin {
-  constructor(_initializerContext: PluginInitializerContext) {}
+  private readonly hideCompleted: boolean;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    const { hideCompleted } = initializerContext.config.get<{ hideCompleted: boolean }>();
+
+    this.hideCompleted = hideCompleted;
+  }
 
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
     const savedObjects = core.savedObjects;
+
+    core.uiSettings.register({
+      'todo:hideCompleted': {
+        category: ['todo'],
+        description: i18n.translate('todo.uiSettings.hideCompleted.description', {
+          defaultMessage: 'Hide completed todos from the list.',
+        }),
+        name: i18n.translate('todo.uiSettings.hideCompleted.name', {
+          defaultMessage: 'Hide completed todos',
+        }),
+        requiresPageReload: false,
+        schema: schema.boolean(),
+        value: this.hideCompleted,
+      },
+    });
 
     const SAVED_OBJECTS_TYPE = 'todo';
     savedObjects.registerType({
@@ -95,6 +117,9 @@ export class ToDoPlugin implements Plugin {
       async (context, _request, response) => {
         try {
           const savedObjectsClient = (await context.core).savedObjects.getClient();
+          const uiSettingsClient = (await context.core).uiSettings.client;
+
+          const hideCompleted = await uiSettingsClient.get('todo:hideCompleted');
 
           const todosData = await savedObjectsClient.find<Omit<Todo, 'id'>>({
             type: SAVED_OBJECTS_TYPE,
@@ -102,7 +127,11 @@ export class ToDoPlugin implements Plugin {
             sortOrder: 'desc',
           });
 
-          const todos = todosData.saved_objects.map(savedObjectToTodo);
+          let todos = todosData.saved_objects.map(savedObjectToTodo);
+
+          if (hideCompleted) {
+            todos = todos.filter((todo) => !todo.completed);
+          }
 
           return response.ok({ body: todos });
         } catch (error) {

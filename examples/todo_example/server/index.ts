@@ -8,6 +8,13 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
+
+export const config = {
+  schema: schema.object({
+    hideCompleted: schema.boolean({ defaultValue: false }),
+  }),
+};
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { ToDoPlugin } = await import('./plugin');
