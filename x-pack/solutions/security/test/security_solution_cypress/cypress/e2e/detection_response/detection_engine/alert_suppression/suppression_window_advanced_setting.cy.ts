@@ -78,7 +78,7 @@ describe(
 
       describe(`when set to ${SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow}`, () => {
         beforeEach(() => {
-          login();
+          login('admin');
           selectSuppressionBehaviorOnAlertClosure(
             SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow
           );
@@ -115,7 +115,7 @@ describe(
 
       describe(`when set to ${SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow}`, () => {
         beforeEach(() => {
-          login();
+          login('admin');
           selectSuppressionBehaviorOnAlertClosure(
             SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow
           );
@@ -152,7 +152,7 @@ describe(
 
       describe('modal display', () => {
         beforeEach(() => {
-          login();
+          login('admin');
           selectSuppressionBehaviorOnAlertClosure(
             SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow
           );
