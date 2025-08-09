@@ -33,7 +33,7 @@ interface AppProps {
 }
 
 const ADD_TASK_ERROR = i18n.translate('todoExample.notifications.addTaskErrorToastTitle', {
-  defaultMessage: 'Failed to add task.',
+  defaultMessage: '❌ Failed to add task.',
 });
 
 const DELETE_MODAL_CANCEL = i18n.translate('todoExample.deleteModal.cancelButtonLabel', {
@@ -49,29 +49,29 @@ const DELETE_MODAL_TITLE = i18n.translate('todoExample.deleteModal.title', {
 });
 
 const DELETE_TASK_ERROR = i18n.translate('todoExample.notifications.deleteTaskErrorToastTitle', {
-  defaultMessage: 'Failed to delete task.',
+  defaultMessage: '🗑️ Failed to delete task.',
 });
 
 const DELETE_TASK_SUCCESS = i18n.translate(
   'todoExample.notifications.deleteTaskSuccessToastTitle',
   {
-    defaultMessage: 'Task was deleted successfully.',
+    defaultMessage: '🗑️ Task was deleted successfully!',
   }
 );
 
 const FETCH_TASKS_ERROR = i18n.translate('todoExample.notifications.fetchTasksErrorToastTitle', {
-  defaultMessage: 'Failed to fetch your tasks.',
+  defaultMessage: '⚠️ Failed to fetch your tasks.',
 });
 
 const UPDATE_STATUS_ERROR = i18n.translate(
   'todoExample.notifications.updateStatusErrorToastTitle',
   {
-    defaultMessage: 'Failed to update task status.',
+    defaultMessage: '⚠️ Failed to update task status.',
   }
 );
 
 const UPDATE_TASK_ERROR = i18n.translate('todoExample.notifications.updateTaskErrorToastTitle', {
-  defaultMessage: 'Failed to update task.',
+  defaultMessage: '❌ Failed to update task.',
 });
 
 export const App = ({ http, notifications }: AppProps) => {
@@ -157,11 +157,11 @@ export const App = ({ http, notifications }: AppProps) => {
       notifications.toasts.addSuccess({
         title: editingTodo
           ? i18n.translate('todoExample.notifications.updateTaskSuccessToastTitle', {
-              defaultMessage: 'Task {taskTitle} was updated.',
+              defaultMessage: '✅ Task {taskTitle} was updated!',
               values: { taskTitle: responseData.title },
             })
           : i18n.translate('todoExample.notifications.addTaskSuccessToastTitle', {
-              defaultMessage: 'Task {taskTitle} was added.',
+              defaultMessage: '🎉 Task {taskTitle} was added!',
               values: { taskTitle: responseData.title },
             }),
       });
@@ -185,11 +185,11 @@ export const App = ({ http, notifications }: AppProps) => {
       notifications.toasts.addSuccess({
         title: completed
           ? i18n.translate('todoExample.notifications.completeTaskSuccessToastTitle', {
-              defaultMessage: 'Task {taskTitle} was completed.',
+              defaultMessage: '🎉 Task {taskTitle} was completed!',
               values: { taskTitle: todo.title },
             })
           : i18n.translate('todoExample.notifications.reopenTaskSuccessToastTitle', {
-              defaultMessage: 'Task {taskTitle} was reopened.',
+              defaultMessage: '🔄 Task {taskTitle} was reopened!',
               values: { taskTitle: todo.title },
             }),
       });
