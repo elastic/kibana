@@ -17,6 +17,23 @@ import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/d
 import { ChangeDataView } from './change_dataview';
 import { dataViewMock, dataViewMockEsql } from './mocks/dataview';
 import type { DataViewPickerProps } from './data_view_picker';
+import { DataView } from '@kbn/data-views-plugin/common';
+
+// Mock DOM measurement functions to prevent EUI truncation width errors
+Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+  configurable: true,
+  value: 500,
+});
+
+Object.defineProperty(HTMLElement.prototype, 'scrollWidth', {
+  configurable: true,
+  value: 400,
+});
+
+Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+  configurable: true,
+  value: 500,
+});
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({
@@ -171,10 +188,15 @@ describe('DataView component', () => {
 
     await user.click(screen.getByTestId('dataview-trigger'));
 
-    // Verify the component renders correctly with ad hoc data views
+    // Verify both saved and ad hoc dataviews are visible
     await waitFor(() => {
-      expect(screen.getByTestId('dataview-trigger')).toBeInTheDocument();
-      // The ad hoc data view integration is tested through component behavior
+      expect(screen.getAllByRole('option')).toHaveLength(2);
+      expect(screen.getByRole('option', { name: 'dataview-1' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'the-data-view' })).toBeInTheDocument();
+
+      // Verify the ad hoc data view has the "Temporary" badge
+      expect(screen.getByTestId('dataViewItemTempBadge-the-data-view')).toBeInTheDocument();
+      expect(screen.getByText('Temporary')).toBeInTheDocument();
     });
   });
 
@@ -200,10 +222,11 @@ describe('DataView component', () => {
 
     await user.click(screen.getByTestId('dataview-trigger'));
 
-    // Verify the component renders correctly with ES|QL ad hoc data views
+    // Verify that ES|QL ad hoc dataviews are filtered out, only saved dataview should be visible
     await waitFor(() => {
-      expect(screen.getByTestId('dataview-trigger')).toBeInTheDocument();
-      // The ES|QL data view integration is tested through component behavior
+      expect(screen.getAllByRole('option')).toHaveLength(1);
+      expect(screen.getByRole('option', { name: 'dataview-1' })).toBeInTheDocument();
+      expect(screen.queryByRole('option', { name: 'the-data-view-esql' })).not.toBeInTheDocument();
     });
   });
 
@@ -229,10 +252,60 @@ describe('DataView component', () => {
 
     await user.click(screen.getByTestId('dataview-trigger'));
 
-    // Verify the component renders correctly with managed data views
+    // Verify both saved and managed dataviews are visible
     await waitFor(() => {
-      expect(screen.getByTestId('dataview-trigger')).toBeInTheDocument();
-      // The managed data view integration is tested through component behavior
+      expect(screen.getAllByRole('option')).toHaveLength(2);
+      expect(screen.getByRole('option', { name: 'dataview-1' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'the-data-view' })).toBeInTheDocument();
+
+      // Verify the managed data view has the "Managed" badge
+      expect(screen.getByTestId('dataViewItemManagedBadge-the-data-view')).toBeInTheDocument();
+      expect(screen.getByText('Managed')).toBeInTheDocument();
+    });
+  });
+
+  it('should properly handle both ad hoc and managed data views together', async () => {
+    const user = userEvent.setup();
+
+    render(
+      wrapDataViewComponentInContext(
+        {
+          ...props,
+          onDataViewCreated: jest.fn(),
+          savedDataViews: [
+            {
+              id: 'dataview-1',
+              title: 'dataview-1',
+            },
+          ],
+          adHocDataViews: [dataViewMock],
+          managedDataViews: [
+            {
+              ...dataViewMock,
+              id: 'managed-dataview-id',
+              title: 'managed-dataview-title',
+              name: 'managed-dataview',
+            } as unknown as DataView,
+          ],
+        },
+        false
+      )
+    );
+
+    await user.click(screen.getByTestId('dataview-trigger'));
+
+    // Verify all three data views are visible (saved, ad hoc, and managed)
+    await waitFor(() => {
+      expect(screen.getAllByRole('option')).toHaveLength(3);
+      expect(screen.getByRole('option', { name: 'dataview-1' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'the-data-view' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'managed-dataview' })).toBeInTheDocument();
+
+      // Verify the badges for special types
+      expect(screen.getByTestId('dataViewItemTempBadge-the-data-view')).toBeInTheDocument();
+      expect(screen.getByTestId('dataViewItemManagedBadge-managed-dataview')).toBeInTheDocument();
+      expect(screen.getByText('Temporary')).toBeInTheDocument();
+      expect(screen.getByText('Managed')).toBeInTheDocument();
     });
   });
 
