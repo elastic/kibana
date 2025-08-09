@@ -28,7 +28,7 @@ import {
 } from 'rxjs';
 import { v4 } from 'uuid';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { withInferenceSpan } from '@kbn/inference-tracing';
+import { withActiveInferenceSpan } from '@kbn/inference-tracing';
 import {
   ChatCompleteResponse,
   FunctionCallingMode,
@@ -199,7 +199,7 @@ export class ObservabilityAIAssistantClient {
     simulateFunctionCalling?: boolean;
     disableFunctions?: boolean;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
-    return withInferenceSpan('run_tools', () => {
+    return withActiveInferenceSpan('RunTools', () => {
       const isConversationUpdate = persist && !!predefinedConversationId;
       const conversationId = persist ? predefinedConversationId || v4() : '';
 
@@ -225,15 +225,13 @@ export class ObservabilityAIAssistantClient {
               logger: this.dependencies.logger,
               scopes: this.dependencies.scopes,
               chat: (name, chatParams) =>
-                withInferenceSpan('get_title', () =>
-                  this.chat(name, {
-                    ...chatParams,
-                    simulateFunctionCalling,
-                    connectorId,
-                    signal,
-                    stream: false,
-                  })
-                ),
+                this.chat(name, {
+                  ...chatParams,
+                  simulateFunctionCalling,
+                  connectorId,
+                  signal,
+                  stream: false,
+                }),
             }).pipe(shareReplay());
 
       const systemMessage$ = kbUserInstructions$.pipe(
@@ -259,7 +257,7 @@ export class ObservabilityAIAssistantClient {
             ? getContextFunctionRequestIfNeeded(initialMessages)
             : undefined;
 
-          return withInferenceSpan('run_tools', () =>
+          return withActiveInferenceSpan('ContinueConversation', () =>
             mergeOperator(
               // if we have added a context function request, also emit
               // the messageAdd event for it, so we can notify the consumer
