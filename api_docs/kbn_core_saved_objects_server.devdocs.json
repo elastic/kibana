@@ -8998,6 +8998,10 @@
                 "path": "x-pack/platform/plugins/shared/task_manager/server/saved_objects/index.ts"
               },
               {
+                "plugin": "links",
+                "path": "src/platform/plugins/private/links/server/saved_objects/links.ts"
+              },
+              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/saved_objects/data_views.ts"
               },
@@ -9192,10 +9196,6 @@
               {
                 "plugin": "eventAnnotation",
                 "path": "src/platform/plugins/private/event_annotation/server/saved_objects.ts"
-              },
-              {
-                "plugin": "links",
-                "path": "src/platform/plugins/private/links/server/saved_objects/links.ts"
               },
               {
                 "plugin": "savedObjectsManagement",

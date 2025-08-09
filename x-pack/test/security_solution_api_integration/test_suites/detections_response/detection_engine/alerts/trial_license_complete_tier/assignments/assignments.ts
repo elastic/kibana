@@ -25,7 +25,7 @@ import {
   getRuleForAlertTesting,
   waitForAlertsToBePresent,
   waitForRuleSuccess,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
