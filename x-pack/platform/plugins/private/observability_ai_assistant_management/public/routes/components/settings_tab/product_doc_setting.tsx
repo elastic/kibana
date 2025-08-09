@@ -17,10 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
 import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { useKibana } from '../../../hooks/use_kibana';
-import { UseProductDoc } from '../../../hooks/use_product_doc';
 
 const statusToButtonTextMap: Record<Exclude<InstallationStatus, 'error'> | 'loading', string> = {
   installing: i18n.translate(
@@ -44,23 +43,27 @@ const statusToButtonTextMap: Record<Exclude<InstallationStatus, 'error'> | 'load
   }),
 };
 
-export function ProductDocEntry({
+export function ProductDocSetting({
   knowledgeBase,
-  productDoc,
   currentlyDeployedInferenceId,
 }: {
   knowledgeBase: UseKnowledgeBaseResult;
-  productDoc: UseProductDoc;
   currentlyDeployedInferenceId: string | undefined;
 }) {
   const { overlays } = useKibana().services;
 
+  const {
+    status,
+    isProductDocInstalling,
+    isProductDocUninstalling,
+    installProductDoc,
+    uninstallProductDoc,
+  } = knowledgeBase;
+
   const canInstallProductDoc =
     currentlyDeployedInferenceId !== undefined &&
-    !(knowledgeBase.isInstalling || knowledgeBase.isWarmingUpModel || knowledgeBase.isPolling) &&
-    knowledgeBase.status?.value?.kbState === KnowledgeBaseState.READY;
-
-  const { status, isLoading: isStatusLoading, installProductDoc, uninstallProductDoc } = productDoc;
+    !(knowledgeBase.isInstalling || knowledgeBase.isWarmingUpModel) &&
+    status?.value?.inferenceModelState === InferenceModelState.READY;
 
   const onClickInstall = useCallback(() => {
     if (!currentlyDeployedInferenceId) {
@@ -95,19 +98,27 @@ export function ProductDocEntry({
   }, [overlays, uninstallProductDoc, currentlyDeployedInferenceId]);
 
   const buttonText = useMemo(() => {
-    if (!status || status === 'error' || !canInstallProductDoc) {
+    if (!status || status.value?.productDocStatus === 'error' || !canInstallProductDoc) {
       return statusToButtonTextMap.uninstalled;
     }
-    if (isStatusLoading && status !== 'installing' && status !== 'uninstalling') {
+    if (
+      (isProductDocInstalling || isProductDocUninstalling) &&
+      status.value?.productDocStatus !== 'installing' &&
+      status.value?.productDocStatus !== 'uninstalling'
+    ) {
       return statusToButtonTextMap.loading;
     }
-    return statusToButtonTextMap[status];
-  }, [status, isStatusLoading, canInstallProductDoc]);
+    return statusToButtonTextMap[status.value?.productDocStatus || 'uninstalled'];
+  }, [status, isProductDocInstalling, isProductDocUninstalling, canInstallProductDoc]);
 
-  const isLoading = isStatusLoading || status === 'installing' || status === 'uninstalling';
+  const isLoading =
+    isProductDocInstalling ||
+    isProductDocUninstalling ||
+    status.value?.productDocStatus === 'installing' ||
+    status.value?.productDocStatus === 'uninstalling';
 
   const content = useMemo(() => {
-    if (status === 'installed') {
+    if (!isLoading && canInstallProductDoc && status.value?.productDocStatus === 'installed') {
       return (
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={false}>
