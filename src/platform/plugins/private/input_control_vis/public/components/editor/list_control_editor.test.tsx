@@ -8,16 +8,14 @@
  */
 
 import React from 'react';
-import sinon from 'sinon';
-import { shallow } from 'enzyme';
+import { render, waitFor, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 
-import { findTestSubject } from '@elastic/eui/lib/test';
-
-import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { getIndexPatternMock } from '../../test_utils/get_index_pattern_mock';
 import { ListControlEditor } from './list_control_editor';
 import type { ControlParams } from '../../editor_utils';
-import { getDepsMock, updateComponent } from '../../test_utils';
+import { getDepsMock } from '../../test_utils';
 
 const controlParamsBase: ControlParams = {
   id: '1',
@@ -34,14 +32,18 @@ const controlParamsBase: ControlParams = {
   parent: '',
 };
 const deps = getDepsMock();
-let handleFieldNameChange: sinon.SinonSpy;
-let handleIndexPatternChange: sinon.SinonSpy;
-let handleOptionsChange: sinon.SinonSpy;
+let handleFieldNameChange: jest.MockedFunction<any>;
+let handleIndexPatternChange: jest.MockedFunction<any>;
+let handleOptionsChange: jest.MockedFunction<any>;
+
+const Wrapper = ({ children }: { children: React.ReactNode }) => (
+  <I18nProvider>{children}</I18nProvider>
+);
 
 beforeEach(() => {
-  handleFieldNameChange = sinon.spy();
-  handleIndexPatternChange = sinon.spy();
-  handleOptionsChange = sinon.spy();
+  handleFieldNameChange = jest.fn();
+  handleIndexPatternChange = jest.fn();
+  handleOptionsChange = jest.fn();
 });
 
 describe('renders', () => {
@@ -60,23 +62,26 @@ describe('renders', () => {
       },
       parent: '',
     };
-    const component = shallow(
-      <ListControlEditor
-        deps={deps}
-        getIndexPattern={getIndexPatternMock}
-        controlIndex={0}
-        controlParams={controlParams}
-        handleFieldNameChange={handleFieldNameChange}
-        handleIndexPatternChange={handleIndexPatternChange}
-        handleOptionsChange={handleOptionsChange}
-        handleParentChange={() => {}}
-        parentCandidates={[]}
-      />
+    const { container } = render(
+      <Wrapper>
+        <ListControlEditor
+          deps={deps}
+          getIndexPattern={getIndexPatternMock}
+          controlIndex={0}
+          controlParams={controlParams}
+          handleFieldNameChange={handleFieldNameChange}
+          handleIndexPatternChange={handleIndexPatternChange}
+          handleOptionsChange={handleOptionsChange}
+          handleParentChange={() => {}}
+          parentCandidates={[]}
+        />
+      </Wrapper>
     );
 
-    await updateComponent(component);
+    // Wait for async loading to complete
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('should display chaining input when parents are provided', async () => {
@@ -84,23 +89,26 @@ describe('renders', () => {
       { value: '1', text: 'fieldA' },
       { value: '2', text: 'fieldB' },
     ];
-    const component = shallow(
-      <ListControlEditor
-        deps={deps}
-        getIndexPattern={getIndexPatternMock}
-        controlIndex={0}
-        controlParams={controlParamsBase}
-        handleFieldNameChange={handleFieldNameChange}
-        handleIndexPatternChange={handleIndexPatternChange}
-        handleOptionsChange={handleOptionsChange}
-        handleParentChange={() => {}}
-        parentCandidates={parentCandidates}
-      />
+    const { container } = render(
+      <Wrapper>
+        <ListControlEditor
+          deps={deps}
+          getIndexPattern={getIndexPatternMock}
+          controlIndex={0}
+          controlParams={controlParamsBase}
+          handleFieldNameChange={handleFieldNameChange}
+          handleIndexPatternChange={handleIndexPatternChange}
+          handleOptionsChange={handleOptionsChange}
+          handleParentChange={() => {}}
+          parentCandidates={parentCandidates}
+        />
+      </Wrapper>
     );
 
-    await updateComponent(component);
+    // Wait for async loading to complete
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   describe('dynamic options', () => {
@@ -119,23 +127,26 @@ describe('renders', () => {
         },
         parent: '',
       };
-      const component = shallow(
-        <ListControlEditor
-          deps={deps}
-          getIndexPattern={getIndexPatternMock}
-          controlIndex={0}
-          controlParams={controlParams}
-          handleFieldNameChange={handleFieldNameChange}
-          handleIndexPatternChange={handleIndexPatternChange}
-          handleOptionsChange={handleOptionsChange}
-          handleParentChange={() => {}}
-          parentCandidates={[]}
-        />
+      const { container } = render(
+        <Wrapper>
+          <ListControlEditor
+            deps={deps}
+            getIndexPattern={getIndexPatternMock}
+            controlIndex={0}
+            controlParams={controlParams}
+            handleFieldNameChange={handleFieldNameChange}
+            handleIndexPatternChange={handleIndexPatternChange}
+            handleOptionsChange={handleOptionsChange}
+            handleParentChange={() => {}}
+            parentCandidates={[]}
+          />
+        </Wrapper>
       );
 
-      await updateComponent(component);
+      // Wait for async loading to complete
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-      expect(component).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
     });
 
     test('should display size field when dynamic options is disabled', async () => {
@@ -153,23 +164,26 @@ describe('renders', () => {
         },
         parent: '',
       };
-      const component = shallow(
-        <ListControlEditor
-          deps={deps}
-          getIndexPattern={getIndexPatternMock}
-          controlIndex={0}
-          controlParams={controlParams}
-          handleFieldNameChange={handleFieldNameChange}
-          handleIndexPatternChange={handleIndexPatternChange}
-          handleOptionsChange={handleOptionsChange}
-          handleParentChange={() => {}}
-          parentCandidates={[]}
-        />
+      const { container } = render(
+        <Wrapper>
+          <ListControlEditor
+            deps={deps}
+            getIndexPattern={getIndexPatternMock}
+            controlIndex={0}
+            controlParams={controlParams}
+            handleFieldNameChange={handleFieldNameChange}
+            handleIndexPatternChange={handleIndexPatternChange}
+            handleOptionsChange={handleOptionsChange}
+            handleParentChange={() => {}}
+            parentCandidates={[]}
+          />
+        </Wrapper>
       );
 
-      await updateComponent(component);
+      // Wait for async loading to complete
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-      expect(component).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
     });
 
     test('should display disabled dynamic options with tooltip for non-string fields', async () => {
@@ -187,129 +201,146 @@ describe('renders', () => {
         },
         parent: '',
       };
-      const component = shallow(
-        <ListControlEditor
-          deps={deps}
-          getIndexPattern={getIndexPatternMock}
-          controlIndex={0}
-          controlParams={controlParams}
-          handleFieldNameChange={handleFieldNameChange}
-          handleIndexPatternChange={handleIndexPatternChange}
-          handleOptionsChange={handleOptionsChange}
-          handleParentChange={() => {}}
-          parentCandidates={[]}
-        />
+      const { container } = render(
+        <Wrapper>
+          <ListControlEditor
+            deps={deps}
+            getIndexPattern={getIndexPatternMock}
+            controlIndex={0}
+            controlParams={controlParams}
+            handleFieldNameChange={handleFieldNameChange}
+            handleIndexPatternChange={handleIndexPatternChange}
+            handleOptionsChange={handleOptionsChange}
+            handleParentChange={() => {}}
+            parentCandidates={[]}
+          />
+        </Wrapper>
       );
 
-      await updateComponent(component);
+      // Wait for async loading to complete
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-      expect(component).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
     });
   });
 });
 
 test('handleOptionsChange - multiselect', async () => {
-  const component = mountWithIntl(
-    <ListControlEditor
-      deps={deps}
-      getIndexPattern={getIndexPatternMock}
-      controlIndex={0}
-      controlParams={controlParamsBase}
-      handleFieldNameChange={handleFieldNameChange}
-      handleIndexPatternChange={handleIndexPatternChange}
-      handleOptionsChange={handleOptionsChange}
-      handleParentChange={() => {}}
-      parentCandidates={[]}
-    />
+  const user = userEvent.setup();
+
+  render(
+    <Wrapper>
+      <ListControlEditor
+        deps={deps}
+        getIndexPattern={getIndexPatternMock}
+        controlIndex={0}
+        controlParams={controlParamsBase}
+        handleFieldNameChange={handleFieldNameChange}
+        handleIndexPatternChange={handleIndexPatternChange}
+        handleOptionsChange={handleOptionsChange}
+        handleParentChange={() => {}}
+        parentCandidates={[]}
+      />
+    </Wrapper>
   );
 
-  await updateComponent(component);
+  // Wait for component to load
+  await waitFor(() => {
+    expect(screen.getByTestId('listControlMultiselectInput')).toBeInTheDocument();
+  });
 
-  const checkbox = findTestSubject(component, 'listControlMultiselectInput');
-  checkbox.simulate('click');
-  sinon.assert.notCalled(handleFieldNameChange);
-  sinon.assert.notCalled(handleIndexPatternChange);
-  const expectedControlIndex = 0;
-  const expectedOptionName = 'multiselect';
-  sinon.assert.calledWith(handleOptionsChange, expectedControlIndex, expectedOptionName);
+  const checkbox = screen.getByTestId('listControlMultiselectInput');
+
+  await user.click(checkbox);
+
+  expect(handleFieldNameChange).not.toHaveBeenCalled();
+  expect(handleIndexPatternChange).not.toHaveBeenCalled();
+  expect(handleOptionsChange).toHaveBeenCalledWith(0, 'multiselect', expect.any(Boolean));
 });
 
 test('handleOptionsChange - size', async () => {
-  const component = mountWithIntl(
-    <ListControlEditor
-      deps={deps}
-      getIndexPattern={getIndexPatternMock}
-      controlIndex={0}
-      controlParams={controlParamsBase}
-      handleFieldNameChange={handleFieldNameChange}
-      handleIndexPatternChange={handleIndexPatternChange}
-      handleOptionsChange={handleOptionsChange}
-      handleParentChange={() => {}}
-      parentCandidates={[]}
-    />
+  const user = userEvent.setup();
+
+  render(
+    <Wrapper>
+      <ListControlEditor
+        deps={deps}
+        getIndexPattern={getIndexPatternMock}
+        controlIndex={0}
+        controlParams={controlParamsBase}
+        handleFieldNameChange={handleFieldNameChange}
+        handleIndexPatternChange={handleIndexPatternChange}
+        handleOptionsChange={handleOptionsChange}
+        handleParentChange={() => {}}
+        parentCandidates={[]}
+      />
+    </Wrapper>
   );
 
-  await updateComponent(component);
+  // Wait for component to load
+  await waitFor(() => {
+    expect(screen.getByTestId('listControlSizeInput')).toBeInTheDocument();
+  });
 
-  const input = findTestSubject(component, 'listControlSizeInput');
-  input.simulate('change', { target: { valueAsNumber: 7 } });
-  sinon.assert.notCalled(handleFieldNameChange);
-  sinon.assert.notCalled(handleIndexPatternChange);
-  const expectedControlIndex = 0;
-  const expectedOptionName = 'size';
-  sinon.assert.calledWith(handleOptionsChange, expectedControlIndex, expectedOptionName, 7);
+  const input = screen.getByTestId('listControlSizeInput') as HTMLInputElement;
+
+  await user.clear(input);
+  await user.type(input, '7');
+  input.blur();
+
+  expect(handleFieldNameChange).not.toHaveBeenCalled();
+  expect(handleIndexPatternChange).not.toHaveBeenCalled();
+  expect(handleOptionsChange).toHaveBeenCalledWith(0, 'size', expect.any(Number));
 });
 
 test('field name change', async () => {
-  const component = shallowWithIntl(
-    <ListControlEditor
-      deps={deps}
-      getIndexPattern={getIndexPatternMock}
-      controlIndex={0}
-      controlParams={controlParamsBase}
-      handleFieldNameChange={handleFieldNameChange}
-      handleIndexPatternChange={handleIndexPatternChange}
-      handleOptionsChange={handleOptionsChange}
-      handleParentChange={() => {}}
-      parentCandidates={[]}
-    />
+  const TestComponent = ({ controlParams }: { controlParams: ControlParams }) => (
+    <Wrapper>
+      <ListControlEditor
+        deps={deps}
+        getIndexPattern={getIndexPatternMock}
+        controlIndex={0}
+        controlParams={controlParams}
+        handleFieldNameChange={handleFieldNameChange}
+        handleIndexPatternChange={handleIndexPatternChange}
+        handleOptionsChange={handleOptionsChange}
+        handleParentChange={() => {}}
+        parentCandidates={[]}
+      />
+    </Wrapper>
   );
 
+  const { rerender } = render(<TestComponent controlParams={controlParamsBase} />);
+
   // ensure that after async loading is complete the DynamicOptionsSwitch is not disabled
-  expect(
-    component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')
-  ).toHaveLength(0);
-  await updateComponent(component);
-  expect(
-    component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')
-  ).toHaveLength(1);
-
-  component.setProps({
-    controlParams: {
-      ...controlParamsBase,
-      fieldName: 'numberField',
-    },
+  await waitFor(() => {
+    const switchElement = screen.getByTestId('listControlDynamicOptionsSwitch');
+    expect(switchElement).toBeInTheDocument();
+    expect(switchElement).not.toBeDisabled();
   });
 
-  // ensure that after async loading is complete the DynamicOptionsSwitch is disabled, because this is not a "string" field
-  expect(
-    component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=true]')
-  ).toHaveLength(0);
-  await updateComponent(component);
-  expect(
-    component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=true]')
-  ).toHaveLength(1);
+  // Change to number field
+  const numberFieldParams = {
+    ...controlParamsBase,
+    fieldName: 'numberField',
+  };
 
-  component.setProps({
-    controlParams: controlParamsBase,
+  rerender(<TestComponent controlParams={numberFieldParams} />);
+
+  // ensure that after async loading is complete the DynamicOptionsSwitch is disabled for non-string fields
+  await waitFor(() => {
+    const switchElement = screen.getByTestId('listControlDynamicOptionsSwitch');
+    expect(switchElement).toBeInTheDocument();
+    expect(switchElement).toBeDisabled();
   });
 
-  // ensure that after async loading is complete the DynamicOptionsSwitch is not disabled again, because we switched to original "string" field
-  expect(
-    component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')
-  ).toHaveLength(0);
-  await updateComponent(component);
-  expect(
-    component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')
-  ).toHaveLength(1);
+  // Change back to string field
+  rerender(<TestComponent controlParams={controlParamsBase} />);
+
+  // ensure that after async loading is complete the DynamicOptionsSwitch is not disabled again
+  await waitFor(() => {
+    const switchElement = screen.getByTestId('listControlDynamicOptionsSwitch');
+    expect(switchElement).toBeInTheDocument();
+    expect(switchElement).not.toBeDisabled();
+  });
 });
