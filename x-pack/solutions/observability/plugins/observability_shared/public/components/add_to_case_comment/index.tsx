@@ -12,7 +12,7 @@ import { NotificationsStart } from '@kbn/core/public';
 
 interface AddToCaseCommentProps {
   comment: string;
-  onCommentChange: React.Dispatch<React.SetStateAction<string>>;
+  onCommentChange: (comment: string) => void;
   notifications: NotificationsStart;
 }
 
@@ -20,12 +20,6 @@ export function AddToCaseComment({ comment, onCommentChange }: AddToCaseCommentP
   const input = (
     <EuiTextArea
       data-test-subj="syntheticsAddToCaseCommentTextArea"
-      placeholder={i18n.translate(
-        'xpack.observabilityShared.cases.addPageToCaseModal.commentPlaceholder',
-        {
-          defaultMessage: 'Add a comment (optional)',
-        }
-      )}
       onChange={(e) => {
         onCommentChange(e.target.value);
       }}

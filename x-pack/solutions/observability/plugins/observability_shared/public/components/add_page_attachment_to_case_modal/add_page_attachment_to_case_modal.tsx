@@ -50,14 +50,11 @@ export function AddPageAttachmentToCaseModal({
     return canUseCases();
   }, [canUseCases]);
 
-  const hasCasesPermissions =
-    casesPermissions.read && casesPermissions.update && casesPermissions.push;
-  const CasesContext = useMemo(() => {
-    if (!getCasesContext) {
-      return React.Fragment;
-    }
-    return getCasesContext();
-  }, [getCasesContext]);
+  const hasCasesPermissions = useMemo(() => {
+    return casesPermissions.read && casesPermissions.update && casesPermissions.push;
+  }, [casesPermissions]);
+
+  const CasesContext = getCasesContext ? getCasesContext() : React.Fragment;
 
   useEffect(() => {
     if (!hasCasesPermissions) {
@@ -96,11 +93,16 @@ function AddToCaseButtonContent({
   const useCasesAddToExistingCaseModal = cases.hooks.useCasesAddToExistingCaseModal!;
   const casesModal = useCasesAddToExistingCaseModal();
 
+  const handleCloseModal = useCallback(() => {
+    setIsCommentModalOpen(true);
+    onCloseModal();
+  }, [onCloseModal]);
+
   const onCommentAdded = useCallback(() => {
     setIsCommentModalOpen(false);
     casesModal.open({
-      getAttachments: () => {
-        return [
+      getAttachments: () =>
+        [
           {
             persistableStateAttachmentState: {
               ...pageAttachmentState,
@@ -109,56 +111,51 @@ function AddToCaseButtonContent({
             persistableStateAttachmentTypeId: '.page',
             type: 'persistableState',
           },
-        ] as CaseAttachmentsWithoutOwner;
-      },
+        ] as CaseAttachmentsWithoutOwner,
     });
   }, [casesModal, comment, pageAttachmentState]);
 
-  return (
-    <>
-      {isCommentModalOpen && (
-        <EuiConfirmModal
-          onCancel={onCloseModal}
-          aria-label={i18n.translate(
-            'xpack.observabilityShared.cases.addToCaseModal.confirmAriaLabel',
-            {
-              defaultMessage: 'Confirm comment',
-            }
-          )}
-          onConfirm={onCommentAdded}
-          data-test-subj="syntheticsAddToCaseCommentModal"
-          style={{ width: 800 }}
-          confirmButtonText={i18n.translate(
-            'xpack.observabilityShared.cases.addToPageAttachmentToCaseModal.confirmButtonText',
-            {
-              defaultMessage: 'Confirm',
-            }
-          )}
-          cancelButtonText={i18n.translate(
-            'xpack.observabilityShared.cases.addToPageAttachmentToCaseModal.cancelButtonText',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-        >
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              {i18n.translate('xpack.observabilityShared.cases.addToCaseModal.title', {
-                defaultMessage: 'Add page to case',
-              })}
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <AddToCaseComment
-              onCommentChange={setComment}
-              comment={comment}
-              notifications={notifications}
-            />
-          </EuiModalBody>
-        </EuiConfirmModal>
+  return isCommentModalOpen ? (
+    <EuiConfirmModal
+      onCancel={handleCloseModal}
+      aria-label={i18n.translate(
+        'xpack.observabilityShared.cases.addToCaseModal.confirmAriaLabel',
+        {
+          defaultMessage: 'Confirm comment',
+        }
       )}
-    </>
-  );
+      onConfirm={onCommentAdded}
+      data-test-subj="syntheticsAddToCaseCommentModal"
+      style={{ width: 800 }}
+      confirmButtonText={i18n.translate(
+        'xpack.observabilityShared.cases.addToPageAttachmentToCaseModal.confirmButtonText',
+        {
+          defaultMessage: 'Confirm',
+        }
+      )}
+      cancelButtonText={i18n.translate(
+        'xpack.observabilityShared.cases.addToPageAttachmentToCaseModal.cancelButtonText',
+        {
+          defaultMessage: 'Cancel',
+        }
+      )}
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          {i18n.translate('xpack.observabilityShared.cases.addToCaseModal.title', {
+            defaultMessage: 'Add page to case',
+          })}
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <AddToCaseComment
+          onCommentChange={(change) => setComment(change)}
+          comment={comment}
+          notifications={notifications}
+        />
+      </EuiModalBody>
+    </EuiConfirmModal>
+  ) : null;
 }
 
 // eslint-disable-next-line import/no-default-export
