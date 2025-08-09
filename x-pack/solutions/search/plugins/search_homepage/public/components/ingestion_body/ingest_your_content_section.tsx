@@ -81,7 +81,7 @@ export const IngestYourContentSection = () => {
             <EuiTitle size="s">
               <h3>
                 <FormattedMessage
-                  id="xpack.xpack.searchHomepage.ingestContentSection.title"
+                  id="xpack.searchHomepage.ingestContentSection.title"
                   defaultMessage="Ingest your content"
                 />
               </h3>
@@ -89,7 +89,7 @@ export const IngestYourContentSection = () => {
             <EuiText color="subdued" size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.xpack.searchHomepage.ingestContentSection.description"
+                  id="xpack.searchHomepage.ingestContentSection.description"
                   defaultMessage="Choose from various methods and source to import your data, ensuring a perfect fit for your technical skills and data sources."
                 />
               </p>
@@ -100,7 +100,7 @@ export const IngestYourContentSection = () => {
                   <p>
                     <strong>
                       <FormattedMessage
-                        id="xpack.xpack.searchHomepage.ingestContentSection.sampleData.label"
+                        id="xpack.searchHomepage.ingestContentSection.sampleData.label"
                         defaultMessage="Want to try sample data?"
                       />
                     </strong>
@@ -118,17 +118,16 @@ export const IngestYourContentSection = () => {
       <EuiFlexGrid columns={3}>
         <IngestionSourceCard
           icon="document"
-          title={i18n.translate(
-            'xpack.xpack.searchHomepage.ingestContentSection.fileUpload.title',
-            { defaultMessage: 'Upload a file' }
-          )}
+          title={i18n.translate('xpack.searchHomepage.ingestContentSection.fileUpload.title', {
+            defaultMessage: 'Upload a file',
+          })}
           description={i18n.translate(
-            'xpack.xpack.searchHomepage.ingestContentSection.fileUpload.description',
+            'xpack.searchHomepage.ingestContentSection.fileUpload.description',
             { defaultMessage: 'Quickly analyze and import data into an Elasticsearch' }
           )}
           action={
             <EuiButton data-test-subj="uploadFileButton" onClick={onFileUpload}>
-              {i18n.translate('xpack.xpack.searchHomepage.ingestContentSection.fileUpload.cta', {
+              {i18n.translate('xpack.searchHomepage.ingestContentSection.fileUpload.cta', {
                 defaultMessage: 'Upload a file',
               })}
             </EuiButton>
@@ -138,12 +137,11 @@ export const IngestYourContentSection = () => {
         {webCrawlersLink !== undefined && (
           <IngestionSourceCard
             icon="web"
-            title={i18n.translate(
-              'xpack.xpack.searchHomepage.ingestContentSection.webCrawler.title',
-              { defaultMessage: 'Crawl a website' }
-            )}
+            title={i18n.translate('xpack.searchHomepage.ingestContentSection.webCrawler.title', {
+              defaultMessage: 'Crawl a website',
+            })}
             description={i18n.translate(
-              'xpack.xpack.searchHomepage.ingestContentSection.webCrawler.description',
+              'xpack.searchHomepage.ingestContentSection.webCrawler.description',
               { defaultMessage: 'Extract searchable content from websites and knowledge bases.' }
             )}
             action={
@@ -152,7 +150,7 @@ export const IngestYourContentSection = () => {
                 href={webCrawlersLink.href}
                 onClick={onWebCrawlersClick}
               >
-                {i18n.translate('xpack.xpack.searchHomepage.ingestContentSection.webCrawler.cta', {
+                {i18n.translate('xpack.searchHomepage.ingestContentSection.webCrawler.cta', {
                   defaultMessage: 'View Elastic Open Web Crawler',
                 })}
               </EuiButton>
@@ -162,12 +160,11 @@ export const IngestYourContentSection = () => {
         {connectorsLink !== undefined && (
           <IngestionSourceCard
             icon="plugs"
-            title={i18n.translate(
-              'xpack.xpack.searchHomepage.ingestContentSection.connectors.title',
-              { defaultMessage: 'Connect to a third-party data source' }
-            )}
+            title={i18n.translate('xpack.searchHomepage.ingestContentSection.connectors.title', {
+              defaultMessage: 'Connect to a third-party data source',
+            })}
             description={i18n.translate(
-              'xpack.xpack.searchHomepage.ingestContentSection.connectors.description',
+              'xpack.searchHomepage.ingestContentSection.connectors.description',
               {
                 defaultMessage:
                   'Sync third-party data sources to Elasticsearch, by deploying Elastic connectors on your own infrastructure.',
@@ -179,7 +176,7 @@ export const IngestYourContentSection = () => {
                 href={connectorsLink.href}
                 onClick={onConnectorsClick}
               >
-                {i18n.translate('xpack.xpack.searchHomepage.ingestContentSection.connectors.cta', {
+                {i18n.translate('xpack.searchHomepage.ingestContentSection.connectors.cta', {
                   defaultMessage: 'Add a connector',
                 })}
               </EuiButton>
