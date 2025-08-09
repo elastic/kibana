@@ -8,6 +8,7 @@
  */
 
 import { EnterIfNode, EnterConditionBranchNode } from '@kbn/workflows';
+import { KQLSyntaxError } from '@kbn/es-query';
 import { StepImplementation } from '../step_base';
 import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import { evaluateKql } from './eval_kql';
@@ -91,7 +92,7 @@ export class EnterIfNodeImpl implements StepImplementation {
     try {
       return evaluateKql(condition, this.workflowContextManager.getContext());
     } catch (error) {
-      if (error?.message?.includes('KQLSyntaxError')) {
+      if (error instanceof KQLSyntaxError) {
         throw new Error(
           `Syntax error in condition "${condition}" for step ${this.step.id}: ${String(error)}`
         );

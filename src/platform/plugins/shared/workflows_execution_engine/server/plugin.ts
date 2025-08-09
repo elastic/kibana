@@ -143,7 +143,7 @@ export class WorkflowsExecutionEnginePlugin
         try {
           await step.run();
         } catch (error) {
-          // If an unhandled error occurs in a step, it terminates the workflow execution
+          // If an unhandled error occurs in a step, the workflow execution is terminated
           workflowLogger.logError(
             `Error executing step ${currentNode.id} (${currentNode.name}): ${error.message}`
           );
