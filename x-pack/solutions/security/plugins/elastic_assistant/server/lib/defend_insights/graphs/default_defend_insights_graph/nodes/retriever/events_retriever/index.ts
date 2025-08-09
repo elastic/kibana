@@ -13,7 +13,8 @@ import { BaseRetriever, type BaseRetrieverInput } from '@langchain/core/retrieve
 import type { DefendInsightType, Replacements } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 
-import { getAnonymizedEvents } from './get_anonymized_events';
+import type { AIAssistantKnowledgeBaseDataClient } from '../../../../../../../ai_assistant_data_clients/knowledge_base';
+import { getAnonymizedEvents } from './get_events';
 
 export type CustomRetrieverInput = BaseRetrieverInput;
 
@@ -24,6 +25,7 @@ export class AnonymizedEventsRetriever extends BaseRetriever {
   private readonly endpointIds: string[];
   private readonly anonymizationFields?: AnonymizationFieldResponse[];
   private readonly esClient: ElasticsearchClient;
+  private readonly kbDataClient: AIAssistantKnowledgeBaseDataClient | null;
   private readonly onNewReplacements?: (newReplacements: Replacements) => void;
   private readonly replacements?: Replacements;
   private readonly size?: number;
@@ -36,6 +38,7 @@ export class AnonymizedEventsRetriever extends BaseRetriever {
     anonymizationFields,
     fields,
     esClient,
+    kbDataClient,
     onNewReplacements,
     replacements,
     size,
@@ -46,6 +49,7 @@ export class AnonymizedEventsRetriever extends BaseRetriever {
     endpointIds: string[];
     anonymizationFields?: AnonymizationFieldResponse[];
     esClient: ElasticsearchClient;
+    kbDataClient: AIAssistantKnowledgeBaseDataClient | null;
     fields?: CustomRetrieverInput;
     onNewReplacements?: (newReplacements: Replacements) => void;
     replacements?: Replacements;
@@ -59,6 +63,7 @@ export class AnonymizedEventsRetriever extends BaseRetriever {
     this.endpointIds = endpointIds;
     this.anonymizationFields = anonymizationFields;
     this.esClient = esClient;
+    this.kbDataClient = kbDataClient;
     this.onNewReplacements = onNewReplacements;
     this.replacements = replacements;
     this.size = size;
@@ -75,6 +80,7 @@ export class AnonymizedEventsRetriever extends BaseRetriever {
       endpointIds: this.endpointIds,
       anonymizationFields: this.anonymizationFields,
       esClient: this.esClient,
+      kbDataClient: this.kbDataClient,
       onNewReplacements: this.onNewReplacements,
       replacements: this.replacements,
       size: this.size,

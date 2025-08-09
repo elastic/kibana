@@ -114,6 +114,7 @@ describe('evaluateDefendInsights', () => {
       endpointIds: [],
       esClient: mockEsClient,
       llm: expect.any(Object),
+      kbDataClient: null,
       logger: mockLogger,
       size: 10,
       anonymizationFields: [],

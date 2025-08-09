@@ -17,7 +17,8 @@ describe('getCombinedDefendInsightsPrompt', () => {
       combinedMaybePartialResults: '',
     });
 
-    expect(result).toBe(`defendInsightsPrompt
+    expect(result).toBe(`
+defendInsightsPrompt
 
 Use context from the following events to provide insights:
 
@@ -37,7 +38,8 @@ event2
       continuePrompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.CONTINUE,
     });
 
-    expect(result).toBe(`defendInsightsPrompt
+    expect(result).toBe(`
+defendInsightsPrompt
 
 Use context from the following events to provide insights:
 
