@@ -1,0 +1,11 @@
+---
+action.name: connect_kernel
+action.message: "Failed to start network event reporting"
+os: [MacOS]
+date: "2025-08-15"
+---
+
+## Remediation
+After successfully loading the ElasticEndpoint system extension, an additional message appears, asking to allow Elastic Endpoint to filter network content.
+
+Click Allow to enable content filtering for the ElasticEndpoint system extension. Without this approval, Elastic Endpoint cannot receive network events and, therefore, cannot enable network-related features such as host isolation.
