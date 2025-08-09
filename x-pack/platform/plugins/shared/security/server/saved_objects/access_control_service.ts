@@ -24,8 +24,11 @@ export class AccessControlService {
     typeRegistry,
   }: {
     objects: AuthorizeObject[];
-    typeRegistry: ISavedObjectTypeRegistry;
+    typeRegistry?: ISavedObjectTypeRegistry;
   }) {
+    if (!typeRegistry) {
+      return { typesRequiringAccessControl: new Set<string>() };
+    }
     const currentUser = this.userForOperation;
     const typesRequiringCheck = new Set<string>();
 

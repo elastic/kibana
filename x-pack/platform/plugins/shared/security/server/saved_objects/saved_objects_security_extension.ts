@@ -692,9 +692,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   async authorize<A extends string>(
     params: InternalAuthorizeParams
   ): Promise<CheckAuthorizationResult<string>> {
-    if (!this.typeRegistry) {
-      throw new Error('Type registry is not defined');
-    }
     if (params.actions.size === 0) {
       throw new Error('No actions specified for authorization');
     }
@@ -732,7 +729,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const typesAndSpaces = params.enforceMap;
 
     if (typesAndSpaces !== undefined && checkResult) {
-      Array.from(params.actions).forEach((action) =>
+      params.actions.forEach((action) =>
         this.enforceAuthorization({
           typesAndSpaces,
           action,
