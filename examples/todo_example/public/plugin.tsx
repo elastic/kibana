@@ -11,30 +11,38 @@ import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { I18nProvider } from '@kbn/i18n-react';
+import { App } from './components/app';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
 }
 
 export class ToDoPlugin implements Plugin<void, void, SetupDeps> {
-  public setup(core: CoreSetup, deps: SetupDeps) {
-    // Register an application into the side navigation menu
+  public async setup(core: CoreSetup, deps: SetupDeps) {
+    const { http, notifications } = core;
+
     core.application.register({
       id: 'todo',
       title: 'My Todo List',
       async mount({ element }: AppMountParameters) {
-        ReactDOM.render(<div data-test-subj="todoDiv">My Todo List!</div>, element);
+        ReactDOM.render(
+          <I18nProvider>
+            <App http={http} notifications={notifications} />
+          </I18nProvider>,
+          element
+        );
         return () => ReactDOM.unmountComponentAtNode(element);
       },
     });
-    // This section is only needed to get this example plugin to show up in our Developer Examples.
+
     deps.developerExamples.register({
       appId: 'todo',
       title: 'To Do Application',
       description: `Build a plugin that registers a To Do application.`,
     });
   }
-  public start(core: CoreStart) {
+  public start(_core: CoreStart) {
     return {};
   }
   public stop() {}
