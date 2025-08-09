@@ -14,13 +14,43 @@ import type {
   CoreStart,
   SavedObject,
 } from '@kbn/core/server';
+import type {
+  SavedObjectModelTransformationDoc,
+  SavedObjectsModelVersionMap,
+} from '@kbn/core-saved-objects-server';
 import { schema } from '@kbn/config-schema';
 
-interface Todo {
-  id: string;
-  title: string;
+export interface Todo {
   completed: boolean;
+  id: string;
+  priority: 'High' | 'Medium' | 'Low';
+  title: string;
 }
+
+const MODEL_VERSIONS: SavedObjectsModelVersionMap = {
+  1: {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          priority: { type: 'keyword' },
+        },
+      },
+      {
+        type: 'data_backfill',
+        backfillFn: (doc: SavedObjectModelTransformationDoc<Todo>) => {
+          if (doc.attributes.priority === undefined) {
+            doc.attributes.priority = 'Medium';
+          }
+          if (!doc.references) {
+            doc.references = [];
+          }
+          return doc;
+        },
+      },
+    ],
+  },
+};
 
 const savedObjectToTodo = (so: SavedObject<Omit<Todo, 'id'>>) => ({
   id: so.id,
@@ -28,7 +58,7 @@ const savedObjectToTodo = (so: SavedObject<Omit<Todo, 'id'>>) => ({
 });
 
 export class ToDoPlugin implements Plugin {
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(_initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
@@ -36,21 +66,23 @@ export class ToDoPlugin implements Plugin {
 
     const SAVED_OBJECTS_TYPE = 'todo';
     savedObjects.registerType({
-      name: SAVED_OBJECTS_TYPE,
-      namespaceType: 'single',
-      hidden: false,
       mappings: {
         properties: {
           completed: { type: 'boolean' },
+          priority: { type: 'keyword' },
           title: { type: 'text' },
         },
       },
+      modelVersions: MODEL_VERSIONS,
+      name: SAVED_OBJECTS_TYPE,
+      namespaceType: 'single',
+      hidden: false,
     });
 
     router.get(
       {
         path: '/api/todos',
-        validate: false,
+        options: { access: 'public' },
         security: {
           authz: {
             enabled: false,
@@ -58,7 +90,7 @@ export class ToDoPlugin implements Plugin {
               'This route is opted out of authorization because it is only intended for test use',
           },
         },
-        options: { access: 'public' },
+        validate: false,
       },
       async (context, _request, response) => {
         try {
@@ -66,11 +98,13 @@ export class ToDoPlugin implements Plugin {
 
           const todosData = await savedObjectsClient.find<Omit<Todo, 'id'>>({
             type: SAVED_OBJECTS_TYPE,
+            sortField: 'created_at',
+            sortOrder: 'desc',
           });
 
           const todos = todosData.saved_objects.map(savedObjectToTodo);
 
-          return response.ok({ body: { todos } });
+          return response.ok({ body: todos });
         } catch (error) {
           return response.badRequest({ body: error.message });
         }
@@ -80,11 +114,7 @@ export class ToDoPlugin implements Plugin {
     router.get(
       {
         path: '/api/todos/{id}',
-        validate: {
-          params: schema.object({
-            id: schema.string(),
-          }),
-        },
+        options: { access: 'public' },
         security: {
           authz: {
             enabled: false,
@@ -92,7 +122,11 @@ export class ToDoPlugin implements Plugin {
               'This route is opted out of authorization because it is only intended for test use',
           },
         },
-        options: { access: 'public' },
+        validate: {
+          params: schema.object({
+            id: schema.string(),
+          }),
+        },
       },
       async (context, request, response) => {
         try {
@@ -103,7 +137,7 @@ export class ToDoPlugin implements Plugin {
             request.params.id
           );
 
-          return response.ok({ body: { todo: savedObjectToTodo(todo) } });
+          return response.ok({ body: savedObjectToTodo(todo) });
         } catch (error) {
           if (error.output?.statusCode === 404) {
             return response.notFound();
@@ -117,11 +151,7 @@ export class ToDoPlugin implements Plugin {
     router.post(
       {
         path: '/api/todos',
-        validate: {
-          body: schema.object({
-            title: schema.string(),
-          }),
-        },
+        options: { access: 'public' },
         security: {
           authz: {
             enabled: false,
@@ -129,18 +159,25 @@ export class ToDoPlugin implements Plugin {
               'This route is opted out of authorization because it is only intended for test use',
           },
         },
-        options: { access: 'public' },
+        validate: {
+          body: schema.object({
+            completed: schema.boolean(),
+            title: schema.string(),
+            priority: schema.oneOf([
+              schema.literal('High'),
+              schema.literal('Medium'),
+              schema.literal('Low'),
+            ]),
+          }),
+        },
       },
       async (context, request, response) => {
         try {
           const savedObjectsClient = (await context.core).savedObjects.getClient();
 
-          const newTodo = await savedObjectsClient.create(SAVED_OBJECTS_TYPE, {
-            title: request.body.title,
-            completed: false,
-          });
+          const newTodo = await savedObjectsClient.create(SAVED_OBJECTS_TYPE, request.body);
 
-          return response.ok({ body: { todo: savedObjectToTodo(newTodo) } });
+          return response.ok({ body: savedObjectToTodo(newTodo) });
         } catch (error) {
           return response.badRequest({ body: error.message });
         }
@@ -150,15 +187,7 @@ export class ToDoPlugin implements Plugin {
     router.put(
       {
         path: '/api/todos/{id}',
-        validate: {
-          body: schema.object({
-            title: schema.maybe(schema.string()),
-            completed: schema.maybe(schema.boolean()),
-          }),
-          params: schema.object({
-            id: schema.string(),
-          }),
-        },
+        options: { access: 'public' },
         security: {
           authz: {
             enabled: false,
@@ -166,30 +195,66 @@ export class ToDoPlugin implements Plugin {
               'This route is opted out of authorization because it is only intended for test use',
           },
         },
-        options: { access: 'public' },
+        validate: {
+          body: schema.object({
+            completed: schema.boolean(),
+            priority: schema.oneOf([
+              schema.literal('High'),
+              schema.literal('Medium'),
+              schema.literal('Low'),
+            ]),
+            title: schema.string(),
+          }),
+          params: schema.object({
+            id: schema.string(),
+          }),
+        },
       },
       async (context, request, response) => {
         try {
           const savedObjectsClient = (await context.core).savedObjects.getClient();
           const { id } = request.params;
-          const { title, completed } = request.body;
-
-          const attributesToUpdate: Partial<Omit<Todo, 'id'>> = {};
-          if (title !== undefined) {
-            attributesToUpdate.title = title;
-          }
-          if (completed !== undefined) {
-            attributesToUpdate.completed = completed;
-          }
-
-          await savedObjectsClient.update(SAVED_OBJECTS_TYPE, id, attributesToUpdate);
+          await savedObjectsClient.update(SAVED_OBJECTS_TYPE, id, request.body);
 
           const updatedTodo = await savedObjectsClient.get<Omit<Todo, 'id'>>(
             SAVED_OBJECTS_TYPE,
             id
           );
 
-          return response.ok({ body: { todo: savedObjectToTodo(updatedTodo) } });
+          return response.ok({ body: savedObjectToTodo(updatedTodo) });
+        } catch (error) {
+          if (error.output?.statusCode === 404) {
+            return response.notFound();
+          }
+
+          return response.badRequest({ body: error.message });
+        }
+      }
+    );
+
+    router.delete(
+      {
+        path: '/api/todos/{id}',
+        options: { access: 'public' },
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out of authorization because it is only intended for test use',
+          },
+        },
+        validate: {
+          params: schema.object({
+            id: schema.string(),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const savedObjectsClient = (await context.core).savedObjects.getClient();
+          await savedObjectsClient.delete(SAVED_OBJECTS_TYPE, request.params.id);
+
+          return response.ok();
         } catch (error) {
           if (error.output?.statusCode === 404) {
             return response.notFound();
@@ -201,7 +266,7 @@ export class ToDoPlugin implements Plugin {
     );
   }
 
-  public start(core: CoreStart) {}
+  public start(_core: CoreStart) {}
 
   public stop() {}
 }
