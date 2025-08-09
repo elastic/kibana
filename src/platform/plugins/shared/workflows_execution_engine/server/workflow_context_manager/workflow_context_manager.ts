@@ -80,7 +80,7 @@ export class WorkflowContextManager {
     return this.context[key];
   }
 
-  public readContextPath(propertyPath: any): { pathExists: boolean; value: any } {
+  public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {
     const propertyPathSegments = propertyPath.split('.');
     let result: any = this.getContext();
 
