@@ -32,13 +32,21 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
     beforeEach(async () => {
       await common.navigateToApp('home');
-      await browser.setLocalStorageItem('discoverExperimental:tabs', 'true');
+      await kibanaServer.request({
+        method: 'PUT',
+        path: '/internal/core/_settings',
+        body: { 'feature_flags.overrides.discover.tabsEnabled': true },
+      });
       await common.navigateToApp('discover');
       await discover.waitUntilTabIsLoaded();
     });
 
     after(async () => {
-      await browser.setLocalStorageItem('discoverExperimental:tabs', 'false');
+      await kibanaServer.request({
+        method: 'PUT',
+        path: '/internal/core/_settings',
+        body: { 'feature_flags.overrides.discover.tabsEnabled': false },
+      });
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );

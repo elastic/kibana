@@ -32,7 +32,7 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
-import { TABS_ENABLED } from '../../../../constants';
+import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -62,6 +62,7 @@ export const DiscoverTopNav = ({
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
   );
+  const tabsEnabled = services.featureFlags?.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, false);
   const savedSearch = useSavedSearchInitial();
   const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
@@ -279,7 +280,7 @@ export const DiscoverTopNav = ({
         }
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         draft={searchDraftUiState}
-        onDraftChange={TABS_ENABLED ? onSearchDraftChange : undefined}
+        onDraftChange={tabsEnabled ? onSearchDraftChange : undefined}
         esqlEditorInitialState={esqlEditorUiState}
         onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
       />
