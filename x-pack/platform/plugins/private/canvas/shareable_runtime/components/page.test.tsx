@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 import { Page } from './page';
 
 describe('<Page />', () => {
   test('null workpad renders nothing', () => {
-    expect(mount(<Page index={0} />).isEmptyRender());
+    const { container } = render(<Page index={0} />);
+    expect(container.firstChild).toBeNull();
   });
 });
