@@ -13,7 +13,7 @@ jest.mock('../../../../kibana_services', () => {
   };
 });
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 
 import { Feature } from 'geojson';
 import { MVTSingleLayerVectorSource } from '../../../sources/mvt_single_layer_vector_source';
@@ -89,8 +89,26 @@ describe('getLayerIcon', () => {
     const layer: MvtVectorLayer = createLayer({}, {});
 
     const iconAndTooltipContent = layer.getLayerIcon(false);
-    const component = shallow(iconAndTooltipContent.icon);
-    expect(component).toMatchSnapshot();
+    const { container } = render(iconAndTooltipContent.icon);
+    
+    // Check that the SVG icon is rendered with proper dimensions and styling
+    const svgElement = container.querySelector('svg');
+    expect(svgElement).toBeInTheDocument();
+    expect(svgElement).toHaveAttribute('width', '16');
+    expect(svgElement).toHaveAttribute('height', '16');
+    expect(svgElement).toHaveAttribute('viewBox', '0 0 16 16');
+    
+    // Verify the icon has the expected MVT layer styling (teal colors)
+    expect(svgElement).toHaveStyle('stroke: #009490');
+    expect(svgElement).toHaveStyle('stroke-width: 1px');
+    expect(svgElement).toHaveStyle('fill: #16C5C0');
+    
+    // Check that the rect element is present (represents the polygon shape)
+    const rectElement = container.querySelector('rect');
+    expect(rectElement).toBeInTheDocument();
+    expect(rectElement).toHaveAttribute('width', '15');
+    expect(rectElement).toHaveAttribute('height', '15');
+    expect(rectElement).toHaveAttribute('rx', '4'); // rounded corners
   });
 });
 
