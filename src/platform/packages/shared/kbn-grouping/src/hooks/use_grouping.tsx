@@ -84,6 +84,11 @@ export interface GroupingArgs<T> {
     count?: number | undefined
   ) => void;
   title?: string;
+  onOpenTracker?: (
+    type: UiCounterMetricType,
+    event: string | string[],
+    count?: number | undefined
+  ) => void;
 }
 
 /**
@@ -112,6 +117,7 @@ export const useGrouping = <T,>({
   onOptionsChange,
   tracker,
   title,
+  onOpenTracker,
 }: GroupingArgs<T>): UseGrouping<T> => {
   const [groupingState, dispatch] = useReducer(
     groupsReducerWithStorage,
@@ -145,6 +151,7 @@ export const useGrouping = <T,>({
     onOptionsChange,
     tracker,
     title,
+    onOpenTracker,
   });
 
   const getGrouping = useCallback(
