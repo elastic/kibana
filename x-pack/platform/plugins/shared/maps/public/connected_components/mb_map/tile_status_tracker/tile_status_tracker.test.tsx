@@ -7,7 +7,7 @@
 
 // eslint-disable-next-line max-classes-per-file
 import React from 'react';
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import type { Map as MbMap, MapSourceDataEvent } from '@kbn/mapbox-gl';
 import type { TileError, TileMetaFeature } from '../../../../common/descriptor_types';
 import { TileStatusTracker } from './tile_status_tracker';
@@ -136,7 +136,7 @@ describe('TileStatusTracker', () => {
     const loadedMap: Map<string, boolean> = new Map<string, boolean>();
     const mockMbMap = new MockMbMap();
 
-    const component = mount(
+    const { unmount } = render(
       <TileStatusTracker
         mbMap={mockMbMap as unknown as MbMap}
         layerList={[
@@ -186,7 +186,7 @@ describe('TileStatusTracker', () => {
     expect(loadedMap.get('bar')).toBe(true); // tiles were aborted or errored
     expect(loadedMap.has('foobar')).toBe(false); // never received tile requests, status should not have been reported for layer
 
-    component.unmount();
+    unmount();
 
     expect(mockMbMap.listeners.length).toBe(0);
   });
@@ -213,7 +213,7 @@ describe('TileStatusTracker', () => {
     test('should clear previous tile error when tile starts loading', async () => {
       const mockMbMap = new MockMbMap();
 
-      mount(
+      render(
         <TileStatusTracker
           mbMap={mockMbMap as unknown as MbMap}
           layerList={[
@@ -265,7 +265,7 @@ describe('TileStatusTracker', () => {
       const mockMbMap = new MockMbMap();
       const layer1 = createMockLayer('layer1', 'layer1Source');
 
-      const wrapper = mount(
+      const { rerender } = render(
         <TileStatusTracker
           mbMap={mockMbMap as unknown as MbMap}
           layerList={[layer1]}
@@ -297,7 +297,13 @@ describe('TileStatusTracker', () => {
           },
         } as unknown as IVectorSource;
       };
-      wrapper.setProps({ layerList: [geojsonLayer1] });
+      rerender(
+        <TileStatusTracker
+          mbMap={mockMbMap as unknown as MbMap}
+          layerList={[geojsonLayer1]}
+          onTileStateChange={onTileStateChange}
+        />
+      );
 
       // simulate delay. Cache-checking is debounced.
       await sleep(300);
@@ -308,7 +314,7 @@ describe('TileStatusTracker', () => {
     test('should only return tile errors within map zoom', async () => {
       const mockMbMap = new MockMbMap();
 
-      mount(
+      render(
         <TileStatusTracker
           mbMap={mockMbMap as unknown as MbMap}
           layerList={[createMockLayer('layer1', 'layer1Source')]}
@@ -340,7 +346,7 @@ describe('TileStatusTracker', () => {
     test('should only return tile errors within map bounds', async () => {
       const mockMbMap = new MockMbMap();
 
-      mount(
+      render(
         <TileStatusTracker
           mbMap={mockMbMap as unknown as MbMap}
           layerList={[createMockLayer('layer1', 'layer1Source')]}
@@ -376,7 +382,7 @@ describe('TileStatusTracker', () => {
         reason: 'simulated es error',
       };
 
-      mount(
+      render(
         <TileStatusTracker
           mbMap={mockMbMap as unknown as MbMap}
           layerList={[createMockLayer('layer1', 'layer1Source')]}
@@ -411,7 +417,7 @@ describe('TileStatusTracker', () => {
     test('should safely handle non-json response body', async () => {
       const mockMbMap = new MockMbMap();
 
-      mount(
+      render(
         <TileStatusTracker
           mbMap={mockMbMap as unknown as MbMap}
           layerList={[createMockLayer('layer1', 'layer1Source')]}
