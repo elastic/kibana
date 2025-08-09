@@ -12,7 +12,9 @@ jest.mock('../../../kibana_services', () => ({
 }));
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 import { ILayer } from '../../../classes/layers/layer';
 
 import { AttributionControl } from './attribution_control';
@@ -29,15 +31,21 @@ describe('AttributionControl', () => {
         return [{ url: 'https://coolmaps.com', label: 'attribution with link' }];
       },
     } as unknown as ILayer;
-    const component = shallow(
-      <AttributionControl layerList={[mockLayer1, mockLayer2]} isFullScreen={true} />
+    render(
+      <I18nProvider>
+        <AttributionControl layerList={[mockLayer1, mockLayer2]} isFullScreen={true} />
+      </I18nProvider>
     );
 
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(component).toMatchSnapshot();
+    // Wait for attributions to load
+    await waitFor(() => {
+      expect(screen.getByText('attribution with link')).toBeInTheDocument();
+    });
+    
+    // Verify attribution control has the correct CSS class
+    expect(document.querySelector('.mapAttributionControl__fullScreen')).toBeInTheDocument();
+    
+    // Verify link attribution
+    expect(screen.getByRole('link', { name: 'attribution with link (external, opens in a new tab or window)' })).toHaveAttribute('href', 'https://coolmaps.com');
   });
 });

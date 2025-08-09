@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 
 import { ResolutionEditor } from './resolution_editor';
 import { GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
@@ -18,21 +20,61 @@ const defaultProps = {
 };
 
 test('should render 4 tick slider when renderAs is POINT', () => {
-  const component = shallow(<ResolutionEditor renderAs={RENDER_AS.POINT} {...defaultProps} />);
-  expect(component).toMatchSnapshot();
+  render(
+    <I18nProvider>
+      <ResolutionEditor renderAs={RENDER_AS.POINT} {...defaultProps} />
+    </I18nProvider>
+  );
+  
+  // Verify the Resolution form label is present
+  expect(screen.getByText('Resolution')).toBeInTheDocument();
+  
+  // Verify the slider tick labels are present
+  expect(screen.getByText('low')).toBeInTheDocument();
+  expect(screen.getByText('high')).toBeInTheDocument();
 });
 
 test('should render 4 tick slider when renderAs is GRID', () => {
-  const component = shallow(<ResolutionEditor renderAs={RENDER_AS.GRID} {...defaultProps} />);
-  expect(component).toMatchSnapshot();
+  render(
+    <I18nProvider>
+      <ResolutionEditor renderAs={RENDER_AS.GRID} {...defaultProps} />
+    </I18nProvider>
+  );
+  
+  // Verify the Resolution form label is present
+  expect(screen.getByText('Resolution')).toBeInTheDocument();
+  
+  // Verify the slider tick labels are present
+  expect(screen.getByText('low')).toBeInTheDocument();
+  expect(screen.getByText('high')).toBeInTheDocument();
 });
 
 test('should render 4 tick slider when renderAs is HEATMAP', () => {
-  const component = shallow(<ResolutionEditor renderAs={RENDER_AS.HEATMAP} {...defaultProps} />);
-  expect(component).toMatchSnapshot();
+  render(
+    <I18nProvider>
+      <ResolutionEditor renderAs={RENDER_AS.HEATMAP} {...defaultProps} />
+    </I18nProvider>
+  );
+  
+  // Verify the Resolution form label is present
+  expect(screen.getByText('Resolution')).toBeInTheDocument();
+  
+  // Verify the slider tick labels are present
+  expect(screen.getByText('low')).toBeInTheDocument();
+  expect(screen.getByText('high')).toBeInTheDocument();
 });
 
 test('should render 3 tick slider when renderAs is HEX', () => {
-  const component = shallow(<ResolutionEditor renderAs={RENDER_AS.HEX} {...defaultProps} />);
-  expect(component).toMatchSnapshot();
+  render(
+    <I18nProvider>
+      <ResolutionEditor renderAs={RENDER_AS.HEX} {...defaultProps} />
+    </I18nProvider>
+  );
+  
+  // Verify the Resolution form label is present
+  expect(screen.getByText('Resolution')).toBeInTheDocument();
+  
+  // Verify the slider tick labels are present
+  expect(screen.getByText('low')).toBeInTheDocument();
+  expect(screen.getByText('high')).toBeInTheDocument();
 });

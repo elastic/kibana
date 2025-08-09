@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
@@ -28,14 +30,31 @@ const defaultProps = {
 
 describe('source editor geo_grid_source', () => {
   test('should render editor', async () => {
-    const component = shallow(<UpdateSourceEditor {...defaultProps} />);
-    expect(component).toMatchSnapshot();
+    render(
+      <I18nProvider>
+        <UpdateSourceEditor {...defaultProps} />
+      </I18nProvider>
+    );
+    
+    // Verify the Metrics section is present
+    expect(screen.getByText('Metrics')).toBeInTheDocument();
+    
+    // Verify the Clusters section is present (bucketsName) - use heading role to be specific
+    const clustersHeading = screen.getByRole('heading', { name: 'Clusters' });
+    expect(clustersHeading).toBeInTheDocument();
   });
 
   test('should not allow editing multiple metrics for heatmap', async () => {
-    const component = shallow(
-      <UpdateSourceEditor {...defaultProps} currentLayerType={LAYER_TYPE.HEATMAP} />
+    render(
+      <I18nProvider>
+        <UpdateSourceEditor {...defaultProps} currentLayerType={LAYER_TYPE.HEATMAP} />
+      </I18nProvider>
     );
-    expect(component).toMatchSnapshot();
+    
+    // Verify the Metrics section is present
+    expect(screen.getByText('Metrics')).toBeInTheDocument();
+    
+    // Verify the Heat map section is present (for heatmap layer type)
+    expect(screen.getByText('Heat map')).toBeInTheDocument();
   });
 });

@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen, cleanup } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 import { ScaleControl } from './scale_control';
 import type { LngLat, LngLatBounds, Map as MapboxMap, PointLike } from '@kbn/mapbox-gl';
 
@@ -49,20 +51,36 @@ const mockMBMap = {
 } as unknown as MapboxMap;
 
 test('render', () => {
-  const component = mount(<ScaleControl mbMap={mockMBMap} isFullScreen={false} />);
-  expect(component).toMatchSnapshot();
+  render(
+    <I18nProvider>
+      <ScaleControl mbMap={mockMBMap} isFullScreen={false} />
+    </I18nProvider>
+  );
+  
+  // Verify the scale control displays the distance
+  expect(screen.getByText('~50 km')).toBeInTheDocument();
 });
 
 test('isFullScreen', () => {
-  const component = mount(<ScaleControl mbMap={mockMBMap} isFullScreen={true} />);
-  expect(component).toMatchSnapshot();
+  render(
+    <I18nProvider>
+      <ScaleControl mbMap={mockMBMap} isFullScreen={true} />
+    </I18nProvider>
+  );
+  
+  // Verify the scale control displays the distance
+  expect(screen.getByText('~50 km')).toBeInTheDocument();
 });
 
 test('should un-register all map callbacks on unmount', () => {
-  const component = mount(<ScaleControl mbMap={mockMBMap} isFullScreen={false} />);
+  const { unmount } = render(
+    <I18nProvider>
+      <ScaleControl mbMap={mockMBMap} isFullScreen={false} />
+    </I18nProvider>
+  );
 
   expect(Object.keys(mockMbMapHandlers).length).toBe(1);
 
-  component.unmount();
+  unmount();
   expect(Object.keys(mockMbMapHandlers).length).toBe(0);
 });

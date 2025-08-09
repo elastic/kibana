@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 
 import { TooltipSelector } from './tooltip_selector';
 import { AbstractField } from '../../classes/fields/field';
@@ -40,12 +42,31 @@ const defaultProps = {
 
 describe('TooltipSelector', () => {
   test('should render component', async () => {
-    const component = shallow(<TooltipSelector {...defaultProps} />);
+    render(
+      <I18nProvider>
+        <TooltipSelector {...defaultProps} />
+      </I18nProvider>
+    );
 
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-    expect(component).toMatchSnapshot();
+    // Wait for async field labels to load and verify the component rendered
+    await waitFor(() => {
+      // Verify the field label is displayed
+      expect(screen.getByText('ISO 3166-1 alpha-2 code')).toBeInTheDocument();
+    });
+
+    // Verify drag and drop container is rendered
+    const container = document.querySelector('[data-rfd-droppable-id="mapLayerTOC"]');
+    expect(container).toBeInTheDocument();
+    
+    // Verify the draggable field item is rendered
+    const draggableItem = document.querySelector('[data-rfd-draggable-id="iso2"]');
+    expect(draggableItem).toBeInTheDocument();
+    
+    // Verify the Add button is rendered
+    expect(screen.getByText('Add')).toBeInTheDocument();
+    
+    // Verify remove and reorder buttons are present
+    expect(screen.getByLabelText('Remove property')).toBeInTheDocument();
+    expect(screen.getByLabelText('Reorder property')).toBeInTheDocument();
   });
 });

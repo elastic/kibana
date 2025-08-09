@@ -6,12 +6,23 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 import { XYZTMSEditor } from './xyz_tms_editor';
 
 const onSourceConfigChange = () => {};
 
 test('should render', () => {
-  const component = shallow(<XYZTMSEditor onSourceConfigChange={onSourceConfigChange} />);
-  expect(component).toMatchSnapshot();
+  render(
+    <I18nProvider>
+      <XYZTMSEditor onSourceConfigChange={onSourceConfigChange} />
+    </I18nProvider>
+  );
+  
+  // Verify the URL input field is present
+  expect(screen.getByLabelText('Url')).toBeInTheDocument();
+  
+  // Verify the placeholder text is present
+  expect(screen.getByPlaceholderText('https://a.tile.openstreetmap.org/{z}/{x}/{y}.png')).toBeInTheDocument();
 });

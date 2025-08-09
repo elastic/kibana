@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 import { Footer } from './footer';
 import { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
@@ -37,14 +39,14 @@ describe('Footer', () => {
     ];
     describe('mouseover (unlocked)', () => {
       test('should not render header', async () => {
-        const component = shallow(<Footer {...defaultProps} features={SINGLE_FEATURE} />);
+        const { container } = render(
+          <I18nProvider>
+            <Footer {...defaultProps} features={SINGLE_FEATURE} />
+          </I18nProvider>
+        );
 
-        // Ensure all promises resolve
-        await new Promise((resolve) => process.nextTick(resolve));
-        // Ensure the state changes are reflected
-        component.update();
-
-        expect(component).toMatchSnapshot();
+        // Single feature should render nothing (empty fragment)
+        expect(container.firstChild).toBeNull();
       });
     });
   });
@@ -66,30 +68,30 @@ describe('Footer', () => {
     ];
     describe('mouseover (unlocked)', () => {
       test('should only show features count', async () => {
-        const component = shallow(
-          <Footer {...defaultProps} features={MULTI_FEATURES_SINGE_LAYER} />
+        render(
+          <I18nProvider>
+            <Footer {...defaultProps} features={MULTI_FEATURES_SINGE_LAYER} />
+          </I18nProvider>
         );
 
-        // Ensure all promises resolve
-        await new Promise((resolve) => process.nextTick(resolve));
-        // Ensure the state changes are reflected
-        component.update();
-
-        expect(component).toMatchSnapshot();
+        // Should show page number for multiple features when unlocked
+        await waitFor(() => {
+          expect(screen.getByText('1 of 2')).toBeInTheDocument();
+        });
       });
     });
     describe('locked', () => {
       test('should show pagination controls and features count', async () => {
-        const component = shallow(
-          <Footer {...defaultProps} isLocked={true} features={MULTI_FEATURES_SINGE_LAYER} />
+        render(
+          <I18nProvider>
+            <Footer {...defaultProps} isLocked={true} features={MULTI_FEATURES_SINGE_LAYER} />
+          </I18nProvider>
         );
 
-        // Ensure all promises resolve
-        await new Promise((resolve) => process.nextTick(resolve));
-        // Ensure the state changes are reflected
-        component.update();
-
-        expect(component).toMatchSnapshot();
+        // Should show pagination for locked mode with multiple features
+        await waitFor(() => {
+          expect(screen.getByRole('navigation')).toBeInTheDocument();
+        });
       });
     });
   });
@@ -117,30 +119,34 @@ describe('Footer', () => {
     ];
     describe('mouseover (unlocked)', () => {
       test('should only show features count', async () => {
-        const component = shallow(
-          <Footer {...defaultProps} features={MULTI_FEATURES_MULTI_LAYERS} />
+        render(
+          <I18nProvider>
+            <Footer {...defaultProps} features={MULTI_FEATURES_MULTI_LAYERS} />
+          </I18nProvider>
         );
 
-        // Ensure all promises resolve
-        await new Promise((resolve) => process.nextTick(resolve));
-        // Ensure the state changes are reflected
-        component.update();
-
-        expect(component).toMatchSnapshot();
+        // Should show page number for multiple features when unlocked
+        await waitFor(() => {
+          expect(screen.getByText('1 of 3')).toBeInTheDocument();
+        });
       });
     });
     describe('locked', () => {
       test('should show pagination controls, features count, and layer select', async () => {
-        const component = shallow(
-          <Footer {...defaultProps} isLocked={true} features={MULTI_FEATURES_MULTI_LAYERS} />
+        render(
+          <I18nProvider>
+            <Footer {...defaultProps} isLocked={true} features={MULTI_FEATURES_MULTI_LAYERS} />
+          </I18nProvider>
         );
 
-        // Ensure all promises resolve
-        await new Promise((resolve) => process.nextTick(resolve));
-        // Ensure the state changes are reflected
-        component.update();
-
-        expect(component).toMatchSnapshot();
+        // Should show pagination and layer select for locked mode with multiple layers
+        await waitFor(() => {
+          expect(screen.getByRole('navigation')).toBeInTheDocument();
+        });
+        
+        await waitFor(() => {
+          expect(screen.getByLabelText('Filter results by layer')).toBeInTheDocument();
+        });
       });
     });
   });

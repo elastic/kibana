@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 import { MetricsExpression } from './metrics_expression';
 import { AGG_TYPE } from '../../../../../common/constants';
 
@@ -17,22 +19,30 @@ const defaultProps = {
 };
 
 test('Should render default props', () => {
-  const component = shallow(<MetricsExpression {...defaultProps} />);
+  render(
+    <I18nProvider>
+      <MetricsExpression {...defaultProps} />
+    </I18nProvider>
+  );
 
-  expect(component).toMatchSnapshot();
+  // Verify the expression button with count metric
+  expect(screen.getByRole('button', { name: 'and use metric count' })).toBeInTheDocument();
 });
 
 test('Should render metrics expression for metrics', () => {
-  const component = shallow(
-    <MetricsExpression
-      {...defaultProps}
-      metrics={[
-        { type: AGG_TYPE.COUNT, label: 'my count' }, // should ignore label
-        { type: AGG_TYPE.MAX }, // incomplete - no field, should not be included in expression
-        { type: AGG_TYPE.MAX, field: 'prop1', label: 'mostest' }, // should ignore label
-      ]}
-    />
+  render(
+    <I18nProvider>
+      <MetricsExpression
+        {...defaultProps}
+        metrics={[
+          { type: AGG_TYPE.COUNT, label: 'my count' }, // should ignore label
+          { type: AGG_TYPE.MAX }, // incomplete - no field, should not be included in expression
+          { type: AGG_TYPE.MAX, field: 'prop1', label: 'mostest' }, // should ignore label
+        ]}
+      />
+    </I18nProvider>
   );
 
-  expect(component).toMatchSnapshot();
+  // Verify the expression button with multiple metrics
+  expect(screen.getByRole('button', { name: 'and use metrics count, max prop1' })).toBeInTheDocument();
 });

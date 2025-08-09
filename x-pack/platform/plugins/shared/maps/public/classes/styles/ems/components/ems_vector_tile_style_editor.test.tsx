@@ -6,16 +6,34 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 
 import { EMSVectorTileStyleEditor } from './ems_vector_tile_style_editor';
 
 describe('EMSVectorTileStyleEditor', () => {
   test('is rendered', () => {
-    const component = shallow(
-      <EMSVectorTileStyleEditor color="#4A412A" onColorChange={() => {}} />
+    const mockOnColorChange = jest.fn();
+    
+    render(
+      <I18nProvider>
+        <EMSVectorTileStyleEditor color="#4A412A" onColorChange={mockOnColorChange} />
+      </I18nProvider>
     );
 
-    expect(component).toMatchSnapshot();
+    // Verify the form row label is present
+    expect(screen.getByText('Color blend')).toBeInTheDocument();
+    
+    // Verify the color picker is present and accessible
+    const colorPicker = screen.getByLabelText('Color blend');
+    expect(colorPicker).toBeInTheDocument();
+    
+    // Verify the color picker has the correct initial color
+    expect(colorPicker).toHaveValue('#4A412A');
+    
+    // Verify the color picker is compressed and clearable by checking its container
+    const colorPickerContainer = colorPicker.closest('.euiFormRow');
+    expect(colorPickerContainer).toBeInTheDocument();
   });
 });

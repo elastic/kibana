@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 
 jest.mock('../components/vector_style_editor', () => ({
   VectorStyleEditor: () => {
     return <div>mockVectorStyleEditor</div>;
   },
 }));
-
-import React from 'react';
 import { ICON_SOURCE, RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 // @ts-ignore
 import { DynamicIconProperty } from './dynamic_icon_property';
@@ -58,11 +59,23 @@ describe('renderLegendDetailRow', () => {
       iconPaletteId: 'filledShapes',
     });
     const legendRow = iconStyle.renderLegendDetailRow({ isPointsOnly: true, isLinesOnly: false });
-    const component = shallow(legendRow);
-    await new Promise((resolve) => process.nextTick(resolve));
-    component.update();
-
-    expect(component).toMatchSnapshot();
+    
+    render(
+      <I18nProvider>
+        {legendRow}
+      </I18nProvider>
+    );
+    
+    // Wait for async rendering
+    await waitFor(() => {
+      // Verify the field label is displayed
+      expect(screen.getByText('foobar_label')).toBeInTheDocument();
+    });
+    
+    // Verify formatted category labels are present
+    expect(screen.getByText('US_format')).toBeInTheDocument();
+    expect(screen.getByText('CN_format')).toBeInTheDocument();
+    expect(screen.getByText('Other')).toBeInTheDocument();
   });
 
   test('Should render categorical legend with custom icons in breaks', async () => {
@@ -82,11 +95,22 @@ describe('renderLegendDetailRow', () => {
       ],
     });
     const legendRow = iconStyle.renderLegendDetailRow({ isPointsOnly: true, isLinesOnly: false });
-    const component = shallow(legendRow);
-    await new Promise((resolve) => process.nextTick(resolve));
-    component.update();
-
-    expect(component).toMatchSnapshot();
+    
+    render(
+      <I18nProvider>
+        {legendRow}
+      </I18nProvider>
+    );
+    
+    // Wait for async rendering
+    await waitFor(() => {
+      // Verify the field label is displayed
+      expect(screen.getByText('foobar_label')).toBeInTheDocument();
+    });
+    
+    // Verify custom icon category labels are present
+    expect(screen.getByText('MX_format')).toBeInTheDocument();
+    expect(screen.getByText('Other')).toBeInTheDocument();
   });
 });
 

@@ -8,12 +8,28 @@
 jest.mock('../../../kibana_services', () => ({}));
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 
 import { MVTSingleLayerVectorSourceEditor } from './mvt_single_layer_vector_source_editor';
 
 test('should render source creation editor (fields should _not_ be included)', async () => {
-  const component = shallow(<MVTSingleLayerVectorSourceEditor onSourceConfigChange={() => {}} />);
+  render(
+    <I18nProvider>
+      <MVTSingleLayerVectorSourceEditor onSourceConfigChange={() => {}} />
+    </I18nProvider>
+  );
 
-  expect(component).toMatchSnapshot();
+  // Verify the URL input field is present
+  expect(screen.getByLabelText('Url')).toBeInTheDocument();
+  
+  // Verify the help text is present
+  expect(screen.getByText(/URL of the .mvt vector tile service/)).toBeInTheDocument();
+  
+  // Verify the Source layer input is present
+  expect(screen.getByLabelText('Source layer')).toBeInTheDocument();
+  
+  // Verify Available levels is present
+  expect(screen.getByText('Available levels')).toBeInTheDocument();
 });

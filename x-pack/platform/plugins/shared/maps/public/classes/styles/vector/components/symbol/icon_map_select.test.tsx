@@ -26,7 +26,9 @@ jest.mock('../../symbol_utils', () => {
 });
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 
 import { FIELD_ORIGIN } from '../../../../../../common/constants';
 import { AbstractField } from '../../../../fields/field';
@@ -64,70 +66,103 @@ const defaultProps = {
 };
 
 test('Should render default props', () => {
-  const component = shallow(<IconMapSelect {...defaultProps} />);
+  render(
+    <I18nProvider>
+      <IconMapSelect {...defaultProps} />
+    </I18nProvider>
+  );
 
-  expect(component).toMatchSnapshot();
+  // Verify SuperSelect is rendered with the mock option display
+  const superSelect = screen.getByRole('button');
+  expect(superSelect).toBeInTheDocument();
+  expect(screen.getByText('mock filledShapes option')).toBeInTheDocument();
+  
+  // Default case only renders SuperSelect and spacer, not IconStops
+  // (IconStops is rendered conditionally based on useCustomIconMap)
 });
 
 test('Should render custom stops input when useCustomIconMap', () => {
-  const component = shallow(
-    <IconMapSelect
-      {...defaultProps}
-      useCustomIconMap={true}
-      customIconStops={[
-        {
-          stop: null,
-          icon: 'circle',
-        },
-        {
-          stop: 'value1',
-          icon: 'marker',
-        },
-      ]}
-    />
+  render(
+    <I18nProvider>
+      <IconMapSelect
+        {...defaultProps}
+        useCustomIconMap={true}
+        customIconStops={[
+          {
+            stop: null,
+            icon: 'circle',
+          },
+          {
+            stop: 'value1',
+            icon: 'marker',
+          },
+        ]}
+      />
+    </I18nProvider>
   );
 
-  expect(component).toMatchSnapshot();
+  // Verify SuperSelect is rendered for custom icon selection
+  const superSelect = screen.getByRole('button');
+  expect(superSelect).toBeInTheDocument();
+  
+  // Verify IconStops component is rendered (mocked)  
+  expect(screen.getByText('mockIconStops')).toBeInTheDocument();
 });
 
 test('Should render icon map select with custom icons', () => {
-  const component = shallow(
-    <IconMapSelect
-      {...defaultProps}
-      customIcons={[
-        {
-          symbolId: '__kbn__custom_icon_sdf__foobar',
-          label: 'My Custom Icon',
-          svg: '<svg width="200" height="250" xmlns="http://www.w3.org/2000/svg"><path stroke="#000" fill="transparent" stroke-width="5" d="M10 10h30v30H10z"/></svg>',
-          cutoff: 0.25,
-          radius: 0.25,
-        },
-        {
-          symbolId: '__kbn__custom_icon_sdf__bizzbuzz',
-          label: 'My Other Custom Icon',
-          svg: '<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="531.74" height="460.5" overflow="visible" xml:space="preserve"><path stroke="#000" d="M.866 460 265.87 1l265.004 459z"/></svg>',
-          cutoff: 0.3,
-          radius: 0.15,
-        },
-      ]}
-      customIconStops={[
-        {
-          stop: null,
-          icon: '__kbn__custom_icon_sdf__bizzbuzz',
-        },
-        {
-          stop: 'value1',
-          icon: 'marker',
-        },
-      ]}
-    />
+  render(
+    <I18nProvider>
+      <IconMapSelect
+        {...defaultProps}
+        customIcons={[
+          {
+            symbolId: '__kbn__custom_icon_sdf__foobar',
+            label: 'My Custom Icon',
+            svg: '<svg width="200" height="250" xmlns="http://www.w3.org/2000/svg"><path stroke="#000" fill="transparent" stroke-width="5" d="M10 10h30v30H10z"/></svg>',
+            cutoff: 0.25,
+            radius: 0.25,
+          },
+          {
+            symbolId: '__kbn__custom_icon_sdf__bizzbuzz',
+            label: 'My Other Custom Icon',
+            svg: '<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="531.74" height="460.5" overflow="visible" xml:space="preserve"><path stroke="#000" d="M.866 460 265.87 1l265.004 459z"/></svg>',
+            cutoff: 0.3,
+            radius: 0.15,
+          },
+        ]}
+        customIconStops={[
+          {
+            stop: null,
+            icon: '__kbn__custom_icon_sdf__bizzbuzz',
+          },
+          {
+            stop: 'value1',
+            icon: 'marker',
+          },
+        ]}
+      />
+    </I18nProvider>
   );
 
-  expect(component).toMatchSnapshot();
+  // Verify SuperSelect is rendered with the mock option display
+  const superSelect = screen.getByRole('button');
+  expect(superSelect).toBeInTheDocument();
+  expect(screen.getByText('mock filledShapes option')).toBeInTheDocument();
+  
+  // This case also only renders SuperSelect and spacer, not IconStops
+  // (Similar to default case based on snapshot)
 });
 
 test('Should not render icon map select when isCustomOnly', () => {
-  const component = shallow(<IconMapSelect {...defaultProps} isCustomOnly={true} />);
+  render(
+    <I18nProvider>
+      <IconMapSelect {...defaultProps} isCustomOnly={true} />
+    </I18nProvider>
+  );
 
-  expect(component).toMatchSnapshot();
+  // When isCustomOnly is true, SuperSelect should not be rendered
+  expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  
+  // But IconStops component should still be rendered (mocked)
+  expect(screen.getByText('mockIconStops')).toBeInTheDocument();
 });

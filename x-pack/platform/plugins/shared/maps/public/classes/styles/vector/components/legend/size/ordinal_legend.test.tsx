@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 
 import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../../../common/constants';
 import type { DynamicSizeProperty } from '../../../properties/dynamic_size_property';
@@ -36,9 +38,7 @@ const mockStyle = {
   },
   getField: () => {
     return {
-      getLabel: () => {
-        return 'bytes';
-      },
+      getLabel: () => Promise.resolve('bytes'),
     } as unknown as IField;
   },
   getOptions: () => {
@@ -60,12 +60,31 @@ const mockStyle = {
 } as unknown as DynamicSizeProperty;
 
 test('Should render legend', async () => {
-  const component = shallow(<OrdinalLegend style={mockStyle} />);
+  render(
+    <I18nProvider>
+      <OrdinalLegend style={mockStyle} />
+    </I18nProvider>
+  );
 
-  // Ensure all promises resolve
-  await new Promise((resolve) => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
+  // Wait for the async field label to load
+  await waitFor(() => {
+    expect(screen.getByText('bytes')).toBeInTheDocument();
+  });
 
-  expect(component).toMatchSnapshot();
+  // Verify min and max labels are displayed
+  expect(screen.getByText('0KB')).toBeInTheDocument();
+  expect(screen.getByText('19KB')).toBeInTheDocument();
+  
+  // Verify that circle icons are rendered with different stroke widths
+  const svgElements = document.querySelectorAll('svg');
+  expect(svgElements.length).toBe(3); // Should have 3 circle icons
+  
+  // Check that circles have different stroke-width values
+  const firstCircle = svgElements[0];
+  const secondCircle = svgElements[1];
+  const thirdCircle = svgElements[2];
+  
+  expect(firstCircle).toHaveStyle('stroke-width: 1px');
+  expect(secondCircle).toHaveStyle('stroke-width: 2px');
+  expect(thirdCircle).toHaveStyle('stroke-width: 3px');
 });

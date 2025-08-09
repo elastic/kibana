@@ -21,7 +21,9 @@ jest.mock('../../components/legend/size', () => ({
 }));
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 
 import { DynamicSizeProperty } from './dynamic_size_property';
 import { FIELD_ORIGIN, RawValue, VECTOR_STYLES } from '../../../../../../common/constants';
@@ -42,8 +44,14 @@ describe('renderLegendDetailRow', () => {
     );
 
     const legendRow = sizeProp.renderLegendDetailRow();
-    const component = shallow(legendRow);
-    expect(component).toMatchSnapshot();
+    render(
+      <I18nProvider>
+        {legendRow}
+      </I18nProvider>
+    );
+    
+    // Verify the mocked ordinal legend is rendered
+    expect(screen.getByText('mockMarkerSizeLegend')).toBeInTheDocument();
   });
 
   test('Should render marker size legend for icon size property', () => {
@@ -59,8 +67,14 @@ describe('renderLegendDetailRow', () => {
     );
 
     const legendRow = sizeProp.renderLegendDetailRow();
-    const component = shallow(legendRow);
-    expect(component).toMatchSnapshot();
+    render(
+      <I18nProvider>
+        {legendRow}
+      </I18nProvider>
+    );
+    
+    // Verify the mocked marker size legend is rendered
+    expect(screen.getByText('mockMarkerSizeLegend')).toBeInTheDocument();
   });
 });
 

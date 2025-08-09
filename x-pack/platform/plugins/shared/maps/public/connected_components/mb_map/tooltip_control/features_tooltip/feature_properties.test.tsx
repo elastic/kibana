@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 import { FeatureProperties } from './feature_properties';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
@@ -66,80 +68,92 @@ const mockTooltipProperties = [
 
 describe('FeatureProperties', () => {
   test('should render', async () => {
-    const component = shallow(
-      <FeatureProperties
-        {...defaultProps}
-        loadFeatureProperties={async () => {
-          return mockTooltipProperties;
-        }}
-      />
+    render(
+      <I18nProvider>
+        <FeatureProperties
+          {...defaultProps}
+          loadFeatureProperties={async () => {
+            return mockTooltipProperties;
+          }}
+        />
+      </I18nProvider>
     );
 
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(component).toMatchSnapshot();
+    // Wait for properties to load and verify they are rendered
+    await waitFor(() => {
+      expect(screen.getByText('prop1')).toBeInTheDocument();
+    });
+    
+    expect(screen.getByText('prop2')).toBeInTheDocument();
+    expect(screen.getByText('foobar1')).toBeInTheDocument();
+    expect(screen.getByText('foobar2')).toBeInTheDocument();
   });
 
   test('should show filter button for filterable properties', async () => {
-    const component = shallow(
-      <FeatureProperties
-        {...defaultProps}
-        showFilterButtons={true}
-        loadFeatureProperties={async () => {
-          return mockTooltipProperties;
-        }}
-      />
+    render(
+      <I18nProvider>
+        <FeatureProperties
+          {...defaultProps}
+          showFilterButtons={true}
+          loadFeatureProperties={async () => {
+            return mockTooltipProperties;
+          }}
+        />
+      </I18nProvider>
     );
 
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(component).toMatchSnapshot();
+    // Wait for properties to load
+    await waitFor(() => {
+      expect(screen.getByText('prop1')).toBeInTheDocument();
+    });
+    
+    // Verify filter button is present (should be one since prop1 is filterable, prop2 is not)
+    expect(screen.getByLabelText('Filter on property')).toBeInTheDocument();
   });
 
   test('should show view actions button when there are available actions', async () => {
-    const component = shallow(
-      <FeatureProperties
-        {...defaultProps}
-        showFilterButtons={true}
-        loadFeatureProperties={async () => {
-          return mockTooltipProperties;
-        }}
-        getFilterActions={async () => {
-          return [{ id: 'drilldown1' } as unknown as Action];
-        }}
-      />
+    render(
+      <I18nProvider>
+        <FeatureProperties
+          {...defaultProps}
+          showFilterButtons={true}
+          loadFeatureProperties={async () => {
+            return mockTooltipProperties;
+          }}
+          getFilterActions={async () => {
+            return [{ id: 'drilldown1' } as unknown as Action];
+          }}
+        />
+      </I18nProvider>
     );
 
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(component).toMatchSnapshot();
+    // Wait for properties to load
+    await waitFor(() => {
+      expect(screen.getByText('prop1')).toBeInTheDocument();
+    });
+    
+    // Should show properties with available actions
+    expect(screen.getByText('prop2')).toBeInTheDocument();
   });
 
   test('should show error message if unable to load tooltip content', async () => {
-    const component = shallow(
-      <FeatureProperties
-        {...defaultProps}
-        showFilterButtons={true}
-        loadFeatureProperties={async () => {
-          throw new Error('Simulated load properties error');
-        }}
-      />
+    render(
+      <I18nProvider>
+        <FeatureProperties
+          {...defaultProps}
+          showFilterButtons={true}
+          loadFeatureProperties={async () => {
+            throw new Error('Simulated load properties error');
+          }}
+        />
+      </I18nProvider>
     );
 
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(component).toMatchSnapshot();
+    // Wait for error to be displayed
+    await waitFor(() => {
+      expect(screen.getByText('Unable to load tooltip content')).toBeInTheDocument();
+    });
+    
+    expect(screen.getByText('Simulated load properties error')).toBeInTheDocument();
   });
 });

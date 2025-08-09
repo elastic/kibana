@@ -14,7 +14,9 @@ jest.mock('../../kibana_services', () => {
 });
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 import { CustomIconsPanel } from './custom_icons_panel';
 
 const defaultProps = {
@@ -24,9 +26,20 @@ const defaultProps = {
 };
 
 test('should render', async () => {
-  const component = shallow(<CustomIconsPanel {...defaultProps} />);
+  render(
+    <I18nProvider>
+      <CustomIconsPanel {...defaultProps} />
+    </I18nProvider>
+  );
 
-  expect(component).toMatchSnapshot();
+  // Verify the Custom icons title is present
+  expect(screen.getByText('Custom icons')).toBeInTheDocument();
+  
+  // Verify empty state description
+  expect(screen.getByText('Add a custom icon that can be used in layers in this map.')).toBeInTheDocument();
+  
+  // Verify Add button is present
+  expect(screen.getByText('Add')).toBeInTheDocument();
 });
 
 test('should render with custom icons', async () => {
@@ -46,7 +59,17 @@ test('should render with custom icons', async () => {
       radius: 0.15,
     },
   ];
-  const component = shallow(<CustomIconsPanel {...defaultProps} customIcons={customIcons} />);
+  
+  render(
+    <I18nProvider>
+      <CustomIconsPanel {...defaultProps} customIcons={customIcons} />
+    </I18nProvider>
+  );
 
-  expect(component).toMatchSnapshot();
+  // Verify the Custom icons title is present
+  expect(screen.getByText('Custom icons')).toBeInTheDocument();
+  
+  // Verify custom icon labels are present
+  expect(screen.getByText('My Custom Icon')).toBeInTheDocument();
+  expect(screen.getByText('My Other Custom Icon')).toBeInTheDocument();
 });
