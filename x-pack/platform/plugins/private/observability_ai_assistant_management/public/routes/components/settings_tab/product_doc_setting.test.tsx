@@ -15,8 +15,6 @@ import {
   LEGACY_CUSTOM_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
-import { UseProductDoc } from '../../../hooks/use_product_doc';
-import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 
 const createMockStatus = (
   overrides?: Partial<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>
@@ -49,14 +47,10 @@ const createMockKnowledgeBase = (
   isPolling: false,
   install: jest.fn().mockResolvedValue(undefined),
   warmupModel: jest.fn().mockResolvedValue(undefined),
-  ...overrides,
-});
-
-const createProductDoc = (overrides: Partial<UseProductDoc> = {}) => ({
-  status: 'uninstalled' as InstallationStatus,
-  isLoading: false,
-  installProductDoc: jest.fn().mockResolvedValue({} as any),
-  uninstallProductDoc: jest.fn().mockResolvedValue({} as any),
+  isProductDocInstalling: false,
+  isProductDocUninstalling: false,
+  installProductDoc: jest.fn().mockResolvedValue(undefined),
+  uninstallProductDoc: jest.fn().mockResolvedValue(undefined),
   ...overrides,
 });
 
@@ -74,14 +68,9 @@ describe('ProductDocSetting', () => {
       }),
     });
 
-    const productDoc = createProductDoc({
-      status: 'installed',
-    });
-
     render(
       <ProductDocSetting
         knowledgeBase={mockKnowledgeBase}
-        productDoc={productDoc}
         currentlyDeployedInferenceId={undefined}
       />
     );
@@ -93,12 +82,10 @@ describe('ProductDocSetting', () => {
 
   it('should render the uninstalled state correctly', async () => {
     const mockKnowledgeBase = createMockKnowledgeBase();
-    const productDoc = createProductDoc();
 
     render(
       <ProductDocSetting
         knowledgeBase={mockKnowledgeBase}
-        productDoc={productDoc}
         currentlyDeployedInferenceId={undefined}
       />
     );

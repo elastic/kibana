@@ -86,6 +86,10 @@ const createMockKnowledgeBase = (
   isPolling: false,
   install: jest.fn().mockResolvedValue(undefined),
   warmupModel: jest.fn().mockResolvedValue(undefined),
+  isProductDocInstalling: false,
+  isProductDocUninstalling: false,
+  installProductDoc: jest.fn().mockResolvedValue(undefined),
+  uninstallProductDoc: jest.fn().mockResolvedValue(undefined),
   ...overrides,
 });
 
