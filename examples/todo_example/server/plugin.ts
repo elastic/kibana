@@ -226,13 +226,15 @@ export class ToDoPlugin implements Plugin {
         },
         validate: {
           body: schema.object({
-            completed: schema.boolean(),
-            priority: schema.oneOf([
-              schema.literal('High'),
-              schema.literal('Medium'),
-              schema.literal('Low'),
-            ]),
-            title: schema.string(),
+            completed: schema.maybe(schema.boolean()),
+            priority: schema.maybe(
+              schema.oneOf([
+                schema.literal('High'),
+                schema.literal('Medium'),
+                schema.literal('Low'),
+              ])
+            ),
+            title: schema.maybe(schema.string()),
           }),
           params: schema.object({
             id: schema.string(),
@@ -243,7 +245,15 @@ export class ToDoPlugin implements Plugin {
         try {
           const savedObjectsClient = (await context.core).savedObjects.getClient();
           const { id } = request.params;
-          await savedObjectsClient.update(SAVED_OBJECTS_TYPE, id, request.body);
+
+          const current = await savedObjectsClient.get<Omit<Todo, 'id'>>(SAVED_OBJECTS_TYPE, id);
+
+          const updatedAttributes = {
+            ...current.attributes,
+            ...request.body,
+          };
+
+          await savedObjectsClient.update(SAVED_OBJECTS_TYPE, id, updatedAttributes);
 
           const updatedTodo = await savedObjectsClient.get<Omit<Todo, 'id'>>(
             SAVED_OBJECTS_TYPE,

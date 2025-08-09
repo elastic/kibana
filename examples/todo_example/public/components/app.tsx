@@ -177,21 +177,20 @@ export const App = ({ http, notifications }: AppProps) => {
   const handleStatusChange = async (todo: Todo, completed: boolean) => {
     try {
       setTodos((prev) => prev.map((t) => (t.id === todo.id ? { ...t, completed } : t)));
-      const { id, ...restTodo } = todo;
 
-      await http.put(`/api/todos/${id}`, {
-        body: JSON.stringify({ ...restTodo, completed }),
+      await http.put(`/api/todos/${todo.id}`, {
+        body: JSON.stringify({ completed }),
       });
 
       notifications.toasts.addSuccess({
         title: completed
           ? i18n.translate('todoExample.notifications.completeTaskSuccessToastTitle', {
               defaultMessage: 'Task {taskTitle} was completed.',
-              values: { taskTitle: restTodo.title },
+              values: { taskTitle: todo.title },
             })
           : i18n.translate('todoExample.notifications.reopenTaskSuccessToastTitle', {
               defaultMessage: 'Task {taskTitle} was reopened.',
-              values: { taskTitle: restTodo.title },
+              values: { taskTitle: todo.title },
             }),
       });
     } catch (error) {
