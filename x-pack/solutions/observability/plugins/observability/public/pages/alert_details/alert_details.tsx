@@ -36,6 +36,7 @@ import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { usePageReady } from '@kbn/ebt-tools';
+import moment from 'moment';
 import { ObsCasesContext } from './components/obs_cases_context';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import { AlertDetailsSource, TAB_IDS, TabId } from './types';
@@ -305,6 +306,9 @@ export function AlertDetails() {
         isLoadingRelatedDashboards={isLoadingRelatedDashboards}
         rule={rule}
         onSuccessAddSuggestedDashboard={onSuccessAddSuggestedDashboard}
+        alertAnnotation={{
+          start: moment(alertDetail.formatted.start).toISOString(),
+        }}
       />
     ) : (
       <EuiLoadingSpinner />

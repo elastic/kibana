@@ -30,6 +30,10 @@ export function extractDashboardState(
     if (typeof stateAsObject.viewMode === 'string')
       dashboardState.viewMode = stateAsObject.viewMode as ViewMode;
 
+    if (stateAsObject.alert && typeof stateAsObject.alert === 'object') {
+      dashboardState.alert = stateAsObject.alert as { start: string };
+    }
+
     dashboardState = {
       ...dashboardState,
       ...extractSearchState(stateAsObject),
