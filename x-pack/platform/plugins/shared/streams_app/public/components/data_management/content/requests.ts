@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ContentPack, ContentPackIncludedObjects, StreamDiff } from '@kbn/content-packs-schema';
+import {
+  ContentPack,
+  ContentPackIncludedObjects,
+  StreamConflict,
+  StreamDiff,
+} from '@kbn/content-packs-schema';
 import { HttpSetup } from '@kbn/core/public';
 import { Streams } from '@kbn/streams-schema';
 
@@ -76,7 +81,7 @@ export async function diffContent({
   body.append('content', file);
   body.append('include', JSON.stringify(include));
 
-  const response = await http.post<StreamDiff[]>(
+  const response = await http.post<{ diffs: StreamDiff[]; conflicts: StreamConflict[] }>(
     `/internal/streams/${definition.stream.name}/content/diff`,
     {
       body,

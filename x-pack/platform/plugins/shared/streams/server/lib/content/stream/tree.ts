@@ -6,7 +6,11 @@
  */
 
 import { isEqual, uniq } from 'lodash';
-import { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content-packs-schema';
+import {
+  ContentPackIncludedObjects,
+  ContentPackStream,
+  StreamConflict,
+} from '@kbn/content-packs-schema';
 import { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
 import { filterQueries, filterRouting, includedObjectsFor } from './helpers';
 
@@ -63,7 +67,11 @@ export function mergeTrees({
   base: StreamTree | undefined;
   existing: StreamTree;
   incoming: StreamTree;
-}) {
+}): {
+  existing: StreamTree;
+  merged: StreamTree;
+  conflicts: StreamConflict[];
+} {
   const merged: StreamTree = {
     name: existing.name,
     type: 'stream',
@@ -104,30 +112,35 @@ export function mergeTrees({
     return fields;
   }, {} as FieldDefinition);
 
-  merged.request.queries = mergeQueries({
+  const { merged: mergedQueries, conflicts: queryConflicts } = mergeQueries({
     base: base?.request.queries,
     existing: existing.request.queries,
     incoming: incoming.request.queries,
   });
+  merged.request.queries = mergedQueries;
 
-  const [mergedChildren, mergedRouting] = uniq([
+  const {
+    children: mergedChildren,
+    routing: mergedRouting,
+    conflicts: childConflicts,
+  } = uniq([
     ...(base?.children.map(({ name }) => name) ?? []),
     ...existing.children.map(({ name }) => name),
     ...incoming.children.map(({ name }) => name),
-    ,
   ]).reduce(
-    ([children, routing], name) => {
+    ({ children, routing, conflicts }, name) => {
       const baseChild = base?.children.find((child) => child.name === name);
       const existingChild = existing.children.find((child) => child.name === name);
       const incomingChild = incoming.children.find((child) => child.name === name);
 
       if (existingChild && incomingChild) {
-        const { merged: mergedChild } = mergeTrees({
+        const { merged: mergedChild, conflicts: childConflicts } = mergeTrees({
           base: baseChild,
           existing: existingChild,
           incoming: incomingChild,
         });
         children.push(mergedChild);
+        conflicts.push(...childConflicts);
 
         const baseRouting = base?.request.stream.ingest.wired.routing.find(
           ({ destination }) => destination === name
@@ -148,7 +161,7 @@ export function mergeTrees({
           }
         }
 
-        return [children, routing];
+        return { children, routing, conflicts };
       }
 
       if (existingChild && !baseChild && !incomingChild) {
@@ -159,7 +172,7 @@ export function mergeTrees({
           )!
         );
 
-        return [children, routing];
+        return { children, routing, conflicts };
       }
 
       if (!baseChild && incomingChild) {
@@ -169,19 +182,31 @@ export function mergeTrees({
             ({ destination }) => destination === name
           )!
         );
-
-        return [children, routing];
       }
 
-      return [children, routing];
+      return { children, routing, conflicts };
     },
-    [[], []] as [StreamTree[], RoutingDefinition[]]
+    { children: [], routing: [], conflicts: [] } as {
+      children: StreamTree[];
+      routing: RoutingDefinition[];
+      conflicts: StreamConflict[];
+    }
   );
 
   merged.children = mergedChildren;
   merged.request.stream.ingest.wired.routing = mergedRouting;
 
-  return { existing: existing, merged };
+  return {
+    existing: existing,
+    merged,
+    conflicts: [
+      {
+        name: merged.name,
+        conflicts: { fields: [], queries: queryConflicts, routing: [] },
+      },
+      ...childConflicts,
+    ].filter(({ conflicts }) => Object.values(conflicts).some((values) => values.length > 0)),
+  };
 }
 
 function mergeQueries({
@@ -192,8 +217,9 @@ function mergeQueries({
   base?: StreamQuery[];
   existing: StreamQuery[];
   incoming: StreamQuery[];
-}): StreamQuery[] {
-  return uniq([
+}): { merged: StreamQuery[]; conflicts: StreamConflict['conflicts']['queries'] } {
+  const conflicts: StreamConflict['conflicts']['queries'] = [];
+  const merged = uniq([
     ...(base.map((query) => query.id) ?? []),
     ...existing.map((query) => query.id),
     ...incoming.map((query) => query.id),
@@ -210,6 +236,7 @@ function mergeQueries({
       if (!isEqual(baseQuery, existingQuery) && !isEqual(existingQuery, incomingQuery)) {
         // conflict - existing query was modified by user
         queries.push(existingQuery);
+        conflicts.push({ id, current: existingQuery, incoming: incomingQuery });
         return queries;
       }
 
@@ -220,4 +247,6 @@ function mergeQueries({
 
     return queries;
   }, [] as StreamQuery[]);
+
+  return { merged, conflicts };
 }

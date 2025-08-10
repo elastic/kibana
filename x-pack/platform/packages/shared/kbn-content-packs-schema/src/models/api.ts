@@ -66,3 +66,18 @@ export interface StreamDiff {
     updated: MergeableProperties<true>;
   };
 }
+
+export type PropertyConflict<T> = {
+  id: string;
+  current: T;
+  incoming: T;
+};
+
+export interface StreamConflict {
+  name: string;
+  conflicts: {
+    fields: PropertyConflict<FieldDefinition>[];
+    queries: PropertyConflict<StreamQuery>[];
+    routing: PropertyConflict<RoutingDefinition>[];
+  };
+}

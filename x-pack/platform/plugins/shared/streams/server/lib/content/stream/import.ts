@@ -16,7 +16,7 @@ import { StreamTree, asTree, mergeTrees } from './tree';
 import { AssetClient } from '../../streams/assets/asset_client';
 import { StreamsClient } from '../../streams/client';
 import { asContentPackEntry, scopeContentPackStreams, scopeIncludedObjects } from './helpers';
-import { StoredContentPack } from '../content_client';
+import { ContentPackInstallation } from '../content_client';
 
 export async function importContentPack({
   root,
@@ -31,7 +31,7 @@ export async function importContentPack({
   assetClient: AssetClient;
   streamsClient: StreamsClient;
   include: ContentPackIncludedObjects;
-  installation?: StoredContentPack;
+  installation?: ContentPackInstallation;
 }) {
   const { merged } = await mergeContentPack({
     root,
@@ -59,7 +59,7 @@ export async function mergeContentPack({
   assetClient: AssetClient;
   streamsClient: StreamsClient;
   include: ContentPackIncludedObjects;
-  installation?: StoredContentPack;
+  installation?: ContentPackInstallation;
 }) {
   const descendants = await streamsClient.getDescendants(root.name);
   const queryLinks = await assetClient.getAssetLinks(

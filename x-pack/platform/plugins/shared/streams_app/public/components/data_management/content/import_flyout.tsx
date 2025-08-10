@@ -11,6 +11,7 @@ import {
   ContentPackEntry,
   ContentPackIncludedObjects,
   ContentPackManifest,
+  StreamConflict,
   StreamDiff,
 } from '@kbn/content-packs-schema';
 import {
@@ -26,7 +27,6 @@ import {
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -50,8 +50,6 @@ export function ImportContentPackFlyout({
     core: { http, notifications },
   } = useKibana();
 
-  const modalTitleId = useGeneratedHtmlId();
-
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [contentPackObjects, setContentPackObjects] = useState<ContentPackEntry[]>([]);
@@ -59,28 +57,31 @@ export function ImportContentPackFlyout({
     objects: { all: {} },
   });
   const [manifest, setManifest] = useState<ContentPackManifest | undefined>();
-  const [diffs, setDiffs] = useState<StreamDiff[] | null>(null);
+  const [diffsAndConflicts, setDiffsAndConflicts] = useState<{
+    diffs: StreamDiff[];
+    conflicts: StreamConflict[];
+  } | null>(null);
 
   return (
     <>
-      {diffs ? (
+      {diffsAndConflicts ? (
         <EuiConfirmModal
           title="Diffs"
-          onCancel={() => setDiffs(null)}
+          onCancel={() => setDiffsAndConflicts(null)}
           onConfirm={() => {}}
           cancelButtonText="Keep editing"
           confirmButtonText="Discard changes"
           buttonColor="danger"
           defaultFocusedButton="confirm"
         >
-          <Diff diffs={diffs} />
+          <Diff {...diffsAndConflicts} />
         </EuiConfirmModal>
       ) : null}
 
-      <EuiFlyout onClose={onClose} aria-labelledby={modalTitleId}>
+      <EuiFlyout onClose={onClose}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle>
-            <h2 id={modalTitleId}>
+            <h2>
               {i18n.translate('xpack.streams.streamDetailDashboard.importContent', {
                 defaultMessage: 'Import content pack',
               })}
@@ -161,13 +162,13 @@ export function ImportContentPackFlyout({
                 onClick={async () => {
                   if (!file || !hasSelectedObjects(includedObjects)) return;
 
-                  const diffs = await diffContent({
+                  const response = await diffContent({
                     http,
                     file,
                     definition,
                     include: includedObjects,
                   });
-                  setDiffs(diffs);
+                  setDiffsAndConflicts(response);
                 }}
               >
                 {i18n.translate('xpack.streams.importContentPackFlyout.diffContent', {

@@ -16,14 +16,14 @@ export const contentStorageSettings = {
     properties: {
       [STREAM_NAME]: types.keyword(),
       [CONTENT_NAME]: types.keyword(),
-      streams: types.object(),
+      streams: types.object({ enabled: false }),
     },
   },
 } satisfies IndexStorageSettings;
 
 export type ContentStorageSettings = typeof contentStorageSettings;
 
-export interface StoredContentPack {
+export interface ContentPackInstallation {
   [STREAM_NAME]: string;
   [CONTENT_NAME]: string;
   streams: ContentPackStream[];
@@ -32,11 +32,11 @@ export interface StoredContentPack {
 export class ContentClient {
   constructor(
     private readonly clients: {
-      storageClient: IStorageClient<ContentStorageSettings, StoredContentPack>;
+      storageClient: IStorageClient<ContentStorageSettings, ContentPackInstallation>;
     }
   ) {}
 
-  async getStoredContentPacks(streamName: string) {
+  async getInstallations(streamName: string) {
     const response = await this.clients.storageClient.search({
       size: 10_000,
       track_total_hits: false,
@@ -50,13 +50,13 @@ export class ContentClient {
     return response.hits.hits.map((hit) => hit._source);
   }
 
-  async getStoredContentPack(streamName: string, contentName: string) {
+  async getInstallation(streamName: string, contentName: string) {
     const id = objectHash({ streamName, contentName });
     const response = await this.clients.storageClient.get({ id });
     return response._source!;
   }
 
-  async upsertStoredContentPack(
+  async upsertInstallation(
     streamName: string,
     content: {
       name: string;

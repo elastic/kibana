@@ -141,7 +141,7 @@ const importContentRoute = createServerRoute({
 
     const contentPack = await parseArchive(params.body.content);
     const installation = await contentClient
-      .getStoredContentPack(params.path.name, contentPack.name)
+      .getInstallation(params.path.name, contentPack.name)
       .catch((err) => {
         if (isNotFoundError(err)) {
           return undefined;
@@ -160,7 +160,13 @@ const importContentRoute = createServerRoute({
     });
 
     const streams = prepareStreamsForImport({ tree: merged });
-    return await streamsClient.bulkUpsert(streams);
+    const result = await streamsClient.bulkUpsert(streams);
+    await contentClient.upsertInstallation(params.path.name, {
+      name: contentPack.name,
+      streams,
+    });
+
+    return result;
   },
 });
 
@@ -233,7 +239,7 @@ const diffContentRoute = createServerRoute({
 
     const contentPack = await parseArchive(params.body.content);
     const installation = await contentClient
-      .getStoredContentPack(params.path.name, contentPack.name)
+      .getInstallation(params.path.name, contentPack.name)
       .catch((err) => {
         if (isNotFoundError(err)) {
           return undefined;
@@ -242,7 +248,7 @@ const diffContentRoute = createServerRoute({
         throw err;
       });
 
-    const { existing, merged } = await mergeContentPack({
+    const { existing, merged, conflicts } = await mergeContentPack({
       root,
       assetClient,
       streamsClient,
@@ -251,7 +257,7 @@ const diffContentRoute = createServerRoute({
       include: params.body.include,
     });
 
-    return diffTrees({ existing, merged });
+    return { diffs: diffTrees({ existing, merged }), conflicts };
   },
 });
 
