@@ -17,6 +17,7 @@ import type {
   RuleMigrationAdapterId,
   RuleMigrationAdapters,
   RuleMigrationIndexNameProviders,
+  RuleMigrationsClientDependencies,
 } from '../types';
 import {
   getIntegrationsFieldMap,
@@ -27,7 +28,6 @@ import {
 } from './rule_migrations_field_maps';
 import { RuleMigrationIndexMigrator } from '../index_migrators';
 import { SiemMigrationsBaseDataService } from '../../common/siem_migrations_base_service';
-import type { SiemMigrationsClientDependencies } from '../../common/types';
 
 export const INDEX_PATTERN = '.kibana-siem-rule-migrations';
 
@@ -35,7 +35,7 @@ interface CreateClientParams {
   spaceId: string;
   currentUser: AuthenticatedUser;
   esScopedClient: IScopedClusterClient;
-  dependencies: SiemMigrationsClientDependencies;
+  dependencies: RuleMigrationsClientDependencies;
 }
 interface CreateRuleAdapterParams {
   adapterId: RuleMigrationAdapterId;

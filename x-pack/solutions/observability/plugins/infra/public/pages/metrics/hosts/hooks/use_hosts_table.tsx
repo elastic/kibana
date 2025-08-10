@@ -17,7 +17,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
 import type { CloudProvider } from '@kbn/custom-icons';
-import { DataSchemaFormat, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -162,7 +162,7 @@ export const useHostsTable = () => {
   const { value: formulas } = useAsync(
     () =>
       inventoryModel.metrics.getFormulas({
-        schema: searchCriteria.preferredSchema ?? DataSchemaFormat.ECS,
+        schema: searchCriteria.preferredSchema ?? 'ecs',
       }),
     [inventoryModel.metrics, searchCriteria.preferredSchema]
   );

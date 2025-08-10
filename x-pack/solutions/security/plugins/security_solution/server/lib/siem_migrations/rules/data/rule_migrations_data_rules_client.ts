@@ -31,7 +31,7 @@ import {
 import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { conditions as searchConditions } from './search';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
-import { MAX_ES_SEARCH_SIZE } from '../constants';
+import { MAX_ES_SEARCH_SIZE, SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../constants';
 
 export type AddRuleMigrationRulesInput = Omit<
   RuleMigrationRule,
@@ -238,6 +238,7 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataBaseClient 
           result: { terms: { field: 'translation_result' } },
           installable: { filter: { bool: { must: searchConditions.isInstallable() } } },
           prebuilt: { filter: searchConditions.isPrebuilt() },
+          missing_index: { filter: searchConditions.isMissingIndex() },
         },
       },
       failed: { filter: { term: { status: SiemMigrationStatus.FAILED } } },
@@ -263,6 +264,7 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataBaseClient 
           result: this.translationResultAggCount(translationResultsAgg),
           installable: (successAgg.installable as AggregationsFilterAggregate)?.doc_count ?? 0,
           prebuilt: (successAgg.prebuilt as AggregationsFilterAggregate)?.doc_count ?? 0,
+          missing_index: (successAgg.missing_index as AggregationsFilterAggregate)?.doc_count ?? 0,
         },
         failed: (aggs.failed as AggregationsFilterAggregate)?.doc_count ?? 0,
       },
@@ -395,6 +397,7 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataBaseClient 
     filters: RuleMigrationFilters = {}
   ): QueryDslQueryContainer {
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
+
     if (filters.status) {
       if (Array.isArray(filters.status)) {
         filter.push({ terms: { status: filters.status } });
@@ -402,12 +405,15 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataBaseClient 
         filter.push({ term: { status: filters.status } });
       }
     }
+
     if (filters.ids) {
       filter.push({ terms: { _id: filters.ids } });
     }
+
     if (filters.searchTerm?.length) {
       filter.push(searchConditions.matchTitle(filters.searchTerm));
     }
+
     if (filters.installed === true) {
       filter.push(searchConditions.isInstalled());
     } else if (filters.installed === false) {
@@ -443,6 +449,10 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataBaseClient 
     } else if (filters.untranslatable === false) {
       filter.push(searchConditions.isNotUntranslatable());
     }
+    if (filters.missingIndex === true) {
+      filter.push(searchConditions.isMissingIndex());
+    }
+
     return { bool: { filter } };
   }
 
@@ -462,5 +472,38 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataBaseClient 
         _index: index,
       },
     }));
+  }
+
+  async updateIndexPattern(
+    id: string,
+    indexPattern: string,
+    translatedRuleIds?: string[]
+  ): Promise<number | undefined> {
+    const index = await this.getIndexName();
+    const additionalFilter: RuleMigrationFilters = { missingIndex: true };
+    if (translatedRuleIds) {
+      additionalFilter.ids = translatedRuleIds;
+    }
+    const query = this.getFilterQuery(id, additionalFilter);
+
+    const result = await this.esClient
+      .updateByQuery({
+        index,
+        script: {
+          source: `
+                def originalQuery = ctx._source.elastic_rule.query;
+                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', '${indexPattern}');
+                ctx._source.elastic_rule.query = newQuery;
+              `,
+          lang: 'painless',
+        },
+        query,
+      })
+      .catch((error) => {
+        this.logger.error(`Error updating index pattern for migration ${id}: ${error}`);
+        throw error;
+      });
+
+    return result.updated;
   }
 }

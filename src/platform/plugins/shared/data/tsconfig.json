@@ -58,6 +58,7 @@
     "@kbn/logging",
     "@kbn/core-execution-context-server",
     "@kbn/data-service-server",
+    "@kbn/css-utils",
   ],
   "exclude": [
     "target/**/*",

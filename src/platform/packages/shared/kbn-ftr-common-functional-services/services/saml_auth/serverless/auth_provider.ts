@@ -58,6 +58,8 @@ export class ServerlessAuthProvider implements AuthProvider {
       throw new Error(`Unsupported serverless projectType: ${this.projectType}`);
     }
 
+    // TODO: Add support for serverless projects with different tiers
+    // ref https://github.com/elastic/kibana/pull/229919
     this.rolesDefinitionPath = resolve(SERVERLESS_ROLES_ROOT_PATH, this.projectType, 'roles.yml');
   }
 

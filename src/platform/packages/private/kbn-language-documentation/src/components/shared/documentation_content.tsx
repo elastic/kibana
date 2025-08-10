@@ -11,8 +11,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiBetaBadge } from '@elastic/eui';
-import type { LanguageDocumentationSections } from '../../types';
-import { LicenseInfo, MultipleLicenseInfo, getLicensesArray } from '../../utils/get_license_array';
+import type { LanguageDocumentationSections, LicenseInfo, MultipleLicenseInfo } from '../../types';
+import { getLicensesArray } from '../../utils/get_license_array';
 
 function toTitleCase(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();

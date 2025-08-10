@@ -19,7 +19,7 @@ export const awsSQS = createInventoryModel('awsSQS', {
       defaultMessage: 'SQS Queue',
     }
   ),
-  requiredModule: 'aws',
+  requiredIntegration: 'aws',
   crosslinkSupport: {
     details: true,
     logs: true,

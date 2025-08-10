@@ -91,7 +91,7 @@ const AIValueComponent = () => {
                 ? [
                     <EuiButtonEmpty
                       className="exportPdfButton"
-                      iconType="download"
+                      iconType="export"
                       onClick={exportPDF}
                       size="s"
                     >

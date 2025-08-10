@@ -25,10 +25,10 @@ import {
   LinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
-  LinkOptions,
 } from '../../../common/content_management';
 import { LinksStrings } from '../links_strings';
 import { UnorderedLink } from '../../editor/open_link_editor_flyout';
+import type { LinkOptions } from '../../../server';
 
 export const LinkOptionsComponent = ({
   link,

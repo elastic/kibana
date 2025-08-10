@@ -1,3 +1,7 @@
 @langchain/langgraph-checkpoint
 dom-to-image-more
 pdf-lib
+tree-dump
+@a2a-js/sdk
+@opentelemetry/exporter-metrics-otlp-http
+inversify

@@ -35,13 +35,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens legend statistics', () => {
     before(async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/legend_statistics'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/legend_statistics'
       );
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
       );
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/default'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/default'
       );
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults':

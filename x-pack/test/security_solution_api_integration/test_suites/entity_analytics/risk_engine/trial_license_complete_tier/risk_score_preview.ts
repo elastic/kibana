@@ -16,7 +16,7 @@ import {
   createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-} from '../../../../../common/utils/security_solution';
+} from '../../../../config/services/detections_response';
 import {
   assetCriticalityRouteHelpersFactory,
   buildDocument,

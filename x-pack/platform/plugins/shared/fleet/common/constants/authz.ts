@@ -60,6 +60,18 @@ export const ENDPOINT_PRIVILEGES: Record<string, PrivilegeMapObject> = deepFreez
     privilegeType: 'api',
     privilegeName: 'readTrustedApplications',
   },
+  writeTrustedDevices: {
+    appId: DEFAULT_APP_CATEGORIES.security.id,
+    privilegeSplit: '-',
+    privilegeType: 'api',
+    privilegeName: 'writeTrustedDevices',
+  },
+  readTrustedDevices: {
+    appId: DEFAULT_APP_CATEGORIES.security.id,
+    privilegeSplit: '-',
+    privilegeType: 'api',
+    privilegeName: 'readTrustedDevices',
+  },
   writeHostIsolationExceptions: {
     appId: DEFAULT_APP_CATEGORIES.security.id,
     privilegeSplit: '-',

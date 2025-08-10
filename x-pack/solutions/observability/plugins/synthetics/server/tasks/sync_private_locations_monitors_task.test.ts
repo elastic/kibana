@@ -454,7 +454,7 @@ describe('runSynPrivateLocationMonitorsTaskSoon', () => {
     const error = new Error('Failed to run soon');
     mockTaskManagerStart.runSoon.mockRejectedValue(error);
 
-    await runSynPrivateLocationMonitorsTaskSoon({ server: mockServerSetup as any });
+    await runSynPrivateLocationMonitorsTaskSoon({ server: mockServerSetup as any, retries: 0 });
 
     expect(mockLogger.error).toHaveBeenCalledWith(
       `Error scheduling Synthetics sync private location monitors task: ${error.message}`,

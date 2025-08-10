@@ -59,6 +59,7 @@ export const AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ = {
   CLOUDFORMATION: 'aws-cloudformation-setup-option',
   MANUAL: 'aws-manual-setup-option',
 };
+export const AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ = 'launchCloudFormationAgentlessButton';
 export const GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ = {
   CLOUD_SHELL: 'gcpGoogleCloudShellOptionTestId',
   MANUAL: 'gcpManualOptionTestId',

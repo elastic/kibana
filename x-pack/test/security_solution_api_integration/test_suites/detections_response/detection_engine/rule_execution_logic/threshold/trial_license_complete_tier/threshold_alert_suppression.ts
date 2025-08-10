@@ -24,7 +24,7 @@ import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/ap
 
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
-import { createRule } from '../../../../../../../common/utils/security_solution';
+import { createRule } from '../../../../../../config/services/detections_response';
 import {
   getAlerts,
   getOpenAlerts,

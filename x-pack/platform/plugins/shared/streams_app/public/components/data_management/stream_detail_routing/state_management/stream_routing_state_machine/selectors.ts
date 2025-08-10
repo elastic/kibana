@@ -6,7 +6,10 @@
  */
 
 import { createSelector } from 'reselect';
+import { flattenObject } from '@kbn/object-utils';
+import { FlattenRecord } from '@kbn/streams-schema';
 import { StreamRoutingContext } from './types';
+import { RoutingSamplesContext } from './routing_samples_state_machine';
 
 /**
  * Selects the set of dotted fields that are not supported by the current simulation.
@@ -24,5 +27,15 @@ export const selectCurrentRule = createSelector(
     }
 
     return currentRoutingRule;
+  }
+);
+
+/**
+ * Selects the documents used for the data preview table.
+ */
+export const selectPreviewDocuments = createSelector(
+  [(context: RoutingSamplesContext) => context.documents],
+  (documents) => {
+    return documents.map((doc) => flattenObject(doc)) as FlattenRecord[];
   }
 );

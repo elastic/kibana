@@ -20,7 +20,7 @@ import { PrivilegeMonitoringEngineStatus } from './common.gen';
 
 export type PrivMonHealthResponse = z.infer<typeof PrivMonHealthResponse>;
 export const PrivMonHealthResponse = z.object({
-  status: z.union([PrivilegeMonitoringEngineStatus, z.literal('not_found')]),
+  status: PrivilegeMonitoringEngineStatus,
   error: z
     .object({
       message: z.string().optional(),

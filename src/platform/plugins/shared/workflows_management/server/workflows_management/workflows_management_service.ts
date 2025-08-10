@@ -19,9 +19,8 @@ import {
   WorkflowExecutionListDto,
   WorkflowListDto,
 } from '@kbn/workflows';
-
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common';
-import { parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
+import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import {
   WORKFLOW_SAVED_OBJECT_TYPE,
   WorkflowSavedObjectAttributes,
@@ -212,7 +211,7 @@ export class WorkflowsService {
         createdBy: response.attributes.createdBy,
         lastUpdatedAt: new Date(response.updated_at!),
         lastUpdatedBy: response.attributes.lastUpdatedBy,
-        definition: response.attributes.definition as any,
+        definition: response.attributes.definition,
         yaml: response.attributes.yaml,
       };
     } catch (error: any) {
@@ -249,8 +248,8 @@ export class WorkflowsService {
     );
 
     // Schedule the workflow if it has triggers
-    if (this.taskScheduler && workflowToCreate.definition.workflow.triggers) {
-      for (const trigger of workflowToCreate.definition.workflow.triggers) {
+    if (this.taskScheduler && workflowToCreate.definition.triggers) {
+      for (const trigger of workflowToCreate.definition.triggers) {
         if (trigger.type === 'triggers.elastic.scheduled' && trigger.enabled) {
           await this.taskScheduler.scheduleWorkflowTask(response.id, 'default', trigger);
         }
@@ -430,7 +429,7 @@ export class WorkflowsService {
       bool: {
         must: [
           {
-            term: {
+            match: {
               'workflow.execution_id': executionId,
             },
           },
@@ -446,12 +445,12 @@ export class WorkflowsService {
       bool: {
         must: [
           {
-            term: {
+            match: {
               'workflow.execution_id': executionId,
             },
           },
           {
-            term: {
+            match: {
               'workflow.step_id': stepId,
             },
           },

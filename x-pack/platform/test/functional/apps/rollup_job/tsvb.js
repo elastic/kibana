@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }) {
       // load visualize to have an index pattern ready, otherwise visualize will redirect
       await security.testUser.setRoles(['global_visualize_all', 'test_rollup_reader']);
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/rollup/rollup.json'
       );
       await kibanaServer.uiSettings.update({
         defaultIndex: 'rollup',
@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }) {
         MOCK_ROLLUP_INDEX_NAME,
       ]);
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/rollup/rollup.json'
       );
       await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': false });
       await kibanaServer.uiSettings.replace({});

@@ -15,8 +15,8 @@ import { MenuItem } from '../../../types';
 
 export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, MenuItem {
   hasContent?: boolean;
-  iconType?: IconType;
-  isCurrent: boolean;
+  iconType: IconType;
+  isActive: boolean;
   label: string;
   onClick: () => void;
   onKeyDown?: (e: KeyboardEvent) => void;
@@ -26,7 +26,7 @@ export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconTy
  * Toggle button pattern: https://eui.elastic.co/docs/components/navigation/buttons/button/#toggle-button
  */
 export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemProps>(
-  ({ hasContent, iconType, id, isCurrent, label, ...props }, ref: ForwardedRef<HTMLDivElement>) => {
+  ({ hasContent, iconType, id, isActive, label, ...props }, ref: ForwardedRef<HTMLDivElement>) => {
     const wrapperStyles = css`
       display: flex;
       justify-content: center;
@@ -36,9 +36,9 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
     const menuItem = (
       <EuiButtonIcon
         aria-label={label}
-        color={isCurrent ? 'primary' : 'text'}
+        color={isActive ? 'primary' : 'text'}
         data-test-subj={`footerMenuItem-${id}`}
-        display={isCurrent ? 'base' : 'empty'}
+        display={isActive ? 'base' : 'empty'}
         iconType={iconType || 'empty'}
         size="s"
         {...props}

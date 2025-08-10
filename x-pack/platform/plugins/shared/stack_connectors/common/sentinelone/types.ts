@@ -130,8 +130,8 @@ export type SentinelOneDownloadRemoteScriptResultsParams = TypeOf<
   typeof SentinelOneDownloadRemoteScriptResultsParamsSchema
 >;
 
-export type SentinelOneGetRemoteScriptsParams = TypeOf<
-  typeof SentinelOneGetRemoteScriptsParamsSchema
+export type SentinelOneGetRemoteScriptsParams = Partial<
+  TypeOf<typeof SentinelOneGetRemoteScriptsParamsSchema>
 >;
 
 export type SentinelOneGetRemoteScriptsResponse = TypeOf<

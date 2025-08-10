@@ -266,7 +266,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       <FlyoutPanels.Item data-test-subj="indexPatternEditorFlyout" border="right">
         <FlyoutPanels.Content>
           <EuiTitle data-test-subj="flyoutTitle">
-            <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
+            <h2 id="dataViewEditorFlyoutTitle">{editData ? editorTitleEditMode : editorTitle}</h2>
           </EuiTitle>
           {showManagementLink && editData && editData.id && (
             <EuiLink

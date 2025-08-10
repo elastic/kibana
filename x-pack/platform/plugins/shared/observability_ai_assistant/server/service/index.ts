@@ -110,6 +110,7 @@ export class ObservabilityAIAssistantService {
       esClient: {
         asInternalUser,
       },
+      productDoc: plugins.productDocBase.management,
     });
 
     return new ObservabilityAIAssistantClient({

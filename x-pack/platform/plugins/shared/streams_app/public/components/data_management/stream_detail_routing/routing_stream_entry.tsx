@@ -55,8 +55,8 @@ export function RoutingStreamEntry({
     <EuiPanel
       hasShadow={false}
       hasBorder
-      color={isNeverCondition(routingRule.if) ? 'transparent' : undefined}
       paddingSize="s"
+      data-test-subj={`routingRule-${routingRule.destination}`}
       className={css`
         overflow: hidden;
         .streamsDragHandle {
@@ -80,6 +80,7 @@ export function RoutingStreamEntry({
             className="streamsDragHandle"
             color="transparent"
             paddingSize="s"
+            data-test-subj={`routingRuleDragHandle-${routingRule.destination}`}
             {...draggableProvided.dragHandleProps}
             aria-label={i18n.translate(
               'xpack.streams.routingStreamEntry.euiPanel.dragHandleLabel',
@@ -122,7 +123,7 @@ export function RoutingStreamEntry({
           </EuiBadge>
         )}
         <EuiButtonIcon
-          data-test-subj="streamsAppRoutingStreamEntryButton"
+          data-test-subj={`routingRuleEditButton-${routingRule.destination}`}
           iconType="pencil"
           disabled={!isEditingEnabled}
           onClick={() => onEditIconClick(routingRule.id)}

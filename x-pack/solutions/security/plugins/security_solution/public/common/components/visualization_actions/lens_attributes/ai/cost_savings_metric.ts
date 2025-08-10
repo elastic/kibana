@@ -39,7 +39,7 @@ export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
                   label: 'Cost Savings',
                   operationType: 'formula',
                   params: {
-                    format: { id: 'custom', params: { decimals: 0, pattern: '$0,0.[000]' } },
+                    format: { id: 'custom', params: { decimals: 0, pattern: '$0,0' } },
                     formula: `count() * ((${minutesPerAlert}/60)*${analystHourlyRate})`,
                     isFormulaBroken: false,
                   },
@@ -67,17 +67,17 @@ export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
                         {
                           args: [
                             {
-                              args: [8, 60],
+                              args: [minutesPerAlert, 60],
                               location: { max: 16, min: 12 },
                               name: 'divide',
-                              text: '8/60',
+                              text: `${minutesPerAlert}/60`,
                               type: 'function',
                             },
-                            75,
+                            analystHourlyRate,
                           ],
                           location: { max: 20, min: 11 },
                           name: 'multiply',
-                          text: '(8/60)*75',
+                          text: `(${minutesPerAlert}/60)*${analystHourlyRate}`,
                           type: 'function',
                         },
                       ],

@@ -35,7 +35,6 @@ import { TimeSaved } from './time_saved';
 interface Props {
   from: string;
   to: string;
-  attackAlertIds: string[];
   hasAttackDiscoveries: boolean;
   valueMetrics: ValueMetrics;
   valueMetricsCompare: ValueMetrics;
@@ -48,7 +47,6 @@ const LI_PADDING = css`
 `;
 
 export const ExecutiveSummary: React.FC<Props> = ({
-  attackAlertIds,
   minutesPerAlert,
   analystHourlyRate,
   hasAttackDiscoveries,
@@ -264,7 +262,6 @@ export const ExecutiveSummary: React.FC<Props> = ({
               <EuiFlexItem>
                 <CostSavings
                   analystHourlyRate={analystHourlyRate}
-                  attackAlertIds={attackAlertIds}
                   costSavings={valueMetrics.costSavings}
                   costSavingsCompare={valueMetricsCompare.costSavings}
                   minutesPerAlert={minutesPerAlert}
@@ -275,7 +272,6 @@ export const ExecutiveSummary: React.FC<Props> = ({
               <EuiFlexItem>
                 <TimeSaved
                   minutesPerAlert={minutesPerAlert}
-                  attackAlertIds={attackAlertIds}
                   hoursSaved={valueMetrics.hoursSaved}
                   hoursSavedCompare={valueMetricsCompare.hoursSaved}
                   from={from}

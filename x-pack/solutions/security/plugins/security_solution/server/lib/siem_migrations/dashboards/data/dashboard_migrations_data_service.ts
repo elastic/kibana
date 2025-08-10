@@ -16,19 +16,20 @@ import type {
   DashboardMigrationAdapters,
   DashboardMigrationAdapterId,
   DashboardMigrationIndexNameProviders,
+  DashboardMigrationsClientDependencies,
 } from '../types';
 import { SiemMigrationsBaseDataService } from '../../common/siem_migrations_base_service';
 import { dashboardMigrationsDashboardsFieldMap, dashboardMigrationsFieldMap } from './field_maps';
 import { DashboardMigrationsDataClient } from './dashboard_migrations_data_client';
-import type { SiemMigrationsClientDependencies } from '../../common/types';
 export const INDEX_PATTERN = '.kibana-siem-dashboard-migrations';
 
 interface CreateClientParams {
   spaceId: string;
   currentUser: AuthenticatedUser;
   esScopedClient: IScopedClusterClient;
-  dependencies: SiemMigrationsClientDependencies;
+  dependencies: DashboardMigrationsClientDependencies;
 }
+
 interface CreateDashboardAdapterParams {
   adapterId: DashboardMigrationAdapterId;
   fieldMap: FieldMap;

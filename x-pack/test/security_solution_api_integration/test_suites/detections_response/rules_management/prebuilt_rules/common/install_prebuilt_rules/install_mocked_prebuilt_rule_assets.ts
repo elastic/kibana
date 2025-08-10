@@ -19,7 +19,7 @@ import {
   installPrebuiltRules,
   getInstalledRules,
 } from '../../../../utils';
-import { deleteAllRules, deleteRule } from '../../../../../../../common/utils/security_solution';
+import { deleteAllRules, deleteRule } from '../../../../../../config/services/detections_response';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');

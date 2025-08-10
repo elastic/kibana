@@ -1,6 +1,4 @@
-# -----
-# Copy from internal roles config in elasticsearch-controller
-# -----
+# ----- Copy from internal roles config in elasticsearch-controller
 # modeled after the t1_analyst minus osquery run saved queries privilege
 viewer:
   cluster: []

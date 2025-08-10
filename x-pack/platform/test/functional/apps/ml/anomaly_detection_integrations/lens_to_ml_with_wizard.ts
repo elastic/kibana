@@ -19,7 +19,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
   const dashboardTitle = 'lens_to_ml';
   const dashboardArchive =
-    'x-pack/test/functional/fixtures/kbn_archiver/ml/lens_to_ml_dashboard.json';
+    'x-pack/platform/test/functional/fixtures/kbn_archives/ml/lens_to_ml_dashboard.json';
 
   async function retrySwitchTab(tabIndex: number, seconds: number) {
     await retry.tryForTime(seconds * 1000, async () => {

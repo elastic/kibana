@@ -6,8 +6,8 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import type { PrometheusExporter } from '@kbn/metrics';
 import { MONITORING_COLLECTION_BASE_PATH } from '../../../../constants';
-import { PrometheusExporter } from '../../../../lib';
 
 export const PROMETHEUS_PATH = `${MONITORING_COLLECTION_BASE_PATH}/v1/prometheus`;
 export function registerV1PrometheusRoute({
