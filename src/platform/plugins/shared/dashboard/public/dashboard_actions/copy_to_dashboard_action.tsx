@@ -102,13 +102,6 @@ export class CopyToDashboardAction implements Action<EmbeddableApiContext> {
       {
         maxWidth: 400,
         'data-test-subj': 'copyToDashboardPanel',
-        handleClose: () => {
-          // focus the panel
-          const triggerId = apiHasUniqueId(embeddable) ? `panel-${embeddable.uuid}` : undefined;
-          if (triggerId) {
-            focusFirstFocusable(document.getElementById(triggerId));
-          }
-        },
       }
     );
   }

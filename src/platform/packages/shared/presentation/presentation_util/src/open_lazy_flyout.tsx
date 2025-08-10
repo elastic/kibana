@@ -64,14 +64,14 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   const onClose = () => {
     overlayTracker?.clearOverlays();
     flyoutRef?.close();
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       const focusTarget = determineFocusTargetAfterClose?.();
       if (focusTarget) {
         focusFirstFocusable(focusTarget);
       } else if (focusedPanelId) {
         focusFirstFocusable(document.getElementById(`panel-${focusedPanelId}`));
       }
-    }, 100);
+    });
   };
 
   /**
