@@ -140,7 +140,7 @@ export const initTransform =
 
           const targetVersion = getVersion(to);
 
-          if (!migrationDefinition[targetVersion] || requestVersion < 1) {
+          if (!migrationDefinition[targetVersion] || targetVersion < 1) {
             return {
               error: new Error(`Invalid version to up transform to [${to}].`),
               value: null,
