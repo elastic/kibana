@@ -82,6 +82,7 @@ export class LensStorage extends SOContentStorage<LensCrud> {
         updatedAt: '', // type misalignment
         ...rest,
         attributes: {
+          ...attributes, // temporarily pass all attributes for SO finder usages
           title: attributes.title,
           description: attributes.description ?? '',
         },
