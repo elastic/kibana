@@ -14,19 +14,27 @@ import { coreServices } from '../services/kibana_services';
 export async function addFromLibrary(dashboardApi: DashboardApi) {
   let lastAddedPanelUuid: string | undefined;
 
- 
-
   openLazyFlyout({
     core: coreServices,
     parentApi: dashboardApi,
     loadContent: async ({ ariaLabelledBy }) => {
       const { AddFromLibraryFlyout } = await import('@kbn/embeddable-plugin/public');
-      return <AddFromLibraryFlyout container={dashboardApi} modalTitleId={ariaLabelledBy} setPanelToFocus={(uuid?: string) => {lastAddedPanelUuid = uuid}}/>;
+      return (
+        <AddFromLibraryFlyout
+          container={dashboardApi}
+          modalTitleId={ariaLabelledBy}
+          setPanelToFocus={(uuid?: string) => {
+            lastAddedPanelUuid = uuid;
+          }}
+        />
+      );
     },
     flyoutProps: {
       'data-test-subj': 'dashboardAddPanel',
       determineFocusTargetAfterClose: () => {
-        return lastAddedPanelUuid ? document.getElementById(`panel-${lastAddedPanelUuid}`):  document.getElementById('addFromLibraryButton')
+        return lastAddedPanelUuid
+          ? document.getElementById(`panel-${lastAddedPanelUuid}`)
+          : document.getElementById('addFromLibraryButton');
       },
     },
   });

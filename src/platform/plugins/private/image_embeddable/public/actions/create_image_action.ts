@@ -39,7 +39,7 @@ export const createImageAction: ActionDefinition<EmbeddableApiContext> = {
           closeFlyout,
           ariaLabelledBy,
           onSave: async (imageConfig: ImageConfig) => {
-            newlyCreatedPanel =await parentApi.addNewPanel<ImageEmbeddableSerializedState>({
+            newlyCreatedPanel = await parentApi.addNewPanel<ImageEmbeddableSerializedState>({
               panelType: IMAGE_EMBEDDABLE_TYPE,
               serializedState: { rawState: { imageConfig } },
             });
@@ -52,7 +52,7 @@ export const createImageAction: ActionDefinition<EmbeddableApiContext> = {
             ? document.getElementById(`panel-${newlyCreatedPanel.uuid}`)
             : document.getElementById(`dashboardEditorMenuButton`);
         },
-      }
+      },
     });
   },
   grouping: [ADD_PANEL_ANNOTATION_GROUP],

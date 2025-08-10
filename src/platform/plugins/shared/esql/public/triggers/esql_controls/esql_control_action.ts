@@ -99,7 +99,7 @@ export class CreateESQLControlAction implements Action<Context> {
         isResizable: true,
         maxWidth: 800,
         determineFocusTargetAfterClose: () =>
-          document.getElementById('dashboard-controls-menu-button'), //TODO
+          document.getElementById('dashboard-controls-menu-button'), // TODO
       },
     });
   }

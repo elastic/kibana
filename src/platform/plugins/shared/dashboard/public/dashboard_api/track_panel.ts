@@ -11,7 +11,10 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 export const highlightAnimationDuration = 2000;
 
-export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefined>, hasOverlaysOpen: () => boolean) {
+export function initializeTrackPanel(
+  untilLoaded: (id: string) => Promise<undefined>,
+  hasOverlaysOpen: () => boolean
+) {
   const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const focusedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const highlightPanelId$ = new BehaviorSubject<string | undefined>(undefined);
@@ -20,7 +23,6 @@ export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefi
   let scrollPosition: number | undefined;
 
   function setScrollToPanelId(id: string | undefined) {
-    console.log('waht is this', id, scrollToPanelId$.value)
     if (scrollToPanelId$.value !== id) scrollToPanelId$.next(id);
   }
 
@@ -51,7 +53,7 @@ export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefi
         untilLoaded(id).then(() => {
           // Adds the highlight class in the next event loop to allow the DOM to update
           setTimeout(() => {
-            panelRef.classList.add('dshDashboardGrid__item--highlighted')
+            panelRef.classList.add('dshDashboardGrid__item--highlighted');
             if (!hasOverlaysOpen()) {
               panelRef.focus();
             }
@@ -66,7 +68,7 @@ export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefi
     },
     scrollToPanelId$,
     scrollToPanel: async (panelRef: HTMLDivElement) => {
-      console.log('panelRef', panelRef, scrollToPanelId$.value)
+      console.log('panelRef', panelRef, scrollToPanelId$.value);
       const id = scrollToPanelId$.value;
       if (!id) return;
 

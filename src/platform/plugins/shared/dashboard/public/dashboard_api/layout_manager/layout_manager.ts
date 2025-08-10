@@ -45,7 +45,6 @@ import type { initializeTrackPanel } from '../track_panel';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
 import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from './types';
-import { focusFirstFocusable } from '@kbn/presentation-util';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,

@@ -155,12 +155,12 @@ export function InternalDashboardTopNav({
           viewMode === 'edit' ? (
             <>
               {dashboardTitle}
-              <button onClick={() => openSettingsFlyout(dashboardApi)} css={styles.updateIcon} tabIndex={0}>
-                <EuiIcon
-                  aria-label={topNavStrings.settings.description}
-                  size="s"
-                  type="pencil"
-                />
+              <button
+                onClick={() => openSettingsFlyout(dashboardApi)}
+                css={styles.updateIcon}
+                tabIndex={0}
+              >
+                <EuiIcon aria-label={topNavStrings.settings.description} size="s" type="pencil" />
               </button>
             </>
           ) : (

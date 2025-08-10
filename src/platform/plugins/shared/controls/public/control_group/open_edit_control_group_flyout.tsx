@@ -53,7 +53,8 @@ export const openEditControlGroupFlyout = (
         defaultMessage: 'Edit control settings',
       }),
       outsideClickCloses: false,
-      determineFocusTargetAfterClose: () => document.getElementById('dashboard-controls-menu-button'),
+      determineFocusTargetAfterClose: () =>
+        document.getElementById('dashboard-controls-menu-button'),
     },
   });
 };

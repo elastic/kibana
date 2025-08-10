@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 import type { DefaultDataControlState } from '../../../common';
 import { coreServices } from '../../services/kibana_services';
 import type { ControlGroupApi } from '../../control_group/types';
-import { apiHasUniqueId } from '@kbn/presentation-publishing';
 
 export const openDataControlEditor = <
   State extends DefaultDataControlState = DefaultDataControlState
@@ -26,13 +25,15 @@ export const openDataControlEditor = <
   initialDefaultPanelTitle,
   onSave,
   controlGroupApi,
+  isNew,
 }: {
   initialState: Partial<State>;
   controlType?: string;
   controlId?: string;
   initialDefaultPanelTitle?: string;
-  onSave: ({ type, state }: { type: string; state: Partial<State> }) => void;
+  onSave: ({ type, state }: { type: string; state: Partial<State> }) => string;
   controlGroupApi: ControlGroupApi;
+  isNew?: boolean;
 }) => {
   const onCancel = (newState: Partial<State>, closeFlyout: () => void) => {
     if (deepEqual(initialState, newState)) {
@@ -64,6 +65,8 @@ export const openDataControlEditor = <
       });
   };
 
+  let newlyCreatedId: string;
+
   openLazyFlyout({
     core: coreServices,
     parentApi: controlGroupApi.parentApi,
@@ -76,23 +79,25 @@ export const openDataControlEditor = <
           initialState={initialState}
           controlType={controlType}
           controlId={controlId}
+          isNew={isNew}
           initialDefaultPanelTitle={initialDefaultPanelTitle}
           onCancel={(state) => {
             onCancel(state, closeFlyout);
           }}
-          onSave={(state, selectedControlType) => {
+          onSave={async (state, selectedControlType) => {
+            await onSave({ type: selectedControlType, state });
             closeFlyout();
-            onSave({ type: selectedControlType, state });
           }}
         />
       );
     },
     flyoutProps: {
       determineFocusTargetAfterClose: () => {
-        return controlId
-        ? document.getElementById(`control-title-${controlId}`)
-        : document.getElementById('dashboard-controls-menu-button')
-      }
+        return (
+          document.getElementById(`control-title-${controlId || newlyCreatedId}`) ||
+          document.getElementById('dashboard-controls-menu-button')
+        );
+      },
     },
   });
 };

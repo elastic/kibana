@@ -50,7 +50,7 @@ export const AddFromLibraryFlyout = ({
 }: {
   container: CanAddNewPanel;
   modalTitleId?: string;
-  setPanelToFocus?: (uuid?: string) => void
+  setPanelToFocus?: (uuid?: string) => void;
 }) => {
   const libraryTypes = useAddFromLibraryTypes();
 
@@ -75,7 +75,7 @@ export const AddFromLibraryFlyout = ({
       runAddTelemetry(container, savedObject, libraryType.savedObjectMetaData);
 
       if (setPanelToFocus && apiHasUniqueId(embeddable)) {
-        setPanelToFocus(embeddable.uuid)
+        setPanelToFocus(embeddable.uuid);
       }
     },
     [container]
