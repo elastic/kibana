@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ContentPack, ContentPackIncludedObjects } from '@kbn/content-packs-schema';
+import { ContentPack, ContentPackIncludedObjects, StreamDiff } from '@kbn/content-packs-schema';
 import { HttpSetup } from '@kbn/core/public';
 import { Streams } from '@kbn/streams-schema';
 
@@ -59,4 +59,33 @@ export async function previewContent({
   );
 
   return contentPack;
+}
+
+export async function diffContent({
+  file,
+  http,
+  definition,
+  include,
+}: {
+  file: File;
+  http: HttpSetup;
+  definition: Streams.ingest.all.GetResponse;
+  include: ContentPackIncludedObjects;
+}) {
+  const body = new FormData();
+  body.append('content', file);
+  body.append('include', JSON.stringify(include));
+
+  const response = await http.post<StreamDiff[]>(
+    `/internal/streams/${definition.stream.name}/content/diff`,
+    {
+      body,
+      headers: {
+        // Important to be undefined, it forces proper headers to be set for FormData
+        'Content-Type': undefined,
+      },
+    }
+  );
+
+  return response;
 }

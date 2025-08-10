@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 
 export interface ContentPackIncludeAll {
@@ -45,3 +46,23 @@ export const contentPackIncludedObjectsSchema: z.Schema<ContentPackIncludedObjec
     }),
   ])
 );
+
+interface Diff<T> {
+  from: T;
+  to: T;
+}
+
+export type MergeableProperties<UseDiff extends boolean = false> = {
+  fields: UseDiff extends true ? Diff<FieldDefinition>[] : FieldDefinition[];
+  queries: UseDiff extends true ? Diff<StreamQuery>[] : StreamQuery[];
+  routing: UseDiff extends true ? Diff<RoutingDefinition>[] : RoutingDefinition[];
+};
+
+export interface StreamDiff {
+  name: string;
+  diff: {
+    added: MergeableProperties;
+    removed: MergeableProperties;
+    updated: MergeableProperties<true>;
+  };
+}

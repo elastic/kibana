@@ -55,6 +55,7 @@ function sortDescendants(descendants: ContentPackStream[]): StreamRow[] {
     };
   });
 }
+
 export function ContentPackObjectsList({
   definition,
   objects,

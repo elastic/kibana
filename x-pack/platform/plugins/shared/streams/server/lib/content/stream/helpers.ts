@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { intersectionBy } from 'lodash';
+import { intersectionBy, omit } from 'lodash';
 import {
   ContentPackIncludedObjects,
   ContentPackStream,
@@ -13,6 +13,8 @@ import {
   isIncludeAll,
 } from '@kbn/content-packs-schema';
 import { ContentPackIncludeError } from '../error';
+import { QueryLink } from '../../../../common/assets';
+import { Streams } from '@kbn/streams-schema';
 
 export function withoutRootPrefix(root: string, name: string) {
   const prefix = `${root}.`;
@@ -119,6 +121,24 @@ export function scopeIncludedObjects({
         ...scopeIncludedObjects({ root, include: routing }),
         destination: withRootPrefix(root, routing.destination),
       })),
+    },
+  };
+}
+
+export function asContentPackEntry({
+  stream,
+  queryLinks,
+}: {
+  stream: Streams.WiredStream.Definition;
+  queryLinks: QueryLink[];
+}): ContentPackStream {
+  return {
+    type: 'stream' as const,
+    name: stream.name,
+    request: {
+      stream: { ...omit(stream, ['name']) },
+      queries: queryLinks.map(({ query }) => query),
+      dashboards: [],
     },
   };
 }

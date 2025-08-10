@@ -4,26 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ContentPackSavedObjectLinks,
-  SavedObjectLinkWithReferences,
-} from '@kbn/content-packs-schema';
+
+import { ContentPackStream } from '@kbn/content-packs-schema';
 import { IStorageClient, IndexStorageSettings, types } from '@kbn/storage-adapter';
 import objectHash from 'object-hash';
 import { CONTENT_NAME, STREAM_NAME } from './fields';
 
 export const contentStorageSettings = {
-  name: '.kibana_streams_content_packs',
+  name: '.kibana_streams_content_pack_installations',
   schema: {
     properties: {
       [STREAM_NAME]: types.keyword(),
       [CONTENT_NAME]: types.keyword(),
-      dashboards: types.object(),
-      'dashboards.source_id': types.keyword(),
-      'dashboards.target_id': types.keyword(),
-      'dashboards.references': types.object(),
-      'dashboards.references.source_id': types.keyword(),
-      'dashboards.references.target_id': types.keyword(),
+      streams: types.object(),
     },
   },
 } satisfies IndexStorageSettings;
@@ -33,7 +26,7 @@ export type ContentStorageSettings = typeof contentStorageSettings;
 export interface StoredContentPack {
   [STREAM_NAME]: string;
   [CONTENT_NAME]: string;
-  dashboards: SavedObjectLinkWithReferences[];
+  streams: ContentPackStream[];
 }
 
 export class ContentClient {
@@ -65,7 +58,10 @@ export class ContentClient {
 
   async upsertStoredContentPack(
     streamName: string,
-    content: { name: string } & ContentPackSavedObjectLinks
+    content: {
+      name: string;
+      streams: ContentPackStream[];
+    }
   ) {
     const id = objectHash({ streamName, contentName: content.name });
     await this.clients.storageClient.index({
@@ -73,7 +69,7 @@ export class ContentClient {
       document: {
         [STREAM_NAME]: streamName,
         [CONTENT_NAME]: content.name,
-        dashboards: content.dashboards,
+        streams: content.streams,
       },
     });
   }

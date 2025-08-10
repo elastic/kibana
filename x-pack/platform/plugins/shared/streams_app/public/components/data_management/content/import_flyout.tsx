@@ -11,10 +11,12 @@ import {
   ContentPackEntry,
   ContentPackIncludedObjects,
   ContentPackManifest,
+  StreamDiff,
 } from '@kbn/content-packs-schema';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiConfirmModal,
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,10 +31,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ContentPackObjectsList } from './objects_list';
-import { importContent, previewContent } from './requests';
+import { diffContent, importContent, previewContent } from './requests';
 import { ContentPackMetadata } from './manifest';
 import { getFormattedError } from '../../../util/errors';
 import { hasSelectedObjects } from './helpers';
+import { Diff } from './diff';
 
 export function ImportContentPackFlyout({
   definition,
@@ -56,129 +59,166 @@ export function ImportContentPackFlyout({
     objects: { all: {} },
   });
   const [manifest, setManifest] = useState<ContentPackManifest | undefined>();
+  const [diffs, setDiffs] = useState<StreamDiff[] | null>(null);
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby={modalTitleId}>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle>
-          <h2 id={modalTitleId}>
-            {i18n.translate('xpack.streams.streamDetailDashboard.importContent', {
-              defaultMessage: 'Import content pack',
-            })}
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
+    <>
+      {diffs ? (
+        <EuiConfirmModal
+          title="Diffs"
+          onCancel={() => setDiffs(null)}
+          onConfirm={() => {}}
+          cancelButtonText="Keep editing"
+          confirmButtonText="Discard changes"
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+        >
+          <Diff diffs={diffs} />
+        </EuiConfirmModal>
+      ) : null}
 
-      <EuiFlyoutBody>
-        <EuiFilePicker
-          id={'streams-content-import'}
-          multiple={false}
-          initialPromptText="Select a streams content file"
-          fullWidth
-          onChange={async (files) => {
-            if (files?.length) {
-              const archiveFile = files.item(0);
-              if (!archiveFile) return;
-
-              setFile(archiveFile);
-
-              try {
-                const contentPackParsed = await previewContent({
-                  http,
-                  definition,
-                  file: archiveFile,
-                });
-
-                setManifest({
-                  name: contentPackParsed.name,
-                  version: contentPackParsed.version,
-                  description: contentPackParsed.description,
-                });
-                setContentPackObjects(contentPackParsed.entries);
-              } catch (err) {
-                setFile(null);
-
-                notifications.toasts.addError(err, {
-                  title: i18n.translate('xpack.streams.failedToPreviewContentError', {
-                    defaultMessage: 'Failed to preview content pack',
-                  }),
-                  toastMessage: getFormattedError(err).message,
-                });
-              }
-            } else {
-              setFile(null);
-            }
-          }}
-          display={'large'}
-        />
-
-        {file && manifest ? (
-          <>
-            <EuiSpacer />
-            <ContentPackMetadata manifest={manifest} readonly={true} />
-            <EuiSpacer />
-
-            <ContentPackObjectsList
-              definition={definition}
-              objects={contentPackObjects}
-              onSelectionChange={setIncludedObjects}
-            />
-          </>
-        ) : null}
-      </EuiFlyoutBody>
-
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => onClose()}>
-              {i18n.translate('xpack.streams.importContentPackFlyout.cancel', {
-                defaultMessage: 'Cancel',
+      <EuiFlyout onClose={onClose} aria-labelledby={modalTitleId}>
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle>
+            <h2 id={modalTitleId}>
+              {i18n.translate('xpack.streams.streamDetailDashboard.importContent', {
+                defaultMessage: 'Import content pack',
               })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
 
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="streamsAppModalFooterButton"
-              isDisabled={!file || !hasSelectedObjects(includedObjects)}
-              isLoading={isLoading}
-              fill
-              onClick={async () => {
-                if (!file) return;
+        <EuiFlyoutBody>
+          <EuiFilePicker
+            id={'streams-content-import'}
+            multiple={false}
+            initialPromptText="Select a streams content file"
+            fullWidth
+            onChange={async (files) => {
+              if (files?.length) {
+                const archiveFile = files.item(0);
+                if (!archiveFile) return;
 
-                setIsLoading(true);
+                setFile(archiveFile);
 
                 try {
-                  await importContent({
+                  const contentPackParsed = await previewContent({
+                    http,
+                    definition,
+                    file: archiveFile,
+                  });
+
+                  setManifest({
+                    name: contentPackParsed.name,
+                    version: contentPackParsed.version,
+                    description: contentPackParsed.description,
+                  });
+                  setContentPackObjects(contentPackParsed.entries);
+                } catch (err) {
+                  setFile(null);
+
+                  notifications.toasts.addError(err, {
+                    title: i18n.translate('xpack.streams.failedToPreviewContentError', {
+                      defaultMessage: 'Failed to preview content pack',
+                    }),
+                    toastMessage: getFormattedError(err).message,
+                  });
+                }
+              } else {
+                setFile(null);
+              }
+            }}
+            display={'large'}
+          />
+
+          {file && manifest ? (
+            <>
+              <EuiSpacer />
+              <ContentPackMetadata manifest={manifest} readonly={true} />
+              <EuiSpacer />
+
+              <ContentPackObjectsList
+                definition={definition}
+                objects={contentPackObjects}
+                onSelectionChange={setIncludedObjects}
+              />
+            </>
+          ) : null}
+        </EuiFlyoutBody>
+
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={() => onClose()}>
+                {i18n.translate('xpack.streams.importContentPackFlyout.cancel', {
+                  defaultMessage: 'Cancel',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={async () => {
+                  if (!file || !hasSelectedObjects(includedObjects)) return;
+
+                  const diffs = await diffContent({
                     http,
                     file,
                     definition,
                     include: includedObjects,
                   });
+                  setDiffs(diffs);
+                }}
+              >
+                {i18n.translate('xpack.streams.importContentPackFlyout.diffContent', {
+                  defaultMessage: 'Preview diff',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
 
-                  setIsLoading(false);
-                  setContentPackObjects([]);
-                  setFile(null);
-                  onImport();
-                } catch (err) {
-                  setIsLoading(false);
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="streamsAppModalFooterButton"
+                isDisabled={!file || !hasSelectedObjects(includedObjects)}
+                isLoading={isLoading}
+                fill
+                onClick={async () => {
+                  if (!file) return;
 
-                  notifications.toasts.addError(err, {
-                    title: i18n.translate('xpack.streams.failedToImportContentError', {
-                      defaultMessage: 'Failed to import content pack',
-                    }),
-                    toastMessage: getFormattedError(err).message,
-                  });
-                }
-              }}
-            >
-              {i18n.translate('xpack.streams.importContentPackFlyout.importToStream', {
-                defaultMessage: 'Import to stream',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+                  setIsLoading(true);
+
+                  try {
+                    await importContent({
+                      http,
+                      file,
+                      definition,
+                      include: includedObjects,
+                    });
+
+                    setIsLoading(false);
+                    setContentPackObjects([]);
+                    setFile(null);
+                    onImport();
+                  } catch (err) {
+                    setIsLoading(false);
+
+                    notifications.toasts.addError(err, {
+                      title: i18n.translate('xpack.streams.failedToImportContentError', {
+                        defaultMessage: 'Failed to import content pack',
+                      }),
+                      toastMessage: getFormattedError(err).message,
+                    });
+                  }
+                }}
+              >
+                {i18n.translate('xpack.streams.importContentPackFlyout.importToStream', {
+                  defaultMessage: 'Import to stream',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    </>
   );
 }
