@@ -238,6 +238,7 @@ const ProcessorsEditor = React.memo(() => {
           <EuiButton
             size="s"
             iconType="plus"
+            data-test-subj="streamsAppStreamDetailEnrichmentAddProcessorButton"
             onClick={() => addProcessor()}
             disabled={!canAddProcessor}
           >

@@ -14,13 +14,14 @@ import agent from 'elastic-apm-node';
 import { RunStepResult } from '../step/step_base';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
-import { IWorkflowContextLogger } from './types';
+import { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecution: EsWorkflowExecution;
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
   workflowExecutionGraph: graphlib.Graph;
+  workflowLogger: IWorkflowEventLogger;
 }
 
 /**
@@ -48,7 +49,8 @@ export class WorkflowExecutionRuntimeManager {
   private stepStates: Map<string, Record<string, any> | undefined> = new Map();
   private currentStepIndex: number = 0;
   private topologicalOrder: string[];
-  private contextManager?: IWorkflowContextLogger;
+  // private contextManager?: IWorkflowContextLogger;
+  private workflowLogger: IWorkflowEventLogger | null = null;
 
   // APM trace properties - consistent traceId for entire workflow execution
   private readonly traceId: string;
@@ -70,13 +72,7 @@ export class WorkflowExecutionRuntimeManager {
 
     // Use workflow execution ID as traceId for APM compatibility
     this.traceId = this.workflowExecution.id;
-  }
-
-  /**
-   * Set the logger instance - called after construction to avoid circular dependencies
-   */
-  public setLogger(logger: IWorkflowContextLogger): void {
-    this.contextManager = logger;
+    this.workflowLogger = workflowExecutionRuntimeManagerInit.workflowLogger;
   }
 
   /**
@@ -107,6 +103,7 @@ export class WorkflowExecutionRuntimeManager {
     return successors.map((successorId) => this.workflowExecutionGraph.node(successorId)) as any[];
   }
 
+  // TODO: To rename to getCurrentNode and use proper type
   public getCurrentStep(): any {
     // must be a proper type
     if (this.currentStepIndex < 0 || this.currentStepIndex >= this.topologicalOrder.length) {
@@ -116,10 +113,12 @@ export class WorkflowExecutionRuntimeManager {
     return this.workflowExecutionGraph.node(currentStepId);
   }
 
+  // TODO: To rename to goToNode
   public goToStep(stepId: string): void {
     this.currentStepIndex = this.topologicalOrder.findIndex((id) => id === stepId);
   }
 
+  // TODO: To rename to goToNextNode
   public goToNextStep(): void {
     if (this.currentStepIndex < this.topologicalOrder.length - 1) {
       for (let i = this.currentStepIndex + 1; i < this.topologicalOrder.length; i++) {
@@ -181,23 +180,20 @@ export class WorkflowExecutionRuntimeManager {
         const stepNode = this.workflowExecutionGraph.node(stepId) as any;
         const stepName = stepNode?.name || stepId;
 
-        const stepExecution = {
-          id: workflowStepExecutionId,
-          workflowId,
-          workflowRunId,
-          stepId: nodeId,
-          topologicalIndex: this.topologicalOrder.findIndex((id) => id === stepId),
-          status: ExecutionStatus.RUNNING,
-          startedAt: stepStartedAt.toISOString(),
-        } as Partial<EsWorkflowStepExecution>;
+      const stepExecution = {
+        id: workflowStepExecutionId,
+        workflowId, // Replace with actual workflow ID
+        workflowRunId,
+        stepId: nodeId,
+        topologicalIndex: this.topologicalOrder.findIndex((id) => id === stepId),
+        status: ExecutionStatus.RUNNING,
+        startedAt: stepStartedAt.toISOString(),
+      } as Partial<EsWorkflowStepExecution>;
 
-        // Log step start using context manager
-        this.contextManager?.logStepStart(stepId, stepName);
-
-        await this.stepExecutionRepository.createStepExecution(stepExecution);
-        this.stepExecutions.set(nodeId, stepExecution as EsWorkflowStepExecution);
-      }
-    );
+      await this.stepExecutionRepository.createStepExecution(stepExecution);
+      this.stepExecutions.set(nodeId, stepExecution as EsWorkflowStepExecution);
+      this.logStepStart(stepId);
+    });
   }
 
   public async finishStep(stepId: string): Promise<void> {
@@ -225,30 +221,25 @@ export class WorkflowExecutionRuntimeManager {
           throw new Error(`Step execution not found for step ID: ${stepId}`);
         }
 
-        const stepStatus = stepResult.error ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED;
-        const completedAt = new Date();
-        const executionTimeMs =
-          completedAt.getTime() - new Date(startedStepExecution.startedAt).getTime();
-        const stepExecutionUpdate = {
-          id: startedStepExecution.id,
-          status: stepStatus,
-          completedAt: completedAt.toISOString(),
-          executionTimeMs,
-          error: stepResult.error,
-          output: stepResult.output,
-        } as Partial<EsWorkflowStepExecution>;
+    const stepStatus = stepResult.error ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED;
+    const completedAt = new Date();
+    const executionTimeMs =
+      completedAt.getTime() - new Date(startedStepExecution.startedAt).getTime();
+    const stepExecutionUpdate = {
+      id: startedStepExecution.id,
+      status: stepStatus,
+      completedAt: completedAt.toISOString(),
+      executionTimeMs,
+      error: stepResult.error,
+      output: stepResult.output,
+    } as Partial<EsWorkflowStepExecution>;
 
-        // Log step completion using context manager
-        const success = !stepResult.error;
-        const stepNode = this.workflowExecutionGraph.node(stepId) as any;
-        const stepName = stepNode?.name || stepId;
-        this.contextManager?.logStepComplete(stepId, stepName, success);
-
-        await this.stepExecutionRepository.updateStepExecution(stepExecutionUpdate);
-        this.stepExecutions.set(stepId, {
-          ...startedStepExecution,
-          ...stepExecutionUpdate,
-        } as EsWorkflowStepExecution);
+    await this.stepExecutionRepository.updateStepExecution(stepExecutionUpdate);
+    this.stepExecutions.set(stepId, {
+      ...startedStepExecution,
+      ...stepExecutionUpdate,
+    } as EsWorkflowStepExecution);
+    this.logStepComplete(stepId);
 
         await this.updateWorkflowState();
 
@@ -267,7 +258,7 @@ export class WorkflowExecutionRuntimeManager {
         id: workflowStepExecutionId,
         workflowRunId: this.workflowExecution.id,
         stepId,
-        topologicalIndex: 0, // TODO: this.topologicalOrder.indexOf(stepId),
+        topologicalIndex: this.topologicalOrder.indexOf(stepId),
         status: ExecutionStatus.SKIPPED,
       } as Partial<EsWorkflowStepExecution>;
     });
@@ -282,7 +273,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async start(): Promise<void> {
-    this.contextManager?.logInfo('Starting workflow execution with APM tracing', {
+    this.workflowLogger?.logInfo('Starting workflow execution with APM tracing', {
       workflow: { execution_id: this.workflowExecution.id },
     });
 
@@ -292,7 +283,7 @@ export class WorkflowExecutionRuntimeManager {
       // Check if this is triggered by alerting (has alerting labels) or task manager directly
       const isTriggeredByAlerting = !!(existingTransaction as any)._labels?.alerting_rule_id;
 
-      this.contextManager?.logDebug('Found existing transaction context', {
+      this.workflowLogger?.logDebug('Found existing transaction context', {
         transaction: {
           name: existingTransaction.name,
           type: existingTransaction.type,
@@ -305,7 +296,7 @@ export class WorkflowExecutionRuntimeManager {
       if (isTriggeredByAlerting) {
         // For alerting-triggered workflows, create a dedicated workflow transaction
         // This provides a focused view for the embeddable instead of the entire alerting trace
-        this.contextManager?.logInfo(
+        this.workflowLogger?.logInfo(
           'Creating dedicated workflow transaction within alerting trace'
         );
 
@@ -332,7 +323,7 @@ export class WorkflowExecutionRuntimeManager {
         // Store the workflow transaction ID (not the alerting transaction ID)
         const workflowTransactionId = workflowTransaction.ids?.['transaction.id'];
         if (workflowTransactionId) {
-          this.contextManager?.logDebug('Storing workflow transaction ID', {
+          this.workflowLogger?.logDebug('Storing workflow transaction ID', {
             transaction: { workflow_transaction_id: workflowTransactionId },
           });
 
@@ -346,7 +337,7 @@ export class WorkflowExecutionRuntimeManager {
             entryTransactionId: workflowTransactionId,
           };
 
-          this.contextManager?.logDebug('Workflow transaction ID stored in workflow execution');
+          this.workflowLogger?.logDebug('Workflow transaction ID stored in workflow execution');
         }
 
         // Capture trace ID from the workflow transaction
@@ -360,7 +351,7 @@ export class WorkflowExecutionRuntimeManager {
         }
 
         if (realTraceId) {
-          this.contextManager?.logDebug('Captured APM trace ID from workflow transaction', {
+          this.workflowLogger?.logDebug('Captured APM trace ID from workflow transaction', {
             trace: { trace_id: realTraceId },
           });
           await this.workflowExecutionRepository.updateWorkflowExecution({
@@ -375,7 +366,7 @@ export class WorkflowExecutionRuntimeManager {
         }
       } else {
         // For task manager triggered workflows, reuse the existing transaction
-        this.contextManager?.logInfo('Reusing task manager transaction for workflow execution');
+        this.workflowLogger?.logInfo('Reusing task manager transaction for workflow execution');
 
         this.workflowTransaction = existingTransaction;
 
@@ -391,7 +382,7 @@ export class WorkflowExecutionRuntimeManager {
         // Store the task transaction ID in the workflow execution
         const taskTransactionId = existingTransaction.ids?.['transaction.id'];
         if (taskTransactionId) {
-          this.contextManager?.logDebug('Storing task transaction ID', {
+          this.workflowLogger?.logDebug('Storing task transaction ID', {
             transaction: { task_transaction_id: taskTransactionId },
           });
 
@@ -405,7 +396,7 @@ export class WorkflowExecutionRuntimeManager {
             entryTransactionId: taskTransactionId,
           };
 
-          this.contextManager?.logDebug('Task transaction ID stored in workflow execution');
+          this.workflowLogger?.logDebug('Task transaction ID stored in workflow execution');
         }
 
         // Capture trace ID from the task transaction
@@ -419,7 +410,7 @@ export class WorkflowExecutionRuntimeManager {
         }
 
         if (realTraceId) {
-          this.contextManager?.logDebug('Captured APM trace ID from task transaction', {
+          this.workflowLogger?.logDebug('Captured APM trace ID from task transaction', {
             trace: { trace_id: realTraceId },
           });
           await this.workflowExecutionRepository.updateWorkflowExecution({
@@ -452,7 +443,7 @@ export class WorkflowExecutionRuntimeManager {
       existingTransaction.outcome = 'success';
     } else {
       // Fallback if no task transaction exists - proceed without tracing
-      this.contextManager?.logWarn(
+      this.workflowLogger?.logWarn(
         'No active Task Manager transaction found, proceeding without APM tracing'
       );
       const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
@@ -468,6 +459,7 @@ export class WorkflowExecutionRuntimeManager {
         ...this.workflowExecution,
         ...updatedWorkflowExecution,
       };
+      this.logWorkflowStart();
     }
     // Note: Transaction will be ended by Task Manager when the task completes
   }
@@ -516,12 +508,12 @@ export class WorkflowExecutionRuntimeManager {
           const isTriggeredByAlerting = this.workflowTransaction.type === 'workflow_execution';
           if (isTriggeredByAlerting) {
             this.workflowTransaction.end();
-            this.contextManager?.logDebug(
+            this.workflowLogger?.logDebug(
               'Workflow transaction ended with failure outcome (alerting-triggered)'
             );
           } else {
             // For task manager triggered workflows, Task Manager will handle ending
-            this.contextManager?.logDebug(
+            this.workflowLogger?.logDebug(
               'Task transaction outcome updated to failure (task manager will end)'
             );
           }
@@ -530,7 +522,7 @@ export class WorkflowExecutionRuntimeManager {
     );
   }
 
-  private async updateWorkflowState(): Promise<void> {
+  private async updateWorkflowState(error?: any): Promise<void> {
     const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
       id: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
@@ -542,11 +534,11 @@ export class WorkflowExecutionRuntimeManager {
     if (this.isWorkflowFinished()) {
       workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
     }
-    const currentStepError = this.getCurrentStepError();
+    const workflowError = error || this.getCurrentStepError();
 
-    if (currentStepError) {
+    if (workflowError) {
       workflowExecutionUpdate.status = ExecutionStatus.FAILED;
-      workflowExecutionUpdate.error = currentStepError;
+      workflowExecutionUpdate.error = workflowError;
     }
 
     if (
@@ -558,6 +550,8 @@ export class WorkflowExecutionRuntimeManager {
       const completeDate = new Date();
       workflowExecutionUpdate.finishedAt = completeDate.toISOString();
       workflowExecutionUpdate.duration = completeDate.getTime() - startedAt.getTime();
+      this.logWorkflowComplete(workflowExecutionUpdate.status === ExecutionStatus.COMPLETED);
+      
 
       // Update the workflow transaction outcome when workflow completes
       if (this.workflowTransaction) {
@@ -568,12 +562,12 @@ export class WorkflowExecutionRuntimeManager {
         const isTriggeredByAlerting = this.workflowTransaction.type === 'workflow_execution';
         if (isTriggeredByAlerting) {
           this.workflowTransaction.end();
-          this.contextManager?.logDebug('Workflow transaction ended (alerting-triggered)', {
+          this.workflowLogger?.logDebug('Workflow transaction ended (alerting-triggered)', {
             transaction: { outcome: this.workflowTransaction.outcome },
           });
         } else {
           // For task manager triggered workflows, Task Manager will handle ending
-          this.contextManager?.logDebug(
+          this.workflowLogger?.logDebug(
             'Task transaction outcome updated (task manager will end)',
             {
               transaction: { outcome: this.workflowTransaction.outcome },
@@ -609,5 +603,50 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     return undefined;
+  }
+
+  private logWorkflowStart(): void {
+    this.workflowLogger?.logInfo('Workflow execution started', {
+      event: { action: 'workflow-start', category: ['workflow'] },
+      tags: ['workflow', 'execution', 'start'],
+    });
+  }
+
+  private logWorkflowComplete(success: boolean): void {
+    this.workflowLogger?.logInfo(
+      `Workflow execution ${success ? 'completed successfully' : 'failed'}`,
+      {
+        event: {
+          action: 'workflow-complete',
+          category: ['workflow'],
+          outcome: success ? 'success' : 'failure',
+        },
+        tags: ['workflow', 'execution', 'complete'],
+      }
+    );
+  }
+
+  private logStepStart(stepId: string): void {
+    const node = this.workflowExecutionGraph.node(stepId) as any;
+    const stepName = node?.name || stepId;
+    this.workflowLogger?.logInfo(`Step '${stepName}' started`, {
+      event: { action: 'step-start', category: ['workflow', 'step'] },
+      tags: ['workflow', 'step', 'start'],
+    });
+  }
+
+  private logStepComplete(stepId: string): void {
+    const node = this.workflowExecutionGraph.node(stepId) as any;
+    const stepName = node?.name || stepId;
+    const workflowStep = this.stepExecutions.get(stepId);
+    const isSuccess = workflowStep?.status === ExecutionStatus.COMPLETED;
+    this.workflowLogger?.logInfo(`Step '${stepName}' ${isSuccess ? 'completed' : 'failed'}`, {
+      event: {
+        action: 'step-complete',
+        category: ['workflow', 'step'],
+        outcome: isSuccess ? 'success' : 'failure',
+      },
+      tags: ['workflow', 'step', 'complete'],
+    });
   }
 }
