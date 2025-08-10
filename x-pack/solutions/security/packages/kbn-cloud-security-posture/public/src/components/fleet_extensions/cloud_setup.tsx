@@ -203,7 +203,6 @@ export const CloudSetup = memo<CloudSetupProps>(
           <>
             <EuiSpacer size="m" />
             <SetupTechnologySelector
-              showLimitationsMessage={!isServerless}
               disabled={isEditPage}
               setupTechnology={setupTechnology}
               allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
