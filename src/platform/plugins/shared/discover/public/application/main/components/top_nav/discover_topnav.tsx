@@ -62,7 +62,10 @@ export const DiscoverTopNav = ({
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
   );
-  const tabsEnabled = services.featureFlags?.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, false);
+  const tabsEnabled = services.core.featureFlags.getBooleanValue(
+    TABS_ENABLED_FEATURE_FLAG_KEY,
+    false
+  );
   const savedSearch = useSavedSearchInitial();
   const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {

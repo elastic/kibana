@@ -69,7 +69,7 @@ export const initializeSession: InternalStateThunkActionCreator<
     getState,
     { services, customizationContext, runtimeStateManager, urlStateStorage, tabsStorageManager }
   ) => {
-    const tabsEnabled = services.core.featureFlags?.getBooleanValue(
+    const tabsEnabled = services.core.featureFlags.getBooleanValue(
       TABS_ENABLED_FEATURE_FLAG_KEY,
       false
     );
