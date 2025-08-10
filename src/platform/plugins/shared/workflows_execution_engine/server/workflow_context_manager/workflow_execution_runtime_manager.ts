@@ -176,10 +176,6 @@ export class WorkflowExecutionRuntimeManager {
         const workflowStepExecutionId = `${workflowRunId}-${nodeId}`;
         const stepStartedAt = new Date();
 
-        // Get step details from the graph
-        const stepNode = this.workflowExecutionGraph.node(stepId) as any;
-        const stepName = stepNode?.name || stepId;
-
         const stepExecution = {
           id: workflowStepExecutionId,
           workflowId, // Replace with actual workflow ID
