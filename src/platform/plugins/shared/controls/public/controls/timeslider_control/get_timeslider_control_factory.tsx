@@ -23,6 +23,7 @@ import {
 
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
+import type { TimeSliderControlState } from '@kbn/controls-schemas';
 import {
   defaultControlComparators,
   initializeDefaultControlManager,
@@ -42,7 +43,7 @@ import {
   roundDownToNextStepSizeFactor,
   roundUpToNextStepSizeFactor,
 } from './time_utils';
-import { Timeslice, TimesliderControlApi, TimesliderControlState } from './types';
+import { Timeslice, TimesliderControlApi } from './types';
 import { isCompressed } from '../../control_group/utils/is_compressed';
 
 const displayName = i18n.translate('controls.timesliderControl.displayName', {
@@ -50,7 +51,7 @@ const displayName = i18n.translate('controls.timesliderControl.displayName', {
 });
 
 export const getTimesliderControlFactory = (): ControlFactory<
-  TimesliderControlState,
+  TimeSliderControlState,
   TimesliderControlApi
 > => {
   return {
@@ -228,7 +229,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<TimesliderControlState>({
+      const unsavedChangesApi = initializeUnsavedChanges<TimeSliderControlState>({
         uuid,
         parentApi: controlGroupApi,
         serializeState,

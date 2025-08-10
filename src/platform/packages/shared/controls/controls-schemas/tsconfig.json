@@ -13,5 +13,5 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": ["@kbn/controls-constants", "@kbn/config-schema"]
+  "kbn_references": ["@kbn/controls-constants", "@kbn/config-schema", "@kbn/esql-types"]
 }

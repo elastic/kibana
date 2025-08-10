@@ -8,17 +8,9 @@
  */
 
 import type { PublishesTitle, PublishesTimeslice } from '@kbn/presentation-publishing';
-import type { DefaultControlState } from '../../../common';
 import type { DefaultControlApi } from '../types';
 
 export type Timeslice = [number, number];
-
-export interface TimesliderControlState extends DefaultControlState {
-  isAnchored?: boolean;
-  // Encode value as percentage of time range to support relative time ranges.
-  timesliceStartAsPercentageOfTimeRange?: number;
-  timesliceEndAsPercentageOfTimeRange?: number;
-}
 
 export type TimesliderControlApi = DefaultControlApi &
   Pick<PublishesTitle, 'defaultTitle$'> &

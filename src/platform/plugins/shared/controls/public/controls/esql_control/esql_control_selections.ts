@@ -11,7 +11,8 @@ import { BehaviorSubject, combineLatest, debounceTime, filter, map, merge, switc
 import { ESQLVariableType } from '@kbn/esql-types';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { ESQLControlVariable, ESQLControlState, EsqlControlType } from '@kbn/esql-types';
+import { ESQLControlVariable, EsqlControlType } from '@kbn/esql-types';
+import type { ESQLControlState } from '@kbn/controls-schemas';
 import {
   OptionsListSearchTechnique,
   OptionsListSelection,

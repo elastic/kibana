@@ -15,6 +15,7 @@ import { Filter, RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
+import type { RangeSliderControlState } from '@kbn/controls-schemas';
 
 import { isCompressed } from '../../../control_group/utils/is_compressed';
 import {
@@ -27,10 +28,10 @@ import { hasNoResults$ } from './has_no_results';
 import { minMax$ } from './min_max';
 import { initializeRangeControlSelections } from './range_control_selections';
 import { RangeSliderStrings } from './range_slider_strings';
-import type { RangesliderControlApi, RangesliderControlState } from './types';
+import type { RangesliderControlApi } from './types';
 
 export const getRangesliderControlFactory = (): DataControlFactory<
-  RangesliderControlState,
+  RangeSliderControlState,
   RangesliderControlApi
 > => {
   return {
@@ -71,13 +72,13 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       const step$ = new BehaviorSubject<number | undefined>(initialState.step ?? 1);
 
       const dataControlManager = initializeDataControlManager<
-        Pick<RangesliderControlState, 'step'>
+        Pick<RangeSliderControlState, 'step'>
       >(
         uuid,
         RANGE_SLIDER_CONTROL,
         initialState,
         () => ({ step: step$.getValue() }),
-        (editorState: Pick<RangesliderControlState, 'step'>) => {
+        (editorState: Pick<RangeSliderControlState, 'step'>) => {
           if (editorState.step !== step$.getValue()) step$.next(editorState.step);
         },
         controlGroupApi
@@ -99,7 +100,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<RangesliderControlState>({
+      const unsavedChangesApi = initializeUnsavedChanges<RangeSliderControlState>({
         uuid,
         parentApi: controlGroupApi,
         serializeState,

@@ -8,9 +8,9 @@
  */
 
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type {
   ControlGroupRenderer,
-  OptionsListControlState,
   ControlGroupRuntimeState,
   ControlGroupRendererApi,
 } from '@kbn/controls-plugin/public';

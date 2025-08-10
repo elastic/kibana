@@ -23,12 +23,8 @@ import { css } from '@emotion/react';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
-import {
-  ESQLVariableType,
-  EsqlControlType,
-  type ESQLControlState,
-  type ControlWidthOptions,
-} from '@kbn/esql-types';
+import type { ESQLControlState } from '@kbn/controls-schemas';
+import { ESQLVariableType, EsqlControlType, type ControlWidthOptions } from '@kbn/esql-types';
 import {
   getIndexPatternFromESQLQuery,
   getESQLResults,
@@ -52,8 +48,8 @@ interface ValueControlFormProps {
 
 const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
 const INITIAL_EMPTY_STATE_QUERY = `/** Example
-To get the agent field values use: 
-FROM logs-* 
+To get the agent field values use:
+FROM logs-*
 |  WHERE @timestamp <=?_tend and @timestamp >?_tstart
 | STATS BY agent
 */`;

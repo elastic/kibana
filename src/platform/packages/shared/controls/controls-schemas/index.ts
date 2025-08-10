@@ -10,10 +10,15 @@
 export { controlsGroupSchema } from './src/controls_group_schema';
 
 export type {
-  ControlState,
   ControlWidth,
   ControlsGroupState,
   ControlsLabelPosition,
   ControlsChainingSystem,
   ControlsIgnoreParentSettings,
+  ESQLControlState,
+  OptionsListControlState,
+  OptionsListDisplaySettings,
+  RangeValue,
+  RangeSliderControlState,
+  TimeSliderControlState,
 } from './src/types';
