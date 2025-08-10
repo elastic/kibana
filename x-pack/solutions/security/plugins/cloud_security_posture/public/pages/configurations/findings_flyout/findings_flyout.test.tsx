@@ -78,63 +78,46 @@ describe('<FindingsFlyout/>', () => {
     });
 
     it('does not display evidence field when result.evidence and resource.raw are missing', () => {
-      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
-        data: {
-          result: {
-            hits: [
-              {
-                _source: {
-                  ...mockFindingsHit,
-                  result: { ...mockFindingsHit.result, evidence: undefined },
-                  rule: {
-                    ...mockFindingsHit.rule,
-                    // resource.raw is only shown for CIS GCP rules
-                    benchmark: { ...mockFindingsHit.rule.benchmark, id: 'cis_gcp' },
-                  },
-                  resource: {
-                    ...mockFindingsHit.resource,
-                    raw: undefined,
-                  },
-                },
-              },
-            ],
-          },
-        },
-      });
-      const { queryByText } = render(<TestComponent />);
+      const { queryByText } = render(
+        <TestComponent
+          finding={{
+            ...mockFindingsHit,
+            result: { ...mockFindingsHit.result, evidence: undefined },
+            rule: {
+              ...mockFindingsHit.rule,
+              // resource.raw is only shown for CIS GCP rules
+              benchmark: { ...mockFindingsHit.rule.benchmark, id: 'cis_gcp' },
+            },
+            resource: {
+              ...mockFindingsHit.resource,
+              raw: undefined,
+            },
+          }}
+        />
+      );
       const missingEvidenceTitle = queryByText('Evidence');
       expect(missingEvidenceTitle).toBeNull();
     });
 
     it('displays evidence field when it exists', () => {
-      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
-        data: { result: { hits: [{ _source: mockFindingsHit }] } },
-      });
-      const { getByText } = render(<TestComponent />);
+      const { getByText } = render(<TestComponent finding={mockFindingsHit} />);
       const evidenceTitle = getByText('Evidence');
       expect(evidenceTitle).toBeInTheDocument();
     });
 
     it('displays evidence as resource.raw for CIS_GCP when evidence field does not exists', () => {
-      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
-        data: {
-          result: {
-            hits: [
-              {
-                _source: {
-                  ...mockFindingsHit,
-                  result: { ...mockFindingsHit.result, evidence: undefined },
-                  rule: {
-                    ...mockFindingsHit.rule,
-                    benchmark: { ...mockFindingsHit.rule.benchmark, id: 'cis_gcp' },
-                  },
-                },
-              },
-            ],
-          },
-        },
-      });
-      const { getByText } = render(<TestComponent />);
+      const { getByText } = render(
+        <TestComponent
+          finding={{
+            ...mockFindingsHit,
+            result: { ...mockFindingsHit.result, evidence: undefined },
+            rule: {
+              ...mockFindingsHit.rule,
+              benchmark: { ...mockFindingsHit.rule.benchmark, id: 'cis_gcp' },
+            },
+          }}
+        />
+      );
       const evidenceTitle = getByText('Evidence');
       expect(evidenceTitle).toBeInTheDocument();
     });
