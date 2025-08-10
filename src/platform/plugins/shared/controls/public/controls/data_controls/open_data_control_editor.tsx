@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import type { DefaultDataControlState } from '../../../common';
 import { coreServices } from '../../services/kibana_services';
 import type { ControlGroupApi } from '../../control_group/types';
+import { apiHasUniqueId } from '@kbn/presentation-publishing';
 
 export const openDataControlEditor = <
   State extends DefaultDataControlState = DefaultDataControlState
@@ -87,7 +88,11 @@ export const openDataControlEditor = <
       );
     },
     flyoutProps: {
-      triggerId: 'dashboard-controls-menu-button',
+      determineFocusTargetAfterClose: () => {
+        return controlId
+        ? document.getElementById(`control-title-${controlId}`)
+        : document.getElementById('dashboard-controls-menu-button')
+      }
     },
   });
 };

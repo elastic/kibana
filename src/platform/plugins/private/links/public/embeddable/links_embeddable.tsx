@@ -223,6 +223,7 @@ export const getLinksEmbeddableFactory = () => {
             },
             flyoutProps: {
               'data-test-subj': 'links--panelEditor--flyout',
+              focusedPanelId: api.uuid,
             },
           });
         },

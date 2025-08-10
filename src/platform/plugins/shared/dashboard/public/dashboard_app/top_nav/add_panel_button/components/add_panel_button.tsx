@@ -41,7 +41,7 @@ export const AddPanelButton = ({ isDisabled }: { isDisabled?: boolean }) => {
       },
       flyoutProps: {
         'data-test-subj': 'dashboardPanelSelectionFlyout',
-        triggerId: 'dashboardEditorMenuButton',
+        determineFocusTargetAfterClose: () => document.getElementById('dashboardEditorMenuButton'),
       },
     });
   }, [dashboardApi]);

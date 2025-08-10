@@ -31,7 +31,7 @@ const props = {
   flyoutProps: {
     'data-test-subj': 'lazyFlyoutTest',
   },
-  triggerId: 'testTrigger',
+  determineFocusTargetAfterClose: () => 'testTrigger',
 };
 
 describe('openLazyFlyout', () => {

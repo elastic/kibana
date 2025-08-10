@@ -57,7 +57,9 @@ export function getDashboardApi({
   const viewModeManager = initializeViewModeManager(incomingEmbeddable, savedObjectResult);
   const trackPanel = initializeTrackPanel(async (id: string) => {
     await layoutManager.api.getChildApi(id);
-  });
+  }, () => Boolean(trackOverlayApi.hasOverlays$.value));
+
+  const trackOverlayApi = initializeTrackOverlay(trackPanel.setFocusedPanelId, trackPanel.highlightPanelId$);
 
   const references$ = new BehaviorSubject<Reference[] | undefined>(initialState.references);
   const getReferences = (id: string) => {
@@ -122,8 +124,6 @@ export function getDashboardApi({
       panelReferences: panelReferences ?? [],
     };
   }
-
-  const trackOverlayApi = initializeTrackOverlay(trackPanel.setFocusedPanelId);
 
   const dashboardApi = {
     ...viewModeManager.api,

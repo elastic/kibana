@@ -111,7 +111,7 @@ export const getAlertsTableEmbeddableFactory = (
                   ariaLabelledBy={ariaLabelledBy}
                   coreServices={coreServices}
                   closeFlyout={closeFlyout}
-                  onSave={(newConfig: EmbeddableAlertsTableConfig) => {
+                  onSave={async (newConfig: EmbeddableAlertsTableConfig) => {
                     tableConfig$.next(newConfig);
                   }}
                 />

@@ -45,6 +45,7 @@ import type { initializeTrackPanel } from '../track_panel';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
 import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from './types';
+import { focusFirstFocusable } from '@kbn/presentation-util';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
@@ -395,7 +396,16 @@ export function initializeLayoutManager(
           ...currentLayout,
           sections,
         });
-        trackPanel.scrollToBottom$.next();
+
+        console.log('waht is this', newId)
+        trackPanel.setScrollToPanelId(newId);
+        // complete.then(() => {
+        //   // focus the new section
+        //   console.log('is happens')
+        //   focusFirstFocusable(
+        //     document.getElementById(`kbnGridSectionTitle-${newId}`)
+        //   );
+        // });
       },
     },
   };

@@ -26,6 +26,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
+import { focusFirstFocusable } from '@kbn/presentation-util';
 import { type DashboardApi, DASHBOARD_API_TYPE } from '../dashboard_api/types';
 import { coreServices } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
@@ -85,12 +86,29 @@ export class CopyToDashboardAction implements Action<EmbeddableApiContext> {
 
     const session = coreServices.overlays.openModal(
       toMountPoint(
-        <CopyToDashboardModal closeModal={() => session.close()} api={embeddable} />,
+        <CopyToDashboardModal
+          closeModal={() => {
+            session.close();
+            // focus the panel
+            const triggerId = apiHasUniqueId(embeddable) ? `panel-${embeddable.uuid}` : undefined;
+            if (triggerId) {
+              focusFirstFocusable(document.getElementById(triggerId));
+            }
+          }}
+          api={embeddable}
+        />,
         coreServices
       ),
       {
         maxWidth: 400,
         'data-test-subj': 'copyToDashboardPanel',
+        handleClose: () => {
+          // focus the panel
+          const triggerId = apiHasUniqueId(embeddable) ? `panel-${embeddable.uuid}` : undefined;
+          if (triggerId) {
+            focusFirstFocusable(document.getElementById(triggerId));
+          }
+        },
       }
     );
   }

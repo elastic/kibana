@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OverlayFlyoutOpenOptions, OverlayRef } from '@kbn/core/public';
+import type { OverlayRef } from '@kbn/core/public';
 import type { Adapters } from '../common';
+import { OpenLazyFlyoutParams } from '@kbn/presentation-util/src/open_lazy_flyout';
 
 /**
  * The props interface that a custom inspector view component, that will be passed
@@ -61,7 +62,7 @@ export interface InspectorViewDescription {
 export interface InspectorOptions {
   title?: string;
   options?: unknown;
-  flyoutProps?: Partial<OverlayFlyoutOpenOptions> & { triggerId?: string; focusedPanelId?: string };
+  flyoutProps?: OpenLazyFlyoutParams['flyoutProps']
 }
 
 export type InspectorSession = OverlayRef;
