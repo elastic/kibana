@@ -180,20 +180,21 @@ export class WorkflowExecutionRuntimeManager {
         const stepNode = this.workflowExecutionGraph.node(stepId) as any;
         const stepName = stepNode?.name || stepId;
 
-      const stepExecution = {
-        id: workflowStepExecutionId,
-        workflowId, // Replace with actual workflow ID
-        workflowRunId,
-        stepId: nodeId,
-        topologicalIndex: this.topologicalOrder.findIndex((id) => id === stepId),
-        status: ExecutionStatus.RUNNING,
-        startedAt: stepStartedAt.toISOString(),
-      } as Partial<EsWorkflowStepExecution>;
+        const stepExecution = {
+          id: workflowStepExecutionId,
+          workflowId, // Replace with actual workflow ID
+          workflowRunId,
+          stepId: nodeId,
+          topologicalIndex: this.topologicalOrder.findIndex((id) => id === stepId),
+          status: ExecutionStatus.RUNNING,
+          startedAt: stepStartedAt.toISOString(),
+        } as Partial<EsWorkflowStepExecution>;
 
-      await this.stepExecutionRepository.createStepExecution(stepExecution);
-      this.stepExecutions.set(nodeId, stepExecution as EsWorkflowStepExecution);
-      this.logStepStart(stepId);
-    });
+        await this.stepExecutionRepository.createStepExecution(stepExecution);
+        this.stepExecutions.set(nodeId, stepExecution as EsWorkflowStepExecution);
+        this.logStepStart(stepId);
+      }
+    );
   }
 
   public async finishStep(stepId: string): Promise<void> {
@@ -221,25 +222,25 @@ export class WorkflowExecutionRuntimeManager {
           throw new Error(`Step execution not found for step ID: ${stepId}`);
         }
 
-    const stepStatus = stepResult.error ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED;
-    const completedAt = new Date();
-    const executionTimeMs =
-      completedAt.getTime() - new Date(startedStepExecution.startedAt).getTime();
-    const stepExecutionUpdate = {
-      id: startedStepExecution.id,
-      status: stepStatus,
-      completedAt: completedAt.toISOString(),
-      executionTimeMs,
-      error: stepResult.error,
-      output: stepResult.output,
-    } as Partial<EsWorkflowStepExecution>;
+        const stepStatus = stepResult.error ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED;
+        const completedAt = new Date();
+        const executionTimeMs =
+          completedAt.getTime() - new Date(startedStepExecution.startedAt).getTime();
+        const stepExecutionUpdate = {
+          id: startedStepExecution.id,
+          status: stepStatus,
+          completedAt: completedAt.toISOString(),
+          executionTimeMs,
+          error: stepResult.error,
+          output: stepResult.output,
+        } as Partial<EsWorkflowStepExecution>;
 
-    await this.stepExecutionRepository.updateStepExecution(stepExecutionUpdate);
-    this.stepExecutions.set(stepId, {
-      ...startedStepExecution,
-      ...stepExecutionUpdate,
-    } as EsWorkflowStepExecution);
-    this.logStepComplete(stepId);
+        await this.stepExecutionRepository.updateStepExecution(stepExecutionUpdate);
+        this.stepExecutions.set(stepId, {
+          ...startedStepExecution,
+          ...stepExecutionUpdate,
+        } as EsWorkflowStepExecution);
+        this.logStepComplete(stepId);
 
         await this.updateWorkflowState();
 
@@ -551,7 +552,6 @@ export class WorkflowExecutionRuntimeManager {
       workflowExecutionUpdate.finishedAt = completeDate.toISOString();
       workflowExecutionUpdate.duration = completeDate.getTime() - startedAt.getTime();
       this.logWorkflowComplete(workflowExecutionUpdate.status === ExecutionStatus.COMPLETED);
-      
 
       // Update the workflow transaction outcome when workflow completes
       if (this.workflowTransaction) {
