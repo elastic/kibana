@@ -12,7 +12,7 @@ import { ProcessorFieldSelector } from '../processor_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { IgnoreFailureToggle } from '../ignore_toggles';
-import { OverrideField } from './set_optional_fields';
+import { IgnoreEmptyValueField, MediaTypeField, OverrideField } from './set_optional_fields';
 import { SetValueOrCopyFromField } from './set_value_or_copy_from_field';
 
 export const SetProcessorForm = () => {
@@ -28,6 +28,8 @@ export const SetProcessorForm = () => {
       <EuiSpacer size="m" />
       <FieldsAccordion>
         <OverrideField />
+        <IgnoreEmptyValueField />
+        <MediaTypeField />
         <EuiSpacer size="m" />
         <ProcessorConditionEditor />
       </FieldsAccordion>
