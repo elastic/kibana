@@ -1313,6 +1313,14 @@ export class CstToAstConverter {
 
   // -------------------------------------------------------------- expressions
 
+  private toExpression(ctx: cst.QualifiedNamePatternContext): ast.ESQLAstExpression {
+    if (ctx instanceof cst.QualifiedNamePatternContext) {
+      return this.fromQualifiedNamePattern(ctx);
+    }
+
+    return this.toColumn(ctx);
+  }
+
   private toColumnsFromCommand(
     ctx:
       | cst.KeepCommandContext
@@ -1897,7 +1905,65 @@ export class CstToAstConverter {
 
   // ----------------------------------------------------- expression: "column"
 
-  private fromQualifiedNamePattern(ctx: cst.QualifiedNamePatternContext): ast.ESQLAstExpression {
+  private toColumn(
+    ctx: antlr.ParserRuleContext | cst.QualifiedNamePatternContext | cst.QualifiedNameContext
+  ): ast.ESQLColumn {
+    const args: ast.ESQLColumn['args'] = [];
+
+    if (ctx instanceof cst.QualifiedNamePatternContext) {
+      const node = this.fromQualifiedNamePattern(ctx);
+
+      if (node.type === 'column') {
+        return node;
+      } else if (node) {
+        args.push(node);
+      } else {
+        throw new Error(`Unexpected node type: ${(node as ast.ESQLProperNode).type} in toColumn`);
+      }
+    } else if (ctx instanceof cst.QualifiedNameContext) {
+      const list = ctx.identifierOrParameter_list();
+
+      for (const item of list) {
+        if (item instanceof cst.IdentifierOrParameterContext) {
+          const node = this.fromIdentifierOrParam(item);
+
+          if (node) {
+            args.push(node);
+          }
+        }
+      }
+    } else {
+      // This happens when ANTLR grammar does not specify a rule, for which
+      // a context is created. For example, as of this writing, the FROM ... METADATA
+      // uses `UNQUOTED_SOURCE` lexer tokens directly for column names, without
+      // wrapping them into a context.
+      const name = this.sanitizeIdentifierString(ctx);
+      const node = Builder.identifier({ name }, this.createParserFields(ctx));
+
+      args.push(node);
+    }
+
+    const text = this.sanitizeIdentifierString(ctx);
+    const hasQuotes = Boolean(this.getQuotedText(ctx) || this.isQuoted(ctx.getText()));
+    const column = Builder.expression.column(
+      { args },
+      {
+        text: ctx.getText(),
+        location: getPosition(ctx.start, ctx.stop),
+        incomplete: Boolean(ctx.exception || text === ''),
+      }
+    );
+
+    column.name = text;
+    column.quoted = hasQuotes;
+
+    return column;
+  }
+
+  private fromQualifiedNamePattern(
+    ctx: cst.QualifiedNamePatternContext
+  ): ast.ESQLColumn | ast.ESQLParam | ast.ESQLIdentifier {
+    const args: ast.ESQLColumn['args'] = [];
     const patterns = ctx.identifierPattern_list();
 
     // Special case: a single parameter is returned as a param literal
@@ -1915,51 +1981,22 @@ export class CstToAstConverter {
       }
     }
 
-    return this.toColumn(ctx);
-  }
+    for (const identifierPattern of patterns) {
+      const ID_PATTERN = identifierPattern.ID_PATTERN();
 
-  private toColumn(
-    ctx: antlr.ParserRuleContext | cst.QualifiedNamePatternContext | cst.QualifiedNameContext
-  ): ast.ESQLColumn {
-    const args: ast.ESQLColumn['args'] = [];
+      if (ID_PATTERN) {
+        const node = this.fromNodeToIdentifier(ID_PATTERN);
 
-    if (ctx instanceof cst.QualifiedNamePatternContext) {
-      const list = ctx.identifierPattern_list();
+        args.push(node);
+      } else {
+        // Support single and double parameters inside identifierPattern
+        const paramCtx = identifierPattern.parameter?.() || identifierPattern.doubleParameter?.();
+        const parameter = paramCtx ? this.toParam(paramCtx) : undefined;
 
-      for (const identifierPattern of list) {
-        const ID_PATTERN = identifierPattern.ID_PATTERN();
-
-        if (ID_PATTERN) {
-          const node = this.fromNodeToIdentifier(ID_PATTERN);
-
-          args.push(node);
-        } else {
-          // Support single and double parameters inside identifierPattern
-          const paramCtx = identifierPattern.parameter?.() || identifierPattern.doubleParameter?.();
-          const parameter = paramCtx ? this.toParam(paramCtx) : undefined;
-
-          if (parameter) {
-            args.push(parameter);
-          }
+        if (parameter) {
+          args.push(parameter);
         }
       }
-    } else if (ctx instanceof cst.QualifiedNameContext) {
-      const list = ctx.identifierOrParameter_list();
-
-      for (const item of list) {
-        if (item instanceof cst.IdentifierOrParameterContext) {
-          const node = this.fromIdentifierOrParam(item);
-
-          if (node) {
-            args.push(node);
-          }
-        }
-      }
-    } else {
-      const name = this.sanitizeIdentifierString(ctx);
-      const node = Builder.identifier({ name }, this.createParserFields(ctx));
-
-      args.push(node);
     }
 
     const text = this.sanitizeIdentifierString(ctx);
