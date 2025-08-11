@@ -17,7 +17,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
 import type { CloudProvider } from '@kbn/custom-icons';
-import { DataSchemaFormat, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -158,14 +158,13 @@ export const useHostsTable = () => {
 
   const displayAlerts = hostNodes.some((item) => 'alertsCount' in item);
   const showApmHostTroubleshooting = hostNodes.some((item) => !item.hasSystemMetrics);
-  const schema = searchCriteria.preferredSchema ?? DataSchemaFormat.ECS;
 
   const { value: formulas } = useAsync(
     () =>
       inventoryModel.metrics.getFormulas({
-        schema,
+        schema: searchCriteria.preferredSchema ?? 'ecs',
       }),
-    [inventoryModel.metrics, schema]
+    [inventoryModel.metrics, searchCriteria.preferredSchema]
   );
 
   const [{ detailsItemId, pagination, sorting }, setProperties] = useHostsTableUrlState();
