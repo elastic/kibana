@@ -34,20 +34,13 @@ export const generateInferenceEndpointId = (config: Config) => {
 
 export const getNonEmptyValidator = (
   requiredFieldsSchema: ConfigEntryView[],
-  validationEventHandler: ({
-    settingsFormFields,
-    authFormFields,
-  }: {
-    settingsFormFields: ConfigEntryView[];
-    authFormFields: ConfigEntryView[];
-  }) => void,
+  validationEventHandler: (fieldsWithErrors: ConfigEntryView[]) => void,
   isSubmitting: boolean = false,
   isSecrets: boolean = false
 ) => {
   return (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
     const [{ value, path }] = args;
-    const settingsFormFields: ConfigEntryView[] = [];
-    const authFormFields: ConfigEntryView[] = [];
+    const updatedFormFields: ConfigEntryView[] = [];
 
     const configData = (value ?? {}) as Record<string, unknown>;
     let hasErrors = false;
@@ -71,14 +64,10 @@ export const getNonEmptyValidator = (
           }
         }
 
-        if (field.sensitive) {
-          authFormFields.push(field);
-        } else {
-          settingsFormFields.push(field);
-        }
+        updatedFormFields.push(field);
       });
 
-      validationEventHandler({ settingsFormFields, authFormFields });
+      validationEventHandler(updatedFormFields);
       if (hasErrors) {
         return {
           code: 'ERR_FIELD_MISSING',

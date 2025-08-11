@@ -13,13 +13,7 @@ import { getNonEmptyValidator } from '../../utils/helpers';
 
 interface ProviderConfigHiddenFieldProps {
   requiredProviderFormFields: ConfigEntryView[];
-  setRequiredProviderFormFields: ({
-    settingsFormFields,
-    authFormFields,
-  }: {
-    settingsFormFields: ConfigEntryView[];
-    authFormFields: ConfigEntryView[];
-  }) => void;
+  setRequiredProviderFormFields: (fieldsWithErrors: ConfigEntryView[]) => void;
   isSubmitting: boolean;
 }
 

@@ -136,17 +136,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     ],
   });
 
-  const updateFieldsForValidation = ({
-    settingsFormFields,
-    authFormFields,
-  }: {
-    settingsFormFields: ConfigEntryView[];
-    authFormFields: ConfigEntryView[];
-  }) => {
-    setProviderSettingsFormFields(settingsFormFields);
-    setAuthenticationFormFields(authFormFields);
-  };
-
   const toggleProviderPopover = useCallback(() => {
     setProviderPopoverOpen((isOpen) => !isOpen);
   }, []);
@@ -586,19 +575,13 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           />
           {/* HIDDEN VALIDATION */}
           <ProviderSecretHiddenField
-            requiredProviderFormFields={[
-              ...providerSettingsFormFields,
-              ...authenticationFormFields,
-            ]}
-            setRequiredProviderFormFields={updateFieldsForValidation}
+            requiredProviderFormFields={authenticationFormFields}
+            setRequiredProviderFormFields={setAuthenticationFormFields}
             isSubmitting={isSubmitting}
           />
           <ProviderConfigHiddenField
-            requiredProviderFormFields={[
-              ...providerSettingsFormFields,
-              ...authenticationFormFields,
-            ]}
-            setRequiredProviderFormFields={updateFieldsForValidation}
+            requiredProviderFormFields={providerSettingsFormFields}
+            setRequiredProviderFormFields={setProviderSettingsFormFields}
             isSubmitting={isSubmitting}
           />
         </>
