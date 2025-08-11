@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableExamplesPlugin } from './plugin';
+import { ControlsAsAPanelExamplePlugin } from './plugin';
 
-export { AddButton as AddEmbeddableButton } from './app/presentation_container_example/components/add_button';
-export { embeddableExamplesGrouping } from './react_embeddables/embeddable_examples_grouping';
-
-export const plugin = () => new EmbeddableExamplesPlugin();
+export function plugin() {
+  return new ControlsAsAPanelExamplePlugin();
+}
