@@ -10,14 +10,24 @@
 import { graphlib } from '@dagrejs/dagre';
 import { WorkflowYaml } from '@kbn/workflows';
 
-export type NodeType = 'if' | 'merge' | 'parallel' | 'action' | 'foreach' | 'atomic' | 'trigger';
+export type WorkflowGraphNodeType =
+  | 'if'
+  | 'merge'
+  | 'parallel'
+  | 'action'
+  | 'foreach'
+  | 'atomic'
+  | 'trigger';
 
-interface NodeLabel {
-  label: string;
-  type: NodeType;
+export interface WorkflowGraphNodeLabel {
+  label: {
+    stepType: string;
+    label: string;
+  };
+  type: WorkflowGraphNodeType;
 }
 
-export type WorkflowGraph = graphlib.Graph<NodeLabel>;
+export type WorkflowGraph = graphlib.Graph<WorkflowGraphNodeLabel>;
 
 export const flowNodeTypes = ['if', 'merge', 'parallel', 'foreach', 'atomic', 'merge', 'trigger'];
 
@@ -221,12 +231,12 @@ export function getWorkflowGraph<T extends WorkflowYaml>(workflow: T) {
     workflow.steps ?? []
   );
 
-  const dagreGraph = new graphlib.Graph<NodeLabel>();
+  const dagreGraph = new graphlib.Graph<WorkflowGraphNodeLabel>();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
 
   nodes.forEach((node) => {
     dagreGraph.setNode(node.id, {
-      label: node.label,
+      label: node.data,
       type: node.type,
     });
   });
