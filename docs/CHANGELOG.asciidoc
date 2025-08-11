@@ -118,13 +118,13 @@ Search::
 [float]
 [[fixes-v8.19.2]]
 === Fixes
+Alerting::
+* Fixes an issue with the `job/list` API's report filtering ({kibana-pull}230876[#230876]).
 Dashboards and Visualizations::
 * Fixes screen reader-only header in the Dashboards list ({kibana-pull}230470[#230470]).
 Elastic Observability solution::
 * Fixes an issue with `setupLockManagerIndex` where if the first call failed, all subsequent calls would fail as well ({kibana-pull}230519[#230519]).
 * Adds loading state to the **Install** and **Uninstall** buttons for Elastic documentation on the AI Assistant **Settings** page ({kibana-pull}229579[#229579]).
-Reporting::
-* Fixes an issue with the `job/list` API's report filtering ({kibana-pull}230876[#230876]).
 
 [[release-notes-8.19.1]]
 == {kib} 8.19.1
@@ -186,7 +186,7 @@ include::CHANGELOG.asciidoc[tag=known-issue-230275]
 After creating a report in a non-default {kib} space, the document exists in the `.kibana-reporting` index but isn't shown in the Reporting UI.
 
 *Resolved* +
-This issue is resolved in 8.19.0, 8.19.2, 9.1.0, 9.1.2, and later.
+This issue is resolved in 8.19.0, 8.19.2, 9.1.0, and 9.1.2.
 ====
 // end::known-issue-2462[]
 
