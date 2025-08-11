@@ -131,17 +131,6 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'dropbox',
   },
   {
-    iconPath: 'github.svg',
-    isBeta: true,
-    isNative: false,
-    isTechPreview: false,
-    keywords: ['github', 'cloud', 'server', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.github.name', {
-      defaultMessage: 'GitHub',
-    }),
-    serviceType: 'github',
-  },
-  {
     iconPath: 'oracle.svg',
     isBeta: true,
     isNative: false,
