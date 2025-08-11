@@ -228,8 +228,10 @@ describe('fetchGraph', () => {
       `WITH targetEntityName = entity.name, targetEntityType = entity.type, targetSourceIndex = entity.source`
     );
 
-    expect(query).not.toContain(`actorsDocData = VALUES(actorDocData)`);
-    expect(query).not.toContain(`targetsDocData = VALUES(targetDocData)`);
+    expect(query).toContain(`EVAL actorDocData = TO_STRING(null)`);
+    expect(query).toContain(`EVAL targetDocData = TO_STRING(null)`);
+    expect(query).toContain(`actorsDocData = VALUES(actorDocData)`);
+    expect(query).toContain(`targetsDocData = VALUES(targetDocData)`);
     expect(result).toEqual([{ id: 'dummy' }]);
   });
 

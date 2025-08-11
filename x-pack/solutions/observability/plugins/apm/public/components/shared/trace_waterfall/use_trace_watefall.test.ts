@@ -211,7 +211,7 @@ describe('getLegends', () => {
         traceId: '',
         duration: 1,
         serviceName: 'svcC',
-        spanType: 'db',
+        type: 'db',
         errorCount: 0,
       },
       {
@@ -221,7 +221,7 @@ describe('getLegends', () => {
         traceId: '',
         duration: 1,
         serviceName: 'svcC',
-        spanType: 'http',
+        type: 'http',
         errorCount: 0,
       },
       {
@@ -231,7 +231,7 @@ describe('getLegends', () => {
         traceId: '',
         duration: 1,
         serviceName: 'svcC',
-        spanType: 'cache',
+        type: 'cache',
         errorCount: 0,
       },
     ];
@@ -241,10 +241,10 @@ describe('getLegends', () => {
       { type: WaterfallLegendType.ServiceName, value: 'svcA', color: 'color0' },
       { type: WaterfallLegendType.ServiceName, value: 'svcB', color: 'color1' },
       { type: WaterfallLegendType.ServiceName, value: 'svcC', color: 'color2' },
-      { type: WaterfallLegendType.SpanType, value: '', color: 'color3' },
-      { type: WaterfallLegendType.SpanType, value: 'db', color: 'color4' },
-      { type: WaterfallLegendType.SpanType, value: 'http', color: 'color5' },
-      { type: WaterfallLegendType.SpanType, value: 'cache', color: 'color6' },
+      { type: WaterfallLegendType.Type, value: '', color: 'color3' }, // needed in the legends component to display the service name when colorBy is Type
+      { type: WaterfallLegendType.Type, value: 'db', color: 'color4' },
+      { type: WaterfallLegendType.Type, value: 'http', color: 'color5' },
+      { type: WaterfallLegendType.Type, value: 'cache', color: 'color6' },
     ]);
   });
 
@@ -284,7 +284,7 @@ describe('getLegends', () => {
         traceId: '',
         duration: 1,
         serviceName: 'svcB',
-        spanType: 'http',
+        type: 'http',
         errorCount: 0,
       },
       {
@@ -294,7 +294,7 @@ describe('getLegends', () => {
         traceId: '',
         duration: 1,
         serviceName: 'svcB',
-        spanType: 'http',
+        type: 'http',
         errorCount: 0,
       },
     ];
@@ -304,8 +304,8 @@ describe('getLegends', () => {
     expect(result).toEqual([
       { type: WaterfallLegendType.ServiceName, value: 'svcA', color: 'color0' },
       { type: WaterfallLegendType.ServiceName, value: 'svcB', color: 'color1' },
-      { type: WaterfallLegendType.SpanType, value: '', color: 'color2' }, // needed in the legends component to display the service name when colorBy is SpanType
-      { type: WaterfallLegendType.SpanType, value: 'http', color: 'color3' },
+      { type: WaterfallLegendType.Type, value: '', color: 'color2' }, // needed in the legends component to display the service name when colorBy is Type
+      { type: WaterfallLegendType.Type, value: 'http', color: 'color3' },
     ]);
   });
 
@@ -327,7 +327,7 @@ describe('getLegends', () => {
 
     const result = getLegends(traceItems);
 
-    expect(Object.keys(result)).toHaveLength(16); // 15+1 for legends component to display the service name when colorBy is SpanType
+    expect(Object.keys(result)).toHaveLength(16); // 15+1 for legends component to display the service name when colorBy is Type
 
     expect(result[0].color).toBe('color0');
     expect(result[10].color).toBe('color10');
@@ -344,14 +344,14 @@ describe('createColorLookupMap', () => {
     const legends = [
       { type: WaterfallLegendType.ServiceName, value: 'svcA', color: 'red' },
       { type: WaterfallLegendType.ServiceName, value: 'svcB', color: 'blue' },
-      { type: WaterfallLegendType.SpanType, value: 'db', color: 'green' },
+      { type: WaterfallLegendType.Type, value: 'db', color: 'green' },
     ];
 
     const result = createColorLookupMap(legends);
 
     expect(result.get('serviceName:svcA')).toBe('red');
     expect(result.get('serviceName:svcB')).toBe('blue');
-    expect(result.get('spanType:db')).toBe('green');
+    expect(result.get('type:db')).toBe('green');
   });
 });
 
