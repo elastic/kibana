@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { dimensionsApi } from './api/dimensions';
 import { fieldsApi } from './api/fields';
 
 export const routeRepository = {
+  ...dimensionsApi,
   ...fieldsApi,
 };
