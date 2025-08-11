@@ -26,9 +26,7 @@ import {
   groupAlertsBy,
   selectNumberOfAlerts,
 } from '../../../../tasks/alerts';
-import {
-  IS_SERVERLESS,
-} from '../../../../env_var_names_constants';
+import { IS_SERVERLESS } from '../../../../env_var_names_constants';
 
 describe(
   'Alert suppression - advanced settings',
@@ -50,8 +48,8 @@ describe(
     };
 
     const doLogin = () => {
-      login( Cypress.env(IS_SERVERLESS) ? 'admin' : undefined )
-    }
+      login(Cypress.env(IS_SERVERLESS) ? 'admin' : undefined);
+    };
 
     const headings: Record<SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM, string> = {
       [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow]:
