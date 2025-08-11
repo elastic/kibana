@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { GRAPH_ENTITY_NODE_DETAILS_ID } from '../test_ids';
 import { Tag } from './tag/tag';
 import { Ips } from './ips/ips';
 import { CountryFlags } from './country_flags/country_flags';
@@ -34,6 +35,7 @@ export const NodeDetails = ({ count, tag, label, ips, countryCodes }: NodeDetail
 
   return (
     <EuiFlexGroup
+      data-test-subj={GRAPH_ENTITY_NODE_DETAILS_ID}
       direction="column"
       gutterSize={shouldRenderTop && shouldRenderBottom ? 's' : 'none'}
       css={css`

@@ -9,13 +9,12 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
-  Ips,
-  TEST_SUBJ_TEXT,
-  TEST_SUBJ_PLUS_COUNT,
-  TEST_SUBJ_TOOLTIP_CONTENT,
-  TEST_SUBJ_TOOLTIP_IP,
-  MAX_IPS_IN_TOOLTIP,
-} from './ips';
+  GRAPH_IPS_TEXT_ID,
+  GRAPH_IPS_PLUS_COUNT_ID,
+  GRAPH_IPS_TOOLTIP_CONTENT_ID,
+  GRAPH_IPS_TOOLTIP_IP_ID,
+} from '../../test_ids';
+import { Ips, MAX_IPS_IN_TOOLTIP } from './ips';
 
 describe('Ips', () => {
   test('renders nothing when input array is empty', () => {
@@ -27,16 +26,16 @@ describe('Ips', () => {
     const testIp = '192.168.1.1';
     render(<Ips ips={[testIp]} />);
 
-    expect(screen.getByTestId(TEST_SUBJ_TEXT)).toHaveTextContent(`${'IP: '}${testIp}`);
-    expect(screen.queryByTestId(TEST_SUBJ_PLUS_COUNT)).not.toBeInTheDocument();
+    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent(`${'IP: '}${testIp}`);
+    expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_ID)).not.toBeInTheDocument();
   });
 
   test('renders multiple IPs with a counter', () => {
     const testIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
     render(<Ips ips={testIps} />);
 
-    expect(screen.getByTestId(TEST_SUBJ_TEXT)).toHaveTextContent(`${'IP: '}${testIps[0]}`);
-    expect(screen.getByTestId(TEST_SUBJ_PLUS_COUNT)).toHaveTextContent('+2');
+    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent(`${'IP: '}${testIps[0]}`);
+    expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID)).toHaveTextContent('+2');
   });
 
   test('renders aria-label in focusable button', () => {
@@ -52,11 +51,11 @@ describe('Ips', () => {
       const testIps = ['192.168.1.1'];
       render(<Ips ips={testIps} />);
 
-      expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
-      await userEvent.hover(screen.getByTestId(TEST_SUBJ_TEXT));
+      expect(screen.queryByTestId(GRAPH_IPS_TOOLTIP_CONTENT_ID)).not.toBeInTheDocument();
+      await userEvent.hover(screen.getByTestId(GRAPH_IPS_TEXT_ID));
 
       await waitFor(() => {
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
+        expect(screen.queryByTestId(GRAPH_IPS_TOOLTIP_CONTENT_ID)).not.toBeInTheDocument();
       });
     });
 
@@ -64,18 +63,18 @@ describe('Ips', () => {
       const testIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
       render(<Ips ips={testIps} />);
 
-      expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
-      expect(screen.getByTestId(TEST_SUBJ_TEXT)).toHaveTextContent(`${'IP: '}${testIps[0]}`);
-      await userEvent.hover(screen.getByTestId(TEST_SUBJ_TEXT));
+      expect(screen.queryByTestId(GRAPH_IPS_TOOLTIP_CONTENT_ID)).not.toBeInTheDocument();
+      expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent(`${'IP: '}${testIps[0]}`);
+      await userEvent.hover(screen.getByTestId(GRAPH_IPS_TEXT_ID));
 
       await waitFor(() => {
-        expect(screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
+        expect(screen.getByTestId(GRAPH_IPS_TOOLTIP_CONTENT_ID)).toBeInTheDocument();
       });
 
-      const tooltipIps = screen.getAllByTestId(TEST_SUBJ_TOOLTIP_IP).map((ip) => ip.textContent);
+      const tooltipIps = screen.getAllByTestId(GRAPH_IPS_TOOLTIP_IP_ID).map((ip) => ip.textContent);
       expect(tooltipIps).toEqual(testIps);
 
-      expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toHaveTextContent(
+      expect(screen.queryByTestId(GRAPH_IPS_TOOLTIP_CONTENT_ID)).not.toHaveTextContent(
         'Open full details in flyout'
       );
     });
@@ -89,15 +88,15 @@ describe('Ips', () => {
 
       render(<Ips ips={testIps} />);
 
-      expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
-      expect(screen.getByTestId(TEST_SUBJ_TEXT)).toHaveTextContent(`${'IP: '}${testIps[0]}`);
-      await userEvent.hover(screen.getByTestId(TEST_SUBJ_TEXT));
+      expect(screen.queryByTestId(GRAPH_IPS_TOOLTIP_CONTENT_ID)).not.toBeInTheDocument();
+      expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent(`${'IP: '}${testIps[0]}`);
+      await userEvent.hover(screen.getByTestId(GRAPH_IPS_TEXT_ID));
 
       await waitFor(() => {
-        expect(screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
+        expect(screen.getByTestId(GRAPH_IPS_TOOLTIP_CONTENT_ID)).toBeInTheDocument();
       });
 
-      const tooltipIps = screen.getAllByTestId(TEST_SUBJ_TOOLTIP_IP).map((ip) => ip.textContent);
+      const tooltipIps = screen.getAllByTestId(GRAPH_IPS_TOOLTIP_IP_ID).map((ip) => ip.textContent);
 
       expect(tooltipIps).toHaveLength(MAX_IPS_IN_TOOLTIP);
       expect(tooltipIps).toEqual(testIps.slice(0, MAX_IPS_IN_TOOLTIP));
