@@ -28,7 +28,6 @@ export interface FetcherOptions {
   showToastOnError?: boolean;
   requestObservable$?: BehaviorSubject<(() => any) | undefined>;
   autoFetch?: boolean;
-
   reloadRequestTimeUpdateEnabled?: boolean;
 }
 
