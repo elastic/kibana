@@ -79,7 +79,7 @@ export class RelatedDashboardsClient {
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
     lens: (panel: DashboardPanel) => {
-      let references = this.isLensVizAttributes(panel.panelConfig.attributes)
+      let references = isLensVizAttributes(panel.panelConfig.attributes)
         ? panel.panelConfig.attributes.references
         : undefined;
       if (!references && panel.panelIndex) {
@@ -98,19 +98,19 @@ export class RelatedDashboardsClient {
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
     lens: (panel: DashboardPanel) => {
-      let state: unknown = this.isLensVizAttributes(panel.panelConfig.attributes)
+      let state: unknown = isLensVizAttributes(panel.panelConfig.attributes)
         ? panel.panelConfig.attributes.state
         : undefined;
       if (!state && panel.panelIndex) {
         state = this.referencedPanelManager.getByIndex(panel.panelIndex)?.state;
       }
-      if (this.isLensAttributesState(state)) {
+      if (isLensAttributesState(state)) {
         const fields = new Set<string>();
         const dataSourceLayers = state.datasourceStates.formBased?.layers || {};
         Object.values(dataSourceLayers).forEach((ds) => {
           const columns = ds.columns;
           Object.values(columns).forEach((col) => {
-            if (this.hasSourceField(col)) {
+            if ('sourceField' in col) {
               fields.add(col.sourceField);
             }
           });
@@ -119,14 +119,6 @@ export class RelatedDashboardsClient {
       }
     },
   };
-
-  private hasSourceField(c: GenericIndexPatternColumn): c is FieldBasedIndexPatternColumn {
-    return 'sourceField' in c;
-  }
-
-  private isLensAttributesState(state: unknown): state is LensAttributes['state'] {
-    return typeof state === 'object' && state !== null && 'datasourceStates' in state;
-  }
 
   private rankDashboards(alert: AlertData): SuggestedDashboard[] {
     if (!isSuggestedDashboardsValidRuleTypeId(alert.getRuleTypeId())) return [];
@@ -335,18 +327,6 @@ export class RelatedDashboardsClient {
     return fields ?? new Set<string>();
   }
 
-  private isLensVizAttributes(attributes: unknown): attributes is LensAttributes {
-    if (!attributes) {
-      return false;
-    }
-    return (
-      Boolean(attributes) &&
-      typeof attributes === 'object' &&
-      'type' in attributes &&
-      attributes.type === 'lens'
-    );
-  }
-
   private async getLinkedDashboards(ruleId: string): Promise<LinkedDashboard[]> {
     const rule = await this.alertsClient.getRuleById(ruleId);
     if (!rule) {
@@ -388,6 +368,22 @@ export class RelatedDashboardsClient {
       throw new Error(`Error fetching dashboard with id ${id}: ${error.message || error}`);
     }
   }
+}
+
+function isLensVizAttributes(attributes: unknown): attributes is LensAttributes {
+  if (!attributes) {
+    return false;
+  }
+  return (
+    Boolean(attributes) &&
+    typeof attributes === 'object' &&
+    'type' in attributes &&
+    attributes.type === 'lens'
+  );
+}
+
+function isLensAttributesState(state: unknown): state is LensAttributes['state'] {
+  return typeof state === 'object' && state !== null && 'datasourceStates' in state;
 }
 
 function scoreMatch(
