@@ -9,6 +9,19 @@ import { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/serve
 import type { Logger, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 import { ReferencedPanelAttributes, ReferencedPanelAttributesWithReferences } from './helpers';
 
+/**
+ * The ReferencedPanelManager class manages the relationship between dashboard panels and their references.
+ * 
+ * It's responsible for:
+ * - Tracking panels that are referenced in dashboards but require lazy loading
+ * - Maintaining the relationship between panelIndex (the reference ID in a dashboard) and panelId (the actual saved object ID)
+ * - Fetching panel details when needed via bulkGet operations
+ * - Providing access to panel attributes and references via the panelIndex
+ * 
+ * This class is essential for handling dashboard panels that have their configuration stored as separate
+ * saved objects, allowing the system to resolve and retrieve the actual panel configuration when needed
+ * to analyze fields, indices, and other properties of visualization panels.
+ */
 export class ReferencedPanelManager {
   // The panelIndex refers to the ID of the saved object reference, while the panelId refers to the ID of the saved object itself (the panel).
   // So, if the same saved object panel is referenced in two different dashboards, it will have different panelIndex values in each dashboard, but the same panelId, since they're both referencing the same panel.

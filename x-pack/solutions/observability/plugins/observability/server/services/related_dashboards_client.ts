@@ -10,10 +10,6 @@ import { SearchResponse } from '@kbn/content-management-plugin/server/core/crud'
 import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import { isDashboardPanel } from '@kbn/dashboard-plugin/common';
 import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
-import type {
-  FieldBasedIndexPatternColumn,
-  GenericIndexPatternColumn,
-} from '@kbn/lens-plugin/public';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type { LinkedDashboard, SuggestedDashboard } from '@kbn/observability-schema';
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
@@ -28,6 +24,8 @@ import { MatchedBy } from '@kbn/observability-schema/related_dashboards/schema/r
 
 const MAX_SUGGESTED_MANAGED_DASHBOARDS = 3;
 const SCORING_EXCLUDED_FIELDS = ['tags', 'event.action', 'event.kind'];
+const TEXT_MATCH_LIMIT = 5;
+const UNFILTERED_MATCH_LIMIT = 1000;
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 
@@ -121,39 +119,55 @@ export class RelatedDashboardsClient {
   };
 
   private rankDashboards(alert: AlertData): SuggestedDashboard[] {
+    // TODO: Do we need this
     if (!isSuggestedDashboardsValidRuleTypeId(alert.getRuleTypeId())) return [];
 
-    const allSuggestedDashboards = new Set<SuggestedDashboard>();
-    const relevantDashboardsById = new Map<string, SuggestedDashboard>();
-    const index = alert.getRuleQueryIndex();
-    const allRelevantFields = alert.getAllRelevantFields();
+    const suggestedDashboards = new Set<SuggestedDashboard>();
 
-    this.dashboardsById.forEach((d) => {
-      console.log('ADD DASHBOARD', d.id, 'SCORE', d.score);
-      allSuggestedDashboards.add({
-        id: d.id,
-        title: d.attributes.title,
-        description: d.attributes.description,
-        tags: d.attributes.tags,
-        // If it has a pre-existing score, that's a text match
-        matchedBy: { textMatch: d.score, isManaged: d.managed },
-        score: d.score ?? 0,
-      });
+    // Add dashboards that are text matches
+    this.dashboardsById.forEach((dashboard, id) => {
+      if (dashboard.score && dashboard.score > 0) {
+        suggestedDashboards.add({
+          id: dashboard.id,
+          title: dashboard.attributes.title,
+          description: dashboard.attributes.description,
+          tags: dashboard.attributes.tags,
+          matchedBy: { textMatch: dashboard.score, isManaged: dashboard.managed },
+          score: dashboard.score ?? 0,
+        });
+      }
     });
 
-    if (index) {
-      const { dashboards } = this.dashboardsForIndex(index, this.dashboardsById.values());
-      dashboards.forEach((dashboard) => allSuggestedDashboards.add(dashboard));
-    }
-    if (allRelevantFields.length > 0) {
-      const { dashboards } = this.dashboardsForField(
-        allRelevantFields,
-        this.dashboardsById.values()
-      );
-      dashboards.forEach((dashboard) => allSuggestedDashboards.add(dashboard));
+    // Add dashboards that are field matches
+    this.dashboardsForField(alert.getAllRelevantFields(), this.dashboardsById.values()).forEach(
+      (dashboard) => suggestedDashboards.add(dashboard)
+    );
+
+    // Add dashboards that are index matches
+    const ruleQueryIndex = alert.getRuleQueryIndex();
+    if (ruleQueryIndex) {
+      const { dashboards } = this.dashboardsForIndex(ruleQueryIndex, this.dashboardsById.values());
+      dashboards.forEach((dashboard) => suggestedDashboards.add(dashboard));
     }
 
-    allSuggestedDashboards.forEach((dashboard) => {
+    const relevantDashboardsById = new Map<string, SuggestedDashboard>();
+    const index = alert.getRuleQueryIndex();
+
+    Object.values(this.dashboardsById)
+      .filter((d) => d.matchedBy.fields.size > 0 || d.matchedBy.index.size > 0 || d.textMatch > 0)
+      .forEach((d) => {
+        suggestedDashboards.add({
+          id: d.id,
+          title: d.attributes.title,
+          description: d.attributes.description,
+          tags: d.attributes.tags,
+          // If it has a pre-existing score, that's a text match
+          matchedBy: { textMatch: d.score, isManaged: d.managed },
+          score: d.score ?? 0,
+        });
+      });
+
+    suggestedDashboards.forEach((dashboard) => {
       relevantDashboardsById.set(dashboard.id, {
         ...dashboard,
         matchedBy: {
@@ -189,20 +203,19 @@ export class RelatedDashboardsClient {
     // First do a text search and set a base score based on the rank in the results
     // We ignore the actual ES score... because the SO client doesn't expose it, so just assume
     // that the top 5 results are decent enough and weight linearly
-    const textMatchLimit = 5;
     const textMatches = await this.dashboardClient.search({
       text: alert.getRuleName(), // TODO handle empty strings
       defaultSearchOperator: 'OR',
-      limit: textMatchLimit,
+      limit: TEXT_MATCH_LIMIT,
     });
     for (const [index, dashboard] of textMatches.result.hits.entries()) {
       // Declining initial score based on distance from the top of the results
-      dashboard.score = textMatchLimit - index;
+      dashboard.score = TEXT_MATCH_LIMIT - index;
     }
     await this.processDashboardSearch(textMatches);
 
     // Now match by fields and indices, these will use the previous score as a multiplier if relevant
-    const allMatches = await this.dashboardClient.search({ limit: 7 });
+    const allMatches = await this.dashboardClient.search({ limit: UNFILTERED_MATCH_LIMIT });
     await this.processDashboardSearch(allMatches);
 
     return this.rankDashboards(alert);
@@ -227,7 +240,6 @@ export class RelatedDashboardsClient {
       if (rankScore) {
         dashboard.score = hits.length - idx;
       }
-      console.log('DASHSET ID', dashboard.id, 'SCORE', dashboard.score);
       this.dashboardsById.set(dashboard.id, dashboard);
     }
 
@@ -264,9 +276,7 @@ export class RelatedDashboardsClient {
   private dashboardsForField(
     fields: string[],
     dashboards: Iterable<Dashboard>
-  ): {
-    dashboards: SuggestedDashboard[];
-  } {
+  ): SuggestedDashboard[] {
     const relevantDashboards: SuggestedDashboard[] = [];
     for (const d of dashboards) {
       const panels = d.attributes.panels.filter(isDashboardPanel);
@@ -291,7 +301,7 @@ export class RelatedDashboardsClient {
         });
       }
     }
-    return { dashboards: relevantDashboards };
+    return relevantDashboards;
   }
 
   private panelsWithIndex(index: string, panels: DashboardPanel[]): DashboardPanel[] {
