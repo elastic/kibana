@@ -24,6 +24,11 @@ interface SearchSessionManagementDeps {
   usageCollector?: SearchUsageCollector;
 }
 
+interface FetchReturn {
+  savedObjects: SearchSessionSavedObject[];
+  statuses: Record<string, SearchSessionStatusResponse>;
+}
+
 export class SearchSessionsMgmtAPI {
   constructor(
     private sessionsClient: ISessionsClient,
@@ -31,9 +36,7 @@ export class SearchSessionsMgmtAPI {
     private deps: SearchSessionManagementDeps
   ) {}
 
-  public async fetchTableData(): Promise<
-    [SearchSessionSavedObject[], Record<string, SearchSessionStatusResponse>]
-  > {
+  public async fetchTableData(): Promise<FetchReturn> {
     const mgmtConfig = this.config.management;
 
     const refreshTimeout = moment.duration(mgmtConfig.refreshTimeout);
@@ -62,7 +65,10 @@ export class SearchSessionsMgmtAPI {
     try {
       const result = await race(fetch$, timeout$).toPromise();
       if (result && result.saved_objects) {
-        return [result.saved_objects as SearchSessionSavedObject[], result.statuses];
+        return {
+          savedObjects: result.saved_objects as SearchSessionSavedObject[],
+          statuses: result.statuses,
+        };
       }
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -74,7 +80,10 @@ export class SearchSessionsMgmtAPI {
       });
     }
 
-    return [[], {}];
+    return {
+      savedObjects: [],
+      statuses: {},
+    };
   }
 
   public getExtendByDuration() {

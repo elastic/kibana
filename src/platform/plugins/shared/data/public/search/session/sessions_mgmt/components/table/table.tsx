@@ -103,9 +103,9 @@ export function SearchSessionsMgmtTable({
     if (document.visibilityState !== 'hidden') {
       let results: UISession[] = [];
       try {
-        const [savedObjects, sessionStatuses] = await api.fetchTableData();
+        const { savedObjects, statuses } = await api.fetchTableData();
         results = savedObjects.map((savedObject) =>
-          mapToUISession({ savedObject, locators, sessionStatuses })
+          mapToUISession({ savedObject, locators, sessionStatuses: statuses })
         );
       } catch (e) {} // eslint-disable-line no-empty
 

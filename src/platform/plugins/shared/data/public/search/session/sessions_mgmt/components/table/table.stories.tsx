@@ -62,7 +62,10 @@ const Component = ({
     application: mockCoreStart.application,
   });
   api.fetchTableData = async () => {
-    return [data, statuses];
+    return {
+      savedObjects: data,
+      statuses,
+    };
   };
 
   const mockSearchUsageCollector = createSearchUsageCollectorMock();

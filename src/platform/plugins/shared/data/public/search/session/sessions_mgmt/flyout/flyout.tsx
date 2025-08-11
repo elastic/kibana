@@ -50,7 +50,10 @@ export const Flyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle id={flyoutId} size="m">
           <h1>
-            <FormattedMessage id="data.session_mgmt.flyout" defaultMessage="Background searches" />
+            <FormattedMessage
+              id="data.session_mgmt.flyout_title"
+              defaultMessage="Background searches"
+            />
           </h1>
         </EuiTitle>
       </EuiFlyoutHeader>

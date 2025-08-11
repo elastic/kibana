@@ -66,7 +66,7 @@ describe('Search Sessions Management API', () => {
         application: mockCoreStart.application,
       });
 
-      const [results, statuses] = await api.fetchTableData();
+      const { savedObjects: results, statuses } = await api.fetchTableData();
       expect(results).toEqual([
         {
           id: 'hello-pizza-123',
@@ -109,7 +109,7 @@ describe('Search Sessions Management API', () => {
         application: mockCoreStart.application,
       });
 
-      const [res, statuses] = await api.fetchTableData();
+      const { savedObjects: res, statuses } = await api.fetchTableData();
       expect(statuses[res[0].id]).toEqual({ status: 'expired' });
     });
 
