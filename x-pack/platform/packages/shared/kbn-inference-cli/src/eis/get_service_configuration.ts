@@ -25,9 +25,6 @@ async function getFiles(files: string[]): Promise<string[]> {
   await git.init();
   await git.raw(['config', 'core.sparseCheckout', 'true']);
 
-  const sparseCheckoutPath = Path.join(tmpDir, '.git', 'info', 'sparse-checkout');
-  await Fs.writeFile(sparseCheckoutPath, files.join('\n'), 'utf-8');
-
   async function pull() {
     return await git.pull('origin', 'main', { '--depth': '1' });
   }
