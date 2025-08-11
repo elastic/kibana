@@ -30,10 +30,6 @@ const ID = 'CostSavingsMetricQuery';
  * Renders a Lens embeddable metric visualization showing estimated cost savings
  * based on the number of AI filtered alerts, minutes saved per alert,
  * and analyst hourly rate for a given time range.
- *
- * Background-color: colors.backgroundBaseSuccess, #E2F8F0
- * Border-color: colors.success, #008A5E
- * Big numbers color: colors.textSuccess, #09724D
  */
 
 const CostSavingsMetricComponent: React.FC<Props> = ({
