@@ -524,7 +524,7 @@ export function getTextBasedDatasource({
         }
         Object.values(layer.columns).forEach((column) => {
           columnLabelMap[column.columnId] = uniqueLabelGenerator(
-            (column.customLabel ? column.label : undefined) ?? column.fieldName
+            column.customLabel && column.label ? column.label : column.fieldName
           );
         });
       });
