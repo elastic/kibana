@@ -243,26 +243,29 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
-                <EuiFlexItem
-                  grow={false}
-                  style={{
-                    backgroundColor: euiTheme.colors.backgroundFilledAccent,
-                    height: 5,
-                    width: 10,
-                  }}
-                />
-                <EuiFlexItem>
-                  <EuiText size={'xs'}>
-                    <FormattedMessage
-                      id="xpack.infra.inventoryTimeline.legend.anomalyLabel"
-                      defaultMessage="Anomaly detected"
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+            {preferredSchema !== 'semconv' ? (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
+                  <EuiFlexItem
+                    grow={false}
+                    style={{
+                      backgroundColor: euiTheme.colors.backgroundFilledAccent,
+                      height: 5,
+                      width: 10,
+                    }}
+                  />
+
+                  <EuiFlexItem>
+                    <EuiText size="xs">
+                      <FormattedMessage
+                        id="xpack.infra.inventoryTimeline.legend.anomalyLabel"
+                        defaultMessage="Anomaly detected"
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
       </TimelineHeader>
