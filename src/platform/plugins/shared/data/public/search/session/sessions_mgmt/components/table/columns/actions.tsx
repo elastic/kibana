@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
@@ -26,24 +27,27 @@ export const actionsColumn = ({
   allowedActions?: UISession['actions'];
 }): EuiBasicTableColumn<UISession> => ({
   field: 'actions',
-  name: '',
+  name: i18n.translate('data.mgmt.searchSessions.table.headerActions', {
+    defaultMessage: 'Actions',
+  }),
   sortable: false,
+  align: 'right',
   render: (actions: UISession['actions'], session) => {
-    if (actions && actions.length) {
-      return (
-        <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" alignItems="flexEnd">
-          <EuiFlexItem grow={false} data-test-subj="sessionManagementActionsCol">
-            <PopoverActionsMenu
-              api={api}
-              key={`popkey-${session.id}`}
-              session={session}
-              core={core}
-              allowedActions={allowedActions}
-              onActionComplete={onActionComplete}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
+    if (!actions?.length) return null;
+
+    return (
+      <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" alignItems="flexEnd">
+        <EuiFlexItem grow={false} data-test-subj="sessionManagementActionsCol">
+          <PopoverActionsMenu
+            api={api}
+            key={`popkey-${session.id}`}
+            session={session}
+            core={core}
+            allowedActions={allowedActions}
+            onActionComplete={onActionComplete}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   },
 });
