@@ -12,6 +12,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { getConnectorList, getDefaultConnector } from '../../runner/utils';
+import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
 
 export const getChatModel$ = ({
   connectorId,
@@ -41,9 +42,7 @@ export const getChatModel$ = ({
         request,
         connectorId: selectedConnectorId,
         chatModelOptions: {
-          telemetryMetadata: {
-            pluginId: 'one_chat',
-          },
+          telemetryMetadata: MODEL_TELEMETRY_METADATA,
         },
       });
     })

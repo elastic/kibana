@@ -10,6 +10,7 @@ import type { ModelProvider, ScopedModel } from '@kbn/onechat-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { getConnectorList, getDefaultConnector } from './utils';
+import { MODEL_TELEMETRY_METADATA } from '../../telemetry';
 
 export interface CreateModelProviderOpts {
   inference: InferenceServerStart;
@@ -59,9 +60,7 @@ export const createModelProvider = ({
       request,
       connectorId,
       chatModelOptions: {
-        telemetryMetadata: {
-          pluginId: 'one_chat',
-        },
+        telemetryMetadata: MODEL_TELEMETRY_METADATA,
       },
     });
 
