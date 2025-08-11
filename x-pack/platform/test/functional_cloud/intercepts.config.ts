@@ -8,18 +8,23 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../config.base.ts'));
+  const functionalCloudConfig = await readConfigFile(require.resolve('./config.ts'));
 
-  const baseConfig = functionalConfig.getAll();
+  const currentDate = new Date(Date.now());
+  const trialEndDate = new Date(currentDate);
+
+  // Set trial end date to one month in the future
+  trialEndDate.setMonth(trialEndDate.getMonth() + 1);
 
   return {
-    ...baseConfig,
-    testFiles: [require.resolve('.')],
+    ...functionalCloudConfig.getAll(),
+    testFiles: [require.resolve('./tests/trial_product_intercepts.ts')],
     kbnTestServer: {
-      ...baseConfig.kbnTestServer,
+      ...functionalCloudConfig.get('kbnTestServer'),
       serverArgs: [
-        ...baseConfig.kbnTestServer.serverArgs,
-        '--license=trial',
+        ...functionalCloudConfig.get('kbnTestServer.serverArgs'),
+        // Set a trial end date for testing
+        `--xpack.cloud.trial_end_date=${trialEndDate.toISOString()}`,
         '--xpack.product_intercept.enabled=true',
         // Use a shorter interval for testing purposes
         '--xpack.product_intercept.trialInterceptInterval=10s',

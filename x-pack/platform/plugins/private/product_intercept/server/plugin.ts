@@ -70,13 +70,16 @@ export class ProductInterceptServerPlugin
 
       // Register trial intercept only if the trial end date is set and not passed
       if (this.trialEndDate && Date.now() <= this.trialEndDate.getTime()) {
-        void intercepts.registerTriggerDefinition?.(TRIAL_TRIGGER_DEF_ID, () => {
-          this.logger.debug('Registering global product trial intercept trigger definition');
-          return {
-            triggerAfter: this.config.trialInterceptInterval,
-            isRecurrent: false,
-          };
-        });
+        void intercepts.registerTriggerDefinition?.(
+          `${TRIAL_TRIGGER_DEF_ID}:${this.buildVersion}`,
+          () => {
+            this.logger.debug('Registering global product trial intercept trigger definition');
+            return {
+              triggerAfter: this.config.trialInterceptInterval,
+              isRecurrent: false,
+            };
+          }
+        );
       }
     }
 

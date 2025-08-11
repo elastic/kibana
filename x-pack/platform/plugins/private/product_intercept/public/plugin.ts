@@ -61,7 +61,7 @@ export class ProductInterceptPublicPlugin implements Plugin {
         this.upgradeInterceptSubscription,
       ] = [
         TRIGGER_DEF_ID,
-        TRIAL_TRIGGER_DEF_ID,
+        `${TRIAL_TRIGGER_DEF_ID}:${this.buildVersion}`,
         `${UPGRADE_TRIGGER_DEF_PREFIX_ID}:${this.buildVersion}`,
       ].map((triggerId) =>
         intercepts
