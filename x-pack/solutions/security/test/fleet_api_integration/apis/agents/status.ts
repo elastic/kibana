@@ -19,7 +19,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const superTestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('fleet_agents_status', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/230292
+  describe.skip('fleet_agents_status', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       await es.create({
