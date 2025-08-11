@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import * as z from '@kbn/zod';
+import datemath from '@elastic/datemath';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 
 // Recursive schema using z.lazy (needs ref strategy to resolve)
@@ -81,9 +82,35 @@ export const testOasGenerationZ3 = createObservabilityOnboardingServerRoute({
   },
   params: z.object({
     query: z.object({
-      startDate: z.date().describe('Start date for the query').meta({
-        example: 'now-1d',
-      }),
+      startDate: z
+        .custom<string>(
+          (val) => {
+            if (typeof val !== 'string') return false;
+
+            const parsed = datemath.parse(val);
+            return parsed && parsed.isValid();
+          },
+          {
+            message:
+              'Value must be a valid Kibana date string that can be parsed by datemath (e.g., "now-1d", "now/d", ISO date, etc.)',
+          }
+        )
+        .openapi({
+          type: 'string',
+          description:
+            'Kibana-style date string supporting relative dates like now-1d, now-7d, now/d, or ISO date strings. Uses the same datemath parser as other Kibana APIs.',
+          example: 'now-1d',
+          title: 'Kibana Date String',
+          examples: [
+            'now-1d',
+            'now-7d',
+            'now/d',
+            'now-30m',
+            'now+1h',
+            '2023-10-31T23:59:59Z',
+            '2023-10-31',
+          ],
+        }),
       endDate: z.date().describe('End date for the query').default('now').optional().meta({
         example: '2023-10-31T23:59:59Z',
       }),

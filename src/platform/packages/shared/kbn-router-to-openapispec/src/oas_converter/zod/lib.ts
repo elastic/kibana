@@ -256,6 +256,11 @@ function isValidOpenApiQueryParameterSchema(unwrappedShape: z.ZodType): boolean 
     });
   }
 
+  // Allow ZodCustom types if they have custom OpenAPI metadata.
+  if (unwrappedShape instanceof z.ZodCustom) {
+    return !!getCustomOpenApiMetadata(unwrappedShape);
+  }
+
   // Other complex types like Maps, Sets are generally not directly mapped well to query strings.
   return false;
 }
