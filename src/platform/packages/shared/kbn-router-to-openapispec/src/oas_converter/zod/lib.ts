@@ -40,11 +40,6 @@ function postProcessJsonOutput(json: z.core.JSONSchema.BaseSchema) {
     return json;
   }
 
-  // Remove the description
-  if (typeof json.description !== 'undefined') {
-    delete json.description;
-  }
-
   // Remove the $schema property if it exists
   if (typeof json.$schema !== 'undefined') {
     delete json.$schema;
@@ -84,11 +79,23 @@ function postProcessJsonOutput(json: z.core.JSONSchema.BaseSchema) {
   };
 }
 
+function getCustomOpenApiMetadata(schema: z.core.$ZodType) {
+  // If the schema has a custom OpenAPI metadata method, apply it
+  if (typeof (schema as any).getOpenAPIMetadata === 'function') {
+    const openAPIMetadata = (schema as any).getOpenAPIMetadata();
+    if (openAPIMetadata && typeof openAPIMetadata === 'object') {
+      // Apply all OpenAPI metadata properties to ensure nothing is lost
+      return openAPIMetadata;
+    }
+  }
+  return undefined;
+}
+
 function toJSON(schema: z.ZodType) {
   // If no wrapper is found, this is considered the innermost type.
   // Check for unsupported types that should be coerced.
-  // const coercedSchema = coerceUnsupportedZodType(schema);
 
+  let customOpenApiMetadata: z.core.JSONSchema.BaseSchema | undefined;
   const json = z.toJSONSchema(schema, {
     io: 'input',
     target: 'draft-7',
@@ -98,8 +105,18 @@ function toJSON(schema: z.ZodType) {
         ctx.zodSchema,
         ctx.jsonSchema as z.core.JSONSchema.BaseSchema
       );
+
+      customOpenApiMetadata = getCustomOpenApiMetadata(ctx.zodSchema);
     },
   });
+
+  // If the schema has custom OpenAPI metadata, return it directly
+  if (customOpenApiMetadata) {
+    return {
+      json: customOpenApiMetadata,
+      definitions: {},
+    };
+  }
 
   return postProcessJsonOutput(json);
 }
@@ -286,13 +303,14 @@ const convertObjectMembersToParameterObjects = (
     }
 
     const isOptional = !subShape.safeParse(undefined).success;
+    const { description: schemaDescription, ...json } = toJSON(subShape).json;
 
     return {
       name: shapeKey,
       in: isPathParameter ? 'path' : 'query',
       required: isPathParameter || isOptional,
-      schema: toJSON(subShape).json,
-      description: subShape.description,
+      schema: json,
+      description: schemaDescription ?? subShape.description,
     };
   });
 };
@@ -366,11 +384,17 @@ export const convert = (schema: z.ZodType): ReturnType<OpenAPIConverter['convert
   try {
     convertionOutput = toJSON(schema);
   } catch (e) {
-    convertionOutput = toJSON(
-      getPassThroughBodyObject(
-        'Could not convert the schema to OpenAPI equivalent, passing through as any.'
-      )
-    );
+    // Use custom OpenAPI metadata if available, or fallback to a generic pass-through object
+    convertionOutput = {
+      json:
+        getCustomOpenApiMetadata(schema) ??
+        toJSON(
+          getPassThroughBodyObject(
+            'Could not convert the schema to OpenAPI equivalent, passing through as any.'
+          )
+        ).json,
+      definitions: {},
+    };
   }
 
   return {
