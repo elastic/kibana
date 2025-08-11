@@ -38,6 +38,15 @@ import { Config } from '../types/types';
 import { TaskTypeOption } from '../utils/helpers';
 import { buttonCss, accordionCss } from './inference_service_form_fields';
 
+const taskTypeConfig = {
+  validations: [
+    {
+      validator: fieldValidators.emptyField(LABELS.getRequiredMessage('Task type')),
+      isBlocking: true,
+    },
+  ],
+};
+
 interface AdditionalOptionsFieldsProps {
   config: Config;
   onTaskTypeOptionsSelect: (taskType: string, provider?: string) => void;

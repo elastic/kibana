@@ -69,6 +69,15 @@ export const accordionCss = css`
   }
 `;
 
+const providerConfigConfig = {
+  validations: [
+    {
+      validator: fieldValidators.emptyField(LABELS.PROVIDER_REQUIRED),
+      isBlocking: true,
+    },
+  ],
+};
+
 export function isProviderForSolutions(
   filterBySolution: SolutionView,
   provider: InferenceProvider
