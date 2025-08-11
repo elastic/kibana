@@ -42,7 +42,7 @@ describe('run agent', () => {
     const abortController = new AbortController();
     const messages = [
       new SystemMessage('You are a system prompt'),
-      new HumanMessage('Can you help me'),
+      new HumanMessage('["some","json","string"]'),
     ];
     const stateUpdate = await runAgent({
       logger: mockLoggerFactory.get(),
@@ -68,8 +68,8 @@ describe('run agent', () => {
     });
     expect(model.invoke).toBeCalledTimes(1);
     expect(model.invoke).toHaveBeenCalledWith([
-      new SystemMessage('You are a system prompt.'),
-      new HumanMessage('Can you help me.'),
+      new SystemMessage('You are a system prompt'),
+      new HumanMessage('["some","json","string"].'),
     ]);
   });
 });
