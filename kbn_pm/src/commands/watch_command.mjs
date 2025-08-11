@@ -15,6 +15,7 @@ export const command = {
   name: 'watch',
   description: 'Runs a build in the webpack-built packages and keeps watching them for changes',
   flagsHelp: `
+    --allow-root         Required supplementary flag if you're running this command as root.
     --offline            Run the installation process without consulting online resources. This is useful and
                           sometimes necessary for using bootstrap on an airplane for instance. The local caches
                           will be used exclusively, including a yarn-registry local mirror which is created and
