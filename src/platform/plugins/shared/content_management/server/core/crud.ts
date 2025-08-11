@@ -82,7 +82,7 @@ export class ContentCrud<T = unknown> {
 
     try {
       const result = await this.storage.get(ctx, contentId, options);
-
+      console.log('content crud get-----', JSON.stringify(result, null, 2));
       this.eventBus.emit({
         type: 'getItemSuccess',
         contentId,
@@ -91,7 +91,10 @@ export class ContentCrud<T = unknown> {
         options,
       });
 
-      return { contentTypeId: this.contentTypeId, result };
+      const { id, type, data, meta } = result;
+
+
+      return { contentTypeId: this.contentTypeId, result: {id, type: type, data, meta} };
     } catch (e) {
       this.eventBus.emit({
         type: 'getItemError',

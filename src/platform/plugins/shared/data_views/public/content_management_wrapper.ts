@@ -68,7 +68,9 @@ export class ContentMagementWrapper implements PersistenceAPI {
       throw new DataViewSavedObjectConflictError(id);
     }
 
-    return response.item;
+    console.log('ContentMagementWrapper------', JSON.stringify(response, null, 2));
+
+    return response;
   }
 
   async update(
@@ -87,7 +89,7 @@ export class ContentMagementWrapper implements PersistenceAPI {
     });
 
     // cast is necessary since its the full object and not just the changes
-    return response.item as SavedObject<DataViewAttributes>;
+    return response as SavedObject<DataViewAttributes>;
   }
 
   async create(attributes: DataViewAttributes, options: DataViewCrudTypes['CreateOptions']) {
@@ -100,7 +102,7 @@ export class ContentMagementWrapper implements PersistenceAPI {
       options,
     });
 
-    return result.item;
+    return result;
   }
 
   async delete(id: string) {

@@ -233,7 +233,7 @@ export class DashboardStorage {
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
-
+console.log('get dashboard result---', JSON.stringify(value, null, 2));
     return value;
   }
 
@@ -346,6 +346,7 @@ export class DashboardStorage {
       DashboardAttributes
     >(data);
     if (dataError) {
+      console.error('dashboard_storage Data error in update:', dataError);
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
     }
 

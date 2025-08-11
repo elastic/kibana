@@ -255,17 +255,25 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       outcome,
     } = await soClient.resolve<Types['Attributes']>(this.savedObjectType, id);
 
+    const item = savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false);
+
+    const { id: savedObjectId, type, attributes, ...meta} = item;
     const response: Types['GetOut'] = {
-      item: savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false),
+      id: savedObjectId,
+      type,
+      data: attributes,
       meta: {
+        ...meta,
         aliasPurpose,
         aliasTargetId,
         outcome,
       },
     };
+    console.log('saved object get-----', JSON.stringify(response, null, 2));
 
     const validationError = transforms.get.out.result.validate(response);
     if (validationError) {
+      console.log('validationError---', this.throwOnResultValidationError, JSON.stringify(validationError, null, 2));
       if (this.throwOnResultValidationError) {
         throw Boom.badRequest(`Invalid response. ${validationError.message}`);
       } else {
@@ -286,6 +294,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
+    console.log('saved object content storage get-----', JSON.stringify(value, null, 2));
 
     return value;
   }
@@ -367,13 +376,14 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
   ): Promise<Types['UpdateOut']> {
     const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
-
+    console.log('SOContentStorage update called with-----', JSON.stringify(data, null, 2));
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
       Types['Attributes'],
       Types['Attributes']
     >(data);
     if (dataError) {
+      console.error('Data error in update:', dataError);
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
     }
 

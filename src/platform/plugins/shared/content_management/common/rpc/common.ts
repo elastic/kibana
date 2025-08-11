@@ -11,7 +11,14 @@ import { schema } from '@kbn/config-schema';
 
 export const itemResultSchema = schema.object(
   {
-    data: schema.object({}, { unknowns: 'allow' }),
+    data: schema.object({
+      title: schema.string(),
+      timeFieldName: schema.maybe(schema.string()),
+      allowNoIndex: schema.maybe(schema.boolean()),
+      name: schema.maybe(schema.string()),
+      sourceFilters: schema.maybe(schema.arrayOf(schema.string())),
+      fieldFormatMap: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+    }, { unknowns: 'allow' }),
     meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     id: schema.string(),
     type: schema.string(),
