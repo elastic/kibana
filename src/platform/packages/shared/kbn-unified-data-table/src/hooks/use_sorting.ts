@@ -134,7 +134,10 @@ export const isSortable = ({
     }
     return Boolean(
       columnSchema !== kibanaJSON ||
-        (dataViewField?.type && dataViewField.type in NonStringSortableFieldType)
+        (dataViewField?.type &&
+          Object.values(NonStringSortableFieldType).includes(
+            dataViewField.type as NonStringSortableFieldType
+          ))
     );
   }
 
