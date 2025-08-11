@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiBadge,
@@ -109,8 +109,8 @@ const schemaTranslationMap = {
   }),
 };
 
-const getInputDisplay = (schema: DataSchemaFormat) => {
-  const translation = schemaTranslationMap[schema];
+const getInputDisplay = (schema: DataSchemaFormat | null) => {
+  const translation = schema ? schemaTranslationMap[schema] : null;
   if (translation) {
     return translation;
   }
@@ -118,6 +118,8 @@ const getInputDisplay = (schema: DataSchemaFormat) => {
     defaultMessage: 'Unknown schema',
   });
 };
+
+type SelectOptions = DataSchemaFormat | 'unknown';
 
 export const SchemaSelector = ({
   onChange,
@@ -130,8 +132,6 @@ export const SchemaSelector = ({
   value: DataSchemaFormat | null;
   isLoading: boolean;
 }) => {
-  const [selectedSchema, setSelectedSchema] = useState<DataSchemaFormat>(value || 'ecs');
-
   const options = useMemo(
     () =>
       schemas.map((schema) => ({
@@ -147,15 +147,15 @@ export const SchemaSelector = ({
   );
 
   // If only one schema is available and it's not the preferred, show both in the dropdown
-  const displayOptions = useMemo<EuiSuperSelectOption<DataSchemaFormat>[]>(
+  const displayOptions = useMemo<EuiSuperSelectOption<SelectOptions>[]>(
     () =>
       options.length === 1 && isInvalid
         ? [
             {
-              inputDisplay: <InvalidDisplay value={getInputDisplay(value ?? 'ecs')} />,
-              value: value ?? 'ecs',
+              inputDisplay: <InvalidDisplay value={getInputDisplay(value)} />,
+              value: 'unknown',
               disabled: true,
-              dropdownDisplay: <InvalidDropdownDisplay value={getInputDisplay(value ?? 'ecs')} />,
+              dropdownDisplay: <InvalidDropdownDisplay value={getInputDisplay(value)} />,
             },
             ...options,
           ]
@@ -164,9 +164,8 @@ export const SchemaSelector = ({
   );
 
   const onSelect = useCallback(
-    (selectedValue: DataSchemaFormat) => {
-      if (selectedValue) {
-        setSelectedSchema(selectedValue);
+    (selectedValue: SelectOptions) => {
+      if (selectedValue !== 'unknown') {
         onChange(selectedValue);
       }
     },
@@ -189,7 +188,7 @@ export const SchemaSelector = ({
                   data-test-subj="infraSchemaSelect"
                   id={'infraSchemaSelectorSelect'}
                   options={displayOptions}
-                  valueOfSelected={selectedSchema}
+                  valueOfSelected={value || 'unknown'}
                   onChange={onSelect}
                   isLoading={isLoading}
                   fullWidth
