@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiButton, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 import moment from 'moment';
@@ -17,32 +17,47 @@ import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { TableText } from '..';
 import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../../common';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { AvailableColumns, getColumns } from '../../lib/get_columns';
-import { UISession } from '../../types';
-import { OnActionComplete } from '../actions';
-import { getAppFilter } from './app_filter';
-import { getStatusFilter } from './status_filter';
+import { getColumns as getDefaultColumns } from './columns/get_columns';
+import { LocatorsStart, UISession } from '../../types';
+import { OnActionComplete } from './actions';
+import { getAppFilter } from './utils/get_app_filter';
+import { getStatusFilter } from './utils/get_status_filter';
 import { SearchUsageCollector } from '../../../../collectors';
 import type { SearchSessionsConfigSchema } from '../../../../../../server/config';
+import { mapToUISession } from './utils/map_to_ui_session';
 
 interface Props {
   core: CoreStart;
+  locators: LocatorsStart;
   api: SearchSessionsMgmtAPI;
   timezone: string;
   config: SearchSessionsConfigSchema;
   kibanaVersion: string;
   searchUsageCollector: SearchUsageCollector;
-  columns?: AvailableColumns[];
+  hideRefreshButton?: boolean;
+  getColumns?: (params: {
+    core: CoreStart;
+    api: SearchSessionsMgmtAPI;
+    config: SearchSessionsConfigSchema;
+    timezone: string;
+    kibanaVersion: string;
+    searchUsageCollector: SearchUsageCollector;
+    onActionComplete: OnActionComplete;
+  }) => Array<EuiBasicTableColumn<UISession>>;
 }
+
+export type GetColumnsFn = Props['getColumns'];
 
 export function SearchSessionsMgmtTable({
   core,
+  locators,
   api,
   timezone,
   config,
   kibanaVersion,
   searchUsageCollector,
-  columns,
+  hideRefreshButton = false,
+  getColumns = getDefaultColumns,
   ...props
 }: Props) {
   const [tableData, setTableData] = useState<UISession[]>([]);
@@ -88,7 +103,10 @@ export function SearchSessionsMgmtTable({
     if (document.visibilityState !== 'hidden') {
       let results: UISession[] = [];
       try {
-        results = await api.fetchTableData();
+        const { savedObjects, statuses } = await api.fetchTableData();
+        results = savedObjects.map((savedObject) =>
+          mapToUISession({ savedObject, locators, sessionStatuses: statuses })
+        );
       } catch (e) {} // eslint-disable-line no-empty
 
       if (showLatestResultsHandler.current === renderResults) {
@@ -101,7 +119,7 @@ export function SearchSessionsMgmtTable({
       if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current);
       refreshTimeoutRef.current = window.setTimeout(doRefresh, refreshInterval);
     }
-  }, [api, refreshInterval]);
+  }, [api, refreshInterval, locators]);
 
   // initial data load
   useEffect(() => {
@@ -116,25 +134,35 @@ export function SearchSessionsMgmtTable({
     doRefresh();
   };
 
-  const tableColumns = getColumns(
+  const columns = getColumns({
     core,
     api,
     config,
     timezone,
     onActionComplete,
     kibanaVersion,
-    searchUsageCollector
-  ).filter((column) => {
-    if (!columns) return true;
-    if (!('field' in column)) return true;
-    return columns.includes(column.field);
+    searchUsageCollector,
   });
+
+  const filters = useMemo(() => {
+    const _filters = [];
+
+    const hasAppColumn = columns.some((column) => 'field' in column && column.field === 'appId');
+    if (hasAppColumn) _filters.push(getAppFilter(tableData));
+
+    const hasStatusColumn = columns.some(
+      (column) => 'field' in column && column.field === 'status'
+    );
+    if (hasStatusColumn) _filters.push(getStatusFilter(tableData));
+
+    return _filters;
+  }, [columns, tableData]);
 
   // table config: search / filters
   const search: EuiSearchBarProps = {
     box: { incremental: true },
-    filters: [getStatusFilter(tableData), getAppFilter(tableData)],
-    toolsRight: (
+    filters,
+    toolsRight: hideRefreshButton ? undefined : (
       <TableText>
         <EuiButton
           fill
@@ -162,7 +190,7 @@ export function SearchSessionsMgmtTable({
         'data-test-subj': `searchSessionsRow`,
         'data-test-search-session-id': `id-${searchSession.id}`,
       })}
-      columns={tableColumns}
+      columns={columns}
       items={tableData}
       pagination={{
         pageSize,
