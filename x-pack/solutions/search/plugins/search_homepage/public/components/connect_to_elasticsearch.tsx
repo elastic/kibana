@@ -4,20 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButtonIcon,
-  EuiCopy,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
+import { FormInfoField } from '@kbn/search-shared-ui';
 import { ConnectToElasticsearchSidePanel } from './connect_to_elasticsearch_side_panel';
 import { AISearchCapabilities } from './ai_search_capabilities/ai_search_capabilities';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
@@ -30,7 +22,7 @@ export const ConnectToElasticsearch = () => {
   const isQuickstartEnabled = useSearchQuickstartsFeatureFlag();
 
   return (
-    <EuiFlexGroup gutterSize="xl">
+    <EuiFlexGroup gutterSize="xl" wrap>
       <EuiFlexItem grow={3}>
         <EuiFlexGroup direction="column" gutterSize="l">
           <EuiFlexItem grow={false}>
@@ -56,7 +48,7 @@ export const ConnectToElasticsearch = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem>
             <EuiFlexGroup alignItems="flexStart" gutterSize="l">
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup direction="column" gutterSize="s">
@@ -72,53 +64,18 @@ export const ConnectToElasticsearch = () => {
                       </span>
                     </EuiTitle>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup gutterSize="s">
-                      <EuiFlexItem grow={false}>
-                        <EuiCopy textToCopy={elasticsearchUrl}>
-                          {(copy) => (
-                            <EuiButtonIcon
-                              aria-label={i18n.translate(
-                                'xpack.searchHomepage.connectToElasticsearch.copyElasticsearchUrlAriaLabel',
-                                { defaultMessage: 'Copy Elasticsearch URL' }
-                              )}
-                              onClick={copy}
-                              iconType="copyClipboard"
-                              size="m"
-                              data-test-subj="copyEndpointButton"
-                            />
-                          )}
-                        </EuiCopy>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiFieldText
-                          value={elasticsearchUrl}
-                          readOnly
-                          data-test-subj="endpointValueField"
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                  <EuiFlexItem>
+                    <FormInfoField
+                      value={elasticsearchUrl}
+                      copyValue={elasticsearchUrl}
+                      dataTestSubj="endpointValueField"
+                      copyValueDataTestSubj="copyEndpointButton"
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup direction="column" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xxs">
-                      <span>
-                        {i18n.translate(
-                          'xpack.searchHomepage.connectToElasticsearch.apiKeysLabel',
-                          {
-                            defaultMessage: 'API keys',
-                          }
-                        )}
-                      </span>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <ApiKeyForm data-test-subj="apiKeyForm" />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+              <EuiFlexItem>
+                <ApiKeyForm />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

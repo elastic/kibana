@@ -18,6 +18,10 @@ export const DATA_QUALITY = i18n.translate(
   }
 );
 
+export const AI_VALUE_DASHBOARD = i18n.translate('xpack.securitySolution.navigation.aiValue', {
+  defaultMessage: 'Value report',
+});
+
 export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
   'xpack.securitySolution.navigation.entityRiskScore',
   {
@@ -162,6 +166,12 @@ export const TRUSTED_APPLICATIONS = i18n.translate(
   'xpack.securitySolution.search.administration.trustedApps',
   {
     defaultMessage: 'Trusted applications',
+  }
+);
+export const TRUSTED_DEVICES = i18n.translate(
+  'xpack.securitySolution.search.administration.trustedDevices',
+  {
+    defaultMessage: 'Trusted devices',
   }
 );
 export const EVENT_FILTERS = i18n.translate(

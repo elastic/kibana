@@ -76,12 +76,13 @@ const createRoundFromEvents = ({
       const toolResult = toolResults.find(
         (result) => result.tool_call_id === toolCall.tool_call_id
       );
+
       return {
         type: ConversationRoundStepType.toolCall,
         tool_call_id: toolCall.tool_call_id,
         tool_id: toolCall.tool_id,
         params: toolCall.params,
-        result: toolResult?.result ?? 'unknown',
+        results: toolResult?.results ?? [],
       };
     }
     if (isReasoningEvent(event)) {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
@@ -160,11 +162,12 @@ export interface ResponseActionsClientUpdateCasesOptions {
 }
 
 export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+  TParameters extends EndpointActionDataParameterTypes = undefined,
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   TMeta extends {} = {}
-> = ResponseActionsRequestBody &
-  Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> &
+> = Omit<ResponseActionsRequestBody, 'parameters'> & {
+  parameters?: TParameters;
+} & Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> &
   Pick<LogsEndpointAction<TParameters, TOutputContent, TMeta>, 'meta'> & {
     command: ResponseActionsApiCommandNames;
     actionId?: string;
@@ -541,7 +544,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
    * @protected
    */
   protected async validateRequest(
-    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<any, any, any>
   ): Promise<ResponseActionsClientValidateRequestResponse> {
     // Validation for Automated Response actions
     if (this.options.isAutomated) {
@@ -811,7 +814,11 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
    * @protected
    */
   protected buildExternalComment(
-    actionRequestIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+    actionRequestIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      any,
+      any,
+      any
+    >
   ): string {
     const { actionId = uuidv4(), comment, command } = actionRequestIndexOptions;
 

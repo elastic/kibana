@@ -13,6 +13,7 @@ import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapOnechatErrors } from '../utils/errors';
 
 export interface ChatParams {
+  signal?: AbortSignal;
   agentId?: string;
   mode?: AgentMode;
   connectorId?: string;
@@ -37,6 +38,7 @@ export class ChatService {
     };
     return defer(() => {
       return this.http.post('/api/chat/converse/async', {
+        signal: params.signal,
         asResponse: true,
         rawResponse: true,
         body: JSON.stringify(payload),

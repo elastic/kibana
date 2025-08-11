@@ -17,11 +17,8 @@ import {
   createAlertsIndex,
   waitForRulePartialFailure,
   getRuleForAlertTesting,
-} from '../../../../../../common/utils/security_solution';
-import {
-  createUserAndRole,
-  deleteUserAndRole,
-} from '../../../../../../common/services/security_solution';
+} from '../../../../../config/services/detections_response';
+import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
@@ -34,13 +31,17 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless @skipInServerless check_privileges', () => {
     before(async () => {
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alias'
+      );
       await createAlertsIndex(supertest, log);
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alias'
+      );
       await deleteAllAlerts(supertest, log, es);
     });
 
