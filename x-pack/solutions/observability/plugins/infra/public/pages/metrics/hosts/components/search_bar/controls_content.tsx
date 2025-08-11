@@ -125,7 +125,6 @@ export const ControlsContent = ({
   return (
     <ControlGroupContainer>
       <ControlGroupRenderer
-        // key={schema}
         getCreationOptions={getInitialInput}
         onApiAvailable={loadCompleteHandler}
         timeRange={timeRange}
