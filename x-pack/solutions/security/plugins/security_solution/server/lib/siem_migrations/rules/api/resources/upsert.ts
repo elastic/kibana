@@ -51,7 +51,10 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
         ): Promise<IKibanaResponse<UpsertRuleMigrationResourcesResponse>> => {
           const resources = req.body;
           const migrationId = req.params.migration_id;
-          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+            context.securitySolution,
+            'rules'
+          );
           try {
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();

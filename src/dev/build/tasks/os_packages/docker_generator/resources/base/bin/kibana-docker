@@ -204,11 +204,14 @@ kibana_vars=(
     telemetry.metrics.exporters # Allow specifying the array here or..
     telemetry.metrics.exporters.grpc.url # ... or a single exporter by specifying these 2.
     telemetry.metrics.exporters.grpc.headers
+    telemetry.metrics.exporters.grpc.exportIntervalMillis
+    telemetry.metrics.exporters.grpc.temporalityPreference
     tilemap.options.attribution
     tilemap.options.maxZoom
     tilemap.options.minZoom
     tilemap.options.subdomains
     tilemap.url
+    usageCollection.maxCollectorConcurrency
     vega.enableExternalUrls
     vis_type_vega.enableExternalUrls
     xpack.actions.allowedHosts
