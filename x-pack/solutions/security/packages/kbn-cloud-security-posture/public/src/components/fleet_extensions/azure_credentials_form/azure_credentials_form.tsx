@@ -230,11 +230,12 @@ export const AzureCredentialsForm = ({
     onSetupFormatChange(AZURE_SETUP_FORMAT.ARM_TEMPLATE);
   }
 
+  // This sets the Fleet wrapper's isValid to false if Azure is not enabled for this version of the integration
   if (
     isValidAzureRef.current &&
     isValid &&
-    !azureEnabled &&
-    setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE
+    !azureEnabled // &&
+    // setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE
   ) {
     isValidAzureRef.current = false;
     updatePolicy({ updatedPolicy: newPolicy, isValid: false });

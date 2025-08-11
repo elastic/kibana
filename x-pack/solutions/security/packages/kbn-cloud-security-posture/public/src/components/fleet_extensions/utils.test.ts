@@ -289,7 +289,7 @@ describe('getDefaultAzureCredentialsType', () => {
       ],
     } as PackageInfo;
 
-    const result = getDefaultAzureCredentialsType(packageInfo, setupTechnology);
+    const result = getDefaultAzureCredentialsType(packageInfo, TEMPLATE_NAME, setupTechnology);
 
     expect(result).toBe('managed_identity');
   });
