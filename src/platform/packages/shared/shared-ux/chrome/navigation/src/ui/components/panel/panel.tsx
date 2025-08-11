@@ -86,7 +86,7 @@ interface Props {
 
 export const Panel: FC<Props> = ({ selectedNode }) => {
   const filteredChildren = selectedNode.children?.filter(
-    (child) => child.sideNavStatus !== 'hidden'
+    (child) => child.sideNavStatus !== 'hidden' && child.sideNavStatus !== 'hiddenV1'
   );
 
   let serializedChildren: ChromeProjectNavigationNode[] = [];

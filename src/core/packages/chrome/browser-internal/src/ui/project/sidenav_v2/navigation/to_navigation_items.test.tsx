@@ -26,13 +26,13 @@ describe('toNavigationItems', () => {
     navItems: { footerItems, primaryItems },
   } = toNavigationItems(navigationTree, [], []);
 
-  it('should return logo from navigation tree', () => {
+  it('should return missing logo from navigation tree', () => {
     expect(logoItem).toMatchInlineSnapshot(`
       Object {
         "href": "/missing-href-😭",
-        "iconType": "logoSecurity",
-        "id": "security_solution_nav",
-        "label": "Security",
+        "iconType": "logoKibana",
+        "id": "kibana",
+        "label": "Kibana",
       }
     `);
   });
@@ -53,7 +53,11 @@ describe('toNavigationItems', () => {
     expect(consoleWarnSpy.mock.calls[0][0]).toMatchInlineSnapshot(`
       "
       === Navigation Warnings ===
-      • Navigation item \\"security_solution_nav\\" is missing a \\"href\\". Using fallback value: \\"/missing-href-😭\\".
+      • First body node is not a \\"home\\" node. It should be a logo node with solution logo, name and home page href. renderAs: \\"home\\" is expected, but got \\"undefined\\".
+      • Navigation item is missing. Using fallback value: \\"/missing-href-😭\\" for key \\"href\\".
+      • Navigation item is missing. Using fallback value: \\"logoKibana\\" for key \\"icon\\".
+      • Navigation item is missing. Using fallback value: \\"kibana\\" for key \\"id\\".
+      • Navigation item is missing. Using fallback value: \\"Kibana\\" for key \\"title\\".
       • Navigation item \\"discover\\" is missing a \\"icon\\". Using fallback value: \\"discoverApp\\".
       • Navigation item \\"dashboards\\" is missing a \\"icon\\". Using fallback value: \\"dashboardApp\\".
       • Navigation node \\"node-2\\" is missing href and is not a panel opener. This node was likely used as a sub-section. Ignoring this node and flattening its children: securityGroup:rules, alerts, attack_discovery, cloud_security_posture-findings, cases.
@@ -87,13 +91,6 @@ describe('isActive', () => {
   it('should return null if no active paths', () => {
     const { activeItemId } = toNavigationItems(navigationTree, [], []);
     expect(activeItemId).toBeUndefined();
-  });
-
-  it('should return logo node as active item', () => {
-    const logoNode = navigationTree.body[0] as ChromeProjectNavigationNode;
-
-    const { activeItemId } = toNavigationItems(navigationTree, [], [[logoNode]]);
-    expect(activeItemId).toBe(logoNode.id);
   });
 
   it('should return primary menu node as active item', () => {
@@ -188,5 +185,42 @@ describe('isActive', () => {
     );
 
     expect(activeItemId).toBe(managementSecondaryItem.id);
+  });
+});
+
+describe('logo node', () => {
+  const treeWithLogo = structuredClone(navigationTree);
+  const homeNode: ChromeProjectNavigationNode = {
+    id: 'securityHome',
+    icon: 'launch',
+    href: '/tzo/s/sec/app/security/get_started',
+    path: 'security_solution_nav.get_started',
+    title: 'Security',
+    deepLink: {} as any,
+    isExternalLink: false,
+    sideNavStatus: 'visible',
+    renderAs: 'home',
+  };
+
+  (treeWithLogo.body[0] as ChromeProjectNavigationNode).children = [
+    homeNode,
+    ...(treeWithLogo.body[0] as ChromeProjectNavigationNode).children!,
+  ];
+
+  test('should return logo node with correct properties', () => {
+    const { logoItem } = toNavigationItems(navigationTree, [], []);
+    expect(logoItem).toMatchInlineSnapshot(`
+    Object {
+      "href": "/missing-href-😭",
+      "iconType": "logoKibana",
+      "id": "kibana",
+      "label": "Kibana",
+    }
+  `);
+  });
+
+  test('Logo node can be active', () => {
+    const { activeItemId } = toNavigationItems(treeWithLogo, [], [[homeNode]]);
+    expect(activeItemId).toBe(homeNode.id);
   });
 });

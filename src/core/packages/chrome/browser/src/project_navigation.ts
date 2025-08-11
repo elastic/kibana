@@ -102,9 +102,9 @@ export type CloudLinks = {
   [id in CloudLinkId]?: CloudLink;
 };
 
-export type SideNavNodeStatus = 'hidden' | 'visible';
+export type SideNavNodeStatus = 'hidden' | 'hiddenV1' | 'hiddenV2' | 'visible';
 
-export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
+export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item' | 'home';
 
 export type EuiThemeSize = Exclude<
   (typeof EuiThemeSizes)[number],

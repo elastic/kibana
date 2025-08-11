@@ -84,6 +84,13 @@ export const getNavigationTreeDefinition = ({
               breadcrumbStatus: 'hidden',
               children: [
                 {
+                  link: SEARCH_HOMEPAGE,
+                  title,
+                  icon,
+                  renderAs: 'home',
+                  sideNavStatus: 'hiddenV1',
+                },
+                {
                   getIsActive: ({ pathNameSerialized, prepend }) => {
                     return (
                       pathNameSerialized.startsWith(prepend('/app/elasticsearch/overview')) ||
@@ -94,6 +101,7 @@ export const getNavigationTreeDefinition = ({
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.home', {
                     defaultMessage: 'Home',
                   }),
+                  sideNavStatus: 'hiddenV2',
                 },
                 {
                   link: 'discover',

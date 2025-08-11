@@ -80,14 +80,23 @@ export const toNavigationItems = (
   if (navigationTree.body.length === 1) {
     const firstNode = navigationTree.body[0];
     if (!isRecentlyAccessedDefinition(firstNode)) {
-      logoNode = firstNode;
       primaryNodes = firstNode.children ?? [];
+      if (primaryNodes[0].renderAs === 'home') {
+        logoNode = primaryNodes[0];
+        primaryNodes = primaryNodes.slice(1); // Remove the logo node from primary items
+        maybeMarkActive(logoNode, 0);
+      } else {
+        warnOnce(
+          `First body node is not a "home" node. It should be a logo node with solution logo, name and home page href. renderAs: "home" is expected, but got "${firstNode.renderAs}".`
+        );
+      }
     }
   } else {
     warnOnce(
-      `Navigation tree has multiple root nodes. First level should have a single node for the logo and solution name.`
+      `Navigation tree body has multiple root nodes. First level should have a single node. It is not used and shall be removed later after we fully migrate to the new nav.`
     );
   }
+
   if (navigationTree.footer?.length === 1) {
     const firstNode = navigationTree.footer[0];
     if (!isRecentlyAccessedDefinition(firstNode)) {
@@ -96,14 +105,6 @@ export const toNavigationItems = (
   } else {
     warnOnce(
       `Navigation tree footer has multiple root nodes. Footer should have a single node for the footer links.`
-    );
-  }
-
-  if (logoNode) {
-    maybeMarkActive(logoNode, 0);
-  } else {
-    warnOnce(
-      'Navigation tree is missing a logo node. The first level should contain a logo node with solution logo, name and home page href.'
     );
   }
 
@@ -124,7 +125,7 @@ export const toNavigationItems = (
       return null;
     }
 
-    if (navNode.sideNavStatus === 'hidden') {
+    if (navNode.sideNavStatus === 'hidden' || navNode.sideNavStatus === 'hiddenV2') {
       return null;
     }
 
@@ -204,14 +205,17 @@ export const toNavigationItems = (
         // Otherwise, we need to create sections for each child
         secondarySections = filterEmpty(
           navNode.children.map((child) => {
-            if (child.sideNavStatus === 'hidden') return null;
+            if (child.sideNavStatus === 'hidden' || child.sideNavStatus === 'hiddenV2') return null;
             if (!child.children?.length) return null;
 
             warnUnsupportedNavNodeOptions(child);
 
             const secondaryItems: SecondaryMenuItem[] =
               child.children
-                .filter((subChild) => subChild.sideNavStatus !== 'hidden')
+                .filter(
+                  (subChild) =>
+                    subChild.sideNavStatus !== 'hidden' && subChild.sideNavStatus !== 'hiddenV2'
+                )
                 .map((subChild) => {
                   warnUnsupportedNavNodeOptions(subChild);
                   maybeMarkActive(subChild, 2);
@@ -300,13 +304,23 @@ function warnIfMissing<T extends { id: string }, K extends keyof T>(
   key: K,
   fallback: NonNullable<T[K]>
 ): NonNullable<T[K]> {
-  const value = obj?.[key];
+  if (!obj) {
+    warnOnce(
+      `Navigation item is missing. Using fallback value: "${String(fallback)}" for key "${String(
+        key
+      )}".`
+    );
+    return fallback;
+  }
+
+  const value = obj[key];
   if (value === undefined || value === null) {
     warnOnce(
       `Navigation item "${String(obj?.id)}" is missing a "${String(
         key
       )}". Using fallback value: "${String(fallback)}".`
     );
+
     return fallback;
   }
   return value as NonNullable<T[K]>;
