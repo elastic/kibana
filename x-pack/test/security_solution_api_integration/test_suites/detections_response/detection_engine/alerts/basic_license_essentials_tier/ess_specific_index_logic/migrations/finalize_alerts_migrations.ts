@@ -18,11 +18,8 @@ import {
   createAlertsIndex,
   deleteAllAlerts,
   waitFor,
-} from '../../../../../../../../common/utils/security_solution';
-import {
-  createUserAndRole,
-  deleteUserAndRole,
-} from '../../../../../../../../common/services/security_solution';
+} from '../../../../../../../config/services/detections_response';
+import { createUserAndRole, deleteUserAndRole } from '../../../../../../../config/services/common';
 
 interface StatusResponse {
   index: string;

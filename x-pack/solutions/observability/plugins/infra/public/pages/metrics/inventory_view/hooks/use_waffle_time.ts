@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect, useMemo } from 'react';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
@@ -13,6 +13,7 @@ import DateMath from '@kbn/datemath';
 import { constant, identity } from 'fp-ts/function';
 import createContainer from 'constate';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
+import type { Moment } from 'moment';
 import type { InventoryView } from '../../../../../common/inventory_views';
 import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
 import { useInventoryViewsContext } from './use_inventory_views';
@@ -21,11 +22,11 @@ export const DEFAULT_WAFFLE_TIME_STATE: WaffleTimeState = {
   isAutoReloading: false,
 };
 
-function mapInventoryViewToState(savedView: InventoryView): WaffleTimeState {
+function mapInventoryViewToState(savedView: InventoryView, defaultTime?: Moment): WaffleTimeState {
   const { time, autoReload } = savedView.attributes;
 
   return {
-    currentTime: time ?? DEFAULT_WAFFLE_TIME_STATE.currentTime,
+    currentTime: time ?? defaultTime?.toDate().getTime() ?? Date.now(),
     isAutoReloading: autoReload,
   };
 }
@@ -37,7 +38,7 @@ export const useWaffleTime = () => {
   const kibanaTime = DateMath.parse(getTime().to);
   const [urlState, setUrlState] = useUrlState<WaffleTimeState>({
     defaultState: currentView
-      ? mapInventoryViewToState(currentView)
+      ? mapInventoryViewToState(currentView, kibanaTime)
       : {
           ...DEFAULT_WAFFLE_TIME_STATE,
           currentTime: kibanaTime ? kibanaTime.toDate().getTime() : Date.now(),
@@ -45,6 +46,7 @@ export const useWaffleTime = () => {
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleTime',
+    writeDefaultState: true,
   });
 
   const previousViewId = useRef<string | undefined>(currentView?.id);
@@ -54,8 +56,6 @@ export const useWaffleTime = () => {
       previousViewId.current = currentView.id;
     }
   }, [currentView, setUrlState]);
-
-  const { currentTime, isAutoReloading } = urlState;
 
   const startAutoReload = useCallback(() => {
     setUrlState((previous) => ({ ...previous, isAutoReloading: true, currentTime: Date.now() }));
@@ -72,16 +72,18 @@ export const useWaffleTime = () => {
     [setUrlState]
   );
 
-  const currentTimeRange = {
-    from: currentTime - 1000 * 60 * 5,
-    interval: '1m',
-    to: currentTime,
-  };
+  const currentTimeRange = useMemo(
+    () => ({
+      from: urlState.currentTime - 1000 * 60 * 5,
+      interval: '1m',
+      to: urlState.currentTime,
+    }),
+    [urlState.currentTime]
+  );
 
   return {
-    currentTime,
+    ...urlState,
     currentTimeRange,
-    isAutoReloading,
     startAutoReload,
     stopAutoReload,
     jumpToTime,
