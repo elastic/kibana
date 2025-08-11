@@ -16,7 +16,7 @@ const COPY_FROM_FIELD = 'copy_from';
 
 export const ValueField = ({ toggleCustom }: { toggleCustom: () => void }) => {
   const { register, unregister } = useFormContext();
-  const { ref, ...inputProps } = register(VALUE_FIELD);
+  const { ref, ...inputProps } = register(VALUE_FIELD, { required: true });
 
   useEffect(() => {
     return () => {
@@ -55,7 +55,7 @@ export const ValueField = ({ toggleCustom }: { toggleCustom: () => void }) => {
 
 export const CopyFromField = ({ toggleCustom }: { toggleCustom: () => void }) => {
   const { register, unregister } = useFormContext();
-  const { ref, ...inputProps } = register(COPY_FROM_FIELD);
+  const { ref, ...inputProps } = register(COPY_FROM_FIELD, { required: true });
 
   useEffect(() => {
     return () => {
