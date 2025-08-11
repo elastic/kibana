@@ -52,7 +52,6 @@
       "serverless"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "observability",
       "licenseManagement",
       "kibanaUtils",

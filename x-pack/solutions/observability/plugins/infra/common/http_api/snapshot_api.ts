@@ -114,7 +114,7 @@ export const SnapshotRequestRT = rt.intersection([
   rt.partial({
     accountId: rt.string,
     region: rt.string,
-    filterQuery: rt.union([rt.string, rt.null]),
+    kuery: rt.string,
     overrideCompositeSize: rt.number,
     dropPartialBuckets: rt.boolean,
     schema: DataSchemaFormatRT,

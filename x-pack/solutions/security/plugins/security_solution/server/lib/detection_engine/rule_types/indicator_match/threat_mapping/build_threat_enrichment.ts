@@ -10,6 +10,7 @@ import type { BuildThreatEnrichmentOptions } from './types';
 import { getSignalIdToMatchedQueriesMap } from './get_signal_id_to_matched_queries_map';
 
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
+import { validateCompleteThreatMatches } from './validate_complete_threat_matches';
 
 // we do want to make extra requests to the threat index to get enrichments from all threats
 // previously we were enriched alerts only from `currentThreatList` but not all threats
@@ -22,6 +23,7 @@ export const buildThreatEnrichment = ({
   reassignThreatPitId,
   threatIndexFields,
   allowedFieldsForTermsQuery,
+  threatMapping,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
   return async (signals) => {
     const { signalIdToMatchedQueriesMap, threatList } = await getSignalIdToMatchedQueriesMap({
@@ -36,8 +38,13 @@ export const buildThreatEnrichment = ({
       threatIndicatorPath,
     });
 
-    const enrichment = threatEnrichmentFactory({
+    const { matchedEvents: validatedSignalIdToMatchedQueriesMap } = validateCompleteThreatMatches(
       signalIdToMatchedQueriesMap,
+      threatMapping
+    );
+
+    const enrichment = threatEnrichmentFactory({
+      signalIdToMatchedQueriesMap: validatedSignalIdToMatchedQueriesMap,
       threatIndicatorPath,
       matchedThreats: threatList,
     });

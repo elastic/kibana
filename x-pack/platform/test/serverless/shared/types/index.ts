@@ -6,9 +6,33 @@
  */
 
 import { ServerlessProjectType } from '@kbn/es';
-import { InheritedServices } from '../../api_integration/services';
+import { GenericFtrProviderContext } from '@kbn/test';
+import { services } from '../../api_integration/services';
+import { pageObjects } from '../../functional/page_objects';
 
-export interface CreateTestConfigOptions<TServices extends {} = InheritedServices> {
+export type InheritedFtrProviderContext = GenericFtrProviderContext<
+  typeof services,
+  typeof pageObjects
+>;
+
+export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<
+  infer TServices,
+  infer TPageObjects
+>
+  ? TServices
+  : {};
+
+export type InheritedPageObjects = InheritedFtrProviderContext extends GenericFtrProviderContext<
+  infer TServices,
+  infer TPageObjects
+>
+  ? TPageObjects
+  : {};
+
+export interface CreateTestConfigOptions<
+  TServices extends {} = InheritedServices,
+  TPageObjects extends {} = InheritedPageObjects
+> {
   serverlessProject: ServerlessProjectType;
   esServerArgs?: string[];
   kbnServerArgs?: string[];
@@ -16,5 +40,6 @@ export interface CreateTestConfigOptions<TServices extends {} = InheritedService
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
   services?: TServices;
+  pageObjects?: TPageObjects;
   apps?: Record<string, { pathname: string; hash?: string }>;
 }
