@@ -108,7 +108,11 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
   return (
     <KibanaPageTemplate>
       <KibanaPageTemplate.Header
-        pageTitle={labels.tools.editEsqlToolTitle}
+        pageTitle={
+          mode === OnechatEsqlToolFormMode.Edit
+            ? labels.tools.editEsqlToolTitle
+            : labels.tools.newEsqlToolTitle
+        }
         breadcrumbs={[
           {
             text: labels.tools.title,
