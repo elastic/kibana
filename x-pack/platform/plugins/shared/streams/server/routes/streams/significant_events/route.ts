@@ -228,10 +228,12 @@ const generateSignificantEventsRoute = createServerRoute({
       throw badRequest('Streams are not enabled');
     }
 
+    const definition = await streamsClient.getStream(params.path.name);
+
     return fromRxjs(
       generateSignificantEventDefinitions(
         {
-          name: params.path.name,
+          definition,
           connectorId: params.query.connectorId,
           currentDate: params.query.currentDate,
           shortLookback: params.query.shortLookback,
