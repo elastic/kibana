@@ -4560,6 +4560,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-layout-feature-flags@link:src/core/packages/chrome/layout/core-chrome-layout-feature-flags":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-chrome-layout@link:src/core/packages/chrome/layout/core-chrome-layout":
   version "0.0.0"
   uid ""
