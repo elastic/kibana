@@ -26,6 +26,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DataStreamApis } from '../../use_data_stream_apis';
+import { useConversation } from '../../use_conversation';
 import { Conversation, useAssistantContext } from '../../../..';
 import * as i18n from './translations';
 import {
@@ -37,7 +39,9 @@ interface Params {
   isConversationOwner: boolean;
   isDisabled?: boolean;
   onChatCleared?: () => void;
+  refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
   selectedConversation?: Conversation;
+  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation | undefined>>;
 }
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
@@ -53,9 +57,17 @@ const ConditionalWrap = ({
 }) => (condition ? wrap(children) : children);
 
 export const ConversationSettingsMenu: React.FC<Params> = React.memo(
-  ({ isConversationOwner, isDisabled = false, onChatCleared, selectedConversation }: Params) => {
+  ({
+    isConversationOwner,
+    isDisabled = false,
+    onChatCleared,
+    refetchCurrentUserConversations,
+    selectedConversation,
+    setCurrentConversation,
+  }: Params) => {
     const confirmModalTitleId = useGeneratedHtmlId();
     const { http, toasts } = useAssistantContext();
+    const { createConversation } = useConversation();
     const { euiTheme } = useEuiTheme();
     const {
       setContentReferencesVisible,
@@ -112,6 +124,33 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
       [selectedConversation]
     );
 
+    const handleDuplicateConversation = useCallback(async () => {
+      try {
+        if (!selectedConversation || selectedConversation.id === '') {
+          throw new Error('No conversation available to duplicate');
+        }
+        const newConversation = await createConversation({
+          title: `[Duplicate] ${selectedConversation.title}`,
+          apiConfig: selectedConversation.apiConfig,
+          messages: selectedConversation.messages,
+          replacements: selectedConversation.replacements,
+        });
+        if (newConversation) {
+          await refetchCurrentUserConversations();
+          setCurrentConversation(newConversation);
+          toasts?.addSuccess({
+            title: i18n.DUPLICATE_SUCCESS(newConversation.title),
+          });
+        } else {
+          throw new Error('Failed to duplicate conversation');
+        }
+      } catch (error) {
+        toasts?.addError(error, {
+          title: i18n.COPY_URL_ERROR,
+        });
+      }
+    }, [createConversation, refetchCurrentUserConversations, selectedConversation, toasts]);
+
     const handleCopyUrl = useCallback(() => {
       try {
         if (!selectedConversation) {
@@ -136,16 +175,14 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
           title: i18n.COPY_URL_ERROR,
         });
       }
-    }, [selectedConversation]);
+    }, [http?.basePath, selectedConversation, toasts]);
 
     const items = useMemo(
       () => [
         <EuiContextMenuItem
           aria-label={'duplicate'}
           key={'duplicate'}
-          onClick={() => {
-            console.log('duplicate');
-          }}
+          onClick={handleDuplicateConversation}
           icon={'gear'}
           data-test-subj={'duplicate'}
         >

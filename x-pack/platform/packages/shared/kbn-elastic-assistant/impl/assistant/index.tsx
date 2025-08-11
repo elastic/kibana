@@ -504,6 +504,7 @@ const AssistantComponent: React.FC<Props> = ({
                     refetchPrompts={refetchPrompts}
                     selectedConversation={currentConversation}
                     setChatHistoryVisible={setChatHistoryVisible}
+                    setCurrentConversation={setCurrentConversation}
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
                     setPaginationObserver={setPaginationObserver}
                   />

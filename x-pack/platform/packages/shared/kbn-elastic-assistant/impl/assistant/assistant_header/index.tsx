@@ -62,6 +62,7 @@ interface OwnProps {
   refetchPrompts?: (
     options?: RefetchOptions & RefetchQueryFilters<unknown>
   ) => Promise<QueryObserverResult<unknown, unknown>>;
+  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation | undefined>>;
   setPaginationObserver: (ref: HTMLDivElement) => void;
 }
 
@@ -93,6 +94,7 @@ export const AssistantHeader: React.FC<Props> = ({
   refetchPrompts,
   selectedConversation,
   setChatHistoryVisible,
+  setCurrentConversation,
   setIsSettingsModalVisible,
   setPaginationObserver,
 }) => {
@@ -231,7 +233,9 @@ export const AssistantHeader: React.FC<Props> = ({
                       isConversationOwner={isConversationOwner}
                       isDisabled={isDisabled}
                       onChatCleared={onChatCleared}
+                      refetchCurrentUserConversations={refetchCurrentUserConversations}
                       selectedConversation={selectedConversation}
+                      setCurrentConversation={setCurrentConversation}
                     />
                   </div>
                 </EuiFlexItem>

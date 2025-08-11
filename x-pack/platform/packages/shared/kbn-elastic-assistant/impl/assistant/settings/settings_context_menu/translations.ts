@@ -123,3 +123,16 @@ export const COPY_URL_ERROR = i18n.translate(
     defaultMessage: 'Could not copy conversation URL',
   }
 );
+
+export const DUPLICATE_SUCCESS = (title: string) =>
+  i18n.translate('xpack.elasticAssistant.assistant.settings.conversation.duplicateSuccess', {
+    defaultMessage: '{title} created successfully',
+    values: { title },
+  });
+
+export const DUPLICATE_ERROR = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.conversation.duplicateError',
+  {
+    defaultMessage: 'Could not duplicate conversation',
+  }
+);
