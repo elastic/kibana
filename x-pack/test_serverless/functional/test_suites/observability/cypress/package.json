@@ -6,7 +6,7 @@
   "license": "Elastic License 2.0",
   "scripts": {
     "cypress:open": "node ../../../../../../node_modules/.bin/cypress open --config-file ./cypress.config.ts",
-    "cypress:run": "node ../../../../../../node_modules/.bin/cypress run --browser $(if [ \"$USE_CHROME_BETA\" = \"true\" ] || [ \"$USE_CHROME_BETA\" = \"1\" ]; then echo \"chrome:beta\"; else echo \"chrome\"; fi) --config-file ./cypress.config.ts",
+    "cypress:run": "bash -c 'node ../../../../../../node_modules/.bin/cypress run --browser $(if [ \"$USE_CHROME_BETA\" = \"true\" ] || [ \"$USE_CHROME_BETA\" = \"1\" ]; then echo \"chrome:beta\"; else echo \"chrome\"; fi) --config-file ./cypress.config.ts'",
     "cypress:serverless:open": "node ../../../../../../scripts/functional_tests --config ./config_runner.ts",
     "cypress:serverless:run": "node ../../../../../../scripts/functional_tests --config ./config_server.ts"
   }
