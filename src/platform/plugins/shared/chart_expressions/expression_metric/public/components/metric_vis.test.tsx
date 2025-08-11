@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+<<<<<<< HEAD
 import { renderHook, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -20,6 +21,19 @@ import type { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/p
 import type { MetricVisParam } from '../../common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import type { PaletteOutput } from '@kbn/coloring';
+=======
+import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { MetricVis, MetricVisComponentProps } from './metric_vis';
+import { MetricWTrend } from '@elastic/charts';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { SerializableRecord } from '@kbn/utility-types';
+import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
+import { MetricVisParam } from '../../common';
+import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
+import { PaletteOutput } from '@kbn/coloring';
+>>>>>>> 9c625fdd540 (Update metric vis test)
 import { faker } from '@faker-js/faker';
 import {
   setupResizeObserverMock,
@@ -27,6 +41,10 @@ import {
   renderChart,
   waitForRenderComplete,
 } from '@kbn/chart-test-jest-helpers';
+<<<<<<< HEAD
+=======
+import { euiThemeVars } from '@kbn/ui-theme';
+>>>>>>> 9c625fdd540 (Update metric vis test)
 
 import * as secondaryMetricInfoModule from './secondary_metric_info';
 
@@ -84,13 +102,13 @@ const defaultMetricParams: MetricVisParam = {
   secondaryAlign: 'right',
   iconAlign: 'left',
   valueFontSize: 'default',
-  primaryPosition: 'bottom',
-  titleWeight: 'bold',
   secondaryTrend: {
     visuals: undefined,
     baseline: undefined,
     palette: undefined,
   },
+  primaryPosition: 'bottom',
+  titleWeight: 'bold',
   secondaryLabelPosition: 'before',
   applyColorTo: 'background',
 };
@@ -302,14 +320,14 @@ describe('MetricVisComponent', function () {
 
     it('should not call getSecondaryMetricInfo if no secondaryMetric', async () => {
       const spy = jest.spyOn(secondaryMetricInfoModule, 'getSecondaryMetricInfo');
-      await renderChart({ config });
+      await renderMetricChart({ config });
       expect(spy).not.toHaveBeenCalled();
       spy.mockRestore();
     });
 
-    it('should call getSecondaryMetricInfo and display secondary metric', async () => {
+    it('should call getSecondaryMetricInfo and should display secondary metric', async () => {
       const spy = jest.spyOn(secondaryMetricInfoModule, 'getSecondaryMetricInfo');
-      const { rerender } = await renderChart({
+      const { rerender } = await renderMetricChart({
         config: {
           ...config,
           metric: { ...config.metric, subtitle: 'subtitle', secondaryLabel: undefined },
@@ -560,8 +578,8 @@ describe('MetricVisComponent', function () {
       }
     });
 
-    it('should display secondary prefix or secondary metric', async () => {
-      const { rerender } = await renderChart({
+    it('should display secondary label or secondary metric', async () => {
+      const { rerender } = await renderMetricChart({
         config: {
           ...config,
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
@@ -570,7 +588,6 @@ describe('MetricVisComponent', function () {
       });
 
       let charts = screen.getAllByRole('listitem');
-
       for (const row of table.rows) {
         const regExp = new RegExp(`howdynumber-${row[minPriceColumnId]}`, 'i');
         // Check that at least one listitem contains the expected text
@@ -1025,9 +1042,8 @@ describe('MetricVisComponent', function () {
             },
           },
         });
-        const { result } = renderHook(() => useEuiTheme());
         expect(screen.getByRole('figure')).toHaveStyle({
-          backgroundColor: result.current.euiTheme.colors.emptyShade,
+          backgroundColor: euiThemeVars.euiColorEmptyShade,
         });
         expect(mockGetColorForValue).not.toHaveBeenCalled();
       });

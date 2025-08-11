@@ -2179,7 +2179,7 @@
   resolved "https://registry.yarnpkg.com/@elastic/ecs/-/ecs-9.0.0.tgz#5599c87f72a1b2137467f80c158777ff5c4fdd81"
   integrity sha512-FVFOFGgo8D2XoYs/2M9gaC76VzKhMKkrVqnGkbuQAB0CKoAFy9k5I2K7IMmDs6l4R5OVFiJk6uwfLiTXyHyjDA==
 
-"@elastic/elasticsearch-types@npm:@elastic/elasticsearch@^8.2.1", "elasticsearch-8.x@npm:@elastic/elasticsearch@8.18.2":
+"@elastic/elasticsearch-types@npm:@elastic/elasticsearch@^8.2.1":
   version "8.18.2"
   resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.18.2.tgz#0916b6e3b5bde29ad12c2f2a241b14bf7429e4a7"
   integrity sha512-2pOc/hGdxkbaDavfAlnUfjJdVsFRCGqg7fpsWJfJ2UzpgViIyojdViHg8zOCT1J14lAwvDgb9CNETWa3SBZRfw==
@@ -2870,7 +2870,12 @@
   dependencies:
     eslint-visitor-keys "^3.4.3"
 
-"@eslint-community/regexpp@^4.4.0", "@eslint-community/regexpp@^4.6.1":
+"@eslint-community/regexpp@^4.10.0":
+  version "4.12.1"
+  resolved "https://registry.yarnpkg.com/@eslint-community/regexpp/-/regexpp-4.12.1.tgz#cfc6cffe39df390a3841cde2abccf92eaa7ae0e0"
+  integrity sha512-CCZCDJuduB9OUkFkY2IgppNZMi2lBQgD2qzwXkEia16cge2pijY/aXi96CJMquDMn3nJdlPV1A5KrJEXwfLNzQ==
+
+"@eslint-community/regexpp@^4.6.1":
   version "4.10.0"
   resolved "https://registry.yarnpkg.com/@eslint-community/regexpp/-/regexpp-4.10.0.tgz#548f6de556857c8bb73bbee70c35dc82a2e74d63"
   integrity sha512-Cu96Sd2By9mCNTx2iyKOmq10v22jUVQv0lQnlGNy16oE9589yE+QADPbrMGCkA51cKZSg3Pu/aTJVTGfL/qjUA==
@@ -12440,11 +12445,6 @@
   dependencies:
     "@types/d3-color" "*"
 
-"@types/d3-path@^2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@types/d3-path/-/d3-path-2.0.2.tgz#6052f38f6186319769dfabab61b5514b0e02c75c"
-  integrity sha512-3YHpvDw9LzONaJzejXLOwZ3LqwwkoXb9LI2YN7Hbd6pkGo5nIlJ09ul4bQhBN4hQZJKmUpX8HkVqbzgUKY48cg==
-
 "@types/d3-scale@^3.3.0":
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/@types/d3-scale/-/d3-scale-3.3.2.tgz#18c94e90f4f1c6b1ee14a70f14bfca2bd1c61d06"
@@ -12842,7 +12842,7 @@
     "@types/node" "*"
     "@types/webpack" "^4"
 
-"@types/lodash@^4.14.202", "@types/lodash@^4.17.0", "@types/lodash@^4.17.16":
+"@types/lodash@^4.14.202", "@types/lodash@^4.17.16":
   version "4.17.16"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.16.tgz#94ae78fab4a38d73086e962d0b65c30d816bfb0a"
   integrity sha512-HX7Em5NYQAXKW+1T+FiuG27NGwzJfCX3s1GjOa7ujxZa52kjJLOr4FUxT+giF6Tgxv1e+/czV/iTtBw27WTU9g==
@@ -13348,7 +13348,7 @@
     "@types/node" "*"
     "@types/ws" "*"
 
-"@types/semver@^7.3.12", "@types/semver@^7.3.4", "@types/semver@^7.5.1", "@types/semver@^7.7.0":
+"@types/semver@^7.3.4", "@types/semver@^7.5.1", "@types/semver@^7.7.0":
   version "7.7.0"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.7.0.tgz#64c441bdae033b378b6eef7d0c3d77c329b9378e"
   integrity sha512-k107IF4+Xr7UHjwDc7Cfd6PRQfbdkiRabXGRjo07b4WyPahFBZCZ1sE+BNxYIJPPg73UkfOsVOLwqVc/6ETrIA==
@@ -20287,15 +20287,6 @@ form-data-encoder@1.7.2:
   resolved "https://registry.yarnpkg.com/form-data-encoder/-/form-data-encoder-1.7.2.tgz#1f1ae3dccf58ed4690b86d87e4f57c654fbab040"
   integrity sha512-qfqtYan3rxrnCk1VYaA4H+Ms9xdpPqvLZa6xmMgFvhO32x7/3J/ExcTd6qpxM0vH2GdMI+poehyBZvqfMTto8A==
 
-form-data@4.0.0:
-  version "4.0.0"
-  resolved "https://registry.npmjs.org/form-data/-/form-data-4.0.0.tgz"
-  integrity sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==
-  dependencies:
-    asynckit "^0.4.0"
-    combined-stream "^1.0.8"
-    mime-types "^2.1.12"
-
 form-data@^3.0.0:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/form-data/-/form-data-3.0.4.tgz#938273171d3f999286a4557528ce022dc2c98df1"
@@ -22512,11 +22503,6 @@ is-potential-custom-element-name@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/is-potential-custom-element-name/-/is-potential-custom-element-name-1.0.1.tgz#171ed6f19e3ac554394edf78caa05784a45bebb5"
   integrity sha512-bCYeRA2rVibKZd+s2625gGnGF/t7DSqDs4dP7CrLA1m7jKWz6pps0LpYLJN8Q64HtmPKJ1hrN3nzPNKFEKOUiQ==
-
-is-primitive@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/is-primitive/-/is-primitive-3.0.1.tgz#98c4db1abff185485a657fc2905052b940524d05"
-  integrity sha512-GljRxhWvlCNRfZyORiH77FwdFwGcMO620o37EOYC0ORWdq+WYNVqW0w2Juzew4M+L81l6/QS3t5gkkihyRqv9w==
 
 is-promise@^2.2.2:
   version "2.2.2"
