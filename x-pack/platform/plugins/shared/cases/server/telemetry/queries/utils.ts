@@ -198,7 +198,19 @@ export const getAlertsCountsFromBuckets = (buckets: AlertBuckets['buckets']) => 
   weekly: buckets?.[1]?.topAlertsPerBucket?.value ?? 0,
   monthly: buckets?.[0]?.topAlertsPerBucket?.value ?? 0,
 });
-
+interface CountsAndMaxAlertsAggRes {
+  by_owner: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+      counts: AlertBuckets;
+      references: MaxBucketOnCaseAggregation['references'];
+      uniqueAlertCommentsCount: {
+        value: number;
+      };
+    }>;
+  };
+}
 export const getCountsAndMaxAlertsData = async ({
   savedObjectsClient,
 }: {
@@ -206,37 +218,78 @@ export const getCountsAndMaxAlertsData = async ({
 }) => {
   const filter = getOnlyAlertsCommentsFilter();
 
-  const res = await savedObjectsClient.find<
-    unknown,
-    {
-      counts: AlertBuckets;
-      references: MaxBucketOnCaseAggregation['references'];
-      uniqueAlertCommentsCount: { value: number };
-    }
-  >({
+  const res = await savedObjectsClient.find<unknown, CountsAndMaxAlertsAggRes>({
     page: 0,
     perPage: 0,
     filter,
     type: CASE_COMMENT_SAVED_OBJECT,
     namespaces: ['*'],
     aggs: {
-      ...getAlertsCountsAggregationQuery(),
-      ...getAlertsMaxBucketOnCaseAggregationQuery(),
-      ...getUniqueAlertCommentsCountQuery(),
+      by_owner: {
+        terms: {
+          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.owner`,
+          size: 3,
+          include: ['securitySolution', 'observability', 'cases'],
+        },
+        aggs: {
+          ...getAlertsCountsAggregationQuery(),
+          ...getAlertsMaxBucketOnCaseAggregationQuery(),
+          ...getUniqueAlertCommentsCountQuery(),
+        },
+      },
     },
   });
 
-  const countsBuckets = res.aggregations?.counts?.buckets ?? [];
-  const totalAlerts = res.aggregations?.uniqueAlertCommentsCount.value ?? 0;
-  const maxOnACase = res.aggregations?.references?.cases?.max?.value ?? 0;
+  const sec = getSolutionStats('securitySolution', res?.aggregations);
+  const obs = getSolutionStats('observability', res?.aggregations);
+  const cases = getSolutionStats('cases', res?.aggregations);
+  const all = getTotalStats(res?.aggregations);
+  return {
+    all,
+    sec,
+    obs,
+    cases,
+  };
+};
+
+export const getSolutionStats = (
+  owner: Owner,
+  countsAndMaxAlertsAggRes?: CountsAndMaxAlertsAggRes
+) => {
+  const bucket = countsAndMaxAlertsAggRes?.by_owner?.buckets?.find((b) => b?.key === owner);
+  if (!bucket) {
+    return {
+      total: 0,
+      daily: 0,
+      weekly: 0,
+      monthly: 0,
+      maxOnACase: 0,
+    };
+  }
 
   return {
-    all: {
-      total: totalAlerts,
-      ...getAlertsCountsFromBuckets(countsBuckets),
-      maxOnACase,
-    },
+    total: bucket?.uniqueAlertCommentsCount?.value ?? 0,
+    ...getAlertsCountsFromBuckets(bucket?.counts?.buckets ?? []),
+    maxOnACase: bucket?.references?.cases?.max?.value ?? 0,
   };
+};
+export const getTotalStats = (countsAndMaxAlertsAggRes?: CountsAndMaxAlertsAggRes) => {
+  const buckets = countsAndMaxAlertsAggRes?.by_owner?.buckets ?? [];
+  return buckets.reduce(
+    (acc, bucket) => {
+      acc.total += bucket?.uniqueAlertCommentsCount?.value ?? 0;
+      const counts = getAlertsCountsFromBuckets(bucket?.counts?.buckets ?? []);
+      acc.daily += counts.daily;
+      acc.weekly += counts.weekly;
+      acc.monthly += counts.monthly;
+      const maxCaseVal = bucket?.references?.cases?.max?.value ?? 0;
+      if (maxCaseVal > acc.maxOnACase) {
+        acc.maxOnACase = maxCaseVal;
+      }
+      return acc;
+    },
+    { total: 0, daily: 0, weekly: 0, monthly: 0, maxOnACase: 0 }
+  );
 };
 
 export const getCountsAndMaxData = async ({

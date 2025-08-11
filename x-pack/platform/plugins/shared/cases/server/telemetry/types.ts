@@ -203,7 +203,12 @@ export interface CasesTelemetry {
   };
   userActions: { all: Count & { maxOnACase: number } };
   comments: { all: Count & { maxOnACase: number } };
-  alerts: { all: Count & { maxOnACase: number } };
+  alerts: {
+    all: Count & { maxOnACase: number };
+    obs: Count & { maxOnACase: number };
+    sec: Count & { maxOnACase: number };
+    cases: Count & { maxOnACase: number };
+  };
   connectors: {
     all: {
       all: { totalAttached: number };
