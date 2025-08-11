@@ -18,4 +18,5 @@ export interface RuleMigrationFilters {
   partiallyTranslated?: boolean;
   untranslatable?: boolean;
   searchTerm?: string;
+  missingIndex?: boolean;
 }

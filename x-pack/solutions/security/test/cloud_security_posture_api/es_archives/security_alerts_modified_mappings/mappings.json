@@ -24,6 +24,30 @@
           "ignore_malformed": false,
           "type": "date"
         },
+        "actor": {
+          "properties": {
+            "entity": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "target": {
+          "properties": {
+            "entity": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
         "agent": {
           "properties": {
             "build": {
@@ -8649,10 +8673,6 @@
       "index": {
         "auto_expand_replicas": "0-1",
         "hidden": "true",
-        "lifecycle": {
-          "name": ".alerts-ilm-policy",
-          "rollover_alias": ".alerts-security.alerts-default"
-        },
         "mapping": {
           "ignore_malformed": "true",
           "total_fields": {
