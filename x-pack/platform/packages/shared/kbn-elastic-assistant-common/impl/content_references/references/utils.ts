@@ -87,8 +87,7 @@ export const sanitizeMessages = (messages: BaseMessage[]): BaseMessage[] => {
   return messages.map((message) => {
     if (!Array.isArray(message.content)) {
       message.content = removeContentReferences(message.content).trim();
-    }
-    if (Array.isArray(message.content)) {
+    } else {
       message.content = message.content.map((item) => {
         if (item && item.type === 'text' && 'text' in item && typeof item.text === 'string') {
           item.text = removeContentReferences(item.text).trim();
