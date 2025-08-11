@@ -90,6 +90,11 @@ describe('provides correct series naming', () => {
     cleanResizeObserverMock();
     jest.useRealTimers();
   });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    convertSpy.mockImplementation((d) => d);
+    getFormatSpy.mockReturnValue({ convert: convertSpy });
+  });
 
   test('simplest xy chart without human-readable name', async () => {
     const args = createArgsWithLayers();
