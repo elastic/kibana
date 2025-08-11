@@ -316,7 +316,11 @@ describe('TokenAuthenticationProvider', () => {
       );
 
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
-        AuthenticationResult.failed(Boom.badRequest('Both access and refresh tokens are expired.'))
+        AuthenticationResult.failed(
+          Boom.badRequest(
+            'Your session has expired because your refresh token is no longer valid. Please log in again.'
+          )
+        )
       );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
@@ -348,7 +352,11 @@ describe('TokenAuthenticationProvider', () => {
         InvalidGrantError.expiredOrInvalidRefreshToken()
       );
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
-        AuthenticationResult.failed(Boom.badRequest('Both access and refresh tokens are expired.'))
+        AuthenticationResult.failed(
+          Boom.badRequest(
+            'Your session has expired because your refresh token is no longer valid. Please log in again.'
+          )
+        )
       );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
