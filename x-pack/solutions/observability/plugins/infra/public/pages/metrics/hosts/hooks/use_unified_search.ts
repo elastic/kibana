@@ -199,6 +199,9 @@ export const useUnifiedSearch = () => {
 
   useEffect(() => {
     const subscription = new Subscription();
+
+    queryStringService.clearQuery();
+
     subscription.add(
       filterManagerService
         .getUpdates$()

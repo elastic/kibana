@@ -92,6 +92,7 @@ export const useWaffleFilters = () => {
   // sync up the URL state with eventual changes made in the kuery bar
   useEffect(() => {
     const subscription = new Subscription();
+    queryStringService.clearQuery();
 
     subscription.add(
       queryStringService
