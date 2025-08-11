@@ -27,6 +27,7 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { getAppInfo } from '@kbn/core-application-browser-internal';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 
 import { ChromeService } from './chrome_service';
 
@@ -72,6 +73,7 @@ function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
     notifications: notificationServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
+    featureFlags: coreFeatureFlagsMock.createStart(),
   };
 
   if (availableApps) {
