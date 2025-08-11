@@ -147,7 +147,7 @@ export function AgentConfigurationCreateEdit({
 
       {pageStep === 'choose-settings-step' && (
         <SettingsPage
-          status={existingConfigResult?.status}
+          untouchedConfig={existingConfigResult}
           unsavedChanges={unsavedChanges}
           onClickEdit={() => setPage('choose-service-step', history)}
           newConfig={newConfig}

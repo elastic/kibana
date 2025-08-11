@@ -23,13 +23,17 @@ import { useHistory } from 'react-router-dom';
 import { isEDOTAgentName, type AgentName } from '@kbn/elastic-agent-utils';
 import type { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
-import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
+import type {
+  AgentConfiguration,
+  AgentConfigurationIntake,
+} from '../../../../../../../common/agent_configuration/configuration_types';
 import {
   filterByAgent,
   settingDefinitions,
   validateSetting,
 } from '../../../../../../../common/agent_configuration/setting_definitions';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
+import type { FetcherResult } from '../../../../../../hooks/use_fetcher';
 import { FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { saveConfig } from './save_config';
 import { SettingFormRow } from './setting_form_row';
@@ -40,7 +44,7 @@ function removeEmpty(obj: { [key: string]: any }) {
 }
 
 export function SettingsPage({
-  status,
+  untouchedConfig,
   unsavedChanges,
   newConfig,
   setNewConfig,
@@ -48,7 +52,7 @@ export function SettingsPage({
   isEditMode,
   onClickEdit,
 }: {
-  status?: FETCH_STATUS;
+  untouchedConfig?: FetcherResult<AgentConfiguration>;
   unsavedChanges: Record<string, string>;
   newConfig: AgentConfigurationIntake;
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
@@ -64,6 +68,7 @@ export function SettingsPage({
   const [removedConfigCount, setRemovedConfigCount] = useState<number>(0);
   const [validationErrors, setValidationErrors] = useState<Set<string>>(new Set<string>());
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
+  const status = untouchedConfig?.status;
   const isLoading = status === FETCH_STATUS.LOADING;
   const isAdvancedConfigSupported =
     newConfig.agent_name && isEDOTAgentName(newConfig.agent_name as AgentName);
@@ -162,7 +167,8 @@ export function SettingsPage({
   };
 
   const handleDelete = (key: string, index: number) => {
-    if (newConfig.settings[key] !== undefined) {
+    // Detect removed config only when the key-value already existed before
+    if (key in (untouchedConfig?.data?.settings ?? {})) {
       setRemovedConfigCount((prev) => prev + 1);
     }
     removeValidationError(`key${index}`);
