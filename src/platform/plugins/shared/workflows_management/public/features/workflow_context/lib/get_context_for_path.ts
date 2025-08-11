@@ -81,13 +81,13 @@ export function getContextSchemaForPath(
   }
   if (nearestStep.foreach) {
     contextSchema = contextSchema.extend({
-      foreach: z.object({ item: z.any() }).describe('Current item of the foreach loop'),
+      foreach: z.object({ item: z.any() }),
     });
   }
   const outputsSchema = getAvailableOutputsSchema(definition, workflowGraph, nearestStep.name);
-  if (outputsSchema) {
+  if (Object.keys(outputsSchema.shape).length > 0) {
     contextSchema = contextSchema.extend({
-      steps: outputsSchema.describe('Outputs of previous steps'),
+      steps: outputsSchema,
     });
   }
   return contextSchema;

@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 export function parsePath(path: string) {
   const segments = path
@@ -105,4 +106,8 @@ export function inferZodType(obj: any): z.ZodType {
   }
 
   return z.unknown();
+}
+
+export function expectZodSchemaEqual(a: z.ZodType, b: z.ZodType) {
+  expect(zodToJsonSchema(a)).toEqual(zodToJsonSchema(b));
 }

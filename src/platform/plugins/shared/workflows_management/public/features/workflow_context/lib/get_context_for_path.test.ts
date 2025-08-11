@@ -9,9 +9,11 @@
 
 import { WorkflowYaml } from '@kbn/workflows';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
-import { getContextForPath } from './get_context_for_path';
+import { getContextSchemaForPath } from './get_context_for_path';
+import { z } from '@kbn/zod';
+import { expectZodSchemaEqual } from '../../../../common/lib/zod_utils';
 
-describe('getContextForPath', () => {
+describe('getContextSchemaForPath', () => {
   const definition = {
     version: '1' as const,
     name: 'test-workflow',
@@ -25,14 +27,14 @@ describe('getContextForPath', () => {
     steps: [
       {
         name: 'first-step',
-        type: 'console.log',
+        type: 'console',
         with: {
           message: 'Hello, world!',
         },
       },
       {
         name: 'second-step',
-        type: 'console.log',
+        type: 'console',
         with: {
           message: 'Again, hello, world!',
         },
@@ -44,14 +46,14 @@ describe('getContextForPath', () => {
         steps: [
           {
             name: 'if-true-1',
-            type: 'console.log',
+            type: 'console',
             with: {
               message: 'If true',
             },
           },
           {
             name: 'if-true-2',
-            type: 'console.log',
+            type: 'console',
             with: {
               message: 'If true 2',
             },
@@ -60,7 +62,7 @@ describe('getContextForPath', () => {
         else: [
           {
             name: 'if-false',
-            type: 'console.log',
+            type: 'console',
             with: {
               message: 'If false',
             },
@@ -76,33 +78,46 @@ describe('getContextForPath', () => {
   const workflowGraph = getWorkflowGraph(definition);
 
   it('should return the root context for the first step', () => {
-    const context = getContextForPath(definition, workflowGraph, ['steps', 0]);
+    const context = getContextSchemaForPath(definition, workflowGraph, ['steps', 0]);
 
-    expect(context).toEqual({
-      consts: {
-        test: 'test',
-      },
-      steps: {},
-    });
+    expect(Object.keys(context.shape)).toEqual(['consts']);
+    expectZodSchemaEqual(
+      context,
+      z.object({
+        consts: z.object({
+          test: z.string(),
+        }),
+      })
+    );
   });
 
   it('should return the context for the second step', () => {
-    const context2 = getContextForPath(definition, workflowGraph, ['steps', 1, 'with', 'message']);
+    const context = getContextSchemaForPath(definition, workflowGraph, [
+      'steps',
+      1,
+      'with',
+      'message',
+    ]);
 
-    expect(context2).toEqual({
-      consts: {
-        test: 'test',
-      },
-      steps: {
-        'first-step': {
-          output: {},
-        },
-      },
-    });
+    expectZodSchemaEqual(
+      context,
+      z.object({
+        consts: z.object({
+          test: z.string(),
+        }),
+        steps: z.object({
+          'first-step': z.object({
+            output: z.object({
+              message: z.string(),
+            }),
+          }),
+        }),
+      })
+    );
   });
 
   it('should return the context for second step in true branch of if-split', () => {
-    const context = getContextForPath(definition, workflowGraph, [
+    const context = getContextSchemaForPath(definition, workflowGraph, [
       'steps',
       2,
       'steps',
@@ -111,29 +126,13 @@ describe('getContextForPath', () => {
       'message',
     ]);
 
-    expect(context).toEqual({
-      consts: {
-        test: 'test',
-      },
-      steps: {
-        'first-step': {
-          output: {},
-        },
-        'second-step': {
-          output: {},
-        },
-        'if-split': {
-          output: {},
-        },
-        'if-true-1': {
-          output: {},
-        },
-      },
-    });
+    expect(Object.keys((context.shape as any).steps.shape).sort()).toEqual(
+      ['first-step', 'second-step', 'if-split', 'if-true-1'].sort()
+    );
   });
 
   it('should return the context for first step in false branch of if-split', () => {
-    const context = getContextForPath(definition, workflowGraph, [
+    const context = getContextSchemaForPath(definition, workflowGraph, [
       'steps',
       2,
       'else',
@@ -142,21 +141,8 @@ describe('getContextForPath', () => {
       'message',
     ]);
 
-    expect(context).toEqual({
-      consts: {
-        test: 'test',
-      },
-      steps: {
-        'first-step': {
-          output: {},
-        },
-        'second-step': {
-          output: {},
-        },
-        'if-split': {
-          output: {},
-        },
-      },
-    });
+    expect(Object.keys((context.shape as any).steps.shape).sort()).toEqual(
+      ['first-step', 'second-step', 'if-split'].sort()
+    );
   });
 });

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getSchemaAtPath, inferZodType, isValidSchemaPath } from './zod_utils';
+import {
+  expectZodSchemaEqual,
+  getSchemaAtPath,
+  inferZodType,
+  isValidSchemaPath,
+} from './zod_utils';
 import { z } from '@kbn/zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
-
-function expectZodSchemaEqual(a: z.ZodType, b: z.ZodType) {
-  expect(zodToJsonSchema(a)).toEqual(zodToJsonSchema(b));
-}
 
 describe('isValidSchemaPath', () => {
   it('should return true for simple paths', () => {
