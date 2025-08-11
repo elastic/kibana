@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import { configureStore } from '@reduxjs/toolkit';
+import { metricsGridSlice } from './slices/metrics_grid_slice';
 
-export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+export const store = configureStore({
+  reducer: {
+    metricsGrid: metricsGridSlice.reducer,
+  },
+  devTools: process.env.NODE_ENV !== 'production',
 });
 
-export type MetricsExperienceConfig = TypeOf<typeof configSchema>;
-
-export const config: PluginConfigDescriptor<MetricsExperienceConfig> = {
-  schema: configSchema,
-};
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

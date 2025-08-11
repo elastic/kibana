@@ -18,7 +18,7 @@
       "fieldsMetadata"
     ],
     "optionalPlugins": [],
-    "requiredBundles": []
+    "requiredBundles": ["kibanaReact"]
   }
 }
 

@@ -8,9 +8,11 @@
  */
 
 import { dimensionsApi } from './api/dimensions';
+import { metricDataApi } from './api/data';
 import { fieldsApi } from './api/fields';
 
 export const routeRepository = {
   ...dimensionsApi,
+  ...metricDataApi, // TODO: Remove once we integrate with Lens for the charts
   ...fieldsApi,
 };

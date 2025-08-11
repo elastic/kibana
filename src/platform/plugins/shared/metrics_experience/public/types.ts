@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
-
-export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
-});
-
-export type MetricsExperienceConfig = TypeOf<typeof configSchema>;
-
-export const config: PluginConfigDescriptor<MetricsExperienceConfig> = {
-  schema: configSchema,
-};
+export interface MetricField {
+  name: string;
+  index: string;
+  dimensions: Array<{ name: string; type: string; description?: string }>;
+  type: string;
+  time_series_metric?: string;
+  unit?: string;
+  description?: string;
+  source?: string;
+  stability?: string;
+  display?: string;
+  no_data?: boolean;
+}

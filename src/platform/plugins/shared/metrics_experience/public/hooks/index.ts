@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
-
-export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
-});
-
-export type MetricsExperienceConfig = TypeOf<typeof configSchema>;
-
-export const config: PluginConfigDescriptor<MetricsExperienceConfig> = {
-  schema: configSchema,
-};
+export { useMetricDataQuery } from './use_metric_data_query';
+export { useMetricFieldsQuery } from './use_metric_fields_query';
+export { useDimensionsQuery } from './use_dimensions_query';
+export { useEsqlAst } from './use_esql_ast';

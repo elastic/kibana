@@ -7,15 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import { Parser, Walker } from '@kbn/esql-ast';
 
-export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
-});
+export function extractDimensionsFromESQL(esql: string) {
+  const ast = Parser.parse(esql);
+  const dimensions = new Set<string>();
 
-export type MetricsExperienceConfig = TypeOf<typeof configSchema>;
+  const statsNode = Walker.matchAll(ast.root, {
+    type: 'command',
+    name: 'stats',
+  });
 
-export const config: PluginConfigDescriptor<MetricsExperienceConfig> = {
-  schema: configSchema,
-};
+  Walker.walk(statsNode, {
+    visitColumn: (ctx, parent) => {
+      if (parent?.name === 'by') {
+        dimensions.add(ctx.name);
+      }
+    },
+  });
+
+  return [...dimensions];
+}

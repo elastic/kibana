@@ -7,15 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import { EuiSpacer, EuiText } from '@elastic/eui';
+import React from 'react';
 
-export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
-});
+interface MetricsCountProps {
+  count: number;
+}
 
-export type MetricsExperienceConfig = TypeOf<typeof configSchema>;
-
-export const config: PluginConfigDescriptor<MetricsExperienceConfig> = {
-  schema: configSchema,
+export const MetricsCount: React.FC<MetricsCountProps> = ({ count }) => {
+  return (
+    <>
+      <EuiSpacer size="xs" />
+      <EuiText size="xs" color="text">
+        <strong>
+          {count} metric{count !== 1 ? 's' : ''} found
+        </strong>
+      </EuiText>
+      <EuiSpacer size="s" />
+    </>
+  );
 };

@@ -14,7 +14,6 @@ import {
   MsearchMultiSearchResult,
   MsearchRequestItem,
 } from '@elastic/elasticsearch/lib/api/types';
-import { joinArrayValues } from './join_array_values';
 import { DataStreamFieldCapsMap, Dimension, MetricField } from '../types';
 import { extractDimensions } from './extract_dimensions';
 
@@ -41,9 +40,8 @@ function processSampleMetricDocuments(
       continue;
     }
     if (searchResult && searchResult.hits.hits?.length > 0) {
-      const fields = searchResult.hits.hits[0].fields;
-      const actualDimensions = joinArrayValues(fields);
-      metricsDocumentMap.set(metricName, Object.keys(actualDimensions));
+      const fields = searchResult.hits.hits[0].fields || {};
+      metricsDocumentMap.set(metricName, Object.keys(fields));
     }
   }
 
