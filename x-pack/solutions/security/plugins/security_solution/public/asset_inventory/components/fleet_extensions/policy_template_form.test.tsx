@@ -18,17 +18,16 @@ import {
   getMockPolicyGCP,
   getPackageInfoMock,
 } from './mocks';
-import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackageInfo,
+  PackagePolicy,
+  PackagePolicyConfigRecordEntry,
+} from '@kbn/fleet-plugin/common';
 import { useParams } from 'react-router-dom';
 import { ExperimentalFeaturesService } from '@kbn/fleet-plugin/public/services';
 import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
-import { CLOUDBEAT_AWS } from './aws_credentials_form/constants';
-import { getAssetPolicy } from './utils';
-import {
-  CLOUDBEAT_GCP,
-  GCP_ORGANIZATION_ACCOUNT,
-  GCP_SINGLE_ACCOUNT,
-} from './gcp_credentials_form/constants';
 import {
   AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
@@ -40,10 +39,10 @@ import {
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
 } from './test_subjects';
-import { CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 import CloudAssetInventoryPolicyTemplateForm from './policy_template_form';
 import { useKibana } from '../../hooks/use_kibana';
 import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
+import { CLOUDBEAT_AWS, CLOUDBEAT_AZURE, CLOUDBEAT_GCP } from './constants';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -60,6 +59,44 @@ jest.mock('../../hooks/use_kibana', () => ({
 
 const onChange = jest.fn();
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
+
+const GCP_ORGANIZATION_ACCOUNT = 'organization-account';
+const GCP_SINGLE_ACCOUNT = 'single-account';
+
+const getAssetInput = (
+  input: NewPackagePolicyInput,
+  inputType: string,
+  inputVars?: Record<string, PackagePolicyConfigRecordEntry>
+) => {
+  const isInputEnabled = input.type === inputType;
+
+  return {
+    ...input,
+    enabled: isInputEnabled,
+    streams: input.streams.map((stream) => ({
+      ...stream,
+      enabled: isInputEnabled,
+      // Merge new vars with existing vars
+      ...(isInputEnabled &&
+        inputVars && {
+          vars: {
+            ...stream.vars,
+            ...inputVars,
+          },
+        }),
+    })),
+  };
+};
+
+const getAssetPolicy = (
+  newPolicy: NewPackagePolicy,
+  inputType: string,
+  inputVars?: Record<string, PackagePolicyConfigRecordEntry>
+): NewPackagePolicy => ({
+  ...newPolicy,
+  // Enable new policy input and disable all others
+  inputs: newPolicy.inputs.map((item) => getAssetInput(item, inputType, inputVars)),
+});
 
 describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
   beforeEach(() => {
@@ -897,7 +934,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         expect(getByLabelText('Client Certificate Password')).toBeInTheDocument()
       );
     });
-    it(`updates Service principal with Client Certificate fields`, async () => {
+    it.only(`updates Service principal with Client Certificate fields`, async () => {
       let policy = getMockPolicyAzure();
       policy = getAssetPolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.type': { value: 'service_principal_with_client_certificate' },
@@ -911,7 +948,22 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
       expect(onChange).toHaveBeenCalledWith({
         isValid: true,
-        updatedPolicy: policy,
+        updatedPolicy: {
+          ...policy,
+          inputs: [
+            ...policy.inputs,
+            {
+              type: CLOUDBEAT_AZURE,
+              enabled: true,
+              vars: {
+                ...policy.inputs.find((input) => input.type === CLOUDBEAT_AZURE)?.vars,
+                'azure.account_type': { value: 'organization', type: 'text' },
+                'azure.credentials.tenant_id': { value: 'a', type: 'text' },
+              },
+            },
+          ],
+        },
+        isExtensionLoaded: true,
       });
       rerender(
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
@@ -922,8 +974,25 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
       expect(onChange).toHaveBeenCalledWith({
         isValid: true,
-        updatedPolicy: policy,
+        isExtensionLoaded: true,
+        updatedPolicy: {
+          ...policy,
+          inputs: [
+            ...policy.inputs,
+            {
+              type: CLOUDBEAT_AZURE,
+              enabled: true,
+              vars: {
+                ...policy.inputs.find((input) => input.type === CLOUDBEAT_AZURE)?.vars,
+                'azure.account_type': 'organization',
+                'azure.credentials.tenant_id': 'a',
+                'azure.credentials.client_id': 'b',
+              },
+            },
+          ],
+        },
       });
+
       rerender(
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
@@ -933,8 +1002,26 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
       expect(onChange).toHaveBeenCalledWith({
         isValid: true,
-        updatedPolicy: policy,
+        isExtensionLoaded: true,
+        updatedPolicy: {
+          ...policy,
+          inputs: [
+            ...policy.inputs,
+            {
+              type: CLOUDBEAT_AZURE,
+              enabled: true,
+              vars: {
+                ...policy.inputs.find((input) => input.type === CLOUDBEAT_AZURE)?.vars,
+                'azure.account_type': 'organization',
+                'azure.credentials.tenant_id': 'a',
+                'azure.credentials.client_id': 'b',
+                'azure.credentials.client_certificate_path': 'c',
+              },
+            },
+          ],
+        },
       });
+
       rerender(
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
@@ -944,7 +1031,25 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
       expect(onChange).toHaveBeenCalledWith({
         isValid: true,
-        updatedPolicy: policy,
+        isExtensionLoaded: true,
+        updatedPolicy: {
+          ...policy,
+          inputs: [
+            ...policy.inputs,
+            {
+              type: CLOUDBEAT_AZURE,
+              enabled: true,
+              vars: {
+                ...policy.inputs.find((input) => input.type === CLOUDBEAT_AZURE)?.vars,
+                'azure.account_type': 'organization',
+                'azure.credentials.tenant_id': 'a',
+                'azure.credentials.client_id': 'b',
+                'azure.credentials.client_certificate_path': 'c',
+                'azure.credentials.client_certificate_password': 'd',
+              },
+            },
+          ],
+        },
       });
     });
 

@@ -8,10 +8,8 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackageInfo, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RegistryRelease, RegistryVarType } from '@kbn/fleet-plugin/common/types';
-import { CLOUDBEAT_AWS } from './aws_credentials_form/constants';
-import { CLOUDBEAT_GCP } from './gcp_credentials_form/constants';
-import { CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 import type { AssetInput } from './types';
+import { CLOUDBEAT_AWS, CLOUDBEAT_AZURE, CLOUDBEAT_GCP } from './constants';
 
 export const getMockPolicyAWS = (vars?: PackagePolicyConfigRecord) =>
   getPolicyMock(CLOUDBEAT_AWS, 'aws', vars);
