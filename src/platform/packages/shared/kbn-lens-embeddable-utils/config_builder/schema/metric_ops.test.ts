@@ -35,14 +35,6 @@ describe('Metric Operations Schemas', () => {
       const validated = staticOperationDefinitionSchema.validate(input);
       expect(validated).toEqual(input);
     });
-
-    it('throws on missing value', () => {
-      const input = {
-        operation: 'static_value' as const,
-      };
-
-      expect(() => staticOperationDefinitionSchema.validate(input)).toThrow();
-    });
   });
 
   describe('formulaOperationDefinition', () => {
@@ -95,7 +87,7 @@ describe('Metric Operations Schemas', () => {
     });
 
     it('validates basic metric operations', () => {
-      const operations = ['min', 'max', 'sum', 'avg', 'median'] as const;
+      const operations = ['min', 'max', 'average', 'median', 'standard_deviation'] as const;
 
       operations.forEach((op) => {
         const input = {
@@ -122,11 +114,53 @@ describe('Metric Operations Schemas', () => {
       expect(validated).toEqual(input);
     });
 
+    it('validates percentile operation with default value', () => {
+      const input = {
+        operation: 'percentile' as const,
+        field: 'response_time',
+        percentile: undefined,
+      };
+
+      const validated = percentileOperationSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('validates percentile operation without percentile', () => {
+      const input = {
+        operation: 'percentile' as const,
+        field: 'response_time',
+      };
+
+      const validated = percentileOperationSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
     it('validates percentile ranks operation', () => {
       const input = {
-        operation: 'percentile_ranks' as const,
+        operation: 'percentile_rank' as const,
         field: 'response_time',
-        ranks: [50, 75, 90, 95],
+        rank: 50,
+      };
+
+      const validated = percentileRanksOperationSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('should use percentile rank without rank', () => {
+      const input = {
+        operation: 'percentile_rank' as const,
+        field: 'response_time',
+      };
+
+      const validated = percentileRanksOperationSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('should use percentile rank pass ', () => {
+      const input = {
+        operation: 'percentile_rank' as const,
+        field: 'response_time',
+        rank: undefined,
       };
 
       const validated = percentileRanksOperationSchema.validate(input);
@@ -159,6 +193,33 @@ describe('Metric Operations Schemas', () => {
       const validated = movingAverageOperationSchema.validate(input);
       expect(validated).toEqual(input);
     });
+
+    it('validates moving average operation without window param', () => {
+      const input = {
+        operation: 'moving_average' as const,
+        of: {
+          operation: 'sum' as const,
+          field: 'value',
+        },
+      };
+
+      const validated = movingAverageOperationSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('validates moving average operation with undefined window param', () => {
+      const input = {
+        operation: 'moving_average' as const,
+        of: {
+          operation: 'sum' as const,
+          field: 'value',
+        },
+        window: undefined,
+      };
+
+      const validated = movingAverageOperationSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
   });
 
   describe('time-based operations', () => {
@@ -186,6 +247,19 @@ describe('Metric Operations Schemas', () => {
       const input = {
         operation: 'last_value' as const,
         field: 'status',
+        sort_by: 'timestamp',
+      };
+
+      const validated = lastValueOperationSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('validates last value operation with undefined show_array_values value', () => {
+      const input = {
+        operation: 'last_value' as const,
+        field: 'status',
+        sort_by: 'timestamp',
+        show_array_values: undefined,
       };
 
       const validated = lastValueOperationSchema.validate(input);

@@ -8,12 +8,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
-// @TODO: move these into the shared type/values package
-const LENS_SAMPLING_MIN_VALUE = 0;
-const LENS_SAMPLING_MAX_VALUE = 1;
-const LENS_SAMPLING_DEFAULT_VALUE = 1;
-const LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE = false;
+import {
+  LENS_SAMPLING_MIN_VALUE,
+  LENS_SAMPLING_MAX_VALUE,
+  LENS_SAMPLING_DEFAULT_VALUE,
+  LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
+} from './constants';
 
 export const sharedPanelInfoSchema = schema.object({
   /**

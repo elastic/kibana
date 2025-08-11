@@ -8,21 +8,21 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
-// @TODO: move it to shared type/values package
-const LENS_FORMAT_NUMBER_DECIMALS_DEFAULT = 2;
+import { LENS_FORMAT_NUMBER_DECIMALS_DEFAULT } from './constants';
 
 const numericFormatSchema = schema.object({
   type: schema.oneOf([schema.literal('number'), schema.literal('percent')]),
   /**
    * Number of decimals
    */
-  decimals: schema.number({
-    defaultValue: LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
-    meta: {
-      description: 'Number of decimals',
-    },
-  }),
+  decimals: schema.maybe(
+    schema.number({
+      defaultValue: LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
+      meta: {
+        description: 'Number of decimals',
+      },
+    })
+  ),
   /**
    * Suffix
    */

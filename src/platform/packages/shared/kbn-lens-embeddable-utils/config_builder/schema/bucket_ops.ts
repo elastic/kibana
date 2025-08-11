@@ -9,19 +9,30 @@
 
 import { schema } from '@kbn/config-schema';
 import { filterWithLabelSchema } from './filter';
-
-// @TODO: move it to shared type/values package
-const LENS_HISTOGRAM_GRANULARITY_DEFAULT = 5;
-const LENS_HISTOGRAM_GRANULARITY_MIN = 1;
-const LENS_HISTOGRAM_GRANULARITY_MAX = 7;
-
-const LENS_TERMS_SIZE_DEFAULT = 5;
+import {
+  LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
+  LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
+  LENS_HISTOGRAM_GRANULARITY_MAX,
+  LENS_HISTOGRAM_GRANULARITY_MIN,
+  LENS_TERMS_SIZE_DEFAULT,
+} from './constants';
+import { formatSchema } from './format';
 
 export const bucketDateHistogramOperationSchema = schema.object({
   /**
    * Select bucket operation type
    */
   operation: schema.literal('date_histogram'),
+  /**
+   * Label for the operation
+   */
+  label: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Label for the operation',
+      },
+    })
+  ),
   /**
    * Field to be used for the date histogram
    */
@@ -69,8 +80,18 @@ export const bucketDateHistogramOperationSchema = schema.object({
   ),
 });
 
-export const bucketTermsOperationSchema = schema.object({
+export const bucketTermsOperationSchema = formatSchema.extends({
   operation: schema.literal('terms'),
+  /**
+   * Label for the operation
+   */
+  label: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Label for the operation',
+      },
+    })
+  ),
   /**
    * Fields to be used for the terms
    */
@@ -197,8 +218,21 @@ export const bucketTermsOperationSchema = schema.object({
         type: schema.literal('custom'),
         /**
          * Operation type
+         * @TODO handle the different param options for some of these operations
          */
-        operation: schema.literal('field-op-only'),
+        operation: schema.oneOf([
+          schema.literal('min'),
+          schema.literal('max'),
+          schema.literal('average'),
+          schema.literal('median'),
+          schema.literal('standard_deviation'),
+          schema.literal('unique_count'),
+          schema.literal('percentile'),
+          schema.literal('percentile_rank'),
+          schema.literal('count'),
+          schema.literal('sum'),
+          schema.literal('last_value'),
+        ]),
         /**
          * Field to be used for the custom operation
          */
@@ -219,13 +253,33 @@ export const bucketTermsOperationSchema = schema.object({
 export const bucketFilterOperationSchema = schema.object({
   operation: schema.literal('filters'),
   /**
+   * Label for the operation
+   */
+  label: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Label for the operation',
+      },
+    })
+  ),
+  /**
    * Filters
    */
   filters: schema.arrayOf(filterWithLabelSchema),
 });
 
-export const bucketHistogramOperationSchema = schema.object({
+export const bucketHistogramOperationSchema = formatSchema.extends({
   operation: schema.literal('histogram'),
+  /**
+   * Label for the operation
+   */
+  label: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Label for the operation',
+      },
+    })
+  ),
   /**
    * Field to be used for the histogram
    */
@@ -237,14 +291,23 @@ export const bucketHistogramOperationSchema = schema.object({
   /**
    * Granularity of the histogram
    */
-  granularity: schema.number({
-    meta: {
-      description: 'Granularity of the histogram',
-    },
-    min: LENS_HISTOGRAM_GRANULARITY_MIN,
-    max: LENS_HISTOGRAM_GRANULARITY_MAX,
-    defaultValue: LENS_HISTOGRAM_GRANULARITY_DEFAULT,
-  }),
+  granularity: schema.maybe(
+    schema.oneOf(
+      [
+        schema.number({
+          meta: {
+            description: 'Granularity of the histogram',
+          },
+          min: LENS_HISTOGRAM_GRANULARITY_MIN,
+          max: LENS_HISTOGRAM_GRANULARITY_MAX,
+        }),
+        schema.literal('auto'),
+      ],
+      {
+        defaultValue: LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
+      }
+    )
+  ),
   /**
    * Whether to include empty rows
    */
@@ -253,12 +316,23 @@ export const bucketHistogramOperationSchema = schema.object({
       meta: {
         description: 'Whether to include empty rows',
       },
+      defaultValue: LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
     })
   ),
 });
 
-export const bucketRangesOperationSchema = schema.object({
+export const bucketRangesOperationSchema = formatSchema.extends({
   operation: schema.literal('range'),
+  /**
+   * Label for the operation
+   */
+  label: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Label for the operation',
+      },
+    })
+  ),
   /**
    * Field to be used for the range
    */

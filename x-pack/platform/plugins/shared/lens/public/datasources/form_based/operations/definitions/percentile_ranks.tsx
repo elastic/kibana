@@ -12,6 +12,7 @@ import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_RANK_ID, PERCENTILE_RANK_NAME } from '@kbn/lens-formula-docs';
+import type { ValueFormatConfig } from '../../../../../common';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -30,6 +31,7 @@ export interface PercentileRanksIndexPatternColumn extends FieldBasedIndexPatter
   operationType: typeof PERCENTILE_RANK_ID;
   params: {
     value: number;
+    format?: ValueFormatConfig;
   };
 }
 
