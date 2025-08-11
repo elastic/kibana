@@ -339,6 +339,9 @@ describe('Alert details', () => {
         from: moment(alertDetail.formatted.start).subtract(30, 'minutes').toISOString(),
         to: moment(alertDetail.formatted.start).add(30, 'minutes').toISOString(),
       },
+      alert: {
+        start: moment(alertDetail.formatted.start).toISOString(),
+      },
     });
   });
 });
