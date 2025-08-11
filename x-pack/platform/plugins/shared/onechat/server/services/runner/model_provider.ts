@@ -37,7 +37,7 @@ export const createModelProviderFactory: CreateModelProviderFactoryFn = (factory
 };
 
 /**
- * Utility function to creates a {@link ModelProvider}
+ * Utility function to create a {@link ModelProvider}
  */
 export const createModelProvider = ({
   inference,
@@ -58,7 +58,11 @@ export const createModelProvider = ({
     const chatModel = await inference.getChatModel({
       request,
       connectorId,
-      chatModelOptions: {},
+      chatModelOptions: {
+        telemetryMetadata: {
+          pluginId: 'one_chat',
+        },
+      },
     });
 
     const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
