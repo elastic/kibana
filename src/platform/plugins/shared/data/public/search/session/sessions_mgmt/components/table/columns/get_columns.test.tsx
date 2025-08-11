@@ -79,7 +79,7 @@ describe('getColumns', () => {
     { field: 'created', name: 'Created', sortable: true },
     { field: 'expires', name: 'Expiration', sortable: true },
     { field: 'status', name: '', sortable: false },
-    { field: 'actions', name: '', sortable: false },
+    { field: 'actions', name: 'Actions', sortable: false },
   ])('returns the $field column', (expectedColumn) => {
     const columns = setup();
     expect(columns).toContainEqual(expect.objectContaining(expectedColumn));
