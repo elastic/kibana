@@ -20,13 +20,28 @@ export function getYamlStringFromJSON(json: any) {
   return doc.toString(YAML_STRINGIFY_OPTIONS);
 }
 
+export function preProcessYamlString(yamlString: string) {
+  // Pre-process the YAML to quote template expressions
+  // e.g. `message: {{event.message}}` -> `message: "{{event.message}}"`
+  // otherwise parser will treat `{event.message}` as a key of a map and .toJson method will crush kibana
+  return yamlString.replace(/:\s*(\{\{[^}]+\}\})/gm, ': "$1"');
+}
+
 export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
   yamlString: string,
   schema: T
 ): z.SafeParseReturnType<z.input<T>, z.output<T>> {
-  const doc = parseDocument(yamlString);
-  const json = doc.toJSON();
-  return schema.safeParse(json);
+  try {
+    const processedYaml = preProcessYamlString(yamlString);
+    const doc = parseDocument(processedYaml);
+    const json = doc.toJSON();
+    return schema.safeParse(json);
+  } catch (error) {
+    return {
+      success: false,
+      error: error as z.ZodError,
+    };
+  }
 }
 
 export function getCurrentPath(document: Document, absolutePosition: number) {
