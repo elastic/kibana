@@ -9,7 +9,7 @@ import {
   getPrebuiltRuleMock,
   getPrebuiltRuleMockOfType,
 } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,

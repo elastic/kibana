@@ -31,7 +31,9 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_DEVICES_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH,
 } from './constants';
 import { isDefaultOrMissing, getArtifactListPageUrlPath } from './url_routing';
 
@@ -137,6 +139,18 @@ export const getPolicyTrustedAppsPath = (policyId: string, search?: string) => {
   })}${appendSearch(search)}`;
 };
 
+export const getPolicyTrustedDevicesPath = (
+  policyId: string,
+  location?: Partial<PolicyDetailsArtifactsPageLocation>
+) => {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_DEVICES_PATH, {
+    tabName: AdministrationSubTab.policies,
+    policyId,
+  })}${appendSearch(
+    querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
+  )}`;
+};
+
 export const getPolicyEventFiltersPath = (
   policyId: string,
   location?: Partial<PolicyDetailsArtifactsPageLocation>
@@ -207,6 +221,16 @@ export const extractListPaginationParams = (query: querystring.ParsedUrlQuery) =
 export const getTrustedAppsListPath = (location?: Partial<ArtifactListPageUrlParams>): string => {
   const path = generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {
     tabName: AdministrationSubTab.trustedApps,
+  });
+
+  return getArtifactListPageUrlPath(path, location);
+};
+
+export const getTrustedDevicesListPath = (
+  location?: Partial<ArtifactListPageUrlParams>
+): string => {
+  const path = generatePath(MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH, {
+    tabName: AdministrationSubTab.trustedDevices,
   });
 
   return getArtifactListPageUrlPath(path, location);
