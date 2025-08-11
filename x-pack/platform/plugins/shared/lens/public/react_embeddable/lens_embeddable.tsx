@@ -74,17 +74,11 @@ export const createLensEmbeddableFactory = (
           const visualization = initialState.rawState.attributes?.state.visualization;
 
           if (isXYState(visualization)) {
-            const hasAlertAnnotation = visualization.layers.find(
-              (layer) => layer.layerId === 'annotation_alert_started'
-            );
-
-            if (!hasAlertAnnotation) {
-              const indexPatternId = initialState.rawState.attributes?.references.find(
-                (r) => r.type === 'index-pattern'
-              )?.id;
-              const annotations = getAdhocAnnotations(alert, indexPatternId ?? '');
-              visualization.layers.push(...annotations);
-            }
+            const indexPatternId = initialState.rawState.attributes?.references.find(
+              (r) => r.type === 'index-pattern'
+            )?.id;
+            const annotations = getAdhocAnnotations(alert, indexPatternId ?? '');
+            visualization.layers.push(...annotations);
           }
         }
       }

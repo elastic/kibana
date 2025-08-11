@@ -15,7 +15,7 @@ export function getAdhocAnnotations(
 ): XYByValueAnnotationLayerConfig[] {
   return [
     {
-      layerId: 'annotation_alert_started',
+      layerId: uuidv4(),
       layerType: 'annotations',
       annotations: [
         {
