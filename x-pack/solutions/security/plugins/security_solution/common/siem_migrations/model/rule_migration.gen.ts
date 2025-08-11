@@ -390,6 +390,10 @@ export const RuleMigrationTranslationStats = z.object({
        * The number of rules that have been successfully translated and matched Elastic prebuilt rules.
        */
       prebuilt: z.number().int(),
+      /**
+       * The number of rules that have the placeholder for the missing index pattern in the query.
+       */
+      missing_index: z.number().int(),
     }),
     /**
      * The number of rules that have failed translation.
