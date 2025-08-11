@@ -47,7 +47,7 @@ export const NoDataCard = ({
   docsLink: link,
   onClick,
   icon,
-  hideActions = false,
+  hideActionButton = false,
   'data-test-subj': dataTestSubj = 'noDataCard',
 }: Props) => {
   const cardIcon = icon ? icon : <ElasticAgentCardIllustration />;
@@ -77,7 +77,7 @@ export const NoDataCard = ({
         )
       }
       actions={
-        !hideActions && canAccessFleet && href ? (
+        !hideActionButton && canAccessFleet && href ? (
           // eslint-disable-next-line @elastic/eui/href-or-on-click
           <EuiButton
             color="primary"

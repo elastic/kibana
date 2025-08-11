@@ -211,7 +211,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
               ),
               docsLink: `${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-get-started.html`,
               'data-test-subj': 'profilingCheckSetupCard',
-              hideActions: true,
+              hideActionButton: true,
             },
           },
         }}

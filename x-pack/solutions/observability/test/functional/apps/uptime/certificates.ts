@@ -30,7 +30,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await esArchiver.unload(UPTIME_HEARTBEAT_DATA);
       });
 
-      it.skip('go to certs page', async () => {
+      it('go to certs page', async () => {
         await uptimeService.common.waitUntilDataIsLoaded();
         await uptimeService.cert.hasViewCertButton();
         await uptimeService.navigation.goToCertificates();
@@ -55,7 +55,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await makeCheck({ es, tls: true });
       });
 
-      it.skip('can navigate to cert page', async () => {
+      it('can navigate to cert page', async () => {
         await uptimeService.common.waitUntilDataIsLoaded();
         await uptimeService.cert.hasViewCertButton();
         await uptimeService.navigation.goToCertificates();

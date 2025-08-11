@@ -116,6 +116,6 @@ export const WithComplexDescription = {
       </EuiFlexGrid>
     ),
     href: '/app/integrations/browse',
-    hideActions: true,
+    hideActionButton: true,
   },
 };

@@ -53,8 +53,8 @@ describe('NoDataCardComponent', () => {
       expect(screen.getByText('Custom description')).toBeInTheDocument();
     });
 
-    test('does not render button if hideActions is passed and/or without href', () => {
-      render(<NoDataCard hideActions={true} />);
+    test('does not render button if hideButton is passed and/or without href', () => {
+      render(<NoDataCard hideActionButton={true} />);
 
       expect(screen.queryByTestId('noDataDefaultActionButton')).not.toBeInTheDocument();
       expect(screen.queryByRole('link', { name: /Should not show/i })).not.toBeInTheDocument();

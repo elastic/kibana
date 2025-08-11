@@ -51,7 +51,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('uptimeSettingsDefineConnector');
     });
 
-    it.skip('go to settings to define connector', async () => {
+    it('go to settings to define connector', async () => {
       await uptimeService.overview.clickDefineSettings();
       await uptimeService.common.waitUntilDataIsLoaded();
       await testSubjects.existOrFail('comboBoxInput');

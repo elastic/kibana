@@ -20,7 +20,7 @@ type PropArguments = Pick<
   | 'href'
   | 'docsLink'
   | 'canAccessFleet'
-  | 'hideActions'
+  | 'hideActionButton'
   | 'data-test-subj'
 >;
 type ServiceArguments = Pick<NoDataCardServices, 'canAccessFleet'>;
