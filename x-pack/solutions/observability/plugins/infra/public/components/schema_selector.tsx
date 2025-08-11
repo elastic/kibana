@@ -18,7 +18,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import {
+  DataSchemaFormatEnum,
+  type DataSchemaFormat,
+} from '@kbn/metrics-data-access-plugin/common';
 import type { HostsState } from '../pages/metrics/hosts/hooks/use_unified_search_url_state';
 
 const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvailable', {
@@ -95,10 +98,10 @@ const InvalidDisplay = ({ value }: { value: string }) => {
   );
 };
 const schemaTranslationMap = {
-  [DataSchemaFormat.ECS]: i18n.translate('xpack.infra.schemaSelector.ecsDisplay', {
+  [DataSchemaFormatEnum.ECS]: i18n.translate('xpack.infra.schemaSelector.ecsDisplay', {
     defaultMessage: 'Elastic System Integration',
   }),
-  [DataSchemaFormat.SEMCONV]: i18n.translate('xpack.infra.schemaSelector.semconvDisplay', {
+  [DataSchemaFormatEnum.SEMCONV]: i18n.translate('xpack.infra.schemaSelector.semconvDisplay', {
     defaultMessage: 'OpenTelemetry',
   }),
 };
