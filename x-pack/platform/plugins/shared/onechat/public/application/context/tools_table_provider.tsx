@@ -10,7 +10,7 @@ import { noop } from 'lodash';
 import React, { createContext, useCallback, useContext } from 'react';
 import { appPaths } from '../utils/app_paths';
 import { useNavigation } from '../hooks/use_navigation';
-import { useDeleteToolModal, useDeleteToolsModal } from '../hooks/tools/use_delete_tools';
+import { useDeleteTool, useDeleteTools } from '../hooks/tools/use_delete_tools';
 import { labels } from '../utils/i18n';
 
 export interface ToolsActionsContextType {
@@ -54,7 +54,7 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
     deleteTool,
     confirmDelete,
     cancelDelete,
-  } = useDeleteToolModal();
+  } = useDeleteTool();
 
   const {
     isOpen: isBulkDeleteToolsModalOpen,
@@ -63,7 +63,7 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
     deleteTools: bulkDeleteTools,
     confirmDelete: confirmBulkDeleteTools,
     cancelDelete: cancelBulkDeleteTools,
-  } = useDeleteToolsModal();
+  } = useDeleteTools();
 
   const deleteEsqlToolTitleId = useGeneratedHtmlId({
     prefix: 'deleteEsqlToolTitle',

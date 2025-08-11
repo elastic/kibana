@@ -15,7 +15,7 @@ import { duplicateName } from '../../utils/duplicate_name';
 import { labels } from '../../utils/i18n';
 import { useOnechatServices } from '../use_onechat_service';
 import { useToasts } from '../use_toasts';
-import { useOnechatTool } from './use_tools';
+import { useToolService } from './use_tools';
 
 type CreateToolMutationOptions = UseMutationOptions<CreateToolResponse, Error, CreateToolPayload>;
 
@@ -53,7 +53,7 @@ export interface UseCreateToolProps {
 
 export const useCreateTool = ({ sourceToolId, onSuccess, onError }: UseCreateToolProps = {}) => {
   const { addSuccessToast, addErrorToast } = useToasts();
-  const { tool: sourceTool, isLoading } = useOnechatTool(sourceToolId);
+  const { tool: sourceTool, isLoading } = useToolService(sourceToolId);
 
   const handleSuccess = useCallback<CreateToolSuccessCallback>(
     (response, variables, context) => {

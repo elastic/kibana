@@ -13,7 +13,7 @@ import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
 import { useOnechatServices } from '../use_onechat_service';
 import { useToasts } from '../use_toasts';
-import { useOnechatTool } from './use_tools';
+import { useToolService } from './use_tools';
 
 interface EditToolMutationVariables {
   toolId: string;
@@ -60,7 +60,7 @@ export interface UseEditToolProps {
 
 export const useEditTool = ({ toolId, onSuccess, onError }: UseEditToolProps) => {
   const { addSuccessToast, addErrorToast } = useToasts();
-  const { tool: editingTool, isLoading } = useOnechatTool(toolId);
+  const { tool: editingTool, isLoading } = useToolService(toolId);
 
   const handleSuccess = useCallback<EditToolSuccessCallback>(
     (response, variables, context) => {

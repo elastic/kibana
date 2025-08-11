@@ -12,11 +12,11 @@ import { useMemo } from 'react';
 import { queryKeys } from '../../query_keys';
 import { useOnechatServices } from '../use_onechat_service';
 
-export interface UseOnechatToolsProps {
+export interface UseToolsProps {
   includeSystemTools?: boolean;
 }
 
-export const useOnechatTools = ({ includeSystemTools }: UseOnechatToolsProps = {}) => {
+export const useToolsService = ({ includeSystemTools }: UseToolsProps = {}) => {
   const { toolsService } = useOnechatServices();
 
   const { data, isLoading, error } = useQuery({
@@ -37,7 +37,7 @@ export const useOnechatTools = ({ includeSystemTools }: UseOnechatToolsProps = {
   return { tools, isLoading, error };
 };
 
-export const useOnechatTool = (toolId?: string) => {
+export const useToolService = (toolId?: string) => {
   const { toolsService } = useOnechatServices();
 
   const {
