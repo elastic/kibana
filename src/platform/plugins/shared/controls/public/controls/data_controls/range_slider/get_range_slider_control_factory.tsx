@@ -205,7 +205,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
 
           const hasValidLowerBound = !isNaN(gte) && gte !== min;
           const hasValidUpperBound = !isNaN(lte) && lte !== max;
-          
+
           let rangeFilter: Filter | undefined;
           if (value && dataView && dataViewField && (hasValidLowerBound || hasValidUpperBound)) {
             const params = {
