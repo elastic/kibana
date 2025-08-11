@@ -66,7 +66,6 @@ packages/kbn-babel-preset @elastic/kibana-operations
 src/platform/packages/shared/kbn-babel-register @elastic/kibana-operations
 src/platform/packages/private/kbn-babel-transform @elastic/kibana-operations
 x-pack/platform/plugins/private/banners @elastic/appex-sharedux
-packages/kbn-bazel-runner @elastic/kibana-operations
 src/platform/packages/shared/kbn-bfetch-error @elastic/appex-sharedux
 examples/bfetch_explorer @elastic/appex-sharedux
 src/platform/plugins/shared/bfetch @elastic/appex-sharedux
@@ -1631,12 +1630,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/cli_keystore/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
-/.bazelignore @elastic/kibana-operations
-/.bazeliskversion @elastic/kibana-operations
-/.bazelrc @elastic/kibana-operations
-/.bazelrc.common @elastic/kibana-operations
-/.bazelversion @elastic/kibana-operations
-/WORKSPACE.bazel @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 /.buildkite/scripts/steps/esql_grammar_sync.sh @elastic/kibana-esql
 /.buildkite/scripts/steps/esql_generate_function_metadata.sh @elastic/kibana-esql
