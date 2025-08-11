@@ -11,7 +11,6 @@ import type { Reference } from '@kbn/content-management-utils';
 import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, debounceTime, merge } from 'rxjs';
 import { v4 } from 'uuid';
-import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { DASHBOARD_APP_ID } from '../../common/constants';
 import { getReferencesForControls, getReferencesForPanelId } from '../../common';
 import type { DashboardState } from '../../common/types';
@@ -41,7 +40,6 @@ import {
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
-import { getAdhocAnnotations } from './get_adhoc_annotations';
 
 export function getDashboardApi({
   creationOptions,
@@ -131,16 +129,6 @@ export function getDashboardApi({
 
   const trackOverlayApi = initializeTrackOverlay(trackPanel.setFocusedPanelId);
 
-  const addAdhocAnnotationsToPanelState = (panelState: SerializedPanelState) => {
-    const alert = creationOptions?.getInitialInput?.().alert;
-
-    if (alert) {
-      const annotations = getAdhocAnnotations(alert);
-      const rawState = panelState.rawState as any;
-      rawState.attributes?.state?.visualization?.layers?.push(...annotations);
-    }
-  };
-
   const dashboardApi = {
     ...viewModeManager.api,
     ...dataLoadingManager.api,
@@ -222,13 +210,12 @@ export function getDashboardApi({
     savedObjectId$,
     setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),
     getSerializedStateForChild: (childId: string) => {
-      if (childId === CONTROL_GROUP_EMBEDDABLE_ID) {
-        return controlGroupManager.internalApi.getStateForControlGroup();
-      } else {
-        const panelState = layoutManager.internalApi.getSerializedStateForPanel(childId);
-        addAdhocAnnotationsToPanelState(panelState);
-        return panelState;
-      }
+      return childId === CONTROL_GROUP_EMBEDDABLE_ID
+        ? controlGroupManager.internalApi.getStateForControlGroup()
+        : layoutManager.internalApi.getSerializedStateForPanel(childId);
+    },
+    getAlertForAnnotation: () => {
+      return creationOptions?.getInitialInput?.().alert;
     },
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
     type: DASHBOARD_API_TYPE as 'dashboard',

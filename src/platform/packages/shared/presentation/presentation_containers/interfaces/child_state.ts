@@ -13,6 +13,7 @@ export interface HasSerializedChildState<SerializedState extends object = object
   getSerializedStateForChild: (
     childId: string
   ) => SerializedPanelState<SerializedState> | undefined;
+  getAlertForAnnotation: () => { start: string };
 }
 
 export const apiHasSerializedChildState = <SerializedState extends object = object>(

@@ -72,3 +72,9 @@ export function apiPublishesInlineEditingCapabilities(
 ): api is { canEditInline: boolean } {
   return isObject(api) && Object.hasOwn(api, 'canEditInline');
 }
+
+export function apiHasGetAlertForAnnotation(
+  api: unknown
+): api is { getAlertForAnnotation: () => { start: string } } {
+  return isObject(api) && Object.hasOwn(api, 'getAlertForAnnotation');
+}
