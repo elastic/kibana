@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getAlerts(supertest, log, es, createdRule);
 
-      expect(alerts.hits.hits.length).toBe(1);
+      expect(alerts.hits.hits).toHaveLength(1);
       expect(removeRandomValuedPropertiesFromAlert(alerts.hits.hits[0]._source)).toEqual({
         'kibana.alert.rule.parameters': {
           description: 'Detecting root and admin users',
@@ -216,7 +216,7 @@ export default ({ getService }: FtrProviderContext) => {
         size: 10,
       });
 
-      expect(previewAlerts.length).toBe(1);
+      expect(previewAlerts).toHaveLength(1);
       expect(previewAlerts[0]._source).toEqual(
         expect.objectContaining({
           'agent.name': 'test-1',
@@ -252,7 +252,7 @@ export default ({ getService }: FtrProviderContext) => {
         size: 10,
       });
 
-      expect(previewAlerts.length).toBe(3);
+      expect(previewAlerts).toHaveLength(3);
     });
 
     describe('non-aggregating query rules', () => {
@@ -291,7 +291,7 @@ export default ({ getService }: FtrProviderContext) => {
           size: 10,
         });
 
-        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts).toHaveLength(1);
         // all fields from source document should be returned
         expect(previewAlerts[0]._source).toEqual(
           expect.objectContaining({
@@ -335,7 +335,7 @@ export default ({ getService }: FtrProviderContext) => {
           size: 10,
         });
 
-        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts).toHaveLength(1);
       });
     });
 
@@ -369,7 +369,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts).toHaveLength(1);
         expect(previewAlerts[0]._source).toHaveProperty('custom_named_agent', 'test-1');
         expect(previewAlerts[0]._source).not.toHaveProperty(['agent.name']);
         expect(previewAlerts[0]._source).not.toHaveProperty('agent.name');
@@ -410,7 +410,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-          expect(previewAlerts.length).toBe(3);
+          expect(previewAlerts).toHaveLength(3);
           expect(previewAlerts.map((_) => _._source?.['agent.name'])).toEqual(
             expect.arrayContaining(['part-0', 'part-1', 'test-1'])
           );
@@ -450,7 +450,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-          expect(previewAlerts.length).toBe(3);
+          expect(previewAlerts).toHaveLength(3);
         });
 
         //  When expanded field dropped, ES|QL response rows will be identical.
@@ -489,7 +489,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-          expect(previewAlerts.length).toBe(2);
+          expect(previewAlerts).toHaveLength(2);
         });
 
         it('should generate alert per expanded row when mv_expand used multiple times', async () => {
@@ -530,7 +530,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-          expect(previewAlerts.length).toBe(7);
+          expect(previewAlerts).toHaveLength(7);
           expect(previewAlerts.map((_) => _._source?.['agent.name'])).toEqual(
             expect.arrayContaining(['part-0', 'part-1', 'test-1'])
           );
@@ -570,7 +570,7 @@ export default ({ getService }: FtrProviderContext) => {
             size: 10,
           });
 
-          expect(previewAlerts.length).toBe(2);
+          expect(previewAlerts).toHaveLength(2);
         });
 
         it('should deduplicate alerts generated form expanded rows when expanded field renamed', async () => {
@@ -606,7 +606,7 @@ export default ({ getService }: FtrProviderContext) => {
             size: 10,
           });
 
-          expect(previewAlerts.length).toBe(2);
+          expect(previewAlerts).toHaveLength(2);
         });
 
         it('should deduplicate alert when expanded field dropped', async () => {
@@ -642,7 +642,7 @@ export default ({ getService }: FtrProviderContext) => {
             size: 10,
           });
 
-          expect(previewAlerts.length).toBe(1);
+          expect(previewAlerts).toHaveLength(1);
         });
 
         describe('pagination', () => {
@@ -688,7 +688,7 @@ export default ({ getService }: FtrProviderContext) => {
               200
             );
 
-            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+            expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
             runSoonRule(supertest, createdRule.id);
@@ -703,7 +703,7 @@ export default ({ getService }: FtrProviderContext) => {
               new Date()
             );
 
-            expect(alertsResponse.hits.hits.length).toBe(120);
+            expect(alertsResponse.hits.hits).toHaveLength(120);
           });
 
           it('should create alerts from all events(2 x max_signals)', async () => {
@@ -739,7 +739,7 @@ export default ({ getService }: FtrProviderContext) => {
               RuleExecutionStatusEnum['partial failure'],
               200
             );
-            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+            expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
             await patchRule(supertest, log, {
@@ -762,7 +762,7 @@ export default ({ getService }: FtrProviderContext) => {
               new Date()
             );
 
-            expect(alertsResponse.hits.hits.length).toBe(200);
+            expect(alertsResponse.hits.hits).toHaveLength(200);
           });
 
           it('should create alerts from all events(2 x max_signals) when used timestamp override', async () => {
@@ -801,7 +801,7 @@ export default ({ getService }: FtrProviderContext) => {
               RuleExecutionStatusEnum['partial failure'],
               200
             );
-            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+            expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
             await patchRule(supertest, log, {
@@ -824,7 +824,7 @@ export default ({ getService }: FtrProviderContext) => {
               new Date()
             );
 
-            expect(alertsResponse.hits.hits.length).toBe(200);
+            expect(alertsResponse.hits.hits).toHaveLength(200);
           });
 
           it('should create alerts from all events(2 x max_signals) when used timestamp override without fallback', async () => {
@@ -863,7 +863,7 @@ export default ({ getService }: FtrProviderContext) => {
               RuleExecutionStatusEnum['partial failure'],
               200
             );
-            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+            expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
             await patchRule(supertest, log, {
@@ -886,7 +886,7 @@ export default ({ getService }: FtrProviderContext) => {
               new Date()
             );
 
-            expect(alertsResponse.hits.hits.length).toBe(200);
+            expect(alertsResponse.hits.hits).toHaveLength(200);
           });
 
           it('should not create more than max_signals alerts from single document when paginate through results', async () => {
@@ -932,7 +932,7 @@ export default ({ getService }: FtrProviderContext) => {
               200
             );
 
-            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+            expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
             runSoonRule(supertest, createdRule.id);
@@ -948,7 +948,7 @@ export default ({ getService }: FtrProviderContext) => {
               new Date()
             );
 
-            expect(alertsResponse.hits.hits.length).toBe(200);
+            expect(alertsResponse.hits.hits).toHaveLength(200);
 
             const agentTypeCounts = alertsResponse.hits.hits.reduce<Record<string, number>>(
               (acc, curr) => {
@@ -1011,7 +1011,7 @@ export default ({ getService }: FtrProviderContext) => {
               200
             );
 
-            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+            expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
             runSoonRule(supertest, createdRule.id);
@@ -1026,7 +1026,7 @@ export default ({ getService }: FtrProviderContext) => {
               new Date()
             );
 
-            expect(alertsResponse.hits.hits.length).toBe(120);
+            expect(alertsResponse.hits.hits).toHaveLength(120);
           });
 
           it('should create alerts from multiple expanded values', async () => {
@@ -1073,7 +1073,7 @@ export default ({ getService }: FtrProviderContext) => {
               200
             );
 
-            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+            expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
             runSoonRule(supertest, createdRule.id);
@@ -1088,7 +1088,7 @@ export default ({ getService }: FtrProviderContext) => {
               new Date()
             );
             // 60 from doc1 and 75 from doc2
-            expect(alertsResponse.hits.hits.length).toBe(135);
+            expect(alertsResponse.hits.hits).toHaveLength(135);
           });
         });
       });
@@ -1130,7 +1130,7 @@ export default ({ getService }: FtrProviderContext) => {
           sort: ['agent.name'],
         });
 
-        expect(previewAlertsOrderedByAgentName.length).toBe(3);
+        expect(previewAlertsOrderedByAgentName).toHaveLength(3);
         expect(previewAlertsOrderedByAgentName[0]._source).toEqual(
           expect.objectContaining({
             'agent.name': 'test-1',
@@ -1184,7 +1184,7 @@ export default ({ getService }: FtrProviderContext) => {
           size: 10,
         });
 
-        expect(previewAlerts.length).toBe(2);
+        expect(previewAlerts).toHaveLength(2);
         expect(previewAlerts[0]._source).toHaveProperty(['_counted'], 1);
         expect(previewAlerts[1]._source).toHaveProperty(['_counted'], 1);
       });
@@ -1213,7 +1213,7 @@ export default ({ getService }: FtrProviderContext) => {
           size: 10,
         });
 
-        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts).toHaveLength(1);
         // no data has been injected during rule execution interval
         expect(previewAlerts[0]._source).toHaveProperty(['_counted'], 0);
       });
@@ -1268,7 +1268,7 @@ export default ({ getService }: FtrProviderContext) => {
           sort: ['event.ingested'],
         });
 
-        expect(previewAlerts.length).toBe(2);
+        expect(previewAlerts).toHaveLength(2);
         expect(previewAlerts[0]._source).toHaveProperty(['event.ingested'], expectedEventIngested);
         expect(previewAlerts[1]._source).not.toHaveProperty(['event.ingested']);
       });
@@ -1299,7 +1299,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts).toHaveLength(1);
         expect(previewAlerts[0]._source).toHaveProperty(['event.ingested'], expectedEventIngested);
       });
     });
@@ -1344,7 +1344,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-        expect(previewAlerts.length).toBe(2);
+        expect(previewAlerts).toHaveLength(2);
       });
     });
 
@@ -1383,7 +1383,7 @@ export default ({ getService }: FtrProviderContext) => {
           size: 200,
         });
 
-        expect(previewAlerts.length).toBe(100);
+        expect(previewAlerts).toHaveLength(100);
       });
 
       it("doesn't generate max alerts warning when circuit breaker is met but not exceeded", async () => {
@@ -1419,7 +1419,7 @@ export default ({ getService }: FtrProviderContext) => {
           size: 200,
         });
 
-        expect(previewAlerts.length).toBe(100);
+        expect(previewAlerts).toHaveLength(100);
       });
 
       it('should work for max alerts > 100', async () => {
@@ -1455,7 +1455,7 @@ export default ({ getService }: FtrProviderContext) => {
           size: 200,
         });
 
-        expect(previewAlerts.length).toBe(150);
+        expect(previewAlerts).toHaveLength(150);
       });
 
       // we use actual rule executions, not preview, because for preview API alerts index refresh=false for non suppressed alerts
@@ -1538,7 +1538,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
 
         // should return 100 alerts
-        expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+        expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
         // re-trigger rule execution with new interval
         await patchRule(supertest, log, {
@@ -1563,7 +1563,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
 
         // should return 160 alerts
-        expect(alertsResponse.hits.hits.length).toBe(160);
+        expect(alertsResponse.hits.hits).toHaveLength(160);
       });
     });
 
@@ -1598,7 +1598,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts).toHaveLength(1);
 
         expect(previewAlerts[0]._source).toHaveProperty('host.risk.calculated_level', 'Low');
         expect(previewAlerts[0]._source).toHaveProperty('host.risk.calculated_score_norm', 1);
@@ -1640,7 +1640,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts).toHaveLength(1);
 
         expect(previewAlerts[0]?._source?.['host.asset.criticality']).toBe('extreme_impact');
       });
@@ -1680,7 +1680,7 @@ export default ({ getService }: FtrProviderContext) => {
           size: 10,
         });
 
-        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts).toHaveLength(1);
         expect(previewAlerts[0]._source).toHaveProperty(['observer.os.full'], 'full test os');
         // *.text is multifield define in mappings for observer.os.full
         expect(previewAlerts[0]._source).not.toHaveProperty(['observer.os.full.text']);
@@ -1723,7 +1723,7 @@ export default ({ getService }: FtrProviderContext) => {
           size: 10,
         });
 
-        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts).toHaveLength(1);
         expect(previewAlerts[0]._source).toHaveProperty(
           ['process.entry_leader.name'],
           'test_process_name'
@@ -1786,7 +1786,7 @@ export default ({ getService }: FtrProviderContext) => {
             size: 10,
           });
 
-          expect(previewAlerts.length).toBe(1);
+          expect(previewAlerts).toHaveLength(1);
           // all multifields have been indexed, which is expected, seen we don't know original mappings
           expect(previewAlerts[0]._source).toHaveProperty(
             ['random.entry_leader.name'],
@@ -1833,7 +1833,7 @@ export default ({ getService }: FtrProviderContext) => {
             timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
           });
 
-          expect(logs[0].errors.length).toEqual(0);
+          expect(logs[0].errors).toHaveLength(0);
         });
       });
     });
@@ -1904,7 +1904,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
         const allNewAlertsAfter2ManualRuns = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlertsAfter2ManualRuns.hits.hits.length).toEqual(2);
+        expect(allNewAlertsAfter2ManualRuns.hits.hits).toHaveLength(2);
       });
 
       it('does not alert if the manual run overlaps with a previous scheduled rule execution', async () => {
@@ -2199,8 +2199,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // Failing: See https://github.com/elastic/kibana/issues/224699
-    describe.skip('shard failures', () => {
+    describe('shard failures', () => {
       const config = getService('config');
       const isServerless = config.get('serverless');
       const dataPathBuilder = new EsArchivePathBuilder(isServerless);
@@ -2249,7 +2248,7 @@ export default ({ getService }: FtrProviderContext) => {
           ])
         );
 
-        expect(previewAlerts?.length).toBeGreaterThan(0);
+        expect(previewAlerts).not.toHaveLength(0);
       });
 
       it('should handle shard failures and include errors in logs for query that is aggregating', async () => {
