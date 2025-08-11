@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { SavedObjectsReference } from '@kbn/content-management-content-editor';
 import type { RelatedDashboard } from '@kbn/observability-schema';
-import moment from 'moment';
 import { useKibana } from '../../../../utils/kibana_react';
 
 export interface ActionButtonProps {
