@@ -73,7 +73,13 @@ export class LockManager {
           script: {
             lang: 'painless',
             source: `
+                    // Get the current time on the ES server.
                     long now = System.currentTimeMillis();
+
+                    // Update the document if:
+                    // - the document does not exist or,
+                    // - the lock is expired or,
+                    // - the current document is owned by the same token
                     if (ctx.op == 'create' ||
                         Instant.parse(ctx._source.expiresAt).toEpochMilli() < now ||
                         ctx._source.token == params.token) {
