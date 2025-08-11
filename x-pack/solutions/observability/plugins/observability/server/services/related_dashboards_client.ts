@@ -28,7 +28,7 @@ import {
   isSuggestedDashboardsValidRuleTypeId,
 } from './helpers';
 import { ReferencedPanelManager } from './referenced_panel_manager';
-import { SearchQuery } from '@kbn/content-management-plugin/common';
+import { Alert } from '@kbn/alerts-as-data-utils';
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 
@@ -63,11 +63,7 @@ export class RelatedDashboardsClient {
     }
 
     const [suggestedDashboards, linkedDashboards] = await Promise.all([
-      this.fetchSuggested(alert, {
-        ruleName: alert.getRuleName() || '',
-        page: 1,
-        limit: 100,
-      }),
+      this.fetchSuggested(alert),
       this.getLinkedDashboards(ruleId),
     ]);
 
@@ -142,12 +138,28 @@ export class RelatedDashboardsClient {
     const index = alert.getRuleQueryIndex();
     const allRelevantFields = alert.getAllRelevantFields();
 
+    this.dashboardsById.forEach((d) => {
+      console.log('ADD DASHBOARD', d.id, 'SCORE', d.score);
+      allSuggestedDashboards.add({
+        id: d.id,
+        title: d.attributes.title,
+        description: d.attributes.description,
+        tags: d.attributes.tags,
+        // If it has a pre-existing score, that's a text match
+        matchedBy: { textMatch: [d.score] },
+        score: d.score ?? 0,
+      });
+    });
+
     if (index) {
-      const { dashboards } = this.getDashboardsByIndex(index);
+      const { dashboards } = this.dashboardsForIndex(index, this.dashboardsById.values());
       dashboards.forEach((dashboard) => allSuggestedDashboards.add(dashboard));
     }
     if (allRelevantFields.length > 0) {
-      const { dashboards } = this.getDashboardsByField(allRelevantFields);
+      const { dashboards } = this.dashboardsForField(
+        allRelevantFields,
+        this.dashboardsById.values()
+      );
       dashboards.forEach((dashboard) => allSuggestedDashboards.add(dashboard));
     }
 
@@ -168,37 +180,34 @@ export class RelatedDashboardsClient {
     return sortedDashboards;
   }
 
-  private async fetchSuggested(
-    alert: AlertData,
-    {
-      ruleName,
-      page,
-      perPage = 20,
-      limit,
-    }: {
-      ruleName: string;
-      page: number;
-      perPage?: number;
-      limit?: number;
+  private async fetchSuggested(alert: AlertData): Promise<SuggestedDashboard[]> {
+    // First do a text search and set a base score based on the rank in the results
+    // We ignore the actual ES score... because the SO client doesn't expose it, so just assume
+    // that the top 5 results are decent enough and weight linearly
+    const textMatchLimit = 5;
+    const textMatches = await this.dashboardClient.search({
+      text: alert.getRuleName(), // TODO handle empty strings
+      defaultSearchOperator: 'OR',
+      limit: textMatchLimit,
+    });
+    for (const [index, dashboard] of textMatches.result.hits.entries()) {
+      // Declining initial score based on distance from the top of the results
+      dashboard.score = textMatchLimit - index;
     }
-  ): Promise<SuggestedDashboard[]> {
-    const searchAndStore = async (query: SearchQuery) => {
-      const res = await await this.dashboardClient.search(query);
-      await this.processDashboardSearch(res);
-    };
-    await Promise.all([
-      searchAndStore({ text: ruleName, defaultSearchOperator: 'OR', limit: 100 }),
-      searchAndStore({ limit: 500 }),
-    ]);
+    await this.processDashboardSearch(textMatches);
+
+    // Now match by fields and indices, these will use the previous score as a multiplier if relevant
+    const allMatches = await this.dashboardClient.search({ limit: 7 });
+    await this.processDashboardSearch(allMatches);
 
     return this.rankDashboards(alert);
   }
 
-  private async processDashboardSearch(dsr: SearchResponse<Dashboard>) {
+  private async processDashboardSearch(dsr: SearchResponse<Dashboard>, rankScore = false) {
     const {
       result: { hits },
     } = dsr;
-    for (const dashboard of hits) {
+    for (const [idx, dashboard] of hits.entries()) {
       for (const panel of dashboard.attributes.panels) {
         if (
           isDashboardPanel(panel) &&
@@ -208,19 +217,28 @@ export class RelatedDashboardsClient {
           this.referencedPanelManager.addReferencedPanel({ dashboard, panel });
         }
       }
+
+      // For text matches we start the score based on their position in the results
+      if (rankScore) {
+        dashboard.score = hits.length - idx;
+      }
+      console.log('DASHSET ID', dashboard.id, 'SCORE', dashboard.score);
       this.dashboardsById.set(dashboard.id, dashboard);
     }
 
     await this.referencedPanelManager.fetchReferencedPanels();
   }
 
-  private getDashboardsByIndex(index: string): {
+  private dashboardsForIndex(
+    index: string,
+    dashboards: Iterable<Dashboard>
+  ): {
     dashboards: SuggestedDashboard[];
   } {
     const relevantDashboards: SuggestedDashboard[] = [];
-    this.dashboardsById.forEach((d) => {
+    for (const d of dashboards) {
       const panels = d.attributes.panels.filter(isDashboardPanel);
-      const matchingPanels = this.getPanelsByIndex(index, panels);
+      const matchingPanels = this.panelsWithIndex(index, panels);
       if (matchingPanels.length > 0) {
         this.logger.debug(
           () => `Found ${matchingPanels.length} panel(s) in dashboard ${d.id} using index ${index}`
@@ -234,15 +252,18 @@ export class RelatedDashboardsClient {
           score: 0, // scores are computed when dashboards are deduplicated
         });
       }
-    });
+    }
     return { dashboards: relevantDashboards };
   }
 
-  private getDashboardsByField(fields: string[]): {
+  private dashboardsForField(
+    fields: string[],
+    dashboards: Iterable<Dashboard>
+  ): {
     dashboards: SuggestedDashboard[];
   } {
     const relevantDashboards: SuggestedDashboard[] = [];
-    this.dashboardsById.forEach((d) => {
+    for (const d of dashboards) {
       const panels = d.attributes.panels.filter(isDashboardPanel);
       const matchingPanels = this.getPanelsByField(fields, panels);
       const allMatchingFields = new Set(
@@ -264,11 +285,11 @@ export class RelatedDashboardsClient {
           score: 0, // scores are computed when dashboards are deduplicated
         });
       }
-    });
+    }
     return { dashboards: relevantDashboards };
   }
 
-  private getPanelsByIndex(index: string, panels: DashboardPanel[]): DashboardPanel[] {
+  private panelsWithIndex(index: string, panels: DashboardPanel[]): DashboardPanel[] {
     const panelsByIndex = panels.filter((p) => this.getPanelIndices(p).has(index));
     return panelsByIndex;
   }
@@ -378,3 +399,5 @@ export class RelatedDashboardsClient {
     return intersection.size / union.size;
   }
 }
+
+function relatedDashboardScore(alert: AlertData) {}

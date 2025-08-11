@@ -28,6 +28,7 @@ export const suggestedDashboardSchema = z.object({
   matchedBy: z.object({
     fields: z.array(z.string()).optional(),
     index: z.array(z.string()).optional(),
+    textMatch: z.array(z.number()).optional(),
   }),
   score: z.number(),
 });
