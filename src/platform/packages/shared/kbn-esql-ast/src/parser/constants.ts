@@ -24,3 +24,61 @@ export const DOUBLE_BACKTICK = '``';
 
 export const DEFAULT_CHANNEL: number = +(Token as any).DEFAULT_CHANNEL;
 export const HIDDEN_CHANNEL: number = +(Token as any).HIDDEN_CHANNEL;
+
+export const SOURCE_COMMANDS = new Set<string>(['FROM', 'ROW', 'SHOW', 'TS', 'EXPLAIN']);
+
+export const PROCESSING_COMMANDS = new Set<string>([
+  'EVAL',
+  'WHERE',
+  'KEEP',
+  'LIMIT',
+  'STATS',
+  'SORT',
+  'DROP',
+  'RENAME',
+  'DISSECT',
+  'GROK',
+  'ENRICH',
+  'MV_EXPAND',
+  'JOIN',
+  'CHANGE_POINT',
+  'COMPLETION',
+  'SAMPLE',
+  'FORK',
+  'INLINESTATS',
+  'LOOKUP',
+  'INSIST',
+  'RERANK',
+  'FUSE',
+]);
+
+export const COMMANDS = new Set<string>([...SOURCE_COMMANDS, ...PROCESSING_COMMANDS]);
+
+export const KEYWORDS = new Set<string>([
+  ...COMMANDS,
+  'AND',
+  'ASC',
+  'BY',
+  'DESC',
+  'FALSE',
+  'FIRST',
+  'FULL',
+  'IN',
+  'INFO',
+  'INNER',
+  'IS',
+  'LAST',
+  'LEFT',
+  'LIKE',
+  'METADATA',
+  'NOT',
+  'NULL',
+  'NULLS',
+  'ON',
+  'OR',
+  'OUTER',
+  'RIGHT',
+  'RLIKE',
+  'TRUE',
+  'WITH',
+]);

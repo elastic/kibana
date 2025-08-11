@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React, { FC, VFC } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -13,10 +13,10 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
+import { Indicator } from '../../../../common/types/indicator';
 import { useFilterInOut } from '../hooks/use_filter_in_out';
 import { FilterIn } from '../utils/filter';
-import { Indicator } from '../../../../common/types/indicator';
-import { FILTER_FOR_TITLE } from './translations';
+import { FILTER_IN_ANNOUNCEMENT, FILTER_IN_TITLE } from './translations';
 
 const ICON_TYPE = 'plusInCircle';
 
@@ -42,6 +42,10 @@ export interface FilterInCellActionProps extends FilterInProps {
   Component: typeof EuiButtonEmpty | typeof EuiButtonIcon;
 }
 
+export interface FilterInContextMenuProps extends FilterInProps {
+  onAnnounce: (filterInMessage: string) => void;
+}
+
 /**
  * Retrieves the indicator's field and value, then creates a new {@link Filter} and adds it to the {@link FilterManager}.
  *
@@ -60,9 +64,9 @@ export const FilterInButtonIcon: VFC<FilterInProps> = ({
   }
 
   return (
-    <EuiToolTip content={FILTER_FOR_TITLE}>
+    <EuiToolTip content={FILTER_IN_TITLE}>
       <EuiButtonIcon
-        aria-label={FILTER_FOR_TITLE}
+        aria-label={FILTER_IN_TITLE}
         iconType={ICON_TYPE}
         iconSize="s"
         size="xs"
@@ -92,16 +96,16 @@ export const FilterInButtonEmpty: VFC<FilterInProps> = ({
   }
 
   return (
-    <EuiToolTip content={FILTER_FOR_TITLE}>
+    <EuiToolTip content={FILTER_IN_TITLE}>
       <EuiButtonEmpty
-        aria-label={FILTER_FOR_TITLE}
+        aria-label={FILTER_IN_TITLE}
         iconType={ICON_TYPE}
         iconSize="s"
         color="primary"
         onClick={filterFn}
         data-test-subj={dataTestSub}
       >
-        {FILTER_FOR_TITLE}
+        {FILTER_IN_TITLE}
       </EuiButtonEmpty>
     </EuiToolTip>
   );
@@ -114,10 +118,11 @@ export const FilterInButtonEmpty: VFC<FilterInProps> = ({
  *
  * @returns filter in {@link EuiContextMenuItem} for a context menu
  */
-export const FilterInContextMenu: VFC<FilterInProps> = ({
+export const FilterInContextMenu: FC<FilterInContextMenuProps> = ({
   data,
   field,
   'data-test-subj': dataTestSub,
+  onAnnounce,
 }) => {
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterIn });
   if (!filterFn) {
@@ -129,10 +134,13 @@ export const FilterInContextMenu: VFC<FilterInProps> = ({
       key="filterIn"
       icon="plusInCircle"
       size="s"
-      onClick={filterFn}
+      onClick={() => {
+        filterFn();
+        onAnnounce(FILTER_IN_ANNOUNCEMENT(field, typeof data === 'string' ? data : ''));
+      }}
       data-test-subj={dataTestSub}
     >
-      {FILTER_FOR_TITLE}
+      {FILTER_IN_TITLE}
     </EuiContextMenuItem>
   );
 };
@@ -156,10 +164,10 @@ export const FilterInCellAction: VFC<FilterInCellActionProps> = ({
   }
 
   return (
-    <EuiToolTip content={FILTER_FOR_TITLE}>
+    <EuiToolTip content={FILTER_IN_TITLE}>
       <EuiFlexItem data-test-subj={dataTestSub}>
-        <Component aria-label={FILTER_FOR_TITLE} iconType={ICON_TYPE} onClick={filterFn}>
-          {FILTER_FOR_TITLE}
+        <Component aria-label={FILTER_IN_TITLE} iconType={ICON_TYPE} onClick={filterFn}>
+          {FILTER_IN_TITLE}
         </Component>
       </EuiFlexItem>
     </EuiToolTip>
