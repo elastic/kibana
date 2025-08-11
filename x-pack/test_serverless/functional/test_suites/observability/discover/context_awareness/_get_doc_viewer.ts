@@ -69,8 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const [, surroundingActionEl] = await dataGrid.getRowActions();
         await surroundingActionEl.click();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await browser.refresh();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        
 
         await dataGrid.clickRowToggle({ isAnchorRow: true });
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
@@ -82,8 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const [singleDocActionEl] = await dataGrid.getRowActions();
         await singleDocActionEl.click();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await browser.refresh();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        
 
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
         await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
@@ -105,8 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const [, surroundingActionEl] = await dataGrid.getRowActions();
         await surroundingActionEl.click();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await browser.refresh();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        
 
         await dataGrid.clickRowToggle({ isAnchorRow: true });
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
@@ -116,8 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const [singleDocActionEl] = await dataGrid.getRowActions();
         await singleDocActionEl.click();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await browser.refresh();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        
 
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
         await testSubjects.missingOrFail('docViewerTab-doc_view_logs_overview');
