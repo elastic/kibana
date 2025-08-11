@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
+import {
+  FieldDefinition,
+  RoutingDefinition,
+  StreamQuery,
+  streamQuerySchema,
+} from '@kbn/streams-schema';
+import { fieldDefinitionSchema } from '@kbn/streams-schema/src/fields';
+import { routingDefinitionSchema } from '@kbn/streams-schema/src/models/ingest/routing';
 import { z } from '@kbn/zod';
 
 export interface ContentPackIncludeAll {
@@ -47,13 +54,41 @@ export const contentPackIncludedObjectsSchema: z.Schema<ContentPackIncludedObjec
   ])
 );
 
-type MergeableProperties = {
+export type ConflictResolution<K extends MergeablePropertiesKeys = MergeablePropertiesKeys> = {
+  type: K;
+  stream: string;
+  id: string;
+  value: MergeableProperties[K];
+};
+
+export const conflictResolutionSchema: z.Schema<ConflictResolution> = z.union([
+  z.object({
+    type: z.literal('field'),
+    stream: z.string(),
+    id: z.string(),
+    value: fieldDefinitionSchema,
+  }),
+  z.object({
+    type: z.literal('routing'),
+    stream: z.string(),
+    id: z.string(),
+    value: routingDefinitionSchema,
+  }),
+  z.object({
+    type: z.literal('query'),
+    stream: z.string(),
+    id: z.string(),
+    value: streamQuerySchema,
+  }),
+]);
+
+export type MergeableProperties = {
   field: FieldDefinition;
   routing: RoutingDefinition;
   query: StreamQuery;
 };
 
-type MergeablePropertiesKeys = keyof MergeableProperties;
+export type MergeablePropertiesKeys = keyof MergeableProperties;
 
 type PropertyAdded<K extends MergeablePropertiesKeys = MergeablePropertiesKeys> = {
   type: K;

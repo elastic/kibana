@@ -7,7 +7,11 @@
 
 import { Readable } from 'stream';
 import { z } from '@kbn/zod';
-import { ContentPack, contentPackIncludedObjectsSchema } from '@kbn/content-packs-schema';
+import {
+  ContentPack,
+  conflictResolutionSchema,
+  contentPackIncludedObjectsSchema,
+} from '@kbn/content-packs-schema';
 import { FieldDefinition, Streams, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
@@ -123,6 +127,9 @@ const importContentRoute = createServerRoute({
       include: z
         .string()
         .transform((value) => contentPackIncludedObjectsSchema.parse(JSON.parse(value))),
+      resolutions: z
+        .string()
+        .transform((value) => z.array(conflictResolutionSchema).parse(JSON.parse(value))),
       content: z.instanceof(Readable),
     }),
   }),
@@ -157,6 +164,7 @@ const importContentRoute = createServerRoute({
       contentPack,
       installation,
       include: params.body.include,
+      resolutions: params.body.resolutions,
     });
 
     const hasSystemResolvedConflicts = conflicts.some((streamConflicts) =>
@@ -262,6 +270,7 @@ const diffContentRoute = createServerRoute({
       contentPack,
       installation,
       include: params.body.include,
+      resolutions: [],
     });
 
     return { diffs: diffTrees({ existing, merged }), conflicts };

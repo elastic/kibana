@@ -13,7 +13,7 @@ import {
   StreamConflict,
 } from '@kbn/content-packs-schema';
 import { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
-import { filterQueries, filterRouting, includedObjectsFor } from './helpers';
+import { ConflictResolvers, filterQueries, filterRouting, includedObjectsFor } from './helpers';
 
 export type StreamTree = ContentPackStream & {
   children: StreamTree[];
@@ -60,13 +60,6 @@ export function asTree({
   };
 }
 
-type Resolver<T> = (existing: T, incoming: T) => { source: 'system' | 'user'; value: T };
-interface Resolvers {
-  query: Resolver<StreamQuery>;
-  field: Resolver<FieldDefinition>;
-  routing: Resolver<RoutingDefinition>;
-}
-
 export function mergeTrees({
   base,
   existing,
@@ -76,7 +69,7 @@ export function mergeTrees({
   base: StreamTree | undefined;
   existing: StreamTree;
   incoming: StreamTree;
-  resolvers: Resolvers;
+  resolvers: ConflictResolvers;
 }): {
   existing: StreamTree;
   incoming: StreamTree;
@@ -228,7 +221,7 @@ function mergeQueries({
   base?: StreamQuery[];
   existing: StreamQuery[];
   incoming: StreamQuery[];
-  resolver: Resolvers['query'];
+  resolver: ConflictResolvers['query'];
 }): { merged: StreamQuery[]; conflicts: PropertyConflict<'query'>[] } {
   const conflicts: PropertyConflict<'query'>[] = [];
   const merged = uniq([

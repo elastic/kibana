@@ -7,15 +7,21 @@
 
 import { omit } from 'lodash';
 import {
+  ConflictResolution,
   ContentPack,
   ContentPackIncludedObjects,
   ContentPackStream,
 } from '@kbn/content-packs-schema';
-import { FieldDefinition, RoutingDefinition, StreamQuery, Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { StreamTree, asTree, mergeTrees } from './tree';
 import { AssetClient } from '../../streams/assets/asset_client';
 import { StreamsClient } from '../../streams/client';
-import { asContentPackEntry, scopeContentPackStreams, scopeIncludedObjects } from './helpers';
+import {
+  asContentPackEntry,
+  buildResolvers,
+  scopeContentPackStreams,
+  scopeIncludedObjects,
+} from './helpers';
 import { ContentPackInstallation } from '../content_client';
 
 export async function importContentPack({
@@ -25,6 +31,7 @@ export async function importContentPack({
   streamsClient,
   include,
   installation,
+  resolutions,
 }: {
   root: Streams.WiredStream.Definition;
   contentPack: ContentPack;
@@ -32,6 +39,7 @@ export async function importContentPack({
   streamsClient: StreamsClient;
   include: ContentPackIncludedObjects;
   installation?: ContentPackInstallation;
+  resolutions: ConflictResolution[];
 }) {
   const { merged } = await mergeContentPack({
     root,
@@ -40,6 +48,7 @@ export async function importContentPack({
     streamsClient,
     include,
     installation,
+    resolutions,
   });
 
   const streams = flattenTree(merged);
@@ -53,6 +62,7 @@ export async function mergeContentPack({
   streamsClient,
   include,
   installation,
+  resolutions,
 }: {
   root: Streams.WiredStream.Definition;
   contentPack: ContentPack;
@@ -60,6 +70,7 @@ export async function mergeContentPack({
   streamsClient: StreamsClient;
   include: ContentPackIncludedObjects;
   installation?: ContentPackInstallation;
+  resolutions: ConflictResolution[];
 }) {
   const descendants = await streamsClient.getDescendants(root.name);
   const queryLinks = await assetClient.getAssetLinks(
@@ -98,17 +109,7 @@ export async function mergeContentPack({
     base: baseTree,
     existing: existingTree,
     incoming: incomingTree,
-    resolvers: {
-      query: (existing: StreamQuery, incoming: StreamQuery) => {
-        return { source: 'system', value: existing };
-      },
-      field: (existing: FieldDefinition, incoming: FieldDefinition) => {
-        return { source: 'system', value: existing };
-      },
-      routing: (existing: RoutingDefinition, incoming: RoutingDefinition) => {
-        return { source: 'system', value: existing };
-      },
-    },
+    resolvers: buildResolvers(resolutions),
   });
 }
 
