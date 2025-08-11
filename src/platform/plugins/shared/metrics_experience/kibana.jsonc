@@ -9,7 +9,6 @@
     "server": true,
     "browser": true,
     "configPath": [
-      "xpack",
       "metricsExperience"
     ],
     "requiredPlugins": [
