@@ -11,7 +11,7 @@ export {
   MessageRole,
   ConversationAccess,
   KnowledgeBaseType,
-  KnowledgeBaseState,
+  InferenceModelState,
 } from './types';
 export type { FunctionDefinition, CompatibleJSONSchema } from './functions/types';
 export {

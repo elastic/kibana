@@ -833,16 +833,16 @@
               "path": "x-pack/platform/plugins/shared/fleet/server/telemetry/sender.test.ts"
             },
             {
+              "plugin": "synthetics",
+              "path": "x-pack/solutions/observability/plugins/synthetics/server/telemetry/sender.ts"
+            },
+            {
               "plugin": "securitySolution",
               "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/sender.ts"
             },
             {
               "plugin": "securitySolution",
               "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/sender_helpers.ts"
-            },
-            {
-              "plugin": "synthetics",
-              "path": "x-pack/solutions/observability/plugins/synthetics/server/telemetry/sender.ts"
             },
             {
               "plugin": "synthetics",
