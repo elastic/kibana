@@ -80,6 +80,11 @@ export const ENDPOINT_ARTIFACT_LISTS = deepFreeze({
     name: 'Endpoint Security Trusted Apps List',
     description: 'Endpoint Security Trusted Apps List',
   },
+  trustedDevices: {
+    id: 'endpoint_trusted_devices',
+    name: 'Endpoint Security Trusted Devices List',
+    description: 'Endpoint Security Trusted Devices List',
+  },
   eventFilters: {
     id: 'endpoint_event_filters',
     name: 'Endpoint Security Event Filters List',

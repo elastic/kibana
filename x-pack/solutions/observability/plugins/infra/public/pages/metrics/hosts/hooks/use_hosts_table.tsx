@@ -17,7 +17,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
 import type { CloudProvider } from '@kbn/custom-icons';
-import { DataSchemaFormat, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -158,14 +158,13 @@ export const useHostsTable = () => {
 
   const displayAlerts = hostNodes.some((item) => 'alertsCount' in item);
   const showApmHostTroubleshooting = hostNodes.some((item) => !item.hasSystemMetrics);
-  const schema = searchCriteria.preferredSchema ?? DataSchemaFormat.ECS;
 
   const { value: formulas } = useAsync(
     () =>
       inventoryModel.metrics.getFormulas({
-        schema,
+        schema: searchCriteria.preferredSchema ?? 'ecs',
       }),
-    [inventoryModel.metrics, schema]
+    [inventoryModel.metrics, searchCriteria.preferredSchema]
   );
 
   const [{ detailsItemId, pagination, sorting }, setProperties] = useHostsTableUrlState();
@@ -454,63 +453,67 @@ export const useHostsTable = () => {
           buildMetricCell(max, 'diskSpaceUsage', hasSystemMetrics),
         align: 'right',
       },
-      {
-        name: (
-          <>
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate('xpack.infra.hostsViewPage.table.rx.screenReaderOnlyLabel', {
-                  defaultMessage: 'Network Inbound',
-                })}
-              </span>
-            </EuiScreenReaderOnly>
-            <ColumnHeader
-              label={TABLE_COLUMN_LABEL.rx}
-              toolTip={METRICS_TOOLTIP.rx}
-              formula={formulas?.get('rx').value}
-            />
-          </>
-        ),
-        width: '12%',
-        field: 'rxV2',
-        sortable: true,
-        'data-test-subj': 'hostsView-tableRow-rx',
-        render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
-          buildMetricCell(avg, 'rx', hasSystemMetrics),
-        align: 'right',
-      },
-      {
-        name: (
-          <>
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate('xpack.infra.hostsViewPage.table.tx.screenReaderOnlyLabel', {
-                  defaultMessage: 'Network Outbound',
-                })}
-              </span>
-            </EuiScreenReaderOnly>
-            <ColumnHeader
-              label={TABLE_COLUMN_LABEL.tx}
-              toolTip={METRICS_TOOLTIP.tx}
-              formula={formulas?.get('tx').value}
-            />
-          </>
-        ),
-        width: '12%',
-        field: 'txV2',
-        sortable: true,
-        'data-test-subj': 'hostsView-tableRow-tx',
-        render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
-          buildMetricCell(avg, 'tx', hasSystemMetrics),
-        align: 'right',
-      },
+      ...((searchCriteria.preferredSchema !== 'semconv'
+        ? [
+            {
+              name: (
+                <>
+                  <EuiScreenReaderOnly>
+                    <span>
+                      {i18n.translate('xpack.infra.hostsViewPage.table.rx.screenReaderOnlyLabel', {
+                        defaultMessage: 'Network Inbound',
+                      })}
+                    </span>
+                  </EuiScreenReaderOnly>
+                  <ColumnHeader
+                    label={TABLE_COLUMN_LABEL.rx}
+                    toolTip={METRICS_TOOLTIP.rx}
+                    formula={formulas?.get('rx').value}
+                  />
+                </>
+              ),
+              width: '12%',
+              field: 'rxV2',
+              sortable: true,
+              'data-test-subj': 'hostsView-tableRow-rx',
+              render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
+                buildMetricCell(avg, 'rx', hasSystemMetrics),
+              align: 'right',
+            },
+            {
+              name: (
+                <>
+                  <EuiScreenReaderOnly>
+                    <span>
+                      {i18n.translate('xpack.infra.hostsViewPage.table.tx.screenReaderOnlyLabel', {
+                        defaultMessage: 'Network Outbound',
+                      })}
+                    </span>
+                  </EuiScreenReaderOnly>
+                  <ColumnHeader
+                    label={TABLE_COLUMN_LABEL.tx}
+                    toolTip={METRICS_TOOLTIP.tx}
+                    formula={formulas?.get('tx').value}
+                  />
+                </>
+              ),
+              width: '12%',
+              field: 'txV2',
+              sortable: true,
+              'data-test-subj': 'hostsView-tableRow-tx',
+              render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
+                buildMetricCell(avg, 'tx', hasSystemMetrics),
+              align: 'right',
+            },
+          ]
+        : []) as EuiBasicTableColumn<HostNodeRow>[]),
     ],
-
     [
       displayAlerts,
       showApmHostTroubleshooting,
       formulas,
       metricColumnsWidth,
+      searchCriteria.preferredSchema,
       detailsItemId,
       setProperties,
       reportHostEntryClick,

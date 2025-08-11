@@ -50,11 +50,6 @@ import {
   getCaseSavedObjectsFromES,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import {
-  createAlertsIndex,
-  deleteAllAlerts,
-  deleteAllRules,
-} from '@kbn/test-suites-xpack/common/utils/security_solution';
-import {
   globalRead,
   noKibanaPrivileges,
   obsOnly,
@@ -70,6 +65,11 @@ import {
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication/users';
 import { getAlertById } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/alerts';
 import type { User } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication/types';
+import {
+  createAlertsIndex,
+  deleteAllAlerts,
+  deleteAllRules,
+} from '../../../../../common/utils/detections_response';
 import {
   getSecuritySolutionAlerts,
   createSecuritySolutionAlerts,
