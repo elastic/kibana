@@ -40,6 +40,7 @@ disabled:
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/actions/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alert_suppression/configs/ess_trial_license.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/exceptions/operators_data_types/date_types/basic_license_essentials_tier/configs/ess.config.ts
