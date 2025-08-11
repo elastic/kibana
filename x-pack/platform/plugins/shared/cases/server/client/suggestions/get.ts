@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SuggestionResponse } from '../../../common/types/domain';
+import type { SuggestionHandlerResponse } from '../../../common/types/domain';
 
 import type { CasesClientArgs } from '../types';
 
@@ -17,7 +17,7 @@ import type { GetAllForOwnerArgs } from './types';
 export async function getAllForOwner(
   { owner, context, request }: GetAllForOwnerArgs,
   clientArgs: CasesClientArgs
-): Promise<SuggestionResponse> {
+): Promise<SuggestionHandlerResponse> {
   const { attachmentSuggestionRegistry } = clientArgs;
 
   const suggestions = await attachmentSuggestionRegistry.getAllSuggestionsForOwner(

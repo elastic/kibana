@@ -25,6 +25,7 @@ import type {
   AddObservableRequest,
   UpdateObservableRequest,
   UserActionInternalFindResponse,
+  SuggestionResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -59,6 +60,7 @@ import {
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
   getCaseSimilarCasesUrl,
+  getCaseSuggestionsUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -659,4 +661,21 @@ export const getSimilarCases = async ({
   );
 
   return convertSimilarCasesToCamel(decodeCasesSimilarResponse(response));
+};
+export const getCaseSuggestions = async ({
+  caseId,
+  signal,
+}: {
+  caseId: string;
+  signal?: AbortSignal;
+}): Promise<SuggestionResponse> => {
+  const response = await KibanaServices.get().http.fetch<SuggestionResponse>(
+    getCaseSuggestionsUrl(caseId),
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+
+  return response;
 };

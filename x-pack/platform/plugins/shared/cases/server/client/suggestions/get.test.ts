@@ -6,14 +6,14 @@
  */
 import type { KibanaRequest } from '@kbn/core/server';
 import { getAllForOwner } from './get';
-import type { SuggestionResponse } from '../../../common/types/domain';
+import type { SuggestionHandlerResponse } from '../../../common/types/domain';
 import type { CasesClientArgs } from '../types';
 import type { GetAllForOwnerArgs } from './types';
 import { loggerMock } from '@kbn/logging-mocks';
 
 describe('getAllForOwner', () => {
   it('calls attachmentSuggestionRegistry.getAllSuggestionsForOwner and returns suggestions', async () => {
-    const mockSuggestions: SuggestionResponse = {
+    const mockSuggestions: SuggestionHandlerResponse = {
       suggestions: [
         {
           id: 'test-id',
