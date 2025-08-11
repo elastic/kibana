@@ -95,6 +95,54 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/metrics-config",
+        "id": "def-common.MetricsExporterCommonConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "MetricsExporterCommonConfig",
+        "description": [
+          "\nCommon configuration for OTLP metrics exporters"
+        ],
+        "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/metrics-config",
+            "id": "def-common.MetricsExporterCommonConfig.exportIntervalMillis",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "exportIntervalMillis",
+            "description": [
+              "Frequency in which the exporter should collect the metrics"
+            ],
+            "signature": [
+              "number | moment.Duration | undefined"
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/metrics-config",
+            "id": "def-common.MetricsExporterCommonConfig.temporalityPreference",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "temporalityPreference",
+            "description": [
+              "The preferred temporality of the metrics. Defaults to `delta`, as it plays better with the ES backend."
+            ],
+            "signature": [
+              "\"delta\" | \"cumulative\""
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -109,7 +157,23 @@
           "\nAllowed configurations for OTLP metrics exporters"
         ],
         "signature": [
-          "{ grpc: { url: string; headers?: Record<string, string> | undefined; exportIntervalMillis?: number | moment.Duration | undefined; }; } | { http: { url: string; headers?: Record<string, string> | undefined; exportIntervalMillis?: number | moment.Duration | undefined; }; }"
+          "{ grpc: ",
+          {
+            "pluginId": "@kbn/metrics-config",
+            "scope": "common",
+            "docId": "kibKbnMetricsConfigPluginApi",
+            "section": "def-common.MetricsExporterCommonConfig",
+            "text": "MetricsExporterCommonConfig"
+          },
+          " & { url: string; headers?: Record<string, string> | undefined; }; } | { http: ",
+          {
+            "pluginId": "@kbn/metrics-config",
+            "scope": "common",
+            "docId": "kibKbnMetricsConfigPluginApi",
+            "section": "def-common.MetricsExporterCommonConfig",
+            "text": "MetricsExporterCommonConfig"
+          },
+          " & { url: string; headers?: Record<string, string> | undefined; }; }"
         ],
         "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
         "deprecated": false,
