@@ -292,7 +292,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Allows users to manage trusted USB and external devices
    */
   trustedDevices: false,
->>>>>>> upstream/main
 
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
