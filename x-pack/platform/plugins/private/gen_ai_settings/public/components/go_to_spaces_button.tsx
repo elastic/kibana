@@ -31,7 +31,7 @@ export const GoToSpacesButton: React.FC<GoToSpacesButtonProps> = ({
             ? 'genAiSettings.goToPermissionsTabButtonLabel'
             : 'genAiSettings.goToSpacesButtonLabel'
         }
-        defaultMessage={navigateToPermissions ? 'Go to Permissions tab' : 'Go to Spaces'}
+        defaultMessage={navigateToPermissions ? 'Go to Permissions tab' : 'Go to Space Settings'}
       />
     </EuiButton>
   );

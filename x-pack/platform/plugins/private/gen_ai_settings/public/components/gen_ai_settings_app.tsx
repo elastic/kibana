@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import {
   EuiPageSection,
   EuiSpacer,
@@ -41,6 +41,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   const { showSpacesIntegration, isPermissionsBased, showAiBreadcrumb } = useEnabledFeatures();
   const { euiTheme } = useEuiTheme();
 
+  const hasConnectorsAllPrivilege =
+    application.capabilities.actions?.show === true &&
+    application.capabilities.actions?.execute === true &&
+    application.capabilities.actions?.delete === true &&
+    application.capabilities.actions?.save === true;
   const canManageSpaces = application.capabilities.management.kibana.spaces;
   const connectors = useGenAiConnectors();
   const hasElasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
@@ -77,6 +82,73 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     });
   }, [application, http.basePath, isPermissionsBased]);
 
+  const connectorDescription = useMemo(() => {
+    if (!hasElasticManagedLlm) {
+      return (
+        <p>
+          <FormattedMessage
+            id="genAiSettings.aiConnectorDescription"
+            defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. In order to use the AI Assistant you must ${
+              hasConnectorsAllPrivilege ? 'set up' : 'have'
+            } a Generative AI connector.`}
+          />
+        </p>
+      );
+    }
+
+    const showSpacesNote = showSpacesIntegration && canManageSpaces && hasConnectorsAllPrivilege;
+
+    return (
+      <p>
+        <FormattedMessage
+          id="genAiSettings.aiConnectorDescriptionWithLink"
+          defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {elasticManagedLlm} connector ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${
+            showSpacesNote
+              ? ' Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
+              : ''
+          }`}
+          values={{
+            link: (
+              <EuiLink
+                href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="genAiSettings.additionalCostsLink"
+                  defaultMessage="additional costs incur"
+                />
+              </EuiLink>
+            ),
+            elasticManagedLlm: (
+              <strong>
+                <FormattedMessage
+                  id="genAiSettings.elasticManagedLlm"
+                  defaultMessage="Elastic Managed LLM"
+                />
+              </strong>
+            ),
+            ...(showSpacesNote && {
+              aiFeatureVisibility: (
+                <strong>
+                  <FormattedMessage
+                    id="genAiSettings.aiFeatureVisibilityText"
+                    defaultMessage="AI feature visibility"
+                  />
+                </strong>
+              ),
+            }),
+          }}
+        />
+      </p>
+    );
+  }, [
+    hasElasticManagedLlm,
+    hasConnectorsAllPrivilege,
+    showSpacesIntegration,
+    canManageSpaces,
+    docLinks,
+  ]);
+
   return (
     <div data-test-subj="genAiSettingsPage">
       <EuiTitle size="l">
@@ -112,59 +184,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
-            description={
-              !!hasElasticManagedLlm ? (
-                <p>
-                  <FormattedMessage
-                    id="genAiSettings.aiConnectorDescriptionWithLink"
-                    defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {elasticManagedLlm} connector ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${
-                      showSpacesIntegration && canManageSpaces
-                        ? ' Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
-                        : ''
-                    }`}
-                    values={{
-                      link: (
-                        <EuiLink
-                          href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
-                          target="_blank"
-                        >
-                          <FormattedMessage
-                            id="genAiSettings.additionalCostsLink"
-                            defaultMessage="additional costs incur"
-                          />
-                        </EuiLink>
-                      ),
-                      elasticManagedLlm: (
-                        <strong>
-                          <FormattedMessage
-                            id="genAiSettings.elasticManagedLlm"
-                            defaultMessage="Elastic Managed LLM"
-                          />
-                        </strong>
-                      ),
-                      ...(showSpacesIntegration &&
-                        canManageSpaces && {
-                          aiFeatureVisibility: (
-                            <strong>
-                              <FormattedMessage
-                                id="genAiSettings.aiFeatureVisibilityText"
-                                defaultMessage="AI feature visibility"
-                              />
-                            </strong>
-                          ),
-                        }),
-                    }}
-                  />
-                </p>
-              ) : (
-                <p>
-                  <FormattedMessage
-                    id="genAiSettings.aiConnectorDescription"
-                    defaultMessage="A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. In order to use the AI Assistant you must set up a Generative AI connector."
-                  />
-                </p>
-              )
-            }
+            description={connectorDescription}
           >
             <EuiFormRow fullWidth>
               <EuiFlexGroup gutterSize="m" responsive={false}>
@@ -180,10 +200,17 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                       });
                     }}
                   >
-                    <FormattedMessage
-                      id="genAiSettings.goToConnectorsButtonLabel"
-                      defaultMessage="Manage connectors"
-                    />
+                    {hasConnectorsAllPrivilege ? (
+                      <FormattedMessage
+                        id="genAiSettings.goToConnectorsButtonLabel"
+                        defaultMessage="Manage connectors"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="genAiSettings.viewConnectorsButtonLabel"
+                        defaultMessage="View connectors"
+                      />
+                    )}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -244,13 +271,13 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   ) : (
                     <FormattedMessage
                       id="genAiSettings.showAIAssistantDescriptionLabel"
-                      defaultMessage="Enable or disable AI-powered features in the {spaces} settings."
+                      defaultMessage="Enable or disable AI-powered features in {space} settings."
                       values={{
-                        spaces: (
+                        space: (
                           <strong>
                             <FormattedMessage
                               id="genAiSettings.spacesLabel"
-                              defaultMessage="Spaces"
+                              defaultMessage="Space"
                             />
                           </strong>
                         ),

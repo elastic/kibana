@@ -49,11 +49,9 @@ export class GenAiSettingsPlugin
     const capabilities = coreStart.application.capabilities;
     // This section depends mainly on Connectors feature, but should have its own Kibana feature setting in the future.
     if (
-      // Connectors 'all' privilege
+      // Connectors 'Read' privilege
       capabilities.actions?.show === true &&
-      capabilities.actions?.execute === true &&
-      capabilities.actions?.delete === true &&
-      capabilities.actions?.save === true
+      capabilities.actions?.execute === true
     ) {
       management.sections.section.ai.registerApp({
         id: 'genAiSettings',
