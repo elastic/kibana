@@ -7,3 +7,6 @@
 
 export const WORKFLOW_LOCALSTORAGE_KEY = 'search_onboarding_workflow';
 export const GLOBAL_EMPTY_STATE_SKIP_KEY = 'search_onboarding_global_empty_state_skip';
+
+// Feature Flags
+export const SEARCH_HOMEPAGE_INGESTION_CTA_FEATURE_FLAG = 'searchSolution.homepage.ingestionCTA';
