@@ -16,17 +16,23 @@ import { generateRandomIndexName } from '../utils/indices';
 import { useKibana } from './use_kibana';
 
 export const useSearchHomePageRedirect = () => {
-  const { application, http } = useKibana().services;
+  const { application } = useKibana().services;
   const indexName = useMemo(() => generateRandomIndexName(), []);
   const { data: userPrivileges } = useUserPrivilegesQuery(indexName);
   const skipGlobalEmptyState = useMemo(() => {
     return localStorage.getItem(GLOBAL_EMPTY_STATE_SKIP_KEY) === 'true';
   }, []);
-  const { data: indicesStatus } = useIndicesStatusQuery(undefined, !skipGlobalEmptyState);
+  const {
+    data: indicesStatus,
+    isLoading,
+    error,
+  } = useIndicesStatusQuery(undefined, !skipGlobalEmptyState);
 
-  const [hasDoneRedirect, setHasDoneRedirect] = useState(() => false);
-  return useEffect(() => {
-    if (hasDoneRedirect || skipGlobalEmptyState) {
+  const [redirectChecked, setRedirectChecked] = useState(() => false);
+
+  useEffect(() => {
+    if (skipGlobalEmptyState) {
+      setRedirectChecked(true);
       return;
     }
 
@@ -35,27 +41,23 @@ export const useSearchHomePageRedirect = () => {
     }
 
     if (userPrivileges?.privileges?.canManageIndex === false) {
-      setHasDoneRedirect(true);
+      setRedirectChecked(true);
       return;
     }
 
-    if (!indicesStatus) {
+    if (!indicesStatus || error) {
       return;
     }
     if (indicesStatus.indexNames.length === 0) {
-      application.navigateToApp('elasticsearchStart');
-      setHasDoneRedirect(true);
+      application.navigateToApp('elasticsearchStart').catch(() => {
+        setRedirectChecked(true);
+      });
       return;
     }
+    setRedirectChecked(true);
+  }, [application, indicesStatus, userPrivileges, skipGlobalEmptyState, error]);
 
-    setHasDoneRedirect(true);
-  }, [
-    application,
-    http,
-    indicesStatus,
-    setHasDoneRedirect,
-    hasDoneRedirect,
-    userPrivileges,
-    skipGlobalEmptyState,
-  ]);
+  return {
+    isLoading: redirectChecked ? isLoading : true,
+  };
 };

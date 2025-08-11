@@ -471,7 +471,13 @@
             "description": [],
             "signature": [
               "CallbackFn<{}, ",
-              "ESQLSourceResult",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLSourceResult",
+                "text": "ESQLSourceResult"
+              },
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
@@ -735,6 +741,24 @@
                 "text": "ESQLLicenseResult"
               },
               " | undefined>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLCallbacks.getActiveProduct",
+            "type": "Function",
+            "tags": [],
+            "label": "getActiveProduct",
+            "description": [],
+            "signature": [
+              "(() => ",
+              "PricingProduct",
+              " | undefined) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
