@@ -89,11 +89,11 @@ const getEntityDocuments = (
   targetsDocDataArray: NodeDocumentDataModel[]
 ): NodeDocumentDataModel[] => {
   // Filter documents that match this entity ID from both actors and targets
-  const matchingActorDocs = actorsDocDataArray.filter(doc => doc.id === entityId);
-  const matchingTargetDocs = targetsDocDataArray.filter(doc => doc.id === entityId);
+  const matchingActorDocs = actorsDocDataArray.filter((doc) => doc.id === entityId);
+  const matchingTargetDocs = targetsDocDataArray.filter((doc) => doc.id === entityId);
   const matchingDocs = [...matchingActorDocs, ...matchingTargetDocs];
-  
-  return matchingDocs.map(doc => ({...doc, type: DOCUMENT_TYPE_SINGLE_ENTITY}));
+
+  return matchingDocs.map((doc) => ({ ...doc, type: DOCUMENT_TYPE_SINGLE_ENTITY }));
 };
 
 const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap'>) => {
