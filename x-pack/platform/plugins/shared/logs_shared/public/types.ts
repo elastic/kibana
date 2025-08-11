@@ -23,6 +23,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { LogsSharedLocators } from '../common/locators';
 import type { LogAIAssistantProps } from './components/log_ai_assistant/log_ai_assistant';
 import type { SelfContainedLogsOverview } from './components/logs_overview';
@@ -58,6 +59,7 @@ export interface LogsSharedClientStartDeps {
   fieldFormats: FieldFormatsStart;
   embeddable: EmbeddableStart;
   savedSearch: SavedSearchPublicPluginStart;
+  ml?: MlPluginStart;
 }
 
 export type LogsSharedClientCoreSetup = CoreSetup<
