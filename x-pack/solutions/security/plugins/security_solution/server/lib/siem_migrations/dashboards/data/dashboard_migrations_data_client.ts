@@ -9,8 +9,10 @@ import type { Logger } from '@kbn/logging';
 import type { AuthenticatedUser, IScopedClusterClient } from '@kbn/core/server';
 import { DashboardMigrationsDataDashboardsClient } from './dashboard_migrations_dashboards_client';
 import { DashboardMigrationsDataMigrationClient } from './dashboard_migrations_migration_client';
-import type { DashboardMigrationIndexNameProviders } from '../types';
-import type { SiemMigrationsClientDependencies } from '../../common/types';
+import type {
+  DashboardMigrationIndexNameProviders,
+  DashboardMigrationsClientDependencies,
+} from '../types';
 
 export class DashboardMigrationsDataClient {
   public readonly migrations: DashboardMigrationsDataMigrationClient;
@@ -22,7 +24,7 @@ export class DashboardMigrationsDataClient {
     esScopedClient: IScopedClusterClient,
     logger: Logger,
     spaceId: string,
-    dependencies: SiemMigrationsClientDependencies
+    dependencies: DashboardMigrationsClientDependencies
   ) {
     this.migrations = new DashboardMigrationsDataMigrationClient(
       indexNameProviders.migrations,
