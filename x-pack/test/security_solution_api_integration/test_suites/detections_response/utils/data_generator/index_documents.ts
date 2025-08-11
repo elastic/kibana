@@ -16,12 +16,12 @@ interface IndexDocumentsParams {
   log: ToolingLog;
 }
 
-type IndexDocuments = (params: IndexDocumentsParams) => Promise<BulkResponse>;
+type IndexDocuments = (params: IndexDocumentsParams, shouldLogStuff?: boolean) => Promise<BulkResponse>;
 
 /**
  * Indexes documents into provided index
  */
-export const indexDocuments: IndexDocuments = async ({ es, documents, index, log }) => {
+export const indexDocuments: IndexDocuments = async ({ es, documents, index, log }, shouldLogEsStuff = false) => {
   const operations = documents.flatMap((doc: object) => [{ index: { _index: index } }, doc]);
 
   const response = await es.bulk({ refresh: true, operations });
@@ -35,6 +35,9 @@ export const indexDocuments: IndexDocuments = async ({ es, documents, index, log
       throw Error(responseIndex.error.message);
     }
   });
-  console.log(">>> response.items", JSON.stringify(response.items, null, 2))
+  if(shouldLogEsStuff) {
+    console.log(">>> response.items", JSON.stringify(response.items, null, 2))
+  }
+  
   return response;
 };

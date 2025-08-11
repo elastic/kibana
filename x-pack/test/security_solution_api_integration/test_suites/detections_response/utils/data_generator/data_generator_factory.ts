@@ -29,7 +29,7 @@ interface DataGeneratorResponse {
 interface DataGenerator {
   indexListOfDocuments: (docs: Document[]) => Promise<DataGeneratorResponse>;
   indexGeneratedDocuments: (params: GenerateDocumentsParams) => Promise<DataGeneratorResponse>;
-  indexEnhancedDocuments: (params: EnhanceDocumentsOptions) => Promise<DataGeneratorResponse>;
+  indexEnhancedDocuments: (params: EnhanceDocumentsOptions, shouldLogEsStuff?: boolean) => Promise<DataGeneratorResponse>;
 }
 
 /**
@@ -62,9 +62,9 @@ export const dataGeneratorFactory = ({
         response,
       };
     },
-    indexEnhancedDocuments: async (params: EnhanceDocumentsOptions) => {
+    indexEnhancedDocuments: async (params: EnhanceDocumentsOptions, shouldLogEsStuff = false) => {
       const documents = enhanceDocuments(params);
-      const response = await indexDocuments({ es, index, documents, log });
+      const response = await indexDocuments({ es, index, documents, log }, shouldLogEsStuff);
 
       return {
         documents,

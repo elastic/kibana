@@ -1982,7 +1982,7 @@ export default ({ getService }: FtrProviderContext) => {
         const doc2 = { agent: { name: 'test-1' } };
         const doc3 = { agent: { name: 'test-1' }, 'client.ip': '127.0.0.1' };
 
-        await indexEnhancedDocuments({ documents: [doc1, doc2, doc3], interval, id });
+        await indexEnhancedDocuments({ documents: [doc1, doc2, doc3], interval, id }, true);
 
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
