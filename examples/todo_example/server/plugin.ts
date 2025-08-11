@@ -24,6 +24,7 @@ import { schema } from '@kbn/config-schema';
 export interface Todo {
   completed: boolean;
   id: string;
+  order: number;
   priority: 'High' | 'Medium' | 'Low';
   title: string;
 }
@@ -91,6 +92,7 @@ export class ToDoPlugin implements Plugin {
       mappings: {
         properties: {
           completed: { type: 'boolean' },
+          order: { type: 'integer' },
           priority: { type: 'keyword' },
           title: { type: 'text' },
         },
@@ -123,8 +125,8 @@ export class ToDoPlugin implements Plugin {
 
           const todosData = await savedObjectsClient.find<Omit<Todo, 'id'>>({
             type: SAVED_OBJECTS_TYPE,
-            sortField: 'created_at',
-            sortOrder: 'desc',
+            sortField: 'order',
+            sortOrder: 'asc',
           });
 
           let todos = todosData.saved_objects.map(savedObjectToTodo);
@@ -191,12 +193,13 @@ export class ToDoPlugin implements Plugin {
         validate: {
           body: schema.object({
             completed: schema.boolean(),
-            title: schema.string(),
+            order: schema.maybe(schema.number()),
             priority: schema.oneOf([
               schema.literal('High'),
               schema.literal('Medium'),
               schema.literal('Low'),
             ]),
+            title: schema.string(),
           }),
         },
       },
@@ -204,7 +207,27 @@ export class ToDoPlugin implements Plugin {
         try {
           const savedObjectsClient = (await context.core).savedObjects.getClient();
 
-          const newTodo = await savedObjectsClient.create(SAVED_OBJECTS_TYPE, request.body);
+          let order = request.body.order;
+
+          if (order === undefined) {
+            const existingTodos = await savedObjectsClient.find<Omit<Todo, 'id'>>({
+              type: SAVED_OBJECTS_TYPE,
+              perPage: 1,
+              sortField: 'order',
+              sortOrder: 'desc',
+            });
+            order =
+              existingTodos.saved_objects.length > 0
+                ? (existingTodos.saved_objects[0].attributes.order || 0) + 1
+                : 0;
+          }
+
+          const todoData = {
+            ...request.body,
+            order,
+          };
+
+          const newTodo = await savedObjectsClient.create(SAVED_OBJECTS_TYPE, todoData);
 
           return response.ok({ body: savedObjectToTodo(newTodo) });
         } catch (error) {
@@ -227,6 +250,7 @@ export class ToDoPlugin implements Plugin {
         validate: {
           body: schema.object({
             completed: schema.maybe(schema.boolean()),
+            order: schema.maybe(schema.number()),
             priority: schema.maybe(
               schema.oneOf([
                 schema.literal('High'),
@@ -299,6 +323,46 @@ export class ToDoPlugin implements Plugin {
             return response.notFound();
           }
 
+          return response.badRequest({ body: error.message });
+        }
+      }
+    );
+
+    router.post(
+      {
+        path: '/api/todos/reorder',
+        options: { access: 'public' },
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out of authorization because it is only intended for test use',
+          },
+        },
+        validate: {
+          body: schema.object({
+            order: schema.arrayOf(
+              schema.object({
+                id: schema.string(),
+                order: schema.number(),
+              })
+            ),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const savedObjectsClient = (await context.core).savedObjects.getClient();
+          const { order } = request.body;
+
+          await Promise.all(
+            order.map(({ id, order: orderValue }) =>
+              savedObjectsClient.update(SAVED_OBJECTS_TYPE, id, { order: orderValue })
+            )
+          );
+
+          return response.ok({ body: { success: true } });
+        } catch (error) {
           return response.badRequest({ body: error.message });
         }
       }

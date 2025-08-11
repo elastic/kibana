@@ -11,6 +11,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiListGroupItem,
   EuiPanel,
   EuiText,
@@ -28,9 +29,16 @@ interface TodoItemProps {
   onEdit: (todo: Todo) => void;
   onStatusChange: (todo: Todo, completed: boolean) => void;
   todo: Todo;
+  dndProvided: any;
 }
 
-export const TodoItem = ({ onDelete, onEdit, onStatusChange, todo }: TodoItemProps) => {
+export const TodoItem = ({
+  dndProvided,
+  onDelete,
+  onEdit,
+  onStatusChange,
+  todo,
+}: TodoItemProps) => {
   const { euiTheme } = useEuiTheme();
 
   const priorityColor =
@@ -80,7 +88,10 @@ export const TodoItem = ({ onDelete, onEdit, onStatusChange, todo }: TodoItemPro
           borderRadius="m"
           color="plain"
           css={css`
-            width: 400px;
+            width: 300px;
+            @media (min-width: 600px) {
+              width: 400px;
+            }
           `}
           hasBorder
           hasShadow
@@ -93,6 +104,15 @@ export const TodoItem = ({ onDelete, onEdit, onStatusChange, todo }: TodoItemPro
               `}
             >
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem
+                  color="transparent"
+                  grow={false}
+                  paddingSize="s"
+                  {...dndProvided.dragHandleProps}
+                  aria-label="Drag Handle"
+                >
+                  <EuiIcon type="grab" />
+                </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiCheckbox
                     aria-label={checkboxAriaLabel}

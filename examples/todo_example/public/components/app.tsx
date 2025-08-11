@@ -8,9 +8,13 @@
  */
 
 import type { HttpSetup, NotificationsSetup } from '@kbn/core/public';
+import type { DropResult } from '@hello-pangea/dnd';
 import {
   EuiButton,
   EuiConfirmModal,
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiDroppable,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +22,7 @@ import {
   EuiLoadingSpinner,
   EuiText,
   EuiTitle,
+  euiDragDropReorder,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -61,6 +66,10 @@ const DELETE_TASK_SUCCESS = i18n.translate(
 
 const FETCH_TASKS_ERROR = i18n.translate('todoExample.notifications.fetchTasksErrorToastTitle', {
   defaultMessage: '⚠️ Failed to fetch your tasks.',
+});
+
+const REORDER_TASKS_ERROR = i18n.translate('todoExample.notifications.reorderError', {
+  defaultMessage: '⚠️ Failed to save new task order.',
 });
 
 const UPDATE_STATUS_ERROR = i18n.translate(
@@ -210,6 +219,32 @@ export const App = ({ http, notifications }: AppProps) => {
     setIsConfirmModalOpen(true);
   };
 
+  const onDragEnd = async (result: DropResult) => {
+    const { source, destination } = result;
+
+    if (source && destination) {
+      const items = euiDragDropReorder(todos, source.index, destination.index);
+
+      const reordered = items.map((item, idx) => ({ ...item, order: idx }));
+
+      setTodos(reordered);
+
+      const reorderPayload = {
+        order: reordered.map(({ id, order }) => ({ id, order })),
+      };
+
+      try {
+        await http.post('/api/todos/reorder', {
+          body: JSON.stringify(reorderPayload),
+        });
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: REORDER_TASKS_ERROR,
+        });
+      }
+    }
+  };
+
   return (
     <KibanaPageTemplate>
       <KibanaPageTemplate.Header paddingSize="xl">
@@ -284,17 +319,33 @@ export const App = ({ http, notifications }: AppProps) => {
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={true} style={{ overflowY: 'auto', width: '100%' }}>
-              <EuiListGroup maxWidth={800}>
-                {todos.map((todo) => (
-                  <TodoItem
-                    key={todo.id}
-                    onDelete={requestDelete}
-                    onEdit={openFlyoutWithTodo}
-                    onStatusChange={handleStatusChange}
-                    todo={todo}
-                  />
-                ))}
-              </EuiListGroup>
+              <EuiDragDropContext onDragEnd={onDragEnd}>
+                <EuiDroppable droppableId="CUSTOM_HANDLE_DROPPABLE_AREA" spacing="s">
+                  <EuiListGroup gutterSize="none" maxWidth={600}>
+                    {todos.map((todo, idx) => (
+                      <EuiDraggable
+                        customDragHandle={true}
+                        draggableId={todo.id}
+                        hasInteractiveChildren={true}
+                        index={idx}
+                        key={todo.id}
+                        spacing="s"
+                      >
+                        {(provided) => (
+                          <TodoItem
+                            key={todo.id}
+                            onDelete={requestDelete}
+                            onEdit={openFlyoutWithTodo}
+                            onStatusChange={handleStatusChange}
+                            dndProvided={provided}
+                            todo={todo}
+                          />
+                        )}
+                      </EuiDraggable>
+                    ))}
+                  </EuiListGroup>
+                </EuiDroppable>
+              </EuiDragDropContext>
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
