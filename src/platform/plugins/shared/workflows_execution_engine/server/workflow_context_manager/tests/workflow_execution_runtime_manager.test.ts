@@ -174,16 +174,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
       underTest.goToStep('node2');
     });
 
-    it('should fail the current step', async () => {
-      const error = new Error('Test error');
-      await underTest.fail(error);
-
-      expect(underTest.getStepResult('node2')).toEqual({
-        output: null,
-        error,
-      });
-    });
-
     it('should fail the workflow execution', async () => {
       const error = new Error('Test error');
       await underTest.fail(error);

@@ -20107,7 +20107,7 @@
           },
           ", ",
           "IKibanaResponse",
-          "<any> | { suggestedDashboards: { id: string; title: string; description: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; tags?: string[] | undefined; }[]; linkedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; tags?: string[] | undefined; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; }, ",
+          "<any> | { suggestedDashboards: { id: string; title: string; description: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; tags?: string[] | undefined; }[]; linkedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; tags?: string[] | undefined; }[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -20265,7 +20265,7 @@
           },
           ", ",
           "IKibanaResponse",
-          "<any> | { suggestedDashboards: { id: string; title: string; description: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; tags?: string[] | undefined; }[]; linkedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; tags?: string[] | undefined; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; }, ",
+          "<any> | { suggestedDashboards: { id: string; title: string; description: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; tags?: string[] | undefined; }[]; linkedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; tags?: string[] | undefined; }[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
