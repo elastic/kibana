@@ -9,6 +9,10 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { dateRangeQuery } from '@kbn/es-query';
+import { parse } from '@kbn/datemath';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 interface CreateDimensionsParams {
   esClient: ElasticsearchClient;
@@ -18,15 +22,9 @@ interface CreateDimensionsParams {
   to?: string;
   logger: Logger;
 }
-
-interface TermsBucket {
-  key: string;
-  doc_count: number;
-}
-
 interface AggregationsResponse {
   [dimension: string]: {
-    buckets: TermsBucket[];
+    buckets: estypes.AggregationsStringTermsBucketKeys[];
   };
 }
 
@@ -41,23 +39,17 @@ export const createDimensions = async ({
   if (!dimensions || dimensions.length === 0) {
     return [];
   }
+  const timeRangeFilter: QueryDslQueryContainer[] = [];
 
-  // Build time range filter if provided
-  const timeRangeFilter =
-    from && to
-      ? [
-          {
-            range: {
-              '@timestamp': {
-                gte: from,
-                lte: to,
-                format: 'strict_date_optional_time',
-              },
-            },
-          },
-        ]
-      : [];
+  if (from && to) {
+    const start = parse(from);
+    const end = parse(to, { roundUp: true });
 
+    // Build time range filter if provided
+    if (start && end) {
+      timeRangeFilter.push(dateRangeQuery(start.valueOf(), end.valueOf(), '@timestamp')[0]);
+    }
+  }
   // Create aggregations for each dimension
   const aggs: Record<string, object> = {};
   dimensions.forEach((dimension) => {
@@ -92,7 +84,7 @@ export const createDimensions = async ({
         const buckets = agg?.buckets ?? [];
         buckets.forEach((bucket) => {
           values.push({
-            value: bucket.key,
+            value: String(bucket.key ?? ''),
             field: dimension,
           });
         });
