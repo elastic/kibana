@@ -211,6 +211,7 @@ kibana_vars=(
     tilemap.options.minZoom
     tilemap.options.subdomains
     tilemap.url
+    usageCollection.maxCollectorConcurrency
     vega.enableExternalUrls
     vis_type_vega.enableExternalUrls
     xpack.actions.allowedHosts

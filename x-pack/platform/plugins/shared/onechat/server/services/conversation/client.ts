@@ -12,6 +12,7 @@ import {
   createConversationNotFoundError,
   ConversationWithoutRounds,
 } from '@kbn/onechat-common';
+import { isNotFoundError } from '@kbn/es-errors';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
@@ -29,6 +30,7 @@ import {
 
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
+  exists(conversationId: string): Promise<boolean>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
   update(conversation: ConversationUpdateRequest): Promise<Conversation>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
@@ -87,6 +89,19 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     return fromEs(document);
+  }
+
+  async exists(conversationId: string): Promise<boolean> {
+    try {
+      const document = await this.storage.getClient().get({ id: conversationId });
+      return hasAccess({ conversation: document, user: this.user });
+    } catch (error) {
+      // Only catch 404 errors (document not found), re-throw all others
+      if (isNotFoundError(error)) {
+        return false;
+      }
+      throw error;
+    }
   }
 
   async create(conversation: ConversationCreateRequest): Promise<Conversation> {

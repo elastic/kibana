@@ -29,3 +29,4 @@ export const profilingCostPervCPUPerHour = 'observability:profilingCostPervCPUPe
 export const profilingAzureCostDiscountRate = 'observability:profilingAzureCostDiscountRate';
 export const apmEnableTransactionProfiling = 'observability:apmEnableTransactionProfiling';
 export const searchExcludedDataTiers = 'observability:searchExcludedDataTiers';
+export const enableDiagnosticMode = 'observability:enableDiagnosticMode';

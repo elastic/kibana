@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import * as semver from 'semver';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/common';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getKbIndexCreatedVersion } from '../utils/knowledge_base';
 import {
@@ -139,7 +139,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             endpoint: 'GET /internal/observability_ai_assistant/kb/status',
           });
 
-          expect(body.kbState === KnowledgeBaseState.READY).to.be(true);
+          expect(body.inferenceModelState === InferenceModelState.READY).to.be(true);
         });
       });
     });

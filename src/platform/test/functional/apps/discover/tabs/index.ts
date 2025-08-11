@@ -51,6 +51,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
     loadTestFile(require.resolve('./_duplication'));
     loadTestFile(require.resolve('./_new_tab'));
+    loadTestFile(require.resolve('./_no_data'));
     loadTestFile(require.resolve('./_restorable_state'));
   });
 }
