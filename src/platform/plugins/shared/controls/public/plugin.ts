@@ -8,7 +8,6 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { registerControlGroupEmbeddable } from './control_group/register_control_group_embeddable';
 import { registerOptionsListControl } from './controls/data_controls/options_list_control/register_options_list_control';
@@ -38,7 +37,7 @@ export class ControlsPlugin
   }
 
   public start(coreStart: CoreStart, startPlugins: ControlsPluginStartDeps) {
-    setKibanaServices(coreStart, startPlugins, new Storage(localStorage));
+    setKibanaServices(coreStart, startPlugins);
 
     registerActions(startPlugins.uiActions);
   }

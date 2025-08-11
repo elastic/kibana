@@ -12,9 +12,6 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { PublishingSubject } from '@kbn/presentation-publishing';
-import { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { EsqlPluginStartBase } from '@kbn/esql-editor/src/types';
 
 export interface CanClearSelections {
@@ -39,8 +36,5 @@ export interface ControlsPluginStartDeps {
   uiActions: UiActionsStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  expressions: ExpressionsStart;
-  fieldsMetadata?: FieldsMetadataPublicStart;
-  usageCollection?: UsageCollectionStart;
   esql?: EsqlPluginStartBase;
 }

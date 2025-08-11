@@ -11,32 +11,13 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { IStorage, Storage } from '@kbn/kibana-utils-plugin/public';
-import { MockedKeys } from '@kbn/utility-types-jest';
 
 import { setKibanaServices } from './kibana_services';
 
-// Taken from core. See: src/plugins/kibana_utils/public/storage/storage.test.ts
-const createMockStore = (): MockedKeys<IStorage> => {
-  let store: Record<string, any> = {};
-  return {
-    getItem: jest.fn().mockImplementation((key) => store[key]),
-    setItem: jest.fn().mockImplementation((key, value) => (store[key] = value)),
-    removeItem: jest.fn().mockImplementation((key: string) => delete store[key]),
-    clear: jest.fn().mockImplementation(() => (store = {})),
-  };
-};
-
 export const setStubKibanaServices = () => {
-  setKibanaServices(
-    coreMock.createStart(),
-    {
-      data: dataPluginMock.createStartContract(),
-      dataViews: dataViewPluginMocks.createStartContract(),
-      uiActions: uiActionsPluginMock.createStartContract(),
-      expressions: expressionsPluginMock.createStartContract(),
-    },
-    new Storage(createMockStore())
-  );
+  setKibanaServices(coreMock.createStart(), {
+    data: dataPluginMock.createStartContract(),
+    dataViews: dataViewPluginMocks.createStartContract(),
+    uiActions: uiActionsPluginMock.createStartContract(),
+  });
 };
