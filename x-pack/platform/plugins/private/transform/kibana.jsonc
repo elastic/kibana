@@ -2,7 +2,6 @@
   "type": "plugin",
   "id": "@kbn/transform-plugin",
   "owner": [
-    "@elastic/ml-ui",
     "@elastic/kibana-management"
   ],
   "group": "platform",

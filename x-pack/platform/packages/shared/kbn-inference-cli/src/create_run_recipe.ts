@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { FlagOptions, Flags, mergeFlagOptions, run } from '@kbn/dev-cli-runner';
-import { withInferenceSpan } from '@kbn/inference-tracing';
+import { withActiveInferenceSpan } from '@kbn/inference-tracing';
 import { createKibanaClient, KibanaClient, toolingLogToLogger } from '@kbn/kibana-api-cli';
 import { LogLevelId } from '@kbn/logging';
 import { setDiagLogger } from '@kbn/telemetry';
@@ -87,7 +87,7 @@ export const createRunRecipe =
           connectorId: flags.connectorId as string | undefined,
         });
 
-        return await withInferenceSpan(`run_recipe${name ? ` ${name}` : ''}`, () =>
+        return await withActiveInferenceSpan(`RunRecipe${name ? `: ${name}` : ''}`, () =>
           callback({
             inferenceClient,
             kibanaClient,

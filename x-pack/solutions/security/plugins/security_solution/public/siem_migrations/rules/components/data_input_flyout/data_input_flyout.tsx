@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -43,6 +44,8 @@ export interface MigrationDataInputFlyoutProps {
 }
 export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps>(
   ({ onClose, migrationStats: initialMigrationSats }) => {
+    const modalTitleId = useGeneratedHtmlId();
+
     const [migrationStats, setMigrationStats] = useState<RuleMigrationTaskStats | undefined>(
       initialMigrationSats
     );
@@ -103,10 +106,11 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
         maxWidth={1200}
         minWidth={500}
         data-test-subj="uploadRulesFlyout"
+        aria-labelledby={modalTitleId}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>
+            <h2 id={modalTitleId}>
               <FormattedMessage
                 id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.title"
                 defaultMessage="Upload Splunk SIEM rules"

@@ -18,4 +18,4 @@ export type {
   IndexAdapterParams,
   InstallParams,
 } from './src/index_adapter';
-export * from './src/field_maps/types';
+export type * from './src/field_maps/types';
