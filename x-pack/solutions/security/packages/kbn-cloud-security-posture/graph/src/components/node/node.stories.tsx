@@ -99,3 +99,214 @@ const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
 export const Node: StoryObj<NodeViewModel> = {
   render: Template,
 };
+
+// Additional stories for comprehensive testing scenarios
+export const NodeColorVariants: StoryObj = {
+  render: () => {
+    const colorNodes = (['primary', 'danger', 'warning'] as const).map((color, index) => ({
+      id: `color-${color}`,
+      type: 'hexagon',
+      data: {
+        id: `color-${color}`,
+        label: `${color} Node`,
+        tag: 'Server',
+        color,
+        icon: 'storage',
+        interactive: true,
+        shape: 'hexagon',
+      },
+      position: { x: index * 150, y: 0 },
+    }));
+
+    return (
+      <ThemeProvider theme={{ darkMode: false }}>
+        <ReactFlow fitView attributionPosition={undefined} nodeTypes={nodeTypes} nodes={colorNodes}>
+          <Controls />
+          <Background />
+        </ReactFlow>
+        <GlobalGraphStyles />
+      </ThemeProvider>
+    );
+  },
+};
+
+export const NodeEdgeCases: StoryObj = {
+  render: () => {
+    const edgeCaseNodes = [
+      {
+        id: 'empty-node',
+        type: 'rectangle',
+        data: {
+          id: 'empty-node',
+          interactive: true,
+          shape: 'rectangle',
+        },
+        position: { x: 0, y: 0 },
+      },
+      {
+        id: 'no-label-node',
+        type: 'ellipse',
+        data: {
+          id: 'no-label-with-tag',
+          tag: 'Host',
+          color: 'primary',
+          interactive: true,
+          shape: 'ellipse',
+        },
+        position: { x: 150, y: 0 },
+      },
+      {
+        id: 'many-ips-node',
+        type: 'pentagon',
+        data: {
+          id: 'many-ips-node',
+          label: 'Multi-IP Server',
+          tag: 'Server',
+          ips: Array.from({ length: 15 }, (_, i) => `192.168.1.${i + 1}`),
+          color: 'warning',
+          interactive: true,
+          shape: 'pentagon',
+        },
+        position: { x: 300, y: 0 },
+      },
+      {
+        id: 'count-zero-node',
+        type: 'diamond',
+        data: {
+          id: 'count-zero-node',
+          label: 'Zero Count',
+          tag: 'Process',
+          count: 0,
+          color: 'danger',
+          interactive: true,
+          shape: 'diamond',
+        },
+        position: { x: 450, y: 0 },
+      },
+    ];
+
+    return (
+      <ThemeProvider theme={{ darkMode: false }}>
+        <ReactFlow
+          fitView
+          attributionPosition={undefined}
+          nodeTypes={nodeTypes}
+          nodes={edgeCaseNodes}
+        >
+          <Controls />
+          <Background />
+        </ReactFlow>
+        <GlobalGraphStyles />
+      </ThemeProvider>
+    );
+  },
+};
+
+export const NodeInteractivityStates: StoryObj = {
+  render: () => {
+    const interactivityNodes = [
+      {
+        id: 'interactive-node',
+        type: 'hexagon',
+        data: {
+          id: 'interactive-node',
+          label: 'Interactive Node',
+          tag: 'Interactive',
+          color: 'primary',
+          icon: 'gear',
+          interactive: true,
+          shape: 'hexagon',
+        },
+        position: { x: 0, y: 0 },
+      },
+      {
+        id: 'non-interactive-node',
+        type: 'hexagon',
+        data: {
+          id: 'non-interactive-node',
+          label: 'Non-Interactive Node',
+          tag: 'Static',
+          color: 'primary',
+          icon: 'gear',
+          interactive: false,
+          shape: 'hexagon',
+        },
+        position: { x: 200, y: 0 },
+      },
+    ];
+
+    return (
+      <ThemeProvider theme={{ darkMode: false }}>
+        <ReactFlow
+          fitView
+          attributionPosition={undefined}
+          nodeTypes={nodeTypes}
+          nodes={interactivityNodes}
+        >
+          <Controls />
+          <Background />
+        </ReactFlow>
+        <GlobalGraphStyles />
+      </ThemeProvider>
+    );
+  },
+};
+
+export const NodeWithMixedFlags: StoryObj = {
+  render: () => {
+    const flagNodes = [
+      {
+        id: 'single-flag-node',
+        type: 'ellipse',
+        data: {
+          id: 'single-flag-node',
+          label: 'Single Flag',
+          tag: 'Host',
+          countryCodes: ['us'],
+          color: 'primary',
+          interactive: true,
+          shape: 'ellipse',
+        },
+        position: { x: 0, y: 0 },
+      },
+      {
+        id: 'multiple-flags-node',
+        type: 'ellipse',
+        data: {
+          id: 'multiple-flags-node',
+          label: 'Multiple Flags',
+          tag: 'Host',
+          countryCodes: ['us', 'gb', 'fr', 'de', 'jp'],
+          color: 'primary',
+          interactive: true,
+          shape: 'ellipse',
+        },
+        position: { x: 200, y: 0 },
+      },
+      {
+        id: 'many-flags-node',
+        type: 'ellipse',
+        data: {
+          id: 'many-flags-node',
+          label: 'Many Flags',
+          tag: 'Host',
+          countryCodes: ['us', 'gb', 'fr', 'de', 'jp', 'au', 'ca', 'br', 'in', 'cn'],
+          color: 'primary',
+          interactive: true,
+          shape: 'ellipse',
+        },
+        position: { x: 400, y: 0 },
+      },
+    ];
+
+    return (
+      <ThemeProvider theme={{ darkMode: false }}>
+        <ReactFlow fitView attributionPosition={undefined} nodeTypes={nodeTypes} nodes={flagNodes}>
+          <Controls />
+          <Background />
+        </ReactFlow>
+        <GlobalGraphStyles />
+      </ThemeProvider>
+    );
+  },
+};
