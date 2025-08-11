@@ -186,6 +186,7 @@ export function getDashboardApi({
       }
 
       if (saveResult) {
+        references$.next(saveResult.references);
         unsavedChangesManager.internalApi.onSave(saveResult.savedState);
         const settings = settingsManager.api.getSettings();
         settingsManager.api.setSettings({
@@ -197,8 +198,6 @@ export function getDashboardApi({
           title: saveResult.savedState.title,
         });
         savedObjectId$.next(saveResult.id);
-
-        references$.next(saveResult.references);
       }
 
       return saveResult;
@@ -215,8 +214,8 @@ export function getDashboardApi({
       });
 
       if (saveResult?.error) return;
-      unsavedChangesManager.internalApi.onSave(dashboardState);
       references$.next(saveResult.references);
+      unsavedChangesManager.internalApi.onSave(dashboardState);
 
       return;
     },
