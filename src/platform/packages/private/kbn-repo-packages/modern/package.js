@@ -21,7 +21,7 @@ const { readPackageManifest } = require('./parse_package_manifest');
 const normalize = (path) => (Path.sep !== '/' ? path.split('\\').join('/') : path);
 
 /**
- * Representation of a Bazel Package in the Kibana repository
+ * Representation of a Package in the Kibana repository
  * @class
  */
 class Package {
@@ -241,8 +241,7 @@ class Package {
   }
 
   /**
-   * Custom inspect handler so that logging variables in scripts/generate doesn't
-   * print all the BUILD.bazel files
+   * Custom inspect handler
    */
   [inspect.custom]() {
     return `${this.isPlugin() ? `PluginPackage` : `Package`}<${this.normalizedRepoRelativeDir}>`;
