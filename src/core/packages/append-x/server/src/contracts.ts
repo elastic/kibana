@@ -49,8 +49,8 @@ const myDataStream = dataStream.create({
 // This could be a nice way to expose the "low-level" requests we are making so that
 // the data stream abstraction feels more like a thin helper or layer around the
 // the Elasticsearch APIs.
-esClient.indices.putIndexTemplate(dataStream.asPutIndexTemplateRequestArgs());
-esClient.indices.createDataStream(dataStream.asCreateDataStreamRequestArgs());
+esClient.indices.putIndexTemplate(dataStream.asPutIndexTemplateRequestArgs(myDataStream));
+esClient.indices.createDataStream(dataStream.asCreateDataStreamRequestArgs(myDataStream));
 
 // Register your data stream with the AppendX service
 appendXSetup.registerDataStream(myDataStream);
@@ -127,8 +127,8 @@ interface DataStreamHelpers {
   create: <Schema extends Record<string, unknown>>(
     arg: DataStreamDeclaration<Schema>
   ) => DataStreamDeclaration<Schema>;
-  asPutIndexTemplateRequestArgs(): api.IndicesPutIndexTemplateRequest;
-  asCreateDataStreamRequestArgs(): api.IndicesCreateDataStreamRequest;
+  asPutIndexTemplateRequestArgs(ds: DataStreamDeclaration): api.IndicesPutIndexTemplateRequest;
+  asCreateDataStreamRequestArgs(ds: DataStreamDeclaration): api.IndicesCreateDataStreamRequest;
 }
 
 export interface AppendXServiceSetup {
