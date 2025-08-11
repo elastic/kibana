@@ -19,6 +19,7 @@ import {
   ControlValuesSource,
   OPTIONS_LIST_CONTROL,
 } from '@kbn/controls-constants';
+import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultDataControlState, ControlGroupEditorConfig } from '../../../../../common';
 import { ListOptionsInput } from './list_options_input/list_options_input';
 import { DataControlEditorStrings } from '../../data_control_constants';
@@ -29,7 +30,6 @@ import {
   EditorComponentStatus,
   INITIAL_EMPTY_STATE_ESQL_QUERY,
 } from '../editor_constants';
-import { ESQLLangEditor } from './esql_lang_editor';
 import { ESQLValuesPreview } from './esql_values_preview';
 import { getESQLSingleColumnValues } from '../../common/get_esql_single_column_values';
 

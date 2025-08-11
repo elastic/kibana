@@ -16,11 +16,9 @@
       "data",
       "unifiedSearch",
       "uiActions",
-      "contentManagement",
-      "expressions"
+      "esql"
     ],
-    "optionalPlugins": ["fieldsMetadata", "usageCollection"],
-    "requiredBundles": ["kibanaReact", "kibanaUtils"],
+    "requiredBundles": ["kibanaUtils"],
     "extraPublicDirs": ["common"]
   }
 }
