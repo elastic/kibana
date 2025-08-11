@@ -15,9 +15,9 @@ import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CodeEditor } from '@kbn/code-editor';
-import { UISession } from '../../types';
-import { IClickActionDescriptor } from '..';
-import { SearchSessionsMgmtAPI } from '../../lib/api';
+import { IClickActionDescriptor } from './types';
+import { UISession } from '../../../types';
+import { SearchSessionsMgmtAPI } from '../../../lib/api';
 
 interface InspectFlyoutProps {
   searchSession: UISession;

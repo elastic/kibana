@@ -14,11 +14,11 @@ import React, { useState } from 'react';
 import moment from 'moment';
 import { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { IClickActionDescriptor } from '..';
+import { SearchSessionsMgmtAPI } from '../../../lib/api';
+import { IClickActionDescriptor } from './types';
 import { OnActionDismiss } from './types';
-import { UISession } from '../../types';
-import extendSessionIcon from '../../icons/extend_session.svg';
+import { UISession } from '../../../types';
+import extendSessionIcon from './icons/extend_session.svg';
 
 interface ExtendButtonProps {
   searchSession: UISession;
