@@ -208,15 +208,15 @@ describe('logo node', () => {
   ];
 
   test('should return logo node with correct properties', () => {
-    const { logoItem } = toNavigationItems(navigationTree, [], []);
+    const { logoItem } = toNavigationItems(treeWithLogo, [], []);
     expect(logoItem).toMatchInlineSnapshot(`
-    Object {
-      "href": "/missing-href-😭",
-      "iconType": "logoKibana",
-      "id": "kibana",
-      "label": "Kibana",
-    }
-  `);
+      Object {
+        "href": "/tzo/s/sec/app/security/get_started",
+        "iconType": "launch",
+        "id": "securityHome",
+        "label": "Security",
+      }
+    `);
   });
 
   test('Logo node can be active', () => {
