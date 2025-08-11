@@ -35,7 +35,7 @@ export const LOCAL_LOCATION = {
 };
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe.skip('SyncGlobalParams', function () {
+  describe('SyncGlobalParams', function () {
     this.tags('skipCloud');
     const supertestAPI = getService('supertestWithoutAuth');
     const supertestWithAuth = getService('supertest');
