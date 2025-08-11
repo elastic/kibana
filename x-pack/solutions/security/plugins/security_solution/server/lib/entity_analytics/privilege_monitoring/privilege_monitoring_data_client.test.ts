@@ -392,4 +392,15 @@ describe('Privilege Monitoring Data Client', () => {
       await expect(dataClient.scheduleNow()).rejects.toThrow('Task Manager is not available');
     });
   });
+
+  describe('createUsers', () => {
+    it('throws when current user count >= maximum user limit', async () => {
+      const mockGetCountOfPrivilegeMonitoringUsers = jest.fn().mockResolvedValue(10000);
+      dataClient.getCountOfPrivilegeMonitoringUsers = mockGetCountOfPrivilegeMonitoringUsers;
+      await expect(dataClient.createUser({ user: { name: 'alice' } }, 'api')).rejects.toThrow(
+        'Maximum number of privileged users reached: 10000'
+      );
+      expect(mockGetCountOfPrivilegeMonitoringUsers).toHaveBeenCalled();
+    });
+  });
 });

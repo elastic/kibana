@@ -336,7 +336,7 @@ export class PrivilegeMonitoringDataClient {
   ): Promise<CreatePrivMonUserResponse> {
     const currentPrivUsersCount = await this.getCountOfPrivilegeMonitoringUsers();
     this.log('info', `Current privileged users count: ${currentPrivUsersCount}`);
-    if (currentPrivUsersCount > PRIVMON_MAX_USERS_ALLOWED) {
+    if (currentPrivUsersCount >= PRIVMON_MAX_USERS_ALLOWED) {
       throw new Error(`Maximum number of privileged users reached: ${PRIVMON_MAX_USERS_ALLOWED}`);
     }
     const doc = merge(user, {
