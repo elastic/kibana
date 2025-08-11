@@ -127,17 +127,17 @@ export const openAddDiscoverFilterPopover = () => {
 };
 
 export const searchForField = (fieldId: string) => {
-  cy.get(DISCOVER_FIELD_SEARCH).should('be.visible').type(fieldId);
+  cy.get(DISCOVER_FIELD_SEARCH).filter(':visible').type(fieldId);
 };
 
 export const clearFieldSearch = () => {
-  cy.get(DISCOVER_FIELD_SEARCH).first().clear();
+  cy.get(DISCOVER_FIELD_SEARCH).filter(':visible').clear();
 };
 
 export const addFieldToTable = (fieldId: string) => {
   searchForField(fieldId);
   cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).first().should('exist');
-  cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).first().trigger('click');
+  cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).first().realClick();
   clearFieldSearch();
 };
 
