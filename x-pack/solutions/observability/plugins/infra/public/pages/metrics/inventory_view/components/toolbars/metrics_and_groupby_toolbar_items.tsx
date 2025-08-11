@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
@@ -33,34 +33,35 @@ export const MetricsAndGroupByToolbarItems = ({
 }: Props) => {
   const inventoryModel = findInventoryModel(props.nodeType);
   const { featureFlags } = usePluginConfig();
-  const { data: timeRangeMetadata, loading } = useTimeRangeMetadataContext();
+  const { data: timeRangeMetadata, loading = false } = useTimeRangeMetadataContext();
 
   const schemas: DataSchemaFormat[] = useMemo(
     () => timeRangeMetadata?.schemas || [],
     [timeRangeMetadata]
   );
 
+  const previousPreferredSchema = useRef(preferredSchema);
   useEffect(() => {
+    const previousPreferredSchemaCurrent = previousPreferredSchema.current;
     if (
+      !featureFlags.hostOtelEnabled ||
       !allowSchemaSelection ||
-      !timeRangeMetadata ||
-      schemas.length === 0 ||
-      !featureFlags.hostOtelEnabled
+      !timeRangeMetadata?.preferredSchema ||
+      schemas.length === 0
     ) {
       return;
     }
 
-    const current = preferredSchema;
-    if (current === null) {
+    if (previousPreferredSchemaCurrent === null) {
       changePreferredSchema(timeRangeMetadata.preferredSchema);
+      previousPreferredSchema.current = timeRangeMetadata.preferredSchema;
     }
   }, [
     allowSchemaSelection,
     changePreferredSchema,
     featureFlags.hostOtelEnabled,
-    preferredSchema,
     schemas,
-    timeRangeMetadata,
+    timeRangeMetadata?.preferredSchema,
   ]);
 
   const { value: aggregations } = useAsync(
@@ -114,7 +115,7 @@ export const MetricsAndGroupByToolbarItems = ({
           <SchemaSelector
             value={preferredSchema ?? 'ecs'}
             schemas={schemas}
-            isLoading={loading ?? false}
+            isLoading={loading}
             onChange={changePreferredSchema}
           />
         </EuiFlexItem>

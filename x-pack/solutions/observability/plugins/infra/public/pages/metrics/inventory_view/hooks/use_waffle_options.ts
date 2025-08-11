@@ -110,7 +110,7 @@ export const useWaffleOptions = () => {
     writeDefaultState: true,
   });
 
-  const previousViewId = useRef<string | undefined>(currentView?.id);
+  const previousViewId = useRef<string>(currentView?.id ?? staticInventoryViewId);
   useEffect(() => {
     if (currentView && currentView.id !== previousViewId.current) {
       setUrlState(mapInventoryViewToState(currentView));
