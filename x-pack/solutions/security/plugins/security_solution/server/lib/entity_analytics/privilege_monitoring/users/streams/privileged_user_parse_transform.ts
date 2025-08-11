@@ -9,8 +9,8 @@ import { Transform } from 'stream';
 import { right, left, isRight } from 'fp-ts/Either';
 import type { Either } from 'fp-ts/Either';
 
-import { parseMonitoredPrivilegedUserCsvRow } from '../../../../../common/entity_analytics/privileged_user_monitoring/parse_privileged_user_monitoring_csv_row';
-import type { BulkPrivMonUser, BulkProcessingError } from './bulk/types';
+import { parseMonitoredPrivilegedUserCsvRow } from '../../../../../../common/entity_analytics/privileged_user_monitoring/parse_privileged_user_monitoring_csv_row';
+import type { BulkPrivMonUser, BulkProcessingError } from '../bulk/types';
 
 /**
  * Transform stream that processes rows of a CSV file containing privileged user data.

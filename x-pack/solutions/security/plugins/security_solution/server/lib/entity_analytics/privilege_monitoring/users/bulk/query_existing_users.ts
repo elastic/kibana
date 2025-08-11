@@ -8,8 +8,8 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { isRight, type Either } from 'fp-ts/Either';
-import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
-import type { Batch, BulkPrivMonUser, BulkProcessingError } from './bulk/types';
+import type { MonitoredUserDoc } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
+import type { Batch, BulkPrivMonUser, BulkProcessingError } from './types';
 
 export const queryExistingUsers =
   (esClient: ElasticsearchClient, index: string) =>

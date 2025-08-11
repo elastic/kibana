@@ -11,8 +11,9 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
-import { monitoringEntitySourceTypeName } from './saved_objects';
+
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { monitoringEntitySourceTypeName } from '../saved_objects';
 
 describe('MonitoringEntitySourceDataClient', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
