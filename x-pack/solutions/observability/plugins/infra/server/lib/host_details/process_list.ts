@@ -332,46 +332,50 @@ const getProcessListSEMCONV = async (
 
   if (result.aggregations?.summaryEvent?.by_status?.buckets?.length) {
     const statusBuckets = result.aggregations.summaryEvent.by_status.buckets;
-    let total = 0;
 
     const getValue = (fields: Record<string, unknown>, fieldName: string) => {
       const value = fields[fieldName];
       return Array.isArray(value) ? value[0] : value;
     };
 
-    statusBuckets.forEach((bucket) => {
-      const status = bucket.key;
-      const latestHit = bucket.latest_count?.hits?.hits?.[0];
+    const { total, ...statusCounts } = statusBuckets.reduce(
+      (acc, bucket) => {
+        const status = bucket.key;
+        const latestHit = bucket.latest_count?.hits?.hits?.[0];
 
-      if (latestHit?.fields) {
-        const count = Number(getValue(latestHit.fields, 'system.processes.count')) || 0;
-        total += count;
+        if (latestHit?.fields) {
+          const count = Number(getValue(latestHit.fields, 'system.processes.count')) || 0;
+          acc.total += count;
 
-        // Map SEMCONV status values to UI field names
-        switch (status) {
-          case 'running':
-            summary.running = count;
-            break;
-          case 'sleeping':
-            summary.sleeping = count;
-            break;
-          case 'stopped':
-            summary.stopped = count;
-            break;
-          case 'idle':
-            summary.idle = count;
-            break;
-          case 'zombies': // SEMCONV uses "zombies", UI expects "zombie"
-            summary.zombie = count;
-            break;
-          default: // blocked, daemon, detached, locked, orphan, paging, system, unknown
-            summary.unknown = (summary.unknown || 0) + count;
-            break;
+          // Map SEMCONV status values to UI field names
+          switch (status) {
+            case 'running':
+              acc.running = count;
+              break;
+            case 'sleeping':
+              acc.sleeping = count;
+              break;
+            case 'stopped':
+              acc.stopped = count;
+              break;
+            case 'idle':
+              acc.idle = count;
+              break;
+            case 'zombies': // SEMCONV uses "zombies", UI expects "zombie"
+              acc.zombie = count;
+              break;
+            default: // blocked, daemon, detached, locked, orphan, paging, system, unknown
+              acc.unknown = (acc.unknown || 0) + count;
+              break;
+          }
         }
-      }
-    });
 
-    summary.total = total;
+        return acc;
+      },
+      { total: 0 } as { total: number; [key: string]: number }
+    );
+
+    Object.assign(summary, { total, ...statusCounts });
   }
 
   return {
