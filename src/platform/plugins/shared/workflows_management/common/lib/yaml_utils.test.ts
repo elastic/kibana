@@ -9,18 +9,44 @@
 
 import { z } from '@kbn/zod';
 import { parseWorkflowYamlToJSON } from './yaml_utils';
+import { ConnectorContract, generateYamlSchemaFromConnectors } from '@kbn/workflows';
 
 describe('parseWorkflowYamlToJSON', () => {
-  it('should parse yaml to json according to zod schema', () => {
-    const yaml = 'a: b';
-    const result = parseWorkflowYamlToJSON(yaml, z.object({ a: z.string() }));
+  const mockConnectors: ConnectorContract[] = [
+    {
+      type: 'noop',
+      paramsSchema: z.object({
+        message: z.string(),
+      }),
+      outputSchema: z.object({
+        message: z.string(),
+      }),
+    },
+  ];
+  const yamlSchemaLoose = generateYamlSchemaFromConnectors(mockConnectors, true);
+
+  it('should parse yaml to json according to partial zod schema', () => {
+    const yaml = `steps:
+      - name: step1
+        type: noop
+        with:
+          message: "Hello, world!"
+    `;
+    const result = parseWorkflowYamlToJSON(yaml, yamlSchemaLoose);
     expect(result.success).toBe(true);
-    expect(result.data).toEqual({ a: 'b' });
+    expect(result.data).toEqual({
+      steps: [{ name: 'step1', type: 'noop', with: { message: 'Hello, world!' } }],
+    });
   });
 
   it('should fail if yaml does not match zod schema', () => {
-    const yaml = 'a: b';
-    const result = parseWorkflowYamlToJSON(yaml, z.object({ a: z.number() }));
+    const yaml = `steps:
+      - name: step1
+        type-id: noop
+        with:
+          message: "Hello, world!"
+    `;
+    const result = parseWorkflowYamlToJSON(yaml, yamlSchemaLoose);
     expect(result.success).toBe(false);
     expect(result.error).toBeDefined();
   });
@@ -32,10 +58,45 @@ describe('parseWorkflowYamlToJSON', () => {
     expect(result.error).toBeDefined();
   });
 
-  it('should quote template expressions', () => {
-    const yaml = 'a: {{b}}';
-    const result = parseWorkflowYamlToJSON(yaml, z.object({ a: z.string() }));
+  it('should keep template expressions as is if they are in a string', () => {
+    const yaml = `steps:
+      - name: step1
+        type: noop
+        with:
+          message: Hello, {{event.message}}
+    `;
+    const result = parseWorkflowYamlToJSON(yaml, yamlSchemaLoose);
     expect(result.success).toBe(true);
-    expect(result.data).toEqual({ a: '{{b}}' });
+    expect(result.data).toEqual({
+      steps: [{ name: 'step1', type: 'noop', with: { message: 'Hello, {{event.message}}' } }],
+    });
+  });
+
+  it('should fail on unquoted template expressions', () => {
+    const yaml = `steps:
+      - name: step1
+        action:
+          type: noop
+          params:
+            message: {{event.message}}
+    `;
+    const result = parseWorkflowYamlToJSON(
+      yaml,
+      z.object({
+        steps: z.array(
+          z.object({
+            name: z.string(),
+            action: z.object({
+              type: z.string(),
+              params: z.object({
+                message: z.string(),
+              }),
+            }),
+          })
+        ),
+      })
+    );
+    expect(result.success).toBe(false);
+    expect(result.error).toBeDefined();
   });
 });

@@ -19,7 +19,7 @@ import {
   WorkflowExecutionListDto,
   WorkflowListDto,
 } from '@kbn/workflows';
-import { parseWorkflowYamlToJSON, preProcessYamlString } from '../../common/lib/yaml_utils';
+import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import {
   WORKFLOW_SAVED_OBJECT_TYPE,
@@ -224,7 +224,6 @@ export class WorkflowsService {
 
   public async createWorkflow(workflow: CreateWorkflowCommand): Promise<WorkflowDetailDto> {
     const savedObjectsClient = await this.getSavedObjectsClient();
-    const processedYaml = preProcessYamlString(workflow.yaml);
     const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
     if (!parsedYaml.success) {
       throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
@@ -237,7 +236,7 @@ export class WorkflowsService {
       description: workflowToCreate.description,
       status: workflowToCreate.status,
       tags: workflowToCreate.tags || [],
-      yaml: processedYaml,
+      yaml: workflow.yaml,
       definition: workflowToCreate.definition,
       createdBy: 'system', // TODO: get from context
       lastUpdatedBy: 'system', // TODO: get from context
@@ -281,7 +280,6 @@ export class WorkflowsService {
     let updateData: Partial<WorkflowSavedObjectAttributes>;
 
     if (yaml) {
-      const processedYaml = preProcessYamlString(yaml);
       const parsedYaml = parseWorkflowYamlToJSON(yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
       if (!parsedYaml.success) {
         throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
@@ -293,7 +291,7 @@ export class WorkflowsService {
         description: updatedWorkflow.description,
         status: updatedWorkflow.status,
         tags: updatedWorkflow.tags || [],
-        yaml: processedYaml,
+        yaml,
         definition: updatedWorkflow.definition,
         lastUpdatedBy: 'system', // TODO: get from context
       };
