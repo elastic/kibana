@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiCheckbox,
   EuiFlexGroup,
@@ -18,18 +20,17 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import React from 'react';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { Todo } from '../../server/plugin';
+import type { DraggableProvided } from '@hello-pangea/dnd';
+import type { Todo } from '../../../common';
 import { TodoActions } from './todo_actions';
 
 interface TodoItemProps {
+  dndProvided: DraggableProvided;
   onDelete: (todo: Todo) => void;
   onEdit: (todo: Todo) => void;
   onStatusChange: (todo: Todo, completed: boolean) => void;
   todo: Todo;
-  dndProvided: any;
 }
 
 export const TodoItem = ({
@@ -40,6 +41,8 @@ export const TodoItem = ({
   todo,
 }: TodoItemProps) => {
   const { euiTheme } = useEuiTheme();
+
+  const handleCheckboxChange = () => onStatusChange(todo, !todo.completed);
 
   const priorityColor =
     todo.priority === 'High'
@@ -86,7 +89,7 @@ export const TodoItem = ({
       label={
         <EuiPanel
           borderRadius="m"
-          color="plain"
+          color={todo.completed ? 'subdued' : 'plain'}
           css={css`
             width: 300px;
             @media (min-width: 600px) {
@@ -118,7 +121,7 @@ export const TodoItem = ({
                     aria-label={checkboxAriaLabel}
                     checked={todo.completed}
                     id={`todo-checkbox-${todo.id}`}
-                    onChange={() => onStatusChange(todo, !todo.completed)}
+                    onChange={handleCheckboxChange}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -139,7 +142,7 @@ export const TodoItem = ({
               <TodoActions
                 onDelete={() => onDelete(todo)}
                 onEdit={() => onEdit(todo)}
-                todo={todo}
+                todoTitle={todo.title}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -8,10 +8,10 @@
  */
 
 import type {
-  Plugin,
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
+  Plugin,
+  PluginInitializerContext,
   SavedObject,
 } from '@kbn/core/server';
 import type {
@@ -20,14 +20,12 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
+import type { Todo } from '../common';
 
-export interface Todo {
-  completed: boolean;
-  id: string;
-  order: number;
-  priority: 'High' | 'Medium' | 'Low';
-  title: string;
-}
+const savedObjectToTodo = (so: SavedObject<Omit<Todo, 'id'>>) => ({
+  id: so.id,
+  ...so.attributes,
+});
 
 const MODEL_VERSIONS: SavedObjectsModelVersionMap = {
   1: {
@@ -53,11 +51,6 @@ const MODEL_VERSIONS: SavedObjectsModelVersionMap = {
     ],
   },
 };
-
-const savedObjectToTodo = (so: SavedObject<Omit<Todo, 'id'>>) => ({
-  id: so.id,
-  ...so.attributes,
-});
 
 export class ToDoPlugin implements Plugin {
   private readonly hideCompleted: boolean;

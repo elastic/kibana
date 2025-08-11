@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import {
   EuiButton,
   EuiCheckbox,
@@ -21,15 +22,15 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Todo } from '../../server/plugin';
+import { i18n } from '@kbn/i18n';
+import type { Todo } from '../../../common';
+import { useTodoFlyoutForm } from '../../hooks/use_todo_flyout_form';
 
 interface TodoEditFlyoutProps {
   editingTodo: Todo | null;
   onClose: () => void;
-  onSave: (formData: Omit<Todo, 'id'>) => void;
+  onSave: (formData: Omit<Todo, 'id'>) => Promise<void>;
 }
 
 const COMPLETED_LABEL = i18n.translate('todoExample.todoFormFlyout.completedLabel', {
@@ -63,45 +64,15 @@ const PRIORITY_OPTIONS: Array<EuiComboBoxOptionOption<Todo['priority']>> = [
 ];
 
 export const TodoFlyout = ({ editingTodo, onClose, onSave }: TodoEditFlyoutProps) => {
-  const [formState, setFormState] = useState({
-    completed: editingTodo?.completed || false,
-    priority: editingTodo?.priority || 'Medium',
-    title: editingTodo?.title || '',
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [isTitleInvalid, setIsTitleInvalid] = useState(false);
-
-  useEffect(() => {
-    setFormState({
-      completed: editingTodo?.completed || false,
-      priority: editingTodo?.priority || 'Medium',
-      title: editingTodo?.title || '',
-    });
-  }, [editingTodo]);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!validateForm()) return;
-
-    setIsLoading(true);
-    await onSave(formState);
-    setIsLoading(false);
-
-    onClose();
-  };
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isTitleInvalid) setIsTitleInvalid(false);
-
-    setFormState({ ...formState, title: e.target.value });
-  };
-
-  const validateForm = () => {
-    const isInvalid = formState.title.trim() === '';
-    setIsTitleInvalid(isInvalid);
-    return !isInvalid;
-  };
+  const {
+    formState,
+    isLoading,
+    isTitleInvalid,
+    handlePriorityChange,
+    handleStatusChange,
+    handleSubmit,
+    handleTitleChange,
+  } = useTodoFlyoutForm({ editingTodo, onClose, onSave });
 
   return (
     <EuiFlyout aria-labelledby="todoFlyoutTitle" onClose={onClose} size="s">
@@ -150,12 +121,7 @@ export const TodoFlyout = ({ editingTodo, onClose, onSave }: TodoEditFlyoutProps
             <EuiComboBox
               id="todoPriority"
               isClearable={false}
-              onChange={(selected) =>
-                setFormState({
-                  ...formState,
-                  priority: selected[0]?.value ?? 'Medium',
-                })
-              }
+              onChange={handlePriorityChange}
               options={PRIORITY_OPTIONS}
               selectedOptions={[
                 PRIORITY_OPTIONS.find(({ value }) => value === formState.priority) ||
@@ -176,7 +142,7 @@ export const TodoFlyout = ({ editingTodo, onClose, onSave }: TodoEditFlyoutProps
               checked={formState.completed}
               id="todoComplete"
               label={COMPLETED_LABEL}
-              onChange={(e) => setFormState({ ...formState, completed: e.target.checked })}
+              onChange={handleStatusChange}
             />
           </EuiFormRow>
           <EuiSpacer size="xl" />

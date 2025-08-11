@@ -8,18 +8,17 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Todo } from '../../server/plugin';
 
 interface TodoActionsProps {
   onDelete: () => void;
   onEdit: () => void;
-  todo: Todo;
+  todoTitle: string;
 }
 
-const TodoActionsContainerStyles = css`
+const todoActionsContainerStyles = css`
   flex: none;
   flex-shrink: 0;
   min-width: auto;
@@ -33,21 +32,21 @@ const EDIT_TOOLTIP = i18n.translate('todoExample.todoActions.editTooltip', {
   defaultMessage: 'Edit task',
 });
 
-export const TodoActions = ({ todo, onEdit, onDelete }: TodoActionsProps) => {
+export const TodoActions = ({ todoTitle, onEdit, onDelete }: TodoActionsProps) => {
   const deleteAriaLabel = i18n.translate('todoExample.todoActions.deleteAriaLabel', {
     defaultMessage: 'Delete {taskTitle} task',
-    values: { taskTitle: todo.title },
+    values: { taskTitle: todoTitle },
   });
 
   const editAriaLabel = i18n.translate('todoExample.todoActions.editAriaLabel', {
     defaultMessage: 'Edit {taskTitle} task',
-    values: { taskTitle: todo.title },
+    values: { taskTitle: todoTitle },
   });
 
   return (
     <EuiFlexGroup
       alignItems="center"
-      css={TodoActionsContainerStyles}
+      css={todoActionsContainerStyles}
       gutterSize="xs"
       responsive={false}
     >
