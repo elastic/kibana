@@ -16,7 +16,7 @@ export const filtersRT = rt.exact(
     types: rt.array(rt.string),
     integrations: rt.array(rt.string),
     namespaces: rt.array(rt.string),
-    qualities: rt.array(rt.union([rt.literal('poor'), rt.literal('degraded'), rt.literal('good')])),
+    qualities: rt.array(rt.union([rt.literal('poor'), rt.literal('warning'), rt.literal('good')])),
     query: rt.string,
   })
 );

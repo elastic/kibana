@@ -7,6 +7,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { useDatasetDetailsTelemetry, useDatasetQualityDetailsState } from '../../hooks';
 import { DataStreamNotFoundPrompt } from './index_not_found_prompt';
 import { Header } from './header';
@@ -22,7 +23,7 @@ export default function DatasetQualityDetails() {
     useDatasetQualityDetailsState();
   const { startTracking } = useDatasetDetailsTelemetry();
 
-  const [isAlertFlyoutOpen, setIsAlertFlyoutOpen] = useState(false);
+  const [ruleType, setRuleType] = useState<typeof DEGRADED_DOCS_RULE_TYPE_ID | null>(null);
 
   useEffect(() => {
     startTracking();
@@ -34,11 +35,11 @@ export default function DatasetQualityDetails() {
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="datasetDetailsContainer">
         <EuiFlexItem grow={false}>
           <Header
-            isAlertFlyoutOpen={isAlertFlyoutOpen}
-            closeAlertFlyout={() => setIsAlertFlyoutOpen(false)}
+            isAlertFlyoutOpen={ruleType === DEGRADED_DOCS_RULE_TYPE_ID}
+            closeAlertFlyout={() => setRuleType(null)}
           />
           <EuiHorizontalRule />
-          <Overview openAlertFlyout={() => setIsAlertFlyoutOpen(true)} />
+          <Overview openAlertFlyout={() => setRuleType(DEGRADED_DOCS_RULE_TYPE_ID)} />
           <EuiHorizontalRule />
           <Details />
         </EuiFlexItem>

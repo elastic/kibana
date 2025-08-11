@@ -170,7 +170,7 @@ export const summaryPanelQualityPoorText = i18n.translate(
 export const summaryPanelQualityDegradedText = i18n.translate(
   'xpack.datasetQuality.summaryPanelQualityDegradedText',
   {
-    defaultMessage: 'Degraded',
+    defaultMessage: 'Warning',
   }
 );
 
