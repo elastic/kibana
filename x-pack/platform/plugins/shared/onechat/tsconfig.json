@@ -57,5 +57,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/core-http-server-mocks",
     "@kbn/cloud-plugin",
+    "@kbn/es-errors",
   ]
 }
