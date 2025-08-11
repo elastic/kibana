@@ -325,6 +325,11 @@ const FlyoutPanelWrapper = ({
       paddingSize="m"
       outsideClickCloses={false}
       onClose={onClose}
+      closeButtonProps={{
+        // Inspector overlay also uses an EuiFlyout with a close button, so set a different data-test-subj
+        // to avoid a conflict
+        'data-test-subj': 'mapContainerFlyoutCloseButton',
+      }}
     >
       {flyoutPanel}
     </EuiFlyoutResizable>
