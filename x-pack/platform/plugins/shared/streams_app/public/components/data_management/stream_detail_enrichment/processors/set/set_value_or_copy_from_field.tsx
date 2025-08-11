@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { EuiCode, EuiFieldText, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,7 +18,7 @@ export const ValueField = ({ toggleCustom }: { toggleCustom: () => void }) => {
   const { register, unregister } = useFormContext();
   const { ref, ...inputProps } = register(VALUE_FIELD);
 
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       unregister(VALUE_FIELD);
     };
@@ -57,7 +57,7 @@ export const CopyFromField = ({ toggleCustom }: { toggleCustom: () => void }) =>
   const { register, unregister } = useFormContext();
   const { ref, ...inputProps } = register(COPY_FROM_FIELD);
 
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       unregister(COPY_FROM_FIELD);
     };
@@ -101,9 +101,9 @@ export const SetValueOrCopyFromField = () => {
   const { getValues } = useFormContext();
   const isCopyFromDefined =
     getValues(COPY_FROM_FIELD) !== undefined && getValues(COPY_FROM_FIELD) !== '';
-  const [isCopyFromField, setIsCopyFromField] = React.useState<boolean>(isCopyFromDefined);
+  const [isCopyFromField, setIsCopyFromField] = useState<boolean>(isCopyFromDefined);
 
-  const toggleCustom = React.useCallback(() => {
+  const toggleCustom = useCallback(() => {
     setIsCopyFromField((prev) => !prev);
   }, []);
 
