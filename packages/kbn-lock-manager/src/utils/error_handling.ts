@@ -44,7 +44,7 @@ const retryResponseStatuses = [
   504, // GatewayTimeout
 ];
 
-export const isRetryableEsClientError = (e: Error): boolean => {
+export const isRetryableError = (e: Error): boolean => {
   const isCircuitBreakingException =
     e instanceof esErrors.ResponseError &&
     e.body?.error?.caused_by?.caused_by.type === 'circuit_breaking_exception';

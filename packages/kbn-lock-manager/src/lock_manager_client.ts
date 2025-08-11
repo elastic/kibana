@@ -20,7 +20,7 @@ import {
   getEsReason,
   getRetryConfig,
   isDocumentMissingException,
-  isRetryableEsClientError,
+  isRetryableError,
   isVersionConflictException,
 } from './utils/error_handling';
 
@@ -139,7 +139,7 @@ export class LockManager {
         const esReason = getEsReason(error);
 
         // Retry certain errors
-        if (isRetryableEsClientError(error)) {
+        if (isRetryableError(error)) {
           this.logger.debug(
             `Retrying lock acquisition for "${this.lockId}": ${error.message} and reason: ${esReason}`
           );
@@ -200,7 +200,7 @@ export class LockManager {
 
         const esReason = getEsReason(error);
 
-        if (isRetryableEsClientError(error)) {
+        if (isRetryableError(error)) {
           this.logger.debug(
             `Retrying lock release for "${this.lockId}": ${error.message} and reason: ${esReason}`
           );
@@ -279,7 +279,7 @@ export class LockManager {
 
         const esReason = getEsReason(error);
 
-        if (isRetryableEsClientError(error)) {
+        if (isRetryableError(error)) {
           this.logger.debug(
             `Retrying lock extension for "${this.lockId}": ${error.message} and reason: ${esReason}`
           );
