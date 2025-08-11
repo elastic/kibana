@@ -12,7 +12,6 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -36,7 +35,6 @@ import { cacheNonParametrizedAsyncFunction, cacheParametrizedAsyncFunction } fro
 import { EsqlVariablesService } from './variables_service';
 
 interface EsqlPluginSetupDependencies {
-  indexManagement: IndexManagementPluginSetup;
   uiActions: UiActionsSetup;
 }
 
@@ -60,11 +58,7 @@ export interface EsqlPluginStart {
 }
 
 export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
-  private indexManagement?: IndexManagementPluginSetup;
-
-  public setup(_: CoreSetup, { indexManagement, uiActions }: EsqlPluginSetupDependencies) {
-    this.indexManagement = indexManagement;
-
+  public setup(_: CoreSetup, { uiActions }: EsqlPluginSetupDependencies) {
     uiActions.registerTrigger(updateESQLQueryTrigger);
     uiActions.registerTrigger(esqlControlTrigger);
 
@@ -182,7 +176,6 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       expressions,
       storage,
       uiActions,
-      this.indexManagement,
       fieldsMetadata,
       usageCollection
     );
