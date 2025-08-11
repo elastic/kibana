@@ -251,7 +251,7 @@ function mergeQueries({
       }
 
       queries.push(incomingQuery);
-    } else {
+    } else if (!baseQuery || !isEqual(baseQuery, existingQuery)) {
       queries.push(existingQuery);
     }
 

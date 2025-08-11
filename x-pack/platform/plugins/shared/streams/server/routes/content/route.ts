@@ -273,7 +273,7 @@ const diffContentRoute = createServerRoute({
       resolutions: [],
     });
 
-    return { diffs: diffTrees({ existing, merged }), conflicts };
+    return { changes: diffTrees({ existing, merged }), conflicts };
   },
 });
 

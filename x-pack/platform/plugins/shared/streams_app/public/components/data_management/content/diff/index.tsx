@@ -6,20 +6,33 @@
  */
 
 import React from 'react';
-import { capitalize } from 'lodash';
-import { StreamConflict, StreamDiff, isRoutingChange } from '@kbn/content-packs-schema';
+import {
+  ConflictResolution,
+  PropertyAdded,
+  PropertyRemoved,
+  StreamChanges,
+  StreamConflict,
+  isAddChange,
+  isRemoveChange,
+  isRoutingChange,
+} from '@kbn/content-packs-schema';
 import { getSegments, isChildOf, isDescendantOf } from '@kbn/streams-schema';
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Conflict } from './conflict';
+import { ChangesTable, ConflictsTable } from './conflict';
 
-type StreamRow = StreamDiff & {
-  level: number;
-  isParent: boolean;
-};
-
-export function Diff({ diffs, conflicts }: { diffs: StreamDiff[]; conflicts: StreamConflict[] }) {
-  const sorted = diffs.sort((a, b) => a.name.localeCompare(b.name));
+export function Diff({
+  changes,
+  conflicts,
+  resolutions,
+  setResolutions,
+}: {
+  changes: StreamChanges[];
+  conflicts: StreamConflict[];
+  resolutions: ConflictResolution[];
+  setResolutions: (resolutions: ConflictResolution[]) => void;
+}) {
+  const sorted = changes.sort((a, b) => a.name.localeCompare(b.name));
   const rows = sorted.map((entry, index) => {
     const next = sorted[index + 1];
     return {
@@ -34,25 +47,33 @@ export function Diff({ diffs, conflicts }: { diffs: StreamDiff[]; conflicts: Str
       {rows.map((row) => {
         const ancestors = rows.filter(({ name }) => isDescendantOf(name, row.name));
         const wasRemoved = ancestors.some((ancestor) =>
-          ancestor.diff.removed.find((change) => {
-            return (
-              isRoutingChange(change) &&
-              (change.value.from.destination === row.name ||
-                isDescendantOf(change.value.from.destination, row.name))
-            );
-          })
+          ancestor.changes
+            .filter(
+              (change): change is PropertyRemoved<'routing'> =>
+                isRoutingChange(change) && isRemoveChange(change)
+            )
+            .find((change) => {
+              return (
+                change.value.destination === row.name ||
+                isDescendantOf(change.value.destination, row.name)
+              );
+            })
         );
         const wasAdded = ancestors.some((ancestor) =>
-          ancestor.diff.added.find((change) => {
-            return (
-              isRoutingChange(change) &&
-              (change.value.to.destination === row.name ||
-                isDescendantOf(change.value.to.destination, row.name))
-            );
-          })
+          ancestor.changes
+            .filter(
+              (change): change is PropertyAdded<'routing'> =>
+                isRoutingChange(change) && isAddChange(change)
+            )
+            .find((change) => {
+              return (
+                isRoutingChange(change) &&
+                (change.value.destination === row.name ||
+                  isDescendantOf(change.value.destination, row.name))
+              );
+            })
         );
-        const wasUpdated =
-          row.diff.added.length > 0 || row.diff.removed.length > 0 || row.diff.updated.length > 0;
+        const wasUpdated = row.changes.length > 0;
         const streamConflicts = conflicts.find(({ name }) => name === row.name);
         const color = wasRemoved
           ? 'danger'
@@ -73,60 +94,36 @@ export function Diff({ diffs, conflicts }: { diffs: StreamDiff[]; conflicts: Str
                 id={row.name}
                 buttonContent={
                   <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-                    <EuiFlexGroup direction="row" alignItems="center">
+                    <EuiFlexItem>
                       <EuiText color={color}>{row.name}</EuiText>
-                      {streamConflicts ? <EuiIcon type="warningFilled" color="danger" /> : null}
-                    </EuiFlexGroup>
-
-                    <EuiFlexItem grow={false}>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
                       <EuiText color="subdued" size="xs">
                         {i18n.translate('xpack.streams.contentDiff.details', {
                           defaultMessage: 'details',
                         })}
                       </EuiText>
                     </EuiFlexItem>
+                    {streamConflicts ? (
+                      <EuiFlexItem>
+                        <EuiIcon type="warningFilled" color="danger" />
+                      </EuiFlexItem>
+                    ) : null}
                   </EuiFlexGroup>
                 }
                 arrowDisplay="none"
               >
                 <EuiPanel color="subdued">
-                  <EuiText size="s" color={color}>
-                    {streamConflicts ? (
-                      <>
-                        <EuiFlexItem>Conflicts</EuiFlexItem>
-                        {streamConflicts.conflicts.map((conflict) => {
-                          return (
-                            <EuiFlexGroup>
-                              <Conflict conflict={conflict} />;
-                            </EuiFlexGroup>
-                          );
-                        })}
-                      </>
-                    ) : null}
+                  {streamConflicts ? (
+                    <ConflictsTable
+                      stream={row.name}
+                      conflicts={streamConflicts.conflicts}
+                      resolutions={resolutions}
+                      setResolutions={setResolutions}
+                    />
+                  ) : null}
 
-                    {Object.entries(row.diff)
-                      .filter(([, values]) => values.length)
-                      .map(([key, values]) => (
-                        <>
-                          <EuiText>{capitalize(key)}</EuiText>
-                          <>
-                            {values.map((op) => (
-                              <EuiText
-                                color={
-                                  key === 'added'
-                                    ? 'success'
-                                    : key === 'removed'
-                                    ? 'danger'
-                                    : 'warning'
-                                }
-                              >
-                                {JSON.stringify(op)}
-                              </EuiText>
-                            ))}
-                          </>
-                        </>
-                      ))}
-                  </EuiText>
+                  {changes.length > 0 ? <ChangesTable changes={row.changes} /> : null}
                 </EuiPanel>
               </EuiAccordion>
             )}

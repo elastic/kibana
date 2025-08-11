@@ -90,22 +90,25 @@ export type MergeableProperties = {
 
 export type MergeablePropertiesKeys = keyof MergeableProperties;
 
-type PropertyAdded<K extends MergeablePropertiesKeys = MergeablePropertiesKeys> = {
+export type PropertyAdded<K extends MergeablePropertiesKeys = MergeablePropertiesKeys> = {
+  operation: 'add';
   type: K;
-  value: { to: MergeableProperties[K] };
+  value: MergeableProperties[K];
 };
 
-type PropertyRemoved<K extends MergeablePropertiesKeys = MergeablePropertiesKeys> = {
+export type PropertyRemoved<K extends MergeablePropertiesKeys = MergeablePropertiesKeys> = {
+  operation: 'remove';
   type: K;
-  value: { from: MergeableProperties[K] };
+  value: MergeableProperties[K];
 };
 
-type PropertyUpdated<K extends MergeablePropertiesKeys = MergeablePropertiesKeys> = {
+export type PropertyUpdated<K extends MergeablePropertiesKeys = MergeablePropertiesKeys> = {
+  operation: 'update';
   type: K;
   value: { from: MergeableProperties[K]; to: MergeableProperties[K] };
 };
 
-type PropertyChange<K extends MergeablePropertiesKeys = MergeablePropertiesKeys> =
+export type PropertyChange<K extends MergeablePropertiesKeys = MergeablePropertiesKeys> =
   | PropertyAdded<K>
   | PropertyRemoved<K>
   | PropertyUpdated<K>;
@@ -120,28 +123,30 @@ export type PropertyConflict<K extends MergeablePropertiesKeys = MergeableProper
   };
 };
 
-export type PropertyDiff<T extends MergeablePropertiesKeys = MergeablePropertiesKeys> = {
-  added: PropertyAdded<T>[];
-  removed: PropertyRemoved<T>[];
-  updated: PropertyUpdated<T>[];
-};
-
-export interface StreamDiff {
+export interface StreamChanges {
   name: string;
-  diff: PropertyDiff;
+  changes: PropertyChange[];
 }
-
-export type StreamDiffAndConflicts = StreamDiff & {
-  conflicts: StreamConflict[];
-};
 
 export interface StreamConflict {
   name: string;
   conflicts: PropertyConflict[];
 }
 
-export function isRoutingChange(value: PropertyChange): value is PropertyChange<'routing'> {
-  return value.type === 'routing';
+export function isRemoveChange(change: PropertyChange): change is PropertyRemoved {
+  return change.operation === 'remove';
+}
+
+export function isAddChange(change: PropertyChange): change is PropertyAdded {
+  return change.operation === 'add';
+}
+
+export function isUpdateChange(change: PropertyChange): change is PropertyUpdated {
+  return change.operation === 'update';
+}
+
+export function isRoutingChange(change: PropertyChange): change is PropertyChange<'routing'> {
+  return change.type === 'routing';
 }
 
 export function isFieldChange(value: PropertyChange): value is PropertyChange<'field'> {

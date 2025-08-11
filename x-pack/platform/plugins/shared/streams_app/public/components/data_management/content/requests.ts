@@ -6,10 +6,11 @@
  */
 
 import {
+  ConflictResolution,
   ContentPack,
   ContentPackIncludedObjects,
+  StreamChanges,
   StreamConflict,
-  StreamDiff,
 } from '@kbn/content-packs-schema';
 import { HttpSetup } from '@kbn/core/public';
 import { Streams } from '@kbn/streams-schema';
@@ -19,15 +20,18 @@ export async function importContent({
   http,
   definition,
   include,
+  resolutions,
 }: {
   file: File;
   http: HttpSetup;
   definition: Streams.ingest.all.GetResponse;
   include: ContentPackIncludedObjects;
+  resolutions: ConflictResolution[];
 }) {
   const body = new FormData();
   body.append('content', file);
   body.append('include', JSON.stringify(include));
+  body.append('resolutions', JSON.stringify(resolutions));
 
   const response = await http.post(`/api/streams/${definition.stream.name}/content/import`, {
     body,
@@ -81,7 +85,7 @@ export async function diffContent({
   body.append('content', file);
   body.append('include', JSON.stringify(include));
 
-  const response = await http.post<{ diffs: StreamDiff[]; conflicts: StreamConflict[] }>(
+  const response = await http.post<{ changes: StreamChanges[]; conflicts: StreamConflict[] }>(
     `/internal/streams/${definition.stream.name}/content/diff`,
     {
       body,

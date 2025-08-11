@@ -8,14 +8,14 @@
 import React, { useState } from 'react';
 import { Streams } from '@kbn/streams-schema';
 import {
+  ConflictResolution,
   ContentPackEntry,
   ContentPackIncludedObjects,
   ContentPackManifest,
+  StreamChanges,
   StreamConflict,
-  StreamDiff,
 } from '@kbn/content-packs-schema';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiConfirmModal,
   EuiFilePicker,
@@ -34,7 +34,6 @@ import { ContentPackObjectsList } from './objects_list';
 import { diffContent, importContent, previewContent } from './requests';
 import { ContentPackMetadata } from './manifest';
 import { getFormattedError } from '../../../util/errors';
-import { hasSelectedObjects } from './helpers';
 import { Diff } from './diff';
 
 export function ImportContentPackFlyout({
@@ -57,24 +56,98 @@ export function ImportContentPackFlyout({
     objects: { all: {} },
   });
   const [manifest, setManifest] = useState<ContentPackManifest | undefined>();
-  const [diffsAndConflicts, setDiffsAndConflicts] = useState<{
-    diffs: StreamDiff[];
-    conflicts: StreamConflict[];
-  } | null>(null);
+  const [diffsAndConflicts, setDiffsAndConflicts] = useState<
+    | {
+        changes: StreamChanges[];
+        conflicts: StreamConflict[];
+      }
+    | undefined
+  >(
+    undefined /*{
+    changes: [
+      {
+        name: 'logs',
+        changes: [
+          {
+            operation: 'remove',
+            type: 'routing',
+            value: { if: { never: {} }, destination: 'logs.hello' },
+          },
+        ],
+      },
+      { name: 'logs.hello', changes: [] },
+      { name: 'logs.hello.world', changes: [] },
+    ],
+    conflicts: [
+      {
+        name: 'logs',
+        conflicts: [
+          {
+            type: 'query',
+            id: 'ade9fb02-d5f7-475c-befa-20afadb575cb',
+            value: {
+              resolution: 'system',
+              current: {
+                id: 'ade9fb02-d5f7-475c-befa-20afadb575cb',
+                title: 'root event updated',
+                kql: { query: 'message: "hello"' },
+              },
+              incoming: {
+                id: 'ade9fb02-d5f7-475c-befa-20afadb575cb',
+                title: 'root event',
+                kql: { query: 'message: "hello"' },
+              },
+            },
+          },
+        ],
+      },
+    ],
+  }*/
+  );
+  const [resolutions, setResolutions] = useState<ConflictResolution[]>([]);
 
   return (
     <>
       {diffsAndConflicts ? (
         <EuiConfirmModal
-          title="Diffs"
-          onCancel={() => setDiffsAndConflicts(null)}
-          onConfirm={() => {}}
-          cancelButtonText="Keep editing"
-          confirmButtonText="Discard changes"
-          buttonColor="danger"
+          title="Preview"
+          isLoading={isLoading}
+          onCancel={() => setDiffsAndConflicts(undefined)}
+          onConfirm={async () => {
+            if (!file) return;
+
+            setIsLoading(true);
+
+            try {
+              await importContent({
+                http,
+                file,
+                definition,
+                resolutions,
+                include: includedObjects,
+              });
+
+              setIsLoading(false);
+              setContentPackObjects([]);
+              setFile(null);
+              onImport();
+            } catch (err) {
+              setIsLoading(false);
+
+              notifications.toasts.addError(err, {
+                title: i18n.translate('xpack.streams.failedToImportContentError', {
+                  defaultMessage: 'Failed to import content pack',
+                }),
+                toastMessage: getFormattedError(err).message,
+              });
+            }
+          }}
+          cancelButtonText="Close"
+          confirmButtonText="Import"
+          buttonColor="primary"
           defaultFocusedButton="confirm"
         >
-          <Diff {...diffsAndConflicts} />
+          <Diff resolutions={resolutions} setResolutions={setResolutions} {...diffsAndConflicts} />
         </EuiConfirmModal>
       ) : null}
 
@@ -172,50 +245,9 @@ export function ImportContentPackFlyout({
                 }}
               >
                 {i18n.translate('xpack.streams.importContentPackFlyout.diffContent', {
-                  defaultMessage: 'Preview diff',
+                  defaultMessage: 'Preview',
                 })}
               </EuiButtonEmpty>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="streamsAppModalFooterButton"
-                isDisabled={!file || !hasSelectedObjects(includedObjects)}
-                isLoading={isLoading}
-                fill
-                onClick={async () => {
-                  if (!file) return;
-
-                  setIsLoading(true);
-
-                  try {
-                    await importContent({
-                      http,
-                      file,
-                      definition,
-                      include: includedObjects,
-                    });
-
-                    setIsLoading(false);
-                    setContentPackObjects([]);
-                    setFile(null);
-                    onImport();
-                  } catch (err) {
-                    setIsLoading(false);
-
-                    notifications.toasts.addError(err, {
-                      title: i18n.translate('xpack.streams.failedToImportContentError', {
-                        defaultMessage: 'Failed to import content pack',
-                      }),
-                      toastMessage: getFormattedError(err).message,
-                    });
-                  }
-                }}
-              >
-                {i18n.translate('xpack.streams.importContentPackFlyout.importToStream', {
-                  defaultMessage: 'Import to stream',
-                })}
-              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
