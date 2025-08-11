@@ -75,7 +75,6 @@ export const BaseStepSchema = z.object({
   name: z.string().min(1),
   if: z.string().optional(),
   foreach: z.string().optional(),
-  // next: z.string().optional(),
   'on-failure': WorkflowOnFailureSchema.optional(),
   timeout: z.number().optional(),
 });
@@ -95,12 +94,19 @@ export const ForEachStepSchema = BaseStepSchema.extend({
 });
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;
 
-export const getForEachStepSchema = (stepSchema: z.ZodType) => {
-  return BaseStepSchema.extend({
+export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = BaseStepSchema.extend({
     type: z.literal('foreach'),
     foreach: z.string(),
     steps: z.array(stepSchema).min(1),
   });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
 };
 
 export const IfStepSchema = BaseStepSchema.extend({
@@ -111,13 +117,20 @@ export const IfStepSchema = BaseStepSchema.extend({
 });
 export type IfStep = z.infer<typeof IfStepSchema>;
 
-export const getIfStepSchema = (stepSchema: z.ZodType) => {
-  return BaseStepSchema.extend({
+export const getIfStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = BaseStepSchema.extend({
     type: z.literal('if'),
     condition: z.string(),
     steps: z.array(stepSchema).min(1),
     else: z.array(stepSchema).optional(),
   });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
 };
 
 export const ParallelStepSchema = BaseStepSchema.extend({
@@ -131,11 +144,18 @@ export const ParallelStepSchema = BaseStepSchema.extend({
 });
 export type ParallelStep = z.infer<typeof ParallelStepSchema>;
 
-export const getParallelStepSchema = (stepSchema: z.ZodType) => {
-  return BaseStepSchema.extend({
+export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = BaseStepSchema.extend({
     type: z.literal('parallel'),
     branches: z.array(z.object({ name: z.string(), steps: z.array(stepSchema) })),
   });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
 };
 
 export const MergeStepSchema = BaseStepSchema.extend({
@@ -145,12 +165,19 @@ export const MergeStepSchema = BaseStepSchema.extend({
 });
 export type MergeStep = z.infer<typeof MergeStepSchema>;
 
-export const getMergeStepSchema = (stepSchema: z.ZodType) => {
-  return BaseStepSchema.extend({
+export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = BaseStepSchema.extend({
     type: z.literal('merge'),
     sources: z.array(z.string()), // references to branches or steps to merge
     steps: z.array(stepSchema), // steps to run after merge
   });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
 };
 
 /* --- Inputs --- */

@@ -2892,15 +2892,17 @@
               "InferenceInferenceEndpointInfo",
               " | undefined; modelStats?: Partial<",
               "MlTrainedModelStats",
-              "> | undefined; kbState: ",
+              "> | undefined; inferenceModelState: ",
               {
                 "pluginId": "observabilityAIAssistant",
                 "scope": "common",
                 "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-common.KnowledgeBaseState",
-                "text": "KnowledgeBaseState"
+                "section": "def-common.InferenceModelState",
+                "text": "InferenceModelState"
               },
-              "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }, ",
+              "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; productDocStatus: ",
+              "InstallationStatus",
+              "; }, ",
               "ObservabilityAIAssistantRouteCreateOptions",
               ">; \"POST /internal/observability_ai_assistant/kb/reindex\": ",
               {
@@ -3938,15 +3940,17 @@
               "InferenceInferenceEndpointInfo",
               " | undefined; modelStats?: Partial<",
               "MlTrainedModelStats",
-              "> | undefined; kbState: ",
+              "> | undefined; inferenceModelState: ",
               {
                 "pluginId": "observabilityAIAssistant",
                 "scope": "common",
                 "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-common.KnowledgeBaseState",
-                "text": "KnowledgeBaseState"
+                "section": "def-common.InferenceModelState",
+                "text": "InferenceModelState"
               },
-              "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }, ",
+              "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; productDocStatus: ",
+              "InstallationStatus",
+              "; }, ",
               "ObservabilityAIAssistantRouteCreateOptions",
               ">; \"POST /internal/observability_ai_assistant/kb/reindex\": ",
               {
@@ -5275,10 +5279,10 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.KnowledgeBaseEntryRole",
+        "id": "def-public.InferenceModelState",
         "type": "Enum",
         "tags": [],
-        "label": "KnowledgeBaseEntryRole",
+        "label": "InferenceModelState",
         "description": [],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
         "deprecated": false,
@@ -5287,10 +5291,10 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.KnowledgeBaseState",
+        "id": "def-public.KnowledgeBaseEntryRole",
         "type": "Enum",
         "tags": [],
-        "label": "KnowledgeBaseState",
+        "label": "KnowledgeBaseEntryRole",
         "description": [],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
         "deprecated": false,
@@ -5748,15 +5752,17 @@
           "InferenceInferenceEndpointInfo",
           " | undefined; modelStats?: Partial<",
           "MlTrainedModelStats",
-          "> | undefined; kbState: ",
+          "> | undefined; inferenceModelState: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
             "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.KnowledgeBaseState",
-            "text": "KnowledgeBaseState"
+            "section": "def-common.InferenceModelState",
+            "text": "InferenceModelState"
           },
-          "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }, ",
+          "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; productDocStatus: ",
+          "InstallationStatus",
+          "; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/reindex\": ",
           {
@@ -7124,15 +7130,17 @@
           "InferenceInferenceEndpointInfo",
           " | undefined; modelStats?: Partial<",
           "MlTrainedModelStats",
-          "> | undefined; kbState: ",
+          "> | undefined; inferenceModelState: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
             "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.KnowledgeBaseState",
-            "text": "KnowledgeBaseState"
+            "section": "def-common.InferenceModelState",
+            "text": "InferenceModelState"
           },
-          "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }, ",
+          "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; productDocStatus: ",
+          "InstallationStatus",
+          "; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/reindex\": ",
           {
@@ -9728,15 +9736,17 @@
               "InferenceInferenceEndpointInfo",
               " | undefined; modelStats?: ",
               "MlTrainedModelStats",
-              " | undefined; errorMessage?: string | undefined; kbState: ",
+              " | undefined; errorMessage?: string | undefined; inferenceModelState: ",
               {
                 "pluginId": "observabilityAIAssistant",
                 "scope": "common",
                 "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-common.KnowledgeBaseState",
-                "text": "KnowledgeBaseState"
+                "section": "def-common.InferenceModelState",
+                "text": "InferenceModelState"
               },
-              "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }>"
+              "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; productDocStatus: ",
+              "InstallationStatus",
+              "; }>"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
             "deprecated": false,
@@ -11754,15 +11764,17 @@
           "InferenceInferenceEndpointInfo",
           " | undefined; modelStats?: Partial<",
           "MlTrainedModelStats",
-          "> | undefined; kbState: ",
+          "> | undefined; inferenceModelState: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
             "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.KnowledgeBaseState",
-            "text": "KnowledgeBaseState"
+            "section": "def-common.InferenceModelState",
+            "text": "InferenceModelState"
           },
-          "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }, ",
+          "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; productDocStatus: ",
+          "InstallationStatus",
+          "; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/reindex\": ",
           {
@@ -13603,10 +13615,10 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-common.KnowledgeBaseEntryRole",
+        "id": "def-common.InferenceModelState",
         "type": "Enum",
         "tags": [],
-        "label": "KnowledgeBaseEntryRole",
+        "label": "InferenceModelState",
         "description": [],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
         "deprecated": false,
@@ -13615,10 +13627,10 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-common.KnowledgeBaseState",
+        "id": "def-common.KnowledgeBaseEntryRole",
         "type": "Enum",
         "tags": [],
-        "label": "KnowledgeBaseState",
+        "label": "KnowledgeBaseEntryRole",
         "description": [],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
         "deprecated": false,
