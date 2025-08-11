@@ -7,10 +7,12 @@
 
 import { services as svlPlatformServices } from '@kbn/test-suites-xpack-platform/serverless/functional/services';
 import { services as platformServices } from '@kbn/test-suites-xpack-platform/functional/services';
+import { SvlSecNavigationServiceProvider } from './svl_sec_navigation';
 
 export const services = {
   ...svlPlatformServices,
   // Security Solution serverless FTR services
+  svlSecNavigation: SvlSecNavigationServiceProvider,
   ml: platformServices.ml,
 };
 

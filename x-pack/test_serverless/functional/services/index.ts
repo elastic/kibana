@@ -15,7 +15,6 @@ import { services as deploymentAgnosticFunctionalServices } from './deployment_a
 import { services as svlSharedServices } from '../../shared/services';
 import { SvlChatNavigationServiceProvider } from './svl_chat_navigation';
 import { SvlObltNavigationServiceProvider } from './svl_oblt_navigation';
-import { SvlSecNavigationServiceProvider } from './svl_sec_navigation';
 import { SvlCasesServiceProvider } from '../../api_integration/services/svl_cases';
 import { services as SvlApiIntegrationSvcs } from '../../api_integration/services';
 
@@ -28,7 +27,6 @@ export const services = {
   svlChatNavigation: SvlChatNavigationServiceProvider,
   svlCommonNavigation: SvlCommonNavigationServiceProvider,
   svlObltNavigation: SvlObltNavigationServiceProvider,
-  svlSecNavigation: SvlSecNavigationServiceProvider,
   svlCommonScreenshots: SvlCommonScreenshotsProvider,
   svlCases: SvlCasesServiceProvider,
   svlMl: MachineLearningProvider,

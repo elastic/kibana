@@ -7,6 +7,7 @@
 
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { createTestConfig } from '@kbn/test-suites-xpack-platform/serverless/functional/config.base';
+import { kbnServerArgs as fleetKbnServerArgs } from '@kbn/test-suites-xpack-platform/serverless/api_integration/services/default_fleet_setup';
 import { services } from '../services';
 import { pageObjects } from '../page_objects';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../test_suites/constants';
