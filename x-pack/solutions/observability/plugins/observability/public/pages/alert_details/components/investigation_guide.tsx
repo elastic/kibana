@@ -13,7 +13,7 @@ import React, { useState } from 'react';
 import {
   AlertDetailsRuleFormFlyout,
   type AlertDetailsRuleFormFlyoutBaseProps,
-} from './AlertDetailsRuleFormFlyout';
+} from './alert_details_rule_form_flyout';
 
 interface InvestigationGuideProps extends AlertDetailsRuleFormFlyoutBaseProps {
   blob?: string;
