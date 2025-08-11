@@ -164,10 +164,10 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     await waitFor(() => {
+      expect(screen.getByTestId('superDatePickerShowDatesButton')).toBeInTheDocument();
       expect(
         container.querySelector('input[placeholder*="search"], textarea')
       ).not.toBeInTheDocument();
-      expect(screen.getByTestId('superDatePickerShowDatesButton')).toBeInTheDocument();
     });
   });
 
@@ -181,10 +181,10 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     await waitFor(() => {
+      expect(screen.queryByTestId('superDatePickerShowDatesButton')).not.toBeInTheDocument();
       expect(
         container.querySelector('input[placeholder*="search"], textarea')
       ).not.toBeInTheDocument();
-      expect(screen.queryByTestId('superDatePickerShowDatesButton')).not.toBeInTheDocument();
     });
   });
 
@@ -201,10 +201,10 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     await waitFor(() => {
+      expect(screen.getByTestId('superDatePickerShowDatesButton')).toBeInTheDocument();
       expect(
         container.querySelector('input[placeholder*="search"], textarea')
       ).not.toBeInTheDocument();
-      expect(screen.getByTestId('superDatePickerShowDatesButton')).toBeInTheDocument();
     });
   });
 
@@ -222,8 +222,8 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     await waitFor(() => {
-      expect(screen.queryByTestId('querySubmitButton')).not.toBeInTheDocument();
       expect(screen.getByTestId('superDatePickerShowDatesButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('querySubmitButton')).not.toBeInTheDocument();
     });
   });
 
@@ -302,10 +302,10 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     await waitFor(() => {
+      expect(screen.queryByTestId('superDatePickerShowDatesButton')).not.toBeInTheDocument();
       expect(
         container.querySelector('input[placeholder*="search"], textarea')
       ).not.toBeInTheDocument();
-      expect(screen.queryByTestId('superDatePickerShowDatesButton')).not.toBeInTheDocument();
     });
   });
 
@@ -320,10 +320,10 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     await waitFor(() => {
+      expect(screen.queryByTestId('superDatePickerShowDatesButton')).not.toBeInTheDocument();
       expect(
         container.querySelector('input[placeholder*="search"], textarea')
       ).not.toBeInTheDocument();
-      expect(screen.queryByTestId('superDatePickerShowDatesButton')).not.toBeInTheDocument();
     });
   });
 
@@ -342,12 +342,12 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     await waitFor(() => {
-      expect(
-        container.querySelector('input[placeholder*="search"], textarea')
-      ).not.toBeInTheDocument();
       // Check for ES|QL related elements instead
       expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
       expect(screen.getByTestId('superDatePickerShowDatesButton')).toBeInTheDocument();
+      expect(
+        container.querySelector('input[placeholder*="search"], textarea')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -371,12 +371,12 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     await waitFor(() => {
-      expect(
-        container.querySelector('input[placeholder*="search"], textarea')
-      ).not.toBeInTheDocument();
       // Check for ES|QL related elements instead
       expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
       expect(screen.getByTestId('kbnQueryBar-datePicker-disabled')).toBeInTheDocument();
+      expect(
+        container.querySelector('input[placeholder*="search"], textarea')
+      ).not.toBeInTheDocument();
     });
   });
 
