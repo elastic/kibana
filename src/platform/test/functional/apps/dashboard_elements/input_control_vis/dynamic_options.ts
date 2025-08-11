@@ -19,14 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
   const comboBox = getService('comboBox');
-  const retry = getService('retry');
-
-  // Helper function to retry comboBox.set with stale element handling
-  async function setComboBoxWithRetry(selector: string, value: string) {
-    await retry.try(async () => {
-      await comboBox.set(selector, value);
-    });
-  }
 
   describe('dynamic options', () => {
     before(async () => {
@@ -53,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not fetch new options when non-string is filtered', async () => {
-        await setComboBoxWithRetry('fieldSelect-0', 'clientip');
+        await comboBox.setWithRetry('fieldSelect-0', 'clientip');
         await visEditor.clickGo();
 
         const initialOptions = await comboBox.getOptionsList('listControlSelect0');
@@ -78,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           navigateToVisualize: false,
         });
         await header.waitUntilLoadingHasFinished();
-        await setComboBoxWithRetry('listControlSelect0', 'win 7');
+        await comboBox.setWithRetry('listControlSelect0', 'win 7');
       });
 
       it('should fetch new options when string field is filtered', async () => {

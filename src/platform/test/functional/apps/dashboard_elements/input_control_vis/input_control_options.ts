@@ -26,13 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const FIELD_NAME = 'machine.os.raw';
 
-  // Helper function to retry comboBox.set with stale element handling
-  async function setComboBoxWithRetry(selector: string, value: string) {
-    await retry.try(async () => {
-      await comboBox.set(selector, value);
-    });
-  }
-
   describe('input control options', () => {
     before(async () => {
       await visualize.initTests();
@@ -72,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should stage filter when item selected but not create filter pill', async () => {
-        await setComboBoxWithRetry('listControlSelect0', 'ios');
+        await comboBox.setWithRetry('listControlSelect0', 'ios');
 
         const selectedOptions = await comboBox.getComboBoxSelectedOptions('listControlSelect0');
         expect(selectedOptions[0].trim()).to.equal('ios');
@@ -93,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('input control is clear', async () => {
           return (await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0')) === false;
         });
-        await setComboBoxWithRetry('listControlSelect0', 'osx');
+        await comboBox.setWithRetry('listControlSelect0', 'osx');
         await visEditor.inputControlSubmit();
         await common.sleep(1000);
 
@@ -112,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should clear form when Clear button is clicked but not remove filter pill', async () => {
-        await setComboBoxWithRetry('listControlSelect0', 'ios');
+        await comboBox.setWithRetry('listControlSelect0', 'ios');
         await visEditor.inputControlSubmit();
         const hasFilterBeforeClearBtnClicked = await filterBar.hasFilter(FIELD_NAME, 'ios');
         expect(hasFilterBeforeClearBtnClicked).to.equal(true);
@@ -155,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should add filter pill when item selected', async () => {
-        await setComboBoxWithRetry('listControlSelect0', 'ios');
+        await comboBox.setWithRetry('listControlSelect0', 'ios');
 
         const selectedOptions = await comboBox.getComboBoxSelectedOptions('listControlSelect0');
         expect(selectedOptions[0].trim()).to.equal('ios');

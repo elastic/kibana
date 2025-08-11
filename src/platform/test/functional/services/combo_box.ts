@@ -38,6 +38,19 @@ export class ComboBoxService extends FtrService {
     await this.setElement(comboBox, value);
   }
 
+  /**
+   * Finds combobox element and sets specified value with retry logic for stale element handling
+   *
+   * @param comboBoxSelector data-test-subj selector
+   * @param value option text
+   */
+  public async setWithRetry(comboBoxSelector: string, value: string): Promise<void> {
+    this.log.debug(`comboBox.setWithRetry, comboBoxSelector: ${comboBoxSelector}`);
+    await this.retry.try(async () => {
+      await this.set(comboBoxSelector, value);
+    });
+  }
+
   public async setForLastInput(comboBoxSelector: string, value: string): Promise<void> {
     this.log.debug(`comboBox.set, comboBoxSelector: ${comboBoxSelector}`);
     const comboBox = await this.find.byXPath(
