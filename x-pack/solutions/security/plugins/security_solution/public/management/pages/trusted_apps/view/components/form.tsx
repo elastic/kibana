@@ -99,6 +99,9 @@ import { TRUSTED_APPS_LIST_TYPE } from '../../constants';
 import { Loader } from '../../../../../common/components/loader';
 import { computeHasDuplicateFields, getAddedFieldsCounts } from '../../../../common/utils';
 import type { EventFilterItemAndAdvancedTrustedAppsEntries } from '../../../../../../common/endpoint/types/exception_list_items';
+import { FILTER_PROCESS_DESCENDANTS_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
+import { isFilterProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
+import { ProcessDescendantsTooltip } from '../../event_filters/view/components/process_descendant_tooltip';
 
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */
@@ -678,6 +681,78 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       processChanged();
     }, [processChanged]);
 
+    // --- Begin: Filter Process Descendants Feature ---
+    const isFilterProcessDescendantsFeatureEnabled = useIsExperimentalFeatureEnabled(
+      'filterProcessDescendantsForEventFiltersEnabled'
+    );
+    const isFilterProcessDescendantsSelected = useMemo(
+      () => isFilterProcessDescendantsEnabled(item),
+      [item]
+    );
+
+    const handleFilterTypeOnChange = useCallback(
+      (id: string) => {
+        const newTagsForDescendants = id === 'descendants' ? [FILTER_PROCESS_DESCENDANTS_TAG] : [];
+        const tags = getTagsUpdatedBy('processDescendantsFiltering', newTagsForDescendants);
+        processChanged({ ...item, tags });
+        if (!hasFormChanged) setHasFormChanged(true);
+      },
+      [getTagsUpdatedBy, hasFormChanged, processChanged, item]
+    );
+
+    const filterTypeOptions = useMemo(
+      () => [
+        {
+          id: 'events',
+          label: <EuiText size="s">Events</EuiText>,
+          iconType: isFilterProcessDescendantsSelected ? 'empty' : 'checkInCircleFilled',
+          'data-test-subj': 'trustedApps-filterEventsButton',
+        },
+        {
+          id: 'descendants',
+          label: (
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+              <EuiText size="s">Process Descendants</EuiText>
+              <ProcessDescendantsTooltip data-test-subj="trustedApps-filterProcessDescendantsTooltip" />
+            </EuiFlexGroup>
+          ),
+          iconType: isFilterProcessDescendantsSelected ? 'checkInCircleFilled' : 'empty',
+          'data-test-subj': 'trustedApps-filterProcessDescendantsButton',
+        },
+      ],
+      [isFilterProcessDescendantsSelected]
+    );
+
+    const filterTypeSubsection = useMemo(() => {
+      if (!isFilterProcessDescendantsFeatureEnabled) return null;
+      return (
+        <>
+          <EuiButtonGroup
+            legend="Events or Process descendants selector"
+            color="primary"
+            onChange={handleFilterTypeOnChange}
+            options={filterTypeOptions}
+            idSelected={isFilterProcessDescendantsSelected ? 'descendants' : 'events'}
+          />
+          <EuiSpacer size="m" />
+          {isFilterProcessDescendantsSelected && (
+            <>
+              <EuiText size="s">
+                Additional condition added: <code>process descendants</code>
+              </EuiText>
+              <EuiSpacer size="m" />
+            </>
+          )}
+        </>
+      );
+    }, [
+      isFilterProcessDescendantsFeatureEnabled,
+      handleFilterTypeOnChange,
+      filterTypeOptions,
+      isFilterProcessDescendantsSelected,
+    ]);
+    // --- End: Filter Process Descendants Feature ---
+
     if (isIndexPatternLoading || !trustedApp) {
       return <Loader size="xl" />;
     }
@@ -769,6 +844,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
+        {filterTypeSubsection}
         {isTAAdvancedModeFeatureFlagEnabled && isFormAdvancedMode && (
           <>
             <EuiSpacer size="s" />
