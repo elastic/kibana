@@ -8,10 +8,10 @@
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import type {
-  AlertsTelemetryAggregationsByOwnerResults,
   AttachmentAggregationResult,
   AttachmentFrameworkAggsResult,
   CaseAggregationResult,
+  CasesTelemetryWithAlertsAggsByOwnerResults,
   FileAttachmentAggregationResults,
 } from '../types';
 import {
@@ -31,7 +31,6 @@ import {
   getOnlyConnectorsFilter,
   getReferencesAggregationQuery,
   getSolutionValues,
-  getTotalWithAlerts,
   getUniqueAlertCommentsCountQuery,
   processWithAlertsByOwner,
 } from './utils';
@@ -237,20 +236,41 @@ describe('utils', () => {
         ],
       },
     };
-    const withAlertsByOwnerResults: AlertsTelemetryAggregationsByOwnerResults = {
+    const withAlertsByOwnerResults: CasesTelemetryWithAlertsAggsByOwnerResults = {
       by_owner: {
         buckets: [
           {
             key: 'cases',
             doc_count: 10,
+            references: {
+              referenceType: {
+                referenceAgg: {
+                  value: 10,
+                },
+              },
+            },
           },
           {
             key: 'observability',
-            doc_count: 5,
+            doc_count: 8,
+            references: {
+              referenceType: {
+                referenceAgg: {
+                  value: 5,
+                },
+              },
+            },
           },
           {
             key: 'securitySolution',
-            doc_count: 20,
+            doc_count: 10,
+            references: {
+              referenceType: {
+                referenceAgg: {
+                  value: 20,
+                },
+              },
+            },
           },
         ],
       },
@@ -262,7 +282,7 @@ describe('utils', () => {
           attachmentAggregations: attachmentAggsResult,
           filesAggregations: filesRes,
           owner: 'securitySolution',
-          totalWithAlertsAggregationsByOwner: withAlertsByOwnerResults,
+          casesTotalWithAlerts: withAlertsByOwnerResults,
         })
       ).toMatchInlineSnapshot(`
         Object {
@@ -329,7 +349,7 @@ describe('utils', () => {
           caseAggregations: caseAggsResult,
           attachmentAggregations: attachmentAggsResult,
           filesAggregations: filesRes,
-          totalWithAlertsAggregationsByOwner: withAlertsByOwnerResults,
+          casesTotalWithAlerts: withAlertsByOwnerResults,
           owner: 'cases',
         })
       ).toMatchInlineSnapshot(`
@@ -397,7 +417,7 @@ describe('utils', () => {
           caseAggregations: caseAggsResult,
           attachmentAggregations: attachmentAggsResult,
           filesAggregations: filesRes,
-          totalWithAlertsAggregationsByOwner: withAlertsByOwnerResults,
+          casesTotalWithAlerts: withAlertsByOwnerResults,
           owner: 'observability',
         })
       ).toMatchInlineSnapshot(`
@@ -1529,21 +1549,43 @@ describe('utils', () => {
         required: 0,
       });
     });
+
     it('parses and returns the correct cases with alerts by owner', () => {
-      const withAlertsByOwnerResults: AlertsTelemetryAggregationsByOwnerResults = {
+      const withAlertsByOwnerResults: CasesTelemetryWithAlertsAggsByOwnerResults = {
         by_owner: {
           buckets: [
             {
               key: 'cases',
               doc_count: 10,
+              references: {
+                referenceType: {
+                  referenceAgg: {
+                    value: 10,
+                  },
+                },
+              },
             },
             {
               key: 'observability',
-              doc_count: 5,
+              doc_count: 8,
+              references: {
+                referenceType: {
+                  referenceAgg: {
+                    value: 5,
+                  },
+                },
+              },
             },
             {
               key: 'securitySolution',
-              doc_count: 20,
+              doc_count: 10,
+              references: {
+                referenceType: {
+                  referenceAgg: {
+                    value: 20,
+                  },
+                },
+              },
             },
           ],
         },
@@ -1553,30 +1595,6 @@ describe('utils', () => {
         observability: 5,
         cases: 10,
       });
-    });
-  });
-  describe('getTotalWithAlerts', () => {
-    it('returns the total number of cases with alerts across solutions', () => {
-      const withAlertsByOwnerResults: AlertsTelemetryAggregationsByOwnerResults = {
-        by_owner: {
-          buckets: [
-            {
-              key: 'cases',
-              doc_count: 10,
-            },
-            {
-              key: 'observability',
-              doc_count: 5,
-            },
-            {
-              key: 'securitySolution',
-              doc_count: 20,
-            },
-          ],
-        },
-      };
-
-      expect(getTotalWithAlerts(withAlertsByOwnerResults)).toEqual(35);
     });
   });
 });
