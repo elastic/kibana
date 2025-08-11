@@ -26,6 +26,7 @@ import { createCriteriaEvaluator } from './evaluators/criteria';
 import { DefaultEvaluators } from './types';
 import { reportModelScore } from './utils/report_model_score';
 import { createConnectorFixture } from './utils/create_connector_fixture';
+import { createCorrectnessEvaluator } from './evaluators/corectness';
 
 /**
  * Test type for evaluations. Loads an inference client and a
@@ -142,6 +143,12 @@ export const evaluate = base.extend<
           return createCriteriaEvaluator({
             inferenceClient: evaluatorInferenceClient,
             criteria,
+            log,
+          });
+        },
+        corectness: () => {
+          return createCorrectnessEvaluator({
+            inferenceClient: evaluatorInferenceClient,
             log,
           });
         },

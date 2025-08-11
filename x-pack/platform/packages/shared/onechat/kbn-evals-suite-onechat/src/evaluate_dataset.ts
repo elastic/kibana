@@ -85,6 +85,20 @@ export function createEvaluateDataset({
             return result;
           },
         },
+        {
+          name: 'correctness-evaluator',
+          kind: 'LLM',
+          evaluate: async ({ input, output, expected, metadata }) => {
+            const result = await evaluators.corectness().evaluate({
+              input,
+              expected,
+              output,
+              metadata,
+            });
+
+            return result;
+          },
+        },
       ]
     );
   };
