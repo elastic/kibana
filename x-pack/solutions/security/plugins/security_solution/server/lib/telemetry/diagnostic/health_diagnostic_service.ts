@@ -53,7 +53,7 @@ const TASK_TYPE = 'security:health-diagnostic';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
 const INTERVAL = '1h';
 const TIMEOUT = '10m';
-const QUERY_ARTIFACT_ID = 'health-diagnostic-query';
+const QUERY_ARTIFACT_ID = 'health-diagnostic-queries-v1';
 
 export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private readonly salt = 'c2a5d101-d0ef-49cc-871e-6ee55f9546f8';
