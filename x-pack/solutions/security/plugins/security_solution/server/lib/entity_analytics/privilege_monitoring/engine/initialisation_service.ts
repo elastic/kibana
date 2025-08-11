@@ -111,7 +111,8 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
   const createOrUpdateDefaultDataSource = async (
     monitoringIndexSourceClient: MonitoringEntitySourceDescriptorClient
   ) => {
-    const sourceName = `default-monitoring-index-${deps.namespace}`;
+    // const sourceName = `default-monitoring-index-${this.opts.namespace}`;
+    const sourceName = dataClient.index; // `entity_analytics.monitoring.users-${this.opts.namespace}`;
 
     const defaultIndexSource: CreateMonitoringEntitySource = {
       type: 'index',

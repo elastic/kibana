@@ -12,6 +12,7 @@ import {
   PrivilegeMonitoringEngineDescriptorClient,
 } from '../saved_objects';
 import { removePrivilegeMonitoringTask } from '../tasks/privilege_monitoring_task';
+import { ignoreSONotFoundError } from '../saved_objects/helpers';
 
 export const createEngineCrudService = (
   dataClient: PrivilegeMonitoringDataClient,
@@ -27,7 +28,7 @@ export const createEngineCrudService = (
   const _delete = async (deleteData = false) => {
     dataClient.log('info', 'Deleting privilege monitoring engine');
 
-    await descriptorClient.delete();
+    await descriptorClient.delete().catch(ignoreSONotFoundError);
 
     if (deleteData) {
       await esClient.indices.delete({ index }, { ignore: [404] });
@@ -46,9 +47,9 @@ export const createEngineCrudService = (
       soClient,
     });
 
-    await indexSourceClient
-      .findAll({})
-      .then((sos) => sos.forEach((so) => indexSourceClient.delete(so.id)));
+    const allDataSources = await indexSourceClient.findAll({});
+    const deleteSourcePromises = allDataSources.map((so) => indexSourceClient.delete(so.id));
+    await Promise.all(deleteSourcePromises);
 
     return { deleted: true };
   };

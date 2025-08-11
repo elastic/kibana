@@ -40,7 +40,7 @@ export class PrivilegeMonitoringEngineDescriptorClient {
       {
         status: PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED,
       },
-      { id: this.getSavedObjectId() }
+      { id: this.getSavedObjectId(), refresh: 'wait_for' }
     );
     return attributes;
   }
@@ -124,6 +124,6 @@ export class PrivilegeMonitoringEngineDescriptorClient {
 
   async delete() {
     const id = this.getSavedObjectId();
-    return this.deps.soClient.delete(privilegeMonitoringTypeName, id);
+    return this.deps.soClient.delete(privilegeMonitoringTypeName, id, { refresh: 'wait_for' });
   }
 }
