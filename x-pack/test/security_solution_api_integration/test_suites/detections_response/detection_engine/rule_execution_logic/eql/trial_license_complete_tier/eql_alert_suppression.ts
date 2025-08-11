@@ -169,7 +169,7 @@ export default ({ getService }: FtrProviderContext) => {
             undefined,
             afterTimestamp
           );
-          expect(secondAlerts.hits.hits.length).toEqual(1);
+          expect(secondAlerts.hits.hits).toHaveLength(1);
           expect(secondAlerts.hits.hits[0]._source).toEqual(
             expect.objectContaining({
               [ALERT_SUPPRESSION_TERMS]: [
@@ -342,7 +342,7 @@ export default ({ getService }: FtrProviderContext) => {
             afterTimestamp
           );
 
-          expect(secondAlerts.hits.hits.length).toEqual(3);
+          expect(secondAlerts.hits.hits).toHaveLength(3);
 
           const sortedAlerts = sortBy(secondAlerts.hits.hits, ALERT_ORIGINAL_TIME);
 
@@ -405,7 +405,7 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: [ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).toBe(2);
+          expect(previewAlerts).toHaveLength(2);
           expect(previewAlerts[0]._source).toEqual(
             expect.objectContaining({
               [ALERT_SUPPRESSION_TERMS]: [
@@ -490,7 +490,7 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: [ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts).toHaveLength(1);
           expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
@@ -560,7 +560,7 @@ export default ({ getService }: FtrProviderContext) => {
             sort: ['host.name', ALERT_ORIGINAL_TIME],
           });
 
-          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts).toHaveLength(1);
           expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
@@ -621,7 +621,7 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: ['host.name', ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts).toHaveLength(1);
           expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
@@ -698,7 +698,7 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: ['agent.name', ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).toEqual(2);
+          expect(previewAlerts).toHaveLength(2);
           expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
@@ -789,7 +789,7 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: ['agent.name', ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).toEqual(4);
+          expect(previewAlerts).toHaveLength(4);
           expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
@@ -855,7 +855,7 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: [ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts).toHaveLength(1);
           expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
@@ -905,7 +905,7 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: [ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts).toHaveLength(1);
           expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
@@ -961,7 +961,7 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: ['agent.name', ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).toEqual(2);
+          expect(previewAlerts).toHaveLength(2);
           expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
@@ -1054,7 +1054,7 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: ['agent.name', 'agent.version', ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).toEqual(4);
+          expect(previewAlerts).toHaveLength(4);
           expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
@@ -1154,7 +1154,7 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: ['agent.name', ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).toEqual(3);
+          expect(previewAlerts).toHaveLength(3);
           expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
@@ -1242,7 +1242,7 @@ export default ({ getService }: FtrProviderContext) => {
             sort: ['agent.name', 'agent.version', ALERT_ORIGINAL_TIME],
           });
           // from 7 injected, only one should be suppressed
-          expect(previewAlerts.length).toEqual(6);
+          expect(previewAlerts).toHaveLength(6);
           expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
@@ -1310,7 +1310,7 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: ['host.name', ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).toEqual(2);
+          expect(previewAlerts).toHaveLength(2);
           expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
@@ -1381,7 +1381,7 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: ['host.name', ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).toEqual(2);
+          expect(previewAlerts).toHaveLength(2);
           expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
@@ -1451,7 +1451,7 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: ['host.name', ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).toEqual(2);
+          expect(previewAlerts).toHaveLength(2);
           expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
@@ -1526,7 +1526,7 @@ export default ({ getService }: FtrProviderContext) => {
           previewId,
           sort: ['agent.name', ALERT_ORIGINAL_TIME],
         });
-        expect(previewAlerts.length).toEqual(1);
+        expect(previewAlerts).toHaveLength(1);
         expect(previewAlerts[0]._source).toEqual({
           ...previewAlerts[0]._source,
           [ALERT_SUPPRESSION_TERMS]: [
@@ -1591,7 +1591,7 @@ export default ({ getService }: FtrProviderContext) => {
           size: 1000,
           sort: ['agent.name', ALERT_ORIGINAL_TIME],
         });
-        expect(previewAlerts.length).toEqual(100);
+        expect(previewAlerts).toHaveLength(100);
       });
 
       it('adds execution values to rule execution state', async () => {
@@ -1695,7 +1695,7 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: [ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts).toHaveLength(1);
           expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
@@ -1846,10 +1846,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
         // we expect one created alert and one suppressed alert
         // and two building block alerts, let's confirm that
-        expect(previewAlerts.length).toEqual(3);
+        expect(previewAlerts).toHaveLength(3);
         const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
-        expect(buildingBlockAlerts.length).toEqual(2);
-        expect(sequenceAlert.length).toEqual(1);
+        expect(buildingBlockAlerts).toHaveLength(2);
+        expect(sequenceAlert).toHaveLength(1);
 
         expect(sequenceAlert[0]?._source).toEqual({
           ...sequenceAlert[0]?._source,
@@ -1917,13 +1917,13 @@ export default ({ getService }: FtrProviderContext) => {
         });
         // we expect one created alert and one suppressed alert
         // and two building block alerts, let's confirm that
-        expect(previewAlerts.length).toEqual(3);
+        expect(previewAlerts).toHaveLength(3);
         const [sequenceAlert, buildingBlockAlerts] = partition(
           previewAlerts,
           (alert) => alert?._source?.[ALERT_SUPPRESSION_DOCS_COUNT] != null
         );
-        expect(buildingBlockAlerts.length).toEqual(2);
-        expect(sequenceAlert.length).toEqual(1);
+        expect(buildingBlockAlerts).toHaveLength(2);
+        expect(sequenceAlert).toHaveLength(1);
 
         expect(sequenceAlert[0]?._source).toEqual({
           ...sequenceAlert[0]?._source,
@@ -1998,11 +1998,11 @@ export default ({ getService }: FtrProviderContext) => {
         });
         // we expect two sequence alerts
         // each sequence alert having two building block alerts
-        expect(previewAlerts.length).toEqual(6);
+        expect(previewAlerts).toHaveLength(6);
         const [sequenceAlerts, buildingBlockAlerts] =
           partitionSequenceBuildingBlocks(previewAlerts);
-        expect(buildingBlockAlerts.length).toEqual(4);
-        expect(sequenceAlerts.length).toEqual(2);
+        expect(buildingBlockAlerts).toHaveLength(4);
+        expect(sequenceAlerts).toHaveLength(2);
 
         expect(sequenceAlerts[0]?._source).toEqual({
           ...sequenceAlerts[0]?._source,
@@ -2106,13 +2106,13 @@ export default ({ getService }: FtrProviderContext) => {
         // and two building block alerts per shell alert, let's confirm that
         const [sequenceAlerts, buildingBlockAlerts] =
           partitionSequenceBuildingBlocks(previewAlerts);
-        expect(buildingBlockAlerts.length).toEqual(6);
-        expect(sequenceAlerts.length).toEqual(3);
+        expect(buildingBlockAlerts).toHaveLength(6);
+        expect(sequenceAlerts).toHaveLength(3);
         const [suppressedSequenceAlerts] = partition(
           sequenceAlerts,
           (alert) => (alert?._source?.['kibana.alert.suppression.docs_count'] as number) >= 0
         );
-        expect(suppressedSequenceAlerts.length).toEqual(1);
+        expect(suppressedSequenceAlerts).toHaveLength(1);
 
         expect(suppressedSequenceAlerts[0]._source).toEqual({
           ...suppressedSequenceAlerts[0]._source,
@@ -2175,15 +2175,15 @@ export default ({ getService }: FtrProviderContext) => {
         });
         // we expect one alert and two suppressed alerts
         // and two building block alerts, let's confirm that
-        expect(previewAlerts.length).toEqual(6);
+        expect(previewAlerts).toHaveLength(6);
         const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
         const [suppressedSequenceAlerts] = partition(
           sequenceAlert,
           (alert) => (alert?._source?.['kibana.alert.suppression.docs_count'] as number) >= 0
         );
-        expect(buildingBlockAlerts.length).toEqual(4);
-        expect(sequenceAlert.length).toEqual(2);
-        expect(suppressedSequenceAlerts.length).toEqual(0);
+        expect(buildingBlockAlerts).toHaveLength(4);
+        expect(sequenceAlert).toHaveLength(2);
+        expect(suppressedSequenceAlerts).toHaveLength(0);
         expect(sequenceAlert[0]?._source).toEqual({
           ...sequenceAlert[0]?._source,
           [ALERT_SUPPRESSION_TERMS]: undefined,
@@ -2248,15 +2248,15 @@ export default ({ getService }: FtrProviderContext) => {
         });
         // we expect one alert and two suppressed alerts
         // and two building block alerts, let's confirm that
-        expect(previewAlerts.length).toEqual(3);
+        expect(previewAlerts).toHaveLength(3);
         const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
         const [suppressedSequenceAlerts] = partition(
           sequenceAlert,
           (alert) => (alert?._source?.['kibana.alert.suppression.docs_count'] as number) >= 0
         );
-        expect(suppressedSequenceAlerts.length).toEqual(1);
-        expect(buildingBlockAlerts.length).toEqual(2);
-        expect(sequenceAlert.length).toEqual(1);
+        expect(suppressedSequenceAlerts).toHaveLength(1);
+        expect(buildingBlockAlerts).toHaveLength(2);
+        expect(sequenceAlert).toHaveLength(1);
 
         expect(sequenceAlert[0]?._source).toEqual({
           ...sequenceAlert[0]?._source,
@@ -2334,18 +2334,18 @@ export default ({ getService }: FtrProviderContext) => {
           sort: [ALERT_ORIGINAL_TIME],
         });
 
-        expect(previewAlerts.length).toEqual(9);
+        expect(previewAlerts).toHaveLength(9);
         const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
         const [suppressedSequenceAlerts] = partition(
           sequenceAlert,
           (alert) => (alert?._source?.['kibana.alert.suppression.docs_count'] as number) >= 0
         );
         // no alerts should be suppressed because doNotSuppress is set
-        expect(suppressedSequenceAlerts.length).toEqual(0);
-        expect(buildingBlockAlerts.length).toEqual(6);
+        expect(suppressedSequenceAlerts).toHaveLength(0);
+        expect(buildingBlockAlerts).toHaveLength(6);
         // 3 sequence alerts comprised of
         // (doc1 + doc1WithNoHost), (doc1WithNoHost + doc2WithNoHost), (doc2WithNoHost + doc3WithNoHost)
-        expect(sequenceAlert.length).toEqual(3);
+        expect(sequenceAlert).toHaveLength(3);
 
         expect(sequenceAlert[0]?._source).toEqual({
           ...sequenceAlert[0]?._source,
@@ -2403,10 +2403,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
         // we expect one alert and two suppressed alerts
         // and two building block alerts, let's confirm that
-        expect(previewAlerts.length).toEqual(3);
+        expect(previewAlerts).toHaveLength(3);
         const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
-        expect(buildingBlockAlerts.length).toEqual(2);
-        expect(sequenceAlert.length).toEqual(1);
+        expect(buildingBlockAlerts).toHaveLength(2);
+        expect(sequenceAlert).toHaveLength(1);
 
         expect(sequenceAlert[0]?._source).toEqual({
           ...sequenceAlert[0]?._source,
@@ -2487,10 +2487,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
         // we expect one alert and two suppressed alerts
         // and two building block alerts, let's confirm that
-        expect(previewAlerts.length).toEqual(3);
+        expect(previewAlerts).toHaveLength(3);
         const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
-        expect(buildingBlockAlerts.length).toEqual(2);
-        expect(sequenceAlert.length).toEqual(1);
+        expect(buildingBlockAlerts).toHaveLength(2);
+        expect(sequenceAlert).toHaveLength(1);
 
         expect(sequenceAlert[0]._source).toEqual({
           ...sequenceAlert[0]._source,
@@ -2547,7 +2547,7 @@ export default ({ getService }: FtrProviderContext) => {
           sort: [ALERT_ORIGINAL_TIME],
         });
         const [sequenceAlert] = partitionSequenceBuildingBlocks(previewAlerts);
-        expect(previewAlerts.length).toEqual(3); // one sequence, two building block
+        expect(previewAlerts).toHaveLength(3); // one sequence, two building block
         expect(sequenceAlert[0]._source).toEqual({
           ...sequenceAlert[0]._source,
           [ALERT_SUPPRESSION_TERMS]: [
@@ -2644,7 +2644,7 @@ export default ({ getService }: FtrProviderContext) => {
         const [sequenceAlert] = partitionSequenceBuildingBlocks(previewAlerts);
 
         // for sequence alerts if neither of the fields are there, we cannot suppress
-        expect(sequenceAlert.length).toEqual(4);
+        expect(sequenceAlert).toHaveLength(4);
         expect(sequenceAlert[0]._source).toEqual({
           ...sequenceAlert[0]._source,
           [ALERT_SUPPRESSION_TERMS]: [
@@ -2791,7 +2791,7 @@ export default ({ getService }: FtrProviderContext) => {
           sequenceAlert,
           (alert) => (alert?._source?.['kibana.alert.suppression.docs_count'] as number) >= 0
         );
-        expect(suppressedSequenceAlerts.length).toEqual(1);
+        expect(suppressedSequenceAlerts).toHaveLength(1);
         expect(suppressedSequenceAlerts[0]._source).toEqual({
           ...suppressedSequenceAlerts[0]._source,
           [ALERT_SUPPRESSION_TERMS]: [
@@ -2860,8 +2860,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
         const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
 
-        expect(buildingBlockAlerts.length).toEqual(2);
-        expect(sequenceAlert.length).toEqual(1);
+        expect(buildingBlockAlerts).toHaveLength(2);
+        expect(sequenceAlert).toHaveLength(1);
         expect(sequenceAlert[0]._source).toEqual({
           ...sequenceAlert[0]._source,
           [ALERT_SUPPRESSION_TERMS]: [
@@ -2875,8 +2875,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/202940
-    describe.skip('@skipInServerless sequence queries with suppression duration', () => {
+    describe('@skipInServerless sequence queries with suppression duration', () => {
       it('suppresses alerts across two rule executions when the suppression duration exceeds the rule interval', async () => {
         const id = uuidv4();
         const firstTimestamp = new Date(Date.now() - 1000).toISOString();
@@ -2911,12 +2910,12 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getOpenAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits.length).toEqual(3);
+        expect(alerts.hits.hits).toHaveLength(3);
         const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(
           alerts.hits.hits
         );
-        expect(buildingBlockAlerts.length).toEqual(2);
-        expect(sequenceAlert.length).toEqual(1);
+        expect(buildingBlockAlerts).toHaveLength(2);
+        expect(sequenceAlert).toHaveLength(1);
 
         // suppression start equal to alert timestamp
         const suppressionStart = sequenceAlert[0]._source?.[TIMESTAMP];
@@ -2964,7 +2963,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const [sequenceAlert2] = partitionSequenceBuildingBlocks(secondAlerts.hits.hits);
 
-        expect(sequenceAlert2.length).toEqual(1);
+        expect(sequenceAlert2).toHaveLength(1);
         expect(sequenceAlert2[0]._source).toEqual({
           ...sequenceAlert2[0]?._source,
           [ALERT_SUPPRESSION_TERMS]: [
@@ -2983,8 +2982,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(suppressionEnd).toBeGreaterThan(new Date(secondTimestamp).getDate());
       });
 
-      // Skipped here: https://github.com/elastic/kibana/issues/202945
-      it.skip('does not suppress alerts outside of duration', async () => {
+      it('does not suppress alerts outside of duration', async () => {
         const id = uuidv4();
         // this timestamp is 1 minute in the past
         const firstTimestamp = new Date(Date.now() - 5000).toISOString();
@@ -3019,12 +3017,12 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getOpenAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits.length).toEqual(3);
+        expect(alerts.hits.hits).toHaveLength(3);
         const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(
           alerts.hits.hits
         );
-        expect(buildingBlockAlerts.length).toEqual(2);
-        expect(sequenceAlert.length).toEqual(1);
+        expect(buildingBlockAlerts).toHaveLength(2);
+        expect(sequenceAlert).toHaveLength(1);
 
         expect(sequenceAlert[0]._source).toEqual({
           ...sequenceAlert[0]._source,
@@ -3069,7 +3067,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const [sequenceAlert2] = partitionSequenceBuildingBlocks(secondAlerts.hits.hits);
 
-        expect(sequenceAlert2.length).toEqual(2);
+        expect(sequenceAlert2).toHaveLength(2);
         expect(sequenceAlert2[0]._source).toEqual({
           ...sequenceAlert2[0]?._source,
           [ALERT_SUPPRESSION_TERMS]: [
@@ -3153,12 +3151,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         // we expect one shell alert
         // and three building block alerts
-        expect(alerts.hits.hits.length).toEqual(4);
+        expect(alerts.hits.hits).toHaveLength(4);
         const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(
           alerts.hits.hits
         );
-        expect(buildingBlockAlerts.length).toEqual(3);
-        expect(sequenceAlert.length).toEqual(1);
+        expect(buildingBlockAlerts).toHaveLength(3);
+        expect(sequenceAlert).toHaveLength(1);
 
         expect(sequenceAlert[0]._source).toEqual({
           ...sequenceAlert[0]._source,
@@ -3172,8 +3170,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      // Skipped here: https://github.com/elastic/kibana/issues/202945
-      it.skip('does not suppress alerts outside of duration when query with 3 sequences', async () => {
+      it('does not suppress alerts outside of duration when query with 3 sequences', async () => {
         const id = uuidv4();
         const dateNow = Date.now();
         const timestampSequenceEvent1 = new Date(dateNow - 5000).toISOString();
@@ -3212,12 +3209,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         // we expect one shell alert
         // and three building block alerts
-        expect(alerts.hits.hits.length).toEqual(4);
+        expect(alerts.hits.hits).toHaveLength(4);
         const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(
           alerts.hits.hits
         );
-        expect(buildingBlockAlerts.length).toEqual(3);
-        expect(sequenceAlert.length).toEqual(1);
+        expect(buildingBlockAlerts).toHaveLength(3);
+        expect(sequenceAlert).toHaveLength(1);
 
         expect(sequenceAlert[0]._source).toEqual({
           ...sequenceAlert[0]._source,
@@ -3270,8 +3267,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         // two sequence alerts because the second one happened
         // outside of the rule's suppression duration
-        expect(sequenceAlert2.length).toEqual(2);
-        expect(buildingBlockAlerts2.length).toEqual(6);
+        expect(sequenceAlert2).toHaveLength(2);
+        expect(buildingBlockAlerts2).toHaveLength(6);
         // timestamps should be different for two alerts, showing they were
         // created in different rule executions
         expect(sequenceAlert2[0]?._source?.[TIMESTAMP]).not.toEqual(
