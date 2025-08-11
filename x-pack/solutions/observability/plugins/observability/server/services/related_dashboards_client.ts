@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEmpty, omit } from 'lodash';
+import { isEmpty } from 'lodash';
 import { IContentClient } from '@kbn/content-management-plugin/server/types';
 import { SearchResponse } from '@kbn/content-management-plugin/server/core/crud';
 import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
@@ -15,11 +15,7 @@ import type {
   GenericIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
-import type {
-  RelatedDashboard,
-  SuggestedDashboard,
-  LinkedDashboard,
-} from '@kbn/observability-schema';
+import type { LinkedDashboard, SuggestedDashboard } from '@kbn/observability-schema';
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
 import type { AlertData } from './alert_data';
 import {
@@ -28,13 +24,15 @@ import {
   isSuggestedDashboardsValidRuleTypeId,
 } from './helpers';
 import { ReferencedPanelManager } from './referenced_panel_manager';
-import { Alert } from '@kbn/alerts-as-data-utils';
+import { MatchedBy } from '@kbn/observability-schema/related_dashboards/schema/related_dashboard/v1';
+
+const MAX_SUGGESTED_MANAGED_DASHBOARDS = 3;
+const SCORING_EXCLUDED_FIELDS = ['tags', 'event.action', 'event.kind'];
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 
 export class RelatedDashboardsClient {
   public dashboardsById = new Map<string, Dashboard>();
-  private alert: AlertData | null = null;
 
   constructor(
     private logger: Logger,
@@ -146,7 +144,7 @@ export class RelatedDashboardsClient {
         description: d.attributes.description,
         tags: d.attributes.tags,
         // If it has a pre-existing score, that's a text match
-        matchedBy: { textMatch: [d.score] },
+        matchedBy: { textMatch: d.score, isManaged: d.managed },
         score: d.score ?? 0,
       });
     });
@@ -170,13 +168,28 @@ export class RelatedDashboardsClient {
           ...relevantDashboardsById.get(dashboard.id)?.matchedBy,
           ...dashboard.matchedBy,
         },
-        score: this.getScore(alert, dashboard),
+        score: scoreMatch(dashboard.matchedBy, allRelevantFields, index ? [index] : []),
       });
     });
 
-    const sortedDashboards = Array.from(relevantDashboardsById.values()).sort((a, b) => {
-      return b.score - a.score;
-    });
+    let matchedManagedDashboards = 0;
+    const sortedDashboards = Array.from(relevantDashboardsById.values())
+      .sort((a, b) => {
+        return b.score - a.score;
+      })
+      .filter((d) => {
+        // Unmanaged dashboards (user created) always match
+        if (!d.matchedBy.isManaged) {
+          return true;
+        }
+        // Only allow as many managed dashboards as the quota allows
+        matchedManagedDashboards++;
+        if (matchedManagedDashboards > MAX_SUGGESTED_MANAGED_DASHBOARDS) {
+          return false;
+        }
+        return true;
+      });
+
     return sortedDashboards;
   }
 
@@ -375,29 +388,53 @@ export class RelatedDashboardsClient {
       throw new Error(`Error fetching dashboard with id ${id}: ${error.message || error}`);
     }
   }
-
-  private getMatchingFields(dashboard: RelatedDashboard): string[] {
-    const matchingFields = new Set<string>();
-    // grab all the top level arrays from the matchedBy object via Object.values
-    Object.values(omit(dashboard.matchedBy, 'linked')).forEach((match) => {
-      // add the values of each array to the matchingFields set
-      match.forEach((value) => {
-        matchingFields.add(value);
-      });
-    });
-    return Array.from(matchingFields);
-  }
-
-  private getScore(alert: AlertData, dashboard: RelatedDashboard): number {
-    const allRelevantFields = alert.getAllRelevantFields();
-    const index = alert.getRuleQueryIndex();
-    const setA = new Set<string>([...allRelevantFields, ...(index ? [index] : [])]);
-    const setB = new Set<string>(this.getMatchingFields(dashboard));
-    const intersection = new Set([...setA].filter((item) => setB.has(item)));
-    const union = new Set([...setA, ...setB]);
-
-    return intersection.size / union.size;
-  }
 }
 
-function relatedDashboardScore(alert: AlertData) {}
+function scoreMatch(
+  matchedBy: MatchedBy & { textMatch?: number; isManaged?: boolean },
+  fields: string[],
+  index: string[]
+): number {
+  // Filter out excluded fields
+  const filteredFields = fields.filter((field) => !SCORING_EXCLUDED_FIELDS.includes(field));
+
+  // Calculate Jaccard similarity
+  const matchingFields = new Set<string>();
+
+  // Get fields from matchedBy
+  if (matchedBy.fields) {
+    matchedBy.fields
+      .filter((field) => !SCORING_EXCLUDED_FIELDS.includes(field))
+      .forEach((field) => matchingFields.add(field));
+  }
+
+  // Get indexes from matchedBy
+  if (matchedBy.index) {
+    matchedBy.index.forEach((idx) => matchingFields.add(idx));
+  }
+
+  // Add provided indexes
+  if (index && index.length > 0) {
+    index.forEach((idx) => matchingFields.add(idx));
+  }
+
+  // Calculate Jaccard similarity for fields/indices
+  const setA = new Set<string>([...filteredFields, ...(index || [])]);
+  const setB = matchingFields;
+  const intersection = new Set([...setA].filter((item) => setB.has(item)));
+  const union = new Set([...setA, ...setB]);
+
+  let baseScore = intersection.size / Math.max(union.size, 1); // Avoid division by zero
+
+  // Apply textMatch boost if available (heavily weight this)
+  if (matchedBy.textMatch && matchedBy.textMatch > 0) {
+    baseScore = baseScore + matchedBy.textMatch * 0.5;
+  }
+
+  // Penalize managed dashboards
+  if (matchedBy.isManaged) {
+    baseScore = baseScore * 0.25; // 75% penalty for managed dashboards
+  }
+
+  return baseScore;
+}

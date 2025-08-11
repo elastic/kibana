@@ -28,11 +28,13 @@ export const suggestedDashboardSchema = z.object({
   matchedBy: z.object({
     fields: z.array(z.string()).optional(),
     index: z.array(z.string()).optional(),
-    textMatch: z.array(z.number()).optional(),
+    textMatch: z.number().optional(),
+    isManaged: z.boolean().optional(),
   }),
   score: z.number(),
 });
 
 export type LinkedDashboard = z.output<typeof linkedDashboardSchema>;
+export type MatchedBy = z.output<typeof linkedDashboardSchema>['matchedBy'];
 export type SuggestedDashboard = z.output<typeof suggestedDashboardSchema>;
 export type RelatedDashboard = LinkedDashboard | SuggestedDashboard;
