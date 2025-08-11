@@ -10,7 +10,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import type { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export interface UsageStatsPayloadTestFriendly extends UsageStatsPayload {
   // Overwriting the `object` type to a more test-friendly type
