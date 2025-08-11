@@ -128,11 +128,17 @@ export const DiscoverMainRoute = ({
 
       return actions.confirm(
         i18n.translate('discover.confirmModal.confirmTextDescription', {
-          defaultMessage: 'Leaving Discover without saving may result in lost changes.',
+          defaultMessage:
+            "You'll lose unsaved changes if you open another Discover session before returning to this one.",
         }),
         i18n.translate('discover.confirmModal.title', {
           defaultMessage: 'Unsaved changes',
-        })
+        }),
+        () => {},
+        i18n.translate('discover.confirmModal.confirmText', {
+          defaultMessage: 'Leave without saving',
+        }),
+        'danger'
       );
     });
   }, [onAppLeave, runtimeStateManager]);
