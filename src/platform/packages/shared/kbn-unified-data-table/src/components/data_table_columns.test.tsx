@@ -13,7 +13,7 @@ import { deserializeHeaderRowHeight, getEuiGridColumns } from './data_table_colu
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { dataTableContextMock } from '../../__mocks__/table_context';
 import { servicesMock } from '../../__mocks__/services';
-import { ROWS_HEIGHT_OPTIONS } from '../constants';
+import { ROWS_HEIGHT_OPTIONS, kibanaJSON } from '../constants';
 import { UnifiedDataTableSettingsColumn } from '../types';
 
 const columns = ['extension', 'message'];
@@ -259,6 +259,35 @@ describe('Data table columns', function () {
         cellActionsHandling: 'replace',
       });
       expect(gridColumns[1].schema).toBe('string');
+      expect(gridColumns[1].isSortable).toBe(true);
+    });
+
+    it('should not enable sorting on json columns', async () => {
+      const gridColumns = getEuiGridColumns({
+        columns: ['geo.coordinates'],
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        columnsMeta: {
+          'geo.coordinates': { type: 'geo_point' },
+        },
+        onResize: () => {},
+        cellActionsHandling: 'replace',
+      });
+      expect(gridColumns[0].schema).toBe(kibanaJSON);
+      expect(gridColumns[0].isSortable).toBe(false);
     });
 
     it('returns eui grid with in memory sorting for text based languages and columns not on the columnsMeta', async () => {
@@ -291,6 +320,7 @@ describe('Data table columns', function () {
         cellActionsHandling: 'replace',
       });
       expect(gridColumns[1].schema).toBe('numeric');
+      expect(gridColumns[1].isSortable).toBe(true);
     });
 
     it('returns columns in correct format when column customisation is provided', async () => {

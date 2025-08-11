@@ -34,6 +34,7 @@ import {
   ROWS_HEIGHT_OPTIONS,
   DEFAULT_CONTROL_COLUMN_WIDTH,
   SCORE_COLUMN_NAME,
+  kibanaJSON,
 } from '../constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { buildEditFieldButton } from './build_edit_field_button';
@@ -202,14 +203,16 @@ function buildEuiGridColumn({
   }
 
   const columnType = dataViewField?.type;
+  const columnSchema = getSchemaByKbnType(columnType);
 
   const column: EuiDataGridColumn = {
     id: columnName,
-    schema: getSchemaByKbnType(columnType),
+    schema: columnSchema,
     isSortable:
       isSortEnabled &&
       // TODO: would be great to have something like `sortable` flag for text based columns too
-      ((isPlainRecord && columnName !== '_source') || dataViewField?.sortable === true),
+      ((isPlainRecord && columnName !== '_source' && columnSchema !== kibanaJSON) ||
+        dataViewField?.sortable === true),
     display:
       showColumnTokens || headerRowHeight !== 1 ? (
         <DataTableColumnHeaderMemoized
