@@ -164,6 +164,37 @@ export const toNavigationItems = (
     }
 
     let secondarySections: SecondaryMenuSection[] | undefined;
+
+    // Helper function to filter out hidden and custom render items
+    const filterValidSecondaryChildren = (
+      children: ChromeProjectNavigationNode[]
+    ): ChromeProjectNavigationNode[] => {
+      return children
+        .filter((child) => child.sideNavStatus !== 'hidden' && child.sideNavStatus !== 'hiddenV2')
+        .filter((child) => {
+          const isCustomRender = typeof child.renderItem === 'function';
+          if (isCustomRender) {
+            warnOnce(
+              `Custom renderItem is not supported in the new navigation. Ignoring it for node "${child.id}".`
+            );
+          }
+          return !isCustomRender;
+        });
+    };
+
+    // Helper function to convert a node to a secondary menu item
+    const createSecondaryMenuItem = (child: ChromeProjectNavigationNode): SecondaryMenuItem => {
+      warnUnsupportedNavNodeOptions(child);
+      maybeMarkActive(child, 2);
+      return {
+        id: child.id,
+        label: warnIfMissing(child, 'title', 'Missing Title 😭'),
+        href: warnIfMissing(child, 'href', 'Missing Href 😭'),
+        external: child.isExternalLink,
+        'data-test-subj': getTestSubj(child),
+      };
+    };
+
     if (navNode.renderAs === 'panelOpener') {
       if (!navNode.children?.length) {
         warnOnce(`Panel opener node "${navNode.id}" has no children. Ignoring it.`);
@@ -182,23 +213,12 @@ export const toNavigationItems = (
         );
 
         // If all children have hrefs, we can treat them as secondary items
+        const validChildren = filterValidSecondaryChildren(navNode.children);
         secondarySections = [
-          // create a single section for all children
           {
             id: `${navNode.id}-section`,
             label: null,
-            items: navNode.children.map((child) => {
-              warnUnsupportedNavNodeOptions(child);
-              maybeMarkActive(child, 2);
-              return {
-                id: child.id,
-                label: warnIfMissing(child, 'title', 'Missing Title 😭'),
-                href: warnIfMissing(child, 'href', 'Missing Href 😭'),
-                external: child.isExternalLink,
-                iconType: child.icon,
-                'data-test-subj': getTestSubj(child),
-              };
-            }),
+            items: validChildren.map(createSecondaryMenuItem),
           },
         ];
       } else {
@@ -210,23 +230,8 @@ export const toNavigationItems = (
 
             warnUnsupportedNavNodeOptions(child);
 
-            const secondaryItems: SecondaryMenuItem[] =
-              child.children
-                .filter(
-                  (subChild) =>
-                    subChild.sideNavStatus !== 'hidden' && subChild.sideNavStatus !== 'hiddenV2'
-                )
-                .map((subChild) => {
-                  warnUnsupportedNavNodeOptions(subChild);
-                  maybeMarkActive(subChild, 2);
-                  return {
-                    id: subChild.id,
-                    label: warnIfMissing(subChild, 'title', 'Missing Title 😭'),
-                    href: warnIfMissing(subChild, 'href', 'Missing Href 😭'),
-                    external: subChild.isExternalLink,
-                    'data-test-subj': getTestSubj(subChild),
-                  };
-                }) ?? [];
+            const validChildren = filterValidSecondaryChildren(child.children);
+            const secondaryItems = validChildren.map(createSecondaryMenuItem);
 
             if (child.href) {
               warnOnce(
@@ -240,7 +245,7 @@ export const toNavigationItems = (
               items: secondaryItems,
             };
           })
-        );
+        ).filter((section) => section.items.length > 0); // Filter out empty sections;
       }
     }
 
