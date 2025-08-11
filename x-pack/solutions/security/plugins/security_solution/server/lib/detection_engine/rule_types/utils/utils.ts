@@ -464,9 +464,6 @@ export const getRuleRangeTuples = async ({
     };
   }
 
-  console.log('intervalDurationMs', intervalDuration.asMilliseconds());
-  console.log('duration', moment.duration(originalTo.diff(originalFrom)).asMilliseconds());
-
   return {
     tuples: tuples.reverse(),
     remainingGap: moment.duration(remainingGapMilliseconds),
