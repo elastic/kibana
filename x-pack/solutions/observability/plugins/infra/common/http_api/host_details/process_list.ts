@@ -6,7 +6,11 @@
  */
 
 import * as rt from 'io-ts';
-import { MetricsAPISeriesRT, type MetricsAPIRow } from '@kbn/metrics-data-access-plugin/common';
+import {
+  MetricsAPISeriesRT,
+  type MetricsAPIRow,
+  DataSchemaFormat,
+} from '@kbn/metrics-data-access-plugin/common';
 
 const AggValueRT = rt.type({
   value: rt.number,
@@ -21,6 +25,11 @@ export const ProcessListAPIRequestRT = rt.type({
     isAscending: rt.boolean,
   }),
   searchFilter: rt.array(rt.record(rt.string, rt.record(rt.string, rt.unknown))),
+  schema: rt.union([
+    rt.literal(DataSchemaFormat.ECS),
+    rt.literal(DataSchemaFormat.SEMCONV),
+    rt.null,
+  ]),
 });
 
 export const ProcessListAPIQueryAggregationRT = rt.type({
@@ -79,6 +88,51 @@ export const ProcessListAPIQueryAggregationRT = rt.type({
   }),
 });
 
+// SEMCONV-specific aggregation type
+export const ProcessListAPIQueryAggregationSEMCONVRT = rt.type({
+  summaryEvent: rt.type({
+    by_status: rt.type({
+      buckets: rt.array(
+        rt.type({
+          key: rt.string,
+          latest_count: rt.type({
+            hits: rt.type({
+              hits: rt.array(
+                rt.type({
+                  fields: rt.record(rt.string, rt.array(rt.union([rt.string, rt.number]))),
+                })
+              ),
+            }),
+          }),
+        })
+      ),
+    }),
+  }),
+  processes: rt.type({
+    filteredProcs: rt.type({
+      buckets: rt.array(
+        rt.type({
+          key: rt.string,
+          cpu: AggValueRT,
+          memory: AggValueRT,
+          startTime: rt.type({
+            value_as_string: rt.string,
+          }),
+          meta: rt.type({
+            hits: rt.type({
+              hits: rt.array(
+                rt.type({
+                  fields: rt.record(rt.string, rt.array(rt.union([rt.string, rt.number]))),
+                })
+              ),
+            }),
+          }),
+        })
+      ),
+    }),
+  }),
+});
+
 // string in case of 'N?A'
 const summaryPropertyRT = rt.union([rt.number, rt.string]);
 
@@ -109,6 +163,10 @@ export const ProcessListAPIResponseRT = rt.type({
 });
 
 export type ProcessListAPIQueryAggregation = rt.TypeOf<typeof ProcessListAPIQueryAggregationRT>;
+
+export type ProcessListAPIQueryAggregationSEMCONV = rt.TypeOf<
+  typeof ProcessListAPIQueryAggregationSEMCONVRT
+>;
 
 export type ProcessListAPIRequest = rt.TypeOf<typeof ProcessListAPIRequestRT>;
 

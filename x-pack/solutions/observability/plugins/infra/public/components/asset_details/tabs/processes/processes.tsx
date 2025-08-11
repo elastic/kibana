@@ -46,7 +46,7 @@ export const Processes = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { getDateRangeInTimestamp } = useDatePickerContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { entity } = useAssetDetailsRenderPropsContext();
+  const { entity, schema } = useAssetDetailsRenderPropsContext();
   const { sourceId } = useSourceContext();
   const { request$ } = useRequestObservable();
   const { isActiveTab } = useTabSwitcherContext();
@@ -91,12 +91,13 @@ export const Processes = () => {
           to: toTimestamp,
           sortBy: parsedSortBy,
           searchFilter,
+          schema,
         }),
       });
 
       return decodeOrThrow(ProcessListAPIResponseRT)(response);
     },
-    [hostTerm, parsedSortBy, searchFilter, sourceId, toTimestamp],
+    [hostTerm, parsedSortBy, searchFilter, sourceId, toTimestamp, schema],
     {
       requestObservable$: request$,
       autoFetch: isActiveTab('processes'),
