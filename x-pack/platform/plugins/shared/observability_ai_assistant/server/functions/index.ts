@@ -6,7 +6,7 @@
  */
 
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { KnowledgeBaseState } from '../../common';
+import { InferenceModelState } from '../../common';
 import { getSystemPrompt } from '../prompts/system_prompt';
 import { getInferenceIdFromWriteIndex } from '../service/knowledge_base_service/get_inference_id_from_write_index';
 import { registerKibanaFunction } from './kibana';
@@ -43,8 +43,8 @@ export const registerFunctions: RegistrationCallback = async ({
   const isObservabilityDeployment = scopes.includes('observability');
   const isGenericDeployment = scopes.length === 0 || (scopes.length === 1 && scopes[0] === 'all');
 
-  const { kbState } = await client.getKnowledgeBaseStatus();
-  const isKnowledgeBaseReady = kbState === KnowledgeBaseState.READY;
+  const { inferenceModelState } = await client.getKnowledgeBaseStatus();
+  const isKnowledgeBaseReady = inferenceModelState === InferenceModelState.READY;
 
   // determine if product documentation is installed
   const llmTasks = pluginsStart?.llmTasks;

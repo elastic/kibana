@@ -17,7 +17,8 @@
       "taskManager",
       "dataViews",
       "inference",
-      "llmTasks"
+      "llmTasks",
+      "productDocBase"
     ],
     "optionalPlugins": ["cloud", "serverless"],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
