@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { TimeRange } from '@kbn/es-query';
-import { SuggestionResponse, AttachmentType } from '@kbn/cases-plugin/common';
+import { SuggestionHandlerResponse, AttachmentType } from '@kbn/cases-plugin/common';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/common';
 import type { SyntheticsMonitorSuggestion } from '../../common/types';
@@ -26,7 +26,7 @@ export const getExampleByServiceName = async ({
     timeRange: TimeRange;
     serviceName: string;
   };
-}): Promise<SuggestionResponse<SyntheticsMonitorSuggestion>> => {
+}): Promise<SuggestionHandlerResponse<SyntheticsMonitorSuggestion>> => {
   const mockResult = {
     saved_objects: [
       {

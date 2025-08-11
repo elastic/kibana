@@ -11,7 +11,7 @@ import { Registry } from '../../common/registry';
 import type {
   SuggestionContext,
   SuggestionOwner,
-  SuggestionResponse,
+  SuggestionHandlerResponse,
 } from '../../common/types/domain';
 import type { SuggestionType } from './types';
 
@@ -36,7 +36,7 @@ export class AttachmentSuggestionRegistry extends Registry<SuggestionType> {
     owners: SuggestionOwner[],
     context: SuggestionContext,
     request: KibanaRequest
-  ): Promise<SuggestionResponse> {
+  ): Promise<SuggestionHandlerResponse> {
     const allSuggestionDefinitions = this.getAllForOwners(owners);
     const allSuggestionHandlers = flatten(
       allSuggestionDefinitions.map((suggestion) => {
@@ -54,12 +54,12 @@ export class AttachmentSuggestionRegistry extends Registry<SuggestionType> {
 
     const fulfilledResponses = allSettledResponses
       .filter(
-        (result): result is PromiseFulfilledResult<SuggestionResponse> =>
+        (result): result is PromiseFulfilledResult<SuggestionHandlerResponse> =>
           result.status === 'fulfilled'
       )
       .map((result) => result.value);
 
-    return fulfilledResponses.reduce<SuggestionResponse>(
+    return fulfilledResponses.reduce<SuggestionHandlerResponse>(
       (acc, response) => {
         return {
           ...acc,

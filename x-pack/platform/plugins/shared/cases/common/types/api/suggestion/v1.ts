@@ -5,7 +5,11 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { suggestionOwnerSchema, suggestionContextRt } from '../../domain/suggestion/v1';
+import {
+  suggestionOwnerSchema,
+  suggestionContextRt,
+  type SuggestionItem,
+} from '../../domain/suggestion/v1';
 
 export const suggestionRequestRt = z.object({
   owners: z.array(suggestionOwnerSchema),
@@ -13,3 +17,7 @@ export const suggestionRequestRt = z.object({
 });
 
 export type SuggestionRequest = z.infer<typeof suggestionRequestRt>;
+
+export interface SuggestionResponse {
+  suggestions: Array<SuggestionItem>;
+}

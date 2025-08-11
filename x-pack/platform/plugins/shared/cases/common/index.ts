@@ -21,6 +21,7 @@ export type {
   CasePatchRequest,
   GetRelatedCasesByAlertResponse,
   UserActionFindResponse,
+  SuggestionResponse,
 } from './types/api';
 export type { Case, Cases, RelatedCase } from './types/domain';
 export type {
@@ -66,7 +67,7 @@ export {
   ConnectorTypes,
   AttachmentType,
   ExternalReferenceStorageType,
-  type SuggestionResponse,
+  type SuggestionHandlerResponse,
   type SuggestionContext,
   type SuggestionItem,
 } from './types/domain';

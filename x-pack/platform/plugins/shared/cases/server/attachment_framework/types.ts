@@ -12,7 +12,7 @@ import type {
   PersistableStateAttachmentPayload,
   SuggestionOwner,
   SuggestionContext,
-  SuggestionResponse,
+  SuggestionHandlerResponse,
 } from '../../common/types/domain';
 
 export type PersistableStateAttachmentState = Pick<
@@ -52,13 +52,9 @@ export interface SuggestionType<TPayload extends {} = {}> {
   handlers: Record<string, SuggestionHandler<TPayload>>;
 }
 
-export type SuggestionHandler<TPayload extends {} = Record<string, unknown>> = ({
-  context,
-  request,
-}: {
-  context: SuggestionContext;
-  request: KibanaRequest;
-}) => Promise<SuggestionResponse<TPayload>>;
+export type SuggestionHandler<TPayload extends {} = {}> = (
+  params: SuggestionHandlerParams
+) => Promise<SuggestionHandlerResponse<TPayload>>;
 
 export interface SuggestionHandlerParams {
   request: KibanaRequest;

@@ -5,7 +5,8 @@
  * 2.0.
  */
 import type { IKibanaResponse } from '@kbn/core/server';
-import { suggestionRequestRt, type SuggestionResponse } from '../../../../common/types/domain';
+import { type SuggestionResponse } from '../../../../common/types/api';
+import { suggestionRequestRt } from '../../../../common/types/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
