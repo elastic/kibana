@@ -36,6 +36,7 @@ import type { InferenceServerStart, InferenceServerSetup } from '@kbn/inference-
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAIAssistantAppServerStart {}
@@ -58,6 +59,7 @@ export interface ObservabilityAIAssistantAppPluginStartDependencies {
   logsDataAccess: LogsDataAccessPluginStart;
   spaces: SpacesPluginStart;
   llmTasks: LlmTasksPluginStart;
+  productDocBase: ProductDocBaseStartContract;
 }
 
 export interface ObservabilityAIAssistantAppPluginSetupDependencies {
@@ -75,4 +77,5 @@ export interface ObservabilityAIAssistantAppPluginSetupDependencies {
   serverless?: ServerlessPluginSetup;
   inference: InferenceServerSetup;
   spaces: SpacesPluginSetup;
+  productDocBase: ProductDocBaseStartContract;
 }

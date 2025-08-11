@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { graphlib } from '@dagrejs/dagre';
 import {
-  IfStep,
-  ForEachStep,
-  EnterIfNode,
-  ExitIfNode,
-  EnterForeachNode,
-  ExitForeachNode,
-  WorkflowSchema,
-  EnterConditionBranchNode,
-  ExitConditionBranchNode,
-  ConnectorStep,
   AtomicGraphNode,
+  ConnectorStep,
+  EnterConditionBranchNode,
+  EnterForeachNode,
+  EnterIfNode,
+  ExitConditionBranchNode,
+  ExitForeachNode,
+  ExitIfNode,
+  ForEachStep,
+  IfStep,
+  WorkflowYaml,
 } from '@kbn/workflows';
 import { convertToWorkflowGraph } from './build_execution_graph';
-import { graphlib } from '@dagrejs/dagre';
 
 describe('convertToWorkflowGraph', () => {
   describe('atomic steps', () => {
@@ -44,7 +44,7 @@ describe('convertToWorkflowGraph', () => {
           },
         } as ConnectorStep,
       ],
-    } as Partial<WorkflowSchema>;
+    } as Partial<WorkflowYaml>;
 
     it('should return nodes for atomic step in correct topological order', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
@@ -112,7 +112,7 @@ describe('convertToWorkflowGraph', () => {
           ],
         } as IfStep,
       ],
-    } as Partial<WorkflowSchema>;
+    } as Partial<WorkflowYaml>;
 
     it('should return nodes for if condition in correct topological order', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
@@ -234,7 +234,7 @@ describe('convertToWorkflowGraph', () => {
             ],
           } as IfStep,
         ],
-      } as Partial<WorkflowSchema>;
+      } as Partial<WorkflowYaml>;
 
       it('should handle if step without else branch correctly', () => {
         const executionGraph = convertToWorkflowGraph(workflowDefinitionWithoutElse as any);
@@ -278,7 +278,7 @@ describe('convertToWorkflowGraph', () => {
           ],
         } as ForEachStep,
       ],
-    } as Partial<WorkflowSchema>;
+    } as Partial<WorkflowYaml>;
 
     it('should return nodes for foreach step in correct topological order', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
@@ -356,7 +356,7 @@ describe('convertToWorkflowGraph', () => {
             ],
           } as ForEachStep,
         ],
-      } as Partial<WorkflowSchema>;
+      } as Partial<WorkflowYaml>;
 
       it('should handle nested foreach steps correctly', () => {
         const executionGraph = convertToWorkflowGraph(nestedWorkflowDefinition as any);
@@ -425,7 +425,7 @@ describe('convertToWorkflowGraph', () => {
           ],
         } as ForEachStep,
       ],
-    } as Partial<WorkflowSchema>;
+    } as Partial<WorkflowYaml>;
 
     it('should have correctly structured graph for complex nodes', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
