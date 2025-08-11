@@ -160,7 +160,7 @@ export function ImportContentPackFlyout({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={async () => {
-                  if (!file || !hasSelectedObjects(includedObjects)) return;
+                  if (!file) return;
 
                   const response = await diffContent({
                     http,

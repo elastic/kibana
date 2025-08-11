@@ -16,9 +16,9 @@ import { StatusError } from '../../lib/streams/errors/status_error';
 import { generateArchive, parseArchive } from '../../lib/content';
 import {
   asContentPackEntry,
+  flattenTree,
   mergeContentPack,
   prepareStreamsForExport,
-  prepareStreamsForImport,
   scopeIncludedObjects,
 } from '../../lib/content/stream';
 import { baseFields } from '../../lib/streams/component_templates/logs_layer';
@@ -150,7 +150,7 @@ const importContentRoute = createServerRoute({
         throw err;
       });
 
-    const { merged } = await mergeContentPack({
+    const { incoming, merged, conflicts } = await mergeContentPack({
       root,
       assetClient,
       streamsClient,
@@ -159,11 +159,18 @@ const importContentRoute = createServerRoute({
       include: params.body.include,
     });
 
-    const streams = prepareStreamsForImport({ tree: merged });
+    const hasSystemResolvedConflicts = conflicts.some((streamConflicts) =>
+      streamConflicts.conflicts.some(({ value: { resolution } }) => resolution === 'system')
+    );
+    if (hasSystemResolvedConflicts) {
+      throw new StatusError('All conflicts must be resolved by user', 400);
+    }
+
+    const streams = flattenTree(merged);
     const result = await streamsClient.bulkUpsert(streams);
     await contentClient.upsertInstallation(params.path.name, {
       name: contentPack.name,
-      streams,
+      streams: flattenTree(incoming),
     });
 
     return result;

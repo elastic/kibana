@@ -47,37 +47,79 @@ export const contentPackIncludedObjectsSchema: z.Schema<ContentPackIncludedObjec
   ])
 );
 
-interface Diff<T> {
-  from: T;
-  to: T;
-}
+type MergeableProperties = {
+  field: FieldDefinition;
+  routing: RoutingDefinition;
+  query: StreamQuery;
+};
 
-export type MergeableProperties<UseDiff extends boolean = false> = {
-  fields: UseDiff extends true ? Diff<FieldDefinition>[] : FieldDefinition[];
-  queries: UseDiff extends true ? Diff<StreamQuery>[] : StreamQuery[];
-  routing: UseDiff extends true ? Diff<RoutingDefinition>[] : RoutingDefinition[];
+type MergeablePropertiesKeys = keyof MergeableProperties;
+
+type PropertyAdded<K extends MergeablePropertiesKeys = MergeablePropertiesKeys> = {
+  type: K;
+  value: { to: MergeableProperties[K] };
+};
+
+type PropertyRemoved<K extends MergeablePropertiesKeys = MergeablePropertiesKeys> = {
+  type: K;
+  value: { from: MergeableProperties[K] };
+};
+
+type PropertyUpdated<K extends MergeablePropertiesKeys = MergeablePropertiesKeys> = {
+  type: K;
+  value: { from: MergeableProperties[K]; to: MergeableProperties[K] };
+};
+
+type PropertyChange<K extends MergeablePropertiesKeys = MergeablePropertiesKeys> =
+  | PropertyAdded<K>
+  | PropertyRemoved<K>
+  | PropertyUpdated<K>;
+
+export type PropertyConflict<K extends MergeablePropertiesKeys = MergeablePropertiesKeys> = {
+  type: K;
+  id: string;
+  value: {
+    resolution: 'system' | 'user';
+    current: MergeableProperties[K];
+    incoming: MergeableProperties[K];
+  };
+};
+
+export type PropertyDiff<T extends MergeablePropertiesKeys = MergeablePropertiesKeys> = {
+  added: PropertyAdded<T>[];
+  removed: PropertyRemoved<T>[];
+  updated: PropertyUpdated<T>[];
 };
 
 export interface StreamDiff {
   name: string;
-  diff: {
-    added: MergeableProperties;
-    removed: MergeableProperties;
-    updated: MergeableProperties<true>;
-  };
+  diff: PropertyDiff;
 }
 
-export type PropertyConflict<T> = {
-  id: string;
-  current: T;
-  incoming: T;
+export type StreamDiffAndConflicts = StreamDiff & {
+  conflicts: StreamConflict[];
 };
 
 export interface StreamConflict {
   name: string;
-  conflicts: {
-    fields: PropertyConflict<FieldDefinition>[];
-    queries: PropertyConflict<StreamQuery>[];
-    routing: PropertyConflict<RoutingDefinition>[];
-  };
+  conflicts: PropertyConflict[];
+}
+
+export function isRoutingChange(value: PropertyChange): value is PropertyChange<'routing'> {
+  return value.type === 'routing';
+}
+
+export function isFieldChange(value: PropertyChange): value is PropertyChange<'field'> {
+  return value.type === 'field';
+}
+
+export function isQueryChange(value: PropertyChange): value is PropertyChange<'query'> {
+  return value.type === 'query';
+}
+
+export function isPropertyChangeOfType<T extends 'field' | 'routing' | 'query'>(
+  change: PropertyChange,
+  type: T
+): change is Extract<PropertyChange, { type: T }> {
+  return change.type === type;
 }

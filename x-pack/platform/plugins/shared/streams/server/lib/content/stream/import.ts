@@ -11,7 +11,7 @@ import {
   ContentPackIncludedObjects,
   ContentPackStream,
 } from '@kbn/content-packs-schema';
-import { Streams } from '@kbn/streams-schema';
+import { FieldDefinition, RoutingDefinition, StreamQuery, Streams } from '@kbn/streams-schema';
 import { StreamTree, asTree, mergeTrees } from './tree';
 import { AssetClient } from '../../streams/assets/asset_client';
 import { StreamsClient } from '../../streams/client';
@@ -42,7 +42,7 @@ export async function importContentPack({
     installation,
   });
 
-  const streams = prepareStreamsForImport({ tree: merged });
+  const streams = flattenTree(merged);
   return await streamsClient.bulkUpsert(streams);
 }
 
@@ -98,13 +98,20 @@ export async function mergeContentPack({
     base: baseTree,
     existing: existingTree,
     incoming: incomingTree,
+    resolvers: {
+      query: (existing: StreamQuery, incoming: StreamQuery) => {
+        return { source: 'system', value: existing };
+      },
+      field: (existing: FieldDefinition, incoming: FieldDefinition) => {
+        return { source: 'system', value: existing };
+      },
+      routing: (existing: RoutingDefinition, incoming: RoutingDefinition) => {
+        return { source: 'system', value: existing };
+      },
+    },
   });
 }
 
-export function prepareStreamsForImport({ tree }: { tree: StreamTree }): ContentPackStream[] {
-  return flattenTree(tree);
-}
-
-function flattenTree(tree: StreamTree): ContentPackStream[] {
+export function flattenTree(tree: StreamTree): ContentPackStream[] {
   return [omit(tree, 'children'), ...tree.children.flatMap(flattenTree)];
 }

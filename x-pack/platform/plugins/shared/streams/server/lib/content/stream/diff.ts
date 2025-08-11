@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MergeableProperties, StreamDiff } from '@kbn/content-packs-schema';
+import { PropertyDiff, StreamDiff } from '@kbn/content-packs-schema';
 import { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
 import { StreamTree } from './tree';
 import { isEqual, uniqBy } from 'lodash';
@@ -40,7 +40,7 @@ function _diffTrees({
     });
 
     return [
-      mergePropertyDiffs(merged.name, { queries, fields, routing }),
+      mergePropertyDiffs(existing.name, { queries, fields, routing }),
       ...uniqBy([...merged.children, ...existing.children], ({ name }) => name).flatMap((child) => {
         const inputChild = existing.children.find(({ name }) => name === child.name);
         const outputChild = merged.children.find(({ name }) => name === child.name);
@@ -62,20 +62,14 @@ function _diffTrees({
   ];
 }
 
-type PropertyDiff<T extends keyof MergeableProperties> = {
-  added: MergeableProperties[T];
-  removed: MergeableProperties[T];
-  updated: MergeableProperties<true>[T];
-};
-
 function diffQueries({
   existing,
   merged,
 }: {
   existing: StreamQuery[];
   merged: StreamQuery[];
-}): PropertyDiff<'queries'> {
-  const diff: PropertyDiff<'queries'> = { added: [], removed: [], updated: [] };
+}): PropertyDiff<'query'> {
+  const diff: PropertyDiff<'query'> = { added: [], removed: [], updated: [] };
 
   uniqBy([...existing, ...merged], ({ id }) => id).forEach((query) => {
     const existingQuery = existing.find(({ id }) => id == query.id);
@@ -83,12 +77,12 @@ function diffQueries({
 
     if (existingQuery && mergedQuery) {
       if (!isEqual(existingQuery, mergedQuery)) {
-        diff.updated.push({ from: existingQuery, to: mergedQuery });
+        diff.updated.push({ type: 'query', value: { from: existingQuery, to: mergedQuery } });
       }
     } else if (existingQuery) {
-      diff.removed.push(existingQuery);
+      diff.removed.push({ type: 'query', value: { from: existingQuery } });
     } else if (mergedQuery) {
-      diff.added.push(mergedQuery);
+      diff.added.push({ type: 'query', value: { to: mergedQuery } });
     }
   });
 
@@ -101,8 +95,8 @@ function diffFields({
 }: {
   input: FieldDefinition;
   output: FieldDefinition;
-}): PropertyDiff<'fields'> {
-  const diff: PropertyDiff<'fields'> = { added: [], removed: [], updated: [] };
+}): PropertyDiff<'field'> {
+  const diff: PropertyDiff<'field'> = { added: [], removed: [], updated: [] };
 
   Object.keys({ ...input, ...output }).forEach((key) => {
     const inputField = input[key];
@@ -110,12 +104,15 @@ function diffFields({
 
     if (inputField && outputField) {
       if (!isEqual(inputField, outputField)) {
-        diff.updated.push({ from: { [key]: inputField }, to: { [key]: outputField } });
+        diff.updated.push({
+          type: 'field',
+          value: { from: { [key]: inputField }, to: { [key]: outputField } },
+        });
       }
     } else if (inputField) {
-      diff.removed.push({ [key]: inputField });
+      diff.removed.push({ type: 'field', value: { from: { [key]: inputField } } });
     } else if (outputField) {
-      diff.added.push({ [key]: outputField });
+      diff.added.push({ type: 'field', value: { to: { [key]: outputField } } });
     }
   });
 
@@ -139,12 +136,15 @@ function diffRouting({
 
     if (inputDefinition && outputDefinition) {
       if (!isEqual(inputDefinition, outputDefinition)) {
-        diff.updated.push({ from: inputDefinition, to: outputDefinition });
+        diff.updated.push({
+          type: 'routing',
+          value: { from: inputDefinition, to: outputDefinition },
+        });
       }
     } else if (inputDefinition) {
-      diff.removed.push(inputDefinition);
+      diff.removed.push({ type: 'routing', value: { from: inputDefinition } });
     } else if (outputDefinition) {
-      diff.added.push(outputDefinition);
+      diff.added.push({ type: 'routing', value: { to: outputDefinition } });
     }
   });
 
@@ -158,8 +158,8 @@ function mergePropertyDiffs(
     fields,
     routing,
   }: {
-    queries: PropertyDiff<'queries'>;
-    fields: PropertyDiff<'fields'>;
+    queries: PropertyDiff<'query'>;
+    fields: PropertyDiff<'field'>;
     routing: PropertyDiff<'routing'>;
   } = {
     queries: { added: [], updated: [], removed: [] },
@@ -170,21 +170,9 @@ function mergePropertyDiffs(
   return {
     name,
     diff: {
-      added: {
-        queries: queries.added,
-        fields: fields.added,
-        routing: routing.added,
-      },
-      removed: {
-        queries: queries.removed,
-        fields: fields.removed,
-        routing: routing.removed,
-      },
-      updated: {
-        queries: queries.updated,
-        fields: fields.updated,
-        routing: routing.updated,
-      },
+      added: [...queries.added, ...fields.added, ...routing.added],
+      removed: [...queries.removed, ...fields.removed, ...routing.removed],
+      updated: [...queries.updated, ...fields.updated, ...routing.updated],
     },
   };
 }

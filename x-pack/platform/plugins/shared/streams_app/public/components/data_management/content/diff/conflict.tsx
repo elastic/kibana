@@ -5,20 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { PropertyConflict } from '@kbn/content-packs-schema';
-import { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
-import React from 'react';
 
-export function Conflict({
-  conflict,
-}: {
-  conflict: PropertyConflict<FieldDefinition | RoutingDefinition | StreamQuery>;
-}) {
+export function Conflict({ conflict }: { conflict: PropertyConflict }) {
   return (
     <>
-      <EuiText>{JSON.stringify(conflict.current, null, 2)}</EuiText>
-      <EuiText>{JSON.stringify(conflict.incoming, null, 2)}</EuiText>
+      <EuiText>{JSON.stringify(conflict.value.current, null, 2)}</EuiText>
+      <EuiText>{JSON.stringify(conflict.value.incoming, null, 2)}</EuiText>
     </>
   );
 }

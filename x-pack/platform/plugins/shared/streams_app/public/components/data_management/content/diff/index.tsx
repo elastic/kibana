@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { StreamConflict, StreamDiff } from '@kbn/content-packs-schema';
+import { capitalize } from 'lodash';
+import { StreamConflict, StreamDiff, isRoutingChange } from '@kbn/content-packs-schema';
 import { getSegments, isChildOf, isDescendantOf } from '@kbn/streams-schema';
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { capitalize } from 'lodash';
 import { Conflict } from './conflict';
 
 type StreamRow = StreamDiff & {
@@ -34,19 +34,25 @@ export function Diff({ diffs, conflicts }: { diffs: StreamDiff[]; conflicts: Str
       {rows.map((row) => {
         const ancestors = rows.filter(({ name }) => isDescendantOf(name, row.name));
         const wasRemoved = ancestors.some((ancestor) =>
-          ancestor.diff.removed.routing.find(({ destination }) => {
-            return destination === row.name || isDescendantOf(destination, row.name);
+          ancestor.diff.removed.find((change) => {
+            return (
+              isRoutingChange(change) &&
+              (change.value.from.destination === row.name ||
+                isDescendantOf(change.value.from.destination, row.name))
+            );
           })
         );
         const wasAdded = ancestors.some((ancestor) =>
-          ancestor.diff.added.routing.find(({ destination }) => {
-            return destination === row.name || isDescendantOf(destination, row.name);
+          ancestor.diff.added.find((change) => {
+            return (
+              isRoutingChange(change) &&
+              (change.value.to.destination === row.name ||
+                isDescendantOf(change.value.to.destination, row.name))
+            );
           })
         );
         const wasUpdated =
-          Object.values(row.diff.added).some((values) => values.length > 0) ||
-          Object.values(row.diff.removed).some((values) => values.length > 0) ||
-          Object.values(row.diff.updated).some((values) => values.length > 0);
+          row.diff.added.length > 0 || row.diff.removed.length > 0 || row.diff.updated.length > 0;
         const streamConflicts = conflicts.find(({ name }) => name === row.name);
         const color = wasRemoved
           ? 'danger'
@@ -56,21 +62,7 @@ export function Diff({ diffs, conflicts }: { diffs: StreamDiff[]; conflicts: Str
           ? 'warning'
           : 'default';
 
-        const propertiesAdded = Object.entries(row.diff.added).filter(
-          ([, values]) => values.length
-        );
-        const propertiesUpdated = Object.entries(row.diff.updated).filter(
-          ([, values]) => values.length
-        );
-        const propertiesRemoved = Object.entries(row.diff.removed).filter(
-          ([, values]) => values.length
-        );
-
-        const hasChanges =
-          propertiesAdded.length > 0 ||
-          propertiesUpdated.length > 0 ||
-          propertiesRemoved.length > 0 ||
-          !!streamConflicts;
+        const hasChanges = wasUpdated || !!streamConflicts;
 
         return (
           <EuiFlexGroup key={row.name} style={{ marginLeft: `${row.level * 16}px` }}>
@@ -102,23 +94,17 @@ export function Diff({ diffs, conflicts }: { diffs: StreamDiff[]; conflicts: Str
                     {streamConflicts ? (
                       <>
                         <EuiFlexItem>Conflicts</EuiFlexItem>
-                        {Object.entries(streamConflicts.conflicts)
-                          .filter(([, values]) => values.length > 0)
-                          .map(([key, values]) => {
-                            return (
-                              <EuiFlexGroup>
-                                <EuiFlexItem>{capitalize(key)}</EuiFlexItem>
-                                <EuiFlexGroup>
-                                  {values.map((value) => {
-                                    return <Conflict conflict={value} />;
-                                  })}
-                                </EuiFlexGroup>
-                              </EuiFlexGroup>
-                            );
-                          })}
+                        {streamConflicts.conflicts.map((conflict) => {
+                          return (
+                            <EuiFlexGroup>
+                              <Conflict conflict={conflict} />;
+                            </EuiFlexGroup>
+                          );
+                        })}
                       </>
                     ) : null}
-                    {Object.entries(row.diff.added)
+
+                    {Object.entries(row.diff)
                       .filter(([, values]) => values.length)
                       .map(([key, values]) => (
                         <>
