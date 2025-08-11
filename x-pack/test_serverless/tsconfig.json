@@ -95,5 +95,10 @@
     "@kbn/test-suites-xpack-platform",
     "@kbn/test-suites-xpack-security",
     "@kbn/test-suites-xpack-observability",
+    "@kbn/streams-schema",
+    "@kbn/infra-plugin",
+    "@kbn/observability-plugin",
+    "@kbn/response-ops-rule-params",
+    "@kbn/telemetry-collection-manager-plugin",
   ]
 }

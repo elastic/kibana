@@ -19,7 +19,7 @@ import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export interface SloBurnRateRuleParams {
   sloId: string;
@@ -71,7 +71,7 @@ const RETRY_COUNT = 10;
 const RETRY_DELAY = 1000;
 const generateUniqueKey = () => uuidv4().replace(/-/g, '');
 
-export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
+export function AlertingApiProvider({ getService }: FtrProviderContext) {
   const samlAuth = getService('samlAuth');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
