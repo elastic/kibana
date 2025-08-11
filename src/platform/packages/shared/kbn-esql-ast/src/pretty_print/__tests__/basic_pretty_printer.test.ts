@@ -69,6 +69,14 @@ describe('single line query', () => {
       });
     });
 
+    describe('WHERE', () => {
+      test('escapes field parts which match keywords (FIRST)', () => {
+        const { text } = reprint('FROM a | WHERE `first`.name == "Beatrice" AND `and` == "one"');
+
+        expect(text).toBe('FROM a | WHERE `first`.name == "Beatrice" AND `and` == "one"');
+      });
+    });
+
     describe('EXPLAIN', () => {
       /** @todo Enable once query expressions are supported.  */
       test.skip('a nested query', () => {

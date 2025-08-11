@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -18,16 +19,27 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asDuration } from '../../../../common/utils/formatters';
-import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
+import type { TraceWaterfallItem } from './use_trace_waterfall';
+
+const ORPHAN_TITLE = i18n.translate('xpack.apm.trace.barDetails.euiIconTip.orphanTitleLabel', {
+  defaultMessage: 'Orphan',
+});
+const ORPHAN_CONTENT = i18n.translate(
+  'xpack.apm.trace.barDetails.euiIconTip.orphanSpanContentLabel',
+  {
+    defaultMessage:
+      'This span is orphaned due to missing trace context and has been reparented to the root to restore the execution flow',
+  }
+);
 
 export function BarDetails({
   item,
   left,
   onErrorClick,
 }: {
-  item: TraceItem;
+  item: TraceWaterfallItem;
   left: number;
   onErrorClick?: (params: { traceId: string; docId: string }) => void;
 }) {
@@ -115,6 +127,21 @@ export function BarDetails({
             ) : (
               <EuiIcon type="errorFilled" color={theme.euiTheme.colors.danger} size="s" />
             )}
+          </EuiFlexItem>
+        ) : null}
+        {item.isOrphan ? (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              data-test-subj="apmBarDetailsOrphanTooltip"
+              iconProps={{
+                'data-test-subj': 'apmBarDetailsOrphanIcon',
+                'aria-label': ORPHAN_TITLE,
+              }}
+              color={theme.euiTheme.colors.danger}
+              type="unlink"
+              title={ORPHAN_TITLE}
+              content={ORPHAN_CONTENT}
+            />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
