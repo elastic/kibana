@@ -40,7 +40,7 @@ import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
 import { DEFAULT_ALERTS_PAGE_SIZE } from '@kbn/alerts-ui-shared/src/common/constants';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import deepEqual from 'fast-deep-equal';
+import { isEqual } from 'lodash';
 import { Alert } from '@kbn/alerting-types';
 import { useGetMutedAlertsQuery } from '@kbn/response-ops-alerts-apis/hooks/use_get_muted_alerts_query';
 import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/query_keys';
@@ -298,13 +298,14 @@ const AlertsTableContent = typedForwardRef(
         minScore,
         trackScores,
         // Go back to the first page if the query changes
-        pageIndex: !deepEqual(prevQueryParams, {
+        pageIndex: !isEqual(prevQueryParams, {
           ruleTypeIds,
           consumers,
           fields,
           query,
           sort,
           runtimeMappings,
+          trackScores,
         })
           ? 0
           : oldPageIndex,
