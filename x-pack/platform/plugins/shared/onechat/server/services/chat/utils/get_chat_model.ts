@@ -40,7 +40,11 @@ export const getChatModel$ = ({
       return inference.getChatModel({
         request,
         connectorId: selectedConnectorId,
-        chatModelOptions: {},
+        chatModelOptions: {
+          telemetryMetadata: {
+            pluginId: 'one_chat',
+          },
+        },
       });
     })
   );
