@@ -21,6 +21,33 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+## 9.1.2 [kibana-9.1.2-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+### Features and enhancements [kibana-9.1.2-features-enhancements]
+
+**Kibana security**:
+* Adds a link to the Automatic Import documentation in the log description and related error message to clarify which log formats are supported [#229375]({{kib-pull}}229375).
+
+### Fixes [kibana-9.1.2-fixes]
+
+**Alerting**:
+* Fixes an issue with the `job/list` API's report filtering [#230876]({{kib-pull}}230876).
+
+**Data ingestion and Fleet**:
+* Fixes validation for `text` and `password` inputs in the package policy editor [#229932]({{kib-pull}}229932).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.1.2 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.1.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes the breadcrumb to include a link to the home page when browsing pages from the **Elasticsearch** section of the navigation [#230270]({{kib-pull}}230270).
+
 ## 9.1.1 [kibana-9.1.1-release-notes]
 
 % ::::{NOTE}
