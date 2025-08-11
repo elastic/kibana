@@ -33,7 +33,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   waitForRuleSuccess,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../config/services/detections_response';
 import {
   getEqlRuleForAlertTesting,
   getOpenAlerts,

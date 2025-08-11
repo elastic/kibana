@@ -20,6 +20,8 @@ import { ScoutTestConfig } from '../../types';
 import { Protocol } from '../../playwright/types';
 import { ScoutLogger } from './logger';
 
+// TODO: Add support for serverless projects with different tiers
+// ref https://github.com/elastic/kibana/pull/229919
 const getResourceDirPath = (config: ScoutTestConfig) => {
   return config.serverless
     ? path.resolve(SERVERLESS_ROLES_ROOT_PATH, config.projectType!)
