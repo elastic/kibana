@@ -100,6 +100,7 @@ const AssistantComponent: React.FC<Props> = ({
     showAnonymizedValues,
     setContentReferencesVisible,
     setShowAnonymizedValues,
+    dashboard,
   } = useAssistantContext();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
@@ -389,6 +390,9 @@ const AssistantComponent: React.FC<Props> = ({
             currentUserAvatar,
             systemPromptContent: currentSystemPrompt?.content,
             contentReferencesVisible,
+            http,
+            connectorId: currentConversation?.apiConfig?.connectorId,
+            dashboard,
           })}
           // Avoid comments going off the flyout
           css={css`
@@ -417,8 +421,11 @@ const AssistantComponent: React.FC<Props> = ({
       currentUserAvatar,
       currentSystemPrompt?.content,
       contentReferencesVisible,
+      http,
+      currentConversation?.apiConfig?.connectorId,
       euiTheme.size.l,
       selectedPromptContextsCount,
+      dashboard,
     ]
   );
 

@@ -7,13 +7,14 @@
 
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
-import React, { Suspense } from 'react';
+import React, { Suspense, useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AssistantOverlay } from '@kbn/elastic-assistant';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AssistantNavLink } from '@kbn/elastic-assistant/impl/assistant_context/assistant_nav_link';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import {
   ElasticAssistantPublicPluginSetupDependencies,
   ElasticAssistantPublicPluginStartDependencies,
@@ -49,9 +50,10 @@ export class ElasticAssistantPublicPlugin
   public start(coreStart: CoreStart, dependencies: ElasticAssistantPublicPluginStartDependencies) {
     const startServices = (): StartServices => {
       const { ...startPlugins } = coreStart.security;
+
       licenseService.start(dependencies.licensing.license$);
       const telemetry = this.telemetry.start();
-
+      console.log('dashboard', dependencies.dashboard);
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
@@ -63,6 +65,8 @@ export class ElasticAssistantPublicPlugin
         storage: this.storage,
         discover: dependencies.discover,
         spaces: dependencies.spaces,
+        dashboard: dependencies.dashboard,
+        data: dependencies.data,
         elasticAssistantSharedState: dependencies.elasticAssistantSharedState,
         aiAssistantManagementSelection: dependencies.aiAssistantManagementSelection,
       };

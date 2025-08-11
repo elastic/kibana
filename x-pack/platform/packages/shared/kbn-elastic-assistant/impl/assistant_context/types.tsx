@@ -7,6 +7,7 @@
 
 import { ApiConfig, Message, Replacements } from '@kbn/elastic-assistant-common';
 import { EuiCommentProps } from '@elastic/eui';
+import type { HttpSetup } from '@kbn/core/public';
 import { UserAvatar } from '.';
 
 export interface MessagePresentation {
@@ -92,4 +93,6 @@ export type GetAssistantMessages = (commentArgs: {
   setIsStreaming: (isStreaming: boolean) => void;
   systemPromptContent?: string;
   contentReferencesVisible: boolean;
+  http?: HttpSetup;
+  connectorId?: string;
 }) => EuiCommentProps[];

@@ -3972,6 +3972,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-client-tools-plugin@link:x-pack/platform/plugins/shared/ai_infra/ai_client_tools":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-security-labs-content@link:x-pack/solutions/security/packages/ai-security-labs-content":
   version "0.0.0"
   uid ""
@@ -6081,6 +6085,10 @@
   uid ""
 
 "@kbn/gen-ai-functional-testing@link:src/platform/packages/private/kbn-gen-ai-functional-testing":
+  version "0.0.0"
+  uid ""
+
+"@kbn/gen-ai-settings-plugin@link:x-pack/platform/plugins/private/gen_ai_settings":
   version "0.0.0"
   uid ""
 

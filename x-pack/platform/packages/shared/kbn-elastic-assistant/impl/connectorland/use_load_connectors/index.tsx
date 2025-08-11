@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { ServerError } from '@kbn/cases-plugin/public/types';
@@ -13,6 +13,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AIConnector } from '../connector_selector';
 import * as i18n from '../translations';
 
@@ -35,6 +36,11 @@ export const useLoadConnectors = ({
   toasts,
   inferenceEnabled = false,
 }: Props): UseQueryResult<AIConnector[], IHttpFetchError> => {
+  const { uiSettings } = useKibana().services;
+  const defaultConnectorId = useMemo(
+    () => uiSettings?.get('genAI:defaultConnectorId'),
+    [uiSettings]
+  );
   useEffect(() => {
     if (inferenceEnabled && !actionTypes.includes('.inference')) {
       actionTypes.push('.inference');
@@ -49,6 +55,7 @@ export const useLoadConnectors = ({
         if (!connector.isMissingSecrets && actionTypes.includes(connector.actionTypeId)) {
           acc.push({
             ...connector,
+            isDefault: defaultConnectorId === connector.id,
             apiProvider:
               !connector.isPreconfigured &&
               !connector.isSystemAction &&

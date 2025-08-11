@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { MessageRole } from '@kbn/elastic-assistant-common';
+import type { HttpSetup } from '@kbn/core/public';
 import type { ContentMessage } from '..';
 import { useStream } from './use_stream';
 import { StopGeneratingButton } from './buttons/stop_generating_button';
@@ -31,6 +32,8 @@ interface Props {
   setIsStreaming: (isStreaming: boolean) => void;
   transformMessage: (message: string) => ContentMessage;
   messageRole: MessageRole;
+  http?: HttpSetup;
+  connectorId?: string;
 }
 
 export const StreamComment = ({
@@ -48,12 +51,16 @@ export const StreamComment = ({
   setIsStreaming,
   transformMessage,
   messageRole,
+  http,
+  connectorId,
 }: Props) => {
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
     refetchCurrentConversation,
     content,
     reader,
     isError,
+    http,
+    connectorId,
   });
   useEffect(() => {
     setIsStreaming(isStreaming);

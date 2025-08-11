@@ -33,11 +33,13 @@
       "triggersActionsUi",
       "elasticAssistantSharedState",
       "aiAssistantManagementSelection",
-      "discover"
+      "discover",
+      "dashboard"
     ],
     "requiredBundles": [
       "kibanaReact",
-      "kibanaUtils"
+      "kibanaUtils",
+      "aiClientTools"
     ]
   },
   "build": {

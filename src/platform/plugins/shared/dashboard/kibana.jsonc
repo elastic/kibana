@@ -26,7 +26,8 @@
       "uiActions",
       "urlForwarding",
       "presentationUtil",
-      "unifiedSearch"
+      "unifiedSearch",
+
     ],
     "optionalPlugins": [
       "home",
@@ -39,14 +40,17 @@
       "serverless",
       "noDataPage",
       "observabilityAIAssistant",
-      "lens"
+      "lens",
+      "inference",
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
       "presentationUtil",
       "presentationPanel",
-      "savedObjects"
+      "savedObjects",
+      "inference",
+      "aiClientTools"
     ]
   }
 }

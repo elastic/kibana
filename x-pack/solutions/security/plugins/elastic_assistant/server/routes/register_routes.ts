@@ -33,7 +33,7 @@ import { findPromptsRoute } from './prompts/find_route';
 import { bulkActionAnonymizationFieldsRoute } from './anonymization_fields/bulk_actions_route';
 import { findAnonymizationFieldsRoute } from './anonymization_fields/find_route';
 import { chatCompleteRoute } from './chat/chat_complete_route';
-import { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
+import { postActionsConnectorExecuteRoute, getActionsConnectorExecuteMetadataRoute } from './post_actions_connector_execute';
 import { bulkActionKnowledgeBaseEntriesRoute } from './knowledge_base/entries/bulk_actions_route';
 import { createKnowledgeBaseEntryRoute } from './knowledge_base/entries/create_route';
 import { findKnowledgeBaseEntriesRoute } from './knowledge_base/entries/find_route';
@@ -100,6 +100,7 @@ export const registerRoutes = (
 
   // Actions Connector Execute (LLM Wrapper)
   postActionsConnectorExecuteRoute(router, config);
+  getActionsConnectorExecuteMetadataRoute(router, config);
 
   // Evaluate
   getEvaluateRoute(router);

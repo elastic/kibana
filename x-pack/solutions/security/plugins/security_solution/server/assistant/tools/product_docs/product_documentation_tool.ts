@@ -77,6 +77,7 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
           ),
           product: z
             .enum(['kibana', 'elasticsearch', 'observability', 'security'])
+            .optional()
             .describe(
               `If specified, will filter the products to retrieve documentation for
             Possible options are:
@@ -86,8 +87,7 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
             - "security": Elastic Security solution
             If not specified, will search against all products
             `
-            )
-            .optional(),
+            ),
         }),
         tags: ['product-documentation'],
       }

@@ -19,6 +19,7 @@ import { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemet
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { AgentState, NodeParamsBase } from './types';
 import { AssistantDataClients } from '../../executors/types';
+import { ToolExecutionMetadataStore } from '../../../tool_execution_metadata_store';
 
 import { stepRouter } from './nodes/step_router';
 import { modelInput } from './nodes/model_input';
@@ -46,6 +47,7 @@ export interface GetDefaultAssistantGraphParams {
   contentReferencesStore: ContentReferencesStore;
   telemetryParams?: TelemetryParams;
   telemetry: AnalyticsServiceSetup;
+  metadataStore?: ToolExecutionMetadataStore;
 }
 
 export type DefaultAssistantGraph = ReturnType<typeof getDefaultAssistantGraph>;
@@ -65,6 +67,7 @@ export const getDefaultAssistantGraph = ({
   tools,
   replacements,
   getFormattedTime,
+  metadataStore,
 }: GetDefaultAssistantGraphParams) => {
   try {
     // Default node parameters
@@ -111,6 +114,7 @@ export const getDefaultAssistantGraph = ({
           tools,
           telemetryParams,
           telemetry,
+          metadataStore,
         })
       )
       .addNode(NodeType.RESPOND, async (state: AgentState) => {

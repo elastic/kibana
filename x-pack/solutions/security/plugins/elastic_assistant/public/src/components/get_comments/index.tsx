@@ -14,6 +14,7 @@ import type { Replacements } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import styled from '@emotion/styled';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
+import type { HttpSetup } from '@kbn/core/public';
 import { StreamComment } from './stream';
 import * as i18n from './translations';
 
@@ -28,6 +29,22 @@ const SpinnerWrapper = styled.div`
 export interface ContentMessage extends ClientMessage {
   content: string;
 }
+
+export interface GetCommentsProps {
+  abortStream: () => void;
+  currentConversation: any;
+  isFetchingResponse: boolean;
+  refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
+  regenerateMessage: (conversationId: string) => void;
+  showAnonymizedValues: boolean;
+  currentUserAvatar?: any;
+  setIsStreaming: (isStreaming: boolean) => void;
+  systemPromptContent?: string;
+  contentReferencesVisible: boolean;
+  http?: HttpSetup;
+  connectorId?: string;
+}
+
 const transformMessageWithReplacements = ({
   message,
   content,
@@ -50,9 +67,9 @@ const transformMessageWithReplacements = ({
   };
 };
 
-type GetComments = (args: {
-  CommentActions: React.FC<{ message: ClientMessage }>;
-}) => GetAssistantMessages;
+export type GetComments = (args: {
+  CommentActions: (args: { message: ClientMessage }) => React.ReactElement;
+}) => (props: GetCommentsProps) => any[];
 
 export const getComments: GetComments =
   (args) =>
@@ -67,6 +84,9 @@ export const getComments: GetComments =
     setIsStreaming,
     systemPromptContent,
     contentReferencesVisible,
+    http,
+    connectorId,
+    dashboard,
   }) => {
     if (!currentConversation) return [];
 
@@ -98,6 +118,8 @@ export const getComments: GetComments =
                 isFetching
                 // we never need to append to a code block in the loading comment, which is what this index is used for
                 index={999}
+                http={http}
+                connectorId={connectorId}
               />
             ),
           },
@@ -144,6 +166,8 @@ export const getComments: GetComments =
                   messageRole={'assistant'}
                   // we never need to append to a code block in the system comment, which is what this index is used for
                   index={999}
+                  http={http}
+                  connectorId={connectorId}
                 />
               ),
             },
@@ -197,6 +221,8 @@ export const getComments: GetComments =
                 setIsStreaming={setIsStreaming}
                 transformMessage={transformMessage}
                 messageRole={message.role}
+                http={http}
+                connectorId={connectorId}
               />
             ),
           };
@@ -224,6 +250,9 @@ export const getComments: GetComments =
               setIsStreaming={setIsStreaming}
               transformMessage={transformMessage}
               messageRole={message.role}
+              http={http}
+              connectorId={connectorId}
+              dashboard={dashboard}
             />
           ),
         };

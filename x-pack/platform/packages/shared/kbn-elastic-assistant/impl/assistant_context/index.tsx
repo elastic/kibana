@@ -22,6 +22,7 @@ import {
 } from '@kbn/core/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@tanstack/react-query';
+import { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -83,6 +84,7 @@ export interface AssistantProviderProps {
   getUrlForApp: GetUrlForApp;
   getComments: GetAssistantMessages;
   http: HttpSetup;
+  dashboard: DashboardApi;
   inferenceEnabled?: boolean;
   nameSpace?: string;
   navigateToApp: ApplicationStart['navigateToApp'];
@@ -186,6 +188,8 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
     currentAppId,
     userProfileService,
     chrome,
+    dashboard,
+    data,
   } = props;
 
   const defaultTraceOptions: TraceOptions = {
@@ -313,6 +317,8 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       basePath,
       basePromptContexts,
       currentUserAvatar,
+      data,
+      dashboard,
       docLinks,
       getComments,
       getUrlForApp,
@@ -392,6 +398,8 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       codeBlockRef,
       userProfileService,
       chrome,
+      data,
+      dashboard,
     ]
   );
 

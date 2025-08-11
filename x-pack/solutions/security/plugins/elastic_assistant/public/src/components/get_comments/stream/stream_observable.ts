@@ -70,11 +70,25 @@ export const getStreamObservable = ({
               });
             } else {
               const output = decoded;
+
               const lines = output.split('\n');
+
+              const clientSideToolCalls = lines.filter((line) => line.includes(`"args"`)).map((line) => {
+                try {
+                  return JSON.parse(line);
+                } catch (e) {
+                  return undefined;
+                }
+              }).filter((call) => call !== undefined);
+              if (clientSideToolCalls.length > 0) {
+                observer.next({ chunks: [], loading: true, clientSideToolCalls: clientSideToolCalls });
+              }
+
               lines[0] = langChainBuffer + lines[0];
               langChainBuffer = lines.pop() || '';
 
               nextChunks = getLangChainChunks(lines);
+
               nextChunks.forEach((chunk: string) => {
                 chunks.push(chunk);
                 observer.next({

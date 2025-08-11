@@ -64,7 +64,7 @@ export class AiAssistantManagementObservabilityPlugin
     { home, management, observabilityAIAssistant }: SetupDependencies
   ): AiAssistantManagementObservabilityPluginSetup {
     const title = i18n.translate('xpack.observabilityAiAssistantManagement.app.title', {
-      defaultMessage: 'AI Assistant for Observability and Search',
+      defaultMessage: 'AI Assistant',
     });
 
     if (home) {
@@ -75,18 +75,18 @@ export class AiAssistantManagementObservabilityPlugin
           defaultMessage: 'Manage your AI Assistant for Observability and Search.',
         }),
         icon: 'sparkles',
-        path: '/app/management/kibana/ai-assistant/observability',
+        path: '/app/management/ai/ai-assistant/observability',
         showOnHomePage: false,
         category: 'admin',
       });
     }
 
     if (observabilityAIAssistant) {
-      management.sections.section.kibana.registerApp({
+      management.sections.section.ai.registerApp({
         id: 'observabilityAiAssistantManagement',
         title,
         hideFromSidebar: true,
-        order: 1,
+        order: 2,
         mount: async (mountParams) => {
           const { mountManagementSection } = await import('./app');
 
