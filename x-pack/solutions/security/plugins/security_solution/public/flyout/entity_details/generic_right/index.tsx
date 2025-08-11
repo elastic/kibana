@@ -56,6 +56,7 @@ export const isCommonError = (error: unknown): error is CommonError => {
 export interface GenericEntityPanelProps {
   entityDocId: string;
   scopeId: string;
+  isPreviewMode?: boolean;
   /** this is because FlyoutPanelProps defined params as Record<string, unknown> {@link FlyoutPanelProps#params} */
   [key: string]: unknown;
 }
@@ -67,10 +68,13 @@ export interface GenericEntityPanelExpandableFlyoutProps extends FlyoutPanelProp
 
 export const GENERIC_PANEL_RISK_SCORE_QUERY_ID = 'genericPanelRiskScoreQuery';
 
-export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelProps) => {
+export const GenericEntityPanel = ({
+  entityDocId,
+  scopeId,
+  isPreviewMode,
+}: GenericEntityPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
-
   const { getGenericEntity } = useGetGenericEntity(entityDocId);
   const genericInsightsValue = getGenericEntity.data?._source?.entity.id;
   const { getAssetCriticality } = useGenericEntityCriticality({
@@ -176,6 +180,7 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
 
   const source = getGenericEntity.data._source;
   const entity = getGenericEntity.data._source.entity;
+  const shouldShowFooter = !isPreviewMode && assetInventoryEnabled;
 
   return (
     <>
@@ -184,6 +189,7 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
         expandDetails={() =>
           openGenericEntityDetailsPanelByPath({ tab: EntityDetailsLeftPanelTab.FIELDS_TABLE })
         }
+        isPreviewMode={isPreviewMode}
       />
       <GenericEntityFlyoutHeader entity={entity} source={source} />
       <GenericEntityFlyoutContent
@@ -193,7 +199,7 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
         insightsValue={source.entity.id}
         onAssetCriticalityChange={calculateEntityRiskScore}
       />
-      {assetInventoryEnabled && <GenericEntityFlyoutFooter entityId={entity.id} />}
+      {shouldShowFooter && <GenericEntityFlyoutFooter entityId={entity.id} />}
     </>
   );
 };
