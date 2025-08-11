@@ -947,6 +947,7 @@ describe('StatusRuleExecutor', () => {
           status: 'down',
           downThreshold: 1,
           timestamp: '2024-05-13T12:33:37.000Z',
+          serviceName: 'service1',
         } as any,
         locationNames: ['US Central QA'],
         locationIds: ['loc1'],
@@ -960,7 +961,11 @@ describe('StatusRuleExecutor', () => {
         downThreshold: 1,
       });
 
-      const expectedGrouping = { location: { id: 'loc1' }, monitor: { id: 'mon-1' } };
+      const expectedGrouping = {
+        location: { id: 'loc1' },
+        monitor: { id: 'mon-1', config_id: 'config1' },
+        service: { name: 'service1' },
+      };
 
       // Verify grouping is present in context
       const [{ context, payload }] = alertsClientMock.setAlertData.mock.calls.map(([args]) => args);

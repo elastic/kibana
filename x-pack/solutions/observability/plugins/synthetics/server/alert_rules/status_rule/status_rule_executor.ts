@@ -567,9 +567,14 @@ export class StatusRuleExecutor {
       });
     }
 
-    const grouping: Record<string, unknown> = { monitor: { id: monitorSummary.monitorId } };
+    const grouping: Record<string, unknown> = {
+      monitor: { id: monitorSummary.monitorId, config_id: monitorSummary.configId },
+    };
     if (locationIds.length === 1) {
       grouping.location = { id: locationIds[0] };
+    }
+    if (monitorSummary.serviceName) {
+      grouping.service = { name: monitorSummary.serviceName };
     }
 
     const context = {
