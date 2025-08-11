@@ -52,7 +52,7 @@ export interface SuggestionType<TPayload extends {} = {}> {
   handlers: Record<string, SuggestionHandler<TPayload>>;
 }
 
-export type SuggestionHandler<TPayload = Record<string, unknown>> = ({
+export type SuggestionHandler<TPayload extends {} = Record<string, unknown>> = ({
   context,
   request,
 }: {
