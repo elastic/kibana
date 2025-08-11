@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AddToCaseComment } from '.';
-import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 // Mock i18n
@@ -20,8 +19,6 @@ jest.mock('@kbn/i18n-react', () => ({
     formatMessage: ({ defaultMessage }: { defaultMessage: string }) => defaultMessage,
   }),
 }));
-
-const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
 
 describe('AddToCaseComment', () => {
   const addErrorMock = jest.fn();
@@ -35,26 +32,11 @@ describe('AddToCaseComment', () => {
   };
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
-      isObsAIAssistantEnabled: true,
-      generateSummary: jest.fn(),
-      isLoading: false,
-      summary: '',
-      errors: [],
-      abortController: { signal: new AbortController().signal, abort: jest.fn() },
-      screenContexts: [],
-    });
   });
 
   it('renders the input field with placeholder text', () => {
     render(
-      <AddToCaseComment
-        comment=""
-        onCommentChange={jest.fn()}
-        setIsLoading={jest.fn()}
-        observabilityAIAssistant={undefined}
-        notifications={notificationsMock}
-      />
+      <AddToCaseComment comment="" onCommentChange={jest.fn()} notifications={notificationsMock} />
     );
 
     expect(screen.getByPlaceholderText('Add a comment (optional)')).toBeInTheDocument();
@@ -66,8 +48,6 @@ describe('AddToCaseComment', () => {
       <AddToCaseComment
         comment=""
         onCommentChange={onCommentChangeMock}
-        setIsLoading={jest.fn()}
-        observabilityAIAssistant={undefined}
         notifications={notificationsMock}
       />
     );
@@ -77,165 +57,5 @@ describe('AddToCaseComment', () => {
     });
 
     expect(onCommentChangeMock).toHaveBeenCalledWith('New comment');
-  });
-
-  it('displays AI assistant help text when enabled', () => {
-    render(
-      <AddToCaseComment
-        comment=""
-        onCommentChange={jest.fn()}
-        setIsLoading={jest.fn()}
-        observabilityAIAssistant={mockObservabilityAIAssistant}
-        notifications={notificationsMock}
-      />
-    );
-
-    expect(
-      screen.getByText(
-        '{icon} Initial comment AI generated. AI can be wrong or incomplete. Please review and edit as necessary.'
-      )
-    ).toBeInTheDocument();
-  });
-
-  it('does not display AI assistant help text when isObsAIAssistantEnabled is false', () => {
-    jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
-      isObsAIAssistantEnabled: false,
-      generateSummary: jest.fn(),
-      isLoading: false,
-      summary: '',
-      abortController: { signal: new AbortController().signal, abort: jest.fn() },
-      screenContexts: [],
-      errors: [],
-    });
-
-    render(
-      <AddToCaseComment
-        comment=""
-        onCommentChange={jest.fn()}
-        setIsLoading={jest.fn()}
-        observabilityAIAssistant={undefined}
-        notifications={notificationsMock}
-      />
-    );
-
-    expect(
-      screen.queryByText(
-        '{icon} Initial comment AI generated. AI can be wrong or incomplete. Please review and edit as necessary.'
-      )
-    ).not.toBeInTheDocument();
-  });
-
-  it('does not display AI assistant help text when there are errors', () => {
-    jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
-      isObsAIAssistantEnabled: true,
-      generateSummary: jest.fn(),
-      isLoading: false,
-      summary: '',
-      abortController: { signal: new AbortController().signal, abort: jest.fn() },
-      screenContexts: [],
-      errors: [new Error('Test error')],
-    });
-
-    render(
-      <AddToCaseComment
-        comment=""
-        onCommentChange={jest.fn()}
-        setIsLoading={jest.fn()}
-        observabilityAIAssistant={undefined}
-        notifications={notificationsMock}
-      />
-    );
-
-    expect(
-      screen.queryByText(
-        '{icon} Initial comment AI generated. AI can be wrong or incomplete. Please review and edit as necessary.'
-      )
-    ).not.toBeInTheDocument();
-  });
-
-  it('calls generateSummary when isObsAIAssistantEnabled is true', () => {
-    const generateSummaryMock = jest.fn();
-    jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
-      isObsAIAssistantEnabled: true,
-      generateSummary: generateSummaryMock,
-      isLoading: false,
-      summary: '',
-      abortController: { signal: new AbortController().signal, abort: jest.fn() },
-      screenContexts: [],
-      errors: [],
-    });
-
-    render(
-      <AddToCaseComment
-        comment=""
-        onCommentChange={jest.fn()}
-        setIsLoading={jest.fn()}
-        observabilityAIAssistant={mockObservabilityAIAssistant}
-        notifications={notificationsMock}
-      />
-    );
-
-    expect(generateSummaryMock).toHaveBeenCalled();
-  });
-
-  it('appends partial summaries to the comment using handleStreamingUpdate', () => {
-    const onCommentChangeMock = jest.fn((prevComment) => `${prevComment} Partial summary`);
-    const generateSummaryMock = jest.fn();
-    const usePageSummarySpy = jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
-      isObsAIAssistantEnabled: true,
-      generateSummary: generateSummaryMock,
-      isLoading: false,
-      summary: '',
-      abortController: { signal: new AbortController().signal, abort: jest.fn() },
-      screenContexts: [],
-      errors: [],
-    });
-
-    render(
-      <AddToCaseComment
-        comment="Existing comment"
-        onCommentChange={onCommentChangeMock}
-        setIsLoading={jest.fn()}
-        observabilityAIAssistant={mockObservabilityAIAssistant}
-        notifications={notificationsMock}
-      />
-    );
-
-    expect(onCommentChangeMock).not.toBeCalledWith(expect.any(Function));
-
-    expect(screen.getByText('Existing comment')).toBeInTheDocument();
-
-    expect(generateSummaryMock).toHaveBeenCalled();
-
-    const handleStreamingUpdate = usePageSummarySpy.mock.calls[0]![0]!.onChunk!;
-    handleStreamingUpdate(' Partial summary');
-
-    expect(onCommentChangeMock).toBeCalledWith(expect.any(Function));
-  });
-
-  it('calls notifications.toasts.addError when errors are present', () => {
-    jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
-      isObsAIAssistantEnabled: true,
-      generateSummary: jest.fn(),
-      isLoading: false,
-      summary: '',
-      abortController: { signal: new AbortController().signal, abort: jest.fn() },
-      screenContexts: [],
-      errors: [new Error('Test error')],
-    });
-
-    render(
-      <AddToCaseComment
-        comment=""
-        onCommentChange={jest.fn()}
-        setIsLoading={jest.fn()}
-        observabilityAIAssistant={mockObservabilityAIAssistant}
-        notifications={notificationsMock}
-      />
-    );
-
-    expect(notificationsMock.toasts.addError).toHaveBeenCalledWith(expect.any(Error), {
-      title: 'Could not initialize AI-generated summary',
-    });
   });
 });
