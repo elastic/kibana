@@ -116,10 +116,10 @@ const GroupSelectorComponent = ({
     [isGroupSelected, options]
   );
 
-  // const onButtonClick = useCallback(() => setIsPopoverOpen((currentVal) => !currentVal), []);
   const onButtonClick = useCallback(() => {
     setIsPopoverOpen((currentVal) => {
       const nextVal = !currentVal;
+      // Only tracks opening of Group by popup menu, not closing it
       if (nextVal && onOpenTracker) {
         onOpenTracker(METRIC_TYPE.CLICK, 'group_by_opened');
       }
