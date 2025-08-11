@@ -36,8 +36,7 @@ import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
 import { getAdhocAnnotations } from './get_adhoc_annotations';
-import { XYState } from '../visualizations/xy/types';
-import { apiHasGetAlertForAnnotation } from './type_guards';
+import { apiHasGetAlertForAnnotation, isXYState } from './type_guards';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
@@ -67,6 +66,28 @@ export const createLensEmbeddableFactory = (
         () => titleManager.api.title$.getValue(),
         initialState
       );
+
+      if (apiHasGetAlertForAnnotation(parentApi)) {
+        const alert = parentApi.getAlertForAnnotation();
+
+        if (alert) {
+          const visualization = initialState.rawState.attributes?.state.visualization;
+
+          if (isXYState(visualization)) {
+            const hasAlertAnnotation = visualization.layers.find(
+              (layer) => layer.layerId === 'annotation_alert_started'
+            );
+
+            if (!hasAlertAnnotation) {
+              const indexPatternId = initialState.rawState.attributes?.references.find(
+                (r) => r.type === 'index-pattern'
+              )?.id;
+              const annotations = getAdhocAnnotations(alert, indexPatternId ?? '');
+              visualization.layers.push(...annotations);
+            }
+          }
+        }
+      }
 
       const initialRuntimeState = await deserializeState(
         services,
@@ -149,24 +170,6 @@ export const createLensEmbeddableFactory = (
           ...searchContextConfig.getLatestState(),
           ...stateConfig.getLatestState(),
         };
-      }
-
-      if (apiHasGetAlertForAnnotation(parentApi)) {
-        const alert = parentApi.getAlertForAnnotation();
-
-        if (alert) {
-          const indexPatternId = initialRuntimeState.attributes.references.find(
-            (r) => r.type === 'index-pattern'
-          )?.id;
-          const annotations = getAdhocAnnotations(alert, indexPatternId ?? '');
-          const visualization = initialRuntimeState.attributes.state.visualization as XYState;
-          const hasAlertAnnotation = visualization.layers.find(
-            (layer) => layer.layerId === 'annotation_alert_started'
-          );
-          if (!hasAlertAnnotation) {
-            visualization.layers.push(...annotations);
-          }
-        }
       }
 
       const unsavedChangesApi = initializeUnsavedChanges<LensSerializedState>({

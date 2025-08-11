@@ -17,6 +17,7 @@ import {
   LensComponentForwardedProps,
   LensPublicCallbacks,
 } from './types';
+import { XYLayerConfig } from '../visualizations/xy/types';
 
 function apiHasLensCallbacks(api: unknown): api is LensApiCallbacks {
   const fns = [
@@ -77,4 +78,8 @@ export function apiHasGetAlertForAnnotation(
   api: unknown
 ): api is { getAlertForAnnotation: () => { start: string } } {
   return isObject(api) && Object.hasOwn(api, 'getAlertForAnnotation');
+}
+
+export function isXYState(visualization: unknown): visualization is { layers: XYLayerConfig[] } {
+  return isObject(visualization) && Object.hasOwn(visualization, 'layers');
 }
