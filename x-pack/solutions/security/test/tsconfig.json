@@ -59,6 +59,8 @@
     "@kbn/task-manager-plugin",
     "@kbn/serverless-security-settings",
     "@kbn/rison",
-    "@kbn/core-chrome-browser"
+    "@kbn/core-chrome-browser",
+    "@kbn/openapi-common",
+    "@kbn/spaces-plugin"
   ]
 }
