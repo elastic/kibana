@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getHasFocus } from '../../has_focus';
+import { getHasFocus } from '../has_focus';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, visualize, timePicker, lens } = getPageObjects([
