@@ -8,18 +8,22 @@
 import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
 import { Logger } from '@kbn/core/server';
 import { type InferenceClient } from '@kbn/inference-common';
-import type { GeneratedSignificantEventQuery } from '@kbn/streams-schema';
+import {
+  getIndexPatternsForStream,
+  type GeneratedSignificantEventQuery,
+  type Streams,
+} from '@kbn/streams-schema';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
 import { Observable } from 'rxjs';
-import KQL_GUIDE from './prompts/kql_guide.text';
 import type { AssetClient } from '../streams/assets/asset_client';
+import KQL_GUIDE from './prompts/kql_guide.text';
 
 const DEFAULT_SHORT_LOOKBACK = moment.duration(24, 'hours');
 const DEFAULT_LONG_LOOKBACK = moment.duration(7, 'days');
 
 interface Params {
-  name: string;
+  definition: Streams.all.Definition;
   connectorId: string;
   currentDate?: Date;
   shortLookback?: moment.Duration;
@@ -41,14 +45,16 @@ export function generateUsingZeroShot(
     (async () => {
       try {
         const {
-          name,
+          definition,
           connectorId,
           currentDate = new Date(),
           shortLookback = DEFAULT_SHORT_LOOKBACK,
         } = params;
         const { inferenceClient, esClient, logger, assetClient } = dependencies;
 
-        const features = await assetClient.bulkGetByIds(name, 'feature', ['identified_system']);
+        const features = await assetClient.bulkGetByIds(definition.name, 'feature', [
+          'identified_system',
+        ]);
         const identifiedSystem = features[0]?.feature.feature;
 
         if (!identifiedSystem) {
@@ -65,7 +71,7 @@ export function generateUsingZeroShot(
           esClient: esClient.client,
           start,
           end,
-          index: name,
+          index: getIndexPatternsForStream(definition),
         });
 
         const short = sortAndTruncateAnalyzedFields(analysis);

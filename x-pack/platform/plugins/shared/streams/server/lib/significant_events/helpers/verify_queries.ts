@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { kqlQuery } from '@kbn/es-query';
+import { getIndexPatternsForStream, type Streams } from '@kbn/streams-schema';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import pLimit from 'p-limit';
 import { rangeQuery } from '../../../routes/internal/esql/query_helpers';
@@ -18,7 +19,7 @@ interface Query {
 
 interface Params {
   queries: Query[];
-  name: string;
+  definition: Streams.all.Definition;
   start: number;
   end: number;
 }
@@ -42,7 +43,7 @@ export async function verifyQueries(
   params: Params,
   dependencies: Dependencies
 ): Promise<VerifiedQueries> {
-  const { queries, name, start, end } = params;
+  const { queries, definition, start, end } = params;
   const { esClient, logger } = dependencies;
 
   const limiter = pLimit(10);
@@ -53,7 +54,7 @@ export async function verifyQueries(
           return esClient
             .search('verify_query', {
               track_total_hits: true,
-              index: name,
+              index: getIndexPatternsForStream(definition),
               size: 0,
               timeout: '5s',
               query: {
@@ -72,7 +73,7 @@ export async function verifyQueries(
     esClient
       .search('verify_query', {
         track_total_hits: true,
-        index: name,
+        index: getIndexPatternsForStream(definition),
         size: 0,
         timeout: '5s',
       })

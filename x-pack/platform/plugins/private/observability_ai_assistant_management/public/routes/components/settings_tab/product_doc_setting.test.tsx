@@ -7,23 +7,21 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { ProductDocEntry } from './product_doc_entry';
+import { ProductDocSetting } from './product_doc_setting';
 import {
   APIReturnType,
   ELSER_ON_ML_NODE_INFERENCE_ID,
-  KnowledgeBaseState,
+  InferenceModelState,
   LEGACY_CUSTOM_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
-import { UseProductDoc } from '../../../hooks/use_product_doc';
-import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 
 const createMockStatus = (
   overrides?: Partial<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>
 ): UseKnowledgeBaseResult['status'] => ({
   value: {
     enabled: true,
-    kbState: KnowledgeBaseState.READY,
+    inferenceModelState: InferenceModelState.READY,
     isReIndexing: false,
     currentInferenceId: ELSER_ON_ML_NODE_INFERENCE_ID,
     concreteWriteIndex: 'index_1',
@@ -33,6 +31,7 @@ const createMockStatus = (
       service: 'my-service',
       service_settings: {},
     },
+    productDocStatus: 'uninstalled',
     ...overrides,
   },
   loading: false,
@@ -48,21 +47,20 @@ const createMockKnowledgeBase = (
   isPolling: false,
   install: jest.fn().mockResolvedValue(undefined),
   warmupModel: jest.fn().mockResolvedValue(undefined),
+  isProductDocInstalling: false,
+  isProductDocUninstalling: false,
+  installProductDoc: jest.fn().mockResolvedValue(undefined),
+  uninstallProductDoc: jest.fn().mockResolvedValue(undefined),
   ...overrides,
 });
 
-const createProductDoc = (overrides: Partial<UseProductDoc> = {}) => ({
-  status: 'uninstalled' as InstallationStatus,
-  isLoading: false,
-  installProductDoc: jest.fn().mockResolvedValue({} as any),
-  uninstallProductDoc: jest.fn().mockResolvedValue({} as any),
-  ...overrides,
-});
-
-describe('ProductDocEntry', () => {
+describe('ProductDocSetting', () => {
   it('should render the installed state correctly', async () => {
     const mockKnowledgeBase = createMockKnowledgeBase({
+      isInstalling: false,
+      isWarmingUpModel: false,
       status: createMockStatus({
+        inferenceModelState: InferenceModelState.READY,
         currentInferenceId: LEGACY_CUSTOM_INFERENCE_ID,
         endpoint: {
           inference_id: LEGACY_CUSTOM_INFERENCE_ID,
@@ -70,18 +68,16 @@ describe('ProductDocEntry', () => {
           service: 'my-service',
           service_settings: {},
         },
+        productDocStatus: 'installed',
       }),
-    });
-
-    const productDoc = createProductDoc({
-      status: 'installed',
+      isProductDocInstalling: false,
+      isProductDocUninstalling: false,
     });
 
     render(
-      <ProductDocEntry
+      <ProductDocSetting
         knowledgeBase={mockKnowledgeBase}
-        productDoc={productDoc}
-        currentlyDeployedInferenceId={undefined}
+        currentlyDeployedInferenceId={ELSER_ON_ML_NODE_INFERENCE_ID}
       />
     );
 
@@ -91,13 +87,13 @@ describe('ProductDocEntry', () => {
   });
 
   it('should render the uninstalled state correctly', async () => {
-    const mockKnowledgeBase = createMockKnowledgeBase();
-    const productDoc = createProductDoc();
+    const mockKnowledgeBase = createMockKnowledgeBase({
+      status: createMockStatus({ productDocStatus: 'uninstalled' }),
+    });
 
     render(
-      <ProductDocEntry
+      <ProductDocSetting
         knowledgeBase={mockKnowledgeBase}
-        productDoc={productDoc}
         currentlyDeployedInferenceId={undefined}
       />
     );

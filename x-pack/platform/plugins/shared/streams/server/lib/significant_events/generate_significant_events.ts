@@ -8,22 +8,26 @@
 import { describeDataset, getLogPatterns, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
 import { Logger } from '@kbn/core/server';
 import { ShortIdTable, type InferenceClient } from '@kbn/inference-common';
-import type { GeneratedSignificantEventQuery } from '@kbn/streams-schema';
+import {
+  getIndexPatternsForStream,
+  type GeneratedSignificantEventQuery,
+  type Streams,
+} from '@kbn/streams-schema';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
 import { Observable } from 'rxjs';
 import { v4 } from 'uuid';
-import { verifyQueries } from './helpers/verify_queries';
 import { isKqlQueryValid } from '../../routes/internal/esql/query_helpers';
+import type { AssetClient } from '../streams/assets/asset_client';
+import { verifyQueries } from './helpers/verify_queries';
 import INSTRUCTION from './prompts/generate_queries_instruction.text';
 import KQL_GUIDE from './prompts/kql_guide.text';
-import type { AssetClient } from '../streams/assets/asset_client';
 
 const DEFAULT_SHORT_LOOKBACK = moment.duration(24, 'hours');
 const DEFAULT_LONG_LOOKBACK = moment.duration(7, 'days');
 
 interface Params {
-  name: string;
+  definition: Streams.all.Definition;
   connectorId: string;
   currentDate?: Date;
   shortLookback?: moment.Duration;
@@ -45,7 +49,7 @@ export function generateSignificantEventDefinitions(
     (async () => {
       try {
         const {
-          name,
+          definition,
           connectorId,
           currentDate = new Date(),
           shortLookback = DEFAULT_SHORT_LOOKBACK,
@@ -63,7 +67,7 @@ export function generateSignificantEventDefinitions(
           esClient: esClient.client,
           start,
           end,
-          index: name,
+          index: getIndexPatternsForStream(definition),
         });
 
         const short = sortAndTruncateAnalyzedFields(analysis);
@@ -86,7 +90,7 @@ export function generateSignificantEventDefinitions(
               end,
               esClient,
               fields: [categorizationField],
-              index: name,
+              index: getIndexPatternsForStream(definition),
               includeChanges: true,
               metadata: [],
             }).then((results) => {
@@ -171,7 +175,7 @@ Quality over quantity - aim for queries that have high signal-to-noise ratio.
         }
 
         const verifiedQueries = await verifyQueries(
-          { queries, start: lookbackStart, end, name },
+          { queries, start: lookbackStart, end, definition },
           { esClient, logger }
         );
 
