@@ -497,6 +497,8 @@ describe('ReportingStore', () => {
         statefulSettings: { enabled: false },
       };
       mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
+      mockEsClient = (await mockCore.getEsClient()).asInternalUser as typeof mockEsClient;
+
       mockCallsForApplyingMapping(mockEsClient);
 
       const store = new TestReportingStore(mockCore, mockLogger);
