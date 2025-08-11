@@ -34,7 +34,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 ### Fixes [kibana-9.1.2-fixes]
 
 **Alerting**:
-* Fixes an issue with the `job/list` API's report filtering [#230876]({{kib-pull}}230876).
+* Fixes an issue that prevents reports from showing in the Reporting UI when they're created in a non-default {{kib}} space [#230876]({{kib-pull}}230876).
 
 **Data ingestion and Fleet**:
 * Fixes validation for `text` and `password` inputs in the package policy editor [#229932]({{kib-pull}}229932).
