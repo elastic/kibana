@@ -37,7 +37,10 @@ export async function runAgent({
   logger.debug(() => `${NodeType.AGENT}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
   const modifiedMessages = state.messages.map((message) => {
-    if ('content' in message && typeof message.content === 'string') {
+    if ('content' in message &&
+      typeof message.content === 'string' &&
+      (message.content[message.content.length - 1] == '}' ||
+        message.content[message.content.length - 1] == ']')) {
       /* The Gemini models throw an error if the content can be parsed as JSON.
       A hack to avoid this is to append a period to the end of the message. This map
       should be removed when the root cause of that issue is fixed.
