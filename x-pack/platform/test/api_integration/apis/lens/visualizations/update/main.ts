@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { LENS_VIS_API_PATH, LENS_API_VERSION } from '@kbn/lens-plugin/common/constants';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
+import type { LensUpdateResponseBody } from '@kbn/lens-plugin/server';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { getExampleLensBody } from '../../examples';
 
@@ -25,7 +26,9 @@ export default function ({ getService }: FtrProviderContext) {
         .send(getExampleLensBody('Custom title'));
 
       expect(response.status).to.be(200);
-      expect(response.body.attributes.title).to.be('Custom title');
+
+      const body: LensUpdateResponseBody = response.body;
+      expect(body.data.title).to.be('Custom title');
     });
 
     it('should error when updating an unknown lens visualization', async () => {
@@ -37,9 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send(getExampleLensBody('Custom title'));
 
       expect(response.status).to.be(404);
-      expect(response.body.message).to.be(
-        'A Lens visualization with saved object id [123] was not found.'
-      );
+      expect(response.body.message).to.be('A Lens visualization with id [123] was not found.');
     });
   });
 }

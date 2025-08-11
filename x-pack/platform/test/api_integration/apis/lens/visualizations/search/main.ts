@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { LENS_VIS_API_PATH, LENS_API_VERSION } from '@kbn/lens-plugin/common/constants';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
+import { LensSearchResponseBody } from '@kbn/lens-plugin/server';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -22,7 +23,9 @@ export default function ({ getService }: FtrProviderContext) {
         .send();
 
       expect(response.status).to.be(200);
-      expect(response.body.length).to.be(4);
+
+      const body: LensSearchResponseBody = response.body;
+      expect(body.data.length).to.be(4);
     });
 
     it('should filter lens visualizations by title and description', async () => {
@@ -33,7 +36,9 @@ export default function ({ getService }: FtrProviderContext) {
         .send();
 
       expect(response.status).to.be(200);
-      expect(response.body.length).to.be(2);
+
+      const body: LensSearchResponseBody = response.body;
+      expect(body.data.length).to.be(2);
     });
   });
 }

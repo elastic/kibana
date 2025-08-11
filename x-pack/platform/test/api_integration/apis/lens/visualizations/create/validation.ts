@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.status).to.be(400);
       expect(response.body.message).to.be(
-        '[request body.data.title]: expected value of type [string] but got [undefined]'
+        '[request body.data]: expected at least one defined value but got [undefined]'
       );
     });
   });

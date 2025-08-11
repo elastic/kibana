@@ -35,9 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send();
 
       expect(response.status).to.be(404);
-      expect(response.body.message).to.be(
-        'A Lens visualization with saved object id [123] was not found.'
-      );
+      expect(response.body.message).to.be('A Lens visualization with id [123] was not found.');
     });
   });
 }

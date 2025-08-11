@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { LENS_VIS_API_PATH, LENS_API_VERSION } from '@kbn/lens-plugin/common/constants';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
+import type { LensCreateResponseBody } from '@kbn/lens-plugin/server';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { getExampleLensBody } from '../../examples';
 
@@ -21,9 +22,12 @@ export default function ({ getService }: FtrProviderContext) {
         .post(LENS_VIS_API_PATH)
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, LENS_API_VERSION)
-        .send(getExampleLensBody());
+        .send(getExampleLensBody(undefined, 'new lens vis'));
 
       expect(response.status).to.be(201);
+
+      const body: LensCreateResponseBody = response.body;
+      expect(body.data.description).to.be('new lens vis');
     });
   });
 }
