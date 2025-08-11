@@ -17,7 +17,7 @@ import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/d
 import { ChangeDataView } from './change_dataview';
 import { dataViewMock, dataViewMockEsql } from './mocks/dataview';
 import type { DataViewPickerProps } from './data_view_picker';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 // Mock DOM measurement functions to prevent EUI truncation width errors
 Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
@@ -152,7 +152,9 @@ describe('DataView component', () => {
     },
   ])('$description', async ({ hasOnDataViewCreated, expectPresent }) => {
     const addDataViewSpy = jest.fn();
-    const testProps = hasOnDataViewCreated ? { ...props, onDataViewCreated: addDataViewSpy } : props;
+    const testProps = hasOnDataViewCreated
+      ? { ...props, onDataViewCreated: addDataViewSpy }
+      : props;
 
     render(wrapDataViewComponentInContext(testProps, !hasOnDataViewCreated));
 
@@ -171,7 +173,6 @@ describe('DataView component', () => {
   });
 
   it('should properly handle ad hoc data views', async () => {
-
     render(
       wrapDataViewComponentInContext(
         {
@@ -202,7 +203,6 @@ describe('DataView component', () => {
   });
 
   it('should properly handle ES|QL ad hoc data views', async () => {
-
     render(
       wrapDataViewComponentInContext(
         {
@@ -229,7 +229,6 @@ describe('DataView component', () => {
   });
 
   it('should properly handle managed data views', async () => {
-
     render(
       wrapDataViewComponentInContext(
         {
@@ -260,7 +259,6 @@ describe('DataView component', () => {
   });
 
   it('should properly handle both ad hoc and managed data views together', async () => {
-
     render(
       wrapDataViewComponentInContext(
         {
