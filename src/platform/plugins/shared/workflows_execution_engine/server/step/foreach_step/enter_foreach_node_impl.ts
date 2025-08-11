@@ -79,11 +79,20 @@ export class EnterForeachNodeImpl implements StepImplementation {
     try {
       items = JSON.parse(this.step.configuration.foreach);
     } catch (error) {
-      const { value } = this.contextManager.readContextPath(this.step.configuration.foreach);
-      items = value;
+      const { value, pathExists } = this.contextManager.readContextPath(
+        this.step.configuration.foreach
+      );
 
-      if (!Array.isArray(items)) {
-        items = JSON.parse(items);
+      if (!pathExists) {
+        throw new Error(
+          `Foreach configuration path "${this.step.configuration.foreach}" does not exist in the workflow context.`
+        );
+      }
+
+      if (Array.isArray(value)) {
+        items = value;
+      } else if (typeof value === 'string') {
+        items = JSON.parse(value);
       }
     }
 
