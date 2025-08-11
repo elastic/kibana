@@ -1981,10 +1981,10 @@
     "enums": [
       {
         "parentPluginId": "metricsDataAccess",
-        "id": "def-common.DataSchemaFormat",
+        "id": "def-common.DataSchemaFormatEnum",
         "type": "Enum",
         "tags": [],
-        "label": "DataSchemaFormat",
+        "label": "DataSchemaFormatEnum",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/shared/metrics/types.ts",
         "deprecated": false,
@@ -2004,6 +2004,21 @@
           "\"container.id\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.DataSchemaFormat",
+        "type": "Type",
+        "tags": [],
+        "label": "DataSchemaFormat",
+        "description": [],
+        "signature": [
+          "\"ecs\" | \"semconv\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/shared/metrics/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
