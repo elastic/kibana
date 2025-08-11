@@ -23,7 +23,7 @@ export const getDefaultArguments = (
       }
     : { n: 1, stop: stop ?? null, temperature: temperature ?? DEFAULT_OPEN_AI_TEMPERATURE };
 
-export const DEFAULT_OPEN_AI_TEMPERATURE = 0.2;
+export const DEFAULT_OPEN_AI_TEMPERATURE = 1;
 // this is a fallback for logging, connector will default to the connector model
 // x-pack/platform/plugins/shared/stack_connectors/common/openai/constants.ts
 export const DEFAULT_OPEN_AI_MODEL = 'gpt-4.1';

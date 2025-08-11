@@ -40,8 +40,8 @@ export async function runAgent({
     if (
       'content' in message &&
       typeof message.content === 'string' &&
-      (message.content[message.content.length - 1] == '}' ||
-        message.content[message.content.length - 1] == ']')
+      (message.content[message.content.length - 1] === '}' ||
+        message.content[message.content.length - 1] === ']')
     ) {
       /* The Gemini models throw an error if the content can be parsed as JSON.
       A hack to avoid this is to append a period to the end of the message. This map
