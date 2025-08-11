@@ -94,6 +94,7 @@ export const INTERNAL_CASE_OBSERVABLES_DELETE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
 export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_find` as const;
+export const INTERNAL_CASE_SUGGESTIONS_URL = `/internal/case_suggestions/_find` as const;
 
 /**
  * Action routes

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SuggestionResponse } from '../../../common/types/domain';
+import type { SuggestionHandlerResponse } from '../../../common/types/domain';
 import type { CasesClientArgs } from '../types';
 import type { GetAllForOwnersArgs } from './types';
 import { getAllForOwners } from './get';
@@ -14,7 +14,7 @@ import { getAllForOwners } from './get';
  * API for interacting with attachment suggestions.
  */
 export interface AttachmentSuggestionsSubClient {
-  getAllForOwners(getAllForOwnersArgs: GetAllForOwnersArgs): Promise<SuggestionResponse>;
+  getAllForOwners(getAllForOwnersArgs: GetAllForOwnersArgs): Promise<SuggestionHandlerResponse>;
 }
 
 /**
