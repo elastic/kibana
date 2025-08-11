@@ -57,4 +57,4 @@ describe('sendGapDetectedTelemetryEvent', () => {
 
     expect(mockAnalytics.reportEvent).not.toHaveBeenCalled();
   });
-}); 
+});

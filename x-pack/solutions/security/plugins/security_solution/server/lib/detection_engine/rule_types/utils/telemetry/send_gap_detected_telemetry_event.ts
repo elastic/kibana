@@ -15,7 +15,6 @@ export const sendGapDetectedTelemetryEvent = ({
   gapDuration,
   originalFrom,
   originalTo,
-
 }: {
   analytics: AnalyticsServiceSetup;
   interval: string;
@@ -23,7 +22,6 @@ export const sendGapDetectedTelemetryEvent = ({
   originalFrom: moment.Moment;
   originalTo: moment.Moment;
 }) => {
-
   const intervalDuration = parseInterval(interval);
 
   if (!intervalDuration) {

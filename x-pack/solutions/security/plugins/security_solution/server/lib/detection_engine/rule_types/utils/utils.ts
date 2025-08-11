@@ -427,7 +427,13 @@ export const getRuleRangeTuples = async ({
         interval
       )}"`
     );
-    return { tuples, remainingGap: moment.duration(0), warningStatusMessage, originalFrom, originalTo };
+    return {
+      tuples,
+      remainingGap: moment.duration(0),
+      warningStatusMessage,
+      originalFrom,
+      originalTo,
+    };
   }
 
   const gap = getGapBetweenRuns({
