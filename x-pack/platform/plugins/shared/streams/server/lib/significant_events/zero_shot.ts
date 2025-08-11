@@ -97,7 +97,7 @@ export function generateUsingZeroShot(
 ${JSON.stringify(identifiedSystem)}
 
 ## Context
-- Index Name: ${name}
+- Index Name: ${definition.name}
 - Sample logs field: ${messageField.name}
 
 ## Dataset analysis
