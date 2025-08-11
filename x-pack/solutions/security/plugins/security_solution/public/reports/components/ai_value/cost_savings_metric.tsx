@@ -19,7 +19,6 @@ import { VisualizationEmbeddable } from '../../../common/components/visualizatio
 import { getCostSavingsMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_metric';
 
 interface Props {
-  isDarkMode: boolean;
   from: string;
   to: string;
   minutesPerAlert: number;
@@ -38,7 +37,6 @@ const ID = 'CostSavingsMetricQuery';
  */
 
 const CostSavingsMetricComponent: React.FC<Props> = ({
-  isDarkMode,
   minutesPerAlert,
   analystHourlyRate,
   from,
@@ -50,15 +48,16 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
 
   const timerange = useMemo(() => ({ from, to }), [from, to]);
   const getLensAttributes = useCallback<GetLensAttributes>(
-    (args) => getCostSavingsMetricLensAttributes({ ...args, minutesPerAlert, analystHourlyRate }),
-    [analystHourlyRate, minutesPerAlert]
+    (args) =>
+      getCostSavingsMetricLensAttributes({
+        ...args,
+        backgroundColor: colors.backgroundBaseSuccess,
+        minutesPerAlert,
+        analystHourlyRate,
+      }),
+    [analystHourlyRate, colors.backgroundBaseSuccess, minutesPerAlert]
   );
-  console.log({
-    isDarkMode,
-    colors,
-    success: colors.success,
-    backgroundBaseSuccess: colors.backgroundBaseSuccess,
-  });
+
   return (
     <div
       css={css`
@@ -67,20 +66,20 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
           height: 100% !important;
         }
         .echMetricText__icon .euiIcon {
-          fill: ${isDarkMode ? '#008A5E' : colors.success};
+          fill: ${colors.success};
         }
         .echMetricText {
           padding: 8px 20px 60px;
         }
         p.echMetricText__value {
-          color: ${isDarkMode ? '#09724D' : colors.success};
+          color: ${colors.success};
         }
         .euiPanel,
         .embPanel__hoverActions > span {
-          background: ${isDarkMode ? '#E2F8F0' : colors.backgroundBaseSuccess};
+          background: ${colors.backgroundBaseSuccess};
         }
         .embPanel__hoverActionsAnchor {
-          --internalBorderStyle: 1px solid ${isDarkMode ? '#008A5E' : colors.success}!important;
+          --internalBorderStyle: 1px solid ${colors.success}!important;
         }
       `}
     >

@@ -267,7 +267,6 @@ export const ExecutiveSummary: React.FC<Props> = ({
               <EuiFlexItem>
                 <CostSavings
                   analystHourlyRate={analystHourlyRate}
-                  isDarkMode={isDarkMode}
                   costSavings={valueMetrics.costSavings}
                   costSavingsCompare={valueMetricsCompare.costSavings}
                   minutesPerAlert={minutesPerAlert}
