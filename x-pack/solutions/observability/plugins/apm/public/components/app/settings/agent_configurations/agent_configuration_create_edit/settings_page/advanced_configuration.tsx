@@ -24,13 +24,13 @@ import { AdvancedConfigValueInput } from './advanced_config_value_input';
 
 export function AdvancedConfiguration({
   newConfig,
-  settingsDefinitionsByAgent,
+  settingsDefinitions,
   setValidationErrors,
   onChange,
   onDelete,
 }: {
   newConfig: AgentConfigurationIntake;
-  settingsDefinitionsByAgent: SettingDefinition[];
+  settingsDefinitions: SettingDefinition[];
   setValidationErrors: React.Dispatch<React.SetStateAction<string[]>>;
   onChange: (key: string, value: string, oldKey?: string) => void;
   onDelete: (key: string, index: number) => void;
@@ -38,8 +38,8 @@ export function AdvancedConfiguration({
   const agentLanguage = newConfig.agent_name?.split('/')[1] || '';
 
   const predefinedAgentConfigKeys = useMemo(
-    () => settingsDefinitionsByAgent.map((setting) => setting.key),
-    [settingsDefinitionsByAgent]
+    () => settingsDefinitions.map((setting) => setting.key),
+    [settingsDefinitions]
   );
 
   const unknownAgentConfigs = useMemo(() => {

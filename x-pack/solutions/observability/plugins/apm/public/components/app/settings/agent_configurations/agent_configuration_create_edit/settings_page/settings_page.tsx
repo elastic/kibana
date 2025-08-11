@@ -67,7 +67,7 @@ export function SettingsPage({
   const isLoading = status === FETCH_STATUS.LOADING;
   const isAdvancedConfigSupported =
     newConfig.agent_name && isEDOTAgentName(newConfig.agent_name as AgentName);
-  const invalidAdvancedConfig = validationErrors.length > 0;
+  const isAdvancedConfigInvalid = validationErrors.length > 0;
 
   const settingsDefinitionsByAgent = useMemo(
     () => settingDefinitions.filter(filterByAgent(newConfig.agent_name as AgentName)),
@@ -271,7 +271,7 @@ export function SettingsPage({
                   <AdvancedConfiguration
                     newConfig={newConfig}
                     setValidationErrors={setValidationErrors}
-                    settingsDefinitionsByAgent={settingsDefinitionsByAgent}
+                    settingsDefinitions={settingsDefinitionsByAgent}
                     onChange={handleChange}
                     onDelete={handleDelete}
                   />
@@ -297,7 +297,7 @@ export function SettingsPage({
           })}
           unsavedChangesCount={unsavedChangesCount + removedConfigCount}
           appTestSubj="apm"
-          areChangesInvalid={invalidAdvancedConfig}
+          areChangesInvalid={isAdvancedConfigInvalid}
         />
       )}
     </>
