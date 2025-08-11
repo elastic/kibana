@@ -150,6 +150,36 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       }
     });
 
+    it(`settings cannot be saved with savedObjectsManagement: ["all"] but only advancedSettings: ["read"] privilege`, async () => {
+      const username = 'settings_so_all_settings_read';
+      const roleName = 'settings_so_all_settings_read';
+      const password = `${username}-password`;
+      try {
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                savedObjectsManagement: ['all'],
+                advancedSettings: ['read'],
+              },
+            },
+          ],
+        });
+
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+
+        const regularSettingResult = await saveAdvancedSetting(username, password);
+        expect403(regularSettingResult);
+      } finally {
+        await security.role.delete(roleName);
+        await security.user.delete(username);
+      }
+    });
+
     describe('spaces', () => {
       // the following tests create a user_1 which has dashboard all access to space_1 and dashboard read access to space_2
       const space1Id = 'space_1';
