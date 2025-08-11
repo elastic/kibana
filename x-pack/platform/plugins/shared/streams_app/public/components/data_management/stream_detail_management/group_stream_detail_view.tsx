@@ -6,14 +6,62 @@
  */
 
 import { Streams } from '@kbn/streams-schema';
-import { EuiDescriptionList, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiDescriptionList, EuiLink, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { OverlayRef } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import { useKibana } from '../../../hooks/use_kibana';
+import { GroupStreamModificationFlyout } from '../../group_stream_creation_flyout/group_stream_creation_flyout';
 
 export const GroupStreamDetailView = ({
   definition,
+  refreshDefinition,
 }: {
   definition: Streams.GroupStream.GetResponse;
+  refreshDefinition: () => void;
 }) => {
+  const {
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+    core,
+  } = useKibana();
+
+  const streamsListFetch = useStreamsAppFetch(
+    async ({ signal }) => {
+      const { streams } = await streamsRepositoryClient.fetch('GET /internal/streams', {
+        signal,
+      });
+      return streams;
+    },
+    [streamsRepositoryClient]
+  );
+
+  const overlayRef = React.useRef<OverlayRef | null>(null);
+
+  function openGroupStreamModificationFlyout(existingStream?: Streams.GroupStream.Definition) {
+    overlayRef.current?.close();
+    overlayRef.current = core.overlays.openFlyout(
+      toMountPoint(
+        <GroupStreamModificationFlyout
+          client={streamsRepositoryClient}
+          streamsList={streamsListFetch.value}
+          refresh={() => {
+            refreshDefinition();
+            overlayRef.current?.close();
+          }}
+          notifications={core.notifications}
+          existingStream={existingStream}
+        />,
+        core
+      ),
+      { size: 's' }
+    );
+  }
+
   const stream = definition.stream;
 
   const renderLinks = (links: string[]) =>
@@ -32,6 +80,10 @@ export const GroupStreamDetailView = ({
       : 'None';
 
   const meta = [
+    {
+      title: 'Description',
+      description: stream.description,
+    },
     {
       title: 'Owner',
       description: stream.group.owner,
@@ -58,5 +110,17 @@ export const GroupStreamDetailView = ({
     },
   ];
 
-  return <EuiDescriptionList textStyle="reverse" listItems={meta} />;
+  return (
+    <div>
+      <EuiDescriptionList textStyle="reverse" listItems={meta} />
+      <EuiSpacer size="m" />
+      <EuiButton
+        onClick={() => {
+          openGroupStreamModificationFlyout(stream);
+        }}
+      >
+        Edit
+      </EuiButton>
+    </div>
+  );
 };
