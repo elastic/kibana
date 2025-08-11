@@ -35,7 +35,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     secondaryMetric: {
       types: ['vis_dimension', 'string'],
       help: i18n.translate('expressionMetricVis.function.secondaryMetric.help', {
-        defaultMessage: 'The Secondary Metric (shown above the primary).',
+        defaultMessage: 'The Secondary Metric.',
       }),
     },
     max: {
@@ -65,7 +65,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     secondaryLabel: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryLabel.help', {
-        defaultMessage: 'Optional text to be show next to the Secondary Metric.',
+        defaultMessage: 'Optional text displayed next to the Secondary Metric.',
       }),
     },
     progressDirection: {
@@ -109,7 +109,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     primaryPosition: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.primaryPosition.help', {
-        defaultMessage: 'The postion of the Primary Metric.',
+        defaultMessage: 'The postion of the Primary Metric (top or bottom).',
       }),
     },
     titleWeight: {
