@@ -9,6 +9,7 @@ import type { Logger, LogMeta } from '@kbn/core/server';
 import type { LogLevelId, LogMessageSource, LogRecord } from '@kbn/logging';
 
 interface TaskRunnerLoggerOpts {
+  prefix?: string;
   logger: Logger;
   tags: string[];
 }

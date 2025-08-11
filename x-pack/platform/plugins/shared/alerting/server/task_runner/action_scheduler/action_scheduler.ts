@@ -12,7 +12,6 @@ import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { chunk } from 'lodash';
 import type { ThrottledActions } from '../../types';
 import type { ActionSchedulerOptions, ActionsToSchedule, IActionScheduler } from './types';
-import type { Alert } from '../../alert';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
@@ -23,6 +22,9 @@ import type {
 import { getSummaryActionsFromTaskState } from './lib';
 import { withAlertingSpan } from '../lib';
 import * as schedulers from './schedulers';
+import type { AlertsResult } from '../../alerts_client/types';
+import { reduceAlerts } from './alert_reducers';
+import { reducers } from './alert_reducers/reducers';
 
 const BULK_SCHEDULE_CHUNK_SIZE = 1000;
 
@@ -40,6 +42,7 @@ export class ActionScheduler<
   RecoveryActionGroupId extends string,
   AlertData extends RuleAlertData
 > {
+  private throttledSummaryActions: ThrottledActions = {};
   private readonly schedulers: Array<
     IActionScheduler<State, Context, ActionGroupIds, RecoveryActionGroupId>
   > = [];
@@ -56,39 +59,41 @@ export class ActionScheduler<
       AlertData
     >
   ) {
+    const canGetSummarizedAlerts =
+      !!context.ruleType.alerts && !!context.alertsClient.getSummarizedAlerts;
+
+    this.throttledSummaryActions = getSummaryActionsFromTaskState({
+      actions: this.context.rule.actions,
+      summaryActions: this.context.taskInstance.state?.summaryActions,
+    });
+
     for (const [_, scheduler] of Object.entries(schedulers)) {
-      this.schedulers.push(new scheduler(context));
+      this.schedulers.push(
+        new scheduler({
+          ...context,
+          canGetSummarizedAlerts,
+          throttledSummaryActions: this.throttledSummaryActions,
+        })
+      );
     }
 
     // sort schedulers by priority
     this.schedulers.sort((a, b) => a.priority - b.priority);
   }
 
-  public async run({
-    activeAlerts,
-    recoveredAlerts,
-  }: {
-    activeAlerts?: Record<string, Alert<State, Context, ActionGroupIds>>;
-    recoveredAlerts?: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
-  }): Promise<RunResult> {
-    const throttledSummaryActions: ThrottledActions = getSummaryActionsFromTaskState({
-      actions: this.context.rule.actions,
-      summaryActions: this.context.taskInstance.state?.summaryActions,
+  public async run(alerts: AlertsResult<State, Context, ActionGroupIds>): Promise<RunResult> {
+    const reducedAlerts = await reduceAlerts(alerts, reducers, {
+      logger: this.context.logger,
+      rule: this.context.rule,
     });
 
     const allActionsToScheduleResult: ActionsToSchedule[] = [];
     for (const scheduler of this.schedulers) {
-      allActionsToScheduleResult.push(
-        ...(await scheduler.getActionsToSchedule({
-          activeAlerts,
-          recoveredAlerts,
-          throttledSummaryActions,
-        }))
-      );
+      allActionsToScheduleResult.push(...(await scheduler.getActionsToSchedule(reducedAlerts)));
     }
 
     if (allActionsToScheduleResult.length === 0) {
-      return { throttledSummaryActions };
+      return { throttledSummaryActions: this.throttledSummaryActions };
     }
 
     let bulkScheduleResponse: ExecutionResponseItem[] = [];
@@ -154,6 +159,6 @@ export class ActionScheduler<
       }
     }
 
-    return { throttledSummaryActions };
+    return { throttledSummaryActions: this.throttledSummaryActions };
   }
 }

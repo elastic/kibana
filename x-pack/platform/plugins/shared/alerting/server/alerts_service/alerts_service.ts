@@ -45,7 +45,7 @@ import {
   installWithTimeout,
   InstallShutdownError,
 } from './lib';
-import type { LegacyAlertsClientParams, AlertRuleData } from '../alerts_client';
+import type { LegacyAlertsClientParams } from '../alerts_client';
 import { AlertsClient } from '../alerts_client';
 import type { IAlertsClient } from '../alerts_client/types';
 import type { SetAlertsToUntrackedParams } from './lib/set_alerts_to_untracked';
@@ -68,7 +68,6 @@ interface AlertsServiceParams {
 
 export interface CreateAlertsClientParams extends LegacyAlertsClientParams {
   namespace: string;
-  rule: AlertRuleData;
 }
 interface IAlertsService {
   /**
