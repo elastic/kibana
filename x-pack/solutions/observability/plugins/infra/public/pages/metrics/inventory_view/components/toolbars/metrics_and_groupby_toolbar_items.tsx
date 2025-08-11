@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
@@ -40,9 +40,7 @@ export const MetricsAndGroupByToolbarItems = ({
     [timeRangeMetadata]
   );
 
-  const previousPreferredSchema = useRef(preferredSchema);
   useEffect(() => {
-    const previousPreferredSchemaCurrent = previousPreferredSchema.current;
     if (
       !featureFlags.hostOtelEnabled ||
       !allowSchemaSelection ||
@@ -52,13 +50,13 @@ export const MetricsAndGroupByToolbarItems = ({
       return;
     }
 
-    if (previousPreferredSchemaCurrent === null) {
+    if (preferredSchema === null) {
       changePreferredSchema(timeRangeMetadata.preferredSchema);
-      previousPreferredSchema.current = timeRangeMetadata.preferredSchema;
     }
   }, [
     allowSchemaSelection,
     changePreferredSchema,
+    preferredSchema,
     featureFlags.hostOtelEnabled,
     schemas,
     timeRangeMetadata?.preferredSchema,
