@@ -5746,15 +5746,22 @@
             }
           },
           {
+            "description": "The fields to return in the `attributes` key of the response.",
             "in": "query",
             "name": "fields",
             "required": false,
             "schema": {
-              "items": {
-                "description": "The fields to return in the `attributes` key of the response.",
-                "type": "string"
-              },
-              "type": "array"
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           {
@@ -21581,6 +21588,21 @@
                           "discovery": {
                             "additionalProperties": true,
                             "properties": {
+                              "datasets": {
+                                "items": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "name"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
                               "fields": {
                                 "items": {
                                   "additionalProperties": true,
@@ -23714,6 +23736,21 @@
                         "discovery": {
                           "additionalProperties": true,
                           "properties": {
+                            "datasets": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
                             "fields": {
                               "items": {
                                 "additionalProperties": true,
@@ -24647,6 +24684,21 @@
                         "discovery": {
                           "additionalProperties": true,
                           "properties": {
+                            "datasets": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
                             "fields": {
                               "items": {
                                 "additionalProperties": true,

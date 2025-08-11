@@ -1429,27 +1429,6 @@
             "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-public.FleetStartServices.guidedOnboarding",
-            "type": "Object",
-            "tags": [],
-            "label": "guidedOnboarding",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "guidedOnboarding",
-                "scope": "public",
-                "docId": "kibGuidedOnboardingPluginApi",
-                "section": "def-public.GuidedOnboardingPluginStart",
-                "text": "GuidedOnboardingPluginStart"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -27665,7 +27644,7 @@
             "label": "discovery",
             "description": [],
             "signature": [
-              "{ datasets?: ",
+              "{ fields?: { name: string; }[] | undefined; datasets?: ",
               "DiscoveryDataset",
               "[] | undefined; } | undefined"
             ],
@@ -30686,7 +30665,7 @@
             "section": "def-common.RegistryPolicyTemplate",
             "text": "RegistryPolicyTemplate"
           },
-          "[] | undefined; discovery?: { datasets?: ",
+          "[] | undefined; discovery?: { fields?: { name: string; }[] | undefined; datasets?: ",
           "DiscoveryDataset",
           "[] | undefined; } | undefined; }"
         ],
