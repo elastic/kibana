@@ -32,7 +32,7 @@ interface Props {
   searchUsageCollector: SearchUsageCollector;
 }
 
-export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) {
+export function SearchSessionsMgmtMain({ documentation, share, ...tableProps }: Props) {
   if (isBackgroundSearchEnabled()) {
     return (
       <>
