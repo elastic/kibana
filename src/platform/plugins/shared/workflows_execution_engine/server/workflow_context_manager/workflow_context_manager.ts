@@ -35,6 +35,7 @@ export class WorkflowContextManager {
       workflowRunId: init.workflowRunId,
       workflow: init.workflow,
       event: init.event,
+      consts: init.workflow.consts,
     };
 
     this.workflowExecutionGraph = init.workflowExecutionGraph;
