@@ -25,15 +25,17 @@ import { AdvancedConfigValueInput } from './advanced_config_value_input';
 export function AdvancedConfiguration({
   newConfig,
   settingsDefinitions,
-  setValidationErrors,
   onChange,
   onDelete,
+  addValidationError,
+  removeValidationError,
 }: {
   newConfig: AgentConfigurationIntake;
   settingsDefinitions: SettingDefinition[];
-  setValidationErrors: React.Dispatch<React.SetStateAction<string[]>>;
   onChange: (key: string, value: string, oldKey?: string) => void;
   onDelete: (key: string, index: number) => void;
+  addValidationError: (key: string) => void;
+  removeValidationError: (key: string) => void;
 }) {
   const agentLanguage = newConfig.agent_name?.split('/')[1] || '';
 
@@ -122,19 +124,21 @@ export function AdvancedConfiguration({
               <AdvancedConfigKeyInput
                 configKey={configKey}
                 index={index}
-                setValidationErrors={setValidationErrors}
                 onChange={(newKey) => onChange(newKey, configValue, configKey)}
                 checkIfAdvancedConfigKeyExists={checkIfAdvancedConfigKeyExists}
                 checkIfPredefinedConfigKeyExists={checkIfPredefinedConfigKeyExists}
+                addValidationError={addValidationError}
+                removeValidationError={removeValidationError}
               />
             </EuiFlexItem>
             <EuiFlexItem>
               <AdvancedConfigValueInput
                 configValue={configValue}
                 index={index}
-                setValidationErrors={setValidationErrors}
                 onChange={(newValue) => onChange(configKey, newValue)}
                 onDelete={() => onDelete(configKey, index)}
+                addValidationError={addValidationError}
+                removeValidationError={removeValidationError}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

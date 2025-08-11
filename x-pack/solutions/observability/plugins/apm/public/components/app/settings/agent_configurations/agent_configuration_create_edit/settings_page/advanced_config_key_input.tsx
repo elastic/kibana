@@ -13,17 +13,19 @@ import { useEffect, useState } from 'react';
 export function AdvancedConfigKeyInput({
   configKey,
   index,
-  setValidationErrors,
   onChange,
   checkIfAdvancedConfigKeyExists,
   checkIfPredefinedConfigKeyExists,
+  addValidationError,
+  removeValidationError,
 }: {
   configKey: string;
   index: number;
-  setValidationErrors: React.Dispatch<React.SetStateAction<string[]>>;
   onChange: (newKey: string) => void;
   checkIfAdvancedConfigKeyExists: (newKey: string, oldKey: string) => boolean;
   checkIfPredefinedConfigKeyExists: (key: string) => boolean;
+  addValidationError: (key: string) => void;
+  removeValidationError: (key: string) => void;
 }) {
   // Handle key inputs with local state to avoid duplicated keys overwriting each other
   const [localKey, setLocalKey] = useState(configKey);
@@ -60,9 +62,9 @@ export function AdvancedConfigKeyInput({
     const errorKey = `key${index}`;
 
     if (Boolean(getErrorMsg(newKey))) {
-      setValidationErrors((prev) => (prev.includes(errorKey) ? prev : [...prev, errorKey]));
+      addValidationError(errorKey);
     } else {
-      setValidationErrors((prev) => prev.filter((error) => error !== errorKey));
+      removeValidationError(errorKey);
       onChange(newKey);
     }
   };

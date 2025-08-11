@@ -13,15 +13,17 @@ import { useState } from 'react';
 export function AdvancedConfigValueInput({
   configValue,
   index,
-  setValidationErrors,
   onChange,
   onDelete,
+  addValidationError,
+  removeValidationError,
 }: {
   configValue: string;
   index: number;
-  setValidationErrors: React.Dispatch<React.SetStateAction<string[]>>;
   onChange: (newValue: string) => void;
   onDelete: () => void;
+  addValidationError: (key: string) => void;
+  removeValidationError: (key: string) => void;
 }) {
   const [touched, setTouched] = useState(false);
 
@@ -35,9 +37,9 @@ export function AdvancedConfigValueInput({
     const errorKey = `value${index}`;
 
     if (isInvalidInput(newValue)) {
-      setValidationErrors((prev) => [...prev, errorKey]);
+      addValidationError(errorKey);
     } else {
-      setValidationErrors((prev) => prev.filter((error) => error !== errorKey));
+      removeValidationError(errorKey);
     }
   };
 

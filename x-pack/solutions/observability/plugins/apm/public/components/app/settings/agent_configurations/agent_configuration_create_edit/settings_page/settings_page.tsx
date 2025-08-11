@@ -62,12 +62,26 @@ export function SettingsPage({
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
   const [removedConfigCount, setRemovedConfigCount] = useState<number>(0);
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [validationErrors, setValidationErrors] = useState<Set<string>>(new Set<string>());
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
   const isLoading = status === FETCH_STATUS.LOADING;
   const isAdvancedConfigSupported =
     newConfig.agent_name && isEDOTAgentName(newConfig.agent_name as AgentName);
-  const isAdvancedConfigInvalid = validationErrors.length > 0;
+  const isAdvancedConfigInvalid = validationErrors.size > 0;
+
+  const addValidationError = (key: string) => {
+    setValidationErrors((prev) => {
+      prev.add(key);
+      return new Set(prev);
+    });
+  };
+
+  const removeValidationError = (key: string) => {
+    setValidationErrors((prev) => {
+      prev.delete(key);
+      return new Set(prev);
+    });
+  };
 
   const settingsDefinitionsByAgent = useMemo(
     () => settingDefinitions.filter(filterByAgent(newConfig.agent_name as AgentName)),
@@ -151,9 +165,8 @@ export function SettingsPage({
     if (newConfig.settings[key] !== undefined) {
       setRemovedConfigCount((prev) => prev + 1);
     }
-    setValidationErrors((prev) =>
-      prev.filter((error) => !error.includes(`key${index}`) && !error.includes(`value${index}`))
-    );
+    removeValidationError(`key${index}`);
+    removeValidationError(`value${index}`);
     setNewConfig((prev) => {
       const { [key]: deleted, ...rest } = prev.settings;
       return {
@@ -270,10 +283,11 @@ export function SettingsPage({
                   <EuiHorizontalRule />
                   <AdvancedConfiguration
                     newConfig={newConfig}
-                    setValidationErrors={setValidationErrors}
                     settingsDefinitions={settingsDefinitionsByAgent}
                     onChange={handleChange}
                     onDelete={handleDelete}
+                    addValidationError={addValidationError}
+                    removeValidationError={removeValidationError}
                   />
                 </>
               )}
