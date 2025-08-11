@@ -101,10 +101,12 @@ export class PrivilegeMonitoringEngineDescriptorClient {
 
   async maybeGet() {
     try {
-      return this.deps.soClient.get<PrivilegedMonitoringEngineDescriptor>(
+      const result = await this.deps.soClient.get<PrivilegedMonitoringEngineDescriptor>(
         privilegeMonitoringTypeName,
         this.getSavedObjectId()
       );
+
+      return result;
     } catch (e) {
       if (e.output && e.output.statusCode === 404) {
         return undefined;
