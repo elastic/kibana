@@ -30,11 +30,6 @@ import { useIntersectingState } from '../../hooks/use_intersecting_state';
 
 const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
-const docViewerFlyoutOverrides = css`
-  .DiscoverFlyout {
-    z-index: 8001 !important;
-  }
-`;
 
 export const Logs = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -128,7 +123,11 @@ export const Logs = () => {
   return (
     <>
       {/* z-index override so DocViewer flyout is being visible */}
-      <Global styles={docViewerFlyoutOverrides} />
+      <Global styles={css`
+          .DiscoverFlyout {
+            z-index: 6000 !important;
+          }
+        `} />
       <EuiFlexGroup direction="column" ref={ref}>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>

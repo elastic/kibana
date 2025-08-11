@@ -31,11 +31,6 @@ import { useViewportDimensions } from '../../../hooks/use_viewport_dimensions';
 
 const MODAL_MARGIN = 25;
 
-const docViewerFlyoutOverrides = css`
-  .DiscoverFlyout {
-    z-index: 9001 !important;
-  }
-`;
 
 export const PageViewLogInContext: React.FC = () => {
   const {
@@ -88,7 +83,13 @@ export const PageViewLogInContext: React.FC = () => {
   return (
     <>
       {/* z-index override so DocViewer flyout is being visible */}
-      <Global styles={docViewerFlyoutOverrides} />
+      <Global
+        styles={css`
+          .DiscoverFlyout {
+            z-index: 6000 !important;
+          }
+        `}
+      />
       <EuiModal onClose={closeModal} maxWidth={false}>
         <LogInContextWrapper width={vw - MODAL_MARGIN * 2} height={vh - MODAL_MARGIN * 2}>
           <EuiFlexGroup direction="column" responsive={false} wrap={false} css={{ height: '100%' }}>
