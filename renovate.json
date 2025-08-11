@@ -176,9 +176,6 @@
     {
       "groupName": "@elastic/appex-ai-infra dependencies",
       "matchDepNames": [
-        "@aws-crypto/sha256-js",
-        "@aws-crypto/util",
-        "@langtrase/trace-attributes",
         "@arizeai/openinference-semantic-conventions",
         "@smithy/eventstream-serde-node",
         "@smithy/node-http-handler",
@@ -511,11 +508,9 @@
         "prop-types",
         "react",
         "react-dom",
-        "react-is",
         "@types/prop-types",
         "@types/react",
         "@types/react-dom",
-        "@types/react-is",
         "csstype"
       ],
       "reviewers": [
@@ -762,7 +757,6 @@
       "groupName": "@elastic/fleet dependencies",
       "matchDepNames": [
         "exponential-backoff",
-        "@paralleldrive/cuid2",
         "isbinaryfile",
         "js-search",
         "openpgp",
@@ -868,8 +862,6 @@
       "matchDepNames": [
         "@formatjs/icu-messageformat-parser",
         "@formatjs/intl",
-        "@formatjs/intl-pluralrules",
-        "@formatjs/intl-relativetimeformat",
         "@formatjs/intl-utils",
         "@formatjs/ts-transformer"
       ],
@@ -897,6 +889,7 @@
         "fetch-mock",
         "fp-ts",
         "getos",
+        "inversify",
         "joi-to-json",
         "@apidevtools/json-schema-ref-parser",
         "@fast-check/jest",
@@ -932,7 +925,6 @@
     {
       "groupName": "ansi related",
       "matchDepNames": [
-        "ansi-regex",
         "has-ansi",
         "strip-ansi",
         "@types/has-ansi"
@@ -1562,26 +1554,6 @@
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
-    },
-    {
-      "groupName": "bazel",
-      "matchDepNames": [],
-      "matchDepPatterns": [
-        "^@bazel"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": false
     },
     {
       "groupName": "typescript",
@@ -2273,8 +2245,6 @@
         "@types/d3-interpolate",
         "@types/d3-scale",
         "@types/d3-selection",
-        "@types/d3-shape",
-        "@types/d3-time",
         "@types/d3-transition",
         "d3",
         "d3-array",
@@ -2282,8 +2252,6 @@
         "d3-interpolate",
         "d3-scale",
         "d3-selection",
-        "d3-shape",
-        "d3-time",
         "d3-transition"
       ],
       "reviewers": [
@@ -2389,6 +2357,7 @@
     {
       "groupName": "workchat gen-ai dependencies",
       "matchDepNames": [
+        "@a2a-js/sdk",
         "@modelcontextprotocol/sdk",
         "@n8n/json-schema-to-zod",
         "expr-eval"
@@ -3278,7 +3247,6 @@
         "i18n-iso-countries",
         "pdf-lib",
         "node-diff3",
-        "re-resizable",
         "react-diff-view",
         "reduce-reducers",
         "snakecase-keys",
@@ -4015,25 +3983,6 @@
       "enabled": true
     },
     {
-      "groupName": "fnv-plus",
-      "matchDepNames": [
-        "fnv-plus",
-        "@types/fnv-plus"
-      ],
-      "reviewers": [
-        "team:obs-ux-infra_services-team"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "hdr-histogram-js",
       "matchDepNames": [
         "hdr-histogram-js"
@@ -4509,7 +4458,8 @@
     {
       "groupName": "Kibana ES|QL Team",
       "matchDepNames": [
-        "recast"
+        "recast",
+        "tree-dump"
       ],
       "reviewers": [
         "team:kibana-esql"
@@ -4558,25 +4508,6 @@
         "Team:Visualizations",
         "release_note:skip",
         "backport:prev-minor"
-      ],
-      "enabled": true
-    },
-    {
-      "groupName": "set-value",
-      "matchDepNames": [
-        "set-value",
-        "@types/set-value"
-      ],
-      "reviewers": [
-        "team:visualizations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open",
-        "Team:Visualizations"
       ],
       "enabled": true
     },

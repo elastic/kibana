@@ -37,7 +37,7 @@ interface Props {
   nodes: SnapshotNode[];
   loading: boolean;
   reload: () => void;
-  onDrilldown: (filter: KueryFilterQuery) => void;
+  onDrilldown: (filter: string) => void;
   currentTime: number;
   view: string;
   boundsOverride: InfraWaffleMapBounds;
@@ -86,10 +86,7 @@ export const NodesOverview = ({
 
   const handleDrilldown = useCallback(
     (filter: string) => {
-      onDrilldown({
-        kind: 'kuery',
-        expression: filter,
-      });
+      onDrilldown(filter);
       return;
     },
     [onDrilldown]
