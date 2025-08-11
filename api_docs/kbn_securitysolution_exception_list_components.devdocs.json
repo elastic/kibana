@@ -1514,7 +1514,7 @@
             "label": "exceptions_list",
             "description": [],
             "signature": [
-              "{ id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }[] | undefined"
+              "{ id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }[] | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
             "deprecated": false,
