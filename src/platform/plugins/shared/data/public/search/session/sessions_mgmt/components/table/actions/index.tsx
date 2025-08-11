@@ -8,4 +8,4 @@
  */
 
 export { PopoverActionsMenu } from './popover_actions';
-export * from './types';
+export type * from './types';
