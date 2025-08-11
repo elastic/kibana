@@ -32,6 +32,7 @@ export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> 
   recentlyClosedItems: TabItem[];
   'data-test-subj'?: string;
   services: TabsServices;
+  hideTabsBar?: boolean;
   renderContent: (selectedItem: TabItem) => React.ReactNode;
   createItem: () => TabItem;
   onChanged: (state: TabbedContentState) => void;
@@ -49,6 +50,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   recentlyClosedItems,
   maxItemsCount,
   services,
+  hideTabsBar = false,
   renderContent,
   createItem,
   onChanged,
@@ -180,25 +182,27 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       gutterSize="none"
       className="eui-fullHeight"
     >
-      <EuiFlexItem grow={false}>
-        <TabsBar
-          ref={tabsBarApi}
-          items={items}
-          selectedItem={selectedItem}
-          recentlyClosedItems={recentlyClosedItems}
-          maxItemsCount={maxItemsCount}
-          tabContentId={tabContentId}
-          getTabMenuItems={getTabMenuItems}
-          services={services}
-          onAdd={onAdd}
-          onLabelEdited={onLabelEdited}
-          onSelect={onSelect}
-          onSelectRecentlyClosed={onSelectRecentlyClosed}
-          onReorder={onReorder}
-          onClose={onClose}
-          getPreviewData={getPreviewData}
-        />
-      </EuiFlexItem>
+      {!hideTabsBar && (
+        <EuiFlexItem grow={false}>
+          <TabsBar
+            ref={tabsBarApi}
+            items={items}
+            selectedItem={selectedItem}
+            recentlyClosedItems={recentlyClosedItems}
+            maxItemsCount={maxItemsCount}
+            tabContentId={tabContentId}
+            getTabMenuItems={getTabMenuItems}
+            services={services}
+            onAdd={onAdd}
+            onLabelEdited={onLabelEdited}
+            onSelect={onSelect}
+            onSelectRecentlyClosed={onSelectRecentlyClosed}
+            onReorder={onReorder}
+            onClose={onClose}
+            getPreviewData={getPreviewData}
+          />
+        </EuiFlexItem>
+      )}
       {selectedItem ? (
         <EuiFlexItem
           data-test-subj="unifiedTabs_selectedTabContent"
