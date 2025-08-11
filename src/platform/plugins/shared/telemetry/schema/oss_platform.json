@@ -10760,12 +10760,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "observability:apmEnableServiceMapApiV2": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "observability:aiAssistantSimulatedFunctionCalling": {
           "type": "boolean",
           "_meta": {
@@ -10794,6 +10788,12 @@
           }
         },
         "onechat:mcp:enabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "onechat:a2a:enabled": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
