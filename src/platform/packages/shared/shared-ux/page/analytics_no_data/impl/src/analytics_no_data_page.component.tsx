@@ -51,10 +51,6 @@ const flavors: {
         description: i18n.translate('sharedUXPackages.noDataConfig.addIntegrationsDescription', {
           defaultMessage: 'Use Elastic Agent to collect data and build out Analytics solutions.',
         }),
-        button: i18n.translate('sharedUXPackages.noDataConfig.addIntegrationsButton', {
-          defaultMessage: 'Browse integrations',
-        }),
-        href: prependBasePath('/app/integrations/browse'),
         'data-test-subj': 'kbnOverviewAddIntegrations',
         docsLink: kibanaGuideDocLink,
       },

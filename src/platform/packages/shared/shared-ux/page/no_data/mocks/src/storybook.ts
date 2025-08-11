@@ -25,10 +25,6 @@ export class NoDataPageStorybookMock extends AbstractStorybookMock<
   PropArguments
 > {
   propArguments = {
-    docsLink: {
-      control: { control: 'text' },
-      defaultValue: 'docs/link',
-    },
     pageTitle: {
       control: { control: 'text' },
       defaultValue: '',

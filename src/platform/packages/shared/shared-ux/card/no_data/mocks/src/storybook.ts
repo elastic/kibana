@@ -79,6 +79,12 @@ export class StorybookMock extends AbstractStorybookMock<
       },
       defaultValue: true,
     },
+    hideActionButton: {
+      control: {
+        control: 'boolean',
+      },
+      defaultValue: false,
+    },
   };
 
   serviceArguments = {
@@ -98,6 +104,7 @@ export class StorybookMock extends AbstractStorybookMock<
       canAccessFleet: this.getArgumentValue('canAccessFleet', params),
       href: this.getArgumentValue('href', params),
       docsLink: this.getArgumentValue('docsLink', params),
+      hideActionButton: this.getArgumentValue('hideActionButton', params),
     };
   }
 

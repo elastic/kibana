@@ -31,7 +31,7 @@ export const _KibanaPageTemplate: FC<KibanaPageTemplateProps> = ({
   if (noDataConfig && solutionNav) {
     return (
       <NoDataConfigPageWithSolutionNavBar
-        data-test-subj="noDataConfigPageWithSolutionNavBar"
+        data-test-subj={rest['data-test-subj']}
         className={className}
         noDataConfig={noDataConfig}
         solutionNav={solutionNav}
@@ -42,7 +42,7 @@ export const _KibanaPageTemplate: FC<KibanaPageTemplateProps> = ({
   if (noDataConfig) {
     return (
       <NoDataConfigPage
-        data-test-subj="noDataConfigPage"
+        data-test-subj={rest['data-test-subj']}
         className={className}
         noDataConfig={noDataConfig}
       />

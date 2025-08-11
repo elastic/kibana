@@ -11,6 +11,7 @@ import React from 'react';
 import { EuiButton, EuiPageTemplate, EuiTitle, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { NoDataCardComponentProps as Props } from '@kbn/shared-ux-card-no-data-types';
 import { ElasticAgentCardIllustration } from './elastic_agent_card_illustration';
 
@@ -50,8 +51,13 @@ export const NoDataCard = ({
   hideActionButton = false,
   'data-test-subj': dataTestSubj = 'noDataCard',
 }: Props) => {
+  const { services } = useKibana();
+  const basePath = services?.http?.basePath;
+
   const cardIcon = icon ? icon : <ElasticAgentCardIllustration />;
   const docsLink = link || 'https://www.elastic.co/kibana';
+  const buttonHref = href || basePath?.prepend('/app/integrations/browse');
+
   const renderDescription = (content: React.ReactNode, fallback: string) => {
     if (typeof content === 'string') {
       return <p>{content}</p>;
@@ -82,7 +88,7 @@ export const NoDataCard = ({
           <EuiButton
             color="primary"
             fill
-            href={href}
+            href={buttonHref}
             data-test-subj="noDataDefaultActionButton"
             onClick={onClick || (() => {})}
           >
