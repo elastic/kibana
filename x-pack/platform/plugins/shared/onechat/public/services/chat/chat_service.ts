@@ -42,6 +42,9 @@ export class ChatService {
         asResponse: true,
         rawResponse: true,
         body: JSON.stringify(payload),
+        headers: {
+          'X-Elastic-Product-Use-Case': 'one_chat',
+        },
       });
     }).pipe(
       // @ts-expect-error SseEvent mixin issue
