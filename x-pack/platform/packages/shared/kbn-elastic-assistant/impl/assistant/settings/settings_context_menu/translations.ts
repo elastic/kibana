@@ -111,9 +111,15 @@ export const COPY_URL = i18n.translate(
     defaultMessage: 'Copy URL',
   }
 );
-export const ARCHIVE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.conversation.archive',
+export const COPY_URL_SUCCESS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.conversation.copySuccess',
   {
-    defaultMessage: 'Archive',
+    defaultMessage: 'Conversation URL copied to clipboard',
+  }
+);
+export const COPY_URL_ERROR = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.conversation.copyError',
+  {
+    defaultMessage: 'Could not copy conversation URL',
   }
 );

@@ -55,6 +55,7 @@ const ConditionalWrap = ({
 export const ConversationSettingsMenu: React.FC<Params> = React.memo(
   ({ isConversationOwner, isDisabled = false, onChatCleared, selectedConversation }: Params) => {
     const confirmModalTitleId = useGeneratedHtmlId();
+    const { http, toasts } = useAssistantContext();
     const { euiTheme } = useEuiTheme();
     const {
       setContentReferencesVisible,
@@ -111,6 +112,32 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
       [selectedConversation]
     );
 
+    const handleCopyUrl = useCallback(() => {
+      try {
+        if (!selectedConversation) {
+          throw new Error('No conversation id available to copy');
+        }
+        const conversationUrl = http?.basePath.prepend(
+          `/app/security/get_started?assistant=${selectedConversation.id}`
+        );
+
+        if (!conversationUrl) {
+          throw new Error('Conversation URL does not exist');
+        }
+
+        const urlToCopy = new URL(conversationUrl, window.location.origin).toString();
+        navigator.clipboard?.writeText(urlToCopy);
+
+        toasts?.addSuccess({
+          title: i18n.COPY_URL_SUCCESS,
+        });
+      } catch (error) {
+        toasts?.addError(error, {
+          title: i18n.COPY_URL_ERROR,
+        });
+      }
+    }, [selectedConversation]);
+
     const items = useMemo(
       () => [
         <EuiContextMenuItem
@@ -129,9 +156,7 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
           key={'copy-url'}
           icon={'documents'}
           data-test-subj={'copy-url'}
-          onClick={() => {
-            console.log('copy-url');
-          }}
+          onClick={handleCopyUrl}
         >
           {i18n.COPY_URL}
         </EuiContextMenuItem>,

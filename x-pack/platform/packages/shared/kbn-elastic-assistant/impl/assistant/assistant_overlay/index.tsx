@@ -82,7 +82,6 @@ export const AssistantOverlay = React.memo(() => {
 
   const handleOpenFromUrlState = useCallback(
     (id: string) => {
-      // Try to restore the last conversation on shortcut pressed
       if (!isModalVisible) {
         setSelectedConversation(getLastConversation({ id }));
         assistantTelemetry?.reportAssistantInvoked({
@@ -97,10 +96,10 @@ export const AssistantOverlay = React.memo(() => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const assistantId = params.get('assistant');
-    if (assistantId) {
+    if (assistantId && !isModalVisible) {
       handleOpenFromUrlState(assistantId);
     }
-  }, []);
+  }, [handleOpenFromUrlState, isModalVisible]);
 
   // Register keyboard listener to show the modal when cmd + ; is pressed
   const onKeyDown = useCallback(
