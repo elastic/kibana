@@ -18,6 +18,7 @@ import {
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
+import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';
 
 export const listUsersRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -48,7 +49,10 @@ export const listUsersRoute = (router: EntityAnalyticsRoutesDeps['router'], logg
           );
 
           const secSol = await context.securitySolution;
-          const body = await secSol.getPrivilegeMonitoringDataClient().listUsers(request.query.kql);
+          const dataClient = secSol.getPrivilegeMonitoringDataClient();
+          const crudService = createPrivilegedUsersCrudService(dataClient);
+
+          const body = await crudService.list(request.query.kql);
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
