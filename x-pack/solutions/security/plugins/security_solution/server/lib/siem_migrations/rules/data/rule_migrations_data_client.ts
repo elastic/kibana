@@ -11,9 +11,8 @@ import { RuleMigrationsDataPrebuiltRulesClient } from './rule_migrations_data_pr
 import { RuleMigrationsDataResourcesClient } from './rule_migrations_data_resources_client';
 import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
 import { RuleMigrationsDataLookupsClient } from './rule_migrations_data_lookups_client';
-import type { RuleMigrationIndexNameProviders } from '../types';
+import type { RuleMigrationIndexNameProviders, RuleMigrationsClientDependencies } from '../types';
 import { RuleMigrationsDataMigrationClient } from './rule_migrations_data_migration_client';
-import type { SiemMigrationsClientDependencies } from '../../common/types';
 
 export class RuleMigrationsDataClient {
   protected logger: Logger;
@@ -32,7 +31,7 @@ export class RuleMigrationsDataClient {
     esScopedClient: IScopedClusterClient,
     logger: Logger,
     spaceId: string,
-    dependencies: SiemMigrationsClientDependencies
+    dependencies: RuleMigrationsClientDependencies
   ) {
     this.migrations = new RuleMigrationsDataMigrationClient(
       indexNameProviders.migrations,
