@@ -10,6 +10,7 @@
 import { monaco } from '@kbn/monaco';
 import { ConnectorContract, generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { getCompletionItemProvider, parseLineForCompletion } from './get_completion_item_provider';
+import { z } from '@kbn/zod';
 
 // Mock Monaco editor model
 const createMockModel = (value: string, cursorOffset: number) => {
@@ -48,16 +49,48 @@ const createMockModel = (value: string, cursorOffset: number) => {
   };
 };
 
+function testCompletion(
+  completionProvider: monaco.languages.CompletionItemProvider,
+  yamlContent: string,
+  expectedSuggestions: string[]
+) {
+  const cursorOffset = yamlContent.indexOf('|<-');
+  const mockModel = createMockModel(yamlContent, cursorOffset);
+  const position = mockModel.getPositionAt(cursorOffset);
+  const triggerCharacter = yamlContent.slice(cursorOffset - 1, cursorOffset);
+
+  const result = completionProvider.provideCompletionItems(
+    mockModel as any,
+    position as any,
+    {
+      triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+      triggerCharacter,
+    } as any,
+    {} as any // cancellation token
+  );
+
+  // Handle both sync and async returns
+  const completionList = result as monaco.languages.CompletionList;
+  expect(completionList?.suggestions).toBeDefined();
+  expect(completionList?.suggestions.length).toBeGreaterThan(0);
+
+  // Should include basic context items
+  const labels =
+    completionList?.suggestions.map((s: monaco.languages.CompletionItem) => s.label) || [];
+  // checking for sorted arrays to avoid flakiness, since the order of suggestions is not guaranteed
+  expect(labels.sort()).toEqual(expectedSuggestions.sort());
+}
+
 describe('getCompletionItemProvider', () => {
   const mockConnectors: ConnectorContract[] = [
     {
       type: 'console.log',
-      params: [
-        {
-          name: 'message',
-          type: 'string',
-        },
-      ],
+      paramsSchema: z.object({
+        message: z.string(),
+      }),
+      outputSchema: z.object({
+        message: z.string(),
+      }),
     },
   ];
 
@@ -65,44 +98,117 @@ describe('getCompletionItemProvider', () => {
   const completionProvider = getCompletionItemProvider(workflowSchema);
 
   describe('Integration tests', () => {
-    it('should provide basic completions', () => {
+    it('should provide basic completions with mustache', () => {
       const yamlContent = `
 version: "1"
 name: "test"
 consts:
   apiUrl: "https://api.example.com"
 steps:
-  - name: "step1"
-    type: "console.log"  
+  - name: step1
+    type: console.log  
     with:
-      message: "{{ }}"
+      message: "{{<-}}"
+`.trim();
+      testCompletion(completionProvider, yamlContent, ['consts']);
+    });
+
+    it('should provide basic completions with @', () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: step1
+    type: console.log  
+    with:
+      message: "@<-"
 `.trim();
 
-      // Position cursor inside the mustache template
-      const cursorOffset = yamlContent.indexOf('{{ }}') + 3;
-      const mockModel = createMockModel(yamlContent, cursorOffset);
-      const position = mockModel.getPositionAt(cursorOffset);
+      testCompletion(completionProvider, yamlContent, ['consts']);
+    });
 
-      const result = completionProvider.provideCompletionItems(
-        mockModel as any,
-        position as any,
-        {
-          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
-          triggerCharacter: '{',
-        } as any,
-        {} as any // cancellation token
-      );
+    it('should provide const completion', () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: step1
+    type: console.log  
+    with:
+      message: "{{consts.|<-}}"
+`.trim();
 
-      // Handle both sync and async returns
-      const completionList = result as monaco.languages.CompletionList;
-      expect(completionList?.suggestions).toBeDefined();
-      expect(completionList?.suggestions.length).toBeGreaterThan(0);
+      testCompletion(completionProvider, yamlContent, ['apiUrl']);
+    });
 
-      // Should include basic context items
-      const labels =
-        completionList?.suggestions.map((s: monaco.languages.CompletionItem) => s.label) || [];
-      expect(labels).toContain('consts');
-      expect(labels).toContain('steps');
+    it('should provide previous step completion', () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: step0
+    type: console.log  
+    with:
+      message: "hello"
+  - name: step1
+    type: console.log  
+    with:
+      message: "{{steps.|<-}}"
+`.trim();
+
+      testCompletion(completionProvider, yamlContent, ['step0']);
+    });
+
+    it('should not provide unreachable step', () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: if-step
+    type: if
+    with:
+      condition: "{{steps.step0.output.message == 'hello'}}"
+    steps:
+      - name: first-true-step
+        type: console.log  
+        with:
+          message: "im true"
+      - name: second-true-step
+        type: console.log  
+        with:
+          message: "im true, {{steps.|<-}}"
+    else:
+      - name: false-step
+        type: console.log  
+        with:
+          message: "im unreachable"
+`.trim();
+
+      testCompletion(completionProvider, yamlContent, ['if-step', 'first-true-step']);
+    });
+
+    it('should autocomplete incomplete key', () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: step0
+    type: console.log  
+    with:
+      message: "{{consts.a|<-}}"
+`.trim();
+
+      testCompletion(completionProvider, yamlContent, ['apiUrl']);
     });
   });
 
@@ -110,25 +216,25 @@ steps:
     describe('@ trigger scenarios', () => {
       it('should parse @ trigger without key', () => {
         const result = parseLineForCompletion('message: "@');
-        expect(result.matchType).toBe('at-trigger');
+        expect(result.matchType).toBe('at');
         expect(result.fullKey).toBe('');
       });
 
       it('should parse @ trigger with simple key', () => {
         const result = parseLineForCompletion('message: "@consts');
-        expect(result.matchType).toBe('at-trigger');
+        expect(result.matchType).toBe('at');
         expect(result.fullKey).toBe('consts');
       });
 
       it('should parse @ trigger with dotted path', () => {
         const result = parseLineForCompletion('message: "@steps.step1');
-        expect(result.matchType).toBe('at-trigger');
+        expect(result.matchType).toBe('at');
         expect(result.fullKey).toBe('steps.step1');
       });
 
       it('should parse @ trigger with trailing dot', () => {
         const result = parseLineForCompletion('message: "@consts.');
-        expect(result.matchType).toBe('at-trigger');
+        expect(result.matchType).toBe('at');
         expect(result.fullKey).toBe('consts');
       });
     });
@@ -176,7 +282,7 @@ steps:
     describe('priority handling', () => {
       it('should prioritize @ trigger over mustache', () => {
         const result = parseLineForCompletion('{{ consts.old }} @steps');
-        expect(result.matchType).toBe('at-trigger');
+        expect(result.matchType).toBe('at');
         expect(result.fullKey).toBe('steps');
       });
 

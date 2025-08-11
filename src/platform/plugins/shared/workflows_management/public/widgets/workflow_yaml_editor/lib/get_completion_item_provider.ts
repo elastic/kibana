@@ -19,7 +19,7 @@ import { getSchemaAtPath, parsePath } from '../../../../common/lib/zod_utils';
 export interface LineParseResult {
   fullKey: string;
   pathSegments: string[] | null;
-  matchType: 'at-trigger' | 'mustache-complete' | 'mustache-unfinished' | null;
+  matchType: 'at' | 'bracket-unfinished' | 'mustache-complete' | 'mustache-unfinished' | null;
   match: RegExpMatchArray | null;
 }
 
@@ -40,7 +40,7 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
     return {
       fullKey,
       pathSegments: parsePath(fullKey),
-      matchType: 'at-trigger',
+      matchType: 'at',
       match: atMatch,
     };
   }
@@ -77,38 +77,34 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   };
 }
 
-export function getDetail(fullKey: string, insertText: string) {
-  if (insertText.endsWith('output')) {
-    return 'Step output';
-  }
-  if (insertText.includes('steps')) {
-    return 'State of previous steps';
-  }
-  if (insertText.includes('consts')) {
-    return 'Workflow constants';
-  }
-  return undefined;
-}
-
 export function getSuggestion(
-  fullKey: string,
+  parseResult: LineParseResult,
   key: string,
   context: monaco.languages.CompletionContext,
   range: monaco.IRange,
-  type: string
+  type: string,
+  description?: string
 ): monaco.languages.CompletionItem {
-  const isAt = ['@'].includes(context.triggerCharacter ?? '');
+  const isAt = context.triggerCharacter === '@';
+  const isBracket = context.triggerCharacter === '{';
+  let insertText = key;
+  let insertTextRules = monaco.languages.CompletionItemInsertTextRule.None;
+  if (isAt) {
+    insertText = `{{ ${key}$0 }}`;
+    insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+  } else if (isBracket) {
+    // monaco-editor automatically adds a closing bracket, so we need to add only inner brackets
+    insertText = `{ ${key}$0 }`;
+    insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+  }
   // $0 is the cursor position
-  const insertText = isAt ? `{{ ${key}$0 }}` : key;
   return {
     label: key,
     kind: monaco.languages.CompletionItemKind.Field,
     range,
     insertText,
-    detail: type,
-    insertTextRules: isAt
-      ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-      : monaco.languages.CompletionItemInsertTextRule.None,
+    detail: `${type}` + (description ? `: ${description}` : ''),
+    insertTextRules,
     additionalTextEdits: isAt
       ? [
           {
@@ -130,7 +126,7 @@ export function getCompletionItemProvider(
   workflowYamlSchema: z.ZodSchema
 ): monaco.languages.CompletionItemProvider {
   return {
-    triggerCharacters: ['@', '.', '{'],
+    triggerCharacters: ['@', '.'],
     provideCompletionItems: (model, position, completionContext) => {
       try {
         const { lineNumber } = position;
@@ -185,11 +181,12 @@ export function getCompletionItemProvider(
           const current = getSchemaAtPath(context, key);
           suggestions.push(
             getSuggestion(
-              parseResult.fullKey,
+              parseResult,
               key,
               completionContext,
               range,
-              (current?._def as any)?.typeName?.toLowerCase().replace('zod', '') || ''
+              (current?._def as any)?.typeName?.toLowerCase().replace('zod', '') || '',
+              current.description
             )
           );
         });

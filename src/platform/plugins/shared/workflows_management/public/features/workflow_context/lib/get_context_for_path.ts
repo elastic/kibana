@@ -75,11 +75,20 @@ export function getContextSchemaForPath(
     return rootContextSchema;
   }
   const nearestStep = _.get(definition, nearestStepPath);
+  let contextSchema = rootContextSchema;
   if (!nearestStep) {
     throw new Error(`Invalid path: ${path.join('.')}`);
   }
-  return rootContextSchema.extend({
-    foreach: nearestStep?.foreach ? z.object({ item: z.any() }) : z.undefined(),
-    steps: getAvailableOutputsSchema(definition, workflowGraph, nearestStep.name) ?? {},
-  });
+  if (nearestStep.foreach) {
+    contextSchema = contextSchema.extend({
+      foreach: z.object({ item: z.any() }).describe('Current item of the foreach loop'),
+    });
+  }
+  const outputsSchema = getAvailableOutputsSchema(definition, workflowGraph, nearestStep.name);
+  if (outputsSchema) {
+    contextSchema = contextSchema.extend({
+      steps: outputsSchema.describe('Outputs of previous steps'),
+    });
+  }
+  return contextSchema;
 }
