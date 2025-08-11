@@ -15,7 +15,7 @@ import {
   randomIngestPipeline,
   taskHasRun,
   waitFor,
-} from '../../../../common/utils/security_solution';
+} from '../../../config/services/detections_response';
 
 const TASK_ID = 'security:ingest-pipelines-stats-telemetry:1.0.0';
 const INGEST_PIPELINES_STATS_EBT = 'telemetry_node_ingest_pipelines_stats_event';

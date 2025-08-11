@@ -68,6 +68,7 @@ export const accordionCss = css`
     display: inline-flex;
   }
 `;
+
 export function isProviderForSolutions(
   filterBySolution: SolutionView,
   provider: InferenceProvider
@@ -477,17 +478,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
   return !isLoading ? (
     <>
-      <UseField
-        path="config.provider"
-        config={{
-          validations: [
-            {
-              validator: fieldValidators.emptyField(LABELS.PROVIDER_REQUIRED),
-              isBlocking: true,
-            },
-          ],
-        }}
-      >
+      <UseField path="config.provider" config={providerConfigConfig}>
         {(field) => {
           const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
           const selectInput = providerSuperSelect(isInvalid);

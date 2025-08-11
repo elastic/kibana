@@ -81,17 +81,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
             />
           </EuiText>
           <EuiSpacer size="m" />
-          <UseField
-            path="config.taskType"
-            config={{
-              validations: [
-                {
-                  validator: fieldValidators.emptyField(LABELS.getRequiredMessage('Task type')),
-                  isBlocking: true,
-                },
-              ],
-            }}
-          >
+          <UseField path="config.taskType" config={taskTypeConfig}>
             {(field) => {
               const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
