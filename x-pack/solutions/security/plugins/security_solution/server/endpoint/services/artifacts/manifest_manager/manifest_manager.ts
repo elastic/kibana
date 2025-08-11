@@ -654,7 +654,7 @@ export class ManifestManager {
     const results = await Promise.all([
       this.buildExceptionListArtifacts(allPolicyIds),
       this.buildTrustedAppsArtifacts(allPolicyIds),
-      ...(this.experimentalFeatures.trustedDevicesEnabled
+      ...(this.experimentalFeatures.trustedDevices
         ? [this.buildTrustedDevicesArtifacts(allPolicyIds)]
         : []),
       this.buildEventFiltersArtifacts(allPolicyIds),
