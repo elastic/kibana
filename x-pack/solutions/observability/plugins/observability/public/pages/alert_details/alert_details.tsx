@@ -205,7 +205,7 @@ export function AlertDetails() {
 
   // This is the time range that will be used to open the dashboards
   // in the related dashboards tab
-  const alertTimeRange = useMemo(() => {
+  const dashboardTimeRange = useMemo(() => {
     return {
       from: moment(alertDetail?.formatted.start).subtract(30, 'minutes').toISOString(),
       to: moment(alertDetail?.formatted.start).add(30, 'minutes').toISOString(),
@@ -315,7 +315,7 @@ export function AlertDetails() {
         isLoadingRelatedDashboards={isLoadingRelatedDashboards}
         rule={rule}
         onSuccessAddSuggestedDashboard={onSuccessAddSuggestedDashboard}
-        timeRange={alertTimeRange}
+        timeRange={dashboardTimeRange}
       />
     ) : (
       <EuiLoadingSpinner />
