@@ -52,6 +52,7 @@ import {
 import { ConfigurationFormItems } from './configuration/configuration_form_items';
 import { MoreOptionsFields } from './more_options_fields';
 import { AdditionalOptionsFields } from './additional_options_fields';
+import { AuthenticationFormItems } from './configuration/authentication_form_items';
 import { ProviderSecretHiddenField } from './hidden_fields/provider_secret_hidden_field';
 import { ProviderConfigHiddenField } from './hidden_fields/provider_config_hidden_field';
 import { useProviders } from '../hooks/use_providers';
@@ -541,6 +542,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           </EuiTitle>
           <EuiSpacer size="m" />
           <ConfigurationFormItems
+            dataTestSubj="configuration-fields"
             isLoading={false}
             direction="column"
             descriptionLinks={serviceProviderLinkComponents[config.provider as ServiceProviderKeys]}
@@ -564,26 +566,12 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           {/* AUTHENTICATION */}
           {authenticationFormFields.length > 0 ? (
             <>
-              <EuiTitle size="xxs" data-test-subj="authentication-label">
-                <h4>
-                  <FormattedMessage
-                    id="xpack.inferenceEndpointUICommon.components.authenticationLabel"
-                    defaultMessage="Authentication"
-                  />
-                </h4>
-              </EuiTitle>
-              <EuiSpacer size="m" />
-              <ConfigurationFormItems
+              <AuthenticationFormItems
                 isLoading={false}
-                direction="column"
-                descriptionLinks={
-                  serviceProviderLinkComponents[config.provider as ServiceProviderKeys]
-                }
                 items={authenticationFormFields}
                 setConfigEntry={onSetProviderConfigEntry}
                 isEdit={isEdit}
                 isPreconfigured={isPreconfigured}
-                isInternalProvider={isInternalProvider}
               />
               <EuiHorizontalRule margin="m" />
             </>
