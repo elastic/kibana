@@ -39,6 +39,14 @@ export const createDimensions = async ({
   if (!dimensions || dimensions.length === 0) {
     return [];
   }
+
+  if (dimensions.length > 10) {
+    logger.error(
+      `Too many dimensions requested, maximum is 10 and the requested dimensions are: ${dimensions.length}`
+    );
+    return [];
+  }
+
   const timeRangeFilter: QueryDslQueryContainer[] = [];
 
   if (from && to) {

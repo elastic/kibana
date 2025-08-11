@@ -16,7 +16,7 @@ export const dimensionsApi = createRoute({
   security: { authz: { requiredPrivileges: ['read'] } },
   params: z.object({
     body: z.object({
-      dimensions: z.array(z.string()),
+      dimensions: z.array(z.string()).max(10),
       indices: z.array(z.string()).optional(),
       from: z.string().optional(),
       to: z.string().optional(),
@@ -28,6 +28,13 @@ export const dimensionsApi = createRoute({
 
     if (!dimensions || dimensions.length === 0) {
       return { values: [] };
+    }
+
+    if (dimensions.length > 10) {
+      logger.error(
+        `Too many dimensions requested, maximum is 10 and the requested dimensions are: ${dimensions.length}`
+      );
+      return { values: [], error: `Too many dimensions requested, maximum is 10` };
     }
 
     const values = await createDimensions({
