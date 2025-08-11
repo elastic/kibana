@@ -17,23 +17,22 @@ export const evaluate = base.extend<
   onechatSetup: [
     async ({ fetch, log }, use) => {
       // Ensure OneChat API is enabled before running the evaluation
-
       const currentSettings = (await fetch('/internal/kibana/settings')) as any;
-      const oneChatApiFlagKey = 'onechat:api:enabled';
-      const isOnechatEnabled = currentSettings?.settings?.[oneChatApiFlagKey]?.userValue === true;
+      const isOnechatEnabled =
+        currentSettings?.settings?.['onechat:api:enabled']?.userValue === true;
 
       if (isOnechatEnabled) {
-        log.info('OneChat API is already enabled');
+        log.debug('OneChat API is already enabled');
       } else {
         await fetch('/internal/kibana/settings', {
           method: 'POST',
           body: JSON.stringify({
             changes: {
-              [oneChatApiFlagKey]: true,
+              ['onechat:api:enabled']: true,
             },
           }),
         });
-        log.info('OneChat API enabled for the evaluation');
+        log.debug('OneChat API enabled for the evaluation');
       }
 
       await use();
