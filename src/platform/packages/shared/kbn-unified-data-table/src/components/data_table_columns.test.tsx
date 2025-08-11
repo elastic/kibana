@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { getVisibleColumns } from '@kbn/discover-utils';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { deserializeHeaderRowHeight, getEuiGridColumns } from './data_table_columns';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { dataTableContextMock } from '../../__mocks__/table_context';
@@ -262,7 +263,7 @@ describe('Data table columns', function () {
       expect(gridColumns[1].isSortable).toBe(true);
     });
 
-    it('should not enable sorting on json columns', async () => {
+    it('should not allow sorting on json columns', async () => {
       const gridColumns = getEuiGridColumns({
         columns: ['geo.coordinates'],
         settings: {},
@@ -288,6 +289,62 @@ describe('Data table columns', function () {
       });
       expect(gridColumns[0].schema).toBe(kibanaJSON);
       expect(gridColumns[0].isSortable).toBe(false);
+    });
+
+    it('should allow sorting on version columns', async () => {
+      const gridColumns = getEuiGridColumns({
+        columns: ['stack_version'],
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        columnsMeta: {
+          stack_version: { type: 'version' as DatatableColumnType },
+        },
+        onResize: () => {},
+        cellActionsHandling: 'replace',
+      });
+      expect(gridColumns[0].schema).toBe(kibanaJSON);
+      expect(gridColumns[0].isSortable).toBe(true);
+    });
+
+    it('should allow sorting on ip columns', async () => {
+      const gridColumns = getEuiGridColumns({
+        columns: ['ip_address'],
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        columnsMeta: {
+          ip_address: { type: 'ip' },
+        },
+        onResize: () => {},
+        cellActionsHandling: 'replace',
+      });
+      expect(gridColumns[0].schema).toBe('numeric');
+      expect(gridColumns[0].isSortable).toBe(true);
     });
 
     it('returns eui grid with in memory sorting for text based languages and columns not on the columnsMeta', async () => {
