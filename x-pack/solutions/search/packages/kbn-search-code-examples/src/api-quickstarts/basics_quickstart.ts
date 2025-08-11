@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// TODO: get docs team approval on the copy
 export const basicsQuickstartCommands: string = `# Welcome to the Elasticsearch Basics Quickstart!
 # This quickstart will guide you through the fundamental operations in Elasticsearch
 # using API calls from within the Kibana Dev console.
