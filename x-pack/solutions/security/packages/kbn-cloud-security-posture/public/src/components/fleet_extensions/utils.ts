@@ -351,7 +351,7 @@ export const getInputHiddenVars = (
     case AZURE_PROVIDER:
       return {
         'azure.credentials.type': {
-          value: getDefaultAzureCredentialsType(packageInfo, setupTechnology),
+          value: getDefaultAzureCredentialsType(packageInfo, templateName, setupTechnology),
           type: 'text',
         },
       };
@@ -409,7 +409,7 @@ export const getArmTemplateUrlFromPackage = (
 export const getDefaultAzureCredentialsType = (
   packageInfo: PackageInfo,
   templateName: string,
-  setupTechnology?: SetupTechnology
+  setupTechnology: SetupTechnology
 ): string => {
   if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
     return AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET;
