@@ -26,6 +26,9 @@ import {
   groupAlertsBy,
   selectNumberOfAlerts,
 } from '../../../../tasks/alerts';
+import {
+  IS_SERVERLESS,
+} from '../../../../env_var_names_constants';
 
 describe(
   'Alert suppression - advanced settings',
@@ -45,6 +48,10 @@ describe(
 
       waitForAlertsToPopulate();
     };
+
+    const doLogin = () => {
+      login( Cypress.env(IS_SERVERLESS) ? 'admin' : undefined )
+    }
 
     const headings: Record<SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM, string> = {
       [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow]:
@@ -78,7 +85,7 @@ describe(
 
       describe(`when set to ${SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow}`, () => {
         beforeEach(() => {
-          login('admin');
+          doLogin();
           selectSuppressionBehaviorOnAlertClosure(
             SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow
           );
@@ -115,7 +122,7 @@ describe(
 
       describe(`when set to ${SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow}`, () => {
         beforeEach(() => {
-          login('admin');
+          doLogin();
           selectSuppressionBehaviorOnAlertClosure(
             SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow
           );
@@ -152,7 +159,7 @@ describe(
 
       describe('modal display', () => {
         beforeEach(() => {
-          login('admin');
+          doLogin();
           selectSuppressionBehaviorOnAlertClosure(
             SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow
           );
