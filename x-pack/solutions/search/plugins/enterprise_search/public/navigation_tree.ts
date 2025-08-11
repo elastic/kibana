@@ -88,7 +88,7 @@ export const getNavigationTreeDefinition = ({
                   title,
                   icon,
                   renderAs: 'home',
-                  sideNavStatus: 'hiddenV1',
+                  sideNavVersion: 'v2',
                 },
                 {
                   getIsActive: ({ pathNameSerialized, prepend }) => {
@@ -101,7 +101,7 @@ export const getNavigationTreeDefinition = ({
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.home', {
                     defaultMessage: 'Home',
                   }),
-                  sideNavStatus: 'hiddenV2',
+                  sideNavVersion: 'v1',
                 },
                 {
                   link: 'discover',

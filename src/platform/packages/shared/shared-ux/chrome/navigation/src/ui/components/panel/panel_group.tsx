@@ -69,7 +69,7 @@ const someChildIsVisible = (children: ChromeProjectNavigationNode[]) => {
     if (child.renderAs === 'item') return true;
     if (child.children) {
       return child.children.every(
-        ({ sideNavStatus }) => sideNavStatus !== 'hidden' && sideNavStatus !== 'hiddenV1'
+        ({ sideNavStatus, sideNavVersion }) => sideNavStatus !== 'hidden' && sideNavVersion !== 'v2'
       );
     }
     return true;
@@ -85,7 +85,7 @@ interface Props {
 export const PanelGroup: FC<Props> = ({ navNode, parentId, nodeIndex }) => {
   const { id, title, spaceBefore: _spaceBefore, withBadge } = navNode;
   const filteredChildren = navNode.children?.filter(
-    (child) => child.sideNavStatus !== 'hidden' && child.sideNavStatus !== 'hiddenV1'
+    (child) => child.sideNavStatus !== 'hidden' && child.sideNavVersion !== 'v2'
   );
   const hasTitle = !!title && title !== '';
 

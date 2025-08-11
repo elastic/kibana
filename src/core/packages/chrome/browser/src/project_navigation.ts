@@ -102,7 +102,9 @@ export type CloudLinks = {
   [id in CloudLinkId]?: CloudLink;
 };
 
-export type SideNavNodeStatus = 'hidden' | 'hiddenV1' | 'hiddenV2' | 'visible';
+export type SideNavNodeStatus = 'hidden' | 'visible';
+
+export type SideNavVersion = 'v1' | 'v2';
 
 export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item' | 'home';
 
@@ -147,6 +149,11 @@ interface NodeDefinitionBase {
    * @default 'visible'
    */
   sideNavStatus?: SideNavNodeStatus;
+  /**
+   * Optional version to specify which side navigation version this node is intended for.
+   * This allows for version-specific rendering behavior.
+   */
+  sideNavVersion?: SideNavVersion;
   /**
    * Optional function to get the active state. This function is called whenever the location changes.
    */

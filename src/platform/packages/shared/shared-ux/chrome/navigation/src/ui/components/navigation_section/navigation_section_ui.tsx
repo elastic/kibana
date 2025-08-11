@@ -44,7 +44,7 @@ const nodeHasChildren = (navNode: ChromeProjectNavigationNode) => Boolean(navNod
 
 /** Predicate to determine if a node should be visible in the main side nav.*/
 const itemIsVisible = (item: ChromeProjectNavigationNode) => {
-  if (item.sideNavStatus === 'hidden' || item.sideNavStatus === 'hiddenV1') return false;
+  if (item.sideNavStatus === 'hidden' || item.sideNavVersion === 'v2') return false;
 
   if (item.renderItem) return true;
 

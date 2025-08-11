@@ -28,7 +28,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
           title: SOLUTION_NAME,
           icon: 'logoSecurity',
           renderAs: 'home',
-          sideNavStatus: 'hiddenV1',
+          sideNavVersion: 'v2',
         },
         {
           link: 'discover',

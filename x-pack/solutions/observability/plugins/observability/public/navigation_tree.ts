@@ -32,14 +32,14 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
         children: [
           {
             link: 'observability-overview',
-            sideNavStatus: 'hiddenV1',
             title,
             icon,
             renderAs: 'home',
+            sideNavVersion: 'v2',
           },
           {
             link: 'observability-overview',
-            sideNavStatus: 'hiddenV2',
+            sideNavVersion: 'v1',
           },
           {
             title: i18n.translate('xpack.observability.obltNav.discover', {

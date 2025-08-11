@@ -125,7 +125,7 @@ export const toNavigationItems = (
       return null;
     }
 
-    if (navNode.sideNavStatus === 'hidden' || navNode.sideNavStatus === 'hiddenV2') {
+    if (navNode.sideNavStatus === 'hidden' || navNode.sideNavVersion === 'v1') {
       return null;
     }
 
@@ -170,7 +170,7 @@ export const toNavigationItems = (
       children: ChromeProjectNavigationNode[]
     ): ChromeProjectNavigationNode[] => {
       return children
-        .filter((child) => child.sideNavStatus !== 'hidden' && child.sideNavStatus !== 'hiddenV2')
+        .filter((child) => child.sideNavStatus !== 'hidden' && child.sideNavVersion !== 'v1')
         .filter((child) => {
           const isCustomRender = typeof child.renderItem === 'function';
           if (isCustomRender) {
@@ -225,7 +225,7 @@ export const toNavigationItems = (
         // Otherwise, we need to create sections for each child
         secondarySections = filterEmpty(
           navNode.children.map((child) => {
-            if (child.sideNavStatus === 'hidden' || child.sideNavStatus === 'hiddenV2') return null;
+            if (child.sideNavStatus === 'hidden' || child.sideNavVersion === 'v1') return null;
             if (!child.children?.length) return null;
 
             warnUnsupportedNavNodeOptions(child);
