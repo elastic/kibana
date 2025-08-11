@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { useDismissableTour } from '../../../../../../hooks/use_dismissable_tour';
+import { useGlobalFleetTours } from '../../../../../../hooks';
 
 import { useLastSeenInactiveAgentsCount } from '../hooks';
 
@@ -84,41 +84,48 @@ const LeftpaddedNotificationBadge = styled(EuiNotificationBadge)`
 const InactiveAgentsTourStep: React.FC<{
   children: React.ReactNode;
   isOpen: boolean;
-  setInactiveAgentsCalloutHasBeenDismissed: (val: boolean) => void;
-}> = ({ children, isOpen, setInactiveAgentsCalloutHasBeenDismissed }) => (
-  <EuiTourStep
-    content={
-      <EuiText size="s">
+}> = ({ children, isOpen }) => {
+  const { shouldShowTour, nextTour } = useGlobalFleetTours('INACTIVE_AGENTS', {
+    isConditionMet: () => isOpen,
+  });
+
+  const handleFinish = () => {
+    nextTour();
+  };
+
+  return (
+    <EuiTourStep
+      content={
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.fleet.agentList.inactiveAgentsTourStepContent"
+            defaultMessage="Some agents have become inactive and have been hidden. Use status filters to show inactive or unenrolled agents."
+          />
+        </EuiText>
+      }
+      isStepOpen={shouldShowTour()}
+      minWidth={300}
+      step={1}
+      stepsTotal={1}
+      title={
         <FormattedMessage
-          id="xpack.fleet.agentList.inactiveAgentsTourStepContent"
-          defaultMessage="Some agents have become inactive and have been hidden. Use status filters to show inactive or unenrolled agents."
+          id="xpack.fleet.agentList.inactiveAgentsTourStepTitle"
+          defaultMessage="Inactive agents"
         />
-      </EuiText>
-    }
-    isStepOpen={isOpen}
-    minWidth={300}
-    step={1}
-    stepsTotal={0}
-    title=""
-    onFinish={() => {}}
-    anchorPosition="upCenter"
-    maxWidth={280}
-    footerAction={
-      <EuiLink
-        onClick={() => {
-          setInactiveAgentsCalloutHasBeenDismissed(true);
-        }}
-      >
-        <FormattedMessage
-          id="xpack.fleet.addAgentHelpPopover.footActionButton"
-          defaultMessage="Got it"
-        />
-      </EuiLink>
-    }
-  >
-    {children as React.ReactElement}
-  </EuiTourStep>
-);
+      }
+      onFinish={handleFinish}
+      anchorPosition="upCenter"
+      maxWidth={280}
+      footerAction={
+        <EuiLink onClick={handleFinish}>
+          <FormattedMessage id="xpack.fleet.tour.finishButton" defaultMessage="Finish" />
+        </EuiLink>
+      }
+    >
+      {children as React.ReactElement}
+    </EuiTourStep>
+  );
+};
 
 export const AgentStatusFilter: React.FC<{
   selectedStatus: string[];
@@ -137,9 +144,6 @@ export const AgentStatusFilter: React.FC<{
   } = props;
   const [lastSeenInactiveAgentsCount, setLastSeenInactiveAgentsCount] =
     useLastSeenInactiveAgentsCount();
-  const { isHidden: inactiveAgentsCalloutHasBeenDismissed, dismiss: dismissInactiveAgentsCallout } =
-    useDismissableTour('INACTIVE_AGENTS');
-
   const newlyInactiveAgentsCount = useMemo(() => {
     const newVal = totalInactiveAgents - lastSeenInactiveAgentsCount;
 
@@ -173,10 +177,6 @@ export const AgentStatusFilter: React.FC<{
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState<boolean>(isOpenByDefault);
 
   const updateIsStatusFilterOpen = (isOpen: boolean) => {
-    if (isOpen && newlyInactiveAgentsCount > 0 && !inactiveAgentsCalloutHasBeenDismissed) {
-      dismissInactiveAgentsCallout();
-    }
-
     setIsStatusFilterOpen(isOpen);
   };
 
@@ -219,10 +219,7 @@ export const AgentStatusFilter: React.FC<{
   );
 
   return (
-    <InactiveAgentsTourStep
-      isOpen={newlyInactiveAgentsCount > 0 && !inactiveAgentsCalloutHasBeenDismissed}
-      setInactiveAgentsCalloutHasBeenDismissed={dismissInactiveAgentsCallout}
-    >
+    <InactiveAgentsTourStep isOpen={newlyInactiveAgentsCount > 0}>
       <EuiPopover
         ownFocus
         zIndex={Number(euiTheme.levels.header) - 1}
