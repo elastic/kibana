@@ -226,38 +226,3 @@ export async function getDestinationParentIds({
 
   return { rawResponse: response, hasParent: response.hits.hits.length > 0 };
 }
-
-export async function getExitSpansFromSamples({
-  apmEventClient,
-  start,
-  end,
-  ids,
-}: {
-  apmEventClient: APMEventClient;
-  start: number;
-  end: number;
-  ids: string[] | undefined;
-}) {
-  const response = await apmEventClient.search('diagnostics_get_exit_spans_from_samples', {
-    apm: {
-      events: [ProcessorEvent.span],
-    },
-    track_total_hits: false,
-    size: 1,
-    terminate_after: 1,
-    query: {
-      bool: {
-        filter: [...rangeQuery(start, end), ...(ids ? termsQuery(SPAN_ID, ...ids) : [])],
-      },
-    },
-    aggs: {
-      sample_docs: {
-        top_hits: {
-          size: 5,
-        },
-      },
-    },
-  });
-
-  return { rawResponse: response, hasParent: response.hits.hits.length > 0 };
-}
