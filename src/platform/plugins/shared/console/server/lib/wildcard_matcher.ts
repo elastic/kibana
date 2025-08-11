@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Minimatch, IMinimatch } from 'minimatch';
+import { Minimatch } from 'minimatch';
 
 export class WildcardMatcher {
   pattern: string;
-  matcher: IMinimatch;
+  matcher: Minimatch;
 
   constructor(private readonly wildcardPattern: string, private readonly emptyVal?: string) {
     this.pattern = String(this.wildcardPattern || '*');
