@@ -63,3 +63,5 @@ export const ProcessDescendantsTooltip = memo<ProcessDescendantsTooltipProps>(
     );
   }
 );
+
+ProcessDescendantsTooltip.displayName = 'ProcessDescendantsTooltip';
