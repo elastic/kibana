@@ -173,8 +173,8 @@ const buildEsqlQuery = ({
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL  ${
-  isEnrichPolicyExists
-    ? `| ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type, actorSourceId = doc_id, actorSourceIndex = doc_index
+    isEnrichPolicyExists
+      ? `| ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type, actorSourceId = doc_id, actorSourceIndex = doc_index
 | ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type, targetSourceId = doc_id, targetSourceIndex = doc_index
 // Construct actor and target entities data
 | EVAL actorDocData = CONCAT("{",
@@ -197,9 +197,9 @@ const buildEsqlQuery = ({
       ",\\"type\\":\\"", targetEntityType, "\\"",
     "}",
   "}")`
-    : `| EVAL actorDocData = TO_STRING(null)
+      : `| EVAL actorDocData = TO_STRING(null)
 | EVAL targetDocData = TO_STRING(null)`
-}
+  }
 // Origin event and alerts allow us to identify the start position of graph traversal
 | EVAL isOrigin = ${
     originEventIds.length > 0
