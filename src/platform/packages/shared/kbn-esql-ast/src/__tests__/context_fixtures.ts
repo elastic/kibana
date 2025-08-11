@@ -204,6 +204,10 @@ export const mockContext: ICommandContext = {
   timeSeriesSources: timeseriesIndices,
   inferenceEndpoints,
   histogramBarTarget: 50,
+  activeProduct: {
+    type: 'observability',
+    tier: 'complete',
+  },
 };
 
 export const getMockCallbacks = (): ICommandCallbacks => {
@@ -214,5 +218,6 @@ export const getMockCallbacks = (): ICommandCallbacks => {
       .mockResolvedValue(expectedFields.map((name) => ({ label: name, text: name }))),
     getSuggestedUserDefinedColumnName: jest.fn(),
     getColumnsForQuery: jest.fn(),
+    hasMinimumLicenseRequired: jest.fn().mockReturnValue(true),
   };
 };
