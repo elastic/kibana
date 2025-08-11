@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiText, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { RoundedBadge } from '../styles';
 import type { DocumentAnalysisOutput } from './analyze_documents';
 
@@ -67,7 +68,7 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
                   color: ${euiTheme.colors.textInverse};
                 `}
               >
-                {analysis.alertsCount}
+                {getAbbreviatedNumber(analysis.alertsCount)}
               </EuiText>
             )}
           </RoundedBadge>
@@ -100,7 +101,7 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
                 color: ${euiTheme.colors.textHeading};
               `}
             >
-              {analysis.eventsCount}
+              {getAbbreviatedNumber(analysis.eventsCount)}
             </EuiText>
           </RoundedBadge>
           <EuiText

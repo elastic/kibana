@@ -95,4 +95,22 @@ describe('LabelNodeTooltipContent', () => {
     // Check that the event count is present for multiple events
     expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent(eventsCount.toString());
   });
+
+  test('renders abbreviated counters with very large number of events and alerts', () => {
+    const eventsCount = 1_200_000;
+    const alertsCount = 1_200_000;
+    const analysis = analyzeDocuments({ eventsCount, alertsCount });
+
+    render(<LabelNodeTooltipContent analysis={analysis} />);
+
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_SECTION)).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ_ALERT_SECTION)).toBeInTheDocument();
+
+    // Check that the alert icon and count are both present for multiple alerts
+    expect(screen.getByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent('1.2m');
+
+    // Check that the event count is present for multiple events
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent('1.2m');
+  });
 });

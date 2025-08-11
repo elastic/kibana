@@ -28,6 +28,7 @@ const useCases = {
   'One event and one alert': { eventsCount: 1, alertsCount: 1 },
   'Multiple events and alerts': { eventsCount: 2, alertsCount: 2 },
   'Hundreds of events and alerts': { eventsCount: 120, alertsCount: 120 },
+  'Millions of events and alerts': { eventsCount: 1_200_000, alertsCount: 1_200_000 },
 };
 
 const Template = () => {
