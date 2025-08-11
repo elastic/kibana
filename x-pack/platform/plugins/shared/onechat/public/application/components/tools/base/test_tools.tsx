@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiFieldText,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -17,12 +18,13 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { EsqlToolDefinitionWithSchema } from "@kbn/onechat-common";
+import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
+import { useExecuteTool } from '../../../hooks/tools/use_execute_tools';
+import type { ExecuteToolResponse } from '../../../../../common/http_api/tools';
 
 interface OnechatTestToolFlyoutProps {
   isOpen: boolean;
@@ -31,23 +33,25 @@ interface OnechatTestToolFlyoutProps {
   onClose: () => void;
 }
 
-const inputs = [
-  {
-    label: 'Tool ID',
-    name: 'toolId',
-    type: 'text',
-  },
-  {
-    label: 'Configuration',
-    name: 'configuration',
-    type: 'json',
-  },
-  {
-    label: 'Max Results',
-    name: 'maxResults',
-    type: 'number',
-  },
-]
+const getParameters = (tool: EsqlToolDefinitionWithSchema | undefined) => {
+  if (!tool) return [];
+
+  const fields: Array<{ name: string; label: string; value: string; type: string }> = [];
+
+  if (tool.configuration && tool.configuration.params) {
+    const params = tool.configuration.params as Record<string, any>;
+    Object.entries(params).forEach(([paramName, paramConfig]) => {
+      fields.push({
+        name: `${paramName}`,
+        label: `${paramName}`,
+        value: '',
+        type: paramConfig.type || 'text',
+      });
+    });
+  }
+
+  return fields;
+};
 
 export const OnechatTestFlyout: React.FC<OnechatTestToolFlyoutProps> = ({
   isOpen,
@@ -55,12 +59,16 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyoutProps> = ({
   tool,
   onClose,
 }) => {
-  const { euiTheme } = useEuiTheme();
-  
-  const [formData, setFormData] = useState({
-    toolId: tool?.id || '',
-    configuration: JSON.stringify(tool?.configuration, null, 2),
-    maxResults: '3',
+  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [response, setResponse] = useState<string>('{}');
+
+  const { executeTool, isLoading: isExecuting } = useExecuteTool({
+    onSuccess: (data: ExecuteToolResponse) => {
+      setResponse(JSON.stringify(data, null, 2));
+    },
+    onError: (error: Error) => {
+      setResponse(JSON.stringify({ error: 'Failed to execute tool' }, null, 2));
+    },
   });
 
   if (!isOpen) {
@@ -68,11 +76,29 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyoutProps> = ({
   }
 
   const handleInputChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleExecute = () => {
-    console.log('Execute test with data:', formData);
+  const handleExecute = async () => {
+    if (!tool?.id) return;
+
+    const toolParams: Record<string, any> = {};
+    getParameters(tool).forEach((field) => {
+      if (formData[field.name]) {
+        let value = formData[field.name];
+        if (field.type === 'integer' || field.type === 'long') {
+          value = parseInt(value, 10);
+        } else if (field.type === 'double' || field.type === 'float') {
+          value = parseFloat(value);
+        }
+        toolParams[field.name] = value;
+      }
+    });
+
+    await executeTool({
+      toolId: tool.id,
+      toolParams,
+    });
   };
 
   return (
@@ -90,55 +116,77 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyoutProps> = ({
         <EuiFlexGroup gutterSize="l">
           <EuiFlexItem grow={1}>
             <EuiTitle size="s">
-              <h5>Inputs</h5>
+              <h5>
+                {i18n.translate('xpack.onechat.tools.testTool.inputsTitle', {
+                  defaultMessage: 'Inputs',
+                })}
+              </h5>
             </EuiTitle>
             <EuiSpacer size="m" />
             <EuiForm component="form">
-              {inputs.map((input) => (
-                <EuiFormRow
-                  key={input.name}
-                  label={input.label}
-                >
-                  <EuiFieldText
-                    type={input.type}
-                    value={formData[input.name as keyof typeof formData]}
-                    onChange={(e) => handleInputChange(input.name, e.target.value)}
-                    placeholder={`Enter ${input.label.toLowerCase()}`}
-                    min={input.type === 'number' ? 1 : undefined}
-                  />
+              {getParameters(tool)?.map((field) => (
+                <EuiFormRow key={field.name} label={field.label}>
+                  {field.type === 'integer' ||
+                  field.type === 'long' ||
+                  field.type === 'double' ||
+                  field.type === 'float' ? (
+                    <EuiFieldNumber
+                      value={formData[field.name] || ''}
+                      onChange={(e) => handleInputChange(field.name, e.target.value)}
+                      placeholder={`Enter ${field.label.toLowerCase()}`}
+                      fullWidth
+                    />
+                  ) : (
+                    <EuiFieldText
+                      value={formData[field.name] || field.value}
+                      onChange={(e) => handleInputChange(field.name, e.target.value)}
+                      placeholder={`Enter ${field.label.toLowerCase()}`}
+                      fullWidth
+                    />
+                  )}
                 </EuiFormRow>
               ))}
               <EuiSpacer size="m" />
               <EuiFlexGroup>
                 <EuiFlexItem>
-                  <EuiButton fill onClick={handleExecute}>
-                    Execute
+                  <EuiButton
+                    fill
+                    onClick={handleExecute}
+                    isLoading={isExecuting}
+                    disabled={!tool?.id}
+                  >
+                    {i18n.translate('xpack.onechat.tools.testTool.executeButton', {
+                      defaultMessage: 'Execute',
+                    })}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiForm>
           </EuiFlexItem>
-          <EuiFlexItem grow={2}>
+          <EuiFlexItem grow={3}>
             <EuiTitle size="s">
-              <h5>Response</h5>
+              <h5>
+                {i18n.translate('xpack.onechat.tools.testTool.responseTitle', {
+                  defaultMessage: 'Response',
+                })}
+              </h5>
             </EuiTitle>
             <EuiSpacer size="m" />
-              <CodeEditor
-                languageId="json"
-                value="{}"
-                fullWidth={true}
-                height="400px"
-                options={{
-                  readOnly: true,
-                  fontSize: 14,
-                  wordWrap: 'on',
-                  automaticLayout: true,
-                }}
-              />
+            <CodeEditor
+              languageId="json"
+              value={response}
+              fullWidth={true}
+              height="600px"
+              options={{
+                readOnly: true,
+                fontSize: 14,
+                wordWrap: 'on',
+                automaticLayout: true,
+              }}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutBody>
     </EuiFlyout>
   );
 };
-
