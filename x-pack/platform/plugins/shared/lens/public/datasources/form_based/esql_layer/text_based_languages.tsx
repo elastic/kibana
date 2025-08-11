@@ -56,16 +56,10 @@ import {
   retrieveLayerColumnsFromCache,
 } from './fieldlist_cache';
 import { TEXT_BASED_LANGUAGE_ERROR } from '../../../user_messages_ids';
+import { wrapOnDot } from '../../../text_utils';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
-}
-
-function wrapOnDot(str?: string) {
-  // u200B is a non-width white-space character, which allows
-  // the browser to efficiently word-wrap right after the dot
-  // without us having to draw a lot of extra DOM elements, etc
-  return str ? str.replace(/\./g, '.\u200B') : '';
 }
 
 const getSelectedFieldsFromColumns = memoizeOne(
