@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,6 +36,7 @@ import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { usePageReady } from '@kbn/ebt-tools';
+import moment from 'moment';
 import { ObsCasesContext } from './components/obs_cases_context';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import { AlertDetailsSource, TAB_IDS, TabId } from './types';
@@ -202,6 +203,15 @@ export function AlertDetails() {
     },
   });
 
+  // This is the time range that will be used to open the dashboards
+  // in the related dashboards tab
+  const dashboardTimeRange = useMemo(() => {
+    return {
+      from: moment(alertDetail?.formatted.start).subtract(30, 'minutes').toISOString(),
+      to: moment(alertDetail?.formatted.start).add(30, 'minutes').toISOString(),
+    };
+  }, [alertDetail]);
+
   if (isLoading) {
     return <CenterJustifiedSpinner />;
   }
@@ -305,6 +315,7 @@ export function AlertDetails() {
         isLoadingRelatedDashboards={isLoadingRelatedDashboards}
         rule={rule}
         onSuccessAddSuggestedDashboard={onSuccessAddSuggestedDashboard}
+        timeRange={dashboardTimeRange}
       />
     ) : (
       <EuiLoadingSpinner />
