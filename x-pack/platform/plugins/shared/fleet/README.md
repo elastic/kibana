@@ -206,8 +206,8 @@ The process for running serverless API integration tests is similar to above. Se
 Security:
 
 ```sh
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/solutions/security/test/serverless/api_integration/test_suites/fleet/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/solutions/security/test/serverless/api_integration/test_suites/fleet/config.ts
 ```
 
 Observability:
