@@ -6,6 +6,7 @@
  */
 import { isEmpty, omit } from 'lodash';
 import { IContentClient } from '@kbn/content-management-plugin/server/types';
+import { SearchResponse } from '@kbn/content-management-plugin/server/core/crud';
 import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import { isDashboardPanel } from '@kbn/dashboard-plugin/common';
 import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
@@ -27,6 +28,7 @@ import {
   isSuggestedDashboardsValidRuleTypeId,
 } from './helpers';
 import { ReferencedPanelManager } from './referenced_panel_manager';
+import { SearchQuery } from '@kbn/content-management-plugin/common';
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 
@@ -46,15 +48,29 @@ export class RelatedDashboardsClient {
     suggestedDashboards: SuggestedDashboard[];
     linkedDashboards: LinkedDashboard[];
   }> {
-    const [alertDocument] = await Promise.all([
-      this.alertsClient.getAlertById(this.alertId),
-      this.fetchFirst500Dashboards(),
-    ]);
-    this.setAlert(alertDocument);
+    const alert = await this.alertsClient.getAlertById(this.alertId);
+    if (!alert) {
+      throw new Error(
+        `Alert with id ${this.alertId} not found. Could not fetch related dashboards.`
+      );
+    }
+
+    const ruleId = alert.getRuleId();
+    if (!ruleId) {
+      throw new Error(
+        `Alert with id ${this.alertId} does not have a rule ID. Could not fetch linked dashboards.`
+      );
+    }
+
     const [suggestedDashboards, linkedDashboards] = await Promise.all([
-      this.fetchSuggestedDashboards(),
-      this.getLinkedDashboards(),
+      this.fetchSuggested(alert, {
+        ruleName: alert.getRuleName() || '',
+        page: 1,
+        limit: 100,
+      }),
+      this.getLinkedDashboards(ruleId),
     ]);
+
     const filteredSuggestedDashboards = suggestedDashboards.filter(
       (suggested) => !linkedDashboards.some((linked) => linked.id === suggested.id)
     );
@@ -118,25 +134,12 @@ export class RelatedDashboardsClient {
     return typeof state === 'object' && state !== null && 'datasourceStates' in state;
   }
 
-  private setAlert(alert: AlertData) {
-    this.alert = alert;
-  }
-
-  private checkAlert(): AlertData {
-    if (!this.alert)
-      throw new Error(
-        `Alert with id ${this.alertId} not found. Could not fetch related dashboards.`
-      );
-    return this.alert;
-  }
-
-  private async fetchSuggestedDashboards(): Promise<SuggestedDashboard[]> {
-    const alert = this.checkAlert();
+  private rankDashboards(alert: AlertData): SuggestedDashboard[] {
     if (!isSuggestedDashboardsValidRuleTypeId(alert.getRuleTypeId())) return [];
 
     const allSuggestedDashboards = new Set<SuggestedDashboard>();
     const relevantDashboardsById = new Map<string, SuggestedDashboard>();
-    const index = this.getRuleQueryIndex();
+    const index = alert.getRuleQueryIndex();
     const allRelevantFields = alert.getAllRelevantFields();
 
     if (index) {
@@ -147,6 +150,7 @@ export class RelatedDashboardsClient {
       const { dashboards } = this.getDashboardsByField(allRelevantFields);
       dashboards.forEach((dashboard) => allSuggestedDashboards.add(dashboard));
     }
+
     allSuggestedDashboards.forEach((dashboard) => {
       relevantDashboardsById.set(dashboard.id, {
         ...dashboard,
@@ -154,28 +158,46 @@ export class RelatedDashboardsClient {
           ...relevantDashboardsById.get(dashboard.id)?.matchedBy,
           ...dashboard.matchedBy,
         },
-        score: this.getScore(dashboard),
+        score: this.getScore(alert, dashboard),
       });
     });
+
     const sortedDashboards = Array.from(relevantDashboardsById.values()).sort((a, b) => {
       return b.score - a.score;
     });
     return sortedDashboards;
   }
 
-  private async fetchDashboards({
-    page,
-    perPage = 20,
-    limit,
-  }: {
-    page: number;
-    perPage?: number;
-    limit?: number;
-  }) {
-    const dashboards = await this.dashboardClient.search({ limit: perPage, cursor: `${page}` });
+  private async fetchSuggested(
+    alert: AlertData,
+    {
+      ruleName,
+      page,
+      perPage = 20,
+      limit,
+    }: {
+      ruleName: string;
+      page: number;
+      perPage?: number;
+      limit?: number;
+    }
+  ): Promise<SuggestedDashboard[]> {
+    const searchAndStore = async (query: SearchQuery) => {
+      const res = await await this.dashboardClient.search(query);
+      await this.processDashboardSearch(res);
+    };
+    await Promise.all([
+      searchAndStore({ text: ruleName, defaultSearchOperator: 'OR', limit: 100 }),
+      searchAndStore({ limit: 500 }),
+    ]);
+
+    return this.rankDashboards(alert);
+  }
+
+  private async processDashboardSearch(dsr: SearchResponse<Dashboard>) {
     const {
       result: { hits },
-    } = dashboards;
+    } = dsr;
     for (const dashboard of hits) {
       for (const panel of dashboard.attributes.panels) {
         if (
@@ -190,20 +212,6 @@ export class RelatedDashboardsClient {
     }
 
     await this.referencedPanelManager.fetchReferencedPanels();
-
-    const fetchedUntil = (page - 1) * perPage + dashboards.result.hits.length;
-
-    if (dashboards.result.pagination.total <= fetchedUntil) {
-      return;
-    }
-    if (limit && fetchedUntil >= limit) {
-      return;
-    }
-    await this.fetchDashboards({ page: page + 1, perPage, limit });
-  }
-
-  private async fetchFirst500Dashboards() {
-    await this.fetchDashboards({ page: 1, perPage: 500, limit: 500 });
   }
 
   private getDashboardsByIndex(index: string): {
@@ -305,20 +313,7 @@ export class RelatedDashboardsClient {
     );
   }
 
-  private getRuleQueryIndex(): string | null {
-    const alert = this.checkAlert();
-    const index = alert.getRuleQueryIndex();
-    return index;
-  }
-
-  private async getLinkedDashboards(): Promise<LinkedDashboard[]> {
-    const alert = this.checkAlert();
-    const ruleId = alert.getRuleId();
-    if (!ruleId) {
-      throw new Error(
-        `Alert with id ${this.alertId} does not have a rule ID. Could not fetch linked dashboards.`
-      );
-    }
+  private async getLinkedDashboards(ruleId: string): Promise<LinkedDashboard[]> {
     const rule = await this.alertsClient.getRuleById(ruleId);
     if (!rule) {
       throw new Error(
@@ -372,10 +367,9 @@ export class RelatedDashboardsClient {
     return Array.from(matchingFields);
   }
 
-  private getScore(dashboard: RelatedDashboard): number {
-    const alert = this.checkAlert();
+  private getScore(alert: AlertData, dashboard: RelatedDashboard): number {
     const allRelevantFields = alert.getAllRelevantFields();
-    const index = this.getRuleQueryIndex();
+    const index = alert.getRuleQueryIndex();
     const setA = new Set<string>([...allRelevantFields, ...(index ? [index] : [])]);
     const setB = new Set<string>(this.getMatchingFields(dashboard));
     const intersection = new Set([...setA].filter((item) => setB.has(item)));

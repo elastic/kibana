@@ -8,6 +8,7 @@
 import { omit } from 'lodash';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import {
+  ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
@@ -110,5 +111,9 @@ export class AlertData {
 
   getRuleTypeId(): string | undefined {
     return this.alert[ALERT_RULE_TYPE_ID];
+  }
+
+  getRuleName(): string | undefined {
+    return this.alert[ALERT_RULE_NAME];
   }
 }

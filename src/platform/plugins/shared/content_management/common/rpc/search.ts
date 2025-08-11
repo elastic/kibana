@@ -63,6 +63,8 @@ export const searchSchemas: ProcedureSchemas = {
 export interface SearchQuery {
   /** The text to search for */
   text?: string;
+  /** Default text operator */
+  defaultSearchOperator?: 'AND' | 'OR';
   /** List of tags id to include and exclude */
   tags?: {
     included?: string[];
