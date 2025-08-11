@@ -40,13 +40,13 @@ export function AdvancedConfiguration({
   const agentLanguage = newConfig.agent_name?.split('/')[1] || '';
 
   const predefinedAgentConfigKeys = useMemo(
-    () => settingsDefinitions.map((setting) => setting.key),
+    () => new Set(settingsDefinitions.map((setting) => setting.key)),
     [settingsDefinitions]
   );
 
   const unknownAgentConfigs = useMemo(() => {
     return new Map(
-      Object.entries(newConfig.settings).filter(([key]) => !predefinedAgentConfigKeys.includes(key))
+      Object.entries(newConfig.settings).filter(([key]) => !predefinedAgentConfigKeys.has(key))
     );
   }, [predefinedAgentConfigKeys, newConfig.settings]);
 
@@ -57,7 +57,7 @@ export function AdvancedConfiguration({
   );
 
   const checkIfPredefinedConfigKeyExists = useCallback(
-    (key: string) => predefinedAgentConfigKeys.includes(key),
+    (key: string) => predefinedAgentConfigKeys.has(key),
     [predefinedAgentConfigKeys]
   );
 
@@ -115,15 +115,16 @@ export function AdvancedConfiguration({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      {[...unknownAgentConfigs].map(([configKey, configValue], index, array) => (
+      {[...unknownAgentConfigs].map(([configKey, configValue], index) => (
         // Use reverse index as key prop to allow adding new rows at the top
-        <Fragment key={array.length - 1 - index}>
+        <Fragment key={unknownAgentConfigs.size - 1 - index}>
           {index > 0 && <EuiSpacer size="s" />}
           <EuiFlexGroup>
             <EuiFlexItem>
               <AdvancedConfigKeyInput
                 configKey={configKey}
-                index={index}
+                id={index}
+                showLabel={index === 0}
                 onChange={(newKey) => onChange(newKey, configValue, configKey)}
                 checkIfAdvancedConfigKeyExists={checkIfAdvancedConfigKeyExists}
                 checkIfPredefinedConfigKeyExists={checkIfPredefinedConfigKeyExists}
@@ -134,7 +135,8 @@ export function AdvancedConfiguration({
             <EuiFlexItem>
               <AdvancedConfigValueInput
                 configValue={configValue}
-                index={index}
+                id={index}
+                showLabel={index === 0}
                 onChange={(newValue) => onChange(configKey, newValue)}
                 onDelete={() => onDelete(configKey, index)}
                 addValidationError={addValidationError}

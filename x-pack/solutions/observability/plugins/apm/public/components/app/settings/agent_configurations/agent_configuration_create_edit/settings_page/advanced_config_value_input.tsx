@@ -12,14 +12,16 @@ import { useState } from 'react';
 
 export function AdvancedConfigValueInput({
   configValue,
-  index,
+  id,
+  showLabel,
   onChange,
   onDelete,
   addValidationError,
   removeValidationError,
 }: {
   configValue: string;
-  index: number;
+  id: number;
+  showLabel: boolean;
   onChange: (newValue: string) => void;
   onDelete: () => void;
   addValidationError: (key: string) => void;
@@ -34,7 +36,7 @@ export function AdvancedConfigValueInput({
   const handleValueChange = (newValue: string) => {
     setTouched(true);
     onChange(newValue);
-    const errorKey = `value${index}`;
+    const errorKey = `value${id}`;
 
     if (isInvalidInput(newValue)) {
       addValidationError(errorKey);
@@ -46,7 +48,7 @@ export function AdvancedConfigValueInput({
   return (
     <EuiFormRow
       label={
-        index === 0
+        showLabel
           ? i18n.translate('xpack.apm.agentConfig.settingsPage.valueLabel', {
               defaultMessage: 'value',
             })

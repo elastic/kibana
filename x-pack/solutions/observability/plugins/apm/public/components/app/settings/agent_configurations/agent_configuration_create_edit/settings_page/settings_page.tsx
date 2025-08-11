@@ -166,13 +166,13 @@ export function SettingsPage({
     });
   };
 
-  const handleDelete = (key: string, index: number) => {
+  const handleDelete = (key: string, id: number) => {
     // Detect removed config only when the key-value already existed before
     if (key in (untouchedConfig?.data?.settings ?? {})) {
       setRemovedConfigCount((prev) => prev + 1);
     }
-    removeValidationError(`key${index}`);
-    removeValidationError(`value${index}`);
+    removeValidationError(`key${id}`);
+    removeValidationError(`value${id}`);
     setNewConfig((prev) => {
       const { [key]: deleted, ...rest } = prev.settings;
       return {

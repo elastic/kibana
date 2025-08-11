@@ -12,7 +12,8 @@ import { useEffect, useState } from 'react';
 
 export function AdvancedConfigKeyInput({
   configKey,
-  index,
+  id,
+  showLabel,
   onChange,
   checkIfAdvancedConfigKeyExists,
   checkIfPredefinedConfigKeyExists,
@@ -20,7 +21,8 @@ export function AdvancedConfigKeyInput({
   removeValidationError,
 }: {
   configKey: string;
-  index: number;
+  id: number;
+  showLabel: boolean;
   onChange: (newKey: string) => void;
   checkIfAdvancedConfigKeyExists: (newKey: string, oldKey: string) => boolean;
   checkIfPredefinedConfigKeyExists: (key: string) => boolean;
@@ -59,7 +61,7 @@ export function AdvancedConfigKeyInput({
 
   const handleKeyChange = (newKey: string) => {
     setLocalKey(newKey);
-    const errorKey = `key${index}`;
+    const errorKey = `key${id}`;
 
     if (Boolean(getErrorMsg(newKey))) {
       addValidationError(errorKey);
@@ -72,7 +74,7 @@ export function AdvancedConfigKeyInput({
   return (
     <EuiFormRow
       label={
-        index === 0
+        showLabel
           ? i18n.translate('xpack.apm.agentConfig.settingsPage.keyLabel', {
               defaultMessage: 'key',
             })
