@@ -31,6 +31,14 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
             color: 'primary',
             shape: 'ellipse',
             icon: 'user',
+            documentsData: [
+              {
+                id: '1',
+                type: 'singleentity',
+                sourceDocId: 'YboN3HMzWeEP4tP8xOlatgEAAAAAAAAA',
+                index: '.entities.v1.latest.security_generic_default',
+              },
+            ],
           },
           {
             id: 'projects/your-project-id/roles/customRole',

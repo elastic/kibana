@@ -53,6 +53,7 @@ export interface ItemExpandPopoverListItemProps {
   label: string;
   onClick: () => void;
   testSubject: string;
+  disabled?: boolean;
 }
 
 export interface SeparatorExpandPopoverListItemProps {
@@ -86,6 +87,7 @@ export const ListGroupGraphPopover = memo<ListGroupGraphPopoverProps>(
                 iconType={item.iconType}
                 label={item.label}
                 onClick={item.onClick}
+                disabled={item.disabled}
                 data-test-subj={item.testSubject}
               />
             );

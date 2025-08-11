@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { castArray } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
+import { DOCUMENT_TYPE_SINGLE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type {
   EdgeColor,
   EdgeDataModel,
@@ -82,6 +83,19 @@ export const parseRecords = (
   };
 };
 
+const getEntityDocuments = (
+  entityId: string,
+  actorsDocDataArray: NodeDocumentDataModel[],
+  targetsDocDataArray: NodeDocumentDataModel[]
+): NodeDocumentDataModel[] => {
+  // Filter documents that match this entity ID from both actors and targets
+  const matchingActorDocs = actorsDocDataArray.filter(doc => doc.id === entityId);
+  const matchingTargetDocs = targetsDocDataArray.filter(doc => doc.id === entityId);
+  const matchingDocs = [...matchingActorDocs, ...matchingTargetDocs];
+  
+  return matchingDocs.map(doc => ({...doc, type: DOCUMENT_TYPE_SINGLE_ENTITY}));
+};
+
 const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap'>) => {
   const { nodesMap, edgeLabelsNodes, labelEdges } = context;
 
@@ -141,6 +155,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
     [...actorIdsArray, ...targetIdsArraySafe].forEach((id) => {
       if (nodesMap[id] === undefined) {
         nodesMap[id] = {
+          documentsData: getEntityDocuments(id, actorsDocDataArray, targetsDocDataArray),
           id,
           label: unknownTargets.includes(id) ? 'Unknown' : undefined,
           color: 'primary',

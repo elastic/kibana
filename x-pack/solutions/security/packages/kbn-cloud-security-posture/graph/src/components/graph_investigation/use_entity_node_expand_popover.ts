@@ -9,6 +9,7 @@ import type React from 'react';
 import { useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { useNodeExpandGraphPopover } from './use_node_expand_graph_popover';
 import { getNodeDocumentMode, type NodeProps } from '../../..';
 import {
@@ -93,6 +94,10 @@ export const useEntityNodeExpandPopover = (
       const shouldShowEntityDetailsListItem =
         onShowEntityDetailsClick && getNodeDocumentMode(node.data) === 'single-entity';
 
+      const isEntityDetailsDisabled =
+        !shouldShowEntityDetailsListItem ||
+        !(node.data.documentsData as NodeDocumentDataModel[])?.[0]?.sourceDocId;
+
       return [
         {
           type: 'item',
@@ -160,27 +165,24 @@ export const useEntityNodeExpandPopover = (
             onToggleExploreRelatedEntitiesClick(node, relatedEntitiesAction);
           },
         },
-        ...(shouldShowEntityDetailsListItem
-          ? ([
-              {
-                type: 'separator',
-              },
-              {
-                type: 'item',
-                iconType: 'expand',
-                testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
-                label: i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
-                  {
-                    defaultMessage: 'Show entity details',
-                  }
-                ),
-                onClick: () => {
-                  onShowEntityDetailsClick(node);
-                },
-              },
-            ] satisfies Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>)
-          : []),
+        {
+          type: 'separator',
+        },
+        {
+          type: 'item',
+          iconType: 'expand',
+          testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+          label: i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
+            {
+              defaultMessage: 'Show entity details',
+            }
+          ),
+          disabled: isEntityDetailsDisabled,
+          onClick: () => {
+            onShowEntityDetailsClick?.(node);
+          },
+        },
       ];
     },
     [

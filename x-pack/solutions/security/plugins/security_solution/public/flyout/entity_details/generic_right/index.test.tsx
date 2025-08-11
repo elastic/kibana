@@ -8,6 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import type {
   ExpandableFlyoutApi,
   ExpandableFlyoutState,
@@ -22,6 +23,7 @@ import type { GenericEntityPanelProps } from '.';
 import { GenericEntityPanel } from '.';
 import { useGetGenericEntity } from './hooks/use_get_generic_entity';
 import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
+import { GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ } from './constants';
 
 const mockProps: GenericEntityPanelProps = {
   entityDocId: 'entity_doc_id_test',
@@ -33,6 +35,27 @@ const defaultEntityData = {
   _source: {
     entity: { id: 'entity-123-test' },
   },
+};
+
+// Create a custom TestProvider wrapper that allows overriding uiSettings
+const TestProvidersWithUiSettings = ({
+  children,
+  assetInventoryEnabled = true,
+}: {
+  children: React.ReactNode;
+  assetInventoryEnabled?: boolean;
+}) => {
+  const customStartServices = createStartServicesMock();
+  customStartServices.uiSettings.get = jest
+    .fn()
+    .mockImplementation((key: string, defaultValue?: unknown) => {
+      if (key === 'securitySolution:enableAssetInventory') {
+        return assetInventoryEnabled;
+      }
+      return defaultValue;
+    });
+
+  return <TestProviders startServices={customStartServices}>{children}</TestProviders>;
 };
 
 jest.mock('./hooks/use_get_generic_entity', () => ({
@@ -60,7 +83,7 @@ jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutState: jest.fn(),
 }));
 
-describe('HostPanel', () => {
+describe('GenericEntityPanel', () => {
   beforeEach(() => {
     mockUseGetGenericEntity.mockReturnValue({
       getGenericEntity: {
@@ -85,9 +108,9 @@ describe('HostPanel', () => {
 
   it('renders generic flyout', () => {
     const { getByTestId } = render(
-      <TestProviders>
+      <TestProvidersWithUiSettings>
         <GenericEntityPanel {...mockProps} />
-      </TestProviders>
+      </TestProvidersWithUiSettings>
     );
 
     expect(getByTestId('generic-panel-header')).toBeInTheDocument();
@@ -156,5 +179,35 @@ describe('HostPanel', () => {
     );
 
     expect(queryByTestId('generic-right-flyout-error-prompt')).toBeInTheDocument();
+  });
+
+  it('renders footer when not in preview mode', () => {
+    const { getByTestId } = render(
+      <TestProvidersWithUiSettings assetInventoryEnabled={true}>
+        <GenericEntityPanel {...mockProps} isPreviewMode={false} />
+      </TestProvidersWithUiSettings>
+    );
+
+    expect(getByTestId(GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ)).toBeInTheDocument();
+  });
+
+  it('does not render footer when in preview mode', () => {
+    const { queryByTestId } = render(
+      <TestProvidersWithUiSettings assetInventoryEnabled={true}>
+        <GenericEntityPanel {...mockProps} isPreviewMode={true} />
+      </TestProvidersWithUiSettings>
+    );
+
+    expect(queryByTestId(GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ)).not.toBeInTheDocument();
+  });
+
+  it('does not render footer when asset inventory is disabled', () => {
+    const { queryByTestId } = render(
+      <TestProvidersWithUiSettings assetInventoryEnabled={false}>
+        <GenericEntityPanel {...mockProps} isPreviewMode={false} />
+      </TestProvidersWithUiSettings>
+    );
+
+    expect(queryByTestId(GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ)).not.toBeInTheDocument();
   });
 });
