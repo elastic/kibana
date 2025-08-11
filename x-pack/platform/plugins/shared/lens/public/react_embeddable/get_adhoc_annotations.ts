@@ -19,7 +19,7 @@ export function getAdhocAnnotations(
       layerType: 'annotations',
       annotations: [
         {
-          label: i18n.translate('dashboard.adhocAnnotation.alertStarted', {
+          label: i18n.translate('xpack.lens.visualization.adhocAnnotation.alertStarted', {
             defaultMessage: 'Alert started',
           }),
           type: 'manual',
