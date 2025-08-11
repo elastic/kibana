@@ -8,7 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '@kbn/presentation-publishing';
 
 export const getDashboardPageTitle = () =>
   i18n.translate('dashboard.dashboardPageTitle', {
@@ -42,19 +41,9 @@ export const dashboardManagedBadge = {
  * @param viewMode {DashboardViewMode} the current mode. If in editing state, prepends 'Editing ' to the title.
  * @returns {string} A title to display to the user based on the above parameters.
  */
-export function getDashboardTitle(
-  title: string | undefined,
-  viewMode: ViewMode,
-  isNew: boolean
-): string {
-  const isEditMode = viewMode === 'edit';
+export function getDashboardTitle(title: string | undefined, isNew: boolean): string {
   const dashboardTitle = isNew || !Boolean(title) ? getNewDashboardTitle() : (title as string);
-  return isEditMode
-    ? i18n.translate('dashboard.strings.dashboardEditTitle', {
-        defaultMessage: 'Editing {title}',
-        values: { title: dashboardTitle },
-      })
-    : dashboardTitle;
+  return dashboardTitle;
 }
 
 export const unsavedChangesBadgeStrings = {
@@ -244,6 +233,14 @@ export const topNavStrings = {
     }),
     description: i18n.translate('dashboard.topNave.viewModeInteractiveSaveConfigDescription', {
       defaultMessage: 'Create a copy of your dashboard',
+    }),
+  },
+  add: {
+    label: i18n.translate('dashboard.topNave.addButtonAriaLabel', {
+      defaultMessage: 'add',
+    }),
+    description: i18n.translate('dashboard.topNave.addConfigDescription', {
+      defaultMessage: 'Add content to your dashboard',
     }),
   },
 };

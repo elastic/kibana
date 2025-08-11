@@ -23,17 +23,22 @@ import { coreServices, shareService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
+import { ShowAddMenu } from '../../dashboard_renderer/show_add_menu';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
   setIsLabsShown,
   maybeRedirect,
   showResetChange,
+  isResetting,
+  setIsResetting,
 }: {
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
   maybeRedirect: (result?: SaveDashboardReturn) => void;
   showResetChange?: boolean;
+  isResetting: boolean;
+  setIsResetting: (isResetting: boolean) => void;
 }) => {
   const isMounted = useMountedState();
 
@@ -50,6 +55,7 @@ export const useDashboardMenuItems = ({
       dashboardApi.viewMode$
     );
   const disableTopNav = isSaveInProgress || hasOverlays;
+  const isCreatingNewDashboard = viewMode === 'edit' && !lastSavedId;
 
   /**
    * Show the Dashboard app's share menu
@@ -87,7 +93,6 @@ export const useDashboardMenuItems = ({
    * (1) reset the dashboard to the last saved state, and
    * (2) if `switchToViewMode` is `true`, set the dashboard to view mode.
    */
-  const [isResetting, setIsResetting] = useState(false);
   const resetChanges = useCallback(
     (switchToViewMode: boolean = false) => {
       dashboardApi.clearOverlays();
@@ -110,7 +115,7 @@ export const useDashboardMenuItems = ({
         }
       }, viewMode);
     },
-    [dashboardApi, hasUnsavedChanges, viewMode, isMounted]
+    [dashboardApi, hasUnsavedChanges, viewMode, setIsResetting, isMounted]
   );
 
   /**
@@ -162,29 +167,18 @@ export const useDashboardMenuItems = ({
 
       interactiveSave: {
         disableButton: disableTopNav,
-        emphasize: !Boolean(lastSavedId),
+        emphasize: isCreatingNewDashboard,
         id: 'interactive-save',
         testId: 'dashboardInteractiveSaveMenuItem',
+        iconType: lastSavedId ? undefined : 'save',
         run: dashboardInteractiveSave,
-        label:
-          viewMode === 'view'
-            ? topNavStrings.viewModeInteractiveSave.label
-            : Boolean(lastSavedId)
-            ? topNavStrings.editModeInteractiveSave.label
-            : topNavStrings.quickSave.label,
+        label: isCreatingNewDashboard
+          ? topNavStrings.quickSave.label
+          : topNavStrings.viewModeInteractiveSave.label,
         description:
           viewMode === 'view'
             ? topNavStrings.viewModeInteractiveSave.description
             : topNavStrings.editModeInteractiveSave.description,
-      } as TopNavMenuData,
-
-      switchToViewMode: {
-        ...topNavStrings.switchToViewMode,
-        id: 'cancel',
-        disableButton: disableTopNav || !lastSavedId || isResetting,
-        isLoading: isResetting,
-        testId: 'dashboardViewOnlyMode',
-        run: () => resetChanges(true),
       } as TopNavMenuData,
 
       share: {
@@ -215,21 +209,30 @@ export const useDashboardMenuItems = ({
         htmlId: 'dashboardSettingsButton',
         run: () => openSettingsFlyout(dashboardApi),
       },
+
+      add: {
+        ...topNavStrings.add,
+        id: 'add',
+        iconType: 'plusInCircle',
+        testId: 'dashboardAddButton',
+        disableButton: disableTopNav,
+        run: (anchorElement: HTMLElement) =>
+          ShowAddMenu({ dashboardApi, anchorElement, coreServices }),
+      },
     };
   }, [
     disableTopNav,
     isSaveInProgress,
     hasUnsavedChanges,
-    lastSavedId,
-    dashboardInteractiveSave,
     viewMode,
+    lastSavedId,
+    isCreatingNewDashboard,
+    dashboardInteractiveSave,
     showShare,
     dashboardApi,
     setIsLabsShown,
     isLabsShown,
     quickSaveDashboard,
-    resetChanges,
-    isResetting,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
@@ -314,18 +317,21 @@ export const useDashboardMenuItems = ({
     const editModeItems: TopNavMenuData[] = [];
 
     if (lastSavedId) {
-      editModeItems.push(menuItems.interactiveSave, menuItems.switchToViewMode);
-
+      editModeItems.push(menuItems.interactiveSave);
       if (showResetChange) {
         editModeItems.push(resetChangesMenuItem);
       }
-
       editModeItems.push(menuItems.quickSave);
     } else {
-      editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
+      editModeItems.push(menuItems.interactiveSave);
     }
 
-    const editModeTopNavConfigItems = [...labsMenuItem, menuItems.settings, ...editModeItems];
+    const editModeTopNavConfigItems = [
+      ...labsMenuItem,
+      menuItems.add,
+      menuItems.settings,
+      ...editModeItems,
+    ];
 
     // insert share menu item before the last item in edit mode
     editModeTopNavConfigItems.splice(-1, 0, ...shareMenuItem);
@@ -336,9 +342,9 @@ export const useDashboardMenuItems = ({
     menuItems.labs,
     menuItems.export,
     menuItems.share,
+    menuItems.add,
     menuItems.settings,
     menuItems.interactiveSave,
-    menuItems.switchToViewMode,
     menuItems.quickSave,
     hasExportIntegration,
     lastSavedId,
