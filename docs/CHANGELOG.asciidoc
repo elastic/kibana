@@ -119,7 +119,7 @@ Search::
 [[fixes-v8.19.2]]
 === Fixes
 Alerting::
-* Fixes an issue with the `job/list` API's report filtering ({kibana-pull}230876[#230876]).
+* Fixes an issue that prevents reports from showing in the Reporting UI when they're created in a non-default {kib} space ({kibana-pull}230876[#230876]).
 Dashboards and Visualizations::
 * Fixes screen reader-only header in the Dashboards list ({kibana-pull}230470[#230470]).
 Elastic Observability solution::
