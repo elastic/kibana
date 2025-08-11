@@ -219,8 +219,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           if: {
             field: 'attributes.log.logger',
-            operator: 'eq' as const,
-            value: 'nginx',
+            eq: 'nginx',
           },
         };
         const response = await forkStream(apiClient, 'logs', body);
@@ -234,8 +233,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           if: {
             field: 'log.logger',
-            operator: 'eq' as const,
-            value: 'nginx',
+            eq: 'nginx',
           },
         };
         const response = await forkStream(apiClient, 'logs', body, 409);
@@ -268,7 +266,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx.access',
           },
-          if: { field: 'severity_text', operator: 'eq' as const, value: 'info' },
+          if: { field: 'severity_text', eq: 'info' },
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
@@ -300,7 +298,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx.error',
           },
-          if: { field: 'attributes.log', operator: 'eq' as const, value: 'error' },
+          if: { field: 'attributes.log', eq: 'error' },
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
@@ -332,7 +330,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.number-test',
           },
-          if: { field: 'attributes.code', operator: 'gte' as const, value: '500' },
+          if: { field: 'attributes.code', gte: '500' },
         };
         const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
@@ -364,8 +362,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           if: {
             or: [
-              { field: 'body.text', operator: 'contains' as const, value: '500' },
-              { field: 'body.text', operator: 'contains' as const, value: 400 },
+              { field: 'body.text', contains: '500' },
+              { field: 'body.text', contains: 400 },
             ],
           },
         };
@@ -399,8 +397,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             or: [
               {
                 field: 'attributes.@abc.weird fieldname',
-                operator: 'contains' as const,
-                value: 'route_it',
+                contains: 'route_it',
               },
             ],
           },
@@ -540,8 +537,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             destination: 'logs.nginx.error',
             if: {
               field: 'attributes.log',
-              operator: 'eq',
-              value: 'error',
+              eq: 'error',
             },
           },
         ]);

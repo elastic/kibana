@@ -117,7 +117,6 @@ const defaultGrokProcessorFormState: (
   action: 'grok',
   from: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
   patterns: [new DraftGrokExpression(formStateDependencies.grokCollection, '')],
-  pattern_definitions: {},
   ignore_failure: true,
   ignore_missing: true,
   where: ALWAYS_CONDITION,

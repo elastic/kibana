@@ -51,7 +51,7 @@ const operatorConditionAndResults = [
   {
     condition: { field: 'log.logger', contains: 'proxy' },
     result:
-      "(relevant_fields['log.logger'] !== null && ((relevant_fields['log.logger'] instanceof Number && relevant_fields['log.logger'].toString().contains(\"proxy\")) || relevant_fields['log.logger'].contains(\"proxy\")))",
+      "(relevant_fields['log.logger'] !== null && ((relevant_fields['log.logger'] instanceof Number && relevant_fields['log.logger'].toString().toLowerCase().contains(\"proxy\")) || relevant_fields['log.logger'].toLowerCase().contains(\"proxy\")))",
   },
   {
     condition: { field: 'log.logger', exists: true },
@@ -96,7 +96,7 @@ describe('conditionToPainless', () => {
           contains: 500,
         };
         expect(conditionToStatement(condition)).toEqual(
-          "(relevant_fields['message'] !== null && ((relevant_fields['message'] instanceof Number && relevant_fields['message'].toString().contains(\"500\")) || relevant_fields['message'].contains(\"500\")))"
+          "(relevant_fields['message'] !== null && ((relevant_fields['message'] instanceof Number && relevant_fields['message'].toString().toLowerCase().contains(\"500\")) || relevant_fields['message'].toLowerCase().contains(\"500\")))"
         );
       });
     });
