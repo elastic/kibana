@@ -51765,23 +51765,47 @@ paths:
                                                                       - always
                                                               ignore_failure:
                                                                 type: boolean
-                                                          - type: object
-                                                            properties:
-                                                              field:
-                                                                minLength: 1
-                                                                type: string
-                                                              ignore_empty_value:
-                                                                type: boolean
-                                                              media_type:
-                                                                type: string
-                                                              override:
-                                                                type: boolean
-                                                              value:
-                                                                minLength: 1
-                                                                type: string
-                                                            required:
-                                                              - field
-                                                              - value
+                                                          - anyOf:
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  copy_from:
+                                                                    not: {}
+                                                                  field:
+                                                                    minLength: 1
+                                                                    type: string
+                                                                  ignore_empty_value:
+                                                                    type: boolean
+                                                                  media_type:
+                                                                    type: string
+                                                                  override:
+                                                                    type: boolean
+                                                                  value:
+                                                                    minLength: 1
+                                                                    type: string
+                                                                required:
+                                                                  - field
+                                                                  - value
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  copy_from:
+                                                                    minLength: 1
+                                                                    type: string
+                                                                  field:
+                                                                    minLength: 1
+                                                                    type: string
+                                                                  ignore_empty_value:
+                                                                    type: boolean
+                                                                  media_type:
+                                                                    type: string
+                                                                  override:
+                                                                    type: boolean
+                                                                  value:
+                                                                    not: {}
+                                                                required:
+                                                                  - field
+                                                                  - copy_from
                                                     required:
                                                       - set
                                                   - additionalProperties: false
@@ -53085,23 +53109,47 @@ paths:
                                                                   - always
                                                           ignore_failure:
                                                             type: boolean
-                                                      - type: object
-                                                        properties:
-                                                          field:
-                                                            minLength: 1
-                                                            type: string
-                                                          ignore_empty_value:
-                                                            type: boolean
-                                                          media_type:
-                                                            type: string
-                                                          override:
-                                                            type: boolean
-                                                          value:
-                                                            minLength: 1
-                                                            type: string
-                                                        required:
-                                                          - field
-                                                          - value
+                                                      - anyOf:
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              copy_from:
+                                                                not: {}
+                                                              field:
+                                                                minLength: 1
+                                                                type: string
+                                                              ignore_empty_value:
+                                                                type: boolean
+                                                              media_type:
+                                                                type: string
+                                                              override:
+                                                                type: boolean
+                                                              value:
+                                                                minLength: 1
+                                                                type: string
+                                                            required:
+                                                              - field
+                                                              - value
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              copy_from:
+                                                                minLength: 1
+                                                                type: string
+                                                              field:
+                                                                minLength: 1
+                                                                type: string
+                                                              ignore_empty_value:
+                                                                type: boolean
+                                                              media_type:
+                                                                type: string
+                                                              override:
+                                                                type: boolean
+                                                              value:
+                                                                not: {}
+                                                            required:
+                                                              - field
+                                                              - copy_from
                                                 required:
                                                   - set
                                               - additionalProperties: false
@@ -54260,23 +54308,47 @@ paths:
                                                                       - always
                                                               ignore_failure:
                                                                 type: boolean
-                                                          - type: object
-                                                            properties:
-                                                              field:
-                                                                minLength: 1
-                                                                type: string
-                                                              ignore_empty_value:
-                                                                type: boolean
-                                                              media_type:
-                                                                type: string
-                                                              override:
-                                                                type: boolean
-                                                              value:
-                                                                minLength: 1
-                                                                type: string
-                                                            required:
-                                                              - field
-                                                              - value
+                                                          - anyOf:
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  copy_from:
+                                                                    not: {}
+                                                                  field:
+                                                                    minLength: 1
+                                                                    type: string
+                                                                  ignore_empty_value:
+                                                                    type: boolean
+                                                                  media_type:
+                                                                    type: string
+                                                                  override:
+                                                                    type: boolean
+                                                                  value:
+                                                                    minLength: 1
+                                                                    type: string
+                                                                required:
+                                                                  - field
+                                                                  - value
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  copy_from:
+                                                                    minLength: 1
+                                                                    type: string
+                                                                  field:
+                                                                    minLength: 1
+                                                                    type: string
+                                                                  ignore_empty_value:
+                                                                    type: boolean
+                                                                  media_type:
+                                                                    type: string
+                                                                  override:
+                                                                    type: boolean
+                                                                  value:
+                                                                    not: {}
+                                                                required:
+                                                                  - field
+                                                                  - copy_from
                                                     required:
                                                       - set
                                                   - additionalProperties: false
@@ -55433,23 +55505,47 @@ paths:
                                                                   - always
                                                           ignore_failure:
                                                             type: boolean
-                                                      - type: object
-                                                        properties:
-                                                          field:
-                                                            minLength: 1
-                                                            type: string
-                                                          ignore_empty_value:
-                                                            type: boolean
-                                                          media_type:
-                                                            type: string
-                                                          override:
-                                                            type: boolean
-                                                          value:
-                                                            minLength: 1
-                                                            type: string
-                                                        required:
-                                                          - field
-                                                          - value
+                                                      - anyOf:
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              copy_from:
+                                                                not: {}
+                                                              field:
+                                                                minLength: 1
+                                                                type: string
+                                                              ignore_empty_value:
+                                                                type: boolean
+                                                              media_type:
+                                                                type: string
+                                                              override:
+                                                                type: boolean
+                                                              value:
+                                                                minLength: 1
+                                                                type: string
+                                                            required:
+                                                              - field
+                                                              - value
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              copy_from:
+                                                                minLength: 1
+                                                                type: string
+                                                              field:
+                                                                minLength: 1
+                                                                type: string
+                                                              ignore_empty_value:
+                                                                type: boolean
+                                                              media_type:
+                                                                type: string
+                                                              override:
+                                                                type: boolean
+                                                              value:
+                                                                not: {}
+                                                            required:
+                                                              - field
+                                                              - copy_from
                                                 required:
                                                   - set
                                               - additionalProperties: false
@@ -56889,23 +56985,47 @@ paths:
                                                       - always
                                               ignore_failure:
                                                 type: boolean
-                                          - type: object
-                                            properties:
-                                              field:
-                                                minLength: 1
-                                                type: string
-                                              ignore_empty_value:
-                                                type: boolean
-                                              media_type:
-                                                type: string
-                                              override:
-                                                type: boolean
-                                              value:
-                                                minLength: 1
-                                                type: string
-                                            required:
-                                              - field
-                                              - value
+                                          - anyOf:
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  copy_from:
+                                                    not: {}
+                                                  field:
+                                                    minLength: 1
+                                                    type: string
+                                                  ignore_empty_value:
+                                                    type: boolean
+                                                  media_type:
+                                                    type: string
+                                                  override:
+                                                    type: boolean
+                                                  value:
+                                                    minLength: 1
+                                                    type: string
+                                                required:
+                                                  - field
+                                                  - value
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  copy_from:
+                                                    minLength: 1
+                                                    type: string
+                                                  field:
+                                                    minLength: 1
+                                                    type: string
+                                                  ignore_empty_value:
+                                                    type: boolean
+                                                  media_type:
+                                                    type: string
+                                                  override:
+                                                    type: boolean
+                                                  value:
+                                                    not: {}
+                                                required:
+                                                  - field
+                                                  - copy_from
                                     required:
                                       - set
                                   - additionalProperties: false
@@ -58127,23 +58247,47 @@ paths:
                                                       - always
                                               ignore_failure:
                                                 type: boolean
-                                          - type: object
-                                            properties:
-                                              field:
-                                                minLength: 1
-                                                type: string
-                                              ignore_empty_value:
-                                                type: boolean
-                                              media_type:
-                                                type: string
-                                              override:
-                                                type: boolean
-                                              value:
-                                                minLength: 1
-                                                type: string
-                                            required:
-                                              - field
-                                              - value
+                                          - anyOf:
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  copy_from:
+                                                    not: {}
+                                                  field:
+                                                    minLength: 1
+                                                    type: string
+                                                  ignore_empty_value:
+                                                    type: boolean
+                                                  media_type:
+                                                    type: string
+                                                  override:
+                                                    type: boolean
+                                                  value:
+                                                    minLength: 1
+                                                    type: string
+                                                required:
+                                                  - field
+                                                  - value
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  copy_from:
+                                                    minLength: 1
+                                                    type: string
+                                                  field:
+                                                    minLength: 1
+                                                    type: string
+                                                  ignore_empty_value:
+                                                    type: boolean
+                                                  media_type:
+                                                    type: string
+                                                  override:
+                                                    type: boolean
+                                                  value:
+                                                    not: {}
+                                                required:
+                                                  - field
+                                                  - copy_from
                                     required:
                                       - set
                                   - additionalProperties: false
