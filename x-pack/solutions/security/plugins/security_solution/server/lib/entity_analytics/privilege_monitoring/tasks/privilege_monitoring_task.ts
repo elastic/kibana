@@ -15,6 +15,7 @@ import type {
 
 import moment from 'moment';
 import type { RunSoonResult } from '@kbn/task-manager-plugin/server/task_scheduling';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
@@ -217,6 +218,7 @@ const runPrivilegeMonitoringTask = async ({
     });
     const soClient = core.savedObjects.getScopedClient(request, {
       includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
     });
     await dataSourcesService.plainIndexSync(soClient);
   } catch (e) {

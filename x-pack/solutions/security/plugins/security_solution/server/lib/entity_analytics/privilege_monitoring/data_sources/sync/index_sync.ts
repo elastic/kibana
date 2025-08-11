@@ -150,11 +150,11 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
       const existingUserMap = new Map<string, string | undefined>();
       for (const hit of existingUserRes.hits.hits) {
         const username = hit._source?.user?.name;
-        dataClient.log('debug', `Found existing user: ${username} with ID: ${hit._id}`);
+        dataClient.log('info', `Found existing user: ${username} with ID: ${hit._id}`);
         if (username) existingUserMap.set(username, hit._id);
       }
 
-      const usersToWrite: PrivMonBulkUser[] = batchUsernames.map((username) => ({
+      const usersToWrite: PrivMonBulkUser[] = batchUniqueUsernames.map((username) => ({
         username,
         indexName,
         existingUserId: existingUserMap.get(username),
