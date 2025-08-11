@@ -349,7 +349,7 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Fixes the handling of the **Body cell lines** display option in Discover when the default value is set to `-1` in Advanced Settings [#228697]({{kib-pull}}228697). 
 
 **Elastic Observability solution**:
-For the Elastic Observability 8.18.5 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+For the Elastic Observability 9.0.5 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
 
 **Elastic Security solution**:
 For the Elastic Security 8.18.5 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
