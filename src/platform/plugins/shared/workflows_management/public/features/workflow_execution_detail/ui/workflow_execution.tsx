@@ -177,7 +177,7 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     });
 
     return {
-      traceId: foundTraceId, // 🔥 KEY CHANGE: Use the stored trace ID from workflow execution
+      traceId: foundTraceId,
       rangeFrom: expandedStartTime.toISOString(),
       rangeTo: expandedEndTime.toISOString(),
       entryTransactionId:
