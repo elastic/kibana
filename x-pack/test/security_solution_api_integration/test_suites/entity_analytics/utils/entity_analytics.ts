@@ -14,7 +14,7 @@ import {
   ENTITY_ANALYTICS_INTERNAL_RUN_MIGRATIONS_ROUTE,
   API_VERSIONS,
 } from '@kbn/security-solution-plugin/common/constants';
-import { routeWithNamespace } from '../../../../common/utils/security_solution';
+import { routeWithNamespace } from '../../../config/services/detections_response';
 
 export const entityAnalyticsRouteHelpersFactory = (
   supertest: SuperTest.Agent,
