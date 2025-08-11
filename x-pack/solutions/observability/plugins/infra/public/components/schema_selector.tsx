@@ -188,7 +188,7 @@ export const SchemaSelector = ({
                   data-test-subj="infraSchemaSelect"
                   id={'infraSchemaSelectorSelect'}
                   options={displayOptions}
-                  valueOfSelected={value || 'unknown'}
+                  valueOfSelected={isInvalid ? 'unknown' : value ?? 'ecs'}
                   onChange={onSelect}
                   isLoading={isLoading}
                   fullWidth

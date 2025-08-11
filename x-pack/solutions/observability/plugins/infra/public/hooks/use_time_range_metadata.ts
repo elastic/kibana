@@ -17,10 +17,12 @@ import { useFetcher } from './use_fetcher';
 export const useTimeRangeMetadata = ({
   dataSource,
   kuery,
+  filters,
   start,
   end,
 }: {
   kuery?: string;
+  filters?: string;
   dataSource: EntityTypes;
   start: string;
   end: string;
@@ -34,12 +36,13 @@ export const useTimeRangeMetadata = ({
           to: end,
           kuery,
           dataSource,
+          filters,
         },
       });
 
       return decodeOrThrow(getTimeRangeMetadataResponseRT)(response);
     },
-    [start, end, kuery, dataSource],
+    [start, end, kuery, filters, dataSource],
     {
       reloadRequestTimeUpdateEnabled: false,
     }
