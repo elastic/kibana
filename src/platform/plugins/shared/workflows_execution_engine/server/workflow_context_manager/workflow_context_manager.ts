@@ -56,7 +56,7 @@ export class WorkflowContextManager {
       stepContex.steps[nodeId] = {};
       const stepResult = this.workflowExecutionRuntime.getStepResult(nodeId);
       if (stepResult) {
-        stepContex.steps[nodeId] = stepResult.output;
+        stepContex.steps[nodeId] = stepResult;
       }
 
       const stepState = this.workflowExecutionRuntime.getStepState(nodeId);
