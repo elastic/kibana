@@ -64,7 +64,7 @@ describe(
     it('Displays the callout when there are running maintenance windows', () => {
       visit(RULES_MANAGEMENT_URL);
 
-      cy.contains('A maintenance window is running for Security rules');
+      cy.contains('One or more maintenance windows are running');
     });
   }
 );

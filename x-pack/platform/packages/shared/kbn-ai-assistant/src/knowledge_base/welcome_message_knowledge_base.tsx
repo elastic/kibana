@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
 import usePrevious from 'react-use/lib/usePrevious';
 import { UseKnowledgeBaseResult } from '../hooks';
 import { KnowledgeBaseInstallationStatusPanel } from './knowledge_base_installation_status_panel';
@@ -38,7 +38,7 @@ export function WelcomeMessageKnowledgeBase({
     );
   }
 
-  if (knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY) {
+  if (knowledgeBase.status.value?.inferenceModelState === InferenceModelState.READY) {
     return showSuccessBanner ? (
       <div>
         <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="center">
