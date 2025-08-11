@@ -137,6 +137,7 @@ export class EmbeddableStateTransfer {
     appId: string,
     options?: { path?: string; state: EmbeddablePackageState<SerializedStateType> }
   ): Promise<void> {
+    console.log('navigateToWithEmbeddablePackage');
     this.isTransferInProgress = true;
     await this.navigateToWithState<EmbeddablePackageState<SerializedStateType>>(
       appId,

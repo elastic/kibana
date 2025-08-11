@@ -19,6 +19,9 @@ import type {
   ScopedHistory,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { ControlPanelsState } from '@kbn/controls-plugin/public';
+import { type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
@@ -26,6 +29,7 @@ import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { ESQLControlState } from '@kbn/esql-types';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -398,6 +402,33 @@ export class DiscoverPlugin
 
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
+        const savedSessionAttributes = savedObject.attributes as SavedSearchAttributes;
+
+        if (
+          savedSessionAttributes.controlGroupJson &&
+          Object.keys(savedSessionAttributes.controlGroupJson).length > 0
+        ) {
+          const controlsState = JSON.parse(
+            savedSessionAttributes.controlGroupJson
+          ) as ControlPanelsState<ESQLControlState>;
+          if ('controlGroupApi$' in container) {
+            const controlGroupApi$ =
+              container.controlGroupApi$ as BehaviorSubject<ControlGroupRendererApi>;
+            const controlGroupApi = controlGroupApi$.getValue();
+            Object.values(controlsState).forEach((panel) => {
+              // add a new control
+              controlGroupApi.addNewPanel({
+                panelType: ESQL_CONTROL,
+                serializedState: {
+                  rawState: {
+                    ...panel,
+                  },
+                },
+              });
+            });
+          }
+        }
+
         const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
         container.addNewPanel(
           {
