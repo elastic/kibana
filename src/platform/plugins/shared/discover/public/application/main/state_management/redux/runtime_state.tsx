@@ -49,12 +49,21 @@ export const createRuntimeStateManager = (): RuntimeStateManager => ({
   tabs: { byId: {} },
 });
 
+export type InitialUnifiedHistogramLayoutProps = Pick<
+  UnifiedHistogramPartialLayoutProps,
+  'topPanelHeight'
+>;
+
 export const createTabRuntimeState = ({
   profilesManager,
   ebtManager,
+  initialValues,
 }: {
   profilesManager: ProfilesManager;
   ebtManager: DiscoverEBTManager;
+  initialValues?: {
+    unifiedHistogramLayoutProps?: InitialUnifiedHistogramLayoutProps;
+  };
 }): ReactiveTabRuntimeState => {
   const scopedEbtManager = ebtManager.createScopedEBTManager();
 
@@ -65,7 +74,7 @@ export const createTabRuntimeState = ({
     ),
     unifiedHistogramLayoutProps$: new BehaviorSubject<
       UnifiedHistogramPartialLayoutProps | undefined
-    >(undefined),
+    >(initialValues?.unifiedHistogramLayoutProps),
     scopedProfilesManager$: new BehaviorSubject(
       profilesManager.createScopedProfilesManager({ scopedEbtManager })
     ),
@@ -105,6 +114,15 @@ export const selectTabRuntimeGlobalState = (
     refreshInterval,
     filters,
   };
+};
+
+export const selectRestorableTabRuntimeHistogramLayoutProps = (
+  runtimeStateManager: RuntimeStateManager,
+  tabId: string
+): InitialUnifiedHistogramLayoutProps | undefined => {
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+  const layoutProps = tabRuntimeState?.unifiedHistogramLayoutProps$?.getValue();
+  return layoutProps ? { topPanelHeight: layoutProps.topPanelHeight } : undefined;
 };
 
 export const useCurrentTabRuntimeState = <T,>(

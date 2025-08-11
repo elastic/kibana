@@ -26,10 +26,10 @@ import {
   ServerlessSearchPluginStart,
   ServerlessSearchPluginStartDependencies,
 } from './types';
-import { createIndexDocumentsContent } from './application/components/index_documents/documents_tab';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
 import { navigationTree } from './navigation_tree';
 import { SEARCH_HOMEPAGE_PATH } from './application/constants';
+import { WEB_CRAWLERS_LABEL } from '../common/i18n_string';
 
 export class ServerlessSearchPlugin
   implements
@@ -136,13 +136,9 @@ export class ServerlessSearchPlugin
       },
     });
 
-    const webCrawlersTitle = i18n.translate('xpack.serverlessSearch.app.webCrawlers.title', {
-      defaultMessage: 'Web Crawlers',
-    });
-
     core.application.register({
       id: 'serverlessWebCrawlers',
-      title: webCrawlersTitle,
+      title: WEB_CRAWLERS_LABEL,
       appRoute: '/app/web_crawlers',
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
@@ -150,7 +146,7 @@ export class ServerlessSearchPlugin
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/web_crawlers');
         const [coreStart, services] = await core.getStartServices();
-        coreStart.chrome.docTitle.change(webCrawlersTitle);
+        coreStart.chrome.docTitle.change(WEB_CRAWLERS_LABEL);
         docLinks.setDocLinks(coreStart.docLinks.links);
 
         return await renderApp(element, coreStart, { history, ...services }, queryClient);
@@ -200,9 +196,6 @@ export class ServerlessSearchPlugin
     });
 
     indexManagement?.extensionsService.setIndexMappingsContent(createIndexMappingsContent(core));
-    indexManagement?.extensionsService.addIndexDetailsTab(
-      createIndexDocumentsContent(core, services)
-    );
     indexManagement?.extensionsService.setIndexOverviewContent(
       createIndexOverviewContent(core, services)
     );

@@ -9,8 +9,8 @@ import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
-import { OnechatBaseTools } from './base_tools';
-import { OnechatEsqlTools } from './esql_tools';
+import { OnechatBaseTools } from './base/base_tools';
+import { OnechatEsqlTools } from './esql/esql_tools';
 
 export const OnechatTools = () => {
   return (

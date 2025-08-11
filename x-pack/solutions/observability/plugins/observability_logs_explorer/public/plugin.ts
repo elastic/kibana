@@ -26,7 +26,7 @@ export class ObservabilityLogsExplorerPlugin
     _pluginsSetup: ObservabilityLogsExplorerSetupDeps
   ) {
     const title = i18n.translate('xpack.observabilityLogsExplorer.appTitle', {
-      defaultMessage: 'Logs Explorer',
+      defaultMessage: 'Logs explorer',
     });
 
     // App used solely to redirect from "/app/observability-logs-explorer" to "/app/discover"

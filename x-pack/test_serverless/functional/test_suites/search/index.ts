@@ -30,5 +30,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./ml'));
     loadTestFile(require.resolve('./custom_role_access'));
     loadTestFile(require.resolve('./inference_management'));
+    loadTestFile(require.resolve('./search_query_rules/search_query_rules_overview'));
+    loadTestFile(require.resolve('./search_synonyms/search_synonyms_overview'));
+    loadTestFile(require.resolve('./search_synonyms/search_synonym_detail'));
   });
 }

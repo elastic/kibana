@@ -50,20 +50,26 @@ describe('UpdateAlertsModal', () => {
     expect(defaultProps.onCancel).toHaveBeenCalled();
   });
 
-  it('calls onConfirm(false) when markDiscoveriesOnly is clicked', () => {
+  it('calls onConfirm with updateAlerts: false when markDiscoveriesOnly is clicked', () => {
     render(<UpdateAlertsModal {...defaultProps} />);
 
     fireEvent.click(screen.getByTestId('markDiscoveriesOnly'));
 
-    expect(defaultProps.onConfirm).toHaveBeenCalledWith(false);
+    expect(defaultProps.onConfirm).toHaveBeenCalledWith({
+      updateAlerts: false,
+      workflowStatus: 'acknowledged',
+    });
   });
 
-  it('calls onConfirm(true) when markAlertsAndDiscoveries is clicked', () => {
+  it('calls onConfirm with updateAlerts: true when markAlertsAndDiscoveries is clicked', () => {
     render(<UpdateAlertsModal {...defaultProps} />);
 
     fireEvent.click(screen.getByTestId('markAlertsAndDiscoveries'));
 
-    expect(defaultProps.onConfirm).toHaveBeenCalledWith(true);
+    expect(defaultProps.onConfirm).toHaveBeenCalledWith({
+      updateAlerts: true,
+      workflowStatus: 'acknowledged',
+    });
   });
 
   it.each([

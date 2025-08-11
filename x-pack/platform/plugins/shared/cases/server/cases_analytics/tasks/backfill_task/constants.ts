@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const TASK_TYPE = 'cai:cases_analytics_index_backfill';
 export const BACKFILL_RUN_AT = 60 * 1000; // milliseconds

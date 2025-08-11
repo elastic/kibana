@@ -33,7 +33,7 @@ export const Logs = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { getDateRangeInTimestamp, dateRange, autoRefresh } = useDatePickerContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { entity } = useAssetDetailsRenderPropsContext();
   const { logs } = useDataViewsContext();
 
   const { reference: logViewReference } = logs ?? {};
@@ -76,7 +76,7 @@ export const Logs = () => {
 
   const filter = useMemo(() => {
     const query = [
-      `${findInventoryFields(asset.type).id}: "${asset.id}"`,
+      `${findInventoryFields(entity.type).id}: "${entity.id}"`,
       ...(textQueryDebounced !== '' ? [textQueryDebounced] : []),
     ].join(' and ');
 
@@ -84,7 +84,7 @@ export const Logs = () => {
       language: 'kuery',
       query,
     };
-  }, [asset.type, asset.id, textQueryDebounced]);
+  }, [entity.type, entity.id, textQueryDebounced]);
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTextQuery(e.target.value);
@@ -98,8 +98,8 @@ export const Logs = () => {
   const logsUrl = useMemo(() => {
     return logsLocator.getRedirectUrl({
       query: getNodeQuery({
-        nodeField: findInventoryFields(asset.type).id,
-        nodeId: asset.id,
+        nodeField: findInventoryFields(entity.type).id,
+        nodeId: entity.id,
         filter: textQueryDebounced,
       }),
       timeRange: {
@@ -110,8 +110,8 @@ export const Logs = () => {
     });
   }, [
     logsLocator,
-    asset.id,
-    asset.type,
+    entity.id,
+    entity.type,
     state.startTimestamp,
     state.currentTimestamp,
     textQueryDebounced,

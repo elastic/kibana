@@ -31,9 +31,10 @@ import {
 import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
 import type { EdgeViewModel, NodeViewModel } from '../types';
-import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from './constants';
+import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
 
 import '@xyflow/react/dist/style.css';
+import { GlobalGraphStyles } from './styles';
 import { Controls } from '../controls/controls';
 
 export interface GraphProps extends CommonProps {
@@ -116,7 +117,7 @@ export const Graph = memo<GraphProps>(
         currNodesRef.current = nodes;
         currEdgesRef.current = edges;
         setTimeout(() => {
-          fitViewRef.current?.(fitViewOptions);
+          fitViewRef.current?.();
         }, 30);
       }
     }, [nodes, edges, setNodes, setEdges, isGraphInteractive]);
@@ -173,6 +174,7 @@ export const Graph = memo<GraphProps>(
           {children}
           <Background id={backgroundId} />
         </ReactFlow>
+        <GlobalGraphStyles />
       </div>
     );
   }

@@ -7,11 +7,11 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { KbnClient } from '@kbn/test';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
 import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
+import { createKbnClient } from '../common/stack_services';
 
 class EndpointPolicyGenerator extends BaseDataGenerator {
   private counter = 1;
@@ -25,14 +25,25 @@ const generate = new EndpointPolicyGenerator();
 
 export const cli = async () => {
   await run(
-    async ({ log, flags: { kibana, count } }) => {
-      const kbn = new KbnClient({ log, url: kibana as string });
-      const max = Number(count);
+    async ({ log, flags }) => {
+      const kbn = createKbnClient({
+        url: flags.kibana as string,
+        username: flags.username as string,
+        password: flags.password as string,
+        apiKey: flags.apikey as string,
+        spaceId: flags.spaceId as string,
+        log,
+      });
+      const max = Number(flags.count);
       const maxErrors = 10; // Max errors encountered until the script exits
       const errors: string[] = [];
       let created = 0;
 
-      log.info(`Creating ${count} endpoint policies...`);
+      log.info(
+        `Creating ${flags.count} endpoint policies${
+          flags.apiKey ? ` in space ${flags.spaceId}` : ''
+        }...`
+      );
 
       try {
         await setupFleetForEndpoint(kbn, log);
@@ -62,16 +73,24 @@ export const cli = async () => {
       log.success(`Done!`);
     },
     {
-      description: 'Load Endpoint Policies into fleet (also creates associated Agent Policies)',
+      description: 'Load Endpoint Policies into Fleet (also creates associated Agent Policies)',
       flags: {
-        string: ['kibana'],
+        string: ['kibana', 'username', 'password', 'spaceId'],
         default: {
           count: 15,
-          kibana: 'http://elastic:changeme@127.0.0.1:5601',
+          spaceId: '',
+          kibana: 'http://127.0.0.1:5601',
+          username: 'elastic',
+          password: 'changeme',
+          apikey: undefined,
         },
         help: `
         --count            Number of Endpoint Policies to create. Default: 15
-        --kibana           The URL to kibana including credentials. Default: http://elastic:changeme@127.0.0.1:5601
+        --spaceId          The space ID where policies will be created. Used the 'default' space by default
+        --kibana           The URL to kibana including credentials. Default: http://127.0.0.1:5601
+        --username         The username to use for authentication for local or cloud environment. Default: elastic
+        --password         The password to use for authentication for local or cloud environment. Default: changeme
+        --apikey           API key for authenticating for Serverless environment.
       `,
       },
     }

@@ -40,6 +40,7 @@ export type {
   SavedObjectsTypeMappingDefinition,
   SavedObjectsFieldMapping,
   SavedObjectsMappingProperties,
+  SavedObjectsMappingPropertiesSafe,
 } from './src/mapping_definition';
 export type {
   SavedObjectMigration,

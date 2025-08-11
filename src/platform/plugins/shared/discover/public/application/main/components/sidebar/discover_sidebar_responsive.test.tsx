@@ -569,7 +569,7 @@ describe('discover responsive sidebar', function () {
         nameFilter: 'byte',
         selectedFieldTypes: ['number'],
         pageSize: 10,
-        scrollPosition: 0,
+        scrollTop: 0,
         accordionState: {},
       },
     });
@@ -858,20 +858,6 @@ describe('discover responsive sidebar', function () {
       expect(findTestSubject(comp, 'fieldList').exists()).toBe(false);
       findTestSubject(comp, 'unifiedFieldListSidebar__toggle-expand').simulate('click');
       expect(findTestSubject(comp, 'fieldList').exists()).toBe(true);
-    });
-  });
-
-  describe('field list customization', () => {
-    it('should render Smart Fields', async () => {
-      mockUseCustomizations = true;
-      const comp = await mountComponent(props);
-
-      expect(findTestSubject(comp, 'fieldList').exists()).toBe(true);
-      expect(findTestSubject(comp, 'fieldListGroupedSmartFields').exists()).toBe(true);
-
-      const smartFieldsCount = findTestSubject(comp, 'fieldListGroupedSmartFields-count');
-
-      expect(smartFieldsCount.text()).toBe('2');
     });
   });
 });

@@ -18,7 +18,7 @@ import {
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { HighlightField } from '../../components/highlight_field.tsx';
+import { HighlightField } from '../../components/highlight_field';
 import {
   FieldConfiguration,
   getCommonFieldConfiguration,
@@ -56,6 +56,8 @@ export const getSpanFieldConfiguration = ({
           {({ content }) => (
             <DependencyNameLink
               dependencyName={value as string}
+              spanType={flattenedDoc[SPAN_TYPE_FIELD]}
+              spanSubtype={flattenedDoc[SPAN_SUBTYPE_FIELD]}
               environment={flattenedDoc[SERVICE_ENVIRONMENT_FIELD]}
               formattedDependencyName={content}
             />

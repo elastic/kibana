@@ -10,7 +10,6 @@ import { Chart, Metric, Settings } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { EuiSkeletonText, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import { EuiErrorBoundary } from '@elastic/eui';
 
 export function MetricItem({
   data,
@@ -40,12 +39,10 @@ export function MetricItem({
           <EuiSkeletonText lines={3} />
         </EuiPanel>
       ) : (
-        <EuiErrorBoundary>
-          <Chart>
-            <Settings baseTheme={chartBaseTheme} />
-            <Metric id={`metric_${id}`} data={[data]} />
-          </Chart>
-        </EuiErrorBoundary>
+        <Chart>
+          <Settings baseTheme={chartBaseTheme} />
+          <Metric id={`metric_${id}`} data={[data]} />
+        </Chart>
       )}
     </div>
   );

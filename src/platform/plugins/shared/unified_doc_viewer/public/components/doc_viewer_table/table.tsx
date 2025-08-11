@@ -25,6 +25,7 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   type UseEuiTheme,
+  euiFontSize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -556,8 +557,11 @@ const componentStyles = {
         },
       },
     }),
-  fieldsGrid: ({ euiTheme }: UseEuiTheme) =>
-    css({
+  fieldsGrid: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+    const { fontSize } = euiFontSize(themeContext, 's');
+
+    return css({
       '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
         borderTop: 'none',
       },
@@ -575,6 +579,27 @@ const componentStyles = {
         padding: `calc(${euiTheme.size.xs} / 2) 0 0 ${euiTheme.size.xs}`,
       },
 
+      '.kbnDocViewer__fieldName': {
+        padding: euiTheme.size.xs,
+        paddingLeft: 0,
+        lineHeight: euiTheme.font.lineHeightMultiplier,
+
+        '.euiDataGridRowCell__popover &': {
+          fontSize,
+        },
+      },
+
+      '.kbnDocViewer__fieldName_icon': {
+        paddingTop: `calc(${euiTheme.size.xs} * 1.5)`,
+        lineHeight: euiTheme.font.lineHeightMultiplier,
+      },
+
+      '.kbnDocViewer__fieldName_multiFieldBadge': {
+        margin: `${euiTheme.size.xs} 0`,
+        fontWeight: euiTheme.font.weight.regular,
+        fontFamily: euiTheme.font.family,
+      },
+
       '.kbnDocViewer__fieldsGrid__pinAction': {
         opacity: 0,
       },
@@ -588,7 +613,8 @@ const componentStyles = {
       '.euiDataGridRow:hover .kbnDocViewer__fieldsGrid__pinAction': {
         opacity: 1,
       },
-    }),
+    });
+  },
   noFieldsFound: css({
     minHeight: 300,
   }),

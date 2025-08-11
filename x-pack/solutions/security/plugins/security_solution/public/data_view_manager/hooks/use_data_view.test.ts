@@ -26,7 +26,7 @@ const mockToastsDanger = jest.fn();
 
 const mockNotifications = {
   toasts: {
-    danger: mockToastsDanger,
+    addDanger: mockToastsDanger,
   },
 };
 
@@ -46,8 +46,8 @@ jest.mock('../../common/lib/kibana', () => {
     useKibana: () => ({
       services: {
         dataViews: mockDataViews,
+        notifications: mockNotifications,
       },
-      notifications: mockNotifications,
     }),
   };
 });
@@ -140,7 +140,7 @@ describe('useDataView', () => {
     expect(result.current.status).toBe('pristine');
   });
 
-  it('should set status to error and call toasts.danger on get error', async () => {
+  it('should set status to error and call toasts.addDanger on get error', async () => {
     mockGet.mockRejectedValue(new Error('fail!'));
 
     const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default));
@@ -149,7 +149,7 @@ describe('useDataView', () => {
     expect(result.current.status).toBe('error');
     expect(mockToastsDanger).toHaveBeenCalledWith({
       title: 'Error retrieving data view',
-      body: expect.stringContaining('fail!'),
+      text: expect.stringContaining('fail!'),
     });
   });
 
@@ -162,7 +162,7 @@ describe('useDataView', () => {
     expect(result.current.status).toBe('error');
     expect(mockToastsDanger).toHaveBeenCalledWith({
       title: 'Error retrieving data view',
-      body: expect.stringContaining('unknown'),
+      text: expect.stringContaining('unknown'),
     });
   });
 });

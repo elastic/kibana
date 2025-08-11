@@ -39,7 +39,7 @@ export const ManyChildren: StoryFn<{}> = () => {
           duration: 5000000,
           serviceName: 'frontend',
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-          hasError: true,
+          errorCount: 1,
         },
         ...Array(200)
           .fill(0)
@@ -51,6 +51,7 @@ export const ManyChildren: StoryFn<{}> = () => {
             parentId: '1',
             serviceName: 'child-service',
             traceId: 'ed1aacaf31264b93e0e405e42b00af74',
+            errorCount: 0,
           })),
       ]}
     />
@@ -70,7 +71,7 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           duration: 5000000,
           serviceName: 'frontend',
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-          hasError: true,
+          errorCount: 1,
         },
         {
           id: 'cdd3568d81149715',
@@ -80,6 +81,7 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           parentId: 'd2efb76164a77608',
           serviceName: 'quote',
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
+          errorCount: 0,
         },
         {
           id: 'a111aabbccddeeff',
@@ -89,6 +91,7 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           parentId: 'cdd3568d81149715',
           serviceName: 'database',
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
+          errorCount: 0,
         },
       ]}
     />
@@ -104,7 +107,7 @@ export const Example: StoryFn<{}> = () => {
           name: 'POST',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 53170917,
-          hasError: false,
+          errorCount: 0,
           serviceName: 'load-generator',
         },
         {
@@ -113,7 +116,7 @@ export const Example: StoryFn<{}> = () => {
           name: 'executing api route (pages) /api/checkout',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 51298750,
-          hasError: false,
+          errorCount: 0,
           parentId: '06b480d1e6e2ac2e',
           serviceName: 'frontend',
         },
@@ -123,7 +126,7 @@ export const Example: StoryFn<{}> = () => {
           name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 1187042,
-          hasError: false,
+          errorCount: 0,
           parentId: '2b18312dfedbf16a',
           serviceName: 'frontend',
         },
@@ -133,12 +136,116 @@ export const Example: StoryFn<{}> = () => {
           name: 'oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 90416,
-          hasError: false,
+          errorCount: 0,
           parentId: '41b39c13ec0166a8',
           serviceName: 'product-catalog',
         },
       ]}
       highlightedTraceId="41b39c13ec0166a8"
+    />
+  );
+};
+
+export const ExampleWithServiceLegend: StoryFn<{}> = () => {
+  return (
+    <TraceWaterfall
+      traceItems={[
+        {
+          id: '06b480d1e6e2ac2e',
+          timestampUs: new Date('2025-05-27T12:15:04.973Z').getTime() * 1000,
+          name: 'POST',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 53170917,
+          errorCount: 0,
+          serviceName: 'load-generator',
+        },
+        {
+          id: '2b18312dfedbf16a',
+          timestampUs: new Date('2025-05-27T12:15:04.974Z').getTime() * 1000,
+          name: 'executing api route (pages) /api/checkout',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 51298750,
+          errorCount: 0,
+          parentId: '06b480d1e6e2ac2e',
+          serviceName: 'frontend',
+        },
+        {
+          id: '41b39c13ec0166a8',
+          timestampUs: new Date('2025-05-27T12:15:06.024Z').getTime() * 1000,
+          name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 1187042,
+          errorCount: 0,
+          parentId: '2b18312dfedbf16a',
+          serviceName: 'frontend',
+        },
+        {
+          id: '255547a7b6b19871',
+          timestampUs: new Date('2025-05-27T12:15:06.500Z').getTime() * 1000,
+          name: 'oteldemo.ProductCatalogService/GetProduct',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 90416,
+          errorCount: 0,
+          parentId: '41b39c13ec0166a8',
+          serviceName: 'product-catalog',
+        },
+      ]}
+      highlightedTraceId="41b39c13ec0166a8"
+      showLegend
+    />
+  );
+};
+
+export const ExampleWithTypeLegend: StoryFn<{}> = () => {
+  return (
+    <TraceWaterfall
+      traceItems={[
+        {
+          id: '06b480d1e6e2ac2e',
+          timestampUs: new Date('2025-05-27T12:15:04.973Z').getTime() * 1000,
+          name: 'POST',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 53170917,
+          errorCount: 0,
+          serviceName: 'frontend',
+        },
+        {
+          id: '2b18312dfedbf16a',
+          timestampUs: new Date('2025-05-27T12:15:04.974Z').getTime() * 1000,
+          name: 'executing api route (pages) /api/checkout',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 51298750,
+          errorCount: 0,
+          parentId: '06b480d1e6e2ac2e',
+          serviceName: 'frontend',
+          spanType: 'http',
+        },
+        {
+          id: '41b39c13ec0166a8',
+          timestampUs: new Date('2025-05-27T12:15:06.024Z').getTime() * 1000,
+          name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 1187042,
+          errorCount: 0,
+          parentId: '2b18312dfedbf16a',
+          serviceName: 'frontend',
+          spanType: 'http',
+        },
+        {
+          id: '255547a7b6b19871',
+          timestampUs: new Date('2025-05-27T12:15:06.500Z').getTime() * 1000,
+          name: 'oteldemo.ProductCatalogService/GetProduct',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 90416,
+          errorCount: 0,
+          parentId: '41b39c13ec0166a8',
+          serviceName: 'frontend',
+          spanType: 'css',
+        },
+      ]}
+      highlightedTraceId="41b39c13ec0166a8"
+      serviceName="frontend"
+      showLegend
     />
   );
 };
@@ -190,7 +297,7 @@ export const APMExample: StoryFn<{}> = () => {
         duration: item.span.duration?.us || item.transaction?.duration?.us,
         traceId: item.trace.id,
         parentId: item.parent?.id,
-        serviceName: item.service.name || item.service.name,
+        serviceName: item.service.name,
       } as TraceItem)
   );
 

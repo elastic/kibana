@@ -7,12 +7,18 @@
 
 import type { NodeViewModel, NodeDocumentDataViewModel } from './types';
 
+export const isStackNode = (node: NodeViewModel) => node.shape === 'group';
+export const isLabelNode = (node: NodeViewModel) => node.shape === 'label';
+
 export const isEntityNode = (node: NodeViewModel) =>
   node.shape === 'ellipse' ||
   node.shape === 'pentagon' ||
   node.shape === 'rectangle' ||
   node.shape === 'diamond' ||
   node.shape === 'hexagon';
+
+export const isStackedLabel = (node: NodeViewModel): boolean =>
+  !(node.shape === 'label' && Boolean(node.parentId));
 
 /**
  * Returns the node document mode, or 'na' if documentsData is missing or empty.

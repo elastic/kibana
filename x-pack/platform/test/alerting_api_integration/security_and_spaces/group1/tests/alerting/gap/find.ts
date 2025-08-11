@@ -53,6 +53,14 @@ export default function findGapsTests({ getService }: FtrProviderContext) {
           password: user.password,
         };
 
+        beforeEach(async () => {
+          await supertest
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/delete_gaps`)
+            .set('kbn-xsrf', 'foo')
+            .send({})
+            .expect(200);
+        });
+
         describe('find gaps with request body', () => {
           it('should handle finding gaps with various parameters', async () => {
             // Create 2 rules

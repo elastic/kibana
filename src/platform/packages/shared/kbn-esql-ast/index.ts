@@ -11,12 +11,11 @@ export type {
   ESQLAst,
   ESQLAstItem,
   ESQLAstCommand,
-  ESQLAstTimeseriesCommand,
   ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
   ESQLFunction,
-  ESQLTimeInterval,
+  ESQLTimeSpanLiteral,
   ESQLLocation,
   ESQLMessage,
   ESQLSingleAstItem,
@@ -44,10 +43,13 @@ export {
   type ParseOptions,
   type ParseResult,
   ESQLErrorListener,
+  TIME_SPAN_UNITS,
 } from './src/parser';
 
 export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './src/walker';
+
 export * as synth from './src/synth';
+export { qry, cmd, exp } from './src/synth';
 
 export {
   LeafPrinter,
@@ -66,7 +68,7 @@ export { singleItems, resolveItem, lastItem, firstItem } from './src/visitor/uti
 
 export { esqlCommandRegistry } from './src/commands_registry';
 
-export * from './src/commands_registry/utils/complete_items';
+export * from './src/commands_registry/complete_items';
 export * from './src/commands_registry/constants';
 export * from './src/definitions/constants';
 export * from './src/definitions/types';

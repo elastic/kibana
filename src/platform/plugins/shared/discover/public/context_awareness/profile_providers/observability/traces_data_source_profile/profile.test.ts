@@ -107,4 +107,27 @@ describe('tracesDataSourceProfileProvider', () => {
       } as DataSourceProfileProviderParams)
     ).toEqual(RESOLUTION_MISMATCH);
   });
+
+  describe('getColumnsConfiguration', () => {
+    it('should return custom configuration for the "_source" column', () => {
+      const getColumnsConfiguration =
+        tracesDataSourceProfileProvider.profile.getColumnsConfiguration?.(() => ({}), {
+          context: {
+            category: DataSourceCategory.Traces,
+          },
+        });
+
+      const columnConfiguration = getColumnsConfiguration?.();
+      expect(columnConfiguration).toBeDefined();
+      expect(columnConfiguration).toHaveProperty('_source');
+
+      const config = columnConfiguration!._source({
+        column: { id: '_source', displayAsText: 'Summary' },
+        headerRowHeight: 1,
+      });
+
+      expect(config).toBeDefined();
+      expect(config).toHaveProperty('display');
+    });
+  });
 });

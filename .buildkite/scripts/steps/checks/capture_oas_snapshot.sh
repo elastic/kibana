@@ -5,7 +5,7 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
-.buildkite/scripts/copy_es_snapshot_cache.sh
+.buildkite/scripts/setup_es_snapshot_cache.sh
 
 echo --- Capture OAS snapshot
 cmd="node scripts/capture_oas_snapshot \

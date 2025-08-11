@@ -638,6 +638,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response?.saved_objects?.[0]?.attributes).to.eql({
           dataViewId: '.alerts-security.alerts-default',
           enabled: true,
+          excludeAlertStatuses: ['closed'],
           filter: {},
           interval: '1h',
           pageSize: 3500,

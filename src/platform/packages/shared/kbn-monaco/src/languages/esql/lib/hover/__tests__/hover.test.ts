@@ -6,8 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { getFunctionSignatures } from '@kbn/esql-ast/src/definitions/utils';
-import { getFunctionDefinition } from '@kbn/esql-validation-autocomplete';
+import { getFunctionSignatures, getFunctionDefinition } from '@kbn/esql-ast/src/definitions/utils';
 import {
   modeDescription,
   ENRICH_MODES,

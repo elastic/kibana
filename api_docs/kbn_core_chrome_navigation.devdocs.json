@@ -1,0 +1,104 @@
+{
+  "id": "@kbn/core-chrome-navigation",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-chrome-navigation",
+        "id": "def-public.Navigation",
+        "type": "Function",
+        "tags": [],
+        "label": "Navigation",
+        "description": [],
+        "signature": [
+          "({ isCollapsed: isCollapsedProp, items, logoLabel, logoType, setWidth, }: NavigationProps) => React.JSX.Element"
+        ],
+        "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation",
+            "id": "def-public.Navigation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  isCollapsed: isCollapsedProp,\n  items,\n  logoLabel,\n  logoType,\n  setWidth,\n}",
+            "description": [],
+            "signature": [
+              "NavigationProps"
+            ],
+            "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-navigation",
+        "id": "def-public.useNavigation",
+        "type": "Function",
+        "tags": [],
+        "label": "useNavigation",
+        "description": [],
+        "signature": [
+          "({ initialMenuItem, isCollapsed }: UseNavigationProps) => { navigateTo: (primaryMenuItem: ",
+          "MenuItem",
+          ", secondaryMenuItem?: ",
+          "SecondaryMenuItem",
+          " | undefined) => void; isMenuItemActive: (item: ",
+          "MenuItem",
+          " | ",
+          "SecondaryMenuItem",
+          ") => boolean; currentPage: string | undefined; currentSubpage: string | null; sidePanelContent: ",
+          "MenuItem",
+          " | null; isCollapsed: boolean; isSidePanelOpen: boolean; }"
+        ],
+        "path": "src/core/packages/chrome/navigation/src/hooks/use_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation",
+            "id": "def-public.useNavigation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ initialMenuItem, isCollapsed }",
+            "description": [],
+            "signature": [
+              "UseNavigationProps"
+            ],
+            "path": "src/core/packages/chrome/navigation/src/hooks/use_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -13,18 +13,20 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
   describe('Maps endpoints', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
       );
-      await esArchiver.load('x-pack/test/functional/es_archives/maps/data');
+      await kibanaServer.importExport.load(
+        'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json'
+      );
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/maps/data');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.unload('x-pack/test/functional/es_archives/maps/data');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/maps/data');
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json'
       );
     });
 

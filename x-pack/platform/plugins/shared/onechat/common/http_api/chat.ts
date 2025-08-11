@@ -20,6 +20,7 @@ export interface ChatRequestBodyPayload {
 
 export interface ChatResponse {
   conversation_id: string;
+  trace_id?: string;
   steps: ConversationRoundStep[];
   response: AssistantResponse;
 }

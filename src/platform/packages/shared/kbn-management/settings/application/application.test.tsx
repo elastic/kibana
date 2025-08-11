@@ -84,7 +84,7 @@ describe('Settings application', () => {
   it("doesn't render settings that are not applicable in the current solution", async () => {
     const services: SettingsApplicationServices = createSettingsApplicationServicesMock(
       undefined,
-      'es',
+      ['classic', 'es'],
       'security'
     );
 
@@ -97,7 +97,7 @@ describe('Settings application', () => {
   it('renders settings that are applicable in the current solution', async () => {
     const services: SettingsApplicationServices = createSettingsApplicationServicesMock(
       undefined,
-      'oblt',
+      ['classic', 'oblt'],
       'oblt'
     );
 

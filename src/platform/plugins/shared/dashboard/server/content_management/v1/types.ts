@@ -19,10 +19,11 @@ import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { WithRequiredProperty } from '@kbn/utility-types';
 import {
   dashboardItemSchema,
-  controlGroupInputSchema,
   panelGridDataSchema,
   panelSchema,
   sectionSchema,
+  filterSchema,
+  querySchema,
   dashboardAttributesSchema,
   dashboardCreateOptionsSchema,
   dashboardCreateResultSchema,
@@ -34,6 +35,8 @@ import {
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
 
+export type DashboardFilter = TypeOf<typeof filterSchema>;
+export type DashboardQuery = TypeOf<typeof querySchema>;
 export type DashboardOptions = TypeOf<typeof optionsSchema>;
 
 // Panel config has some defined types but also allows for custom keys added by embeddables
@@ -55,7 +58,6 @@ export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'reference
   references: SavedObjectReference[] | undefined;
 };
 
-export type ControlGroupAttributes = TypeOf<typeof controlGroupInputSchema>;
 export type GridData = WithRequiredProperty<TypeOf<typeof panelGridDataSchema>, 'i'>;
 
 export type DashboardGetIn = GetIn<typeof CONTENT_ID>;

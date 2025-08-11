@@ -28,14 +28,14 @@
     "@kbn/monaco",
     "@kbn/search-types",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-mount",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/i18n-react",
     "@kbn/visualization-utils",
     "@kbn/esql-types",
     "@kbn/licensing-plugin",
     "@kbn/projects-solutions-groups",
-    "@kbn/esql-ast"
+    "@kbn/esql-ast",
+    "@kbn/presentation-util"
   ],
   "exclude": [
     "target/**/*",

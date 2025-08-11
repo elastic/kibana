@@ -224,7 +224,12 @@ export function getWebpackConfig(
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
                       sourceMap: true,
                       quietDeps: true,
-                      silenceDeprecations: ['import', 'legacy-js-api'],
+                      silenceDeprecations: [
+                        'color-functions',
+                        'import',
+                        'global-builtin',
+                        'legacy-js-api',
+                      ],
                     },
                   },
                 },
@@ -278,7 +283,7 @@ export function getWebpackConfig(
         },
         // automatically chooses between exporting a data URI and emitting a separate file. Previously achievable by using url-loader with asset size limit.
         {
-          test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
+          test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|webp)(\?|$)/,
           type: 'asset',
           parser: {
             dataUrlCondition: {

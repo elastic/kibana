@@ -40,8 +40,13 @@ export interface PackageSpecManifest {
     fields?: Array<{
       name: string;
     }>;
+    datasets?: DiscoveryDataset[];
   };
 }
+export interface DiscoveryDataset {
+  name: string;
+}
+
 export interface PackageSpecTags {
   text: string;
   asset_types?: string[];

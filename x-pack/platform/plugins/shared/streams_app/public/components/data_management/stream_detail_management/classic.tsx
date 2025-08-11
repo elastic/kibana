@@ -34,7 +34,7 @@ export function ClassicStreamDetailManagement({
   definition,
   refreshDefinition,
 }: {
-  definition: Streams.UnwiredStream.GetResponse;
+  definition: Streams.ClassicStream.GetResponse;
   refreshDefinition: () => void;
 }) {
   const {
@@ -58,7 +58,7 @@ export function ClassicStreamDetailManagement({
                 values: { streamId: key },
               })}
               <EuiBadgeGroup gutterSize="s">
-                {Streams.UnwiredStream.Definition.is(definition.stream) && <ClassicStreamBadge />}
+                {Streams.ClassicStream.Definition.is(definition.stream) && <ClassicStreamBadge />}
                 <LifecycleBadge lifecycle={definition.effective_lifecycle} />
               </EuiBadgeGroup>
             </EuiFlexGroup>
@@ -141,7 +141,7 @@ export function ClassicStreamDetailManagement({
     tabs.significantEvents = otherTabs.significantEvents;
   }
 
-  if (!isValidManagementSubTab(tab)) {
+  if (!isValidManagementSubTab(tab) || tabs[tab] === undefined) {
     return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'enrich' } }} />;
   }
 

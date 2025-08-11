@@ -14,12 +14,7 @@ export const servers: ScoutServerConfig = {
   ...defaultConfig,
   esTestCluster: {
     ...defaultConfig.esTestCluster,
-    serverArgs: [
-      ...defaultConfig.esTestCluster.serverArgs,
-      'xpack.apm_data.enabled=true',
-      // for ML, data frame analytics are not part of this project type
-      'xpack.ml.dfa.enabled=false',
-    ],
+    serverArgs: [...defaultConfig.esTestCluster.serverArgs, 'xpack.apm_data.enabled=true'],
   },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,

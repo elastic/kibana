@@ -7,6 +7,11 @@
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+export {
+  HOST_NAME_FIELD,
+  CONTAINER_ID_FIELD,
+  KUBERNETES_POD_UID_FIELD,
+} from '@kbn/metrics-data-access-plugin/common';
 
 export const METRICS_INDEX_PATTERN = 'metrics-*,metricbeat-*';
 export const LOGS_INDEX_PATTERN = 'logs-*,filebeat-*,kibana_sample_data_logs*';
@@ -43,17 +48,6 @@ export const MANDATORY_PROCESS_FIELDS = [
   'process.command_line',
 ];
 export const PROCESS_COMMANDLINE_FIELD = 'process.command_line';
-
-// system
-export const HOST_NAME_FIELD = 'host.name';
-export const CONTAINER_ID_FIELD = 'container.id';
-export const KUBERNETES_POD_UID_FIELD = 'kubernetes.pod.uid';
-export const EVENT_MODULE = 'event.module';
-export const METRICSET_MODULE = 'metricset.module';
-export const METRICSET_NAME = 'metricset.name';
-
-// integrations
-export const SYSTEM_INTEGRATION = 'system';
 
 // logs
 export const MESSAGE_FIELD = 'message';

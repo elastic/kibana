@@ -34,6 +34,9 @@ export interface DataSourceContext {
   streamName: string;
   dataSource: EnrichmentDataSourceWithUIAttributes;
   data: SampleDocument[];
+  uiAttributes: {
+    color: string;
+  };
 }
 
 export type DataSourceEvent =

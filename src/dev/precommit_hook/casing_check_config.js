@@ -74,10 +74,6 @@ export const IGNORE_FILE_GLOBS = [
 
   'x-pack/solutions/observability/plugins/profiling/Makefile',
 
-  // Bazel default files
-  '**/WORKSPACE.bazel',
-  '**/BUILD.bazel',
-
   // Buildkite
   '.buildkite/**/*',
 
@@ -94,7 +90,7 @@ export const IGNORE_FILE_GLOBS = [
   'updatecli-compose.yaml',
 
   // naming convention follow this pattern: kb-product-doc-{{productName}}-{{versionMajor}}.{{versionMinor}}.zip: https://github.com/elastic/kibana/blob/33993b7123bc0d6c85d9c42b15610cc0d5092281/docs/reference/configuration-reference/ai-assistant-settings.md
-  'x-pack/test/api_integration/deployment_agnostic/apis/observability/ai_assistant/complete/product_docs/**/*',
+  'x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/complete/product_docs/**/*',
 ];
 
 /**
@@ -110,6 +106,7 @@ export const KEBAB_CASE_DIRECTORY_GLOBS = [
   'src/dev/packages/*',
   'src/core/packages/*/*',
   'src/platform/packages/private/*',
+  'src/platform/packages/private/opentelemetry/*',
   'src/platform/packages/shared/*',
   'x-pack/platform/packages/private/*',
   'x-pack/platform/packages/shared/*',

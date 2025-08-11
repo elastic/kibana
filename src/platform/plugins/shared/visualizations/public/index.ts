@@ -90,3 +90,5 @@ export const getConvertToLensModule = async () => {
   return await import('./convert_to_lens');
 };
 export { getDataViewByIndexPatternId } from './convert_to_lens/datasource';
+
+export { visContainerClassName, visContainerStyle } from './vis.styles';

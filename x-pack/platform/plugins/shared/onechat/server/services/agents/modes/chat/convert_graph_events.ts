@@ -14,8 +14,7 @@ import {
   MessageCompleteEvent,
   ToolCallEvent,
   ToolResultEvent,
-} from '@kbn/onechat-common/agents';
-import { StructuredToolIdentifier } from '@kbn/onechat-common/tools';
+} from '@kbn/onechat-common';
 import {
   matchGraphName,
   matchEvent,
@@ -30,6 +29,7 @@ import {
   toolIdentifierFromToolCall,
   ToolIdMapping,
 } from '@kbn/onechat-genai-utils/langchain';
+import { Logger } from '@kbn/logging';
 import type { StateType } from './graph';
 
 export type ConvertedEvents =
@@ -41,12 +41,14 @@ export type ConvertedEvents =
 export const convertGraphEvents = ({
   graphName,
   toolIdMapping,
+  logger,
 }: {
   graphName: string;
   toolIdMapping: ToolIdMapping;
+  logger: Logger;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
-    const toolCallIdToIdMap = new Map<string, StructuredToolIdentifier>();
+    const toolCallIdToIdMap = new Map<string, string>();
     const messageId = uuidv4();
 
     return streamEvents$.pipe(
@@ -79,8 +81,7 @@ export const convertGraphEvents = ({
               toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
               toolCallEvents.push(
                 createToolCallEvent({
-                  toolId: toolId.toolId,
-                  toolType: toolId.providerId,
+                  toolId,
                   toolCallId,
                   params: args,
                 })
@@ -110,9 +111,8 @@ export const convertGraphEvents = ({
             toolResultEvents.push(
               createToolResultEvent({
                 toolCallId: toolMessage.tool_call_id,
-                toolId: toolId?.toolId ?? 'unknown',
-                toolType: toolId?.providerId ?? 'unknown',
-                result: JSON.stringify(toolReturn.result),
+                toolId: toolId ?? 'unknown',
+                results: toolReturn.results,
               })
             );
           }

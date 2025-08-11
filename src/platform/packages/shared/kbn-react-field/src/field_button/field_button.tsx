@@ -9,8 +9,9 @@
 
 import classNames from 'classnames';
 import React, { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
-import { CommonProps } from '@elastic/eui';
-import './field_button.scss';
+import { css } from '@emotion/react';
+import { euiFocusRing, euiFontSize, type CommonProps, type UseEuiTheme } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
   /**
@@ -64,14 +65,7 @@ export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
   buttonProps?: ButtonHTMLAttributes<HTMLButtonElement> & CommonProps;
 }
 
-const sizeToClassNameMap = {
-  xs: 'kbnFieldButton--xs',
-  s: 'kbnFieldButton--s',
-} as const;
-
-export type ButtonSize = keyof typeof sizeToClassNameMap;
-
-export const SIZES = Object.keys(sizeToClassNameMap) as ButtonSize[];
+export type ButtonSize = 'xs' | 's';
 
 export function FieldButton({
   size,
@@ -88,12 +82,12 @@ export function FieldButton({
   buttonProps,
   ...rest
 }: FieldButtonProps) {
+  const styles = useMemoCss(componentStyles);
+
   const classes = classNames(
     'kbnFieldButton',
-    size ? sizeToClassNameMap[size] : null,
     {
-      'kbnFieldButton-isActive': isActive,
-      'kbnFieldButton--flushBoth': flush === 'both',
+      kbnFieldButtonIsActive: isActive,
     },
     className
   );
@@ -102,19 +96,42 @@ export function FieldButton({
 
   const innerContent = (
     <>
-      {fieldIcon && <span className="kbnFieldButton__fieldIcon">{fieldIcon}</span>}
+      {fieldIcon && (
+        <span data-test-subj="kbnFieldButton_fieldIcon" css={styles.fieldIcon}>
+          {fieldIcon}
+        </span>
+      )}
       {fieldName && (
-        <span className="kbnFieldButton__name eui-textBreakAll">
+        <span className="kbnFieldButton__name eui-textBreakAll" css={styles.buttonName}>
           <span className="kbnFieldButton__nameInner">{fieldName}</span>
         </span>
       )}
-      {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
+      {fieldInfoIcon && (
+        <div css={styles.infoIcon} data-test-subj="kbnFieldButton_fieldInfoIcon">
+          {fieldInfoIcon}
+        </div>
+      )}
     </>
   );
 
   return (
-    <div className={classes} {...rest}>
-      {dragHandle && <div className="kbnFieldButton__dragHandle">{dragHandle}</div>}
+    <div
+      className={classes}
+      css={[
+        styles.fieldButtonWrapper,
+        size === 'xs' && styles.fieldButtonWrapperXs,
+        flush === 'both' && styles.buttonFlushBoth,
+      ]}
+      {...rest}
+    >
+      {dragHandle && (
+        <div
+          data-test-subj="kbnFieldButton_dragHandle"
+          css={[styles.dragHandle, size === 'xs' && styles.dragHandleXs]}
+        >
+          {dragHandle}
+        </div>
+      )}
       {onClick ? (
         <button
           onClick={(e) => {
@@ -125,17 +142,108 @@ export function FieldButton({
           }}
           data-test-subj={dataTestSubj}
           className={contentClasses}
+          css={[styles.fieldButton, size === 'xs' && styles.fieldButtonXs]}
           {...buttonProps}
         >
           {innerContent}
         </button>
       ) : (
-        <div className={contentClasses} data-test-subj={dataTestSubj}>
+        <div
+          className={contentClasses}
+          css={[styles.fieldButton, size === 'xs' && styles.fieldButtonXs]}
+          data-test-subj={dataTestSubj}
+        >
           {innerContent}
         </div>
       )}
 
-      {fieldAction && <div className="kbnFieldButton__fieldAction">{fieldAction}</div>}
+      {fieldAction && (
+        <div
+          data-test-subj="kbnFieldButton_fieldAction"
+          css={[styles.fieldAction, size === 'xs' && styles.fieldActionXs]}
+        >
+          {fieldAction}
+        </div>
+      )}
     </div>
   );
 }
+
+const componentStyles = {
+  fieldButtonWrapper: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+    const { fontSize } = euiFontSize(themeContext, 's');
+
+    return css({
+      fontSize,
+      borderRadius: euiTheme.border.radius.medium,
+      marginBottom: euiTheme.size.xs,
+      padding: `0 ${euiTheme.size.s}`,
+      display: 'flex',
+      alignItems: 'flex-start',
+      transition: `box-shadow ${euiTheme.animation.fast} ${euiTheme.animation.resistance}, background-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance}`,
+
+      '&:focusWithin': euiFocusRing(themeContext),
+      '&.kbnFieldButtonIsActive': euiFocusRing(themeContext),
+    });
+  },
+  fieldButtonWrapperXs: (themeContext: UseEuiTheme) => {
+    const { fontSize } = euiFontSize(themeContext, 'xs');
+    return css({
+      fontSize,
+    });
+  },
+  fieldButton: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flexGrow: 1,
+      textAlign: 'left',
+      padding: `${euiTheme.size.s} 0`,
+      display: 'flex',
+      alignItems: 'flex-start',
+      lineHeight: 'normal',
+    }),
+  fieldButtonXs: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: `${euiTheme.size.xs} 0`,
+    }),
+  fieldIcon: css({
+    flexShrink: 0,
+    lineHeight: 0,
+  }),
+  buttonName: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flexGrow: 1,
+      padding: `0 ${euiTheme.size.s}`,
+    }),
+  infoIcon: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: euiTheme.size.base,
+      flexShrink: 0,
+      lineHeight: 0,
+    }),
+  fieldAction: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginLeft: euiTheme.size.s,
+      lineHeight: euiTheme.size.xl,
+    }),
+  fieldActionXs: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginLeft: euiTheme.size.xs,
+      lineHeight: euiTheme.size.l,
+    }),
+  dragHandle: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginRight: euiTheme.size.s,
+      lineHeight: euiTheme.size.xl,
+    }),
+  dragHandleXs: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      lineHeight: euiTheme.size.l,
+    }),
+  buttonFlushBoth: css({
+    paddingInline: 0,
+  }),
+};

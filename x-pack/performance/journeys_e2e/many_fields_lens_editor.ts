@@ -13,7 +13,7 @@ export const journey = new Journey({
   kbnArchives: ['x-pack/performance/kbn_archives/lens_many_fields'],
   esArchives: ['src/platform/test/functional/fixtures/es_archiver/stress_test'],
 })
-  .step('Go to Visualize Library landing page', async ({ page, kbnUrl, kibanaPage }) => {
+  .step('Go to Visualize library landing page', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(
       kbnUrl.get(
         `/app/visualize#/?_g=(filters:!(),time:(from:'2022-09-07T10:53:30.262Z',to:'2022-09-07T10:55:09.280Z'))`

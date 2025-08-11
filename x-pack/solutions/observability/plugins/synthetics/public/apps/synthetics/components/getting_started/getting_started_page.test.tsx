@@ -15,6 +15,11 @@ import { SyntheticsSettingsContextValues } from '../../contexts/synthetics_setti
 import { fireEvent } from '@testing-library/react';
 import { kibanaService } from '../../../../utils/kibana_service';
 
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useGeneratedHtmlId: () => 'mocked-id',
+}));
+
 describe('GettingStartedPage', () => {
   beforeEach(() => {
     jest.spyOn(privateLocationsHooks, 'usePrivateLocationsAPI').mockReturnValue({

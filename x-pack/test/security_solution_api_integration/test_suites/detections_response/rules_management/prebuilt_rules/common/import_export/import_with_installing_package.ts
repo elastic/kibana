@@ -5,19 +5,31 @@
  * 2.0.
  */
 
-import path from 'path';
-import fs from 'fs';
 import expect from 'expect';
-import type { Client } from '@elastic/elasticsearch';
-import type SuperTest from 'supertest';
+import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import {
   deleteAllPrebuiltRuleAssets,
   installPrebuiltRules,
-  refreshSavedObjectIndices,
   importRulesWithSuccess,
+  createPrebuiltRulesPackage,
+  installFleetPackageByUpload,
+  deletePrebuiltRulesFleetPackage,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import {
+  PREBUILT_RULE_ASSET_A,
+  PREBUILT_RULE_ASSET_B,
+  PREBUILT_RULE_ID_A,
+  PREBUILT_RULE_ID_B,
+} from '../configs/edge_cases/ess_air_gapped_with_bundled_packages.config';
+
+const NON_CUSTOMIZED_PREBUILT_RULE = PREBUILT_RULE_ASSET_A;
+const CUSTOMIZED_PREBUILT_RULE = {
+  ...PREBUILT_RULE_ASSET_B,
+  description: 'Custom description',
+  tags: ['custom-tag'],
+};
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -26,61 +38,11 @@ export default ({ getService }: FtrProviderContext): void => {
   const securitySolutionApi = getService('securitySolutionApi');
   const retryService = getService('retry');
 
-  // Prebuilt rules matching rules in the mock package
-  const PREBUILT_RULE_ID_A = 'test-prebuilt-rule-a';
-  const NON_CUSTOMIZED_PREBUILT_RULE = {
-    rule_id: PREBUILT_RULE_ID_A,
-    version: 3,
-    type: 'query',
-    name: 'Mock rule A from mock 99.0.0 package',
-    description: 'Mock rule A from mock 99.0.0 package',
-    risk_score: 47,
-    severity: 'medium',
-    from: 'now-30m',
-    index: ['test-*'],
-    author: ['Elastic'],
-    license: 'Elastic License v2',
-    query: '*:*',
-    language: 'kuery',
-    immutable: true,
-    rule_source: {
-      type: 'external',
-      is_customized: false,
-    },
-  };
-  const PREBUILT_RULE_ID_B = 'test-prebuilt-rule-b';
-  const CUSTOMIZED_PREBUILT_RULE = {
-    rule_id: PREBUILT_RULE_ID_B,
-    version: 3,
-    type: 'eql',
-    name: 'Mock rule B from mock 99.0.0 package',
-    description: 'Custom description',
-    tags: ['custom-tag'],
-    risk_score: 47,
-    severity: 'medium',
-    from: 'now-30m',
-    index: ['test-*'],
-    author: ['Elastic'],
-    license: 'Elastic License v2',
-    query: 'any where true',
-    language: 'eql',
-    immutable: true,
-    rule_source: {
-      type: 'external',
-      is_customized: true,
-    },
-  };
-
   describe('@ess @serverless @skipInServerlessMKI Import prebuilt rules when the package is not installed', () => {
     beforeEach(async () => {
+      await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
-      await deleteMockPrebuiltRulesPackage(supertest);
-    });
-
-    after(async () => {
-      await deleteAllPrebuiltRuleAssets(es, log);
-      await deleteAllRules(supertest, log);
     });
 
     const IMPORT_PAYLOAD = [
@@ -171,7 +133,20 @@ export default ({ getService }: FtrProviderContext): void => {
       // Package installation is rate limited. A single package installation is allowed per 10 seconds.
       await retryService.tryWithRetries(
         'installSecurityDetectionEnginePackage',
-        async () => await installMockPrebuiltRulesPackageWithTestRules(es, supertest),
+        async () => {
+          const securityDetectionEnginePackageZip = createPrebuiltRulesPackage({
+            packageName: PREBUILT_RULES_PACKAGE_NAME,
+            // Use a high version to avoid conflicts with real packages
+            // including mock bundled packages path configured via "xpack.fleet.developer.bundledPackageLocation"
+            packageSemver: '99.0.0',
+            prebuiltRuleAssets: [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B],
+          });
+
+          await installFleetPackageByUpload({
+            getService,
+            packageBuffer: securityDetectionEnginePackageZip.toBuffer(),
+          });
+        },
         {
           retryCount: 5,
           retryDelay: 5000,
@@ -179,7 +154,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       );
       await installPrebuiltRules(es, supertest);
-      await deleteMockPrebuiltRulesPackage(supertest).expect(200);
+      await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
 
       await importRulesWithSuccess({
         getService,
@@ -246,32 +221,3 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   });
 };
-
-async function installMockPrebuiltRulesPackageWithTestRules(
-  es: Client,
-  supertest: SuperTest.Agent
-): Promise<void> {
-  const buffer = fs.readFileSync(
-    path.join(path.dirname(__filename), '../fixtures/packages/security_detection_engine-99.0.0.zip')
-  );
-  const response = await supertest
-    .post('/api/fleet/epm/packages')
-    .set('kbn-xsrf', 'xxxx')
-    .set('elastic-api-version', '2023-10-31')
-    .type('application/zip')
-    .send(buffer)
-    .expect(200);
-
-  expect(response.body.items).toBeDefined();
-  expect(response.body.items.length).toBeGreaterThan(0);
-
-  await refreshSavedObjectIndices(es);
-}
-
-function deleteMockPrebuiltRulesPackage(supertest: SuperTest.Agent): SuperTest.Test {
-  return supertest
-    .delete('/api/fleet/epm/packages/security_detection_engine/99.0.0')
-    .set('kbn-xsrf', 'xxxx')
-    .set('elastic-api-version', '2023-10-31')
-    .send();
-}

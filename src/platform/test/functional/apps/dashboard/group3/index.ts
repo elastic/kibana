@@ -36,7 +36,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     } else {
       loadTestFile(require.resolve('./dashboard_time_picker'));
       loadTestFile(require.resolve('./bwc_urls'));
-      loadTestFile(require.resolve('./panel_context_menu'));
       loadTestFile(require.resolve('./dashboard_state'));
     }
   });

@@ -6,9 +6,9 @@
  */
 
 import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
-import { DeploymentAgnosticFtrProviderContext } from '../../../../../api_integration/deployment_agnostic/ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const samlAuth = getService('samlAuth');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;

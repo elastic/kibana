@@ -15,6 +15,7 @@ export {
   getRootPropertiesObjects,
   getTypes,
   type IndexMapping,
+  type IndexMappingSafe,
   type IndexMappingMeta,
   type IndexTypesMap,
   type SavedObjectsTypeMappingDefinitions,

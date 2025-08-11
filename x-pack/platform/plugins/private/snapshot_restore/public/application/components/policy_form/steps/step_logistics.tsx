@@ -111,6 +111,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         fullWidth
       >
         <EuiFieldText
+          isInvalid={touched.name && Boolean(errors.name)}
           defaultValue={policy.name}
           fullWidth
           onBlur={() => setTouched({ ...touched, name: true })}
@@ -412,6 +413,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             fullWidth
           >
             <EuiFieldText
+              isInvalid={touched.schedule && Boolean(errors.schedule)}
               defaultValue={policy.schedule}
               fullWidth
               onChange={(e) => {

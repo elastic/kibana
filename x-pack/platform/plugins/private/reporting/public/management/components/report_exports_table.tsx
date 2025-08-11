@@ -406,9 +406,15 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
             onClick: (job) => this.setState({ selectedJob: job }),
           },
           {
-            name: i18n.translate('xpack.reporting.exports.table.openInKibanaAppLabel', {
-              defaultMessage: 'Open Dashboard',
-            }),
+            name: (job) =>
+              i18n.translate('xpack.reporting.schedules.table.openDashboard.title', {
+                defaultMessage: 'Open in {objectType}',
+                values: {
+                  objectType: job.objectType
+                    ? getDisplayNameFromObjectType(job.objectType)
+                    : 'Kibana',
+                },
+              }),
             'data-test-subj': 'reportOpenInKibanaApp',
             description: i18n.translate(
               'xpack.reporting.exports.table.openInKibanaAppDescription',

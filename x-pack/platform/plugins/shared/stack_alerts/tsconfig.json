@@ -54,7 +54,6 @@
     "@kbn/object-utils",
     "@kbn/expressions-plugin",
     "@kbn/esql-ast",
-    "@kbn/esql-validation-autocomplete",
   ],
   "exclude": ["target/**/*"]
 }

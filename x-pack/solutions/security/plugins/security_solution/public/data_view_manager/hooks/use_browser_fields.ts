@@ -13,6 +13,8 @@ import { useDataView } from './use_data_view';
 import { browserFieldsManager } from '../utils/security_browser_fields_manager';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
+const emptyFields = {};
+
 export const useBrowserFields = (
   scope: DataViewManagerScopeName = DataViewManagerScopeName.default,
   /**
@@ -25,8 +27,8 @@ export const useBrowserFields = (
   const activeDataView = newDataViewPickerEnabled ? dataView : oldDataView;
 
   return useMemo(() => {
-    if (!activeDataView) {
-      return {};
+    if (!activeDataView?.id) {
+      return emptyFields;
     }
 
     const { browserFields } = browserFieldsManager.getBrowserFields(activeDataView, scope);

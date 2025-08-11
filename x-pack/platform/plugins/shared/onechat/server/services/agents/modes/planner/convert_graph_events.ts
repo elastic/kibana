@@ -17,7 +17,7 @@ import {
   ToolResultEvent,
   isToolCallEvent,
   isToolResultEvent,
-} from '@kbn/onechat-common/agents';
+} from '@kbn/onechat-common';
 import {
   matchGraphName,
   matchEvent,
@@ -29,6 +29,7 @@ import {
   createReasoningEvent,
   ToolIdMapping,
 } from '@kbn/onechat-genai-utils/langchain';
+import { Logger } from '@kbn/logging';
 import { convertGraphEvents as convertExecutorEvents } from '../chat/convert_graph_events';
 import type { StateType } from './graph';
 import { lastPlanningResult, PlanningResult } from './backlog';
@@ -53,9 +54,11 @@ const formatPlanningResult = (planning: PlanningResult): string => {
 export const convertGraphEvents = ({
   graphName,
   toolIdMapping,
+  logger,
 }: {
   graphName: string;
   toolIdMapping: ToolIdMapping;
+  logger: Logger;
 }): OperatorFunction<LangchainStreamEvent, ResearcherAgentEvents> => {
   return (streamEvents$) => {
     const messageId = uuidv4();
@@ -67,6 +70,7 @@ export const convertGraphEvents = ({
         convertExecutorEvents({
           graphName: 'executor_agent',
           toolIdMapping,
+          logger,
         }),
         filter((event) => {
           return isToolCallEvent(event) || isToolResultEvent(event);

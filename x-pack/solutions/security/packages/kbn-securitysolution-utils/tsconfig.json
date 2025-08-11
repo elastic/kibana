@@ -9,7 +9,6 @@
     "@kbn/i18n",
     "@kbn/esql-utils",
     "@kbn/esql-ast",
-    "@kbn/esql-validation-autocomplete",
     "@kbn/datemath"
   ],
   "exclude": ["target/**/*"]

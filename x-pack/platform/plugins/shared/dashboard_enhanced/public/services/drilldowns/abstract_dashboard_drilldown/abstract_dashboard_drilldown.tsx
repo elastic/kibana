@@ -17,6 +17,7 @@ import { CollectConfigProps, StartServicesGetter } from '@kbn/kibana-utils-plugi
 import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { CollectConfigContainer } from './components';
 import { txtGoToDashboard } from './i18n';
 import { Config } from './types';
@@ -25,6 +26,7 @@ export interface Params {
     uiActionsEnhanced: AdvancedUiActionsStart;
     data: DataPublicPluginStart;
     share: SharePluginStart;
+    dashboard: DashboardStart;
   }>;
 }
 

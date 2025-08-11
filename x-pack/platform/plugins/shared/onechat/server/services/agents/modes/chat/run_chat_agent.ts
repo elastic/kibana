@@ -40,10 +40,12 @@ export const runChatAgent: RunChatAgentFn = async (
     customInstructions,
     runId = uuidv4(),
     agentId,
+    abortSignal,
   },
   { logger, request, modelProvider, toolProvider, events }
 ) => {
   const model = await modelProvider.getDefaultModel();
+  logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
 
   const selectedTools = await selectProviderTools({
     provider: toolProvider,
@@ -61,6 +63,7 @@ export const runChatAgent: RunChatAgentFn = async (
     nextInput,
     previousRounds: conversation,
   });
+
   const agentGraph = createAgentGraph({
     logger,
     chatModel: model.chatModel,
@@ -68,17 +71,20 @@ export const runChatAgent: RunChatAgentFn = async (
     customInstructions,
   });
 
+  logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
+
   const eventStream = agentGraph.streamEvents(
     { initialMessages },
     {
       version: 'v2',
+      signal: abortSignal,
       runName: chatAgentGraphName,
       metadata: {
         graphName: chatAgentGraphName,
         agentId,
         runId,
       },
-      recursionLimit: 10,
+      recursionLimit: 25,
       callbacks: [],
     }
   );
@@ -88,6 +94,7 @@ export const runChatAgent: RunChatAgentFn = async (
     convertGraphEvents({
       graphName: chatAgentGraphName,
       toolIdMapping,
+      logger,
     }),
     addRoundCompleteEvent({ userInput: nextInput }),
     shareReplay()

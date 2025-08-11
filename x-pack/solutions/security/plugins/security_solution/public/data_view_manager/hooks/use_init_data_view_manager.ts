@@ -96,6 +96,7 @@ export const useInitDataViewManager = () => {
       DataViewManagerScopeName.timeline,
       DataViewManagerScopeName.detections,
       DataViewManagerScopeName.analyzer,
+      DataViewManagerScopeName.explore,
     ].map((scope) =>
       createDataViewSelectedListener({
         scope,

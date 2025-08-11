@@ -9,13 +9,13 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand } from '../../../types';
 import { ESQL_NUMBER_TYPES } from '../../../definitions/types';
-import { pipeCompleteItem } from '../../utils/complete_items';
-import type { ISuggestionItem, ICommandCallbacks } from '../../types';
+import { pipeCompleteItem } from '../../complete_items';
+import type { ISuggestionItem, ICommandCallbacks, ICommandContext } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import {
   buildUserDefinedColumnsDefinitions,
   findFinalWord,
-} from '../../../definitions/utils/autocomplete';
+} from '../../../definitions/utils/autocomplete/helpers';
 
 export enum Position {
   VALUE = 'value',
@@ -90,9 +90,12 @@ export const asSuggestion: ISuggestionItem = {
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  callbacks?: ICommandCallbacks
+  callbacks?: ICommandCallbacks,
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
-  const pos = getPosition(query, command);
+  const innerText = query.substring(0, cursorPosition);
+  const pos = getPosition(innerText, command);
 
   switch (pos) {
     case Position.VALUE:
@@ -101,12 +104,12 @@ export async function autocomplete(
           advanceCursor: true,
           openSuggestions: true,
         })) ?? [];
-      const lastWord = findFinalWord(query);
+      const lastWord = findFinalWord(innerText);
       if (lastWord !== '') {
         numericFields.forEach((fieldSuggestion) => {
           fieldSuggestion.rangeToReplace = {
-            start: query.length - lastWord.length + 1,
-            end: query.length + 1,
+            start: innerText.length - lastWord.length + 1,
+            end: innerText.length + 1,
           };
         });
       }

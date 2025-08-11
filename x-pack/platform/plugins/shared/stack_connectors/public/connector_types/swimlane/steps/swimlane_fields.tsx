@@ -126,6 +126,7 @@ const MappingField: React.FC<{
           return (
             <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
               <EuiComboBox
+                isInvalid={isInvalid}
                 singleSelection={SINGLE_SELECTION}
                 selectedOptions={selectedOptions}
                 onChange={onComboChange}

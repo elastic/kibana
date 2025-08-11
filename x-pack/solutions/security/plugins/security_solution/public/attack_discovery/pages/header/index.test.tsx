@@ -47,6 +47,7 @@ describe('Actions', () => {
     (useAssistantAvailability as jest.Mock).mockReturnValue({
       hasAssistantPrivilege: true,
       isAssistantEnabled: true,
+      isAssistantVisible: true,
     });
 
     mockUseKibana.mockReturnValue({
@@ -106,20 +107,48 @@ describe('Actions', () => {
     expect(connectorSelector).not.toBeInTheDocument();
   });
 
-  it('invokes onGenerate when the generate button is clicked', () => {
-    const onGenerate = jest.fn();
+  describe('generate/run button', () => {
+    it('invokes onGenerate when the legacy generate button is clicked (feature flag false)', () => {
+      const featureFlagValue = false;
+      mockUseKibana.mockReturnValue({
+        services: {
+          featureFlags: {
+            getBooleanValue: jest.fn().mockReturnValue(featureFlagValue),
+          },
+        },
+      } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
 
-    render(
-      <TestProviders>
-        <Header {...defaultProps} onGenerate={onGenerate} />
-      </TestProviders>
-    );
+      const onGenerate = jest.fn();
+      render(
+        <TestProviders>
+          <Header {...defaultProps} onGenerate={onGenerate} />
+        </TestProviders>
+      );
+      const generate = screen.getByTestId('generate');
+      fireEvent.click(generate);
+      expect(onGenerate).toHaveBeenCalled();
+    });
 
-    const generate = screen.getByTestId('generate');
+    it('invokes onGenerate when the new run button is clicked (feature flag true)', () => {
+      const featureFlagValue = true;
+      mockUseKibana.mockReturnValue({
+        services: {
+          featureFlags: {
+            getBooleanValue: jest.fn().mockReturnValue(featureFlagValue),
+          },
+        },
+      } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
 
-    fireEvent.click(generate);
-
-    expect(onGenerate).toHaveBeenCalled();
+      const onGenerate = jest.fn();
+      render(
+        <TestProviders>
+          <Header {...defaultProps} onGenerate={onGenerate} />
+        </TestProviders>
+      );
+      const runBtn = screen.getByTestId('run');
+      fireEvent.click(runBtn);
+      expect(onGenerate).toHaveBeenCalled();
+    });
   });
 
   it('displays the cancel button when loading and the feature flag is false', () => {
@@ -194,32 +223,87 @@ describe('Actions', () => {
     expect(onCancel).toHaveBeenCalled();
   });
 
-  it('disables the generate button when connectorId is undefined', () => {
-    const connectorId = undefined;
+  describe('disabled state', () => {
+    it('disables the legacy generate button when connectorId is undefined (feature flag false)', () => {
+      const featureFlagValue = false;
+      mockUseKibana.mockReturnValue({
+        services: {
+          featureFlags: {
+            getBooleanValue: jest.fn().mockReturnValue(featureFlagValue),
+          },
+        },
+      } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
 
-    render(
-      <TestProviders>
-        <Header {...defaultProps} connectorId={connectorId} />
-      </TestProviders>
-    );
+      render(
+        <TestProviders>
+          <Header {...defaultProps} connectorId={undefined} />
+        </TestProviders>
+      );
+      const generate = screen.getByTestId('generate');
+      expect(generate).toBeDisabled();
+    });
 
-    const generate = screen.getByTestId('generate');
+    it('disables the new run button when connectorId is undefined (feature flag true)', () => {
+      const featureFlagValue = true;
+      mockUseKibana.mockReturnValue({
+        services: {
+          featureFlags: {
+            getBooleanValue: jest.fn().mockReturnValue(featureFlagValue),
+          },
+        },
+      } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
 
-    expect(generate).toBeDisabled();
+      render(
+        <TestProviders>
+          <Header {...defaultProps} connectorId={undefined} />
+        </TestProviders>
+      );
+      const runBtn = screen.getByTestId('run');
+      expect(runBtn).toBeDisabled();
+    });
   });
 
-  it('invokes openFlyout when the settings button is clicked', async () => {
-    const openFlyout = jest.fn();
+  describe('settings button', () => {
+    it('invokes openFlyout when the legacy settings button is clicked (feature flag false)', async () => {
+      const featureFlagValue = false;
+      mockUseKibana.mockReturnValue({
+        services: {
+          featureFlags: {
+            getBooleanValue: jest.fn().mockReturnValue(featureFlagValue),
+          },
+        },
+      } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
 
-    render(
-      <TestProviders>
-        <Header {...defaultProps} openFlyout={openFlyout} />
-      </TestProviders>
-    );
+      const openFlyout = jest.fn();
+      render(
+        <TestProviders>
+          <Header {...defaultProps} openFlyout={openFlyout} />
+        </TestProviders>
+      );
+      const settings = screen.getByTestId('openAlertSelection');
+      fireEvent.click(settings);
+      await waitFor(() => expect(openFlyout).toHaveBeenCalled());
+    });
 
-    const settings = screen.getByTestId('openAlertSelection');
-    fireEvent.click(settings);
+    it('invokes openFlyout when the new settings button is clicked (feature flag true)', async () => {
+      const featureFlagValue = true;
+      mockUseKibana.mockReturnValue({
+        services: {
+          featureFlags: {
+            getBooleanValue: jest.fn().mockReturnValue(featureFlagValue),
+          },
+        },
+      } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
 
-    await waitFor(() => expect(openFlyout).toHaveBeenCalled());
+      const openFlyout = jest.fn();
+      render(
+        <TestProviders>
+          <Header {...defaultProps} openFlyout={openFlyout} />
+        </TestProviders>
+      );
+      const settingsBtn = screen.getByTestId('settings');
+      fireEvent.click(settingsBtn);
+      await waitFor(() => expect(openFlyout).toHaveBeenCalled());
+    });
   });
 });
