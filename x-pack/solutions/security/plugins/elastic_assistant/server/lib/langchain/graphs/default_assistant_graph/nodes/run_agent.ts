@@ -12,8 +12,8 @@ import { BaseLanguageModelInput } from '@langchain/core/language_models/base';
 import { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 
-export interface RunAgentParams extends NodeParamsBase {
-  state: AgentState;
+export interface RunAgentParams extends Pick<NodeParamsBase, 'logger'> {
+  state: Pick<AgentState, 'messages'>;
   config?: RunnableConfig;
   model: Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>;
 }
@@ -38,13 +38,19 @@ export async function runAgent({
 
   const modifiedMessages = state.messages.map((message) => {
     if ('content' in message && typeof message.content === 'string') {
-      message.content = `${message.content}.`; // For some reason if the content can be parsed as JSON, then Gemini throws an error. Append a period to avoid this.
+      /* The Gemini models throw an error if the content can be parsed as JSON.
+      A hack to avoid this is to append a period to the end of the message. This map
+      should be removed when the root cause of that issue is fixed.
+      */
+      const newContent = `${message.content}.`;
+      message.content = newContent;
+      message.lc_kwargs.content = newContent;
     }
     return message;
   });
 
   const result = await model
-    .withConfig({ tags: [AGENT_NODE_TAG], signal: config?.signal })
+    .withConfig({ tags: [AGENT_NODE_TAG], ...config })
     .invoke(modifiedMessages);
 
   return {

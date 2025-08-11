@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { containsToolCalls } from '@kbn/langchain/server/utils/tools';
 import { NodeType } from '../constants';
 import { AgentState } from '../types';
 
@@ -18,11 +19,7 @@ export function stepRouter(state: AgentState): string {
   switch (state.lastNode) {
     case NodeType.AGENT:
       const lastMessage = state.messages[state.messages.length - 1];
-      if (
-        'tool_calls' in lastMessage &&
-        Array.isArray(lastMessage.tool_calls) &&
-        lastMessage.tool_calls?.length
-      ) {
+      if (containsToolCalls(lastMessage)) {
         return NodeType.TOOLS;
       }
       return NodeType.END;

@@ -41,6 +41,7 @@ export class TelemetryTracer extends BaseTracer implements LangChainTracerFields
     this.telemetry = fields.telemetry;
     this.telemetryParams = fields.telemetryParams;
   }
+
   async onToolError(run: Run) {
     const eventType = 'invoke_assistant_error';
     const telemetryValue = {
