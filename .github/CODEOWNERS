@@ -1840,7 +1840,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/serverless @elastic/appex-qa
 /x-pack/test/api_integration/deployment_agnostic @elastic/appex-qa
 /x-pack/platform/test/functional/services/ml/api.ts @elastic/appex-qa # temporarily due to SKA tests relocation
-/x-pack/test/api_integration/deployment_agnostic/apis/ @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/solutions/observability/test/functional/config.base.ts @elastic/appex-qa
 /x-pack/solutions/observability/test/functional/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/solutions/observability/test/functional/page_objects/index.ts @elastic/appex-qa
