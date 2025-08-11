@@ -5448,6 +5448,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dashboard-markdown@link:src/platform/plugins/shared/dashboard_markdown":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dashboard-plugin@link:src/platform/plugins/shared/dashboard":
   version "0.0.0"
   uid ""
@@ -5969,6 +5973,10 @@
   uid ""
 
 "@kbn/failed-test-reporter-cli@link:packages/kbn-failed-test-reporter-cli":
+  version "0.0.0"
+  uid ""
+
+"@kbn/failure-store-modal@link:x-pack/platform/packages/shared/kbn-failure-store-modal":
   version "0.0.0"
   uid ""
 
