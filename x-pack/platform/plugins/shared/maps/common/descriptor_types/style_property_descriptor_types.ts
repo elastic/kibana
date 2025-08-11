@@ -276,13 +276,13 @@ export type EMSVectorTileStyleDescriptor = StyleDescriptor & {
   color: string;
 };
 
-export type StylePropertyOptions =
+/* export type StylePropertyOptions =
   | LabelBorderSizeOptions
   | LabelPositionStylePropertyDescriptor['options']
   | LabelZoomRangeStylePropertyDescriptor['options']
   | SymbolizeAsOptions
   | DynamicStylePropertyOptions
-  | StaticStylePropertyOptions;
+  | StaticStylePropertyOptions;*/
 
 export type StaticStylePropertyOptions =
   | ColorStaticOptions
