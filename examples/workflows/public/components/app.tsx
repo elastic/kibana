@@ -74,7 +74,7 @@ workflow:
         message: Step 1 executed for rule"{{event.ruleName}}"
     
     - name: slack-connector-step
-      type: slack.sendMessage
+      type: slack
       connector-id: keep-playground
       with:
         message: |

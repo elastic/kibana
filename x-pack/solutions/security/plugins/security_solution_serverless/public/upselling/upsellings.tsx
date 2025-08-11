@@ -24,6 +24,7 @@ import {
   EndpointCustomNotificationLazy,
   EndpointPolicyProtectionsLazy,
   EndpointProtectionUpdatesLazy,
+  EndpointDeviceControlLazy,
   RuleDetailsEndpointExceptionsLazy,
 } from './sections/endpoint_management';
 import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
@@ -127,6 +128,11 @@ export const upsellingSections: UpsellingSections = [
     id: 'ruleDetailsEndpointExceptions',
     pli: ProductFeatureKey.endpointExceptions,
     component: RuleDetailsEndpointExceptionsLazy,
+  },
+  {
+    id: 'endpoint_device_control',
+    pli: ProductFeatureKey.endpointTrustedDevices,
+    component: EndpointDeviceControlLazy,
   },
   {
     id: 'endpoint_protection_updates',

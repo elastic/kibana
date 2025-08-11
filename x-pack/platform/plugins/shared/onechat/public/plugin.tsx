@@ -12,7 +12,8 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { registerApp } from './register';
+import { ONECHAT_UI_SETTING_ID } from '../common/constants';
+import { registerAnalytics, registerApp } from './register';
 import {
   AgentService,
   ChatService,
@@ -27,7 +28,6 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
-import { ONECHAT_UI_SETTING_ID } from '../common/constants';
 
 export class OnechatPlugin
   implements
@@ -57,7 +57,10 @@ export class OnechatPlugin
           return this.internalServices;
         },
       });
+
+      registerAnalytics({ analytics: core.analytics });
     }
+
     return {};
   }
 

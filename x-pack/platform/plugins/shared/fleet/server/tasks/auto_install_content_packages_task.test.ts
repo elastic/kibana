@@ -34,6 +34,9 @@ jest.mock('../services/epm/registry');
 jest.mock('../services/epm/packages', () => ({
   getInstalledPackages: jest.fn(),
 }));
+jest.mock('../services/epm/packages/get_prerelease_setting', () => ({
+  getPrereleaseFromSettings: jest.fn().mockReturnValue(false),
+}));
 
 const MockRegistry = jest.mocked(Registry);
 
@@ -170,8 +173,10 @@ describe('AutoInstallContentPackagesTask', () => {
       });
       expect(packageClientMock.installPackage).toHaveBeenCalledTimes(2);
       expect(esClient.esql.query).toHaveBeenCalledWith({
-        query:
-          'FROM logs-*,metrics-*,traces-* | KEEP @timestamp, data_stream.dataset | WHERE @timestamp > NOW() - 10 minutes | STATS COUNT(*) BY data_stream.dataset | LIMIT 100 ',
+        query: `FROM logs-*,metrics-*,traces-* 
+      | KEEP @timestamp, data_stream.dataset 
+      | WHERE @timestamp > NOW() - 10 minutes 
+      | STATS COUNT(*) BY data_stream.dataset `,
       });
     });
 
@@ -195,8 +200,10 @@ describe('AutoInstallContentPackagesTask', () => {
       });
       expect(packageClientMock.installPackage).toHaveBeenCalledTimes(1);
       expect(esClient.esql.query).toHaveBeenCalledWith({
-        query:
-          'FROM logs-*,metrics-*,traces-* | KEEP @timestamp, data_stream.dataset | WHERE @timestamp > NOW() - 10 minutes | STATS COUNT(*) BY data_stream.dataset | LIMIT 100 | WHERE data_stream.dataset NOT IN ("system.test")',
+        query: `FROM logs-*,metrics-*,traces-* 
+      | KEEP @timestamp, data_stream.dataset 
+      | WHERE @timestamp > NOW() - 10 minutes 
+      | STATS COUNT(*) BY data_stream.dataset | WHERE data_stream.dataset NOT IN ("system.test")`,
       });
     });
 

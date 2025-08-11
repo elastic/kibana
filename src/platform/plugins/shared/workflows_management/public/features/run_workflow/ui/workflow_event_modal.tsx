@@ -15,6 +15,7 @@ import {
   EuiButton,
   EuiFlexItem,
   EuiFlexGroup,
+  useGeneratedHtmlId,
   EuiComboBox,
   EuiFormRow,
   EuiText,
@@ -58,6 +59,7 @@ export function WorkflowEventModal({
 }) {
   const { services } = useKibana();
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
+  const modalTitleId = useGeneratedHtmlId();
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [alertsLoading, setAlertsLoading] = useState(false);
@@ -237,9 +239,14 @@ export function WorkflowEventModal({
   };
 
   return (
-    <EuiModal onClose={onClose} maxWidth={1400} style={{ width: '1200px' }}>
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      onClose={onClose}
+      maxWidth={1400}
+      style={{ width: '1200px' }}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Run Workflow</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>Run Workflow</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiFlexGroup direction="column" gutterSize="l">

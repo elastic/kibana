@@ -14,17 +14,17 @@ import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/
 export class EnterForeachNodeImpl implements StepImplementation {
   constructor(
     private step: EnterForeachNode,
-    private workflowState: WorkflowExecutionRuntimeManager
+    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
   public async run(): Promise<void> {
-    const evaluatedItems = this.step.configuration.foreach; // must be real items from step definition
-    const foreachState = this.workflowState.getStepState(this.step.id);
+    const foreachState = this.wfExecutionRuntimeManager.getStepState(this.step.id);
 
     if (!foreachState) {
-      await this.workflowState.startStep(this.step.id);
+      const evaluatedItems = this.getItems();
+      await this.wfExecutionRuntimeManager.startStep(this.step.id);
       // Initialize foreach state
-      void this.workflowState.setStepState(this.step.id, {
+      await this.wfExecutionRuntimeManager.setStepState(this.step.id, {
         items: evaluatedItems,
         item: evaluatedItems[0],
         index: 0,
@@ -34,9 +34,9 @@ export class EnterForeachNodeImpl implements StepImplementation {
       // Update items and index if they have changed
       const items = foreachState.items;
       const index = foreachState.index + 1;
-      const item = evaluatedItems[index];
+      const item = items[index];
       const total = foreachState.total;
-      void this.workflowState.setStepState(this.step.id, {
+      await this.wfExecutionRuntimeManager.setStepState(this.step.id, {
         items,
         index,
         item,
@@ -44,6 +44,12 @@ export class EnterForeachNodeImpl implements StepImplementation {
       });
     }
 
-    void this.workflowState.goToNextStep();
+    this.wfExecutionRuntimeManager.goToNextStep();
+  }
+
+  private getItems(): any[] {
+    return Array.isArray(this.step.configuration.foreach)
+      ? this.step.configuration.foreach
+      : JSON.parse(this.step.configuration.foreach); // must be real items from step definition
   }
 }

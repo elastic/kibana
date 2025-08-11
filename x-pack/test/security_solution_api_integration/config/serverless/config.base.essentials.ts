@@ -15,6 +15,12 @@ export interface CreateTestConfigOptions {
   junit: { reportName: string };
   kbnTestServerArgs?: string[];
   kbnTestServerEnv?: Record<string, string>;
+  /**
+   * Log message to wait for before initiating tests, defaults to waiting for Kibana status to be `available`.
+   * Note that this log message must not be filtered out by the current logging config, for example by the
+   * log level. If needed, you can adjust the logging level via `kbnTestServer.serverArgs`.
+   */
+  kbnTestServerWait?: RegExp;
 }
 
 export function createTestConfig(options: CreateTestConfigOptions) {
@@ -42,6 +48,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         env: {
           ...svlSharedConfig.get('kbnTestServer.env'),
           ...options.kbnTestServerEnv,
+        },
+        runOptions: {
+          ...svlSharedConfig.get('kbnTestServer.runOptions'),
+          wait: options.kbnTestServerWait,
         },
       },
       testFiles: options.testFiles,

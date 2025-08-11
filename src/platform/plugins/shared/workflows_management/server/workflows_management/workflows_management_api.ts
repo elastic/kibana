@@ -9,19 +9,20 @@
 
 import {
   CreateWorkflowCommand,
-  WorkflowListDto,
-  WorkflowExecutionDto,
-  WorkflowExecutionListDto,
-  WorkflowDetailDto,
   EsWorkflow,
-  WorkflowExecutionEngineModel,
-  UpdatedWorkflowResponseDto,
   transformWorkflowYamlJsontoEsWorkflow,
+  UpdatedWorkflowResponseDto,
+  WorkflowDetailDto,
+  WorkflowExecutionDto,
+  WorkflowExecutionEngineModel,
+  WorkflowExecutionListDto,
+  WorkflowListDto,
+  WorkflowYaml,
 } from '@kbn/workflows';
-import { parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
-import { WorkflowsService } from './workflows_management_service';
+import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import { SchedulerService } from '../scheduler/scheduler_service';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common';
+import { WorkflowsService } from './workflows_management_service';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event';
@@ -112,8 +113,7 @@ export class WorkflowsManagementApi {
       throw parsedYaml.error;
     }
 
-    // @ts-expect-error - TODO: fix this
-    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
+    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
 
     return await this.schedulerService.runWorkflow(
       {

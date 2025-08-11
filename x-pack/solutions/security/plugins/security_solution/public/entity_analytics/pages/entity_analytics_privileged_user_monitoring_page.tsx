@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
+import { PrivilegeMonitoringEngineStatusEnum } from '../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import type { PrivMonHealthResponse } from '../../../common/api/entity_analytics/privilege_monitoring/health.gen';
 import type { InitMonitoringEngineResponse } from '../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
 import { SecurityPageName } from '../../app/types';
@@ -166,7 +167,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
       });
     }
 
-    if (engineStatus.data?.status === 'not_found') {
+    if (engineStatus.data?.status === PrivilegeMonitoringEngineStatusEnum.not_installed) {
       return dispatch({ type: 'SHOW_ONBOARDING' });
     } else {
       return dispatch({ type: 'SHOW_DASHBOARD' });

@@ -11,7 +11,7 @@ export interface GetDocumentByIdSuccess {
   id: string;
   index: string;
   found: true;
-  _source: unknown;
+  _source: Record<string, unknown>;
 }
 
 export interface GetDocumentByIdFailure {
@@ -31,7 +31,7 @@ export const getDocumentById = async ({
   index: string;
   esClient: ElasticsearchClient;
 }): Promise<GetDocumentByIdResult> => {
-  const { body: response, statusCode } = await esClient.get(
+  const { body: response, statusCode } = await esClient.get<Record<string, unknown>>(
     {
       id,
       index,

@@ -20,7 +20,6 @@ import {
   ESQLOrderExpression,
   ESQLProperNode,
   ESQLSource,
-  ESQLTimeInterval,
   ESQLUnknownItem,
 } from '../types';
 
@@ -31,7 +30,6 @@ export type NodeMatchKeys =
   | keyof ESQLCommandOption
   | keyof ESQLSource
   | keyof ESQLColumn
-  | keyof ESQLTimeInterval
   | keyof ESQLList
   | keyof ESQLLiteral
   | keyof ESQLIdentifier

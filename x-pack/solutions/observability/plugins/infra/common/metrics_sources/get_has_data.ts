@@ -9,6 +9,7 @@ import { isoToEpochRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 import { SupportedEntityTypesRT } from '../http_api/shared/entity_type';
 import { DataSchemaFormatRT } from '../http_api/shared';
+
 export const getHasDataQueryParamsRT = rt.partial({
   entityType: SupportedEntityTypesRT,
 });
@@ -29,6 +30,7 @@ export const getTimeRangeMetadataQueryParamsRT = rt.intersection([
 ]);
 
 export const getTimeRangeMetadataResponseRT = rt.type({
+  preferredSchema: rt.union([DataSchemaFormatRT, rt.null]),
   schemas: rt.array(DataSchemaFormatRT),
 });
 

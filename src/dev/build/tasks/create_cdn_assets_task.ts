@@ -99,6 +99,10 @@ export const CreateCdnAssets: Task = {
       resolve(buildSource, 'node_modules/@kbn/core-apps-server-internal/assets'),
       resolve(assets, buildSha, 'ui')
     );
+    await copyAll(
+      resolve(buildSource, 'node_modules/@elastic/charts/dist'),
+      resolve(assets, buildSha, 'ui', 'charts')
+    );
 
     await compressTar({
       source: assets,

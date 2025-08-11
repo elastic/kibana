@@ -75,6 +75,7 @@
     "@kbn/unified-doc-viewer",
     "@kbn/monaco",
     "@kbn/unified-doc-viewer-plugin",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/apm-synthtrace-client"
   ]
 }

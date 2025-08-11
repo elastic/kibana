@@ -128,11 +128,13 @@
         "type": "Type",
         "tags": [],
         "label": "MonitoringCollectionConfig",
-        "description": [],
+        "description": [
+          "\nConfiguration of the plugin `monitoring_collection`"
+        ],
         "signature": [
           "{ readonly enabled: boolean; readonly opentelemetry: Readonly<{} & { metrics: Readonly<{} & { otlp: Readonly<{ url?: string | undefined; headers?: Record<string, string> | undefined; } & { exportIntervalMillis: number; logLevel: string; }>; prometheus: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
         ],
-        "path": "x-pack/platform/plugins/private/monitoring_collection/server/config.ts",
+        "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/monitoring_collection_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

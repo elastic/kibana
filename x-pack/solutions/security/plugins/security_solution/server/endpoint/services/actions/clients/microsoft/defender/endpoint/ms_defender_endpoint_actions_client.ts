@@ -375,7 +375,8 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
   }
 
   protected async validateRequest(
-    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<any, any, any>
   ): Promise<ResponseActionsClientValidateRequestResponse> {
     // TODO: support multiple agents
     if (payload.endpoint_ids.length > 1) {
@@ -402,6 +403,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
+      parameters: undefined,
       command: 'isolate',
     };
 
@@ -453,6 +455,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
+      parameters: undefined,
       command: 'unisolate',
     };
 

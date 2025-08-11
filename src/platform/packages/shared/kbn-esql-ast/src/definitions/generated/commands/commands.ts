@@ -80,11 +80,6 @@ export const commandsMetadata: Record<string, unknown> = {
     type: 'command',
     name: 'rerank',
   },
-  rrf: {
-    type: 'command',
-    name: 'rrf',
-    license: 'ENTERPRISE',
-  },
   sample: {
     type: 'command',
     name: 'sample',

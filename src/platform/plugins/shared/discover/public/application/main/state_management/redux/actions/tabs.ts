@@ -10,6 +10,9 @@
 import type { TabbedContentState } from '@kbn/unified-tabs/src/components/tabbed_content/tabbed_content';
 import { cloneDeep, differenceBy, omit, pick } from 'lodash';
 import type { QueryState } from '@kbn/data-plugin/common';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
+import { createDataSource } from '../../../../../../common/data_sources/utils';
 import type { TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
@@ -89,6 +92,9 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
   async (dispatch, getState, { services, runtimeStateManager, urlStateStorage }) => {
     const currentState = getState();
     const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
+    const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
+    const currentTabStateContainer = currentTabRuntimeState.stateContainer$.getValue();
+
     const updatedTabs = items.map<TabState>((item) => {
       const existingTab = selectTab(currentState, item.id);
 
@@ -98,31 +104,49 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
         ...pick(item, 'id', 'label', 'duplicatedFromId'),
       };
 
-      if (item.duplicatedFromId && !existingTab) {
-        const existingTabToDuplicateFrom = selectTab(currentState, item.duplicatedFromId);
+      if (!existingTab) {
+        if (item.duplicatedFromId) {
+          // the new tab was created by duplicating an existing tab
+          const existingTabToDuplicateFrom = selectTab(currentState, item.duplicatedFromId);
 
-        if (!existingTabToDuplicateFrom) {
-          return tab;
+          if (!existingTabToDuplicateFrom) {
+            return tab;
+          }
+
+          tab.initialAppState =
+            selectTabRuntimeAppState(runtimeStateManager, item.duplicatedFromId) ??
+            cloneDeep(existingTabToDuplicateFrom.initialAppState);
+          tab.initialGlobalState = cloneDeep({
+            ...existingTabToDuplicateFrom.initialGlobalState,
+            ...existingTabToDuplicateFrom.lastPersistedGlobalState,
+          });
+          tab.uiState = cloneDeep(existingTabToDuplicateFrom.uiState);
+        } else {
+          // the new tab is a fresh one
+          const currentQuery = selectTabRuntimeAppState(runtimeStateManager, currentTab.id)?.query;
+          const currentDataView = currentTabRuntimeState.currentDataView$.getValue();
+
+          if (!currentQuery || !currentDataView) {
+            return tab;
+          }
+
+          const isCurrentModeESQL = isOfAggregateQueryType(currentQuery);
+
+          tab.initialAppState = {
+            query: isCurrentModeESQL ? { esql: getInitialESQLQuery(currentDataView) } : undefined,
+            dataSource: createDataSource({
+              dataView: currentDataView,
+              query: currentQuery,
+            }),
+          };
         }
-
-        tab.initialAppState =
-          selectTabRuntimeAppState(runtimeStateManager, item.duplicatedFromId) ??
-          cloneDeep(existingTabToDuplicateFrom.initialAppState);
-        tab.initialGlobalState = cloneDeep({
-          ...existingTabToDuplicateFrom.initialGlobalState,
-          ...existingTabToDuplicateFrom.lastPersistedGlobalState,
-        });
-        tab.uiState = cloneDeep(existingTabToDuplicateFrom.uiState);
       }
 
       return tab;
     });
 
     if (selectedItem?.id !== currentTab.id) {
-      const previousTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
-      const previousTabStateContainer = previousTabRuntimeState.stateContainer$.getValue();
-
-      previousTabStateContainer?.actions.stopSyncing();
+      currentTabStateContainer?.actions.stopSyncing();
 
       const nextTab = selectedItem ? selectTab(currentState, selectedItem.id) : undefined;
       const nextTabRuntimeState = selectedItem

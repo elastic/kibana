@@ -51,7 +51,10 @@ export const registerSiemRuleMigrationsUpdateRulesRoute = (
             }
             const ids = rulesToUpdate.map((rule) => rule.id);
 
-            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+              context.securitySolution,
+              'rules'
+            );
             try {
               const ctx = await context.resolve(['securitySolution']);
               const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();

@@ -12,7 +12,7 @@ import { RISK_SCORE_ENTITY_CALCULATION_URL } from '@kbn/security-solution-plugin
 import { v4 as uuidv4 } from 'uuid';
 import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import { dataGeneratorFactory } from '../../../detections_response/utils';
-import { deleteAllAlerts, deleteAllRules } from '../../../../../common/utils/security_solution';
+import { deleteAllAlerts, deleteAllRules } from '../../../../config/services/detections_response';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,

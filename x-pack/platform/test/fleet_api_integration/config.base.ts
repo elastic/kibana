@@ -90,6 +90,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           'enableAutomaticAgentUpgrades',
           'enableAgentMigrations',
           'enablePackageRollback',
+          'enableAgentStatusAlerting',
         ])}`,
         `--xpack.cloud.id='123456789'`,
         `--xpack.fleet.agentless.enabled=true`,

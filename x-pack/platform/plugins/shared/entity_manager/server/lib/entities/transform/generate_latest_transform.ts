@@ -125,6 +125,9 @@ function generateFilters(definition: EntityDefinition) {
 
   definition.identityFields.forEach(({ field }) => {
     filter.bool.must.push({ exists: { field } });
+    filter.bool.must_not.push({
+      term: { [field]: '' }, // identity field can't be empty
+    });
   });
 
   filter.bool.must.push({
@@ -140,5 +143,6 @@ function generateFilters(definition: EntityDefinition) {
       _tier: TRANSFORM_IGNORED_SLOW_TIERS,
     },
   });
+
   return filter;
 }

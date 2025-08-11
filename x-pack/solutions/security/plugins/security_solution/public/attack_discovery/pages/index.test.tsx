@@ -8,7 +8,6 @@
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { Router } from '@kbn/shared-ux-router';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -37,6 +36,11 @@ const mockConnectors: unknown[] = [
     actionTypeId: '.gen-ai',
   },
 ];
+
+// Mock feature flags to ensure attackDiscoveryAlertsEnabled is false for legacy code path tests
+jest.mock('./use_kibana_feature_flags', () => ({
+  useKibanaFeatureFlags: () => ({ attackDiscoveryAlertsEnabled: false }),
+}));
 
 jest.mock('react-use/lib/useLocalStorage', () =>
   jest.fn().mockImplementation((key, defaultValue) => {
@@ -111,18 +115,7 @@ jest.mock('./use_attack_discovery', () => ({
 
 const mockFilterManager = createFilterManagerMock();
 
-const stubSecurityDataView = createStubDataView({
-  spec: {
-    id: 'security',
-    title: 'security',
-  },
-});
-
-const mockDataViewsService = {
-  ...dataViewPluginMocks.createStartContract(),
-  get: () => Promise.resolve(stubSecurityDataView),
-  clearInstanceCache: () => Promise.resolve(),
-};
+const mockDataViewsService = dataViewPluginMocks.createStartContract();
 
 const mockUpselling = new UpsellingService();
 
@@ -511,8 +504,10 @@ describe('AttackDiscovery', () => {
       expect(screen.queryByTestId('loadingCallout')).toBeNull();
     });
 
-    it('renders the expected number of attack discoveries', () => {
-      expect(screen.queryAllByTestId('attackDiscovery')).toHaveLength(attackDiscoveries.length);
+    it('renders the expected number of attack discoveries', async () => {
+      const panels = screen.getAllByTestId(/^attackDiscoveryPanel-/);
+
+      expect(panels).toHaveLength(attackDiscoveries.length);
     });
 
     it('does NOT render the empty prompt', () => {

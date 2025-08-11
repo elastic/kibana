@@ -6,19 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isEqual } from 'lodash';
-import {
-  isFunctionExpression,
-  isOptionNode,
-  isColumn,
-  isIdentifier,
-  isTimeInterval,
-} from '../../../ast/is';
+import { isFunctionExpression, isOptionNode, isColumn, isIdentifier } from '../../../ast/is';
 import { validateFunction } from './function';
 import { validateOption } from './option';
 import { validateColumnForCommand } from './column';
 import { errors } from '../errors';
-import { getMessageFromId } from '../errors';
 import { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
 import { ICommandCallbacks, ICommandContext } from '../../../commands_registry/types';
 
@@ -31,7 +23,6 @@ export const validateCommandArguments = (
   },
   callbacks: ICommandCallbacks = {}
 ) => {
-  const currentCommandIndex = ast.findIndex((astCommand) => isEqual(astCommand, command));
   const messages: ESQLMessage[] = [];
   for (const arg of command.args) {
     if (!Array.isArray(arg)) {
@@ -44,7 +35,6 @@ export const validateCommandArguments = (
             context,
             callbacks,
             parentAst: ast,
-            currentCommandIndex,
           })
         );
       } else if (isOptionNode(arg)) {
@@ -55,18 +45,6 @@ export const validateCommandArguments = (
         } else {
           messages.push(...validateColumnForCommand(arg, command.name, context));
         }
-      } else if (isTimeInterval(arg)) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'unsupportedTypeForCommand',
-            values: {
-              command: command.name.toUpperCase(),
-              type: 'date_period',
-              value: arg.name,
-            },
-            locations: arg.location,
-          })
-        );
       }
     }
   }

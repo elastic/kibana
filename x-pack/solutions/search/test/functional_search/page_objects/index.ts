@@ -14,6 +14,7 @@ import { SearchNavigationProvider } from './search_navigation';
 import { SearchOverviewProvider } from './search_overview_page';
 import { SearchHomePageProvider } from './search_homepage';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
+import { SearchQueryRulesPageProvider } from './search_query_rules_page';
 
 export const pageObjects = {
   ...platformPageObjects,
@@ -25,4 +26,5 @@ export const pageObjects = {
   searchOverview: SearchOverviewProvider,
   searchHomePage: SearchHomePageProvider,
   searchPlayground: SearchPlaygroundPageProvider,
+  searchQueryRules: SearchQueryRulesPageProvider,
 };

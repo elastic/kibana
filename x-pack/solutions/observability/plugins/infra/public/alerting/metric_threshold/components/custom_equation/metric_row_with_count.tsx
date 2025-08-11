@@ -7,7 +7,8 @@
 import { EuiFormRow, EuiHorizontalRule, EuiFlexItem, EuiFlexGroup, EuiSelect } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { MetricsExplorerKueryBar } from '../../../../pages/metrics/metrics_explorer/components/kuery_bar';
+import type { Query } from '@kbn/es-query';
+import { UnifiedSearchBar } from '../../../../components/shared/unified_search_bar';
 import type { CustomMetricAggTypes } from '../../../../../common/alerting/metrics';
 import { Aggregators } from '../../../../../common/alerting/metrics';
 import { MetricRowControls } from './metric_row_controls';
@@ -54,10 +55,12 @@ export const MetricRowWithCount = ({
   );
 
   const handleFilterChange = useCallback(
-    (filterString: string) => {
+    (payload: { query?: Query }) => {
+      const kuery = payload.query?.query as string;
+
       onChange({
         name,
-        filter: filterString,
+        filter: kuery,
         aggType: agg as CustomMetricAggTypes,
       });
     },
@@ -76,7 +79,6 @@ export const MetricRowWithCount = ({
           >
             <EuiSelect
               data-test-subj="infraMetricRowWithCountSelect"
-              compressed
               options={aggOptions}
               value={agg}
               onChange={handleAggChange}
@@ -90,12 +92,14 @@ export const MetricRowWithCount = ({
               { defaultMessage: 'KQL Filter {name}', values: { name } }
             )}
           >
-            <MetricsExplorerKueryBar
-              placeholder={' '}
-              compressed
-              onChange={handleFilterChange}
-              onSubmit={handleFilterChange}
-              value={filter}
+            <UnifiedSearchBar
+              onQuerySubmit={handleFilterChange}
+              showPlaceholder={false}
+              useDefaultBehaviors={false}
+              query={{
+                query: filter || '',
+                language: 'kuery',
+              }}
             />
           </EuiFormRow>
         </EuiFlexItem>

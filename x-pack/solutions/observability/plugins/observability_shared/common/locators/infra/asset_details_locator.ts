@@ -8,6 +8,7 @@ import { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import { type AlertStatus } from '@kbn/rule-data-utils';
+import { DataSchemaFormat } from './hosts_locator';
 
 export enum SupportedEntityTypes {
   container = 'container',
@@ -41,6 +42,7 @@ export interface AssetDetailsLocatorParams extends SerializableRecord {
     logsSearch?: string;
     profilingSearch?: string;
     alertStatus?: AlertStatus | 'all';
+    schema?: DataSchemaFormat | null;
   };
 }
 

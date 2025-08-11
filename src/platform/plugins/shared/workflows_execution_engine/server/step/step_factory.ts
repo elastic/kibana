@@ -12,10 +12,16 @@ import { WorkflowContextManager } from '../workflow_context_manager/workflow_con
 import { StepImplementation } from './step_base';
 // Import schema and inferred types
 import { ConnectorExecutor } from '../connector_executor';
-import { ConnectorStepImpl } from './connector_step';
-import { EnterIfNodeImpl, ExitIfNodeImpl } from './if_step';
+import {
+  EnterConditionBranchNodeImpl,
+  EnterIfNodeImpl,
+  ExitIfNodeImpl,
+  ExitConditionBranchNodeImpl,
+} from './if_step';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
+import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
+import { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -25,10 +31,11 @@ import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 
 export class StepFactory {
   public create<TStep extends BaseStep>(
-    step: TStep, // Use z.infer<typeof StepSchema> when fully defined
+    step: TStep, // TODO: TStep must refer to a node type, not BaseStep (IfElseNode, ForeachNode, etc.)
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
-    workflowState: WorkflowExecutionRuntimeManager
+    workflowState: WorkflowExecutionRuntimeManager,
+    workflowLogger: IWorkflowEventLogger // Assuming you have a logger interface
   ): StepImplementation {
     const stepType = (step as any).type; // Use a more type-safe way to determine step type if possible
 
@@ -42,17 +49,27 @@ export class StepFactory {
       case 'exit-foreach':
         return new ExitForeachNodeImpl(step as any, workflowState);
       case 'enter-if':
-        return new EnterIfNodeImpl(step as any, workflowState);
+        return new EnterIfNodeImpl(step as any, workflowState, contextManager, workflowLogger);
+      case 'enter-condition-branch':
+        return new EnterConditionBranchNodeImpl(workflowState);
+      case 'exit-condition-branch':
+        return new ExitConditionBranchNodeImpl(step as any, workflowState);
       case 'exit-if':
         return new ExitIfNodeImpl(step as any, workflowState);
       case 'atomic':
-      // return new AtomicStepImpl(step as AtomicStep, contextManager);
+        return new AtomicStepImpl(
+          step as any,
+          contextManager,
+          connectorExecutor,
+          workflowState,
+          workflowLogger
+        );
       case 'parallel':
       // return new ParallelStepImpl(step as ParallelStep, contextManager);
       case 'merge':
       // return new MergeStepImpl(step as MergeStep, contextManager);
       default:
-        return new ConnectorStepImpl(step as any, contextManager, connectorExecutor, workflowState);
+        throw new Error(`Unknown node type: ${stepType}`);
     }
   }
 }

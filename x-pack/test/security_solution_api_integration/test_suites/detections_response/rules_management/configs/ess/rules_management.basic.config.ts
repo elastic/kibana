@@ -6,7 +6,7 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-import { LOGGING_CONFIG } from '../constants';
+import { LOGGING_CONFIG, FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP } from '../constants';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
@@ -21,6 +21,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         `--logging.loggers=${JSON.stringify(LOGGING_CONFIG)}`,
       ],
+      runOptions: {
+        wait: FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP,
+      },
     },
   };
 }

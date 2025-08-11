@@ -8,7 +8,6 @@
 import createContainer from 'constate';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useMemo, useEffect } from 'react';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { GetInfraEntityCountResponsePayloadRT } from '../../../../../common/http_api';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
@@ -26,7 +25,7 @@ export const useHostCount = () => {
         query: buildQuery(),
         from: parsedDateRange.from,
         to: parsedDateRange.to,
-        schema: searchCriteria?.preferredSchema || DataSchemaFormat.ECS,
+        schema: searchCriteria?.preferredSchema || 'ecs',
       }),
     [buildQuery, parsedDateRange.from, parsedDateRange.to, searchCriteria?.preferredSchema]
   );

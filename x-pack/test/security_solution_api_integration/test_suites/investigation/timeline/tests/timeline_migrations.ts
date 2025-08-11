@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
           'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timelines/7.15.0_space'
         );
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/security_solution/timelines/7.15.0_space',
+          'x-pack/solutions/security/test/fixtures/kbn_archives/timelines/7.15.0_space',
           { space: 'awesome-space' }
         );
       });

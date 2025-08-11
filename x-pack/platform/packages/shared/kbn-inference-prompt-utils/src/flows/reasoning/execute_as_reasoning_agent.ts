@@ -136,10 +136,12 @@ export function executeAsReasoningAgent(
         const callback = toolCallbacks[toolCall.function.name];
 
         const response = await withExecuteToolSpan(
+          toolCall.function.name,
           {
-            name: toolCall.function.name,
-            input: 'arguments' in toolCall.function ? toolCall.function.arguments : undefined,
-            toolCallId: toolCall.toolCallId,
+            tool: {
+              input: 'arguments' in toolCall.function ? toolCall.function.arguments : undefined,
+              toolCallId: toolCall.toolCallId,
+            },
           },
           () => callback(toolCall)
         );

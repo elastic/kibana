@@ -425,7 +425,18 @@ describe('autocomplete', () => {
     ]);
 
     // STATS argument BY
-    testSuggestions('FROM index1 | STATS AVG(booleanField) B/', ['WHERE ', 'BY ', ', ', '| ']);
+    testSuggestions('FROM index1 | STATS AVG(doubleField) B/', [
+      'WHERE ',
+      'BY ',
+      ', ',
+      '| ',
+      ...getFunctionSignaturesByReturnType(
+        Location.STATS,
+        'any',
+        { operators: true, skipAssign: true },
+        ['double']
+      ),
+    ]);
 
     // STATS argument BY expression
     testSuggestions('FROM index1 | STATS field BY f/', [
@@ -811,11 +822,20 @@ describe('autocomplete', () => {
     );
 
     // STATS argument BY
-    testSuggestions('FROM a | STATS AVG(numberField) /', [
+    testSuggestions('FROM a | STATS AVG(integerField) /', [
       ', ',
       attachTriggerCommand('WHERE '),
       attachTriggerCommand('BY '),
       attachTriggerCommand('| '),
+      ...getFunctionSignaturesByReturnType(
+        Location.STATS,
+        'any',
+        {
+          operators: true,
+          skipAssign: true,
+        },
+        ['integer']
+      ),
     ]);
 
     // STATS argument BY field

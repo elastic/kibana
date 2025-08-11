@@ -57,7 +57,10 @@ export class QueryClient {
      * - If a query is updated without a breaking change, it updates the existing rule.
      * - If a query is deleted, it removes the associated rule.
      */
-    const currentQueryLinks = await this.dependencies.assetClient.getAssetLinks(stream, ['query']);
+    const { [stream]: currentQueryLinks } = await this.dependencies.assetClient.getAssetLinks(
+      [stream],
+      ['query']
+    );
     const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
     const nextIds = new Set(queries.map((query) => query.id));
 
@@ -122,6 +125,22 @@ export class QueryClient {
     await this.bulk(stream, [{ delete: { id: queryId } }]);
   }
 
+  public async deleteAll(stream: string) {
+    if (!this.isSignificantEventsEnabled) {
+      this.dependencies.logger.debug(
+        `Skipping deleteAll for stream "${stream}" because significant events feature is disabled.`
+      );
+      return;
+    }
+
+    const { [stream]: currentQueryLinks } = await this.dependencies.assetClient.getAssetLinks(
+      [stream],
+      ['query']
+    );
+    const queriesToDelete = currentQueryLinks.map((link) => ({ delete: { id: link.query.id } }));
+    await this.bulk(stream, queriesToDelete);
+  }
+
   public async bulk(
     stream: string,
     operations: Array<{ index?: StreamQuery; delete?: { id: string } }>
@@ -133,7 +152,10 @@ export class QueryClient {
       return;
     }
 
-    const currentQueryLinks = await this.dependencies.assetClient.getAssetLinks(stream, ['query']);
+    const { [stream]: currentQueryLinks } = await this.dependencies.assetClient.getAssetLinks(
+      [stream],
+      ['query']
+    );
     const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
     const indexOperationsMap = new Map(
       operations
@@ -229,7 +251,7 @@ export class QueryClient {
           query: esqlQuery,
         },
         enabled: true,
-        tags: ['streams'],
+        tags: ['streams', stream],
         schedule: {
           interval: '1m',
         },
@@ -252,7 +274,7 @@ export class QueryClient {
           timestampField: '@timestamp',
           query: esqlQuery,
         },
-        tags: ['streams'],
+        tags: ['streams', stream],
         schedule: {
           interval: '1m',
         },

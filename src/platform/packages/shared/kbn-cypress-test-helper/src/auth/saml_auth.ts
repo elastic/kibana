@@ -20,6 +20,8 @@ const ES_RESOURCES_DIR = resolve(
   'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/roles_users/serverless/es_serverless_resources'
 );
 
+// TODO: Add support for serverless projects with different tiers
+// ref https://github.com/elastic/kibana/pull/229919
 export const ES_RESOURCES = Object.freeze({
   roles: join(ES_RESOURCES_DIR, 'roles.yml'),
   users: join(ES_RESOURCES_DIR, 'users'),

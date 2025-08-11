@@ -10,8 +10,10 @@
 import { MenuItem } from '../../types';
 
 export const LOGO = {
+  href: '/observability',
+  id: 'observability',
   label: 'Observability',
-  logoType: 'logoObservability',
+  type: 'logoObservability',
 };
 
 export const PRIMARY_MENU_ITEMS: MenuItem[] = [

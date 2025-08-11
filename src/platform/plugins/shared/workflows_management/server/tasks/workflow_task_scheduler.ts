@@ -32,7 +32,7 @@ export class WorkflowTaskScheduler {
    * Schedules tasks for all enabled scheduled triggers in a workflow
    */
   async scheduleWorkflowTasks(workflow: EsWorkflow, spaceId: string): Promise<string[]> {
-    const scheduledTriggers = getScheduledTriggers(workflow.definition.workflow.triggers);
+    const scheduledTriggers = getScheduledTriggers(workflow.definition.triggers);
     const scheduledTaskIds: string[] = [];
 
     for (const trigger of scheduledTriggers) {

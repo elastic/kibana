@@ -114,7 +114,7 @@ export const useInfrastructureNodeMetrics = <T>(
           groupBy: metricsExplorerOptions.groupBy,
           limit: NODE_COUNT_LIMIT,
           indexPattern: metricIndices,
-          filterQuery: metricsExplorerOptions.filterQuery,
+          kuery: metricsExplorerOptions.filterQuery,
           timerange: timerangeWithInterval,
         };
 

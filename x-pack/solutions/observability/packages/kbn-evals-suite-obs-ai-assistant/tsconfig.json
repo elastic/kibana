@@ -21,5 +21,6 @@
     "@kbn/ai-assistant-common",
     "@kbn/core",
     "@kbn/core-http-browser",
+    "@kbn/scout-oblt",
   ]
 }

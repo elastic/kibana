@@ -537,6 +537,29 @@ export class AlertUtils {
     }
     return await request.send();
   }
+
+  public async createInternallyManagedRule(objectRemover?: ObjectRemover) {
+    let request = this.supertestWithoutAuth
+      .post(`${getUrlPrefix(this.space.id)}/api/alerting/rule`)
+      .set('kbn-xsrf', 'foo');
+
+    if (this.user) {
+      request = request.auth(this.user.username, this.user.password);
+    }
+
+    const response = await request.send({
+      ...getTestRuleData({
+        name: 'test.internal-rule-type',
+        rule_type_id: 'test.internal-rule-type',
+      }),
+    });
+
+    if (response.statusCode === 200 && objectRemover) {
+      objectRemover.add(this.space.id, response.body.id, 'rule', 'alerting');
+    }
+
+    return response;
+  }
 }
 
 export function getUnauthorizedErrorMessage(operation: string, alertType: string, scope: string) {

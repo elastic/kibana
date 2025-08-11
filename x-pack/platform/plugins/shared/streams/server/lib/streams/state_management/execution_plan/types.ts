@@ -74,10 +74,18 @@ export interface UpsertDatastreamAction {
   };
 }
 
-export interface UpsertWriteIndexOrRolloverAction {
-  type: 'upsert_write_index_or_rollover';
+export interface RolloverAction {
+  type: 'rollover';
   request: {
     name: string;
+  };
+}
+
+export interface UpdateDefaultIngestPipelineAction {
+  type: 'update_default_ingest_pipeline';
+  request: {
+    name: string;
+    pipeline: string | undefined;
   };
 }
 
@@ -108,6 +116,13 @@ export interface DeleteDotStreamsDocumentAction {
   };
 }
 
+export interface DeleteQueriesAction {
+  type: 'delete_queries';
+  request: {
+    name: string;
+  };
+}
+
 export type ElasticsearchAction =
   | UpsertComponentTemplateAction
   | DeleteComponentTemplateAction
@@ -118,11 +133,13 @@ export type ElasticsearchAction =
   | AppendProcessorToIngestPipelineAction
   | DeleteProcessorFromIngestPipelineAction
   | UpsertDatastreamAction
-  | UpsertWriteIndexOrRolloverAction
+  | RolloverAction
   | UpdateLifecycleAction
   | DeleteDatastreamAction
+  | UpdateDefaultIngestPipelineAction
   | UpsertDotStreamsDocumentAction
-  | DeleteDotStreamsDocumentAction;
+  | DeleteDotStreamsDocumentAction
+  | DeleteQueriesAction;
 
 export interface ActionsByType {
   upsert_component_template: UpsertComponentTemplateAction[];
@@ -134,9 +151,11 @@ export interface ActionsByType {
   append_processor_to_ingest_pipeline: AppendProcessorToIngestPipelineAction[];
   delete_processor_from_ingest_pipeline: DeleteProcessorFromIngestPipelineAction[];
   upsert_datastream: UpsertDatastreamAction[];
-  upsert_write_index_or_rollover: UpsertWriteIndexOrRolloverAction[];
+  rollover: RolloverAction[];
+  update_default_ingest_pipeline: UpdateDefaultIngestPipelineAction[];
   update_lifecycle: UpdateLifecycleAction[];
   delete_datastream: DeleteDatastreamAction[];
   upsert_dot_streams_document: UpsertDotStreamsDocumentAction[];
   delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
+  delete_queries: DeleteQueriesAction[];
 }

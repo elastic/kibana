@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { WorkflowYaml, WorkflowYamlSchema } from '../spec/schema';
+import { WorkflowSchema, WorkflowYaml } from '../spec/schema';
 
 export enum ExecutionStatus {
   // In progress
@@ -123,7 +123,7 @@ export const EsWorkflowSchema = z.object({
   createdBy: z.string(),
   lastUpdatedAt: z.date(),
   lastUpdatedBy: z.string(),
-  definition: WorkflowYamlSchema,
+  definition: WorkflowSchema,
   yaml: z.string(),
 });
 

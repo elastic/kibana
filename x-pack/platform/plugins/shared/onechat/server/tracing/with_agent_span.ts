@@ -7,7 +7,7 @@
 
 import { Span } from '@opentelemetry/api';
 import { safeJsonStringify } from '@kbn/std';
-import { withInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
+import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
 import type { AgentDefinition } from '@kbn/onechat-common';
 import type { AgentHandlerReturn } from '@kbn/onechat-server';
 
@@ -20,12 +20,14 @@ export function withAgentSpan(
   cb: (span?: Span) => Promise<AgentHandlerReturn>
 ): Promise<AgentHandlerReturn> {
   const { id: agentId, configuration } = agent;
-  return withInferenceSpan(
+  return withActiveInferenceSpan(
+    'ExecuteAgent',
     {
-      name: 'execute_agent',
-      [ElasticGenAIAttributes.InferenceSpanKind]: 'AGENT',
-      [ElasticGenAIAttributes.AgentId]: agentId,
-      [ElasticGenAIAttributes.AgentConfig]: safeJsonStringify(configuration),
+      attributes: {
+        [ElasticGenAIAttributes.InferenceSpanKind]: 'AGENT',
+        [ElasticGenAIAttributes.AgentId]: agentId,
+        [ElasticGenAIAttributes.AgentConfig]: safeJsonStringify(configuration),
+      },
     },
     (span) => {
       if (!span) {
@@ -33,12 +35,10 @@ export function withAgentSpan(
       }
 
       const res = cb(span);
-      res
-        .then((agentReturn) => {
-          span.setAttribute('output.value', safeJsonStringify(agentReturn) ?? 'unknown');
-        })
-        .catch((e) => {});
-      return res;
+      return res.then((agentReturn) => {
+        span.setAttribute('output.value', safeJsonStringify(agentReturn) ?? 'unknown');
+        return agentReturn;
+      });
     }
   );
 }
