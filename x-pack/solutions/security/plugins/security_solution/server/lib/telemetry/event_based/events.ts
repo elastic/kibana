@@ -1454,6 +1454,34 @@ export const ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT: EventTypeOpts<{
   },
 };
 
+export const GAP_DETECTED_EVENT: EventTypeOpts<{
+  gapDuration: number;
+  intervalDuration: number;
+  intervalAndLookbackDuration: number;
+}> = {
+  eventType: 'gap_detected_event',
+  schema: {
+    gapDuration: {
+      type: 'long',
+      _meta: {
+        description: 'The duration of the gap',
+      },
+    },
+    intervalDuration: {
+      type: 'long',
+      _meta: {
+        description: 'The duration of the interval',
+      },
+    },
+    intervalAndLookbackDuration: {
+      type: 'long',
+      _meta: {
+        description: 'The duration of the interval and lookback',
+      },
+    },
+  },
+};
+
 export const events = [
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
@@ -1485,4 +1513,5 @@ export const events = [
   SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE,
   SIEM_MIGRATIONS_PREBUILT_RULES_MATCH,
   SIEM_MIGRATIONS_INTEGRATIONS_MATCH,
+  GAP_DETECTED_EVENT,
 ];
