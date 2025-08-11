@@ -21,6 +21,7 @@ import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
   EuiDataGridCustomBodyProps,
+  EuiThemeProvider,
 } from '@elastic/eui';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -135,27 +136,29 @@ const renderDataTable = async (props: Partial<UnifiedDataTableProps>) => {
     });
 
     return (
-      <IntlProvider locale="en">
-        <DataTable
-          {...props}
-          columns={columns}
-          onSetColumns={onSetColumns}
-          settings={settings}
-          onResize={({ columnId, width }) => {
-            setSettings({
-              ...settings,
-              columns: {
-                ...settings?.columns,
-                [columnId]: {
-                  width,
+      <EuiThemeProvider>
+        <IntlProvider locale="en">
+          <DataTable
+            {...props}
+            columns={columns}
+            onSetColumns={onSetColumns}
+            settings={settings}
+            onResize={({ columnId, width }) => {
+              setSettings({
+                ...settings,
+                columns: {
+                  ...settings?.columns,
+                  [columnId]: {
+                    width,
+                  },
                 },
-              },
-            });
-          }}
-          sort={sort}
-          onSort={setSort as UnifiedDataTableProps['onSort']}
-        />
-      </IntlProvider>
+              });
+            }}
+            sort={sort}
+            onSort={setSort as UnifiedDataTableProps['onSort']}
+          />
+        </IntlProvider>
+      </EuiThemeProvider>
     );
   };
 
