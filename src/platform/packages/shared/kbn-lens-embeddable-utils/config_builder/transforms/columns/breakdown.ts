@@ -24,7 +24,6 @@ import {
   LensApiBucketOperations,
   LensApiDateHistogramOperation,
   LensApiFilterOperation,
-  LensApiHistogramOperation,
   LensApiRangeOperation,
   LensApiTermsOperation,
 } from '../schema/bucket_ops';
