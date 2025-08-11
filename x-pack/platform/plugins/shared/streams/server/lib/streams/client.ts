@@ -688,8 +688,6 @@ export class StreamsClient {
       }
     );
 
-    await this.dependencies.queryClient.syncQueries(name, []);
-
     return { acknowledged: true, result: 'deleted' };
   }
 

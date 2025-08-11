@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiBetaBadge,
   EuiLink,
-  EuiPageHeader,
   useEuiTheme,
   EuiButton,
   EuiComboBox,
@@ -26,6 +25,8 @@ import {
   EuiText,
   EuiPanel,
   EuiButtonIcon,
+  EuiEmptyPrompt,
+  EuiLoadingLogo,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
@@ -37,6 +38,7 @@ import { useAbortController } from '@kbn/react-hooks';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { Streams } from '@kbn/streams-schema';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { isEmpty } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsTreeTable } from './tree_table';
@@ -46,6 +48,7 @@ import { useTimefilter } from '../../hooks/use_timefilter';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 export function StreamListView() {
+  const { euiTheme } = useEuiTheme();
   const {
     dependencies: {
       start: {
@@ -55,12 +58,15 @@ export function StreamListView() {
     },
     core,
   } = useKibana();
-  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
+  const onboardingLocator = share.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
-  const handleAddData = () => {
-    onboardingLocator?.navigate({});
-  };
+  const handleAddData = onboardingLocator
+    ? () => {
+        onboardingLocator.navigate({});
+      }
+    : undefined;
+
   const { timeState } = useTimefilter();
   const streamsListFetch = useStreamsAppFetch(
     async ({ signal }) => {
@@ -75,8 +81,6 @@ export function StreamListView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [streamsRepositoryClient, timeState.start, timeState.end]
   );
-
-  const { euiTheme } = useEuiTheme();
 
   const overlayRef = React.useRef<OverlayRef | null>(null);
 
@@ -102,13 +106,10 @@ export function StreamListView() {
 
   return (
     <>
-      <EuiPageHeader
-        paddingSize="l"
+      <StreamsAppPageTemplate.Header
+        bottomBorder="extended"
         css={css`
           background: ${euiTheme.colors.backgroundBasePlain};
-          .euiSpacer--l {
-            display: none !important;
-          }
         `}
         pageTitle={
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -140,29 +141,33 @@ export function StreamListView() {
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-      >
-        <p
-          css={css`
-            margin: 0 0 ${euiTheme.size.s} 0;
-            font-size: ${euiTheme.font.scale.s};
-            color: ${euiTheme.colors.textSubdued};
-            line-height: ${euiTheme.size.l};
-          `}
-        >
-          {i18n.translate('xpack.streams.streamsListView.pageHeaderDescription', {
-            defaultMessage:
-              'Use Streams to organize and process your data into clear structured flows, and simplify routing, field extraction, and retention management.',
-          })}{' '}
-          <EuiLink target="_blank" href={core.docLinks.links.observability.logsStreams}>
-            {i18n.translate('xpack.streams.streamsListView.pageHeaderDocsLink', {
-              defaultMessage: 'See docs',
-            })}
-          </EuiLink>
-        </p>
-      </EuiPageHeader>
-
+        description={
+          <>
+            {i18n.translate('xpack.streams.streamsListView.pageHeaderDescription', {
+              defaultMessage:
+                'Use Streams to organize and process your data into clear structured flows, and simplify routing, field extraction, and retention management.',
+            })}{' '}
+            <EuiLink target="_blank" href={core.docLinks.links.observability.logsStreams}>
+              {i18n.translate('xpack.streams.streamsListView.pageHeaderDocsLink', {
+                defaultMessage: 'See docs',
+              })}
+            </EuiLink>
+          </>
+        }
+      />
       <StreamsAppPageTemplate.Body grow>
-        {!streamsListFetch.loading && !streamsListFetch.value?.length ? (
+        {streamsListFetch.loading && streamsListFetch.value === undefined ? (
+          <EuiEmptyPrompt
+            icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+            title={
+              <h2>
+                {i18n.translate('xpack.streams.streamsListView.loadingStreams', {
+                  defaultMessage: 'Loading Streams',
+                })}
+              </h2>
+            }
+          />
+        ) : !streamsListFetch.loading && isEmpty(streamsListFetch.value) ? (
           <StreamsListEmptyPrompt onAddData={handleAddData} />
         ) : (
           <>

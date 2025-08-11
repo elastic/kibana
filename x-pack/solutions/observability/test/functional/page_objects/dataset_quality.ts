@@ -144,6 +144,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityNamespacesSelectable: 'datasetQualityNamespacesSelectable',
     datasetQualityNamespacesSelectableButton: 'datasetQualityNamespacesSelectableButton',
     datasetQualityTypesSelectable: 'datasetQualityFilterType',
+    datasetQualityTypesSelectableButton: 'datasetQualityFilterTypeSelectableButton',
     datasetQualityQualitiesSelectable: 'datasetQualityQualitiesSelectable',
     datasetQualityQualitiesSelectableButton: 'datasetQualityQualitiesSelectableButton',
     datasetQualityDetailsEmptyPrompt: 'datasetQualityDetailsEmptyPrompt',
@@ -154,8 +155,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityDetailsIntegrationRowVersion: 'datasetQualityDetailsFieldsList-version',
     datasetQualityDetailsLinkToDiscover: 'datasetQualityDetailsLinkToDiscover',
     datasetQualityInsufficientPrivileges: 'datasetQualityInsufficientPrivileges',
-    datasetQualityNoDataEmptyState: 'datasetQualityTableNoData',
     datasetQualityNoPrivilegesEmptyState: 'datasetQualityNoPrivilegesEmptyState',
+    datasetQualityNoDataEmptyState: 'datasetQualityTableNoData',
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
     superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',
     superDatePickerQuickMenu: 'superDatePickerQuickMenu',
@@ -192,7 +193,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         ),
       });
 
-      return PageObjects.common.navigateToUrlWithBrowserHistory(
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
         'management',
         '/data/data_quality',
         queryStringParams,
@@ -202,6 +203,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
           ensureCurrentUrl: false,
         }
       );
+      return await this.waitUntilTableLoaded();
     },
 
     async navigateToDetails(pageState: datasetQualityDetailsUrlSchemaV1.UrlSchema) {

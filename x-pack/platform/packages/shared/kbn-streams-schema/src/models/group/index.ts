@@ -77,3 +77,8 @@ export const GroupStream: ModelValidation<BaseStream.Model, GroupStream.Model> =
     UpsertRequest: z.object({}),
   }
 );
+
+// Optimized implementation for Definition check - the fallback is a zod-based check
+GroupStream.Definition.is = (
+  stream: BaseStream.Model['Definition']
+): stream is GroupStream.Definition => 'group' in stream;
