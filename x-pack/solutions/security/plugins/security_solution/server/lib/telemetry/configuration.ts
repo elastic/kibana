@@ -51,28 +51,28 @@ class TelemetryConfigurationDTO {
   };
   private readonly DEFAULT_HEALTH_DIAGNOSTIC_CONFIG: HealthDiagnosticConfiguration = {
     query: {
-      maxDocuments: 100_000_000,
-      bufferSize: 10_000,
+      maxDocuments: 10_000,
+      bufferSize: 1_000,
     } as HealthDiagnosticQueryConfig,
     rssGrowthCircuitBreaker: {
       maxRssGrowthPercent: 40,
-      validationIntervalMs: 200,
+      validationIntervalMs: 500,
     } as RssGrowthCircuitBreakerConfig,
     timeoutCircuitBreaker: {
-      timeoutMillis: 1000,
-      validationIntervalMs: 50,
+      timeoutMillis: 5000,
+      validationIntervalMs: 500,
     } as TimeoutCircuitBreakerConfig,
     eventLoopUtilizationCircuitBreaker: {
-      thresholdMillis: 1000,
-      validationIntervalMs: 50,
+      thresholdMillis: 5000,
+      validationIntervalMs: 500,
     } as EventLoopUtilizationCircuitBreakerConfig,
     eventLoopDelayCircuitBreaker: {
-      thresholdMillis: 100,
-      validationIntervalMs: 10,
+      thresholdMillis: 500,
+      validationIntervalMs: 250,
     } as EventLoopDelayCircuitBreakerConfig,
     elasticsearchCircuitBreaker: {
-      maxJvmHeapUsedPercent: 80,
-      maxCpuPercent: 80,
+      maxJvmHeapUsedPercent: 90,
+      maxCpuPercent: 90,
       expectedClusterHealth: ['green', 'yellow'],
       validationIntervalMs: 1000,
     } as ElasticsearchCircuitBreakerConfig,
