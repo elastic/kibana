@@ -70,6 +70,7 @@ export function ChangeDataView({
   onEditDataView,
   onCreateDefaultAdHocDataView,
   onClosePopover,
+  indexHelpText,
 }: DataViewPickerProps) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -178,6 +179,7 @@ export function ChangeDataView({
                   onSave: (updatedDataView) => {
                     onEditDataView(updatedDataView);
                   },
+                  indexHelpText,
                 });
               } else {
                 application.navigateToApp('management', {
@@ -272,6 +274,7 @@ export function ChangeDataView({
     onEditDataView,
     searchListInputId,
     selectableProps,
+    indexHelpText,
   ]);
 
   return (

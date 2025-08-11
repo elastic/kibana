@@ -71,6 +71,10 @@ export interface DataViewEditorProps {
    * if set to true a link to the management page is shown
    */
   showManagementLink?: boolean;
+  /**
+   * Optional help text to show when editing a data view
+   */
+  indexHelpText?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

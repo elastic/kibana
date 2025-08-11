@@ -70,6 +70,7 @@ export interface Props {
   showManagementLink?: boolean;
   allowAdHoc: boolean;
   dataViewEditorService: DataViewEditorService;
+  indexHelpText?: string;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
@@ -87,6 +88,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   editData,
   allowAdHoc,
   showManagementLink,
+  indexHelpText,
   dataViewEditorService,
 }: Props) => {
   const styles = useMemoCss(componentStyles);
@@ -298,6 +300,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                   indexPatternValidationProvider={
                     dataViewEditorService.indexPatternValidationProvider
                   }
+                  indexHelpText={indexHelpText}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
