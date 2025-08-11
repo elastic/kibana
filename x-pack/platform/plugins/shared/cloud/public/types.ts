@@ -9,19 +9,11 @@ import type { SolutionId } from '@kbn/core-chrome-browser';
 import type { KibanaProductTier, KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { FC, PropsWithChildren } from 'react';
 
-export interface CloudStart {
-  /**
-   * A React component that provides a pre-wired `React.Context` which connects components to Cloud services.
-   */
-  CloudContextProvider: FC<PropsWithChildren<unknown>>;
-  /**
-   * `true` when Kibana is running on Elastic Cloud.
-   */
-  isCloudEnabled: boolean;
-  /**
-   * Cloud ID. Undefined if not running on Cloud.
-   */
-  cloudId?: string;
+/**
+ * Represents basic URLs for the Cloud plugin, that do not require specific user roles to access.
+ * TODO: Absorb `kibanaUrl` and `baseUrl` into this for more consistency.
+ */
+export interface CloudUrls {
   /**
    * This is the path to the Cloud deployments management page. The value is already prepended with `baseUrl`.
    *
@@ -39,10 +31,6 @@ export interface CloudStart {
    */
   profileUrl?: string;
   /**
-   * The full URL to the billing page on Elastic Cloud. Undefined if not running on Cloud.
-   */
-  billingUrl?: string;
-  /**
    * The full URL to the organization management page on Elastic Cloud. Undefined if not running on Cloud.
    */
   organizationUrl?: string;
@@ -59,9 +47,44 @@ export interface CloudStart {
    */
   projectsUrl?: string;
   /**
+   * This is the path to the Snapshots page for the deployment to which the Kibana instance belongs. The value is already prepended with `deploymentUrl`.
+   *
+   * @example `{deploymentUrl}/elasticsearch/snapshots`
+   */
+  snapshotsUrl?: string;
+}
+
+/**
+ * Represents privileged URLs that require specific user roles to access.
+ */
+export interface CloudPrivilegedUrls {
+  /**
+   * The full URL to the billing page on Elastic Cloud.
+   */
+  billingUrl?: string;
+}
+
+export interface CloudStart extends CloudUrls {
+  /**
+   * A React component that provides a pre-wired `React.Context` which connects components to Cloud services.
+   */
+  CloudContextProvider: FC<PropsWithChildren<unknown>>;
+  /**
+   * `true` when Kibana is running on Elastic Cloud.
+   */
+  isCloudEnabled: boolean;
+  /**
+   * Cloud ID.
+   */
+  cloudId?: string;
+  /**
    * Fetches the full URL to the elasticsearch cluster.
    */
   fetchElasticsearchConfig: () => Promise<PublicElasticsearchConfigType>;
+  /**
+   * Service that manages getPrivilegedUrls URLs for the Cloud plugin.
+   */
+  getPrivilegedUrls: () => Promise<CloudPrivilegedUrls>;
   /**
    * The full URL to the Kibana deployment.
    */
@@ -93,7 +116,7 @@ export interface CloudStart {
   };
 }
 
-export interface CloudSetup {
+export interface CloudSetup extends CloudUrls {
   /**
    * Cloud ID. Undefined if not running on Cloud.
    */
@@ -123,33 +146,9 @@ export interface CloudSetup {
    */
   baseUrl?: string;
   /**
-   * The full URL to the deployment management page on Elastic Cloud. Undefined if not running on Cloud.
-   *
-   * @example `{baseUrl}/deployments/bfdad4ef99a24212a06d387593686d63`
+   * Service that manages getPrivilegedUrls URLs for the Cloud plugin.
    */
-  deploymentUrl?: string;
-  /**
-   * The full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless.
-   */
-  projectsUrl?: string;
-  /**
-   * This is the path to the Cloud User Profile page. The value is already prepended with `baseUrl`.
-   *
-   * @example `{baseUrl}/user/settings/`
-   */
-  profileUrl?: string;
-  /**
-   * This is the path to the Cloud Account and Billing page. The value is already prepended with `baseUrl`.
-   *
-   * @example `{baseUrl}/account/`
-   */
-  organizationUrl?: string;
-  /**
-   * This is the path to the Snapshots page for the deployment to which the Kibana instance belongs. The value is already prepended with `deploymentUrl`.
-   *
-   * @example `{deploymentUrl}/elasticsearch/snapshots`
-   */
-  snapshotsUrl?: string;
+  getPrivilegedUrls: () => Promise<CloudPrivilegedUrls>;
   /**
    * Fetches the full URL to the elasticsearch cluster.
    */

@@ -8,7 +8,7 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { CloudPlugin } from './plugin';
 
-export type { CloudSetup, CloudStart } from './types';
+export type { CloudPrivilegedUrls, CloudUrls, CloudSetup, CloudStart } from './types';
 export type { CloudConfigType } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
