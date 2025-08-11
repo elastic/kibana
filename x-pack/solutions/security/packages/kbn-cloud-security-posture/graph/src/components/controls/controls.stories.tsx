@@ -40,8 +40,9 @@ export default {
     showFitView: {
       control: { type: 'boolean' },
     },
-    showCenter: {
-      control: { type: 'boolean' },
+    nodeIdsToCenter: {
+      control: { type: 'object' },
+      description: 'Array of starting node IDs (nodes with no predecessors) for centering',
     },
   },
   decorators: [GlobalStylesStorybookDecorator],
@@ -51,6 +52,15 @@ export const Controls: StoryObj<ControlsProps> = {
   args: {
     showZoom: true,
     showFitView: true,
-    showCenter: true,
+    nodeIdsToCenter: ['node1', 'node2'],
+    fitViewOptions: { duration: 200 },
+  },
+};
+
+export const ControlsWithoutStartingNodes: StoryObj<ControlsProps> = {
+  args: {
+    showZoom: true,
+    showFitView: true,
+    fitViewOptions: { duration: 200 },
   },
 };

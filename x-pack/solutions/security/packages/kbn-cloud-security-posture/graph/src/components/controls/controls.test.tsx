@@ -14,7 +14,6 @@ import { useStore, useReactFlow } from '@xyflow/react';
 const defaultProps: ControlsProps = {
   showZoom: true,
   showFitView: true,
-  showCenter: true,
 };
 
 jest.mock('@xyflow/react', () => ({
@@ -44,76 +43,171 @@ describe('Controls', () => {
     useStoreMock.mockReturnValue({ minZoomReached: false, maxZoomReached: false });
   });
 
-  it('renders zoom in and zoom out buttons', () => {
-    const { getByLabelText } = renderWithProviders();
-    expect(getByLabelText('Zoom in')).toBeInTheDocument();
-    expect(getByLabelText('Zoom out')).toBeInTheDocument();
+  describe('zoom', () => {
+    it('renders zoom in and zoom out buttons', () => {
+      const { getByLabelText } = renderWithProviders();
+      expect(getByLabelText('Zoom in')).toBeInTheDocument();
+      expect(getByLabelText('Zoom out')).toBeInTheDocument();
+    });
+
+    it('hides zoom in and zoom out buttons if showZoom is false', () => {
+      const { queryByLabelText } = renderWithProviders({ showZoom: false });
+      expect(queryByLabelText('Zoom in')).not.toBeInTheDocument();
+      expect(queryByLabelText('Zoom out')).not.toBeInTheDocument();
+    });
+
+    it('calls onZoomIn when zoom in button is clicked', () => {
+      const onZoomIn = jest.fn();
+      const { getByLabelText } = renderWithProviders({ ...defaultProps, onZoomIn });
+
+      fireEvent.click(getByLabelText('Zoom in'));
+
+      expect(useReactFlowMock().zoomIn).toHaveBeenCalled();
+      expect(onZoomIn).toHaveBeenCalled();
+    });
+
+    it('calls onZoomOut when zoom out button is clicked', () => {
+      const onZoomOut = jest.fn();
+      const { getByLabelText } = renderWithProviders({ ...defaultProps, onZoomOut });
+
+      fireEvent.click(getByLabelText('Zoom out'));
+
+      expect(useReactFlowMock().zoomOut).toHaveBeenCalled();
+      expect(onZoomOut).toHaveBeenCalled();
+    });
+
+    it('disables zoom in button when max zoom is reached', () => {
+      useStoreMock.mockReturnValue({ minZoomReached: false, maxZoomReached: true });
+
+      const { getByLabelText } = renderWithProviders();
+
+      const zoomInButton = getByLabelText('Zoom in');
+      expect(zoomInButton).toBeDisabled();
+    });
+
+    it('disables zoom out button when min zoom is reached', () => {
+      useStoreMock.mockReturnValue({ minZoomReached: true, maxZoomReached: false });
+
+      const { getByLabelText } = renderWithProviders();
+
+      const zoomOutButton = getByLabelText('Zoom out');
+      expect(zoomOutButton).toBeDisabled();
+    });
   });
 
-  it('renders fit view button', () => {
-    const { getByLabelText } = renderWithProviders();
-    expect(getByLabelText('Fit view')).toBeInTheDocument();
+  describe('fit view', () => {
+    it('renders fit view button', () => {
+      const { getByLabelText } = renderWithProviders();
+      expect(getByLabelText('Fit view')).toBeInTheDocument();
+    });
+
+    it('hides fit view button', () => {
+      const { queryByLabelText } = renderWithProviders({ showFitView: false });
+      expect(queryByLabelText('Fit view')).not.toBeInTheDocument();
+    });
+
+    it('calls onFitView when fit view button is clicked', () => {
+      const onFitView = jest.fn();
+      const fitViewOptions = { duration: 200 };
+      const { getByLabelText } = renderWithProviders({
+        ...defaultProps,
+        onFitView,
+        fitViewOptions,
+      });
+
+      fireEvent.click(getByLabelText('Fit view'));
+
+      expect(useReactFlowMock().fitView).toHaveBeenCalledWith(fitViewOptions);
+      expect(onFitView).toHaveBeenCalled();
+    });
   });
 
-  it('renders center button', () => {
-    const { getByLabelText } = renderWithProviders();
-    expect(getByLabelText('Center')).toBeInTheDocument();
-  });
+  describe('center', () => {
+    it('hides center button by default', () => {
+      const { queryByLabelText } = renderWithProviders();
+      expect(queryByLabelText('Center')).not.toBeInTheDocument();
+    });
 
-  it('calls onZoomIn when zoom in button is clicked', () => {
-    const onZoomIn = jest.fn();
-    const { getByLabelText } = renderWithProviders({ ...defaultProps, onZoomIn });
+    it('hides center button when nodeIdsToCenter is empty array', () => {
+      const { queryByLabelText } = renderWithProviders({
+        ...defaultProps,
+        nodeIdsToCenter: [],
+      });
 
-    fireEvent.click(getByLabelText('Zoom in'));
+      expect(queryByLabelText('Center')).not.toBeInTheDocument();
+    });
 
-    expect(useReactFlowMock().zoomIn).toHaveBeenCalled();
-    expect(onZoomIn).toHaveBeenCalled();
-  });
+    it('hides center button when nodeIdsToCenter contains only empty strings', () => {
+      const { queryByLabelText } = renderWithProviders({
+        ...defaultProps,
+        nodeIdsToCenter: [''],
+      });
 
-  it('calls onZoomOut when zoom out button is clicked', () => {
-    const onZoomOut = jest.fn();
-    const { getByLabelText } = renderWithProviders({ ...defaultProps, onZoomOut });
+      expect(queryByLabelText('Center')).not.toBeInTheDocument();
+    });
 
-    fireEvent.click(getByLabelText('Zoom out'));
+    it('hides center button when nodeIdsToCenter contains only whitespace strings', () => {
+      const { queryByLabelText } = renderWithProviders({
+        ...defaultProps,
+        nodeIdsToCenter: ['   ', '\t', '\n', '  '],
+      });
 
-    expect(useReactFlowMock().zoomOut).toHaveBeenCalled();
-    expect(onZoomOut).toHaveBeenCalled();
-  });
+      expect(queryByLabelText('Center')).not.toBeInTheDocument();
+    });
 
-  it('calls onFitView when fit view button is clicked', () => {
-    const onFitView = jest.fn();
-    const { getByLabelText } = renderWithProviders({ ...defaultProps, onFitView });
+    it('renders center button when nodeIdsToCenter is populated', () => {
+      const { getByLabelText } = renderWithProviders({
+        ...defaultProps,
+        nodeIdsToCenter: ['node1'], // Need at least one non-empty node ID for center button to render
+      });
+      expect(getByLabelText('Center')).toBeInTheDocument();
+    });
 
-    fireEvent.click(getByLabelText('Fit view'));
+    it('renders center button when nodeIdsToCenter contains mix of empty and non-empty IDs', () => {
+      const { getByLabelText } = renderWithProviders({
+        ...defaultProps,
+        nodeIdsToCenter: ['', 'node1', '  ', 'node2', ''],
+      });
 
-    expect(useReactFlowMock().fitView).toHaveBeenCalled();
-    expect(onFitView).toHaveBeenCalled();
-  });
+      expect(getByLabelText('Center')).toBeInTheDocument();
+    });
 
-  it('calls onCenter when center button is clicked', () => {
-    const onCenter = jest.fn();
-    const { getByLabelText } = renderWithProviders({ ...defaultProps, onCenter });
+    it('calls onCenter and centers graph on selected node IDs when center button is clicked', () => {
+      const onCenter = jest.fn();
+      const fitViewOptions = { duration: 200 };
+      const { getByLabelText } = renderWithProviders({
+        ...defaultProps,
+        onCenter,
+        fitViewOptions,
+        nodeIdsToCenter: ['node1', 'node2'],
+      });
 
-    fireEvent.click(getByLabelText('Center'));
+      fireEvent.click(getByLabelText('Center'));
 
-    expect(onCenter).toHaveBeenCalled();
-  });
+      expect(useReactFlowMock().fitView).toHaveBeenCalledWith({
+        ...fitViewOptions,
+        nodes: [{ id: 'node1' }, { id: 'node2' }],
+      });
+      expect(onCenter).toHaveBeenCalled();
+    });
 
-  it('disables zoom in button when max zoom is reached', () => {
-    useStoreMock.mockReturnValue({ minZoomReached: false, maxZoomReached: true });
+    it('calls onCenter and centers graph on selected, non-empty node IDs when center button is clicked', () => {
+      const onCenter = jest.fn();
+      const fitViewOptions = { duration: 200 };
+      const { getByLabelText } = renderWithProviders({
+        ...defaultProps,
+        onCenter,
+        fitViewOptions,
+        nodeIdsToCenter: ['', 'node1', '  ', 'node2', ''],
+      });
 
-    const { getByLabelText } = renderWithProviders();
+      fireEvent.click(getByLabelText('Center'));
 
-    const zoomInButton = getByLabelText('Zoom in');
-    expect(zoomInButton).toBeDisabled();
-  });
-
-  it('disables zoom out button when min zoom is reached', () => {
-    useStoreMock.mockReturnValue({ minZoomReached: true, maxZoomReached: false });
-
-    const { getByLabelText } = renderWithProviders();
-
-    const zoomOutButton = getByLabelText('Zoom out');
-    expect(zoomOutButton).toBeDisabled();
+      expect(useReactFlowMock().fitView).toHaveBeenCalledWith({
+        ...fitViewOptions,
+        nodes: [{ id: 'node1' }, { id: 'node2' }],
+      });
+      expect(onCenter).toHaveBeenCalled();
+    });
   });
 });

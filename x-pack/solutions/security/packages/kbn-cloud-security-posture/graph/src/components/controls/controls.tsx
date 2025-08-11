@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -25,6 +25,7 @@ import {
   GRAPH_CONTROLS_ZOOM_OUT_ID,
 } from '../test_ids';
 import fitToViewIcon from '../../assets/icons/fit_to_view.svg';
+import { NodeViewModel } from '../types';
 
 const selector = (s: ReactFlowState) => ({
   minZoomReached: s.transform[2] <= s.minZoom,
@@ -34,8 +35,9 @@ const selector = (s: ReactFlowState) => ({
 export interface ControlsProps extends CommonProps {
   showZoom?: boolean;
   showFitView?: boolean;
-  showCenter?: boolean;
   fitViewOptions?: FitViewOptions;
+  /** Array of node IDs the graph must center to */
+  nodeIdsToCenter?: NodeViewModel['id'][];
   /** Callback when zoom in button is clicked */
   onZoomIn?: () => void;
   /** Callback when zoom out button is clicked */
@@ -64,8 +66,8 @@ const fitToViewIconFn = () => <EuiIcon type={fitToViewIcon} size="m" color="text
 export const Controls = ({
   showZoom = true,
   showFitView = true,
-  showCenter = true,
   fitViewOptions,
+  nodeIdsToCenter,
   onZoomIn,
   onZoomOut,
   onCenter,
@@ -75,6 +77,13 @@ export const Controls = ({
   const { euiTheme } = useEuiTheme();
   const { zoomIn, zoomOut, fitView } = useReactFlow();
   const { maxZoomReached, minZoomReached } = useStore(selector);
+
+  // Sanitize nodeIdsToCenter to filter out empty strings and undefined/null values
+  // Converts ['node1', 'node2'] into [{ id: 'node1' }, { id: 'node2' }]
+  const nonEmptyNodeIds = useMemo(
+    () => (nodeIdsToCenter ?? []).filter((id) => id && id.trim().length > 0).map((id) => ({ id })),
+    [nodeIdsToCenter]
+  );
 
   const onZoomInHandler = () => {
     zoomIn({ duration: fitViewOptions?.duration });
@@ -91,6 +100,11 @@ export const Controls = ({
     onFitView?.();
   };
 
+  const onCenterHandler = () => {
+    fitView({ ...fitViewOptions, nodes: nonEmptyNodeIds });
+    onCenter?.();
+  };
+
   const btnCss = css`
     border-radius: 0;
   `;
@@ -101,7 +115,7 @@ export const Controls = ({
     background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
 
-  if (!showZoom && !showCenter && !showFitView) {
+  if (!showZoom && !showFitView && nonEmptyNodeIds.length === 0) {
     return <></>;
   }
 
@@ -135,7 +149,7 @@ export const Controls = ({
           </EuiFlexItem>
         </>
       )}
-      {showCenter && (
+      {nonEmptyNodeIds.length > 0 && (
         <EuiFlexItem grow={false}>
           {showZoom ? <EuiHorizontalRule size="full" margin="none" /> : null}
           <EuiButtonIcon
@@ -145,13 +159,15 @@ export const Controls = ({
             color="text"
             data-test-subj={GRAPH_CONTROLS_CENTER_ID}
             css={btnCss}
-            onClick={() => onCenter?.()}
+            onClick={onCenterHandler}
           />
         </EuiFlexItem>
       )}
       {showFitView && (
         <EuiFlexItem grow={false}>
-          {showZoom || showCenter ? <EuiHorizontalRule size="full" margin="none" /> : null}
+          {showZoom || nonEmptyNodeIds.length > 0 ? (
+            <EuiHorizontalRule size="full" margin="none" />
+          ) : null}
           <EuiButtonIcon
             iconType={fitToViewIconFn}
             aria-label={FitViewLabel}
