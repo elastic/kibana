@@ -13,8 +13,10 @@ import prettyMilliseconds from 'pretty-ms';
 import { duration } from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
 import pRetry from 'p-retry';
-import { LOCKS_CONCRETE_INDEX_NAME } from './setup_lock_manager_index';
-import { runSetupIndexAssetOnce } from './utils/setup_index_assets_once';
+import {
+  LOCKS_CONCRETE_INDEX_NAME,
+  runSetupIndexAssetOnce,
+} from './utils/setup_lock_manager_index';
 import {
   LockAcquisitionError,
   getEsReason,

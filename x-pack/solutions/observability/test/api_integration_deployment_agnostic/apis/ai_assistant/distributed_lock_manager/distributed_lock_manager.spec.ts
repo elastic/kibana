@@ -18,15 +18,14 @@ import {
   LockManager,
   LockDocument,
   withLock,
-  rerunSetupIndexAsset,
 } from '@kbn/lock-manager/src/lock_manager_client';
 import {
   LOCKS_COMPONENT_TEMPLATE_NAME,
   LOCKS_CONCRETE_INDEX_NAME,
   LOCKS_INDEX_TEMPLATE_NAME,
   setupLockManagerIndex,
-} from '@kbn/lock-manager/src/setup_lock_manager_index';
-
+  rerunSetupIndexAsset,
+} from '@kbn/lock-manager/src/utils/setup_lock_manager_index';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getLoggerMock } from '../utils/kibana_mocks';
 import { dateAsTimestamp, durationAsMs, sleep } from '../utils/time';
