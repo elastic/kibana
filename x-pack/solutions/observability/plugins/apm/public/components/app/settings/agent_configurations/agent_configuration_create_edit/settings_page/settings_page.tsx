@@ -263,7 +263,7 @@ export function SettingsPage({
                 unsavedChanges,
                 newConfig,
                 settingsDefinitionsByAgent,
-                handleChange,
+                onChange: handleChange,
               })}
               {isAdvancedConfigSupported && (
                 <>
@@ -308,12 +308,12 @@ function renderSettings({
   newConfig,
   unsavedChanges,
   settingsDefinitionsByAgent,
-  handleChange,
+  onChange,
 }: {
   newConfig: AgentConfigurationIntake;
   unsavedChanges: Record<string, string>;
   settingsDefinitionsByAgent: SettingDefinition[];
-  handleChange: (key: string, value: string) => void;
+  onChange: (key: string, value: string) => void;
 }) {
   return settingsDefinitionsByAgent.map((setting) => (
     <SettingFormRow
@@ -321,7 +321,7 @@ function renderSettings({
       key={setting.key}
       setting={setting}
       value={newConfig.settings[setting.key]}
-      onChange={(key, value) => handleChange(key, value)}
+      onChange={onChange}
     />
   ));
 }
