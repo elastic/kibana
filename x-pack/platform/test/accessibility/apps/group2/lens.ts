@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { getHasFocus } from '../../has_focus';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, visualize, timePicker, lens } = getPageObjects([
@@ -22,11 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const find = getService('find');
 
-  const hasFocus = async (testSubject: string) => {
-    const targetElement = await testSubjects.find(testSubject);
-    const activeElement = await find.activeElement();
-    return (await targetElement._webElement.getId()) === (await activeElement._webElement.getId());
-  };
+  const hasFocus = getHasFocus(testSubjects, find);
 
   describe('Lens Accessibility', () => {
     const lensChartName = 'MyLensChart';

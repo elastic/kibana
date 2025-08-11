@@ -222,6 +222,7 @@ export class TOCEntry extends Component<Props, State> {
           aria-label={EDIT_LAYER_SETTINGS_LABEL}
           title={EDIT_LAYER_SETTINGS_LABEL}
           onClick={this._openLayerPanelWithCheck}
+          data-test-subj="editLayerSettingsButton"
         />
       );
       quickActions.push(

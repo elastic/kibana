@@ -5,14 +5,20 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { getHasFocus } from '../../has_focus';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const inspector = getService('inspector');
+  const browser = getService('browser');
+  const find = getService('find');
   const { common, header, home, maps } = getPageObjects(['common', 'header', 'home', 'maps']);
+
+  const hasFocus = getHasFocus(testSubjects, find);
 
   describe('Maps app Accessibility', () => {
     before(async () => {
@@ -32,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await home.removeSampleDataSet('flights');
     });
 
-    it('loads  maps workpads', async function () {
+    it('loads maps workpads', async function () {
       await maps.loadSavedMap('[Flights] Origin Time Delayed');
       await a11y.testAppSnapshot();
     });
@@ -117,6 +123,54 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'maps cancel button exists',
         async () => await testSubjects.exists('confirmModalCancelButton')
       );
+    });
+
+    describe('keyboard navigation', () => {
+      it('allows the user to tab directly from the open timeslider button to the timeslider', async function () {
+        await testSubjects.click('timesliderToggleButton');
+        await testSubjects.exists('mapTimeslider');
+        await browser.pressKeys(browser.keys.TAB);
+        expect(await hasFocus('timeSlider-previousTimeWindow'));
+        // Close the timeslider
+        await testSubjects.click('timesliderToggleButton');
+      });
+    });
+
+    describe('focus behavior', () => {
+      it('focuses flyout close button after clicking Add Layer', async function () {
+        await testSubjects.click('addLayerButton');
+        await testSubjects.exists('mapContainerFlyoutCloseButton');
+        expect(await hasFocus('mapContainerFlyoutCloseButton'));
+      });
+
+      it('returns focus to the Add Layer button when closing the Add Layer flyout', async function () {
+        await testSubjects.click('mapContainerFlyoutCloseButton');
+        expect(await hasFocus('addLayerButton'));
+      });
+
+      it('focuses flyout close button after clicking Edit Layer', async function () {
+        await testSubjects.click('layerTocActionsPanelToggleButtonFlight_Origin_Location');
+        await testSubjects.click('editLayerSettingsButton');
+        await testSubjects.exists('mapContainerFlyoutCloseButton');
+        expect(await hasFocus('mapContainerFlyoutCloseButton'));
+      });
+
+      it('returns focus to the Edit Layer button when closing the Edit Layer flyout', async function () {
+        await testSubjects.click('mapContainerFlyoutCloseButton');
+        await testSubjects.exists('editLayerSettingsButton');
+        expect(await hasFocus('editLayerSettingsButton'));
+      });
+
+      it('focuses flyout close button after clicking Settings', async function () {
+        await testSubjects.click('openSettingsButton');
+        await testSubjects.exists('mapContainerFlyoutCloseButton');
+        expect(await hasFocus('mapContainerFlyoutCloseButton'));
+      });
+
+      it('returns focus to the Settings button when closing the Settings flyout', async function () {
+        await testSubjects.click('mapContainerFlyoutCloseButton');
+        expect(await hasFocus('openSettingsButton'));
+      });
     });
   });
 }

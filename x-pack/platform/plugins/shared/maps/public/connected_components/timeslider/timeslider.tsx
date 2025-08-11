@@ -62,7 +62,7 @@ export function Timeslider({ setTimeslice, timeRange, waitForTimesliceToLoad$ }:
   }, [api, setTimeslice, waitForTimesliceToLoad$]);
 
   return (
-    <div className="mapTimeslider mapTimeslider--animation">
+    <div className="mapTimeslider mapTimeslider--animation" data-test-subj="mapTimeslider">
       <ControlGroupRenderer
         onApiAvailable={(nextApi: ControlGroupRendererApi) => {
           setApi(nextApi);
