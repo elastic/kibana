@@ -12,10 +12,10 @@ import type { Query } from '@kbn/es-query';
 import { Feature } from 'geojson';
 import {
   EMSVectorTileStyleDescriptor,
-  HeatmapStyleDescriptor,
   StyleDescriptor,
   VectorStyleDescriptor,
 } from './style_property_descriptor_types';
+import { HeatmapStyleDescriptor } from '.';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
 import { AbstractSourceDescriptor, JoinSourceDescriptor } from './source_descriptor_types';
 import { LAYER_TYPE } from '../constants';

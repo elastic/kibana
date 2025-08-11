@@ -272,10 +272,6 @@ export type VectorStyleDescriptor = StyleDescriptor & {
   __styleMeta?: StyleMetaDescriptor;
 };
 
-export type HeatmapStyleDescriptor = StyleDescriptor & {
-  colorRampName: string;
-};
-
 export type EMSVectorTileStyleDescriptor = StyleDescriptor & {
   color: string;
 };

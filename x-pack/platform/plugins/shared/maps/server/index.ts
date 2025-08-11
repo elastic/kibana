@@ -9,6 +9,8 @@ import { PluginInitializerContext } from '@kbn/core/server';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 import { configSchema, MapsXPackConfig } from './config';
 
+export type { HeatmapStyleDescriptor } from './content_management';
+
 export const config: PluginConfigDescriptor<MapsXPackConfig> = {
   // exposeToBrowser specifies kibana.yml settings to expose to the browser
   // the value `true` in this context signals configuration is exposed to browser

@@ -10,3 +10,5 @@ export type * from './source_descriptor_types';
 export type * from './layer_descriptor_types';
 export type * from './map_descriptor';
 export type * from './style_property_descriptor_types';
+
+export type { HeatmapStyleDescriptor } from '../../server';

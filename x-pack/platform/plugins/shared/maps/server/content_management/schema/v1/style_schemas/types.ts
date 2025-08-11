@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export type * from './schema/v1/style_schemas';
+import { TypeOf } from '@kbn/config-schema';
+import { heatmapStyleSchema } from './heatmap_style_schemas';
 
-export { MapsStorage } from './maps_storage';
+export type HeatmapStyleDescriptor = TypeOf<typeof heatmapStyleSchema>;
