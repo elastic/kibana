@@ -148,7 +148,7 @@ export enum KnowledgeBaseType {
   Contextual = 'contextual',
 }
 
-export enum KnowledgeBaseState {
+export enum InferenceModelState {
   NOT_INSTALLED = 'NOT_INSTALLED',
   MODEL_PENDING_DEPLOYMENT = 'MODEL_PENDING_DEPLOYMENT',
   DEPLOYING_MODEL = 'DEPLOYING_MODEL',
