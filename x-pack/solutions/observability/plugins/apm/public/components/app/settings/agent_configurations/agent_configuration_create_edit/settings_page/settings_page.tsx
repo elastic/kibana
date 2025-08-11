@@ -128,8 +128,10 @@ export function SettingsPage({
     const config = { ...newConfig, settings: removeEmpty(newConfig.settings) };
 
     setIsSaving(true);
-    await saveConfig({ config, isEditMode, toasts });
-    reportTelemetry({ telemetry, config, settingsDefinitions: settingsDefinitionsByAgent });
+    const succeeded = await saveConfig({ config, isEditMode, toasts });
+    if (succeeded) {
+      reportTelemetry({ telemetry, config, settingsDefinitions: settingsDefinitionsByAgent });
+    }
     setIsSaving(false);
 
     // go back to overview
