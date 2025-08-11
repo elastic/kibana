@@ -25,12 +25,14 @@ export function DashboardTiles({
   isLoadingDashboards,
   dashboards,
   dataTestSubj,
+  timeRange,
   alertAnnotation,
 }: {
   title: string;
   isLoadingDashboards: boolean;
   dashboards?: Array<RelatedDashboard & { actionButtonProps?: ActionButtonProps }>;
   dataTestSubj: string;
+  timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
   alertAnnotation: NonNullable<DashboardLocatorParams['alert']>;
 }) {
   const wrapWithHeader = (component: React.ReactNode) => {
@@ -68,6 +70,7 @@ export function DashboardTiles({
         key={rest.id}
         dashboard={rest}
         actionButtonProps={actionButtonProps}
+        timeRange={timeRange}
         alertAnnotation={alertAnnotation}
       />
     ))

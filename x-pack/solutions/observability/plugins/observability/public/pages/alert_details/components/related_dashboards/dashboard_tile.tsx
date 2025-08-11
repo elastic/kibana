@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import {
   EuiText,
   EuiFlexGroup,
@@ -17,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { SavedObjectsReference } from '@kbn/content-management-content-editor';
 import type { RelatedDashboard } from '@kbn/observability-schema';
-import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import moment from 'moment';
 import { useKibana } from '../../../../utils/kibana_react';
 
@@ -32,10 +32,12 @@ export interface ActionButtonProps {
 export function DashboardTile({
   dashboard,
   actionButtonProps,
+  timeRange,
   alertAnnotation,
 }: {
   dashboard: RelatedDashboard;
   actionButtonProps?: ActionButtonProps;
+  timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
   alertAnnotation: NonNullable<DashboardLocatorParams['alert']>;
 }) {
   const {
@@ -59,10 +61,7 @@ export function DashboardTile({
             data-test-subj="o11yDashboardTileLink"
             href={dashboardLocator?.getRedirectUrl({
               dashboardId: dashboard.id,
-              timeRange: {
-                from: moment(alertAnnotation.start).subtract(30, 'minutes').toISOString(),
-                to: moment(alertAnnotation.start).add(30, 'minutes').toISOString(),
-              },
+              timeRange,
               alert: {
                 start: alertAnnotation.start,
               },

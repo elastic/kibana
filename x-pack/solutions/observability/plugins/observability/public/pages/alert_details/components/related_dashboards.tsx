@@ -19,6 +19,7 @@ interface RelatedDashboardsProps {
   linkedDashboards?: LinkedDashboard[];
   isLoadingRelatedDashboards: boolean;
   onSuccessAddSuggestedDashboard: () => Promise<void>;
+  timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
   alertAnnotation: NonNullable<DashboardLocatorParams['alert']>;
 }
 
@@ -28,6 +29,7 @@ export function RelatedDashboards({
   linkedDashboards,
   suggestedDashboards,
   onSuccessAddSuggestedDashboard,
+  timeRange,
   alertAnnotation,
 }: RelatedDashboardsProps) {
   const { onClickAddSuggestedDashboard, addingDashboardId } = useAddSuggestedDashboards({
@@ -67,6 +69,7 @@ export function RelatedDashboards({
         isLoadingDashboards={isLoadingRelatedDashboards}
         dashboards={linkedDashboards}
         dataTestSubj="linked-dashboards"
+        timeRange={timeRange}
         alertAnnotation={alertAnnotation}
       />
       <DashboardTiles
@@ -76,6 +79,7 @@ export function RelatedDashboards({
         isLoadingDashboards={isLoadingRelatedDashboards}
         dashboards={suggestedDashboardsWithButton}
         dataTestSubj="suggested-dashboards"
+        timeRange={timeRange}
         alertAnnotation={alertAnnotation}
       />
     </div>
