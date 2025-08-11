@@ -17,7 +17,7 @@ export const validateEndpointPackagePolicy = (inputs: NewPackagePolicyInput[]) =
   // An elastic defend policy MUST have an input with expected policy and manifest data
   if (!input?.config?.policy?.value || !input?.config?.artifact_manifest?.value) {
     throw new EndpointIntegrationFleetError(
-      `Invalid Elastic Defend security policy. 'inputs[0].config.policy.value' and 'inputs[0].config.policy.value' are required.`
+      `Invalid Elastic Defend security policy. 'inputs[0].config.policy.value' and 'inputs[0].config.artifact_manifest.value' are required.`
     );
   }
 
