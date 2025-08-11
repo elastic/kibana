@@ -16,9 +16,10 @@ import { LayoutView } from './layout_view';
 
 export const SnapshotContainer = React.memo(() => {
   const { sourceId } = useSourceContext();
-  const { metric, groupBy, nodeType, accountId, region } = useWaffleOptionsContext();
+  const { metric, groupBy, nodeType, accountId, region, preferredSchema } =
+    useWaffleOptionsContext();
   const { currentTime } = useWaffleTimeContext();
-  const { filterQueryAsJson } = useWaffleFiltersContext();
+  const { filterQuery } = useWaffleFiltersContext();
 
   const {
     loading,
@@ -27,7 +28,7 @@ export const SnapshotContainer = React.memo(() => {
     interval = '60s',
   } = useSnapshot(
     {
-      filterQuery: filterQueryAsJson,
+      kuery: filterQuery.query,
       metrics: [metric],
       groupBy,
       nodeType,
@@ -35,6 +36,7 @@ export const SnapshotContainer = React.memo(() => {
       currentTime,
       accountId,
       region,
+      schema: preferredSchema,
     },
     { sendRequestImmediately: true }
   );
