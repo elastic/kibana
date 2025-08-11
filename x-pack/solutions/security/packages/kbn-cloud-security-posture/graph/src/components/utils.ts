@@ -88,7 +88,10 @@ export const getSingleDocumentData = (
   node: NodeViewModel
 ): NodeDocumentDataViewModel | undefined => {
   const mode = getNodeDocumentMode(node);
-  if (!hasNodeDocumentsData(node) || (mode !== 'single-alert' && mode !== 'single-event' && mode !== 'single-entity')) {
+  if (
+    !hasNodeDocumentsData(node) ||
+    (mode !== 'single-alert' && mode !== 'single-event' && mode !== 'single-entity')
+  ) {
     return undefined;
   }
 

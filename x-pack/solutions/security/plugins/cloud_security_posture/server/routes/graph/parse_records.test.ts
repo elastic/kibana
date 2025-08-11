@@ -390,8 +390,8 @@ describe('parseRecords', () => {
       index: 'logs-user-assets',
       entity: {
         name: 'John Doe',
-        type: 'Identity'
-      }
+        type: 'Identity',
+      },
     });
 
     // Check host1 node - should have both actor and target documents for host1
@@ -405,8 +405,8 @@ describe('parseRecords', () => {
       index: 'logs-assets',
       entity: {
         name: 'server-01',
-        type: 'host'
-      }
+        type: 'host',
+      },
     });
     expect(host1Node.documentsData[1]).toMatchObject({
       id: 'host1',
@@ -415,8 +415,8 @@ describe('parseRecords', () => {
       index: 'logs-assets',
       entity: {
         name: 'server-01-updated',
-        type: 'host'
-      }
+        type: 'host',
+      },
     });
 
     // Check service1 node - should only have target document for service1
@@ -430,8 +430,8 @@ describe('parseRecords', () => {
       index: 'logs-assets',
       entity: {
         name: 'web-service',
-        type: 'service'
-      }
+        type: 'service',
+      },
     });
 
     // Verify that user2 document is not included in any node since user2 is not an actor or target
