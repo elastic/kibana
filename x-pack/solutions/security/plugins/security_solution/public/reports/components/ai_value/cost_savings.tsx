@@ -14,6 +14,7 @@ import { CostSavingsMetric } from './cost_savings_metric';
 import * as i18n from './translations';
 
 interface Props {
+  isDarkMode: boolean;
   minutesPerAlert: number;
   analystHourlyRate: number;
   from: string;
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export const CostSavings: React.FC<Props> = ({
+  isDarkMode,
   minutesPerAlert,
   analystHourlyRate,
   from,
@@ -39,13 +41,14 @@ export const CostSavings: React.FC<Props> = ({
     <EuiPanel
       css={css`
         min-height: 140px;
-        border: 1px solid ${colors.success};
+        border: 1px solid ${isDarkMode ? '#008A5E' : colors.success};
       `}
       hasBorder
       hasShadow={false}
       paddingSize="none"
     >
       <CostSavingsMetric
+        isDarkMode={isDarkMode}
         from={from}
         to={to}
         analystHourlyRate={analystHourlyRate}

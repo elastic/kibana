@@ -19,6 +19,7 @@ import { VisualizationEmbeddable } from '../../../common/components/visualizatio
 import { getCostSavingsMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_metric';
 
 interface Props {
+  isDarkMode: boolean;
   from: string;
   to: string;
   minutesPerAlert: number;
@@ -30,9 +31,14 @@ const ID = 'CostSavingsMetricQuery';
  * Renders a Lens embeddable metric visualization showing estimated cost savings
  * based on the number of AI filtered alerts, minutes saved per alert,
  * and analyst hourly rate for a given time range.
+ *
+ * Background-color: colors.backgroundBaseSuccess, #E2F8F0
+ * Border-color: colors.success, #008A5E
+ * Big numbers color: colors.textSuccess, #09724D
  */
 
 const CostSavingsMetricComponent: React.FC<Props> = ({
+  isDarkMode,
   minutesPerAlert,
   analystHourlyRate,
   from,
@@ -47,6 +53,12 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
     (args) => getCostSavingsMetricLensAttributes({ ...args, minutesPerAlert, analystHourlyRate }),
     [analystHourlyRate, minutesPerAlert]
   );
+  console.log({
+    isDarkMode,
+    colors,
+    success: colors.success,
+    backgroundBaseSuccess: colors.backgroundBaseSuccess,
+  });
   return (
     <div
       css={css`
@@ -55,20 +67,20 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
           height: 100% !important;
         }
         .echMetricText__icon .euiIcon {
-          fill: ${colors.success};
+          fill: ${isDarkMode ? '#008A5E' : colors.success};
         }
         .echMetricText {
           padding: 8px 20px 60px;
         }
         p.echMetricText__value {
-          color: ${colors.success};
+          color: ${isDarkMode ? '#09724D' : colors.success};
         }
         .euiPanel,
         .embPanel__hoverActions > span {
-          background: ${colors.backgroundBaseSuccess};
+          background: ${isDarkMode ? '#E2F8F0' : colors.backgroundBaseSuccess};
         }
         .embPanel__hoverActionsAnchor {
-          --internalBorderStyle: 1px solid ${colors.success}!important;
+          --internalBorderStyle: 1px solid ${isDarkMode ? '#008A5E' : colors.success}!important;
         }
       `}
     >
