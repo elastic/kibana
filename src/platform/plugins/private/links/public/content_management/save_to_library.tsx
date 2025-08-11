@@ -36,25 +36,25 @@ export const runSaveToLibrary = async (newState: EditorState): Promise<EditorSta
       onTitleDuplicate,
       isTitleDuplicateConfirmed,
     }: OnSaveProps): Promise<SaveResult> => {
-      try {
-        if (
-          !(await checkForDuplicateTitle({
-            title: newTitle,
-            lastSavedTitle: newState.title ?? '',
-            copyOnSave: false,
-            onTitleDuplicate,
-            isTitleDuplicateConfirmed,
-          }))
-        ) {
-          return {};
-        }
+      const responsee = await checkForDuplicateTitle({
+        title: newTitle,
+        lastSavedTitle: newState.title ?? '',
+        copyOnSave: false,
+        onTitleDuplicate,
+        isTitleDuplicateConfirmed,
+      });
+      if (!responsee) {
+        return {};
+      }
 
-        const newAttributes = {
-          ...newState,
-          links: serializeResolvedLinks(newState.links ?? []),
-          title: newTitle,
-          description: newDescription,
-        };
+      const newAttributes = {
+        ...newState,
+        links: serializeResolvedLinks(newState.links ?? []),
+        title: newTitle,
+        description: newDescription,
+      };
+
+      try {
         const {
           item: { id },
         } = await linksClient.create({
