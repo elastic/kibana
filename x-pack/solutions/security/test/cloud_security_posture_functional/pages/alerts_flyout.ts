@@ -31,8 +31,10 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
+      // security_alerts_modified_mappings - contains mappings for actor and target
+      // security_alerts - does not contain mappings for actor and target
       await esArchiver.load(
-        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts'
+        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts_modified_mappings'
       );
       await esArchiver.load(
         'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
@@ -188,7 +190,35 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.showEventOrAlertDetails(
         'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)'
       );
-      await alertsPage.flyout.assertPreviewPanelIsOpen('event');
+      await alertsPage.flyout.assertPreviewPanelIsOpen('alert');
+    });
+
+    it('show related alerts', async () => {
+      // Setting the timerange to fit the data and open the flyout for a specific alert
+      await alertsPage.navigateToAlertsPage(
+        `${alertsPage.getAbsoluteTimerangeFilter(
+          '2024-09-01T00:00:00.000Z',
+          '2024-09-02T00:00:00.000Z'
+        )}&${alertsPage.getFlyoutFilter(
+          '589e086d7ceec7d4b353340578bd607e96fbac7eab9e2926f110990be15122f1'
+        )}`
+      );
+      await alertsPage.waitForListToHaveAlerts();
+
+      await alertsPage.flyout.expandVisualizations();
+      await alertsPage.flyout.assertGraphPreviewVisible();
+      await alertsPage.flyout.assertGraphNodesNumber(3);
+
+      await expandedFlyoutGraph.expandGraph();
+      await expandedFlyoutGraph.waitGraphIsLoaded();
+      await expandedFlyoutGraph.assertGraphNodesNumber(3);
+
+      await expandedFlyoutGraph.showActionsOnEntity('projects/your-project-id/roles/customRole');
+
+      await expandedFlyoutGraph.showEventOrAlertDetails(
+        'a(admin6@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole2)'
+      );
+      await alertsPage.flyout.assertPreviewPanelIsOpen('alert');
     });
   });
 }
