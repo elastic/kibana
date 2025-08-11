@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod';
 import { createRoute } from '../create_route';
-import { createDimensions } from '../../lib/create_dimentions'; // <-- import the new function
+import { createDimensions } from '../../lib/create_dimentions';
 
 export const dimensionsApi = createRoute({
   endpoint: 'POST /internal/metrics_experience/dimensions',
