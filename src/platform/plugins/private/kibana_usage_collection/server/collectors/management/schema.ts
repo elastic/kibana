@@ -676,6 +676,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable significant events in streams.',
     },
   },
+  'observability:streamsEnableGroupStreams': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Group Streams in Streams',
+    },
+  },
   'observability:enableDiagnosticMode': {
     type: 'boolean',
     _meta: {

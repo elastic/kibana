@@ -176,4 +176,5 @@ export interface UsageStats {
   'observability:enableStreamsUI': boolean;
   'observability:enableDiagnosticMode': boolean;
   'observability:streamsEnableSignificantEvents': boolean;
+  'observability:streamsEnableGroupStreams': boolean;
 }
