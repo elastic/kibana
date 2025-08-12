@@ -138,13 +138,7 @@ function tokenizeLines(
   splitChars?: string[][]
 ) {
   const delimiterValue =
-    delimiter === '\\s'
-      ? ' '
-      : delimiter === '\\t'
-        ? '\t'
-        : delimiter === '\\|'
-          ? '|'
-          : delimiter;
+    delimiter === '\\s' ? ' ' : delimiter === '\\t' ? '\t' : delimiter === '\\|' ? '|' : delimiter;
 
   return maskedMessages.map(({ literals, masked }, index) => {
     const original = messages[index];
@@ -179,8 +173,8 @@ function tokenizeLines(
             isLastTokenAcrossAllColumns
               ? undefined
               : isLastTokenInColumn
-                ? delimiterValue
-                : nextValue
+              ? delimiterValue
+              : nextValue
           );
           return {
             value,
