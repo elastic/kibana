@@ -34,14 +34,6 @@ describe('AddToCaseComment', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the input field with placeholder text', () => {
-    render(
-      <AddToCaseComment comment="" onCommentChange={jest.fn()} notifications={notificationsMock} />
-    );
-
-    expect(screen.getByPlaceholderText('Add a comment (optional)')).toBeInTheDocument();
-  });
-
   it('updates the comment when text is entered', () => {
     const onCommentChangeMock = jest.fn();
     render(
@@ -52,7 +44,7 @@ describe('AddToCaseComment', () => {
       />
     );
 
-    fireEvent.change(screen.getByPlaceholderText('Add a comment (optional)'), {
+    fireEvent.change(screen.getByLabelText('Add a comment (optional)'), {
       target: { value: 'New comment' },
     });
 

@@ -163,7 +163,6 @@ describe('AddPageAttachmentToCaseModal', () => {
       {
         persistableStateAttachmentState: {
           ...pageAttachmentState,
-          screenContext: [],
           summary: comment,
         },
         persistableStateAttachmentTypeId: '.page',
@@ -199,7 +198,6 @@ describe('AddPageAttachmentToCaseModal', () => {
       {
         persistableStateAttachmentState: {
           ...pageAttachmentState,
-          screenContext: [],
           summary: comment,
         },
         persistableStateAttachmentTypeId: '.page',
