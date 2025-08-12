@@ -36,7 +36,6 @@ export const initTelemetry = (
 
   const apmConfig = apmConfigLoader.getConfig(serviceName);
   const telemetryConfig = apmConfigLoader.getTelemetryConfig();
-  const monitoringCollectionConfig = apmConfigLoader.getMonitoringCollectionConfig();
 
   // attributes.resource.*
   const resource = resources.resourceFromAttributes({
@@ -54,8 +53,8 @@ export const initTelemetry = (
       initTracing({ resource, tracingConfig: telemetryConfig.tracing });
     }
 
-    if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {
-      initMetrics({ resource, metricsConfig: telemetryConfig.metrics, monitoringCollectionConfig });
+    if (telemetryConfig.metrics.enabled) {
+      initMetrics({ resource, metricsConfig: telemetryConfig.metrics });
 
       // Provides metrics about the Event Loop, GC Collector, and Heap stats.
       desiredInstrumentations.add('@opentelemetry/instrumentation-runtime-node');

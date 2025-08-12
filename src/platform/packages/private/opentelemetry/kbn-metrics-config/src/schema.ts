@@ -16,7 +16,6 @@ export const metricsExporterConfigSchema: Type<MetricsExporterConfig> = schema.o
     grpc: schema.object({
       url: schema.string(),
       headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-      exportIntervalMillis: schema.maybe(schema.duration()),
     }),
   }),
 
@@ -25,7 +24,6 @@ export const metricsExporterConfigSchema: Type<MetricsExporterConfig> = schema.o
     http: schema.object({
       url: schema.string(),
       headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-      exportIntervalMillis: schema.maybe(schema.duration()),
     }),
   }),
 ]);

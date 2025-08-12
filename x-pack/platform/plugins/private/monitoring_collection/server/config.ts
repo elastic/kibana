@@ -5,12 +5,26 @@
  * 2.0.
  */
 
-import { monitoringCollectionSchema, type MonitoringCollectionConfig } from '@kbn/metrics-config';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export type { MonitoringCollectionConfig };
+export const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+  opentelemetry: schema.object({
+    metrics: schema.object({
+      otlp: schema.object({
+        url: schema.maybe(schema.string()),
+        headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+        exportIntervalMillis: schema.number({ defaultValue: 10000 }),
+        logLevel: schema.string({ defaultValue: 'info' }),
+      }),
+      prometheus: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+    }),
+  }),
+});
 
-export const configSchema = monitoringCollectionSchema;
-
-export function createConfig(config: MonitoringCollectionConfig) {
+export type MonitoringCollectionConfig = ReturnType<typeof createConfig>;
+export function createConfig(config: TypeOf<typeof configSchema>) {
   return config;
 }
