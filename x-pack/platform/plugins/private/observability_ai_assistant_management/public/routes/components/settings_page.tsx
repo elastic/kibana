@@ -17,10 +17,11 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   useEuiTheme,
+  useEuiShadow,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useKnowledgeBase } from '@kbn/ai-assistant';
 import { SolutionView } from '@kbn/spaces-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { TabsRt } from '../config';
 import { useAppContext } from '../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab/settings_tab';
@@ -46,6 +47,7 @@ export function SettingsPage() {
   const router = useObservabilityAIAssistantManagementRouter();
   const knowledgeBase = useKnowledgeBase();
   const { euiTheme } = useEuiTheme();
+  const headerIconShadow = useEuiShadow('s');
 
   const [currentSpaceSolution, setCurrentSpaceSolution] = useState<SolutionView>();
 
@@ -97,7 +99,7 @@ export function SettingsPage() {
       setBreadcrumbs([
         {
           text: i18n.translate('xpack.observabilityAiAssistantManagement.breadcrumb.index', {
-            defaultMessage: 'AI Assistants',
+            defaultMessage: 'AI Assistant',
           }),
           onClick: (e) => {
             e.preventDefault();
@@ -168,8 +170,10 @@ export function SettingsPage() {
                   backgroundColor: euiTheme.colors.backgroundBasePlain,
                   borderRadius: '50%',
                   padding: 6,
-                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.12)',
                 }}
+                css={css`
+                  ${headerIconShadow};
+                `}
               />
             </EuiFlexItem>
           ))}
@@ -187,10 +191,12 @@ export function SettingsPage() {
               onClick={() => navigateToApp('management', { path: 'ai/genAiSettings' })}
               data-test-subj="genAiSettingsButton"
             >
-              <FormattedMessage
-                id="xpack.observabilityAiAssistantManagement.settingsPage.genAiSettingsButton"
-                defaultMessage="GenAI Settings"
-              />
+              {i18n.translate(
+                'xpack.observabilityAiAssistantManagement.settingsPage.genAiSettingsButton',
+                {
+                  defaultMessage: 'GenAI Settings',
+                }
+              )}
             </EuiButtonEmpty>
           </EuiFlexItem>
         ) : null}
