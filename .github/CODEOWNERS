@@ -1666,6 +1666,9 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/streams-program-team @elastic/obs-ux-logs-team
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/streams-program-team @elastic/obs-ux-logs-team
 /x-pack/test/api_integration/fixtures/kbn_archiver/streams @elastic/streams-program-team @elastic/obs-ux-logs-team
+/x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests @elastic/streams-program-team @elastic/obs-ux-logs-team
+/x-pack/test_serverless/functional/test_suites/observability/streams @elastic/streams-program-team @elastic/obs-ux-logs-team
+
 
 ### END Observability Plugins
 
