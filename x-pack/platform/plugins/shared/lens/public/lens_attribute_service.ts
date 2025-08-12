@@ -52,6 +52,7 @@ export const savedObjectToEmbeddableAttributes = (
 ): LensSavedObjectAttributes => {
   return {
     ...savedObject.attributes,
+    visualizationType: savedObject.attributes.visualizationType ?? null,
     state: savedObject.attributes.state as LensSavedObjectAttributes['state'],
     references: savedObject.references,
   };
@@ -72,6 +73,7 @@ export function getLensAttributeService(http: HttpStart): LensAttributesService 
       return {
         attributes: {
           ...item,
+          visualizationType: item.visualizationType ?? null,
           state: item.state as LensSavedObjectAttributes['state'],
           references: item.references,
         },
@@ -91,6 +93,7 @@ export function getLensAttributeService(http: HttpStart): LensAttributesService 
     ) => {
       const result = await lensDocumentService.save({
         ...attributes,
+        visualizationType: attributes.visualizationType ?? null,
         state: attributes.state as LensSavedObjectAttributes['state'],
         references,
         savedObjectId,

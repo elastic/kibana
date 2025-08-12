@@ -21,7 +21,7 @@ export const lensItemAttributesSchemaV0 = schema.object(
   {
     title: schema.string(),
     description: schema.maybe(schema.nullable(schema.string())),
-    visualizationType: schema.maybe(schema.string()),
+    visualizationType: schema.maybe(schema.nullable(schema.string())),
     state: schema.maybe(schema.any()),
     uiStateJSON: schema.maybe(schema.string()),
     visState: schema.maybe(schema.string()),
