@@ -14,6 +14,7 @@ import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { type Filter, buildExistsFilter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
+import { flattenHit } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { SortDirection, SortDirectionNumeric } from '@kbn/data-plugin/common';
@@ -588,8 +589,8 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const unusedMetaFields = indexPattern.metaFields.filter((metaField) => {
       return !['_id', '_index'].includes(metaField);
     });
-    const flattenHit = (hit: Record<string, any>) => {
-      const properties = indexPattern.flattenHit(hit);
+    const flattenHitWithIndexPattern = (hit: Record<string, any>) => {
+      const properties = flattenHit(hit, indexPattern);
       // remove metaFields
       unusedMetaFields.forEach((metaField) => {
         delete properties[metaField];
@@ -606,7 +607,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       const geoField = await this._getGeoField();
       featureCollection = hitsToGeoJson(
         hits,
-        flattenHit,
+        flattenHitWithIndexPattern,
         geoField.name,
         geoField.type as ES_GEO_FIELD_TYPE,
         epochMillisFields
@@ -695,8 +696,8 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       );
     }
 
-    // @ts-expect-error hit's type is `SearchHit<{}>` while `flattenHit` expects `Record<string, unknown[]>`
-    const properties = indexPattern.flattenHit(hit) as Record<string, string>;
+    // Using flattenHit from data plugin instead of dataView.flattenHit
+    const properties = flattenHit(hit, indexPattern) as Record<string, string>;
     indexPattern.metaFields.forEach((metaField: string) => {
       if (!this._getTooltipPropertyNames().includes(metaField)) {
         delete properties[metaField];
