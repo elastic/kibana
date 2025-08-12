@@ -81,6 +81,8 @@ describe('unsavedChangesManager', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    layoutUnsavedChanges$.next({});
+
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../services/dashboard_backup_service').getDashboardBackupService = () => ({
       setState: setBackupStateMock,
