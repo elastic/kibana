@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonGroup,
   EuiButtonGroupProps,
@@ -56,7 +57,9 @@ export function NPSScoreInput({
       }
     >
       <EuiButtonGroup
-        legend="Survey about user satisfaction"
+        legend={i18n.translate('xpack.productIntercept.npsSurvey.legend', {
+          defaultMessage: 'Survey for customer satisfaction score',
+        })}
         type="single"
         options={options}
         idSelected={selectedOption}
