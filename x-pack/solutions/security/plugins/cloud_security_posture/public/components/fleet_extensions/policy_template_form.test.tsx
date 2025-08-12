@@ -1078,7 +1078,7 @@ describe('<CspPolicyTemplateForm />', () => {
       const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
 
       await userEvent.type(getByLabelText('Role ARN'), 'a');
-      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { role_arn: { value: 'a' } });
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { 'aws.role_arn': { value: 'a' } });
 
       // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenCalledWith({
@@ -1118,7 +1118,7 @@ describe('<CspPolicyTemplateForm />', () => {
       );
 
       await userEvent.type(getByLabelText('Access Key ID'), 'a');
-      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { access_key_id: { value: 'a' } });
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { 'aws.access_key_id': { value: 'a' } });
 
       // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenCalledWith({
@@ -1132,7 +1132,7 @@ describe('<CspPolicyTemplateForm />', () => {
       );
 
       await userEvent.type(getByTestId('passwordInput-secret-access-key'), 'b');
-      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { secret_access_key: { value: 'b' } });
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { 'aws.secret_access_key': { value: 'b' } });
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
@@ -1169,7 +1169,7 @@ describe('<CspPolicyTemplateForm />', () => {
       );
 
       await userEvent.type(getByLabelText('Access Key ID'), 'a');
-      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { access_key_id: { value: 'a' } });
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { 'aws.access_key_id': { value: 'a' } });
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
@@ -1188,7 +1188,7 @@ describe('<CspPolicyTemplateForm />', () => {
       );
 
       await userEvent.type(getByTestId('passwordInput-secret-access-key'), 'b');
-      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { secret_access_key: { value: 'b' } });
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { 'aws.secret_access_key': { value: 'b' } });
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
@@ -1201,7 +1201,7 @@ describe('<CspPolicyTemplateForm />', () => {
       );
 
       await userEvent.type(getByLabelText('Session Token'), 'a');
-      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { session_token: { value: 'a' } });
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { 'aws.session_token': { value: 'a' } });
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
@@ -1237,7 +1237,7 @@ describe('<CspPolicyTemplateForm />', () => {
       await userEvent.type(getByLabelText('Shared Credential File'), 'a');
 
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
-        shared_credential_file: { value: 'a' },
+        'aws.shared_credential_file': { value: 'a' },
       });
 
       expect(onChange).toHaveBeenCalledWith({
@@ -1250,7 +1250,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       await userEvent.type(getByLabelText('Credential Profile Name'), 'b');
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
-        credential_profile_name: { value: 'b' },
+        'aws.credential_profile_name': { value: 'b' },
       });
 
       expect(onChange).toHaveBeenCalledWith({

@@ -11,8 +11,8 @@ import { TestProvider } from '../../test/test_provider';
 import {
   getAwsPackageInfoMock,
   getMockPackageInfo,
-  getMockPackageInfoAssetGCP,
-  getMockPackageInfoAssetInventoryAWS,
+  getMockPackageInfoGCP,
+  getMockPackageInfoAWS,
   getMockPolicyAWS,
   getMockPolicyAzure,
   getMockPolicyGCP,
@@ -43,6 +43,7 @@ import CloudAssetInventoryPolicyTemplateForm from './policy_template_form';
 import { useKibana } from '../../hooks/use_kibana';
 import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
 import { CLOUDBEAT_AWS, CLOUDBEAT_AZURE, CLOUDBEAT_GCP } from './constants';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -131,13 +132,13 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     edit = false,
     packageInfo = {} as PackageInfo,
     isAgentlessEnabled,
-    integrationToEnable,
+    defaultSetupTechnology = SetupTechnology.AGENT_BASED,
   }: {
     edit?: boolean;
     newPolicy: NewPackagePolicy;
     packageInfo?: PackageInfo;
     isAgentlessEnabled?: boolean;
-    integrationToEnable?: string;
+    defaultSetupTechnology?: SetupTechnology;
   }) => {
     const { AppWrapper: FleetAppWrapper } = createFleetTestRendererMock();
     return (
@@ -150,8 +151,8 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
               onChange={onChange}
               packageInfo={packageInfo}
               isEditPage={true}
-              isAgentlessEnabled={isAgentlessEnabled}
-              integrationToEnable={integrationToEnable}
+              defaultSetupTechnology={defaultSetupTechnology}
+              integrationToEnable={'cloud_asset_inventory'}
             />
           )}
           {!edit && (
@@ -161,7 +162,8 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
               packageInfo={packageInfo}
               isEditPage={false}
               isAgentlessEnabled={isAgentlessEnabled}
-              integrationToEnable={integrationToEnable}
+              defaultSetupTechnology={defaultSetupTechnology}
+              integrationToEnable={'cloud_asset_inventory'}
             />
           )}
         </TestProvider>
@@ -171,7 +173,9 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
   it('renders and updates name field', async () => {
     const policy = getMockPolicyAWS();
-    const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
+    const { getByLabelText } = render(
+      <WrappedComponent newPolicy={policy} packageInfo={getAwsPackageInfoMock() as PackageInfo} />
+    );
     const name = getByLabelText('Name');
     expect(name).toBeInTheDocument();
 
@@ -179,6 +183,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
+        isExtensionLoaded: true,
         isValid: true,
         updatedPolicy: { ...policy, name: `${policy.name}1` },
       });
@@ -187,7 +192,9 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
   it('renders and updates description field', async () => {
     const policy = getMockPolicyAWS();
-    const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
+    const { getByLabelText } = render(
+      <WrappedComponent newPolicy={policy} packageInfo={getAwsPackageInfoMock() as PackageInfo} />
+    );
     const description = getByLabelText('Description');
     expect(description).toBeInTheDocument();
 
@@ -195,6 +202,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
+        isExtensionLoaded: true,
         isValid: true,
         updatedPolicy: { ...policy, description: `${policy.description}1` },
       });
@@ -202,7 +210,12 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
   });
 
   it('renders CSP input selector', () => {
-    const { getByLabelText } = render(<WrappedComponent newPolicy={getMockPolicyAWS()} />);
+    const { getByLabelText } = render(
+      <WrappedComponent
+        newPolicy={getMockPolicyAWS()}
+        packageInfo={getAwsPackageInfoMock() as PackageInfo}
+      />
+    );
 
     const option1 = getByLabelText('AWS');
     const option2 = getByLabelText('GCP');
@@ -217,9 +230,13 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     expect(option1).toBeChecked();
   });
 
-  it('renders disabled CSP inputs when editing', () => {
+  it('renders disabled Asset inputs when editing', () => {
     const { getByLabelText } = render(
-      <WrappedComponent newPolicy={getMockPolicyAWS()} edit={true} />
+      <WrappedComponent
+        newPolicy={getMockPolicyAWS()}
+        packageInfo={getAwsPackageInfoMock() as PackageInfo}
+        edit={true}
+      />
     );
 
     const option1 = getByLabelText('AWS');
@@ -267,6 +284,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     // 1st call happens on mount and selects the CloudFormation template
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
+        isExtensionLoaded: true,
         isValid: true,
         updatedPolicy,
       });
@@ -274,6 +292,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
     // 2nd call happens on mount and increments cspm template enabled input
     expect(onChange).toHaveBeenCalledWith({
+      isExtensionLoaded: true,
       isValid: true,
       updatedPolicy: {
         ...getMockPolicyAWS(),
@@ -301,11 +320,13 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     };
 
     onChange({
+      isExtensionLoaded: true,
       isValid: true,
       updatedPolicy: updatedPolicy2,
     });
 
     expect(onChange).toHaveBeenCalledWith({
+      isExtensionLoaded: true,
       isValid: true,
       updatedPolicy: updatedPolicy2,
     });
@@ -330,11 +351,11 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         'aws.setup.format': { value: 'manual' },
       });
       const { getByTestId } = render(
-        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAssetInventoryAWS()} />
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAWS()} />
       );
       expect(getByTestId('externalLink')).toHaveAttribute(
         'href',
-        'https://ela.st/cloud-asset-discovery-get-started'
+        'https://ela.st/cloud-asset-discovery-get-started-aws.html'
       );
     });
     it(`documentation Hyperlink should have correct URL to redirect users to AWS page if user chose Cloudformation`, () => {
@@ -344,7 +365,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         'aws.account_type': { value: 'single-account' },
       });
       const { getByTestId } = render(
-        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAssetInventoryAWS()} />
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAWS()} />
       );
       expect(getByTestId('externalLink')).toHaveAttribute(
         'href',
@@ -357,7 +378,9 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       policy = getAssetPolicy(policy, CLOUDBEAT_AWS, {
         'aws.credentials.type': { value: 'assume_role' },
       });
-      const { getByLabelText, getByRole } = render(<WrappedComponent newPolicy={policy} />);
+      const { getByLabelText, getByRole } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getAwsPackageInfoMock() as PackageInfo} />
+      );
       expect(getByRole('option', { name: 'Assume role', selected: true })).toBeInTheDocument();
       expect(getByLabelText('Role ARN')).toBeInTheDocument();
     });
@@ -367,12 +390,15 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         'aws.credentials.type': { value: 'assume_role' },
       });
 
-      const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
+      const { getByLabelText } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getAwsPackageInfoMock() as PackageInfo} />
+      );
       await userEvent.type(getByLabelText('Role ARN'), 'a');
 
       const newPolicy = getAssetPolicy(policy, CLOUDBEAT_AWS, { 'aws.role_arn': { value: 'a' } });
       // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenCalledWith({
+        isExtensionLoaded: true,
         isValid: true,
         updatedPolicy: newPolicy,
       });
@@ -383,7 +409,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         'aws.credentials.type': { value: 'direct_access_keys' },
       });
       const { getByLabelText, getByRole } = render(
-        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfo() as PackageInfo} />
+        <WrappedComponent newPolicy={policy} packageInfo={getAwsPackageInfoMock() as PackageInfo} />
       );
       expect(
         getByRole('option', { name: 'Direct access keys', selected: true })
@@ -401,21 +427,23 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         'aws.credentials.type': { value: 'direct_access_keys' },
       });
       const { getByLabelText, rerender, getByTestId } = render(
-        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfo() as PackageInfo} />
+        <WrappedComponent newPolicy={policy} packageInfo={getAwsPackageInfoMock() as PackageInfo} />
       );
       await userEvent.type(getByLabelText('Access Key ID'), 'a');
       policy = getAssetPolicy(policy, CLOUDBEAT_AWS, { 'aws.access_key_id': { value: 'a' } });
       // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenCalledWith({
+        isExtensionLoaded: true,
         isValid: true,
         updatedPolicy: policy,
       });
       rerender(
-        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfo() as PackageInfo} />
+        <WrappedComponent newPolicy={policy} packageInfo={getAwsPackageInfoMock() as PackageInfo} />
       );
       await userEvent.type(getByTestId('passwordInput-secret-access-key'), 'b');
       policy = getAssetPolicy(policy, CLOUDBEAT_AWS, { 'aws.secret_access_key': { value: 'b' } });
       expect(onChange).toHaveBeenCalledWith({
+        isExtensionLoaded: true,
         isValid: true,
         updatedPolicy: policy,
       });
@@ -449,6 +477,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         'aws.access_key_id': { value: 'a' },
       });
       expect(onChange).toHaveBeenCalledWith({
+        isExtensionLoaded: true,
         isValid: true,
         updatedPolicy,
       });
@@ -463,6 +492,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         'aws.secret_access_key': { value: 'b' },
       });
       expect(onChange).toHaveBeenCalledWith({
+        isExtensionLoaded: true,
         isValid: true,
         updatedPolicy: updatedPolicy2,
       });
@@ -477,6 +507,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
 
       expect(onChange).toHaveBeenCalledWith({
+        isExtensionLoaded: true,
         isValid: true,
         updatedPolicy: updatedPolicy3,
       });
@@ -487,7 +518,9 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       policy = getAssetPolicy(policy, CLOUDBEAT_AWS, {
         'aws.credentials.type': { value: 'shared_credentials' },
       });
-      const { getByLabelText, getByRole } = render(<WrappedComponent newPolicy={policy} />);
+      const { getByLabelText, getByRole } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAWS() as PackageInfo} />
+      );
       expect(
         getByRole('option', { name: 'Shared credentials', selected: true })
       ).toBeInTheDocument();
@@ -500,7 +533,9 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       policy = getAssetPolicy(policy, CLOUDBEAT_AWS, {
         'aws.credentials.type': { value: 'shared_credentials' },
       });
-      const { getByLabelText, rerender } = render(<WrappedComponent newPolicy={policy} />);
+      const { getByLabelText, rerender } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAWS() as PackageInfo} />
+      );
 
       await userEvent.type(getByLabelText('Shared Credential File'), 'a');
       policy = getAssetPolicy(policy, CLOUDBEAT_AWS, {
@@ -508,11 +543,14 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
 
       expect(onChange).toHaveBeenCalledWith({
+        isExtensionLoaded: true,
         isValid: true,
         updatedPolicy: policy,
       });
 
-      rerender(<WrappedComponent newPolicy={policy} />);
+      rerender(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAWS() as PackageInfo} />
+      );
       await userEvent.type(getByLabelText('Credential Profile Name'), 'b');
 
       policy = getAssetPolicy(policy, CLOUDBEAT_AWS, {
@@ -520,6 +558,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
 
       expect(onChange).toHaveBeenCalledWith({
+        isExtensionLoaded: true,
         isValid: true,
         updatedPolicy: policy,
       });
@@ -533,7 +572,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         'gcp.credentials.type': { value: 'credentials-file' },
       });
       const { getByText } = render(
-        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAssetGCP()} />
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoGCP()} />
       );
       expect(getByText('documentation')).toHaveAttribute(
         'href',
@@ -546,16 +585,12 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
         'gcp.credentials.type': { value: 'credentials-none', type: 'text' },
       });
-      const { getByTestId } = render(
-        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAssetGCP()} />
+      const { container } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoGCP()} />
       );
-      expect(onChange).toHaveBeenCalledWith({
-        isValid: true,
-        updatedPolicy: policy,
-      });
-      expect(
-        getByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.GOOGLE_CLOUD_SHELL_SETUP)
-      ).toBeInTheDocument();
+      const cloudShellSetup = container.querySelector('#google_cloud_shell');
+      expect(cloudShellSetup).toBeInTheDocument();
+      expect(cloudShellSetup).toBeChecked();
     });
 
     it(`renders ${CLOUDBEAT_GCP} Credentials File fields`, () => {
@@ -564,7 +599,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         'gcp.credentials.type': { value: 'credentials-file' },
       });
       const { getByLabelText, getByRole } = render(
-        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAssetGCP()} />
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoGCP()} />
       );
       expect(getByRole('option', { name: 'Credentials File', selected: true })).toBeInTheDocument();
       expect(
@@ -575,11 +610,11 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     it(`updates ${CLOUDBEAT_GCP} Credentials File fields`, async () => {
       let policy = getMockPolicyGCP();
       policy = getAssetPolicy(policy, CLOUDBEAT_GCP, {
-        'gcp.project_id': { value: 'a' },
-        'gcp.credentials.type': { value: 'credentials-file' },
+        'gcp.project_id': { value: 'a', type: 'text' },
+        'gcp.credentials.type': { value: 'credentials-file', type: 'text' },
       });
       const { getByTestId } = render(
-        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAssetGCP()} />
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoGCP()} />
       );
       await userEvent.type(getByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE), 'b');
       policy = getAssetPolicy(policy, CLOUDBEAT_GCP, {
@@ -587,6 +622,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
       expect(onChange).toHaveBeenCalledWith({
         isValid: true,
+        isExtensionLoaded: true,
         updatedPolicy: policy,
       });
     });
@@ -612,7 +648,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
       });
       const { getByLabelText, getByTestId } = render(
-        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAssetGCP()} />
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoGCP()} />
       );
       expect(getByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeInTheDocument();
       expect(getByLabelText('Organization ID')).toBeInTheDocument();
@@ -624,7 +660,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
       });
       const { getByLabelText, getByTestId } = render(
-        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAssetGCP()} />
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoGCP()} />
       );
       expect(getByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeInTheDocument();
       expect(getByLabelText('Organization ID')).toBeInTheDocument();
@@ -636,7 +672,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         'gcp.account_type': { value: GCP_SINGLE_ACCOUNT },
       });
       const { queryByLabelText, queryByTestId } = render(
-        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAssetGCP()} />
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoGCP()} />
       );
       expect(queryByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeNull();
       expect(queryByLabelText('Organization ID')).toBeNull();
@@ -647,14 +683,19 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       policy = getAssetPolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
       });
+
       const { getByTestId } = render(
-        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAssetGCP()} />
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoGCP()} />
       );
+
       await userEvent.type(getByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID), 'c');
+
       policy = getAssetPolicy(policy, CLOUDBEAT_GCP, {
         'gcp.organization_id': { value: 'c' },
       });
+
       expect(onChange).toHaveBeenCalledWith({
+        isExtensionLoaded: true,
         isValid: true,
         updatedPolicy: policy,
       });
@@ -682,41 +723,55 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       policy = getAssetPolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.type': { value: 'service_principal_with_client_secret' },
       });
+
       const { rerender, getByLabelText, getByTestId } = render(
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
+
       await userEvent.type(getByLabelText('Tenant ID'), 'a');
+
       policy = getAssetPolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.tenant_id': { value: 'a' },
       });
+
       expect(onChange).toHaveBeenCalledWith({
+        isExtensionLoaded: true,
         isValid: true,
         updatedPolicy: policy,
       });
+
       rerender(
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
+
       await userEvent.type(getByLabelText('Client ID'), 'b');
       policy = getAssetPolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.client_id': { value: 'b' },
       });
+
       expect(onChange).toHaveBeenCalledWith({
+        isExtensionLoaded: true,
         isValid: true,
         updatedPolicy: policy,
       });
+
       rerender(
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
+
       await userEvent.type(getByTestId('passwordInput-client-secret'), 'c');
       policy = getAssetPolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.client_secret': { value: 'c' },
       });
+
       expect(onChange).toHaveBeenCalledWith({
+        isExtensionLoaded: true,
         isValid: true,
         updatedPolicy: policy,
       });
     });
   });
+
   describe('Agentless', () => {
     it('should not render setup technology selector if agentless is not available and CSPM integration supports agentless', async () => {
       const policy = getMockPolicyAWS();
@@ -738,7 +793,11 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
 
       const { getByTestId, getByLabelText } = render(
-        <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={true} />
+        <WrappedComponent
+          newPolicy={newPackagePolicy}
+          isAgentlessEnabled={true}
+          packageInfo={getPackageInfoMock() as PackageInfo}
+        />
       );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
       // default state
@@ -765,26 +824,25 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
     });
 
-    it.skip('should render setup technology selector for GCP for organization account type', async () => {
+    it('should render setup technology selector for GCP for organization account type', async () => {
       const newPackagePolicy = getAssetPolicy(getMockPolicyGCP(), CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
       });
-      const { getByTestId, queryByTestId, getByLabelText } = render(
+      const { getByTestId, queryByTestId, getByLabelText, container } = render(
         <WrappedComponent
           newPolicy={newPackagePolicy}
           isAgentlessEnabled={true}
-          packageInfo={getMockPackageInfoAssetGCP()}
+          packageInfo={{ version: '1.0.0' } as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
         />
       );
       // navigate to GCP
       const gcpSelectorButton = getByTestId(CAI_GCP_OPTION_TEST_SUBJ);
       await userEvent.click(gcpSelectorButton);
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+      const agentlessOption = container.querySelector('#SetupTechnologySelector_agentless');
       const orgIdField = queryByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
       const projectIdField = queryByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
-      // const credentialsJsonField = queryByTestId(
-      //   CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON
-      // );
       const credentialsTypSelector = queryByTestId(
         CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE
       );
@@ -793,7 +851,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       );
       // default state for GCP with the Org selected
       expect(setupTechnologySelector).toBeInTheDocument();
-      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+      expect(agentlessOption).toBeChecked();
       expect(orgIdField).toBeInTheDocument();
       // expect(credentialsJsonField).toBeInTheDocument();
       expect(projectIdField).not.toBeInTheDocument();
@@ -812,22 +870,31 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       const newPackagePolicy = getMockPolicyGCP({
         'gcp.account_type': { value: GCP_SINGLE_ACCOUNT, type: 'text' },
       });
-      const { getByTestId, queryByTestId } = render(
+      const { getByTestId, queryByTestId, container } = render(
         <WrappedComponent
           newPolicy={newPackagePolicy}
           isAgentlessEnabled={true}
-          packageInfo={{ version: '1.0.0' } as PackageInfo}
+          packageInfo={getMockPackageInfoGCP() as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
         />
       );
       // navigate to GCP
       const gcpSelectorButton = getByTestId(CAI_GCP_OPTION_TEST_SUBJ);
       await userEvent.click(gcpSelectorButton);
       const setupTechnologySelector = queryByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+      expect(setupTechnologySelector).toBeInTheDocument();
+
+      const agentlessOption = container.querySelector('#SetupTechnologySelector_agentless');
+      expect(agentlessOption).toBeChecked();
+
       const orgIdField = queryByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
+      expect(orgIdField).not.toBeInTheDocument();
+
       const projectIdField = queryByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
       const credentialsJsonField = queryByTestId(
         CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON
       );
+      await waitFor(() => expect(credentialsJsonField).toBeInTheDocument());
       const credentialsTypSelector = queryByTestId(
         CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE
       );
@@ -835,10 +902,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE
       );
       // default state for GCP with the Org selected
-      expect(setupTechnologySelector).toBeInTheDocument();
-      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
-      expect(orgIdField).not.toBeInTheDocument();
-      expect(credentialsJsonField).toBeInTheDocument();
+
       expect(projectIdField).toBeInTheDocument();
       expect(credentialsTypSelector).not.toBeInTheDocument();
       expect(credentialsFileField).not.toBeInTheDocument();
@@ -934,122 +998,71 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         expect(getByLabelText('Client Certificate Password')).toBeInTheDocument()
       );
     });
-    it.only(`updates Service principal with Client Certificate fields`, async () => {
+    it(`updates Service principal with Client Certificate fields`, async () => {
       let policy = getMockPolicyAzure();
       policy = getAssetPolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.type': { value: 'service_principal_with_client_certificate' },
       });
+
       const { rerender, getByLabelText, getByTestId } = render(
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
+
       await userEvent.type(getByLabelText('Tenant ID'), 'a');
+
       policy = getAssetPolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.tenant_id': { value: 'a' },
       });
+
       expect(onChange).toHaveBeenCalledWith({
-        isValid: true,
-        updatedPolicy: {
-          ...policy,
-          inputs: [
-            ...policy.inputs,
-            {
-              type: CLOUDBEAT_AZURE,
-              enabled: true,
-              vars: {
-                ...policy.inputs.find((input) => input.type === CLOUDBEAT_AZURE)?.vars,
-                'azure.account_type': { value: 'organization', type: 'text' },
-                'azure.credentials.tenant_id': { value: 'a', type: 'text' },
-              },
-            },
-          ],
-        },
         isExtensionLoaded: true,
+        isValid: true,
+        updatedPolicy: policy,
       });
+
       rerender(
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
+
       await userEvent.type(getByLabelText('Client ID'), 'b');
       policy = getAssetPolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.client_id': { value: 'b' },
       });
+
       expect(onChange).toHaveBeenCalledWith({
-        isValid: true,
         isExtensionLoaded: true,
-        updatedPolicy: {
-          ...policy,
-          inputs: [
-            ...policy.inputs,
-            {
-              type: CLOUDBEAT_AZURE,
-              enabled: true,
-              vars: {
-                ...policy.inputs.find((input) => input.type === CLOUDBEAT_AZURE)?.vars,
-                'azure.account_type': 'organization',
-                'azure.credentials.tenant_id': 'a',
-                'azure.credentials.client_id': 'b',
-              },
-            },
-          ],
-        },
+        isValid: true,
+        updatedPolicy: policy,
       });
 
       rerender(
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
+
       await userEvent.type(getByLabelText('Client Certificate Path'), 'c');
       policy = getAssetPolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.client_certificate_path': { value: 'c' },
       });
+
       expect(onChange).toHaveBeenCalledWith({
-        isValid: true,
         isExtensionLoaded: true,
-        updatedPolicy: {
-          ...policy,
-          inputs: [
-            ...policy.inputs,
-            {
-              type: CLOUDBEAT_AZURE,
-              enabled: true,
-              vars: {
-                ...policy.inputs.find((input) => input.type === CLOUDBEAT_AZURE)?.vars,
-                'azure.account_type': 'organization',
-                'azure.credentials.tenant_id': 'a',
-                'azure.credentials.client_id': 'b',
-                'azure.credentials.client_certificate_path': 'c',
-              },
-            },
-          ],
-        },
+        isValid: true,
+        updatedPolicy: policy,
       });
 
       rerender(
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
+
       await userEvent.type(getByTestId('passwordInput-client-certificate-password'), 'd');
       policy = getAssetPolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.client_certificate_password': { value: 'd' },
       });
+
       expect(onChange).toHaveBeenCalledWith({
-        isValid: true,
         isExtensionLoaded: true,
-        updatedPolicy: {
-          ...policy,
-          inputs: [
-            ...policy.inputs,
-            {
-              type: CLOUDBEAT_AZURE,
-              enabled: true,
-              vars: {
-                ...policy.inputs.find((input) => input.type === CLOUDBEAT_AZURE)?.vars,
-                'azure.account_type': 'organization',
-                'azure.credentials.tenant_id': 'a',
-                'azure.credentials.client_id': 'b',
-                'azure.credentials.client_certificate_path': 'c',
-                'azure.credentials.client_certificate_password': 'd',
-              },
-            },
-          ],
-        },
+        isValid: true,
+        updatedPolicy: policy,
       });
     });
 
