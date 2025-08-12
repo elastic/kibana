@@ -209,7 +209,7 @@ export const useBulkActionItems = ({
               onClick: () =>
                 onClickUpdate(
                   FILTER_CLOSED as AlertWorkflowStatus,
-                  AlertClosingReasonValues.FALSE_POSITIVE
+                  AlertClosingReasonValues.false_positive
                 ),
             },
             {
@@ -217,7 +217,7 @@ export const useBulkActionItems = ({
               onClick: () =>
                 onClickUpdate(
                   FILTER_CLOSED as AlertWorkflowStatus,
-                  AlertClosingReasonValues.DUPLICATE
+                  AlertClosingReasonValues.duplicate
                 ),
             },
             {
@@ -225,7 +225,7 @@ export const useBulkActionItems = ({
               onClick: () =>
                 onClickUpdate(
                   FILTER_CLOSED as AlertWorkflowStatus,
-                  AlertClosingReasonValues.INVESTIGATION_REQUIRED
+                  AlertClosingReasonValues.investigation_required
                 ),
             },
           ],
@@ -234,5 +234,5 @@ export const useBulkActionItems = ({
     [onClickUpdate]
   );
 
-  return { items, panels };
+  return useMemo(() => ({ items, panels }), [items, panels]);
 };
