@@ -32,6 +32,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
       children: [
         {
           link: 'discover',
+          iconV2: 'discoverApp',
         },
         defaultNavigationTree.dashboards(),
         {

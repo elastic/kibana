@@ -131,6 +131,11 @@ interface NodeDefinitionBase {
    * Optional icon for the navigation node. Note: not all navigation depth will render the icon
    */
   icon?: IconType;
+
+  /**
+   * Icon that will be rendered only in new sidenav
+   */
+  iconV2?: IconType;
   /**
    * href for absolute links only. Internal links should use "link".
    */

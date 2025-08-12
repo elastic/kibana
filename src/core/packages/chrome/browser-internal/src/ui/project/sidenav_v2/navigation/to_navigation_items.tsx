@@ -110,7 +110,7 @@ export const toNavigationItems = (
 
   const logoItem: SideNavLogo = {
     href: warnIfMissing(logoNode, 'href', '/missing-href-😭'),
-    iconType: warnIfMissing(logoNode, 'icon', 'logoKibana') as string,
+    iconType: warnIfMissing(logoNode, ['iconV2', 'icon'], 'logoKibana') as string,
     id: warnIfMissing(logoNode, 'id', 'kibana'),
     label: warnIfMissing(logoNode, 'title', 'Kibana'),
   };
@@ -275,7 +275,11 @@ export const toNavigationItems = (
     return {
       id: navNode.id,
       label: warnIfMissing(navNode, 'title', 'Missing Title 😭'),
-      iconType: warnIfMissing(navNode, 'icon', AppDeepLinkIdToIcon[navNode.id] || 'broom'),
+      iconType: warnIfMissing(
+        navNode,
+        ['iconV2', 'icon'],
+        AppDeepLinkIdToIcon[navNode.id] || 'broom'
+      ),
       href: itemHref,
       sections: secondarySections,
       'data-test-subj': getTestSubj(navNode),
@@ -306,29 +310,38 @@ export const toNavigationItems = (
 
 function warnIfMissing<T extends { id: string }, K extends keyof T>(
   obj: T | null | undefined,
-  key: K,
+  key: K | K[],
   fallback: NonNullable<T[K]>
 ): NonNullable<T[K]> {
+  const keys = Array.isArray(key) ? key : [key];
+
+  // Helper function to create warning message
+  const createWarningMessage = (reason: string) =>
+    `Navigation item${obj?.id ? ` "${obj.id}"` : ''} ${reason}. Using fallback value: "${String(
+      fallback
+    )}".`;
+
   if (!obj) {
-    warnOnce(
-      `Navigation item is missing. Using fallback value: "${String(fallback)}" for key "${String(
-        key
-      )}".`
-    );
+    warnOnce(createWarningMessage(`is missing`));
     return fallback;
   }
 
-  const value = obj[key];
-  if (value === undefined || value === null) {
-    warnOnce(
-      `Navigation item "${String(obj?.id)}" is missing a "${String(
-        key
-      )}". Using fallback value: "${String(fallback)}".`
-    );
-
-    return fallback;
+  // Try each key in order until we find a value
+  for (const k of keys) {
+    const value = obj[k];
+    if (value !== undefined && value !== null) {
+      return value as NonNullable<T[K]>;
+    }
   }
-  return value as NonNullable<T[K]>;
+
+  // None of the keys had values, warn and use fallback
+  const missingKeysMessage =
+    keys.length === 1
+      ? `is missing a "${String(keys[0])}"`
+      : `is missing all of "${keys.join(', ')}"`;
+
+  warnOnce(createWarningMessage(missingKeysMessage));
+  return fallback;
 }
 
 const warnedMessages = new Set<string>();
