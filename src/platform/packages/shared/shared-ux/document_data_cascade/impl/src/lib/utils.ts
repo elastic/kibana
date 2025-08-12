@@ -8,7 +8,7 @@
  */
 
 import type { Row } from '@tanstack/react-table';
-import type { GroupNode } from '../components/data_cascade_provider';
+import type { GroupNode } from '../components/store_provider';
 
 /**
  * @description This function returns the path of the row node in the group by hierarchy.
