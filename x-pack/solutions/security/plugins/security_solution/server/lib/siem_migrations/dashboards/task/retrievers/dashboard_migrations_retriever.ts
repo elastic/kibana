@@ -23,4 +23,8 @@ export class DashboardMigrationsRetriever {
   constructor(migrationId: string, clients: DashboardMigrationsRetrieverClients) {
     this.resources = new DashboardResourceRetriever(migrationId, clients.data.resources);
   }
+
+  public async initialize() {
+    await this.resources.initialize();
+  }
 }

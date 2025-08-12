@@ -89,6 +89,9 @@ components:
           description: The status of the dashboard migration process.
           $ref: './migration.schema.yaml#/components/schemas/MigrationStatus'
           default: pending
+        comments:
+          description: The comments for the migration including a summary from the LLM in markdown.
+          $ref: './migration.schema.yaml#/components/schemas/MigrationComments'
         updated_at:
           type: string
           description: The moment of the last update
@@ -119,7 +122,7 @@ components:
           type: string
           description: The description of the dashboard
         data:
-          type: object
+          type: string
           description: The data of the dashboard in the specified format
         last_updated:
           type: string
@@ -153,3 +156,20 @@ components:
     DashboardMigrationTaskStats:
       description: The dashboard migration task stats object.
       $ref: './migration.schema.yaml#/components/schemas/MigrationTaskStats'
+
+    DashboardMigrationTaskExecutionSettings:
+      type: object
+      description: The dashboard migration task execution settings.
+      required:
+        - connector_id
+      properties:
+        connector_id:
+          type: string
+          description: The connector ID used in the last execution.
+
+    DashboardMigrationRetryFilter:
+      type: string
+      description: Indicates the filter to retry the migrations dashboards translation
+      enum: # should match SiemMigrationRetryFilter enum at ../constants.ts
+        - failed
+        - not_fully_translated

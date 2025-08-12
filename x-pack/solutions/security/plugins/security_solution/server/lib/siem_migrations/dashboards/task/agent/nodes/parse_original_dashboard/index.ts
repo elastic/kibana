@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-import { MockRuleMigrationsTaskService } from './mocks';
-export const RuleMigrationsTaskService = MockRuleMigrationsTaskService;
+export { getParseOriginalDashboardNode } from './parse_original_dashboard';

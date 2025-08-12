@@ -87,6 +87,10 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
     this.task = (input, config) => agent.invoke(input, config);
   }
 
+  protected async initialize() {
+    await this.retriever.initialize();
+  }
+
   protected async prepareTaskInput(
     migrationDashboard: StoredDashboardMigrationDashboard
   ): Promise<DashboardMigrationTaskInput> {
@@ -109,7 +113,7 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
         target: migrationOutput.elastic_dashboard as ElasticDashboard,
       }),
       translation_result: migrationOutput.translation_result,
-      // TODO: comments: migrationOutput.comments,
+      comments: migrationOutput.comments,
     };
   }
 }

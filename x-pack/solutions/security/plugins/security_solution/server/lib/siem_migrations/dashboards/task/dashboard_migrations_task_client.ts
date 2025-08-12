@@ -10,6 +10,10 @@ import type {
   DashboardMigration,
   DashboardMigrationDashboard,
 } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
+import type {
+  DashboardMigrationTaskInput,
+  DashboardMigrationTaskOutput,
+} from './dashboard_migrations_task_runner';
 import { DashboardMigrationTaskRunner } from './dashboard_migrations_task_runner';
 import { SiemMigrationsTaskClient } from '../../common/task/siem_migrations_task_client';
 import type { MigrateDashboardConfigSchema } from './agent/types';
@@ -19,7 +23,9 @@ export type DashboardMigrationsRunning = Map<string, DashboardMigrationTaskRunne
 export class DashboardMigrationsTaskClient extends SiemMigrationsTaskClient<
   DashboardMigration,
   DashboardMigrationDashboard,
-  MigrateDashboardConfigSchema
+  DashboardMigrationTaskInput,
+  MigrateDashboardConfigSchema,
+  DashboardMigrationTaskOutput
 > {
   protected readonly TaskRunnerClass = DashboardMigrationTaskRunner;
   protected readonly EvaluatorClass = DashboardMigrationTaskEvaluator;

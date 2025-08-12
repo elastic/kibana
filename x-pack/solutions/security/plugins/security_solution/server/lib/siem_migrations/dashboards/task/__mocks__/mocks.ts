@@ -7,22 +7,24 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { AsyncLocalStorageProviderSingleton } from '@langchain/core/singletons';
-import type { RuleMigrationTelemetryClient } from '../dashboard_migrations_telemetry_client';
+import type { DashboardMigrationTelemetryClient } from '../dashboard_migrations_telemetry_client';
 import type { BaseLLMParams } from '@langchain/core/language_models/llms';
 
 export const createSiemMigrationTelemetryClientMock = () => {
   // Mock for the object returned by startSiemMigrationTask
-  const mockStartRuleTranslationReturn = {
+  const mockStartDashboardTranslationReturn = {
     success: jest.fn(),
     failure: jest.fn(),
   };
 
   // Mock for the function returned by startSiemMigrationTask
-  const mockStartRuleTranslation = jest.fn().mockReturnValue(mockStartRuleTranslationReturn);
+  const mockStartDashboardTranslation = jest
+    .fn()
+    .mockReturnValue(mockStartDashboardTranslationReturn);
 
   // Mock for startSiemMigrationTask return value
   const mockStartSiemMigrationTaskReturn = {
-    startRuleTranslation: mockStartRuleTranslation,
+    startDashboardTranslation: mockStartDashboardTranslation,
     success: jest.fn(),
     failure: jest.fn(),
     aborted: jest.fn(),
@@ -30,9 +32,9 @@ export const createSiemMigrationTelemetryClientMock = () => {
 
   return {
     reportIntegrationsMatch: jest.fn(),
-    reportPrebuiltRulesMatch: jest.fn(),
+    reportPrebuiltDashboardsMatch: jest.fn(),
     startSiemMigrationTask: jest.fn().mockReturnValue(mockStartSiemMigrationTaskReturn),
-  } as jest.Mocked<PublicMethodsOf<RuleMigrationTelemetryClient>>;
+  } as jest.Mocked<PublicMethodsOf<DashboardMigrationTelemetryClient>>;
 };
 
 // Factory function for the mock class
@@ -40,12 +42,12 @@ export const MockSiemMigrationTelemetryClient = jest
   .fn()
   .mockImplementation(() => createSiemMigrationTelemetryClientMock());
 
-export const createRuleMigrationsTaskClientMock = () => ({
+export const createDashboardMigrationsTaskClientMock = () => ({
   start: jest.fn().mockResolvedValue({ started: true }),
   stop: jest.fn().mockResolvedValue({ stopped: true }),
   getStats: jest.fn().mockResolvedValue({
     status: 'done',
-    rules: {
+    items: {
       total: 1,
       finished: 1,
       processing: 0,
@@ -56,15 +58,15 @@ export const createRuleMigrationsTaskClientMock = () => ({
   getAllStats: jest.fn().mockResolvedValue([]),
 });
 
-export const MockRuleMigrationsTaskClient = jest
+export const MockDashboardMigrationsTaskClient = jest
   .fn()
-  .mockImplementation(() => createRuleMigrationsTaskClientMock());
+  .mockImplementation(() => createDashboardMigrationsTaskClientMock());
 
-// Rule migrations task service
+// Dashboard migrations task service
 export const mockStopAll = jest.fn();
-export const mockCreateClient = jest.fn(() => createRuleMigrationsTaskClientMock());
+export const mockCreateClient = jest.fn(() => createDashboardMigrationsTaskClientMock());
 
-export const MockRuleMigrationsTaskService = jest.fn().mockImplementation(() => ({
+export const MockDashboardMigrationsTaskService = jest.fn().mockImplementation(() => ({
   createClient: mockCreateClient,
   stopAll: mockStopAll,
 }));
