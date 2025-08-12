@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           // navigate to context
           await dataGrid.clickRowToggle({ rowIndex: 0 });
-          const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+          const rowActions = await dataGrid.getRowActions();
           await rowActions[1].click();
           await context.waitUntilContextLoadingHasFinished();
 
