@@ -7,22 +7,14 @@
 
 import { omit } from 'lodash';
 import type { Filter } from '@kbn/es-query';
-import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import type { Threshold } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
-<<<<<<<< HEAD:x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_management/prebuilt_rules/install_with_preview.cy.ts
-import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
-
-import { expectRulesInTable } from '../../../../tasks/alerts_detection_rules';
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
-========
 import {
   AlertSuppression,
   type ThreatMapping,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { expectRulesInTable } from '../../../../../tasks/alerts_detection_rules';
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
->>>>>>>> 40b7b42536a ([Security Solution] Split prebuilt rule Cypress tests (#231150)):x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/rule_management/prebuilt_rules/installation/install_with_preview.cy.ts
 import {
   INSTALL_PREBUILT_RULE_BUTTON,
   INSTALL_PREBUILT_RULE_PREVIEW,
