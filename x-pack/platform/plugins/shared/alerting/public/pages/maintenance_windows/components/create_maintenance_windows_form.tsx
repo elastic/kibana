@@ -384,7 +384,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             />
           </EuiFlexItem>
         )}
-
         <>
           <EuiFlexItem>
             <EuiHorizontalRule margin="xl" />
@@ -415,21 +414,19 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           </EuiFlexItem>
         </>
         {(isScopedQueryEnabled && scopedQueryPayload) || showMultipleSolutionsWarning ? (
-          <>
-            <EuiFlexItem>
-              <EuiHorizontalRule margin="xl" />
-              <EuiCallOut
-                data-test-subj="maintenanceWindowMultipleSolutionsRemovedWarning"
-                title={i18n.SOLUTION_CONFIG_REMOVAL_WARNING_TITLE}
-                color="warning"
-              >
-                <p>{i18n.SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE}</p>
-              </EuiCallOut>
-            </EuiFlexItem>
-          </>
+          <EuiFlexItem>
+            <EuiHorizontalRule margin="xl" />
+            <EuiCallOut
+              data-test-subj="maintenanceWindowMultipleSolutionsRemovedWarning"
+              title={i18n.SOLUTION_CONFIG_REMOVAL_WARNING_TITLE}
+              color="warning"
+            >
+              <p>{i18n.SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE}</p>
+            </EuiCallOut>
+          </EuiFlexItem>
         ) : null}
-        <EuiSpacer size="s" />
       </EuiFlexGroup>
+      <EuiHorizontalRule margin="m" />
       <EuiFlexGroup
         alignItems="center"
         justifyContent={isEditMode ? 'spaceBetween' : 'flexEnd'}
