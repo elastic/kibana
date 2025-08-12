@@ -21,7 +21,7 @@ export function getRetryConfig({
   maxTimeout?: number;
 }) {
   return {
-    retries: 8,
+    retries: 5,
     factor: 2,
     minTimeout: 200,
     maxTimeout,
@@ -87,6 +87,6 @@ export class LockAcquisitionError extends Error {
 
 export function getEsReason(error: esErrors.ResponseError): string | undefined {
   if (error instanceof esErrors.ResponseError) {
-    return error.body.error.caused_by.caused_by.reason || error.body.error.caused_by.reason;
+    return error.body?.error?.caused_by?.caused_by?.reason || error.body?.error?.caused_by?.reason;
   }
 }

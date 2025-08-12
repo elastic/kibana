@@ -68,13 +68,14 @@ export class LockManager {
 
     return pRetry(async () => {
       try {
-        const response = await this.esClient.update<LockDocument>({
-          index: LOCKS_CONCRETE_INDEX_NAME,
-          id: this.lockId,
-          scripted_upsert: true,
-          script: {
-            lang: 'painless',
-            source: `
+        const response = await this.esClient.update<LockDocument>(
+          {
+            index: LOCKS_CONCRETE_INDEX_NAME,
+            id: this.lockId,
+            scripted_upsert: true,
+            script: {
+              lang: 'painless',
+              source: `
                     // Get the current time on the ES server.
                     long now = System.currentTimeMillis();
 
@@ -94,15 +95,17 @@ export class LockManager {
                       ctx.op = 'noop';
                     }
                   `,
-            params: {
-              ttl,
-              token: this.token,
-              metadata,
+              params: {
+                ttl,
+                token: this.token,
+                metadata,
+              },
             },
+            // @ts-expect-error
+            upsert: {},
           },
-          // @ts-expect-error
-          upsert: {},
-        });
+          { maxRetries: 0, retryOnTimeout: false } // handle retries with pRetry
+        );
 
         switch (response.result) {
           case 'created': {
@@ -163,22 +166,25 @@ export class LockManager {
   public async release(): Promise<boolean> {
     return pRetry(async () => {
       try {
-        const response = await this.esClient.update<LockDocument>({
-          index: LOCKS_CONCRETE_INDEX_NAME,
-          id: this.lockId,
-          scripted_upsert: false,
-          script: {
-            lang: 'painless',
-            source: `
+        const response = await this.esClient.update<LockDocument>(
+          {
+            index: LOCKS_CONCRETE_INDEX_NAME,
+            id: this.lockId,
+            scripted_upsert: false,
+            script: {
+              lang: 'painless',
+              source: `
                     if (ctx._source.token == params.token) {
                       ctx.op = 'delete';
                     } else {
                       ctx.op = 'noop';
                     }
                   `,
-            params: { token: this.token },
+              params: { token: this.token },
+            },
           },
-        });
+          { maxRetries: 0, retryOnTimeout: false } // handle retries with pRetry
+        );
 
         switch (response.result) {
           case 'deleted':
@@ -246,12 +252,13 @@ export class LockManager {
   public async extendTtl(ttl: number): Promise<boolean> {
     return pRetry(async () => {
       try {
-        const response = await this.esClient.update<LockDocument>({
-          index: LOCKS_CONCRETE_INDEX_NAME,
-          id: this.lockId,
-          script: {
-            lang: 'painless',
-            source: `
+        const response = await this.esClient.update<LockDocument>(
+          {
+            index: LOCKS_CONCRETE_INDEX_NAME,
+            id: this.lockId,
+            script: {
+              lang: 'painless',
+              source: `
                     if (ctx._source.token == params.token) {
                       long now = System.currentTimeMillis();
                       ctx._source.expiresAt = Instant.ofEpochMilli(now + params.ttl).toString();
@@ -259,12 +266,14 @@ export class LockManager {
                       ctx.op = 'noop';
                     }
                   `,
-            params: {
-              ttl,
-              token: this.token,
+              params: {
+                ttl,
+                token: this.token,
+              },
             },
           },
-        });
+          { maxRetries: 0, retryOnTimeout: false } // handle retries with pRetry
+        );
 
         if (response.result === 'noop') {
           this.logger.debug(`Lock "${this.lockId}" TTL not extended: token mismatch or no-op.`);
