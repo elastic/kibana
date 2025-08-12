@@ -41,7 +41,7 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, schema, setVis
   return (
     <RuleFormFlyout
       plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
-      consumer={'infrastructure'}
+      consumer="infrastructure"
       onCancel={onCloseFlyout}
       onSubmit={onCloseFlyout}
       ruleTypeId={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
