@@ -84,5 +84,7 @@
     "@kbn/observability-plugin",
     "@kbn/response-ops-rule-params",
     "@kbn/telemetry-collection-manager-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/reporting-export-types-csv-common",
   ]
 }
