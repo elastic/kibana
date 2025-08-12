@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { ToolFormProvider } from '../../../context/tool_form_provider';
 import { useEditTool } from '../../../hooks/tools/use_edit_tools';
 import { EsqlTool } from './esql_tool';
 import { OnechatEsqlToolFormMode } from './form/esql_tool_form';
@@ -25,14 +24,12 @@ export const EditEsqlTool: React.FC = () => {
   });
 
   return (
-    <ToolFormProvider>
-      <EsqlTool
-        mode={OnechatEsqlToolFormMode.Edit}
-        isLoading={isLoading}
-        isSubmitting={isSubmitting}
-        tool={editingTool}
-        saveTool={editTool}
-      />
-    </ToolFormProvider>
+    <EsqlTool
+      mode={OnechatEsqlToolFormMode.Edit}
+      isLoading={isLoading}
+      isSubmitting={isSubmitting}
+      tool={editingTool}
+      saveTool={editTool}
+    />
   );
 };

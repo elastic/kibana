@@ -18,7 +18,7 @@ import { css } from '@emotion/react';
 import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { FormProvider } from 'react-hook-form';
 import {
   CreateToolPayload,
   CreateToolResponse,
@@ -35,6 +35,7 @@ import {
 } from '../../../utils/transform_esql_form_data';
 import { OnechatEsqlToolForm, OnechatEsqlToolFormMode } from './form/esql_tool_form';
 import { OnechatEsqlToolFormData } from './form/types/esql_tool_form_types';
+import { useEsqlToolForm } from '../../../hooks/tools/use_esql_tool_form';
 
 interface EsqlToolBaseProps {
   tool?: EsqlToolDefinitionWithSchema;
@@ -63,7 +64,8 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToOnechatUrl } = useNavigation();
-  const { reset, formState } = useFormContext();
+  const form = useEsqlToolForm();
+  const { reset, formState } = form;
   const { errors } = formState;
 
   const handleClear = useCallback(() => {
@@ -106,59 +108,49 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
   );
 
   return (
-    <KibanaPageTemplate>
-      <KibanaPageTemplate.Header
-        pageTitle={
-          mode === OnechatEsqlToolFormMode.Edit
-            ? labels.tools.editEsqlToolTitle
-            : labels.tools.newEsqlToolTitle
-        }
-        breadcrumbs={[
-          {
-            text: labels.tools.title,
-            color: 'subdued',
-            onClick: () => navigateToOnechatUrl(appPaths.tools.list),
-          },
-        ]}
-        breadcrumbProps={{
-          css: css`
-            margin-block-end: ${euiTheme.size.l};
-          `,
-        }}
-        css={css`
-          background-color: ${euiTheme.colors.backgroundBasePlain};
-          border-block-end: none;
-        `}
-      />
-      <KibanaPageTemplate.Section>
-        {isLoading ? (
-          <EuiFlexGroup justifyContent="center" alignItems="center">
-            <EuiLoadingSpinner size="xxl" />
+    <FormProvider {...form}>
+      <KibanaPageTemplate>
+        <KibanaPageTemplate.Header
+          pageTitle={
+            mode === OnechatEsqlToolFormMode.Edit
+              ? labels.tools.editEsqlToolTitle
+              : labels.tools.newEsqlToolTitle
+          }
+          css={css`
+            background-color: ${euiTheme.colors.backgroundBasePlain};
+            border-block-end: none;
+          `}
+        />
+        <KibanaPageTemplate.Section>
+          {isLoading ? (
+            <EuiFlexGroup justifyContent="center" alignItems="center">
+              <EuiLoadingSpinner size="xxl" />
+            </EuiFlexGroup>
+          ) : (
+            <OnechatEsqlToolForm mode={mode} formId={esqlToolFormId} saveTool={handleSave} />
+          )}
+        </KibanaPageTemplate.Section>
+        <KibanaPageTemplate.BottomBar
+          css={css`
+            z-index: ${euiTheme.levels.header};
+          `}
+        >
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiButton onClick={handleClear}>{labels.tools.clearButtonLabel}</EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {Object.keys(errors).length > 0 ? (
+                <EuiToolTip display="block" content={labels.tools.saveButtonTooltip}>
+                  {saveButton}
+                </EuiToolTip>
+              ) : (
+                saveButton
+              )}
+            </EuiFlexItem>
           </EuiFlexGroup>
-        ) : (
-          <OnechatEsqlToolForm mode={mode} formId={esqlToolFormId} saveTool={handleSave} />
-        )}
-      </KibanaPageTemplate.Section>
-      <KibanaPageTemplate.BottomBar
-        css={css`
-          z-index: ${euiTheme.levels.header};
-        `}
-      >
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiButton onClick={handleClear}>{labels.tools.clearButtonLabel}</EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {Object.keys(errors).length > 0 ? (
-              <EuiToolTip display="block" content={labels.tools.saveButtonTooltip}>
-                {saveButton}
-              </EuiToolTip>
-            ) : (
-              saveButton
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </KibanaPageTemplate.BottomBar>
-    </KibanaPageTemplate>
+        </KibanaPageTemplate.BottomBar>
+      </KibanaPageTemplate>
+    </FormProvider>
   );
 };

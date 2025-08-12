@@ -147,6 +147,14 @@ export const labels = {
     searchToolsErrorToast: i18n.translate('xpack.onechat.tools.searchToolsErrorToast', {
       defaultMessage: 'Error searching tools',
     }),
+    loadToolErrorToast: (toolId: string) =>
+      i18n.translate('xpack.onechat.tools.loadToolErrorToast', {
+        defaultMessage: 'Unable to load "{toolId}"',
+        values: { toolId },
+      }),
+    loadToolsErrorToast: i18n.translate('xpack.onechat.tools.loadToolsErrorToast', {
+      defaultMessage: 'Unable to load tools',
+    }),
 
     // Delete modals
     deleteEsqlToolTitle: (toolId: string) =>

@@ -25,8 +25,11 @@ export const useNavigation = () => {
   );
 
   const createOnechatUrl = useCallback(
-    (path: string) => {
-      return application.getUrlForApp(ONECHAT_APP_ID, { path });
+    (path: string, params?: Record<string, string>) => {
+      const queryParams = new URLSearchParams(params);
+      return application.getUrlForApp(ONECHAT_APP_ID, {
+        path: queryParams.size ? `${path}?${queryParams}` : path,
+      });
     },
     [application]
   );

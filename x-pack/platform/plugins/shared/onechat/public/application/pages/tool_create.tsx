@@ -7,7 +7,20 @@
 
 import React from 'react';
 import { CreateEsqlTool } from '../components/tools/esql/create_esql_tool';
+import { useBreadcrumb } from '../hooks/use_breadcrumbs';
+import { appPaths } from '../utils/app_paths';
+import { labels } from '../utils/i18n';
 
 export const OnechatToolCreatePage = () => {
+  useBreadcrumb([
+    {
+      text: labels.tools.title,
+      path: appPaths.tools.list,
+    },
+    {
+      text: labels.tools.newEsqlToolTitle,
+      path: appPaths.tools.new,
+    },
+  ]);
   return <CreateEsqlTool />;
 };

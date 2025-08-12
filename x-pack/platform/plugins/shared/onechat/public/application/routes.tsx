@@ -46,10 +46,6 @@ export const OnechatRoutes: React.FC<{}> = () => {
         <OnechatToolsPage />
       </Route>
 
-      <Route path="/agents">
-        <OnechatAgentsPage />
-      </Route>
-
       {/* Default to conversations page */}
       <Route path="/">
         <OnechatConversationsPage />

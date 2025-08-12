@@ -12,6 +12,7 @@ import { appPaths } from '../utils/app_paths';
 import { useNavigation } from '../hooks/use_navigation';
 import { useDeleteTool, useDeleteTools } from '../hooks/tools/use_delete_tools';
 import { labels } from '../utils/i18n';
+import { TOOL_SOURCE_QUERY_PARAM } from '../components/tools/esql/create_esql_tool';
 
 export interface ToolsActionsContextType {
   createTool: () => void;
@@ -20,6 +21,9 @@ export interface ToolsActionsContextType {
   bulkDeleteTools: (toolIds: string[]) => void;
   cloneTool: (toolId: string) => void;
   testTool: (toolId: string) => void;
+  getCreateToolUrl: () => string;
+  getEditToolUrl: (toolId: string) => string;
+  getCloneToolUrl: (toolId: string) => string;
 }
 
 export const ToolsTableActionsContext = createContext<ToolsActionsContextType | undefined>(
@@ -27,11 +31,15 @@ export const ToolsTableActionsContext = createContext<ToolsActionsContextType | 
 );
 
 export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) => {
-  const { navigateToOnechatUrl } = useNavigation();
+  const { navigateToOnechatUrl, createOnechatUrl } = useNavigation();
 
   const createTool = useCallback(() => {
     navigateToOnechatUrl(appPaths.tools.new);
   }, [navigateToOnechatUrl]);
+
+  const getCreateToolUrl = useCallback(() => {
+    return createOnechatUrl(appPaths.tools.new);
+  }, [createOnechatUrl]);
 
   const editTool = useCallback(
     (toolId: string) => {
@@ -40,11 +48,25 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
     [navigateToOnechatUrl]
   );
 
+  const getEditToolUrl = useCallback(
+    (toolId: string) => {
+      return createOnechatUrl(appPaths.tools.edit({ toolId }));
+    },
+    [createOnechatUrl]
+  );
+
   const cloneTool = useCallback(
     (toolId: string) => {
-      navigateToOnechatUrl(appPaths.tools.new, { source: toolId });
+      navigateToOnechatUrl(appPaths.tools.new, { [TOOL_SOURCE_QUERY_PARAM]: toolId });
     },
     [navigateToOnechatUrl]
+  );
+
+  const getCloneToolUrl = useCallback(
+    (toolId: string) => {
+      return createOnechatUrl(appPaths.tools.new, { [TOOL_SOURCE_QUERY_PARAM]: toolId });
+    },
+    [createOnechatUrl]
   );
 
   const {
@@ -82,6 +104,9 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
         editTool,
         cloneTool,
         testTool: noop, // TODO: integrate with tool testing modal
+        getCreateToolUrl,
+        getEditToolUrl,
+        getCloneToolUrl,
       }}
     >
       {children}
