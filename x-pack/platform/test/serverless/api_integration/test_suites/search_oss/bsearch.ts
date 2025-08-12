@@ -10,8 +10,8 @@ import request from 'superagent';
 import { inflateResponse } from '@kbn/bfetch-plugin/public/streaming';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
-import { SupertestWithRoleScopeType } from '../../../services';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { SupertestWithRoleScopeType } from '../../services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { painlessErrReq } from './painless_err_req';
 import { verifyErrorResponse } from './verify_error';
 

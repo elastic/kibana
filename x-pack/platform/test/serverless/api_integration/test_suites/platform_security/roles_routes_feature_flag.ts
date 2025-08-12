@@ -7,8 +7,8 @@
 
 import expect from 'expect';
 import type { Role } from '@kbn/security-plugin-types-common';
-import { SupertestWithRoleScopeType } from '../../../services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { SupertestWithRoleScopeType } from '../../services';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 // Notes:
 // Test coverage comes from stateful test suite: x-pack/test/api_integration/apis/security/roles.ts

@@ -7,8 +7,8 @@
 
 import expect from 'expect';
 import { asyncForEach } from '@kbn/std';
-import { SupertestWithRoleScopeType } from '../../../services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { SupertestWithRoleScopeType } from '../../services';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 // Notes:
 // This suite is currently only called from the feature flags test configs, e.g.
