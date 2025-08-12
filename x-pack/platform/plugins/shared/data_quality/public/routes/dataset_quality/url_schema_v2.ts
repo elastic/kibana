@@ -24,7 +24,7 @@ export const getUrlValueFromState = (
   deepCompactObject<datasetQualityUrlSchemaV2.UrlSchema>({
     table: state.table,
     filters: state.filters,
-    v: 1,
+    v: 2,
   });
 
 const stateFromUrlSchemaRT = new rt.Type<
