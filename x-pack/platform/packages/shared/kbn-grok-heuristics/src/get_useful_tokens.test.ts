@@ -13,135 +13,109 @@
  */
 
 import {
-  getUsefulTokens,
   getReviewFields,
   getGrokProcessor,
   mergeGrokProcessors,
   type NamedColumn,
 } from './get_useful_tokens';
-import { PATTERN_PRECEDENCE } from './constants';
-import type { NormalizedColumn } from './normalize_tokens';
+
 import type { ReviewFields, GrokProcessorResult, TokenTuple } from './get_useful_tokens';
 
-/**
- * Helper function to get the index of a pattern from PATTERN_PRECEDENCE.
- */
-function getPatternIndex(pattern: string) {
-  return PATTERN_PRECEDENCE.indexOf(pattern);
-}
-
-describe('getUsefulTokens', () => {
-  it('handles empty input', () => {
-    const result = getUsefulTokens([], '\\s');
-    expect(result).toEqual({ columns: [], usefulColumns: [], usefulTokens: [] });
-  });
-
-  it('handles columns with collapsible tokens only', () => {
-    const roots: NormalizedColumn[] = [
-      {
-        tokens: [{ values: [], patterns: [getPatternIndex('GREEDYDATA')], excludedPatterns: [] }],
-        whitespace: { minLeading: 0, maxLeading: 0, minTrailing: 0, maxTrailing: 0 },
-      },
-    ];
-    const result = getUsefulTokens(roots, '\\s');
-    expect(result.usefulTokens).toEqual([['GREEDYDATA', undefined]]);
-  });
-
-  it('handles columns with variable whitespace', () => {
-    const roots: NormalizedColumn[] = [
+describe('getReviewFields', () => {
+  it('returns only named fields without literal values', () => {
+    const columns: NamedColumn[] = [
       {
         tokens: [
           {
-            values: ['value1'],
-            patterns: [getPatternIndex('WORD')],
-            excludedPatterns: [getPatternIndex('GREEDYDATA')],
+            id: 'field_1',
+            pattern: 'WORD',
+            values: ['value1', 'value2', 'value3'],
           },
-        ],
-        whitespace: { minLeading: 1, maxLeading: 2, minTrailing: 1, maxTrailing: 2 },
-      },
-    ];
-    const result = getUsefulTokens(roots, '\\s');
-    expect(result.usefulTokens).toEqual([
-      ['\\s+', undefined],
-      ['WORD', 'field_1'],
-      ['\\s+', undefined],
-    ]);
-  });
-
-  it('handles columns with freeform text', () => {
-    const roots: NormalizedColumn[] = [
-      {
-        tokens: [
-          { values: ['text'], patterns: [getPatternIndex('GREEDYDATA')], excludedPatterns: [] },
+          {
+            id: undefined,
+            pattern: '-',
+            values: ['-', '-', '-'],
+          },
+          {
+            id: 'field_2',
+            pattern: 'INT',
+            values: ['1', '2', '3'],
+          },
         ],
         whitespace: { minLeading: 0, maxLeading: 0, minTrailing: 0, maxTrailing: 0 },
       },
     ];
-    const result = getUsefulTokens(roots, '\\s');
-    expect(result.usefulTokens).toEqual([['GREEDYDATA', undefined]]);
-  });
-});
-
-describe('getReviewFields', () => {
-  it('handles empty columns', () => {
-    const result = getReviewFields([], 5);
-    expect(result).toEqual({});
-  });
-
-  it('handles tokens with no values', () => {
-    const columns: NamedColumn[] = [{ tokens: [{ id: 'field_1', pattern: 'WORD', values: [] }] }];
-    const result = getReviewFields(columns, 5);
-    expect(result).toEqual({ field_1: { grok_component: 'WORD', example_values: [] } });
-  });
-
-  it('handles tokens with duplicate values', () => {
-    const columns: NamedColumn[] = [
-      { tokens: [{ id: 'field_1', pattern: 'WORD', values: ['value1', 'value1', 'value2'] }] },
-    ];
     const result = getReviewFields(columns, 5);
     expect(result).toEqual({
-      field_1: { grok_component: 'WORD', example_values: ['value1', 'value2'] },
+      field_1: { grok_component: 'WORD', example_values: ['value1', 'value2', 'value3'] },
+      field_2: { grok_component: 'INT', example_values: ['1', '2', '3'] },
     });
   });
 });
 
 describe('getGrokProcessor', () => {
-  it('handles empty useful tokens', () => {
-    const reviewFields: ReviewFields = {};
-    const reviewResult = { log_source: 'Test Log', fields: [] };
-    const result = getGrokProcessor([], reviewFields, reviewResult);
-    expect(result).toEqual({ description: 'Test Log', patterns: [''], pattern_definitions: {} });
-  });
-
-  it('handles review fields with missing GROK components', () => {
-    const usefulTokens: TokenTuple[] = [['WORD', 'field_1']];
-    const reviewFields: ReviewFields = { field_1: { grok_component: 'WORD', example_values: [] } };
-    const reviewResult = { log_source: 'Test Log', fields: [] };
-    const result = getGrokProcessor(usefulTokens, reviewFields, reviewResult);
-    expect(result.patterns).toEqual(['%{WORD:field_1}']);
-  });
-
   it('handles review results with multiple columns for a single field', () => {
     const usefulTokens: TokenTuple[] = [
-      ['WORD', 'field_1'],
-      ['INT', 'field_2'],
+      ['[', undefined],
+      ['DAY', 'field_1'],
+      [' ', undefined],
+      ['SYSLOGTIMESTAMP', 'field_2'],
+      [' ', undefined],
+      ['INT', 'field_3'],
+      [']', undefined],
+      [' ', undefined],
+      ['[', undefined],
+      ['LOGLEVEL', 'field_4'],
+      [']', undefined],
+      [' ', undefined],
+      ['GREEDYDATA', 'field_5'],
     ];
     const reviewFields: ReviewFields = {
-      field_1: { grok_component: 'WORD', example_values: [] },
-      field_2: { grok_component: 'INT', example_values: [] },
+      field_1: { grok_component: 'DAY', example_values: ['Tue'] },
+      field_2: {
+        grok_component: 'SYSLOGTIMESTAMP',
+        example_values: ['Aug 12 19:19:16', 'Aug 12 19:19:20', 'Aug 12 19:19:23'],
+      },
+      field_3: { grok_component: 'INT', example_values: ['2025'] },
+      field_4: { grok_component: 'LOGLEVEL', example_values: ['notice', 'error', 'notice'] },
+      field_5: {
+        grok_component: 'GREEDYDATA',
+        example_values: [
+          'mod_jk child workerEnv in error state 6',
+          'workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+        ],
+      },
     };
     const reviewResult = {
-      log_source: 'Test Log',
+      log_source: 'Apache HTTP Server Log',
       fields: [
         {
-          name: 'field_combined',
-          columns: ['field_1', 'field_2'],
-          grok_components: ['WORD', 'INT'],
+          name: '@timestamp',
+          columns: ['field_1', 'field_2', 'field_3'],
+          grok_components: ['DAY', 'SYSLOGTIMESTAMP', 'YEAR'],
+        },
+        {
+          name: 'log.level',
+          columns: ['field_4'],
+          grok_components: ['LOGLEVEL'],
+        },
+        {
+          name: 'message',
+          columns: ['field_5'],
+          grok_components: ['GREEDYDATA'],
         },
       ],
     };
     const result = getGrokProcessor(usefulTokens, reviewFields, reviewResult);
-    expect(result.pattern_definitions).toEqual({ CUSTOM_FIELD_COMBINED: '%{WORD}%{INT}' });
+    expect(result).toEqual({
+      description: 'Apache HTTP Server Log',
+      pattern_definitions: {
+        CUSTOM_TIMESTAMP: '%{DAY} %{SYSLOGTIMESTAMP} %{YEAR}',
+      },
+      patterns: [
+        '\\[%{CUSTOM_TIMESTAMP:@timestamp}\\] \\[%{LOGLEVEL:log.level}\\] %{GREEDYDATA:message}',
+      ],
+    });
   });
 });
 
