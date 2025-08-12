@@ -84,6 +84,7 @@ export const EndpointEventCollectionPreset = memo<EndpointEventCollectionPresetP
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiRadio
+                name="endpointDataCollection"
                 id="endpoint_data_collection_only_preset"
                 onChange={NOOP}
                 disabled
