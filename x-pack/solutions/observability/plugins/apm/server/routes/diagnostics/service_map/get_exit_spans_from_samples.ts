@@ -136,11 +136,7 @@ export async function getSourceSpanIds({
     size: 0,
     query: {
       bool: {
-        filter: [
-          ...rangeQuery(start, end),
-          ...termsQuery(SERVICE_NAME, sourceNode), // carlos removed it - need to check if it is needed
-          ...termsQuery(TRACE_ID, ...traceIds),
-        ],
+        filter: [...rangeQuery(start, end), ...termsQuery(TRACE_ID, ...traceIds)],
       },
     },
     aggs: {

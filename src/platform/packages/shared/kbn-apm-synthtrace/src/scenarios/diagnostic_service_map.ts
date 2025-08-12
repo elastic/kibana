@@ -9,7 +9,6 @@
 
 import { apm, ApmFields, httpExitSpan, Serializable } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'stream';
-import { children } from '@kbn/esql-ast/src/visitor/utils';
 import { Scenario } from '../cli/scenario';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
