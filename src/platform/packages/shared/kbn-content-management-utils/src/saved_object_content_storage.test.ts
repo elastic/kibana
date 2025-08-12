@@ -101,7 +101,6 @@ class TestSOContentStorage extends SOContentStorage<MockCrudTypes> {
 
 const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
   storage = storage ?? new TestSOContentStorage();
-  const mockRequest = mockRouter.createFakeKibanaRequest({});
   const requestHandlerCoreContext = coreMock.createRequestHandlerContext();
   const requestHandlerContext = jest.mocked<RequestHandlerContext>({
     core: Promise.resolve(requestHandlerCoreContext),
@@ -117,7 +116,7 @@ const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
 
       return storage!.get(
         {
-          request: mockRequest,
+          request: mockRouter.createFakeKibanaRequest({}),
           requestHandlerContext,
           version: {
             request: 1,
@@ -135,7 +134,7 @@ const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
 
       return storage!.create(
         {
-          request: mockRequest,
+          request: mockRouter.createFakeKibanaRequest({}),
           requestHandlerContext,
           version: {
             request: 1,
@@ -154,7 +153,7 @@ const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
 
       return storage!.update(
         {
-          request: mockRequest,
+          request: mockRouter.createFakeKibanaRequest({}),
           requestHandlerContext,
           version: {
             request: 1,
@@ -179,7 +178,7 @@ const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
 
       return storage!.search(
         {
-          request: mockRequest,
+          request: mockRouter.createFakeKibanaRequest({}),
           requestHandlerContext,
           version: {
             request: 1,
@@ -196,7 +195,7 @@ const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
     mSearch: async (mockSavedObject: SavedObject<MockAttributes>) => {
       return storage!.mSearch!.toItemResult(
         {
-          request: mockRequest,
+          request: mockRouter.createFakeKibanaRequest({}),
           requestHandlerContext,
           version: {
             request: 1,
