@@ -53,7 +53,8 @@ import { EditCategory } from './edit_category';
 import { parseCaseUsers } from '../../utils';
 import { CustomFields } from './custom_fields';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
-import { Suggestions } from './suggestions';
+import { CaseSuggestions } from './case_suggestions';
+import { KibanaServices } from '../../../common/lib/kibana';
 
 const LOCALSTORAGE_SORT_ORDER_KEY = 'cases.userActivity.sortOrder';
 
@@ -267,9 +268,9 @@ export const CaseViewActivity = ({
           <h2>{i18n.CASE_SETTINGS}</h2>
         </EuiScreenReaderOnly>
         <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
-          <EuiFlexItem>
-            <Suggestions caseData={caseData} />
-          </EuiFlexItem>
+          {KibanaServices.getConfig()?.unsafe?.enableCaseSuggestions ? (
+            <CaseSuggestions caseData={caseData} />
+          ) : null}
           {caseAssignmentAuthorized ? (
             <>
               <AssignUsers

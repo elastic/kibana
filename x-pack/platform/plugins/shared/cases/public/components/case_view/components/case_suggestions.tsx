@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { CaseUI } from '../../../../common';
@@ -20,31 +20,31 @@ export const useFetchSuggestion = ({ caseData }: { caseData: CaseUI }) => {
   });
 
   return {
-    isLoadingSloSuggestions: isLoading,
+    isLoadingSuggestions: isLoading,
     suggestions: data?.suggestions || [],
     refetchSuggestions: refetch,
   };
 };
 
-export const Suggestions = React.memo(({ caseData }: { caseData: CaseUI }) => {
-  const { suggestions, isLoadingSloSuggestions } = useFetchSuggestion({ caseData });
+export const CaseSuggestions = React.memo(({ caseData }: { caseData: CaseUI }) => {
+  const { suggestions, isLoadingSuggestions } = useFetchSuggestion({ caseData });
 
   const { attachmentSuggestionRegistry } = useCasesContext();
   const components = attachmentSuggestionRegistry.list();
 
-  if (isLoadingSloSuggestions) {
+  if (isLoadingSuggestions) {
     return <EuiLoadingSpinner size="m" />;
   }
 
   return (
-    <div>
+    <EuiFlexItem>
       {suggestions.map((suggestion) => {
         const component = components.find((c) => c.id === suggestion.id);
         if (!component) return null;
         return <component.children key={suggestion.id} suggestion={suggestion} />;
       })}
-    </div>
+    </EuiFlexItem>
   );
 });
 
-Suggestions.displayName = 'Suggestions';
+CaseSuggestions.displayName = 'CaseSuggestions';
