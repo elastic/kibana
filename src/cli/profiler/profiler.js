@@ -80,6 +80,14 @@ class Profiler {
   }
 }
 
+// DO NOT COMMIT, capturing CPU profile at startup
+const logger = new Logger();
+const profiler = new Profiler(logger);
+profiler.toggle();
+setTimeout(() => {
+  profiler.toggle();
+}, 60_000);
+
 export default function (program) {
   program
     .option('--profiler.signal <signal>', 'Start/stop CPU profiling on <signal>')
