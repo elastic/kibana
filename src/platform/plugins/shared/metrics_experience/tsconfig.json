@@ -12,13 +12,14 @@
     "@kbn/kibana-react-plugin",
     "@kbn/esql-ast",
     "@kbn/shared-ux-utility",
-    "@kbn/core-elasticsearch-server",
     "@kbn/server-route-repository-client",
     "@kbn/traced-es-client",
     "@kbn/es-query",
     "@kbn/datemath",
     "@kbn/discover-utils",
     "@kbn/field-types",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/es-types",
+    "@kbn/zod-helpers"
   ]
 }
