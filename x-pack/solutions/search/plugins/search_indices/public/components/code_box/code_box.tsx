@@ -116,6 +116,8 @@ export const CodeBox = (props: CodeBoxProps) => {
         paddingSize="xs"
         data-test-subj={dataTestSubj ?? 'codeBlockControlsPanel'}
         css={Styles.CodeBoxPanel(euiTheme)}
+        hasShadow={false}
+        hasBorder={true}
       >
         {showTopBar && (
           <>
