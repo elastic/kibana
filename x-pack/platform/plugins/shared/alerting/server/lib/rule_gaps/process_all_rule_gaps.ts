@@ -92,10 +92,10 @@ export const processAllRuleGaps = async <T>({
 
     const { maxProcessedGapsPerRule } = options ?? {};
 
-    const processedGapsCountByRuleId = ruleIdsToProcess.reduce((acc, ruleId) => {
+    const processedGapsCountByRuleId = ruleIdsToProcess.reduce<Record<string, number>>((acc, ruleId) => {
       acc[ruleId] = 0;
       return acc;
-    }, {} as Record<string, number>);
+    }, {});
 
     try {
       while (true) {
