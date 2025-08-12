@@ -16,9 +16,9 @@ import type {
   InferenceEndpointsAutocompleteResult,
   ESQLLicenseResult,
   ESQLSourceResult,
+  CachedFunctionOptions,
 } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import type { CachedFunctionOptions } from '@kbn/esql/public';
 
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;

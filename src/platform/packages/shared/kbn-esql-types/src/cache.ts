@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsqlPlugin, type EsqlPluginStart } from './plugin';
-
-export { ESQLLangEditor } from './create_editor';
-export type { ESQLEditorProps, DataErrorsControl } from '@kbn/esql-editor';
-export type { EsqlPluginStart };
-
-export function plugin() {
-  return new EsqlPlugin();
+export interface CachedFunctionOptions {
+  forceRefresh?: boolean;
 }

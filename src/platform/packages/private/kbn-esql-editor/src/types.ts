@@ -24,6 +24,7 @@ import type {
   RecommendedField,
 } from '@kbn/esql-types';
 import { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import { CachedFunctionOptions } from '@kbn/esql-types';
 
 export interface ControlsContext {
   /** The editor supports the creation of controls,
@@ -112,7 +113,9 @@ interface ESQLVariableService {
 }
 
 export interface EsqlPluginStartBase {
-  getJoinIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
+  getJoinIndicesAutocomplete: (
+    cacheOptions?: CachedFunctionOptions
+  ) => Promise<IndicesAutocompleteResult>;
   getTimeseriesIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
   getEditorExtensionsAutocomplete: (
     queryString: string,

@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface CachedFunctionOptions {
-  forceRefresh?: boolean;
-}
+import { CachedFunctionOptions } from '@kbn/esql-types';
 
 /**
  * Given a non-parametrized async function, returns a function which caches the

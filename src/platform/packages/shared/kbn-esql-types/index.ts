@@ -40,3 +40,5 @@ export {
 export type { ESQLLicenseType, ESQLSignatureLicenseType, ESQLLicenseResult } from './src/license';
 
 export { REGISTRY_EXTENSIONS_ROUTE } from './src/constants';
+
+export { type CachedFunctionOptions } from './src/cache';
