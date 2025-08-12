@@ -154,7 +154,10 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
       buttonElement="button"
       borders="none"
       buttonContent={
-        <EuiTextColor color={euiTheme.colors.primary}>
+        <EuiTextColor
+          color={euiTheme.colors.primary}
+          data-test-subj="inference-endpoint-additional-options-button"
+        >
           <FormattedMessage
             id="xpack.inferenceEndpointUICommon.components.additionalInfo.additionalSettingsLabel"
             defaultMessage="Additional settings"
