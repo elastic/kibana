@@ -6,11 +6,7 @@
  */
 
 import path from 'path';
-import {
-  FtrConfigProviderContext,
-  fleetPackageRegistryDockerImage,
-  defineDockerServersConfig,
-} from '@kbn/test';
+import { FtrConfigProviderContext, defineDockerServersConfig } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
 import { services } from './services';
@@ -27,12 +23,11 @@ export interface CreateTestConfigOptions {
    */
   kbnTestServerWait?: RegExp;
   suiteTags?: { include?: string[]; exclude?: string[] };
+  dockerServers?: ReturnType<typeof defineDockerServersConfig>;
 }
 
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
-    const packageRegistryConfig = path.join(__dirname, './package_registry_config.yml');
-    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
     const svlSharedConfig = await readConfigFile(
       require.resolve('@kbn/test-suites-serverless/shared/config.base')
     );
@@ -43,17 +38,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       services: {
         ...services,
       },
-      dockerServers: defineDockerServersConfig({
-        registry: {
-          enabled: true,
-          image: fleetPackageRegistryDockerImage,
-          portInContainer: 8080,
-          port: 8081,
-          args: dockerArgs,
-          waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
-        },
-      }),
+      ...options.dockerServers,
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [

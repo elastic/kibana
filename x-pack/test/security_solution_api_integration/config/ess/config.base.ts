@@ -7,13 +7,7 @@
 
 import path from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import {
-  FtrConfigProviderContext,
-  fleetPackageRegistryDockerImage,
-  defineDockerServersConfig,
-  kbnTestConfig,
-  kibanaTestUser,
-} from '@kbn/test';
+import { FtrConfigProviderContext, kbnTestConfig, kibanaTestUser } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
 import { services as baseServices } from './services';
@@ -56,9 +50,6 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
     ilmPollInterval,
   } = options;
 
-  const packageRegistryConfig = path.join(__dirname, './package_registry_config.yml');
-  const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
-
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
       require.resolve('../../../api_integration/config.ts')
@@ -73,17 +64,6 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
 
     return {
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
-      dockerServers: defineDockerServersConfig({
-        registry: {
-          enabled: true,
-          image: fleetPackageRegistryDockerImage,
-          portInContainer: 8080,
-          port: 8081,
-          args: dockerArgs,
-          waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
-        },
-      }),
       testFiles,
       servers,
       services,

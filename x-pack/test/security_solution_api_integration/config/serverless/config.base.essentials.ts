@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { FtrConfigProviderContext, defineDockerServersConfig } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { FtrConfigProviderContext } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { installMockPrebuiltRulesPackage } from '../../test_suites/detections_response/utils';
 import { services } from './services';
@@ -21,6 +21,7 @@ export interface CreateTestConfigOptions {
    * log level. If needed, you can adjust the logging level via `kbnTestServer.serverArgs`.
    */
   kbnTestServerWait?: RegExp;
+  dockerServers?: ReturnType<typeof defineDockerServersConfig>;
 }
 
 export function createTestConfig(options: CreateTestConfigOptions) {
@@ -34,6 +35,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       services: {
         ...services,
       },
+      ...options.dockerServers,
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
