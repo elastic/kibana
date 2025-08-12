@@ -431,6 +431,9 @@ describe('metric visualization', () => {
           "chain": Array [
             Object {
               "arguments": Object {
+                "applyColorTo": Array [
+                  "background",
+                ],
                 "color": Array [
                   "static-color",
                 ],
@@ -513,6 +516,9 @@ describe('metric visualization', () => {
           "chain": Array [
             Object {
               "arguments": Object {
+                "applyColorTo": Array [
+                  "background",
+                ],
                 "breakdownBy": Array [
                   "breakdown-col-id",
                 ],
@@ -853,6 +859,9 @@ describe('metric visualization', () => {
         expect(ast.chain[0]).toMatchInlineSnapshot(`
           Object {
             "arguments": Object {
+              "applyColorTo": Array [
+                "background",
+              ],
               "breakdownBy": Array [
                 "breakdown-col-id",
               ],
@@ -1125,6 +1134,7 @@ describe('metric visualization', () => {
   it('clears a layer', () => {
     expect(visualization.clearLayer(fullState, 'some-id', 'indexPattern1')).toMatchInlineSnapshot(`
       Object {
+        "applyColorTo": "background",
         "icon": "empty",
         "iconAlign": "left",
         "layerId": "first",
