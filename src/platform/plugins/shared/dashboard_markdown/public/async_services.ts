@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const EUI_MARKDOWN_ID = 'euiMarkdown';
-export const ADD_EUI_MARKDOWN_ACTION_ID = 'create_eui_markdown';
+export { createMarkdownAction } from './create_markdown_action';
+export { getConvertLegacyMarkdownAction } from './convert_legacy_markdown_action';
+export { markdownEmbeddableFactory } from './markdown_embeddable';

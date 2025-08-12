@@ -8,7 +8,12 @@
  */
 
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { PublishesUnsavedChanges, SerializedTitles } from '@kbn/presentation-publishing';
+import {
+  HasEditCapabilities,
+  CanOverrideHoverActions,
+  PublishesUnsavedChanges,
+  SerializedTitles,
+} from '@kbn/presentation-publishing';
 
 /**
  * The markdown editor's own state. Every embeddable type should separate out its own self-managed state, from state
@@ -24,4 +29,6 @@ export interface MarkdownEditorState {
 export type MarkdownEditorSerializedState = SerializedTitles & MarkdownEditorState;
 
 export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEditorSerializedState> &
-  PublishesUnsavedChanges;
+  PublishesUnsavedChanges &
+  HasEditCapabilities &
+  CanOverrideHoverActions;
