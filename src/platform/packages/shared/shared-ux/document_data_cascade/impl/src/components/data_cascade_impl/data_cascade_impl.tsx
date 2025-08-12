@@ -11,37 +11,32 @@ import React, {
   type ComponentProps,
   Children,
   isValidElement,
-  useCallback,
   useEffect,
   useRef,
-  useState,
   useMemo,
 } from 'react';
 import ReactDOM from 'react-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiAutoSizer, useEuiTheme } from '@elastic/eui';
-import {
-  useReactTable,
-  createColumnHelper,
-  getCoreRowModel,
-  getExpandedRowModel,
-  flexRender,
-  type Row,
-  type ExpandedState,
-} from '@tanstack/react-table';
-import { useVirtualizer, defaultRangeExtractor } from '@tanstack/react-virtual';
+import { flexRender, type Row } from '@tanstack/react-table';
 import { SelectionDropdown } from './group_selection_combobox/selection_dropdown';
-import {
-  useDataCascadeState,
-  useDataCascadeActions,
-  type GroupNode,
-  type LeafNode,
-} from '../store_provider';
 import { CascadeRowPrimitive, type CascadeRowPrimitiveProps } from './data_cascade_row';
 import {
   CascadeRowCellPrimitive,
   type CascadeRowCellPrimitiveProps,
 } from './data_cascade_row_cell';
-import { dataCascadeImplStyles } from './data_cascade_impl.styles';
+import {
+  useDataCascadeState,
+  useDataCascadeActions,
+  type GroupNode,
+  type LeafNode,
+} from '../../store_provider';
+import { useTableHelper } from '../../lib/core/table';
+import {
+  useRowVirtualizerHelper,
+  getGridHeaderPositioningStyle,
+  getGridRowPositioningStyle,
+} from '../../lib/core/virtualizer';
+import { dataCascadeImplStyles, relativePosition, overflowYAuto } from './data_cascade_impl.styles';
 
 export type DataCascadeRowCellProps<G extends GroupNode, L extends LeafNode> = Pick<
   CascadeRowCellPrimitiveProps<G, L>,
@@ -53,30 +48,37 @@ export type DataCascadeRowProps<G extends GroupNode, L extends LeafNode> = Pick<
   'onCascadeGroupNodeExpanded' | 'rowHeaderMetaSlots' | 'rowHeaderTitleSlot'
 > & {
   /**
-   * @description The children for the cascade row.
+   * Child element for the cascade row.
    */
   children: React.ReactElement<DataCascadeRowCellProps<G, L>>;
 };
 
 export interface DataCascadeImplProps<G extends GroupNode, L extends LeafNode>
-  extends Pick<Parameters<typeof useVirtualizer>[0], 'overscan'> {
+  extends Pick<Parameters<typeof useRowVirtualizerHelper>[0], 'overscan'> {
   /**
-   * @description The data to be displayed in the cascade. It should be an array of group nodes.
+   * The data to be displayed in the cascade. It should be an array of group nodes.
    */
   data: G[];
   /**
-   * @description Callback function that is called when the group by selection changes.
+   * Callback function that is called when the group by selection changes.
    */
   onCascadeGroupingChange: ComponentProps<typeof SelectionDropdown>['onSelectionChange'];
   /**
-   * @description The spacing size of the component, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
+   * The spacing size of the component, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
    */
   size?: CascadeRowPrimitiveProps<G, L>['size'];
+  /**
+   * Slot for the table title.
+   */
   tableTitleSlot: React.FC<{ rows: Array<Row<G>> }>;
   /**
-   * @description Whether to cause the group root to stick to the top of the viewport.
+   * Whether to cause the group root to stick to the top of the viewport.
    */
   stickyGroupRoot?: boolean;
+  /**
+   * Whether to allow multiple group rows to be expanded at the same time, default is false.
+   */
+  allowExpandMultiple?: boolean;
   children: React.ReactElement<DataCascadeRowProps<G, L>>;
 }
 
@@ -106,6 +108,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   stickyGroupRoot = false,
   overscan = 10,
   children,
+  allowExpandMultiple = false,
 }: DataCascadeImplProps<G, L>) {
   const rowElement = Children.only(children);
 
@@ -123,13 +126,9 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   const { euiTheme } = useEuiTheme();
   const actions = useDataCascadeActions<G, L>();
   const state = useDataCascadeState<G, L>();
-  const columnHelper = createColumnHelper<G>();
-  const [expanded, setExpanded] = useState<ExpandedState>({});
 
   // The scrollable element for your list
   const scrollElementRef = useRef(null);
-  const virtualizerItemSizeCacheRef = useRef<Map<number, number>>(new Map());
-  const activeStickyIndexRef = useRef<number | null>(null);
   const activeStickyRenderSlotRef = useRef<HTMLDivElement | null>(null);
 
   const styles = useMemo(() => dataCascadeImplStyles(euiTheme), [euiTheme]);
@@ -138,17 +137,11 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     actions.setInitialState(data);
   }, [data, actions]);
 
-  const table = useReactTable<G>({
+  const table = useTableHelper<G>({
     data: state.groupNodes,
-    state: {
-      expanded,
-    },
-    /*
-     * The columns of the table, in this case, we only have one column for grouping
-     * and displaying the row title and meta slots.
-     */
-    columns: [
-      columnHelper.display({
+    state: state.table,
+    columns: (columnsHelper) => [
+      columnsHelper.display({
         id: 'groupBy',
         header: (props) =>
           React.createElement(function GroupByHeader({ table: _table }) {
@@ -178,118 +171,61 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
         }),
       }),
     ],
-    getCoreRowModel: getCoreRowModel(),
-    getRowId: (row) => row.id,
-    getRowCanExpand: useCallback(
-      (row: Row<G>) => {
-        // only allow expanding rows up until the depth of the current group by columns
-        return state.currentGroupByColumns.length - 1 > row.depth;
-      },
-      [state.currentGroupByColumns.length]
-    ),
+    getRowId: (rowData) => rowData.id,
+    getRowCanExpand: (row) => {
+      if (!allowExpandMultiple) {
+        // if allowExpandMultiple is false, only allow expanding the root group
+        return row.depth === 0;
+      }
+
+      // only allow expanding rows up until the depth of the current group by columns
+      return state.currentGroupByColumns.length - 1 > row.depth;
+    },
     getSubRows: (row) => row.children as G[],
-    getExpandedRowModel: getExpandedRowModel(),
-    onExpandedChange: setExpanded,
+    onExpandedChange: (updater) => {
+      const updatedValue = typeof updater === 'function' ? updater(state.table.expanded) : updater;
+
+      actions.setExpandedRows(updatedValue);
+    },
   });
 
   const headerColumns = table.getHeaderGroups()[0].headers;
   const { rows } = table.getRowModel();
 
-  /**
-   * @description range extractor, used to inform virtualizer about our rendering needs in relation to marking specific rows as sticky rows.
-   * see {@link https://tanstack.com/virtual/latest/docs/api/virtualizer#rangeextractor} for more details
-   */
-  const rangeExtractor = useCallback<
-    NonNullable<Parameters<typeof useVirtualizer>[0]['rangeExtractor']>
-  >(
-    (range) => {
-      if (!stickyGroupRoot) {
-        return defaultRangeExtractor(range);
-      }
-
-      const rangeStartRow = rows[range.startIndex];
-
-      // TODO: get buy in to make all item parents sticky, right now we only select the top most parent as sticky
-      activeStickyIndexRef.current =
-        rangeStartRow.subRows?.length && rangeStartRow.getIsExpanded()
-          ? rangeStartRow.index
-          : rangeStartRow.getParentRows()[0]?.index ?? null;
-      const next = new Set(
-        [activeStickyIndexRef.current, ...defaultRangeExtractor(range)].filter(Boolean)
-      );
-      return Array.from(next).sort((a, b) => a - b);
-    },
-    [rows, stickyGroupRoot]
-  );
-
-  const rowVirtualizer = useVirtualizer({
-    count: rows.length,
-    estimateSize: () => 0,
-    getScrollElement: () => scrollElementRef.current,
+  const {
+    activeStickyIndex,
+    rowVirtualizer,
+    virtualizedRowsSizeCache,
+    virtualizedRowComputedTranslateValue,
+  } = useRowVirtualizerHelper<G>({
+    rows,
     overscan,
-    rangeExtractor,
-    onChange: (rowVirtualizerInstance) => {
-      // @ts-expect-error -- the itemsSizeCache property does exist,
-      // but it not included in the type definition because it is marked as a private property,
-      // see {@link https://github.com/TanStack/virtual/blob/v3.13.2/packages/virtual-core/src/index.ts#L360}
-      virtualizerItemSizeCacheRef.current = rowVirtualizerInstance.itemSizeCache;
-    },
+    getScrollElement: () => scrollElementRef.current,
+    stickyGroupRoot,
   });
 
-  /**
-   * @description records the computed translate value for each item of virtualized row
-   */
-  const virtualizedRowComputedTranslateValue = useRef(new Map<number, number>());
-
-  /**
-   * @description returns the position style for the header row, in relation to the scrolled virtualized row
-   */
-  const getGridHeaderPositioningStyle = useCallback(
-    () => ({
-      top: -(virtualizedRowComputedTranslateValue.current.get(0) ?? 0),
-      transform: `translate3d(0, ${virtualizedRowComputedTranslateValue.current.get(0) ?? 0}px, 0)`,
-    }),
-    []
-  );
-
-  /**
-   * @description returns the position style for the grid row, in relation to the scrolled virtualized row
-   */
-  const getGridRowPositioningStyle = useCallback(
-    (renderIndex: number, isActiveStickyRow: boolean) =>
-      !isActiveStickyRow
-        ? {
-            transform: `translateY(${
-              virtualizedRowComputedTranslateValue.current.get(renderIndex) ?? 0
-            }px)`,
-          }
-        : {},
-    []
-  );
-
   return (
-    <div css={{ flex: '1 1 auto' }}>
+    <div css={styles.container}>
       <EuiAutoSizer>
         {(containerSize) => (
-          <div ref={scrollElementRef} style={{ ...containerSize, overflowY: 'auto' }}>
+          <div ref={scrollElementRef} css={overflowYAuto} style={{ ...containerSize }}>
             <EuiFlexGroup
               direction="column"
               gutterSize="none"
-              css={{ width: containerSize.width, position: 'relative' }}
+              css={relativePosition}
+              style={{ width: containerSize.width }}
             >
               <EuiFlexItem
                 css={styles.cascadeTreeGridHeader}
-                style={getGridHeaderPositioningStyle()}
+                style={getGridHeaderPositioningStyle(virtualizedRowComputedTranslateValue)}
               >
                 <EuiFlexGroup direction="column" gutterSize="none">
                   <EuiFlexItem
                     css={
                       (rowVirtualizer.scrollOffset ?? 0) >
                       // apply border on scrolling a quarter of the first row height
-                      (virtualizerItemSizeCacheRef.current.get(0) ?? 0) / 4
-                        ? {
-                            borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                          }
+                      (virtualizedRowsSizeCache.get(0) ?? 0) / 4
+                        ? styles.cascadeTreeGridHeaderScrolled
                         : {}
                     }
                   >
@@ -302,7 +238,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                     })}
                   </EuiFlexItem>
                   <React.Fragment>
-                    {activeStickyIndexRef.current !== null && stickyGroupRoot && (
+                    {activeStickyIndex !== null && stickyGroupRoot && (
                       <EuiFlexItem
                         ref={activeStickyRenderSlotRef}
                         css={styles.cascadeTreeGridHeaderStickyRenderSlot}
@@ -321,7 +257,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                     aria-readonly="true"
                     aria-multiselectable="false"
                     aria-colcount={-1}
-                    css={{ position: 'relative' }}
+                    css={relativePosition}
                   >
                     {rowVirtualizer
                       .getVirtualItems()
@@ -330,12 +266,9 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
 
                         // CONSIDERATION: maybe use the sticky index as a marker for accessibility announcements
                         const isActiveSticky =
-                          stickyGroupRoot && activeStickyIndexRef.current === virtualItem.index;
+                          stickyGroupRoot && activeStickyIndex === virtualItem.index;
 
-                        virtualizedRowComputedTranslateValue.current.set(
-                          renderIndex,
-                          virtualItem.start
-                        );
+                        virtualizedRowComputedTranslateValue.set(renderIndex, virtualItem.start);
 
                         const rowToRender = React.createElement<CascadeRowPrimitiveProps<G, L>>(
                           CascadeRowPrimitive,
@@ -347,7 +280,8 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                             virtualRow: virtualItem,
                             virtualRowStyle: getGridRowPositioningStyle(
                               renderIndex,
-                              isActiveSticky
+                              isActiveSticky,
+                              virtualizedRowComputedTranslateValue
                             ),
                             ...rowElement.props,
                           }
