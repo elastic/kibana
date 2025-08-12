@@ -94,6 +94,11 @@ export interface RecentlyClosedTabState extends TabState {
   closedAt: number;
 }
 
+export enum TabsBarVisibility {
+  default = 'default',
+  hidden = 'hidden',
+}
+
 export interface DiscoverInternalState {
   initializationState: { hasESData: boolean; hasUserDataView: boolean };
   savedDataViews: DataViewListItem[];
@@ -105,6 +110,7 @@ export interface DiscoverInternalState {
    * ESQL query variables
    */
   esqlVariables?: ESQLControlVariable[];
+  tabsBarVisibility: TabsBarVisibility;
   tabs: {
     byId: Record<string, TabState | RecentlyClosedTabState>;
     allIds: string[];

@@ -213,6 +213,7 @@ export class DiscoverPlugin
         const { renderApp } = await import('./application');
         const unmount = renderApp({
           element: params.element,
+          onAppLeave: params.onAppLeave,
           services,
           customizationContext: defaultCustomizationContext,
         });
