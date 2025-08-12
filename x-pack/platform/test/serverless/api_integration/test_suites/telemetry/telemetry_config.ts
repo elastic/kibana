@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-<<<<<<< HEAD:x-pack/test_serverless/api_integration/test_suites/common/telemetry/telemetry_config.ts
-import { expect } from 'expect';
-import { SupertestWithRoleScopeType } from '../../../services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-=======
 import expect from '@kbn/expect';
-import { expect as externalExpect } from 'expect';
 import { SupertestWithRoleScopeType } from '../../services';
 import { FtrProviderContext } from '../../ftr_provider_context';
->>>>>>> da2236055c0 ([ska] relocate serverless platform api-integration tests (#229567)):x-pack/platform/test/serverless/api_integration/test_suites/telemetry/telemetry_config.ts
 
 export default function telemetryConfigTest({ getService }: FtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
