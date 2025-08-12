@@ -23,7 +23,7 @@ export const filtersRT = rt.exact(
 
 export const urlSchemaRT = rt.exact(
   rt.partial({
-    v: rt.literal(1),
+    v: rt.literal(2),
     table: tableRT,
     filters: filtersRT,
   })
