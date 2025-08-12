@@ -6,10 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { IndexAutocompleteItem } from '@kbn/esql-types';
+import type { IndexAutocompleteItem, ESQLSourceResult } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand, ESQLSource } from '../../types';
-import type { ISuggestionItem, ESQLSourceResult } from '../../commands_registry/types';
+import type { ISuggestionItem } from '../../commands_registry/types';
 import { handleFragment } from './autocomplete/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../../commands_registry/complete_items';
 import { EDITOR_MARKER } from '../constants';
