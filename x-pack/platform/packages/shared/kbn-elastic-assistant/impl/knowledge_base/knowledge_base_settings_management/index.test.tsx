@@ -24,7 +24,6 @@ import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
 import { AssistantSpaceIdProvider, useAssistantContext } from '../../..';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useKnowledgeBaseIndices } from '../../assistant/api/knowledge_base/use_knowledge_base_indices';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory, History } from 'history';
 
@@ -161,9 +160,6 @@ describe('KnowledgeBaseSettingsManagement', () => {
         security_labs_exists: true,
       },
       isFetched: true,
-    });
-    (useKnowledgeBaseIndices as jest.Mock).mockReturnValue({
-      data: { indices: ['index-1', 'index-2'] },
     });
     (useKnowledgeBaseEntries as jest.Mock).mockReturnValue({
       data: { data: mockData },

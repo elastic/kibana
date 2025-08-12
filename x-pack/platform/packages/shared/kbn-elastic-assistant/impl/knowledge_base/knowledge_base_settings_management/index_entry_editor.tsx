@@ -15,11 +15,13 @@ import {
   EuiTextArea,
   EuiIcon,
   EuiSuperSelect,
+  EuiLink,
 } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
 import React, { useCallback, useMemo } from 'react';
 import { IndexEntry } from '@kbn/elastic-assistant-common';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import { isGlobalEntry } from './helpers';
 
@@ -29,10 +31,11 @@ interface Props {
   originalEntry?: IndexEntry;
   setEntry: React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>;
   hasManageGlobalKnowledgeBase: boolean;
+  docLink: string;
 }
 
 export const IndexEntryEditor: React.FC<Props> = React.memo<Props>(
-  ({ dataViews, entry, setEntry, hasManageGlobalKnowledgeBase, originalEntry }) => {
+  ({ dataViews, entry, setEntry, hasManageGlobalKnowledgeBase, originalEntry, docLink }) => {
     const privateUsers = useMemo(() => {
       const originalUsers = originalEntry?.users;
       if (originalEntry && !isGlobalEntry(originalEntry)) {
@@ -281,7 +284,23 @@ export const IndexEntryEditor: React.FC<Props> = React.memo<Props>(
           fullWidth
           isInvalid={isMissingIndex}
           error={isMissingIndex && <>{i18n.MISSING_INDEX_ERROR}</>}
-          helpText={i18n.ENTRY_INDEX_NAME_INPUT_DESCRIPTION}
+          helpText={
+            <FormattedMessage
+              id={i18n.ENTRY_INDEX_NAME_INPUT_DESCRIPTION.id}
+              defaultMessage={i18n.ENTRY_INDEX_NAME_INPUT_DESCRIPTION.defaultMessage}
+              values={{
+                docLink: (
+                  <EuiLink
+                    href={docLink}
+                    target="_blank"
+                    data-test-subj="knowledgeBaseIndexEntryDocLink"
+                  >
+                    {i18n.KNOWLEDGE_BASE_DOCUMENTATION_LINK}
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
         >
           <EuiComboBox
             data-test-subj="index-combobox"
