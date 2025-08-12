@@ -22,8 +22,6 @@ import {
 } from './components';
 import { getKey, sortByStatusAndTitle } from './utils';
 
-import './assign_flyout.scss';
-
 interface AssignFlyoutProps {
   tagIds: string[];
   allowedTypes: string[];
@@ -148,7 +146,7 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
       <EuiFlyoutHeader hasBorder>
         <AssignFlyoutHeader tagIds={tagIds} tagCache={tagCache} />
       </EuiFlyoutHeader>
-      <EuiFlyoutHeader hasBorder className="tagAssignFlyout_searchContainer">
+      <EuiFlyoutHeader hasBorder>
         <AssignFlyoutSearchBar
           onChange={({ query: newQuery }) => {
             setQuery(newQuery);

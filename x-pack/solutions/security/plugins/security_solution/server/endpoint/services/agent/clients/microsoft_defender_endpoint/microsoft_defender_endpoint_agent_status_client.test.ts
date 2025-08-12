@@ -43,6 +43,7 @@ describe('Microsoft Defender Agent Status client', () => {
     ]);
 
     clientConstructorOptions = {
+      spaceId: 'default',
       endpointService: endpointAppContextServiceMock,
       connectorActionsClient: microsoftDefenderMock.createMsConnectorActionsClient(),
       esClient: endpointAppContextServiceMock.getInternalEsClient(),
@@ -82,12 +83,10 @@ describe('Microsoft Defender Agent Status client', () => {
   it('should retrieve a list of pending response actions with the IDs that were passed in', async () => {
     await msAgentStatusClientMock.getAgentStatuses(['1-2-3', 'foo']);
 
-    expect(getPendingActionsSummaryMock).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.anything(),
-      expect.anything(),
-      ['1-2-3', 'foo']
-    );
+    expect(getPendingActionsSummaryMock).toHaveBeenCalledWith(expect.anything(), 'default', [
+      '1-2-3',
+      'foo',
+    ]);
   });
 
   it('should return the expected agent status records', async () => {

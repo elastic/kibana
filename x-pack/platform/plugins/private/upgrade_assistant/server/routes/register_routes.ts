@@ -13,19 +13,16 @@ import { registerClusterUpgradeStatusRoutes } from './cluster_upgrade_status';
 import { registerSystemIndicesMigrationRoutes } from './system_indices_migration';
 import { registerESDeprecationRoutes } from './es_deprecations';
 import { registerDeprecationLoggingRoutes } from './deprecation_logging';
-import { registerReindexIndicesRoutes, registerBatchReindexIndicesRoutes } from './reindex_indices';
 import { registerUpdateSettingsRoute } from './update_index_settings';
 import { registerMlSnapshotRoutes } from './ml_snapshots';
-import { ReindexWorker } from '../lib/reindexing';
 import { registerUpgradeStatusRoute } from './status';
 import { registerRemoteClustersRoute } from './remote_clusters';
 import { registerNodeDiskSpaceRoute } from './node_disk_space';
 import { registerClusterSettingsRoute } from './cluster_settings';
 import { registerMigrateDataStreamRoutes } from './migrate_data_streams';
 import { registerUpdateIndexRoute } from './update_index';
-import { registerEnterpriseSearchDeprecationRoutes } from '../lib/enterprise_search/enterprise_search_deprecations_routes';
 
-export function registerRoutes(dependencies: RouteDependencies, getWorker: () => ReindexWorker) {
+export function registerRoutes(dependencies: RouteDependencies) {
   registerAppRoutes(dependencies);
 
   registerCloudBackupStatusRoutes(dependencies);
@@ -33,8 +30,6 @@ export function registerRoutes(dependencies: RouteDependencies, getWorker: () =>
   registerSystemIndicesMigrationRoutes(dependencies);
   registerESDeprecationRoutes(dependencies);
   registerDeprecationLoggingRoutes(dependencies);
-  registerReindexIndicesRoutes(dependencies, getWorker);
-  registerBatchReindexIndicesRoutes(dependencies, getWorker);
   registerUpdateSettingsRoute(dependencies);
   registerMlSnapshotRoutes(dependencies);
   // Route for cloud to retrieve the upgrade status for ES and Kibana
@@ -48,7 +43,4 @@ export function registerRoutes(dependencies: RouteDependencies, getWorker: () =>
 
   // Mark index as read-only and unfreeze it
   registerUpdateIndexRoute(dependencies);
-
-  // Enterprise Search deprecations
-  registerEnterpriseSearchDeprecationRoutes(dependencies);
 }

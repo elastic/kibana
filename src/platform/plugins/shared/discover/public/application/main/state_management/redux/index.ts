@@ -10,38 +10,84 @@
 import { omit } from 'lodash';
 import { internalStateSlice } from './internal_state';
 import {
+  loadDataViewList,
   appendAdHocDataViews,
+  initializeSession,
   replaceAdHocDataViewWithId,
   setAdHocDataViews,
   setDataView,
   setDefaultProfileAdHocDataViews,
+  setTabs,
+  updateTabs,
+  disconnectTab,
+  updateTabAppStateAndGlobalState,
+  restoreTab,
+  clearAllTabs,
+  initializeTabs,
 } from './actions';
 
-export type { DiscoverInternalState, InternalStateDataRequestParams } from './types';
+export type {
+  DiscoverInternalState,
+  TabState,
+  TabStateGlobalState,
+  InternalStateDataRequestParams,
+} from './types';
 
 export { type InternalStateStore, createInternalStateStore } from './internal_state';
 
 export const internalStateActions = {
-  ...omit(internalStateSlice.actions, 'setDataViewId', 'setDefaultProfileAdHocDataViewIds'),
+  ...omit(
+    internalStateSlice.actions,
+    'setTabs',
+    'setDataViewId',
+    'setDefaultProfileAdHocDataViewIds'
+  ),
+  loadDataViewList,
+  setTabs,
+  updateTabs,
+  disconnectTab,
   setDataView,
   setAdHocDataViews,
   setDefaultProfileAdHocDataViews,
   appendAdHocDataViews,
   replaceAdHocDataViewWithId,
+  initializeSession,
+  updateTabAppStateAndGlobalState,
+  restoreTab,
+  clearAllTabs,
+  initializeTabs,
 };
 
 export {
   InternalStateProvider,
   useInternalStateDispatch,
   useInternalStateSelector,
+  CurrentTabProvider,
+  useCurrentTabSelector,
+  useCurrentTabAction,
+  useCurrentChartPortalNode,
   useDataViewsForPicker,
 } from './hooks';
 
 export {
+  selectAllTabs,
+  selectRecentlyClosedTabs,
+  selectTab,
+  selectIsTabsBarHidden,
+} from './selectors';
+
+export {
   type RuntimeStateManager,
+  type CombinedRuntimeState,
+  type InitialUnifiedHistogramLayoutProps,
   createRuntimeStateManager,
   useRuntimeState,
+  selectTabRuntimeState,
+  selectRestorableTabRuntimeHistogramLayoutProps,
+  useCurrentTabRuntimeState,
   RuntimeStateProvider,
   useCurrentDataView,
   useAdHocDataViews,
 } from './runtime_state';
+
+export { type TabActionInjector, createTabActionInjector, createTabItem } from './utils';

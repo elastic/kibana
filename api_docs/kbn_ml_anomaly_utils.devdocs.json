@@ -258,6 +258,56 @@
       },
       {
         "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.getMlSeverityColorRampValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getMlSeverityColorRampValue",
+        "description": [
+          "\nReturns a theme-aware color ramp for ML severity scores."
+        ],
+        "signature": [
+          "(euiTheme: ",
+          "EuiThemeComputed",
+          "<{}>) => ",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ColorRampStop",
+            "text": "ColorRampStop"
+          },
+          "[]"
+        ],
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_ramp.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.getMlSeverityColorRampValue.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "euiTheme",
+            "description": [
+              "The EUI theme object."
+            ],
+            "signature": [
+              "EuiThemeComputed",
+              "<{}>"
+            ],
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_ramp.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An array of ColorRampStop objects."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.getSeverity",
         "type": "Function",
         "tags": [],
@@ -304,17 +354,87 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.getSeverityColor",
         "type": "Function",
-        "tags": [],
-        "label": "getSeverityColor",
-        "description": [
-          "\nReturns a severity RGB color (one of critical, major, minor, warning, low or unknown)\nfor the supplied normalized anomaly score (a value between 0 and 100)."
+        "tags": [
+          "deprecated"
         ],
+        "label": "getSeverityColor",
+        "description": [],
         "signature": [
           "(normalizedScore: number) => string"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/get_severity_color.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "apm",
+            "path": "x-pack/solutions/observability/plugins/apm/common/anomaly_detection/index.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/public/alerting/anomaly_detection_alerts_table/render_cell_value.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/public/alerting/anomaly_detection_alerts_table/render_cell_value.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/public/application/explorer/alerts/anomaly_detection_alerts_state_service.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/public/application/explorer/alerts/anomaly_detection_alerts_state_service.ts"
+          },
+          {
+            "plugin": "apm",
+            "path": "x-pack/solutions/observability/plugins/apm/common/anomaly_detection/index.ts"
+          },
+          {
+            "plugin": "apm",
+            "path": "x-pack/solutions/observability/plugins/apm/common/anomaly_detection/index.ts"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/components/common/charts/duration_line_bar_list.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/components/common/charts/duration_line_bar_list.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/components/common/charts/duration_line_bar_list.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/components/overview/alerts/anomaly_alert/select_severity.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/components/overview/alerts/anomaly_alert/select_severity.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/components/overview/alerts/anomaly_alert/select_severity.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/components/overview/alerts/anomaly_alert/select_severity.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/components/overview/alerts/anomaly_alert/select_severity.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/components/overview/alerts/anomaly_alert/anomaly_alert.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/components/overview/alerts/anomaly_alert/anomaly_alert.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/ml-anomaly-utils",
@@ -322,9 +442,7 @@
             "type": "number",
             "tags": [],
             "label": "normalizedScore",
-            "description": [
-              "- A normalized score between 0-100, which is based on the probability of the anomalousness of this record"
-            ],
+            "description": [],
             "signature": [
               "number"
             ],
@@ -417,6 +535,116 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.getThemeResolvedSeverityColor",
+        "type": "Function",
+        "tags": [],
+        "label": "getThemeResolvedSeverityColor",
+        "description": [
+          "\nResolves severity color based on normalized score and EUI theme colors.\nThis function can be used in contexts where the EuiTheme object is available,\nfor example, within class components that receive the theme via props or context.\n"
+        ],
+        "signature": [
+          "(normalizedScore: number, euiTheme: ",
+          "EuiThemeComputed",
+          "<{}>) => string"
+        ],
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/use_severity_color.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.getThemeResolvedSeverityColor.$1",
+            "type": "number",
+            "tags": [],
+            "label": "normalizedScore",
+            "description": [
+              "The anomaly score, normalized (typically 0-100)."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/use_severity_color.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.getThemeResolvedSeverityColor.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "euiTheme",
+            "description": [
+              "The EuiTheme object."
+            ],
+            "signature": [
+              "EuiThemeComputed",
+              "<{}>"
+            ],
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/use_severity_color.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The hex color string for the severity."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.getThemeResolvedSeverityStrokeColor",
+        "type": "Function",
+        "tags": [],
+        "label": "getThemeResolvedSeverityStrokeColor",
+        "description": [],
+        "signature": [
+          "(normalizedScore: number, euiTheme: ",
+          "EuiThemeComputed",
+          "<{}>) => string"
+        ],
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/use_severity_color.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.getThemeResolvedSeverityStrokeColor.$1",
+            "type": "number",
+            "tags": [],
+            "label": "normalizedScore",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/use_severity_color.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.getThemeResolvedSeverityStrokeColor.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "euiTheme",
+            "description": [],
+            "signature": [
+              "EuiThemeComputed",
+              "<{}>"
+            ],
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/use_severity_color.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -689,6 +917,45 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.useSeverityColor",
+        "type": "Function",
+        "tags": [],
+        "label": "useSeverityColor",
+        "description": [
+          "\nA React hook to get a theme-aware severity color string directly.\nThis hook computes the color based on the normalized score and the current EUI theme.\n"
+        ],
+        "signature": [
+          "(normalizedScore: number) => string"
+        ],
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/use_severity_color.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.useSeverityColor.$1",
+            "type": "number",
+            "tags": [],
+            "label": "normalizedScore",
+            "description": [
+              "The anomaly score, normalized (typically 0-100)."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/use_severity_color.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The hex color string for the severity, corresponding to the current theme."
+        ],
         "initialIsOpen": false
       }
     ],
@@ -1109,6 +1376,59 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.ColorRampStop",
+        "type": "Interface",
+        "tags": [],
+        "label": "ColorRampStop",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ColorRampStop",
+            "text": "ColorRampStop"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_ramp.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.ColorRampStop.stop",
+            "type": "number",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_ramp.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.ColorRampStop.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_ramp.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3004,31 +3324,6 @@
       },
       {
         "parentPluginId": "@kbn/ml-anomaly-utils",
-        "id": "def-common.ML_SEVERITY_COLOR_RAMP",
-        "type": "Array",
-        "tags": [],
-        "label": "ML_SEVERITY_COLOR_RAMP",
-        "description": [
-          "\nSeverity color ramp."
-        ],
-        "signature": [
-          "{ stop: ",
-          {
-            "pluginId": "@kbn/ml-anomaly-utils",
-            "scope": "common",
-            "docId": "kibKbnMlAnomalyUtilsPluginApi",
-            "section": "def-common.ML_ANOMALY_THRESHOLD",
-            "text": "ML_ANOMALY_THRESHOLD"
-          },
-          "; color: string; }[]"
-        ],
-        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.MLAnomalyDoc",
         "type": "Type",
         "tags": [],
@@ -3539,14 +3834,38 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.ML_SEVERITY_COLORS",
         "type": "Object",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ML_SEVERITY_COLORS",
         "description": [
           "\nRGB hex codes used to indicate the severity of an anomaly according to its anomaly score."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_colors.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/public/application/components/severity_control/severity_control.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/public/application/components/severity_control/severity_control.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/public/application/components/severity_control/severity_control.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/public/application/components/severity_control/severity_control.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/public/application/components/severity_control/severity_control.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/ml-anomaly-utils",

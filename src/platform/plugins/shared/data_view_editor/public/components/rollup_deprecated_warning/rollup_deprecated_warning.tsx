@@ -29,7 +29,7 @@ export const RollupDeprecatedWarning = ({ docLinksService }: RollupDeprecatedWar
   <EuiCallOut
     title={rollupBetaWarningTitle}
     color="warning"
-    iconType="help"
+    iconType="question"
     data-test-subj="rollupDeprecationCallout"
   >
     <FormattedMessage

@@ -24,16 +24,10 @@ import { getStacktraceFields } from '../../utils/get_stack_trace_fields';
  */
 export const createStacktraceControl = (props?: Partial<RowControlProps>): RowControlColumn => ({
   id: 'connectedStacktraceDocs',
-  headerAriaLabel: actionsHeaderAriaLabelStacktraceAction,
-  renderControl: (Control, rowProps) => {
+  render: (Control, rowProps) => {
     return <Stacktrace Control={Control} rowProps={rowProps} {...props} />;
   },
 });
-
-const actionsHeaderAriaLabelStacktraceAction = i18n.translate(
-  'discover.customControl.stacktraceArialLabel',
-  { defaultMessage: 'Access to available stacktraces' }
-);
 
 const stacktraceAvailableControlButton = i18n.translate(
   'discover.customControl.stacktrace.available',

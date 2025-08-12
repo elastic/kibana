@@ -220,6 +220,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       getAsLabels: deps.executionContext.getAsLabels,
     },
     featureFlags: {
+      setInitialFeatureFlagsGetter: deps.featureFlags.setInitialFeatureFlagsGetter,
       setProvider: deps.featureFlags.setProvider,
       appendContext: deps.featureFlags.appendContext,
     },
@@ -291,6 +292,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
+    pricing: {
+      isFeatureAvailable: deps.pricing.isFeatureAvailable,
+      registerProductFeatures: deps.pricing.registerProductFeatures,
+    },
     security: {
       registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
       fips: deps.security.fips,
@@ -298,6 +303,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     userProfile: {
       registerUserProfileDelegate: (delegate) =>
         deps.userProfile.registerUserProfileDelegate(delegate),
+    },
+    injection: {
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
     },
   };
 }
@@ -361,6 +369,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     savedObjects: {
       getScopedClient: deps.savedObjects.getScopedClient,
+      getUnsafeInternalClient: deps.savedObjects.getUnsafeInternalClient,
       createInternalRepository: deps.savedObjects.createInternalRepository,
       createScopedRepository: deps.savedObjects.createScopedRepository,
       createSerializer: deps.savedObjects.createSerializer,
@@ -385,10 +394,15 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
+    pricing: deps.pricing,
     security: {
       authc: deps.security.authc,
       audit: deps.security.audit,
     },
     userProfile: deps.userProfile,
+    injection: {
+      fork: () => deps.injection.fork(plugin.opaqueId),
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
+    },
   };
 }

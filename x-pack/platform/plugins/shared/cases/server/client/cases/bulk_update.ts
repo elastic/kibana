@@ -44,6 +44,8 @@ import {
   fillMissingCustomFields,
   getClosedInfoForUpdate,
   getDurationForUpdate,
+  getInProgressInfoForUpdate,
+  getTimingMetricsForUpdate,
 } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
@@ -514,7 +516,7 @@ export const bulkUpdate = async (
       alertsService,
     });
 
-    const commentsMap = await attachmentService.getter.getCaseCommentStats({
+    const commentsMap = await attachmentService.getter.getCaseAttatchmentStats({
       caseIds,
     });
 
@@ -655,6 +657,17 @@ const createPatchCasesPayload = ({
             status: trimmedCaseAttributes.status,
             closedAt: updatedDt,
             createdAt: originalCase.attributes.created_at,
+          }),
+          ...getInProgressInfoForUpdate({
+            status: trimmedCaseAttributes.status,
+            stateTransitionTimestamp: updatedDt,
+            inProgressAt: originalCase.attributes.in_progress_at,
+          }),
+          ...getTimingMetricsForUpdate({
+            status: trimmedCaseAttributes.status,
+            stateTransitionTimestamp: updatedDt,
+            createdAt: originalCase.attributes.created_at,
+            inProgressAt: originalCase.attributes.in_progress_at,
           }),
           updated_at: updatedDt,
           updated_by: user,

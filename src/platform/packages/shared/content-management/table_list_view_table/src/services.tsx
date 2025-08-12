@@ -57,8 +57,6 @@ export interface TagListProps {
  * Abstract external services for this component.
  */
 export interface Services {
-  canEditAdvancedSettings: boolean;
-  getListingLimitSettingsUrl: () => string;
   notifyError: NotifyFn;
   currentAppId$: Observable<string | undefined>;
   navigateToUrl: (url: string) => Promise<void> | void;
@@ -137,6 +135,9 @@ export interface TableListViewKibanaDependencies {
     userProfile: {
       bulkGet: UserProfileServiceStart['bulkGet'];
     };
+    rendering: {
+      addContext: (element: React.ReactNode) => React.ReactElement;
+    };
   };
   /**
    * The public API from the savedObjectsTaggingOss plugin.
@@ -204,7 +205,7 @@ export const TableListViewKibanaProvider: FC<
   PropsWithChildren<TableListViewKibanaDependencies>
 > = ({ children, ...services }) => {
   const { core, savedObjectsTagging, FormattedRelative } = services;
-  const { application, http, notifications, ...startServices } = core;
+  const { application, http, notifications, rendering } = core;
 
   const searchQueryParser = useMemo(() => {
     if (savedObjectsTagging) {
@@ -270,21 +271,15 @@ export const TableListViewKibanaProvider: FC<
                 favoritesClient={services.favorites}
                 notifyError={(title, text) => {
                   notifications.toasts.addDanger({
-                    title: toMountPoint(title, startServices),
+                    title: toMountPoint(title, rendering),
                     text,
                   });
                 }}
               >
                 <TableListViewProvider
-                  canEditAdvancedSettings={Boolean(application.capabilities.advancedSettings?.save)}
-                  getListingLimitSettingsUrl={() =>
-                    application.getUrlForApp('management', {
-                      path: `/kibana/settings?query=savedObjects:listingLimit`,
-                    })
-                  }
                   notifyError={(title, text) => {
                     notifications.toasts.addDanger({
-                      title: toMountPoint(title, startServices),
+                      title: toMountPoint(title, rendering),
                       text,
                     });
                   }}
@@ -298,7 +293,7 @@ export const TableListViewKibanaProvider: FC<
                   TagList={TagList}
                   itemHasTags={itemHasTags}
                   getTagIdsFromReferences={getTagIdsFromReferences}
-                  getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
+                  getTagManagementUrl={() => http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
                   isKibanaVersioningEnabled={services.isKibanaVersioningEnabled ?? false}
                 >
                   {children}

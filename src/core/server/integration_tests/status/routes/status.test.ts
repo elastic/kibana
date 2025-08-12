@@ -12,7 +12,7 @@ import supertest from 'supertest';
 import { omit } from 'lodash';
 
 import { ContextService } from '@kbn/core-http-context-server-internal';
-import { createCoreContext, createHttpService } from '@kbn/core-http-server-mocks';
+import { createCoreContext } from '@kbn/core-http-server-mocks';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
@@ -21,6 +21,7 @@ import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { registerStatusRoute } from '@kbn/core-status-server-internal';
+import { createInternalHttpService } from '../../utilities';
 
 const coreId = Symbol('core');
 
@@ -49,7 +50,7 @@ describe('GET /api/status', () => {
     const coreContext = createCoreContext({ coreId });
     const contextService = new ContextService(coreContext);
 
-    server = createHttpService(coreContext);
+    server = createInternalHttpService(coreContext);
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
     httpSetup = await server.setup({
       context: contextService.setup({ pluginDependencies: new Map() }),

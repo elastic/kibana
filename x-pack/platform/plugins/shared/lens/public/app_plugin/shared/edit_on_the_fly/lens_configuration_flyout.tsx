@@ -57,13 +57,13 @@ export function LensEditConfigurationFlyout({
   hidesSuggestions,
   onApply: onApplyCallback,
   onCancel: onCancelCallback,
-  hideTimeFilterInfo,
   isReadOnly,
   parentApi,
   panelId,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
+
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
@@ -71,7 +71,7 @@ export function LensEditConfigurationFlyout({
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
-  // use the latest activeId, but fallback to attributes
+
   const activeVisualization =
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
 
@@ -83,9 +83,10 @@ export function LensEditConfigurationFlyout({
 
   const dispatch = useLensDispatch();
 
-  const attributesChanged: boolean = useMemo(() => {
-    const previousAttrs = previousAttributes.current;
+  const attributesChanged = useMemo<boolean>(() => {
+    if (isNewPanel) return true;
 
+    const previousAttrs = previousAttributes.current;
     const datasourceStatesAreSame =
       datasourceStates[datasourceId].state && previousAttrs.state.datasourceStates[datasourceId]
         ? datasourceMap[datasourceId].isEqual(
@@ -95,6 +96,8 @@ export function LensEditConfigurationFlyout({
             attributes.references
           )
         : false;
+
+    if (!datasourceStatesAreSame) return true;
 
     const visualizationState = visualization.state;
     const customIsEqual = visualizationMap[previousAttrs.visualizationType]?.isEqual;
@@ -114,15 +117,16 @@ export function LensEditConfigurationFlyout({
         })()
       : isEqual(visualizationState, previousAttrs.state.visualization);
 
-    return !visualizationStateIsEqual || !datasourceStatesAreSame;
+    return !visualizationStateIsEqual;
   }, [
-    attributes.references,
+    datasourceStates,
     datasourceId,
     datasourceMap,
-    datasourceStates,
+    attributes.references,
+    visualization.state,
+    isNewPanel,
     visualizationMap,
     annotationGroups,
-    visualization.state,
   ]);
 
   const onCancel = useCallback(() => {
@@ -318,7 +322,7 @@ export function LensEditConfigurationFlyout({
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
         isSaveable={isSaveable}
-        isScrollable={false}
+        isScrollable
         language={textBasedMode ? getLanguageDisplayName('esql') : ''}
         isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
@@ -337,6 +341,13 @@ export function LensEditConfigurationFlyout({
               flex: 1;
               flex-direction: column;
             }
+            .euiAccordion-isOpen {
+              .euiAccordion__childWrapper {
+                // Override euiAccordion__childWrapper blockSize only when ES|QL mode is enabled
+                block-size: auto ${textBasedMode ? '!important' : ''};
+                flex: 1;
+              }
+            }
             .euiAccordion__childWrapper {
               ${euiScrollBarStyles(euiTheme)}
               overflow-y: auto !important;
@@ -345,11 +356,6 @@ export function LensEditConfigurationFlyout({
               margin-left: -${euiThemeVars.euiFormMaxWidth};
               > * {
                 pointer-events: auto;
-              }
-
-              .euiAccordion-isOpen & {
-                block-size: auto !important;
-                flex: 1;
               }
             }
             .lnsIndexPatternDimensionEditor-advancedOptions {
@@ -362,7 +368,18 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
-          <div ref={editorContainer} />
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              css={css`
+                > * {
+                  flex-grow: 0;
+                }
+              `}
+              gutterSize="none"
+              direction="column"
+              ref={editorContainer}
+            />
+          </EuiFlexItem>
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
@@ -378,9 +395,8 @@ export function LensEditConfigurationFlyout({
                 <EuiTitle
                   size="xxs"
                   css={css`
-                padding: 2px;
-              }
-            `}
+                    padding: 2px;
+                  `}
                 >
                   <h5>
                     {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {

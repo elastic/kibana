@@ -52,7 +52,7 @@ export function GroupBy({ options, onChange, fields, ...rest }: Props) {
       singleSelection={false}
       selectedOptions={selectedOptions}
       options={fields
-        .filter((f) => f.aggregatable && f.type === 'string')
+        .filter((f) => f.aggregatable && (f.type === 'string' || f.type === 'ip'))
         .map((f) => ({ label: f.name }))}
       onChange={handleChange}
       isClearable={true}

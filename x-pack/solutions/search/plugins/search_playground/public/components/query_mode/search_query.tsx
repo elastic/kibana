@@ -10,34 +10,36 @@ import React from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { Controller, useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { ChatForm, ChatFormFields } from '../../types';
+import { PlaygroundForm, PlaygroundFormFields } from '../../types';
 
-export const SearchQuery = () => {
+export const SearchQuery = ({ isLoading }: { isLoading: boolean }) => {
   const { control } = useFormContext();
   const {
-    field: { value: searchBarValue },
     formState: { isSubmitting },
-  } = useController<ChatForm, ChatFormFields.searchQuery>({
-    name: ChatFormFields.searchQuery,
+  } = useController<PlaygroundForm, PlaygroundFormFields.searchQuery>({
+    name: PlaygroundFormFields.searchQuery,
   });
 
   return (
     <Controller
       control={control}
-      name={ChatFormFields.searchQuery}
+      name={PlaygroundFormFields.searchQuery}
       render={({ field }) => (
         <EuiFieldText
           data-test-subj="searchPlaygroundSearchModeFieldText"
           prepend="{query}"
-          {...field}
-          value={searchBarValue}
+          name={field.name}
+          onBlur={field.onBlur}
+          onChange={field.onChange}
+          value={field.value}
+          inputRef={field.ref}
           icon="search"
           fullWidth
           placeholder={i18n.translate(
             'xpack.searchPlayground.searchMode.queryView.searchBar.placeholder',
             { defaultMessage: 'Search for documents' }
           )}
-          isLoading={isSubmitting}
+          isLoading={isLoading || isSubmitting}
         />
       )}
     />

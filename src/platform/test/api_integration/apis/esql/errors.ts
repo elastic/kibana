@@ -11,9 +11,9 @@ import Fs from 'fs';
 import Path from 'path';
 import expect from '@kbn/expect';
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import { hasStartEndParams } from '@kbn/esql-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
-import uniqBy from 'lodash/uniqBy';
-import { groupBy, mapValues } from 'lodash';
+import { groupBy, mapValues, uniqBy } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 function getConfigPath() {
@@ -119,11 +119,23 @@ export default function ({ getService }: FtrProviderContext) {
     error: { message: string } | undefined;
   }> {
     try {
+      const params = hasStartEndParams(query)
+        ? [
+            {
+              _tstart: '2025-02-23T23:00:00.000Z',
+            },
+            {
+              _tend: '2025-03-26T09:09:08.139Z',
+            },
+          ]
+        : [];
       const resp = await es.transport.request<EsqlTable>({
         method: 'POST',
         path: '/_query',
         body: {
           query,
+          // testing the kibana time variables in case they are used in the query
+          params,
         },
       });
       return { resp, error: undefined };

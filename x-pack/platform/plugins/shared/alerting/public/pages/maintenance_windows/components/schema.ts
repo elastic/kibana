@@ -8,12 +8,10 @@
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { Frequency } from '@kbn/rrule';
+import type { RecurringSchedule } from '@kbn/response-ops-recurring-schedule-form/types';
+import { getRecurringScheduleFormSchema } from '@kbn/response-ops-recurring-schedule-form/schemas/recurring_schedule_form_schema';
 import * as i18n from '../translations';
-import type { MaintenanceWindowFrequency } from '../constants';
-import { EndsOptions } from '../constants';
 import type { ScopedQueryAttributes } from '../../../../common';
-import { VALID_CATEGORIES } from '../constants';
 
 const { emptyField } = fieldValidators;
 
@@ -23,20 +21,8 @@ export interface FormProps {
   endDate: string;
   timezone?: string[];
   recurring: boolean;
-  recurringSchedule?: RecurringScheduleFormProps;
-  solutionId?: string;
+  recurringSchedule?: RecurringSchedule;
   scopedQuery?: ScopedQueryAttributes | null;
-}
-
-export interface RecurringScheduleFormProps {
-  frequency: MaintenanceWindowFrequency | 'CUSTOM';
-  interval?: number;
-  ends: string;
-  until?: string;
-  count?: number;
-  customFrequency?: MaintenanceWindowFrequency;
-  byweekday?: Record<string, boolean>;
-  bymonth?: string;
 }
 
 export const schema: FormSchema<FormProps> = {
@@ -48,25 +34,6 @@ export const schema: FormSchema<FormProps> = {
         validator: emptyField(i18n.CREATE_FORM_NAME_REQUIRED),
       },
     ],
-  },
-  solutionId: {
-    type: FIELD_TYPES.SELECT,
-    validations: [
-      {
-        validator: ({ value }: { value: string }) => {
-          if (value === undefined) {
-            return;
-          }
-          if (!VALID_CATEGORIES.includes(value)) {
-            return {
-              message: `Value must be one of: ${VALID_CATEGORIES.join(', ')}`,
-            };
-          }
-        },
-      },
-    ],
-    // The empty string appears by default because of how form libraries typically handle form inputs
-    deserializer: (value) => (value === '' ? undefined : value),
   },
   scopedQuery: {
     defaultValue: {
@@ -82,45 +49,5 @@ export const schema: FormSchema<FormProps> = {
     label: i18n.CREATE_FORM_REPEAT,
     defaultValue: false,
   },
-  recurringSchedule: {
-    frequency: {
-      type: FIELD_TYPES.SELECT,
-      label: i18n.CREATE_FORM_REPEAT,
-      defaultValue: Frequency.DAILY,
-    },
-    interval: {
-      type: FIELD_TYPES.NUMBER,
-      label: '',
-      defaultValue: 1,
-      validations: [
-        {
-          validator: emptyField(i18n.CREATE_FORM_INTERVAL_REQUIRED),
-        },
-      ],
-    },
-    ends: {
-      type: FIELD_TYPES.BUTTON_GROUP,
-      label: i18n.CREATE_FORM_ENDS,
-      defaultValue: EndsOptions.NEVER,
-      validations: [],
-    },
-    until: {},
-    count: {
-      label: '',
-      type: FIELD_TYPES.TEXT,
-      defaultValue: 1,
-      validations: [
-        {
-          validator: emptyField(i18n.CREATE_FORM_COUNT_REQUIRED),
-        },
-      ],
-    },
-    customFrequency: {
-      type: FIELD_TYPES.SELECT,
-      label: '',
-      defaultValue: Frequency.WEEKLY,
-    },
-    byweekday: {},
-    bymonth: { type: FIELD_TYPES.BUTTON_GROUP, label: '', validations: [], defaultValue: 'day' },
-  },
+  recurringSchedule: getRecurringScheduleFormSchema({ allowInfiniteRecurrence: false }),
 };

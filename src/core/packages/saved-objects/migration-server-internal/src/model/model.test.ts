@@ -8,8 +8,8 @@
  */
 
 import { chain } from 'lodash';
-import * as Either from 'fp-ts/lib/Either';
-import * as Option from 'fp-ts/lib/Option';
+import * as Either from 'fp-ts/Either';
+import * as Option from 'fp-ts/Option';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
@@ -58,7 +58,10 @@ import type {
   ReadyToReindexSyncState,
   DoneReindexingSyncState,
   LegacyCheckClusterRoutingAllocationState,
-  CheckClusterRoutingAllocationState,
+  ReindexCheckClusterRoutingAllocationState,
+  PostInitState,
+  CreateIndexCheckClusterRoutingAllocationState,
+  RelocateCheckClusterRoutingAllocationState,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import type { AliasAction, RetryableEsClientError } from '../actions';
@@ -66,6 +69,7 @@ import type { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
 import { model } from './model';
 import type { BulkIndexOperationTuple, BulkOperation } from './create_batches';
+import { TaskCompletedWithRetriableError } from '../actions/wait_for_task';
 
 describe('migrations v2 model', () => {
   const indexMapping: IndexMapping = {
@@ -88,6 +92,7 @@ describe('migrations v2 model', () => {
     kibanaVersion: '7.11.0',
     logs: [],
     retryCount: 0,
+    skipRetryReset: false,
     retryDelay: 0,
     retryAttempts: 15,
     batchSize: 1000,
@@ -406,7 +411,15 @@ describe('migrations v2 model', () => {
           const res: ResponseType<'INIT'> = Either.right({
             '.kibana_7.11.0_001': {
               aliases: { '.kibana': {}, '.kibana_7.11.0': {} },
-              mappings: mappingsWithUnknownType,
+              mappings: {
+                properties: {},
+                _meta: {
+                  mappingVersions: {
+                    someTypeWithMigrations: '8.8.0',
+                    someTypeWithModelVersions: '10.1.0',
+                  },
+                },
+              },
               settings: {},
             },
             '.kibana_3': {
@@ -415,7 +428,7 @@ describe('migrations v2 model', () => {
               settings: {},
             },
           });
-          const newState = model(
+          const newState: PostInitState = model(
             {
               ...initState,
               kibanaVersion: '7.12.0',
@@ -423,9 +436,19 @@ describe('migrations v2 model', () => {
               versionIndex: '.kibana_7.12.0_001',
             },
             res
-          );
+          ) as PostInitState;
 
           expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
+          expect((newState.sourceIndexMappings as Option.Some<IndexMapping>).value).toEqual({
+            _meta: {
+              mappingVersions: {
+                // notice how the logic defaulted to 10.0.0 for types that ONLY define 'migrations:' property
+                someTypeWithMigrations: '10.0.0',
+                someTypeWithModelVersions: '10.1.0',
+              },
+            },
+            properties: {},
+          });
           expect(newState.retryDelay).toEqual(2000);
         });
 
@@ -708,12 +731,12 @@ describe('migrations v2 model', () => {
           expect(newState.retryDelay).toEqual(0);
         });
 
-        test('INIT -> CREATE_NEW_TARGET when the index does not exist and the migrator is NOT involved in a relocation', () => {
+        test('INIT -> CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION when the index does not exist and the migrator is NOT involved in a relocation', () => {
           const res: ResponseType<'INIT'> = Either.right({});
           const newState = model(initState, res);
 
           expect(newState).toMatchObject({
-            controlState: 'CREATE_NEW_TARGET',
+            controlState: 'CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
             sourceIndex: Option.none,
             targetIndex: '.kibana_7.11.0_001',
           });
@@ -721,7 +744,7 @@ describe('migrations v2 model', () => {
           expect(newState.retryDelay).toEqual(0);
         });
 
-        test('INIT -> CREATE_REINDEX_TEMP when the index does not exist and the migrator is involved in a relocation', () => {
+        test('INIT -> RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION when the index does not exist and the migrator is involved in a relocation', () => {
           const res: ResponseType<'INIT'> = Either.right({});
           const newState = model(
             {
@@ -732,7 +755,7 @@ describe('migrations v2 model', () => {
           );
 
           expect(newState).toMatchObject({
-            controlState: 'CREATE_REINDEX_TEMP',
+            controlState: 'RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION',
             sourceIndex: Option.none,
             targetIndex: '.kibana_7.11.0_001',
             versionIndexReadyActions: Option.some([
@@ -744,6 +767,98 @@ describe('migrations v2 model', () => {
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
         });
+      });
+    });
+
+    describe('CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION', () => {
+      const aliasActions = Option.some([Symbol('alias action')] as unknown) as Option.Some<
+        AliasAction[]
+      >;
+      const createIndexCheckClusterRoutingAllocationState: CreateIndexCheckClusterRoutingAllocationState =
+        {
+          ...postInitState,
+          controlState: 'CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
+          versionIndexReadyActions: aliasActions,
+          sourceIndex: Option.none as Option.None,
+          targetIndex: '.kibana_7.11.0_001',
+        };
+
+      test('CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION when cluster allocation is not compatible', () => {
+        const res: ResponseType<'CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.left({
+          type: 'incompatible_cluster_routing_allocation',
+        });
+        const newState = model(createIndexCheckClusterRoutingAllocationState, res);
+
+        expect(newState.controlState).toBe('CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+      });
+
+      test('CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> CREATE_NEW_TARGET when cluster allocation is compatible', () => {
+        const res: ResponseType<'CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.right({});
+        const newState = model(
+          createIndexCheckClusterRoutingAllocationState,
+          res
+        ) as CreateNewTargetState;
+
+        expect(newState.controlState).toBe('CREATE_NEW_TARGET');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+        // check that we are correctly "forwarding" the state
+        expect(newState.targetIndex).toEqual(
+          createIndexCheckClusterRoutingAllocationState.targetIndex
+        );
+        expect(newState.targetIndexMappings).toEqual(
+          createIndexCheckClusterRoutingAllocationState.targetIndexMappings
+        );
+        expect(newState.esCapabilities).toEqual(
+          createIndexCheckClusterRoutingAllocationState.esCapabilities
+        );
+      });
+    });
+
+    describe('RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION', () => {
+      const reindexCheckClusterRoutingAllocationState: RelocateCheckClusterRoutingAllocationState =
+        {
+          ...postInitState,
+          controlState: 'RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION',
+          sourceIndex: Option.some('.kibana') as Option.Some<string>,
+          sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
+          tempIndexMappings: { properties: {} },
+        };
+
+      test('RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION -> RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION when cluster allocation is not compatible', () => {
+        const res: ResponseType<'RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.left({
+          type: 'incompatible_cluster_routing_allocation',
+        });
+        const newState = model(reindexCheckClusterRoutingAllocationState, res);
+
+        expect(newState.controlState).toBe('RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+      });
+
+      test('RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION -> CREATE_REINDEX_TEMP when cluster allocation is compatible', () => {
+        const res: ResponseType<'RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.right({});
+        const newState = model(
+          reindexCheckClusterRoutingAllocationState,
+          res
+        ) as CreateReindexTempState;
+
+        expect(newState.controlState).toBe('CREATE_REINDEX_TEMP');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+        // check that we are correctly "forwarding" the state
+        expect(newState.tempIndex).toEqual(reindexCheckClusterRoutingAllocationState.tempIndex);
+        expect(newState.tempIndexAlias).toEqual(
+          reindexCheckClusterRoutingAllocationState.tempIndexAlias
+        );
+        expect(newState.tempIndexMappings).toEqual(
+          reindexCheckClusterRoutingAllocationState.tempIndexMappings
+        );
+        expect(newState.esCapabilities).toEqual(
+          reindexCheckClusterRoutingAllocationState.esCapabilities
+        );
       });
     });
 
@@ -1209,14 +1324,14 @@ describe('migrations v2 model', () => {
 
         describe('if the migrator is involved in a relocation', () => {
           // no need to attempt to update the mappings, we are going to reindex
-          test('WAIT_FOR_YELLOW_SOURCE -> CHECK_CLUSTER_ROUTING_ALLOCATION', () => {
+          test('WAIT_FOR_YELLOW_SOURCE -> REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION', () => {
             const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
             const newState = model(
               { ...waitForYellowSourceState, mustRelocateDocuments: true },
               res
             );
 
-            expect(newState.controlState).toEqual('CHECK_CLUSTER_ROUTING_ALLOCATION');
+            expect(newState.controlState).toEqual('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION');
           });
         });
       });
@@ -1291,12 +1406,12 @@ describe('migrations v2 model', () => {
       });
 
       describe('if action fails', () => {
-        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CHECK_CLUSTER_ROUTING_ALLOCATION if mappings changes are incompatible', () => {
+        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION if mappings changes are incompatible', () => {
           const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.left({
             type: 'incompatible_mapping_exception',
           });
           const newState = model(updateSourceMappingsPropertiesState, res);
-          expect(newState.controlState).toEqual('CHECK_CLUSTER_ROUTING_ALLOCATION');
+          expect(newState.controlState).toEqual('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION');
         });
 
         test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> FATAL', () => {
@@ -1341,9 +1456,18 @@ describe('migrations v2 model', () => {
             unknownDocs: [],
             errorsByType: {},
           });
-          const newState = model(cleanupUnknownAndExcluded, res) as PrepareCompatibleMigration;
+          const newState = model(cleanupUnknownAndExcluded, res);
 
           expect(newState.controlState).toEqual('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK');
+        });
+
+        test('CLEANUP_UNKNOWN_AND_EXCLUDED -> PREPARE_COMPATIBLE_MIGRATION', () => {
+          const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED'> = Either.right({
+            type: 'cleanup_not_needed' as const,
+          });
+          const newState = model(cleanupUnknownAndExcluded, res);
+
+          expect(newState.controlState).toEqual('PREPARE_COMPATIBLE_MIGRATION');
         });
       });
 
@@ -1469,27 +1593,27 @@ describe('migrations v2 model', () => {
       });
     });
 
-    describe('CHECK_CLUSTER_ROUTING_ALLOCATION', () => {
-      const checkClusterRoutingAllocationState: CheckClusterRoutingAllocationState = {
+    describe('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION', () => {
+      const checkClusterRoutingAllocationState: ReindexCheckClusterRoutingAllocationState = {
         ...postInitState,
-        controlState: 'CHECK_CLUSTER_ROUTING_ALLOCATION',
+        controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
       };
 
-      test('CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_CLUSTER_ROUTING_ALLOCATION when cluster allocation is not compatible', () => {
-        const res: ResponseType<'CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.left({
+      test('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION when cluster allocation is not compatible', () => {
+        const res: ResponseType<'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.left({
           type: 'incompatible_cluster_routing_allocation',
         });
         const newState = model(checkClusterRoutingAllocationState, res);
 
-        expect(newState.controlState).toBe('CHECK_CLUSTER_ROUTING_ALLOCATION');
+        expect(newState.controlState).toBe('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
 
-      test('CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS when cluster allocation is compatible', () => {
-        const res: ResponseType<'CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.right({});
+      test('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS when cluster allocation is compatible', () => {
+        const res: ResponseType<'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.right({});
         const newState = model(checkClusterRoutingAllocationState, res);
 
         expect(newState.controlState).toBe('CHECK_UNKNOWN_DOCUMENTS');
@@ -2973,6 +3097,9 @@ describe('migrations v2 model', () => {
         expect(newState.updateTargetMappingsTaskId).toEqual('update target mappings task');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+        // make sure the updated types query is still in the new state since
+        // we might want to come back if the wait for task state fails
+        expect(newState.updatedTypesQuery).toEqual(updateTargetMappingsState.updatedTypesQuery);
       });
     });
 
@@ -2984,6 +3111,17 @@ describe('migrations v2 model', () => {
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
         updateTargetMappingsTaskId: 'update target mappings task',
+        updatedTypesQuery: Option.fromNullable({
+          bool: {
+            should: [
+              {
+                term: {
+                  type: 'type123',
+                },
+              },
+            ],
+          },
+        }),
       };
 
       test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META if response is right', () => {
@@ -3021,6 +3159,105 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK');
         expect(newState.retryCount).toEqual(2);
         expect(newState.retryDelay).toEqual(4000);
+      });
+
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES when there is an error that makes us want to retry the original task', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
+          message: 'Some error happened that makes us want to retry the original task',
+          type: 'task_completed_with_retriable_error',
+        });
+        const newState = model(
+          updateTargetMappingsWaitForTaskState,
+          res
+        ) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.updatedTypesQuery).toEqual(
+          updateTargetMappingsWaitForTaskState.updatedTypesQuery
+        );
+      });
+
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES updates correcly the retry number', () => {
+        const state = Object.assign({}, updateTargetMappingsWaitForTaskState, { retryCount: 3 });
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
+          message: 'Some error happened that makes us want to retry the original task',
+          type: 'task_completed_with_retriable_error',
+        });
+        const newState = model(state, res) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+        expect(newState.retryCount).toEqual(4);
+        expect(newState.updatedTypesQuery).toEqual(
+          updateTargetMappingsWaitForTaskState.updatedTypesQuery
+        );
+      });
+
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK updates retry attributes correctly', () => {
+        const initialRetryCount = 3;
+
+        // First, we are in UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK
+        const initialWaitState = Object.assign({}, updateTargetMappingsWaitForTaskState, {
+          retryCount: initialRetryCount,
+        });
+        expect(initialWaitState.retryCount).toBe(initialRetryCount);
+        expect(initialWaitState.skipRetryReset).toBeFalsy();
+
+        // Move to UPDATE_TARGET_MAPPINGS_PROPERTIES and retry it (+1 retry)
+        const retryingMappingsUpdate = model(
+          initialWaitState,
+          Either.left({
+            message: 'Some error happened that makes us want to retry the original task',
+            type: 'task_completed_with_retriable_error',
+          } as TaskCompletedWithRetriableError)
+        ) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(retryingMappingsUpdate.retryCount).toBe(initialRetryCount + 1);
+        expect(retryingMappingsUpdate.skipRetryReset).toBe(true);
+
+        // Retry UPDATE_TARGET_MAPPINGS_PROPERTIES again (+1 retry)
+        const retryingMappingsUpdateAgain = model(
+          retryingMappingsUpdate,
+          Either.left({
+            type: 'retryable_es_client_error',
+            message: 'random retryable error',
+          } as RetryableEsClientError)
+        ) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(retryingMappingsUpdateAgain.retryCount).toBe(initialRetryCount + 2);
+        expect(retryingMappingsUpdateAgain.skipRetryReset).toBe(true);
+
+        // Go again to the wait state, so retryCount should remain the same
+        const finalWaitStateBeforeCompletion = model(
+          retryingMappingsUpdateAgain,
+          Either.right({
+            taskId: 'update target mappings task',
+          }) as ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES'>
+        ) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(finalWaitStateBeforeCompletion.retryCount).toBe(initialRetryCount + 2);
+        expect(finalWaitStateBeforeCompletion.skipRetryReset).toBeFalsy();
+
+        // The wait state completes successfully, so retryCount should reset
+        const postUpdateState = model(
+          finalWaitStateBeforeCompletion,
+          Either.right(
+            'pickup_updated_mappings_succeeded'
+          ) as ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'>
+        ) as UpdateTargetMappingsMeta;
+        expect(postUpdateState.retryCount).toBe(0);
+        expect(postUpdateState.skipRetryReset).toBeFalsy();
+      });
+
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> FATAL if task_completed_with_retriable_error has no more retry attemps', () => {
+        const state = Object.assign({}, updateTargetMappingsWaitForTaskState, {
+          retryCount: 8,
+          retryAttempts: 8,
+        });
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
+          message: 'some_retryable_error_during_update',
+          type: 'task_completed_with_retriable_error',
+        });
+        const newState = model(state, res) as FatalState;
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"Unable to complete the UPDATE_TARGET_MAPPINGS_PROPERTIES step after 8 attempts, terminating. The last failure message was: some_retryable_error_during_update"`
+        );
       });
     });
 

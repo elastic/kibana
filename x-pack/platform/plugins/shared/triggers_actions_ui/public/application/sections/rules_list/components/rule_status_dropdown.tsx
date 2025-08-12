@@ -34,7 +34,8 @@ const SNOOZE_END_TIME_FORMAT = 'LL @ LT';
 type DropdownRuleRecord = Pick<
   Rule,
   'enabled' | 'muteAll' | 'isSnoozedUntil' | 'snoozeSchedule' | 'activeSnoozes'
->;
+> &
+  Partial<Pick<Rule, 'ruleTypeId'>>;
 
 export interface ComponentOpts {
   rule: DropdownRuleRecord;
@@ -46,6 +47,7 @@ export interface ComponentOpts {
   isEditable: boolean;
   direction?: 'column' | 'row';
   hideSnoozeOption?: boolean;
+  autoRecoverAlerts?: boolean;
 }
 
 export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
@@ -58,6 +60,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   isEditable,
   hideSnoozeOption = false,
   direction = 'column',
+  autoRecoverAlerts,
 }: ComponentOpts) => {
   const {
     notifications: { toasts },
@@ -140,11 +143,13 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       }
       if (enable) {
         await onEnable();
+      } else if (autoRecoverAlerts === false) {
+        onDisable(false);
       } else {
         onDisableModalOpen();
       }
     },
-    [rule.enabled, onEnable, onDisableModalOpen]
+    [rule.enabled, autoRecoverAlerts, onEnable, onDisableModalOpen, onDisable]
   );
 
   const onSnoozeRule = useCallback(
@@ -223,7 +228,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
         gutterSize={direction === 'row' ? 's' : 'xs'}
         responsive={false}
       >
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} data-test-subj={`ruleType_${rule.ruleTypeId}`}>
           {isEditable ? (
             <EuiPopover
               button={editableBadge}

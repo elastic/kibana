@@ -12,7 +12,7 @@ import { selectOverviewTrends } from './selectors';
 import { refreshOverviewTrends, trendStatsBatch } from './actions';
 import { fetchOverviewTrendStats as trendsApi } from './api';
 
-export const TRENDS_CHUNK_SIZE = 50;
+export const TRENDS_CHUNK_SIZE = 250;
 
 export function* fetchTrendEffect(
   action: ReturnType<typeof trendStatsBatch.get>

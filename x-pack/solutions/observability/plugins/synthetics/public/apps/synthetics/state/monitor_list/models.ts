@@ -7,6 +7,7 @@
 
 import { ErrorToastOptions } from '@kbn/core-notifications-browser';
 
+import { UseLogicalAndField } from '../../../../../common/constants';
 import type { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
 import {
   EncryptedSyntheticsMonitor,
@@ -25,6 +26,7 @@ export interface MonitorFilterState {
   locations?: string[];
   monitorQueryIds?: string[]; // Monitor Query IDs
   showFromAllSpaces?: boolean;
+  useLogicalAndFor?: UseLogicalAndField[];
 }
 
 export interface MonitorListPageState extends MonitorFilterState {

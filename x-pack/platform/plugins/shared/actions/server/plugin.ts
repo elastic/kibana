@@ -102,6 +102,7 @@ import { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_act
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 import { createSystemConnectors } from './create_system_actions';
 import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
+import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
 
 export interface PluginSetupContract {
   registerType<
@@ -250,6 +251,7 @@ export class ActionsPlugin
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
     const actionExecutor = new ActionExecutor({
       isESOCanEncrypt: this.isESOCanEncrypt,
+      connectorRateLimiter: new ConnectorRateLimiter({ config: this.actionsConfig.rateLimiter }),
     });
 
     // get executions count
@@ -558,7 +560,7 @@ export class ActionsPlugin
         getInternalSavedObjectsRepositoryWithoutAccessToActions,
         core.elasticsearch,
         encryptedSavedObjectsClient,
-        () => core.savedObjects.createInternalRepository(includedHiddenTypes)
+        () => this.getUnsecuredSavedObjectsClientWithFakeRequest(core.savedObjects)
       ),
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
@@ -635,6 +637,24 @@ export class ActionsPlugin
       includedHiddenTypes,
     });
 
+  // replace when https://github.com/elastic/kibana/issues/209413 is resolved
+  private getUnsecuredSavedObjectsClientWithFakeRequest = (
+    savedObjects: CoreStart['savedObjects']
+  ) => {
+    const fakeRequest = {
+      headers: {},
+      getBasePath: () => '',
+      path: '/',
+      route: { settings: {} },
+      url: { href: {} },
+      raw: { req: { url: '/' } },
+    } as unknown as KibanaRequest;
+    return savedObjects.getScopedClient(fakeRequest, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+      includedHiddenTypes,
+    });
+  };
+
   private instantiateAuthorization = (request: KibanaRequest) => {
     return new ActionsAuthorization({
       request,
@@ -665,7 +685,7 @@ export class ActionsPlugin
     getSavedObjectRepository: () => ISavedObjectsRepository,
     elasticsearch: ElasticsearchServiceStart,
     encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-    unsecuredSavedObjectsRepository: () => ISavedObjectsRepository
+    unsecuredSavedObjectsRepository: () => SavedObjectsClientContract
   ): () => UnsecuredServices {
     return () => {
       return {

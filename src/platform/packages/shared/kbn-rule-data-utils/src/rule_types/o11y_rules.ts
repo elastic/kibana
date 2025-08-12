@@ -43,6 +43,12 @@ export const SLO_BURN_RATE_RULE_TYPE_ID = 'slo.rules.burnRate';
 export const SLO_RULE_TYPE_IDS = [SLO_BURN_RATE_RULE_TYPE_ID];
 
 /**
+ * ESQL rule types
+ */
+export const STREAMS_ESQL_RULE_TYPE_ID = 'streams.rules.esql';
+export const STREAMS_RULE_TYPE_IDS = [STREAMS_ESQL_RULE_TYPE_ID];
+
+/**
  * Metrics rule types
  */
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';

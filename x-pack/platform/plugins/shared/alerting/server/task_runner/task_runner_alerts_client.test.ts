@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import type {
   RuleExecutorOptions,
@@ -128,7 +127,6 @@ jest.mock('../lib/alerting_event_logger/alerting_event_logger');
 jest.mock('../rules_client/lib/get_alert_from_raw');
 const mockGetAlertFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAlertFromRaw>;
 
-let fakeTimer: sinon.SinonFakeTimers;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const taskRunnerLogger = createTaskRunnerLogger({ logger, tags: ['1', 'test'] });
 
@@ -165,11 +163,12 @@ describe('Task Runner', () => {
     let mockedTaskInstance: ConcreteTaskInstance;
 
     beforeAll(() => {
-      fakeTimer = sinon.useFakeTimers();
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date(DATE_1970));
       mockedTaskInstance = mockTaskInstance();
     });
 
-    afterAll(() => fakeTimer.restore());
+    afterAll(() => jest.useRealTimers());
 
     const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
     const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
@@ -287,6 +286,15 @@ describe('Task Runner', () => {
         });
         logger.get.mockImplementation(() => logger);
         ruleType.executor.mockResolvedValue({ state: {} });
+        clusterClient.search.mockResolvedValue({
+          took: 10,
+          timed_out: false,
+          _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
+          hits: {
+            total: { relation: 'eq', value: 0 },
+            hits: [],
+          },
+        });
       });
 
       test('should not use legacy alerts client if alerts client created', async () => {

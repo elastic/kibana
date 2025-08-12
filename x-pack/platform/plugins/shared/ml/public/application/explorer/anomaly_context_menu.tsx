@@ -194,7 +194,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       };
 
       const state = {
-        input: embeddableInput,
+        serializedState: { rawState: embeddableInput, references: [] },
         type: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
       };
 
@@ -234,6 +234,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
             }
           >
             <EuiFieldNumber
+              isInvalid={!isMaxSeriesToPlotValid}
               data-test-subj="mlAnomalyChartsInitializerMaxSeries"
               id="selectMaxSeriesToPlot"
               name="selectMaxSeriesToPlot"

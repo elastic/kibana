@@ -106,6 +106,7 @@ export const UserFilterPanel: FC<{}> = () => {
             iconSide="right"
             data-test-subj="userFilterPopoverButton"
             onClick={() => setPopoverOpen(!isPopoverOpen)}
+            isSelected={isPopoverOpen}
             hasActiveFilters={selectedUsers.length > 0}
             numActiveFilters={selectedUsers.length}
             grow

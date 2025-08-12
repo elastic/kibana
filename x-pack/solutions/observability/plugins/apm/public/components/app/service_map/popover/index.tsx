@@ -15,24 +15,26 @@ import {
   EuiIcon,
   useEuiTheme,
 } from '@elastic/eui';
+import { enableDiagnosticMode } from '@kbn/observability-plugin/common';
 import type cytoscape from 'cytoscape';
 import type { CSSProperties, MouseEvent } from 'react';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 import type { Environment } from '../../../../../common/environment_rt';
-import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
 import { CytoscapeContext } from '../cytoscape';
 import { getAnimationOptions, popoverWidth } from '../cytoscape_options';
 import { DependencyContents } from './dependency_contents';
-import { EdgeContents } from './edge_contents';
 import { ExternalsListContents } from './externals_list_contents';
 import { ResourceContents } from './resource_contents';
 import { ServiceContents } from './service_contents';
+import { withDiagnoseButton } from './with_diagnose_button';
+import { DiagnosticFlyout } from '../diagnostic_tool/diagnostic_flyout';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 function getContentsComponent(
   selectedElementData: cytoscape.NodeDataDefinition | cytoscape.EdgeDataDefinition,
-  isTraceExplorerEnabled: boolean
+  isDiagnosticModeEnabled: boolean
 ) {
   if (
     selectedElementData.groupedConnections &&
@@ -41,14 +43,10 @@ function getContentsComponent(
     return ExternalsListContents;
   }
   if (selectedElementData[SERVICE_NAME]) {
-    return ServiceContents;
+    return isDiagnosticModeEnabled ? withDiagnoseButton(ServiceContents) : ServiceContents;
   }
   if (selectedElementData[SPAN_TYPE] === 'resource') {
     return ResourceContents;
-  }
-
-  if (isTraceExplorerEnabled && selectedElementData.sourceData && selectedElementData.targetData) {
-    return EdgeContents;
   }
 
   if (selectedElementData.label) {
@@ -65,6 +63,7 @@ interface ContentsProps {
   start: string;
   end: string;
   onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
+  onDiagnoseClick?: (state: boolean) => void;
 }
 
 interface PopoverProps {
@@ -80,17 +79,18 @@ export type { ContentsProps, PopoverProps };
 export function Popover({ focusedServiceName, environment, kuery, start, end }: PopoverProps) {
   const { euiTheme } = useEuiTheme();
   const cy = useContext(CytoscapeContext);
+  const { core } = useApmPluginContext();
   const [selectedElement, setSelectedElement] = useState<
     cytoscape.NodeSingular | cytoscape.EdgeSingular | undefined
   >(undefined);
+  const isDiagnosticModeEnabled = core.uiSettings.get(enableDiagnosticMode);
+  const [isDiagnosticFlyoutOpen, setIsDiagnosticFlyoutOpen] = useState(false);
   const deselect = useCallback(() => {
     if (cy) {
       cy.elements().unselect();
     }
     setSelectedElement(undefined);
   }, [cy, setSelectedElement]);
-
-  const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
 
   const renderedHeight = selectedElement?.renderedHeight() ?? 0;
   const renderedWidth = selectedElement?.renderedWidth() ?? 0;
@@ -113,6 +113,7 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
     position: 'absolute',
     transform: `translate(${x}px, ${translateY}px)`,
   };
+
   const selectedElementData = selectedElement?.data() ?? {};
   const popoverRef = useRef<EuiPopover>(null);
   const selectedElementId = selectedElementData.id;
@@ -128,10 +129,6 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
       cy.on('unselect', 'node', deselect);
       cy.on('viewport', deselect);
       cy.on('drag', 'node', deselect);
-      if (isTraceExplorerEnabled) {
-        cy.on('select', 'edge', selectHandler);
-        cy.on('unselect', 'edge', deselect);
-      }
     }
 
     return () => {
@@ -144,7 +141,7 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
         cy.removeListener('unselect', 'edge', deselect);
       }
     };
-  }, [cy, deselect, isTraceExplorerEnabled]);
+  }, [cy, deselect]);
 
   // Handle positioning of popover. This makes it so the popover positions
   // itself correctly and the arrows are always pointing to where they should.
@@ -173,49 +170,64 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
     ? centerSelectedNode
     : (_event: MouseEvent<HTMLAnchorElement>) => deselect();
 
-  const ContentsComponent = getContentsComponent(selectedElementData, isTraceExplorerEnabled);
+  const ContentsComponent = getContentsComponent(selectedElementData, isDiagnosticModeEnabled);
+
+  // Handler to open the diagnostic flyout
+  const handleDiagnoseClick = () => setIsDiagnosticFlyoutOpen(true);
 
   const isOpen = !!selectedElement && !!ContentsComponent;
 
   return (
-    <EuiPopover
-      anchorPosition={'upCenter'}
-      button={trigger}
-      closePopover={() => {}}
-      isOpen={isOpen}
-      ref={popoverRef}
-      style={popoverStyle}
-    >
-      <EuiFlexGroup direction="column" gutterSize="s" style={{ minWidth: popoverWidth }}>
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h3 style={{ wordBreak: 'break-all' }}>
-              {selectedElementData.label ?? selectedElementId}
-              {kuery && (
-                <EuiToolTip
-                  position="bottom"
-                  content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
-                    defaultMessage: 'The KQL filter is not applied in the displayed stats.',
-                  })}
-                >
-                  <EuiIcon tabIndex={0} type="iInCircle" />
-                </EuiToolTip>
-              )}
-            </h3>
-          </EuiTitle>
-          <EuiHorizontalRule margin="xs" />
-        </EuiFlexItem>
-        {ContentsComponent && (
-          <ContentsComponent
-            onFocusClick={onFocusClick}
-            elementData={selectedElementData}
-            environment={environment}
-            kuery={kuery}
-            start={start}
-            end={end}
-          />
-        )}
-      </EuiFlexGroup>
-    </EuiPopover>
+    <div>
+      <EuiPopover
+        anchorPosition={'upCenter'}
+        button={trigger}
+        closePopover={() => {}}
+        isOpen={isOpen}
+        ref={popoverRef}
+        style={popoverStyle}
+        zIndex={1000}
+      >
+        <EuiFlexGroup direction="column" gutterSize="s" style={{ minWidth: popoverWidth }}>
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h3 style={{ wordBreak: 'break-all' }}>
+                {selectedElementData.label ?? selectedElementId}
+                {kuery && (
+                  <EuiToolTip
+                    position="bottom"
+                    content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
+                      defaultMessage: 'The KQL filter is not applied in the displayed stats.',
+                    })}
+                  >
+                    <EuiIcon tabIndex={0} type="info" />
+                  </EuiToolTip>
+                )}
+              </h3>
+            </EuiTitle>
+            <EuiHorizontalRule margin="xs" />
+          </EuiFlexItem>
+          {ContentsComponent && (
+            <ContentsComponent
+              onFocusClick={onFocusClick}
+              elementData={selectedElementData}
+              environment={environment}
+              kuery={kuery}
+              start={start}
+              end={end}
+              showDiagnoseButton={isDiagnosticModeEnabled}
+              onDiagnoseClick={handleDiagnoseClick}
+            />
+          )}
+        </EuiFlexGroup>
+      </EuiPopover>
+      {selectedElementData.id && (
+        <DiagnosticFlyout
+          selectedNode={selectedElementData}
+          isOpen={isDiagnosticFlyoutOpen}
+          onClose={() => setIsDiagnosticFlyoutOpen(false)}
+        />
+      )}
+    </div>
   );
 }

@@ -18,6 +18,7 @@ export const ConfigSchema = schema.object({
   defaultModel: schema.string({ defaultValue: DEFAULT_GEMINI_MODEL }),
   gcpRegion: schema.string(),
   gcpProjectID: schema.string(),
+  contextWindowLength: schema.maybe(schema.number({})),
 });
 
 export const SecretsSchema = schema.object({
@@ -65,6 +66,7 @@ export const RunActionResponseSchema = schema.object(
 export const RunActionRawResponseSchema = schema.any();
 
 export const InvokeAIActionParamsSchema = schema.object({
+  maxOutputTokens: schema.maybe(schema.number()),
   messages: schema.any(),
   systemInstruction: schema.maybe(schema.string()),
   model: schema.maybe(schema.string()),
@@ -83,6 +85,7 @@ export const InvokeAIActionParamsSchema = schema.object({
 });
 
 export const InvokeAIRawActionParamsSchema = schema.object({
+  maxOutputTokens: schema.maybe(schema.number()),
   messages: schema.any(),
   systemInstruction: schema.maybe(schema.string()),
   model: schema.maybe(schema.string()),

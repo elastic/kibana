@@ -33,7 +33,7 @@ const nodes: NodeViewModel[] = [
     label: 'Node 2',
     color: 'primary',
     shape: 'hexagon',
-    icon: 'questionInCircle',
+    icon: 'question',
   },
 ];
 
@@ -78,7 +78,7 @@ const App: React.FC = () => {
       label: 'Node 2',
       color: 'primary',
       shape: 'hexagon',
-      icon: 'questionInCircle',
+      icon: 'question',
     },
   ];
 

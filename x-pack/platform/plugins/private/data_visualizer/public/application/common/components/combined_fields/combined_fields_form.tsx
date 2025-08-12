@@ -122,6 +122,12 @@ export class CombinedFieldsForm extends Component<Props, State> {
 
   parsePipeline() {
     try {
+      if (this.props.pipelineString === '') {
+        return {
+          description: '',
+          processors: [],
+        };
+      }
       return JSON.parse(this.props.pipelineString);
     } catch (error) {
       throw new Error(

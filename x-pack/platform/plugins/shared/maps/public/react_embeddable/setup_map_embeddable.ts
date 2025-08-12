@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { MapAttributes } from '../../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { untilPluginStartServicesReady } from '../kibana_services';
+import { MapSerializedState } from './types';
 
 export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
   embeddableSetup.registerReactEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, async () => {
@@ -23,11 +24,24 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
   });
 
   embeddableSetup.registerAddFromLibraryType<MapAttributes>({
-    onAdd: (container, savedObject) => {
-      container.addNewPanel({
-        panelType: MAP_SAVED_OBJECT_TYPE,
-        initialState: { savedObjectId: savedObject.id },
-      });
+    onAdd: async (container, savedObject) => {
+      const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
+      container.addNewPanel<MapSerializedState>(
+        {
+          panelType: MAP_SAVED_OBJECT_TYPE,
+          serializedState: {
+            rawState: {},
+            references: [
+              {
+                name: SAVED_OBJECT_REF_NAME,
+                type: MAP_SAVED_OBJECT_TYPE,
+                id: savedObject.id,
+              },
+            ],
+          },
+        },
+        true
+      );
     },
     savedObjectType: MAP_SAVED_OBJECT_TYPE,
     savedObjectName: i18n.translate('xpack.maps.mapSavedObjectLabel', {

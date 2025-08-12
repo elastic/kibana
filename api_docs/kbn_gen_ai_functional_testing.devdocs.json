@@ -128,7 +128,7 @@
             "label": "secrets",
             "description": [],
             "signature": [
-              "{ [x: string]: unknown; }"
+              "Record<string, unknown> | undefined"
             ],
             "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts",
             "deprecated": false,

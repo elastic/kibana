@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { InferenceClient } from '@kbn/inference-plugin/server';
+import type {
+  DocumentAnalysis,
+  FieldPatternResultWithChanges,
+  TruncatedDocumentAnalysis,
+} from '@kbn/ai-tools';
+import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
+import { dateRangeQuery, kqlQuery } from '@kbn/es-query';
+import { InferenceClient } from '@kbn/inference-common';
 import { Logger } from '@kbn/logging';
 import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
-import {
-  DocumentAnalysis,
-  TruncatedDocumentAnalysis,
-} from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
-import { sortAndTruncateAnalyzedFields } from '@kbn/observability-utils-common/llm/log_analysis/sort_and_truncate_analyzed_fields';
-import { analyzeDocuments } from '@kbn/observability-utils-server/entities/analyze_documents';
-import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { kqlQuery } from '@kbn/observability-utils-server/es/queries/kql_query';
-import { rangeQuery } from '@kbn/observability-utils-server/es/queries/range_query';
 import { chunk, isEmpty, isEqual } from 'lodash';
 import pLimit from 'p-limit';
 import {
@@ -314,7 +312,7 @@ export async function analyzeFetchedRelatedEntities({
       index,
       index_filter: {
         bool: {
-          filter: [...rangeQuery(start, end)],
+          filter: [...dateRangeQuery(start, end)],
         },
       },
     });
@@ -330,7 +328,7 @@ export async function analyzeFetchedRelatedEntities({
         index,
         query: {
           bool: {
-            must: [...rangeQuery(start, end), ...kqlQuery(excludeQuery)],
+            must: [...dateRangeQuery(start, end), ...kqlQuery(excludeQuery)],
             should: [
               {
                 multi_match: {
@@ -379,12 +377,12 @@ export async function analyzeFetchedRelatedEntities({
         return limiter(async () => {
           const groupValue = hit.fields![groupingField]?.[0] as string;
 
-          const analysisForGroupingField = await analyzeDocuments({
-            esClient,
+          const analysisForGroupingField = await describeDataset({
+            esClient: esClient.client,
             start,
             end,
             index,
-            kuery: getEntityKuery({
+            kql: getEntityKuery({
               [groupingField]: groupValue,
             }),
           });

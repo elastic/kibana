@@ -68,8 +68,8 @@ export const MaintenanceWindowsPage = React.memo(() => {
   }, [navigateToCreateMaintenanceWindow]);
 
   const refreshData = useCallback(() => refetch(), [refetch]);
-  const showWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID].show;
-  const writeWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID].save;
+  const showWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID]?.show;
+  const writeWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID]?.save;
   const isNotFiltered = search === '' && selectedStatus.length === 0;
 
   const showEmptyPrompt =

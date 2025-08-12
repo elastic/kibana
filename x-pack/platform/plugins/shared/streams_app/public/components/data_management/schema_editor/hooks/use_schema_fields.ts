@@ -6,11 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  NamedFieldDefinitionConfig,
-  WiredStreamGetResponse,
-  getAdvancedParameters,
-} from '@kbn/streams-schema';
+import { NamedFieldDefinitionConfig, Streams, getAdvancedParameters } from '@kbn/streams-schema';
 import { isEqual, omit } from 'lodash';
 import { useMemo, useCallback } from 'react';
 import { useAbortController } from '@kbn/react-hooks';
@@ -24,7 +20,7 @@ export const useSchemaFields = ({
   definition,
   refreshDefinition,
 }: {
-  definition: WiredStreamGetResponse;
+  definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
 }) => {
   const {
@@ -66,6 +62,7 @@ export const useSchemaFields = ({
         format: 'format' in field ? field.format : undefined,
         additionalParameters: getAdvancedParameters(name, field),
         parent: field.from,
+        alias_for: field.alias_for,
         status: 'inherited',
       })
     );

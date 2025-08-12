@@ -120,10 +120,9 @@ export const testLeadingControlColumn: EuiDataGridControlColumn = {
 };
 
 export const mockRowAdditionalLeadingControls = ['visBarVerticalStacked', 'heart', 'inspect'].map(
-  (iconType, index): RowControlColumn => ({
-    id: `exampleControl_${iconType}`,
-    headerAriaLabel: `Example Row Control ${iconType}`,
-    renderControl: (Control, rowProps) => {
+  (iconType): RowControlColumn => ({
+    id: `exampleRowControl-${iconType}`,
+    render: (Control, rowProps) => {
       return (
         <Control
           data-test-subj={`exampleRowControl-${iconType}`}

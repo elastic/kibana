@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment-timezone';
-import _, { cloneDeep } from 'lodash';
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Assign } from '@kbn/utility-types';
 import { isRangeFilter, TimeRange, RangeFilter } from '@kbn/es-query';
@@ -472,8 +472,8 @@ export class AggConfigs {
     if (!this.hasTimeShifts()) {
       return response;
     }
-    const transformedRawResponse = cloneDeep(response.rawResponse);
-    if (!transformedRawResponse.aggregations) {
+    const transformedRawResponse = structuredClone(response.rawResponse);
+    if (!response.rawResponse.aggregations) {
       transformedRawResponse.aggregations = {
         doc_count: response.rawResponse.hits?.total as estypes.AggregationsAggregate,
       };

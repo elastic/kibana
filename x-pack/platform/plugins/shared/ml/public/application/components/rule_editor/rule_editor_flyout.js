@@ -509,11 +509,7 @@ class RuleEditorFlyoutUI extends Component {
 
     if (ruleIndex === -1) {
       flyout = (
-        <EuiFlyout
-          className="ml-rule-editor-flyout"
-          onClose={this.closeFlyout}
-          aria-labelledby="flyoutTitle"
-        >
+        <EuiFlyout onClose={this.closeFlyout} aria-labelledby="flyoutTitle">
           <EuiFlyoutHeader hasBorder={true}>
             <EuiTitle size="m">
               <h1 id="flyoutTitle">
@@ -571,7 +567,6 @@ class RuleEditorFlyoutUI extends Component {
       flyout = (
         <EuiFlyout
           data-test-subj="mlRuleEditorFlyout"
-          className="ml-rule-editor-flyout"
           onClose={this.closeFlyout}
           aria-labelledby="flyoutTitle"
         >
@@ -648,7 +643,6 @@ class RuleEditorFlyoutUI extends Component {
             {conditionSupported === true ? (
               <EuiCheckbox
                 id="enable_conditions_checkbox"
-                className="scope-enable-checkbox"
                 label={conditionsText}
                 checked={isConditionsEnabled}
                 onChange={this.onConditionsEnabledChange}
@@ -663,7 +657,7 @@ class RuleEditorFlyoutUI extends Component {
                     values={{ functionName: anomaly.source.function }}
                   />
                 }
-                iconType="iInCircle"
+                iconType="info"
               />
             )}
             <EuiSpacer size="s" />
@@ -694,7 +688,7 @@ class RuleEditorFlyoutUI extends Component {
                 />
               }
               color="warning"
-              iconType="help"
+              iconType="question"
             >
               <p>
                 <FormattedMessage

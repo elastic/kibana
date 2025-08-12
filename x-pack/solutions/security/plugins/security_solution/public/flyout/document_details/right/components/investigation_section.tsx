@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { ExpandableSection } from './expandable_section';
 import { HighlightedFields } from './highlighted_fields';
@@ -21,13 +22,17 @@ const KEY = 'investigation';
 
 /**
  * Second section of the overview tab in details flyout.
- * It contains investigation guide (alerts only) and highlighted fields
+ * It contains investigation guide (alerts only) and highlighted fields.
  */
 export const InvestigationSection = memo(() => {
-  const { getFieldsData } = useDocumentDetailsContext();
+  const { dataFormattedForFieldBrowser, getFieldsData, investigationFields, scopeId } =
+    useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
+  const ancestorIndex = getField(getFieldsData('signal.ancestors.index')) ?? '';
 
   const expanded = useExpandSection({ title: KEY, defaultValue: true });
+
+  const editHighlightedFieldsEnabled = useIsExperimentalFeatureEnabled('editHighlightedFields');
 
   return (
     <ExpandableSection
@@ -48,7 +53,14 @@ export const InvestigationSection = memo(() => {
           <EuiSpacer size="m" />
         </>
       )}
-      <HighlightedFields />
+      <HighlightedFields
+        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
+        investigationFields={investigationFields}
+        scopeId={scopeId}
+        showCellActions={true}
+        showEditButton={editHighlightedFieldsEnabled}
+        ancestorsIndexName={ancestorIndex}
+      />
     </ExpandableSection>
   );
 });

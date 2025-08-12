@@ -64,6 +64,7 @@ function mockRuleType(overwrites: Partial<RuleType> = {}): RuleType {
     minimumLicenseRequired: 'basic',
     enabledInLicense: true,
     category: 'my-category',
+    isExportable: true,
     ...overwrites,
   };
 }

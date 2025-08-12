@@ -50,7 +50,7 @@ describe('updateIndices', () => {
     });
     expect(esClient.indices.putMapping).toHaveBeenCalledWith({
       index: indexName,
-      body: simulateIndexTemplateResponse.template.mappings,
+      ...simulateIndexTemplateResponse.template.mappings,
     });
   });
 
@@ -158,7 +158,7 @@ describe('createOrUpdateIndex', () => {
     });
     expect(esClient.indices.putMapping).toHaveBeenCalledWith({
       index: name,
-      body: simulateIndexTemplateResponse.template.mappings,
+      ...simulateIndexTemplateResponse.template.mappings,
     });
   });
 });

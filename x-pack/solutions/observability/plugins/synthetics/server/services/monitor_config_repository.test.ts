@@ -7,12 +7,21 @@
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { MonitorConfigRepository } from './monitor_config_repository';
-import { syntheticsMonitorType } from '../../common/types/saved_objects';
 import { ConfigKey, SyntheticsMonitor } from '../../common/runtime_types';
 import * as utils from '../synthetics_service/utils';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import {
+  SavedObjectsClientContract,
+  type SavedObjectsFindOptions,
+} from '@kbn/core-saved-objects-api-server';
+import {
+  legacyMonitorAttributes,
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorAttributes,
+  syntheticsMonitorSavedObjectType,
+} from '../../common/types/saved_objects';
+import { MONITOR_SEARCH_FIELDS } from '../routes/common';
 
 // Mock the utils functions
 jest.mock('../synthetics_service/utils', () => ({
@@ -47,25 +56,33 @@ describe('MonitorConfigRepository', () => {
       const mockMonitor = {
         id,
         attributes: { name: 'Test Monitor' },
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         references: [],
       };
 
-      soClient.get.mockResolvedValue(mockMonitor);
+      soClient.bulkGet.mockResolvedValue({ saved_objects: [mockMonitor] });
 
       const result = await repository.get(id);
 
-      expect(soClient.get).toHaveBeenCalledWith(syntheticsMonitorType, id);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { type: 'synthetics-monitor-multi-space', id },
+        {
+          type: 'synthetics-monitor',
+          id,
+        },
+      ]);
       expect(result).toBe(mockMonitor);
     });
 
     it('should propagate errors', async () => {
       const id = 'test-id';
-      const error = new Error('Not found');
+      const error = new Error(`Failed to get monitor with id ${id}: Not found`);
 
-      soClient.get.mockRejectedValue(error);
+      soClient.bulkGet.mockRejectedValue(error);
 
-      await expect(repository.get(id)).rejects.toThrow(error);
+      await expect(repository.get(id)).rejects.toThrow(
+        /Failed to get monitor with id test-id: Not found/
+      );
     });
   });
 
@@ -76,7 +93,7 @@ describe('MonitorConfigRepository', () => {
       const mockDecryptedMonitor = {
         id,
         attributes: { name: 'Test Monitor', secrets: 'decrypted' },
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         references: [],
       };
 
@@ -85,18 +102,20 @@ describe('MonitorConfigRepository', () => {
       );
       (utils.normalizeSecrets as jest.Mock).mockReturnValue({
         ...mockDecryptedMonitor,
-        normalizedSecrets: true,
       });
 
       const result = await repository.getDecrypted(id, spaceId);
 
       expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
-        syntheticsMonitorType,
+        syntheticsMonitorSavedObjectType,
         id,
         { namespace: spaceId }
       );
       expect(utils.normalizeSecrets).toHaveBeenCalledWith(mockDecryptedMonitor);
-      expect(result).toEqual({ ...mockDecryptedMonitor, normalizedSecrets: true });
+      expect(result).toEqual({
+        decryptedMonitor: mockDecryptedMonitor,
+        normalizedMonitor: mockDecryptedMonitor,
+      });
     });
   });
 
@@ -111,7 +130,7 @@ describe('MonitorConfigRepository', () => {
       const mockCreatedMonitor = {
         id,
         attributes: { name: 'Test Monitor' },
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         references: [],
       };
       soClient.create.mockResolvedValue(mockCreatedMonitor);
@@ -119,6 +138,7 @@ describe('MonitorConfigRepository', () => {
       const result = await repository.create({
         id,
         normalizedMonitor,
+        spaceId: 'default',
       });
 
       expect(utils.formatSecrets).toHaveBeenCalledWith({
@@ -126,18 +146,20 @@ describe('MonitorConfigRepository', () => {
         [ConfigKey.MONITOR_QUERY_ID]: 'custom-id',
         [ConfigKey.CONFIG_ID]: id,
         revision: 1,
+        spaces: ['default'],
       });
 
       expect(soClient.create).toHaveBeenCalledWith(
-        syntheticsMonitorType,
+        syntheticsMonitorSavedObjectType,
         {
           ...normalizedMonitor,
           [ConfigKey.MONITOR_QUERY_ID]: 'custom-id',
           [ConfigKey.CONFIG_ID]: id,
           revision: 1,
           formattedSecrets: true,
+          spaces: ['default'],
         },
-        { id, overwrite: true }
+        { id, overwrite: true, initialNamespaces: ['default'] }
       );
 
       expect(result).toBe(mockCreatedMonitor);
@@ -151,33 +173,36 @@ describe('MonitorConfigRepository', () => {
       const mockCreatedMonitor = {
         id: 'generated-id',
         attributes: { name: 'Test Monitor' },
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         references: [],
       };
       soClient.create.mockResolvedValue(mockCreatedMonitor);
 
       const result = await repository.create({
-        id: '',
+        id: 'test',
         normalizedMonitor,
+        spaceId: 'default',
       });
 
       expect(utils.formatSecrets).toHaveBeenCalledWith({
         ...normalizedMonitor,
-        [ConfigKey.MONITOR_QUERY_ID]: '',
-        [ConfigKey.CONFIG_ID]: '',
+        [ConfigKey.MONITOR_QUERY_ID]: 'test',
+        [ConfigKey.CONFIG_ID]: 'test',
         revision: 1,
+        spaces: ['default'],
       });
 
       expect(soClient.create).toHaveBeenCalledWith(
-        syntheticsMonitorType,
+        syntheticsMonitorSavedObjectType,
         {
           ...normalizedMonitor,
-          [ConfigKey.MONITOR_QUERY_ID]: '',
-          [ConfigKey.CONFIG_ID]: '',
+          [ConfigKey.MONITOR_QUERY_ID]: 'test',
+          [ConfigKey.CONFIG_ID]: 'test',
           revision: 1,
           formattedSecrets: true,
+          spaces: ['default'],
         },
-        undefined
+        { id: 'test', overwrite: true, initialNamespaces: ['default'] }
       );
 
       expect(result).toBe(mockCreatedMonitor);
@@ -207,13 +232,13 @@ describe('MonitorConfigRepository', () => {
           {
             id: 'test-id-1',
             attributes: { name: 'Test Monitor 1' },
-            type: syntheticsMonitorType,
+            type: syntheticsMonitorSavedObjectType,
             references: [],
           },
           {
             id: 'test-id-2',
             attributes: { name: 'Test Monitor 2' },
-            type: syntheticsMonitorType,
+            type: syntheticsMonitorSavedObjectType,
             references: [],
           },
         ],
@@ -226,7 +251,7 @@ describe('MonitorConfigRepository', () => {
       expect(soClient.bulkCreate).toHaveBeenCalledWith([
         {
           id: 'test-id-1',
-          type: syntheticsMonitorType,
+          type: syntheticsMonitorSavedObjectType,
           attributes: {
             name: 'Test Monitor 1',
             [ConfigKey.CUSTOM_HEARTBEAT_ID]: 'custom-id-1',
@@ -238,7 +263,7 @@ describe('MonitorConfigRepository', () => {
         },
         {
           id: 'test-id-2',
-          type: syntheticsMonitorType,
+          type: syntheticsMonitorSavedObjectType,
           attributes: {
             name: 'Test Monitor 2',
             [ConfigKey.MONITOR_QUERY_ID]: 'test-id-2',
@@ -261,12 +286,14 @@ describe('MonitorConfigRepository', () => {
           attributes: {
             name: 'Updated Monitor 1',
           },
+          previousMonitor: { type: 'synthetics-monitor-multi-space' },
         },
         {
           id: 'test-id-2',
           attributes: {
             name: 'Updated Monitor 2',
           },
+          previousMonitor: { type: 'synthetics-monitor' },
         },
       ] as any;
 
@@ -275,13 +302,13 @@ describe('MonitorConfigRepository', () => {
           {
             id: 'test-id-1',
             attributes: { name: 'Updated Monitor 1' },
-            type: syntheticsMonitorType,
+            type: syntheticsMonitorSavedObjectType,
             references: [],
           },
           {
             id: 'test-id-2',
             attributes: { name: 'Updated Monitor 2' },
-            type: syntheticsMonitorType,
+            type: syntheticsMonitorSavedObjectType,
             references: [],
           },
         ],
@@ -293,18 +320,239 @@ describe('MonitorConfigRepository', () => {
 
       expect(soClient.bulkUpdate).toHaveBeenCalledWith([
         {
-          type: syntheticsMonitorType,
+          type: syntheticsMonitorSavedObjectType,
           id: 'test-id-1',
           attributes: { name: 'Updated Monitor 1' },
         },
         {
-          type: syntheticsMonitorType,
+          type: 'synthetics-monitor',
           id: 'test-id-2',
           attributes: { name: 'Updated Monitor 2' },
         },
       ]);
 
-      expect(result).toBe(mockBulkUpdateResult);
+      expect(result).toEqual(mockBulkUpdateResult);
+    });
+
+    it('should update multiple monitors in bulk when spaces do not change', async () => {
+      const monitors = [
+        {
+          id: 'test-id-1',
+          attributes: {
+            name: 'Updated Monitor 1',
+            spaces: ['default'],
+          },
+          soType: syntheticsMonitorSavedObjectType,
+          previousMonitor: {
+            id: 'test-id-1',
+            type: syntheticsMonitorSavedObjectType,
+            namespaces: ['default'],
+            attributes: {},
+            references: [],
+          },
+        },
+        {
+          id: 'test-id-2',
+          attributes: {
+            name: 'Updated Monitor 2',
+            spaces: ['default'],
+          },
+          soType: syntheticsMonitorSavedObjectType,
+          previousMonitor: {
+            id: 'test-id-2',
+            type: syntheticsMonitorSavedObjectType,
+            namespaces: ['default'],
+            attributes: {},
+            references: [],
+          },
+        },
+      ] as any;
+
+      const mockBulkUpdateResult = {
+        saved_objects: [
+          {
+            id: 'test-id-1',
+            attributes: { name: 'Updated Monitor 1' },
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+          {
+            id: 'test-id-2',
+            attributes: { name: 'Updated Monitor 2' },
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+        ],
+      };
+
+      soClient.bulkUpdate.mockResolvedValue(mockBulkUpdateResult);
+
+      const result = await repository.bulkUpdate({ monitors });
+
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          type: syntheticsMonitorSavedObjectType,
+          id: 'test-id-1',
+          attributes: { name: 'Updated Monitor 1', spaces: ['default'] },
+        },
+        {
+          type: syntheticsMonitorSavedObjectType,
+          id: 'test-id-2',
+          attributes: { name: 'Updated Monitor 2', spaces: ['default'] },
+        },
+      ]);
+
+      expect(result).toEqual({
+        saved_objects: mockBulkUpdateResult.saved_objects,
+      });
+    });
+
+    it('should delete legacy monitor and recreate in new type if spaces change', async () => {
+      const monitors = [
+        {
+          id: 'legacy-id',
+          attributes: {
+            name: 'Monitor With Changed Spaces',
+            spaces: ['space-2'],
+          },
+          soType: legacySyntheticsMonitorTypeSingle,
+          previousMonitor: {
+            id: 'legacy-id',
+            type: legacySyntheticsMonitorTypeSingle,
+            namespaces: ['space-1'],
+            attributes: {},
+            references: [],
+          },
+        },
+      ] as any;
+
+      const mockBulkCreateResult = {
+        saved_objects: [
+          {
+            id: 'legacy-id',
+            attributes: { name: 'Monitor With Changed Spaces', spaces: ['space-2'] },
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+        ],
+      };
+      soClient.bulkDelete.mockResolvedValue({} as any);
+      soClient.bulkCreate.mockResolvedValue(mockBulkCreateResult);
+
+      const result = await repository.bulkUpdate({ monitors });
+
+      expect(soClient.bulkDelete).toHaveBeenCalledWith(
+        [{ id: 'legacy-id', type: legacySyntheticsMonitorTypeSingle }],
+        { force: true }
+      );
+      expect(soClient.bulkCreate).toHaveBeenCalledWith([
+        {
+          id: 'legacy-id',
+          type: syntheticsMonitorSavedObjectType,
+          attributes: { name: 'Monitor With Changed Spaces', spaces: ['space-2'] },
+          initialNamespaces: ['space-2'],
+        },
+      ]);
+      expect(result).toEqual({
+        saved_objects: mockBulkCreateResult.saved_objects,
+      });
+    });
+
+    it('should handle mixed updates and recreations', async () => {
+      const monitors = [
+        {
+          id: 'legacy-id',
+          attributes: {
+            name: 'Monitor With Changed Spaces',
+            spaces: ['space-2'],
+          },
+          soType: legacySyntheticsMonitorTypeSingle,
+          previousMonitor: {
+            id: 'legacy-id',
+            type: legacySyntheticsMonitorTypeSingle,
+            namespaces: ['space-1'],
+            attributes: {},
+            references: [],
+          },
+        },
+        {
+          id: 'test-id-2',
+          attributes: {
+            name: 'Updated Monitor 2',
+            spaces: ['default'],
+          },
+          soType: syntheticsMonitorSavedObjectType,
+          previousMonitor: {
+            id: 'test-id-2',
+            type: syntheticsMonitorSavedObjectType,
+            namespaces: ['default'],
+            attributes: {},
+            references: [],
+          },
+        },
+      ] as any;
+
+      soClient.bulkDelete.mockResolvedValue({} as any);
+      const mockBulkCreateResult = {
+        saved_objects: [
+          {
+            id: 'legacy-id',
+            attributes: { name: 'Monitor With Changed Spaces', spaces: ['space-2'] },
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+        ],
+      };
+      soClient.bulkCreate.mockResolvedValue(mockBulkCreateResult);
+      const mockBulkUpdateResult = {
+        saved_objects: [
+          {
+            id: 'test-id-2',
+            attributes: { name: 'Updated Monitor 2', spaces: ['default'] },
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+        ],
+      };
+      soClient.bulkUpdate.mockResolvedValue(mockBulkUpdateResult);
+
+      const result = await repository.bulkUpdate({ monitors });
+
+      expect(soClient.bulkDelete).toHaveBeenCalledWith(
+        [{ id: 'legacy-id', type: legacySyntheticsMonitorTypeSingle }],
+        { force: true }
+      );
+      expect(soClient.bulkCreate).toHaveBeenCalledWith([
+        {
+          id: 'legacy-id',
+          type: syntheticsMonitorSavedObjectType,
+          attributes: { name: 'Monitor With Changed Spaces', spaces: ['space-2'] },
+          initialNamespaces: ['space-2'],
+        },
+      ]);
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          type: syntheticsMonitorSavedObjectType,
+          id: 'test-id-2',
+          attributes: { name: 'Updated Monitor 2', spaces: ['default'] },
+        },
+      ]);
+      expect(result).toEqual({
+        saved_objects: [
+          {
+            id: 'test-id-2',
+            attributes: { name: 'Updated Monitor 2', spaces: ['default'] },
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+          {
+            id: 'legacy-id',
+            attributes: { name: 'Monitor With Changed Spaces', spaces: ['space-2'] },
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+        ],
+      });
     });
   });
 
@@ -316,6 +564,7 @@ describe('MonitorConfigRepository', () => {
         perPage: 10,
         sortField: 'name',
         sortOrder: 'asc' as const,
+        filter: `${syntheticsMonitorAttributes}.enabled:true`,
       };
 
       const mockFindResult = {
@@ -323,13 +572,13 @@ describe('MonitorConfigRepository', () => {
           {
             id: 'test-id-1',
             attributes: { name: 'Test Monitor 1' },
-            type: syntheticsMonitorType,
+            type: syntheticsMonitorSavedObjectType,
             references: [],
           },
           {
             id: 'test-id-2',
             attributes: { name: 'Test Monitor 2' },
-            type: syntheticsMonitorType,
+            type: syntheticsMonitorSavedObjectType,
             references: [],
           },
         ],
@@ -338,16 +587,32 @@ describe('MonitorConfigRepository', () => {
         page: 1,
       } as any;
 
-      soClient.find.mockResolvedValue(mockFindResult);
+      soClient.find.mockImplementation((opts: SavedObjectsFindOptions) => {
+        if (opts.type !== syntheticsMonitorSavedObjectType) {
+          return {
+            saved_objects: [],
+            total: 0,
+            per_page: 0,
+            page: 1,
+          };
+        }
+        return mockFindResult;
+      });
 
       const result = await repository.find(options);
 
       expect(soClient.find).toHaveBeenCalledWith({
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         ...options,
+        perPage: 10000,
       });
 
-      expect(result).toBe(mockFindResult);
+      expect(soClient.find).toHaveBeenLastCalledWith({
+        type: legacySyntheticsMonitorTypeSingle,
+        ...{ ...options, filter: 'synthetics-monitor.attributes.enabled:true', perPage: 10000 },
+      });
+
+      expect(result).toStrictEqual(mockFindResult);
     });
 
     it('should use default perPage if not provided', async () => {
@@ -367,9 +632,10 @@ describe('MonitorConfigRepository', () => {
       await repository.find(options);
 
       expect(soClient.find).toHaveBeenCalledWith({
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         search: 'test',
-        perPage: 5000,
+        perPage: 10000,
+        page: 1,
       });
     });
   });
@@ -383,13 +649,13 @@ describe('MonitorConfigRepository', () => {
         {
           id: 'test-id-1',
           attributes: { name: 'Test Monitor 1', secrets: 'decrypted' },
-          type: syntheticsMonitorType,
+          type: syntheticsMonitorSavedObjectType,
           references: [],
         },
         {
           id: 'test-id-2',
           attributes: { name: 'Test Monitor 2', secrets: 'decrypted' },
-          type: syntheticsMonitorType,
+          type: syntheticsMonitorSavedObjectType,
           references: [],
         },
       ];
@@ -411,14 +677,14 @@ describe('MonitorConfigRepository', () => {
         encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser
       ).toHaveBeenCalledWith({
         filter,
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         perPage: 500,
         namespaces: [spaceId],
       });
 
       expect(pointInTimeFinderMock.find).toHaveBeenCalled();
       expect(pointInTimeFinderMock.close).toHaveBeenCalled();
-      expect(result).toEqual(mockDecryptedMonitors);
+      expect(result).toEqual([...mockDecryptedMonitors, ...mockDecryptedMonitors]);
     });
 
     it('should handle finder.close errors', async () => {
@@ -428,7 +694,7 @@ describe('MonitorConfigRepository', () => {
         {
           id: 'test-id-1',
           attributes: { name: 'Test Monitor 1', secrets: 'decrypted' },
-          type: syntheticsMonitorType,
+          type: syntheticsMonitorSavedObjectType,
           references: [],
         },
       ];
@@ -447,38 +713,32 @@ describe('MonitorConfigRepository', () => {
       const result = await repository.findDecryptedMonitors({ spaceId });
 
       expect(pointInTimeFinderMock.close).toHaveBeenCalled();
-      expect(result).toEqual(mockDecryptedMonitors);
+      expect(result).toEqual([...mockDecryptedMonitors, ...mockDecryptedMonitors]);
       // Should not throw an error when close fails
-    });
-  });
-
-  describe('delete', () => {
-    it('should delete a monitor by id', async () => {
-      const id = 'test-id';
-      const mockDeleteResult = { success: true };
-
-      soClient.delete.mockResolvedValue(mockDeleteResult);
-
-      const result = await repository.delete(id);
-
-      expect(soClient.delete).toHaveBeenCalledWith(syntheticsMonitorType, id);
-      expect(result).toBe(mockDeleteResult);
     });
   });
 
   describe('bulkDelete', () => {
     it('should delete multiple monitors by ids', async () => {
-      const ids = ['test-id-1', 'test-id-2'];
+      const ids = [
+        { id: 'test-id-1', type: syntheticsMonitorSavedObjectType },
+        { id: 'test-id-2', type: syntheticsMonitorSavedObjectType },
+      ];
       const mockBulkDeleteResult = { success: true } as any;
 
       soClient.bulkDelete.mockResolvedValue(mockBulkDeleteResult);
 
       const result = await repository.bulkDelete(ids);
 
-      expect(soClient.bulkDelete).toHaveBeenCalledWith([
-        { type: syntheticsMonitorType, id: 'test-id-1' },
-        { type: syntheticsMonitorType, id: 'test-id-2' },
-      ]);
+      expect(soClient.bulkDelete).toHaveBeenCalledWith(
+        [
+          { type: syntheticsMonitorSavedObjectType, id: 'test-id-1' },
+          { type: syntheticsMonitorSavedObjectType, id: 'test-id-2' },
+        ],
+        {
+          force: true,
+        }
+      );
 
       expect(result).toBe(mockBulkDeleteResult);
     });
@@ -513,7 +773,7 @@ describe('MonitorConfigRepository', () => {
       const result = await repository.getAll(options);
 
       expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith({
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         perPage: 5000,
         search: 'test',
         fields: ['name'],
@@ -524,7 +784,7 @@ describe('MonitorConfigRepository', () => {
         namespaces: ['*'],
       });
 
-      expect(result).toEqual(mockMonitors);
+      expect(result).toEqual([...mockMonitors, ...mockMonitors]);
     });
 
     it('should not include namespaces if showFromAllSpaces is false', async () => {
@@ -547,11 +807,12 @@ describe('MonitorConfigRepository', () => {
       await repository.getAll(options);
 
       expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith({
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         perPage: 5000,
         search: 'test',
         sortField: 'name.keyword',
         sortOrder: 'asc',
+        searchFields: MONITOR_SEARCH_FIELDS,
       });
     });
 
@@ -574,11 +835,12 @@ describe('MonitorConfigRepository', () => {
       await repository.getAll(options);
 
       expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith({
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         perPage: 5000,
         search: 'test',
         sortField: 'name.keyword',
         sortOrder: 'asc',
+        searchFields: MONITOR_SEARCH_FIELDS,
       });
     });
 
@@ -599,8 +861,98 @@ describe('MonitorConfigRepository', () => {
       const result = await repository.getAll(options);
 
       expect(pointInTimeFinderMock.close).toHaveBeenCalled();
-      expect(result).toEqual(mockMonitors);
+      expect(result).toEqual([...mockMonitors, ...mockMonitors]);
       // Should not throw an error when close fails
+    });
+  });
+
+  // Mock logger to spy on its methods
+  const mockLogger = {
+    error: jest.fn(),
+  };
+
+  describe('handleLegacyOptions', () => {
+    // Clear mock history before each test
+    beforeEach(() => {
+      mockLogger.error.mockClear();
+    });
+
+    // Restore any mocks after all tests are done
+    afterAll(() => {
+      jest.restoreAllMocks();
+    });
+
+    test('should convert legacy attributes to new attributes for synthetics-monitor type', () => {
+      const options = {
+        search: 'my-monitor',
+        search_fields: [`${legacyMonitorAttributes}.name`, 'status'],
+        sortField: 'name',
+        filter: `${legacyMonitorAttributes}.enabled:true`,
+      };
+      const type = syntheticsMonitorSavedObjectType;
+
+      const expectedOptions = {
+        filter: 'synthetics-monitor-multi-space.attributes.enabled:true',
+        search: 'my-monitor',
+        search_fields: ['synthetics-monitor-multi-space.attributes.name', 'status'],
+        sortField: 'name',
+      };
+
+      const result = repository.handleLegacyOptions(options, type);
+      expect(result).toEqual(expectedOptions);
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    test('should convert new attributes back to legacy for the legacy monitor type', () => {
+      const options = {
+        search_fields: [`${syntheticsMonitorAttributes}.name`, 'status'],
+        sortField: `${syntheticsMonitorAttributes}.name`,
+      };
+      const legacyType = legacySyntheticsMonitorTypeSingle;
+
+      const expectedOptions = {
+        search_fields: ['synthetics-monitor.attributes.name', 'status'],
+        sortField: 'synthetics-monitor.attributes.name',
+      };
+
+      const result = repository.handleLegacyOptions(options, legacyType);
+      expect(result).toEqual(expectedOptions);
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    test('should return options unchanged if no target attributes are found for a matching type', () => {
+      const options = {
+        search: 'a-monitor',
+        search_fields: ['status'],
+      };
+      const type = 'synthetics-monitor';
+
+      const result = repository.handleLegacyOptions(options, type);
+      expect(result).toEqual(options);
+    });
+
+    test('should handle an empty options object without errors', () => {
+      const options = {};
+      const type = 'synthetics-monitor';
+
+      const result = repository.handleLegacyOptions(options, type);
+      expect(result).toEqual({});
+    });
+
+    test('should handle options with null or undefined values', () => {
+      const options = {
+        search_fields: ['monitor.legacy.name', null],
+        sortField: undefined,
+      };
+      const type = 'synthetics-monitor';
+
+      const expectedOptions = {
+        search_fields: ['monitor.legacy.name', null],
+        sortField: undefined,
+      };
+
+      const result = repository.handleLegacyOptions(options, type);
+      expect(result).toEqual(expectedOptions);
     });
   });
 });

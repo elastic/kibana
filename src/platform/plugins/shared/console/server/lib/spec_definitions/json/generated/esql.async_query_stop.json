@@ -1,0 +1,22 @@
+{
+  "esql.async_query_stop": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "drop_null_columns": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_query/async/{id}/stop"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-async-query-stop",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

@@ -28,15 +28,15 @@ export const registerAlertStatusRoute = (
     .get({
       access: 'internal',
       path: ALERT_STATUS_ROUTE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            requiredPrivileges: ['securitySolution'],
-          },
-        },
         validate: {
           request: {
             query: schema.object({

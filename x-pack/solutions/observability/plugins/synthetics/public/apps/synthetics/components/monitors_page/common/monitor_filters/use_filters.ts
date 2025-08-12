@@ -8,6 +8,7 @@
 import { useMemo, useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { isLogicalAndField } from '../../../../../../../common/constants';
 import { MonitorFiltersResult } from '../../../../../../../common/runtime_types';
 import {
   MonitorFilterState,
@@ -59,6 +60,20 @@ export function useMonitorFiltersState() {
   }, []);
 
   const dispatch = useDispatch();
+  const { useLogicalAndFor } = urlParams;
+
+  useEffect(() => {
+    dispatch(
+      setOverviewPageStateAction({
+        useLogicalAndFor,
+      })
+    );
+    dispatch(
+      updateManagementPageStateAction({
+        useLogicalAndFor,
+      })
+    );
+  }, [dispatch, useLogicalAndFor]);
 
   const serializeFilterValue = useCallback(
     (field: FilterFieldWithQuery, selectedValues: string[] | undefined) => {
@@ -92,13 +107,29 @@ export function useMonitorFiltersState() {
   );
 
   const handleFilterChange: SyntheticsMonitorFilterChangeHandler = useCallback(
-    (field: SyntheticsMonitorFilterField, selectedValues: string[] | undefined) => {
-      // Update url to reflect the changed filter
-      updateUrlParams({
+    (
+      field: SyntheticsMonitorFilterField,
+      selectedValues: string[] | undefined,
+      isLogicalAND?: boolean
+    ) => {
+      const newUrlParams: Partial<Record<SyntheticsMonitorFilterField, string>> = {
         [field]: serializeFilterValue(field, selectedValues),
-      });
+      };
+
+      if (isLogicalAndField(field)) {
+        const currentUseLogicalAndFor = urlParams.useLogicalAndFor || [];
+        newUrlParams.useLogicalAndFor = serializeFilterValue(
+          'useLogicalAndFor',
+          // When all the values are deselected remove the useLogicalAndFor for the field
+          isLogicalAND && selectedValues?.length
+            ? [...currentUseLogicalAndFor, field]
+            : currentUseLogicalAndFor.filter((item: string) => item !== field)
+        );
+      }
+      // Update url to reflect the changed filter
+      updateUrlParams(newUrlParams);
     },
-    [serializeFilterValue, updateUrlParams]
+    [serializeFilterValue, updateUrlParams, urlParams.useLogicalAndFor]
   );
 
   const reduxState = useSelector(selectMonitorFiltersAndQueryState);

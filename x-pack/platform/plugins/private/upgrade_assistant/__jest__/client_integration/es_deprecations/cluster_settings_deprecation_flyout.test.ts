@@ -41,7 +41,10 @@ describe('Cluster settings deprecation flyout', () => {
 
     const { actions, component } = testBed;
     component.update();
-    await actions.table.clickDeprecationRowAt('clusterSetting', 0);
+    await actions.table.clickDeprecationRowAt({
+      deprecationType: 'clusterSetting',
+      index: 0,
+    });
   });
 
   test('renders a flyout with deprecation details', async () => {
@@ -81,7 +84,10 @@ describe('Cluster settings deprecation flyout', () => {
     );
 
     // Reopen the flyout
-    await actions.table.clickDeprecationRowAt('clusterSetting', 0);
+    await actions.table.clickDeprecationRowAt({
+      deprecationType: 'clusterSetting',
+      index: 0,
+    });
 
     // Verify prompt to remove setting no longer displays
     expect(find('removeSettingsPrompt').length).toEqual(0);
@@ -114,7 +120,10 @@ describe('Cluster settings deprecation flyout', () => {
     );
 
     // Reopen the flyout
-    await actions.table.clickDeprecationRowAt('clusterSetting', 0);
+    await actions.table.clickDeprecationRowAt({
+      deprecationType: 'clusterSetting',
+      index: 0,
+    });
 
     // Verify the flyout shows an error message
     expect(find('clusterSettingsDetails.deleteClusterSettingsError').text()).toContain(

@@ -119,7 +119,7 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
   };
 
   return (request, response, toolkit) => {
-    return toolkit.next({ headers: { ...additionalHeaders } });
+    return toolkit.next({ headers: additionalHeaders });
   };
 };
 
@@ -137,7 +137,7 @@ export const createDeprecationWarningHeaderPreResponseHandler = (
         kibanaVersion
       ),
     };
-    return toolkit.next({ headers: { ...additionalHeaders } });
+    return toolkit.next({ headers: additionalHeaders });
   };
 };
 

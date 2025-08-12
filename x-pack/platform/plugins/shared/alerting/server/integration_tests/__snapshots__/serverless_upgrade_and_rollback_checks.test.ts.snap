@@ -203,7 +203,7 @@ Object {
     "groupBy": Object {
       "flags": Object {
         "default": "all",
-        "description": "Indicates whether the aggregation is applied over all documents (\`all\`) or split into groups (\`top\`) using a grouping field (\`termField\`). If grouping is used, an alert will be created for each group when it exceeds the threshold; only the top groups (up to \`termSize\` number of groups) are checked.",
+        "description": "Indicates whether the aggregation is applied over all documents (\`all\`), grouped by row (\`row\`), or split into groups (\`top\`) using a grouping field (\`termField\`) where only the top groups (up to \`termSize\` number of groups) are checked. If grouping is used, an alert will be created for each group when it exceeds the threshold.",
         "error": [Function],
         "presence": "optional",
       },
@@ -5734,10 +5734,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -5752,6 +5754,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -5812,6 +5815,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -5865,10 +5869,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -6271,7 +6277,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -6401,10 +6406,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -6419,6 +6426,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -6479,6 +6487,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -6532,10 +6541,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -6938,7 +6949,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -7059,6 +7069,9 @@ Object {
                     "field": Object {
                       "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
                     },
+                    "negate": Object {
+                      "type": "boolean",
+                    },
                     "type": Object {
                       "const": "mapping",
                       "type": "string",
@@ -7131,10 +7144,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -7149,6 +7164,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -7209,6 +7225,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -7262,10 +7279,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -7668,7 +7687,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -7779,10 +7797,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -7797,6 +7817,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -7857,6 +7878,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -7910,10 +7932,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -8316,7 +8340,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -8385,7 +8408,8 @@ Object {
           "type": "array",
         },
         "historyWindowStart": Object {
-          "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+          "minLength": 1,
+          "type": "string",
         },
         "index": Object {
           "items": Object {
@@ -8482,10 +8506,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -8500,6 +8526,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -8560,6 +8587,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -8613,10 +8641,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -9019,7 +9049,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -9187,10 +9216,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -9205,6 +9236,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -9265,6 +9297,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -9318,10 +9351,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -9724,7 +9759,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -9892,10 +9926,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -9910,6 +9946,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -9970,6 +10007,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -10023,10 +10061,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -10429,7 +10469,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",

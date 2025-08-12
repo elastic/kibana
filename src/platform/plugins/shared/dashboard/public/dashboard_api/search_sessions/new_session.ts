@@ -8,7 +8,7 @@
  */
 
 import { COMPARE_ALL_OPTIONS, Filter, TimeRange, onlyDisabledFiltersChanged } from '@kbn/es-query';
-import { combineLatest, distinctUntilChanged, Observable, skip } from 'rxjs';
+import { combineLatest, distinctUntilChanged, Observable, skip, startWith } from 'rxjs';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiPublishesReload, apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { areTimesEqual } from '../unified_search_manager';
@@ -61,7 +61,7 @@ export function newSession$(api: unknown) {
   }
 
   if (apiPublishesReload(api)) {
-    observables.push(api.reload$);
+    observables.push(api.reload$.pipe(startWith(undefined)));
   }
 
   return combineLatest(observables).pipe(skip(1));

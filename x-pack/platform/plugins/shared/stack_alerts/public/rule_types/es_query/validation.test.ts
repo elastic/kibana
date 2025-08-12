@@ -398,6 +398,21 @@ describe('expression params validation', () => {
     );
   });
 
+  test('if esqlQuery groupBy property is top should return proper error message', () => {
+    const initialParams = {
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      esqlQuery: { esql: 'test' },
+      searchType: SearchType.esqlQuery,
+      timeField: '@timestamp',
+      groupBy: 'top',
+    } as EsQueryRuleParams<SearchType.esqlQuery>;
+    expect(validateExpression(initialParams).errors.groupBy.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.groupBy[0]).toBe('Group by is required.');
+  });
+
   test('if sourceFields property is an array but has more than 5 items, should return proper error message', () => {
     const sourceField = { label: 'test', searchPath: 'test' };
     const initialParams: EsQueryRuleParams<SearchType.esQuery> = {

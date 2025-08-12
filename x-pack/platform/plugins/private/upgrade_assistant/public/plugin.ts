@@ -36,6 +36,8 @@ export class UpgradeAssistantUIPlugin
         currentMajor: kibanaVersion.major,
         prevMajor: kibanaVersion.major - 1,
         nextMajor: kibanaVersion.major + 1,
+        currentMinor: kibanaVersion.minor,
+        currentPatch: kibanaVersion.patch,
       };
 
       const pluginName = i18n.translate('xpack.upgradeAssistant.appTitle', {
@@ -51,7 +53,7 @@ export class UpgradeAssistantUIPlugin
         title: pluginName,
         order: 1,
         async mount(params) {
-          const [coreStart, { data }] = await coreSetup.getStartServices();
+          const [coreStart, { data, reindexService }] = await coreSetup.getStartServices();
 
           const {
             chrome: { docTitle },
@@ -65,6 +67,7 @@ export class UpgradeAssistantUIPlugin
             plugins: {
               cloud,
               share,
+              reindexService,
             },
             services: {
               core: coreStart,

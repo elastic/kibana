@@ -10,6 +10,7 @@ import type { Meta, StoryFn } from '@storybook/react';
 import {
   DecorateWithKibanaContext,
   DecorateWithAssetDetailsStateContext,
+  DecorateWithTabSwitcherContext,
 } from '../../__stories__/decorator';
 import { Processes } from './processes';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
@@ -18,6 +19,7 @@ const stories: Meta = {
   title: 'infra/Asset Details View/Components/Processes',
   decorators: [
     decorateWithGlobalStorybookThemeProviders,
+    DecorateWithTabSwitcherContext('processes'),
     DecorateWithAssetDetailsStateContext,
     DecorateWithKibanaContext,
   ],

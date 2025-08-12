@@ -9,17 +9,7 @@ import type { Moment } from 'moment';
 import type { ESSearchResponse } from '@kbn/es-types';
 import type { SignalSource } from '../types';
 import type { GenericBulkCreateResponse } from '../factories/bulk_create_factory';
-import type { NewTermsFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
-
-export type RecentTermsAggResult = ESSearchResponse<
-  SignalSource,
-  { aggregations: ReturnType<typeof buildRecentTermsAgg> }
->;
-
-export type NewTermsAggResult = ESSearchResponse<
-  SignalSource,
-  { aggregations: ReturnType<typeof buildNewTermsAgg> }
->;
+import type { NewTermsAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 
 export type CompositeDocFetchAggResult = ESSearchResponse<
   SignalSource,
@@ -38,7 +28,7 @@ export type DocFetchAggResult = ESSearchResponse<
 
 export type CreateAlertsHook = (
   aggResult: CompositeDocFetchAggResult | DocFetchAggResult
-) => Promise<GenericBulkCreateResponse<NewTermsFieldsLatest>>;
+) => Promise<GenericBulkCreateResponse<NewTermsAlertLatest>>;
 
 const PAGE_SIZE = 10000;
 

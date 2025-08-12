@@ -23,17 +23,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.createIndexPattern('logstash-*');
     });
 
     after(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
-    });
-
-    beforeEach(async function () {
-      await PageObjects.settings.createIndexPattern('logstash-*');
-    });
-
-    afterEach(async function () {
       await PageObjects.settings.removeIndexPattern();
     });
 

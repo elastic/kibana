@@ -18,6 +18,7 @@ const configSchema = schema.object({
       schema.literal(AIAssistantType.Default),
       schema.literal(AIAssistantType.Never),
       schema.literal(AIAssistantType.Observability),
+      schema.literal(AIAssistantType.Security),
     ],
     { defaultValue: AIAssistantType.Default }
   ),

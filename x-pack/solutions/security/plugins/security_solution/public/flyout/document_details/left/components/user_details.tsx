@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { MISCONFIGURATION_INSIGHT_USER_DETAILS } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
@@ -74,6 +75,7 @@ import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { buildUserNamesFilter } from '../../../../../common/search_strategy';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 const USER_DETAILS_ID = 'entities-users-details';
 const RELATED_HOSTS_ID = 'entities-users-related-hosts';
@@ -102,7 +104,14 @@ export interface UserDetailsProps {
  */
 export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, scopeId }) => {
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
-  const { selectedPatterns } = useSourcererDataView();
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const experimentalSelectedPatterns = useSelectedPatterns();
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+
   const dispatch = useDispatch();
   const { telemetry } = useKibana().services;
   // create a unique, but stable (across re-renders) query id
@@ -378,6 +387,8 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
               userName={userName}
               indexPatterns={selectedPatterns}
               jobNameById={jobNameById}
+              scopeId={scopeId}
+              isFlyoutOpen={true}
             />
           )}
         </AnomalyTableProvider>
@@ -423,7 +434,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
                   />
                 }
               >
-                <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+                <EuiIcon color="subdued" type="info" className="eui-alignTop" />
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>

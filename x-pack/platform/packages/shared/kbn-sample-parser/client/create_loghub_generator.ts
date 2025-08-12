@@ -73,6 +73,7 @@ export function createLoghubGenerator({
         const next = {
           '@timestamp': simulatedTimestamp,
           message: parser.replaceTimestamp(line.message, simulatedTimestamp),
+          ...parser.getFakeMetadata(line.message),
           filepath,
         };
 

@@ -13,6 +13,7 @@ import type {
   ActionStatusRequestSchema,
   KillProcessRequestBody,
   SuspendProcessRequestBody,
+  RunScriptActionRequestBody,
 } from '../../api/endpoint';
 
 import type {
@@ -138,8 +139,34 @@ export interface LogsEndpointAction<
   TMeta extends {} = {}
 > {
   '@timestamp': string;
+  /**
+   * Property identifies the space ID from where the action was created.
+   *
+   * NOTE:  Used primarily for completing 3rd party EDR response actions, since those are completed
+   *        via a background task. It assists in identifying the space that should be used when
+   *        initializing the Response Actions Client to process pending actions.
+   */
+  originSpaceId: string;
+  /** Tags assigned to the action */
+  tags: string[];
   agent: {
     id: string | string[];
+    /**
+     * Policy information for each of the agents that the response action was sent to.
+     * Added in support of space awareness.
+     */
+    policy: Array<{
+      /**
+       * The agent id running on the host. This is same value included in `agent.id`,
+       * **HOWEVER** it is not a mapped field in the index, so no search queries can be targeted
+       * at this field.
+       */
+      agentId: string;
+      /** The elastic agent id that ingested the data. This will be different from `agentId` for 3rd party EDRs */
+      elasticAgentId: string;
+      integrationPolicyId: string;
+      agentPolicyId: string;
+    }>;
   };
   EndpointActions: EndpointActionFields<TParameters, TOutputContent> & ActionRequestFields;
   error?: EcsError;
@@ -150,7 +177,11 @@ export interface LogsEndpointAction<
     id: string;
     name: string;
   };
-  /** Area to store any additional metadata  */
+  /**
+   * Area to store any additional metadata.
+   *
+   * NOTE: this property is not mapped in the index!
+   */
   meta?: TMeta;
 }
 
@@ -222,20 +253,7 @@ export interface ResponseActionScanParameters {
   path: string;
 }
 
-// Currently reflecting CrowdStrike's RunScript parameters
-interface ActionsRunScriptParametersBase {
-  Raw?: string;
-  HostPath?: string;
-  CloudFile?: string;
-  CommandLine?: string;
-  Timeout?: number;
-}
-
-// Enforce at least one of the script parameters is required
-export type ResponseActionRunScriptParameters = AtLeastOne<
-  ActionsRunScriptParametersBase,
-  'Raw' | 'HostPath' | 'CloudFile'
->;
+export type ResponseActionRunScriptParameters = RunScriptActionRequestBody['parameters'];
 
 export type EndpointActionDataParameterTypes =
   | undefined
@@ -594,7 +612,3 @@ export interface ResponseActionUploadOutputContent {
   /** The free space available (after saving the file) of the drive where the file was saved to, In Bytes  */
   disk_free_space: number;
 }
-
-type AtLeastOne<T, K extends keyof T = keyof T> = K extends keyof T
-  ? Required<Pick<T, K>> & Partial<Omit<T, K>>
-  : never;

@@ -26,13 +26,14 @@
       "dataViewEditor",
       "alerting",
       "actions",
-      "dashboard",
       "licensing",
       "expressions",
       "lens",
       "controls",
       "embeddable",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "uiActions",
+      "contentManagement",
     ],
     "optionalPlugins": [
       "cloud",

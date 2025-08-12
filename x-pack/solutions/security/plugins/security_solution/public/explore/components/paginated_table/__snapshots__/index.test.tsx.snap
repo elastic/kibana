@@ -1,177 +1,603 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Paginated Table Component rendering it renders the default load more table 1`] = `
-<InspectButtonContainer
-  show={true}
->
-  <Panel
-    data-test-subj="paginated-table-loading-false"
-    loading={false}
+.c0 {
+  width: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.c0 > * {
+  max-width: 100%;
+}
+
+.c0 .inspectButtonComponent {
+  pointer-events: none;
+  opacity: 0;
+  -webkit-transition: opacity 250 ease;
+  transition: opacity 250 ease;
+}
+
+.c0 .inspectButtonComponent:focus-visible {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.c0:hover .inspectButtonComponent {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.c1 {
+  position: relative;
+}
+
+.c3 tbody th,
+.c3 tbody td {
+  vertical-align: top;
+}
+
+.c3 tbody .euiTableCellContent {
+  display: block;
+}
+
+@media only screen and (min-width:450px) {
+  .c2 .siemSubtitle__item {
+    display: inline-block;
+  }
+
+  .c2 .siemSubtitle__item:last-child {
+    margin-right: 0;
+  }
+}
+
+@media only screen and (min-width:) {
+  .c4 .euiButtonIcon:last-child {
+    margin-left: 28px;
+  }
+
+  .c4 .euiPagination {
+    position: relative;
+  }
+
+  .c4 .euiPagination::before {
+    bottom: 0;
+    content: '\\2026';
+    padding: 5px;
+    position: absolute;
+    right: 10px;
+  }
+}
+
+<div>
+  <div
+    class="c0"
+    data-test-subj="hoverVisibilityContainer"
   >
-    <HeaderSectionComponent
-      inspectMultiple={true}
-      subtitle="Showing: 1 Test Unit"
-      title="Hosts"
-      toggleQuery={[Function]}
-      toggleStatus={true}
-      tooltip="My test tooltip"
+    <div
+      class="euiPanel euiPanel--plain euiPanel--paddingMedium c1 emotion-euiPanel-grow-m-m-plain-hasBorder"
+      data-test-subj="paginated-table-loading-false"
     >
-      <p>
-        My test supplement.
-      </p>
-    </HeaderSectionComponent>
-    <BasicTable
-      columns={
-        Array [
-          Object {
-            "field": "node.host.name",
-            "mobileOptions": Object {
-              "show": true,
-            },
-            "name": "Host",
-            "render": [Function],
-            "truncateText": false,
-          },
-          Object {
-            "field": "node.host.firstSeen",
-            "mobileOptions": Object {
-              "show": true,
-            },
-            "name": "First seen",
-            "render": [Function],
-            "truncateText": false,
-          },
-          Object {
-            "field": "node.host.os",
-            "mobileOptions": Object {
-              "show": true,
-            },
-            "name": "OS",
-            "render": [Function],
-            "truncateText": false,
-          },
-          Object {
-            "field": "node.host.version",
-            "mobileOptions": Object {
-              "show": true,
-            },
-            "name": "Version",
-            "render": [Function],
-            "truncateText": false,
-          },
-        ]
-      }
-      data-test-subj="paginated-basic-table"
-      items={
-        Array [
-          Object {
-            "cursor": Object {
-              "value": "98966fa2013c396155c460d35c0902be",
-            },
-            "host": Object {
-              "_id": "cPsuhGcB0WOhS6qyTKC0",
-              "firstSeen": "2018-12-06T15:40:53.319Z",
-              "name": "elrond.elstc.co",
-              "os": "Ubuntu",
-              "version": "18.04.1 LTS (Bionic Beaver)",
-            },
-          },
-          Object {
-            "cursor": Object {
-              "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
-            },
-            "host": Object {
-              "_id": "KwQDiWcB0WOhS6qyXmrW",
-              "firstSeen": "2018-12-07T14:12:38.560Z",
-              "name": "siem-kibana",
-              "os": "Debian GNU/Linux",
-              "version": "9 (stretch)",
-            },
-          },
-        ]
-      }
-      onChange={[Function]}
-    />
-    <FooterAction
-      justifyContent="spaceBetween"
-    >
-      <EuiFlexItem
-        grow={false}
+      <header
+        class="toggle-expand siemHeaderSection css-125xqyz-header"
+        data-test-subj="header-section"
       >
-        <EuiPopover
-          anchorPosition="downCenter"
-          button={
-            <EuiButtonEmpty
-              color="text"
-              iconSide="right"
-              iconType="arrowDown"
-              onClick={[Function]}
-              size="xs"
-            >
-              Rows per page: 1
-            </EuiButtonEmpty>
-          }
-          closePopover={[Function]}
-          data-test-subj="loadingMoreSizeRowPopover"
-          display="inline-block"
-          hasArrow={true}
-          id="customizablePagination"
-          isOpen={false}
-          ownFocus={true}
-          panelPaddingSize="none"
-          repositionOnScroll={true}
-          repositionToCrossAxis={true}
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-stretch-column"
+          data-test-subj="headerSectionOuterFlexGroup"
         >
-          <EuiContextMenuPanelClass
-            data-test-subj="loadingMorePickSizeRow"
-            items={
-              Array [
-                <EuiContextMenuItem
-                  icon="empty"
-                  onClick={[Function]}
+          <div
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
+          >
+            <div
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
+              data-test-subj="headerSectionInnerFlexGroup"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-grow-1"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
                 >
-                  2 rows
-                </EuiContextMenuItem>,
-                <EuiContextMenuItem
-                  icon="empty"
-                  onClick={[Function]}
-                >
-                  5 rows
-                </EuiContextMenuItem>,
-                <EuiContextMenuItem
-                  icon="empty"
-                  onClick={[Function]}
-                >
-                  10 rows
-                </EuiContextMenuItem>,
-                <EuiContextMenuItem
-                  icon="empty"
-                  onClick={[Function]}
-                >
-                  20 rows
-                </EuiContextMenuItem>,
-                <EuiContextMenuItem
-                  icon="empty"
-                  onClick={[Function]}
-                >
-                  50 rows
-                </EuiContextMenuItem>,
-              ]
-            }
-          />
-        </EuiPopover>
-      </EuiFlexItem>
-      <PaginationEuiFlexItem
-        grow={false}
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-grow-1"
+                  >
+                    <div
+                      class="euiFlexGroup header-section-titles emotion-euiFlexGroup-none-flexStart-stretch-row"
+                    >
+                      <div
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                      >
+                        <button
+                          aria-label="Open"
+                          class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
+                          data-test-subj="query-toggle-header"
+                          title="Open"
+                          type="button"
+                        >
+                          <span
+                            aria-hidden="true"
+                            class="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="arrowDown"
+                          />
+                        </button>
+                      </div>
+                      <div
+                        class="euiFlexItem emotion-euiFlexItem-grow-1"
+                      >
+                        <h2
+                          class="euiTitle emotion-euiTitle-l"
+                          data-test-subj="header-section-title"
+                        >
+                          <span
+                            class="eui-textBreakNormal"
+                          >
+                            Hosts
+                          </span>
+                          <span
+                            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                          >
+                            <span
+                              color="subdued"
+                              data-euiicon-type="info"
+                              data-test-subj="header-section-tooltip-icon"
+                              tabindex="0"
+                            >
+                              Info
+                            </span>
+                          </span>
+                        </h2>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+                data-test-subj="header-section-supplements"
+              >
+                <p>
+                  My test supplement.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
+          >
+            <div
+              class="c2 siemSubtitle"
+              data-test-subj="header-section-subtitle"
+            >
+              <p
+                class="siemSubtitle__item siemSubtitle__item--text"
+                data-test-subj="header-panel-subtitle"
+              >
+                Showing: 1 Test Unit
+              </p>
+            </div>
+          </div>
+        </div>
+      </header>
+      <div
+        class="euiBasicTable c3"
+        data-test-subj="paginated-basic-table"
       >
-        <EuiPagination
-          activePage={0}
-          data-test-subj="numberedPagination"
-          onPageClick={[Function]}
-          pageCount={10}
-        />
-      </PaginationEuiFlexItem>
-    </FooterAction>
-  </Panel>
-</InspectButtonContainer>
+        <table
+          class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+          id="__table_generated-id"
+          tabindex="-1"
+        >
+          <caption
+            class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+          />
+          <thead>
+            <tr>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.host.name_0"
+                role="columnheader"
+                scope="col"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="Host"
+                  >
+                    Host
+                  </span>
+                </div>
+              </th>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.host.firstSeen_1"
+                role="columnheader"
+                scope="col"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="First seen"
+                  >
+                    First seen
+                  </span>
+                </div>
+              </th>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.host.os_2"
+                role="columnheader"
+                scope="col"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="OS"
+                  >
+                    OS
+                  </span>
+                </div>
+              </th>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.host.version_3"
+                role="columnheader"
+                scope="col"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="Version"
+                  >
+                    Version
+                  </span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="css-0"
+          >
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+            >
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class=""
+                  >
+                    —
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class=""
+                  >
+                    —
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class=""
+                  >
+                    —
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class=""
+                  >
+                    —
+                  </span>
+                </div>
+              </td>
+            </tr>
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+            >
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class=""
+                  >
+                    —
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class=""
+                  >
+                    —
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class=""
+                  >
+                    —
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class=""
+                  >
+                    —
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-center-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            class="euiPopover emotion-euiPopover-inline-block"
+            data-test-subj="loadingMoreSizeRowPopover"
+            id="customizablePagination"
+          >
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  Rows per page: 1
+                </span>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem c4 emotion-euiFlexItem-growZero"
+        >
+          <nav
+            class="euiPagination emotion-euiPagination"
+            data-test-subj="numberedPagination"
+          >
+            <span
+              aria-atomic="true"
+              aria-relevant="additions text"
+              class="emotion-euiScreenReaderOnly"
+              role="status"
+            >
+              Page 1 of 10
+            </span>
+            <button
+              aria-label="Previous page"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
+              data-test-subj="pagination-button-previous"
+              disabled=""
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="arrowLeft"
+              />
+            </button>
+            <ul
+              class="euiPagination__list emotion-euiPagination__list"
+            >
+              <li
+                class="euiPagination__item"
+              >
+                <button
+                  aria-current="page"
+                  aria-label="Page 1 of 10"
+                  class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
+                  data-test-subj="pagination-button-0"
+                  disabled=""
+                  type="button"
+                >
+                  <span
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  >
+                    <span
+                      class="eui-textTruncate euiButtonEmpty__text"
+                    >
+                      1
+                    </span>
+                  </span>
+                </button>
+              </li>
+              <li
+                class="euiPagination__item"
+              >
+                <button
+                  aria-label="Page 2 of 10"
+                  class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-euiPaginationButton"
+                  data-test-subj="pagination-button-1"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  >
+                    <span
+                      class="eui-textTruncate euiButtonEmpty__text"
+                    >
+                      2
+                    </span>
+                  </span>
+                </button>
+              </li>
+              <li
+                class="euiPagination__item"
+              >
+                <button
+                  aria-label="Page 3 of 10"
+                  class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-euiPaginationButton"
+                  data-test-subj="pagination-button-2"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  >
+                    <span
+                      class="eui-textTruncate euiButtonEmpty__text"
+                    >
+                      3
+                    </span>
+                  </span>
+                </button>
+              </li>
+              <li
+                class="euiPagination__item"
+              >
+                <button
+                  aria-label="Page 4 of 10"
+                  class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-euiPaginationButton"
+                  data-test-subj="pagination-button-3"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  >
+                    <span
+                      class="eui-textTruncate euiButtonEmpty__text"
+                    >
+                      4
+                    </span>
+                  </span>
+                </button>
+              </li>
+              <li
+                class="euiPagination__item"
+              >
+                <button
+                  aria-label="Page 5 of 10"
+                  class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-euiPaginationButton"
+                  data-test-subj="pagination-button-4"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  >
+                    <span
+                      class="eui-textTruncate euiButtonEmpty__text"
+                    >
+                      5
+                    </span>
+                  </span>
+                </button>
+              </li>
+              <li
+                aria-label="Skipping pages 6 to 9"
+                class="euiPagination__item emotion-euiPagination__ellipsis"
+              >
+                …
+              </li>
+              <li
+                class="euiPagination__item"
+              >
+                <button
+                  aria-label="Page 10 of 10"
+                  class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-euiPaginationButton"
+                  data-test-subj="pagination-button-9"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  >
+                    <span
+                      class="eui-textTruncate euiButtonEmpty__text"
+                    >
+                      10
+                    </span>
+                  </span>
+                </button>
+              </li>
+            </ul>
+            <button
+              aria-label="Next page"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-text-euiPaginationButton"
+              data-test-subj="pagination-button-next"
+              title="Next page"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="arrowRight"
+              />
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 `;

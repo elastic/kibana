@@ -18,11 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  const resetTimeFrame = {
-    from: '2024-06-10T14:00:00.000Z',
-    to: '2024-06-10T16:30:00.000Z',
-  };
-
   const currentTimeFrame = {
     from: '2015-09-20T01:00:00.000Z',
     to: '2015-09-24T16:30:00.000Z',
@@ -43,9 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
-      await kibanaServer.uiSettings.update({
-        'timepicker:timeDefaults': `{ "from": "${resetTimeFrame.from}", "to": "${resetTimeFrame.to}"}`,
-      });
+      await PageObjects.common.unsetTime();
     });
 
     describe('ES|QL mode', () => {

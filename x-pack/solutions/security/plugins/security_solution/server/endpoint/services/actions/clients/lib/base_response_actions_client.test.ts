@@ -46,6 +46,7 @@ import {
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
 } from '../../../../../lib/telemetry/event_based/events';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 jest.mock('../../action_details_by_id', () => {
   const original = jest.requireActual('../../action_details_by_id');
@@ -195,6 +196,7 @@ describe('ResponseActionsClientImpl base class', () => {
         esClient,
         endpointService: endpointAppContextService,
         username: 'foo',
+        spaceId: DEFAULT_SPACE_ID,
       });
       await mockInstance.updateCases(updateCasesOptions);
 
@@ -291,7 +293,8 @@ describe('ResponseActionsClientImpl base class', () => {
       expect(getActionDetailsByIdMock).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
-        'one'
+        'one',
+        { bypassSpaceValidation: false }
       );
     });
   });
@@ -326,6 +329,7 @@ describe('ResponseActionsClientImpl base class', () => {
         case_ids: undefined,
         hosts: undefined,
         parameters: undefined,
+        // @ts-expect-error TS2322 due to type overload
         file: undefined,
       };
 
@@ -343,7 +347,18 @@ describe('ResponseActionsClientImpl base class', () => {
         },
         agent: {
           id: ['one'],
+          policy: [
+            {
+              agentId: 'one',
+              agentPolicyId: expect.any(String),
+              elasticAgentId: 'one',
+              integrationPolicyId: expect.any(String),
+            },
+          ],
         },
+        originSpaceId: 'default',
+        tags: [],
+        meta: undefined,
         user: {
           id: 'foo',
         },
@@ -459,6 +474,29 @@ describe('ResponseActionsClientImpl base class', () => {
       await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsNotSupportedError);
     });
 
+    it('should include `agent.policy` document field if space awareness is enabled', async () => {
+      // @ts-expect-error writing to a readonly property
+      endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
+
+      await expect(
+        baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+      ).resolves.toEqual(
+        expect.objectContaining({
+          agent: {
+            id: ['one'],
+            policy: [
+              {
+                agentId: 'one',
+                agentPolicyId: 'agent-policy-a',
+                elasticAgentId: 'one',
+                integrationPolicyId: 'integration-policy-a',
+              },
+            ],
+          },
+        })
+      );
+    });
+
     describe('And class is instantiated with `isAutomated` set to `true`', () => {
       beforeEach(() => {
         constructorOptions.isAutomated = true;
@@ -484,7 +522,19 @@ describe('ResponseActionsClientImpl base class', () => {
               input_type: 'endpoint',
               type: 'INPUT_ACTION',
             },
-            agent: { id: ['one'] },
+            agent: {
+              id: ['one'],
+              policy: [
+                {
+                  agentId: 'one',
+                  agentPolicyId: expect.any(String),
+                  elasticAgentId: 'one',
+                  integrationPolicyId: expect.any(String),
+                },
+              ],
+            },
+            originSpaceId: 'default',
+            tags: [],
             meta: { one: 1 },
             user: { id: 'foo' },
           });
@@ -531,11 +581,6 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     describe('Telemetry', () => {
-      beforeEach(() => {
-        // @ts-expect-error
-        endpointAppContextService.experimentalFeatures.responseActionsTelemetryEnabled = true;
-      });
-
       it('should send action creation success telemetry for manual actions', async () => {
         await baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
 
@@ -780,7 +825,7 @@ describe('ResponseActionsClientImpl base class', () => {
             EndpointActions: expect.objectContaining({
               action_id: 'action-id-2',
             }),
-            agent: { id: 'agent-b' },
+            agent: { id: 'agent-b', policy: expect.any(Array) },
           }),
           pendingAgentIds: ['agent-b'],
         },
@@ -791,6 +836,17 @@ describe('ResponseActionsClientImpl base class', () => {
 
 class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'endpoint';
+
+  protected async fetchAgentPolicyInfo(
+    agentIds: string[]
+  ): Promise<LogsEndpointAction['agent']['policy']> {
+    return agentIds.map((id) => ({
+      agentId: id,
+      elasticAgentId: id,
+      agentPolicyId: 'agent-policy-a',
+      integrationPolicyId: 'integration-policy-a',
+    }));
+  }
 
   public async updateCases(options: ResponseActionsClientUpdateCasesOptions): Promise<void> {
     return super.updateCases(options);

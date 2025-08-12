@@ -1,6 +1,6 @@
 # ST_WITHIN
 
-The ST_WITHIN function checks if the first geometry is located within the second geometry.
+Determines whether the first geometry is within the second geometry. This is the inverse of the `ST_CONTAINS` function.
 
 ## Syntax
 
@@ -8,15 +8,17 @@ The ST_WITHIN function checks if the first geometry is located within the second
 
 ### Parameters
 
-#### geomA
+#### `geomA`
 
-This is an expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If the value is `null`, the function will return `null`.
+Expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If `null`, the function returns `null`.
 
-#### geomB
+#### `geomB`
 
-This is an expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If the value is `null`, the function will return `null`. It's important to note that the second parameter must have the same coordinate system as the first. This means you cannot combine `geo_*` and `cartesian_*` parameters.
+Expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If `null`, the function returns `null`. The second parameter must have the same coordinate system as the first. Combining `geo_*` and `cartesian_*` parameters is not allowed.
 
 ## Examples
+
+Filtering rows where a city boundary is within a specified polygon
 
 ```esql
 FROM airport_city_boundaries
@@ -24,8 +26,4 @@ FROM airport_city_boundaries
 | KEEP abbrev, airport, region, city, city_location
 ```
 
-```esql
-FROM parks
-| WHERE ST_WITHIN(park_boundary, TO_GEOSHAPE("POLYGON((40.7128 -74.0060, 40.7128 -73.9352, 40.7306 -73.9352, 40.7306 -74.0060, 40.7128 -74.0060))"))
-| KEEP park_name, park_boundary
-```
+This example filters rows where the `city_boundary` geometry is entirely within the specified polygon. It then keeps only the `abbrev`, `airport`, `region`, `city`, and `city_location` columns.

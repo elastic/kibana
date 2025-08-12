@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import React, { ReactElement } from 'react';
 import { NoDataPopover } from './no_data_popover';
-import { EuiTourStep } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 
 describe('NoDataPopover', () => {
   const createMockStorage = () => ({
@@ -21,65 +21,67 @@ describe('NoDataPopover', () => {
     clear: jest.fn(),
   });
 
-  it('should hide popover if showNoDataPopover is set to false', () => {
-    const Child = () => <span />;
-    const instance = mount(
-      <NoDataPopover storage={createMockStorage()} showNoDataPopover={false}>
-        <Child />
+  const renderComponent = (
+    props?: Partial<{
+      showNoDataPopover?: boolean;
+      storage: IStorageWrapper;
+      children: ReactElement;
+    }>
+  ) =>
+    renderWithI18n(
+      <NoDataPopover storage={createMockStorage()} showNoDataPopover={false} {...props}>
+        <span data-test-subj="a_child" />
       </NoDataPopover>
     );
-    expect(instance.find(EuiTourStep).prop('isStepOpen')).toBe(false);
-    expect(instance.find(EuiTourStep).find(Child)).toHaveLength(1);
+
+  it('should hide popover if showNoDataPopover is set to false', async () => {
+    renderComponent();
+    const popover = screen.queryByRole('dialog');
+    expect(popover).not.toBeInTheDocument();
+    expect(screen.getByTestId('a_child')).toBeInTheDocument();
   });
 
   it('should hide popover if showNoDataPopover is set to true, but local storage flag is set', () => {
-    const child = <span />;
     const storage = createMockStorage();
     storage.get.mockReturnValue(true);
-    const instance = mount(
-      <NoDataPopover storage={storage} showNoDataPopover={false}>
-        {child}
-      </NoDataPopover>
-    );
-    expect(instance.find(EuiTourStep).prop('isStepOpen')).toBe(false);
+    renderComponent({ storage });
+    const popover = screen.queryByRole('dialog');
+    expect(popover).not.toBeInTheDocument();
   });
 
-  it('should render popover if showNoDataPopover is set to true and local storage flag is not set', () => {
-    const child = <span />;
-    const instance = mount(
-      <NoDataPopover storage={createMockStorage()} showNoDataPopover={true}>
-        {child}
-      </NoDataPopover>
-    );
-    expect(instance.find(EuiTourStep).prop('isStepOpen')).toBe(true);
+  it('should render popover if showNoDataPopover is set to true and local storage flag is not set', async () => {
+    renderComponent({ showNoDataPopover: true });
+    const popover = screen.queryByRole('dialog');
+    expect(popover).toBeInTheDocument();
   });
 
   it('should hide popover if it is closed', async () => {
     const props = {
-      children: <span />,
       showNoDataPopover: true,
       storage: createMockStorage(),
     };
-    const instance = mount(<NoDataPopover {...props} />);
-    act(() => {
-      instance.find(EuiTourStep).prop('closePopover')!();
-    });
-    instance.setProps({ ...props });
-    expect(instance.find(EuiTourStep).prop('isStepOpen')).toBe(false);
+    renderComponent(props);
+    const popover = screen.queryByRole('dialog');
+    expect(popover).toBeInTheDocument();
+    const closeButton = screen.getByTestId('noDataPopoverDismissButton');
+    fireEvent.click(closeButton);
+    await waitFor(() => expect(closeButton).not.toBeInTheDocument());
+    expect(popover).not.toBeInTheDocument();
   });
 
-  it('should set local storage flag and hide on closing with button', () => {
+  it('should set local storage flag and hide on closing with button', async () => {
     const props = {
-      children: <span />,
       showNoDataPopover: true,
       storage: createMockStorage(),
     };
-    const instance = mount(<NoDataPopover {...props} />);
-    act(() => {
-      instance.find('button[data-test-subj="noDataPopoverDismissButton"]').simulate('click');
-    });
-    instance.setProps({ ...props });
+    renderComponent(props);
+
+    const popover = screen.queryByRole('dialog');
+    expect(popover).toBeInTheDocument();
+    const closeButton = screen.getByTestId('noDataPopoverDismissButton');
+    fireEvent.click(closeButton);
+    await waitFor(() => expect(closeButton).not.toBeInTheDocument());
     expect(props.storage.set).toHaveBeenCalledWith(expect.any(String), true);
-    expect(instance.find(EuiTourStep).prop('isStepOpen')).toBe(false);
+    expect(popover).not.toBeInTheDocument();
   });
 });

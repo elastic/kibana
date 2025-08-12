@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiErrorBoundary,
+  EuiOverlayMask,
 } from '@elastic/eui';
 
 import { useSetIsReadOnly } from '../../../../integrations/hooks/use_read_only_context';
@@ -571,6 +572,11 @@ export const EditPackagePolicyForm = memo<{
             ) : (
               replaceConfigurePackage || configurePackage
             )}
+            {formState === 'LOADING' ? (
+              <EuiOverlayMask headerZindexLocation="below">
+                <Loading />
+              </EuiOverlayMask>
+            ) : null}
             {/* Extra space to accomodate the EuiBottomBar height */}
             <EuiSpacer size="xxl" />
             <EuiSpacer size="xxl" />

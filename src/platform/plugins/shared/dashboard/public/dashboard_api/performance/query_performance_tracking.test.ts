@@ -8,7 +8,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { PerformanceMetricEvent } from '@kbn/ebt-tools';
+import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import { PhaseEvent, PhaseEventType, apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
@@ -18,6 +18,7 @@ import { PerformanceState, startQueryPerformanceTracking } from './query_perform
 
 const mockMetricEvent = jest.fn();
 jest.mock('@kbn/ebt-tools', () => ({
+  ...jest.requireActual('@kbn/ebt-tools'),
   reportPerformanceMetricEvent: (_: CoreStart['analytics'], args: PerformanceMetricEvent) => {
     mockMetricEvent(args);
   },

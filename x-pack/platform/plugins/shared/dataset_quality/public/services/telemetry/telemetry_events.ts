@@ -195,6 +195,19 @@ const datasetNavigatedEventType: DatasetQualityTelemetryEvent = {
     ...datasetCommonSchema,
     sort: sortSchema,
     filters: filtersSchema,
+    target: {
+      type: 'keyword',
+      _meta: {
+        description: 'Action that user took to navigate away from the dataset quality page',
+      },
+    },
+    source: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Section of dataset quality page the action is originated from e.g. header, summary, chart or table etc.',
+      },
+    },
   },
 };
 

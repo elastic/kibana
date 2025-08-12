@@ -26,6 +26,7 @@ import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { IEventLogger, IEventLogClient } from '@kbn/event-log-plugin/server';
 import { isNumber } from 'lodash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { withSpan } from '@kbn/apm-utils';
 import type {
   ScheduleBackfillError,
   ScheduleBackfillParams,
@@ -47,6 +48,7 @@ import { createBackfillError } from './lib';
 import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 import { denormalizeActions } from '../rules_client/lib/denormalize_actions';
 import type { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../rules_client';
+import type { Gap } from '../lib/rule_gaps/gap';
 
 export const BACKFILL_TASK_TYPE = 'ad_hoc_run-backfill';
 
@@ -68,6 +70,7 @@ interface BulkQueueOpts {
   eventLogClient: IEventLogClient;
   internalSavedObjectsRepository: ISavedObjectsRepository;
   eventLogger: IEventLogger | undefined;
+  gaps?: Gap[];
 }
 
 interface DeleteBackfillForRulesOpts {
@@ -105,6 +108,7 @@ export class BackfillClient {
     eventLogClient,
     internalSavedObjectsRepository,
     eventLogger,
+    gaps,
   }: BulkQueueOpts): Promise<ScheduleBackfillResults> {
     const adHocSOsToCreate: Array<SavedObjectsBulkCreateObject<AdHocRunSO>> = [];
 
@@ -181,12 +185,19 @@ export class BackfillClient {
       );
     }
 
-    // Bulk create the saved object
-    const bulkCreateResponse = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(
-      adHocSOsToCreate
-    );
+    // Bulk create the saved objects in chunks of 10 to manage resource usage
+    const chunkSize = 10;
+    const allSavedObjects: Array<SavedObject<AdHocRunSO>> = [];
 
-    const transformedResponse: ScheduleBackfillResults = bulkCreateResponse.saved_objects.map(
+    for (let i = 0; i < adHocSOsToCreate.length; i += chunkSize) {
+      const chunk = adHocSOsToCreate.slice(i, i + chunkSize);
+      const bulkCreateChunkResponse = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(
+        chunk
+      );
+      allSavedObjects.push(...bulkCreateChunkResponse.saved_objects);
+    }
+
+    const transformedResponse: ScheduleBackfillResults = allSavedObjects.map(
       (so: SavedObject<AdHocRunSO>, index: number) => {
         if (so.error) {
           auditLogger?.log(
@@ -271,34 +282,37 @@ export class BackfillClient {
       }
     });
 
-    try {
-      // Process backfills in chunks of 10 to manage resource usage
-      for (let i = 0; i < backfillSOs.length; i += 10) {
-        const chunk = backfillSOs.slice(i, i + 10);
-        await Promise.all(
-          chunk.map((backfill) =>
-            updateGaps({
-              backfillSchedule: backfill.schedule,
-              ruleId: backfill.rule.id,
-              start: new Date(backfill.start),
-              end: backfill?.end ? new Date(backfill.end) : new Date(),
-              eventLogger,
-              eventLogClient,
-              savedObjectsRepository: internalSavedObjectsRepository,
-              logger: this.logger,
-              backfillClient: this,
-              actionsClient,
-            })
-          )
+    await withSpan({ name: 'backfillClient.bulkQueue.updateGaps', type: 'rule' }, async () => {
+      try {
+        // Process backfills in chunks of 10 to manage resource usage
+        for (let i = 0; i < backfillSOs.length; i += 10) {
+          const chunk = backfillSOs.slice(i, i + 10);
+          await Promise.all(
+            chunk.map((backfill) =>
+              updateGaps({
+                backfillSchedule: backfill.schedule,
+                ruleId: backfill.rule.id,
+                start: new Date(backfill.start),
+                end: backfill?.end ? new Date(backfill.end) : new Date(),
+                eventLogger,
+                eventLogClient,
+                savedObjectsRepository: internalSavedObjectsRepository,
+                logger: this.logger,
+                backfillClient: this,
+                actionsClient,
+                gaps,
+              })
+            )
+          );
+        }
+      } catch {
+        this.logger.warn(
+          `Error updating gaps for backfill jobs: ${backfillSOs
+            .map((backfill) => backfill.id)
+            .join(', ')}`
         );
       }
-    } catch {
-      this.logger.warn(
-        `Error updating gaps for backfill jobs: ${backfillSOs
-          .map((backfill) => backfill.id)
-          .join(', ')}`
-      );
-    }
+    });
 
     if (adHocTasksToSchedule.length > 0) {
       const taskManager = await this.taskManagerStartPromise;

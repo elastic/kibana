@@ -57,6 +57,7 @@ export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSc
     previewImagePath: context.staticAssets.getPluginAssetHref('/uptime_monitors/screenshot.webp'),
     onPrem: onPremInstructions([], context),
     elasticCloud: cloudInstructions(context),
+    omitServerless: true,
     onPremElasticCloud: onPremCloudInstructions(context),
     integrationBrowserCategories: ['observability'],
   };

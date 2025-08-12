@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticLogo } from '@kbn/expression-utils';
+import { elasticLogo } from '../../../../public/lib';
 
 export const fontStyle = {
   type: 'style',

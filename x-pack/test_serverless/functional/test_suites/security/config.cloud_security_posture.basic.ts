@@ -18,7 +18,9 @@ export default createTestConfig({
     `--xpack.fleet.packages.0.name=cloud_security_posture`,
     `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_PLUGIN_VERSION}`,
     // configs the environment to run on the basic product tier, which may include PLI block components or messages
-    `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([])}`,
+    `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
+      { product_line: 'security', product_tier: 'essentials' },
+    ])}`,
   ],
   // load tests in the index file
   testFiles: [require.resolve('./ftr/cloud_security_posture')],

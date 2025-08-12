@@ -102,7 +102,10 @@ const configuration = {
     monitorEditDetails: [
       ['[data-test-subj=syntheticsMonitorConfigSchedule]', '10'],
       ['[data-test-subj=syntheticsMonitorConfigName]', browserName],
-      ['[data-test-subj=codeEditorContainer] textarea', 'step("test step", () => {})'],
+      [
+        'div[data-test-subj="codeEditorContainer"][aria-label="JavaScript code editor"] .view-line',
+        'step("test step", () => {})',
+      ],
       ['[data-test-subj=syntheticsMonitorConfigAPMServiceName]', apmServiceName],
     ],
   },
@@ -124,7 +127,10 @@ const configuration = {
     monitorEditDetails: [
       ['[data-test-subj=syntheticsMonitorConfigSchedule]', '10'],
       ['[data-test-subj=syntheticsMonitorConfigName]', browserRecorderName],
-      ['[data-test-subj=codeEditorContainer] textarea', 'step("test step", () => {})'],
+      [
+        'div[data-test-subj="codeEditorContainer"][aria-label="JavaScript code editor"] .view-line',
+        'step("test step", () => {})',
+      ],
       // name: httpName,
     ],
   },
@@ -187,10 +193,7 @@ const createMonitorJourney = ({
       step(`edit ${monitorName}`, async () => {
         await syntheticsApp.navigateToEditMonitor(monitorName);
         await syntheticsApp.findByText(monitorListDetails.location);
-        const hasFailure = await syntheticsApp.findEditMonitorConfiguration(
-          monitorEditDetails,
-          monitorType
-        );
+        const hasFailure = await syntheticsApp.findEditMonitorConfiguration(monitorEditDetails);
         expect(hasFailure).toBeFalsy();
         await page.waitForTimeout(1000);
         await page.getByTestId('syntheticsMonitorConfigSubmitButton').click();

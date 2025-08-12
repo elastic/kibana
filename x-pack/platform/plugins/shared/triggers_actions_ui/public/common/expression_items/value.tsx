@@ -92,8 +92,8 @@ export const ValueExpression = ({
                 min={0}
                 value={value}
                 isInvalid={Number(errors.length) > 0 && value !== undefined}
-                onChange={(e: any) => {
-                  onChangeSelectedValue(e.target.value as number);
+                onChange={(e) => {
+                  onChangeSelectedValue(+e.target.value);
                 }}
               />
             </EuiFormRow>

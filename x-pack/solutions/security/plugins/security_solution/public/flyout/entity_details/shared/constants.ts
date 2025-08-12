@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UniversalEntityPanelExpandableFlyoutProps } from '../universal_right';
+import type { GenericEntityPanelExpandableFlyoutProps } from '../generic_right';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { HostPanelExpandableFlyoutProps } from '../host_right';
 import type { ServicePanelExpandableFlyoutProps } from '../service_right';
@@ -28,13 +28,14 @@ export const MANAGED_USER_QUERY_ID = 'managedUserDetailsQuery';
 export const HostPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-panel';
 export const UserPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-panel';
 export const ServicePanelKey: ServicePanelExpandableFlyoutProps['key'] = 'service-panel';
-export const UniversalEntityPanelKey: UniversalEntityPanelExpandableFlyoutProps['key'] =
-  'universal-entity-panel';
+export const GenericEntityPanelKey: GenericEntityPanelExpandableFlyoutProps['key'] =
+  'generic-entity-panel';
 
 export const EntityPanelKeyByType: Record<EntityType, string | undefined> = {
   [EntityType.host]: HostPanelKey,
   [EntityType.user]: UserPanelKey,
   [EntityType.service]: ServicePanelKey,
+  [EntityType.generic]: undefined, // TODO create generic flyout?
 };
 
 // TODO rename all params and merged them as 'entityName'
@@ -42,4 +43,5 @@ export const EntityPanelParamByType: Record<EntityType, string | undefined> = {
   [EntityType.host]: 'hostName',
   [EntityType.user]: 'userName',
   [EntityType.service]: 'serviceName',
+  [EntityType.generic]: undefined, // TODO create generic flyout?
 };

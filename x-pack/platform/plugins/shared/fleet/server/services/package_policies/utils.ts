@@ -22,19 +22,27 @@ import type {
   PackagePolicySOAttributes,
   PackageInfo,
 } from '../../types';
+import { appContextService } from '..';
 import {
   PackagePolicyMultipleAgentPoliciesError,
   PackagePolicyOutputError,
   PackagePolicyContentPackageError,
+  CustomPackagePolicyNotAllowedForAgentlessError,
 } from '../../errors';
 import { licenseService } from '../license';
 import { outputService } from '../output';
 
-export const mapPackagePolicySavedObjectToPackagePolicy = (
-  { id, version, attributes }: SavedObject<PackagePolicySOAttributes>,
-  namespaces?: string[]
-): PackagePolicy => {
-  const { bump_agent_policy_revision: bumpAgentPolicyRevision, ...restAttributes } = attributes;
+export const mapPackagePolicySavedObjectToPackagePolicy = ({
+  id,
+  version,
+  attributes,
+  namespaces,
+}: SavedObject<PackagePolicySOAttributes>): PackagePolicy => {
+  const {
+    bump_agent_policy_revision: bumpAgentPolicyRevision,
+    latest_revision: latestRevision,
+    ...restAttributes
+  } = attributes;
   return {
     id,
     version,
@@ -118,4 +126,23 @@ export async function canUseOutputForIntegration(
     canUseOutputForIntegrationResult: true,
     errorMessage: null,
   };
+}
+
+export function canDeployCustomPackageAsAgentlessOrThrow(
+  packagePolicy: NewPackagePolicy,
+  packageInfo: PackageInfo
+) {
+  const installSource =
+    packageInfo &&
+    'savedObject' in packageInfo &&
+    packageInfo.savedObject?.attributes.install_source;
+  const isCustom = installSource === 'custom' || installSource === 'upload';
+  const isCustomAgentlessAllowed =
+    appContextService.getConfig()?.agentless?.customIntegrations?.enabled;
+
+  if (packagePolicy.supports_agentless && isCustom && !isCustomAgentlessAllowed) {
+    throw new CustomPackagePolicyNotAllowedForAgentlessError();
+  }
+
+  return true;
 }

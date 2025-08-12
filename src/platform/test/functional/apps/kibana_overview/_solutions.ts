@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'header']);
+  const testSubjects = getService('testSubjects');
 
   describe('overview page - solutions', function describeIndexTests() {
     before(async () => {
@@ -39,7 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('contains Security and Observability solutions', async () => {
-      const solutionCards = await find.allByCssSelector('.kbnOverviewMore__item');
+      const solutionCards = await testSubjects.findAll('kbnOverviewItem');
+
       expect(solutionCards.length >= 2).to.be(true);
 
       const imageSrcs = [];

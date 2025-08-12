@@ -106,7 +106,7 @@ export const SyncJobCallouts: React.FC<SyncJobCalloutsProps> = ({ syncJob }) => 
         <EuiFlexItem>
           <EuiCallOut
             color="primary"
-            iconType="iInCircle"
+            iconType="info"
             title={
               syncJob.trigger_method === TriggerMethod.ON_DEMAND
                 ? i18n.translate('searchConnectors.syncJobs.flyout.syncStartedManually', {

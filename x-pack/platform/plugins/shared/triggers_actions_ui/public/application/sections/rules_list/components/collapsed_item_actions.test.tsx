@@ -6,7 +6,10 @@
  */
 import * as React from 'react';
 import moment from 'moment';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { CollapsedItemActions } from './collapsed_item_actions';
 import { act } from 'react-dom/test-utils';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
@@ -108,6 +111,71 @@ describe('CollapsedItemActions', () => {
     };
   };
 
+  describe('Lifecycle alerts', () => {
+    beforeAll(async () => {
+      await setup();
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('shows untrack active alerts modal if `autoRecoverAlerts` is `true`', async () => {
+      render(<CollapsedItemActions {...getPropsWithRule({ autoRecoverAlerts: true })} />);
+
+      expect(await screen.findByTestId('selectActionButton')).toBeInTheDocument();
+      await userEvent.click(await screen.getByTestId('selectActionButton'));
+      await waitForEuiPopoverOpen();
+      expect(await screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
+
+      await userEvent.click(await screen.getByTestId('disableButton'));
+      await waitFor(async () => {
+        expect(await screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
+        expect(bulkDisableRules).not.toHaveBeenCalled();
+      });
+
+      await userEvent.click(await screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(async () => {
+        expect(bulkDisableRules).toHaveBeenCalledWith({ ids: ['1'], untrack: false });
+      });
+    });
+
+    it('shows untrack active alerts modal if `autoRecoverAlerts` is `undefined`', async () => {
+      render(<CollapsedItemActions {...getPropsWithRule({ autoRecoverAlerts: undefined })} />);
+
+      expect(await screen.findByTestId('selectActionButton')).toBeInTheDocument();
+      await userEvent.click(await screen.getByTestId('selectActionButton'));
+      await waitForEuiPopoverOpen();
+      expect(await screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
+
+      await userEvent.click(await screen.getByTestId('disableButton'));
+      await waitFor(async () => {
+        expect(await screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
+        expect(bulkDisableRules).not.toHaveBeenCalled();
+      });
+
+      await userEvent.click(await screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(async () => {
+        expect(bulkDisableRules).toHaveBeenCalledWith({ ids: ['1'], untrack: false });
+      });
+    });
+
+    it('does not show untrack active alerts modal if `autoRecoverAlerts` is `false`', async () => {
+      render(<CollapsedItemActions {...getPropsWithRule({ autoRecoverAlerts: false })} />);
+
+      expect(await screen.findByTestId('selectActionButton')).toBeInTheDocument();
+      await userEvent.click(await screen.getByTestId('selectActionButton'));
+      await waitForEuiPopoverOpen();
+      expect(await screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
+
+      await userEvent.click(await screen.getByTestId('disableButton'));
+      await waitFor(async () => {
+        expect(await screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+        expect(bulkDisableRules).toHaveBeenCalledWith({ ids: ['1'], untrack: false });
+      });
+    });
+  });
+
   describe('with app context', () => {
     beforeAll(async () => {
       await setup(false);
@@ -147,7 +215,7 @@ describe('CollapsedItemActions', () => {
       jest.useRealTimers();
     });
 
-    test('renders panel items as disabled', async () => {
+    test('does not render panel items when rule is not editable', async () => {
       const wrapper = mountWithIntl(
         <CollapsedItemActions {...getPropsWithRule({ isEditable: false })} />
       );
@@ -155,9 +223,8 @@ describe('CollapsedItemActions', () => {
         await nextTick();
         wrapper.update();
       });
-      expect(
-        wrapper.find('[data-test-subj="selectActionButton"]').first().props().disabled
-      ).toBeTruthy();
+
+      expect(wrapper.find('[data-test-subj="selectActionButton"]').exists()).toBeFalsy();
     });
 
     test('renders closed popover initially and opens on click with all actions enabled', async () => {
@@ -309,21 +376,6 @@ describe('CollapsedItemActions', () => {
       expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
       expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
       expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
-    });
-
-    test('renders actions correctly when rule is not editable', async () => {
-      const wrapper = mountWithIntl(
-        <CollapsedItemActions {...getPropsWithRule({ isEditable: false })} />
-      );
-      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-
-      expect(
-        wrapper.find(`[data-test-subj="selectActionButton"] button`).prop('disabled')
-      ).toBeTruthy();
     });
 
     test('renders actions correctly when rule is not enabled due to license', async () => {

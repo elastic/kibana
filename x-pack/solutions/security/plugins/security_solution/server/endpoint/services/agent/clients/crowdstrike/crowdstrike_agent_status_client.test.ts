@@ -79,6 +79,7 @@ describe('CrowdstrikeAgentStatusClient', () => {
       soClient: savedObjectsClientMock.create(),
       connectorActionsClient: CrowdstrikeMock.createConnectorActionsClient(),
       endpointService: constructorOptions.endpointService,
+      spaceId: 'default',
     });
   });
 

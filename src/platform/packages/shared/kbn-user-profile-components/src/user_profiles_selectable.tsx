@@ -304,7 +304,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
 
         onChange(values);
       }}
-      style={{ maxHeight: height }}
+      css={{ maxHeight: height }}
       singleSelection={singleSelection}
       searchable
       searchProps={{
@@ -383,12 +383,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     {selectedCount ? (
-                      <EuiButtonEmpty
-                        size="xs"
-                        flush="right"
-                        onClick={() => onChange?.([])}
-                        style={{ height: '1rem' }}
-                      >
+                      <EuiButtonEmpty size="xs" flush="right" onClick={() => onChange?.([])}>
                         {clearButtonLabel ?? (
                           <FormattedMessage
                             id="userProfileComponents.userProfilesSelectable.clearButtonLabel"

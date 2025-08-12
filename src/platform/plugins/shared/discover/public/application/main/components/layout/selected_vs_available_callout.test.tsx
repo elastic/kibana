@@ -11,15 +11,15 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 describe('SelectedVSAvailableCallout', () => {
   it('should render the callout if in ES|QL mode and the selected columns are less than the available ones', async () => {
     const stateContainer = getDiscoverStateMock({});
     stateContainer.appState.update({ query: { esql: 'select *' } });
     const component = mountWithIntl(
-      <DiscoverMainProvider value={stateContainer}>
+      <DiscoverTestProvider stateContainer={stateContainer}>
         <SelectedVSAvailableCallout
           esqlQueryColumns={
             [
@@ -30,30 +30,30 @@ describe('SelectedVSAvailableCallout', () => {
           }
           selectedColumns={['bytes']}
         />
-      </DiscoverMainProvider>
+      </DiscoverTestProvider>
     );
     expect(component.find('[data-test-subj="dscSelectedColumnsCallout"]').exists()).toBe(true);
   });
 
   it('should not render the callout if not in ES|QL mode', async () => {
     const component = mountWithIntl(
-      <DiscoverMainProvider value={getDiscoverStateMock({})}>
+      <DiscoverTestProvider stateContainer={getDiscoverStateMock({})}>
         <SelectedVSAvailableCallout esqlQueryColumns={undefined} selectedColumns={['bytes']} />
-      </DiscoverMainProvider>
+      </DiscoverTestProvider>
     );
     expect(component.find('[data-test-subj="dscSelectedColumnsCallout"]').exists()).toBe(false);
   });
 
   it('should not render the callout if in ES|QL mode but the selected columns are equal with the available ones', async () => {
     const component = mountWithIntl(
-      <DiscoverMainProvider value={getDiscoverStateMock({})}>
+      <DiscoverTestProvider stateContainer={getDiscoverStateMock({})}>
         <SelectedVSAvailableCallout
           esqlQueryColumns={
             [{ id: '2', name: 'bytes', meta: { type: 'number' } }] as DatatableColumn[]
           }
           selectedColumns={['bytes']}
         />
-      </DiscoverMainProvider>
+      </DiscoverTestProvider>
     );
     expect(component.find('[data-test-subj="dscSelectedColumnsCallout"]').exists()).toBe(false);
   });

@@ -1,67 +1,81 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`MarkdownOptions should match snapshot 1`] = `
-<EuiPanel
-  paddingSize="s"
->
-  <EuiFlexGroup
-    className="mkdEditor"
-    direction="column"
-    gutterSize="m"
+<div>
+  <div
+    class="euiPanel euiPanel--plain euiPanel--paddingSmall emotion-euiPanel-grow-m-s-plain-hasShadow-MarkdownOptions"
   >
-    <EuiFlexItem
-      grow={false}
+    <div
+      class="euiFlexGroup mkdEditor emotion-euiFlexGroup-m-flexStart-stretch-column"
     >
-      <EuiFlexGroup
-        alignItems="baseline"
-        gutterSize="none"
-        justifyContent="spaceBetween"
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
-        <EuiFlexItem
-          grow={false}
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-none-spaceBetween-baseline-row"
         >
-          <EuiTitle
-            size="xs"
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
-            <h2>
+            <h2
+              class="euiTitle emotion-euiTitle-xs"
+            >
               <label
-                htmlFor="markdownVisInput"
+                for="markdownVisInput"
               >
                 Markdown
               </label>
             </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiText
-            size="xs"
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
-            <EuiLink
-              href="https://docs.github.com/en/get-started/writing-on-github/"
-              target="_blank"
+            <div
+              class="euiText emotion-euiText-xs"
             >
-              <MemoizedFormattedMessage
-                defaultMessage="Help"
-                id="visTypeMarkdown.params.helpLinkLabel"
-              />
-            </EuiLink>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiTextArea
-        className="visEditor--markdown__textarea"
-        data-test-subj="markdownTextarea"
-        fullWidth={true}
-        id="markdownVisInput"
-        onChange={[Function]}
-        resize="none"
-        value="hello from 2020 🥳"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</EuiPanel>
+              <a
+                class="euiLink emotion-euiLink-primary"
+                href="https://docs.github.com/en/get-started/writing-on-github/"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Help
+                <span
+                  class="emotion-EuiExternalLinkIcon"
+                  data-euiicon-type="popout"
+                  role="presentation"
+                />
+                <span
+                  class="emotion-euiScreenReaderOnly"
+                >
+                  (external, opens in a new tab or window)
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <div
+          class="euiFormControlLayout euiFormControlLayout--euiTextArea emotion-euiFormControlLayout-fullWidth-euiTextArea"
+        >
+          <div
+            class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+          >
+            <textarea
+              class="euiTextArea visEditor--markdown__textarea emotion-euiTextArea-none-fullWidth"
+              data-test-subj="markdownTextarea"
+              id="markdownVisInput"
+              rows="6"
+            >
+              hello from 2020 🥳
+            </textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 `;

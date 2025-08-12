@@ -74,3 +74,8 @@ To use the storage index adapter, instantiate it with an authenticated Elasticse
   });
 
 ```
+
+
+# Development
+
+To run integration tests locally, run `node scripts/jest_integration.js --config src/platform/packages/shared/kbn-storage-adapter/jest.integration.config.js`

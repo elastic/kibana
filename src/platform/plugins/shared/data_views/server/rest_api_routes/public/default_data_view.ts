@@ -70,105 +70,117 @@ const manageDefaultIndexPatternRoutesFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.get({ path, access: 'public', description: getDescription }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .get({
+        path,
+        access: 'public',
+        description: getDescription,
         security: {
           authz: {
             enabled: false,
             reason: 'Authorization provided by saved objects client',
           },
         },
-        validate: {
-          request: {},
-          response: {
-            200: {
-              body: () => schema.object({ [`${serviceKey}_id`]: schema.string() }),
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {},
+            response: {
+              200: {
+                body: () => schema.object({ [`${serviceKey}_id`]: schema.string() }),
+              },
             },
           },
         },
-      },
-      handleErrors(async (ctx, req, res) => {
-        const core = await ctx.core;
-        const savedObjectsClient = core.savedObjects.client;
-        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-        const [, , { dataViewsServiceFactory }] = await getStartServices();
-        const dataViewsService = await dataViewsServiceFactory(
-          savedObjectsClient,
-          elasticsearchClient,
-          req
-        );
+        handleErrors(async (ctx, req, res) => {
+          const core = await ctx.core;
+          const savedObjectsClient = core.savedObjects.client;
+          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+          const [, , { dataViewsServiceFactory }] = await getStartServices();
+          const dataViewsService = await dataViewsServiceFactory(
+            savedObjectsClient,
+            elasticsearchClient,
+            req
+          );
 
-        const id = await getDefault({
-          dataViewsService,
-          usageCollection,
-          counterName: `${req.route.method} ${path}`,
-        });
+          const id = await getDefault({
+            dataViewsService,
+            usageCollection,
+            counterName: `${req.route.method} ${path}`,
+          });
 
-        return res.ok({
-          body: {
-            [`${serviceKey}_id`]: id,
-          },
-        });
-      })
-    );
+          return res.ok({
+            body: {
+              [`${serviceKey}_id`]: id,
+            },
+          });
+        })
+      );
 
-    router.versioned.post({ path, access: 'public', description: postDescription }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .post({
+        path,
+        access: 'public',
+        description: postDescription,
         security: {
           authz: {
             requiredPrivileges: ['indexPatterns:manage'],
           },
         },
-        validate: {
-          request: {
-            body: schema.object({
-              [`${serviceKey}_id`]: schema.nullable(
-                schema.string({
-                  minLength: 1,
-                  maxLength: 1_000,
-                })
-              ),
-              force: schema.boolean({ defaultValue: false }),
-            }),
-          },
-          response: {
-            200: {
-              body: () => schema.object({ acknowledged: schema.boolean() }),
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {
+              body: schema.object({
+                [`${serviceKey}_id`]: schema.nullable(
+                  schema.string({
+                    minLength: 1,
+                    maxLength: 1_000,
+                  })
+                ),
+                force: schema.boolean({ defaultValue: false }),
+              }),
+            },
+            response: {
+              200: {
+                body: () => schema.object({ acknowledged: schema.boolean() }),
+              },
             },
           },
         },
-      },
-      handleErrors(async (ctx, req, res) => {
-        const core = await ctx.core;
-        const savedObjectsClient = core.savedObjects.client;
-        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-        const [, , { dataViewsServiceFactory }] = await getStartServices();
-        const dataViewsService = await dataViewsServiceFactory(
-          savedObjectsClient,
-          elasticsearchClient,
-          req
-        );
+        handleErrors(async (ctx, req, res) => {
+          const core = await ctx.core;
+          const savedObjectsClient = core.savedObjects.client;
+          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+          const [, , { dataViewsServiceFactory }] = await getStartServices();
+          const dataViewsService = await dataViewsServiceFactory(
+            savedObjectsClient,
+            elasticsearchClient,
+            req
+          );
 
-        const newDefaultId = req.body[`${serviceKey}_id`] as string;
-        const force = req.body.force as boolean;
+          const newDefaultId = req.body[`${serviceKey}_id`] as string;
+          const force = req.body.force as boolean;
 
-        await setDefault({
-          dataViewsService,
-          usageCollection,
-          counterName: `${req.route.method} ${path}`,
-          newDefaultId,
-          force,
-        });
+          await setDefault({
+            dataViewsService,
+            usageCollection,
+            counterName: `${req.route.method} ${path}`,
+            newDefaultId,
+            force,
+          });
 
-        return res.ok({
-          body: {
-            acknowledged: true,
-          },
-        });
-      })
-    );
+          return res.ok({
+            body: {
+              acknowledged: true,
+            },
+          });
+        })
+      );
   };
 
 export const registerManageDefaultDataViewRoute = manageDefaultIndexPatternRoutesFactory(

@@ -10,7 +10,7 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEqual } from 'lodash';
 import { Query } from '@kbn/es-query';
-import { TextBasedLayerColumn } from '../../../text_based/types';
+import { TextBasedLayerColumn } from '../../esql_layer/types';
 import type { IndexPattern, IndexPatternField } from '../../../../types';
 import {
   type FieldBasedOperationErrorMessage,

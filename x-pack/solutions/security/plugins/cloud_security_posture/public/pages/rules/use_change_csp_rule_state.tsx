@@ -160,8 +160,8 @@ export const useChangeCspRuleState = () => {
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries(BENCHMARK_INTEGRATION_QUERY_KEY_V2);
-      queryClient.invalidateQueries(CSPM_STATS_QUERY_KEY);
-      queryClient.invalidateQueries(KSPM_STATS_QUERY_KEY);
+      queryClient.invalidateQueries([CSPM_STATS_QUERY_KEY]);
+      queryClient.invalidateQueries([KSPM_STATS_QUERY_KEY]);
       queryClient.invalidateQueries(CSP_RULES_STATES_QUERY_KEY);
       showChangeBenchmarkRuleStatesSuccessToast(startServices, {
         newState: variables?.newState,

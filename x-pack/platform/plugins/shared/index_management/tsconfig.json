@@ -56,6 +56,10 @@
     "@kbn/core-application-browser",
     "@kbn/delete-managed-asset-callout",
     "@kbn/inference-endpoint-ui-common",
+    "@kbn/streams-plugin",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/deeplinks-observability",
+    "@kbn/streams-app-plugin",
   ],
   "exclude": ["target/**/*"]
 }

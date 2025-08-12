@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PresentationContainer } from '@kbn/presentation-containers';
 import {
   CanLockHoverActions,
   HasParentApi,
@@ -17,7 +16,7 @@ import {
   PublishesDisabledActionIds,
   PublishesDescription,
   PublishesTitle,
-  PublishesViewMode,
+  CanOverrideHoverActions,
 } from '@kbn/presentation-publishing';
 import { UiActionsService } from '@kbn/ui-actions-plugin/public';
 import { MaybePromise } from '@kbn/utility-types';
@@ -79,10 +78,9 @@ export interface DefaultPresentationPanelApi
         PublishesBlockingError &
         PublishesDescription &
         PublishesDisabledActionIds &
-        HasParentApi<
-          PresentationContainer & Partial<Pick<PublishesTitle, 'hideTitle$'> & PublishesViewMode>
-        > &
-        CanLockHoverActions
+        HasParentApi &
+        CanLockHoverActions &
+        CanOverrideHoverActions
     > {}
 
 export type PresentationPanelProps<

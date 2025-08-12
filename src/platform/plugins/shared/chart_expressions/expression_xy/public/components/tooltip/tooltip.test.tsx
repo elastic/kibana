@@ -10,10 +10,16 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Tooltip } from './tooltip';
-import { generateSeriesId, LayersAccessorsTitles, LayersFieldFormats } from '../../helpers';
+import {
+  generateSeriesId,
+  InvertedRawValueMap,
+  LayersAccessorsTitles,
+  LayersFieldFormats,
+} from '../../helpers';
 import { XYChartSeriesIdentifier } from '@elastic/charts';
 import { sampleArgs, sampleLayer } from '../../../common/__mocks__';
 import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
+import { RawValue } from '@kbn/data-plugin/common';
 
 const getSeriesIdentifier = ({
   layerId,
@@ -44,6 +50,9 @@ const getSeriesIdentifier = ({
 
 describe('Tooltip', () => {
   const { data } = sampleArgs();
+  const invertedRawValueMap: InvertedRawValueMap = new Map(
+    data.columns.map((c) => [c.id, new Map<string, RawValue>()])
+  );
   const { layerId, xAccessor, splitAccessors = [], accessors } = sampleLayer;
   const seriesSplitAccessors = new Map();
   splitAccessors.forEach((splitAccessor) => {
@@ -112,7 +121,9 @@ describe('Tooltip', () => {
         fieldFormats={fieldFormats}
         titles={titles}
         formatFactory={formatFactory}
-        formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
+        formattedDatatables={{
+          [layerId]: { table: data, invertedRawValueMap, formattedColumns: {} },
+        }}
         splitAccessors={{ splitColumnAccessor, splitRowAccessor }}
         layers={[sampleLayer]}
       />
@@ -132,7 +143,9 @@ describe('Tooltip', () => {
         fieldFormats={fieldFormats}
         titles={titles}
         formatFactory={formatFactory}
-        formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
+        formattedDatatables={{
+          [layerId]: { table: data, invertedRawValueMap, formattedColumns: {} },
+        }}
         splitAccessors={{ splitColumnAccessor, splitRowAccessor }}
         xDomain={xDomain}
         layers={[sampleLayer]}
@@ -153,7 +166,9 @@ describe('Tooltip', () => {
         fieldFormats={fieldFormats}
         titles={titles}
         formatFactory={formatFactory}
-        formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
+        formattedDatatables={{
+          [layerId]: { table: data, invertedRawValueMap, formattedColumns: {} },
+        }}
         splitAccessors={{ splitColumnAccessor, splitRowAccessor }}
         xDomain={xDomain}
         layers={[sampleLayer]}
@@ -171,7 +186,9 @@ describe('Tooltip', () => {
         fieldFormats={fieldFormats}
         titles={titles}
         formatFactory={formatFactory}
-        formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
+        formattedDatatables={{
+          [layerId]: { table: data, invertedRawValueMap, formattedColumns: {} },
+        }}
         splitAccessors={{ splitColumnAccessor, splitRowAccessor }}
         xDomain={xDomain2}
         layers={[sampleLayer]}
@@ -191,7 +208,9 @@ describe('Tooltip', () => {
         fieldFormats={fieldFormats}
         titles={titles}
         formatFactory={formatFactory}
-        formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
+        formattedDatatables={{
+          [layerId]: { table: data, invertedRawValueMap, formattedColumns: {} },
+        }}
         splitAccessors={{ splitColumnAccessor, splitRowAccessor }}
         layers={[sampleLayer]}
       />
@@ -217,7 +236,9 @@ describe('Tooltip', () => {
         fieldFormats={fieldFormats}
         titles={titles}
         formatFactory={formatFactory}
-        formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
+        formattedDatatables={{
+          [layerId]: { table: data, invertedRawValueMap, formattedColumns: {} },
+        }}
         splitAccessors={{ splitColumnAccessor, splitRowAccessor }}
         layers={[sampleLayer]}
       />
@@ -245,7 +266,9 @@ describe('Tooltip', () => {
         fieldFormats={fieldFormats}
         titles={titles}
         formatFactory={formatFactory}
-        formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
+        formattedDatatables={{
+          [layerId]: { table: data, invertedRawValueMap, formattedColumns: {} },
+        }}
         splitAccessors={{ splitColumnAccessor, splitRowAccessor }}
         layers={[sampleLayer]}
       />
@@ -274,7 +297,9 @@ describe('Tooltip', () => {
         fieldFormats={fieldFormats}
         titles={titles}
         formatFactory={formatFactory}
-        formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
+        formattedDatatables={{
+          [layerId]: { table: data, invertedRawValueMap, formattedColumns: {} },
+        }}
         splitAccessors={{ splitColumnAccessor, splitRowAccessor }}
         layers={[sampleLayer]}
       />
@@ -302,7 +327,9 @@ describe('Tooltip', () => {
         fieldFormats={fieldFormats}
         titles={titles}
         formatFactory={formatFactory}
-        formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
+        formattedDatatables={{
+          [layerId]: { table: data, invertedRawValueMap, formattedColumns: {} },
+        }}
         splitAccessors={{ splitColumnAccessor }}
         layers={[sampleLayer]}
       />
@@ -330,7 +357,9 @@ describe('Tooltip', () => {
         fieldFormats={fieldFormats}
         titles={titles}
         formatFactory={formatFactory}
-        formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
+        formattedDatatables={{
+          [layerId]: { table: data, invertedRawValueMap, formattedColumns: {} },
+        }}
         splitAccessors={{ splitRowAccessor }}
         layers={[sampleLayer]}
       />

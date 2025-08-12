@@ -16,8 +16,16 @@ export interface CloudDataAttributes {
     token: string;
     security?: CloudSecurityAnswer;
   };
+  resourceData?: ResourceData;
 }
 
+export interface ResourceData {
+  project?: {
+    search?: {
+      type: 'general' | 'vector' | 'timeseries';
+    };
+  };
+}
 export interface CloudSecurityAnswer {
   useCase: 'siem' | 'cloud' | 'edr' | 'other';
   migration?: {

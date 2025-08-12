@@ -7,25 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, FC, useCallback, useContext, useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import { EuiCollapsibleNavBeta, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type {
   ChromeProjectNavigationNode,
-  RootNavigationItemDefinition,
-  RecentlyAccessedDefinition,
   NavigationTreeDefinitionUI,
+  RecentlyAccessedDefinition,
+  RootNavigationItemDefinition,
 } from '@kbn/core-chrome-browser';
-import type { Observable } from 'rxjs';
-import { EuiCollapsibleNavBeta, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import {
-  RecentlyAccessed,
-  NavigationPanel,
-  PanelProvider,
-  type PanelContentProvider,
-  FeedbackBtn,
-} from './components';
+import React, { createContext, FC, useCallback, useContext, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { EMPTY, Observable } from 'rxjs';
 import { useNavigation as useNavigationService } from '../services';
-import { NavigationSectionUI } from './components/navigation_section_ui';
+import {
+  FeedbackBtn,
+  NavigationPanel,
+  NavigationSectionUI,
+  PanelProvider,
+  RecentlyAccessed,
+} from './components';
 
 const isRecentlyAccessedDefinition = (
   item: ChromeProjectNavigationNode | RecentlyAccessedDefinition
@@ -43,13 +42,14 @@ const NavigationContext = createContext<Context>({
 
 export interface Props {
   navigationTree$: Observable<NavigationTreeDefinitionUI>;
-  dataTestSubj?: string;
-  panelContentProvider?: PanelContentProvider;
+  dataTestSubj$?: Observable<string | undefined>;
 }
 
-const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContentProvider }) => {
+const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj$ }) => {
   const { activeNodes$, selectedPanelNode, setSelectedPanelNode, isFeedbackBtnVisible$ } =
     useNavigationService();
+
+  const dataTestSubj = useObservable(dataTestSubj$ ?? EMPTY, undefined);
 
   const activeNodes = useObservable(activeNodes$, []);
   const navigationTree = useObservable(navigationTree$, { id: 'es', body: [] });
@@ -83,12 +83,7 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContent
   );
 
   return (
-    <PanelProvider
-      activeNodes={activeNodes}
-      contentProvider={panelContentProvider}
-      selectedNode={selectedPanelNode}
-      setSelectedNode={setSelectedPanelNode}
-    >
+    <PanelProvider selectedNode={selectedPanelNode} setSelectedNode={setSelectedPanelNode}>
       <NavigationContext.Provider value={contextValue}>
         {/* Main navigation content */}
         <EuiCollapsibleNavBeta.Body data-test-subj={dataTestSubj}>
@@ -102,6 +97,11 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContent
               <EuiSpacer size="s" />
               <FeedbackBtn solutionId={solutionId} />
             </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        {navigationTree.callout && (
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem>{renderNodes(navigationTree.callout)}</EuiFlexItem>
           </EuiFlexGroup>
         )}
         {/* Footer */}
@@ -120,6 +120,19 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContent
 
 export const Navigation = React.memo(NavigationComp) as typeof NavigationComp;
 
+/**
+ * A React hook for accessing the internal state and rendering logic of the `Navigation` component.
+ *
+ * This hook consumes a private context set up by the `Navigation` component itself.
+ * It is intended for use only by the immediate child components of `Navigation` (e.g., `NavGroup`, `NavLinks`)
+ * to coordinate their rendering with the parent.
+ *
+ * NOTE: This is distinct from the `useNavigation` hook in `src/services.tsx`, which provides
+ * access to the top-level navigation services.
+ *
+ * @returns The internal state of the `Navigation` component.
+ * @throws If the hook is used outside of a `Navigation` component.
+ */
 export function useNavigation() {
   const context = useContext(NavigationContext);
   if (!context) {

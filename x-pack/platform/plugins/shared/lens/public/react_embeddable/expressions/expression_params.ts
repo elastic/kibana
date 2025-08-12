@@ -17,8 +17,8 @@ import {
   cellValueTrigger,
   CELL_VALUE_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { DocumentToExpressionReturnType } from '../../async_services';
-import { LensDocument } from '../../persistence';
+import type { DocumentToExpressionReturnType } from '../../async_services';
+import type { LensDocument } from '../../persistence';
 import {
   GetCompatibleCellValueActions,
   IndexPatternMap,

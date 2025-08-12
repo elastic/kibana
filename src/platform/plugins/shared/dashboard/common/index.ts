@@ -7,29 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DashboardCapabilities } from './types';
-
-export type { DashboardPanelMap, DashboardPanelState } from './dashboard_container/types';
-
-export {
-  type InjectExtractDeps,
-  injectReferences,
-  extractReferences,
-} from './dashboard_saved_object/persistable_state/dashboard_saved_object_references';
+export type {
+  DashboardCapabilities,
+  DashboardLocatorParams,
+  DashboardSettings,
+  DashboardState,
+} from './types';
 
 export {
-  createInject,
-  createExtract,
-} from './dashboard_container/persistable_state/dashboard_container_references';
+  getReferencesForPanelId,
+  getReferencesForControls,
+  prefixReferencesFromPanel,
+} from './reference_utils';
 
-export { prefixReferencesFromPanel } from './dashboard_container/persistable_state/dashboard_container_references';
-
-export {
-  convertPanelsArrayToPanelMap,
-  convertPanelMapToPanelsArray,
-  generateNewPanelIds,
-} from './lib/dashboard_panel_converters';
-
-export const UI_SETTINGS = {
-  ENABLE_LABS_UI: 'labs:dashboard:enable_ui',
-};
+export { migrateLegacyQuery } from './migrate_legacy_query';
+export { cleanFiltersForSerialize } from './clean_filters_for_serialize';
+export { isDashboardSection } from './is_dashboard_section';
+export { isDashboardPanel } from './is_dashboard_panel';

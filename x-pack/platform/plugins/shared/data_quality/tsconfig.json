@@ -29,6 +29,7 @@
     "@kbn/deeplinks-observability",
     "@kbn/ebt-tools",
     "@kbn/core-application-common",
+    "@kbn/rule-data-utils",
   ],
   "exclude": ["target/**/*"]
 }

@@ -8,6 +8,7 @@
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { i18n } from '@kbn/i18n';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { ASSET_DETAILS_FLYOUT_COMPONENT_NAME } from '../constants';
 import { Content } from '../content/content';
@@ -24,7 +25,7 @@ export const Flyout = ({
   closeFlyout,
 }: ContentTemplateProps & { closeFlyout: () => void }) => {
   const [, setUrlState] = useAssetDetailsUrlState();
-  const { asset, loading } = useAssetDetailsRenderPropsContext();
+  const { entity, loading, schema } = useAssetDetailsRenderPropsContext();
   const { rightSideItems, tabEntries } = usePageHeader(tabs, links);
   const { activeTabId } = useTabSwitcherContext();
   const {
@@ -34,7 +35,7 @@ export const Flyout = ({
   useEffectOnce(() => {
     telemetry.reportAssetDetailsFlyoutViewed({
       componentName: ASSET_DETAILS_FLYOUT_COMPONENT_NAME,
-      assetType: asset.type,
+      assetType: entity.type,
       tabId: activeTabId,
     });
   });
@@ -48,16 +49,21 @@ export const Flyout = ({
     <EuiFlyout
       onClose={handleOnClose}
       data-component-name={ASSET_DETAILS_FLYOUT_COMPONENT_NAME}
-      data-asset-type={asset.type}
+      data-asset-type={entity.type}
+      aria-labelledby={i18n.translate('xpack.infra.assetDetails.flyout.ariaLabel', {
+        defaultMessage: '{name} details',
+        values: { name: entity.name },
+      })}
     >
       <>
         <EuiFlyoutHeader hasBorder>
           <FlyoutHeader
-            title={asset.name}
+            title={entity.name}
             tabs={tabEntries}
             rightSideItems={rightSideItems}
-            assetType={asset.type}
+            entityType={entity.type}
             loading={loading}
+            schema={schema}
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

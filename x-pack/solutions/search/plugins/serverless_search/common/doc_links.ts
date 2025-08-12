@@ -68,7 +68,7 @@ class ESDocLinks {
     this.logstash = newDocLinks.serverlessSearch.integrationsLogstash;
     this.beats = newDocLinks.serverlessSearch.integrationsBeats;
     this.kibanaFeedback = newDocLinks.kibana.feedback;
-    this.kibanaRunApiInConsole = newDocLinks.console.serverlessGuide;
+    this.kibanaRunApiInConsole = newDocLinks.console.guide;
     this.metadata = newDocLinks.security.mappingRoles;
     this.roleDescriptors = newDocLinks.serverlessSecurity.apiKeyPrivileges;
     this.securityApis = newDocLinks.apis.securityApis;

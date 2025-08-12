@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/streamlang",
+  "description": "A processing DSL for Streams",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0"
+}

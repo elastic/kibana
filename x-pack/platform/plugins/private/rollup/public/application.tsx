@@ -21,8 +21,6 @@ import { rollupJobsStore } from './crud_app/store';
 // @ts-ignore
 import { App } from './crud_app/app';
 
-import './index.scss';
-
 const AppWithExecutionContext = ({
   history,
   executionContext,

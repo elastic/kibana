@@ -25,6 +25,12 @@ export class TestPlugin implements Plugin<TestPluginSetup, TestPluginStart, {}, 
     router.post(
       {
         path: '/api/interpreter_functional/run_expression',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           body: schema.object({
             input: schema.maybe(schema.nullable(schema.object({}, { unknowns: 'allow' }))),

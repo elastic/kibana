@@ -7,8 +7,8 @@
 
 import type { RouteValidationFunction } from '@kbn/core/server';
 import { createPlainError, decodeOrThrow, formatErrors, throwErrors } from '@kbn/io-ts-utils';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 import { Errors, Type } from 'io-ts';
 
 export { createPlainError, decodeOrThrow, formatErrors, throwErrors };

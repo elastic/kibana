@@ -14,7 +14,7 @@ export default {
   title: 'Layout/Call to Action/Types',
   component: Component,
   argTypes: {
-    onManageSubscription: { action: 'onManageSubscription' },
+    onManageLicense: { action: 'onManageLicense' },
   },
 } as Meta<typeof Component>;
 

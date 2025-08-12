@@ -10,133 +10,104 @@
 import React from 'react';
 import { QueryLanguageSwitcher, QueryLanguageSwitcherProps } from './language_switcher';
 import { coreMock } from '@kbn/core/public/mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiButtonIcon, EuiIcon, EuiPopover } from '@elastic/eui';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { fireEvent, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 const startMock = coreMock.createStart();
 
+function renderSwitcher(testProps: Omit<QueryLanguageSwitcherProps, 'deps'>) {
+  return renderWithI18n(
+    <QueryLanguageSwitcher {...testProps} deps={{ docLinks: startMock.docLinks }} />
+  );
+}
+
 describe('LanguageSwitcher', () => {
-  function wrapInContext(testProps: Omit<QueryLanguageSwitcherProps, 'deps'>) {
-    return <QueryLanguageSwitcher {...testProps} deps={{ docLinks: startMock.docLinks }} />;
-  }
+  it('should select the lucene context menu if language is lucene', async () => {
+    renderSwitcher({ language: 'lucene', onSelectLanguage: jest.fn() });
 
-  it('should select the lucene context menu if language is lucene', () => {
-    const component = mountWithIntl(
-      wrapInContext({
-        language: 'lucene',
-        onSelectLanguage: () => {
-          return;
-        },
-      })
-    );
-    component.find(EuiButtonIcon).simulate('click');
-    expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
-    expect(component.find('[data-test-subj="luceneLanguageMenuItem"]').get(0).props.icon).toBe(
-      'check'
-    );
+    await userEvent.click(screen.getByRole('button'));
+    expect(
+      screen.getByTestId('luceneLanguageMenuItem').querySelector('[data-euiicon-type="check"]')
+    ).toBeTruthy();
   });
 
-  it('should select the kql context menu if language is kuery', () => {
-    const component = mountWithIntl(
-      wrapInContext({
-        language: 'kuery',
-        onSelectLanguage: () => {
-          return;
-        },
-      })
-    );
-    component.find(EuiButtonIcon).simulate('click');
-    expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
-    expect(component.find('[data-test-subj="kqlLanguageMenuItem"]').get(0).props.icon).toBe(
-      'check'
-    );
+  it('should select the kql context menu if language is kuery', async () => {
+    renderSwitcher({ language: 'kuery', onSelectLanguage: jest.fn() });
+    await userEvent.click(screen.getByRole('button'));
+    expect(
+      screen.getByTestId('kqlLanguageMenuItem').querySelector('[data-euiicon-type="check"]')
+    ).toBeTruthy();
   });
 
-  it('should select the lucene context menu if language is text', () => {
-    const component = mountWithIntl(
-      wrapInContext({
-        language: 'text',
-        onSelectLanguage: () => {
-          return;
-        },
-      })
-    );
-    component.find(EuiButtonIcon).simulate('click');
-    expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
-    expect(component.find('[data-test-subj="luceneLanguageMenuItem"]').get(0).props.icon).toBe(
-      'check'
-    );
+  it('should select the lucene context menu if language is text', async () => {
+    renderSwitcher({ language: 'text', onSelectLanguage: jest.fn() });
+
+    await userEvent.click(screen.getByRole('button'));
+    expect(
+      screen.getByTestId('luceneLanguageMenuItem').querySelector('[data-euiicon-type="check"]')
+    ).toBeTruthy();
   });
-  it('it set language on nonKql mode text', () => {
+  it('it set language on nonKql mode text', async () => {
     const onSelectLanguage = jest.fn();
-
-    const component = mountWithIntl(
-      wrapInContext({
-        language: 'kuery',
-        nonKqlMode: 'text',
-        onSelectLanguage,
-      })
-    );
-    component.find(EuiButtonIcon).simulate('click');
-    expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
-    expect(component.find('[data-test-subj="kqlLanguageMenuItem"]').get(0).props.icon).toBe(
-      'check'
-    );
-
-    component.find('[data-test-subj="luceneLanguageMenuItem"]').at(1).simulate('click');
+    renderSwitcher({
+      language: 'kuery',
+      nonKqlMode: 'text',
+      onSelectLanguage,
+    });
+    await userEvent.click(screen.getByRole('button'));
+    expect(
+      screen.getByTestId('kqlLanguageMenuItem').querySelector('[data-euiicon-type="check"]')
+    ).toBeTruthy();
+    expect(
+      screen.getByTestId('luceneLanguageMenuItem').querySelector('[data-euiicon-type="check"]')
+    ).toBeFalsy();
+    fireEvent.click(screen.getByTestId('luceneLanguageMenuItem'));
 
     expect(onSelectLanguage).toHaveBeenCalledWith('text');
   });
-  it('it set language on nonKql mode lucene', () => {
+  it('it set language on nonKql mode lucene', async () => {
     const onSelectLanguage = jest.fn();
 
-    const component = mountWithIntl(
-      wrapInContext({
-        language: 'kuery',
-        nonKqlMode: 'lucene',
-        onSelectLanguage,
-      })
-    );
-    component.find(EuiButtonIcon).simulate('click');
-    component.find('[data-test-subj="luceneLanguageMenuItem"]').at(1).simulate('click');
-
+    renderSwitcher({
+      language: 'kuery',
+      nonKqlMode: 'lucene',
+      onSelectLanguage,
+    });
+    await userEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByTestId('luceneLanguageMenuItem'));
     expect(onSelectLanguage).toHaveBeenCalledWith('lucene');
   });
 
-  it('it set language on kuery mode with nonKqlMode text', () => {
+  it('it set language on kuery mode with nonKqlMode text', async () => {
     const onSelectLanguage = jest.fn();
 
-    const component = mountWithIntl(
-      wrapInContext({
-        language: 'text',
-        nonKqlMode: 'text',
-        onSelectLanguage,
-      })
-    );
+    renderSwitcher({
+      language: 'text',
+      nonKqlMode: 'text',
+      onSelectLanguage,
+    });
 
-    expect(component.find(EuiIcon).prop('type')).toBe('filter');
-
-    component.find(EuiButtonIcon).simulate('click');
-    component.find('[data-test-subj="kqlLanguageMenuItem"]').at(1).simulate('click');
-
+    await userEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByTestId('kqlLanguageMenuItem'));
     expect(onSelectLanguage).toHaveBeenCalledWith('kuery');
   });
 
-  it('it set language on kuery mode with nonKqlMode lucene', () => {
+  it('it set language on kuery mode with nonKqlMode lucene', async () => {
     const onSelectLanguage = jest.fn();
 
-    const component = mountWithIntl(
-      wrapInContext({
-        language: 'lucene',
-        nonKqlMode: 'lucene',
-        onSelectLanguage,
-      })
-    );
-    component.find(EuiButtonIcon).simulate('click');
-    expect(component.find('[data-test-subj="luceneLanguageMenuItem"]').get(0).props.icon).toBe(
-      'check'
-    );
+    renderSwitcher({
+      language: 'lucene',
+      nonKqlMode: 'lucene',
+      onSelectLanguage,
+    });
 
-    component.find('[data-test-subj="kqlLanguageMenuItem"]').at(1).simulate('click');
+    await userEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByTestId('luceneLanguageMenuItem'));
+    expect(
+      screen.getByTestId('luceneLanguageMenuItem').querySelector('[data-euiicon-type="check"]')
+    ).toBeTruthy();
+
+    fireEvent.click(screen.getByTestId('kqlLanguageMenuItem'));
 
     expect(onSelectLanguage).toHaveBeenCalledWith('kuery');
   });

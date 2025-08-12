@@ -9,6 +9,8 @@
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
+import { isStringLiteral } from '../ast/is';
+import { TIME_DURATION_UNITS } from '../parser/constants';
 import { LeafPrinter } from '../pretty_print';
 import {
   ESQLAstComment,
@@ -35,11 +37,14 @@ import {
   ESQLStringLiteral,
   ESQLBinaryExpression,
   ESQLUnaryExpression,
-  ESQLTimeInterval,
   ESQLBooleanLiteral,
   ESQLNullLiteral,
   BinaryExpressionOperator,
   ESQLParamKinds,
+  ESQLMap,
+  ESQLMapEntry,
+  ESQLTimeDurationLiteral,
+  ESQLDatePeriodLiteral,
 } from '../types';
 import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
@@ -108,41 +113,73 @@ export namespace Builder {
       };
     };
 
-    export type SourceTemplate = { index: string } & Omit<AstNodeTemplate<ESQLSource>, 'name'>;
+    export namespace source {
+      export type SourceTemplate = {
+        prefix?: string | ESQLSource['prefix'];
+        index?: string | ESQLSource['index'];
+        selector?: string | ESQLSource['selector'];
+      } & Omit<AstNodeTemplate<ESQLSource>, 'name' | 'prefix' | 'index' | 'selector'> &
+        Partial<Pick<ESQLSource, 'name'>>;
 
-    export const source = (
-      indexOrTemplate: string | SourceTemplate,
-      fromParser?: Partial<AstNodeParserFields>
-    ): ESQLSource => {
-      const template: SourceTemplate =
-        typeof indexOrTemplate === 'string'
-          ? { sourceType: 'index', index: indexOrTemplate }
-          : indexOrTemplate;
-      const { index, cluster } = template;
-      return {
-        ...template,
-        ...Builder.parserFields(fromParser),
-        type: 'source',
-        name: (cluster ? cluster + ':' : '') + index,
-      };
-    };
+      export const node = (
+        indexOrTemplate: string | ESQLStringLiteral | SourceTemplate,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLSource => {
+        const template: SourceTemplate =
+          typeof indexOrTemplate === 'string' || isStringLiteral(indexOrTemplate)
+            ? { sourceType: 'index', index: indexOrTemplate }
+            : indexOrTemplate;
+        const prefix: ESQLSource['prefix'] = !template.prefix
+          ? undefined
+          : typeof template.prefix === 'string'
+          ? Builder.expression.literal.string(template.prefix, { unquoted: true })
+          : template.prefix;
+        const index: ESQLSource['index'] = !template.index
+          ? undefined
+          : typeof template.index === 'string'
+          ? Builder.expression.literal.string(template.index, { unquoted: true })
+          : template.index;
+        const selector: ESQLSource['selector'] = !template.selector
+          ? undefined
+          : typeof template.selector === 'string'
+          ? Builder.expression.literal.string(template.selector, { unquoted: true })
+          : template.selector;
+        const sourceNode: ESQLSource = {
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'source',
+          prefix,
+          index,
+          selector,
+          name: template.name ?? '',
+        };
 
-    export const indexSource = (
-      index: string,
-      cluster?: string,
-      template?: Omit<AstNodeTemplate<ESQLSource>, 'name' | 'index' | 'cluster'>,
-      fromParser?: Partial<AstNodeParserFields>
-    ): ESQLSource => {
-      return {
-        ...template,
-        ...Builder.parserFields(fromParser),
-        index,
-        cluster,
-        sourceType: 'index',
-        type: 'source',
-        name: (cluster ? cluster + ':' : '') + index,
+        if (!sourceNode.name) {
+          sourceNode.name = LeafPrinter.source(sourceNode);
+        }
+
+        return sourceNode;
       };
-    };
+
+      export const index = (
+        indexName: string,
+        prefix?: string | ESQLSource['prefix'],
+        selector?: string | ESQLSource['selector'],
+        template?: Omit<AstNodeTemplate<ESQLSource>, 'name' | 'index' | 'prefix'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLSource => {
+        return Builder.expression.source.node(
+          {
+            ...template,
+            index: indexName,
+            prefix,
+            selector,
+            sourceType: 'index',
+          },
+          fromParser
+        );
+      };
+    }
 
     export type ColumnTemplate = Omit<AstNodeTemplate<ESQLColumn>, 'name' | 'quoted' | 'parts'>;
 
@@ -282,6 +319,37 @@ export namespace Builder {
       fromParser?: Partial<AstNodeParserFields>
     ) => Builder.expression.func.binary('where', args, template, fromParser);
 
+    export namespace list {
+      export const literal = (
+        template: Omit<AstNodeTemplate<ESQLList>, 'name' | 'values'> &
+          Partial<Pick<ESQLList, 'values'>> = {},
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLList => {
+        return {
+          values: [],
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'list',
+          name: '',
+        };
+      };
+
+      export const tuple = (
+        template: Omit<AstNodeTemplate<ESQLList>, 'name' | 'values'> &
+          Partial<Pick<ESQLList, 'values'>> = {},
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLList => {
+        return {
+          values: [],
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'list',
+          subtype: 'tuple',
+          name: '',
+        };
+      };
+    }
+
     export namespace literal {
       /**
        * Constructs a NULL literal node.
@@ -377,20 +445,22 @@ export namespace Builder {
       };
 
       /**
-       * Constructs "time interval" literal node.
-       *
-       * @example 1337 milliseconds
+       * Constructs AST nodes from timespan literals (e.g. 1 day, 2s)
        */
-      export const qualifiedInteger = (
-        quantity: ESQLTimeInterval['quantity'],
-        unit: ESQLTimeInterval['unit'],
+      export const timespan = (
+        quantity: ESQLTimeDurationLiteral['quantity'],
+        unit: ESQLTimeDurationLiteral['unit'],
         fromParser?: Partial<AstNodeParserFields>
-      ): ESQLTimeInterval => {
+      ): ESQLTimeDurationLiteral | ESQLDatePeriodLiteral => {
         return {
           ...Builder.parserFields(fromParser),
-          type: 'timeInterval',
+          type: 'literal',
+          literalType: TIME_DURATION_UNITS.has(unit.toLowerCase())
+            ? 'time_duration'
+            : 'date_period',
           unit,
           quantity,
+          value: `${quantity} ${unit}`,
           name: `${quantity} ${unit}`,
         };
       };
@@ -404,15 +474,16 @@ export namespace Builder {
           Partial<Pick<ESQLStringLiteral, 'name'>>,
         fromParser?: Partial<AstNodeParserFields>
       ): ESQLStringLiteral => {
-        const value =
-          '"' +
-          valueUnquoted
-            .replace(/\\/g, '\\\\')
-            .replace(/"/g, '\\"')
-            .replace(/\n/g, '\\n')
-            .replace(/\r/g, '\\r')
-            .replace(/\t/g, '\\t') +
-          '"';
+        const value = !!template?.unquoted
+          ? valueUnquoted
+          : '"' +
+            valueUnquoted
+              .replace(/\\/g, '\\\\')
+              .replace(/"/g, '\\"')
+              .replace(/\n/g, '\\n')
+              .replace(/\r/g, '\\r')
+              .replace(/\t/g, '\\t') +
+            '"';
         const name = template?.name ?? value;
         const node: ESQLStringLiteral = {
           ...template,
@@ -426,19 +497,43 @@ export namespace Builder {
 
         return node;
       };
-
-      export const list = (
-        template: Omit<AstNodeTemplate<ESQLList>, 'name'>,
-        fromParser?: Partial<AstNodeParserFields>
-      ): ESQLList => {
-        return {
-          ...template,
-          ...Builder.parserFields(fromParser),
-          type: 'list',
-          name: '',
-        };
-      };
     }
+
+    export const map = (
+      template: Omit<AstNodeTemplate<ESQLMap>, 'name' | 'entries'> &
+        Partial<Pick<ESQLMap, 'entries'>> = {},
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLMap => {
+      const entries = template.entries ?? [];
+
+      return {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        name: '',
+        type: 'map',
+        entries,
+      };
+    };
+
+    export const entry = (
+      key: string | ESQLMapEntry['key'],
+      value: ESQLMapEntry['value'],
+      fromParser?: Partial<AstNodeParserFields>,
+      template?: Omit<AstNodeTemplate<ESQLMapEntry>, 'key' | 'value'>
+    ): ESQLMapEntry => {
+      if (typeof key === 'string') {
+        key = Builder.expression.literal.string(key);
+      }
+
+      return {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        name: '',
+        type: 'map-entry',
+        key,
+        value,
+      };
+    };
   }
 
   export const identifier = (

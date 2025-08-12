@@ -8,7 +8,7 @@
  */
 
 import { isGreaterOrEqualRt } from '.';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 
 describe('inRangeRT', () => {
   test('passes if value is a positive number', () => {

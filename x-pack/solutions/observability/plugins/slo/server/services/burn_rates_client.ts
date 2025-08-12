@@ -10,7 +10,7 @@ import {
   AggregationsDateRangeAggregate,
   AggregationsSumAggregate,
   AggregationsValueCountAggregate,
-  MsearchMultisearchBody,
+  SearchSearchRequestBody,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
@@ -92,7 +92,7 @@ function commonQuery(
   slo: SLODefinition,
   instanceId: string,
   dateRange: DateRange
-): Pick<MsearchMultisearchBody, 'size' | 'query'> {
+): Pick<SearchSearchRequestBody, 'size' | 'query'> {
   const filter: QueryDslQueryContainer[] = [
     { term: { 'slo.id': slo.id } },
     { term: { 'slo.revision': slo.revision } },

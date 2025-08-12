@@ -11,13 +11,15 @@ import { ALERTS_PREVIEW, ALERT_SUMMARY } from '../../translations';
 const mockProps = {
   alertsPreviewStackBy0: 'mockAlertsPreviewStackBy0',
   alertSummaryStackBy0: 'mockAlertSummaryStackBy0',
-  end: 'now',
-  filters: [],
-  maxAlerts: 100,
-  query: { query: '', language: 'kuery' },
+  settings: {
+    end: 'now',
+    filters: [],
+    query: { query: '', language: 'kuery' },
+    size: 100,
+    start: 'now-7',
+  },
   setAlertsPreviewStackBy0: jest.fn(),
   setAlertSummaryStackBy0: jest.fn(),
-  start: 'now-7',
 };
 
 describe('getTabs', () => {

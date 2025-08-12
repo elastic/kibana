@@ -18,7 +18,7 @@ import { GaugeTicksPositions, GaugeColorModes } from '@kbn/expression-gauge-plug
 import { getMaxValue, getMinValue } from '@kbn/expression-gauge-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import { css } from '@emotion/react';
-import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
+import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import type { GaugeVisualizationState } from './constants';
@@ -168,12 +168,7 @@ export function GaugeDimensionEditor(
                     defaultMessage: 'Ticks on bands',
                   })}
 
-                  <EuiIcon
-                    type="questionInCircle"
-                    color="subdued"
-                    size="s"
-                    className="eui-alignTop"
-                  />
+                  <EuiIcon type="question" color="subdued" size="s" className="eui-alignTop" />
                 </span>
               </TooltipWrapper>
             }

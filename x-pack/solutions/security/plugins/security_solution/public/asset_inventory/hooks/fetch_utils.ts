@@ -6,6 +6,7 @@
  */
 
 import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
+import { ASSET_FIELDS } from '../constants';
 
 export const getRuntimeMappingsFromSort = (fields: string[], sort: string[][]) => {
   return sort
@@ -34,7 +35,7 @@ export const getMultiFieldsSort = (sort: string[][]) => {
  * By default, ES will sort keyword fields in case-sensitive format, the
  * following fields are required to have a case-insensitive sorting.
  */
-const fieldsRequiredSortingByPainlessScript = ['entity.name']; // TODO TBD
+const fieldsRequiredSortingByPainlessScript: string[] = [ASSET_FIELDS.ENTITY_NAME]; // TODO TBD
 
 /**
  * Generates Painless sorting if the given field is matched or returns default sorting

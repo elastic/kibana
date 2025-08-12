@@ -29,24 +29,45 @@ export const createEventFilters = async (
   if (!eventFilters?.nonInteractiveSession) {
     return;
   }
+
   try {
-    // Attempt to Create the Event Filter List. It won't create the list if it already exists.
-    // So we can skip the validation and ignore the conflict error
-    await exceptionsClient.createExceptionList({
-      name: ENDPOINT_ARTIFACT_LISTS.eventFilters.name,
-      namespaceType: 'agnostic',
-      description: ENDPOINT_ARTIFACT_LISTS.eventFilters.description,
+    const existingList = await exceptionsClient.getExceptionList({
       listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
-      type: ExceptionListTypeEnum.ENDPOINT_EVENTS,
-      immutable: false,
-      meta: undefined,
-      tags: [],
-      version: 1,
+      namespaceType: 'agnostic',
+      id: undefined,
     });
+
+    if (existingList) {
+      logger.debug(
+        `Event Filter List with id "${ENDPOINT_ARTIFACT_LISTS.eventFilters.id}" already exists. Skipping creation.`
+      );
+    } else {
+      logger.debug(
+        `Event Filter List with id "${ENDPOINT_ARTIFACT_LISTS.eventFilters.id}" not found. Attempting creation.`
+      );
+      await exceptionsClient.createExceptionList({
+        name: ENDPOINT_ARTIFACT_LISTS.eventFilters.name,
+        namespaceType: 'agnostic',
+        description: ENDPOINT_ARTIFACT_LISTS.eventFilters.description,
+        listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+        type: ExceptionListTypeEnum.ENDPOINT_EVENTS,
+        immutable: false,
+        meta: undefined,
+        tags: [],
+        version: 1,
+      });
+      logger.debug(
+        `Successfully created Event Filter List with id "${ENDPOINT_ARTIFACT_LISTS.eventFilters.id}".`
+      );
+    }
   } catch (err) {
-    // Ignoring error 409 (Conflict)
-    if (!SavedObjectsErrorHelpers.isConflictError(err)) {
-      logger.error(`Error creating Event Filter List: ${wrapErrorIfNeeded(err)}`);
+    if (SavedObjectsErrorHelpers.isConflictError(err)) {
+      logger.debug(
+        `Event Filter List with id "${ENDPOINT_ARTIFACT_LISTS.eventFilters.id}" already exists. Skipping creation.`
+      );
+    } else {
+      logger.error(`Error during Event Filter List handling: ${wrapErrorIfNeeded(err)}`);
+
       return;
     }
   }

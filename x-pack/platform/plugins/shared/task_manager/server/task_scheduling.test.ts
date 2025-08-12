@@ -17,6 +17,7 @@ import { mockLogger } from './test_utils';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { taskManagerMock } from './mocks';
 import { omit } from 'lodash';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 let fakeTimer: sinon.SinonFakeTimers;
 jest.mock('uuid', () => ({
@@ -71,13 +72,43 @@ describe('TaskScheduling', () => {
     };
     await taskScheduling.schedule(task);
     expect(mockTaskStore.schedule).toHaveBeenCalled();
-    expect(mockTaskStore.schedule).toHaveBeenCalledWith({
-      ...task,
-      id: undefined,
-      schedule: undefined,
-      traceparent: 'parent',
-      enabled: true,
-    });
+    expect(mockTaskStore.schedule).toHaveBeenCalledWith(
+      {
+        ...task,
+        id: undefined,
+        schedule: undefined,
+        traceparent: 'parent',
+        enabled: true,
+      },
+      undefined
+    );
+  });
+
+  test('should call task store with request if provided', async () => {
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const task = {
+      taskType: 'foo',
+      params: {},
+      state: {},
+    };
+
+    const mockRequest = httpServerMock.createKibanaRequest();
+
+    await taskScheduling.schedule(task, { request: mockRequest });
+
+    expect(mockTaskStore.schedule).toHaveBeenCalled();
+    expect(mockTaskStore.schedule).toHaveBeenCalledWith(
+      {
+        ...task,
+        id: undefined,
+        schedule: undefined,
+        traceparent: 'parent',
+        enabled: true,
+      },
+      {
+        request: mockRequest,
+      }
+    );
   });
 
   test('allows scheduling tasks that are disabled', async () => {
@@ -90,13 +121,16 @@ describe('TaskScheduling', () => {
     };
     await taskScheduling.schedule(task);
     expect(mockTaskStore.schedule).toHaveBeenCalled();
-    expect(mockTaskStore.schedule).toHaveBeenCalledWith({
-      ...task,
-      id: undefined,
-      schedule: undefined,
-      traceparent: 'parent',
-      enabled: false,
-    });
+    expect(mockTaskStore.schedule).toHaveBeenCalledWith(
+      {
+        ...task,
+        id: undefined,
+        schedule: undefined,
+        traceparent: 'parent',
+        enabled: false,
+      },
+      undefined
+    );
   });
 
   test('allows scheduling existing tasks that may have already been scheduled', async () => {
@@ -839,15 +873,18 @@ describe('TaskScheduling', () => {
       };
       await taskScheduling.bulkSchedule([task]);
       expect(mockTaskStore.bulkSchedule).toHaveBeenCalled();
-      expect(mockTaskStore.bulkSchedule).toHaveBeenCalledWith([
-        {
-          ...task,
-          id: undefined,
-          schedule: undefined,
-          traceparent: 'parent',
-          enabled: true,
-        },
-      ]);
+      expect(mockTaskStore.bulkSchedule).toHaveBeenCalledWith(
+        [
+          {
+            ...task,
+            id: undefined,
+            schedule: undefined,
+            traceparent: 'parent',
+            enabled: true,
+          },
+        ],
+        undefined
+      );
     });
 
     test('allows scheduling tasks that are disabled', async () => {
@@ -865,22 +902,25 @@ describe('TaskScheduling', () => {
       };
       await taskScheduling.bulkSchedule([task1, task2]);
       expect(mockTaskStore.bulkSchedule).toHaveBeenCalled();
-      expect(mockTaskStore.bulkSchedule).toHaveBeenCalledWith([
-        {
-          ...task1,
-          id: undefined,
-          schedule: undefined,
-          traceparent: 'parent',
-          enabled: true,
-        },
-        {
-          ...task2,
-          id: undefined,
-          schedule: undefined,
-          traceparent: 'parent',
-          enabled: false,
-        },
-      ]);
+      expect(mockTaskStore.bulkSchedule).toHaveBeenCalledWith(
+        [
+          {
+            ...task1,
+            id: undefined,
+            schedule: undefined,
+            traceparent: 'parent',
+            enabled: true,
+          },
+          {
+            ...task2,
+            id: undefined,
+            schedule: undefined,
+            traceparent: 'parent',
+            enabled: false,
+          },
+        ],
+        undefined
+      );
     });
 
     test('doesnt allow naively rescheduling existing tasks that have already been scheduled', async () => {

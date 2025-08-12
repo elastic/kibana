@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import {
-  FieldDefinition,
-  IngestStreamGetResponse,
-  isWiredStreamGetResponse,
-} from '@kbn/streams-schema';
+import { FieldDefinition, Streams } from '@kbn/streams-schema';
 import { ErrorActorEvent, fromPromise } from 'xstate5';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { getFormattedError } from '../../../../../util/errors';
 import { StreamEnrichmentServiceDependencies } from './types';
 import { processorConverter } from '../../utils';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
@@ -22,7 +19,7 @@ import { ProcessorDefinitionWithUIAttributes } from '../../types';
 export type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_ingest 2023-10-31'>;
 
 export interface UpsertStreamInput {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   processors: ProcessorDefinitionWithUIAttributes[];
   fields?: FieldDefinition;
 }
@@ -37,7 +34,7 @@ export function createUpsertStreamActor({
         path: {
           name: input.definition.stream.name,
         },
-        body: isWiredStreamGetResponse(input.definition)
+        body: Streams.WiredStream.GetResponse.is(input.definition)
           ? {
               ingest: {
                 ...input.definition.stream.ingest,
@@ -72,11 +69,12 @@ export const createUpsertStreamFailureNofitier =
   ({ toasts }: { toasts: IToasts }) =>
   (params: { event: unknown }) => {
     const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
-    toasts.addError(new Error(event.error.body.message), {
+    const formattedError = getFormattedError(event.error);
+    toasts.addError(formattedError, {
       title: i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.saveChangesError',
         { defaultMessage: "An issue occurred saving processors' changes." }
       ),
-      toastMessage: event.error.body.message,
+      toastMessage: formattedError.message,
     });
   };

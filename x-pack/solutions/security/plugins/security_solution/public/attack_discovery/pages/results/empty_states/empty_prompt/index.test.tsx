@@ -11,8 +11,10 @@ import React from 'react';
 import { EmptyPrompt } from '.';
 import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
 import { TestProviders } from '../../../../../common/mock';
+import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
 
 jest.mock('../../../../../assistant/use_assistant_availability');
+jest.mock('../../../use_kibana_feature_flags');
 
 describe('EmptyPrompt', () => {
   const alertsCount = 20;
@@ -22,6 +24,10 @@ describe('EmptyPrompt', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    (useKibanaFeatureFlags as jest.Mock).mockReturnValue({
+      attackDiscoveryAlertsEnabled: false,
+    });
   });
 
   describe('when the user has the assistant privilege', () => {
@@ -183,6 +189,45 @@ describe('EmptyPrompt', () => {
       const generateButton = screen.getByTestId('generate');
 
       expect(generateButton).toBeDisabled();
+    });
+  });
+
+  describe('when attackDiscoveryAlertsEnabled is true', () => {
+    const defaultProps = {
+      alertsCount: 20,
+      aiConnectorsCount: 2,
+      attackDiscoveriesCount: 0,
+      isLoading: false,
+      isDisabled: false,
+      onGenerate: jest.fn(),
+    };
+
+    beforeEach(() => {
+      (useKibanaFeatureFlags as jest.Mock).mockReturnValue({
+        attackDiscoveryAlertsEnabled: true,
+      });
+      (useAssistantAvailability as jest.Mock).mockReturnValue({
+        hasAssistantPrivilege: true,
+        isAssistantEnabled: true,
+      });
+      jest.clearAllMocks();
+      render(
+        <TestProviders>
+          <EmptyPrompt {...defaultProps} />
+        </TestProviders>
+      );
+    });
+
+    it('renders the history title', () => {
+      const historyTitle = screen.getByTestId('historyTitle');
+
+      expect(historyTitle).toBeInTheDocument();
+    });
+
+    it('renders the history body', () => {
+      const historyBody = screen.getByTestId('historyBody');
+
+      expect(historyBody).toBeInTheDocument();
     });
   });
 });

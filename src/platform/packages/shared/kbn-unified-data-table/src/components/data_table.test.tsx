@@ -21,6 +21,7 @@ import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
   EuiDataGridCustomBodyProps,
+  EuiThemeProvider,
 } from '@elastic/eui';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -135,27 +136,29 @@ const renderDataTable = async (props: Partial<UnifiedDataTableProps>) => {
     });
 
     return (
-      <IntlProvider locale="en">
-        <DataTable
-          {...props}
-          columns={columns}
-          onSetColumns={onSetColumns}
-          settings={settings}
-          onResize={({ columnId, width }) => {
-            setSettings({
-              ...settings,
-              columns: {
-                ...settings?.columns,
-                [columnId]: {
-                  width,
+      <EuiThemeProvider>
+        <IntlProvider locale="en">
+          <DataTable
+            {...props}
+            columns={columns}
+            onSetColumns={onSetColumns}
+            settings={settings}
+            onResize={({ columnId, width }) => {
+              setSettings({
+                ...settings,
+                columns: {
+                  ...settings?.columns,
+                  [columnId]: {
+                    width,
+                  },
                 },
-              },
-            });
-          }}
-          sort={sort}
-          onSort={setSort as UnifiedDataTableProps['onSort']}
-        />
-      </IntlProvider>
+              });
+            }}
+            sort={sort}
+            onSort={setSort as UnifiedDataTableProps['onSort']}
+          />
+        </IntlProvider>
+      </EuiThemeProvider>
     );
   };
 
@@ -797,9 +800,13 @@ describe('UnifiedDataTable', () => {
         expect(
           findTestSubject(component, 'exampleRowControl-visBarVerticalStacked').exists()
         ).toBeTruthy();
-        expect(
-          findTestSubject(component, 'unifiedDataTable_additionalRowControl_menuControl').exists()
-        ).toBeTruthy();
+
+        // The other actions are within the popover
+        findTestSubject(component, 'unifiedDataTable_additionalRowControl_actionsMenu')
+          .first()
+          .simulate('click');
+        expect(findTestSubject(component, 'exampleRowControl-heart').exists()).toBeTruthy();
+        expect(findTestSubject(component, 'exampleRowControl-inspect').exists()).toBeTruthy();
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1555,7 +1562,7 @@ describe('UnifiedDataTable', () => {
 
         expect(screen.getByTestId(BUTTON_TEST_SUBJ)).toBeInTheDocument();
 
-        screen.getByTestId(BUTTON_TEST_SUBJ).click();
+        await userEvent.click(screen.getByTestId(BUTTON_TEST_SUBJ));
 
         expect(screen.getByTestId(INPUT_TEST_SUBJ)).toBeInTheDocument();
 

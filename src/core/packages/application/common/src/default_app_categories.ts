@@ -20,7 +20,6 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     euiIconType: 'logoKibana',
     order: 1000,
   },
-  // BOOKMARK - List of Kibana solutions - TODO handle the new 'chat' project type - https://elastic.slack.com/archives/C061KHPJS2C/p1741691346619339
   enterpriseSearch: {
     id: 'enterpriseSearch',
     label: i18n.translate('core.ui.searchNavList.label', {
@@ -44,6 +43,14 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     }),
     order: 4000,
     euiIconType: 'logoSecurity',
+  },
+  chat: {
+    id: 'chat',
+    label: i18n.translate('core.ui.chatNavList.label', {
+      defaultMessage: 'Workchat',
+    }),
+    order: 4500,
+    euiIconType: 'logoElasticsearch',
   },
   management: {
     id: 'management',

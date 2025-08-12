@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DataSourceType } from '../../../../../../detections/pages/detection_engine/rules/types';
-import { DataSourceType as DataSourceTypeSnakeCase } from '../../../../../../../common/api/detection_engine';
+import { DataSourceType } from '../../../../../common/types';
 import type { DiffableRule } from '../../../../../../../common/api/detection_engine';
+import { DataSourceType as DataSourceTypeSnakeCase } from '../../../../../../../common/api/detection_engine';
 
 interface UseRuleIndexPatternParameters {
   dataSourceType: DataSourceType;

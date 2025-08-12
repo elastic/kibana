@@ -132,6 +132,9 @@ export const RuleSchedule = () => {
             data-test-subj="ruleScheduleNumberInput"
             onChange={onIntervalNumberChange}
             onKeyDown={onKeyDown}
+            id="ruleScheduleNumberInput"
+            itemID="ruleScheduleNumberInput"
+            aria-label={SCHEDULE_TITLE_PREFIX}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={3}>

@@ -6,45 +6,44 @@
  */
 import React from 'react';
 import { screen } from '@testing-library/react';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { NoDataFound } from './no_data_found';
-import { TEST_SUBJ_ONBOARDING_SUCCESS_CALLOUT } from '../../constants';
 import { renderWithTestProvider } from '../../test/test_provider';
+import { mockUseAddIntegrationPath } from './hooks/use_add_integration_path.mock';
+import { useAddIntegrationPath } from './hooks/use_add_integration_path';
 
-// Mocking components which implementation details are out of scope for this unit test
-jest.mock('../../../onboarding/components/onboarding_context', () => ({
-  OnboardingContextProvider: () => <div data-test-subj="onboarding-grid" />,
-}));
-jest.mock('./onboarding_success_callout', () => ({
-  OnboardingSuccessCallout: () => (
-    <div data-test-subj="asset-inventory-onboarding-success-callout" />
-  ),
-}));
-jest.mock('../../../common/hooks/use_space_id');
+jest.mock('./hooks/use_add_integration_path');
 
 describe('NoDataFound Component', () => {
-  beforeEach(() => {
-    (useSpaceId as jest.Mock).mockReturnValue('default');
-  });
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  it('should render loading component when spaceId is not available', () => {
-    (useSpaceId as jest.Mock).mockReturnValue(null);
+  it('should render the No Data Found with an add integration link using the integration path', () => {
+    (useAddIntegrationPath as jest.Mock).mockReturnValue(
+      mockUseAddIntegrationPath({ addIntegrationPath: '/test-integration-path', isLoading: false })
+    );
 
     renderWithTestProvider(<NoDataFound />);
 
-    expect(screen.getByTestId('asset-inventory-loading')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /connect sources to discover assets/i })
+    ).toBeInTheDocument();
+
+    // Check that the add integration link is present and has the correct href
+    const addLink = screen.getByRole('link', { name: /add integration/i });
+    expect(addLink).toBeInTheDocument();
+    expect(addLink).toHaveAttribute('href', '/test-integration-path');
+    expect(addLink).not.toBeDisabled();
   });
 
-  it('should render the No Data Found related content when spaceId is available', () => {
+  it('should disable the add integration button when loading', () => {
+    (useAddIntegrationPath as jest.Mock).mockReturnValue(
+      mockUseAddIntegrationPath({ isLoading: true })
+    );
+
     renderWithTestProvider(<NoDataFound />);
 
-    expect(screen.getByText(/start onboarding your assets/i)).toBeInTheDocument();
-
-    expect(screen.getByTestId(TEST_SUBJ_ONBOARDING_SUCCESS_CALLOUT)).toBeInTheDocument();
-
-    expect(screen.getByTestId('onboarding-grid')).toBeInTheDocument();
+    const addButton = screen.getByRole('button', { name: /add integration/i });
+    expect(addButton).toBeDisabled();
   });
 });

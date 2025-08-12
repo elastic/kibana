@@ -9,31 +9,40 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { DATASTREAM_TYPE_FIELD, getFieldValue, PROCESSOR_EVENT_FIELD } from '@kbn/discover-utils';
+import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../../common/constants';
 import type { DocumentProfileProvider } from '../../../../profiles';
-import { DocumentType } from '../../../../profiles';
+import { DocumentType, SolutionType } from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import { createGetDocViewer } from './accessors';
 
 const OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID = 'observability-traces-span-document-profile';
 
-export const createObservabilityTracesSpanDocumentProfileProvider = (
-  services: ProfileProviderServices
-): DocumentProfileProvider => ({
-  isExperimental: true,
+export const createObservabilityTracesSpanDocumentProfileProvider = ({
+  tracesContextService,
+  apmErrorsContextService,
+  logsContextService,
+}: ProfileProviderServices): DocumentProfileProvider => ({
   profileId: OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID,
+  restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
-    getDocViewer: createGetDocViewer('traces-*'),
-    // TODO add APM configured indexes instead of traces-*, currently blocked by https://github.com/elastic/kibana/issues/211414
-    // this will be handled in https://github.com/elastic/kibana/issues/213112
+    getDocViewer: createGetDocViewer({
+      apm: {
+        errors: apmErrorsContextService.getErrorsIndexPattern(),
+        traces: tracesContextService.getAllTracesIndexPattern(),
+      },
+      logs: logsContextService.getAllLogsIndexPattern() ?? '',
+    }),
   },
-  resolve: ({ record }) => {
-    const isApmEnabled = services.application.capabilities.apm?.show;
+  resolve: ({ record, rootContext }) => {
+    const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;
 
-    if (!isApmEnabled) {
+    if (!isObservabilitySolutionView) {
       return { isMatch: false };
     }
 
-    const isSpanRecord = getIsSpanRecord(record);
+    const isSpanRecord = getIsSpanRecord({
+      record,
+    });
 
     if (!isSpanRecord) {
       return { isMatch: false };
@@ -48,14 +57,16 @@ export const createObservabilityTracesSpanDocumentProfileProvider = (
   },
 });
 
-const getIsSpanRecord = (record: DataTableRecord) => {
-  // TODO add condition to check on the document _index against APM configured indexes, currently blocked by https://github.com/elastic/kibana/issues/211414
-  // this will be handled in https://github.com/elastic/kibana/issues/213112
+const getIsSpanRecord = ({ record }: { record: DataTableRecord }) => {
   return isSpanDocument(record);
 };
 
 const isSpanDocument = (record: DataTableRecord) => {
   const dataStreamType = getFieldValue(record, DATASTREAM_TYPE_FIELD);
   const processorEvent = getFieldValue(record, PROCESSOR_EVENT_FIELD);
-  return dataStreamType === 'traces' && processorEvent === 'span';
+
+  const isApmSpan = processorEvent === 'span';
+  const isOtelSpan = processorEvent == null;
+
+  return dataStreamType === 'traces' && (isApmSpan || isOtelSpan);
 };

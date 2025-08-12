@@ -226,26 +226,26 @@ const MetaInfoDetails = memo<MetaInfoDetailsProps>(({ label, value1, value2, dat
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiText size="xs" style={{ fontFamily: 'Inter' }}>
+        <EuiText size="xs" css={{ fontFamily: 'Inter' }}>
           {label}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}-value1`}>
-        <EuiBadge color="default" style={{ fontFamily: 'Inter' }}>
+        <EuiBadge color="default" css={{ fontFamily: 'Inter' }}>
           {value1}
         </EuiBadge>
       </EuiFlexItem>
       {value2 != null && (
         <>
           <EuiFlexItem grow={false}>
-            <EuiText size="xs" style={{ fontFamily: 'Inter' }}>
+            <EuiText size="xs" css={{ fontFamily: 'Inter' }}>
               {i18n.EXCEPTION_ITEM_META_BY}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}-value2`}>
             <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={false}>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow" style={{ fontFamily: 'Inter' }}>
+                <EuiBadge color="hollow" css={{ fontFamily: 'Inter' }}>
                   {value2}
                 </EuiBadge>
               </EuiFlexItem>

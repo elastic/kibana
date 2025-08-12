@@ -6,53 +6,53 @@
  */
 
 import React, { useMemo } from 'react';
+import { SearchHit } from '@kbn/es-types';
+import { EuiTitle, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress, EuiSpacer } from '@elastic/eui';
-import { useIndexMapping } from '../../hooks/api/use_index_mappings';
-import { AddDocumentsCodeExample } from './add_documents_code_example';
-import { IndexDocuments as IndexDocumentsType } from '../../hooks/api/use_document_search';
-import { DocumentList } from './document_list';
 import type { UserStartPrivilegesResponse } from '../../../common';
+import { Mappings } from '../../types';
+import { AddDocumentsCodeExample } from './add_documents_code_example';
+import { DocumentList } from './document_list';
 
 interface IndexDocumentsProps {
   indexName: string;
-  indexDocuments?: IndexDocumentsType;
-  isInitialLoading: boolean;
+  documents: SearchHit[];
+  mappings?: Mappings;
   userPrivileges?: UserStartPrivilegesResponse;
 }
 
 export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
   indexName,
-  indexDocuments,
-  isInitialLoading,
+  documents,
+  mappings,
   userPrivileges,
 }) => {
-  const { data: mappingData } = useIndexMapping(indexName);
-  const docs = indexDocuments?.results?.data ?? [];
-  const mappingProperties = mappingData?.mappings?.properties ?? {};
+  const mappingProperties = mappings?.mappings?.properties ?? {};
   const hasDeleteDocumentsPrivilege: boolean = useMemo(() => {
     return userPrivileges?.privileges.canDeleteDocuments ?? false;
   }, [userPrivileges]);
 
+  if (documents.length === 0) {
+    return <AddDocumentsCodeExample indexName={indexName} mappingProperties={mappingProperties} />;
+  }
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
-      <EuiSpacer />
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          {isInitialLoading && <EuiProgress size="xs" color="primary" />}
-          {!isInitialLoading && docs.length === 0 && (
-            <AddDocumentsCodeExample indexName={indexName} mappingProperties={mappingProperties} />
-          )}
-          {docs.length > 0 && (
-            <DocumentList
-              indexName={indexName}
-              docs={docs}
-              mappingProperties={mappingProperties}
-              hasDeleteDocumentsPrivilege={hasDeleteDocumentsPrivilege}
-            />
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+    <>
+      <EuiTitle size="xs">
+        <h4>
+          <FormattedMessage
+            id="xpack.searchIndices.indexDetail.data.preview.title"
+            defaultMessage="Data preview"
+          />
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <DocumentList
+        indexName={indexName}
+        docs={documents}
+        mappingProperties={mappingProperties}
+        hasDeleteDocumentsPrivilege={hasDeleteDocumentsPrivilege}
+      />
+    </>
   );
 };

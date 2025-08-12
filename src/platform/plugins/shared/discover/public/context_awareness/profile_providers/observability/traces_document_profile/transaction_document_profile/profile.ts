@@ -9,30 +9,41 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { DATASTREAM_TYPE_FIELD, getFieldValue, PROCESSOR_EVENT_FIELD } from '@kbn/discover-utils';
+import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../../common/constants';
 import type { DocumentProfileProvider } from '../../../../profiles';
-import { DocumentType } from '../../../../profiles';
+import { DocumentType, SolutionType } from '../../../../profiles';
+import { createGetDocViewer } from './accessors';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
-import { getDocViewer } from './accessors';
 
 const OBSERVABILITY_TRACES_TRANSACTION_DOCUMENT_PROFILE_ID =
   'observability-traces-transaction-document-profile';
 
-export const createObservabilityTracesTransactionDocumentProfileProvider = (
-  services: ProfileProviderServices
-): DocumentProfileProvider => ({
-  isExperimental: true,
+export const createObservabilityTracesTransactionDocumentProfileProvider = ({
+  tracesContextService,
+  apmErrorsContextService,
+  logsContextService,
+}: ProfileProviderServices): DocumentProfileProvider => ({
   profileId: OBSERVABILITY_TRACES_TRANSACTION_DOCUMENT_PROFILE_ID,
+  restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
-    getDocViewer,
+    getDocViewer: createGetDocViewer({
+      apm: {
+        errors: apmErrorsContextService.getErrorsIndexPattern(),
+        traces: tracesContextService.getAllTracesIndexPattern(),
+      },
+      logs: logsContextService.getAllLogsIndexPattern() ?? '',
+    }),
   },
-  resolve: ({ record }) => {
-    const isApmEnabled = services.application.capabilities.apm?.show;
+  resolve: ({ record, rootContext }) => {
+    const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;
 
-    if (!isApmEnabled) {
+    if (!isObservabilitySolutionView) {
       return { isMatch: false };
     }
 
-    const isTransactionRecord = getIsTransactionRecord(record);
+    const isTransactionRecord = getIsTransactionRecord({
+      record,
+    });
 
     if (!isTransactionRecord) {
       return { isMatch: false };
@@ -47,9 +58,7 @@ export const createObservabilityTracesTransactionDocumentProfileProvider = (
   },
 });
 
-const getIsTransactionRecord = (record: DataTableRecord) => {
-  // TODO add condition to check on the document _index against APM configured indexes, currently blocked by https://github.com/elastic/kibana/issues/211414
-  // this will be handled in https://github.com/elastic/kibana/issues/213112
+const getIsTransactionRecord = ({ record }: { record: DataTableRecord }) => {
   return isTransactionDocument(record);
 };
 

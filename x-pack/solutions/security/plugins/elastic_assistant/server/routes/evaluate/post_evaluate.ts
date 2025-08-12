@@ -23,25 +23,36 @@ import {
   PostEvaluateBody,
   PostEvaluateResponse,
   DefendInsightType,
+  INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
+  ContentReferencesStore,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
-import { AgentFinish } from 'langchain/agents';
 import { omit } from 'lodash/fp';
-import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/nodes/helpers/prompts';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { HumanMessage } from '@langchain/core/messages';
+import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/prompts';
 import { evaluateDefendInsights } from '../../lib/defend_insights/evaluation';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
 import { promptGroupId } from '../../lib/prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../lib/prompt/helpers';
-import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
-import { formatPrompt } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
+import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/prompts';
+import {
+  DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE,
+  chatPromptFactory,
+} from '../../lib/langchain/graphs/default_assistant_graph/prompts';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../lib/prompt';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
-import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
+import { AssistantToolParams, ElasticAssistantRequestHandlerContext } from '../../types';
 import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
-import { fetchLangSmithDataset } from './utils';
+import {
+  createOrUpdateEvaluationResults,
+  EvaluationStatus,
+  fetchLangSmithDataset,
+  setupEvaluationIndex,
+} from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { evaluateAttackDiscovery } from '../../lib/attack_discovery/evaluation';
@@ -52,17 +63,18 @@ import {
 import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
-import { agentRunableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
+import { PrepareIndicesForAssistantGraphEvaluations } from './prepare_indices_for_evaluations/graph_type/assistant';
+import { ConfigSchema } from '../../config_schema';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
-const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
-const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 
 export const postEvaluateRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
-  getElser: GetElser
+  config?: ConfigSchema
 ) => {
+  const RESPONSE_TIMEOUT = config?.responseTimeout ?? ROUTE_HANDLER_TIMEOUT;
+
   router.versioned
     .post({
       access: INTERNAL_API_ACCESS,
@@ -156,10 +168,27 @@ export const postEvaluateRoute = (
           // Setup graph params
           // Get a scoped esClient for esStore + writing results to the output index
           const esClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const esClientInternalUser = ctx.core.elasticsearch.client.asInternalUser;
+
+          // Create output index for writing results and write current eval as RUNNING
+          await setupEvaluationIndex({ esClientInternalUser, logger });
+          await createOrUpdateEvaluationResults({
+            evaluationResults: [{ id: evaluationId, status: EvaluationStatus.RUNNING }],
+            esClientInternalUser,
+            logger,
+          });
 
           const inference = ctx.elasticAssistant.inference;
           const productDocsAvailable =
-            (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
+            (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable({
+              inferenceId: defaultInferenceEndpoints.ELSER,
+            })) ?? false;
+
+          const { featureFlags } = await context.core;
+          const inferenceChatModelDisabled = await featureFlags.getBooleanValue(
+            INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
+            false
+          );
 
           // Data clients
           const anonymizationFieldsDataClient =
@@ -184,7 +213,18 @@ export const postEvaluateRoute = (
           // Fetch any tools registered to the security assistant
           const assistantTools = assistantContext.getRegisteredTools(DEFAULT_PLUGIN_NAME);
 
-          const { attackDiscoveryGraphs, defendInsightsGraphs } = getGraphsFromNames(graphNames);
+          const { attackDiscoveryGraphs, defendInsightsGraphs, assistantGraphs } =
+            getGraphsFromNames(graphNames);
+
+          const prepareIndicesForAssistantGraph = new PrepareIndicesForAssistantGraphEvaluations({
+            esClient,
+            logger,
+          });
+
+          if (assistantGraphs?.length) {
+            await prepareIndicesForAssistantGraph.cleanup();
+            await prepareIndicesForAssistantGraph.setup();
+          }
 
           if (defendInsightsGraphs.length > 0) {
             const connectorsWithPrompts = await Promise.all(
@@ -207,9 +247,10 @@ export const postEvaluateRoute = (
                 actionsClient,
                 defendInsightsGraphs,
                 connectors: connectorsWithPrompts,
-                connectorTimeout: CONNECTOR_TIMEOUT,
+                connectorTimeout: RESPONSE_TIMEOUT,
                 datasetName,
                 esClient,
+                esClientInternalUser,
                 evaluationId,
                 evaluatorConnectorId,
                 langSmithApiKey,
@@ -251,9 +292,10 @@ export const postEvaluateRoute = (
                 alertsIndexPattern,
                 attackDiscoveryGraphs,
                 connectors: connectorsWithPrompts,
-                connectorTimeout: CONNECTOR_TIMEOUT,
+                connectorTimeout: ROUTE_HANDLER_TIMEOUT,
                 datasetName,
                 esClient,
+                esClientInternalUser,
                 evaluationId,
                 evaluatorConnectorId,
                 langSmithApiKey,
@@ -278,28 +320,50 @@ export const postEvaluateRoute = (
             llmType: string | undefined;
             isOssModel: boolean | undefined;
             connectorId: string;
+            contentReferencesStore: ContentReferencesStore;
           }> = await Promise.all(
             connectors.map(async (connector) => {
               const llmType = getLlmType(connector.actionTypeId);
               const isOssModel = isOpenSourceModel(connector);
-              const isOpenAI = llmType === 'openai' && !isOssModel;
               const llmClass = getLlmClass(llmType);
-              const createLlmInstance = () =>
-                new llmClass({
-                  actionsClient,
-                  connectorId: connector.id,
-                  llmType,
-                  logger,
-                  temperature: getDefaultArguments(llmType).temperature,
-                  signal: abortSignal,
-                  streaming: false,
-                  maxRetries: 0,
-                  convertSystemMessageToHumanContent: false,
-                  telemetryMetadata: {
-                    pluginId: 'security_ai_assistant',
-                  },
-                });
-              const llm = createLlmInstance();
+              const createLlmInstance = async () =>
+                !inferenceChatModelDisabled
+                  ? inference.getChatModel({
+                      request,
+                      connectorId: connector.id,
+                      chatModelOptions: {
+                        signal: abortSignal,
+                        temperature: getDefaultArguments(llmType).temperature,
+                        // prevents the agent from retrying on failure
+                        // failure could be due to bad connector, we should deliver that result to the client asap
+                        maxRetries: 0,
+                        metadata: {
+                          connectorTelemetry: {
+                            pluginId: 'security_ai_assistant',
+                          },
+                        },
+                        // TODO add timeout to inference once resolved https://github.com/elastic/kibana/issues/221318
+                        // timeout: ROUTE_HANDLER_TIMEOUT,
+                      },
+                    })
+                  : new llmClass({
+                      actionsClient,
+                      connectorId: connector.id,
+                      llmType,
+                      logger,
+                      model: connector.config?.defaultModel,
+                      temperature: getDefaultArguments(llmType).temperature,
+                      signal: abortSignal,
+                      streaming: false,
+                      maxRetries: 0,
+                      convertSystemMessageToHumanContent: false,
+                      telemetryMetadata: {
+                        pluginId: 'security_ai_assistant',
+                      },
+                      timeout: ROUTE_HANDLER_TIMEOUT,
+                    });
+
+              const llm = await createLlmInstance();
               const anonymizationFieldsRes =
                 await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>(
                   {
@@ -339,6 +403,7 @@ export const postEvaluateRoute = (
               // Fetch any applicable tools that the source plugin may have registered
               const assistantToolParams: AssistantToolParams = {
                 anonymizationFields,
+                assistantContext,
                 esClient,
                 isEnabledKnowledgeBase,
                 kbDataClient: dataClients?.kbDataClient,
@@ -355,6 +420,7 @@ export const postEvaluateRoute = (
                 size,
                 telemetry: ctx.elasticAssistant.telemetry,
                 ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
+                createLlmInstance,
               };
 
               const tools: StructuredTool[] = (
@@ -376,9 +442,10 @@ export const postEvaluateRoute = (
                     } catch (e) {
                       logger.error(`Failed to get prompt for tool: ${tool.name}`);
                     }
+                    const chatModel = await createLlmInstance();
                     return tool.getTool({
                       ...assistantToolParams,
-                      llm: createLlmInstance(),
+                      llm: chatModel,
                       isOssModel,
                       description,
                     });
@@ -386,100 +453,103 @@ export const postEvaluateRoute = (
                 )
               ).filter((e) => e != null) as StructuredTool[];
 
-              const defaultSystemPrompt = await localGetPrompt({
-                actionsClient,
-                connector,
-                connectorId: connector.id,
-                model: getModelOrOss(llmType, isOssModel),
-                promptGroupId: promptGroupId.aiAssistant,
-                promptId: promptDictionary.systemPrompt,
-                provider: llmType,
-                savedObjectsClient,
-              });
-
-              const chatPromptTemplate = formatPrompt({
-                prompt: defaultSystemPrompt,
-                llmType,
-                isOpenAI,
-              });
-
-              const agentRunnable = await agentRunableFactory({
-                llm: createLlmInstance(),
-                isOpenAI,
-                llmType,
-                tools,
-                isStream: false,
-                prompt: chatPromptTemplate,
-              });
-
-              const uiSettingsDateFormatTimezone = await ctx.core.uiSettings.client.get<string>(
-                DEFAULT_DATE_FORMAT_TZ
-              );
-
               return {
                 connectorId: connector.id,
                 name: `${runName} - ${connector.name}`,
                 llmType,
                 isOssModel,
-                graph: getDefaultAssistantGraph({
-                  agentRunnable,
-                  dataClients,
+                contentReferencesStore,
+                graph: await getDefaultAssistantGraph({
+                  contentReferencesStore,
                   createLlmInstance,
                   logger,
                   actionsClient,
                   savedObjectsClient,
                   tools,
-                  replacements: {},
-                  getFormattedTime: () =>
-                    getFormattedTime({
-                      screenContextTimezone: request.body.screenContext?.timeZone,
-                      uiSettingsDateFormatTimezone,
-                    }),
                 }),
               };
             })
           );
 
           // Run an evaluation for each graph so they show up separately (resulting in each dataset run grouped by connector)
-          await asyncForEach(graphs, async ({ name, graph, llmType, isOssModel, connectorId }) => {
-            // Wrapper function for invoking the graph (to parse different input/output formats)
-            const predict = async (input: { input: string }) => {
-              logger.debug(`input:\n ${JSON.stringify(input, null, 2)}`);
+          await asyncForEach(
+            graphs,
+            async ({ name, graph, llmType, isOssModel, connectorId, contentReferencesStore }) => {
+              // Wrapper function for invoking the graph (to parse different input/output formats)
+              const predict = async (evaluationInput: { input: string }) => {
+                logger.debug(`input:\n ${JSON.stringify(evaluationInput, null, 2)}`);
 
-              const result = await graph.invoke(
-                {
-                  input: input.input,
+                const defaultSystemPrompt = await localGetPrompt({
+                  actionsClient,
                   connectorId,
-                  conversationId: undefined,
-                  responseLanguage: 'English',
-                  llmType,
-                  isStream: false,
-                  isOssModel,
-                }, // TODO: Update to use the correct input format per dataset type
-                {
-                  runName,
-                  tags: ['evaluation'],
-                }
-              );
-              const output = (result.agentOutcome as AgentFinish).returnValues.output;
-              return output;
-            };
+                  model: getModelOrOss(llmType, isOssModel),
+                  promptId: promptDictionary.systemPrompt,
+                  promptGroupId: promptGroupId.aiAssistant,
+                  provider: llmType,
+                  savedObjectsClient,
+                });
 
-            evaluate(predict, {
-              data: datasetName ?? '',
-              evaluators: [], // Evals to be managed in LangSmith for now
-              experimentPrefix: name,
-              client: new Client({ apiKey: langSmithApiKey }),
-              // prevent rate limiting and unexpected multiple experiment runs
-              maxConcurrency: 5,
-            })
-              .then((output) => {
-                logger.debug(`runResp:\n ${JSON.stringify(output, null, 2)}`);
+                const chatPrompt = await chatPromptFactory(
+                  DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE,
+                  {
+                    prompt: defaultSystemPrompt,
+                    contentReferencesStore,
+                    kbClient: dataClients?.kbDataClient,
+                    conversationMessages: [new HumanMessage(evaluationInput.input)],
+                    logger,
+                    formattedTime: getFormattedTime({
+                      uiSettingsDateFormatTimezone: await ctx.core.uiSettings.client.get<string>(
+                        DEFAULT_DATE_FORMAT_TZ
+                      ),
+                      screenContextTimezone: 'UTC',
+                    }),
+                    actionsClient,
+                    savedObjectsClient,
+                    connectorId,
+                    llmType,
+                  }
+                );
+
+                const result = await graph.invoke(
+                  {
+                    connectorId,
+                    conversationId: undefined,
+                    responseLanguage: 'English',
+                    llmType,
+                    isStream: false,
+                    isOssModel,
+                    messages: chatPrompt.messages,
+                  }, // TODO: Update to use the correct input format per dataset type
+                  {
+                    runName,
+                    tags: ['evaluation'],
+                  }
+                );
+                const lastMessage = result.messages[result.messages.length - 1];
+                return lastMessage.text;
+              };
+
+              evaluate(predict, {
+                data: datasetName ?? '',
+                evaluators: [], // Evals to be managed in LangSmith for now
+                experimentPrefix: name,
+                client: new Client({ apiKey: langSmithApiKey }),
+                // prevent rate limiting and unexpected multiple experiment runs
+                maxConcurrency: 3,
               })
-              .catch((err) => {
-                logger.error(`evaluation error:\n ${JSON.stringify(err, null, 2)}`);
-              });
-          });
+                .then((output) => {
+                  void createOrUpdateEvaluationResults({
+                    evaluationResults: [{ id: evaluationId, status: EvaluationStatus.COMPLETE }],
+                    esClientInternalUser,
+                    logger,
+                  });
+                  logger.debug(`runResp:\n ${JSON.stringify(output, null, 2)}`);
+                })
+                .catch((err) => {
+                  logger.error(`evaluation error:\n ${JSON.stringify(err, null, 2)}`);
+                });
+            }
+          );
 
           return response.ok({
             body: { evaluationId, success: true },

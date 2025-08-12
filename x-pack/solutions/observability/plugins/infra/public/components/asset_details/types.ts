@@ -26,7 +26,6 @@ export enum ContentTabIds {
   ANOMALIES = 'anomalies',
   OSQUERY = 'osquery',
   LOGS = 'logs',
-  DASHBOARDS = 'dashboards',
 }
 
 export type TabIds = `${ContentTabIds}`;
@@ -64,9 +63,9 @@ export interface Tab {
 export type LinkOptions = 'alertRule' | 'nodeDetails';
 
 export interface AssetDetailsProps {
-  assetId: string;
-  assetName?: string;
-  assetType: InventoryItemType;
+  entityId: string;
+  entityName?: string;
+  entityType: InventoryItemType;
   autoRefresh?: {
     isPaused?: boolean;
     interval?: number;

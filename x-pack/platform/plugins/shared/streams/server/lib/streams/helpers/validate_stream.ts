@@ -5,18 +5,8 @@
  * 2.0.
  */
 
-import {
-  StreamDefinition,
-  WiredStreamDefinition,
-  isGroupStreamDefinition,
-  isIlmLifecycle,
-  isIngestStreamDefinition,
-  isInheritLifecycle,
-  isUnwiredStreamDefinition,
-  isWiredStreamDefinition,
-} from '@kbn/streams-schema';
-import { difference, isEqual } from 'lodash';
-import { MalformedChildrenError } from '../errors/malformed_children_error';
+import { Streams, isInheritLifecycle } from '@kbn/streams-schema';
+import { isEqual } from 'lodash';
 import { MalformedStreamError } from '../errors/malformed_stream_error';
 import { RootStreamImmutabilityError } from '../errors/root_stream_immutability_error';
 
@@ -26,8 +16,8 @@ import { RootStreamImmutabilityError } from '../errors/root_stream_immutability_
  * Root stream cannot inherit a lifecycle.
  */
 export function validateRootStreamChanges(
-  currentStreamDefinition: WiredStreamDefinition,
-  nextStreamDefinition: WiredStreamDefinition
+  currentStreamDefinition: Streams.WiredStream.Definition,
+  nextStreamDefinition: Streams.WiredStream.Definition
 ) {
   const hasFieldChanges = !isEqual(
     currentStreamDefinition.ingest.wired.fields,
@@ -49,74 +39,5 @@ export function validateRootStreamChanges(
 
   if (isInheritLifecycle(nextStreamDefinition.ingest.lifecycle)) {
     throw new MalformedStreamError('Root stream cannot inherit lifecycle');
-  }
-}
-
-/**
- * Validates if the existing type is the same as the next type
- */
-export function validateStreamTypeChanges(
-  currentStreamDefinition: StreamDefinition,
-  nextStreamDefinition: StreamDefinition
-) {
-  const fromUnwiredToWired =
-    isUnwiredStreamDefinition(currentStreamDefinition) &&
-    isWiredStreamDefinition(nextStreamDefinition);
-
-  if (fromUnwiredToWired) {
-    throw new MalformedStreamError('Cannot change unwired stream to wired stream');
-  }
-
-  const fromWiredToUnwired =
-    isWiredStreamDefinition(currentStreamDefinition) &&
-    isUnwiredStreamDefinition(nextStreamDefinition);
-
-  if (fromWiredToUnwired) {
-    throw new MalformedStreamError('Cannot change wired stream to unwired stream');
-  }
-
-  const fromIngestToGroup =
-    isGroupStreamDefinition(nextStreamDefinition) &&
-    isIngestStreamDefinition(currentStreamDefinition);
-
-  if (fromIngestToGroup) {
-    throw new MalformedStreamError('Cannot change ingest stream to group stream');
-  }
-}
-
-/**
- * Validates whether no children are removed (which is not allowed via updates)
- */
-export function validateStreamChildrenChanges(
-  currentStreamDefinition: WiredStreamDefinition,
-  nextStreamDefinition: WiredStreamDefinition
-) {
-  const existingChildren = currentStreamDefinition.ingest.wired.routing.map(
-    (routingDefinition) => routingDefinition.destination
-  );
-
-  const nextChildren = nextStreamDefinition.ingest.wired.routing.map(
-    (routingDefinition) => routingDefinition.destination
-  );
-
-  const removedChildren = difference(existingChildren, nextChildren);
-
-  if (removedChildren.length) {
-    throw new MalformedChildrenError('Cannot remove children from a stream via updates');
-  }
-}
-
-export function validateStreamLifecycle(definition: StreamDefinition, isServerless: boolean) {
-  if (!isIngestStreamDefinition(definition)) {
-    return;
-  }
-  const lifecycle = definition.ingest.lifecycle;
-
-  if (isServerless && isIlmLifecycle(lifecycle)) {
-    throw new MalformedStreamError('ILM lifecycle is not supported in serverless environments');
-  }
-
-  if (isUnwiredStreamDefinition(definition) && isIlmLifecycle(lifecycle)) {
-    throw new MalformedStreamError('ILM lifecycle is not supported for unwired streams');
   }
 }

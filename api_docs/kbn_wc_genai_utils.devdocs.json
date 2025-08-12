@@ -1,0 +1,181 @@
+{
+  "id": "@kbn/wc-genai-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/wc-genai-utils",
+        "id": "def-common.getConnectorList",
+        "type": "Function",
+        "tags": [],
+        "label": "getConnectorList",
+        "description": [],
+        "signature": [
+          "({ actions, request, }: { actions: ",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.PluginStartContract",
+            "text": "PluginStartContract"
+          },
+          "; request: ",
+          "KibanaRequest",
+          "<unknown, unknown, unknown, any>; }) => Promise<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
+          },
+          "[]>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-genai-utils/src/connectors/get_connector_list.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-genai-utils",
+            "id": "def-common.getConnectorList.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  actions,\n  request,\n}",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wc-genai-utils/src/connectors/get_connector_list.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-genai-utils",
+                "id": "def-common.getConnectorList.$1.actions",
+                "type": "Object",
+                "tags": [],
+                "label": "actions",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "actions",
+                    "scope": "server",
+                    "docId": "kibActionsPluginApi",
+                    "section": "def-server.PluginStartContract",
+                    "text": "PluginStartContract"
+                  }
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-genai-utils/src/connectors/get_connector_list.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/wc-genai-utils",
+                "id": "def-common.getConnectorList.$1.request",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-genai-utils/src/connectors/get_connector_list.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-genai-utils",
+        "id": "def-common.getDefaultConnector",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultConnector",
+        "description": [
+          "\nNaive utility function to consistently return the \"best\" connector for workchat features.\n\nIn practice, mostly useful for development, as for production there should always be a single connector"
+        ],
+        "signature": [
+          "({ connectors }: { connectors: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
+          },
+          "[]; }) => ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-genai-utils/src/connectors/get_default_connector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-genai-utils",
+            "id": "def-common.getDefaultConnector.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ connectors }",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wc-genai-utils/src/connectors/get_default_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-genai-utils",
+                "id": "def-common.getDefaultConnector.$1.connectors",
+                "type": "Array",
+                "tags": [],
+                "label": "connectors",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.InferenceConnector",
+                    "text": "InferenceConnector"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-genai-utils/src/connectors/get_default_connector.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

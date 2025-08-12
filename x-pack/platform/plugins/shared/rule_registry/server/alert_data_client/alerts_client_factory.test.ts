@@ -6,8 +6,9 @@
  */
 
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
-import { AlertsClientFactory, AlertsClientFactoryProps } from './alerts_client_factory';
-import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { AlertsClientFactoryProps } from './alerts_client_factory';
+import { AlertsClientFactory } from './alerts_client_factory';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
@@ -24,6 +25,7 @@ const alertsClientFactoryParams: AlertsClientFactoryProps = {
   getAlertingAuthorization: (_: KibanaRequest) => Promise.resolve(alertingAuthMock),
   securityPluginSetup,
   esClient: {} as ElasticsearchClient,
+  getEsClientScoped: (_: KibanaRequest) => Promise.resolve({} as ElasticsearchClient),
   ruleDataService: ruleDataServiceMock.create(),
   getRuleType: jest.fn(),
   getRuleList: jest.fn(),
@@ -57,6 +59,7 @@ describe('AlertsClientFactory', () => {
       getRuleList: alertsClientFactoryParams.getRuleList,
       getRuleType: alertsClientFactoryParams.getRuleType,
       getAlertIndicesAlias: alertsClientFactoryParams.getAlertIndicesAlias,
+      esClientScoped: {},
     });
   });
 

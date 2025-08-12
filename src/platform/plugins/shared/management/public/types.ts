@@ -31,9 +31,11 @@ export interface DefinedSections {
   ingest: ManagementSection;
   data: ManagementSection;
   insightsAndAlerting: ManagementSection;
+  machineLearning: ManagementSection;
   security: ManagementSection;
   kibana: ManagementSection;
   stack: ManagementSection;
+  ai: ManagementSection;
 }
 
 export interface ManagementStart {
@@ -65,9 +67,11 @@ export enum ManagementSectionId {
   Ingest = 'ingest',
   Data = 'data',
   InsightsAndAlerting = 'insightsAndAlerting',
+  MachineLearning = 'ml',
   Security = 'security',
   Kibana = 'kibana',
   Stack = 'stack',
+  AI = 'ai',
 }
 
 export type Unmount = () => Promise<void> | void;

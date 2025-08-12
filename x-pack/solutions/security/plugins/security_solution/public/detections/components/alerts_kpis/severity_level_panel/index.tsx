@@ -19,6 +19,10 @@ import * as i18n from './translations';
 
 const SEVERITY_DONUT_CHART_ID = 'alerts-summary-severity-donut';
 
+/**
+ * Renders a table and a donut chart showing alerts grouped by severity levels.
+ * The component is used in the alerts page as well as in the AI for SOC alert summary page.
+ */
 export const SeverityLevelPanel: React.FC<ChartsPanelProps> = ({
   filters,
   query,
@@ -26,6 +30,7 @@ export const SeverityLevelPanel: React.FC<ChartsPanelProps> = ({
   runtimeMappings,
   addFilter,
   skip,
+  showCellActions = true,
 }) => {
   const uniqueQueryId = useMemo(() => `${SEVERITY_DONUT_CHART_ID}-${uuid()}`, []);
 
@@ -50,7 +55,12 @@ export const SeverityLevelPanel: React.FC<ChartsPanelProps> = ({
           titleSize="xs"
           hideSubtitle
         />
-        <SeverityLevelChart data={data} isLoading={isLoading} addFilter={addFilter} />
+        <SeverityLevelChart
+          data={data}
+          isLoading={isLoading}
+          addFilter={addFilter}
+          showCellActions={showCellActions}
+        />
       </EuiPanel>
     </InspectButtonContainer>
   );

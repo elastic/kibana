@@ -211,6 +211,7 @@ const CreatePackagePolicyProps = {
       streams: schema.maybe(schema.arrayOf(schema.object(PackagePolicyStreamsSchema))),
     })
   ),
+  spaceIds: schema.maybe(schema.arrayOf(schema.string())),
 };
 
 export const CreatePackagePolicyRequestBodySchema = schema.object({
@@ -435,20 +436,29 @@ export const OrphanedPackagePoliciesResponseSchema = schema.object({
   total: schema.number(),
 });
 
-export const DryRunPackagePolicySchema = schema.object({
-  ...PackagePolicyBaseSchema,
-  id: schema.maybe(schema.string()),
-  force: schema.maybe(schema.boolean()),
-  errors: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        message: schema.string(),
-        key: schema.maybe(schema.string()),
-      })
-    )
-  ),
-  missingVars: schema.maybe(schema.arrayOf(schema.string())),
-});
+export const DryRunPackagePolicySchema = PackagePolicySchema.extends(
+  {
+    id: schema.maybe(schema.string()),
+    force: schema.maybe(schema.boolean()),
+    revision: schema.maybe(schema.number()),
+    updated_at: schema.maybe(schema.string()),
+    updated_by: schema.maybe(schema.string()),
+    created_at: schema.maybe(schema.string()),
+    created_by: schema.maybe(schema.string()),
+    errors: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          message: schema.string(),
+          key: schema.maybe(schema.string()),
+        })
+      )
+    ),
+    missingVars: schema.maybe(schema.arrayOf(schema.string())),
+  },
+  {
+    unknowns: 'allow',
+  }
+);
 
 export const PackagePolicyStatusResponseSchema = schema.object({
   id: schema.string(),

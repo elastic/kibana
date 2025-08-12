@@ -14,36 +14,64 @@ export class HealthGatewayStatusPlugin implements Plugin<void, void> {
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
 
-    router.get({ path: '/health/ok/api/status', validate: {} }, async (context, req, res) =>
-      res.ok()
-    );
-
-    router.get({ path: '/health/redirect/api/status', validate: {} }, async (context, req, res) =>
-      res.redirected({ headers: { location: '/health/ok/api/status' } })
+    router.get(
+      {
+        path: '/health/ok/api/status',
+        security: { authz: { enabled: false, reason: '' } },
+        validate: {},
+      },
+      async (context, req, res) => res.ok()
     );
 
     router.get(
-      { path: '/health/unauthorized/api/status', validate: {} },
+      {
+        path: '/health/redirect/api/status',
+        security: { authz: { enabled: false, reason: '' } },
+        validate: {},
+      },
+      async (context, req, res) =>
+        res.redirected({ headers: { location: '/health/ok/api/status' } })
+    );
+
+    router.get(
+      {
+        path: '/health/unauthorized/api/status',
+        security: { authz: { enabled: false, reason: '' } },
+        validate: {},
+      },
       async (context, req, res) =>
         res.unauthorized({
           headers: { 'www-authenticate': 'Basic' },
         })
     );
 
-    router.get({ path: '/health/not-found/api/status', validate: {} }, async (context, req, res) =>
-      res.notFound()
+    router.get(
+      {
+        path: '/health/not-found/api/status',
+        security: { authz: { enabled: false, reason: '' } },
+        validate: {},
+      },
+      async (context, req, res) => res.notFound()
     );
 
-    router.get({ path: '/health/slow/api/status', validate: {} }, async (context, req, res) => {
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+    router.get(
+      {
+        path: '/health/slow/api/status',
+        security: { authz: { enabled: false, reason: '' } },
+        validate: {},
+      },
+      async (context, req, res) => {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
 
-      return res.ok();
-    });
+        return res.ok();
+      }
+    );
 
     const sessions = new Set<string>();
     router.get(
       {
         path: '/health/flaky/api/status',
+        security: { authz: { enabled: false, reason: '' } },
         validate: {
           query: schema.object({ session: schema.string() }),
         },

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Meta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { EuiButton } from '@elastic/eui';
 
 import { action } from '@storybook/addon-actions';
@@ -56,7 +56,7 @@ const titleConfigBase: FieldConfig<string> = {
 
 // --- SIMPLE
 
-export const Simple = (args: Args) => {
+const SimpleStoryComponent = (args: Args) => {
   const { form } = useForm();
 
   return (
@@ -73,10 +73,12 @@ export const Simple = (args: Args) => {
   );
 };
 
-Simple.parameters = {
-  docs: {
-    source: {
-      code: `
+export const Simple: StoryObj<Args> = {
+  render: (args) => <SimpleStoryComponent {...args} />,
+  parameters: {
+    docs: {
+      source: {
+        code: `
 const MyFormComponent = () => {
   const { form } = useForm();
 
@@ -102,7 +104,8 @@ const MyFormComponent = () => {
   );
 };
       `,
-      language: 'tsx',
+        language: 'tsx',
+      },
     },
   },
 };
@@ -115,7 +118,7 @@ const formSchema = {
   },
 };
 
-export const Schema = (args: Args) => {
+const SchemaStoryComponent = (args: Args) => {
   const { form } = useForm({
     schema: formSchema,
   });
@@ -128,10 +131,12 @@ export const Schema = (args: Args) => {
   );
 };
 
-Schema.parameters = {
-  docs: {
-    source: {
-      code: `
+export const Schema: StoryObj<Args> = {
+  render: (args) => <SchemaStoryComponent {...args} />,
+  parameters: {
+    docs: {
+      source: {
+        code: `
 const formSchema = {
   title: {
     label: 'Title',
@@ -159,7 +164,8 @@ const MyFormComponent = () => {
   );
 };
       `,
-      language: 'tsx',
+        language: 'tsx',
+      },
     },
   },
 };

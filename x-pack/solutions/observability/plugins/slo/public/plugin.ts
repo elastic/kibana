@@ -17,6 +17,7 @@ import {
 import { DefaultClientOptions, createRepositoryClient } from '@kbn/server-route-repository-client';
 import { lazy } from 'react';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import { ExperimentalFeatures, SLOConfig } from '../common/config';
 import { SLOS_BASE_PATH } from '../common/locators/paths';
@@ -38,12 +39,15 @@ import type {
 } from './types';
 import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
 import { registerSloUiActions } from './ui_actions/register_ui_actions';
+import { SloDetailsHistoryLocatorDefinition } from './locators/slo_details_history';
 
 export class SLOPlugin
   implements Plugin<SLOPublicSetup, SLOPublicStart, SLOPublicPluginsSetup, SLOPublicPluginsStart>
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private experimentalFeatures: ExperimentalFeatures = { ruleFormV2: { enabled: false } };
+  private experimentalFeatures: ExperimentalFeatures = {
+    ruleFormV2: { enabled: false },
+  };
 
   constructor(private readonly initContext: PluginInitializerContext<SLOConfig>) {
     this.experimentalFeatures =
@@ -59,6 +63,9 @@ export class SLOPlugin
     const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
     const sloDetailsLocator = plugins.share.url.locators.create(new SloDetailsLocatorDefinition());
+    const sloDetailsHistoryLocator = plugins.share.url.locators.create(
+      new SloDetailsHistoryLocatorDefinition()
+    );
     const sloEditLocator = plugins.share.url.locators.create(new SloEditLocatorDefinition());
     const sloListLocator = plugins.share.url.locators.create(new SloListLocatorDefinition());
 
@@ -127,8 +134,11 @@ export class SLOPlugin
 
         pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
           SLO_OVERVIEW_EMBEDDABLE_ID,
-          (serializedState: SloOverviewEmbeddableState | undefined) => {
-            if (serializedState?.showAllGroupByInstances || serializedState?.groupFilters) {
+          (serializedState?: SerializedPanelState<SloOverviewEmbeddableState>) => {
+            if (
+              serializedState?.rawState?.showAllGroupByInstances ||
+              serializedState?.rawState?.groupFilters
+            ) {
               return { width: 24, height: 8 };
             }
             return { width: 12, height: 8 };
@@ -185,6 +195,7 @@ export class SLOPlugin
 
     return {
       sloDetailsLocator,
+      sloDetailsHistoryLocator,
       sloEditLocator,
       sloListLocator,
     };

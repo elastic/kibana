@@ -12,13 +12,15 @@ import {
 import { IKibanaResponse } from '@kbn/core-http-server';
 import type { SavedObjectsFindResult } from '@kbn/core/server';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
+import { ALERTS_API_URLS } from '../../../common/constants';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 import { RelatedDashboardsClient } from '../../services/related_dashboards_client';
 import { InvestigateAlertsClient } from '../../services/investigate_alerts_client';
 import { AlertNotFoundError } from '../../common/errors/alert_not_found_error';
+import { ReferencedPanelManager } from '../../services/referenced_panel_manager';
 
 const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
-  endpoint: 'GET /internal/observability/alerts/related_dashboards',
+  endpoint: `GET ${ALERTS_API_URLS.INTERNAL_RELATED_DASHBOARDS}`,
   security: {
     authz: {
       enabled: false,
@@ -32,29 +34,35 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
     const { dependencies, params, request, response, context, logger } = services;
     const { alertId } = params.query;
     const { ruleRegistry, dashboard } = dependencies;
-    const { contentClient } = dashboard;
-    const dashboardClient = contentClient!.getForRequest<
+    const { getContentClient } = dashboard;
+    const { savedObjects } = await context.core;
+
+    const dashboardClient = getContentClient()!.getForRequest<
       SavedObjectsFindResult<DashboardAttributes>
     >({
       requestHandlerContext: context,
       request,
-      version: 3,
+      version: 1,
     });
 
     const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
-    const investigateAlertsClient = new InvestigateAlertsClient(alertsClient);
+    const rulesClient = await ruleRegistry.alerting.getRulesClientWithRequest(request);
+    const investigateAlertsClient = new InvestigateAlertsClient(alertsClient, rulesClient);
+    const referencedPanelManager = new ReferencedPanelManager(logger, savedObjects.client);
 
     const dashboardParser = new RelatedDashboardsClient(
       logger,
       dashboardClient,
       investigateAlertsClient,
-      alertId
+      alertId,
+      referencedPanelManager
     );
     try {
-      const { suggestedDashboards } = await dashboardParser.fetchSuggestedDashboards();
+      const { suggestedDashboards, linkedDashboards } =
+        await dashboardParser.fetchRelatedDashboards();
       return {
         suggestedDashboards,
-        linkedDashboards: [],
+        linkedDashboards,
       };
     } catch (e) {
       if (e instanceof AlertNotFoundError) {

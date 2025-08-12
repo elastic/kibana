@@ -18,9 +18,9 @@ import type {
   DataTotalHits$,
 } from '../../state_management/discover_data_state_container';
 import { FetchStatus } from '../../../types';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import React from 'react';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 describe('useFetchMoreRecords', () => {
   const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
@@ -49,9 +49,9 @@ describe('useFetchMoreRecords', () => {
 
   const getWrapper = (stateContainer: DiscoverStateContainer) => {
     return ({ children }: React.PropsWithChildren<unknown>) => (
-      <DiscoverMainProvider value={stateContainer}>
+      <DiscoverTestProvider stateContainer={stateContainer}>
         <>{children}</>
-      </DiscoverMainProvider>
+      </DiscoverTestProvider>
     );
   };
 

@@ -127,15 +127,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
       const defaultName = getFieldByPathName(allSemanticFields, 'semantic_text')
         ? ''
         : 'semantic_text';
-      const referenceField =
-        Object.values(allSemanticFields.byId)
-          .find((field) => field.source.type === 'text' && !field.isMultiField)
-          ?.path.join('.') || '';
       if (!form.getFormData().name) {
         form.setFieldValue('name', defaultName);
       }
       if (!form.getFormData().reference_field) {
-        form.setFieldValue('reference_field', referenceField);
+        form.setFieldValue('reference_field', '');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

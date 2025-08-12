@@ -23,7 +23,9 @@ import { snoozeRule } from '../application/rule/methods/snooze';
 import type { UnsnoozeParams } from '../application/rule/methods/unsnooze';
 import { unsnoozeRule } from '../application/rule/methods/unsnooze';
 import type { GetRuleParams } from '../application/rule/methods/get';
+import type { BulkGetRulesParams } from '../application/rule/methods/bulk_get';
 import { getRule } from '../application/rule/methods/get';
+import { bulkGetRules } from '../application/rule/methods/bulk_get';
 import type { ResolveParams } from '../application/rule/methods/resolve';
 import { resolveRule } from '../application/rule/methods/resolve';
 import type { GetAlertStateParams } from './methods/get_alert_state';
@@ -85,6 +87,13 @@ import { getRuleIdsWithGaps } from '../application/rule/methods/get_rule_ids_wit
 import { getGapsSummaryByRuleIds } from '../application/rule/methods/get_gaps_summary_by_rule_ids';
 import type { GetGapsSummaryByRuleIdsParams } from '../application/rule/methods/get_gaps_summary_by_rule_ids/types';
 import type { FindGapsParams } from '../lib/rule_gaps/types';
+import type { GetGlobalExecutionSummaryParams } from './methods/get_execution_summary';
+import { getGlobalExecutionSummaryWithAuth } from './methods/get_execution_summary';
+import { bulkFillGapsByRuleIds } from '../application/rule/methods/bulk_fill_gaps_by_rule_ids';
+import type {
+  BulkFillGapsByRuleIdsOptions,
+  BulkFillGapsByRuleIdsParams,
+} from '../application/rule/methods/bulk_fill_gaps_by_rule_ids/types';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -161,11 +170,15 @@ export class RulesClient {
     getRuleExecutionKPI(this.context, params);
   public getGlobalExecutionKpiWithAuth = (params: GetGlobalExecutionKPIParams) =>
     getGlobalExecutionKpiWithAuth(this.context, params);
+  public getGlobalExecutionSummaryWithAuth = (params: GetGlobalExecutionSummaryParams) =>
+    getGlobalExecutionSummaryWithAuth(this.context, params);
   public getActionErrorLog = (params: GetActionErrorLogByIdParams) =>
     getActionErrorLog(this.context, params);
   public getActionErrorLogWithAuth = (params: GetActionErrorLogByIdParams) =>
     getActionErrorLogWithAuth(this.context, params);
 
+  public bulkGetRules = <Params extends RuleTypeParams = never>(params: BulkGetRulesParams) =>
+    bulkGetRules<Params>(this.context, params);
   public bulkDeleteRules = (options: BulkDeleteRulesRequestBody) =>
     bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
@@ -220,6 +233,11 @@ export class RulesClient {
   public findGaps = (params: FindGapsParams) => findGaps(this.context, params);
 
   public fillGapById = (params: FillGapByIdParams) => fillGapById(this.context, params);
+
+  public bulkFillGapsByRuleIds = (
+    params: BulkFillGapsByRuleIdsParams,
+    options: BulkFillGapsByRuleIdsOptions
+  ) => bulkFillGapsByRuleIds(this.context, params, options);
 
   public getRuleIdsWithGaps = (params: GetRuleIdsWithGapsParams) =>
     getRuleIdsWithGaps(this.context, params);

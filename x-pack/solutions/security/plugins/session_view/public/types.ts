@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ReactNode } from 'react';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
@@ -13,6 +12,7 @@ import type { Process } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SessionViewPluginSetup {}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SessionViewPluginStart {}
 
@@ -84,34 +84,25 @@ export interface SessionViewDeps {
   ) => void;
   canReadPolicyManagement?: boolean;
   /**
-   * Allows to open the detailed panel outside of the SessionView component. This is necessary when the session view is rendered in the
+   * Allows to open the detailed panel outside of the SessionView component. This is necessary as the session view is rendered in the
    * expandable flyout, where the tree and the detailed panel are separated and need to communicate with each other.
    */
-  openDetailsInExpandableFlyout?: (selectedProcess: Process | null) => void;
+  openDetails: (selectedProcess: Process | null) => void;
   /**
    * Allows to close the detailed panel outside of the SessionView component. This is necessary when the session view is rendered in the
    * expandable flyout: when the user clicks on the TTY output button we need to close the detailed panel.
    */
-  closeDetailsInExpandableFlyout?: () => void;
+  closeDetails: () => void;
   /**
-   * Allows to reset the view from an external component. This is necessary when the session view is rendered in the
+   * Allows to reset the view from an external component. This is necessary as the session view is rendered in the
    * expandable flyout, where the tree and the detailed panels are separated and need to communicate with each other.
    */
   resetJumpToEntityId?: string;
   /**
-   * Allows to reset the view from an external component. This is necessary when the session view is rendered in the
+   * Allows to reset the view from an external component. This is necessary as the session view is rendered in the
    * expandable flyout, where the tree and the detailed panels are separated and need to communicate with each other.
    */
   resetJumpToCursor?: string;
-}
-
-export interface EuiTabProps {
-  id: string;
-  name: string;
-  content: ReactNode;
-  disabled?: boolean;
-  append?: ReactNode;
-  prepend?: ReactNode;
 }
 
 export interface DetailPanelProcess {

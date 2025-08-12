@@ -25,6 +25,7 @@ export const command = {
     --filter             package name to be filter packages by, can be specified multiple times
                           and only packages matching this filter will be matched
     --exclude            package name to be excluded, can be specified multiple times
+    --allow-root         Required supplementary flag if you're running this command as root.
     --quiet              only log the output of commands if they fail
   `,
   reportTimings: {
@@ -53,7 +54,7 @@ export const command = {
         continue;
       }
 
-      log.debug(
+      log.info(
         `running [${scriptName}] script in [${pkg.name}]`,
         scriptArgs.length ? `with args [${scriptArgs.join(' ')}]` : ''
       );

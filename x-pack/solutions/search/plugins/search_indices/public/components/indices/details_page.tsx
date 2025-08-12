@@ -28,7 +28,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { ConnectionDetails } from '../connection_details/connection_details';
 import { QuickStats } from '../quick_stats/quick_stats';
 import { useIndexMapping } from '../../hooks/api/use_index_mappings';
-import { IndexDocuments } from '../index_documents/index_documents';
+import { IndexDetailsData } from './details_page_data';
 import { DeleteIndexModal } from './delete_index_modal';
 import { IndexloadingError } from './details_page_loading_error';
 import { SearchIndexDetailsTabs } from '../../routes';
@@ -54,6 +54,7 @@ export const SearchIndexDetailsPage = () => {
     history,
     share,
     searchNavigation,
+    uiSettings,
   } = useKibana().services;
   const {
     data: index,
@@ -74,10 +75,15 @@ export const SearchIndexDetailsPage = () => {
 
   const navigateToPlayground = useCallback(async () => {
     const playgroundLocator = share.url.locators.get('PLAYGROUND_LOCATOR_ID');
+    const isSearchAvailable = uiSettings.get<boolean>('searchPlayground:searchModeEnabled', false);
+
     if (playgroundLocator && index) {
-      await playgroundLocator.navigate({ 'default-index': index.name });
+      await playgroundLocator.navigate({
+        'default-index': index.name,
+        search: isSearchAvailable,
+      });
     }
-  }, [share, index]);
+  }, [share, index, uiSettings]);
   const navigateToDiscover = useNavigateToDiscover(indexName);
 
   const hasDocuments = Boolean(isInitialLoading || indexDocuments?.results?.data.length);
@@ -100,11 +106,12 @@ export const SearchIndexDetailsPage = () => {
           defaultMessage: 'Data',
         }),
         content: (
-          <IndexDocuments
+          <IndexDetailsData
             indexName={indexName}
             indexDocuments={indexDocuments}
             isInitialLoading={indexDocumentsIsInitialLoading}
             userPrivileges={userPrivileges}
+            navigateToPlayground={navigateToPlayground}
           />
         ),
         'data-test-subj': `${SearchIndexDetailsTabs.DATA}Tab`,
@@ -128,7 +135,14 @@ export const SearchIndexDetailsPage = () => {
         'data-test-subj': `${SearchIndexDetailsTabs.SETTINGS}Tab`,
       },
     ];
-  }, [index, indexName, indexDocuments, indexDocumentsIsInitialLoading, userPrivileges]);
+  }, [
+    index,
+    indexName,
+    indexDocuments,
+    indexDocumentsIsInitialLoading,
+    userPrivileges,
+    navigateToPlayground,
+  ]);
   const [selectedTab, setSelectedTab] = useState(detailsPageTabs[0]);
 
   useEffect(() => {

@@ -35,21 +35,25 @@ import {
   Replacements,
   ContentReferencesStore,
 } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import {
   LicensingApiRequestHandlerContext,
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
-import {
-  ActionsClientChatBedrockConverse,
-  ActionsClientChatOpenAI,
+import type {
   ActionsClientChatVertexAI,
+  ActionsClientChatOpenAI,
   ActionsClientGeminiChatModel,
+  ActionsClientChatBedrockConverse,
   ActionsClientLlm,
 } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-
+import type { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
+import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import type { CheckPrivileges, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
 import {
@@ -61,6 +65,7 @@ import { CallbackIds } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
 import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
 import type { DefendInsightsDataClient } from './lib/defend_insights/persistence';
+import { AttackDiscoveryScheduleDataClient } from './lib/attack_discovery/schedules/data_client';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 export { CallbackIds };
@@ -120,23 +125,30 @@ export interface ElasticAssistantPluginStart {
 
 export interface ElasticAssistantPluginSetupDependencies {
   actions: ActionsPluginSetup;
+  alerting: AlertingServerSetup;
+  eventLog: IEventLogService; // for writing to the event log
   ml: MlPluginSetup;
+  ruleRegistry: RuleRegistryPluginSetupContract;
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
 }
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
+  alerting: AlertingServerStart;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
   licensing: LicensingPluginStart;
   productDocBase: ProductDocBaseStartContract;
+  security: SecurityPluginStart;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
   auditLogger?: AuditLogger;
+  eventLogger: IEventLogger;
+  eventLogIndex: string;
   getRegisteredFeatures: GetRegisteredFeatures;
   getRegisteredTools: GetRegisteredTools;
   logger: Logger;
@@ -150,13 +162,16 @@ export interface ElasticAssistantApiRequestHandlerContext {
     params?: GetAIAssistantKnowledgeBaseDataClientParams
   ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
   getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
+  getAttackDiscoverySchedulingDataClient: () => Promise<AttackDiscoveryScheduleDataClient | null>;
   getDefendInsightsDataClient: () => Promise<DefendInsightsDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
+  getAlertSummaryDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
   savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
+  checkPrivileges: () => CheckPrivileges;
 }
 /**
  * @internal
@@ -177,6 +192,7 @@ export type GetElser = () => Promise<string> | never;
 
 export interface AssistantResourceNames {
   componentTemplate: {
+    alertSummary: string;
     conversations: string;
     knowledgeBase: string;
     prompts: string;
@@ -185,6 +201,7 @@ export interface AssistantResourceNames {
     defendInsights: string;
   };
   indexTemplate: {
+    alertSummary: string;
     conversations: string;
     knowledgeBase: string;
     prompts: string;
@@ -193,6 +210,7 @@ export interface AssistantResourceNames {
     defendInsights: string;
   };
   aliases: {
+    alertSummary: string;
     conversations: string;
     knowledgeBase: string;
     prompts: string;
@@ -201,6 +219,7 @@ export interface AssistantResourceNames {
     defendInsights: string;
   };
   indexPatterns: {
+    alertSummary: string;
     conversations: string;
     knowledgeBase: string;
     prompts: string;
@@ -232,22 +251,24 @@ export interface AssistantTool {
   description: string;
   sourceRegister: string;
   isSupported: (params: AssistantToolParams) => boolean;
-  getTool: (params: AssistantToolParams) => StructuredToolInterface | null;
+  getTool: (params: AssistantToolParams) => Promise<StructuredToolInterface | null>;
 }
 
 export type AssistantToolLlm =
   | ActionsClientChatBedrockConverse
   | ActionsClientChatOpenAI
   | ActionsClientGeminiChatModel
-  | ActionsClientChatVertexAI;
+  | ActionsClientChatVertexAI
+  | InferenceChatModel;
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
+  assistantContext?: ElasticAssistantApiRequestHandlerContext;
   anonymizationFields?: AnonymizationFieldResponse[];
   inference?: InferenceServerStart;
   isEnabledKnowledgeBase: boolean;
   connectorId?: string;
-  contentReferencesStore: ContentReferencesStore | undefined;
+  contentReferencesStore: ContentReferencesStore;
   description?: string;
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
@@ -265,4 +286,16 @@ export interface AssistantToolParams {
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;
+  createLlmInstance?: () => Promise<AssistantToolLlm>;
 }
+
+/**
+ * Helper type for working with AssistantToolParams when some properties are required.
+ *
+ *
+ * ```ts
+ * export type MyNewTypeWithAssistantContext = Require<AssistantToolParams, 'assistantContext'>
+ * ```
+ */
+
+export type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T, P>>;

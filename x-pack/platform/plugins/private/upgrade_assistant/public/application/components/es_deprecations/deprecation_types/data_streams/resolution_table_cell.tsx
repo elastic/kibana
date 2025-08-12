@@ -25,61 +25,7 @@ import { getDataStreamReindexProgressLabel } from '../../../../lib/utils';
 import { LoadingState } from '../../../types';
 import { useDataStreamMigrationContext } from './context';
 
-const getI18nTexts = (
-  resolutionType?: DataStreamResolutionType,
-  excludedActions: Array<'readOnly' | 'reindex'> = []
-) => {
-  const resolutionAction = excludedActions.includes('readOnly')
-    ? 'reindex'
-    : excludedActions.includes('reindex')
-    ? 'readOnly'
-    : 'readOnlyOrReindex';
-
-  const resolutionTexts = {
-    readOnlyOrReindex: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionReadOnlyOrReindexLabel',
-      {
-        defaultMessage: 'Mark as read-only, or reindex',
-      }
-    ),
-    readOnly: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionReadOnlyLabel',
-      {
-        defaultMessage: 'Mark as read-only',
-      }
-    ),
-    reindex: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionReindexLabel',
-      {
-        defaultMessage: 'Reindex',
-      }
-    ),
-  };
-
-  const resolutionTooltipLabels = {
-    readOnlyOrReindex: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipReadOnlyOrReindexLabel',
-      {
-        defaultMessage:
-          'Resolve this issue by reindexing this data stream or marking its indices as read-only. This issue can be resolved automatically.',
-      }
-    ),
-    readOnly: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipReadOnlyLabel',
-      {
-        defaultMessage:
-          'Resolve this issue by marking its indices as read-only. This issue can be resolved automatically.',
-      }
-    ),
-    reindex: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipReindexLabel',
-      {
-        defaultMessage:
-          'Resolve this issue by reindexing this data stream. This issue can be resolved automatically.',
-      }
-    ),
-  };
-
+const getI18nTexts = (resolutionType?: DataStreamResolutionType) => {
   return {
     loadingStatusText: i18n.translate(
       'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionLoadingStatusText',
@@ -91,7 +37,7 @@ const getI18nTexts = (
       'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionInProgressText',
       {
         defaultMessage:
-          '{resolutionType, select, reindex {Reindexing} readonly {Marking as read-only} other {Migration}} in progress…',
+          '{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} other {Migration}} in progress…',
         values: { resolutionType },
       }
     ),
@@ -99,7 +45,7 @@ const getI18nTexts = (
       'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionCompleteText',
       {
         defaultMessage:
-          '{resolutionType, select, reindex {Reindexing} readonly {Marking as read-only} other {Migration}} complete',
+          '{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} other {Migration}} complete',
         values: { resolutionType },
       }
     ),
@@ -107,7 +53,7 @@ const getI18nTexts = (
       'xpack.upgradeAssistant.esDeprecations.dataStream.resulutionFailedText',
       {
         defaultMessage:
-          '{resolutionType, select, reindex {Reindexing} readonly {Marking as read-only} other {Migration}} failed',
+          '{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} other {Migration}} failed',
         values: { resolutionType },
       }
     ),
@@ -115,7 +61,7 @@ const getI18nTexts = (
       'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionFetchFailedText',
       {
         defaultMessage:
-          '{resolutionType, select, reindex {Reindexing} readonly {Marking as read-only} other {Migration}} status not available',
+          '{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} other {Migration}} status not available',
         values: { resolutionType },
       }
     ),
@@ -123,12 +69,42 @@ const getI18nTexts = (
       'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionCanceledText',
       {
         defaultMessage:
-          '{resolutionType, select, reindex {Reindexing} readonly {Marking as read-only} other {Migration}} cancelled',
+          '{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} other {Migration}} cancelled',
         values: { resolutionType },
       }
     ),
-    resolutionText: resolutionTexts[resolutionAction],
-    resolutionTooltipLabel: resolutionTooltipLabels[resolutionAction],
+    recommendedActionTexts: {
+      readonly: {
+        text: i18n.translate(
+          'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReadonlyText',
+          {
+            defaultMessage: 'Recommended: set to read-only',
+          }
+        ),
+        tooltipText: i18n.translate(
+          'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReadonlyTooltipText',
+          {
+            defaultMessage:
+              'If you do not need to update historical data, set it to read-only. You can reindex post-upgrade if updates are needed.',
+          }
+        ),
+      },
+      reindex: {
+        text: i18n.translate(
+          'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReindexText',
+          {
+            defaultMessage: 'Recommended: reindex',
+          }
+        ),
+        tooltipText: i18n.translate(
+          'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReindexTooltipText',
+          {
+            defaultMessage:
+              'The current write index will be rolled over and reindexed. Additional backing indices will be reindexed and remain editable.',
+          }
+        ),
+      },
+    },
   };
 };
 
@@ -136,10 +112,11 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent<{
   correctiveAction: DataStreamsAction;
 }> = ({ correctiveAction }) => {
   const { migrationState } = useDataStreamMigrationContext();
-  const i18nTexts = getI18nTexts(
-    migrationState.resolutionType,
-    correctiveAction.metadata.excludedActions
-  );
+  const i18nTexts = getI18nTexts(migrationState.resolutionType);
+
+  // The suggested option for data streams by default is always 'readonly' unless is excluded from the corrective action.
+  const recommendedAction: DataStreamResolutionType =
+    correctiveAction.metadata.excludedActions?.includes('readOnly') ? 'reindex' : 'readonly';
 
   if (migrationState.loadingState === LoadingState.Loading) {
     return (
@@ -148,7 +125,9 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent<{
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.loadingStatusText}</EuiText>
+          <EuiText size="s" color="subdued">
+            <em>{i18nTexts.loadingStatusText}</em>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -162,12 +141,14 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent<{
             <EuiLoadingSpinner size="m" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              {i18nTexts.resolutionInProgressText}{' '}
-              {getDataStreamReindexProgressLabel(
-                migrationState.status,
-                migrationState.taskPercComplete
-              )}
+            <EuiText size="s" color="subdued">
+              <em>
+                {i18nTexts.resolutionInProgressText}{' '}
+                {getDataStreamReindexProgressLabel(
+                  migrationState.status,
+                  migrationState.taskPercComplete
+                )}
+              </em>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -176,7 +157,7 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent<{
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="check" color="success" />
+            <EuiIcon type="checkInCircleFilled" color="success" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.resolutionCompleteText}</EuiText>
@@ -187,7 +168,7 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent<{
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="warning" color="danger" />
+            <EuiIcon type="warningFilled" color="danger" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.resolutionFailedText}</EuiText>
@@ -198,7 +179,7 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent<{
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="warning" color="danger" />
+            <EuiIcon type="warningFilled" color="danger" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.resolutionFetchFailedText}</EuiText>
@@ -206,17 +187,25 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent<{
         </EuiFlexGroup>
       );
     default:
-      return (
-        <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="indexSettings" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiToolTip>
-      );
+      if (recommendedAction) {
+        return (
+          <EuiText size="s" color="subdued">
+            <em>
+              {i18nTexts.recommendedActionTexts[recommendedAction].text}{' '}
+              <EuiToolTip
+                position="top"
+                content={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
+              >
+                <EuiIcon
+                  type="info"
+                  aria-label={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
+                  size="s"
+                />
+              </EuiToolTip>
+            </em>
+          </EuiText>
+        );
+      }
+      return <></>;
   }
 };

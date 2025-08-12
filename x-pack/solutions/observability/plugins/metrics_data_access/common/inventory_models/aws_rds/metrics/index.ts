@@ -5,33 +5,16 @@
  * 2.0.
  */
 
-import type { InventoryMetrics } from '../../types';
-
-import { cpu } from './snapshot/cpu';
-import { rdsLatency } from './snapshot/rds_latency';
-import { rdsConnections } from './snapshot/rds_connections';
-import { rdsQueriesExecuted } from './snapshot/rds_queries_executed';
-import { rdsActiveTransactions } from './snapshot/rds_active_transactions';
-
 import { awsRDSLatency } from './tsvb/aws_rds_latency';
 import { awsRDSConnections } from './tsvb/aws_rds_connections';
 import { awsRDSCpuTotal } from './tsvb/aws_rds_cpu_total';
 import { awsRDSQueriesExecuted } from './tsvb/aws_rds_queries_executed';
 import { awsRDSActiveTransactions } from './tsvb/aws_rds_active_transactions';
+import type { RDSAggregations } from './snapshot';
+import { MetricsCatalog } from '../../shared/metrics/metrics_catalog';
+import type { InventoryMetricsConfig } from '../../shared/metrics/types';
 
-const awsRDSSnapshotMetrics = {
-  cpu,
-  rdsLatency,
-  rdsConnections,
-  rdsQueriesExecuted,
-  rdsActiveTransactions,
-};
-
-export const awsRDSSnapshotMetricTypes = Object.keys(awsRDSSnapshotMetrics) as Array<
-  keyof typeof awsRDSSnapshotMetrics
->;
-
-export const metrics: InventoryMetrics = {
+export const metrics: InventoryMetricsConfig<RDSAggregations> = {
   tsvb: {
     awsRDSLatency,
     awsRDSConnections,
@@ -39,7 +22,25 @@ export const metrics: InventoryMetrics = {
     awsRDSQueriesExecuted,
     awsRDSActiveTransactions,
   },
-  snapshot: awsRDSSnapshotMetrics,
+  requiredTsvb: [
+    'awsRDSCpuTotal',
+    'awsRDSConnections',
+    'awsRDSQueriesExecuted',
+    'awsRDSActiveTransactions',
+    'awsRDSLatency',
+  ],
+  getAggregations: async (args) => {
+    const { snapshot } = await import('./snapshot');
+    const catalog = new MetricsCatalog(snapshot, args?.schema);
+    return catalog;
+  },
+  getWaffleMapTooltipMetrics: () => [
+    'cpu',
+    'rdsLatency',
+    'rdsConnections',
+    'rdsQueriesExecuted',
+    'rdsActiveTransactions',
+  ],
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 14400, // 4 hours
 };

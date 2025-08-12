@@ -13,7 +13,7 @@ import {
   PromptTypeEnum,
 } from '@kbn/elastic-assistant-common';
 import { HttpSetup } from '@kbn/core-http-browser';
-import { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
 import { InfiniteData, QueryObserverResult } from '@tanstack/react-query';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { AIConnector } from '../../../connectorland/connector_selector';
@@ -59,6 +59,11 @@ interface SystemPromptUpdater {
   selectedSystemPrompt?: SystemPromptSettings;
   systemPromptSettings: SystemPromptSettings[];
 }
+
+const DEFAULT_SYSTEM_PROMPT_SETTINGS: SystemPromptSettings[] = [];
+const DEFAULT_SYSTEM_PROMPT_SETTINGS_UPDATES: SystemPromptSettings[] = [];
+const DEFAULT_PROMPTS_BULK_ACTIONS: PromptsPerformBulkActionRequestBody = {};
+
 export const useSystemPromptUpdater = ({
   allPrompts,
   connectors,
@@ -71,20 +76,20 @@ export const useSystemPromptUpdater = ({
   toasts,
 }: Params): SystemPromptUpdater => {
   // server equivalent
-  const [systemPromptSettings, setSystemPromptSettings] = useState<SystemPromptSettings[]>([]);
+  const [systemPromptSettings, setSystemPromptSettings] = useState<SystemPromptSettings[]>(
+    DEFAULT_SYSTEM_PROMPT_SETTINGS
+  );
   // local updates
   const [systemPromptSettingsUpdates, setSystemPromptSettingsUpdates] = useState<
     SystemPromptSettings[]
-  >([]);
+  >(DEFAULT_SYSTEM_PROMPT_SETTINGS_UPDATES);
   const [promptsBulkActions, setPromptsBulkActions] = useState<PromptsPerformBulkActionRequestBody>(
-    {}
+    DEFAULT_PROMPTS_BULK_ACTIONS
   );
   // System Prompt Selection State
-  const [selectedSystemPromptId, setSelectedSystemPromptId] = useState<string | undefined>();
-
-  const selectedSystemPrompt: SystemPromptSettings | undefined = useMemo(() => {
-    return systemPromptSettingsUpdates.find((sp) => sp.id === selectedSystemPromptId);
-  }, [selectedSystemPromptId, systemPromptSettingsUpdates]);
+  const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<
+    SystemPromptSettings | undefined
+  >();
 
   const systemPrompts = useMemo(() => {
     return allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system);
@@ -107,7 +112,6 @@ export const useSystemPromptUpdater = ({
     filter,
   });
   useEffect(() => {
-    if (!Object.keys(data).length && !systemPrompts.length) return;
     const updateSystemPromptSettings = (prev: SystemPromptSettings[]) => {
       const updatedSettings = systemPrompts.map((p) => {
         const conversations = Object.values(data).filter(
@@ -123,19 +127,14 @@ export const useSystemPromptUpdater = ({
       return prev;
     };
 
-    setSystemPromptSettings(updateSystemPromptSettings);
+    setSystemPromptSettings((prev) => updateSystemPromptSettings(prev));
+    setSystemPromptSettingsUpdates((prev) => updateSystemPromptSettings(prev));
   }, [data, systemPrompts]);
-
-  useEffect(() => {
-    if (systemPromptSettings.length) {
-      setSystemPromptSettingsUpdates(systemPromptSettings);
-    }
-  }, [systemPromptSettings]);
 
   const onSystemPromptSelect = useCallback(
     (systemPrompt?: SystemPromptSettings | string) => {
       if (systemPrompt == null) {
-        return setSelectedSystemPromptId(undefined);
+        return setSelectedSystemPrompt(undefined);
       }
       const isNew = typeof systemPrompt === 'string';
       const newSelectedSystemPrompt: SystemPromptSettings = isNew
@@ -149,12 +148,6 @@ export const useSystemPromptUpdater = ({
           }
         : systemPrompt;
 
-      setSystemPromptSettingsUpdates((prev) =>
-        !prev.some((sp) => sp.id === newSelectedSystemPrompt.id)
-          ? [...prev, newSelectedSystemPrompt]
-          : prev
-      );
-
       if (isNew) {
         setPromptsBulkActions((prev) => ({
           ...prev,
@@ -163,14 +156,13 @@ export const useSystemPromptUpdater = ({
         }));
       }
 
-      setSelectedSystemPromptId(newSelectedSystemPrompt.id);
+      setSelectedSystemPrompt(newSelectedSystemPrompt);
     },
     [currentAppId]
   );
 
   const onSystemPromptDelete = useCallback(
     (id: string) => {
-      setSystemPromptSettingsUpdates((prev) => prev.filter((sp) => sp.id !== id));
       setPromptsBulkActions({
         ...promptsBulkActions,
         delete: {
@@ -184,52 +176,41 @@ export const useSystemPromptUpdater = ({
   const onPromptContentChange = useCallback(
     (newValue: string) => {
       if (selectedSystemPrompt != null) {
-        setSystemPromptSettingsUpdates((prev): SystemPromptSettings[] =>
-          prev.map((sp): SystemPromptSettings => {
-            if (sp.id === selectedSystemPrompt.id) {
-              return {
-                ...sp,
-                content: newValue,
-              };
-            }
-            return sp;
-          })
-        );
-        const existingPrompt = systemPromptSettingsUpdates.find(
-          (sp) => sp.id === selectedSystemPrompt.id
-        );
-        if (existingPrompt) {
-          const newBulkActions = {
-            ...promptsBulkActions,
-            ...(selectedSystemPrompt.id !== ''
-              ? {
-                  update: [
-                    ...(promptsBulkActions.update ?? []).filter(
-                      (p) => p.id !== selectedSystemPrompt.id
-                    ),
-                    {
-                      ...selectedSystemPrompt,
-                      content: newValue,
-                    },
-                  ],
-                }
-              : {
-                  create: [
-                    ...(promptsBulkActions.create ?? []).filter(
-                      (p) => p.name !== selectedSystemPrompt.name
-                    ),
-                    {
-                      ...selectedSystemPrompt,
-                      content: newValue,
-                    },
-                  ],
-                }),
-          };
-          setPromptsBulkActions(newBulkActions);
-        }
+        setSelectedSystemPrompt({
+          ...selectedSystemPrompt,
+          content: newValue,
+        });
+
+        const newBulkActions = {
+          ...promptsBulkActions,
+          ...(selectedSystemPrompt.id !== ''
+            ? {
+                update: [
+                  ...(promptsBulkActions.update ?? []).filter(
+                    (p) => p.id !== selectedSystemPrompt.id
+                  ),
+                  {
+                    ...selectedSystemPrompt,
+                    content: newValue,
+                  },
+                ],
+              }
+            : {
+                create: [
+                  ...(promptsBulkActions.create ?? []).filter(
+                    (p) => p.name !== selectedSystemPrompt.name
+                  ),
+                  {
+                    ...selectedSystemPrompt,
+                    content: newValue,
+                  },
+                ],
+              }),
+        };
+        setPromptsBulkActions(newBulkActions);
       }
     },
-    [promptsBulkActions, selectedSystemPrompt, systemPromptSettingsUpdates]
+    [promptsBulkActions, selectedSystemPrompt]
   );
 
   const onNewConversationDefaultChange = useCallback(
@@ -249,13 +230,9 @@ export const useSystemPromptUpdater = ({
       const shouldUpdateSelectedSystemPrompt = selectedSystemPrompt?.id !== '';
 
       if (selectedSystemPrompt != null) {
-        setSystemPromptSettingsUpdates((prev) => {
-          return prev.map((pp) => {
-            return {
-              ...pp,
-              isNewConversationDefault: selectedSystemPrompt.id === pp.id && isChecked,
-            };
-          });
+        setSelectedSystemPrompt({
+          ...selectedSystemPrompt,
+          isNewConversationDefault: isChecked,
         });
         // Update and Create prompts can happen at the same time, as we have to unchecked the previous default prompt
         // Each prompt can be updated or created
@@ -308,12 +285,9 @@ export const useSystemPromptUpdater = ({
 
   const onConversationSelectionChange = useCallback(
     (currentPromptConversations: Conversation[]) => {
-      const originalSelectedSystemPrompt = systemPromptSettings.find(
-        (sp) => sp.id === selectedSystemPromptId
-      );
       const currentPromptConversationIds = currentPromptConversations.map((convo) => convo.id);
       const removals =
-        originalSelectedSystemPrompt?.conversations.filter(
+        selectedSystemPrompt?.conversations.filter(
           (c) => !currentPromptConversationIds.includes(c.id)
         ) ?? [];
       let cRemovals: Conversation[] = [];
@@ -338,17 +312,10 @@ export const useSystemPromptUpdater = ({
             convo.apiConfig?.defaultSystemPromptId;
 
       if (selectedSystemPrompt != null) {
-        setSystemPromptSettingsUpdates((prev) =>
-          prev.map((sp) => {
-            if (sp.id === selectedSystemPrompt.id) {
-              return {
-                ...sp,
-                conversations: currentPromptConversations,
-              };
-            }
-            return sp;
-          })
-        );
+        setSelectedSystemPrompt({
+          ...selectedSystemPrompt,
+          conversations: currentPromptConversations,
+        });
         let updatedConversationsSettingsBulkActions = { create: {}, update: {} };
         Object.values(currentPromptConversations).forEach((convo) => {
           const getApiConfigWithSelectedPrompt = (): ApiConfig | {} => {
@@ -439,7 +406,6 @@ export const useSystemPromptUpdater = ({
     [
       systemPromptSettings,
       selectedSystemPrompt,
-      selectedSystemPromptId,
       setConversationsSettingsBulkActions,
       defaultConnector,
       connectors,
@@ -447,9 +413,10 @@ export const useSystemPromptUpdater = ({
   );
 
   const resetSystemPromptSettings = useCallback((): void => {
-    setSystemPromptSettingsUpdates(systemPromptSettings);
+    setConversationsSettingsBulkActions({});
     setPromptsBulkActions({});
-  }, [systemPromptSettings]);
+    setSelectedSystemPrompt(undefined);
+  }, [setConversationsSettingsBulkActions]);
 
   const saveSystemPromptSettings = useCallback(async (): Promise<{
     success: boolean;
@@ -463,36 +430,30 @@ export const useSystemPromptUpdater = ({
       : undefined;
     let conversationUpdates;
     if (
-      bulkPromptsResult?.attributes?.results?.created?.length &&
-      conversationsSettingsBulkActions.update &&
-      Object.keys(conversationsSettingsBulkActions.update).length &&
-      bulkPromptsResult?.success
+      // no prompt update or prompt update succeeded
+      (!bulkPromptsResult || bulkPromptsResult?.success) &&
+      conversationsSettingsBulkActions?.update
     ) {
-      const updatesWithNewIds = conversationsSettingsBulkActions.update
-        ? Object.entries(conversationsSettingsBulkActions.update).reduce((acc, [key, value]) => {
-            if (value.apiConfig?.defaultSystemPromptId === '') {
-              // only creating one at a time
-              const createdPrompt = bulkPromptsResult?.attributes?.results?.created[0];
-              if (createdPrompt) {
-                return {
-                  ...acc,
-                  [key]: {
-                    ...value,
-                    apiConfig: { ...value.apiConfig, defaultSystemPromptId: createdPrompt.id },
-                  },
-                };
+      const updatesWithNewIds =
+        conversationsSettingsBulkActions.update &&
+        bulkPromptsResult?.attributes?.results?.created?.length
+          ? Object.entries(conversationsSettingsBulkActions.update).reduce((acc, [key, value]) => {
+              if (value.apiConfig?.defaultSystemPromptId === '') {
+                // only creating one at a time
+                const createdPrompt = bulkPromptsResult?.attributes?.results?.created[0];
+                if (createdPrompt) {
+                  return {
+                    ...acc,
+                    [key]: {
+                      ...value,
+                      apiConfig: { ...value.apiConfig, defaultSystemPromptId: createdPrompt.id },
+                    },
+                  };
+                }
               }
-            }
-            return acc;
-          }, {})
-        : {};
-      setConversationsSettingsBulkActions({
-        ...conversationsSettingsBulkActions,
-        update: {
-          ...conversationsSettingsBulkActions.update,
-          ...updatesWithNewIds,
-        },
-      });
+              return acc;
+            }, {})
+          : {};
       conversationUpdates = {
         ...conversationsSettingsBulkActions,
         update: {
@@ -501,13 +462,17 @@ export const useSystemPromptUpdater = ({
         },
       };
     }
-    setPromptsBulkActions({});
-    return { success: bulkPromptsResult?.success ?? false, conversationUpdates };
+    resetSystemPromptSettings();
+    return {
+      // if no bulk update status, only conversations need to update so return success === true
+      success: bulkPromptsResult?.success ?? true,
+      conversationUpdates,
+    };
   }, [
     conversationsSettingsBulkActions,
     http,
     promptsBulkActions,
-    setConversationsSettingsBulkActions,
+    resetSystemPromptSettings,
     toasts,
   ]);
 

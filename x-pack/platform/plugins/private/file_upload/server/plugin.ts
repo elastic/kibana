@@ -14,9 +14,9 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { UI_SETTING_MAX_FILE_SIZE, MAX_FILE_SIZE } from '@kbn/file-upload-common/src/constants';
 import { fileUploadRoutes } from './routes';
 import { initFileUploadTelemetry } from './telemetry';
-import { MAX_FILE_SIZE, UI_SETTING_MAX_FILE_SIZE } from '../common/constants';
 import { setupCapabilities } from './capabilities';
 import type { StartDeps, SetupDeps } from './types';
 

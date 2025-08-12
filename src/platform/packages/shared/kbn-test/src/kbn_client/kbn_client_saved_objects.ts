@@ -107,9 +107,11 @@ const STANDARD_LIST_TYPES = [
   'cases-connector-mappings',
   // synthetics based objects
   'synthetics-monitor',
+  'synthetics-monitor-multi-space',
   'uptime-dynamic-settings',
   'synthetics-privates-locations',
   'synthetics-private-location',
+  'synthetics-param',
 
   'osquery-saved-query',
   'osquery-pack',

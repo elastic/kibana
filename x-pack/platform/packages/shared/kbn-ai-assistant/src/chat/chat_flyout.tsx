@@ -310,7 +310,7 @@ export function ChatFlyout({
           </EuiFlexItem>
 
           <EuiFlexItem
-            style={{
+            css={{
               maxWidth: isSecondSlotVisible ? SIDEBAR_WIDTH : 0,
               paddingTop: '56px',
             }}

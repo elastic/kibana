@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const retry = getService('retry');
   const { common, dashboard, header, discover } = getPageObjects([
     'common',
     'dashboard',
@@ -161,6 +162,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       expect(highlights.length).to.be.greaterThan(0);
       expect(highlights.every((text) => text === 'Mozilla')).to.be(true);
+    });
+
+    it('should expand the detail row when the toggle arrow is clicked', async function () {
+      await addSearchEmbeddableToDashboard();
+      await retry.try(async function () {
+        await dataGrid.clickRowToggle({ isAnchorRow: false, rowIndex: 0 });
+        const detailsEl = await dataGrid.getDetailsRows();
+        const defaultMessageEl = await detailsEl[0].findByTestSubject('docViewerRowDetailsTitle');
+        expect(defaultMessageEl).to.be.ok();
+        await dataGrid.closeFlyout();
+      });
+    });
+
+    it('filters are added when a cell filter is clicked', async function () {
+      await addSearchEmbeddableToDashboard();
+      const gridCell = '[role="gridcell"]:nth-child(4)';
+      const filterOutButton = '[data-test-subj="filterOutButton"]';
+      const filterForButton = '[data-test-subj="filterForButton"]';
+      await retry.try(async () => {
+        await find.clickByCssSelector(gridCell);
+        await find.clickByCssSelector(filterOutButton);
+        await header.waitUntilLoadingHasFinished();
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(1);
+      });
+      await header.waitUntilLoadingHasFinished();
+      await retry.try(async () => {
+        await find.clickByCssSelector(gridCell);
+        await find.clickByCssSelector(filterForButton);
+        await header.waitUntilLoadingHasFinished();
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(2);
+      });
     });
   });
 }

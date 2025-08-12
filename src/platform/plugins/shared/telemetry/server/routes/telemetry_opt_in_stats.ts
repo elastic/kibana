@@ -68,16 +68,16 @@ export function registerTelemetryOptInStatsRoutes(
     .post({
       access: 'public', // It's not used across Kibana, and I didn't want to remove it in this PR just in case.
       path: GetOptInStatsRoutePathBasedV2,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
     })
     .addVersion(
       {
         version: '2023-10-31',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: {
           request: {
             body: schema.object({

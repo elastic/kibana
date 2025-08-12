@@ -261,7 +261,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
       );
     });
 
-    test('rejects paylaod with missing rules array', () => {
+    test('rejects payload with missing rules array', () => {
       const invalid = { ...validRequest, rules: undefined };
       const result = UpgradeSpecificRulesRequest.safeParse(invalid);
       expectParseError(result);

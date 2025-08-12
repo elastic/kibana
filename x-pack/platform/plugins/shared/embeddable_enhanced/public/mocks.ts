@@ -18,7 +18,7 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    initializeReactEmbeddableDynamicActions: jest.fn(),
+    initializeEmbeddableDynamicActions: jest.fn(),
   };
 
   return startContract;

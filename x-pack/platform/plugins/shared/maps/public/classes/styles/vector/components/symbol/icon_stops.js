@@ -13,6 +13,8 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } fr
 import { IconSelect } from './icon_select';
 import { StopInput } from '../stop_input';
 import { getMakiSymbol, PREFERRED_ICONS, SYMBOL_OPTIONS } from '../../symbol_utils';
+import { mapColorStopsStyles } from '../map_color_stops.styles';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 function isDuplicateStop(targetStop, iconStops) {
   const stops = iconStops.filter(({ stop }) => {
@@ -51,6 +53,7 @@ export function IconStops({
   onCustomIconsChange,
   customIcons,
 }) {
+  const styles = useMemoCss(mapColorStopsStyles);
   return iconStops
     .map(({ stop, icon, iconSource }, index) => {
       const iconInfo =
@@ -150,7 +153,7 @@ export function IconStops({
       return (
         <EuiFormRow
           key={index}
-          className="mapColorStop"
+          css={styles.mapColorStops}
           isInvalid={errors.length !== 0}
           error={errors}
           display="rowCompressed"

@@ -296,7 +296,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       {field?.parentName && (
         <>
           <EuiCallOut
-            iconType="iInCircle"
+            iconType="info"
             title={i18n.translate('indexPatternFieldEditor.editor.form.subFieldParentInfo', {
               defaultMessage: "Field value is defined by ''{parentName}''",
               values: { parentName: field?.parentName },

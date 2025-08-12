@@ -50,7 +50,8 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     policyName: string,
     endpointPackageVersion?: string,
     agentPolicyName?: string,
-    log?: ToolingLog
+    log?: ToolingLog,
+    spaceIds?: string[]
   ): Promise<IndexedFleetEndpointPolicyResponse> => {
     const response: IndexedFleetEndpointPolicyResponse = {
       integrationPolicies: [],
@@ -65,8 +66,9 @@ export const indexFleetEndpointPolicy = usageTracker.track(
       name:
         agentPolicyName || `Policy for ${policyName} (${Math.random().toString(36).substr(2, 5)})`,
       description: `Policy created with endpoint data generator (${policyName})`,
-      namespace: 'default',
+      namespace: spaceIds?.[0] ?? 'default',
       monitoring_enabled: ['logs', 'metrics'],
+      space_ids: spaceIds,
     };
 
     let agentPolicy: AxiosResponse<CreateAgentPolicyResponse>;

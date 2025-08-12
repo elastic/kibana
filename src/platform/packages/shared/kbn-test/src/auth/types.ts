@@ -10,6 +10,7 @@
 import { ToolingLog } from '@kbn/tooling-log';
 
 export interface CloudSamlSessionParams {
+  hostname: string;
   kbnHost: string;
   kbnVersion: string;
   email: string;

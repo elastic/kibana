@@ -8,13 +8,13 @@
 import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
-import { type RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { type RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import type { TableColumn } from './constants';
 
 interface NameProps {
-  rule: RuleMigration;
-  openMigrationRuleDetails: (rule: RuleMigration) => void;
+  rule: RuleMigrationRule;
+  openMigrationRuleDetails: (rule: RuleMigrationRule) => void;
 }
 
 const Name = ({ rule, openMigrationRuleDetails }: NameProps) => {
@@ -40,12 +40,12 @@ const Name = ({ rule, openMigrationRuleDetails }: NameProps) => {
 export const createNameColumn = ({
   openMigrationRuleDetails,
 }: {
-  openMigrationRuleDetails: (rule: RuleMigration) => void;
+  openMigrationRuleDetails: (rule: RuleMigrationRule) => void;
 }): TableColumn => {
   return {
     field: 'elastic_rule.title',
     name: i18n.COLUMN_NAME,
-    render: (_, rule: RuleMigration) => (
+    render: (_, rule: RuleMigrationRule) => (
       <Name rule={rule} openMigrationRuleDetails={openMigrationRuleDetails} />
     ),
     sortable: true,

@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './timeseries_visualization.scss';
-
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
+import { PersistedState, visContainerStyle } from '@kbn/visualizations-plugin/public';
 import type { PaletteRegistry } from '@kbn/coloring';
+import { css } from '@emotion/react';
 import { TimeseriesLoading } from './timeseries_loading';
 import { TimeseriesVisTypes } from './vis_types';
 import type { FetchedIndexPattern, PanelData, TimeseriesVisData } from '../../../common/types';
@@ -169,7 +168,13 @@ function TimeseriesVisualization({
   return (
     <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
       {shouldDisplayLastValueIndicator && (
-        <EuiFlexItem className="tvbLastValueIndicator" grow={false}>
+        <EuiFlexItem
+          className="tvbLastValueIndicator"
+          css={css`
+            align-self: flex-end;
+          `}
+          grow={false}
+        >
           <LastValueModeIndicator
             seriesData={firstSeries?.data}
             ignoreDaylightTime={model.ignore_daylight_time}
@@ -181,8 +186,8 @@ function TimeseriesVisualization({
       <EuiFlexItem>
         <Suspense
           fallback={
-            <div className="visChart__spinner">
-              <EuiLoadingChart mono size="l" />
+            <div className="visChart__spinner" css={visContainerStyle}>
+              <EuiLoadingChart size="l" />
             </div>
           }
         >

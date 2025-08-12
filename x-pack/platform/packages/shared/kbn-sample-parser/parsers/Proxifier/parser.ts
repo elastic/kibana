@@ -11,17 +11,29 @@ const TIMESTAMP_REGEX = /\[(\d{1,2})\.(\d{1,2}) (\d{1,2}):(\d{2}):(\d{2})\]/;
 
 export function getTimestamp(logLine: string): number {
   const match = logLine.match(TIMESTAMP_REGEX);
-  if (match) {
-    const [_, month, day, hour, minute, second] = match;
-    const dateString = `${new Date().getFullYear()}-${month}-${day} ${hour}:${minute}:${second}`;
-    const date = moment.utc(dateString, 'YYYY-MM-DD HH:mm:ss');
-    return date.valueOf();
+  if (!match) {
+    throw new Error('Invalid log line format');
   }
-  throw new Error('Timestamp not found in log line');
+  const [, month, day, hour, minute, second] = match;
+  const date = moment.utc(`${month}.${day} ${hour}:${minute}:${second}`, 'MM.DD HH:mm:ss');
+  return date.valueOf();
 }
 
 export function replaceTimestamp(logLine: string, timestamp: number): string {
-  const newDate = moment.utc(timestamp);
-  const newTimestamp = `[${newDate.format('MM.DD HH:mm:ss')}]`;
-  return logLine.replace(TIMESTAMP_REGEX, newTimestamp);
+  const date = moment.utc(timestamp);
+  const formattedTimestamp = `[${date.format('MM.DD HH:mm:ss')}]`;
+  return logLine.replace(TIMESTAMP_REGEX, formattedTimestamp);
+}
+
+export function getFakeMetadata(logLine: string): object {
+  const randomProcessId = Math.floor(Math.random() * 10000);
+  const randomHostName = `host-${Math.floor(Math.random() * 100)}`;
+  const randomUserName = `user${Math.floor(Math.random() * 1000)}`;
+  return {
+    'process.id': randomProcessId,
+    'host.name': randomHostName,
+    'user.name': randomUserName,
+    'kubernetes.pod.name': `pod-${Math.floor(Math.random() * 1000)}`,
+    'kubernetes.namespace': 'default',
+  };
 }

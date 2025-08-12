@@ -10,13 +10,16 @@ import { useEffect, useState } from 'react';
 import type { IndicesStatusResponse } from '../../../../common';
 
 import { useKibana } from '../../../hooks/use_kibana';
-
 import { navigateToIndexDetails } from '../../utils';
+import type { UserStartPrivilegesResponse } from '../../../../common';
 import { useUsageTracker } from '../../../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../../analytics/constants';
 
-export const useIndicesRedirect = (indicesStatus?: IndicesStatusResponse) => {
-  const { application, http } = useKibana().services;
+export const useIndicesRedirect = (
+  indicesStatus?: IndicesStatusResponse,
+  userPrivileges?: UserStartPrivilegesResponse
+) => {
+  const { application, http, sampleDataIngest } = useKibana().services;
   const [lastStatus, setLastStatus] = useState<IndicesStatusResponse | undefined>(() => undefined);
   const [hasDoneRedirect, setHasDoneRedirect] = useState(() => false);
   const usageTracker = useUsageTracker();
@@ -24,6 +27,17 @@ export const useIndicesRedirect = (indicesStatus?: IndicesStatusResponse) => {
     if (hasDoneRedirect) {
       return;
     }
+
+    if (!userPrivileges) {
+      return;
+    }
+
+    if (userPrivileges?.privileges?.canManageIndex === false) {
+      application.navigateToApp('discover');
+      setHasDoneRedirect(true);
+      return;
+    }
+
     if (!indicesStatus) {
       return;
     }
@@ -37,6 +51,10 @@ export const useIndicesRedirect = (indicesStatus?: IndicesStatusResponse) => {
       return;
     }
     if (indicesStatus.indexNames.length === 1) {
+      if (sampleDataIngest?.isSampleIndex(indicesStatus.indexNames[0])) {
+        return;
+      }
+
       navigateToIndexDetails(application, http, indicesStatus.indexNames[0]);
       setHasDoneRedirect(true);
       usageTracker.click(AnalyticsEvents.startCreateIndexCreatedRedirect);
@@ -47,10 +65,12 @@ export const useIndicesRedirect = (indicesStatus?: IndicesStatusResponse) => {
   }, [
     application,
     http,
+    sampleDataIngest,
     indicesStatus,
     lastStatus,
     setHasDoneRedirect,
     usageTracker,
     hasDoneRedirect,
+    userPrivileges,
   ]);
 };

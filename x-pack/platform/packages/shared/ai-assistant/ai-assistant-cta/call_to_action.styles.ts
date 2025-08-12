@@ -13,11 +13,14 @@ type EmotionFn = (theme: UseEuiTheme) => SerializedStyles;
 
 const MAX_WIDTH = 575;
 
-const root: EmotionFn = ({ euiTheme: { size } }) => css`
-  padding: ${size.s} ${size.xl} ${size.xl} ${size.xl};
-  max-width: ${MAX_WIDTH}px;
-  margin: 0 auto;
-`;
+const root =
+  (beaconSize: number): EmotionFn =>
+  ({ euiTheme: { size } }) =>
+    css`
+      padding: ${size.xl};
+      max-width: ${MAX_WIDTH}px;
+      margin: ${0 - beaconSize}px auto 0 auto;
+    `;
 
 const actions: EmotionFn = ({ euiTheme: { size } }) => css`
   padding: ${size.m};

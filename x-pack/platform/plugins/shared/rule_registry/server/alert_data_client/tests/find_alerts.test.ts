@@ -11,13 +11,14 @@ import {
   SPACE_IDS,
   ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import type { ConstructorOptions } from '../alerts_client';
+import { AlertsClient } from '../alerts_client';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
-import { JsonObject } from '@kbn/utility-types';
+import type { JsonObject } from '@kbn/utility-types';
 
 describe('find()', () => {
   const alertingAuthMock = alertingAuthorizationMock.create();
@@ -28,6 +29,7 @@ describe('find()', () => {
     logger: loggingSystemMock.create().get(),
     authorization: alertingAuthMock,
     esClient: esClientMock,
+    esClientScoped: esClientMock,
     auditLogger,
     ruleDataService: ruleDataServiceMock.create(),
     getRuleType: jest.fn(),
@@ -303,8 +305,11 @@ describe('find()', () => {
                   },
                 },
                 Object {
-                  "term": Object {
-                    "kibana.space_ids": "test_default_space_id",
+                  "terms": Object {
+                    "kibana.space_ids": Array [
+                      "test_default_space_id",
+                      "*",
+                    ],
                   },
                 },
                 Object {
@@ -523,8 +528,11 @@ describe('find()', () => {
                   },
                 },
                 Object {
-                  "term": Object {
-                    "kibana.space_ids": "test_default_space_id",
+                  "terms": Object {
+                    "kibana.space_ids": Array [
+                      "test_default_space_id",
+                      "*",
+                    ],
                   },
                 },
               ],

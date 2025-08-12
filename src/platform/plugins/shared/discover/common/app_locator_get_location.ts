@@ -13,6 +13,7 @@ import type { setStateToKbnUrl as setStateToKbnUrlCommon } from '@kbn/kibana-uti
 import type { DiscoverAppLocatorGetLocation, MainHistoryLocationState } from './app_locator';
 import type { DiscoverAppState } from '../public';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
+import { APP_STATE_URL_KEY } from './constants';
 
 export const appLocatorGetLocationCommon = async (
   {
@@ -82,7 +83,7 @@ export const appLocatorGetLocationCommon = async (
   }
 
   if (Object.keys(appState).length) {
-    path = setStateToKbnUrl('_a', appState, { useHash }, path);
+    path = setStateToKbnUrl(APP_STATE_URL_KEY, appState, { useHash }, path);
   }
 
   return {

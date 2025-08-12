@@ -11,8 +11,8 @@ import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, getOrElse } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/pipeable';
+import { map, getOrElse } from 'fp-ts/Option';
 import type { Logger } from '@kbn/core/server';
 import type { ActionType, ActionTypeExecutorOptions } from '@kbn/actions-plugin/server';
 import {

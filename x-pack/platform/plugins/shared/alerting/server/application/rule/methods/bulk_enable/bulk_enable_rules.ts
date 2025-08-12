@@ -35,8 +35,8 @@ import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
   createNewAPIKeySet,
-  migrateLegacyActions,
   updateMetaAttributes,
+  bulkMigrateLegacyActions,
 } from '../../../../rules_client/lib';
 import type { RulesClientContext, BulkOperationError } from '../../../../rules_client/types';
 import { validateScheduleLimit } from '../get_schedule_frequency';
@@ -203,6 +203,8 @@ const bulkEnableRulesWithOCC = async (
         });
       }
 
+      await bulkMigrateLegacyActions({ context, rules: rulesFinderRules });
+
       await pMap(
         rulesFinderRules,
         async (rule) => {
@@ -223,13 +225,6 @@ const bulkEnableRulesWithOCC = async (
               ruleNameToRuleIdMapping[rule.id] = ruleName;
             }
 
-            const migratedActions = await migrateLegacyActions(context, {
-              ruleId: rule.id,
-              actions: rule.attributes.actions,
-              references: rule.references,
-              attributes: rule.attributes,
-            });
-
             const updatedAttributes = updateMetaAttributes(context, {
               ...rule.attributes,
               ...(!rule.attributes.apiKey &&
@@ -239,13 +234,6 @@ const bulkEnableRulesWithOCC = async (
                   username,
                   shouldUpdateApiKey: true,
                 }))),
-              ...(migratedActions.hasLegacyActions
-                ? {
-                    actions: migratedActions.resultedActions,
-                    throttle: undefined,
-                    notifyWhen: undefined,
-                  }
-                : {}),
               enabled: true,
               updatedBy: username,
               updatedAt: new Date().toISOString(),
@@ -287,9 +275,6 @@ const bulkEnableRulesWithOCC = async (
             rulesToEnable.push({
               ...rule,
               attributes: updatedAttributes,
-              ...(migratedActions.hasLegacyActions
-                ? { references: migratedActions.resultedReferences }
-                : {}),
             });
 
             context.auditLogger?.log(

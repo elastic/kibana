@@ -14,29 +14,23 @@ interface ResourceContext {
 }
 
 export const getResourcesContext = (resources: RuleMigrationResources): ResourceContext => {
-  const result: ResourceContext = { macros: '', lookups: '' };
+  const context: ResourceContext = { macros: '', lookups: '' };
 
   // Process macros
   if (resources.macro?.length) {
-    const macrosMap = resources.macro.reduce((acc, macro) => {
-      acc[macro.name] = macro.content;
-      return acc;
-    }, {} as Record<string, string>);
-
-    result.macros = JSON.stringify(macrosMap, null, 2);
+    const macros = Object.fromEntries(resources.macro.map(({ name, content }) => [name, content]));
+    context.macros = JSON.stringify(macros, null, 2);
   }
 
   // Process lookups
   if (resources.lookup?.length) {
-    const lookupsMap = resources.lookup.reduce((acc, lookup) => {
-      acc[lookup.name] = lookup.content;
-      return acc;
-    }, {} as Record<string, string>);
-
-    result.lookups = JSON.stringify(lookupsMap, null, 2);
+    const lookups = Object.fromEntries(
+      resources.lookup.map(({ name, content }) => [name, content])
+    );
+    context.lookups = JSON.stringify(lookups, null, 2);
   }
 
-  return result;
+  return context;
 };
 
 export const REPLACE_QUERY_RESOURCE_PROMPT = ChatPromptTemplate.fromMessages([

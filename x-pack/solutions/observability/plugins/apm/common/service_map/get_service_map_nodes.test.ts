@@ -114,7 +114,7 @@ describe('getServiceMapNodes', () => {
     expect(getIds(edges)).toEqual(['opbeans-java~opbeans-node']);
   });
 
-  it('adds connection for messaging-based external destinations', () => {
+  it('adds connections for messaging systems', () => {
     const response: ServiceMapConnections = {
       servicesData: [
         getServiceConnectionNode(nodejsService),
@@ -125,11 +125,19 @@ describe('getServiceMapNodes', () => {
           from: getExternalConnectionNode({ ...kafkaExternal, ...javaService }),
           to: getServiceConnectionNode(nodejsService),
         },
+        {
+          from: getExternalConnectionNode({ ...kafkaExternal, ...javaService }),
+          to: getServiceConnectionNode(goService),
+        },
       ],
       connections: [
         {
           source: getServiceConnectionNode(javaService),
           destination: getExternalConnectionNode({ ...kafkaExternal, ...javaService }),
+        },
+        {
+          source: getServiceConnectionNode(javaService),
+          destination: getExternalConnectionNode({ ...kafkaExternal, ...goService }),
         },
       ],
       anomalies,
@@ -139,8 +147,14 @@ describe('getServiceMapNodes', () => {
 
     const { edges, nodes } = partitionElements(elements);
 
-    expect(getIds(nodes)).toEqual(['>kafka/some-queue', 'opbeans-java', 'opbeans-node']);
+    expect(getIds(nodes)).toEqual([
+      '>kafka/some-queue',
+      'opbeans-go',
+      'opbeans-java',
+      'opbeans-node',
+    ]);
     expect(getIds(edges)).toEqual([
+      '>kafka/some-queue~opbeans-go',
       '>kafka/some-queue~opbeans-node',
       'opbeans-java~>kafka/some-queue',
     ]);

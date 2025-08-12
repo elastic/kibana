@@ -27,8 +27,10 @@ import type { CoreUsageDataSetup } from '@kbn/core-usage-data-server';
 import type { CustomBrandingSetup } from '@kbn/core-custom-branding-server';
 import type { UserSettingsServiceSetup } from '@kbn/core-user-settings-server';
 import type { PluginsServiceSetup } from '@kbn/core-plugins-contracts-server';
+import type { PricingServiceSetup } from '@kbn/core-pricing-server';
 import type { SecurityServiceSetup } from '@kbn/core-security-server';
 import type { UserProfileServiceSetup } from '@kbn/core-user-profile-server';
+import type { CoreDiServiceSetup } from '@kbn/core-di';
 import type { CoreStart } from './core_start';
 
 /**
@@ -82,10 +84,14 @@ export interface CoreSetup<TPluginsStart extends Record<string, any> = {}, TStar
   coreUsageData: CoreUsageDataSetup;
   /** {@link PluginsServiceSetup} */
   plugins: PluginsServiceSetup;
+  /** {@link PricingServiceSetup} */
+  pricing: PricingServiceSetup;
   /** {@link SecurityServiceSetup} */
   security: SecurityServiceSetup;
   /** {@link UserProfileServiceSetup} */
   userProfile: UserProfileServiceSetup;
+  /** {@link CoreDiServiceSetup} */
+  injection: CoreDiServiceSetup;
 }
 
 /**

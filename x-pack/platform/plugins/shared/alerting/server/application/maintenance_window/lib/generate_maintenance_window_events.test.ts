@@ -137,4 +137,28 @@ describe('generateMaintenanceWindowEvents', () => {
     expect(result[result.length - 1].gte).toEqual('2023-03-30T00:00:00.000Z');
     expect(result[result.length - 1].lte).toEqual('2023-03-30T01:00:00.000Z');
   });
+
+  it('should generate events starting with start date', () => {
+    const result = generateMaintenanceWindowEvents({
+      duration: 1 * 60 * 60 * 1000,
+      expirationDate: moment(new Date('2023-02-27T00:00:00.000Z'))
+        .tz('UTC')
+        .add(5, 'weeks')
+        .toISOString(),
+      rRule: {
+        tzid: 'UTC',
+        freq: Frequency.WEEKLY,
+        interval: 1,
+        byweekday: ['WE', 'TU', 'TH'],
+        dtstart: '2023-01-27T00:00:00.000Z',
+      },
+      startDate: '2023-03-01T00:00:00.000Z',
+    });
+
+    expect(result[0].lte).toEqual('2023-03-01T01:00:00.000Z'); // events started after start date
+    expect(result[0].gte).toEqual('2023-03-01T00:00:00.000Z');
+
+    expect(result[result.length - 1].lte).toEqual('2023-03-30T01:00:00.000Z'); // events ended before expiration date
+    expect(result[result.length - 1].gte).toEqual('2023-03-30T00:00:00.000Z');
+  });
 });

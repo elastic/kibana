@@ -16,7 +16,6 @@ import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
 import { type ESQLControlVariable } from '@kbn/esql-types';
-import { ESQLVariableType } from '@kbn/esql-types';
 
 export const hasStartEndParams = (query: string) => /\?_tstart|\?_tend/i.test(query);
 
@@ -47,12 +46,8 @@ export const getNamedParams = (
 ) => {
   const namedParams: ESQLSearchParams['params'] = getStartEndParams(query, timeRange);
   if (variables?.length) {
-    variables?.forEach(({ key, value, type }) => {
-      if (type === ESQLVariableType.FIELDS || type === ESQLVariableType.FUNCTIONS) {
-        namedParams.push({ [key]: { identifier: value } });
-      } else {
-        namedParams.push({ [key]: value });
-      }
+    variables?.forEach(({ key, value }) => {
+      namedParams.push({ [key]: value });
     });
   }
   return namedParams;
@@ -76,14 +71,16 @@ export async function getESQLQueryColumnsRaw({
   search,
   signal,
   timeRange,
+  variables,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
   timeRange?: TimeRange;
+  variables?: ESQLControlVariable[];
 }): Promise<ESQLColumn[]> {
   try {
-    const namedParams = getStartEndParams(esqlQuery, timeRange);
+    const namedParams = getNamedParams(esqlQuery, timeRange, variables);
     const response = await lastValueFrom(
       search(
         {
@@ -117,14 +114,22 @@ export async function getESQLQueryColumns({
   search,
   signal,
   timeRange,
+  variables,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
   timeRange?: TimeRange;
+  variables?: ESQLControlVariable[];
 }): Promise<DatatableColumn[]> {
   try {
-    const rawColumns = await getESQLQueryColumnsRaw({ esqlQuery, search, signal, timeRange });
+    const rawColumns = await getESQLQueryColumnsRaw({
+      esqlQuery,
+      search,
+      signal,
+      timeRange,
+      variables,
+    });
     const columns = formatESQLColumns(rawColumns) ?? [];
     return columns;
   } catch (error) {

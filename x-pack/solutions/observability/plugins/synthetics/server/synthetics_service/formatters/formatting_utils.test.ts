@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { replaceStringWithParams } from './formatting_utils';
+import { inlineSourceFormatter, replaceStringWithParams } from './formatting_utils';
 import { loggerMock } from '@kbn/logging-mocks';
+import { ConfigKey } from '../../../common/constants/monitor_management';
 
 describe('replaceStringWithParams', () => {
   const logger = loggerMock.create();
@@ -237,5 +238,15 @@ describe('replaceStringWithParams', () => {
     const result = replaceStringWithParams({}, { param: '1' }, logger);
 
     expect(result).toEqual({});
+  });
+
+  it(`should replace $ {} with adding $ in start for template literal`, () => {
+    const value = inlineSourceFormatter(
+      {
+        [ConfigKey.SOURCE_INLINE]: 'const a = ${b}; const c = ${d}',
+      },
+      ConfigKey.SOURCE_INLINE
+    );
+    expect(value).toEqual('const a = $${b}; const c = $${d}');
   });
 });

@@ -25,6 +25,12 @@ export class CorePluginRouteTimeoutsPlugin implements Plugin {
           timeout: { payload: 100 },
         },
         path: '/short_payload_timeout',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: false,
       },
       async (context, req, res) => {
@@ -41,6 +47,12 @@ export class CorePluginRouteTimeoutsPlugin implements Plugin {
           timeout: { payload: 10000 },
         },
         path: '/longer_payload_timeout',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: false,
       },
       async (context, req, res) => {
@@ -57,6 +69,12 @@ export class CorePluginRouteTimeoutsPlugin implements Plugin {
           timeout: { idleSocket: 5 },
         },
         path: '/short_idle_socket_timeout',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           body: schema.maybe(
             schema.object({
@@ -82,6 +100,12 @@ export class CorePluginRouteTimeoutsPlugin implements Plugin {
           timeout: { idleSocket: 5000 },
         },
         path: '/longer_idle_socket_timeout',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           body: schema.maybe(
             schema.object({

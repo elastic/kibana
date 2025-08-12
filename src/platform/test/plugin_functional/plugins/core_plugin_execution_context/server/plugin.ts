@@ -15,6 +15,12 @@ export class CorePluginExecutionContext implements Plugin {
     router.get(
       {
         path: '/execution_context/pass',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: false,
         options: {
           authRequired: false,

@@ -13,7 +13,9 @@ export type Protocol = 'http' | 'https';
 
 export const VALID_CONFIG_MARKER = Symbol('validConfig');
 
-export type ScoutConfigName = 'local';
+export type ScoutPlaywrightProjects = 'local' | 'ech' | 'mki';
+
+export type ScoutConfigName = 'local' | 'cloud_ech' | 'cloud_mki';
 
 export interface ScoutTestOptions extends PlaywrightTestOptions {
   serversConfigDir: string;

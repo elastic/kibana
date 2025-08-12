@@ -11,11 +11,12 @@ export type {
   UiSettingsType,
   ReadonlyModeType,
   DeprecationSettings,
-  UiSettingsSolution,
+  UiSettingsSolutions,
   UiSettingsParams,
   UserProvidedValues,
   UiSettingsScope,
   GetUiSettingsContext,
+  TechnicalPreviewSettings,
 } from './src/ui_settings';
 export { type DarkModeValue, parseDarkModeValue } from './src/dark_mode';
 export {

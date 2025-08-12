@@ -8,15 +8,13 @@
 import type { PromptContext, PromptContextTemplate } from '@kbn/elastic-assistant';
 import * as i18nDataQuality from '@kbn/ecs-data-quality-dashboard';
 import * as i18n from './translations';
-import * as i18nDetections from '../../../detections/pages/detection_engine/rules/translations';
+import * as i18nDetections from '../../../detection_engine/common/translations';
 import * as i18nEventDetails from '../../../common/components/event_details/translations';
-import * as i18nUserPrompts from '../prompts/user/translations';
 
 export const PROMPT_CONTEXT_ALERT_CATEGORY = 'alert';
 export const PROMPT_CONTEXT_EVENT_CATEGORY = 'event';
 export const PROMPT_CONTEXT_DETECTION_RULES_CATEGORY = 'detection-rules';
 export const DATA_QUALITY_DASHBOARD_CATEGORY = 'data-quality-dashboard';
-export const KNOWLEDGE_BASE_CATEGORY = 'knowledge-base';
 
 /**
  * Global list of PromptContexts intended to be used throughout Security Solution.
@@ -24,14 +22,15 @@ export const KNOWLEDGE_BASE_CATEGORY = 'knowledge-base';
  * a unique set of categories to reference since the PromptContexts available on
  * useAssistantContext are dynamic (not globally registered).
  */
-export const PROMPT_CONTEXTS: Record<PromptContext['category'], PromptContextTemplate> = {
+export const getPromptContexts = (
+  prompts: Record<PromptContext['category'], string>
+): Record<PromptContext['category'], PromptContextTemplate> => ({
   /**
    * Alert summary view context, made available on the alert details flyout
    */
   [PROMPT_CONTEXT_ALERT_CATEGORY]: {
     category: PROMPT_CONTEXT_ALERT_CATEGORY,
-    suggestedUserPrompt:
-      i18nUserPrompts.EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N,
+    suggestedUserPrompt: prompts[PROMPT_CONTEXT_ALERT_CATEGORY],
     description: i18nEventDetails.ALERT_SUMMARY_CONTEXT_DESCRIPTION(i18n.VIEW),
     tooltip: i18nEventDetails.ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
   },
@@ -40,8 +39,7 @@ export const PROMPT_CONTEXTS: Record<PromptContext['category'], PromptContextTem
    */
   [PROMPT_CONTEXT_EVENT_CATEGORY]: {
     category: PROMPT_CONTEXT_EVENT_CATEGORY,
-    suggestedUserPrompt:
-      i18nUserPrompts.EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N,
+    suggestedUserPrompt: prompts[PROMPT_CONTEXT_EVENT_CATEGORY],
     description: i18nEventDetails.EVENT_SUMMARY_CONTEXT_DESCRIPTION(i18n.VIEW),
     tooltip: i18nEventDetails.EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
   },
@@ -50,7 +48,7 @@ export const PROMPT_CONTEXTS: Record<PromptContext['category'], PromptContextTem
    */
   [DATA_QUALITY_DASHBOARD_CATEGORY]: {
     category: DATA_QUALITY_DASHBOARD_CATEGORY,
-    suggestedUserPrompt: i18nDataQuality.DATA_QUALITY_SUGGESTED_USER_PROMPT,
+    suggestedUserPrompt: prompts[DATA_QUALITY_DASHBOARD_CATEGORY],
     description: i18nDataQuality.DATA_QUALITY_PROMPT_CONTEXT_PILL(i18n.INDEX),
     tooltip: i18nDataQuality.DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP,
   },
@@ -59,8 +57,8 @@ export const PROMPT_CONTEXTS: Record<PromptContext['category'], PromptContextTem
    */
   [PROMPT_CONTEXT_DETECTION_RULES_CATEGORY]: {
     category: PROMPT_CONTEXT_DETECTION_RULES_CATEGORY,
-    suggestedUserPrompt: i18nDetections.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS,
+    suggestedUserPrompt: prompts[PROMPT_CONTEXT_DETECTION_RULES_CATEGORY],
     description: i18nDetections.RULE_MANAGEMENT_CONTEXT_DESCRIPTION,
     tooltip: i18nDetections.RULE_MANAGEMENT_CONTEXT_TOOLTIP,
   },
-};
+});

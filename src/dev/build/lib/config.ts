@@ -27,6 +27,7 @@ import {
   ALL_PLATFORMS,
   SERVERLESS_PLATFORMS,
 } from './platform';
+import { BuildOptions } from '../build_distributables';
 
 interface Options {
   isRelease: boolean;
@@ -73,7 +74,8 @@ export class Config {
       {
         examples: opts.withExamplePlugins,
         testPlugins: opts.withTestPlugins,
-      }
+      },
+      opts
     );
   }
 
@@ -94,7 +96,8 @@ export class Config {
     private readonly dockerPush: boolean,
     public readonly isRelease: boolean,
     public readonly downloadFreshNode: boolean,
-    public readonly pluginSelector: PluginSelector
+    public readonly pluginSelector: PluginSelector,
+    public readonly buildOptions: Partial<BuildOptions>
   ) {
     this.pluginFilter = getPluginPackagesFilter(this.pluginSelector);
   }

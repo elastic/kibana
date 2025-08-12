@@ -479,6 +479,51 @@
       },
       {
         "parentPluginId": "apmSourcesAccess",
+        "id": "def-server.APM_AGENT_CONFIGURATION_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "APM_AGENT_CONFIGURATION_INDEX",
+        "description": [],
+        "signature": [
+          "\".apm-agent-configuration\""
+        ],
+        "path": "x-pack/platform/plugins/shared/apm_sources_access/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "apmSourcesAccess",
+        "id": "def-server.APM_CUSTOM_LINK_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "APM_CUSTOM_LINK_INDEX",
+        "description": [],
+        "signature": [
+          "\".apm-custom-link\""
+        ],
+        "path": "x-pack/platform/plugins/shared/apm_sources_access/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "apmSourcesAccess",
+        "id": "def-server.APM_SOURCE_MAP_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "APM_SOURCE_MAP_INDEX",
+        "description": [],
+        "signature": [
+          "\".apm-source-map\""
+        ],
+        "path": "x-pack/platform/plugins/shared/apm_sources_access/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "apmSourcesAccess",
         "id": "def-server.APMIndices",
         "type": "Type",
         "tags": [],

@@ -9,7 +9,7 @@
 
 import { getTabMenuItemsFn } from './get_tab_menu_items';
 import { getNewTabPropsForIndex } from '../hooks/use_new_tab_props';
-import type { TabMenuItem } from '../types';
+import { TabMenuItem, TabMenuItemName } from '../types';
 
 const items = Array.from({ length: 5 }).map((_, i) => getNewTabPropsForIndex(i));
 
@@ -30,7 +30,10 @@ describe('getTabMenuItemsFn', () => {
       onCloseTabsToTheRight: jest.fn(),
     });
     const menuItems = getTabMenuItems(items[0]);
-    expect(menuItems.map(mapMenuItem)).toEqual(['duplicate']);
+    expect(menuItems.map(mapMenuItem)).toEqual([
+      TabMenuItemName.enterRenamingMode,
+      TabMenuItemName.duplicate,
+    ]);
   });
 
   it('returns correct menu items for many tabs', () => {
@@ -43,10 +46,11 @@ describe('getTabMenuItemsFn', () => {
     });
     const menuItems = getTabMenuItems(items[0]);
     expect(menuItems.map(mapMenuItem)).toEqual([
-      'duplicate',
+      TabMenuItemName.enterRenamingMode,
+      TabMenuItemName.duplicate,
       'divider',
-      'closeOtherTabs',
-      'closeTabsToTheRight',
+      TabMenuItemName.closeOtherTabs,
+      TabMenuItemName.closeTabsToTheRight,
     ]);
   });
 
@@ -59,7 +63,12 @@ describe('getTabMenuItemsFn', () => {
       onCloseTabsToTheRight: jest.fn(),
     });
     const menuItems = getTabMenuItems(items[2]);
-    expect(menuItems.map(mapMenuItem)).toEqual(['closeOtherTabs', 'closeTabsToTheRight']);
+    expect(menuItems.map(mapMenuItem)).toEqual([
+      TabMenuItemName.enterRenamingMode,
+      'divider',
+      TabMenuItemName.closeOtherTabs,
+      TabMenuItemName.closeTabsToTheRight,
+    ]);
   });
 
   it('returns correct menu items for the last item of many tabs', () => {
@@ -71,6 +80,11 @@ describe('getTabMenuItemsFn', () => {
       onCloseTabsToTheRight: jest.fn(),
     });
     const menuItems = getTabMenuItems(items[items.length - 1]);
-    expect(menuItems.map(mapMenuItem)).toEqual(['duplicate', 'divider', 'closeOtherTabs']);
+    expect(menuItems.map(mapMenuItem)).toEqual([
+      TabMenuItemName.enterRenamingMode,
+      TabMenuItemName.duplicate,
+      'divider',
+      TabMenuItemName.closeOtherTabs,
+    ]);
   });
 });

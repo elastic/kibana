@@ -136,7 +136,7 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
   );
 
   return (
-    <EuiProvider>
+    <EuiProvider highContrastMode={false}>
       <EuiPageTemplate offset={0}>
         <EuiPageTemplate.Header pageTitle="Data view field editor demo" />
         <EuiPageTemplate.Section>{content}</EuiPageTemplate.Section>

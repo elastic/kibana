@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { ReactNode, useState } from 'react';
-import { FieldPath } from 'react-hook-form';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { RunTimeFieldUsed } from './runtime_field_used';
-import { QuerySearchBar } from './query_search_bar';
-import { QueryDocumentsFlyout } from './query_documents_flyout';
+import React, { ReactNode } from 'react';
+import { FieldPath } from 'react-hook-form';
 import { CreateSLOForm } from '../../types';
+import { QueryDocumentsFlyoutOpenButton } from './query_documents_flyout_open_button';
+import { QuerySearchBar } from './query_search_bar';
+import { RunTimeFieldUsed } from './runtime_field_used';
 
 export interface SearchBarProps {
   dataTestSubj: string;
@@ -28,43 +27,14 @@ export interface SearchBarProps {
 export function QueryBuilder(props: SearchBarProps) {
   const { dataView, name } = props;
 
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const [range, setRange] = useState({ from: 'now-15m', to: 'now' });
-
   return (
     <>
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem>
-          <QuerySearchBar
-            {...props}
-            setRange={setRange}
-            range={range}
-            isFlyoutOpen={isFlyoutOpen}
-          />
+          <QuerySearchBar {...props} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            css={{ marginTop: 27 }}
-            isDisabled={!Boolean(dataView)}
-            data-test-subj="o11yQueryBuilderButton"
-            iconType="documents"
-            onClick={() => setIsFlyoutOpen(true)}
-            aria-label={i18n.translate('xpack.slo.queryBuilder.documentsButtonLabel', {
-              defaultMessage: 'View documents',
-            })}
-          />
-        </EuiFlexItem>
+        <QueryDocumentsFlyoutOpenButton name={name} dataView={dataView} searchBarProps={props} />
       </EuiFlexGroup>
-      {isFlyoutOpen && dataView && (
-        <QueryDocumentsFlyout
-          range={range}
-          setRange={setRange}
-          setIsFlyoutOpen={setIsFlyoutOpen}
-          dataView={dataView}
-          name={name}
-          searchBarProps={props}
-        />
-      )}
       <RunTimeFieldUsed dataView={dataView} name={name} />
     </>
   );

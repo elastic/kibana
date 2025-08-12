@@ -35,7 +35,7 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
     <EuiButtonEmpty
       href={esTransform}
       target="_blank"
-      iconType="help"
+      iconType="question"
       data-test-subj="documentationLink"
     >
       <FormattedMessage

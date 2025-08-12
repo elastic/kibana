@@ -5,40 +5,47 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   DragDropContextProps,
+  EuiAccordion,
+  EuiButton,
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
   EuiPanel,
   EuiResizableContainer,
   EuiSplitPanel,
   EuiText,
+  EuiTimeline,
   EuiTitle,
-  euiDragDropReorder,
-  useEuiShadow,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DraggableProcessorListItem } from './processors_list';
 import { SortableList } from './sortable_list';
 import { ManagementBottomBar } from '../management_bottom_bar';
-import { AddProcessorPanel } from './processors';
 import { SimulationPlayground } from './simulation_playground';
 import {
   StreamEnrichmentContextProvider,
   useSimulatorSelector,
   useStreamEnrichmentEvents,
-  useStreamsEnrichmentSelector,
+  useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
+import { NoProcessorsEmptyPrompt } from './empty_prompts';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
 interface StreamDetailEnrichmentContentProps {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
 }
 
@@ -49,6 +56,8 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
     streams: { streamsRepositoryClient },
   } = dependencies.start;
 
+  const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
+
   return (
     <StreamEnrichmentContextProvider
       definition={props.definition}
@@ -56,6 +65,7 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
       core={core}
       data={data}
       streamsRepositoryClient={streamsRepositoryClient}
+      urlStateStorageContainer={urlStateStorageContainer}
     >
       <StreamDetailEnrichmentContentImpl />
     </StreamEnrichmentContextProvider>
@@ -67,8 +77,12 @@ export function StreamDetailEnrichmentContentImpl() {
 
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
-  const hasChanges = useStreamsEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
-  const isSavingChanges = useStreamsEnrichmentSelector((state) =>
+  const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
+  const hasChanges = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const canManage = useStreamEnrichmentSelector(
+    (state) => state.context.definition.privileges.manage
+  );
+  const isSavingChanges = useStreamEnrichmentSelector((state) =>
     state.matches({ ready: { stream: 'updating' } })
   );
 
@@ -78,7 +92,12 @@ export function StreamDetailEnrichmentContentImpl() {
     http: core.http,
     navigateToUrl: core.application.navigateToUrl,
     openConfirm: core.overlays.openConfirm,
+    shouldPromptOnReplace: false,
   });
+
+  if (!isReady) {
+    return null;
+  }
 
   return (
     <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
@@ -121,6 +140,7 @@ export function StreamDetailEnrichmentContentImpl() {
           onConfirm={saveChanges}
           isLoading={isSavingChanges}
           disabled={!hasChanges}
+          insufficientPrivileges={!canManage}
         />
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
@@ -130,79 +150,212 @@ export function StreamDetailEnrichmentContentImpl() {
 const ProcessorsEditor = React.memo(() => {
   const { euiTheme } = useEuiTheme();
 
-  const { reorderProcessors } = useStreamEnrichmentEvents();
+  const { addProcessor, reorderProcessors } = useStreamEnrichmentEvents();
 
-  const processorsRefs = useStreamsEnrichmentSelector((state) =>
-    state.context.processorsRefs.filter((processorRef) =>
-      processorRef.getSnapshot().matches('configured')
-    )
+  const canAddProcessor = useStreamEnrichmentSelector((state) =>
+    state.can({ type: 'processors.add' })
+  );
+  const canReorderProcessors = useStreamEnrichmentSelector((state) =>
+    state.can({ type: 'processors.reorder', from: Number(), to: Number() })
   );
 
-  const simulationSnapshot = useSimulatorSelector((s) => s);
+  const processorsRefs = useStreamEnrichmentSelector((state) => state.context.processorsRefs);
+
+  const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
+
+  const errors = useMemo(() => {
+    if (!simulation) {
+      return { ignoredFields: [], mappingFailures: [] };
+    }
+
+    const ignoredFieldsSet = new Set<string>();
+    const mappingFailuresSet = new Set<string>();
+
+    simulation.documents.forEach((doc) => {
+      doc.errors.forEach((error) => {
+        if (error.type === 'ignored_fields_failure') {
+          error.ignored_fields.forEach((ignored) => {
+            ignoredFieldsSet.add(ignored.field);
+          });
+        }
+
+        if (error.type === 'field_mapping_failure' && mappingFailuresSet.size < 2) {
+          mappingFailuresSet.add(error.message);
+        }
+      });
+    });
+
+    return {
+      ignoredFields: Array.from(ignoredFieldsSet),
+      mappingFailures: Array.from(mappingFailuresSet),
+    };
+  }, [simulation]);
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
-      const items = euiDragDropReorder(processorsRefs, source.index, destination.index);
-      reorderProcessors(items);
+      reorderProcessors(source.index, destination.index);
     }
   };
-
   const hasProcessors = !isEmpty(processorsRefs);
 
   return (
     <>
-      <EuiPanel
-        paddingSize="m"
-        hasShadow={false}
-        borderRadius="none"
-        grow={false}
-        css={css`
-          z-index: ${euiTheme.levels.maskBelowHeader};
-          ${useEuiShadow('xs')};
-        `}
-      >
-        <EuiTitle size="xxs">
-          <h2>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.headingTitle',
-              {
-                defaultMessage: 'Processors for field extraction',
-              }
-            )}
-          </h2>
-        </EuiTitle>
-        <EuiText component="p" size="xs">
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle',
-            {
-              defaultMessage: 'Drag and drop existing processors to update their execution order.',
-            }
-          )}
-        </EuiText>
-      </EuiPanel>
-      <EuiPanel
-        paddingSize="m"
-        hasShadow={false}
-        borderRadius="none"
-        css={css`
-          overflow: auto;
-        `}
-      >
-        {hasProcessors && (
-          <SortableList onDragItem={handlerItemDrag}>
-            {processorsRefs.map((processorRef, idx) => (
-              <DraggableProcessorListItem
-                key={processorRef.id}
-                idx={idx}
-                processorRef={processorRef}
-                processorMetrics={
-                  simulationSnapshot.context.simulation?.processors_metrics[processorRef.id]
-                }
+      <EuiPanel paddingSize="m" hasShadow={false} borderRadius="none" grow={false}>
+        <EuiFlexGroup alignItems="center" wrap>
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h2>
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.headingTitle',
+                  {
+                    defaultMessage: 'Add and configure processors',
+                  }
+                )}
+              </h2>
+            </EuiTitle>
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
+              <EuiText component="p" size="xs">
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle',
+                  {
+                    defaultMessage: 'Reorder processors to change their execution order',
+                  }
+                )}
+              </EuiText>
+              <EuiIconTip
+                size="m"
+                content={i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitleTooltip',
+                  {
+                    defaultMessage:
+                      'The simulation runs only on new processors. If none are being edited, it includes all new ones. If a processor is under edit, it runs only up to that point, any new processors after it are excluded. If there’s a mix of persisted and new processors, the simulation is skipped entirely.',
+                  }
+                )}
+                position="right"
               />
-            ))}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiButton
+            size="s"
+            iconType="plus"
+            data-test-subj="streamsAppStreamDetailEnrichmentAddProcessorButton"
+            onClick={() => addProcessor()}
+            disabled={!canAddProcessor}
+          >
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.addProcessorButton',
+              { defaultMessage: 'Add processor' }
+            )}
+          </EuiButton>
+        </EuiFlexGroup>
+      </EuiPanel>
+      {hasProcessors ? (
+        <EuiPanel
+          hasShadow={false}
+          borderRadius="none"
+          css={css`
+            overflow: auto;
+            padding: ${euiTheme.size.m};
+          `}
+        >
+          <SortableList onDragItem={handlerItemDrag}>
+            <EuiTimeline aria-label="Processors list" gutterSize="m">
+              {processorsRefs.map((processorRef, idx) => (
+                <DraggableProcessorListItem
+                  isDragDisabled={!canReorderProcessors}
+                  key={processorRef.id}
+                  idx={idx}
+                  processorRef={processorRef}
+                  processorMetrics={simulation?.processors_metrics[processorRef.id]}
+                />
+              ))}
+            </EuiTimeline>
           </SortableList>
+        </EuiPanel>
+      ) : (
+        <NoProcessorsEmptyPrompt />
+      )}
+      <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
+        {!isEmpty(errors.ignoredFields) && (
+          <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
+            <EuiAccordion
+              id="ignored-fields-failures-accordion"
+              initialIsOpen
+              buttonContent={
+                <strong>
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.title',
+                    { defaultMessage: 'Some fields were ignored during the simulation.' }
+                  )}
+                </strong>
+              }
+            >
+              <EuiText component="p" size="s">
+                <p>
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.description',
+                    {
+                      defaultMessage:
+                        'Some fields in these documents were ignored during the ingestion simulation. Review the fields’ mapping limits.',
+                    }
+                  )}
+                </p>
+                <p>
+                  <FormattedMessage
+                    id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
+                    defaultMessage="The ignored fields are: {fields}"
+                    values={{
+                      fields: (
+                        <EuiFlexGroup
+                          gutterSize="s"
+                          css={css`
+                            margin-top: ${euiTheme.size.s};
+                          `}
+                        >
+                          {errors.ignoredFields.map((field) => (
+                            <EuiCode>{field}</EuiCode>
+                          ))}
+                        </EuiFlexGroup>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
+            </EuiAccordion>
+          </EuiPanel>
         )}
-        <AddProcessorPanel />
+        {!isEmpty(errors.mappingFailures) && (
+          <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
+            <EuiAccordion
+              id="mapping-failures-accordion"
+              initialIsOpen
+              buttonContent={i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.title',
+                {
+                  defaultMessage: 'Field conflicts during simulation',
+                }
+              )}
+            >
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.fieldsList"
+                    defaultMessage="These are some mapping failures that occurred during the simulation:"
+                  />
+                </p>
+                <ul>
+                  {errors.mappingFailures.map((failureMessage, id) => (
+                    <li key={id}>
+                      <EuiText css={clampTwoLines} size="s">
+                        {failureMessage}
+                      </EuiText>
+                    </li>
+                  ))}
+                </ul>
+              </EuiText>
+            </EuiAccordion>
+          </EuiPanel>
+        )}
       </EuiPanel>
     </>
   );
@@ -211,4 +364,12 @@ const ProcessorsEditor = React.memo(() => {
 const verticalFlexCss = css`
   display: flex;
   flex-direction: column;
+`;
+
+const clampTwoLines = css`
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;

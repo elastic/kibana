@@ -23,7 +23,7 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 
-import { FILE_FORMATS, NO_TIME_FORMAT } from '../../../../../common/constants';
+import { FILE_FORMATS, NO_TIME_FORMAT } from '@kbn/file-upload-common';
 
 import {
   getFormatOptions,

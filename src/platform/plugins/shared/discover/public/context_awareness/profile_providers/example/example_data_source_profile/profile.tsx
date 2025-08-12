@@ -111,7 +111,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       const prevValue = prev(params);
 
       // This is what is available via params:
-      // const { dataView, services, isEsqlMode, adHocDataViews, onUpdateAdHocDataViews } = params;
+      // const { dataView, services, isEsqlMode, adHocDataViews, actions } = params;
 
       return {
         appMenuRegistry: (registry) => {
@@ -197,10 +197,9 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       return [
         ...additionalControls,
         ...['visBarVerticalStacked', 'heart', 'inspect'].map(
-          (iconType, index): RowControlColumn => ({
+          (iconType): RowControlColumn => ({
             id: `exampleControl_${iconType}`,
-            headerAriaLabel: `Example Row Control ${iconType}`,
-            renderControl: (Control, rowProps) => {
+            render: (Control, rowProps) => {
               return (
                 <Control
                   data-test-subj={`exampleLogsControl_${iconType}`}

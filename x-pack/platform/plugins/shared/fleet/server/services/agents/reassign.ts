@@ -127,6 +127,7 @@ export async function reassignAgents(
     const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery,
+      showAgentless: options.showAgentless,
       showInactive: options.showInactive ?? false,
       page: 1,
       perPage: batchSize,

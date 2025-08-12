@@ -12,7 +12,8 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
 import { OperatingSystem, ConditionEntryField } from '@kbn/securitysolution-utils';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
-
+import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { useFetchIndex } from '../../../../../common/containers/source';
 import { TrustedAppsForm } from './form';
 import type {
   ArtifactFormComponentOnChangeCallbackProps,
@@ -20,14 +21,18 @@ import type {
 } from '../../../../components/artifact_list_page';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import { INPUT_ERRORS } from '../translations';
+import {
+  INPUT_ERRORS,
+  USING_ADVANCED_MODE,
+  USING_ADVANCED_MODE_DESCRIPTION,
+} from '../translations';
 import { licenseService } from '../../../../../common/hooks/use_license';
 import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
-import type { PolicyData, TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
-
-import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
+import type { TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
+jest.mock('../../../../../common/components/user_privileges');
+jest.mock('../../../../../common/containers/source');
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
@@ -42,7 +47,6 @@ jest.mock('../../../../../common/hooks/use_license', () => {
 
 describe('Trusted apps form', () => {
   const formPrefix = 'trustedApps-form';
-  const generator = new EndpointDocGenerator('effected-policy-select');
   let resetHTMLElementOffsetWidth: ReturnType<typeof forceHTMLElementOffsetWidth>;
 
   let formProps: jest.Mocked<ArtifactFormComponentProps>;
@@ -84,6 +88,7 @@ describe('Trusted apps form', () => {
       entries: [createEntry(ConditionEntryField.HASH, 'match', '')],
       type: 'simple',
       tags: ['policy:all'],
+      meta: { temporaryUuid: '1111' },
     };
     return {
       ...defaults,
@@ -102,19 +107,6 @@ describe('Trusted apps form', () => {
       ...defaults,
       ...overrides,
     };
-  }
-
-  function createPolicies(): PolicyData[] {
-    const policies = [
-      generator.generatePolicyPackagePolicy(),
-      generator.generatePolicyPackagePolicy(),
-    ];
-    policies.map((p, i) => {
-      p.id = `id-${i}`;
-      p.name = `some-policy-${Math.random().toString(36).split('.').pop()}`;
-      return p;
-    });
-    return policies;
   }
 
   // Some helpers
@@ -171,22 +163,43 @@ describe('Trusted apps form', () => {
     return Array.from(renderResult.container.querySelectorAll('.euiFormHelpText'));
   };
 
+  const getAdvancedModeToggle = (): HTMLButtonElement => {
+    return renderResult.getByTestId(`advancedModeButton`) as HTMLButtonElement;
+  };
+
+  const getBasicModeToggle = (): HTMLButtonElement => {
+    return renderResult.getByTestId(`basicModeButton`) as HTMLButtonElement;
+  };
+
+  const getAdvancedModeUsageWarningHeader = (dataTestSub: string = formPrefix): HTMLElement => {
+    return renderResult.getByTestId(`${dataTestSub}-advancedModeUsageWarningHeader`);
+  };
+
+  const getAdvancedModeUsageWarningBody = (dataTestSub: string = formPrefix): HTMLElement => {
+    return renderResult.getByTestId(`${dataTestSub}-advancedModeUsageWarningBody`);
+  };
+
   beforeEach(() => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
+    mockedContext.setExperimentalFlag({ trustedAppsAdvancedMode: true });
     latestUpdatedItem = createItem();
+    (useFetchIndex as jest.Mock).mockImplementation(() => [
+      false,
+      {
+        indexPatterns: stubIndexPattern,
+      },
+    ]);
 
     formProps = {
       item: latestUpdatedItem,
       mode: 'create',
       disabled: false,
       error: undefined,
-      policiesIsLoading: false,
       onChange: jest.fn((updates) => {
         latestUpdatedItem = updates.item;
       }),
-      policies: [],
     };
   });
 
@@ -322,29 +335,63 @@ describe('Trusted apps form', () => {
       expect(getConditionValue(getCondition()).required).toEqual(true);
     });
 
-    it('should show path malformed warning', () => {
-      render();
-      expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
+    describe('IS operator', () => {
+      it('should show path malformed warning', () => {
+        render();
+        expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
 
-      const propsItem: Partial<ArtifactFormComponentProps['item']> = {
-        entries: [createEntry(ConditionEntryField.PATH, 'match', 'malformed-path')],
-      };
-      formProps.item = { ...formProps.item, ...propsItem };
-      render();
-      expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          entries: [createEntry(ConditionEntryField.PATH, 'match', 'malformed-path')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+        expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+      });
+
+      it('should show path malformed path warning for linux/mac without an executable name', () => {
+        render();
+        expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          os_types: [OperatingSystem.LINUX],
+          entries: [createEntry(ConditionEntryField.PATH, 'match', '/')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+        expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+      });
+
+      it('should show path malformed path warning for windows with no executable name', () => {
+        render();
+        expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          os_types: [OperatingSystem.WINDOWS],
+          entries: [createEntry(ConditionEntryField.PATH, 'match', 'c:\\fold\\')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+        expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+      });
     });
 
-    it('should show wildcard in path warning', () => {
-      render();
-      expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+    describe('MATCHES operator', () => {
+      it('should show wildcard in path warning', () => {
+        render();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
 
-      const propsItem: Partial<ArtifactFormComponentProps['item']> = {
-        os_types: [OperatingSystem.LINUX],
-        entries: [createEntry(ConditionEntryField.PATH, 'wildcard', '/sys/wil*/*.app')],
-      };
-      formProps.item = { ...formProps.item, ...propsItem };
-      render();
-      expect(screen.getByText(INPUT_ERRORS.wildcardPathWarning(0))).not.toBeNull();
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          os_types: [OperatingSystem.LINUX],
+          entries: [createEntry(ConditionEntryField.PATH, 'wildcard', '/sys/wil*/*.app')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+        expect(screen.getByText(INPUT_ERRORS.wildcardPathWarning(0))).not.toBeNull();
+      });
     });
 
     it('should display the `AND` button', () => {
@@ -377,108 +424,124 @@ describe('Trusted apps form', () => {
         expect(getConditionBuilderAndConnectorBadge().textContent).toEqual('AND');
       });
     });
-  });
 
-  describe('the Policy Selection area', () => {
-    beforeEach(() => {
-      formProps.policies = createPolicies();
-    });
+    describe('Advanced Mode', () => {
+      afterEach(() => {
+        cleanup();
+      });
+      it('should update tags to include "form_mode:advanced" and show advanced mode warning', async () => {
+        await userEvent.click(getAdvancedModeToggle());
 
-    it('should have `global` switch on if effective scope is global and policy options hidden', () => {
-      render();
-      const globalButton = renderResult.getByTestId(
-        `${formPrefix}-effectedPolicies-global`
-      ) as HTMLButtonElement;
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          tags: ['policy:all', 'form_mode:advanced'],
+          entries: [],
+        };
+        const expected = createOnChangeArgs({
+          item: createItem(propsItem),
+        });
+        expect(formProps.onChange).toHaveBeenCalledWith(expected);
 
-      expect(globalButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
-      expect(
-        renderResult.queryByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
-      ).toBeNull();
-      expect(renderResult.queryByTestId('policy-id-0')).toBeNull();
-    });
-
-    it('should have policy options visible and specific policies checked if scope is per-policy', () => {
-      formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
-      render();
-
-      const perPolicyButton = renderResult.getByTestId(
-        `${formPrefix}-effectedPolicies-perPolicy`
-      ) as HTMLButtonElement;
-
-      expect(perPolicyButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
-      expect(renderResult.getByTestId('policy-id-0').getAttribute('aria-disabled')).toEqual(
-        'false'
-      );
-      expect(renderResult.getByTestId('policy-id-0-checkbox')).toBeChecked();
-    });
-
-    it('should show loader when setting `policies.isLoading` to true and scope is per-policy', () => {
-      formProps.policiesIsLoading = true;
-      formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
-      render();
-      expect(renderResult.queryByTestId('loading-spinner')).not.toBeNull();
-    });
-
-    it('should preserve other tags when policies are updated', async () => {
-      formProps.item.tags = ['some:unknown_tag'];
-      const policyId = formProps.policies[0].id;
-      render();
-      await userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-perPolicy`));
-      await userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
-
-      expect(formProps.onChange).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          item: expect.objectContaining({
-            tags: ['some:unknown_tag', `policy:${policyId}`],
-          }),
-        })
-      );
-    });
-  });
-
-  describe('the Policy Selection area when the license downgrades to gold or below', () => {
-    beforeEach(() => {
-      const policies = createPolicies();
-      formProps.policies = policies;
-      formProps.item.tags = [policies.map((p) => `policy:${p.id}`)[0]];
-      formProps.mode = 'edit';
-      // downgrade license
-      (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
-      render();
-    });
-
-    it('maintains policy configuration but does not allow the user to edit add/remove individual policies in edit mode', () => {
-      const perPolicyButton = renderResult.getByTestId(
-        `${formPrefix}-effectedPolicies-perPolicy`
-      ) as HTMLButtonElement;
-      expect(perPolicyButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
-      expect(renderResult.getByTestId('policy-id-0').getAttribute('aria-disabled')).toEqual('true');
-      expect(renderResult.getByTestId('policy-id-0-checkbox')).toBeChecked();
-    });
-    it("allows the user to set the trusted app entry to 'Global' in the edit option", () => {
-      const globalButtonInput = renderResult.getByTestId(
-        'trustedApps-form-effectedPolicies-global'
-      ) as HTMLButtonElement;
-      act(() => {
-        fireEvent.click(globalButtonInput);
+        // update TA to show toggle change
+        formProps.item = formProps.onChange.mock.calls[0][0].item;
+        rerender();
+        expect(
+          getAdvancedModeToggle().classList.contains('euiButtonGroupButton-isSelected')
+        ).toEqual(true);
+        expect(getAdvancedModeUsageWarningHeader().textContent).toEqual(USING_ADVANCED_MODE);
+        expect(getAdvancedModeUsageWarningBody().textContent).toEqual(
+          USING_ADVANCED_MODE_DESCRIPTION
+        );
       });
 
-      const policyItem = formProps.onChange.mock.calls[0][0].item.tags
-        ? formProps.onChange.mock.calls[0][0].item.tags[0]
-        : '';
-      expect(policyItem).toBe('policy:all');
-    });
+      it('when updating an existing trusted app, the previous form mode is enabled by default', async () => {
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          name: 'edit advanced mode ta',
+          entries: [
+            { field: 'file.path.text', operator: 'included', type: 'match', value: 'asdf' },
+          ],
+          tags: ['policy:all', 'form_mode:advanced'],
+        };
 
-    it('hides the policy assignment section if the TA is set to global', () => {
-      formProps.item.tags = ['policy:all'];
-      rerender();
-      expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeNull();
+        formProps = {
+          item: { ...formProps.item, ...propsItem },
+          mode: 'edit',
+          disabled: false,
+          error: undefined,
+          onChange: jest.fn((updates) => {
+            latestUpdatedItem = updates.item;
+          }),
+        };
+
+        latestUpdatedItem = { ...formProps.item, ...propsItem };
+
+        rerenderWithLatestProps();
+
+        expect(
+          getAdvancedModeToggle().classList.contains('euiButtonGroupButton-isSelected')
+        ).toEqual(true);
+        expect(getBasicModeToggle().classList.contains('euiButtonGroupButton-isSelected')).toEqual(
+          false
+        );
+      });
+
+      it('retains previous user input when switching from basic to advanced mode', async () => {
+        setTextFieldValue(getConditionValue(getCondition()), 'some value');
+        const propsItem1: Partial<ArtifactFormComponentProps['item']> = {
+          entries: [
+            {
+              field: ConditionEntryField.HASH,
+              operator: 'included',
+              type: 'match',
+              value: 'some value',
+            },
+          ],
+        };
+        const expectedAfterBasicValueChange = createOnChangeArgs({
+          item: createItem(propsItem1),
+        });
+        expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterBasicValueChange);
+
+        await userEvent.click(getAdvancedModeToggle());
+        const propsItem2: Partial<ArtifactFormComponentProps['item']> = {
+          tags: ['policy:all', 'form_mode:advanced'],
+          entries: [],
+        };
+        const expectedAfterSwitchToAdvancedMode = createOnChangeArgs({
+          item: createItem(propsItem2),
+        });
+        expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterSwitchToAdvancedMode);
+
+        await userEvent.click(getBasicModeToggle());
+        const propsItem3: Partial<ArtifactFormComponentProps['item']> = {
+          entries: [
+            {
+              field: ConditionEntryField.HASH,
+              operator: 'included',
+              type: 'match',
+              value: 'some value',
+            },
+          ],
+        };
+        const expectedAfterSwitchToBasicMode = createOnChangeArgs({
+          item: createItem(propsItem3),
+        });
+        expect(formProps.onChange).toHaveBeenCalledTimes(3);
+        expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterSwitchToBasicMode);
+      });
     });
-    it('hides the policy assignment section if the user is adding a new TA', () => {
-      formProps.mode = 'create';
-      rerender();
-      expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeNull();
-    });
+  });
+
+  it('should display effective scope options', () => {
+    render();
+    const globalButton = renderResult.getByTestId(
+      `${formPrefix}-effectedPolicies-global`
+    ) as HTMLButtonElement;
+
+    expect(globalButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
+    expect(
+      renderResult.queryByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
+    ).toBeNull();
+    expect(renderResult.queryByTestId('policy-id-0')).toBeNull();
   });
 
   describe('and the user visits required fields but does not fill them out', () => {

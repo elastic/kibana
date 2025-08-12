@@ -7,13 +7,13 @@
 
 import { createMockEndpointAppContextService } from '../../endpoint/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { FetchEndpointPolicyNamespaceResponse } from '../../endpoint/services/fleet';
+import type { FetchIntegrationPolicyNamespaceResponse } from '../../endpoint/services/fleet';
 import { createPolicyDataStreamsIfNeeded } from './create_policy_datastreams';
 
 describe('createPolicyDataStreamsIfNeeded()', () => {
   let endpointServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
   let esClientMock: ElasticsearchClientMock;
-  let policyNamespacesMock: FetchEndpointPolicyNamespaceResponse;
+  let policyNamespacesMock: FetchIntegrationPolicyNamespaceResponse;
 
   beforeEach(() => {
     endpointServicesMock = createMockEndpointAppContextService();

@@ -57,7 +57,6 @@ export default {
                 serviceName,
                 fallbackToTransactions: false,
                 serviceAgentStatus: FETCH_STATUS.SUCCESS,
-                serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
               }}
             >
               <StoryComponent />

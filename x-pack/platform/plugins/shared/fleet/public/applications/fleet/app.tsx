@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useEffect, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiPortal, useEuiTheme } from '@elastic/eui';
 import type { History } from 'history';
@@ -14,7 +15,6 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import useObservable from 'react-use/lib/useObservable';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { css } from '@emotion/css';
@@ -27,6 +27,8 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
 import { PackageInstallProvider } from '../integrations/hooks';
 import { SpaceSettingsContextProvider } from '../../hooks/use_space_settings_context';
+
+import { ErrorLayout, PermissionsError } from '../../layouts/error';
 
 import { type FleetStatusProviderProps, useAuthz, useFleetStatus, useFlyoutContext } from './hooks';
 
@@ -60,11 +62,19 @@ import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list
 import { UninstallTokenListPage } from './sections/agents/uninstall_token_list_page';
 import { SettingsApp } from './sections/settings';
 import { DebugPage } from './sections/debug';
-import { ErrorLayout, PermissionsError } from '../../layouts/error';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      networkMode: 'always',
+    },
+    mutations: {
+      networkMode: 'always',
+    },
+  },
+});
 
 export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ children }) => {
   useBreadcrumbs('base');
@@ -199,8 +209,10 @@ export const FleetAppContext: React.FC<{
     fleetStatus,
   }) => {
     const XXL_BREAKPOINT = 1600;
-    const darkModeObservable = useObservable(startServices.theme.theme$);
-    const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
+    const isDarkMode = useObservable(
+      startServices.theme.theme$,
+      startServices.theme.getTheme()
+    ).darkMode;
 
     return (
       <KibanaRenderContextProvider

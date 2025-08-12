@@ -6,30 +6,29 @@
  */
 
 import React from 'react';
-import { EuiCheckbox, EuiConfirmModal, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { useState } from 'react';
-import { css } from '@emotion/css';
 
 const ConfirmModal = ({
-  checkboxLabel,
   onClose,
   title,
   children,
   confirmButtonText,
   setElement,
 }: {
-  checkboxLabel: string;
   onClose: (confirmed: boolean) => void;
   title: React.ReactNode;
   children: React.ReactNode;
   confirmButtonText: React.ReactNode;
   setElement: (element: React.ReactNode | undefined) => void;
 }) => {
-  const [isChecked, setIsChecked] = useState(false);
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={title}
+      titleProps={{ id: modalTitleId }}
       onConfirm={() => {
         onClose(true);
         setElement(undefined);
@@ -41,19 +40,9 @@ const ConfirmModal = ({
       confirmButtonText={confirmButtonText}
       cancelButtonText="Cancel"
       buttonColor="danger"
-      confirmButtonDisabled={!isChecked}
       maxWidth
     >
       <EuiText>{children}</EuiText>
-      <EuiCheckbox
-        id="deleteConfirmationCheckbox"
-        label={checkboxLabel}
-        checked={isChecked}
-        onChange={(e) => setIsChecked(e.target.checked)}
-        className={css`
-          margin-top: 15px;
-        `}
-      />
     </EuiConfirmModal>
   );
 };
@@ -68,16 +57,15 @@ export function useConfirmModal({
   confirmButtonText: React.ReactNode;
 }): {
   element: React.ReactNode | undefined;
-  confirm: (checkBoxLabel: string) => Promise<boolean>;
+  confirm: () => Promise<boolean>;
 } {
   const [element, setElement] = useState<React.ReactNode | undefined>(undefined);
 
-  const confirm = (checkboxLabel: string) => {
+  const confirm = () => {
     return new Promise<boolean>((resolve) => {
       setElement(() => {
         return (
           <ConfirmModal
-            checkboxLabel={checkboxLabel}
             onClose={resolve}
             title={title}
             children={children}

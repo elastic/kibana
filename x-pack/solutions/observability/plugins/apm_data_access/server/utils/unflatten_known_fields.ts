@@ -12,7 +12,7 @@ import { unflattenObject } from '@kbn/observability-utils-common/object/unflatte
 import { mergePlainObjects } from '@kbn/observability-utils-common/object/merge_plain_objects';
 import { castArray, isArray } from 'lodash';
 import type { AgentName } from '@kbn/elastic-agent-utils';
-import type { EventOutcome } from '@kbn/apm-types/src/es_schemas/raw/fields';
+import type { EventOutcome, StatusCode } from '@kbn/apm-types/src/es_schemas/raw/fields';
 import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 
 const {
@@ -29,8 +29,6 @@ const {
   DATA_STEAM_TYPE,
   VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP,
   VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP,
-  SPAN_LINKS_SPAN_ID,
-  SPAN_LINKS_TRACE_ID,
   SPAN_STACKTRACE,
   ...CONCRETE_FIELDS
 } = APM_EVENT_FIELDS_MAP;
@@ -40,6 +38,8 @@ const ALL_FIELDS = Object.values(CONCRETE_FIELDS);
 const KNOWN_MULTI_VALUED_FIELDS = [
   APM_EVENT_FIELDS_MAP.CHILD_ID,
   APM_EVENT_FIELDS_MAP.PROCESS_ARGS,
+  APM_EVENT_FIELDS_MAP.OTEL_SPAN_LINKS_TRACE_ID,
+  APM_EVENT_FIELDS_MAP.OTEL_SPAN_LINKS_SPAN_ID,
 ] as const;
 
 type KnownField = ValuesType<typeof CONCRETE_FIELDS>;
@@ -55,6 +55,7 @@ interface TypeOverrideMap {
   [APM_EVENT_FIELDS_MAP.SPAN_DURATION]: number;
   [APM_EVENT_FIELDS_MAP.AGENT_NAME]: AgentName;
   [APM_EVENT_FIELDS_MAP.EVENT_OUTCOME]: EventOutcome;
+  [APM_EVENT_FIELDS_MAP.STATUS_CODE]: StatusCode;
   [APM_EVENT_FIELDS_MAP.FAAS_COLDSTART]: true;
   [APM_EVENT_FIELDS_MAP.TRANSACTION_DURATION]: number;
   [APM_EVENT_FIELDS_MAP.TIMESTAMP_US]: number;

@@ -61,7 +61,8 @@ async function getConfigModule({
     throw error;
   }
 
-  const { allFtrConfigs, manifestPaths } = getAllFtrConfigsAndManifests();
+  const { ftrConfigEntries, manifestPaths } = getAllFtrConfigsAndManifests();
+  const allFtrConfigs = Array.from(ftrConfigEntries.keys());
 
   if (
     primary &&

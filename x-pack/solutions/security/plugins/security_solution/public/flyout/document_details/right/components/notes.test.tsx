@@ -230,7 +230,7 @@ describe('<Notes />', () => {
   it('should show a - when in rule creation workflow', () => {
     const contextValue = {
       ...mockContextValue,
-      isPreview: true,
+      isRulePreview: true,
     };
 
     const { getByText, queryByTestId } = render(

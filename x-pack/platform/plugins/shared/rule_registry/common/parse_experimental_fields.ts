@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { pick } from 'lodash';
-import { legacyExperimentalFieldMap, ExperimentalRuleFieldMap } from '@kbn/alerts-as-data-utils';
+import type { ExperimentalRuleFieldMap } from '@kbn/alerts-as-data-utils';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 
 import { runtimeTypeFromFieldMap } from './field_map';
 

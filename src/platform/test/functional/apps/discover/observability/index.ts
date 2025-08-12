@@ -9,26 +9,11 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
-  const { common, spaceSettings } = getPageObjects(['common', 'spaceSettings']);
-
-  const from = 'Sep 22, 2015 @ 00:00:00.000';
-  const to = 'Sep 23, 2015 @ 00:00:00.000';
+export default function ({ getPageObjects, loadTestFile }: FtrProviderContext) {
+  const { spaceSettings } = getPageObjects(['common', 'spaceSettings']);
 
   describe('discover/observability', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
-      });
-      await common.setTime({
-        from,
-        to,
-      });
       await spaceSettings.switchSpaceSolutionType({
         spaceName: 'default',
         solution: 'oblt',
@@ -40,13 +25,11 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
         spaceName: 'default',
         solution: 'classic',
       });
-      await common.unsetTime();
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
     });
 
     loadTestFile(require.resolve('./embeddable/_saved_search_embeddable'));
     loadTestFile(require.resolve('./logs/_get_pagination_config'));
+    loadTestFile(require.resolve('./embeddable/_get_doc_viewer'));
+    loadTestFile(require.resolve('./logs/_get_doc_viewer'));
   });
 }

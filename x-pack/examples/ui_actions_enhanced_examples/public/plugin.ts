@@ -22,6 +22,7 @@ import {
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { DashboardHelloWorldDrilldown } from './drilldowns/dashboard_hello_world_drilldown';
 import { DashboardToDiscoverDrilldown } from './drilldowns/dashboard_to_discover_drilldown';
 import { App1ToDashboardDrilldown } from './drilldowns/app1_to_dashboard_drilldown';
@@ -47,6 +48,7 @@ export interface SetupDependencies {
 }
 
 export interface StartDependencies {
+  dashboard: DashboardStart;
   data: DataPublicPluginStart;
   discover: DiscoverStart;
   share: SharePluginStart;
@@ -96,7 +98,7 @@ export class UiActionsEnhancedExamplesPlugin
               triggers: [SAMPLE_APP2_CLICK_TRIGGER],
               placeContext: {},
             }),
-            coreStart
+            coreStart.rendering
           ),
           {
             ownFocus: true,
@@ -122,7 +124,7 @@ export class UiActionsEnhancedExamplesPlugin
               triggers: [SAMPLE_APP2_CLICK_TRIGGER],
               placeContext: { sampleApp2ClickContext },
             }),
-            coreStart
+            coreStart.rendering
           ),
           {
             ownFocus: true,

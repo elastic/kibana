@@ -9,12 +9,17 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
 
 const _allowedExperimentalValues = {
   showExperimentalShipperOptions: false,
-  useSpaceAwareness: false,
-  enableAutomaticAgentUpgrades: false,
-  enableSyncIntegrationsOnRemote: false,
+  useSpaceAwareness: true,
+  enableAutomaticAgentUpgrades: true,
+  enableSyncIntegrationsOnRemote: true,
   enableSSLSecrets: false,
-  installedIntegrationsTabularUI: false,
-  enabledUpgradeAgentlessDeploymentsTask: false,
+  installedIntegrationsTabularUI: true,
+  enabledUpgradeAgentlessDeploymentsTask: true,
+  enableAgentMigrations: false,
+  enablePackageRollback: false,
+  enableAutoInstallContentPackages: false,
+  enableOtelIntegrations: false,
+  enableAgentStatusAlerting: false,
 };
 
 /**

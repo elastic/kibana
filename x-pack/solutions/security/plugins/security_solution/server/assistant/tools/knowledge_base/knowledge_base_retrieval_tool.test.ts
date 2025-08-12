@@ -34,7 +34,9 @@ describe('KnowledgeBaseRetievalTool', () => {
 
   describe('DynamicStructuredTool', () => {
     it('includes citations', async () => {
-      const tool = KNOWLEDGE_BASE_RETRIEVAL_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
+      const tool = (await KNOWLEDGE_BASE_RETRIEVAL_TOOL.getTool(
+        defaultArgs
+      )) as DynamicStructuredTool;
 
       getKnowledgeBaseDocumentEntries.mockResolvedValue([
         new Document({

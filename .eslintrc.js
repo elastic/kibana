@@ -189,7 +189,7 @@ const DEV_PATTERNS = [
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
-  'src/platform/packages/shared/kbn-esql-validation-autocomplete/scripts/**/*',
+  'src/platform/packages/shared/kbn-esql-ast/scripts/**/*',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -257,6 +257,10 @@ const RESTRICTED_IMPORTS = [
     message: 'Please use react-use/lib/{method} instead.',
   },
   {
+    name: 'react-use/lib',
+    message: 'Please use react-use/lib/{method} instead.',
+  },
+  {
     name: 'react-router-dom',
     importNames: ['Router', 'Switch', 'Route'],
     message: 'Please use @kbn/shared-ux-router instead',
@@ -275,12 +279,135 @@ const RESTRICTED_IMPORTS = [
     name: '@testing-library/react-hooks',
     message: 'Please use @testing-library/react instead',
   },
+  ...[
+    'Alt',
+    'Alternative',
+    'Applicative',
+    'Apply',
+    'Array',
+    'Bifunctor',
+    'boolean',
+    'BooleanAlgebra',
+    'Bounded',
+    'BoundedDistributiveLattice',
+    'BoundedJoinSemilattice',
+    'BoundedLattice',
+    'BoundedMeetSemilattice',
+    'Category',
+    'Chain',
+    'ChainRec',
+    'Choice',
+    'Comonad',
+    'Compactable',
+    'Console',
+    'Const',
+    'Contravariant',
+    'Date',
+    'DistributiveLattice',
+    'Either',
+    'EitherT',
+    'Eq',
+    'Extend',
+    'Field',
+    'Filterable',
+    'FilterableWithIndex',
+    'Foldable',
+    'FoldableWithIndex',
+    'function',
+    'Functor',
+    'FunctorWithIndex',
+    'Group',
+    'HeytingAlgebra',
+    'Identity',
+    'Invariant',
+    'IO',
+    'IOEither',
+    'IORef',
+    'JoinSemilattice',
+    'Lattice',
+    'Magma',
+    'Map',
+    'MeetSemilattice',
+    'Monad',
+    'MonadIO',
+    'MonadTask',
+    'MonadThrow',
+    'Monoid',
+    'NonEmptyArray',
+    'Option',
+    'OptionT',
+    'Ord',
+    'Ordering',
+    'pipeable',
+    'Profunctor',
+    'Random',
+    'Reader',
+    'ReaderEither',
+    'ReaderT',
+    'ReaderTask',
+    'ReaderTaskEither',
+    'ReadonlyArray',
+    'ReadonlyMap',
+    'ReadonlyNonEmptyArray',
+    'ReadonlyRecord',
+    'ReadonlySet',
+    'ReadonlyTuple',
+    'Record',
+    'Ring',
+    'Semigroup',
+    'Semigroupoid',
+    'Semiring',
+    'Set',
+    'Show',
+    'State',
+    'StateReaderTaskEither',
+    'StateT',
+    'Store',
+    'Strong',
+    'Task',
+    'TaskEither',
+    'TaskThese',
+    'These',
+    'TheseT',
+    'Traced',
+    'Traversable',
+    'TraversableWithIndex',
+    'Tree',
+    'Tuple',
+    'Unfoldable',
+    'ValidationT',
+    'Witherable',
+    'Writer',
+    'WriterT',
+  ].map((subset) => {
+    return {
+      name: `fp-ts/lib/${subset}`,
+      message: `Please, use fp-ts/${subset} to avoid duplicating the package import`,
+    };
+  }),
+  {
+    name: `fp-ts/lib`,
+    message: `Please, use fp-ts to avoid duplicating the package import`,
+  },
+];
+
+/**
+ * Imports that are deprecated and should be phased out
+ * They are not restricted until fully removed,
+ * but will log a warning
+ **/
+const DEPRECATED_IMPORTS = [
+  {
+    name: 'enzyme',
+    message:
+      'Enzyme is deprecated and no longer maintained. Please use @testing-library/react instead.',
+  },
 ];
 
 module.exports = {
   root: true,
 
-  extends: ['plugin:@elastic/eui/recommended', '@kbn/eslint-config'],
+  extends: ['@kbn/eslint-config'],
 
   overrides: [
     /**
@@ -646,21 +773,34 @@ module.exports = {
         'src/platform/test/*/*.config.ts',
         'src/platform/test/*/{tests,test_suites,apis,apps}/**/*',
         'src/platform/test/server_integration/**/*.ts',
-        'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/solutions/observability/plugins/apm/**/*.js',
-        'x-pack/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
+        'x-pack/platform/test/*/{tests,test_suites,apis,apps}/**/*',
+        'x-pack/platform/test/*api_integration*/**/*',
+        'x-pack/platform/test/*/*config.*ts',
+        'x-pack/solutions/*/test/**/{tests,test_suites,apis,apps,fixtures,index.ts}/**/*',
+        'x-pack/solutions/*/test/**/*config*.ts',
+        'x-pack/solutions/*/test/**/tests/**/*',
+        'x-pack/solutions/*/test/api_integration_deployment_agnostic/*configs/**/*',
+        'x-pack/solutions/*/test/alerting_api_integration/**/*',
+        'x-pack/solutions/*/test/serverless/*/configs/**/*',
+        'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
         'x-pack/test/*/*config.*ts',
-        'x-pack/test/saved_object_api_integration/*/apis/**/*',
-        'x-pack/test/ui_capabilities/*/tests/**/*',
-        'x-pack/test/upgrade_assistant_integration/**/*',
+        'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
+        'x-pack/platform/test/ui_capabilities/*/tests/**/*',
+        'x-pack/platform/test/upgrade_assistant_integration/**/*',
         'x-pack/test/performance/**/*.ts',
         '**/cypress.config.{js,ts}',
         'x-pack/test_serverless/**/config*.ts',
+        'x-pack/platform/test/serverless/shared/config*.ts',
+        'x-pack/platform/test/serverless/*/test_suites/**/*',
+        'x-pack/platform/test/serverless/functional/config*.ts',
+        'x-pack/platform/test/serverless/*/configs/**/*',
         'x-pack/test_serverless/*/test_suites/**/*',
         'x-pack/test/profiling_api_integration/**/*.ts',
         'x-pack/test/security_solution_api_integration/*/test_suites/**/*',
         'x-pack/test/security_solution_api_integration/**/config*.ts',
+        '**/playwright.config.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -800,6 +940,7 @@ module.exports = {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
+        '@kbn/eslint/no_deprecated_imports': ['warn', ...DEPRECATED_IMPORTS],
         'no-restricted-modules': [
           'error',
           {
@@ -967,7 +1108,7 @@ module.exports = {
       files: [
         'x-pack/platform/plugins/shared/observability_solution/**/*.{ts,tsx}',
         'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
-        'x-pack/solutions/observability/plugins/{streams,streams_app}/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/{streams,streams_app}/**/*.{ts,tsx}',
         'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
       ],
       rules: {
@@ -975,7 +1116,7 @@ module.exports = {
           'error',
           {
             additionalHooks:
-              '^(useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient|use.*Fetch)$',
+              '^(useUrl|useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient|use.*Fetch)$',
           },
         ],
       },
@@ -1011,6 +1152,17 @@ module.exports = {
       },
     },
     {
+      files: [
+        'x-pack/solutions/observability/plugins/apm/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/solutions/observability/plugins/infra/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/solutions/observability/plugins/profiling/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/solutions/observability/plugins/observability_shared/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+      ],
+      rules: {
+        '@kbn/eui-a11y/eui_elements_should_have_aria_label_or_aria_labelledby_props': 'warn',
+      },
+    },
+    {
       // require explicit return types in route handlers for performance reasons
       files: ['x-pack/solutions/observability/plugins/apm/server/**/route.ts'],
       rules: {
@@ -1024,13 +1176,13 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/apm_data_access/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/infra/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/inventory/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/metrics_data_access/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/profiling/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/profiling_data_access/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/apm/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/apm_data_access/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/infra/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/inventory/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/metrics_data_access/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/profiling/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/profiling_data_access/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
@@ -1045,7 +1197,6 @@ module.exports = {
       plugins: ['testing-library'],
       rules: {
         'testing-library/await-async-utils': 'error',
-        '@typescript-eslint/consistent-type-imports': 'error',
         'import/order': [
           'warn',
           {
@@ -1068,8 +1219,7 @@ module.exports = {
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        '@typescript-eslint/no-duplicate-imports': 'error',
-        '@typescript-eslint/consistent-type-imports': 'error',
+        'import/no-duplicates': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -1080,19 +1230,28 @@ module.exports = {
         ],
       },
     },
+    {
+      files: [
+        'x-pack/platform/plugins/shared/automatic_import/public/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/automatic_import/common/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    },
 
     /**
      * ML overrides
      */
     {
       files: [
-        'x-pack/platform/plugins/shared/aiops/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/private/data_visualizer/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/shared/ml/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/private/transform/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/packages/shared/ml/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/packages/private/ml/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/private/file_upload/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/aiops/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/private/data_visualizer/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/ml/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/private/transform/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/ml/**/*.{ts,tsx}',
+        'x-pack/platform/packages/private/ml/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/private/file_upload/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
@@ -1130,7 +1289,7 @@ module.exports = {
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        '@typescript-eslint/no-duplicate-imports': ['error'],
+        'import/no-duplicates': ['error'],
         'no-restricted-imports': [
           'error',
           {
@@ -1316,20 +1475,20 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
-        '@typescript-eslint/no-duplicate-imports': ['error'],
+        'import/no-duplicates': ['error'],
       },
       overrides: [
         {
           files: [
-            'x-pack/platform/plugins/shared/cases/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/packages/features/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/packages/navigation/**/*.{js,mjs,ts,tsx}',
-            'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
+            'x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}',
+            'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
+            'x-pack/solutions/security/plugins/security_solution/**/*.{ts,tsx}',
+            'x-pack/solutions/security/plugins/security_solution_ess/**/*.{ts,tsx}',
+            'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{ts,tsx}',
+            'x-pack/solutions/security/packages/data-stream-adapter/**/*.{ts,tsx}',
+            'x-pack/solutions/security/packages/features/**/*.{ts,tsx}',
+            'x-pack/solutions/security/packages/navigation/**/*.{ts,tsx}',
+            'src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}',
           ],
           rules: {
             '@typescript-eslint/consistent-type-imports': 'error',
@@ -1452,9 +1611,9 @@ module.exports = {
         'src/platform/packages/shared/kbn-scout/src/playwright/**/*.ts',
         'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
         'x-pack/solutions/security/packages/kbn-scout-security/src/playwright/**/*.ts',
-        'src/platform/plugins/**/ui_tests/**/*.ts',
-        'x-pack/platform/plugins/**/ui_tests/**/*.ts',
-        'x-pack/solutions/**/plugins/**/ui_tests/**/*.ts',
+        'src/platform/plugins/**/test/scout/**/*.ts',
+        'x-pack/platform/plugins/**/test/scout/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/scout/**/*.ts',
       ],
       excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
       extends: ['plugin:playwright/recommended'],
@@ -1462,7 +1621,7 @@ module.exports = {
       settings: {
         playwright: {
           globalAliases: {
-            test: ['test', 'spaceTest'],
+            test: ['test', 'spaceTest', 'apiTest'],
           },
         },
       },
@@ -1636,11 +1795,9 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'error',
       },
     },
-
     /**
      * ResponseOps overrides
      */
-
     {
       files: [
         'src/platform/packages/shared/response-ops/**/*.{ts, tsx}',
@@ -1649,7 +1806,26 @@ module.exports = {
         'x-pack/platform/plugins/shared/stack_alerts/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/stack_connectors/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/triggers_actions_ui/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/event_log/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/rule_registry/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/task_manager/**/*.{ts, tsx}',
+        'x-pack/solutions/observability/packages/kbn-alerts-grouping/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerts-ui-shared/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerting-types/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-cases-components/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-actions-types/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerts-as-data-utils/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-grouping/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-rrule/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-rule-data-utils/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-triggers-actions-ui-types/**/*.{ts, tsx}',
+        'x-pack/platform/packages/shared/kbn-alerting-comparators/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/embeddable_alerts_table/**/*.{ts,tsx}',
+        'x-pack/platform/test/alerting_api_integration/**/*.{ts, tsx}',
+        'x-pack/platform/test/cases_api_integration/**/*.{ts, tsx}',
+        'x-pack/solutions/**/test/cases_api_integration/**/*.{ts, tsx}',
+        'x-pack/platform/test/rule_registry/**/*.{ts, tsx}',
+        'x-pack/test/api_integration/apis/cases/**/*.{ts, tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
@@ -1675,7 +1851,6 @@ module.exports = {
         'src/platform/plugins/shared/saved_search/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        '@typescript-eslint/consistent-type-imports': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/ban-ts-comment': [
           'error',
@@ -1683,6 +1858,15 @@ module.exports = {
             'ts-expect-error': false,
           },
         ],
+      },
+    },
+    {
+      files: [
+        'src/platform/plugins/shared/discover/**/*.{ts,tsx}',
+        'src/platform/plugins/shared/saved_search/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
       },
     },
 
@@ -1913,8 +2097,18 @@ module.exports = {
         'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
-        '@typescript-eslint/consistent-type-imports': 'error',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
+        '@typescript-eslint/no-empty-object-type': 'off',
+        '@typescript-eslint/no-unsafe-function-type': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-unused-vars': 'off',
+        '@typescript-eslint/no-require-imports': 'off',
+      },
+    },
+    {
+      files: ['x-pack/platform/plugins/shared/osquery/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
       },
     },
     {
@@ -1944,19 +2138,18 @@ module.exports = {
         'src/platform/packages/shared/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
-        'x-pack/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/private/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/shared/security/**/*.{js,mjs,ts,tsx}',
-        'x-pack/test/security_api_integration/**/*.{js,mjs,ts,tsx}',
-        'x-pack/test/security_functional/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/security_api_integration/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/security_functional/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/spaces/**/*.{js,mjs,ts,tsx}',
-        'x-pack/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        '@typescript-eslint/consistent-type-imports': 1,
         'import/order': [
           // This rule sorts import declarations
           'error',
@@ -1994,6 +2187,33 @@ module.exports = {
             ignoreDeclarationSort: true,
           },
         ],
+      },
+    },
+    {
+      files: [
+        'src/platform/plugins/private/interactive_setup/**/*.{ts,tsx}',
+        'src/platform/test/interactive_setup_api_integration/**/*.{ts,tsx}',
+        'src/platform/test/interactive_setup_functional/**/*.{ts,tsx}',
+
+        'packages/kbn-mock-idp-plugin/**/*.{ts,tsx}',
+        'src/platform/packages/private/kbn-mock-idp-utils/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-security-hardening/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-user-profile-components/**/*.{ts,tsx}',
+
+        'x-pack/platform/plugins/shared/encrypted_saved_objects/**/*.{ts,tsx}',
+        'x-pack/platform/test/encrypted_saved_objects_api_integration/**/*.{ts,tsx}',
+
+        'x-pack/platform/plugins/shared/security/**/*.{ts,tsx}',
+        'x-pack/platform/packages/private/security/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/security/**/*.{ts,tsx}',
+        'x-pack/test/security_api_integration/**/*.{ts,tsx}',
+        'x-pack/test/security_functional/**/*.{ts,tsx}',
+
+        'x-pack/platform/plugins/shared/spaces/**/*.{ts,tsx}',
+        'x-pack/platform/test/spaces_api_integration/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 1,
       },
     },
 
@@ -2109,19 +2329,14 @@ module.exports = {
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
         'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)
 
-        // FIXME tomsonpl @kbn/osquery-plugin depends on @kbn/security-solution-plugin (security/private) (cypress code => cypress code)
-        'x-pack/platform/plugins/shared/osquery/**',
         // FIXME PhilippeOberti @kbn/timelines-plugin depends on security-solution-plugin (security/private) (timelines is going to disappear)
         'x-pack/platform/plugins/shared/timelines/**',
-        // FIXME @dmlemeshko
-        `src/platform/test/api_integration/apis/guided_onboarding/get_guides.ts`,
-        `src/platform/test/api_integration/apis/guided_onboarding/put_state.ts`,
 
         // For now, we keep the exception to let tests depend on anythying.
         // Ideally, we need to classify the solution specific ones to reduce CI times
         'x-pack/test_serverless/**',
         'x-pack/test/**',
-        'x-pack/test/plugin_functional/plugins/resolver_test/**',
+        'x-pack/platform/test/plugin_functional/plugins/resolver_test/**',
       ],
       rules: {
         '@kbn/imports/no_group_crossing_manifests': 'warn',
@@ -2142,6 +2357,100 @@ module.exports = {
       rules: {
         // disabling it since package is a CLI tool
         'no-console': 'off',
+      },
+    },
+    {
+      files: ['x-pack/**/cypress/**/*.ts'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@kbn/cypress-test-helper',
+                message:
+                  "Import from a sub-path (e.g. '@kbn/cypress-test-helper/src/utils'). Cypress uses Webpack, which requires direct file imports to avoid parse errors.",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: [
+        'src/platform/plugins/**/test/scout/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/scout/**/*.ts',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@playwright/test',
+                message: "Platform tests should import only from '@kbn/scout'.",
+              },
+              {
+                name: 'playwright',
+                message: "Platform tests should import only from '@kbn/scout'.",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/solutions/observability/plugins/**/test/scout/**/*.ts'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@kbn/scout',
+                message:
+                  "Observability solution tests should import from '@kbn/scout-oblt' instead.",
+              },
+              {
+                name: '@playwright/test',
+                message:
+                  "Observability solution tests should import from '@kbn/scout-oblt' instead.",
+              },
+              {
+                name: 'playwright',
+                message:
+                  "Observability solution tests should import from '@kbn/scout-oblt' instead.",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/solutions/security/plugins/**/test/scout/**/*.ts'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@kbn/scout',
+                message:
+                  "Security solution tests should import from '@kbn/scout-security' instead.",
+              },
+              {
+                name: '@playwright/test',
+                message:
+                  "Security solution tests should import from '@kbn/scout-security' instead.",
+              },
+              {
+                name: 'playwright',
+                message:
+                  "Security solution tests should import from '@kbn/scout-security' instead.",
+              },
+            ],
+          },
+        ],
       },
     },
   ],

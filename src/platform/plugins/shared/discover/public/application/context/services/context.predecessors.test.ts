@@ -87,7 +87,10 @@ describe('context predecessors', function () {
           size,
           [],
           dataPluginMock,
-          discoverServiceMock
+          discoverServiceMock,
+          discoverServiceMock.profilesManager.createScopedProfilesManager({
+            scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+          })
         );
       };
     });
@@ -237,7 +240,10 @@ describe('context predecessors', function () {
           size,
           [],
           dataPluginMock,
-          discoverServiceMock
+          discoverServiceMock,
+          discoverServiceMock.profilesManager.createScopedProfilesManager({
+            scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+          })
         );
       };
     });

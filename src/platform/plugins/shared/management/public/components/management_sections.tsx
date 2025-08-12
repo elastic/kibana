@@ -34,6 +34,14 @@ const insightsAndAlertingTip = i18n.translate('management.sections.insightsAndAl
   defaultMessage: 'Manage how to detect changes in your data',
 });
 
+const machineLearningTitle = i18n.translate('management.sections.machineLearningTitle', {
+  defaultMessage: 'Machine Learning',
+});
+
+const machineLearningTip = i18n.translate('management.sections.machineLearningTip', {
+  defaultMessage: 'Manage your Machine Learning jobs and trained models',
+});
+
 const sectionTitle = i18n.translate('management.sections.section.title', {
   defaultMessage: 'Security',
 });
@@ -48,6 +56,10 @@ const kibanaTitle = i18n.translate('management.sections.kibanaTitle', {
 
 const kibanaTip = i18n.translate('management.sections.kibanaTip', {
   defaultMessage: 'Customize Kibana and manage saved objects',
+});
+
+const aiTitle = i18n.translate('management.sections.aiTitle', {
+  defaultMessage: 'AI',
 });
 
 const stackTitle = i18n.translate('management.sections.stackTitle', {
@@ -79,6 +91,13 @@ export const InsightsAndAlertingSection = {
   order: 2,
 };
 
+export const MachineLearningSection = {
+  id: ManagementSectionId.MachineLearning,
+  title: machineLearningTitle,
+  tip: machineLearningTip,
+  order: 4,
+};
+
 export const SecuritySection = {
   id: 'security',
   title: sectionTitle,
@@ -93,6 +112,12 @@ export const KibanaSection = {
   order: 4,
 };
 
+export const AISection = {
+  id: ManagementSectionId.AI,
+  title: aiTitle,
+  order: 4,
+};
+
 export const StackSection = {
   id: ManagementSectionId.Stack,
   title: stackTitle,
@@ -104,7 +129,9 @@ export const managementSections = [
   IngestSection,
   DataSection,
   InsightsAndAlertingSection,
+  MachineLearningSection,
   SecuritySection,
   KibanaSection,
+  AISection,
   StackSection,
 ];

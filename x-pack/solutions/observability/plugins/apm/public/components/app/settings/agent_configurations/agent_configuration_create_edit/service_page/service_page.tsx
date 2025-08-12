@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { useApmRouter } from '../../../../../../hooks/use_apm_router';
 import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
   omitAllOption,
@@ -18,7 +19,6 @@ import {
 } from '../../../../../../../common/agent_configuration/all_option';
 import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { FormRowSelect } from './form_row_select';
-import { LegacyAPMLink } from '../../../../../shared/links/apm/apm_link';
 import { FormRowSuggestionsSelect } from './form_row_suggestions_select';
 import { SERVICE_NAME } from '../../../../../../../common/es_fields/apm';
 import { isOpenTelemetryAgentName, isEDOTAgentName } from '../../../../../../../common/agent_name';
@@ -44,6 +44,8 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     [newConfig.service.name],
     { preservePreviousData: false }
   );
+
+  const { link } = useApmRouter();
 
   const environments = environmentsData?.environments ?? [];
 
@@ -162,13 +164,22 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       <EuiFlexGroup justifyContent="flexEnd">
         {/* Cancel button */}
         <EuiFlexItem grow={false}>
-          <LegacyAPMLink path="/settings/agent-configuration">
-            <EuiButtonEmpty data-test-subj="apmServicePageCancelButton" color="primary">
+          <EuiLink
+            data-test-subj="apmAgentConfigurationCancelButton"
+            href={link('/settings/agent-configuration')}
+          >
+            <EuiButtonEmpty
+              aria-label={i18n.translate('xpack.apm.servicePage.cancelButton.ariaLabel', {
+                defaultMessage: 'Cancel',
+              })}
+              data-test-subj="apmServicePageCancelButton"
+              color="primary"
+            >
               {i18n.translate('xpack.apm.agentConfig.servicePage.cancelButton', {
                 defaultMessage: 'Cancel',
               })}
             </EuiButtonEmpty>
-          </LegacyAPMLink>
+          </EuiLink>
         </EuiFlexItem>
 
         {/* Next button */}

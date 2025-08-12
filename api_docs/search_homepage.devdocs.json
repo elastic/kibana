@@ -87,26 +87,6 @@
           "path": "x-pack/solutions/search/plugins/search_homepage/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
-        },
-        {
-          "parentPluginId": "searchHomepage",
-          "id": "def-public.SearchHomepagePluginSetup.isHomepageFeatureEnabled",
-          "type": "Function",
-          "tags": [],
-          "label": "isHomepageFeatureEnabled",
-          "description": [
-            "\nChecks if the Search Homepage feature flag is currently enabled."
-          ],
-          "signature": [
-            "() => boolean"
-          ],
-          "path": "x-pack/solutions/search/plugins/search_homepage/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [],
-          "returnComment": [
-            "true if Search Homepage feature is enabled"
-          ]
         }
       ],
       "lifecycle": "setup",
@@ -144,26 +124,6 @@
           "path": "x-pack/solutions/search/plugins/search_homepage/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
-        },
-        {
-          "parentPluginId": "searchHomepage",
-          "id": "def-public.SearchHomepagePluginStart.isHomepageFeatureEnabled",
-          "type": "Function",
-          "tags": [],
-          "label": "isHomepageFeatureEnabled",
-          "description": [
-            "\nChecks if the Search Homepage feature flag is currently enabled."
-          ],
-          "signature": [
-            "() => boolean"
-          ],
-          "path": "x-pack/solutions/search/plugins/search_homepage/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [],
-          "returnComment": [
-            "true if Search Homepage feature is enabled"
-          ]
         },
         {
           "parentPluginId": "searchHomepage",

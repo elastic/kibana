@@ -96,6 +96,7 @@ describe('initializeAlertsClient', () => {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         maintenanceWindowsService,
+        logger,
         request: fakeRequest,
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
@@ -155,6 +156,7 @@ describe('initializeAlertsClient', () => {
       alertsService,
       context: {
         alertingEventLogger,
+        logger,
         maintenanceWindowsService,
         request: fakeRequest,
         ruleId: RULE_ID,
@@ -217,6 +219,7 @@ describe('initializeAlertsClient', () => {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         maintenanceWindowsService,
+        logger,
         request: fakeRequest,
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
@@ -286,6 +289,7 @@ describe('initializeAlertsClient', () => {
       context: {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        logger,
         maintenanceWindowsService,
         request: fakeRequest,
         ruleId: RULE_ID,

@@ -50,6 +50,15 @@ export const RuleTagBadge = suspendedComponentWithProps(
 export const RuleStatusPanel = suspendedComponentWithProps(
   lazy(() => import('./rule_details/components/rule_status_panel'))
 );
+
+export const UntrackAlertsModal = suspendedComponentWithProps(
+  lazy(() =>
+    import('./common/components/untrack_alerts_modal').then((module) => ({
+      default: module.UntrackAlertsModal,
+    }))
+  )
+);
+
 export const GlobalRuleEventLogList = suspendedComponentWithProps(
   lazy(() => import('./rule_details/components/global_rule_event_log_list'))
 );

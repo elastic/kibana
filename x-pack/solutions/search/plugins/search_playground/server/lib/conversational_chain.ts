@@ -28,6 +28,7 @@ import { AssistClient } from '../utils/assist';
 import { getCitations } from '../utils/get_citations';
 import { getTokenEstimate, getTokenEstimateFromMessages } from './token_tracking';
 import { ContextLimitError } from './errors';
+import { ContextModelLimitError } from '../../common';
 
 interface RAGOptions {
   index: string;
@@ -103,11 +104,7 @@ export function contextLimitCheck(
     const aboveContextLimit = approxPromptTokens > modelLimit;
 
     if (aboveContextLimit) {
-      throw new ContextLimitError(
-        'Context exceeds the model limit',
-        modelLimit,
-        approxPromptTokens
-      );
+      throw new ContextLimitError(ContextModelLimitError, modelLimit, approxPromptTokens);
     }
 
     return input;

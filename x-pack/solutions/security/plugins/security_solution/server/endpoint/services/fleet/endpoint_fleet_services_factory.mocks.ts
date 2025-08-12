@@ -23,7 +23,9 @@ export type EndpointInternalFleetServicesInterfaceMocked =
 
 export interface EndpointFleetServicesFactoryInterfaceMocked
   extends EndpointFleetServicesFactoryInterface {
-  asInternalUser: () => EndpointInternalFleetServicesInterfaceMocked;
+  asInternalUser: (
+    ...args: Parameters<EndpointFleetServicesFactoryInterface['asInternalUser']>
+  ) => EndpointInternalFleetServicesInterfaceMocked;
 }
 
 export interface CreateEndpointFleetServicesFactoryMockOptions {
@@ -46,18 +48,32 @@ export const createEndpointFleetServicesFactoryMock = (
     logger = loggingSystemMock.createLogger(),
   } = dependencies;
 
+  // Fix up the agent service to return the same client for the different types of `as*()`
+  fleetDependencies.agentService.asInternalScopedUser.mockReturnValue(
+    fleetDependencies.agentService.asInternalUser
+  );
+  fleetDependencies.agentService.asScoped.mockReturnValue(
+    fleetDependencies.agentService.asInternalUser
+  );
+
   const serviceFactoryMock = new EndpointFleetServicesFactory(
     fleetDependencies,
     savedObjects,
     logger
   ) as unknown as EndpointFleetServicesFactoryInterfaceMocked;
 
-  const fleetInternalServicesMocked = serviceFactoryMock.asInternalUser();
-  jest.spyOn(fleetInternalServicesMocked, 'ensureInCurrentSpace');
-  jest.spyOn(fleetInternalServicesMocked, 'getPolicyNamespace');
-
+  const realAsInternalUserFn = serviceFactoryMock.asInternalUser.bind(serviceFactoryMock);
   const asInternalUserSpy = jest.spyOn(serviceFactoryMock, 'asInternalUser');
-  asInternalUserSpy.mockReturnValue(fleetInternalServicesMocked);
+
+  asInternalUserSpy.mockImplementation((...args) => {
+    const fleetInternalServicesMocked = realAsInternalUserFn(...args);
+    jest.spyOn(fleetInternalServicesMocked, 'ensureInCurrentSpace');
+    jest.spyOn(fleetInternalServicesMocked, 'getPolicyNamespace');
+    jest.spyOn(fleetInternalServicesMocked, 'getIntegrationNamespaces');
+    jest.spyOn(fleetInternalServicesMocked, 'getSoClient');
+
+    return fleetInternalServicesMocked;
+  });
 
   return {
     service: serviceFactoryMock,

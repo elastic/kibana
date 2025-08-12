@@ -210,19 +210,8 @@ class DataTableFormatClass extends Component<
         items={rows}
         sorting={sorting}
         pagination={pagination}
-        onChange={onTableChange}
-        css={css`
-          // Set a min width on each column - you can use [data-test-subj] to target specific columns
-          .euiTableHeaderCell {
-            min-width: 100px;
-          }
-
-          // Make sure the pagination follows the scroll
-          > div:last-child {
-            position: sticky;
-            left: 0;
-          }
-        `}
+        onTableChange={onTableChange}
+        css={styles.table}
       />
     );
   }
@@ -233,3 +222,24 @@ export const DataTableFormat = withEuiTablePersist(DataTableFormatClass, {
   pageSizeOptions: PAGE_SIZE_OPTIONS,
   initialPageSize: 20,
 });
+
+const styles = {
+  table: css({
+    // Set a min width on each column
+    '.euiTableHeaderCell': {
+      minWidth: '100px',
+    },
+    // Make sure the pagination follows the scroll
+    '> div:last-child': {
+      position: 'sticky',
+      left: 0,
+    },
+    // Show filter buttons on row hover or focus
+    'tr:hover .insDataTableFormat__filter, .insDataTableFormat__filter:focus': {
+      opacity: 1,
+    },
+    '.insDataTableFormat__filter': {
+      opacity: 0,
+    },
+  }),
+};

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './v2';
+export * from './v4';

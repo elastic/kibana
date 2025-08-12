@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { NeedTierUpgrade, type NeedTierUpgradeProps } from './need_tier_upgrade';
+export {
+  NeedTierUpgrade,
+  type NeedTierUpgradeProps,
+  DATA_TEST_SUBJ_MANAGE_SUBSCRIPTION_BUTTON,
+} from './need_tier_upgrade';

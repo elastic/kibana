@@ -11,33 +11,36 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { act, render, RenderResult, within } from '@testing-library/react';
+import { act, render as rtlRender, RenderResult, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { OptionsListDisplaySettings } from '../../../../../common/options_list';
-import { getOptionsListMocks } from '../../mocks/api_mocks';
-import { ContextStateManager, OptionsListControlContext } from '../options_list_context_provider';
+import { getOptionsListContextMock } from '../../mocks/api_mocks';
+import { OptionsListControlContext } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopover } from './options_list_popover';
+import { ControlGroupApi } from '../../../../control_group/types';
+import { EuiThemeProvider } from '@elastic/eui';
+
+const render = (ui: React.ReactElement) => {
+  return rtlRender(ui, { wrapper: EuiThemeProvider });
+};
 
 describe('Options list popover', () => {
   const waitOneTick = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
 
   const mountComponent = ({
-    api,
+    componentApi,
     displaySettings,
-    stateManager,
   }: {
-    api: any;
-    displaySettings: any;
-    stateManager: any;
+    componentApi: OptionsListComponentApi;
+    displaySettings: OptionsListDisplaySettings;
   }) => {
     return render(
       <OptionsListControlContext.Provider
         value={{
-          api: api as unknown as OptionsListComponentApi,
+          componentApi,
           displaySettings,
-          stateManager: stateManager as unknown as ContextStateManager,
         }}
       >
         <OptionsListPopover />
@@ -51,9 +54,9 @@ describe('Options list popover', () => {
   };
 
   test('no available options', async () => {
-    const mocks = getOptionsListMocks();
-    mocks.api.availableOptions$.next([]);
-    const popover = mountComponent(mocks);
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.setAvailableOptions([]);
+    const popover = mountComponent(contextMock);
 
     const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
     const noOptionsDiv = within(availableOptionsDiv).getByTestId(
@@ -63,43 +66,43 @@ describe('Options list popover', () => {
   });
 
   test('clicking options calls `makeSelection`', async () => {
-    const mocks = getOptionsListMocks();
-    mocks.api.availableOptions$.next([
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.setAvailableOptions([
       { value: 'woof', docCount: 5 },
       { value: 'bark', docCount: 10 },
       { value: 'meow', docCount: 12 },
     ]);
-    const popover = mountComponent(mocks);
+    const popover = mountComponent(contextMock);
 
     const existsOption = popover.getByTestId('optionsList-control-selection-exists');
     await userEvent.click(existsOption);
-    expect(mocks.api.makeSelection).toBeCalledWith('exists-option', false);
+    expect(contextMock.componentApi.makeSelection).toBeCalledWith('exists-option', false);
 
     let woofOption = popover.getByTestId('optionsList-control-selection-woof');
     await userEvent.click(woofOption);
-    expect(mocks.api.makeSelection).toBeCalledWith('woof', false);
+    expect(contextMock.componentApi.makeSelection).toBeCalledWith('woof', false);
 
     // simulate `makeSelection`
-    mocks.setSelectedOptions(['woof']);
+    contextMock.componentApi.setSelectedOptions(['woof']);
     await waitOneTick();
 
     await clickShowOnlySelections(popover);
     woofOption = popover.getByTestId('optionsList-control-selection-woof');
     await userEvent.click(woofOption);
-    expect(mocks.api.makeSelection).toBeCalledWith('woof', true);
+    expect(contextMock.componentApi.makeSelection).toBeCalledWith('woof', true);
   });
 
   describe('show only selected', () => {
     test('show only selected options', async () => {
-      const mocks = getOptionsListMocks();
+      const contextMock = getOptionsListContextMock();
       const selections = ['woof', 'bark'];
-      mocks.api.availableOptions$.next([
+      contextMock.componentApi.setAvailableOptions([
         { value: 'woof', docCount: 5 },
         { value: 'bark', docCount: 10 },
         { value: 'meow', docCount: 12 },
       ]);
-      const popover = mountComponent(mocks);
-      mocks.setSelectedOptions(selections);
+      const popover = mountComponent(contextMock);
+      contextMock.componentApi.setSelectedOptions(selections);
       await waitOneTick();
 
       await clickShowOnlySelections(popover);
@@ -112,14 +115,14 @@ describe('Options list popover', () => {
     });
 
     test('display error message when the show only selected toggle is true but there are no selections', async () => {
-      const mocks = getOptionsListMocks();
-      mocks.api.availableOptions$.next([
+      const contextMock = getOptionsListContextMock();
+      contextMock.componentApi.setAvailableOptions([
         { value: 'woof', docCount: 5 },
         { value: 'bark', docCount: 10 },
         { value: 'meow', docCount: 12 },
       ]);
-      mocks.setSelectedOptions([]);
-      const popover = mountComponent(mocks);
+      contextMock.componentApi.setSelectedOptions([]);
+      const popover = mountComponent(contextMock);
 
       await clickShowOnlySelections(popover);
       const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
@@ -130,14 +133,14 @@ describe('Options list popover', () => {
     });
 
     test('disable search and sort when show only selected toggle is true', async () => {
-      const mocks = getOptionsListMocks();
-      mocks.api.availableOptions$.next([
+      const contextMock = getOptionsListContextMock();
+      contextMock.componentApi.setAvailableOptions([
         { value: 'woof', docCount: 5 },
         { value: 'bark', docCount: 10 },
         { value: 'meow', docCount: 12 },
       ]);
-      mocks.setSelectedOptions(['woof', 'bark']);
-      const popover = mountComponent(mocks);
+      contextMock.componentApi.setSelectedOptions(['woof', 'bark']);
+      const popover = mountComponent(contextMock);
 
       let searchBox = popover.getByTestId('optionsList-control-search-input');
       let sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
@@ -154,14 +157,14 @@ describe('Options list popover', () => {
 
   describe('invalid selections', () => {
     test('test single invalid selection', async () => {
-      const mocks = getOptionsListMocks();
-      mocks.api.availableOptions$.next([
+      const contextMock = getOptionsListContextMock();
+      contextMock.componentApi.setAvailableOptions([
         { value: 'woof', docCount: 5 },
         { value: 'bark', docCount: 75 },
       ]);
-      const popover = mountComponent(mocks);
-      mocks.setSelectedOptions(['woof', 'bark']);
-      mocks.api.invalidSelections$.next(new Set(['woof']));
+      const popover = mountComponent(contextMock);
+      contextMock.componentApi.setSelectedOptions(['woof', 'bark']);
+      contextMock.componentApi.setInvalidSelections(new Set(['woof']));
       await waitOneTick();
 
       const validSelection = popover.getByTestId('optionsList-control-selection-bark');
@@ -177,14 +180,14 @@ describe('Options list popover', () => {
     });
 
     test('test title when multiple invalid selections', async () => {
-      const mocks = getOptionsListMocks();
-      mocks.api.availableOptions$.next([
+      const contextMock = getOptionsListContextMock();
+      contextMock.componentApi.setAvailableOptions([
         { value: 'woof', docCount: 5 },
         { value: 'bark', docCount: 75 },
       ]);
-      mocks.setSelectedOptions(['bark', 'woof', 'meow']);
-      mocks.api.invalidSelections$.next(new Set(['woof', 'meow']));
-      const popover = mountComponent(mocks);
+      contextMock.componentApi.setSelectedOptions(['bark', 'woof', 'meow']);
+      contextMock.componentApi.setInvalidSelections(new Set(['woof', 'meow']));
+      const popover = mountComponent(contextMock);
 
       const title = popover.getByTestId('optionList__invalidSelectionLabel');
       expect(title).toHaveTextContent('Invalid selections');
@@ -193,8 +196,8 @@ describe('Options list popover', () => {
 
   describe('include/exclude toggle', () => {
     test('should default to exclude = false', async () => {
-      const mocks = getOptionsListMocks();
-      const popover = mountComponent(mocks);
+      const contextMock = getOptionsListContextMock();
+      const popover = mountComponent(contextMock);
       const includeButton = popover.getByTestId('optionsList__includeResults');
       const excludeButton = popover.getByTestId('optionsList__excludeResults');
       expect(includeButton).toHaveAttribute('aria-pressed', 'true');
@@ -202,9 +205,9 @@ describe('Options list popover', () => {
     });
 
     test('if exclude = true, select appropriate button in button group', async () => {
-      const mocks = getOptionsListMocks();
-      const popover = mountComponent(mocks);
-      mocks.api.setExclude(true);
+      const contextMock = getOptionsListContextMock();
+      const popover = mountComponent(contextMock);
+      contextMock.componentApi.setExclude(true);
       await waitOneTick();
 
       const includeButton = popover.getByTestId('optionsList__includeResults');
@@ -216,11 +219,11 @@ describe('Options list popover', () => {
 
   describe('"Exists" option', () => {
     test('if existsSelected = false and no suggestions, then "Exists" does not show up', async () => {
-      const mocks = getOptionsListMocks();
-      mocks.api.availableOptions$.next([]);
-      const popover = mountComponent(mocks);
+      const contextMock = getOptionsListContextMock();
+      contextMock.componentApi.setAvailableOptions([]);
+      const popover = mountComponent(contextMock);
 
-      mocks.setExistsSelected(false);
+      contextMock.componentApi.setExistsSelected(false);
       await waitOneTick();
 
       const existsOption = popover.queryByTestId('optionsList-control-selection-exists');
@@ -228,14 +231,14 @@ describe('Options list popover', () => {
     });
 
     test('if existsSelected = true, "Exists" is the only option when "Show only selected options" is toggled', async () => {
-      const mocks = getOptionsListMocks();
-      mocks.api.availableOptions$.next([
+      const contextMock = getOptionsListContextMock();
+      contextMock.componentApi.setAvailableOptions([
         { value: 'woof', docCount: 5 },
         { value: 'bark', docCount: 75 },
       ]);
-      const popover = mountComponent(mocks);
+      const popover = mountComponent(contextMock);
 
-      mocks.setExistsSelected(true);
+      contextMock.componentApi.setExistsSelected(true);
       await waitOneTick();
       await clickShowOnlySelections(popover);
 
@@ -247,11 +250,11 @@ describe('Options list popover', () => {
   });
 
   describe('field formatter', () => {
-    const mocks = getOptionsListMocks();
+    const contextMock = getOptionsListContextMock();
     const mockedFormatter = jest
       .fn()
       .mockImplementation((value: string | number) => `formatted:${value}`);
-    mocks.api.fieldFormatter = new BehaviorSubject(
+    contextMock.componentApi.fieldFormatter = new BehaviorSubject(
       mockedFormatter as (value: string | number) => string
     );
 
@@ -260,15 +263,15 @@ describe('Options list popover', () => {
     });
 
     test('uses field formatter on suggestions', async () => {
-      mocks.api.availableOptions$.next([
+      contextMock.componentApi.setAvailableOptions([
         { value: 1000, docCount: 1 },
         { value: 123456789, docCount: 4 },
       ]);
-      mocks.api.field$.next({
+      contextMock.testOnlyMethods.setField({
         name: 'Test number field',
         type: 'number',
       } as DataViewField);
-      const popover = mountComponent(mocks);
+      const popover = mountComponent(contextMock);
 
       expect(mockedFormatter).toHaveBeenNthCalledWith(1, 1000);
       expect(mockedFormatter).toHaveBeenNthCalledWith(2, 123456789);
@@ -283,16 +286,16 @@ describe('Options list popover', () => {
     });
 
     test('converts string to number for date field', async () => {
-      mocks.api.availableOptions$.next([
+      contextMock.componentApi.setAvailableOptions([
         { value: 1721283696000, docCount: 1 },
         { value: 1721295533000, docCount: 2 },
       ]);
-      mocks.api.field$.next({
+      contextMock.testOnlyMethods.setField({
         name: 'Test date field',
         type: 'date',
       } as DataViewField);
 
-      mountComponent(mocks);
+      mountComponent(contextMock);
       expect(mockedFormatter).toHaveBeenNthCalledWith(1, 1721283696000);
       expect(mockedFormatter).toHaveBeenNthCalledWith(2, 1721295533000);
     });
@@ -300,24 +303,31 @@ describe('Options list popover', () => {
 
   describe('allow expensive queries warning', () => {
     test('ensure warning icon does not show up when testAllowExpensiveQueries = true/undefined', async () => {
-      const mocks = getOptionsListMocks();
-      mocks.api.field$.next({
+      const contextMock = getOptionsListContextMock();
+      contextMock.testOnlyMethods.setField({
         name: 'Test keyword field',
         type: 'keyword',
       } as DataViewField);
-      const popover = mountComponent(mocks);
+      const popover = mountComponent(contextMock);
       const warning = popover.queryByTestId('optionsList-allow-expensive-queries-warning');
       expect(warning).toBeNull();
     });
 
     test('ensure warning icon shows up when testAllowExpensiveQueries = false', async () => {
-      const mocks = getOptionsListMocks();
-      mocks.api.field$.next({
+      const contextMock = getOptionsListContextMock();
+      contextMock.testOnlyMethods.setField({
         name: 'Test keyword field',
         type: 'keyword',
       } as DataViewField);
-      mocks.api.parentApi.allowExpensiveQueries$.next(false);
-      const popover = mountComponent(mocks);
+      const popover = mountComponent({
+        ...contextMock,
+        componentApi: {
+          ...contextMock.componentApi,
+          parentApi: {
+            allowExpensiveQueries$: new BehaviorSubject<boolean>(false),
+          } as unknown as ControlGroupApi,
+        },
+      });
       const warning = popover.getByTestId('optionsList-allow-expensive-queries-warning');
       expect(warning).toBeInstanceOf(HTMLDivElement);
     });
@@ -331,9 +341,9 @@ describe('Options list popover', () => {
       displaySettings: Partial<OptionsListDisplaySettings>;
       testSubject: string;
     }) => {
-      const mocks = getOptionsListMocks();
-      mocks.displaySettings = displaySettings;
-      const popover = mountComponent(mocks);
+      const contextMock = getOptionsListContextMock();
+      contextMock.displaySettings = displaySettings;
+      const popover = mountComponent(contextMock);
       const test = popover.queryByTestId(testSubject);
       expect(test).toBeNull();
     };

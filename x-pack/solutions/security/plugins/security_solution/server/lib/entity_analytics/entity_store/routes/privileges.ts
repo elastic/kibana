@@ -13,7 +13,6 @@ import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
-import { getEntityStorePrivileges } from '../utils/get_entity_store_privileges';
 import { buildIndexPatterns } from '../utils';
 
 export const entityStoreInternalPrivilegesRoute = (
@@ -43,7 +42,6 @@ export const entityStoreInternalPrivilegesRoute = (
       ): Promise<IKibanaResponse<EntityStoreGetPrivilegesResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const [_, { security }] = await getStartServices();
           const { getSpaceId, getAppClient, getDataViewsService } = await context.securitySolution;
 
           const securitySolution = await context.securitySolution;
@@ -62,7 +60,10 @@ export const entityStoreInternalPrivilegesRoute = (
             getAppClient(),
             getDataViewsService()
           );
-          const body = await getEntityStorePrivileges(request, security, securitySolutionIndices);
+
+          const body = await securitySolution
+            .getEntityStoreDataClient()
+            .getEntityStoreInitPrivileges(securitySolutionIndices);
 
           return response.ok({ body });
         } catch (e) {

@@ -617,7 +617,9 @@ describe('AlertsDataGrid bulk actions', () => {
             await userEvent.click(await screen.findByText('Fake Bulk Action'));
 
             // the callback given to our clients to run when they want to update the loading state
-            mockOnClick.mock.calls[0][2](false);
+            act(() => {
+              mockOnClick.mock.calls[0][2](false);
+            });
 
             expect(screen.queryByTestId('row-loader')).not.toBeInTheDocument();
           });

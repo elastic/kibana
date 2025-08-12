@@ -46,6 +46,12 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
             loader: require.resolve('@kbn/peggy-loader'),
           },
         },
+        {
+          test: /\.text$/,
+          use: {
+            loader: require.resolve('@kbn/dot-text-loader'),
+          },
+        },
       ],
     },
     plugins: [new NodeLibsBrowserPlugin(), new IgnoreNotFoundExportPlugin()],
@@ -53,7 +59,6 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       extensions: ['.js', '.mjs', '.ts', '.tsx', '.json', '.mdx'],
       mainFields: ['browser', 'main'],
       alias: {
-        core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/styles/core_app/images'),
         core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
         vega: resolve(REPO_ROOT, 'node_modules/vega/build-es5/vega.js'),
       },

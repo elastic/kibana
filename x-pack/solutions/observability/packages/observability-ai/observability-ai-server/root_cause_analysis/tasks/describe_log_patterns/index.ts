@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { InferenceClient } from '@kbn/inference-plugin/server';
-import { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
+import { InferenceClient } from '@kbn/inference-common';
+import type { TruncatedDocumentAnalysis } from '@kbn/ai-tools';
 import { omit, partition, sumBy } from 'lodash';
 import { RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { formatEntity } from '../../util/format_entity';

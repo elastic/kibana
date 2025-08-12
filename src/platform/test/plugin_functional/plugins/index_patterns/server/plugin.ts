@@ -30,6 +30,12 @@ export class IndexPatternsTestPlugin
     router.post(
       {
         path: '/api/index-patterns-plugin/create',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           body: schema.object({}, { unknowns: 'allow' }),
         },
@@ -48,7 +54,16 @@ export class IndexPatternsTestPlugin
     );
 
     router.get(
-      { path: '/api/index-patterns-plugin/get-all', validate: false },
+      {
+        path: '/api/index-patterns-plugin/get-all',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
       async (context, req, res) => {
         const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
         const savedObjectsClient = savedObjects.getScopedClient(req);
@@ -65,6 +80,12 @@ export class IndexPatternsTestPlugin
     router.get(
       {
         path: '/api/index-patterns-plugin/get/{id}',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           params: schema.object({
             id: schema.string(),
@@ -88,6 +109,12 @@ export class IndexPatternsTestPlugin
     router.get(
       {
         path: '/api/index-patterns-plugin/update/{id}',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           params: schema.object({
             id: schema.string(),
@@ -112,6 +139,12 @@ export class IndexPatternsTestPlugin
     router.get(
       {
         path: '/api/index-patterns-plugin/delete/{id}',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           params: schema.object({
             id: schema.string(),

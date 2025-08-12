@@ -5,8 +5,11 @@
  * 2.0.
  */
 import React from 'react';
+import {
+  MissingPrivilegesCallOut,
+  MissingPrivilegesDescription,
+} from '../../../../../../common/missing_privileges';
 import * as i18n from './translations';
-import { MissingPrivilegesCallOut, MissingPrivilegesDescription } from '../missing_privileges';
 
 const LEVEL_TRANSLATION = {
   read: i18n.REQUIRED_PRIVILEGES_CONNECTORS_READ,

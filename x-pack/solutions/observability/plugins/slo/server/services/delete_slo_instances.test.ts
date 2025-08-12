@@ -43,6 +43,7 @@ describe('DeleteSLOInstances', () => {
     expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(2);
     expect(mockEsClient.deleteByQuery.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
+        "conflicts": "proceed",
         "index": ".slo-observability.sli-v3*",
         "query": Object {
           "bool": Object {
@@ -98,11 +99,13 @@ describe('DeleteSLOInstances', () => {
             ],
           },
         },
+        "slices": "auto",
         "wait_for_completion": false,
       }
     `);
     expect(mockEsClient.deleteByQuery.mock.calls[1][0]).toMatchInlineSnapshot(`
       Object {
+        "conflicts": "proceed",
         "index": ".slo-observability.summary-v3*",
         "query": Object {
           "bool": Object {
@@ -159,6 +162,8 @@ describe('DeleteSLOInstances', () => {
           },
         },
         "refresh": true,
+        "slices": "auto",
+        "wait_for_completion": false,
       }
     `);
   });

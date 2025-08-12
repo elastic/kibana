@@ -16,9 +16,11 @@ import { ClientPluginsStart } from '../../../../plugin';
 export function AlertSearchBar({
   kqlQuery,
   onChange,
+  filtersForSuggestions,
 }: {
   kqlQuery: string;
   onChange: (val: { kqlQuery?: string; filters?: Filter[] }) => void;
+  filtersForSuggestions?: Filter[];
 }) {
   const {
     data: { query },
@@ -71,6 +73,7 @@ export function AlertSearchBar({
         query={{ query: String(kqlQuery), language: 'kuery' }}
         autoSubmit={true}
         disableLanguageSwitcher={true}
+        filtersForSuggestions={filtersForSuggestions}
       />
     </EuiFormRow>
   );

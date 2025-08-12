@@ -122,6 +122,7 @@ export async function cleanSavedObjectIndices({
     const resp = await client.deleteByQuery(
       {
         index,
+        ignore_unavailable: true,
         refresh: true,
         query: {
           bool: {

@@ -73,7 +73,7 @@ export function TryItButton({
           button={
             <EuiButtonIcon
               data-test-subj="apmPopoverButton"
-              iconType="iInCircle"
+              iconType="info"
               aria-label={i18n.translate(
                 'xpack.apm.tryItButton.euiButtonIcon.tryItHelperButtonLabel',
                 { defaultMessage: 'Try it helper button' }
@@ -184,7 +184,7 @@ export function TryItButton({
   }
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <TechnicalPreviewBadge icon="beaker" />
       {isFeatureEnabled ? null : <PromoLabel />}
       <Link />

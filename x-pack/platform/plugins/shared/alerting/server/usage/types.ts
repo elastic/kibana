@@ -41,6 +41,8 @@ export interface AlertingUsage {
   count_connector_types_by_consumers: Record<string, Record<string, number>>;
   count_rules_snoozed: number;
   count_rules_muted: number;
+  count_rules_with_linked_dashboards: number;
+  count_rules_with_investigation_guide: number;
   count_mw_total: number;
   count_mw_with_repeat_toggle_on: number;
   count_mw_with_filter_alert_toggle_on: number;
@@ -99,4 +101,12 @@ export interface AlertingUsage {
   };
   count_alerts_total: number;
   count_alerts_by_rule_type: Record<string, number>;
+  count_rules_snoozed_by_type: Record<string, number>;
+  count_rules_muted_by_type: Record<string, number>;
+  count_ignored_fields_by_rule_type: Record<string, number>;
+  count_backfill_executions: number;
+  count_backfills_by_execution_status_per_day: Record<string, number>;
+  count_gaps: number;
+  total_unfilled_gap_duration_ms: number;
+  total_filled_gap_duration_ms: number;
 }

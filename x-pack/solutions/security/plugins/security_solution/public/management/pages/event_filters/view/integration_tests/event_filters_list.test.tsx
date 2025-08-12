@@ -40,7 +40,10 @@ describe('When on the Event Filters list page', () => {
       history.push(EVENT_FILTERS_PATH);
     });
 
-    mockedEndpointPrivileges = { canWriteTrustedApplications: true };
+    mockedEndpointPrivileges = {
+      canManageGlobalArtifacts: true,
+      canWriteTrustedApplications: true,
+    };
     mockUserPrivileges.mockReturnValue({ endpointPrivileges: mockedEndpointPrivileges });
   });
 
@@ -91,10 +94,8 @@ describe('When on the Event Filters list page', () => {
 
         render();
 
-        await act(async () => {
-          await waitFor(() => {
-            expect(renderResult.getByTestId('EventFiltersListPage-list')).toBeTruthy();
-          });
+        await waitFor(() => {
+          expect(renderResult.getByTestId('EventFiltersListPage-list')).toBeTruthy();
         });
 
         return renderResult;

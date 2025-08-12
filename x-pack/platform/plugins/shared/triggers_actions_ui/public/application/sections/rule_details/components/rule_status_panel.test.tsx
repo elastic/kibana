@@ -140,6 +140,39 @@ describe('rule status panel', () => {
     await waitFor(() => expect(bulkDisableRules).toHaveBeenCalledTimes(1));
   });
 
+  it('should disable the rule when picking disable in the dropdown without showing untrack alerts modal', async () => {
+    const rule = mockRule({ enabled: true });
+    const bulkDisableRules = jest.fn();
+    render(
+      <IntlProvider locale="en">
+        <RuleStatusPanelWithProvider
+          {...mockAPIs}
+          rule={rule}
+          isEditable
+          healthColor="primary"
+          statusMessage="Ok"
+          requestRefresh={requestRefresh}
+          bulkDisableRules={bulkDisableRules}
+          autoRecoverAlerts={false}
+        />
+      </IntlProvider>
+    );
+
+    if (screen.queryByTestId('centerJustifiedSpinner')) {
+      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+    }
+
+    fireEvent.click(screen.getByTestId('ruleStatusDropdownBadge'));
+
+    fireEvent.click(screen.getByTestId('statusDropdownDisabledItem'));
+
+    expect(screen.queryByRole('confirmModalConfirmButton')).not.toBeInTheDocument();
+
+    expect(screen.queryByRole('progressbar')).toBeInTheDocument();
+
+    await waitFor(() => expect(bulkDisableRules).toHaveBeenCalledTimes(1));
+  });
+
   it('if rule is already disabled should do nothing when picking disable in the dropdown', async () => {
     const rule = mockRule({ enabled: false });
     const bulkDisableRules = jest.fn();

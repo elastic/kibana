@@ -13,7 +13,7 @@
       "_rollup/data/{id}",
       "_rollup/data"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/rollup-get-rollup-caps.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-get-rollup-caps",
     "availability": {
       "stack": true,
       "serverless": false

@@ -27,6 +27,7 @@ export class LogsDataAccessPlugin
     const services = registerServices({
       deps: {
         uiSettings: core.uiSettings,
+        search: plugins.data.search,
       },
     });
 

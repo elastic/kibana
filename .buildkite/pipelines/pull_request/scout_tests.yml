@@ -8,7 +8,7 @@ steps:
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
     retry:
       automatic:
-        # No retry when Scout CI config validation fails
+        # No retry when Scout configs fail
         - exit_status: 10
           limit: 0
         - exit_status: '*'

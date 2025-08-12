@@ -14,7 +14,7 @@ const getState = (appState: AppState) => appState.agentPolicies;
 export const selectAgentPolicies = createSelector(getState, (state) => state);
 
 export const selectAddingNewPrivateLocation = (state: AppState) =>
-  state.privateLocations.isCreatePrivateLocationFlyoutVisible ?? false;
+  state.privateLocations.isPrivateLocationFlyoutVisible ?? false;
 
 export const selectLocationMonitors = (state: AppState) => ({
   locationMonitors: state.dynamicSettings.locationMonitors,

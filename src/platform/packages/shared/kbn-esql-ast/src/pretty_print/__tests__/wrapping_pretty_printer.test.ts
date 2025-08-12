@@ -8,6 +8,8 @@
  */
 
 import { parse } from '../../parser';
+import { ESQLMap } from '../../types';
+import { Walker } from '../../walker';
 import { WrappingPrettyPrinter, WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
 
 const reprint = (src: string, opts?: WrappingPrettyPrinterOptions) => {
@@ -158,6 +160,46 @@ FROM index
         AS type, pvalue
   | LIMIT 123`
       );
+    });
+  });
+
+  /**
+   * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+   * get back to it after 9.1 release.
+   */
+  describe.skip('RERANK', () => {
+    test('default example', () => {
+      const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
+
+      expect(text).toBe('FROM a | RERANK "query" ON field1 WITH some_id');
+    });
+
+    test('wraps long query', () => {
+      const { text } = reprint(
+        `FROM a | RERANK "asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf" ON field1 WITH some_id`
+      );
+
+      expect(text).toBe(`FROM a
+  | RERANK "asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf"
+        ON field1
+        WITH some_id`);
+    });
+
+    test('two fields', () => {
+      const { text } = reprint(`FROM a | RERANK "query" ON field1,field2 WITH some_id`);
+
+      expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH some_id');
+    });
+
+    test('wraps many fields', () => {
+      const { text } = reprint(
+        `FROM a | RERANK "query" ON field1,field2,field3,field4,field5,field6,field7,field8,field9,field10,field11,field12 WITH some_id`
+      );
+      expect(text).toBe(`FROM a
+  | RERANK "query"
+        ON field1, field2, field3, field4, field5, field6, field7, field8, field9,
+          field10, field11, field12
+        WITH some_id`);
     });
   });
 });
@@ -623,6 +665,148 @@ FROM index
     });
   });
 
+  describe('map expression', () => {
+    test('empty map', () => {
+      const src = `ROW F(0, {"a": 0})`;
+      const { root } = parse(src);
+      const map = Walker.match(root, { type: 'map' }) as ESQLMap;
+
+      map.entries = [];
+
+      const text = WrappingPrettyPrinter.print(root);
+
+      expect(text).toBe(`ROW F(0, {})`);
+    });
+
+    test('empty map (multiline)', () => {
+      const src = `ROW F(0, {"a": 0}) | LIMIT 1`;
+      const { root } = parse(src);
+      const map = Walker.match(root, { type: 'map' }) as ESQLMap;
+
+      map.entries = [];
+
+      const text = WrappingPrettyPrinter.print(root, { multiline: true });
+
+      expect(text).toBe(`ROW F(0, {})
+  | LIMIT 1`);
+    });
+
+    test('single entry map', () => {
+      const src = `ROW F(0, {"a": 0})`;
+      const text = reprint(src).text;
+
+      expect(text).toBe(`ROW F(0, {"a": 0})`);
+    });
+
+    test('single entry map (multiline)', () => {
+      const src = `ROW F(0, {"a": 0}) | LIMIT 1`;
+      const text = reprint(src, { multiline: true }).text;
+
+      expect(text).toBe(`ROW F(0, {"a": 0})\n  | LIMIT 1`);
+    });
+
+    test('two entry map', () => {
+      const src = `ROW F(0, {"a": 0, "b": 1})`;
+      const text = reprint(src).text;
+
+      expect(text).toBe(`ROW F(0, {"a": 0, "b": 1})`);
+    });
+
+    test('many small map entries', () => {
+      const src = `ROW FUNCTION(123456789, {"abc1": 123, "abc2": 123, "abc3": 123, "abc4": 123, "abc5": 123, "abc6": 123, "abc7": 123, "abc8": 123, "abc9": 123})`;
+      const text = reprint(src).text;
+
+      expect(text).toBe(`ROW
+  FUNCTION(
+    123456789,
+    {"abc1": 123, "abc2": 123, "abc3": 123, "abc4": 123, "abc5": 123, "abc6": 123,
+      "abc7": 123, "abc8": 123, "abc9": 123})`);
+    });
+
+    test('one long map entry', () => {
+      const src = `ROW FUNCTION(123456789, {
+        "abcdefghijklmnopqrstuvwxyz-1": "abcdefghijklmnopqrstuvwxyz"
+      })`;
+      const text = reprint(src).text;
+
+      expect(text).toBe(`ROW
+  FUNCTION(
+    123456789,
+    {"abcdefghijklmnopqrstuvwxyz-1": "abcdefghijklmnopqrstuvwxyz"})`);
+    });
+
+    test('couple long map entries', () => {
+      const src = `ROW FUNCTION(123456789, {
+        "abcdefghijklmnopqrstuvwxyz-1": "abcdefghijklmnopqrstuvwxyz",
+        "abcdefghijklmnopqrstuvwxyz-2": "abcdefghijklmnopqrstuvwxyz"
+      })`;
+      const text = reprint(src).text;
+
+      expect(text).toBe(`ROW
+  FUNCTION(
+    123456789,
+    {
+      "abcdefghijklmnopqrstuvwxyz-1": "abcdefghijklmnopqrstuvwxyz",
+      "abcdefghijklmnopqrstuvwxyz-2": "abcdefghijklmnopqrstuvwxyz"
+    })`);
+    });
+
+    test('few long map entries', () => {
+      const src = `ROW FUNCTION(123456789, {
+        "abcdefghijklmnopqrstuvwxyz-1": "abcdefghijklmnopqrstuvwxyz",
+        "abcdefghijklmnopqrstuvwxyz-2": "abcdefghijklmnopqrstuvwxyz",
+        "abcdefghijklmnopqrstuvwxyz-3": "abcdefghijklmnopqrstuvwxyz",
+        "abcdefghijklmnopqrstuvwxyz-4": ["abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyz"]})`;
+      const text = reprint(src).text;
+
+      expect(text).toBe(`ROW
+  FUNCTION(
+    123456789,
+    {
+      "abcdefghijklmnopqrstuvwxyz-1": "abcdefghijklmnopqrstuvwxyz",
+      "abcdefghijklmnopqrstuvwxyz-2": "abcdefghijklmnopqrstuvwxyz",
+      "abcdefghijklmnopqrstuvwxyz-3": "abcdefghijklmnopqrstuvwxyz",
+      "abcdefghijklmnopqrstuvwxyz-4":
+        ["abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyz",
+          "abcdefghijklmnopqrstuvwxyz"]
+    })`);
+    });
+
+    test('can break up large map entries into two lines', () => {
+      const src = `ROW FUNCTION(123456789, {
+        "abcdefghijklmnopqrstuvwxyz-1": "abcdefghijklmnopqrstuvwxyz",
+        "abcdefghijklmnopqrstuvwxyz-abcdefghijklmnopqrstuvwxyz-2": "abcdefghijklmnopqrstuvwxyz"
+      })`;
+      const text = reprint(src).text;
+
+      expect(text).toBe(`ROW
+  FUNCTION(
+    123456789,
+    {
+      "abcdefghijklmnopqrstuvwxyz-1": "abcdefghijklmnopqrstuvwxyz",
+      "abcdefghijklmnopqrstuvwxyz-abcdefghijklmnopqrstuvwxyz-2":
+        "abcdefghijklmnopqrstuvwxyz"
+    })`);
+    });
+
+    test('can break up large map entries into two lines when key is long', () => {
+      const src = `ROW FUNCTION(123456789, {
+        "abcdefghijklmnopqrstuvwxyz-1": "abcdefghijklmnopqrstuvwxyz",
+        "abc": "abcdefghijklmnopqrstuvwxyz-abcdefghijklmnopqrstuvwxyz-abcdefghijklmnopqrstuvwxyz"
+      })`;
+      const text = reprint(src).text;
+
+      expect(text).toBe(`ROW
+  FUNCTION(
+    123456789,
+    {
+      "abcdefghijklmnopqrstuvwxyz-1": "abcdefghijklmnopqrstuvwxyz",
+      "abc":
+        "abcdefghijklmnopqrstuvwxyz-abcdefghijklmnopqrstuvwxyz-abcdefghijklmnopqrstuvwxyz"
+    })`);
+    });
+  });
+
   describe('binary expressions', () => {
     test('can break a standalone binary expression (+) to two lines', () => {
       const query = `
@@ -804,7 +988,8 @@ ROW
                     1234567890,
                     1234567890,
                     1234567890,
-                    1234567890]))))))))`);
+                    1234567890
+                  ]))))))))`);
       });
     });
 
@@ -831,8 +1016,40 @@ ROW
   [
     "..............................................",
     "..............................................",
-    ".............................................."]`);
+    ".............................................."
+  ]`);
       });
+    });
+  });
+
+  describe('list tuples', () => {
+    test('wraps long lists over one line', () => {
+      const query =
+        'FROM a | WHERE b in (1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890)';
+      const text = reprint(query).text;
+
+      expect('\n' + text).toBe(`
+FROM a
+  | WHERE
+      b IN
+        (1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890,
+          1234567890, 1234567890, 1234567890)`);
+    });
+
+    test('breaks lists with long items', () => {
+      const query =
+        'FROM a | WHERE b not in ("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz")';
+      const text = reprint(query).text;
+
+      expect('\n' + text).toBe(`
+FROM a
+  | WHERE
+      b NOT IN
+        (
+          "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
+          "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
+          "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+        )`);
     });
   });
 });

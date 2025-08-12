@@ -162,7 +162,6 @@ const indexWithLifecyclePhaseDefinition: Index = {
     step_time_millis: 1544187776208,
     phase_execution: {
       policy: 'testy',
-      // @ts-expect-error ILM type is incorrect https://github.com/elastic/elasticsearch-specification/issues/2326
       phase_definition: { min_age: '0s', actions: { rollover: { max_size: '1gb' } } },
       version: 1,
       modified_date_in_millis: 1544031699844,
@@ -202,6 +201,32 @@ const indexWithLifecycleWaitingStep: Index = {
     },
   },
 };
+const indexWithNonExistentPolicyError: Index = {
+  health: 'yellow',
+  status: 'open',
+  name: 'testy3',
+  uuid: 'XL11TLa3Tvq298_dMUzLHQ',
+  primary: 1,
+  replica: 1,
+  documents: 2,
+  documents_deleted: 0,
+  size: '6.5kb',
+  primary_size: '6.5kb',
+  aliases: 'none',
+  isFrozen: false,
+  hidden: false,
+  ilm: {
+    index: 'testy3',
+    managed: true,
+    policy: 'testy',
+    index_creation_date_millis: 1753074916462,
+    step: 'ERROR',
+    step_info: {
+      type: 'illegal_argument_exception',
+      reason: 'policy [testy] does not exist',
+    },
+  },
+};
 
 moment.tz.setDefault('utc');
 
@@ -218,21 +243,26 @@ describe('extend index management', () => {
       expect(extension).toBeNull();
     });
 
-    test('should return null when no index has lifecycle errors', () => {
+    test('should return null when no index has failed step lifecycle errors', () => {
       const extension = retryLifecycleActionExtension({
         indices: [indexWithLifecyclePolicy, indexWithLifecyclePolicy],
       });
       expect(extension).toBeNull();
     });
 
-    test('should return null when not all indices have lifecycle errors', () => {
+    test('should return extension with only indices that have failed step lifecycle errors', () => {
       const extension = retryLifecycleActionExtension({
-        indices: [indexWithLifecyclePolicy, indexWithLifecycleError],
+        indices: [
+          indexWithLifecyclePolicy,
+          indexWithLifecycleError,
+          indexWithNonExistentPolicyError,
+        ],
       });
-      expect(extension).toBeNull();
+      expect(extension).toBeDefined();
+      expect(extension).toMatchSnapshot();
     });
 
-    test('should return extension when all indices have lifecycle errors', () => {
+    test('should return extension when all indices have failed step lifecycle errors', () => {
       const extension = retryLifecycleActionExtension({
         indices: [indexWithLifecycleError, indexWithLifecycleError],
       });
@@ -324,11 +354,12 @@ describe('extend index management', () => {
       expect(extension).toMatchSnapshot();
     });
 
-    test('should return action definition when any index has lifecycle error', () => {
+    test('should return action definition when any index has failed step lifecycle error', () => {
       const extension = ilmBannerExtension([
         indexWithoutLifecyclePolicy,
         indexWithLifecyclePolicy,
         indexWithLifecycleError,
+        indexWithNonExistentPolicyError,
       ]);
       const { requestMethod, successMessage, buttonLabel } =
         retryLifecycleActionExtension({
@@ -340,6 +371,15 @@ describe('extend index management', () => {
         buttonLabel,
         indexNames: [indexWithLifecycleError.name],
       });
+    });
+
+    test('should not return action definition when index has lifecycle error other than failed step', () => {
+      const extension = ilmBannerExtension([
+        indexWithoutLifecyclePolicy,
+        indexWithLifecyclePolicy,
+        indexWithNonExistentPolicyError,
+      ]);
+      expect(extension?.action).toBeUndefined();
     });
   });
 

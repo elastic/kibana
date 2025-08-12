@@ -11,9 +11,9 @@ import {
   IlmPolicyDeletePhase,
   IlmPolicyPhase,
   IlmPolicyPhases,
-  IngestStreamGetResponse,
   IngestStreamLifecycleILM,
   PhaseName,
+  Streams,
 } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import {
@@ -28,22 +28,21 @@ import {
   formatNumber,
   useEuiTheme,
 } from '@elastic/eui';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { orderIlmPhases, parseDurationInSeconds } from './helpers';
 import { IlmLink } from './ilm_link';
 import { useIlmPhasesColorAndDescription } from './hooks/use_ilm_phases_color_and_description';
+import { DataStreamStats } from './hooks/use_data_stream_stats';
 
 export function IlmSummary({
   definition,
   lifecycle,
-  ilmLocator,
+  stats,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   lifecycle: IngestStreamLifecycleILM;
-  ilmLocator?: LocatorPublic<IlmLocatorParams>;
+  stats?: DataStreamStats;
 }) {
   const {
     dependencies: {
@@ -55,14 +54,15 @@ export function IlmSummary({
 
   const { value, loading, error } = useStreamsAppFetch(
     ({ signal }) => {
-      if (!definition) return;
-
       return streamsRepositoryClient.fetch('GET /internal/streams/{name}/lifecycle/_stats', {
         params: { path: { name: definition.stream.name } },
         signal,
       });
     },
-    [streamsRepositoryClient, definition]
+    // we pass the stats as a hack to refresh the ilm summary
+    // when the ingestion rate graph is refreshed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [streamsRepositoryClient, definition, stats]
   );
 
   const phasesWithGrow = useMemo(() => {
@@ -91,13 +91,16 @@ export function IlmSummary({
       <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
-            <EuiText>
-              <h5>
-                {i18n.translate('xpack.streams.streamDetailLifecycle.policySummary', {
-                  defaultMessage: 'Policy summary',
-                })}
-              </h5>
-            </EuiText>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiText>
+                <h5>
+                  {i18n.translate('xpack.streams.streamDetailLifecycle.policySummary', {
+                    defaultMessage: 'Policy summary',
+                  })}
+                </h5>
+              </EuiText>
+              {loading ? <EuiLoadingSpinner size="s" /> : null}
+            </EuiFlexGroup>
             <EuiTextColor color="subdued">
               {i18n.translate('xpack.streams.streamDetailLifecycle.policySummaryInfo', {
                 defaultMessage: 'Phases and details of the lifecycle applied to this stream',
@@ -106,17 +109,13 @@ export function IlmSummary({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <IlmLink lifecycle={lifecycle} ilmLocator={ilmLocator} />
+            <IlmLink lifecycle={lifecycle} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
 
       <EuiPanel grow={true} hasShadow={false} hasBorder={false} paddingSize="s">
-        {error ? (
-          '-'
-        ) : loading || !phasesWithGrow ? (
-          <EuiLoadingSpinner />
-        ) : (
+        {error || !phasesWithGrow ? null : (
           <EuiFlexGroup direction="row" gutterSize="none" responsive={false}>
             {phasesWithGrow.map((phase, index) => (
               <EuiFlexItem
@@ -162,7 +161,7 @@ function IlmPhase({
       <EuiFlexGroup
         direction="column"
         gutterSize="xs"
-        style={phase.name !== 'delete' ? { borderRight: '1px dashed black' } : undefined}
+        css={phase.name !== 'delete' ? { borderRight: '1px dashed black' } : undefined}
       >
         <EuiPanel
           paddingSize="s"
@@ -176,7 +175,7 @@ function IlmPhase({
           grow={false}
         >
           {phase.name === 'delete' ? (
-            <EuiText size="xs" style={{ margin: '0 2px' }}>
+            <EuiText size="xs" css={{ margin: '0 2px' }}>
               <EuiIcon size="s" type="trash" />
             </EuiText>
           ) : (
@@ -192,11 +191,11 @@ function IlmPhase({
             hasBorder={false}
             hasShadow={false}
             grow={false}
-            style={{ marginBottom: '40px' }}
+            css={{ marginBottom: '40px' }}
           >
             <EuiText size="xs">
               <p>
-                <b>Size</b> {formatNumber(phase.size_in_bytes, '0.0 b')}
+                <b>Size</b> {formatNumber(phase.size_in_bytes, '0.0 ib')}
               </p>
             </EuiText>
           </EuiPanel>
@@ -207,7 +206,7 @@ function IlmPhase({
         {phase.name !== 'delete' ? (
           <EuiPanel
             paddingSize="xs"
-            style={{
+            css={{
               marginRight: minAge ? '-20px' : '-5px',
               width: '50px',
               backgroundColor: ilmPhases.delete.color,
@@ -272,7 +271,7 @@ function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
       {descriptions.map((phase, index) => (
         <React.Fragment key={phase.name}>
           <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false} style={{ width: '20px', alignItems: 'center' }}>
+            <EuiFlexItem grow={false} css={{ width: '20px', alignItems: 'center' }}>
               {'color' in phase ? (
                 <span
                   style={{

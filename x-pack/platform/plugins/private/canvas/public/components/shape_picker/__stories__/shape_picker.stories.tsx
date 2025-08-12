@@ -7,7 +7,7 @@
 
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { getAvailableShapes } from '@kbn/expression-shape-plugin/common';
+import { getAvailableShapes } from '../../../../canvas_plugin_src/renderers/shape';
 import { ShapePicker } from '../shape_picker';
 
 export default {

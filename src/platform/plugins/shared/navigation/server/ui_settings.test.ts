@@ -9,6 +9,7 @@
 
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import type { Space } from '@kbn/spaces-plugin/common';
 
@@ -17,6 +18,10 @@ import { DEFAULT_ROUTES } from '../common/constants';
 
 describe('ui settings', () => {
   const core = coreMock.createSetup();
+  const cloud = cloudMock.createSetup();
+  const setupPlugins = {
+    cloud,
+  };
   const logger = loggingSystemMock.createLogger();
 
   const getValidationFn = (setting: UiSettingsParams) => (value: any) =>
@@ -24,7 +29,7 @@ describe('ui settings', () => {
 
   describe('defaultRoute', () => {
     it('should only accept relative urls', () => {
-      const uiSettings = getUiSettings(core, logger);
+      const uiSettings = getUiSettings(core, setupPlugins, logger);
       const validate = getValidationFn(uiSettings.defaultRoute);
 
       expect(() => validate('/some-url')).not.toThrow();
@@ -38,7 +43,7 @@ describe('ui settings', () => {
 
     describe('getValue()', () => {
       it('should return classic when neither "space" nor "request" is provided', async () => {
-        const { defaultRoute } = getUiSettings(core, logger);
+        const { defaultRoute } = getUiSettings(core, setupPlugins, logger);
         await expect(defaultRoute.getValue!()).resolves.toBe(DEFAULT_ROUTES.classic);
       });
 
@@ -48,7 +53,7 @@ describe('ui settings', () => {
         spaces.spacesService.getActiveSpace.mockResolvedValue(mockSpace as Space);
         core.getStartServices.mockResolvedValue([{} as any, { spaces }, {} as any]);
 
-        const { defaultRoute } = getUiSettings(core, logger);
+        const { defaultRoute } = getUiSettings(core, setupPlugins, logger);
         const requestMock = {
           auth: { isAuthenticated: false },
         };
@@ -64,7 +69,7 @@ describe('ui settings', () => {
           const mockSpace: Pick<Space, 'solution'> = { solution };
           spaces.spacesService.getActiveSpace.mockResolvedValue(mockSpace as Space);
           core.getStartServices.mockResolvedValue([{} as any, { spaces }, {} as any]);
-          const { defaultRoute } = getUiSettings(core, logger);
+          const { defaultRoute } = getUiSettings(core, setupPlugins, logger);
 
           const requestMock = {
             auth: { isAuthenticated: true },
@@ -75,12 +80,31 @@ describe('ui settings', () => {
         }
       });
 
+      it('should return the route based on the serverless project type', async () => {
+        cloud.serverless.projectType = 'observability';
+        const spaces = spacesMock.createStart();
+        const mockSpace = {};
+        spaces.spacesService.getActiveSpace.mockResolvedValue(mockSpace as Space);
+        core.getStartServices.mockResolvedValue([{} as any, { spaces }, {} as any]);
+
+        const { defaultRoute } = getUiSettings(core, setupPlugins, logger);
+
+        const requestMock = {
+          auth: { isAuthenticated: true },
+        };
+        await expect(defaultRoute.getValue!({ request: requestMock as any })).resolves.toBe(
+          DEFAULT_ROUTES.observability
+        );
+
+        cloud.serverless.projectType = undefined;
+      });
+
       it('should handle error thrown', async () => {
         const spaces = spacesMock.createStart();
 
         spaces.spacesService.getActiveSpace.mockRejectedValue(new Error('something went wrong'));
         core.getStartServices.mockResolvedValue([{} as any, { spaces }, {} as any]);
-        const { defaultRoute } = getUiSettings(core, logger);
+        const { defaultRoute } = getUiSettings(core, setupPlugins, logger);
 
         await expect(defaultRoute.getValue!({ request: {} as any })).resolves.toBe(
           DEFAULT_ROUTES.classic

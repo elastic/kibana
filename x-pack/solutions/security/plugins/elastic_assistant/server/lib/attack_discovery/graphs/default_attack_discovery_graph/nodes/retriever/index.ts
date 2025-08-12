@@ -7,10 +7,10 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Replacements } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 
+import type { AttackDiscoveryGraphState } from '../../../../../langchain/graphs';
 import { AnonymizedAlertsRetriever } from './anonymized_alerts_retriever';
-import type { GraphState } from '../../types';
 
 export const getRetrieveAnonymizedAlertsNode = ({
   alertsIndexPattern,
@@ -28,7 +28,7 @@ export const getRetrieveAnonymizedAlertsNode = ({
   onNewReplacements?: (replacements: Replacements) => void;
   replacements?: Replacements;
   size?: number;
-}): ((state: GraphState) => Promise<GraphState>) => {
+}): ((state: AttackDiscoveryGraphState) => Promise<AttackDiscoveryGraphState>) => {
   let localReplacements = { ...(replacements ?? {}) };
   const localOnNewReplacements = (newReplacements: Replacements) => {
     localReplacements = { ...localReplacements, ...newReplacements };
@@ -36,7 +36,9 @@ export const getRetrieveAnonymizedAlertsNode = ({
     onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
   };
 
-  const retrieveAnonymizedAlerts = async (state: GraphState): Promise<GraphState> => {
+  const retrieveAnonymizedAlerts = async (
+    state: AttackDiscoveryGraphState
+  ): Promise<AttackDiscoveryGraphState> => {
     logger?.debug(() => '---RETRIEVE ANONYMIZED ALERTS---');
 
     const { end, filter, start } = state;
@@ -59,7 +61,7 @@ export const getRetrieveAnonymizedAlertsNode = ({
 
     return {
       ...state,
-      anonymizedAlerts: documents,
+      anonymizedDocuments: documents,
       replacements: localReplacements,
     };
   };

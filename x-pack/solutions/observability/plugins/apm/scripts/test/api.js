@@ -97,7 +97,7 @@ const cmd = [
   ...(grep ? [`--grep "${grep}"`] : []),
   ...(updateSnapshots ? [`--updateSnapshots`] : []),
   ...(bail ? [`--bail`] : []),
-  `--config ${REPO_ROOT}/x-pack/test/apm_api_integration/${license}/config.ts`,
+  `--config ${REPO_ROOT}/x-pack/solutions/observability/test/apm_api_integration/${license}/config.ts`,
 ].join(' ');
 
 console.log(`Running: "${cmd}"`);

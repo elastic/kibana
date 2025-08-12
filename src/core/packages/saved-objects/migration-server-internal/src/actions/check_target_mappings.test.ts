@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
 import { checkTargetTypesMappings } from './check_target_mappings';

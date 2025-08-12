@@ -16,12 +16,14 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  useIsDarkMode,
 } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { useAddIntegrationsUrl } from '../../../../common/hooks/use_add_integrations_url';
 import { IntegrationCard } from './integration_card';
-import imageSrc from './alert_summary.png';
+import imageSrcLight from './alert_summary_light.webp';
+import imageSrcDark from './alert_summary_dark.webp';
+import { useNavigateToIntegrationsPage } from '../../../hooks/alert_summary/use_navigate_to_integrations_page';
 
 const TITLE = i18n.translate('xpack.securitySolution.alertSummary.landingPage.title', {
   defaultMessage: 'All your alerts in one place with AI',
@@ -32,6 +34,9 @@ const SUB_TITLE = i18n.translate('xpack.securitySolution.alertSummary.landingPag
 const DATA_TITLE = i18n.translate('xpack.securitySolution.alertSummary.landingPage.dataTitle', {
   defaultMessage: 'Start by connecting your data',
 });
+const IMAGE_TITLE = i18n.translate('xpack.securitySolution.alertSummary.landingPage.imageTitle', {
+  defaultMessage: 'Alert Summary Dashboard showing alerts from various integrations',
+});
 const VIEW_ALL_INTEGRATIONS = i18n.translate(
   'xpack.securitySolution.alertSummary.landingPage.viewAllIntegrationsButtonLabel',
   {
@@ -39,10 +44,7 @@ const VIEW_ALL_INTEGRATIONS = i18n.translate(
   }
 );
 
-const PRIMARY_INTEGRATIONS = [
-  'splunk', // doesnt yet exist
-  'google_secops',
-];
+const PRIMARY_INTEGRATIONS = ['splunk', 'google_secops'];
 
 export const LANDING_PAGE_PROMPT_TEST_ID = 'alert-summary-landing-page-prompt';
 export const LANDING_PAGE_IMAGE_TEST_ID = 'alert-summary-landing-page-image';
@@ -63,7 +65,8 @@ export interface LandingPageProps {
  */
 export const LandingPage = memo(({ packages }: LandingPageProps) => {
   const { euiTheme } = useEuiTheme();
-  const { onClick: moreIntegrations } = useAddIntegrationsUrl(); // TODO this link might have to be revisited once the integration work is done
+  const navigateToIntegrationsPage = useNavigateToIntegrationsPage();
+  const imageSrc = useIsDarkMode() ? imageSrcDark : imageSrcLight;
 
   // We only want to show the 2 top integrations, Splunk and GoogleSecOps, in that specific order
   const primaryPackages = useMemo(
@@ -105,12 +108,15 @@ export const LandingPage = memo(({ packages }: LandingPageProps) => {
             <EuiText>{SUB_TITLE}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiImage // TODO replace the image with a proper gif or video once provided by UIUX
+            <EuiImage
               data-test-subj={LANDING_PAGE_IMAGE_TEST_ID}
-              size="original"
               role="presentation"
-              alt=""
+              alt={IMAGE_TITLE}
               src={imageSrc}
+              margin={'xl'}
+              css={css`
+                width: 800px;
+              `}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -141,7 +147,7 @@ export const LandingPage = memo(({ packages }: LandingPageProps) => {
             <EuiButtonEmpty
               data-test-subj={LANDING_PAGE_VIEW_ALL_INTEGRATIONS_BUTTON_TEST_ID}
               iconType="plusInCircle"
-              onClick={moreIntegrations}
+              onClick={navigateToIntegrationsPage}
             >
               {VIEW_ALL_INTEGRATIONS}
             </EuiButtonEmpty>

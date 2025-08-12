@@ -24,44 +24,38 @@ export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = () =>
     server,
     syntheticsMonitorClient,
   }): Promise<any> => {
-    try {
-      const isServiceAllowed = syntheticsMonitorClient.syntheticsService.isAllowed;
-      const result = await getSyntheticsEnablement({
-        server,
+    const isServiceAllowed = syntheticsMonitorClient.syntheticsService.isAllowed;
+    const result = await getSyntheticsEnablement({
+      server,
+    });
+    const { canEnable, isEnabled } = result;
+    const { security } = server;
+    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({
+      server,
+    });
+    if (apiKey && !isValid) {
+      await syntheticsServiceAPIKeySavedObject.delete(savedObjectsClient);
+      await security.authc.apiKeys?.invalidateAsInternalUser({
+        ids: [apiKey?.id || ''],
       });
-      const { canEnable, isEnabled } = result;
-      const { security } = server;
-      const { apiKey, isValid } = await getAPIKeyForSyntheticsService({
-        server,
-      });
-      if (apiKey && !isValid) {
-        await syntheticsServiceAPIKeySavedObject.delete(savedObjectsClient);
-        await security.authc.apiKeys?.invalidateAsInternalUser({
-          ids: [apiKey?.id || ''],
-        });
-      }
-      const regenerationRequired = !isEnabled || !isValid;
-      const shouldEnableApiKey =
-        server.config.service?.manifestUrl || server.config.service?.devUrl;
-      if (canEnable && regenerationRequired && shouldEnableApiKey) {
-        await generateAndSaveServiceAPIKey({
-          request,
-          authSavedObjectsClient: savedObjectsClient,
-          server,
-        });
-      } else {
-        return { ...result, isServiceAllowed };
-      }
-
-      const res = await getSyntheticsEnablement({
-        server,
-      });
-
-      return { ...res, isServiceAllowed };
-    } catch (e) {
-      server.logger.error(e);
-      throw e;
     }
+    const regenerationRequired = !isEnabled || !isValid;
+    const shouldEnableApiKey = server.config.service?.manifestUrl || server.config.service?.devUrl;
+    if (canEnable && regenerationRequired && shouldEnableApiKey) {
+      await generateAndSaveServiceAPIKey({
+        request,
+        authSavedObjectsClient: savedObjectsClient,
+        server,
+      });
+    } else {
+      return { ...result, isServiceAllowed };
+    }
+
+    const res = await getSyntheticsEnablement({
+      server,
+    });
+
+    return { ...res, isServiceAllowed };
   },
 });
 
@@ -77,21 +71,16 @@ export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
   }): Promise<any> => {
     const { security } = server;
     const { syntheticsService } = syntheticsMonitorClient;
-    try {
-      const { canEnable } = await getSyntheticsEnablement({ server });
-      if (!canEnable) {
-        return response.forbidden();
-      }
-      await syntheticsService.deleteAllConfigs();
-      const { apiKey } = await getAPIKeyForSyntheticsService({
-        server,
-      });
-      await syntheticsServiceAPIKeySavedObject.delete(savedObjectsClient);
-      await security.authc.apiKeys?.invalidateAsInternalUser({ ids: [apiKey?.id || ''] });
-      return response.ok({});
-    } catch (e) {
-      server.logger.error(e);
-      throw e;
+    const { canEnable } = await getSyntheticsEnablement({ server });
+    if (!canEnable) {
+      return response.forbidden();
     }
+    await syntheticsService.deleteAllConfigs();
+    const { apiKey } = await getAPIKeyForSyntheticsService({
+      server,
+    });
+    await syntheticsServiceAPIKeySavedObject.delete(savedObjectsClient);
+    await security.authc.apiKeys?.invalidateAsInternalUser({ ids: [apiKey?.id || ''] });
+    return response.ok({});
   },
 });

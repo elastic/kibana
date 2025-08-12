@@ -11,7 +11,7 @@ tags:
     x-displayName: Uptime
     # description:
     externalDocs:
-      url: https://www.elastic.co/guide/en/observability/current/uptime-intro.html
+      url: https://www.elastic.co/docs/solutions/observability/uptime
       description: Uptime monitoring
 servers:
   - url: /

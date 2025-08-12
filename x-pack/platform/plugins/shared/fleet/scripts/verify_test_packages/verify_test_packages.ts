@@ -9,7 +9,7 @@ import path from 'path';
 import { readdirSync, statSync, readFile } from 'fs';
 import { promisify } from 'util';
 
-import partition from 'lodash/partition';
+import { partition } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 
 import { ToolingLog } from '@kbn/tooling-log';
@@ -22,9 +22,9 @@ import {
 const readFileAsync = promisify(readFile);
 
 export const TEST_PACKAGE_DIRECTORIES = [
-  '../../../../../../test/fleet_api_integration/apis/fixtures/bundled_packages',
-  '../../../../../../test/fleet_api_integration/apis/fixtures/test_packages',
-  '../../../../../../test/fleet_api_integration/apis/fixtures/package_verification/packages',
+  '../../../../../test/fleet_api_integration/apis/fixtures/bundled_packages',
+  '../../../../../test/fleet_api_integration/apis/fixtures/test_packages',
+  '../../../../../test/fleet_api_integration/apis/fixtures/package_verification/packages',
 ];
 
 const getAllPathsFromDir = (dir: string): string[] =>

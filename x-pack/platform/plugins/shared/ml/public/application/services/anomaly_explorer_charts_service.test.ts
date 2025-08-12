@@ -69,7 +69,7 @@ describe('AnomalyExplorerChartsService', () => {
   test('fetches anomaly charts data', () => {
     let result;
     anomalyExplorerService
-      .getAnomalyData$([jobId], 1000, timeRange.earliestMs, timeRange.latestMs)
+      .getAnomalyData$([jobId], 1000, timeRange.earliestMs, timeRange.latestMs, [])
       .subscribe((d) => {
         result = d;
       });
@@ -77,7 +77,7 @@ describe('AnomalyExplorerChartsService', () => {
     expect(mlApiServicesMock.results.getAnomalyCharts$).toHaveBeenCalledWith(
       [jobId],
       [],
-      0,
+      [],
       1486656000000,
       1486670399999,
       { max: 1486670399999, min: 1486656000000 },

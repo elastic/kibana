@@ -101,7 +101,7 @@ export const SearchIndexDocuments: React.FC = () => {
                 'xpack.enterpriseSearch.content.searchIndex.documents.noIndex.title',
                 { defaultMessage: 'Access Control Index not found' }
               )}
-              iconType="iInCircle"
+              iconType="info"
             >
               <p>
                 {i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.noIndex', {
@@ -125,7 +125,7 @@ export const SearchIndexDocuments: React.FC = () => {
               mappings={mappingData ? { [indexName]: mappingData } : undefined}
               meta={data?.meta ?? DEFAULT_PAGINATION}
               onPaginate={(pageIndex) => setPagination({ ...pagination, pageIndex })}
-              setDocsPerPage={(pageSize) => setPagination({ ...pagination, pageSize })}
+              setDocsPerPage={(pageSize) => setPagination({ ...DEFAULT_PAGINATION, pageSize })}
             />
           )}
         </>

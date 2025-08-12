@@ -51,6 +51,9 @@ export async function getRuleIdsWithGaps(
       start,
       end,
       statuses,
+      hasUnfilledIntervals: params.hasUnfilledIntervals,
+      hasInProgressIntervals: params.hasInProgressIntervals,
+      hasFilledIntervals: params.hasFilledIntervals,
     });
 
     const aggs = await eventLogClient.aggregateEventsWithAuthFilter(
@@ -59,6 +62,11 @@ export async function getRuleIdsWithGaps(
       {
         filter,
         aggs: {
+          latest_gap_timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
           unique_rule_ids: {
             terms: {
               field: 'rule.id',
@@ -74,6 +82,7 @@ export async function getRuleIdsWithGaps(
     }
 
     const uniqueRuleIdsAgg = aggs.aggregations?.unique_rule_ids as UniqueRuleIdsAgg;
+    const latestGapTimestampAgg = aggs.aggregations?.latest_gap_timestamp as { value: number };
 
     const resultBuckets = uniqueRuleIdsAgg?.buckets ?? [];
 
@@ -82,6 +91,7 @@ export async function getRuleIdsWithGaps(
     const result: GetRuleIdsWithGapsResponse = {
       total: ruleIds?.length,
       ruleIds,
+      latestGapTimestamp: latestGapTimestampAgg?.value,
     };
 
     return result;

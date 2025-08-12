@@ -88,7 +88,11 @@ export function ObsLineAnnotation({
           <AnnotationIcon annotation={annotation} />
         </span>
       }
-      markerBody={<EuiText>{annotation.annotation?.title ?? annotation.message}</EuiText>}
+      markerBody={
+        <EuiText data-test-subj="annotation-marker-body">
+          {annotation.annotation?.title ?? annotation.message}
+        </EuiText>
+      }
       markerPosition={annotation.annotation.style?.line?.iconPosition ?? 'top'}
       customTooltip={() => <AnnotationTooltip annotation={annotation} />}
     />

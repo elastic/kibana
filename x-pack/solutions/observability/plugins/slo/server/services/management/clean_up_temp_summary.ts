@@ -6,12 +6,13 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import {
   SUMMARY_DESTINATION_INDEX_PATTERN,
   SUMMARY_TEMP_INDEX_NAME,
 } from '../../../common/constants';
 
-interface AggBucketKey {
+interface AggBucketKey extends AggregationsCompositeAggregateKey {
   spaceId: string;
   id: string;
 }

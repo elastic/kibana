@@ -24,6 +24,7 @@ export const BULK_RULE_ACTIONS = {
   DUPLICATE: `${APP_UI_ID} bulkRuleActions duplicate`,
   EXPORT: `${APP_UI_ID} bulkRuleActions export`,
   MANUAL_RULE_RUN: `${APP_UI_ID} bulkRuleActions manual rule run`,
+  FILL_GAPS: `${APP_UI_ID} bulkRuleActions fill gaps`,
   DELETE: `${APP_UI_ID} bulkRuleActions delete`,
   EDIT: `${APP_UI_ID} bulkRuleActions edit`,
 };

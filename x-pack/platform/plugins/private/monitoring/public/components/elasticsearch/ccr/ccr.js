@@ -114,7 +114,7 @@ export const Ccr = (props) => {
                   &nbsp;&nbsp;
                   <EuiIconTip
                     size="m"
-                    type="iInCircle"
+                    type="info"
                     content={
                       <Fragment>
                         <span>

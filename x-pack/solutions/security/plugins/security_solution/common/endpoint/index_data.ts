@@ -135,14 +135,16 @@ export const indexHostsAndAlerts = usageTracker.track(
 
       mergeAndAppendArrays(response, indexedHosts);
 
-      await indexAlerts({
-        client,
-        eventIndex,
-        alertIndex,
-        generator,
-        numAlerts: alertsPerHost,
-        options,
-      });
+      if (alertsPerHost > 0) {
+        await indexAlerts({
+          client,
+          eventIndex,
+          alertIndex,
+          generator,
+          numAlerts: alertsPerHost,
+          options,
+        });
+      }
     }
 
     if (shouldWaitForEndpointMetadataDocs) {

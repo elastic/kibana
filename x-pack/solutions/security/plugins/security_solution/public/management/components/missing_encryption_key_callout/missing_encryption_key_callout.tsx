@@ -31,7 +31,7 @@ export const MissingEncryptionKeyCallout = memo(() => {
     <>
       <EuiCallOut
         color="warning"
-        iconType="iInCircle"
+        iconType="info"
         data-test-subj="missingEncryptionKeyCallout"
         title={i18n.translate(
           'xpack.securitySolution.responder.missingEncryptionKey.callout.title',

@@ -26,6 +26,7 @@ import {
   SecurityPageName,
   SECURITY_FEATURE_ID,
   TRUSTED_APPS_PATH,
+  TRUSTED_DEVICES_PATH,
 } from '../../common/constants';
 import {
   BLOCKLIST,
@@ -36,6 +37,7 @@ import {
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
+  TRUSTED_DEVICES,
   ENTITY_ANALYTICS_RISK_SCORE,
   ENTITY_STORE,
 } from '../app/translations';
@@ -57,7 +59,7 @@ import { IconAssetCriticality } from '../common/icons/asset_criticality';
 const categories = [
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
-      defaultMessage: 'Entity Analytics',
+      defaultMessage: 'Entity analytics',
     }),
     linkIds: [
       SecurityPageName.entityAnalyticsManagement,
@@ -72,6 +74,7 @@ const categories = [
       SecurityPageName.endpoints,
       SecurityPageName.policies,
       SecurityPageName.trustedApps,
+      SecurityPageName.trustedDevices,
       SecurityPageName.eventFilters,
       SecurityPageName.hostIsolationExceptions,
       SecurityPageName.blocklist,
@@ -92,7 +95,7 @@ export const links: LinkItem = {
   path: MANAGE_PATH,
   skipUrlState: true,
   hideTimeline: true,
-  globalNavPosition: 11,
+  globalNavPosition: 12,
   capabilities: [`${SECURITY_FEATURE_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {
@@ -138,6 +141,21 @@ export const links: LinkItem = {
       path: TRUSTED_APPS_PATH,
       skipUrlState: true,
       hideTimeline: true,
+    },
+    {
+      id: SecurityPageName.trustedDevices,
+      title: TRUSTED_DEVICES,
+      description: i18n.translate('xpack.securitySolution.appLinks.trustedDevicesDescription', {
+        defaultMessage:
+          'Add a trusted device to improve performance or alleviate compatibility issues.',
+      }),
+      landingIcon: IconDashboards,
+      path: TRUSTED_DEVICES_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+      experimentalKey: 'trustedDevices',
+      capabilities: [`${SECURITY_FEATURE_ID}.readTrustedDevices`],
+      licenseType: 'enterprise',
     },
     {
       id: SecurityPageName.eventFilters,
@@ -230,6 +248,7 @@ export const getManagementFilteredLinks = async (
     canReadHostIsolationExceptions,
     canReadEndpointList,
     canReadTrustedApplications,
+    canReadTrustedDevices,
     canReadEventFilters,
     canReadBlocklist,
     canReadPolicyManagement,
@@ -265,6 +284,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadTrustedApplications) {
     linksToExclude.push(SecurityPageName.trustedApps);
+  }
+
+  if (!canReadTrustedDevices) {
+    linksToExclude.push(SecurityPageName.trustedDevices);
   }
 
   if (!canReadEventFilters) {

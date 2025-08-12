@@ -33,6 +33,7 @@ export interface WaterfallTransaction {
     coldstart?: boolean;
   };
   span?: {
+    id?: string;
     links?: SpanLink[];
   };
 }
@@ -88,3 +89,5 @@ export interface WaterfallError {
     name: string;
   };
 }
+
+export type IWaterfallGetRelatedErrorsHref = (docId: string) => string;

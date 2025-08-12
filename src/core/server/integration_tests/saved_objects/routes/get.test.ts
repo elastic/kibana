@@ -10,7 +10,7 @@
 import supertest from 'supertest';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import { createHttpService, createCoreContext } from '@kbn/core-http-server-mocks';
+import { createCoreContext } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
@@ -18,7 +18,6 @@ import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import { contextServiceMock, coreMock } from '../../../mocks';
 import {
   registerGetRoute,
   type InternalSavedObjectsRequestHandlerContext,
@@ -26,6 +25,8 @@ import {
 import { createHiddenTypeVariants } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { deprecationMock, setupConfig } from './routes_test_utils';
+import { contextServiceMock, coreMock } from '../../../mocks';
+import { createInternalHttpService } from '../../utilities';
 
 const coreId = Symbol('core');
 const testTypes = [
@@ -45,7 +46,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
 
   beforeEach(async () => {
     const coreContext = createCoreContext({ coreId });
-    server = createHttpService(coreContext);
+    server = createInternalHttpService(coreContext);
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
 
     const contextService = new ContextService(coreContext);

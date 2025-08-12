@@ -16,7 +16,7 @@ import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
 
-import { DASHBOARD_APP_ID } from '../plugin_constants';
+import { DASHBOARD_APP_ID } from '../../common/constants';
 import { DASHBOARD_CONTENT_ID } from '../utils/telemetry_constants';
 import {
   coreServices,

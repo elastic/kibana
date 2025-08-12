@@ -1,6 +1,7 @@
 project: 'Kibana reference'
 toc:
   - file: index.md
+  - file: kibana-accessibility-statement.md
   - file: configuration-reference.md
     children:
       - file: cloud/elastic-cloud-kibana-settings.md
@@ -24,6 +25,8 @@ toc:
       - file: configuration-reference/task-manager-settings.md
       - file: configuration-reference/telemetry-settings.md
       - file: configuration-reference/url-drilldown-settings.md
+      - file: configuration-reference/product-intercept-settings.md
+      - file: configuration-reference/share-settings.md
   - file: advanced-settings.md
   - file: kibana-audit-events.md
   - file: connectors-kibana.md
@@ -32,11 +35,13 @@ toc:
       - file: connectors-kibana/cases-action-type.md
       - file: connectors-kibana/crowdstrike-action-type.md
       - file: connectors-kibana/d3security-action-type.md
+      - file: connectors-kibana/elastic-managed-llm.md
       - file: connectors-kibana/email-action-type.md
       - file: connectors-kibana/gemini-action-type.md
       - file: connectors-kibana/resilient-action-type.md
       - file: connectors-kibana/index-action-type.md
       - file: connectors-kibana/jira-action-type.md
+      - file: connectors-kibana/defender-action-type.md
       - file: connectors-kibana/teams-action-type.md
       - file: connectors-kibana/obs-ai-assistant-action-type.md
       - file: connectors-kibana/openai-action-type.md
@@ -55,6 +60,7 @@ toc:
       - file: connectors-kibana/webhook-action-type.md
       - file: connectors-kibana/cases-webhook-action-type.md
       - file: connectors-kibana/xmatters-action-type.md
+      - file: connectors-kibana/xsoar-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md
   - file: kibana-plugins.md
   - file: commands.md

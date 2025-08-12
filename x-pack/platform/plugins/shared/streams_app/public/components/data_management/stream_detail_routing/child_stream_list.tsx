@@ -12,37 +12,56 @@ import {
   EuiDragDropContext,
   EuiDroppable,
   EuiDraggable,
-  EuiPanel,
-  EuiButtonEmpty,
+  EuiButton,
+  EuiToolTip,
+  euiDragDropReorder,
+  DragDropContextProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
-import { cloneDeep } from 'lodash';
 import React from 'react';
-import { EMPTY_EQUALS_CONDITION } from '../../../util/condition';
+import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
 import { NestedView } from '../../nested_view';
-import { useRoutingState } from './hooks/routing_state';
 import { CurrentStreamEntry } from './current_stream_entry';
 import { NewRoutingStreamEntry } from './new_routing_stream_entry';
 import { RoutingStreamEntry } from './routing_stream_entry';
+import {
+  useStreamRoutingEvents,
+  useStreamsRoutingSelector,
+} from './state_management/stream_routing_state_machine';
 
-export function ChildStreamList({
-  definition,
-  availableStreams,
-  routingAppState: {
-    childUnderEdit,
-    selectChildUnderEdit,
-    childStreams,
-    onChildStreamDragEnd,
-    onChildStreamDragStart,
-    draggingChildStream,
-  },
-}: {
-  definition: WiredStreamGetResponse;
-  routingAppState: ReturnType<typeof useRoutingState>;
-  availableStreams: string[];
-}) {
+function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestingLevel: boolean) {
+  if (maxNestingLevel) {
+    return i18n.translate('xpack.streams.streamDetailRouting.rules.maxNestingLevel', {
+      defaultMessage:
+        'You have reached the maximum nesting level for streams. Try to flatten your hierarchy.',
+    });
+  }
+  if (!canManageRoutingRules) {
+    return i18n.translate('xpack.streams.streamDetailRouting.rules.onlySimulate', {
+      defaultMessage: "You don't have sufficient privileges to create new streams, only simulate.",
+    });
+  }
+}
+
+export function ChildStreamList({ availableStreams }: { availableStreams: string[] }) {
+  const { changeRule, createNewRule, editRule, reorderRules } = useStreamRoutingEvents();
+  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+
+  const { currentRuleId, definition, routing } = routingSnapshot.context;
+  const canCreateRoutingRules = routingSnapshot.can({ type: 'routingRule.create' });
+  const canReorderRoutingRules = routingSnapshot.can({ type: 'routingRule.reorder', routing });
+  const canManageRoutingRules = definition.privileges.manage;
+  const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
+  const shouldDisplayCreateButton = definition.privileges.simulate;
+
+  const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
+    if (source && destination) {
+      const items = euiDragDropReorder(routing, source.index, destination.index);
+      reorderRules(items);
+    }
+  };
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -52,18 +71,39 @@ export function ChildStreamList({
       `}
     >
       <EuiFlexItem grow={false}>
-        <EuiText
-          size="s"
-          className={css`
-            height: 40px;
-            align-content: center;
-            font-weight: bold;
-          `}
-        >
-          {i18n.translate('xpack.streams.streamDetailRouting.rules.header', {
-            defaultMessage: 'Routing rules',
-          })}
-        </EuiText>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap gutterSize="s">
+          <EuiText
+            size="s"
+            className={css`
+              height: 40px;
+              align-content: center;
+              font-weight: bold;
+            `}
+          >
+            {i18n.translate('xpack.streams.streamDetailRouting.rules.header', {
+              defaultMessage: 'Routing rules',
+            })}
+          </EuiText>
+          {shouldDisplayCreateButton && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={getReasonDisabledCreateButton(canManageRoutingRules, maxNestingLevel)}
+              >
+                <EuiButton
+                  iconType="plus"
+                  size="s"
+                  data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
+                  onClick={createNewRule}
+                  disabled={!canCreateRoutingRules || maxNestingLevel}
+                >
+                  {i18n.translate('xpack.streams.streamDetailRouting.addRule', {
+                    defaultMessage: 'Create child stream',
+                  })}
+                </EuiButton>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexGroup
         direction="column"
@@ -73,51 +113,40 @@ export function ChildStreamList({
         `}
       >
         <CurrentStreamEntry definition={definition} />
-        <EuiDragDropContext onDragEnd={onChildStreamDragEnd} onDragStart={onChildStreamDragStart}>
+        <EuiDragDropContext onDragEnd={handlerItemDrag}>
           <EuiDroppable droppableId="routing_children_reordering" spacing="none">
             <EuiFlexGroup direction="column" gutterSize="xs">
-              {childStreams.map((child, i) => (
-                <EuiFlexItem key={`${child.destination}-${i}-flex-item`} grow={false}>
+              {routing.map((routingRule, pos) => (
+                <EuiFlexItem key={routingRule.id} grow={false}>
                   <EuiDraggable
-                    key={child.destination}
-                    index={i}
-                    draggableId={child.destination}
+                    index={pos}
+                    isDragDisabled={!canReorderRoutingRules}
+                    draggableId={routingRule.id}
                     hasInteractiveChildren={true}
                     customDragHandle={true}
                     spacing="none"
                   >
-                    {(provided) => (
+                    {(provided, snapshot) => (
                       <NestedView
-                        key={i}
-                        isBeingDragged={draggingChildStream === child.destination}
+                        last={pos === routing.length - 1}
+                        isBeingDragged={snapshot.isDragging}
                       >
-                        <RoutingStreamEntry
-                          draggableProvided={provided}
-                          child={
-                            !childUnderEdit?.isNew &&
-                            child.destination === childUnderEdit?.child.destination
-                              ? childUnderEdit.child
-                              : child
-                          }
-                          edit={
-                            !childUnderEdit?.isNew &&
-                            child.destination === childUnderEdit?.child.destination
-                          }
-                          onEditStateChange={() => {
-                            if (child.destination === childUnderEdit?.child.destination) {
-                              selectChildUnderEdit(undefined);
-                            } else {
-                              selectChildUnderEdit({ isNew: false, child });
-                            }
-                          }}
-                          onChildChange={(newChild) => {
-                            selectChildUnderEdit({
-                              isNew: false,
-                              child: newChild,
-                            });
-                          }}
-                          availableStreams={availableStreams}
-                        />
+                        {routingRule.isNew ? (
+                          <NewRoutingStreamEntry />
+                        ) : (
+                          <RoutingStreamEntry
+                            availableStreams={availableStreams}
+                            draggableProvided={provided}
+                            isEditing={currentRuleId === routingRule.id}
+                            isEditingEnabled={routingSnapshot.can({
+                              type: 'routingRule.edit',
+                              id: routingRule.id,
+                            })}
+                            onChange={changeRule}
+                            onEditIconClick={editRule}
+                            routingRule={routingRule}
+                          />
+                        )}
                       </NestedView>
                     )}
                   </EuiDraggable>
@@ -126,45 +155,6 @@ export function ChildStreamList({
             </EuiFlexGroup>
           </EuiDroppable>
         </EuiDragDropContext>
-        {childUnderEdit?.isNew ? (
-          <NestedView last>
-            <NewRoutingStreamEntry
-              child={childUnderEdit.child}
-              onChildChange={(newChild) => {
-                if (!newChild) {
-                  selectChildUnderEdit(undefined);
-                  return;
-                }
-                selectChildUnderEdit({
-                  isNew: true,
-                  child: newChild,
-                });
-              }}
-            />
-          </NestedView>
-        ) : (
-          <NestedView last>
-            <EuiPanel hasShadow={false} hasBorder paddingSize="none">
-              <EuiButtonEmpty
-                iconType="plus"
-                data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
-                onClick={() => {
-                  selectChildUnderEdit({
-                    isNew: true,
-                    child: {
-                      destination: `${definition.stream.name}.child`,
-                      if: cloneDeep(EMPTY_EQUALS_CONDITION),
-                    },
-                  });
-                }}
-              >
-                {i18n.translate('xpack.streams.streamDetailRouting.addRule', {
-                  defaultMessage: 'Create a new child stream',
-                })}
-              </EuiButtonEmpty>
-            </EuiPanel>
-          </NestedView>
-        )}
       </EuiFlexGroup>
     </EuiFlexGroup>
   );

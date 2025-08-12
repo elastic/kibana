@@ -19,42 +19,57 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { isDescendantOf } from '@kbn/streams-schema';
-import { useAbortController } from '@kbn/react-hooks';
+import React, { useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 export function StreamDeleteModal({
-  closeModal,
-  clearChildUnderEdit,
-  refreshDefinition,
+  onClose,
+  onDelete,
+  onCancel,
   name,
-  availableStreams,
+  relatedStreams,
 }: {
-  closeModal: () => void;
-  clearChildUnderEdit: () => void;
-  refreshDefinition: () => void;
+  onClose: () => void;
+  onDelete: () => Promise<void>;
+  onCancel: () => void;
   name: string;
-  availableStreams: string[];
+  relatedStreams: string[];
 }) {
   const {
     core: { notifications },
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
   } = useKibana();
   const router = useStreamsAppRouter();
-  const abortController = useAbortController();
-  const [deleteInProgress, setDeleteInProgress] = React.useState(false);
+
+  const [isDeletingStream, setDeleteInProgress] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
-  const streamsToBeDeleted = availableStreams.filter(
-    (stream) => stream === name || isDescendantOf(name, stream)
-  );
+
+  const handleDelete = async () => {
+    try {
+      setDeleteInProgress(true);
+      await onDelete();
+      setDeleteInProgress(false);
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.streams.streamDetailRouting.deleted', {
+          defaultMessage: 'Stream deleted',
+        }),
+      });
+      onClose();
+    } catch (error) {
+      setDeleteInProgress(false);
+      notifications.toasts.addError(error, {
+        title: i18n.translate('xpack.streams.failedToDelete', {
+          defaultMessage: 'Failed to delete stream {id}',
+          values: {
+            id: name,
+          },
+        }),
+      });
+    }
+  };
+
   return (
-    <EuiModal aria-labelledby={modalTitleId} onClose={closeModal}>
+    <EuiModal aria-labelledby={modalTitleId} onClose={onClose}>
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.streams.streamDetailRouting.deleteModalTitle', {
@@ -71,7 +86,7 @@ export function StreamDeleteModal({
                 'Deleting this stream will remove all of its children and the data will no longer be routed. All existing data will be removed as well.',
             })}
           </EuiText>
-          {streamsToBeDeleted.length > 1 && (
+          {relatedStreams.length > 1 && (
             <>
               <EuiText>
                 {i18n.translate('xpack.streams.streamDetailRouting.deleteModalStreams', {
@@ -79,32 +94,29 @@ export function StreamDeleteModal({
                 })}
               </EuiText>
               <EuiListGroup flush={true} maxWidth={false}>
-                {streamsToBeDeleted.map((stream) => (
-                  <li key={stream}>
-                    <EuiListGroupItem
-                      target="_blank"
-                      href={router.link('/{key}/{tab}/{subtab}', {
-                        path: {
-                          key: stream,
-                          tab: 'management',
-                          subtab: 'route',
-                        },
-                      })}
-                      label={stream}
-                    />
-                  </li>
+                {relatedStreams.map((stream) => (
+                  <EuiListGroupItem
+                    key={stream}
+                    target="_blank"
+                    href={router.link('/{key}/management/{tab}', {
+                      path: {
+                        key: stream,
+                        tab: 'route',
+                      },
+                    })}
+                    label={stream}
+                  />
                 ))}
               </EuiListGroup>
             </>
           )}
         </EuiFlexGroup>
       </EuiModalBody>
-
       <EuiModalFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiButtonEmpty
             data-test-subj="streamsAppStreamDetailRoutingCancelButton"
-            onClick={closeModal}
+            onClick={onCancel}
           >
             {i18n.translate('xpack.streams.streamDetailRouting.deleteModalCancel', {
               defaultMessage: 'Cancel',
@@ -114,39 +126,8 @@ export function StreamDeleteModal({
             data-test-subj="streamsAppStreamDetailRoutingDeleteButton"
             color="danger"
             fill
-            onClick={async () => {
-              try {
-                setDeleteInProgress(true);
-                await streamsRepositoryClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
-                  signal: abortController.signal,
-                  params: {
-                    path: {
-                      name,
-                    },
-                  },
-                });
-                setDeleteInProgress(false);
-                notifications.toasts.addSuccess({
-                  title: i18n.translate('xpack.streams.streamDetailRouting.deleted', {
-                    defaultMessage: 'Stream deleted',
-                  }),
-                });
-                clearChildUnderEdit();
-                closeModal();
-                refreshDefinition();
-              } catch (error) {
-                setDeleteInProgress(false);
-                notifications.toasts.addError(error, {
-                  title: i18n.translate('xpack.streams.failedToDelete', {
-                    defaultMessage: 'Failed to delete stream {id}',
-                    values: {
-                      id: name,
-                    },
-                  }),
-                });
-              }
-            }}
-            isLoading={deleteInProgress}
+            onClick={handleDelete}
+            isLoading={isDeletingStream}
           >
             {i18n.translate('xpack.streams.streamDetailRouting.delete', {
               defaultMessage: 'Delete',

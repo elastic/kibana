@@ -35,7 +35,6 @@ import {
   StorageClientSearchResponse,
   StorageClientClean,
   StorageClientCleanResponse,
-  ApplicationDocument,
   InternalIStorageClient,
 } from '../..';
 import { getSchemaVersion } from '../get_schema_version';
@@ -89,6 +88,15 @@ function wrapEsCall<T>(p: Promise<T>): Promise<T> {
   });
 }
 
+export interface StorageIndexAdapterOptions<TApplicationType> {
+  /**
+   * If this callback is provided, it will be called on every _source before returned to the caller of the search or get methods.
+   * This is useful for migrating documents from one version to another, or for transforming the document before returning it.
+   * This should be used as rarely as possible - in most cases, new properties should be added as optional.
+   */
+  migrateSource?: (document: Record<string, unknown>) => TApplicationType;
+}
+
 /**
  * Adapter for writing and reading documents to/from Elasticsearch,
  * using plain indices.
@@ -97,12 +105,16 @@ function wrapEsCall<T>(p: Promise<T>): Promise<T> {
  * - Index Lifecycle Management
  * - Schema upgrades w/ fallbacks
  */
-export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, TApplicationType> {
+export class StorageIndexAdapter<
+  TStorageSettings extends IndexStorageSettings,
+  TApplicationType extends Partial<StorageDocumentOf<TStorageSettings>>
+> {
   private readonly logger: Logger;
   constructor(
     private readonly esClient: ElasticsearchClient,
     logger: Logger,
-    private readonly storage: TStorageSettings
+    private readonly storage: TStorageSettings,
+    private readonly options: StorageIndexAdapterOptions<TApplicationType> = {}
   ) {
     this.logger = logger.get('storage').get(this.storage.name);
   }
@@ -242,8 +254,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
     if (simulateIndexTemplateResponse.template.mappings) {
       await this.esClient.indices.putMapping({
         index: name,
-        // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-        body: simulateIndexTemplateResponse.template.mappings,
+        ...simulateIndexTemplateResponse.template.mappings,
       });
     }
   }
@@ -320,7 +331,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
     return [];
   }
 
-  private search: StorageClientSearch<ApplicationDocument<TApplicationType>> = async (request) => {
+  private search: StorageClientSearch<TApplicationType> = async (request) => {
     return (await wrapEsCall(
       this.esClient
         .search({
@@ -328,7 +339,19 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
           index: this.getSearchIndexPattern(),
           allow_no_indices: true,
         })
-        .catch((error): StorageClientSearchResponse<StorageDocumentOf<TStorageSettings>, any> => {
+        .then((response) => {
+          return {
+            ...response,
+            hits: {
+              ...response.hits,
+              hits: response.hits.hits.map((hit) => ({
+                ...hit,
+                _source: this.maybeMigrateSource(hit._source),
+              })),
+            },
+          };
+        })
+        .catch((error): StorageClientSearchResponse<TApplicationType, any> => {
           if (isNotFoundError(error)) {
             return {
               _shards: {
@@ -349,10 +372,10 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
           }
           throw error;
         })
-    )) as unknown as ReturnType<StorageClientSearch<ApplicationDocument<TApplicationType>>>;
+    )) as unknown as ReturnType<StorageClientSearch<TApplicationType>>;
   };
 
-  private index: StorageClientIndex<ApplicationDocument<TApplicationType>> = async ({
+  private index: StorageClientIndex<TApplicationType> = async ({
     id,
     refresh = 'wait_for',
     ...request
@@ -391,11 +414,21 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
     });
   };
 
-  private bulk: StorageClientBulk<ApplicationDocument<TApplicationType>> = ({
+  private bulk: StorageClientBulk<TApplicationType> = ({
     operations,
     refresh = 'wait_for',
     ...request
   }): Promise<StorageClientBulkResponse> => {
+    if (operations.length === 0) {
+      this.logger.debug(`Bulk request with 0 operations is a noop`);
+      return Promise.resolve({
+        errors: false,
+        items: [],
+        took: 0,
+        ingest_took: 0,
+      });
+    }
+
     this.logger.debug(`Processing ${operations.length} bulk operations`);
 
     const bulkOperations = operations.flatMap((operation): BulkOperationContainer[] => {
@@ -522,10 +555,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
     return { acknowledged: true, result: 'not_found' };
   };
 
-  private get: StorageClientGet<ApplicationDocument<TApplicationType>> = async ({
-    id,
-    ...request
-  }) => {
+  private get: StorageClientGet<TApplicationType> = async ({ id, ...request }) => {
     const response = await this.search({
       track_total_hits: false,
       size: 1,
@@ -566,7 +596,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
       _id: hit._id!,
       _index: hit._index,
       found: true,
-      _source: hit._source as ApplicationDocument<TApplicationType>,
+      _source: this.maybeMigrateSource(hit._source),
       _ignored: hit._ignored,
       _primary_term: hit._primary_term,
       _routing: hit._routing,
@@ -576,13 +606,24 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
     };
   };
 
+  private maybeMigrateSource = (_source: unknown): TApplicationType => {
+    // check whether source is an object, if not fail
+    if (typeof _source !== 'object' || _source === null) {
+      throw new Error(`Source must be an object, got ${typeof _source}`);
+    }
+    if (this.options.migrateSource) {
+      return this.options.migrateSource(_source as Record<string, unknown>);
+    }
+    return _source as TApplicationType;
+  };
+
   private existsIndex: StorageClientExistsIndex = () => {
     return this.esClient.indices.exists({
       index: this.getSearchIndexPattern(),
     });
   };
 
-  getClient(): InternalIStorageClient<ApplicationDocument<TApplicationType>> {
+  getClient(): InternalIStorageClient<TApplicationType> {
     return {
       bulk: this.bulk,
       delete: this.delete,
@@ -596,4 +637,4 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
 }
 
 export type SimpleStorageIndexAdapter<TStorageSettings extends IndexStorageSettings> =
-  StorageIndexAdapter<TStorageSettings, Omit<StorageDocumentOf<TStorageSettings>, '_id'>>;
+  StorageIndexAdapter<TStorageSettings, StorageDocumentOf<TStorageSettings>>;

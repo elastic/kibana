@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Option from 'fp-ts/lib/Option';
+import * as Option from 'fp-ts/Option';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DocLinks } from '@kbn/doc-links';
 import type {
@@ -51,6 +51,7 @@ export interface BaseState extends ControlState {
   readonly preMigrationScript: Option.Option<string>;
   readonly outdatedDocumentsQuery: QueryDslQueryContainer;
   readonly retryCount: number;
+  readonly skipRetryReset: boolean;
   readonly retryDelay: number;
   /**
    * How many times to retry a step that fails with retryable_es_client_error
@@ -310,11 +311,21 @@ export interface CalculateExcludeFiltersState extends SourceExistsState {
   readonly controlState: 'CALCULATE_EXCLUDE_FILTERS';
 }
 
+export interface CreateIndexCheckClusterRoutingAllocationState extends PostInitState {
+  readonly controlState: 'CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION';
+  readonly sourceIndex: Option.None;
+  readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
+}
+
 export interface CreateNewTargetState extends PostInitState {
   /** Blank ES cluster, create a new version-specific target index */
   readonly controlState: 'CREATE_NEW_TARGET';
   readonly sourceIndex: Option.None;
   readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
+}
+
+export interface RelocateCheckClusterRoutingAllocationState extends PostInitState {
+  readonly controlState: 'RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION';
 }
 
 export interface CreateReindexTempState extends PostInitState {
@@ -385,8 +396,8 @@ export interface RefreshTarget extends PostInitState {
   readonly targetIndex: string;
 }
 
-export interface CheckClusterRoutingAllocationState extends SourceExistsState {
-  readonly controlState: 'CHECK_CLUSTER_ROUTING_ALLOCATION';
+export interface ReindexCheckClusterRoutingAllocationState extends SourceExistsState {
+  readonly controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION';
 }
 
 export interface CheckTargetTypesMappingsState extends PostInitState {
@@ -403,6 +414,7 @@ export interface UpdateTargetMappingsPropertiesWaitForTaskState extends PostInit
   /** Update the mappings of the target index */
   readonly controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK';
   readonly updateTargetMappingsTaskId: string;
+  readonly updatedTypesQuery: Option.Option<QueryDslQueryContainer>;
 }
 
 export interface UpdateTargetMappingsMeta extends PostInitState {
@@ -558,13 +570,13 @@ export interface LegacyDeleteState extends LegacyBaseState {
 
 export type State = Readonly<
   | CalculateExcludeFiltersState
-  | CheckClusterRoutingAllocationState
   | CheckTargetTypesMappingsState
   | CheckUnknownDocumentsState
   | CheckVersionIndexReadyActions
   | CleanupUnknownAndExcluded
   | CleanupUnknownAndExcludedWaitForTaskState
   | CloneTempToTarget
+  | CreateIndexCheckClusterRoutingAllocationState
   | CreateNewTargetState
   | CreateReindexTempState
   | DoneReindexingSyncState
@@ -589,11 +601,13 @@ export type State = Readonly<
   | ReadyToReindexSyncState
   | RefreshSource
   | RefreshTarget
+  | ReindexCheckClusterRoutingAllocationState
   | ReindexSourceToTempClosePit
   | ReindexSourceToTempIndexBulk
   | ReindexSourceToTempOpenPit
   | ReindexSourceToTempRead
   | ReindexSourceToTempTransform
+  | RelocateCheckClusterRoutingAllocationState
   | SetSourceWriteBlockState
   | SetTempWriteBlock
   | TransformedDocumentsBulkIndex

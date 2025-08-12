@@ -14,11 +14,6 @@ const layerMock = {
   getDisplayName: async () => {
     return 'myLayerName';
   },
-  getLayerIcon: () => {
-    return {
-      icon: <span>mockIcon</span>,
-    };
-  },
 } as unknown as IVectorLayer;
 
 const defaultProps = {

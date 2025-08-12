@@ -16,7 +16,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
-import { getRiskEngineEntityTypes } from '../../../../../common/entity_analytics/risk_engine/utils';
+import { getEntityAnalyticsEntityTypes } from '../../../../../common/entity_analytics/utils';
 import type { EntityType } from '../../../../../common/search_strategy';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
@@ -277,6 +277,8 @@ export const runTask = async ({
       identifierType: configuredIdentifierType,
       range: configuredRange,
       pageSize,
+      excludeAlertStatuses,
+      excludeAlertTags,
       alertSampleSizePerShard,
     } = configuration;
     if (!enabled) {
@@ -291,7 +293,7 @@ export const runTask = async ({
 
     const identifierTypes: EntityType[] = configuredIdentifierType
       ? [configuredIdentifierType]
-      : getRiskEngineEntityTypes(experimentalFeatures);
+      : getEntityAnalyticsEntityTypes();
 
     const runs: Array<{
       identifierType: EntityType;
@@ -314,6 +316,8 @@ export const runTask = async ({
           runtimeMappings,
           weights: [],
           alertSampleSizePerShard,
+          excludeAlertStatuses,
+          excludeAlertTags,
         });
         const tookMs = Date.now() - now;
 

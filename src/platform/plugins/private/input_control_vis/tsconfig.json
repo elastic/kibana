@@ -7,6 +7,7 @@
     "public/**/*",
     "server/**/*",
     "*.ts",
+    "../../../../../typings/**/*",
   ],
   "kbn_references": [
     "@kbn/kibana-react-plugin",

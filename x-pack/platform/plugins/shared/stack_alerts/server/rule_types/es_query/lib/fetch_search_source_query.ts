@@ -140,7 +140,10 @@ export async function updateSearchSource(
   const timeField = await index.getTimeField();
 
   if (!timeField) {
-    throw new Error(`Data view with ID ${index.id} no longer contains a time field.`);
+    throw createTaskRunError(
+      new Error(`Data view with ID ${index.id} no longer contains a time field.`),
+      TaskErrorSource.USER
+    );
   }
 
   searchSource.setField('size', isGroupAgg ? 0 : params.size);
@@ -248,10 +251,9 @@ export async function generateLink(
 
   // use `lzCompress` flag for making the link readable during debugging/testing
   // const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { lzCompress: false });
-  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
-  const [start, end] = redirectUrl.split('/app');
+  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { spaceId: spacePrefix });
 
-  return start + spacePrefix + '/app' + end;
+  return redirectUrl;
 }
 
 export function getSmallerDataViewSpec(

@@ -22,7 +22,7 @@ import type { ConfigType } from '../config';
 
 /**
  * For consumption by the security plugin only.
- * @private
+ * @internal
  */
 export type SpacesClientWrapper = (
   request: KibanaRequest,
@@ -31,7 +31,7 @@ export type SpacesClientWrapper = (
 
 /**
  * For consumption by the security plugin only.
- * @private
+ * @internal
  */
 export type SpacesClientRepositoryFactory = (
   request: KibanaRequest,

@@ -37,36 +37,42 @@ interface IndexTemplateSettings {
 export const initializeCspIndices = async (
   esClient: ElasticsearchClient,
   cloudSecurityPostureConfig: CloudSecurityPostureConfig,
+  latestFindingsIndexAutoCreated: boolean,
   logger: Logger
 ) => {
   await Promise.allSettled([
     createPipelineIfNotExists(esClient, scorePipelineIngestConfig, logger),
     createPipelineIfNotExists(esClient, latestFindingsPipelineIngestConfig, logger),
   ]);
+  const [createVulnerabilitiesLatestIndexPromise, createBenchmarkScoreIndexPromise] =
+    await Promise.allSettled([
+      createLatestIndex(
+        esClient,
+        latestIndexConfigs.vulnerabilities,
+        cloudSecurityPostureConfig,
+        logger
+      ),
+      createBenchmarkScoreIndex(esClient, cloudSecurityPostureConfig, logger),
+    ]);
 
-  const [
-    createFindingsLatestIndexPromise,
-    createVulnerabilitiesLatestIndexPromise,
-    createBenchmarkScoreIndexPromise,
-  ] = await Promise.allSettled([
-    createLatestIndex(esClient, latestIndexConfigs.findings, cloudSecurityPostureConfig, logger),
-    createLatestIndex(
-      esClient,
-      latestIndexConfigs.vulnerabilities,
-      cloudSecurityPostureConfig,
-      logger
-    ),
-    createBenchmarkScoreIndex(esClient, cloudSecurityPostureConfig, logger),
-  ]);
-
-  if (createFindingsLatestIndexPromise.status === 'rejected') {
-    logger.error(createFindingsLatestIndexPromise.reason);
-  }
   if (createVulnerabilitiesLatestIndexPromise.status === 'rejected') {
     logger.error(createVulnerabilitiesLatestIndexPromise.reason);
   }
   if (createBenchmarkScoreIndexPromise.status === 'rejected') {
     logger.error(createBenchmarkScoreIndexPromise.reason);
+  }
+
+  if (!latestFindingsIndexAutoCreated) {
+    try {
+      await createLatestIndex(
+        esClient,
+        latestIndexConfigs.findings,
+        cloudSecurityPostureConfig,
+        logger
+      );
+    } catch (e) {
+      logger.error(`Failed to create latest findings index: ${e}`);
+    }
   }
 };
 

@@ -20,7 +20,10 @@ import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
 import { useReadonlyHeader } from '../use_readonly_header';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
+import {
+  SecurityRoutePageWrapper,
+  withSecurityRoutePageWrapper,
+} from '../common/components/security_route_page_wrapper';
 
 const ExceptionsRoutes = () => (
   <PluginTemplateWrapper>
@@ -53,11 +56,9 @@ const ExceptionsContainerComponent: React.FC = () => {
 
 const Exceptions = React.memo(ExceptionsContainerComponent);
 
-const renderExceptionsRoutes = () => <Exceptions />;
-
 export const routes = [
   {
     path: EXCEPTIONS_PATH,
-    render: renderExceptionsRoutes,
+    component: withSecurityRoutePageWrapper(Exceptions, SecurityPageName.exceptions),
   },
 ];

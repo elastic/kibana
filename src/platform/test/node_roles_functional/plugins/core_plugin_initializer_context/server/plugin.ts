@@ -21,6 +21,12 @@ export class CorePluginInitializerContextPlugin implements Plugin {
     router.get(
       {
         path: '/core_plugin_initializer_context/node/roles',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: false,
         options: {
           authRequired: false,

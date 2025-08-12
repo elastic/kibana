@@ -12,12 +12,12 @@ import {
   EuiSkeletonText,
   EuiText,
 } from '@elastic/eui';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React from 'react';
-import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
+import React from 'react';
 import { SloStateBadge, SloStatusBadge, SloValueBadge } from '../../../components/slo/slo_badges';
+import { SloTagsBadge } from '../../../components/slo/slo_badges/slo_tags_badge';
 import { SloRemoteBadge } from '../../slos/components/badges/slo_remote_badge';
 import { SLOGroupings } from './groupings/slo_groupings';
 
@@ -45,11 +45,7 @@ export function HeaderTitle({ isLoading, slo }: Props) {
         <SloStatusBadge slo={slo} isLoading={isLoading} />
         <SloStateBadge slo={slo} />
         <SloRemoteBadge slo={slo} />
-        {!!slo?.tags?.length && (
-          <EuiFlexItem grow={true}>
-            <TagsList tags={slo.tags} />
-          </EuiFlexItem>
-        )}
+        <SloTagsBadge slo={slo} />
       </EuiFlexGroup>
       {slo.description && (
         <EuiFlexItem grow={true}>

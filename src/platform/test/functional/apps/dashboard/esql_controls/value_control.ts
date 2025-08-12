@@ -14,18 +14,19 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const { dashboard, timePicker, common, dashboardControls } = getPageObjects([
+  const { dashboard, timePicker, common, dashboardControls, header } = getPageObjects([
     'dashboard',
     'timePicker',
     'common',
     'dashboardControls',
+    'header',
   ]);
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
-  const comboBox = getService('comboBox');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('dashboard - add a value type ES|QL control', function () {
     before(async () => {
@@ -75,6 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(valuesQueryEditorValue).to.contain('FROM logstash-* | STATS BY geo.dest');
 
       // create the control
+      await testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
       await testSubjects.click('saveEsqlControlsFlyoutButton');
       await dashboard.waitForRenderComplete();
 
@@ -86,9 +88,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Check Lens editor has been updated accordingly
       const editorValue = await esql.getEsqlEditorQuery();
       expect(editorValue).to.contain('FROM logstash-* | WHERE geo.dest == ?geo_dest');
+
+      await testSubjects.click('applyFlyoutButton');
+      await dashboard.waitForRenderComplete();
     });
 
     it('should update the Lens chart accordingly', async () => {
+      // now edit the panel and click on Cancel
+      await dashboardPanelActions.clickInlineEdit();
       // change the table to keep only the column with the control
       await esql.setEsqlEditorQuery(
         'FROM logstash-* | WHERE geo.dest == ?geo_dest | KEEP geo.dest'
@@ -96,12 +103,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // run the query
       await testSubjects.click('ESQLEditor-run-query-button');
       await dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
 
       // save the changes
       await testSubjects.click('applyFlyoutButton');
       await dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
       // change the control value
-      await comboBox.set('esqlControlValuesDropdown', 'AO');
+      const controlId = (await dashboardControls.getAllControlIds())[0];
+      await dashboardControls.optionsListOpenPopover(controlId);
+      await dashboardControls.optionsListPopoverSelectOption('AO');
       await dashboard.waitForRenderComplete();
 
       const tableContent = await testSubjects.getVisibleText('lnsTableCellContent');
@@ -112,6 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const firstId = (await dashboardControls.getAllControlIds())[0];
       await dashboardControls.editExistingControl(firstId);
 
+      await esql.waitESQLEditorLoaded();
       await esql.setEsqlEditorQuery('FROM logstash-*');
       // run the query
       await testSubjects.click('ESQLEditor-run-query-button');

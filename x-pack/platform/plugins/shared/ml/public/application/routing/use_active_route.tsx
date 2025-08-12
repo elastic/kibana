@@ -12,6 +12,7 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { DEPRECATED_ML_ROUTE_TO_NEW_ROUTE } from '../../../common/constants/locator';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana } from '../contexts/kibana';
 import type { MlRoute } from './router';
@@ -23,7 +24,6 @@ import { ML_PAGES } from '../../locator';
  */
 export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
   const { pathname } = useLocation();
-
   const {
     services: { executionContext, overlays, ...startServices },
   } = useMlKibana();
@@ -50,7 +50,8 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
     }
     // Remove trailing slash from the pathname
     const pathnameKey = pathname.replace(/\/$/, '');
-    return routesMap[pathnameKey];
+    // Treat empty pathname as root
+    return routesMap[pathnameKey === '' ? '/' : pathnameKey];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
@@ -58,13 +59,23 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
 
   useEffect(
     function handleNotFoundRoute() {
+      // For these deprecated routes, we already direct to the management page in the ml_page.tsx
+      // so no need to show banner
+      if (
+        Object.keys(DEPRECATED_ML_ROUTE_TO_NEW_ROUTE).some(
+          // paths include /, so need to convert `/jobs` -> `jobs`
+          (path) => path === pathname.split('/')[1]
+        )
+      ) {
+        return;
+      }
       if (!activeRoute && !!pathname) {
         bannerId.current = overlays.banners.replace(
           bannerId.current,
           toMountPoint(
             <EuiCallOut
               color="warning"
-              iconType="iInCircle"
+              iconType="info"
               title={
                 <FormattedMessage
                   id="xpack.ml.notFoundPage.title"

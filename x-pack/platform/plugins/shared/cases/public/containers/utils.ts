@@ -6,9 +6,9 @@
  */
 
 import { isObject, transform, snakeCase, isEmpty } from 'lodash';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/Either';
+import { identity } from 'fp-ts/function';
+import { pipe } from 'fp-ts/pipeable';
 
 import type { ToastInputFields } from '@kbn/core/public';
 import { builderMap as customFieldsBuilder } from '../components/custom_fields/builder';

@@ -16,7 +16,6 @@ import { AlertsLocatorParams, observabilityPaths } from '@kbn/observability-plug
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { sloBurnRateParamsSchema } from '@kbn/response-ops-rule-params/slo_burn_rate';
-import { SLO_BURN_RATE_AAD_FIELDS } from '../../../../common/field_names/slo';
 import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
@@ -39,7 +38,6 @@ export function sloBurnRateRuleType(
     name: i18n.translate('xpack.slo.rules.burnRate.name', {
       defaultMessage: 'SLO burn rate',
     }),
-    fieldsForAAD: SLO_BURN_RATE_AAD_FIELDS,
     validate: {
       params: sloBurnRateParamsSchema,
     },
@@ -87,11 +85,32 @@ export function sloBurnRateRuleType(
           name: 'sloErrorBudgetConsumed',
           description: sloErrorBudgetConsumedActionVariableDescription,
         },
+        {
+          name: 'grouping',
+          description: groupingObjectActionVariableDescription,
+        },
       ],
     },
     alerts: {
       context: SLO_RULE_REGISTRATION_CONTEXT,
-      mappings: { fieldMap: { ...legacyExperimentalFieldMap, ...sloRuleFieldMap } },
+      mappings: {
+        fieldMap: {
+          ...legacyExperimentalFieldMap,
+          ...sloRuleFieldMap,
+        },
+        dynamicTemplates: [
+          {
+            strings_as_keywords: {
+              path_match: 'kibana.alert.grouping.*',
+              match_mapping_type: 'string',
+              mapping: {
+                type: 'keyword' as const,
+                ignore_above: 1024,
+              },
+            },
+          },
+        ],
+      },
       useEcs: true,
       useLegacyAlerts: true,
       shouldWrite: true,
@@ -193,5 +212,12 @@ export const sloErrorBudgetConsumedActionVariableDescription = i18n.translate(
   'xpack.slo.alerting.sloErrorBudgetConsumedDescription',
   {
     defaultMessage: 'The consumed error budget at the time of firing the alert.',
+  }
+);
+
+export const groupingObjectActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.groupingObjectActionVariableDescription',
+  {
+    defaultMessage: 'The object containing groups that are reporting data',
   }
 );

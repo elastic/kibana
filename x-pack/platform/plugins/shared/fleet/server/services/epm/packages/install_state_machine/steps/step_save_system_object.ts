@@ -13,7 +13,7 @@ import {
 } from '../../../../../constants';
 import type { Installation } from '../../../../../types';
 
-import { packagePolicyService } from '../../../..';
+import { packagePolicyService } from '../../../../package_policy';
 
 import { auditLoggingService } from '../../../../audit_logging';
 
@@ -38,6 +38,7 @@ export async function stepSaveSystemObject(context: InstallContext) {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 

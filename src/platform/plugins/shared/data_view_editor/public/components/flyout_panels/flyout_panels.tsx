@@ -17,9 +17,8 @@ import React, {
   FC,
   PropsWithChildren,
 } from 'react';
+import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
-
-import './flyout_panels.scss';
 
 interface Panel {
   width?: number;
@@ -106,7 +105,7 @@ export const Panels: FC<PropsWithChildren<Props>> = ({ maxWidth, flyoutClassName
 
   return (
     <flyoutPanelsContext.Provider value={ctx}>
-      <EuiFlexGroup className="fieldEditor__flyoutPanels" gutterSize="none" {...props} />
+      <EuiFlexGroup css={styles.flyoutPanels} gutterSize="none" {...props} />
     </flyoutPanelsContext.Provider>
   );
 };
@@ -119,4 +118,10 @@ export const useFlyoutPanelsContext = (): Context => {
   }
 
   return ctx;
+};
+
+const styles = {
+  flyoutPanels: css({
+    height: '100%',
+  }),
 };

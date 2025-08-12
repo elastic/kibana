@@ -8,6 +8,7 @@ import { ManagementSetup } from '@kbn/management-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { CoreStart, ScopedHistory } from '@kbn/core/public';
+import { ReindexServicePublicStart } from '@kbn/reindex-service-plugin/public';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
@@ -20,6 +21,8 @@ export interface KibanaVersionContext {
   currentMajor: number;
   prevMajor: number;
   nextMajor: number;
+  currentMinor: number;
+  currentPatch: number;
 }
 
 export interface SetupDependencies {
@@ -32,6 +35,7 @@ export interface SetupDependencies {
 export interface StartDependencies {
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
+  reindexService: ReindexServicePublicStart;
 }
 
 export interface ClientConfigType {
@@ -47,6 +51,7 @@ export interface AppDependencies {
   plugins: {
     cloud?: CloudSetup;
     share: SharePluginSetup;
+    reindexService: ReindexServicePublicStart;
   };
   services: {
     core: CoreStart;

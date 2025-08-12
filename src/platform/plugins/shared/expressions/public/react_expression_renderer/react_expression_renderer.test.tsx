@@ -336,9 +336,7 @@ describe('ExpressionRenderer', () => {
     });
 
     const instance = mount(<ReactExpressionRenderer className="myClassName" expression="" />);
-    // Counte is 2 because the class is applied to ReactExpressionRenderer + internal component
-    expect(instance.find('.myClassName').length).toBe(2);
 
-    instance.unmount();
+    expect(instance.find('div.myClassName').length).toBe(1);
   });
 });

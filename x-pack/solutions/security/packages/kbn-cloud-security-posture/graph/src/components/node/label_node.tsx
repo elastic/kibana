@@ -8,52 +8,53 @@
 import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { css } from '@emotion/react';
+import { EuiTextTruncate } from '@elastic/eui';
 import {
   LabelNodeContainer,
   LabelShape,
   HandleStyleOverride,
   LabelShapeOnHover,
   NodeButton,
+  ACTUAL_LABEL_HEIGHT,
+  NODE_LABEL_WIDTH,
   LABEL_PADDING_X,
-  LABEL_BORDER_WIDTH,
-  LABEL_HEIGHT,
 } from './styles';
 import type { LabelNodeViewModel, NodeProps } from '../types';
 import { NodeExpandButton } from './node_expand_button';
-import { getTextWidth } from '../graph/utils';
-
-const LABEL_MIN_WIDTH = 100;
 
 export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   const { id, color, label, interactive, nodeClick, expandButtonClick } =
     props.data as LabelNodeViewModel;
   const text = label ? label : id;
-  const labelWidth = Math.max(
-    LABEL_MIN_WIDTH,
-    getTextWidth(text ?? '') + LABEL_PADDING_X * 2 + LABEL_BORDER_WIDTH * 2
-  );
 
   return (
     <LabelNodeContainer>
       {interactive && <LabelShapeOnHover color={color} />}
       <LabelShape color={color} textAlign="center">
-        {text}
+        <EuiTextTruncate
+          truncation="end"
+          truncationOffset={20}
+          text={text}
+          width={NODE_LABEL_WIDTH - LABEL_PADDING_X * 2}
+        />
       </LabelShape>
       {interactive && (
         <>
           <NodeButton
             css={css`
-              margin-top: -${LABEL_HEIGHT}px;
+              margin-top: -${ACTUAL_LABEL_HEIGHT}px;
             `}
-            height={LABEL_HEIGHT}
-            width={labelWidth}
+            height={ACTUAL_LABEL_HEIGHT}
+            width={NODE_LABEL_WIDTH}
             onClick={(e) => nodeClick?.(e, props)}
           />
           <NodeExpandButton
             color={color}
             onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
-            x={`${labelWidth}px`}
-            y={`${-LABEL_HEIGHT + (LABEL_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
+            x={`${NODE_LABEL_WIDTH}px`}
+            y={`${
+              -ACTUAL_LABEL_HEIGHT + (ACTUAL_LABEL_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2
+            }px`}
           />
         </>
       )}

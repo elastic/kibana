@@ -190,14 +190,40 @@ describe('filterByAgent', () => {
     });
 
     it('opentelemetry/java/elastic', () => {
-      expect(getSettingKeysForAgent('opentelemetry/java/elastic')).toEqual([
-        'deactivate_all_instrumentations',
-        'deactivate_instrumentations',
-        'recording',
-        'send_logs',
-        'send_metrics',
-        'send_traces',
-      ]);
+      expect(getSettingKeysForAgent('opentelemetry/java/elastic')).toEqual(
+        expect.arrayContaining([
+          'deactivate_all_instrumentations',
+          'deactivate_instrumentations',
+          'logging_level',
+          'send_logs',
+          'send_metrics',
+          'send_traces',
+        ])
+      );
+    });
+
+    it('opentelemetry/nodejs/elastic', () => {
+      expect(getSettingKeysForAgent('opentelemetry/nodejs/elastic')).toEqual(
+        expect.arrayContaining(['logging_level'])
+      );
+    });
+
+    it('opentelemetry/python/elastic', () => {
+      expect(getSettingKeysForAgent('opentelemetry/python/elastic')).toEqual(
+        expect.arrayContaining(['logging_level'])
+      );
+    });
+
+    it('opentelemetry/php/elastic', () => {
+      expect(getSettingKeysForAgent('opentelemetry/php/elastic')).toEqual(
+        expect.arrayContaining(['logging_level'])
+      );
+    });
+
+    it('opentelemetry/dotnet/elastic', () => {
+      expect(getSettingKeysForAgent('opentelemetry/dotnet/elastic')).toEqual(
+        expect.arrayContaining(['logging_level'])
+      );
     });
 
     it('"All" services (no agent name)', () => {

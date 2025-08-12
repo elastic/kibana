@@ -161,4 +161,34 @@ describe('useDataGridInTableSearch', () => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/200');
     });
   });
+
+  it('should initialize correctly when initial state is provided', async () => {
+    const originalRenderCellValue = getRenderCellValueMock(testData);
+    const originalCellContext = { testContext: true };
+    const initialProps = {
+      dataGridWrapper: null,
+      dataGridRef: createRef<null>(),
+      visibleColumns: ['columnA', 'columnB'],
+      rows: testData,
+      cellContext: originalCellContext,
+      renderCellValue: originalRenderCellValue,
+      pagination: undefined,
+      initialState: {
+        searchTerm: 'initial search term',
+      },
+    };
+    const { result } = renderHook((props) => useDataGridInTableSearch(props), {
+      initialProps,
+    });
+
+    const { inTableSearchTermCss, inTableSearchControl, cellContextWithInTableSearchSupport } =
+      result.current;
+
+    expect(inTableSearchControl).toBeDefined();
+    expect(inTableSearchTermCss).toBeUndefined();
+    expect(cellContextWithInTableSearchSupport).toEqual({
+      ...originalCellContext,
+      inTableSearchTerm: 'initial search term',
+    });
+  });
 });

@@ -10,6 +10,7 @@ import { render, fireEvent } from '@testing-library/react';
 import { AccountsEvaluatedWidget } from './accounts_evaluated_widget';
 import { BenchmarkData } from '../../common/types_old';
 import { TestProvider } from '../test/test_provider';
+import { FINDINGS_FILTER_OPTIONS, FINDINGS_GROUPING_OPTIONS } from '../common/constants';
 
 const mockNavToFindings = jest.fn();
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_navigate_findings', () => ({
@@ -44,10 +45,10 @@ describe('AccountsEvaluatedWidget', () => {
 
     expect(mockNavToFindings).toHaveBeenCalledWith(
       {
-        'cloud.provider': 'aws',
-        'rule.benchmark.posture_type': 'cspm',
+        [FINDINGS_FILTER_OPTIONS.CLOUD_PROVIDER]: 'aws',
+        [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_POSTURE_TYPE]: 'cspm',
       },
-      ['cloud.account.id']
+      [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID]
     );
   });
 
@@ -62,9 +63,31 @@ describe('AccountsEvaluatedWidget', () => {
 
     expect(mockNavToFindings).toHaveBeenCalledWith(
       {
-        'rule.benchmark.id': 'cis_k8s',
+        [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_ID]: 'cis_k8s',
       },
-      ['orchestrator.cluster.id']
+      [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID]
+    );
+  });
+
+  it('calls navToFindingsByCisBenchmark when a benchmark with benchmarkId and namespace is clicked', () => {
+    const { getByText } = render(
+      <TestProvider>
+        <AccountsEvaluatedWidget
+          benchmarkAssets={benchmarkAssets}
+          benchmarkAbbreviateAbove={999}
+          activeNamespace="test-namespace"
+        />
+      </TestProvider>
+    );
+
+    fireEvent.click(getByText('20'));
+
+    expect(mockNavToFindings).toHaveBeenCalledWith(
+      {
+        [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_ID]: 'cis_k8s',
+        [FINDINGS_FILTER_OPTIONS.NAMESPACE]: 'test-namespace',
+      },
+      [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID]
     );
   });
 });

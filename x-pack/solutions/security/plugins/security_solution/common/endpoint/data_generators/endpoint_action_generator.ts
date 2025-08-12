@@ -11,7 +11,6 @@ import type { estypes } from '@elastic/elasticsearch';
 import { isProcessesAction } from '../service/response_actions/type_guards';
 import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
-import type { GetProcessesActionOutputContent } from '../types';
 import {
   type ActionDetails,
   type ActionResponseOutput,
@@ -21,6 +20,7 @@ import {
   type EndpointActivityLogAction,
   type EndpointActivityLogActionResponse,
   type EndpointPendingActions,
+  type GetProcessesActionOutputContent,
   type LogsEndpointAction,
   type LogsEndpointActionResponse,
   type ProcessesEntry,
@@ -50,11 +50,25 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     overrides: DeepPartial<LogsEndpointAction<TParameters, TOutputContent, TMeta>> = {}
   ): LogsEndpointAction<TParameters, TOutputContent, TMeta> {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
+    const agent = (overrides.agent?.id ?? [
+      this.seededUUIDv4(),
+    ]) as LogsEndpointAction['agent']['id'];
+    const agentId = Array.isArray(agent) ? (agent[0] as string) : agent;
     const doc: LogsEndpointAction<TParameters, TOutputContent, TMeta> = {
       '@timestamp': timeStamp.toISOString(),
       agent: {
-        id: [this.seededUUIDv4()],
+        id: agent,
+        policy: [
+          {
+            agentId,
+            elasticAgentId: agentId,
+            integrationPolicyId: 'integration-policy-1',
+            agentPolicyId: 'agent-policy-1',
+          },
+        ],
       },
+      originSpaceId: 'default',
+      tags: [],
       EndpointActions: {
         action_id: this.seededUUIDv4(),
         expiration: this.randomFutureDate(timeStamp),

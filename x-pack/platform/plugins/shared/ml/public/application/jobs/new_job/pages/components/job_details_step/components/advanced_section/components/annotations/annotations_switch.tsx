@@ -61,7 +61,7 @@ export const AnnotationsSwitch: FC = () => {
             />
           }
           color="primary"
-          iconType="help"
+          iconType="question"
         />
       )}
     </>

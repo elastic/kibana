@@ -17,10 +17,10 @@ import {
   Settings,
   Tooltip,
   niceTimeFormatter,
-  LIGHT_THEME,
-  DARK_THEME,
+  DomainRange,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { AbortableAsyncState } from '@kbn/react-hooks';
@@ -62,19 +62,19 @@ export function ControlledEsqlChart<T extends string>({
   metricNames,
   chartType = 'line',
   height,
-  timerange,
+  xDomain: customXDomain,
 }: {
   id: string;
   result: AbortableAsyncState<UnparsedEsqlResponse>;
   metricNames: T[];
   chartType?: 'area' | 'bar' | 'line';
   height?: number;
-  timerange?: { start: number; end: number };
+  xDomain?: DomainRange;
 }) {
   const {
     core: { uiSettings },
   } = useKibana();
-  const { colorMode } = useEuiTheme();
+  const chartBaseTheme = useElasticChartsTheme();
 
   const allTimeseries = useMemo(
     () =>
@@ -102,14 +102,16 @@ export function ControlledEsqlChart<T extends string>({
   const xValues = allTimeseries.flatMap(({ data }) => data.map(({ x }) => x));
 
   // todo - pull in time range here
-  const min = timerange?.start ?? Math.min(...xValues);
-  const max = timerange?.end ?? Math.max(...xValues);
+  const min = customXDomain?.min ?? Math.min(...xValues);
+  const max = customXDomain?.max ?? Math.max(...xValues);
 
   const isEmpty = min === 0 && max === 0;
 
   const xFormatter = niceTimeFormatter([min, max]);
 
-  const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
+  const xDomain: DomainRange = isEmpty
+    ? { min: 0, max: 1 }
+    : { min, max, minInterval: customXDomain?.minInterval };
 
   const yTickFormat = (value: number | null) => (value === null ? '' : String(value));
   const yLabelFormat = (label: string) => label;
@@ -138,7 +140,7 @@ export function ControlledEsqlChart<T extends string>({
                   style={{ fontWeight: 'normal' }}
                 >
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="iInCircle" />
+                    <EuiIcon type="info" />
                   </EuiFlexItem>
                   <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
                 </EuiFlexGroup>
@@ -155,7 +157,7 @@ export function ControlledEsqlChart<T extends string>({
         legendPosition={Position.Bottom}
         xDomain={xDomain}
         locale={i18n.getLocale()}
-        baseTheme={colorMode === 'LIGHT' ? LIGHT_THEME : DARK_THEME}
+        baseTheme={chartBaseTheme}
       />
       <Axis
         id="x-axis"
@@ -168,6 +170,7 @@ export function ControlledEsqlChart<T extends string>({
         id="y-axis"
         ticks={3}
         position={Position.Left}
+        hide
         tickFormat={yTickFormat}
         labelFormat={yLabelFormat}
       />
@@ -180,12 +183,14 @@ export function ControlledEsqlChart<T extends string>({
             key={serie.id}
             color="#61A2FF"
             id={serie.id}
+            // Defaults to multi layer time axis as of Elastic Charts v70
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={serie.metricNames}
             data={serie.data}
             curve={CurveType.CURVE_MONOTONE_X}
+            enableHistogramMode
           />
         );
       })}

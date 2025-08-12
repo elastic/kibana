@@ -64,7 +64,12 @@ export const QueryEditor: React.FC<QueryEditorProps> = React.memo(
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="save" onClick={handleSaveButtonClick} size="xs">
+            <EuiButtonEmpty
+              data-test-subj="saveTranslatedRuleBtn"
+              iconType="save"
+              onClick={handleSaveButtonClick}
+              size="xs"
+            >
               {i18n.SAVE}
             </EuiButtonEmpty>
           </EuiFlexItem>

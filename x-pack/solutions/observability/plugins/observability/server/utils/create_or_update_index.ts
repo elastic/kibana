@@ -54,13 +54,12 @@ export async function createOrUpdateIndex({
       },
       {
         onFailedAttempt: (e) => {
-          logger.warn(`Could not create index: '${index}'. Retrying...`);
-          logger.warn(e);
+          logger.warn(`Could not create index: '${index}'. Retrying...`, { error: e });
         },
       }
     );
   } catch (e) {
-    logger.error(`Could not create index: '${index}'. Error: ${e.message}.`);
+    logger.error(`Could not create index: '${index}'`, { error: e });
   }
 }
 
@@ -92,7 +91,6 @@ function updateExistingIndex({
 }) {
   return client.indices.putMapping({
     index,
-    // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-    body: mappings,
+    ...mappings,
   });
 }

@@ -17,6 +17,7 @@ export const TelemtryMetadataSchema = schema.object({
 export const ConfigSchema = schema.object({
   apiUrl: schema.string(),
   defaultModel: schema.string({ defaultValue: DEFAULT_BEDROCK_MODEL }),
+  contextWindowLength: schema.maybe(schema.number({})),
 });
 
 export const SecretsSchema = schema.object({
@@ -172,3 +173,25 @@ export const BedrockClientSendParamsSchema = schema.object({
 });
 
 export const BedrockClientSendResponseSchema = schema.object({}, { unknowns: 'allow' });
+
+export const ConverseActionParamsSchema = schema.object(
+  {
+    // Converse API will already be validating, no need for us to strictly validate again
+    messages: schema.arrayOf(schema.any()),
+    model: schema.maybe(schema.string()),
+    system: schema.maybe(schema.arrayOf(schema.any())),
+    temperature: schema.maybe(schema.number()),
+    maxTokens: schema.maybe(schema.number()),
+    stopSequences: schema.maybe(schema.arrayOf(schema.string())),
+    tools: schema.maybe(schema.arrayOf(schema.any())),
+    toolChoice: schema.maybe(schema.any()),
+    // Kibana related properties
+    signal: schema.maybe(schema.any()),
+    timeout: schema.maybe(schema.number()),
+    telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
+    connectorUsageCollector: schema.maybe(schema.any()),
+  },
+  { unknowns: 'allow' }
+);
+
+export const ConverseStreamActionParamsSchema = ConverseActionParamsSchema;

@@ -31,6 +31,7 @@ describe('suggestions in comments', () => {
     const { suggest } = await setup('^');
     expect((await suggest('FROM index | EVAL ^/* */')).length).toBeGreaterThan(0);
     expect((await suggest('FROM index | EVAL /* */ ^')).length).toBeGreaterThan(0);
+    expect((await suggest('FROM index | EVAL /* */^')).length).toBeGreaterThan(0);
     expect((await suggest('FROM index | EVAL ^// a comment')).length).toBeGreaterThan(0);
     expect((await suggest('FROM index | EVAL // a comment\n^')).length).toBeGreaterThan(0);
   });

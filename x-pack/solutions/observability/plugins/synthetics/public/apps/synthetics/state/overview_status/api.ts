@@ -27,6 +27,7 @@ export function toStatusOverviewQueryArgs(
     monitorQueryIds: pageState.monitorQueryIds,
     showFromAllSpaces: pageState.showFromAllSpaces,
     searchFields: [],
+    useLogicalAndFor: pageState.useLogicalAndFor,
   };
 }
 

@@ -56,7 +56,9 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     http,
     toasts,
   });
-  const { data: evalData } = useEvaluationData({ http });
+  const { data: evalData } = useEvaluationData({
+    http,
+  });
   const defaultGraphs = useMemo(() => (evalData as GetEvaluateResponse)?.graphs ?? [], [evalData]);
   const datasets = useMemo(() => (evalData as GetEvaluateResponse)?.datasets ?? [], [evalData]);
 
@@ -395,6 +397,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
             onCreateOption={onGraphOptionsCreate}
             options={graphOptions}
             selectedOptions={selectedGraphOptions}
+            singleSelection // Remove once post_evaluate support running multiple graphs
             onChange={onGraphOptionsChange}
           />
         </EuiFormRow>

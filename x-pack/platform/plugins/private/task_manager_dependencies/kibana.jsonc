@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/task-manager-dependencies-plugin",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Temporary sidecar plugin allowing task manager to register the encrypted saved objects dependency, bypassing circular dependencies.",
+  "plugin": {
+    "id": "taskManagerDependencies",
+    "browser": false,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "task_manager_dependencies",
+    ],
+    "requiredPlugins": [
+      "taskManager",
+      "encryptedSavedObjects",
+    ],
+  },
+}

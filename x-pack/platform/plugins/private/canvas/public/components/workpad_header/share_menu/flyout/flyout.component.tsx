@@ -20,6 +20,7 @@ import {
   EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -184,12 +185,14 @@ export const ShareWebsiteFlyout: FC<Props> = ({
     ];
   }
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={() => onClose('share')} maxWidth>
+    <EuiFlyout onClose={() => onClose('share')} maxWidth aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <EuiFlexGroup alignItems="center">
-            <h2 id="flyoutTitle">
+            <h2 id={flyoutTitleId}>
               <EuiFlexItem grow={false}>{strings.getTitle()}</EuiFlexItem>
             </h2>
             <EuiFlexItem grow={false}>
@@ -203,7 +206,7 @@ export const ShareWebsiteFlyout: FC<Props> = ({
           <p>{strings.getStepsDescription()}</p>
         </EuiText>
         <EuiSpacer />
-        <EuiCallOut size="s" title={title} iconType="iInCircle" />
+        <EuiCallOut size="s" title={title} iconType="info" />
         <EuiSpacer />
         {warningText}
         <EuiSteps steps={steps(onDownload, onCopy)} />

@@ -25,6 +25,7 @@ import {
   EuiIconTip,
   EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import {
   IExecutionLog,
   executionLogSortableColumns,
@@ -35,7 +36,6 @@ import { get } from 'lodash';
 import { getIsExperimentalFeatureEnabled } from '../../../../../common/get_experimental_features';
 import { EventLogListCellRenderer, ColumnId, EventLogPaginationStatus } from '.';
 import { RuleActionErrorBadge } from '../../../rule_details/components/rule_action_error_badge';
-import './event_log_list.scss';
 
 export const getIsColumnSortable = (columnId: string) => {
   return executionLogSortableColumns.includes(columnId as ExecutionLogSortFields);
@@ -142,14 +142,14 @@ const columnsWithToolTipMap: Record<string, Record<string, string>> = {
 
 export const ColumnHeaderWithToolTip = ({ id }: { id: string }) => {
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFlexGroup gutterSize="xs" alignItems="center" style={{ display: 'inline-flex' }}>
       <EuiFlexItem>{columnsWithToolTipMap[id].display}</EuiFlexItem>
       <EuiFlexItem>
         <EuiIconTip
           content={columnsWithToolTipMap[id].toolTip}
           size="s"
           color="subdued"
-          type="questionInCircle"
+          type="question"
           className="eui-alignTop"
         />
       </EuiFlexItem>
@@ -176,6 +176,10 @@ export const EventLogDataGrid = (props: EventLogDataGrid) => {
   } = props;
 
   const { euiTheme } = useEuiTheme();
+
+  const selectedRowCss = css`
+    background-color: ${euiTheme.colors.highlight};
+  `;
 
   const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
@@ -373,6 +377,7 @@ export const EventLogDataGrid = (props: EventLogDataGrid) => {
         sorting={sortingProps}
         pagination={paginationProps}
         gridStyle={gridStyles}
+        css={selectedRowCss}
         renderCellPopover={renderCellPopover}
       />
     </>

@@ -8,6 +8,8 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { PageLoader } from '../../../common/components/page_loader';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy';
@@ -28,6 +30,8 @@ import { useInstalledSecurityJobNameById } from '../../../common/components/ml/h
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import type { NarrowDateRange } from '../../../common/components/ml/types';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 
 export interface NetworkDetailsProps {
   /**
@@ -73,13 +77,35 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
     services: { uiSettings },
   } = useKibana();
 
-  const { indicesExist, sourcererDataView, selectedPatterns } = useSourcererDataView();
-  const [filterQuery, kqlError] = convertToBuildEsQuery({
-    config: getEsQueryConfig(uiSettings),
-    dataViewSpec: sourcererDataView,
-    queries: [query],
-    filters,
-  });
+  const {
+    indicesExist: oldIndicesExist,
+    sourcererDataView: oldSourcererDataView,
+    selectedPatterns: oldSelectedPatterns,
+  } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataView: experimentalDataView, status } = useDataView();
+  const experimentalSelectedPatterns = useSelectedPatterns();
+
+  const indicesExist = newDataViewPickerEnabled
+    ? !!experimentalDataView.matchedIndices?.length
+    : oldIndicesExist;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+
+  const [filterQuery, kqlError] = useMemo(
+    () =>
+      convertToBuildEsQuery({
+        config: getEsQueryConfig(uiSettings),
+        dataViewSpec: oldSourcererDataView,
+        dataView: experimentalDataView,
+        queries: [query],
+        filters,
+      }),
+    [uiSettings, oldSourcererDataView, experimentalDataView, query, filters]
+  );
 
   const [loading, { id, networkDetails }] = useNetworkDetails({
     skip: isInitializing || filterQuery === undefined,
@@ -100,6 +126,10 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
     aggregationInterval: 'auto',
   });
 
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
+
   return indicesExist ? (
     <IpOverview
       contextID={undefined}
@@ -118,6 +148,7 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
       indexPatterns={selectedPatterns}
       jobNameById={jobNameById}
       scopeId={SourcererScopeName.default}
+      isFlyoutOpen={true}
     />
   ) : (
     <EmptyPrompt />

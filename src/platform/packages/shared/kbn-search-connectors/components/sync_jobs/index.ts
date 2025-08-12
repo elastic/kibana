@@ -8,3 +8,4 @@
  */
 
 export * from './sync_jobs_table';
+export { FilteringRulesTable } from './filtering_rules_table';

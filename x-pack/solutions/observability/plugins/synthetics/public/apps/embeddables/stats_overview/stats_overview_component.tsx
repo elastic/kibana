@@ -62,6 +62,7 @@ const WithFiltersComponent = ({ filters }: { filters: MonitorFilters }) => {
     <OverviewStatus
       titleAppend={hasFilters ? <ShowSelectedFilters filters={filters ?? {}} /> : null}
       hideTitle={true}
+      areStatsClickable
     />
   );
 };

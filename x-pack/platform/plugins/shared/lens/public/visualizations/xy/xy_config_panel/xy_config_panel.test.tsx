@@ -46,22 +46,10 @@ describe('XY Toolbar', () => {
     };
   });
 
-  const renderToolbar = (
-    overrideProps?: Partial<
-      VisualizationToolbarProps<XYState> & {
-        useLegacyTimeAxis?: boolean;
-      }
-    >
-  ) => {
+  const renderToolbar = (overrideProps?: Partial<VisualizationToolbarProps<XYState>>) => {
     const state = testState();
     const rtlRender = render(
-      <XyToolbar
-        frame={frame}
-        setState={jest.fn()}
-        state={state}
-        {...overrideProps}
-        useLegacyTimeAxis={false}
-      />
+      <XyToolbar frame={frame} setState={jest.fn()} state={state} {...overrideProps} />
     );
     return rtlRender;
   };

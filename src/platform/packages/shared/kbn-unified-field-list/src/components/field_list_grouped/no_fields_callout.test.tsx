@@ -17,17 +17,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
     expect(component).toMatchInlineSnapshot(`
       <EuiText
         color="subdued"
-        css={
-          Object {
-            "map": undefined,
-            "name": "1qdt3rt",
-            "next": undefined,
-            "styles": "
-                padding: 8px;
-              ",
-            "toString": [Function],
-          }
-        }
+        css="unknown styles"
         data-test-subj="noFieldsCallout-noFieldsExist"
         size="s"
       >
@@ -42,17 +32,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
     expect(component).toMatchInlineSnapshot(`
       <EuiText
         color="subdued"
-        css={
-          Object {
-            "map": undefined,
-            "name": "wd14gj",
-            "next": undefined,
-            "styles": "
-              padding: 8px;
-            ",
-            "toString": [Function],
-          }
-        }
+        css="unknown styles"
         data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
       >
@@ -69,17 +49,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
     expect(component).toMatchInlineSnapshot(`
       <EuiText
         color="subdued"
-        css={
-          Object {
-            "map": undefined,
-            "name": "wd14gj",
-            "next": undefined,
-            "styles": "
-              padding: 8px;
-            ",
-            "toString": [Function],
-          }
-        }
+        css="unknown styles"
         data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
       >
@@ -97,17 +67,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
     expect(component).toMatchInlineSnapshot(`
       <EuiText
         color="subdued"
-        css={
-          Object {
-            "map": undefined,
-            "name": "wd14gj",
-            "next": undefined,
-            "styles": "
-              padding: 8px;
-            ",
-            "toString": [Function],
-          }
-        }
+        css="unknown styles"
         data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
       >
@@ -138,17 +98,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
     expect(component).toMatchInlineSnapshot(`
       <EuiText
         color="subdued"
-        css={
-          Object {
-            "map": undefined,
-            "name": "wd14gj",
-            "next": undefined,
-            "styles": "
-              padding: 8px;
-            ",
-            "toString": [Function],
-          }
-        }
+        css="unknown styles"
         data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
       >
@@ -182,17 +132,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
     expect(component).toMatchInlineSnapshot(`
       <EuiText
         color="subdued"
-        css={
-          Object {
-            "map": undefined,
-            "name": "wd14gj",
-            "next": undefined,
-            "styles": "
-              padding: 8px;
-            ",
-            "toString": [Function],
-          }
-        }
+        css="unknown styles"
         data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
       >
@@ -227,17 +167,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
     expect(component).toMatchInlineSnapshot(`
       <EuiText
         color="subdued"
-        css={
-          Object {
-            "map": undefined,
-            "name": "wd14gj",
-            "next": undefined,
-            "styles": "
-              padding: 8px;
-            ",
-            "toString": [Function],
-          }
-        }
+        css="unknown styles"
         data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
       >

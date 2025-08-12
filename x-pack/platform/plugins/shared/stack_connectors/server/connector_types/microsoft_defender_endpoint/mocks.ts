@@ -147,6 +147,20 @@ const createMicrosoftDefenderConnectorMock = (): CreateMicrosoftDefenderConnecto
         '@odata.count': 1,
         value: [createMicrosoftMachineMock()],
       }),
+
+    // Machine RunScript
+    [`${apiUrl}/api/machines/1-2-3/runliveresponse`]: () =>
+      createAxiosResponseMock({
+        '@odata.context': 'https://api-us3.securitycenter.microsoft.com/api/$metadata#Machines',
+        value: [createMicrosoftMachineMock()],
+      }),
+
+    // GetActionResults - GetLiveResponseResultDownloadLink (default for test action IDs)
+    [`${apiUrl}/api/machineactions/test-action-123/GetLiveResponseResultDownloadLink(index=0)`]:
+      () =>
+        createAxiosResponseMock({
+          value: 'https://download.microsoft.com/mock-download-url/results.json',
+        }),
   };
 
   instanceMock.request.mockImplementation(
@@ -223,7 +237,22 @@ const createMicrosoftMachineAction = (
     creationDateTimeUtc: '2019-01-02T14:39:38.2262283Z',
     lastUpdateDateTimeUtc: '2019-01-02T14:40:44.6596267Z',
     externalID: 'abc',
-    commands: ['RunScript'],
+    commands: [
+      {
+        index: 0,
+        startTime: '2025-07-07T18:50:10.186354Z',
+        endTime: '2025-07-07T18:50:21.811356Z',
+        commandStatus: 'Completed',
+        errors: [],
+        command: {
+          type: 'RunScript',
+          params: [
+            { key: 'ScriptName', value: 'hello.sh' },
+            { key: 'Args', value: '--noargs' },
+          ],
+        },
+      },
+    ],
     cancellationRequestor: '',
     cancellationComment: '',
     cancellationDateTimeUtc: '',

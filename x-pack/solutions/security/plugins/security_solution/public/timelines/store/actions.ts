@@ -8,8 +8,6 @@
 import actionCreatorFactory from 'typescript-fsa';
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-
-import type { SessionViewConfig } from '../../../common/types';
 import type {
   DataProvider,
   QueryOperator,
@@ -22,11 +20,11 @@ import type {
   TimelineNonEcsData,
 } from '../../../common/search_strategy/timeline';
 import type {
-  TimelineTabs,
-  TimelinePersistInput,
-  SerializedFilterQuery,
   ColumnHeaderOptions,
+  SerializedFilterQuery,
   SortColumnTimeline,
+  TimelinePersistInput,
+  TimelineTabs,
 } from '../../../common/types/timeline';
 import type { DataProviderType, RowRendererId } from '../../../common/api/timeline';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
@@ -63,15 +61,6 @@ export const removeProvider = actionCreator<{
   providerId: string;
   andProviderId?: string;
 }>('REMOVE_PROVIDER');
-
-export const updateGraphEventId = actionCreator<{ id: string; graphEventId: string }>(
-  'UPDATE_TIMELINE_GRAPH_EVENT_ID'
-);
-
-export const updateSessionViewConfig = actionCreator<{
-  id: string;
-  sessionViewConfig: SessionViewConfig | null;
-}>('UPDATE_TIMELINE_SESSION_VIEW_CONFIG');
 
 export const unPinEvent = actionCreator<{ id: string; eventId: string }>('UN_PIN_EVENT');
 

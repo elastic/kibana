@@ -9,8 +9,9 @@
 
 import { dedent } from '../lib/indent.mjs';
 import { cleanPaths } from '../lib/clean.mjs';
-import * as Bazel from '../lib/bazel.mjs';
-import { findPluginCleanPaths } from '../lib/find_clean_paths.mjs';
+import { collectBazelPaths, findPluginCleanPaths } from '../lib/find_clean_paths.mjs';
+import Path from 'path';
+import { REPO_ROOT } from '../lib/paths.mjs';
 
 /** @type {import('../lib/command').Command} */
 export const command = {
@@ -21,9 +22,10 @@ export const command = {
     id: 'total',
   },
   flagsHelp: `
+    --allow-root         Required supplementary flag if you're running this command as root.
     --quiet              Prevent logging more than basic success/error messages
   `,
-  async run({ args, log }) {
+  async run({ log }) {
     log.warning(dedent`
       This command is only necessary for the circumstance where you need to recover a consistent
       state when problems arise. If you need to run this command often, please let us know by
@@ -33,13 +35,10 @@ export const command = {
       you might need to run 'yarn kbn reset'.
     `);
 
-    await cleanPaths(log, await findPluginCleanPaths(log));
-
-    // Runs Bazel soft clean
-    if (await Bazel.isInstalled(log)) {
-      await Bazel.clean(log, {
-        quiet: args.getBooleanValue('quiet'),
-      });
-    }
+    await cleanPaths(log, [
+      ...(await findPluginCleanPaths(log)),
+      ...collectBazelPaths(),
+      Path.resolve(REPO_ROOT, '.es', 'cache'),
+    ]);
   },
 };

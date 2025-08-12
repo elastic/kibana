@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { KueryNode, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { SyntheticsEsClient } from '../../../lib';
 import {
   FINAL_SUMMARY_FILTER,
@@ -27,7 +28,17 @@ export async function queryFilterMonitors({
   if (!ruleParams.kqlQuery) {
     return;
   }
-  const filters = toElasticsearchQuery(fromKueryExpression(ruleParams.kqlQuery));
+
+  let kueryNode: KueryNode;
+
+  // This is to check if the kqlQuery is valid, if it is not the fromKueryExpression will throw an error
+  try {
+    kueryNode = fromKueryExpression(ruleParams.kqlQuery);
+  } catch (error) {
+    return;
+  }
+
+  const filters = toElasticsearchQuery(kueryNode);
   const { body: result } = await esClient.search(
     {
       size: 0,
@@ -38,8 +49,8 @@ export async function queryFilterMonitors({
             getRangeFilter({ from: 'now-24h/m', to: 'now/m' }),
             getTimeSpanFilter(),
             {
-              term: {
-                'meta.space_id': spaceId,
+              terms: {
+                'meta.space_id': [spaceId, ALL_SPACES_ID],
               },
             },
             {

@@ -10,7 +10,7 @@ import { services } from './apm_api_integration/common/services';
 
 /**
  * Make sure to create a MKI deployment with custom Kibana image, that includes feature flags arguments
- * This tests most likely will fail on default MKI project
+ * These tests most likely will fail on default MKI project
  */
 export default createTestConfig({
   serverlessProject: 'oblt',
@@ -20,13 +20,10 @@ export default createTestConfig({
   suiteTags: { exclude: ['skipSvlOblt'] },
   services,
   // add feature flags
-  kbnServerArgs: [
-    '--xpack.security.roleManagementEnabled=true', // needed to check composite feautures in /observability/platform_security/authorization.ts
-  ],
+  kbnServerArgs: [],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
 
   // include settings from project controller
-  // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml
-  esServerArgs: ['xpack.ml.dfa.enabled=false'],
+  esServerArgs: ['xpack.security.authc.native_roles.enabled=true'],
 });

@@ -612,6 +612,35 @@ describe('SearchInterceptor', () => {
       expect(mockCoreSetup.http.delete).toHaveBeenCalledTimes(1);
     });
 
+    test('should report telemetry on timeout', async () => {
+      mockCoreSetup.http.post.mockResolvedValue(
+        getMockSearchResponse({
+          isPartial: true,
+          isRunning: true,
+          rawResponse: {
+            foo: 'bar',
+          },
+          id: '1',
+        })
+      );
+
+      const response = searchInterceptor.search({}, { pollInterval: 0 });
+      response.subscribe({ next, error });
+
+      await timeTravel(1000);
+
+      expect(mockCoreStart.analytics.reportEvent).toBeCalled();
+      expect(mockCoreStart.analytics.reportEvent.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "data_search_timeout",
+          Object {
+            "execution_context": undefined,
+            "timeout_ms": 1000,
+          },
+        ]
+      `);
+    });
+
     test('should not leak unresolved promises if DELETE fails', async () => {
       mockCoreSetup.http.delete.mockRejectedValueOnce({ status: 404, statusText: 'Not Found' });
       const responses = [

@@ -23,11 +23,23 @@ export class UiSettingsPlugin implements Plugin {
     });
 
     const router = core.http.createRouter();
-    router.get({ path: '/api/ui-settings-plugin', validate: false }, async (context, req, res) => {
-      const { uiSettings } = await context.core;
-      const uiSettingsValue = await uiSettings.client.get<number>('ui_settings_plugin');
-      return res.ok({ body: { uiSettingsValue } });
-    });
+    router.get(
+      {
+        path: '/api/ui-settings-plugin',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      async (context, req, res) => {
+        const { uiSettings } = await context.core;
+        const uiSettingsValue = await uiSettings.client.get<number>('ui_settings_plugin');
+        return res.ok({ body: { uiSettingsValue } });
+      }
+    );
   }
 
   public start() {}

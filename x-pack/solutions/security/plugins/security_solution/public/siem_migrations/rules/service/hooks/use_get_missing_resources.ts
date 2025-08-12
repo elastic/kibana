@@ -28,7 +28,9 @@ export const useGetMissingResources = (onSuccess: OnSuccess) => {
       (async () => {
         try {
           dispatch({ type: 'start' });
-          const missingResources = await siemMigrations.rules.getMissingResources(migrationId);
+          const missingResources = await siemMigrations.rules.api.getMissingResources({
+            migrationId,
+          });
 
           onSuccess(missingResources);
           dispatch({ type: 'success' });
@@ -41,7 +43,7 @@ export const useGetMissingResources = (onSuccess: OnSuccess) => {
         }
       })();
     },
-    [siemMigrations.rules, notifications.toasts, onSuccess]
+    [siemMigrations.rules.api, notifications.toasts, onSuccess]
   );
 
   return { isLoading: state.loading, error: state.error, getMissingResources };

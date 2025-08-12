@@ -17,7 +17,7 @@
     "patterns": [
       "_ml/data_frame/analytics/{id}/_start"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/start-dfanalytics.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-start-data-frame-analytics",
     "availability": {
       "stack": true,
       "serverless": true

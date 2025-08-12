@@ -105,6 +105,9 @@ export interface StaticTelemetryUsage {
       version: string;
     };
   };
+  'start-local'?: {
+    version: string;
+  };
 }
 
 export function createTelemetryUsageCollector(

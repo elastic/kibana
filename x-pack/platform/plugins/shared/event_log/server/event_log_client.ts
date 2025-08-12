@@ -6,21 +6,21 @@
  */
 
 import { omit } from 'lodash';
-import { Observable } from 'rxjs';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { IClusterClient, KibanaRequest } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
-import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
-import { KueryNode } from '@kbn/es-query';
-import { EsContext } from './es';
-import { IEventLogClient } from './types';
-import {
+import type { KueryNode } from '@kbn/es-query';
+import type { EsContext } from './es';
+import type { IEventLogClient } from './types';
+import type {
   QueryEventsBySavedObjectResult,
   QueryEventsBySavedObjectSearchAfterResult,
 } from './es/cluster_client_adapter';
-import { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
-
+import type { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 

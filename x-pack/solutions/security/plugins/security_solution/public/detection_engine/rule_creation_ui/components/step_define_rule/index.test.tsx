@@ -17,16 +17,16 @@ import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { TestProviders } from '../../../../common/mock';
 import { schema as defineRuleSchema } from './schema';
-import { stepDefineDefaultValue } from '../../../../detections/pages/detection_engine/rules/utils';
+import { stepDefineDefaultValue } from '../../../common/utils';
 import type { FormSubmitHandler } from '../../../../shared_imports';
 import { useForm } from '../../../../shared_imports';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import type { DefineStepRule } from '../../../common/types';
 import { fleetIntegrationsApi } from '../../../fleet_integrations/api/__mocks__';
 import {
   addRequiredFieldRow,
   createIndexPatternField,
   getSelectToggleButtonForName,
-} from '../../../rule_creation/components/required_fields/required_fields.test';
+} from '../../../rule_creation/components/required_fields/required_fields.test_helpers';
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 import {
   expectDuration,
@@ -72,7 +72,10 @@ jest.mock('../../../../common/components/query_bar', () => {
         <div data-test-subj={MOCKED_QUERY_BAR_TEST_ID}>
           <textarea value={filterQuery.query} onChange={handleQueryChange} />
           <input
-            role="listbox"
+            // Language selector is an expandable menu in the real component.
+            // Here we set some role distinguished from `textbox` to match the real
+            // behavior when there is a single role="textbox" input in the QueryBar
+            role="searchbox"
             type="text"
             value={filterQuery.language}
             onChange={handleLanguageChange}
@@ -115,6 +118,7 @@ jest.mock('../../../../common/lib/kibana', () => {
       addError: jest.fn(),
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      addInfo: jest.fn(),
       remove: jest.fn(),
     }),
     useKibana: () => {

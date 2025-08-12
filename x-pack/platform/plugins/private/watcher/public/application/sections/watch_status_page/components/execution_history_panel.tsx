@@ -24,6 +24,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { PAGINATION } from '../../../../../common/constants';
@@ -99,6 +100,9 @@ export const ExecutionHistoryPanel = () => {
     ? JSON.stringify(watchHistoryDetails.details, null, 2)
     : '';
 
+  const watchHistoryDetailFlyoutId = useGeneratedHtmlId({ prefix: 'watchFlyout' });
+  const watchHistoryErrorDetailsFlyoutTitleId = useGeneratedHtmlId({ prefix: 'watchErrorFlyout' });
+
   if (historyError) {
     return (
       <Fragment>
@@ -151,7 +155,7 @@ export const ExecutionHistoryPanel = () => {
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.stateHeader', {
               defaultMessage: 'State',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       ),
@@ -174,7 +178,7 @@ export const ExecutionHistoryPanel = () => {
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.metConditionHeader', {
               defaultMessage: 'Condition met',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       ),
@@ -207,7 +211,7 @@ export const ExecutionHistoryPanel = () => {
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.commentHeader', {
               defaultMessage: 'Comment',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       ),
@@ -229,12 +233,12 @@ export const ExecutionHistoryPanel = () => {
         <EuiFlyout
           data-test-subj="watchHistoryErrorDetailFlyout"
           onClose={() => setDetailWatchId(undefined)}
-          aria-labelledby="watchHistoryErrorDetailsFlyoutTitle"
+          aria-labelledby={watchHistoryErrorDetailsFlyoutTitleId}
           maxWidth={600}
         >
           <EuiFlyoutHeader>
             <EuiTitle size="s">
-              <h3 data-test-subj="title">
+              <h3 data-test-subj="title" id={watchHistoryErrorDetailsFlyoutTitleId}>
                 <FormattedMessage
                   id="xpack.watcher.sections.watchHistory.watchHistoryDetail.errorTitle"
                   defaultMessage="Execution details"
@@ -286,12 +290,7 @@ export const ExecutionHistoryPanel = () => {
                     defaultMessage: 'State',
                   }
                 )}{' '}
-                <EuiIcon
-                  size="s"
-                  color="subdued"
-                  type="questionInCircle"
-                  className="eui-alignTop"
-                />
+                <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
               </span>
             </EuiToolTip>
           ),
@@ -305,12 +304,12 @@ export const ExecutionHistoryPanel = () => {
         <EuiFlyout
           data-test-subj="watchHistoryDetailFlyout"
           onClose={() => setDetailWatchId(undefined)}
-          aria-labelledby="watchHistoryDetailsFlyoutTitle"
+          aria-labelledby={watchHistoryDetailFlyoutId}
           maxWidth={600}
         >
           <EuiFlyoutHeader>
             <EuiTitle size="s">
-              <h3 data-test-subj="title">
+              <h3 data-test-subj="title" id={watchHistoryDetailFlyoutId}>
                 <FormattedMessage
                   id="xpack.watcher.sections.watchHistory.watchHistoryDetail.title"
                   defaultMessage="Executed on {date}"

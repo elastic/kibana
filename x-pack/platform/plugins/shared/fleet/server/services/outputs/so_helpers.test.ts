@@ -18,6 +18,7 @@ describe(`_getFieldsToIncludeEncryptedSO`, () => {
       Array [
         "ssl",
         "password",
+        "kibana_api_key",
         "service_token",
         "shipper",
         "allow_edit",

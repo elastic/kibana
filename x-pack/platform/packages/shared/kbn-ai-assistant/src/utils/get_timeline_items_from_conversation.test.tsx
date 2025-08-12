@@ -12,7 +12,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ChatState, Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { createMockChatService } from './create_mock_chat_service';
 import { KibanaContextProvider } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
-import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
+import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/common';
 
 const mockChatService = createMockChatService();
 
@@ -43,6 +43,7 @@ describe('getTimelineItemsFromConversation', () => {
       messages: [],
       chatState: ChatState.Ready,
       onActionClick: jest.fn(),
+      isArchived: false,
     });
 
     expect(items.length).toBe(1);
@@ -70,8 +71,10 @@ describe('getTimelineItemsFromConversation', () => {
           },
         ],
         onActionClick: jest.fn(),
+        isArchived: false,
       });
     });
+
     it('includes the opening message and the user message', () => {
       expect(items.length).toBe(2);
       expect(items[0].title).toBe('started a conversation');
@@ -137,6 +140,7 @@ describe('getTimelineItemsFromConversation', () => {
           },
         ],
         onActionClick: jest.fn(),
+        isArchived: false,
       });
     });
 
@@ -222,6 +226,7 @@ describe('getTimelineItemsFromConversation', () => {
           },
         ],
         onActionClick: jest.fn(),
+        isArchived: false,
       });
     });
 
@@ -298,6 +303,7 @@ describe('getTimelineItemsFromConversation', () => {
           },
         ],
         onActionClick: jest.fn(),
+        isArchived: false,
       });
     });
 
@@ -364,6 +370,7 @@ describe('getTimelineItemsFromConversation', () => {
           },
         ],
         onActionClick: jest.fn(),
+        isArchived: false,
       });
     });
 
@@ -415,6 +422,7 @@ describe('getTimelineItemsFromConversation', () => {
           },
         ],
         onActionClick: jest.fn(),
+        isArchived: false,
       });
     });
 
@@ -467,6 +475,7 @@ describe('getTimelineItemsFromConversation', () => {
           ...extraMessages,
         ],
         onActionClick: jest.fn(),
+        isArchived: false,
       });
     };
 

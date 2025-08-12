@@ -5,6 +5,10 @@
     "types": ["jest", "node"]
   },
   "include": ["**/*.ts", "**/*.tsx"],
-  "kbn_references": ["@kbn/logging-mocks", "@kbn/timerange"],
+  "kbn_references": [
+    "@kbn/logging-mocks",
+    "@kbn/timerange",
+    "@kbn/logging",
+  ],
   "exclude": ["target/**/*"]
 }

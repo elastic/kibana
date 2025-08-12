@@ -35,7 +35,7 @@ export const OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT: ObservabilityOnboardingTe
       type: 'keyword',
       _meta: {
         description:
-          "The current onboarding flow type user is going through (e.g. 'autoDetect', 'logFiles', 'kubernetes'). If not present, user is on the landing screen.",
+          "The current onboarding flow type user is going through (e.g. 'autoDetect', 'kubernetes'). If not present, user is on the landing screen.",
       },
     },
     flow_id: {

@@ -25,6 +25,7 @@ import {
   LEGACY_NOTIFICATIONS_ID,
   CLOUD_POSTURE_APP_ID,
   SERVER_APP_ID,
+  SECURITY_FEATURE_ID_V3,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -49,6 +50,19 @@ const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
 export const getSecurityV2BaseKibanaFeature = ({
   savedObjects,
 }: SecurityFeatureParams): BaseKibanaFeatureConfig => ({
+  deprecated: {
+    notice: i18n.translate(
+      'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSecurity.deprecationMessage',
+      {
+        defaultMessage: 'The {currentId} permissions are deprecated, please see {latestId}.',
+        values: {
+          currentId: SECURITY_FEATURE_ID_V2,
+          latestId: SECURITY_FEATURE_ID_V3,
+        },
+      }
+    ),
+  },
+
   id: SECURITY_FEATURE_ID_V2,
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionTitle',
@@ -74,20 +88,19 @@ export const getSecurityV2BaseKibanaFeature = ({
   ),
   privileges: {
     all: {
+      replacedBy: {
+        default: [
+          // note: overriden by product feature endpointArtifactManagement when enabled
+          { feature: SECURITY_FEATURE_ID_V3, privileges: ['all'] },
+        ],
+        minimal: [
+          // note: overriden by product feature endpointArtifactManagement when enabled
+          { feature: SECURITY_FEATURE_ID_V3, privileges: ['minimal_all'] },
+        ],
+      },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [
-        APP_ID,
-        'lists-all',
-        'lists-read',
-        'lists-summary',
-        'rac',
-        'cloud-security-posture-all',
-        'cloud-security-posture-read',
-        'cloud-defend-all',
-        'cloud-defend-read',
-        'bulkGetUserProfiles',
-      ],
+      api: [APP_ID, 'rac', 'lists-all', 'lists-read', 'lists-summary'],
       savedObject: {
         all: ['alert', ...savedObjects],
         read: [],
@@ -102,16 +115,13 @@ export const getSecurityV2BaseKibanaFeature = ({
       ui: ['show', 'crud'],
     },
     read: {
+      replacedBy: {
+        default: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['read'] }],
+        minimal: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['minimal_read'] }],
+      },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [
-        APP_ID,
-        'lists-read',
-        'rac',
-        'cloud-security-posture-read',
-        'cloud-defend-read',
-        'bulkGetUserProfiles',
-      ],
+      api: [APP_ID, 'rac', 'lists-read'],
       savedObject: {
         all: [],
         read: [...savedObjects],

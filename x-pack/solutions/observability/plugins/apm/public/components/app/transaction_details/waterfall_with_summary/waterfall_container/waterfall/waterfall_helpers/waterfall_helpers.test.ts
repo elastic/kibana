@@ -26,12 +26,14 @@ import {
   convertTreeToList,
   updateTraceTreeNode,
   reparentOrphanItems,
+  generateLegendsAndAssignColorsToWaterfall,
 } from './waterfall_helpers';
 import type { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import type {
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../../../common/waterfall/typings';
+import { WaterfallLegendType } from '../../../../../../../../common/waterfall/legend';
 
 describe('waterfall_helpers', () => {
   const hits = [
@@ -449,7 +451,7 @@ describe('waterfall_helpers', () => {
     it('should order items correctly', () => {
       const legendValues = {
         serviceName: 'opbeans-java',
-        spanType: '',
+        type: '',
       };
 
       const items: IWaterfallSpanOrTransaction[] = [
@@ -964,7 +966,7 @@ describe('waterfall_helpers', () => {
         duration: 49660,
         offset: 0,
         skew: 0,
-        legendValues: { serviceName: 'opbeans-node', spanType: '' },
+        legendValues: { serviceName: 'opbeans-node', type: '' },
         color: '',
         spanLinksCount: { linkedParents: 0, linkedChildren: 0 },
       },
@@ -993,7 +995,7 @@ describe('waterfall_helpers', () => {
             duration: 47557,
             offset: 1754,
             skew: 0,
-            legendValues: { serviceName: 'opbeans-node', spanType: '' },
+            legendValues: { serviceName: 'opbeans-node', type: '' },
             color: '',
             spanLinksCount: { linkedParents: 0, linkedChildren: 0 },
           },
@@ -1095,7 +1097,7 @@ describe('waterfall_helpers', () => {
             duration: 47557,
             offset: 1754,
             skew: 0,
-            legendValues: { serviceName: 'opbeans-node', spanType: '' },
+            legendValues: { serviceName: 'opbeans-node', type: '' },
             color: '',
             spanLinksCount: { linkedParents: 0, linkedChildren: 0 },
           },
@@ -1141,6 +1143,92 @@ describe('waterfall_helpers', () => {
             hasInitializedChildren: false,
           })
         );
+      });
+    });
+  });
+
+  describe('generateLegendsAndAssignColorsToWaterfall', () => {
+    const createWaterfallItem = (overrides: Partial<IWaterfallItem>): IWaterfallItem =>
+      ({
+        docType: 'span',
+        doc: { service: { name: 'default-service' } },
+        legendValues: {
+          [WaterfallLegendType.ServiceName]: 'default-service',
+          [WaterfallLegendType.Type]: 'http',
+        },
+        color: '',
+        ...overrides,
+      } as IWaterfallItem);
+
+    describe('generateLegendsAndAssignColorsToWaterfall', () => {
+      it('should generate legends for multiple services', () => {
+        const waterfallItems: IWaterfallItem[] = [
+          createWaterfallItem({
+            doc: { service: { name: 'service-a' } },
+            legendValues: {
+              [WaterfallLegendType.ServiceName]: 'service-a',
+            },
+          } as Partial<IWaterfallSpan>),
+          createWaterfallItem({
+            doc: { service: { name: 'service-b' } },
+            legendValues: {
+              [WaterfallLegendType.ServiceName]: 'service-b',
+            },
+          } as Partial<IWaterfallSpan>),
+        ];
+
+        const { legends, colorBy } = generateLegendsAndAssignColorsToWaterfall(waterfallItems);
+        expect(legends.length).toBeGreaterThanOrEqual(2);
+        expect(colorBy).toBe(WaterfallLegendType.ServiceName);
+      });
+
+      it('should generate legends for span types when only one service exists', () => {
+        const waterfallItems: IWaterfallItem[] = [
+          createWaterfallItem({
+            legendValues: { [WaterfallLegendType.Type]: 'db' },
+          } as Partial<IWaterfallSpan>),
+          createWaterfallItem({
+            legendValues: { [WaterfallLegendType.Type]: 'cache' },
+          } as Partial<IWaterfallSpan>),
+        ];
+
+        const { legends, colorBy } = generateLegendsAndAssignColorsToWaterfall(waterfallItems);
+        expect(legends.length).toBeGreaterThanOrEqual(2);
+        expect(colorBy).toBe(WaterfallLegendType.Type);
+      });
+
+      it('should correctly assign colors to items based on legend type', () => {
+        const waterfallItems: IWaterfallItem[] = [
+          createWaterfallItem({
+            legendValues: { [WaterfallLegendType.ServiceName]: 'service-x' },
+          } as Partial<IWaterfallSpan>),
+          createWaterfallItem({
+            legendValues: { [WaterfallLegendType.ServiceName]: 'service-y' },
+          } as Partial<IWaterfallSpan>),
+        ];
+
+        generateLegendsAndAssignColorsToWaterfall(waterfallItems);
+
+        expect(waterfallItems[0].color).toBeDefined();
+        expect(waterfallItems[1].color).toBeDefined();
+        expect(waterfallItems[0].color).not.toBe(waterfallItems[1].color);
+      });
+
+      it('should fall back to service color if span type is missing', () => {
+        const waterfallItems: IWaterfallItem[] = [
+          createWaterfallItem({
+            legendValues: {},
+            doc: { service: { name: 'fallback-service' } },
+          } as Partial<IWaterfallSpan>),
+        ];
+
+        generateLegendsAndAssignColorsToWaterfall(waterfallItems);
+
+        expect(waterfallItems[0].color).toBeDefined();
+      });
+
+      it('should handle empty input without errors', () => {
+        expect(() => generateLegendsAndAssignColorsToWaterfall([])).not.toThrow();
       });
     });
   });

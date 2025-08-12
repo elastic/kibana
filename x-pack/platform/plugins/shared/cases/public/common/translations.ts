@@ -273,6 +273,10 @@ export const SYNC_ALERTS_SWITCH_LABEL_OFF = i18n.translate(
   }
 );
 
+export const SYNC_ALERTS = i18n.translate('xpack.cases.settings.syncAlerts', {
+  defaultMessage: 'Sync alerts',
+});
+
 export const SYNC_ALERTS_HELP = i18n.translate('xpack.cases.components.create.syncAlertHelpText', {
   defaultMessage: 'Enabling this option will sync the alert statuses with the case status.',
 });

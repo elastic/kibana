@@ -255,10 +255,7 @@ describe('Alert Suppression Rules', () => {
       expect(isSuppressionRuleInGA('threat_match')).toBe(true);
       expect(isSuppressionRuleInGA('new_terms')).toBe(true);
       expect(isSuppressionRuleInGA('machine_learning')).toBe(true);
-    });
-
-    test('should return false for rule type suppression in tech preview', () => {
-      expect(isSuppressionRuleInGA('eql')).toBe(false);
+      expect(isSuppressionRuleInGA('eql')).toBe(true);
     });
   });
   describe('isSuppressionRuleConfiguredWithDuration', () => {

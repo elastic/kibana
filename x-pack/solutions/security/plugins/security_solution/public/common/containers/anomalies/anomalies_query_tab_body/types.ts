@@ -24,8 +24,6 @@ export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
   deleteQuery?: ({ id }: { id: string }) => void;
   endDate: GlobalTimeArgs['to'];
   flowTarget?: FlowTargetSourceDest;
-  indexNames: string[];
-  setQuery: GlobalTimeArgs['setQuery'];
   startDate: GlobalTimeArgs['from'];
   skip: boolean;
   hideHistogramIfEmpty?: boolean;

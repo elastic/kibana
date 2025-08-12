@@ -55,7 +55,7 @@ export const mockSourceLayer = {
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: 'euiColorVisNeutral0' },
+        options: { color: 'euiColorVisBase0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -113,7 +113,7 @@ export const mockDestinationLayer = {
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: 'euiColorVisNeutral0' },
+        options: { color: 'euiColorVisBase0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -169,7 +169,7 @@ export const mockClientLayer = {
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: 'euiColorVisNeutral0' },
+        options: { color: 'euiColorVisBase0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -232,7 +232,7 @@ export const mockServerLayer = {
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: 'euiColorVisNeutral0' },
+        options: { color: 'euiColorVisBase0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -535,9 +535,10 @@ export const mockCommaFilebeatExclusionGlobIndexPattern: IndexPatternSavedObject
 export const mockEuiTheme: EuiThemeComputed<{}> = {
   colors: {
     vis: {
-      euiColorVisNeutral0: 'euiColorVisNeutral0',
+      euiColorVisNeutral1: 'euiColorVisNeutral1',
       euiColorVis4: 'euiColorVis4',
       euiColorVis2: 'euiColorVis2',
+      euiColorVisBase0: 'euiColorVisBase0',
     },
   },
 } as unknown as EuiThemeComputed<{}>;

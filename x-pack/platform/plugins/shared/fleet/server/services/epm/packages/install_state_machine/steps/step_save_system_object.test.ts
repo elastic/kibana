@@ -102,6 +102,7 @@ describe('updateLatestExecutedState', () => {
     ]);
     expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
       action: 'update',
+      name: 'test-integration',
       id: 'test-integration',
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
@@ -169,6 +170,7 @@ describe('updateLatestExecutedState', () => {
     expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
       action: 'update',
       id: 'test-integration',
+      name: 'test-integration',
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
     expect(packagePolicyService.bulkUpgrade).toHaveBeenCalledWith(

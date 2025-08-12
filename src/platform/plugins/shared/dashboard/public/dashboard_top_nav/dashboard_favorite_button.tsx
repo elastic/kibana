@@ -14,7 +14,7 @@ import {
   FavoritesContextProvider,
 } from '@kbn/content-management-favorites-public';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { DASHBOARD_APP_ID } from '../plugin_constants';
+import { DASHBOARD_APP_ID } from '../../common/constants';
 import { DASHBOARD_CONTENT_ID } from '../utils/telemetry_constants';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';

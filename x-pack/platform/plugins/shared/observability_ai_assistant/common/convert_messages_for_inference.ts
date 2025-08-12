@@ -12,15 +12,13 @@ import {
 } from '@kbn/inference-common';
 import { generateFakeToolCallId } from '@kbn/inference-plugin/common';
 import type { Logger } from '@kbn/logging';
+import { takeWhile } from 'lodash';
 import { Message, MessageRole } from '.';
 
 function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'error'>) {
   try {
-    return JSON.parse(jsonString ?? '{}');
+    return JSON.parse(jsonString?.trim() ?? '{}');
   } catch (error) {
-    logger.error(
-      `Failed to parse function call arguments when converting messages for inference: ${error}`
-    );
     // if the LLM returns invalid JSON, it is likley because it is hallucinating
     // the function. We don't want to propogate the error about invalid JSON here.
     // Any errors related to the function call will be caught when the function and
@@ -29,13 +27,51 @@ function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'err
   }
 }
 
+export function collapseInternalToolCalls(messages: Message[], logger: Pick<Logger, 'error'>) {
+  const collapsed: Message[] = [];
+
+  for (let i = 0; i < messages.length; i++) {
+    const message = messages[i];
+
+    if (message.message.role === MessageRole.User && message.message.name === 'query') {
+      const messagesToCollapse = takeWhile(messages.slice(i + 1), (msg) => {
+        const name = msg.message.name || msg.message.function_call?.name;
+        return name && ['query', 'visualize_query', 'execute_query'].includes(name);
+      });
+
+      if (messagesToCollapse.length) {
+        const content = JSON.parse(message.message.content!);
+        collapsed.push({
+          ...message,
+          message: {
+            ...message.message,
+            content: JSON.stringify({
+              ...content,
+              steps: convertMessagesForInference(messagesToCollapse, logger),
+            }),
+          },
+        });
+
+        i += messagesToCollapse.length;
+        continue;
+      }
+    }
+
+    collapsed.push(message);
+  }
+
+  return collapsed;
+}
+
 export function convertMessagesForInference(
   messages: Message[],
   logger: Pick<Logger, 'error'>
 ): InferenceMessage[] {
   const inferenceMessages: InferenceMessage[] = [];
 
-  messages.forEach((message) => {
+  const collapsedMessages: Message[] = collapseInternalToolCalls(messages, logger);
+
+  collapsedMessages.forEach((message, idx) => {
     if (message.message.role === MessageRole.Assistant) {
       inferenceMessages.push({
         role: InferenceMessageRole.Assistant,

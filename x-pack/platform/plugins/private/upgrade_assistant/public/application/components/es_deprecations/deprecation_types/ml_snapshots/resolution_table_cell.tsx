@@ -7,14 +7,7 @@
 
 import React from 'react';
 
-import {
-  EuiToolTip,
-  EuiFlexItem,
-  EuiText,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiText, EuiFlexGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useMlSnapshotContext } from './context';
@@ -56,19 +49,6 @@ const i18nTexts = {
       defaultMessage: 'Deletion failed',
     }
   ),
-  resolutionText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.resolutionText',
-    {
-      defaultMessage: 'Upgrade or delete snapshots',
-    }
-  ),
-  resolutionTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.resolutionTooltipLabel',
-    {
-      defaultMessage:
-        'Resolve this issue by upgrading or deleting a job model snapshot. This issue can be resolved automatically.',
-    }
-  ),
 };
 
 export const MlSnapshotsResolutionCell: React.FunctionComponent = () => {
@@ -95,7 +75,7 @@ export const MlSnapshotsResolutionCell: React.FunctionComponent = () => {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlActionResolutionCell">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="check" color="success" />
+          <EuiIcon type="checkInCircleFilled" color="success" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
@@ -112,7 +92,7 @@ export const MlSnapshotsResolutionCell: React.FunctionComponent = () => {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlActionResolutionCell">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="warning" color="danger" />
+          <EuiIcon type="warningFilled" color="danger" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
@@ -125,16 +105,5 @@ export const MlSnapshotsResolutionCell: React.FunctionComponent = () => {
     );
   }
 
-  return (
-    <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
-      <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlActionResolutionCell">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="indexSettings" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
-  );
+  return <></>;
 };

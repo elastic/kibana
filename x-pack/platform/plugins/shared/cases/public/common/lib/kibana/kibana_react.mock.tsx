@@ -41,7 +41,7 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
     security: securityMock.createStart(),
     triggersActionsUi: {
       actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-      getAlertsStateTable: jest.fn().mockReturnValue(<div data-test-subj="alerts-table" />),
+      getAlertsStateTable: jest.fn(() => <div data-test-subj="alerts-table" />),
     },
     spaces: spacesPluginMock.createStartContract(),
     licensing:

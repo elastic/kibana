@@ -46,7 +46,6 @@ export interface CreateRuleFormProps {
   canShowConsumerSelection?: boolean;
   showMustacheAutocompleteSwitch?: boolean;
   isFlyout?: boolean;
-  isServerless?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
   onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
@@ -67,7 +66,6 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     canShowConsumerSelection = true,
     showMustacheAutocompleteSwitch = false,
     isFlyout,
-    isServerless = false,
     onCancel,
     onSubmit,
     onChangeMetaData,
@@ -109,7 +107,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     healthCheckError,
     connectors,
     connectorTypes,
-    aadTemplateFields,
+    alertFields,
     flappingSettings,
   } = useLoadDependencies({
     http,
@@ -138,6 +136,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           actions: newFormData.actions,
           alertDelay: newFormData.alertDelay,
           flapping: newFormData.flapping,
+          artifacts: newFormData.artifacts,
         },
       });
     },
@@ -194,7 +193,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
         plugins,
         connectors,
         connectorTypes,
-        aadTemplateFields,
+        alertFields,
         minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
         selectedRuleTypeModel: ruleTypeModel,
         selectedRuleType: ruleType,
@@ -212,7 +211,6 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           validConsumers,
           ruleType,
           ruleTypes,
-          isServerless,
         }),
       }}
     >

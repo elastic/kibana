@@ -27,7 +27,7 @@ export function DescriptionCallout() {
         title={i18n.translate('xpack.infra.profiling.descriptionCallout.title', {
           defaultMessage: 'Displaying Resource Consumption for this Host',
         })}
-        iconType="iInCircle"
+        iconType="info"
       >
         <EuiText>
           {i18n.translate('xpack.infra.profiling.descriptionCallout.body', {

@@ -6,8 +6,12 @@
  */
 
 import moment from 'moment';
-import type { AnalyticsServiceSetup, AuditLogger } from '@kbn/core/server';
-import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  type Logger,
+  type AnalyticsServiceSetup,
+  type AuditLogger,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -108,9 +112,16 @@ export const registerEntityStoreDataViewRefreshTask = ({
       config: entityStoreConfig,
       security,
       request,
+      uiSettingsClient: core.uiSettings.asScopedToClient(soClient),
     });
 
-    await entityStoreClient.applyDataViewIndices();
+    const { errors } = await entityStoreClient.applyDataViewIndices();
+
+    if (errors.length > 0) {
+      logger.error(
+        `Errors applying data view changes to the entity store. Errors: \n${errors.join('\n\n')}`
+      );
+    }
   };
 
   taskManager.registerTaskDefinitions({

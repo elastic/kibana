@@ -7,6 +7,12 @@
 
 import { EuiAvatar, EuiHighlight } from '@elastic/eui';
 import React from 'react';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
+import {
+  KIBANA_OBSERVABILITY_PROJECT,
+  KIBANA_SECURITY_PROJECT,
+  KIBANA_SEARCH_PROJECT,
+} from '@kbn/projects-solutions-groups';
 
 import { ServiceProviderKeys } from '../../../constants';
 import elasticIcon from '../assets/images/elastic.svg';
@@ -18,15 +24,28 @@ import azureOpenAIIcon from '../assets/images/azure_open_ai.svg';
 import googleAIStudioIcon from '../assets/images/google_ai_studio.svg';
 import mistralIcon from '../assets/images/mistral.svg';
 import amazonBedrockIcon from '../assets/images/amazon_bedrock.svg';
+import amazonSageMakerIcon from '../assets/images/amazon_sagemaker_monochrome.svg';
 import anthropicIcon from '../assets/images/anthropic.svg';
 import alibabaCloudIcon from '../assets/images/alibaba_cloud.svg';
 import ibmWatsonxIcon from '../assets/images/ibm_watsonx.svg';
 import jinaAIIcon from '../assets/images/jinaai.svg';
+import voyageAIIcon from '../assets/images/voyageai.svg';
+import deepSeekIcon from '../assets/images/deepseek.svg';
 
 interface ServiceProviderProps {
   providerKey: ServiceProviderKeys;
   searchValue?: string;
 }
+
+type SolutionKeys = Partial<{
+  [key in SolutionView]: string;
+}>;
+
+export const solutionKeys: SolutionKeys = {
+  [KIBANA_OBSERVABILITY_PROJECT]: 'Observability',
+  [KIBANA_SECURITY_PROJECT]: 'Security',
+  [KIBANA_SEARCH_PROJECT]: 'Search',
+};
 
 export type ProviderSolution = 'Observability' | 'Security' | 'Search';
 
@@ -41,6 +60,11 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     icon: amazonBedrockIcon,
     name: 'Amazon Bedrock',
     solutions: ['Observability', 'Security', 'Search'],
+  },
+  [ServiceProviderKeys.amazon_sagemaker]: {
+    icon: amazonSageMakerIcon,
+    name: 'Amazon SageMaker',
+    solutions: ['Search'],
   },
   [ServiceProviderKeys.azureaistudio]: {
     icon: azureAIStudioIcon,
@@ -110,6 +134,16 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
   [ServiceProviderKeys.jinaai]: {
     icon: jinaAIIcon,
     name: 'Jina AI',
+    solutions: ['Search'],
+  },
+  [ServiceProviderKeys.voyageai]: {
+    icon: voyageAIIcon,
+    name: 'Voyage AI',
+    solutions: ['Search'],
+  },
+  [ServiceProviderKeys.deepseek]: {
+    icon: deepSeekIcon,
+    name: 'DeepSeek',
     solutions: ['Search'],
   },
 };

@@ -30,7 +30,7 @@ export const ChartPlaceholder = ({ style }: { style?: React.CSSProperties }) => 
       <ChartLoadingProgress hasTopMargin={false} />
       <EuiFlexGroup style={style} justifyContent="center" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiLoadingChart mono size="l" />
+          <EuiLoadingChart size="l" />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

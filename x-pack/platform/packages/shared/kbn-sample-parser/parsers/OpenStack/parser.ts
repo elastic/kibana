@@ -22,3 +22,18 @@ export function replaceTimestamp(logLine: string, timestamp: number): string {
   const newTimestamp = moment.utc(timestamp).format('YYYY-MM-DD HH:mm:ss.SSS');
   return logLine.replace(TIMESTAMP_REGEX, newTimestamp);
 }
+
+export function getFakeMetadata(logLine: string): object {
+  const hostNames = ['host1', 'host2', 'host3'];
+  const userNames = ['userA', 'userB', 'userC'];
+  const processNames = ['processX', 'processY', 'processZ'];
+
+  return {
+    'host.name': hostNames[Math.floor(Math.random() * hostNames.length)],
+    'user.name': userNames[Math.floor(Math.random() * userNames.length)],
+    'process.name': processNames[Math.floor(Math.random() * processNames.length)],
+    'process.pid': Math.floor(Math.random() * 10000),
+    'kubernetes.pod.name': `pod-${Math.floor(Math.random() * 1000)}`,
+    'kubernetes.namespace': `namespace-${Math.floor(Math.random() * 100)}`,
+  };
+}

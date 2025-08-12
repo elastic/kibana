@@ -89,6 +89,7 @@ export interface AgentClient {
    */
   listAgents(
     options: ListWithKuery & {
+      showAgentless?: boolean;
       showInactive: boolean;
       aggregations?: Record<string, AggregationsAggregationContainer>;
       searchAfter?: SortResults;
@@ -134,6 +135,7 @@ class AgentClientImpl implements AgentClient {
 
   public async listAgents(
     options: ListWithKuery & {
+      showAgentless?: boolean;
       showInactive: boolean;
       aggregations?: Record<string, AggregationsAggregationContainer>;
       searchAfter?: SortResults;

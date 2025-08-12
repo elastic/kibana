@@ -7,25 +7,19 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+  ILM_LOCATOR_ID,
   IlmLocatorParams,
   Phases,
   PolicyFromES,
 } from '@kbn/index-lifecycle-management-common-shared';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import {
-  IngestStreamGetResponse,
   IngestStreamLifecycle,
-  StreamGetResponse,
-  UnwiredStreamGetResponse,
-  WiredStreamGetResponse,
   getAncestors,
   isIlmLifecycle,
-  isUnwiredStreamGetResponse,
-  isWiredStreamDefinition,
-  isWiredStreamGetResponse,
   findInheritedLifecycle,
   findInheritingStreams,
   isDslLifecycle,
+  Streams,
 } from '@kbn/streams-schema';
 import {
   EuiButton,
@@ -51,10 +45,12 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import useToggle from 'react-use/lib/useToggle';
+import { useKibana } from '../../../hooks/use_kibana';
 import { rolloverCondition } from './helpers/rollover_condition';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useWiredStreams } from '../../../hooks/use_wired_streams';
@@ -67,9 +63,8 @@ interface ModalOptions {
   closeModal: () => void;
   updateLifecycle: (lifecycle: IngestStreamLifecycle) => void;
   getIlmPolicies: () => Promise<PolicyFromES[]>;
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   updateInProgress: boolean;
-  ilmLocator?: LocatorPublic<IlmLocatorParams>;
 }
 
 export function EditLifecycleModal({
@@ -97,6 +92,8 @@ const isInvalidRetention = (value: string) => {
 };
 
 function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }: ModalOptions) {
+  const modalTitleId = useGeneratedHtmlId();
+
   const timeUnits = [
     { name: 'Days', value: 'd' },
     { name: 'Hours', value: 'h' },
@@ -124,9 +121,9 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
   );
 
   return (
-    <EuiModal onClose={closeModal}>
+    <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.streams.streamDetailLifecycle.editRetention', {
             defaultMessage: 'Edit data retention for stream',
           })}
@@ -231,9 +228,17 @@ function IlmModal({
   updateLifecycle,
   updateInProgress,
   getIlmPolicies,
-  ilmLocator,
   definition,
 }: ModalOptions) {
+  const modalTitleId = useGeneratedHtmlId();
+
+  const {
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
+
+  const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
   const existingLifecycle = definition.stream.ingest.lifecycle;
   const [selectedPolicy, setSelectedPolicy] = useState(
     isIlmLifecycle(existingLifecycle) ? existingLifecycle.ilm.policy : undefined
@@ -294,9 +299,9 @@ function IlmModal({
   }, []);
 
   return (
-    <EuiModal onClose={closeModal}>
+    <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.streams.streamDetailLifecycle.attachIlm', {
             defaultMessage: 'Attach a lifecycle policy to this stream',
           })}
@@ -372,10 +377,10 @@ function IlmModal({
 }
 
 function InheritModal({ definition, ...options }: ModalOptions) {
-  if (isWiredStreamGetResponse(definition)) {
+  if (Streams.WiredStream.GetResponse.is(definition)) {
     return <InheritModalWired definition={definition} {...options} />;
-  } else if (isUnwiredStreamGetResponse(definition)) {
-    return <InheritModalUnwired definition={definition} {...options} />;
+  } else if (Streams.ClassicStream.GetResponse.is(definition)) {
+    return <InheritModalClassic definition={definition} {...options} />;
   }
 }
 
@@ -384,7 +389,9 @@ function InheritModalWired({
   closeModal,
   updateInProgress,
   updateLifecycle,
-}: ModalOptions & { definition: WiredStreamGetResponse }) {
+}: ModalOptions & { definition: Streams.WiredStream.GetResponse }) {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { wiredStreams, isLoading: wiredStreamsLoading } = useWiredStreams();
 
   const parents = useMemo(() => {
@@ -397,9 +404,9 @@ function InheritModalWired({
   }, [definition, wiredStreams, wiredStreamsLoading]);
 
   return (
-    <EuiModal onClose={closeModal}>
+    <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleTitle', {
             defaultMessage: 'Set data retention to default',
           })}
@@ -447,16 +454,18 @@ function InheritModalWired({
   );
 }
 
-function InheritModalUnwired({
+function InheritModalClassic({
   definition,
   closeModal,
   updateInProgress,
   updateLifecycle,
-}: ModalOptions & { definition: UnwiredStreamGetResponse }) {
+}: ModalOptions & { definition: Streams.ClassicStream.GetResponse }) {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiModal onClose={closeModal}>
+    <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleTitle', {
             defaultMessage: 'Set data retention to default',
           })}
@@ -464,9 +473,9 @@ function InheritModalUnwired({
       </EuiModalHeader>
 
       <EuiModalBody>
-        {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleUnwiredDesc', {
+        {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleClassicDesc', {
           defaultMessage:
-            'All custom retention settings for this stream will be removed, resetting it to use the configuration of the data stream.',
+            'All custom retention settings for this stream will be removed, resetting it to use the configuration of the template.',
         })}
       </EuiModalBody>
 
@@ -489,7 +498,7 @@ function ModalFooter({
   onConfirm,
   closeModal,
 }: {
-  definition: StreamGetResponse;
+  definition: Streams.all.GetResponse;
   updateInProgress: boolean;
   confirmationLabel: string;
   confirmationIsDisabled?: boolean;
@@ -498,19 +507,19 @@ function ModalFooter({
 }) {
   const { wiredStreams, isLoading: wiredStreamsLoading } = useWiredStreams();
   const inheritingStreams = useMemo(() => {
-    if (!isWiredStreamGetResponse(definition) || wiredStreamsLoading || !wiredStreams) {
+    if (!Streams.WiredStream.GetResponse.is(definition) || wiredStreamsLoading || !wiredStreams) {
       return [];
     }
     return findInheritingStreams(
       definition.stream,
-      wiredStreams.filter(isWiredStreamDefinition)
+      wiredStreams.filter(Streams.WiredStream.Definition.is)
     ).filter((name) => name !== definition.stream.name);
   }, [definition, wiredStreams, wiredStreamsLoading]);
 
   return (
     <EuiModalFooter>
       <EuiFlexGroup direction="column">
-        {isWiredStreamGetResponse(definition) ? (
+        {Streams.WiredStream.GetResponse.is(definition) ? (
           <EuiFlexItem>
             <EuiCallOut
               title={i18n.translate(

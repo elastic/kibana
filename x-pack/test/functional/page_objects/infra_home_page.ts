@@ -31,7 +31,9 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await datePickerInput.type(time);
 
       // dismiss the tooltip, which won't be hidden because blur doesn't happen reliably
-      await testSubjects.click('waffleDatePickerIntervalTooltip');
+      await this.dismissDatePickerTooltip();
+
+      await datePickerInput.pressKeys(browser.keys.ESCAPE);
 
       await this.waitForLoading();
     },
@@ -129,8 +131,8 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await comboBox.setElement(groupByCustomField, field);
       await testSubjects.click('groupByCustomFieldAddButton');
       await this.waitForLoading();
-      const groupNameLinks = await testSubjects.findAll('groupNameLink');
-      return Promise.all(groupNameLinks.map(async (link) => link.getVisibleText()));
+      const groupNameButtons = await testSubjects.findAll('groupNameButton');
+      return Promise.all(groupNameButtons.map((link) => link.getVisibleText()));
     },
 
     async enterSearchTerm(query: string) {

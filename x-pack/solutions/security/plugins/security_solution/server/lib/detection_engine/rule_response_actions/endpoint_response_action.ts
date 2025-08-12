@@ -6,6 +6,8 @@
  */
 
 import { each } from 'lodash';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { EndpointError } from '../../../../common/endpoint/errors';
 import { stringify } from '../../../endpoint/utils/stringify';
 import type {
   RuleResponseEndpointAction,
@@ -30,12 +32,29 @@ export const endpointResponseAction = async (
   );
   const ruleId = alerts[0].kibana.alert?.rule.uuid;
   const ruleName = alerts[0].kibana.alert?.rule.name;
-  const logMsgPrefix = `Rule [${ruleName}][${ruleId}]:`;
-  const { comment, command } = responseAction.params;
   const errors: string[] = [];
+  let spaceId = (alerts[0].kibana.space_ids ?? [])[0];
+
+  if (endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+    if (!spaceId) {
+      logger.error(
+        new EndpointError(
+          `Unable to identify the space ID from alert data ('kibana.space_ids') for rule [${ruleName}][${ruleId}]`
+        )
+      );
+      return;
+    }
+  } else {
+    // force the space to `default` when space awareness is not enabled
+    spaceId = DEFAULT_SPACE_ID;
+  }
+
+  const logMsgPrefix = `Rule [${ruleName}][${ruleId}][${spaceId}]:`;
+  const { comment, command } = responseAction.params;
   const responseActionsClient = endpointAppContextService.getInternalResponseActionsClient({
     agentType: 'endpoint',
     username: 'unknown',
+    spaceId,
   });
 
   const automatedProcessActionsEnabled =

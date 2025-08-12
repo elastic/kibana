@@ -46,7 +46,7 @@ export const SelectableSpacesControl = (props: Props) => {
         />
       }
       position="left"
-      type="iInCircle"
+      type="info"
     />
   );
 

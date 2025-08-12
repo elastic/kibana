@@ -33,7 +33,7 @@ export type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 export { handleInstallPackageFailure, installPackage, ensureInstalledPackage } from './install';
 export { reinstallPackageForInstallation } from './reinstall';
 export { removeInstallation } from './remove';
-
+export { updateCustomIntegration, incrementVersionAndUpdate } from './update_custom_integration';
 export class PackageNotInstalledError extends Error {
   constructor(pkgkey: string) {
     super(`${pkgkey} is not installed`);

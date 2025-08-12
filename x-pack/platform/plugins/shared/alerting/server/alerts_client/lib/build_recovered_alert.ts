@@ -28,6 +28,7 @@ import {
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_SEVERITY_IMPROVING,
   ALERT_RULE_EXECUTION_UUID,
+  ALERT_STATUS_RECOVERED,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import { get } from 'lodash';
@@ -53,6 +54,7 @@ interface BuildRecoveredAlertOpts<
   payload?: DeepPartial<AlertData>;
   timestamp: string;
   kibanaVersion: string;
+  dangerouslyCreateAlertsInAllSpaces?: boolean;
 }
 
 /**
@@ -75,6 +77,7 @@ export const buildRecoveredAlert = <
   runTimestamp,
   recoveryActionGroup,
   kibanaVersion,
+  dangerouslyCreateAlertsInAllSpaces,
 }: BuildRecoveredAlertOpts<
   AlertData,
   LegacyState,
@@ -108,7 +111,7 @@ export const buildRecoveredAlert = <
     [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
     [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
     // Set status to 'recovered'
-    [ALERT_STATUS]: 'recovered',
+    [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
     // Set latest duration as recovered alerts should have updated duration
     ...(legacyAlert.getState().duration
       ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }
@@ -125,7 +128,7 @@ export const buildRecoveredAlert = <
         }
       : {}),
 
-    [SPACE_IDS]: rule[SPACE_IDS],
+    [SPACE_IDS]: dangerouslyCreateAlertsInAllSpaces === true ? ['*'] : rule[SPACE_IDS],
     // Set latest kibana version
     [VERSION]: kibanaVersion,
     [TAGS]: Array.from(

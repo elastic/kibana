@@ -62,58 +62,64 @@ const deleteRuntimeFieldRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.delete({ path, access: 'public', description }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .delete({
+        path,
+        access: 'public',
+        description,
         security: {
           authz: {
             requiredPrivileges: ['indexPatterns:manage'],
           },
         },
-        validate: {
-          request: {
-            params: schema.object({
-              id: schema.string({
-                minLength: 1,
-                maxLength: 1_000,
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {
+              params: schema.object({
+                id: schema.string({
+                  minLength: 1,
+                  maxLength: 1_000,
+                }),
+                name: schema.string({
+                  minLength: 1,
+                  maxLength: 1_000,
+                }),
               }),
-              name: schema.string({
-                minLength: 1,
-                maxLength: 1_000,
-              }),
-            }),
-          },
-          response: {
-            200: {
-              body: () => schema.never(),
+            },
+            response: {
+              200: {
+                body: () => schema.never(),
+              },
             },
           },
         },
-      },
-      handleErrors(async (ctx, req, res) => {
-        const core = await ctx.core;
-        const savedObjectsClient = core.savedObjects.client;
-        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-        const [, , { dataViewsServiceFactory }] = await getStartServices();
-        const dataViewsService = await dataViewsServiceFactory(
-          savedObjectsClient,
-          elasticsearchClient,
-          req
-        );
-        const id = req.params.id;
-        const name = req.params.name;
+        handleErrors(async (ctx, req, res) => {
+          const core = await ctx.core;
+          const savedObjectsClient = core.savedObjects.client;
+          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+          const [, , { dataViewsServiceFactory }] = await getStartServices();
+          const dataViewsService = await dataViewsServiceFactory(
+            savedObjectsClient,
+            elasticsearchClient,
+            req
+          );
+          const id = req.params.id;
+          const name = req.params.name;
 
-        await deleteRuntimeField({
-          dataViewsService,
-          usageCollection,
-          id,
-          name,
-          counterName: `${req.route.method} ${path}`,
-        });
+          await deleteRuntimeField({
+            dataViewsService,
+            usageCollection,
+            id,
+            name,
+            counterName: `${req.route.method} ${path}`,
+          });
 
-        return res.ok();
-      })
-    );
+          return res.ok();
+        })
+      );
   };
 
 export const registerDeleteRuntimeFieldRoute = deleteRuntimeFieldRouteFactory(

@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import type {
-  ThreatMapping,
-  ThreatMappingEntries,
-} from '@kbn/securitysolution-io-ts-alerting-types';
-
+import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import {
   filterThreatMapping,
   buildThreatMappingFilter,
-  splitShouldClauses,
   createInnerAndClauses,
   createAndOrClauses,
   buildEntriesMappingFilter,
@@ -23,35 +18,13 @@ import {
   getThreatListItemMock,
   getThreatMappingFilterMock,
   getFilterThreatMapping,
-  getThreatMappingFiltersShouldMock,
   getThreatMappingFilterShouldMock,
   getThreatListSearchResponseMock,
 } from './build_threat_mapping_filter.mock';
-import type { BooleanFilter, ThreatListItem } from './types';
+import type { BooleanFilter, ThreatListItem, ThreatMappingEntries } from './types';
 
 describe('build_threat_mapping_filter', () => {
   describe('buildThreatMappingFilter', () => {
-    test('it should throw if given a chunk over 1024 in size', () => {
-      const threatMapping = getThreatMappingMock();
-      const threatList = getThreatListSearchResponseMock().hits.hits;
-      expect(() =>
-        buildThreatMappingFilter({
-          threatMapping,
-          threatList,
-          chunkSize: 1025,
-          entryKey: 'value',
-        })
-      ).toThrow('chunk sizes cannot exceed 1024 in size');
-    });
-
-    test('it should NOT throw if given a chunk under 1024 in size', () => {
-      const threatMapping = getThreatMappingMock();
-      const threatList = getThreatListSearchResponseMock().hits.hits;
-      expect(() =>
-        buildThreatMappingFilter({ threatMapping, threatList, chunkSize: 1023, entryKey: 'value' })
-      ).not.toThrow();
-    });
-
     test('it should create the correct entries when using the default mocks', () => {
       const threatMapping = getThreatMappingMock();
       const threatList = getThreatListSearchResponseMock().hits.hits;
@@ -77,7 +50,7 @@ describe('build_threat_mapping_filter', () => {
   describe('filterThreatMapping', () => {
     test('it should not remove any entries when using the default mocks', () => {
       const threatMapping = getThreatMappingMock();
-      const threatListItem = getThreatListSearchResponseMock().hits.hits[0];
+      const threatListItem = getThreatListItemMock();
 
       const item = filterThreatMapping({ threatMapping, threatListItem, entryKey: 'value' });
       const expected = getFilterThreatMapping();
@@ -86,7 +59,7 @@ describe('build_threat_mapping_filter', () => {
 
     test('it should only give one filtered element if only 1 element is defined', () => {
       const [firstElement] = getThreatMappingMock(); // get only the first element
-      const threatListItem = getThreatListSearchResponseMock().hits.hits[0];
+      const threatListItem = getThreatListItemMock();
 
       const item = filterThreatMapping({
         threatMapping: [firstElement],
@@ -99,7 +72,7 @@ describe('build_threat_mapping_filter', () => {
 
     test('it should not mutate the original threatMapping', () => {
       const threatMapping = getThreatMappingMock();
-      const threatListItem = getThreatListSearchResponseMock().hits.hits[0];
+      const threatListItem = getThreatListItemMock();
 
       filterThreatMapping({
         threatMapping,
@@ -111,7 +84,7 @@ describe('build_threat_mapping_filter', () => {
 
     test('it should not mutate the original threatListItem', () => {
       const threatMapping = getThreatMappingMock();
-      const threatListItem = getThreatListSearchResponseMock().hits.hits[0];
+      const threatListItem = getThreatListItemMock();
 
       filterThreatMapping({
         threatMapping,
@@ -215,7 +188,7 @@ describe('build_threat_mapping_filter', () => {
   describe('createInnerAndClauses', () => {
     test('it should return two clauses given a single entry', () => {
       const [{ entries: threatMappingEntries }] = getThreatMappingMock(); // get the first element
-      const threatListItem = getThreatListSearchResponseMock().hits.hits[0];
+      const threatListItem = getThreatListItemMock();
       const innerClause = createInnerAndClauses({
         threatMappingEntries,
         threatListItem,
@@ -229,8 +202,84 @@ describe('build_threat_mapping_filter', () => {
             },
           ],
         },
-      } = getThreatMappingFilterShouldMock(); // get the first element
+      } = getThreatMappingFilterShouldMock();
       expect(innerClause).toEqual(filter);
+    });
+
+    test('it should create a correct query for negate=true mapping entry', () => {
+      const threatListItem = getThreatListItemMock();
+      const innerClause = createInnerAndClauses({
+        threatMappingEntries: [
+          {
+            field: 'host.name',
+            type: 'mapping',
+            value: 'host.name',
+          },
+          {
+            field: 'host.ip',
+            type: 'mapping',
+            value: 'host.ip',
+            negate: true,
+          },
+        ],
+        threatListItem,
+        entryKey: 'value',
+      });
+
+      expect(innerClause).toEqual([
+        {
+          match: {
+            'host.name': {
+              _name: '123__SEP__threat_index__SEP__host.name__SEP__host.name__SEP__mq',
+              query: 'host-1',
+            },
+          },
+        },
+        {
+          bool: {
+            _name: '123__SEP__threat_index__SEP__host.ip__SEP__host.ip__SEP__mq__SEP__negate',
+            must_not: { match: { 'host.ip': { query: '192.168.0.0.1' } } },
+          },
+        },
+      ]);
+    });
+
+    test('it should create a correct query for negate=true mapping entry when not matching field is undefined', () => {
+      const threatListItem = getThreatListItemMock({ fields: { 'host.name': ['host-a'] } });
+      const innerClause = createInnerAndClauses({
+        threatMappingEntries: [
+          {
+            field: 'host.name',
+            type: 'mapping',
+            value: 'host.name',
+          },
+          {
+            field: 'host.ip',
+            type: 'mapping',
+            value: 'host.ip',
+            negate: true,
+          },
+        ],
+        threatListItem,
+        entryKey: 'value',
+      });
+
+      expect(innerClause).toEqual([
+        {
+          match: {
+            'host.name': {
+              _name: '123__SEP__threat_index__SEP__host.name__SEP__host.name__SEP__mq',
+              query: 'host-a',
+            },
+          },
+        },
+        {
+          exists: {
+            _name: '123__SEP__threat_index__SEP__host.ip__SEP__host.ip__SEP__mq__SEP__negate',
+            field: 'host.ip',
+          },
+        },
+      ]);
     });
 
     test('it should return an empty array given an empty array', () => {
@@ -253,7 +302,7 @@ describe('build_threat_mapping_filter', () => {
           type: 'mapping',
         },
       ];
-      const threatListItem = getThreatListSearchResponseMock().hits.hits[0];
+      const threatListItem = getThreatListItemMock();
       const innerClause = createInnerAndClauses({
         threatMappingEntries,
         threatListItem,
@@ -286,7 +335,7 @@ describe('build_threat_mapping_filter', () => {
           type: 'mapping',
         },
       ];
-      const threatListItem = getThreatListSearchResponseMock().hits.hits[0];
+      const threatListItem = getThreatListItemMock();
       const innerClause = createInnerAndClauses({
         threatMappingEntries,
         threatListItem,
@@ -317,7 +366,7 @@ describe('build_threat_mapping_filter', () => {
           type: 'mapping',
         },
       ];
-      const threatListItem = getThreatListSearchResponseMock().hits.hits[0];
+      const threatListItem = getThreatListItemMock();
       const innerClause = createInnerAndClauses({
         threatMappingEntries,
         threatListItem,
@@ -330,14 +379,14 @@ describe('build_threat_mapping_filter', () => {
   describe('createAndOrClauses', () => {
     test('it should return all clauses given the entries', () => {
       const threatMapping = getThreatMappingMock();
-      const threatListItem = getThreatListSearchResponseMock().hits.hits[0];
+      const threatListItem = getThreatListItemMock();
       const innerClause = createAndOrClauses({ threatMapping, threatListItem, entryKey: 'value' });
       expect(innerClause).toEqual(getThreatMappingFilterShouldMock().bool.should);
     });
 
     test('it should filter out data from entries that do not have mappings', () => {
       const threatMapping = getThreatMappingMock();
-      const threatListItem = getThreatListSearchResponseMock().hits.hits[0];
+      const threatListItem = getThreatListItemMock();
       threatListItem._source = {
         ...getThreatListSearchResponseMock().hits.hits[0]._source,
         foo: 'bar',
@@ -347,7 +396,7 @@ describe('build_threat_mapping_filter', () => {
     });
 
     test('it should return an empty boolean given an empty array', () => {
-      const threatListItem = getThreatListSearchResponseMock().hits.hits[0];
+      const threatListItem = getThreatListItemMock();
       const innerClause = createAndOrClauses({
         threatMapping: [],
         threatListItem,
@@ -374,12 +423,9 @@ describe('build_threat_mapping_filter', () => {
       const mapping = buildEntriesMappingFilter({
         threatMapping,
         threatList,
-        chunkSize: 1024,
         entryKey: 'value',
       });
-      const expected: BooleanFilter = {
-        bool: { should: [getThreatMappingFilterShouldMock()], minimum_should_match: 1 },
-      };
+      const expected: BooleanFilter = getThreatMappingFilterShouldMock();
       expect(mapping).toEqual(expected);
     });
 
@@ -389,7 +435,6 @@ describe('build_threat_mapping_filter', () => {
       const mapping = buildEntriesMappingFilter({
         threatMapping,
         threatList,
-        chunkSize: 1024,
         entryKey: 'value',
       });
       const expected: BooleanFilter = {
@@ -403,7 +448,6 @@ describe('build_threat_mapping_filter', () => {
       const mapping = buildEntriesMappingFilter({
         threatMapping: [],
         threatList,
-        chunkSize: 1024,
         entryKey: 'value',
       });
       const expected: BooleanFilter = {
@@ -438,12 +482,9 @@ describe('build_threat_mapping_filter', () => {
       const mapping = buildEntriesMappingFilter({
         threatMapping,
         threatList,
-        chunkSize: 1024,
         entryKey: 'value',
       });
-      const expected: BooleanFilter = {
-        bool: { should: [getThreatMappingFilterShouldMock()], minimum_should_match: 1 },
-      };
+      const expected: BooleanFilter = getThreatMappingFilterShouldMock();
       expect(mapping).toEqual(expected);
     });
 
@@ -453,20 +494,19 @@ describe('build_threat_mapping_filter', () => {
       const mapping = buildEntriesMappingFilter({
         threatMapping,
         threatList,
-        chunkSize: 1024,
         entryKey: 'value',
         allowedFieldsForTermsQuery: {
           source: { 'source.ip': true },
           threat: { 'source.ip': true },
         },
       });
-      const mock = { ...getThreatMappingFilterShouldMock() };
+      const mock = getThreatMappingFilterShouldMock();
       mock.bool.should.pop();
 
       const expected: BooleanFilter = {
         bool: {
           should: [
-            mock,
+            ...mock.bool.should,
             {
               terms: {
                 _name: '__SEP____SEP__source.ip__SEP__source.ip__SEP__tq',
@@ -486,7 +526,6 @@ describe('build_threat_mapping_filter', () => {
       const mapping = buildEntriesMappingFilter({
         threatMapping,
         threatList,
-        chunkSize: 1024,
         entryKey: 'value',
         allowedFieldsForTermsQuery: {
           source: { 'host.name': true, 'host.ip': true },
@@ -494,157 +533,8 @@ describe('build_threat_mapping_filter', () => {
         },
       });
 
-      const expected: BooleanFilter = {
-        bool: {
-          should: [getThreatMappingFilterShouldMock()],
-          minimum_should_match: 1,
-        },
-      };
+      const expected: BooleanFilter = getThreatMappingFilterShouldMock();
       expect(mapping).toEqual(expected);
-    });
-  });
-
-  describe('splitShouldClauses', () => {
-    test('it should NOT split a single should clause as there is nothing to split on with chunkSize 1', () => {
-      const should = getThreatMappingFiltersShouldMock();
-      const clauses = splitShouldClauses({ should, chunkSize: 1 });
-      expect(clauses).toEqual(getThreatMappingFiltersShouldMock());
-    });
-
-    test('it should NOT mutate the original should clause passed in', () => {
-      const should = getThreatMappingFiltersShouldMock();
-      expect(should).toEqual(getThreatMappingFiltersShouldMock());
-    });
-
-    test('it should NOT split a single should clause as there is nothing to split on with chunkSize 2', () => {
-      const should = getThreatMappingFiltersShouldMock();
-      const clauses = splitShouldClauses({ should, chunkSize: 2 });
-      expect(clauses).toEqual(getThreatMappingFiltersShouldMock());
-    });
-
-    test('it should return an empty array given an empty array', () => {
-      const clauses = splitShouldClauses({ should: [], chunkSize: 2 });
-      expect(clauses).toEqual([]);
-    });
-
-    test('it should split an array of size 2 into a length 2 array with chunks on "chunkSize: 1"', () => {
-      const should = getThreatMappingFiltersShouldMock(2);
-      const clauses = splitShouldClauses({ should, chunkSize: 1 });
-      expect(clauses.length).toEqual(2);
-    });
-
-    test('it should not mutate the original when splitting on chunks', () => {
-      const should = getThreatMappingFiltersShouldMock(2);
-      splitShouldClauses({ should, chunkSize: 1 });
-      expect(should).toEqual(getThreatMappingFiltersShouldMock(2));
-    });
-
-    test('it should split an array of size 2 into 2 different chunks on "chunkSize: 1"', () => {
-      const should = getThreatMappingFiltersShouldMock(2);
-      const clauses = splitShouldClauses({ should, chunkSize: 1 });
-      const expected: BooleanFilter[] = [
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(1)],
-            minimum_should_match: 1,
-          },
-        },
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(2)],
-            minimum_should_match: 1,
-          },
-        },
-      ];
-      expect(clauses).toEqual(expected);
-    });
-
-    test('it should split an array of size 4 into 4 groups of 4 chunks on "chunkSize: 1"', () => {
-      const should = getThreatMappingFiltersShouldMock(4);
-      const clauses = splitShouldClauses({ should, chunkSize: 1 });
-      const expected: BooleanFilter[] = [
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(1)],
-            minimum_should_match: 1,
-          },
-        },
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(2)],
-            minimum_should_match: 1,
-          },
-        },
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(3)],
-            minimum_should_match: 1,
-          },
-        },
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(4)],
-            minimum_should_match: 1,
-          },
-        },
-      ];
-      expect(clauses).toEqual(expected);
-    });
-
-    test('it should split an array of size 4 into 2 groups of 2 chunks on "chunkSize: 2"', () => {
-      const should = getThreatMappingFiltersShouldMock(4);
-      const clauses = splitShouldClauses({ should, chunkSize: 2 });
-      const expected: BooleanFilter[] = [
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(1), getThreatMappingFilterShouldMock(2)],
-            minimum_should_match: 1,
-          },
-        },
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(3), getThreatMappingFilterShouldMock(4)],
-            minimum_should_match: 1,
-          },
-        },
-      ];
-      expect(clauses).toEqual(expected);
-    });
-
-    test('it should NOT split an array of size 4 into any groups on "chunkSize: 5"', () => {
-      const should = getThreatMappingFiltersShouldMock(4);
-      const clauses = splitShouldClauses({ should, chunkSize: 5 });
-      const expected: BooleanFilter[] = [
-        getThreatMappingFilterShouldMock(1),
-        getThreatMappingFilterShouldMock(2),
-        getThreatMappingFilterShouldMock(3),
-        getThreatMappingFilterShouldMock(4),
-      ];
-      expect(clauses).toEqual(expected);
-    });
-
-    test('it should split an array of size 4 into 2 groups on "chunkSize: 3"', () => {
-      const should = getThreatMappingFiltersShouldMock(4);
-      const clauses = splitShouldClauses({ should, chunkSize: 3 });
-      const expected: BooleanFilter[] = [
-        {
-          bool: {
-            should: [
-              getThreatMappingFilterShouldMock(1),
-              getThreatMappingFilterShouldMock(2),
-              getThreatMappingFilterShouldMock(3),
-            ],
-            minimum_should_match: 1,
-          },
-        },
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(4)],
-            minimum_should_match: 1,
-          },
-        },
-      ];
-      expect(clauses).toEqual(expected);
     });
   });
 });

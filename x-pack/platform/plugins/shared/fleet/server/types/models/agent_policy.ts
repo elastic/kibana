@@ -53,6 +53,13 @@ function validateCPU(s: string) {
   }
 }
 
+function validateCloudProvider(s: string) {
+  const csps = ['aws', 'azure', 'gcp'];
+  if (!csps.includes(s)) {
+    return 'Invalid cloud provider';
+  }
+}
+
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
   space_ids: schema.maybe(schema.arrayOf(schema.string())),
@@ -148,6 +155,12 @@ export const AgentPolicyBaseSchema = {
   ),
   agentless: schema.maybe(
     schema.object({
+      cloud_connectors: schema.maybe(
+        schema.object({
+          target_csp: schema.maybe(schema.string({ validate: validateCloudProvider })),
+          enabled: schema.boolean(),
+        })
+      ),
       resources: schema.maybe(
         schema.object({
           requests: schema.maybe(
@@ -253,15 +266,19 @@ const BaseSSLSchema = schema.object({
   renegotiation: schema.maybe(schema.string()),
 });
 
-const BaseSecretsSchema = schema.object({
-  ssl: schema.maybe(
-    schema.object({
-      key: schema.object({
-        id: schema.maybe(schema.string()),
-      }),
-    })
-  ),
-});
+const BaseSecretsSchema = schema
+  .object({
+    ssl: schema.maybe(
+      schema.object({
+        key: schema.object({
+          id: schema.maybe(schema.string()),
+        }),
+      })
+    ),
+  })
+  .extendsDeep({
+    unknowns: 'allow',
+  });
 
 export const NewAgentPolicySchema = schema.object({
   ...AgentPolicyBaseSchema,
@@ -323,6 +340,36 @@ export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
   ),
   totalAgents: schema.number(),
 });
+
+export const OTelCollectorPipelineIDSchema = schema.oneOf([
+  schema.literal('logs'),
+  schema.literal('metrics'),
+  schema.literal('traces'),
+  schema.string(),
+]);
+
+export const OTelCollectorPipelineSchema = schema.maybe(
+  schema.object({
+    receivers: schema.maybe(schema.arrayOf(schema.string())),
+    processors: schema.maybe(schema.arrayOf(schema.string())),
+    exporters: schema.maybe(schema.arrayOf(schema.string())),
+  })
+);
+export const OtelCollectorConfigSchema = {
+  extensions: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  receivers: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  processors: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  connectors: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  exporters: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  service: schema.maybe(
+    schema.object({
+      extensions: schema.maybe(schema.arrayOf(schema.string())),
+      pipelines: schema.maybe(
+        schema.recordOf(OTelCollectorPipelineIDSchema, OTelCollectorPipelineSchema)
+      ),
+    })
+  ),
+};
 
 export const FullAgentPolicyResponseSchema = schema.object({
   id: schema.string(),
@@ -484,6 +531,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
       signature: schema.string(),
     })
   ),
+  ...OtelCollectorConfigSchema,
 });
 const MinimalOutputSchema = schema.object({
   id: schema.string(),

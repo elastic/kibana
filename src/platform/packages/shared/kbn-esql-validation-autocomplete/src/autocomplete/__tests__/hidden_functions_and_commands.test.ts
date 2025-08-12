@@ -6,9 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { setTestFunctions } from '../../shared/test_functions';
-import { FunctionDefinitionTypes } from '../../definitions/types';
+import { FunctionDefinitionTypes } from '@kbn/esql-ast';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
 
 describe('hidden commands', () => {
@@ -33,7 +33,7 @@ describe('hidden functions', () => {
         name: 'HIDDEN_FUNCTION',
         description: 'This is a hidden function',
         signatures: [{ params: [], returnType: 'text' }],
-        supportedCommands: ['eval'],
+        locationsAvailable: [Location.EVAL],
         ignoreAsSuggestion: true,
       },
       {
@@ -41,7 +41,7 @@ describe('hidden functions', () => {
         name: 'VISIBLE_FUNCTION',
         description: 'This is a visible function',
         signatures: [{ params: [], returnType: 'text' }],
-        supportedCommands: ['eval'],
+        locationsAvailable: [Location.EVAL],
         ignoreAsSuggestion: false,
       },
     ]);
@@ -59,7 +59,7 @@ describe('hidden functions', () => {
         name: 'HIDDEN_FUNCTION',
         description: 'This is a hidden function',
         signatures: [{ params: [], returnType: 'text' }],
-        supportedCommands: ['stats'],
+        locationsAvailable: [Location.STATS],
         ignoreAsSuggestion: true,
       },
       {
@@ -67,7 +67,7 @@ describe('hidden functions', () => {
         name: 'VISIBLE_FUNCTION',
         description: 'This is a visible function',
         signatures: [{ params: [], returnType: 'text' }],
-        supportedCommands: ['stats'],
+        locationsAvailable: [Location.STATS],
         ignoreAsSuggestion: false,
       },
     ]);
@@ -84,9 +84,14 @@ describe('hidden functions', () => {
         type: FunctionDefinitionTypes.OPERATOR,
         name: 'HIDDEN_OPERATOR',
         description: 'This is a hidden function',
-        supportedCommands: ['eval', 'where', 'row', 'sort'],
+        locationsAvailable: [
+          Location.EVAL,
+          Location.WHERE,
+          Location.ROW,
+          Location.SORT,
+          Location.STATS_BY,
+        ],
         ignoreAsSuggestion: true,
-        supportedOptions: ['by'],
         signatures: [
           {
             params: [
@@ -101,9 +106,14 @@ describe('hidden functions', () => {
         type: FunctionDefinitionTypes.OPERATOR,
         name: 'VISIBLE_OPERATOR',
         description: 'This is a visible function',
-        supportedCommands: ['eval', 'where', 'row', 'sort'],
+        locationsAvailable: [
+          Location.EVAL,
+          Location.WHERE,
+          Location.ROW,
+          Location.SORT,
+          Location.STATS_BY,
+        ],
         ignoreAsSuggestion: false,
-        supportedOptions: ['by'],
         signatures: [
           {
             params: [

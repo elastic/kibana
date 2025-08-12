@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 import * as rt from 'io-ts';
 import { CaseSeverityRt, CaseStatusRt } from '../../../common/types/domain';
 

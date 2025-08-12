@@ -49,6 +49,8 @@ import { CodeEditor } from '@kbn/code-editor';
 import { cx } from '@emotion/css';
 import { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { GenericComboBox } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -68,6 +70,8 @@ import {
   filtersBuilderMaxHeightCss,
 } from './filter_editor.styles';
 import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
+
+const editorFormStyle = css({ padding: euiThemeVars.euiSizeM });
 
 export const strings = {
   getPanelTitleAdd: () =>
@@ -197,7 +201,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
    * Than the currently selected data view need to load the data view from the id to display the filter
    * correctly
    * @param dataViewId
-   * @private
+   * @internal
    */
   private async loadDataView(dataViewId: string, dataViews: DataViewsContract) {
     try {
@@ -239,6 +243,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
         </EuiButtonEmpty>
       </EuiFlexItem>
     );
+
     return (
       <div>
         <EuiPopoverTitle paddingSize="s">
@@ -252,12 +257,12 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
         </EuiPopoverTitle>
 
         {this.state.isLoadingDataView ? (
-          <div className="globalFilterItem__editorForm">
+          <div css={editorFormStyle}>
             <EuiLoadingSpinner />
           </div>
         ) : (
           <EuiForm>
-            <div className="globalFilterItem__editorForm">
+            <div css={editorFormStyle}>
               {this.renderIndexPatternInput()}
 
               {this.state.isCustomEditorOpen

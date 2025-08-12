@@ -9,6 +9,9 @@ import { useEffect, useState } from 'react';
 import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useSelector } from 'react-redux';
 
+import { signalIndexOutdatedSelector } from '../../../../data_view_manager/redux/selectors';
+import { useSignalIndexName } from '../../../../data_view_manager/hooks/use_signal_index_name';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
@@ -28,8 +31,6 @@ export interface ReturnSignalIndex {
 
 /**
  * Hook for managing signal index
- *
- *
  */
 export const useSignalIndex = (): ReturnSignalIndex => {
   const [loading, setLoading] = useState(true);
@@ -42,13 +43,25 @@ export const useSignalIndex = (): ReturnSignalIndex => {
   const { addError } = useAppToasts();
   const { hasIndexRead } = useAlertsPrivileges();
 
-  const signalIndexMappingOutdated = useSelector((state: State) => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const oldSignalIndexMappingOutdated = useSelector((state: State) => {
     return sourcererSelectors.signalIndexMappingOutdated(state);
   });
+  const experimentalSignalIndexMappingOutdated = useSelector(signalIndexOutdatedSelector);
 
-  const signalIndexName = useSelector((state: State) => {
+  const signalIndexMappingOutdated = newDataViewPickerEnabled
+    ? experimentalSignalIndexMappingOutdated
+    : oldSignalIndexMappingOutdated;
+
+  const oldSignalIndexName = useSelector((state: State) => {
     return sourcererSelectors.signalIndexName(state);
   });
+  const experimentalSignalIndexName = useSignalIndexName();
+
+  const signalIndexName = newDataViewPickerEnabled
+    ? experimentalSignalIndexName
+    : oldSignalIndexName;
 
   useEffect(() => {
     let isSubscribed = true;

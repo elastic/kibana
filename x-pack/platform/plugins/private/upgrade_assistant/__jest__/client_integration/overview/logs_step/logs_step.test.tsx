@@ -9,6 +9,8 @@ import { act } from 'react-dom/test-utils';
 import {
   DEPRECATION_LOGS_INDEX,
   APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
+  DEPRECATION_LOGS_ORIGIN_FIELD,
+  APPS_WITH_DEPRECATION_LOGS,
 } from '../../../../common/constants';
 import { setupEnvironment } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
@@ -32,6 +34,10 @@ describe('Overview - Logs Step', () => {
       };
 
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse(undefined, error);
+      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({
+        isDeprecationLogIndexingEnabled: true,
+        isDeprecationLoggingEnabled: true,
+      });
 
       await act(async () => {
         testBed = await setupOverviewPage(httpSetup);
@@ -40,10 +46,27 @@ describe('Overview - Logs Step', () => {
       testBed.component.update();
     });
 
-    test('is rendered', () => {
-      const { exists } = testBed;
+    test('is rendered and allows retry', async () => {
+      const { exists, actions } = testBed;
       expect(exists('deprecationLogsErrorCallout')).toBe(true);
       expect(exists('deprecationLogsRetryButton')).toBe(true);
+
+      expect(exists('logsCountDescription')).toBe(false);
+      expect(exists('viewDiscoverLogsButton')).toBe(false);
+      expect(exists('viewDetailsLink')).toBe(false);
+
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+        count: 10,
+      });
+
+      await actions.clickRetryLogsButton();
+
+      expect(exists('logsCountDescription')).toBe(true);
+      expect(exists('viewDiscoverLogsButton')).toBe(true);
+      expect(exists('viewDetailsLink')).toBe(true);
+
+      expect(exists('deprecationLogsErrorCallout')).toBe(false);
+      expect(exists('deprecationLogsRetryButton')).toBe(false);
     });
   });
 
@@ -102,7 +125,37 @@ describe('Overview - Logs Step', () => {
         component.update();
 
         expect(find('logsCountDescription').text()).toContain('You have 10 deprecation issues');
-        expect(find('viewLogsLink').text()).toContain('View logs');
+      });
+
+      test('displays discover and verify changes buttons', async () => {
+        const { exists, find } = testBed;
+        expect(exists('viewDiscoverLogsButton')).toBe(true);
+        expect(exists('viewDetailsLink')).toBe(true);
+        expect(find('viewDiscoverLogsButton').text()).toContain('Analyze logs in Discover');
+        expect(find('viewDetailsLink').text()).toContain('View details');
+        expect(exists('enableLogsLink')).toBe(false);
+      });
+
+      test('has a link to see logs in discover app', async () => {
+        const { exists, find } = testBed;
+
+        expect(exists('viewDiscoverLogsButton')).toBe(true);
+
+        const decodedUrl = decodeURIComponent(find('viewDiscoverLogsButton').props().href);
+        expect(decodedUrl).toContain('discoverUrl');
+        [
+          '"language":"kuery"',
+          '"query":"@timestamp+>',
+          'filters=',
+          DEPRECATION_LOGS_ORIGIN_FIELD,
+          ...APPS_WITH_DEPRECATION_LOGS,
+        ].forEach((param) => {
+          try {
+            expect(decodedUrl).toContain(param);
+          } catch (e) {
+            throw new Error(`Expected [${param}] not found in ${decodedUrl}`);
+          }
+        });
       });
     });
 
@@ -127,6 +180,8 @@ describe('Overview - Logs Step', () => {
 
         expect(exists('logsCountDescription')).toBe(false);
         expect(find('enableLogsLink').text()).toContain('Enable logging');
+        expect(exists('viewDiscoverLogsButton')).toBe(false);
+        expect(exists('viewDetailsLink')).toBe(false);
       });
     });
   });

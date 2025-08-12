@@ -111,4 +111,31 @@ describe('Component BulkEditRuleErrorsList', () => {
 
     expect(screen.getByText(value)).toBeInTheDocument();
   });
+
+  test.each([
+    [
+      BulkActionsDryRunErrCodeEnum.THRESHOLD_RULE_TYPE_IN_SUPPRESSION,
+      "2 threshold rules can't be edited.",
+    ],
+    [
+      BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD,
+      "2 rules can't be edited.",
+    ],
+  ])('should render correct message for "%s" errorCode', (errorCode, value) => {
+    const ruleErrors: DryRunResult['ruleErrors'] = [
+      {
+        message: 'test failure',
+        errorCode,
+        ruleIds: ['rule:1', 'rule:2'],
+      },
+    ];
+    render(
+      <BulkActionRuleErrorsList bulkAction={BulkActionTypeEnum.edit} ruleErrors={ruleErrors} />,
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    expect(screen.getByText(new RegExp(value, 'i'))).toBeInTheDocument();
+  });
 });

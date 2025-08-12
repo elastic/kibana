@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import { useAIAssistantAppService } from '@kbn/ai-assistant';
 import { AssistantScope } from '@kbn/ai-assistant-common';
-import { useObservable } from 'react-use/lib';
+import useObservable from 'react-use/lib/useObservable';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { isEqual } from 'lodash';
 import { useKibana } from './use_kibana';

@@ -13,7 +13,10 @@ import { EuiDescribedFormGroup, EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@e
 
 import { FunctionHelpPopover } from './function_help';
 
-export const AggDescription: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
+interface Props {
+  titleId: string;
+}
+export const AggDescription: FC<PropsWithChildren<Props>> = memo(({ children, titleId }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.aggSelect.title',
     {
@@ -25,7 +28,7 @@ export const AggDescription: FC<PropsWithChildren<unknown>> = memo(({ children }
       title={
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem grow={false}>
-            <h3>{title}</h3>
+            <h3 id={titleId}>{title}</h3>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <FunctionHelpPopover />
@@ -46,7 +49,7 @@ export const AggDescription: FC<PropsWithChildren<unknown>> = memo(({ children }
   );
 });
 
-export const FieldDescription: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
+export const FieldDescription: FC<PropsWithChildren<Props>> = memo(({ children, titleId }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.fieldSelect.title',
     {
@@ -55,7 +58,7 @@ export const FieldDescription: FC<PropsWithChildren<unknown>> = memo(({ children
   );
   return (
     <EuiDescribedFormGroup
-      title={<h3>{title}</h3>}
+      title={<h3 id={titleId}>{title}</h3>}
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.fieldSelect.description"
@@ -70,7 +73,7 @@ export const FieldDescription: FC<PropsWithChildren<unknown>> = memo(({ children
   );
 });
 
-export const ByFieldDescription: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
+export const ByFieldDescription: FC<PropsWithChildren<Props>> = memo(({ children, titleId }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.byFieldSelect.title',
     {
@@ -79,7 +82,7 @@ export const ByFieldDescription: FC<PropsWithChildren<unknown>> = memo(({ childr
   );
   return (
     <EuiDescribedFormGroup
-      title={<h3>{title}</h3>}
+      title={<h3 id={titleId}>{title}</h3>}
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.byFieldSelect.description"
@@ -94,7 +97,7 @@ export const ByFieldDescription: FC<PropsWithChildren<unknown>> = memo(({ childr
   );
 });
 
-export const OverFieldDescription: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
+export const OverFieldDescription: FC<PropsWithChildren<Props>> = memo(({ children, titleId }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.overFieldSelect.title',
     {
@@ -103,7 +106,7 @@ export const OverFieldDescription: FC<PropsWithChildren<unknown>> = memo(({ chil
   );
   return (
     <EuiDescribedFormGroup
-      title={<h3>{title}</h3>}
+      title={<h3 id={titleId}>{title}</h3>}
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.overFieldSelect.description"
@@ -118,75 +121,81 @@ export const OverFieldDescription: FC<PropsWithChildren<unknown>> = memo(({ chil
   );
 });
 
-export const PartitionFieldDescription: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
-  const title = i18n.translate(
-    'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.partitionFieldSelect.title',
-    {
-      defaultMessage: 'Partition field',
-    }
-  );
-  return (
-    <EuiDescribedFormGroup
-      title={<h3>{title}</h3>}
-      description={
-        <FormattedMessage
-          id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.partitionFieldSelect.description"
-          defaultMessage="Allows segmentation of modeling into logical groups."
-        />
+export const PartitionFieldDescription: FC<PropsWithChildren<Props>> = memo(
+  ({ children, titleId }) => {
+    const title = i18n.translate(
+      'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.partitionFieldSelect.title',
+      {
+        defaultMessage: 'Partition field',
       }
-    >
-      <EuiFormRow>
-        <>{children}</>
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
-  );
-});
+    );
+    return (
+      <EuiDescribedFormGroup
+        title={<h3 id={titleId}>{title}</h3>}
+        description={
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.partitionFieldSelect.description"
+            defaultMessage="Allows segmentation of modeling into logical groups."
+          />
+        }
+      >
+        <EuiFormRow>
+          <>{children}</>
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    );
+  }
+);
 
-export const ExcludeFrequentDescription: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
-  const title = i18n.translate(
-    'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.excludeFrequent.title',
-    {
-      defaultMessage: 'Exclude frequent',
-    }
-  );
-  return (
-    <EuiDescribedFormGroup
-      title={<h3>{title}</h3>}
-      description={
-        <FormattedMessage
-          id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.excludeFrequent.description"
-          defaultMessage="If set, it will automatically identify and exclude frequently occurring entities which may otherwise have dominated results."
-        />
+export const ExcludeFrequentDescription: FC<PropsWithChildren<Props>> = memo(
+  ({ children, titleId }) => {
+    const title = i18n.translate(
+      'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.excludeFrequent.title',
+      {
+        defaultMessage: 'Exclude frequent',
       }
-    >
-      <EuiFormRow>
-        <>{children}</>
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
-  );
-});
+    );
+    return (
+      <EuiDescribedFormGroup
+        title={<h3 id={titleId}>{title}</h3>}
+        description={
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.excludeFrequent.description"
+            defaultMessage="If set, it will automatically identify and exclude frequently occurring entities which may otherwise have dominated results."
+          />
+        }
+      >
+        <EuiFormRow>
+          <>{children}</>
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    );
+  }
+);
 
-export const DescriptionDescription: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
-  const title = i18n.translate(
-    'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.description.title',
-    {
-      defaultMessage: 'Description',
-    }
-  );
-  return (
-    <EuiDescribedFormGroup
-      fullWidth={true}
-      title={<h3>{title}</h3>}
-      description={
-        <FormattedMessage
-          id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.description.description"
-          defaultMessage="Override the default detector description with a meaningful description of what the detector is analyzing."
-        />
+export const DescriptionDescription: FC<PropsWithChildren<Props>> = memo(
+  ({ children, titleId }) => {
+    const title = i18n.translate(
+      'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.description.title',
+      {
+        defaultMessage: 'Description',
       }
-    >
-      <EuiFormRow fullWidth={true}>
-        <>{children}</>
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
-  );
-});
+    );
+    return (
+      <EuiDescribedFormGroup
+        fullWidth={true}
+        title={<h3 id={titleId}>{title}</h3>}
+        description={
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.description.description"
+            defaultMessage="Override the default detector description with a meaningful description of what the detector is analyzing."
+          />
+        }
+      >
+        <EuiFormRow fullWidth={true}>
+          <>{children}</>
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    );
+  }
+);

@@ -25,6 +25,10 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../overview/components/events_by_dataset');
 jest.mock('../../sourcerer/containers');
 jest.mock('../../common/components/user_privileges');
+jest.mock('../../data_view_manager/hooks/use_data_view', () => ({
+  useDataView: jest.fn(() => ({ dataView: { matchedIndices: [] } })),
+}));
+jest.mock('../../common/hooks/use_experimental_features');
 
 describe('TimelinesPage', () => {
   let wrapper: ShallowWrapper;

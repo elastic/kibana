@@ -45,7 +45,7 @@ const mockLinkInfo = jest.fn().mockResolvedValue(defaultLinkInfo);
 
 jest.mock('../../links', () => ({
   ...jest.requireActual('../../links'),
-  getLinkInfo: () => mockLinkInfo(),
+  useLinkInfo: () => mockLinkInfo(),
 }));
 
 describe('global query string', () => {

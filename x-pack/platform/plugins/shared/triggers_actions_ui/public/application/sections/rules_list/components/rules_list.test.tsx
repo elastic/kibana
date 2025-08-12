@@ -5,44 +5,43 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import { MAINTENANCE_WINDOW_FEATURE_ID, parseDuration } from '@kbn/alerting-plugin/common';
+import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
+import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
+import { IToasts } from '@kbn/core/public';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
+  cleanup,
   fireEvent,
   render,
   screen,
   waitFor,
   waitForElementToBeRemoved,
-  cleanup,
 } from '@testing-library/react';
-
-import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
-import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
-import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
-import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-import { percentileFields, RulesList } from './rules_list';
+import * as React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { useKibana } from '../../../../common/lib/kibana';
 import {
   ActionTypeRegistryContract,
   Percentiles,
   RuleTypeModel,
   RuleTypeRegistryContract,
 } from '../../../../types';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { useKibana } from '../../../../common/lib/kibana';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { IToasts } from '@kbn/core/public';
-import { CreateRuleButton } from './create_rule_button';
-import { RulesListDocLink } from './rules_list_doc_link';
+import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
-
-import {
-  mockedRulesData,
-  ruleTypeFromApi,
-  ruleType,
-  getDisabledByLicenseRuleTypeFromApi,
-} from './test_helpers';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MAINTENANCE_WINDOW_FEATURE_ID, parseDuration } from '@kbn/alerting-plugin/common';
 import { getFormattedDuration } from '../../../lib/monitoring_utils';
+import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import { CreateRuleButton } from './create_rule_button';
+import { RulesList, percentileFields } from './rules_list';
+import { RulesListDocLink } from './rules_list_doc_link';
+import {
+  getDisabledByLicenseRuleTypeFromApi,
+  mockedRulesData,
+  ruleType,
+  ruleTypeFromApi,
+} from './test_helper';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -57,8 +56,8 @@ jest.mock('../../../lib/action_connector_api', () => ({
 jest.mock('../../../lib/rule_api/rules_kuery_filter', () => ({
   loadRulesWithKueryFilter: jest.fn(),
 }));
-jest.mock('../../../lib/rule_api/rule_types', () => ({
-  loadRuleTypes: jest.fn(),
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
+  getRuleTypes: jest.fn(),
 }));
 jest.mock('../../../lib/rule_api/aggregate_kuery_filter', () => ({
   loadRuleAggregationsWithKueryFilter: jest.fn(),
@@ -135,10 +134,14 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
 });
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
+jest.mock('@kbn/ebt-tools');
+
+const usePerformanceContextMock = usePerformanceContext as jest.Mock;
+usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
-const { loadRuleTypes } = jest.requireMock('../../../lib/rule_api/rule_types');
+const { getRuleTypes } = jest.requireMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
 const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api/update_api_key');
 const { loadRuleTags } = jest.requireMock('../../../lib/rule_api/aggregate');
 
@@ -182,7 +185,7 @@ describe('Update Api Key', () => {
       data: mockedRulesData,
     });
     loadActionTypes.mockResolvedValue([]);
-    loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
+    getRuleTypes.mockResolvedValue([ruleTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
     useKibanaMock().services.application.capabilities = {
       ...useKibanaMock().services.application.capabilities,
@@ -244,7 +247,7 @@ describe('rules_list component empty', () => {
         name: 'Test2',
       },
     ]);
-    loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
+    getRuleTypes.mockResolvedValue([ruleTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
     loadRuleAggregationsWithKueryFilter.mockResolvedValue({});
     loadRuleTags.mockResolvedValue({
@@ -315,7 +318,7 @@ describe('rules_list ', () => {
         name: 'Test2',
       },
     ]);
-    loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
+    getRuleTypes.mockResolvedValue([ruleTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
     loadRuleAggregationsWithKueryFilter.mockResolvedValue({
       ruleEnabledStatus: { enabled: 2, disabled: 0 },
@@ -455,7 +458,7 @@ describe('rules_list ', () => {
     });
 
     it('should set header actions correctly when the user is not authorized to creat rules', async () => {
-      loadRuleTypes.mockResolvedValueOnce([]);
+      getRuleTypes.mockResolvedValueOnce([]);
       const setHeaderActionsMock = jest.fn();
       renderWithProviders(<RulesList setHeaderActions={setHeaderActionsMock} />);
 
@@ -945,7 +948,7 @@ describe('rules_list ', () => {
             name: 'Test2',
           },
         ]);
-        loadRuleTypes.mockResolvedValue([
+        getRuleTypes.mockResolvedValue([
           { id: 'test_rule_type', name: 'some rule type', authorizedConsumers: {} },
         ]);
         loadAllActions.mockResolvedValue([]);
@@ -1110,7 +1113,7 @@ describe('rule list with different rule types', () => {
         name: 'Test2',
       },
     ]);
-    loadRuleTypes.mockResolvedValue([
+    getRuleTypes.mockResolvedValue([
       ruleTypeFromApi,
       { ...ruleTypeFromApi, id: 'test_rule_type2' },
     ]);
@@ -1248,7 +1251,7 @@ describe('rules_list with show only capability', () => {
           },
         ],
       });
-      loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
+      getRuleTypes.mockResolvedValue([ruleTypeFromApi]);
       const ruleTypeMock: RuleTypeModel = {
         id: 'test_rule_type',
         iconClass: 'test',
@@ -1348,7 +1351,7 @@ describe('rules_list with show only capability', () => {
           },
         ],
       });
-      loadRuleTypes.mockResolvedValue([ruleTypeFromApi, getDisabledByLicenseRuleTypeFromApi()]);
+      getRuleTypes.mockResolvedValue([ruleTypeFromApi, getDisabledByLicenseRuleTypeFromApi()]);
       const ruleTypeRegistry = ruleTypeRegistryMock.create();
       ruleTypeRegistry.has.mockReturnValue(false);
 
@@ -1382,8 +1385,7 @@ describe('rules_list with show only capability', () => {
   });
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/203179
-describe.skip('MaintenanceWindowsMock', () => {
+describe('MaintenanceWindowsMock', () => {
   beforeEach(() => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
 
@@ -1405,7 +1407,7 @@ describe.skip('MaintenanceWindowsMock', () => {
       },
     ]);
 
-    loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
+    getRuleTypes.mockResolvedValue([ruleTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
     loadRuleAggregationsWithKueryFilter.mockResolvedValue({});
     loadRuleTags.mockResolvedValue({
@@ -1449,22 +1451,21 @@ describe.skip('MaintenanceWindowsMock', () => {
   });
 
   it('hides MaintenanceWindowCallout if the category ID is not supported', async () => {
-    loadRuleTypes.mockResolvedValue([{ ...ruleTypeFromApi, category: 'observability' }]);
+    getRuleTypes.mockResolvedValue([{ ...ruleTypeFromApi, category: 'observability' }]);
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([
       { ...RUNNING_MAINTENANCE_WINDOW_1, categoryIds: ['securitySolution'] },
     ]);
 
     renderWithProviders(<RulesList />);
 
-    await expect(
-      screen.findByText('Rule notifications are stopped while maintenance windows are running.')
-    ).rejects.toThrow();
-
-    expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1));
+    expect(
+      screen.queryByText('Rule notifications are stopped while maintenance windows are running.')
+    ).not.toBeInTheDocument();
   });
 
   it('shows MaintenanceWindowCallout for a specific category', async () => {
-    loadRuleTypes.mockResolvedValue([{ ...ruleTypeFromApi, category: 'observability' }]);
+    getRuleTypes.mockResolvedValue([{ ...ruleTypeFromApi, category: 'observability' }]);
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([
       { ...RUNNING_MAINTENANCE_WINDOW_1, categoryIds: ['securitySolution', 'observability'] },
     ]);
@@ -1472,7 +1473,7 @@ describe.skip('MaintenanceWindowsMock', () => {
     renderWithProviders(<RulesList />);
 
     expect(
-      await screen.findByText('A maintenance window is running for Observability rules')
+      await screen.findByText('One or more maintenance windows are running')
     ).toBeInTheDocument();
 
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);

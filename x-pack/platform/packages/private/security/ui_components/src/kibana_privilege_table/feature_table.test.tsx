@@ -1147,7 +1147,7 @@ describe('FeatureTable', () => {
 
       const { type } = wrapper.find(EuiIconTip).props();
 
-      expect(type).toBe('iInCircle');
+      expect(type).toBe('info');
     });
 
     it('should render if there are custom privileges and the accordion has not been toggled (i.e. on load)', () => {
@@ -1209,7 +1209,7 @@ describe('FeatureTable', () => {
 
       const { type } = wrapper.find(EuiIconTip).props();
 
-      expect(type).toBe('iInCircle');
+      expect(type).toBe('info');
     });
 
     it('should not render if there are custom privileges and the accordion is open', () => {

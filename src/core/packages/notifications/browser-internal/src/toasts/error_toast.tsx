@@ -20,26 +20,16 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { RenderingService } from '@kbn/core-rendering-browser';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-interface StartServices {
-  analytics: AnalyticsServiceStart;
-  i18n: I18nStart;
-  userProfile: UserProfileService;
-  theme: ThemeServiceStart;
-}
-
-interface ErrorToastProps extends StartServices {
+interface ErrorToastProps {
   title: string;
   error: Error;
   toastMessage: string;
   openModal: OverlayStart['openModal'];
+  rendering: RenderingService;
 }
 
 interface RequestError extends Error {
@@ -63,11 +53,8 @@ export function showErrorDialog({
   title,
   error,
   openModal,
-  ...startServices
-}: Pick<
-  ErrorToastProps,
-  'error' | 'title' | 'openModal' | 'analytics' | 'i18n' | 'userProfile' | 'theme'
->) {
+  rendering,
+}: Pick<ErrorToastProps, 'error' | 'title' | 'openModal' | 'rendering'>) {
   let text = '';
 
   if (isRequestError(error)) {
@@ -81,50 +68,46 @@ export function showErrorDialog({
 
   const modal = openModal(
     mount(
-      <KibanaRenderContextProvider {...startServices}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody data-test-subj="errorModalBody">
-          <EuiCallOut size="s" color="danger" iconType="error" title={error.message} />
-          {text && (
-            <React.Fragment>
-              <EuiSpacer size="s" />
-              <EuiCodeBlock isCopyable={true} paddingSize="s">
-                {text}
-              </EuiCodeBlock>
-            </React.Fragment>
-          )}
-        </EuiModalBody>
-        <EuiModalFooter>
-          <EuiButton onClick={() => modal.close()} fill>
-            <FormattedMessage
-              id="core.notifications.errorToast.closeModal"
-              defaultMessage="Close"
-            />
-          </EuiButton>
-        </EuiModalFooter>
-      </KibanaRenderContextProvider>
+      rendering.addContext(
+        <>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody data-test-subj="errorModalBody">
+            <EuiCallOut size="s" color="danger" iconType="error" title={error.message} />
+            {text && (
+              <React.Fragment>
+                <EuiSpacer size="s" />
+                <EuiCodeBlock isCopyable={true} paddingSize="s">
+                  {text}
+                </EuiCodeBlock>
+              </React.Fragment>
+            )}
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButton onClick={() => modal.close()} fill>
+              <FormattedMessage
+                id="core.notifications.errorToast.closeModal"
+                defaultMessage="Close"
+              />
+            </EuiButton>
+          </EuiModalFooter>
+        </>
+      )
     )
   );
 }
 
-export function ErrorToast({
-  title,
-  error,
-  toastMessage,
-  openModal,
-  ...startServices
-}: ErrorToastProps) {
-  return (
-    <KibanaRenderContextProvider {...startServices}>
+export function ErrorToast({ title, error, toastMessage, openModal, rendering }: ErrorToastProps) {
+  return rendering.addContext(
+    <>
       <p data-test-subj="errorToastMessage">{toastMessage}</p>
       <div className="eui-textRight">
         <EuiButton
           size="s"
           color="danger"
           data-test-subj="errorToastBtn"
-          onClick={() => showErrorDialog({ title, error, openModal, ...startServices })}
+          onClick={() => showErrorDialog({ title, error, openModal, rendering })}
         >
           <FormattedMessage
             id="core.toasts.errorToast.seeFullError"
@@ -132,7 +115,7 @@ export function ErrorToast({
           />
         </EuiButton>
       </div>
-    </KibanaRenderContextProvider>
+    </>
   );
 }
 

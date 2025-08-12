@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import { termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import { wildcardQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
 import {
   AWSIndexName,
@@ -64,7 +64,7 @@ const createFirehoseOnboardingFlowRoute = createObservabilityOnboardingServerRou
     const packageClient = fleetPluginStart.packageService.asScoped(request);
 
     const [{ encoded: apiKeyEncoded }] = await Promise.all([
-      createShipperApiKey(client.asCurrentUser, 'firehose_onboarding'),
+      createShipperApiKey(client.asCurrentUser, 'firehose'),
       packageClient.ensureInstalledPackage({ pkgName: 'awsfirehose' }),
     ]);
 
@@ -125,7 +125,8 @@ const hasFirehoseDataRoute = createObservabilityOnboardingServerRoute({
         query: {
           bool: {
             should: [
-              ...termQuery('aws.kinesis.name', streamName),
+              ...wildcardQuery('aws.kinesis.name', streamName),
+              ...wildcardQuery('aws.firehose.arn', streamName),
               ...wildcardQuery('aws.exporter.arn', stackName),
             ],
           },

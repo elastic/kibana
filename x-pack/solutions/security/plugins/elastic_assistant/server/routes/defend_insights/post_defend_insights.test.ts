@@ -120,12 +120,14 @@ describe('postDefendInsightsRoute', () => {
     tools.context.licensing.license = insufficientLicense;
     jest.spyOn(insufficientLicense, 'hasAtLeast').mockReturnValue(false);
 
-    await expect(
-      server.inject(
-        postDefendInsightsRequest(mockRequestBody),
-        requestContextMock.convertContext(tools.context)
-      )
-    ).rejects.toThrowError('Encountered unexpected call to response.forbidden');
+    const response = await server.inject(
+      postDefendInsightsRequest(mockRequestBody),
+      requestContextMock.convertContext(tools.context)
+    );
+    expect(response.status).toEqual(403);
+    expect(response.body).toEqual({
+      message: 'Your license does not support Defend Workflows. Please upgrade your license.',
+    });
   });
 
   it('should handle successful request', async () => {
@@ -187,6 +189,29 @@ describe('postDefendInsightsRoute', () => {
         success: false,
       },
       status_code: 500,
+    });
+  });
+
+  describe('runExternalCallbacks', () => {
+    it('should handle error thrown by runExternalCallbacks', async () => {
+      const runExternalCallbacks = jest.requireMock('./helpers').runExternalCallbacks as jest.Mock;
+      runExternalCallbacks.mockRejectedValueOnce(new Error('External callback failed'));
+
+      const response = await server.inject(
+        postDefendInsightsRequest(mockRequestBody),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: {
+          error: 'External callback failed',
+          success: false,
+        },
+        status_code: 500,
+      });
+
+      expect(createDefendInsight).not.toHaveBeenCalled();
     });
   });
 });

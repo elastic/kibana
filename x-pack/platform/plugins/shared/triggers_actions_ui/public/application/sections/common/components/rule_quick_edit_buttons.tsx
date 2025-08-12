@@ -16,7 +16,7 @@ import {
   withBulkRuleOperations,
   ComponentOpts as BulkOperationsComponentOpts,
 } from './with_bulk_rule_api_operations';
-import './rule_quick_edit_buttons.scss';
+
 import { useKibana } from '../../../../common/lib/kibana';
 import { UntrackAlertsModal } from './untrack_alerts_modal';
 
@@ -63,6 +63,14 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     }
     return !!selectedItems.find((alertItem) => !alertItem.enabledInLicense);
   }, [selectedItems, isAllSelected]);
+
+  const hasAutoRecoverAlertsRuleTypes = useMemo(() => {
+    if (isAllSelected) {
+      // Show "untrack active alerts" confirmation modal if all alerts are selected
+      return true;
+    }
+    return !!selectedItems.find((alertItem) => alertItem.autoRecoverAlerts !== false);
+  }, [isAllSelected, selectedItems]);
 
   async function deleteSelectedItems() {
     onPerformingAction();
@@ -233,8 +241,12 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   }
 
   const onDisableClick = useCallback(() => {
-    setIsUntrackAlertsModalOpen(true);
-  }, []);
+    if (hasAutoRecoverAlertsRuleTypes) {
+      setIsUntrackAlertsModalOpen(true);
+    } else {
+      onDisable(false);
+    }
+  }, [hasAutoRecoverAlertsRuleTypes, onDisable]);
 
   const onModalClose = useCallback(() => {
     setIsUntrackAlertsModalOpen(false);

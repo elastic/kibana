@@ -94,7 +94,7 @@ export function APMSection({ bucketSize }: Props) {
   return (
     <SectionContainer
       title={i18n.translate('xpack.observability.overview.apm.title', {
-        defaultMessage: 'Services',
+        defaultMessage: 'Service inventory',
       })}
       appLink={{
         href: appLink,
@@ -109,7 +109,7 @@ export function APMSection({ bucketSize }: Props) {
           <StyledStat
             title={numeral(stats?.services.value).format('0a')}
             description={i18n.translate('xpack.observability.overview.apm.services', {
-              defaultMessage: 'Services',
+              defaultMessage: 'Service inventory',
             })}
             isLoading={isLoading}
             data-test-subj="apmServiceStat"
@@ -129,12 +129,7 @@ export function APMSection({ bucketSize }: Props) {
                   {i18n.translate('xpack.observability.overview.apm.throughput', {
                     defaultMessage: 'Throughput',
                   })}{' '}
-                  <EuiIcon
-                    size="s"
-                    color="subdued"
-                    type="questionInCircle"
-                    className="eui-alignCenter"
-                  />
+                  <EuiIcon size="s" color="subdued" type="question" className="eui-alignCenter" />
                 </>
               </EuiToolTip>
             }

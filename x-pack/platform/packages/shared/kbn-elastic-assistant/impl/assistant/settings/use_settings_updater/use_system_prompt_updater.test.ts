@@ -160,7 +160,7 @@ describe('useSystemPromptUpdater', () => {
     });
   });
 
-  it('should delete a system prompt by ID', () => {
+  it('should delete a system prompt by ID', async () => {
     const { result } = renderHook(() => useSystemPromptUpdater(defaultParams), {
       wrapper: TestProviders,
     });
@@ -169,8 +169,19 @@ describe('useSystemPromptUpdater', () => {
       result.current.onSystemPromptSelect({ ...defaultPrompt, id: '1' });
     });
 
+    expect(result.current.selectedSystemPrompt).toEqual({
+      consumer: 'app-id',
+      content: '',
+      conversations: [],
+      id: '1',
+      name: 'New Prompt',
+      promptType: 'system',
+    });
     act(() => {
       result.current.onSystemPromptDelete('1');
+    });
+    await act(async () => {
+      await result.current.saveSystemPromptSettings();
     });
 
     expect(result.current.selectedSystemPrompt).toBeUndefined();

@@ -14,7 +14,13 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const { dashboard, timePicker, common } = getPageObjects(['dashboard', 'timePicker', 'common']);
+  const { dashboardControls, dashboard, timePicker, common, header } = getPageObjects([
+    'dashboardControls',
+    'dashboard',
+    'timePicker',
+    'common',
+    'header',
+  ]);
   const testSubjects = getService('testSubjects');
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -23,6 +29,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
 
   describe('dashboard - add a field type ES|QL control', function () {
+    // this mutes the forward-compatibility test with Elasticsearch, 8.19 kibana and 9.0 ES.
+    // There are not expected to work together.
+    this.onlyEsVersion('8.19 || >=9.1');
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -46,6 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboard.waitForRenderComplete();
+      await elasticChart.setNewChartUiDebugFlag(true);
 
       await retry.try(async () => {
         const panelCount = await dashboard.getPanelCount();
@@ -83,17 +93,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Check Lens editor has been updated accordingly
       const editorValue = await esql.getEsqlEditorQuery();
-      expect(editorValue).to.contain('FROM logstash* | STATS COUNT(*) BY ?field');
+      expect(editorValue).to.contain('FROM logstash* | STATS COUNT(*) BY ??field');
+
+      // run the query to make sure the chart is updated
+      await testSubjects.click('ESQLEditor-run-query-button');
+      await dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
     });
 
     it('should update the Lens chart accordingly', async () => {
-      await elasticChart.setNewChartUiDebugFlag(true);
       // change the control value
-      await comboBox.set('esqlControlValuesDropdown', 'clientip');
+      const controlId = (await dashboardControls.getAllControlIds())[0];
+      await dashboardControls.optionsListOpenPopover(controlId);
+      await dashboardControls.optionsListPopoverSelectOption('clientip');
       await dashboard.waitForRenderComplete();
 
-      const data = await elasticChart.getChartDebugData('xyVisChart');
-      expect(data?.axes?.x[0]?.title).to.be('clientip');
+      await retry.try(async () => {
+        const data = await elasticChart.getChartDebugData('xyVisChart');
+        expect(data?.axes?.x[0]?.title).to.be('clientip');
+      });
     });
   });
 }

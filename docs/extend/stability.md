@@ -29,7 +29,7 @@ Ensure your feature will work under all possible {{kib}} scenarios.
         * We need to make sure security is set up in a specific way for non-standard {{kib}} indices. (create their own custom roles)
 
 * {{kib}} running behind a reverse proxy or load balancer, without sticky sessions.
-* If a proxy/loadbalancer is running between ES and {kib}
+* If a proxy/loadbalancer is running between ES and {{kib}}
 
 
 ## Kibana.yml settings [_kibana_yml_settings]

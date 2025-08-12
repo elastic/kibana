@@ -26,6 +26,8 @@ interface ExportExceptionListAndItemsOptions {
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
   includeExpiredExceptions: boolean;
+  /** Optional KQL filter to be applied to the data that will be retrieved for export */
+  filter?: string;
 }
 
 export interface ExportExceptionListAndItemsReturn {
@@ -39,6 +41,7 @@ export const exportExceptionListAndItems = async ({
   namespaceType,
   includeExpiredExceptions,
   savedObjectsClient,
+  filter: dataFilter = undefined,
 }: ExportExceptionListAndItemsOptions): Promise<ExportExceptionListAndItemsReturn | null> => {
   const exceptionList = await getExceptionList({
     id,
@@ -56,9 +59,17 @@ export const exportExceptionListAndItems = async ({
       exceptionItems = [...exceptionItems, ...response.data];
     };
     const savedObjectPrefix = getSavedObjectType({ namespaceType });
-    const filter = includeExpiredExceptions
-      ? undefined
-      : `(${savedObjectPrefix}.attributes.expire_time > "${new Date().toISOString()}" OR NOT ${savedObjectPrefix}.attributes.expire_time: *)`;
+    let filter = dataFilter;
+
+    if (!includeExpiredExceptions) {
+      const noExpiredItemsFilter = `(${savedObjectPrefix}.attributes.expire_time > "${new Date().toISOString()}" OR NOT ${savedObjectPrefix}.attributes.expire_time: *)`;
+
+      if (filter) {
+        filter = `(${filter}) AND ${noExpiredItemsFilter}`;
+      } else {
+        filter = noExpiredItemsFilter;
+      }
+    }
 
     await findExceptionListItemPointInTimeFinder({
       executeFunctionOnStream,

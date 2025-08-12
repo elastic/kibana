@@ -1756,6 +1756,20 @@
           },
           {
             "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ProfilingStatus.has_required_role",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "has_required_role",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling_status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
             "id": "def-common.ProfilingStatus.unauthorized",
             "type": "CompoundType",
             "tags": [],
@@ -2385,7 +2399,7 @@
         "tags": [],
         "label": "FrameType",
         "description": [
-          "\nFrame type"
+          "\nFrame type\nThese frame types need to match with the constants defined in\nhttps://github.com/open-telemetry/opentelemetry-ebpf-profiler/blob/main/libpf/frametype.go"
         ],
         "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,

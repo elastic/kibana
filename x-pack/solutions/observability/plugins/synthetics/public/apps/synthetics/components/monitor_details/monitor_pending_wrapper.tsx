@@ -70,7 +70,7 @@ export const MonitorPendingWrapper: FC<PropsWithChildren<unknown>> = ({ children
       ) : null}
       {loaded && !hasPing ? (
         <PageLoader
-          icon={<EuiLoadingChart size="xl" mono />}
+          icon={<EuiLoadingChart size="xl" />}
           title={<h3>{MONITOR_PENDING_HEADING}</h3>}
           body={<p>{MONITOR_PENDING_CONTENT}</p>}
         />

@@ -13,6 +13,7 @@ import { ContextPageObject } from './context_page';
 import { DashboardPageObject } from './dashboard_page';
 import { DiscoverPageObject } from './discover_page';
 import { ErrorPageObject } from './error_page';
+import { ExportPageObject } from './export_page';
 import { HeaderPageObject } from './header_page';
 import { HomePageObject } from './home_page';
 import { NewsfeedPageObject } from './newsfeed_page';
@@ -41,6 +42,7 @@ import { AnnotationEditorPageObject } from './annotation_library_editor_page';
 import { SolutionNavigationProvider } from './solution_navigation';
 import { EmbeddedConsoleProvider } from './embedded_console';
 import { SpaceSettingsPageObject } from './space_settings';
+import { MarkdownVisPageObject } from './markdown_vis';
 
 export const pageObjects = {
   annotationEditor: AnnotationEditorPageObject,
@@ -53,6 +55,7 @@ export const pageObjects = {
   discover: DiscoverPageObject,
   embeddedConsole: EmbeddedConsoleProvider,
   error: ErrorPageObject,
+  exports: ExportPageObject,
   header: HeaderPageObject,
   home: HomePageObject,
   newsfeed: NewsfeedPageObject,
@@ -77,6 +80,7 @@ export const pageObjects = {
   unifiedTabs: UnifiedTabsPageObject,
   filesManagement: FilesManagementPageObject,
   spaceSettings: SpaceSettingsPageObject,
+  markdownVis: MarkdownVisPageObject,
 };
 
 export { SolutionNavigationProvider } from './solution_navigation';

@@ -19,25 +19,22 @@ import {
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import { tracksOverlays } from '@kbn/presentation-containers';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
+import { Filter } from '@kbn/es-query';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import {
   GetStateType,
   LensEmbeddableStartServices,
+  LensHasEditPanel,
   LensInspectorAdapters,
   LensInternalApi,
   LensRuntimeState,
 } from '../types';
-import {
-  buildObservableVariable,
-  emptySerializer,
-  extractInheritedViewModeObservable,
-} from '../helper';
+import { extractInheritedViewModeObservable } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
-import { mountInlineEditPanel } from '../inline_editing/mount';
+import { mountInlinePanel } from '../mount';
 import { StateManagementConfig } from './initialize_state_management';
 import { apiPublishesInlineEditingCapabilities } from '../type_guards';
 import { SearchContextConfig } from './initialize_search_context';
@@ -86,10 +83,7 @@ export function initializeEditApi(
     PublishesDisabledActionIds &
     HasEditCapabilities &
     HasReadOnlyCapabilities &
-    PublishesViewMode & { uuid: string };
-  comparators: {};
-  serialize: () => {};
-  cleanup: () => void;
+    PublishesViewMode & { uuid: string } & LensHasEditPanel;
 } {
   const supportedTriggers = getSupportedTriggers(getState, startDependencies.visualizationMap);
   const isManaged = (currentState: LensRuntimeState) => {
@@ -98,9 +92,7 @@ export function initializeEditApi(
 
   const isESQLModeEnabled = () => uiSettings.get(ENABLE_ESQL);
 
-  const [viewMode$] = buildObservableVariable<ViewMode>(
-    extractInheritedViewModeObservable(parentApi)
-  );
+  const viewMode$ = extractInheritedViewModeObservable(parentApi);
 
   const { disabledActionIds$, setDisabledActionIds } = apiPublishesDisabledActionIds(parentApi)
     ? parentApi
@@ -149,35 +141,48 @@ export function initializeEditApi(
     stateApi.updateSavedObjectId(newState.savedObjectId);
   };
 
-  // Wrap the getState() when inline editing and make sure that the filters in the attributes
-  // are properly injected with the correct references to avoid issues when saving/navigating to the full editor
-  const getStateWithInjectedFilters = () => {
+  /**
+   * Use the search context api here for filters for 2 reasons:
+   *  - the filters here have the correct references already injected
+   *  - the edit filters flow may change in the future and this is the right place to get the filters
+   */
+  const getFilters = ({ attributes }: LensRuntimeState): Filter[] =>
+    searchContextApi.filters$.getValue() ?? attributes.state.filters;
+
+  const convertVisualizationState = ({ attributes }: LensRuntimeState) => {
+    const visState = attributes.state.visualization;
+    const convertToRuntimeState =
+      startDependencies.visualizationMap[attributes.visualizationType ?? '']?.convertToRuntimeState;
+    if (!convertToRuntimeState) return visState;
+    return convertToRuntimeState(visState, attributes.state.datasourceStates);
+  };
+
+  /**
+   * Wrap getState() when inline editing to ensure:
+   *  - Filters in the attributes are properly injected with the correct references to avoid
+   *    issues when saving/navigating to the full editor
+   *  - Apply runtime conversions to visualization state
+   */
+  const getModifiedState = (): LensRuntimeState => {
     const currentState = getState();
-    // use the search context api here for filters for 2 reasons:
-    // * the filters here have the correct references already injected
-    // * the edit filters flow may change in the future and this is the right place to get the filters
-    const currentFilters = searchContextApi.filters$.getValue() ?? [];
-    // if there are no filters, avoid to copy the attributes
-    if (!currentFilters.length) {
-      return currentState;
-    }
-    // otherwise make sure to inject the references into filters
+
     return {
       ...currentState,
       attributes: {
         ...currentState.attributes,
         state: {
           ...currentState.attributes.state,
-          filters: currentFilters,
+          filters: getFilters(currentState),
+          visualization: convertVisualizationState(currentState),
         },
       },
     };
   };
 
   // This will handle both edit and read only mode based on the view mode
-  const openInlineEditor = prepareInlineEditPanel(
+  const getInlineEditor = prepareInlineEditPanel(
     initialState,
-    getStateWithInjectedFilters,
+    getModifiedState,
     updateState,
     internalApi,
     panelManagementApi,
@@ -217,39 +222,28 @@ export function initializeEditApi(
     return isReadOnly(viewMode$) && Boolean(capabilities.visualize_v2.show);
   };
 
-  // this will force the embeddable to toggle the inline editing feature
-  const canEditInline = apiPublishesInlineEditingCapabilities(parentApi)
-    ? parentApi.canEditInline
-    : true;
-
-  const openConfigurationPanel = async (
-    { showOnly }: { showOnly: boolean } = { showOnly: false }
+  const getEditPanel = async (
+    { showOnly, closeFlyout }: { showOnly?: boolean; closeFlyout?: () => void } = {
+      closeFlyout: noop,
+    }
   ) => {
     // save the initial state in case it needs to revert later on
     const firstState = getState();
-
-    const rootEmbeddable = parentApi;
-    const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
-    const ConfigPanel = await openInlineEditor({
+    const ConfigPanel = await getInlineEditor({
       // restore the first state found when the panel opened
       onCancel: () => updateState({ ...firstState }),
-      // the getState() here contains the wrong filters references
-      // but the input attributes are correct as openInlineEditor() handler is using
-      // the getStateWithInjectedFilters() function
+      // the getState() here contains the wrong filters references but the input attributes
+      // are correct as getInlineEditor() handler is using the getModifiedState() function
       onApply: showOnly
         ? noop
         : (attributes: LensRuntimeState['attributes']) =>
             updateState({ ...getState(), attributes }),
+      closeFlyout,
     });
-    if (ConfigPanel) {
-      mountInlineEditPanel(ConfigPanel, startDependencies.coreStart, overlayTracker, uuid);
-    }
+    return ConfigPanel ?? undefined;
   };
 
   return {
-    comparators: { disabledActionIds$: [disabledActionIds$, setDisabledActionIds] },
-    serialize: emptySerializer,
-    cleanup: noop,
     api: {
       uuid,
       viewMode$,
@@ -263,12 +257,18 @@ export function initializeEditApi(
 
       /**
        * This is the key method to enable the new Editing capabilities API
-       * Lens will leverage the netural nature of this function to build the inline editing experience
+       * Lens will leverage the neutral nature of this function to build the inline editing experience
        */
       onEdit: async () => {
         if (!parentApi || !apiHasAppContext(parentApi)) {
           return;
         }
+
+        // this will force the embeddable to toggle the inline editing feature
+        const canEditInline = apiPublishesInlineEditingCapabilities(parentApi)
+          ? parentApi.canEditInline
+          : true;
+
         // just navigate directly to the editor
         if (!canEditInline) {
           const navigateFn = navigateToLensEditor(
@@ -281,8 +281,14 @@ export function initializeEditApi(
           return navigateFn();
         }
 
-        openConfigurationPanel({ showOnly: false });
+        mountInlinePanel({
+          core: startDependencies.coreStart,
+          api: parentApi,
+          loadContent: getEditPanel,
+          options: { uuid },
+        });
       },
+      getEditPanel,
       /**
        * Check everything here: user/app permissions and the current inline editing state
        */
@@ -304,7 +310,17 @@ export function initializeEditApi(
         if (!parentApi || !apiHasAppContext(parentApi)) {
           return;
         }
-        openConfigurationPanel({ showOnly: true });
+        mountInlinePanel({
+          core: startDependencies.coreStart,
+          api: parentApi,
+          loadContent: async ({ closeFlyout } = { closeFlyout: noop }) => {
+            return getEditPanel({
+              showOnly: true,
+              closeFlyout,
+            });
+          },
+          options: { uuid },
+        });
       },
       getEditHref: async () => {
         if (!parentApi || !apiHasAppContext(parentApi)) {

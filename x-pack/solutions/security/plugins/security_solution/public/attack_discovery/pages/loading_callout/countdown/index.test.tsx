@@ -14,6 +14,9 @@ import { Countdown } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { INFORMATION } from '../translations';
 import { APPROXIMATE_TIME_REMAINING } from './translations';
+import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
+
+jest.mock('../../use_kibana_feature_flags');
 
 describe('Countdown', () => {
   const connectorIntervals: GenerationInterval[] = [
@@ -37,6 +40,10 @@ describe('Countdown', () => {
 
   beforeEach(() => {
     jest.clearAllTimers();
+
+    (useKibanaFeatureFlags as jest.Mock).mockReturnValue({
+      attackDiscoveryAlertsEnabled: false,
+    });
   });
 
   afterAll(() => {
@@ -90,5 +97,19 @@ describe('Countdown', () => {
     );
 
     expect(screen.getByRole('button', { name: INFORMATION })).toBeInTheDocument();
+  });
+
+  it('returns null when approximateFutureTime is null', () => {
+    (useKibanaFeatureFlags as jest.Mock).mockReturnValue({
+      attackDiscoveryAlertsEnabled: true,
+    });
+
+    const { container } = render(
+      <TestProviders>
+        <Countdown approximateFutureTime={null} connectorIntervals={connectorIntervals} />
+      </TestProviders>
+    );
+
+    expect(container.innerHTML).toEqual('');
   });
 });
