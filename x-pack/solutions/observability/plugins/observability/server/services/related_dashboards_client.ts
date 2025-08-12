@@ -80,7 +80,7 @@ export class RelatedDashboardsClient {
     await Promise.all(
       [
         this.unfilteredMatches(alert.getAllRelevantFields(), alert.getRuleQueryIndex() || ''),
-        this.fetchSuggestedByTextMatch(alert.getRuleName() || ''),
+        this.titleMatches(alert.getRuleName() || ''),
       ].map(async (search) => {
         (await search).forEach((dashboard) => {
           const existing = dashboardsById.get(dashboard.id);
@@ -112,7 +112,7 @@ export class RelatedDashboardsClient {
     );
   }
 
-  private async fetchSuggestedByTextMatch(ruleName: string): Promise<SuggestedDashboard[]> {
+  private async titleMatches(ruleName: string): Promise<SuggestedDashboard[]> {
     // Return an empty array if the ruleName is an empty string or only whitespace
     if (!ruleName || /^\s*$/.test(ruleName)) {
       return [];
