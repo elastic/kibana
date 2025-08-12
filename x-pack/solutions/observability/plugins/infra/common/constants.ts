@@ -50,7 +50,6 @@ export const MANDATORY_PROCESS_FIELDS_ECS = [
 export const MANDATORY_PROCESS_FIELDS_SEMCONV = [
   'process.pid',
   'process.command_line',
-  'process.cpu.time',
   'process.owner',
 ];
 export const PROCESS_COMMANDLINE_FIELD = 'process.command_line';

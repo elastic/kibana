@@ -6,7 +6,7 @@
  */
 
 import type { ESSearchClient } from '@kbn/metrics-data-access-plugin/server';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { DataSchemaFormatEnum, HOST_METRICS_RECEIVER_OTEL } from '@kbn/metrics-data-access-plugin/common';
 import {
   TIMESTAMP_FIELD,
   PROCESS_COMMANDLINE_FIELD,
@@ -202,7 +202,7 @@ const getProcessListSEMCONV = async (
             must: [
               {
                 term: {
-                  'event.dataset': 'hostmetricsreceiver.otel',
+                  'event.dataset': HOST_METRICS_RECEIVER_OTEL,
                 },
               },
               {
@@ -255,7 +255,7 @@ const getProcessListSEMCONV = async (
             aggs: {
               cpu: {
                 avg: {
-                  field: 'process.cpu.time',
+                  field: 'process.cpu.utilization',
                 },
               },
               memory: {
@@ -298,29 +298,10 @@ const getProcessListSEMCONV = async (
     const hit = bucket.meta.hits.hits[0];
     const meta = hit.fields || {};
 
-    const getValue = (fieldName: string) => {
-      const value = meta[fieldName];
-      return Array.isArray(value) ? value[0] : value;
-    };
-
-    const metricTimestamp = hit.fields?.['@timestamp']
-      ? new Date(getValue('@timestamp')).getTime()
-      : Date.now();
-
-    // Get start time from aggregation or fallback to current time
-    const startTime = bucket.startTime?.value_as_string
-      ? Date.parse(bucket.startTime.value_as_string)
-      : metricTimestamp;
-
-    const processRuntimeMs = metricTimestamp - startTime;
-
-    const cpuTimeValueMs = bucket.cpu.value * 1000; // convert seconds to milliseconds
-    const cpu = processRuntimeMs > 0 ? cpuTimeValueMs / processRuntimeMs : 0;
-
     return {
-      cpu,
+      cpu: bucket.cpu.value, // already a ratio (0-1)
       memory: bucket.memory.value / 100, // convert to ratio (0-1)
-      startTime,
+      startTime: Date.parse(bucket.startTime.value_as_string),
       pid: meta['process.pid'][0] as number,
       state: '', // Not available in SEMCONV
       user: meta['process.owner'][0] as string,
@@ -390,9 +371,9 @@ export const getProcessList = async (
   { hostTerm, to, sortBy, searchFilter, schema, sourceId }: ProcessListAPIRequest
 ) => {
   try {
-    const detectedSchema = schema || DataSchemaFormat.ECS;
+    const detectedSchema = schema || DataSchemaFormatEnum.ECS;
 
-    if (detectedSchema === DataSchemaFormat.SEMCONV) {
+    if (detectedSchema === DataSchemaFormatEnum.SEMCONV) {
       return await getProcessListSEMCONV(search, sourceConfiguration, {
         hostTerm,
         to,

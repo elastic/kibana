@@ -9,8 +9,8 @@ import * as rt from 'io-ts';
 import {
   MetricsAPISeriesRT,
   type MetricsAPIRow,
-  DataSchemaFormat,
 } from '@kbn/metrics-data-access-plugin/common';
+import { DataSchemaFormatRT } from '../shared';
 
 const AggValueRT = rt.type({
   value: rt.number,
@@ -26,8 +26,7 @@ export const ProcessListAPIRequestRT = rt.type({
   }),
   searchFilter: rt.array(rt.record(rt.string, rt.record(rt.string, rt.unknown))),
   schema: rt.union([
-    rt.literal(DataSchemaFormat.ECS),
-    rt.literal(DataSchemaFormat.SEMCONV),
+    DataSchemaFormatRT,
     rt.null,
   ]),
 });
@@ -177,6 +176,10 @@ export const ProcessListAPIChartRequestRT = rt.type({
   indexPattern: rt.string,
   to: rt.number,
   command: rt.string,
+  schema: rt.union([
+    DataSchemaFormatRT,
+    rt.null,
+  ]),
 });
 
 export const ProcessListAPIChartQueryAggregationRT = rt.type({
