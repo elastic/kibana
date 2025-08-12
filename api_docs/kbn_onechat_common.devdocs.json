@@ -3850,6 +3850,23 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.SerializedOnechatError",
+        "type": "Type",
+        "tags": [],
+        "label": "SerializedOnechatError",
+        "description": [],
+        "signature": [
+          "{ error: { code: string; message: string; meta?: Record<string, any> | undefined; }; } & { type: ",
+          "ServerSentEventType",
+          ".error; }"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.ToolCallEvent",
         "type": "Type",
         "tags": [],
