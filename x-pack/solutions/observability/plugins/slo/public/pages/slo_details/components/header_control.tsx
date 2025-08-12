@@ -221,6 +221,19 @@ export function HeaderControl({ slo }: Props) {
     }
   };
 
+  const handleManageLinkedDashboards = () => {
+    //   // TODO: need to handle remote link with parameters to display the flyout
+    // if (!!remoteAddDashboardsUrl) {
+    //   window.open(remoteAddDashboardsUrl, '_blank');
+    // } else {
+    triggerAction({
+      type: 'add_dashboards',
+      item: slo,
+    });
+    setIsPopoverOpen(false);
+    // TODO: handle removeAddDashboardsQueryParam();
+  };
+
   const isRemote = !!slo?.remote;
   const hasUndefinedRemoteKibanaUrl = !!slo?.remote && slo?.remote?.kibanaUrl === '';
 
@@ -397,6 +410,21 @@ export function HeaderControl({ slo }: Props) {
               >
                 {i18n.translate('xpack.slo.sloDetails.headerControl.reset', {
                   defaultMessage: 'Reset',
+                })}
+                {showRemoteLinkIcon}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="manageLinkedDashboards"
+                icon="dashboardApp"
+                disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
+                onClick={handleManageLinkedDashboards}
+                data-test-subj="sloDetailsHeaderControlPopoverManageLinkedDashboards"
+                toolTipContent={
+                  hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+                }
+              >
+                {i18n.translate('xpack.slo.slo.item.actions.manageLinkedDashboards', {
+                  defaultMessage: 'Manage linked dashboards',
                 })}
                 {showRemoteLinkIcon}
               </EuiContextMenuItem>

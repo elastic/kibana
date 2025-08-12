@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGrid, EuiPanel, EuiText, useIsWithinBreakpoints } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiPanel, EuiText, useIsWithinBreakpoints } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import {
@@ -14,7 +14,9 @@ import {
   querySchema,
   rollingTimeWindowTypeSchema,
 } from '@kbn/slo-schema';
+import { isEmpty } from 'lodash';
 import React from 'react';
+import { SloTagsBadge } from '../../../../components/slo/slo_badges/slo_tags_badge';
 import { useKibana } from '../../../../hooks/use_kibana';
 import {
   BUDGETING_METHOD_OCCURRENCES,
@@ -25,8 +27,9 @@ import {
 } from '../../../../utils/slo/labels';
 import { ApmIndicatorOverview } from '../overview/apm_indicator_overview';
 import { DisplayQuery } from '../overview/display_query';
-import { DefinitionItem } from './definition_item';
+import { LinkedDashboards } from '../overview/linked_dashboards';
 import { SyntheticsIndicatorOverview } from '../overview/synthetics_indicator_overview';
+import { DefinitionItem } from './definition_item';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -36,6 +39,7 @@ export function Definition({ slo }: Props) {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
+  const hasNoData = slo.summary.status === 'NO_DATA';
 
   let IndicatorOverview = null;
   switch (slo.indicator.type) {
@@ -51,22 +55,38 @@ export function Definition({ slo }: Props) {
     <EuiPanel paddingSize="none" color="transparent" data-test-subj="definition">
       <EuiFlexGrid columns={isMobile ? 2 : 4} gutterSize="l" responsive={false}>
         <DefinitionItem
+          title={i18n.translate('xpack.slo.sloDetails.overview.observedValueTitle', {
+            defaultMessage: 'Observed value',
+          })}
+          content={
+            <EuiText size="s">
+              {i18n.translate('xpack.slo.sloDetails.overview.observedValueSubtitle', {
+                defaultMessage: '{value} (objective is {objective})',
+                values: {
+                  value: hasNoData ? '-' : numeral(slo.summary.sliValue).format(percentFormat),
+                  objective: numeral(slo.objective.target).format(percentFormat),
+                },
+              })}
+            </EuiText>
+          }
+        />
+        <DefinitionItem
           title={i18n.translate('xpack.slo.sloDetails.overview.indicatorTypeTitle', {
             defaultMessage: 'Indicator type',
           })}
-          subtitle={<EuiText size="s">{toIndicatorTypeLabel(slo.indicator.type)}</EuiText>}
+          content={<EuiText size="s">{toIndicatorTypeLabel(slo.indicator.type)}</EuiText>}
         />
         <DefinitionItem
           title={i18n.translate('xpack.slo.sloDetails.overview.timeWindowTitle', {
             defaultMessage: 'Time window',
           })}
-          subtitle={toTimeWindowLabel(slo.timeWindow)}
+          content={toTimeWindowLabel(slo.timeWindow)}
         />
         <DefinitionItem
           title={i18n.translate('xpack.slo.sloDetails.overview.budgetingMethodTitle', {
             defaultMessage: 'Budgeting method',
           })}
-          subtitle={
+          content={
             occurrencesBudgetingMethodSchema.is(slo.budgetingMethod) ? (
               <EuiText size="s">{BUDGETING_METHOD_OCCURRENCES}</EuiText>
             ) : (
@@ -97,14 +117,29 @@ export function Definition({ slo }: Props) {
             )
           }
         />
-
+        <DefinitionItem
+          title={i18n.translate('xpack.slo.sloDetails.overview.descriptionTitle', {
+            defaultMessage: 'Description',
+          })}
+          content={<EuiText size="s">{!!slo.description ? slo.description : '-'}</EuiText>}
+        />
+        <DefinitionItem
+          title={i18n.translate('xpack.slo.sloDetails.overview.tagsTitle', {
+            defaultMessage: 'Tags',
+          })}
+          content={
+            <EuiFlexGroup direction="row" gutterSize="s" wrap responsive={false}>
+              <SloTagsBadge slo={slo} />
+            </EuiFlexGroup>
+          }
+        />
         {IndicatorOverview}
         {'index' in slo.indicator.params && (
           <DefinitionItem
             title={i18n.translate('xpack.slo.sloDetails.overview.indexTitle', {
               defaultMessage: 'Index pattern',
             })}
-            subtitle={slo.indicator.params.index}
+            content={slo.indicator.params.index}
           />
         )}
         {'filter' in slo.indicator.params && (
@@ -112,7 +147,7 @@ export function Definition({ slo }: Props) {
             title={i18n.translate('xpack.slo.sloDetails.overview.overallQueryTitle', {
               defaultMessage: 'Overall query',
             })}
-            subtitle={
+            content={
               <DisplayQuery
                 query={slo.indicator.params.filter}
                 index={slo.indicator.params.index}
@@ -125,7 +160,7 @@ export function Definition({ slo }: Props) {
             title={i18n.translate('xpack.slo.sloDetails.overview.goodQueryTitle', {
               defaultMessage: 'Good query',
             })}
-            subtitle={
+            content={
               <DisplayQuery query={slo.indicator.params.good} index={slo.indicator.params.index} />
             }
           />
@@ -135,24 +170,32 @@ export function Definition({ slo }: Props) {
             title={i18n.translate('xpack.slo.sloDetails.overview.totalQueryTitle', {
               defaultMessage: 'Total query',
             })}
-            subtitle={
+            content={
               <DisplayQuery query={slo.indicator.params.total} index={slo.indicator.params.index} />
             }
           />
         )}
-
         <DefinitionItem
           title={i18n.translate('xpack.slo.sloDetails.overview.settings.syncDelay', {
             defaultMessage: 'Sync delay',
           })}
-          subtitle={slo.settings.syncDelay}
+          content={slo.settings.syncDelay}
         />
         <DefinitionItem
           title={i18n.translate('xpack.slo.sloDetails.overview.settings.frequency', {
             defaultMessage: 'Frequency',
           })}
-          subtitle={slo.settings.frequency}
+          content={slo.settings.frequency}
         />
+
+        {!isEmpty(slo.assets) && (
+          <DefinitionItem
+            title={i18n.translate('xpack.slo.sloDetails.overview.dashboards', {
+              defaultMessage: 'Linked dashboards',
+            })}
+            content={<LinkedDashboards assets={slo.assets} />}
+          />
+        )}
       </EuiFlexGrid>
     </EuiPanel>
   );

@@ -10,10 +10,10 @@ import React, { ReactNode } from 'react';
 
 export interface Props {
   title: string;
-  subtitle: ReactNode;
+  content: ReactNode;
 }
 
-export function DefinitionItem({ title, subtitle }: Props) {
+export function DefinitionItem({ title, content }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>
@@ -21,7 +21,7 @@ export function DefinitionItem({ title, subtitle }: Props) {
           <strong>{title}</strong>
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{subtitle}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{content}</EuiFlexItem>
     </EuiFlexGroup>
   );
 }

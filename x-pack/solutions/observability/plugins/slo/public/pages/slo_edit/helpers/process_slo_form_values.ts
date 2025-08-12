@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateSLOInput, GetSLOResponse, Indicator, UpdateSLOInput } from '@kbn/slo-schema';
+import { Asset, CreateSLOInput, GetSLOResponse, Indicator, UpdateSLOInput } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { RecursivePartial } from '@kbn/utility-types';
 import { cloneDeep } from 'lodash';
@@ -51,6 +51,7 @@ export function transformSloResponseToCreateSloForm(
     },
     groupBy: [values.groupBy].flat(),
     tags: values.tags,
+    assets: values.assets,
     settings: {
       preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
       syncDelay: values.settings?.syncDelay
@@ -86,6 +87,7 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
         }),
     },
     tags: values.tags,
+    assets: values.assets,
     groupBy: [values.groupBy].flat(),
     settings: {
       preventInitialBackfill: values.settings.preventInitialBackfill,
@@ -119,6 +121,7 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
     },
     tags: values.tags,
     groupBy: [values.groupBy].flat(),
+    assets: values.assets,
     settings: {
       preventInitialBackfill: values.settings.preventInitialBackfill,
       syncDelay: `${values.settings.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
@@ -204,7 +207,7 @@ export function transformPartialSLOStateToFormState(
     state.description = values.description;
   }
   if (values.tags) {
-    state.tags = [values.tags].flat().filter((tag) => !!tag) as string[];
+    state.tags = values.tags.filter((tag) => !!tag) as string[];
   }
 
   if (values.objective) {
@@ -247,6 +250,10 @@ export function transformPartialSLOStateToFormState(
     if (values.settings.syncField) {
       state.settings.syncField = values.settings.syncField;
     }
+  }
+
+  if (values.assets) {
+    state.assets = values.assets.filter((asset) => !!asset) as Asset[];
   }
 
   return state;

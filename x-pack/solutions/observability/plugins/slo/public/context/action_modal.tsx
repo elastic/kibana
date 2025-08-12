@@ -7,6 +7,7 @@
 
 import { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { ReactNode, createContext, useContext, useState } from 'react';
+import { ManageLinkedDashboardsContainer } from '../components/manage_linked_dashboards/manage_linked_dashboards_container';
 import { AddToCaseAction } from '../components/slo/add_to_case_action/add_to_case_action';
 import { SloBulkDeleteConfirmationModal } from '../components/slo/bulk_delete_confirmation_modal/bulk_delete_confirmation_modal';
 import { SloDeleteConfirmationModal } from '../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
@@ -25,7 +26,15 @@ interface BaseAction {
 }
 
 interface SingleAction extends BaseAction {
-  type: 'clone' | 'delete' | 'reset' | 'enable' | 'disable' | 'purge' | 'add_to_case';
+  type:
+    | 'clone'
+    | 'delete'
+    | 'reset'
+    | 'enable'
+    | 'disable'
+    | 'purge'
+    | 'add_to_case'
+    | 'add_dashboards';
   item: SLODefinitionResponse | SLOWithSummaryResponse;
 }
 
@@ -125,6 +134,15 @@ export function ActionModalProvider({ children }: { children: ReactNode }) {
             onConfirm={handleOnConfirm}
           />
         );
+      case 'add_dashboards': {
+        return (
+          <ManageLinkedDashboardsContainer
+            slo={action.item}
+            onCancel={handleOnCancel}
+            onConfirm={handleOnConfirm}
+          />
+        );
+      }
       default:
         return null;
     }

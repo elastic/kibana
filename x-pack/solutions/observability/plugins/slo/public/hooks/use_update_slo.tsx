@@ -54,6 +54,7 @@ export function useUpdateSlo() {
     {
       onSuccess: (data, { slo: { name } }) => {
         queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
+        queryClient.invalidateQueries({ queryKey: sloKeys.details(), exact: false });
 
         const sloViewUrl = http.basePath.prepend(paths.sloDetails(data.id, ALL_VALUE));
 
