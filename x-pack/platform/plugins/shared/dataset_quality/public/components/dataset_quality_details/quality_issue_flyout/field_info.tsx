@@ -6,9 +6,18 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, formatNumber, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  formatNumber,
+  useEuiTheme,
+  EuiSpacer,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { ScaleType, Settings, Tooltip, Chart, BarSeries } from '@elastic/charts';
+import { ScaleType, Settings, Axis, Chart, BarSeries, Position } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 
 import { NUMBER_FORMAT } from '../../../../common/constants';
 import {
@@ -27,6 +36,7 @@ export const QualityIssueFieldInfo = ({
   children?: React.ReactNode;
 }) => {
   const { fieldFormats } = useQualityIssues();
+  const chartBaseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
 
   const dateFormatter = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [
@@ -40,34 +50,45 @@ export const QualityIssueFieldInfo = ({
           <span>{flyoutIssueDetailsTitle}</span>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <span>{flyoutDocsCountTotalText}</span>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          data-test-subj={`datasetQualityDetailsDegradedFieldFlyoutFieldsList-docCount`}
-          grow={false}
-        >
-          <span>{formatNumber(fieldList?.count, NUMBER_FORMAT)}</span>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexItem data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-docCount">
+      <EuiFlexItem>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <span>{flyoutDocsCountTotalText}</span>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem
+            data-test-subj={`datasetQualityDetailsDegradedFieldFlyoutFieldsList-docCount`}
+            grow={false}
+          >
+            <span>{formatNumber(fieldList?.count, NUMBER_FORMAT)}</span>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         {fieldList?.timeSeries && (
-          <Chart size={{ height: 100, width: '100%' }}>
-            <Settings showLegend={false} />
-            <Tooltip type="none" />
-            <BarSeries
-              id="barseries"
-              xScaleType={ScaleType.Linear}
-              yScaleType={ScaleType.Linear}
-              xAccessor="x"
-              yAccessors={['y']}
-              data={fieldList?.timeSeries}
-              color={euiTheme.colors.vis.euiColorVis6}
-            />
-          </Chart>
+          <>
+            <EuiSpacer size="s" />
+            <Chart
+              size={{ height: 150, width: '100%' }}
+              data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldsList-docCountChart"
+            >
+              <Settings showLegend={false} locale={i18n.getLocale()} baseTheme={chartBaseTheme} />
+              <Axis
+                id="doc_count_x_axis"
+                position={Position.Bottom}
+                tickFormat={(d) => dateFormatter.convert(d)}
+              />
+              <Axis id="doc_count_y_axis" position={Position.Left} />
+              <BarSeries
+                id="barseries"
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor="x"
+                yAccessors={['y']}
+                data={fieldList?.timeSeries}
+                color={euiTheme.colors.vis.euiColorVis6}
+              />
+            </Chart>
+          </>
         )}
       </EuiFlexItem>
       <EuiFlexGroup
