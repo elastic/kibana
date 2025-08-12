@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { expect } from 'expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { InternalRequestHeader, RoleCredentials } from '../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
