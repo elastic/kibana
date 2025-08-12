@@ -6,6 +6,8 @@
  */
 import { v4 as generateId } from 'uuid';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import type { Reference } from '@kbn/content-management-utils';
 import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import {
@@ -38,20 +40,10 @@ export const redirectToDashboard = ({
   const { references } = extract(rawState as unknown as EmbeddableStateWithType);
 
   const appId = originatingApp || 'dashboards';
-  // const controls: {
-  //   type: string;
-  //   serializedState: { rawState: ControlPanelState<DefaultControlState> };
-  // }[] = [];
   const controls: ControlsGroupState['controls'] = [];
   Object.values(controlsInput ?? {}).forEach((panel, idx) => {
     const { width, grow, type, ...controlConfig } = panel;
     const id = generateId();
-    // controls.push({
-    //   type: CONTROLS_GROUP_TYPE,
-    //   serializedState: {
-    //     rawState: panel,
-    //   },
-    // });
     controls.push({
       id,
       grow,
@@ -61,34 +53,37 @@ export const redirectToDashboard = ({
       controlConfig,
     });
   });
-  stateTransfer.navigateToWithMultipleEmbeddablePackage<LensSerializedState | ControlsGroupState>(
-    appId,
+  const embeddablePackages: EmbeddablePackageState[] = [
     {
-      state: [
-        {
-          type: LENS_EMBEDDABLE_TYPE,
-          serializedState: {
-            rawState,
-            references,
-          },
+      type: LENS_EMBEDDABLE_TYPE,
+      serializedState: {
+        rawState,
+        references,
+      },
+    },
+  ];
+
+  // Only add controls group if there are controls
+  if (controls.length > 0) {
+    embeddablePackages.push({
+      type: CONTROLS_GROUP_TYPE,
+      serializedState: {
+        rawState: {
+          labelPosition: DEFAULT_CONTROLS_LABEL_POSITION,
+          chainingSystem: DEFAULT_CONTROLS_CHAINING,
+          autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
+          ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
+          controls,
         },
-        {
-          type: CONTROLS_GROUP_TYPE,
-          serializedState: {
-            rawState: {
-              labelPosition: DEFAULT_CONTROLS_LABEL_POSITION,
-              chainingSystem: DEFAULT_CONTROLS_CHAINING,
-              autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
-              ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
-              controls,
-            },
-            references: [],
-          },
-        },
-      ],
-      path:
-        getOriginatingPath?.(dashboardId) ??
-        (dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`),
-    }
-  );
+        references: [] as Reference[],
+      },
+    });
+  }
+
+  stateTransfer.navigateToWithMultipleEmbeddablePackage(appId, {
+    state: embeddablePackages,
+    path:
+      getOriginatingPath?.(dashboardId) ??
+      (dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`),
+  });
 };
