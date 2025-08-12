@@ -19,7 +19,7 @@ import {
 } from './types';
 
 import { loadEmbeddableData } from './data_loader';
-import { isTextBasedLanguage, deserializeState } from './helper';
+import { isTextBasedLanguage, deserializeState, handleAdhocAnnotations } from './helper';
 import { initializeEditApi } from './initializers/initialize_edit';
 import { initializeInspector } from './initializers/initialize_inspector';
 import {
@@ -35,8 +35,6 @@ import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
-import { getAdhocAnnotations } from './get_adhoc_annotations';
-import { apiHasGetAlertForAnnotation, isXYState } from './type_guards';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
@@ -67,21 +65,7 @@ export const createLensEmbeddableFactory = (
         initialState
       );
 
-      if (apiHasGetAlertForAnnotation(parentApi)) {
-        const alert = parentApi.getAlertForAnnotation();
-
-        if (alert) {
-          const visualization = initialState.rawState.attributes?.state.visualization;
-
-          if (isXYState(visualization)) {
-            const indexPatternId = initialState.rawState.attributes?.references.find(
-              (r) => r.type === 'index-pattern'
-            )?.id;
-            const annotations = getAdhocAnnotations(alert, indexPatternId ?? '');
-            visualization.layers.push(...annotations);
-          }
-        }
-      }
+      handleAdhocAnnotations(parentApi, initialState.rawState);
 
       const initialRuntimeState = await deserializeState(
         services,

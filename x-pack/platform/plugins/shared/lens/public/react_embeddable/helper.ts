@@ -30,6 +30,8 @@ import { DatasourceStates, GeneralDatasourceStates } from '../state_management';
 import { FormBasedPersistedState } from '../datasources/form_based/types';
 import { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
 import { DOC_TYPE } from '../../common/constants';
+import { getAdhocAnnotations } from './get_adhoc_annotations';
+import { apiHasGetAlertForAnnotation, isXYState } from './type_guards';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -162,4 +164,22 @@ export function getStructuredDatasourceStates(
       datasourceStates?.textBased ??
       undefined) as TextBasedPersistedState,
   };
+}
+
+export function handleAdhocAnnotations(parentApi: unknown, rawState: LensSerializedState) {
+  if (apiHasGetAlertForAnnotation(parentApi)) {
+    const alert = parentApi.getAlertForAnnotation();
+
+    if (alert) {
+      const visualization = rawState.attributes?.state.visualization;
+
+      if (isXYState(visualization)) {
+        const indexPatternId = rawState.attributes?.references.find(
+          (r) => r.type === 'index-pattern'
+        )?.id;
+        const annotations = getAdhocAnnotations(alert, indexPatternId ?? '');
+        visualization.layers.push(...annotations);
+      }
+    }
+  }
 }
