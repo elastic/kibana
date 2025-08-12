@@ -3425,6 +3425,10 @@ describe('Task Runner', () => {
     });
   });
 
+  test('should return shouldDisableTask when task is enabled but rule is not', async () => {
+    // TBD
+  });
+
   function testAlertingEventLogCalls({
     ruleContext = alertingEventLoggerInitializer,
     ruleTypeDef = ruleType,

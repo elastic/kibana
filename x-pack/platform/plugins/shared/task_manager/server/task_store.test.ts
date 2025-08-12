@@ -2274,7 +2274,7 @@ describe('TaskStore', () => {
 
   describe('getLifecycle', () => {
     test('returns the task status if the task exists ', async () => {
-      expect.assertions(7);
+      expect.assertions(8);
       return Promise.all(
         Object.values(TaskStatus).map(async (status) => {
           const task = {
@@ -2475,7 +2475,10 @@ describe('TaskStore', () => {
             },
           },
         ],
-        { refresh: false }
+        {
+          overwrite: true,
+          refresh: false,
+        }
       );
 
       expect(result).toEqual([
@@ -2924,7 +2927,10 @@ describe('TaskStore', () => {
             },
           },
         ],
-        { refresh: false }
+        {
+          overwrite: true,
+          refresh: false,
+        }
       );
     });
   });

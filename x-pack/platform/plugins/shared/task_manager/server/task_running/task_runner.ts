@@ -719,17 +719,9 @@ export class TaskManagerRunner implements TaskRunner {
       await this.removeTask();
     } else {
       const { shouldValidate = true } = unwrap(result);
-      const enabled = fieldUpdates.status === TaskStatus.ShouldDisable ? false : true;
-      if (!enabled) {
-        const label = `${this.taskType}:${this.instance.task.id}`;
-        this.logger.warn(`disabling task ${label} as it indicated it should disable itself`);
-      }
 
       let shouldUpdateTask: boolean = false;
       let partialTask: PartialConcreteTaskInstance = {
-        ...fieldUpdates,
-        // reset fields that track the lifecycle of the concluded `task run`
-        enabled,
         id: this.instance.task.id,
         version: this.instance.task.version,
       };
@@ -758,6 +750,13 @@ export class TaskManagerRunner implements TaskRunner {
         }
       } else {
         shouldUpdateTask = true;
+
+        const setDisabled = fieldUpdates.status === TaskStatus.ShouldDisable ? true : false;
+        if (setDisabled) {
+          const label = `${this.taskType}:${this.instance.task.id}`;
+          this.logger.warn(`disabling task ${label} as it indicated it should disable itself`);
+        }
+
         partialTask = {
           ...partialTask,
           ...fieldUpdates,
@@ -765,6 +764,7 @@ export class TaskManagerRunner implements TaskRunner {
           startedAt: null,
           retryAt: null,
           ownerId: null,
+          ...(setDisabled ? { enabled: false } : {}),
         };
       }
 
