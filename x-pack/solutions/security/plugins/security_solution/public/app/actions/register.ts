@@ -43,6 +43,13 @@ import { registerDiscoverHistogramActions } from './register_discover_histogram_
 import { createFilterInLensAction } from './filter/lens/filter_in';
 import { createFilterOutLensAction } from './filter/lens/filter_out';
 
+export const CELL_VALUE_LENS_LEGEND_FILTER_IN_ACTION = 'CELL_VALUE_LENS_LEGEND_FILTER_IN_ACTION';
+export const CELL_VALUE_LENS_LEGEND_FILTER_OUT_ACTION = 'CELL_VALUE_LENS_LEGEND_FILTER_OUT_ACTION';
+export const CELL_VALUE_LENS_LEGEND_ADD_TO_TIMELINE_ACTION =
+  'CELL_VALUE_LENS_LEGEND_ADD_TO_TIMELINE_ACTION';
+export const CELL_VALUE_LENS_LEGEND_COPY_TO_CLIPBOARD_ACTION =
+  'CELL_VALUE_LENS_LEGEND_COPY_TO_CLIPBOARD_ACTION';
+
 export const registerUIActions = async (
   store: SecurityAppStore,
   history: History,
@@ -60,16 +67,32 @@ const registerLensEmbeddableActions = (store: SecurityAppStore, services: StartS
   const { uiActions } = services;
 
   const filterInLegendActions = createFilterInLensAction({ store, order: 2, services });
-  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterInLegendActions);
+  uiActions.addTriggerActionAsync(
+    CELL_VALUE_TRIGGER,
+    CELL_VALUE_LENS_LEGEND_FILTER_IN_ACTION,
+    async () => filterInLegendActions
+  );
 
   const filterOutLegendActions = createFilterOutLensAction({ store, order: 3, services });
-  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterOutLegendActions);
+  uiActions.addTriggerActionAsync(
+    CELL_VALUE_TRIGGER,
+    CELL_VALUE_LENS_LEGEND_FILTER_OUT_ACTION,
+    async () => filterOutLegendActions
+  );
 
   const addToTimelineAction = createAddToTimelineLensAction({ store, order: 4 });
-  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, addToTimelineAction);
+  uiActions.addTriggerActionAsync(
+    CELL_VALUE_TRIGGER,
+    CELL_VALUE_LENS_LEGEND_ADD_TO_TIMELINE_ACTION,
+    async () => addToTimelineAction
+  );
 
   const copyToClipboardAction = createCopyToClipboardLensAction({ order: 5 });
-  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, copyToClipboardAction);
+  uiActions.addTriggerActionAsync(
+    CELL_VALUE_TRIGGER,
+    CELL_VALUE_LENS_LEGEND_COPY_TO_CLIPBOARD_ACTION,
+    async () => copyToClipboardAction
+  );
 };
 
 const registerDiscoverCellActions = (store: SecurityAppStore, services: StartServices) => {
@@ -91,7 +114,11 @@ const registerDiscoverCellActions = (store: SecurityAppStore, services: StartSer
       if (actionFactory) {
         const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
         const actionWithTelemetry = enhanceActionWithTelemetry(action, services);
-        uiActions.addTriggerAction(triggerId, actionWithTelemetry);
+        uiActions.addTriggerActionAsync(
+          triggerId,
+          `${triggerId}-${actionName}`,
+          async () => actionWithTelemetry
+        );
       }
     });
   };
@@ -131,9 +158,10 @@ const registerCellActions = (
     actionsOrder.forEach((actionName, order) => {
       const actionFactory = cellActionsFactories[actionName];
       if (actionFactory) {
-        const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
-        const actionWithTelemetry = enhanceActionWithTelemetry(action, services);
-        uiActions.addTriggerAction(triggerId, actionWithTelemetry);
+        uiActions.addTriggerActionAsync(triggerId, `${triggerId}-${actionName}`, async () => {
+          const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
+          return enhanceActionWithTelemetry(action, services);
+        });
       }
     });
   };

@@ -155,7 +155,7 @@ export class UiActionsService {
    * Use `plugins.uiActions.addTriggerActionAsync` instead.
    */
   public readonly addTriggerAction = (triggerId: string, action: ActionDefinition<any>): void => {
-    if (!this.actions.has(action.id)) this.registerAction(action);
+    if (!this.actions.has(action.id)) this.registerActionAsync(action.id, async () => action);
     this.attachAction(triggerId, action.id);
   };
 

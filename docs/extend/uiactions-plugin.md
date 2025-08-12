@@ -43,13 +43,13 @@ plugins.uiActions.getTrigger('MY_APP_PIE_CHART_CLICK').exec({
 Finally, your code or developers from other plugins can register UI actions that listen for the above trigger and execute some code when the trigger is triggered.
 
 ```typescript
-plugins.uiActions.registerAction({
+plugins.uiActions.registerActionAsync('DO_SOMETHING', async () => ({
   id: 'DO_SOMETHING',
   isCompatible: async (context) => true,
   execute: async (context) => {
     // Do something.
   },
-});
+}));
 plugins.uiActions.attachAction('MY_APP_PIE_CHART_CLICK', 'DO_SOMETHING');
 ```
 

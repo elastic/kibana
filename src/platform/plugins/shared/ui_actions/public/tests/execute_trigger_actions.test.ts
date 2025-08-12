@@ -58,7 +58,7 @@ test('executes a single action mapped to a trigger', async () => {
   const action = createTestAction('test1', () => true);
 
   setup.registerTrigger(trigger);
-  setup.addTriggerAction(trigger.id, action);
+  setup.addTriggerActionAsync(trigger.id, 'test1', async () => action);
 
   const context = {};
   const start = doStart();
@@ -96,7 +96,7 @@ test('does not execute an incompatible action', async () => {
   );
 
   setup.registerTrigger(trigger);
-  setup.addTriggerAction(trigger.id, action);
+  setup.addTriggerActionAsync('MY-TRIGGER', 'test1', async () => action);
 
   const start = doStart();
   const context = {
@@ -119,8 +119,8 @@ test('shows a context menu when more than one action is mapped to a trigger', as
   const action2 = createTestAction('test2', () => true);
 
   setup.registerTrigger(trigger);
-  setup.addTriggerAction(trigger.id, action1);
-  setup.addTriggerAction(trigger.id, action2);
+  setup.addTriggerActionAsync(trigger.id, 'test1', async () => action1);
+  setup.addTriggerActionAsync(trigger.id, 'test2', async () => action2);
 
   expect(openContextMenu).toHaveBeenCalledTimes(0);
 
@@ -145,7 +145,7 @@ test('shows a context menu when there is only one action mapped to a trigger and
   const action1 = createTestAction('test1', () => true);
 
   setup.registerTrigger(trigger);
-  setup.addTriggerAction(trigger.id, action1);
+  setup.addTriggerActionAsync(trigger.id, 'test1', async () => action1);
 
   expect(openContextMenu).toHaveBeenCalledTimes(0);
 
@@ -173,7 +173,7 @@ test('passes whole action context to isCompatible()', async () => {
   });
 
   setup.registerTrigger(trigger);
-  setup.addTriggerAction(trigger.id, action);
+  setup.addTriggerActionAsync(trigger.id, 'test', async () => action);
 
   const start = doStart();
 
@@ -192,8 +192,8 @@ test("doesn't show a context menu for auto executable actions", async () => {
   const action2 = createTestAction('test2', () => true, false);
 
   setup.registerTrigger(trigger);
-  setup.addTriggerAction(trigger.id, action1);
-  setup.addTriggerAction(trigger.id, action2);
+  setup.addTriggerActionAsync(trigger.id, 'test1', async () => action1);
+  setup.addTriggerActionAsync(trigger.id, 'test2', async () => action2);
 
   expect(openContextMenu).toHaveBeenCalledTimes(0);
 
@@ -218,7 +218,7 @@ test('passes trigger into execute', async () => {
   const action = createTestAction<{ foo: string }>('test', () => true);
 
   setup.registerTrigger(trigger);
-  setup.addTriggerAction(trigger.id, action);
+  setup.addTriggerActionAsync(trigger.id, 'test', async () => action);
 
   const start = doStart();
 

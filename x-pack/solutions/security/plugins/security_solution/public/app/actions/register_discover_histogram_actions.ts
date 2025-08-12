@@ -26,7 +26,7 @@ const createDiscoverHistogramCustomFilterAction = async (
     EsqlInTimelineAction.VIS_FILTER_ACTION,
     EsqlInTimelineAction.VIS_FILTER_ACTION
   );
-  services.uiActions.registerAction(histogramApplyFilter);
+  services.uiActions.registerActionAsync(histogramApplyFilter.id, async () => histogramApplyFilter);
 
   return histogramApplyFilter;
 };

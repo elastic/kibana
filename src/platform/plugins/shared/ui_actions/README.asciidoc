@@ -62,6 +62,22 @@ plugins.uiActions.registerAction({
 plugins.uiActions.attachAction('MY_APP_PIE_CHART_CLICK', 'DO_SOMETHING');
 ----
 
+NOTE: `registerAction` is deprecated. Use `registerActionAsync` instead for better performance and lazy loading of actions.
+
+For new implementations, use the async version:
+
+[source,typescript jsx]
+----
+plugins.uiActions.registerActionAsync('DO_SOMETHING', async () => ({
+  id: 'DO_SOMETHING',
+  isCompatible: async (context) => true,
+  execute: async (context) => {
+    // Do something.
+  },
+}));
+plugins.uiActions.attachAction('MY_APP_PIE_CHART_CLICK', 'DO_SOMETHING');
+----
+
 Now your `DO_SOMETHING` action will automatically execute when `MY_APP_PIE_CHART_CLICK`
 trigger is triggered; or, if more than one compatible action is attached to
 that trigger, user will be presented with a context menu popup to select one
