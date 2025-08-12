@@ -258,7 +258,7 @@ export const FilesPreview: FC = () => {
 
 export type ResultsPreviewProps = Omit<FilePreviewItem, 'fileName'>;
 
-const ResultsPreview: FC<ResultsPreviewProps> = ({ filePreview, mappings, columnNames }) => {
+const ResultsPreview: FC<ResultsPreviewProps> = ({ filePreview, columnNames }) => {
   const columns = useMemo<Array<EuiBasicTableColumn<object>>>(() => {
     return columnNames.map((name) => {
       return {
