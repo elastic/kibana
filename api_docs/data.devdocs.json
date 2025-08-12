@@ -2777,7 +2777,7 @@
             "signature": [
               "(core: ",
               "CoreStart",
-              ", { uiActions, fieldFormats, dataViews, inspector, screenshotMode }: ",
+              ", { uiActions, fieldFormats, dataViews, inspector, screenshotMode, share }: ",
               "DataStartDependencies",
               ") => ",
               {
@@ -2812,7 +2812,7 @@
                 "id": "def-public.DataPublicPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ uiActions, fieldFormats, dataViews, inspector, screenshotMode }",
+                "label": "{ uiActions, fieldFormats, dataViews, inspector, screenshotMode, share }",
                 "description": [],
                 "signature": [
                   "DataStartDependencies"

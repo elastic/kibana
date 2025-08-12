@@ -14,6 +14,7 @@ import deepEqual from 'fast-deep-equal';
 import { constant, identity } from 'fp-ts/function';
 import createContainter from 'constate';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
+import { Subscription, map, tap } from 'rxjs';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import type { InventoryView } from '../../../../../common/inventory_views';
 import {
@@ -50,21 +51,10 @@ export const useWaffleFilters = () => {
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleFilter',
+    writeDefaultState: true,
   });
 
   const previousViewId = useRef<string | undefined>(currentView?.id);
-  useEffect(() => {
-    if (currentView && currentView.id !== previousViewId.current) {
-      setUrlState(mapInventoryViewToState(currentView));
-      previousViewId.current = currentView.id;
-    }
-  }, [currentView, setUrlState]);
-
-  useEffect(() => {
-    if (!deepEqual(queryStringService.getQuery(), urlState)) {
-      queryStringService.setQuery(urlState);
-    }
-  }, [queryStringService, urlState]);
 
   const isValidKuery = useCallback((expression: string) => {
     try {
@@ -84,6 +74,40 @@ export const useWaffleFilters = () => {
     },
     [isValidKuery, setUrlState]
   );
+
+  useEffect(() => {
+    if (currentView && currentView.id !== previousViewId.current) {
+      setUrlState(mapInventoryViewToState(currentView));
+      previousViewId.current = currentView.id;
+    }
+  }, [currentView, setUrlState]);
+
+  // sync up the query string service with the URL state
+  useEffect(() => {
+    if (!deepEqual(queryStringService.getQuery(), urlState)) {
+      queryStringService.setQuery(urlState);
+    }
+  }, [queryStringService, urlState]);
+
+  // sync up the URL state with eventual changes made in the kuery bar
+  useEffect(() => {
+    const subscription = new Subscription();
+    queryStringService.clearQuery();
+
+    subscription.add(
+      queryStringService
+        .getUpdates$()
+        .pipe(
+          map(() => queryStringService.getQuery() as Query),
+          tap((query) => applyFilterQuery({ query }))
+        )
+        .subscribe()
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [queryStringService, applyFilterQuery]);
 
   useEffect(() => {
     inventoryPrefill.setKuery(urlState.query);

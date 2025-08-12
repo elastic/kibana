@@ -127,7 +127,7 @@ describe('InterceptDisplayManager', () => {
 
     expect(screen.queryByRole('dialog')).not.toBeNull();
 
-    await user.click(screen.getByTestId('productInterceptDismiss'));
+    await user.click(screen.getByTestId('productInterceptDismissButton'));
 
     expect(ackProductIntercept).toHaveBeenCalledWith({
       ackType: 'dismissed',

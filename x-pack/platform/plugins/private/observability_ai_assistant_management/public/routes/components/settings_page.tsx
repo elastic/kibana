@@ -7,28 +7,47 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+  useEuiShadow,
+  useEuiTheme,
+} from '@elastic/eui';
 import { useKnowledgeBase } from '@kbn/ai-assistant';
+import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useAppContext } from '../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab/settings_tab';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
 import { useObservabilityAIAssistantManagementRouterParams } from '../../hooks/use_observability_management_params';
 import { useObservabilityAIAssistantManagementRouter } from '../../hooks/use_observability_management_router';
 import type { TabsRt } from '../config';
-import { SearchConnectorTab } from './search_connector_tab';
 import { useKibana } from '../../hooks/use_kibana';
+import { SearchConnectorTab } from './search_connector_tab';
 
 export function SettingsPage() {
   const { setBreadcrumbs } = useAppContext();
   const {
     services: {
-      application: { navigateToApp, isAppRegistered },
+      application: { navigateToApp, isAppRegistered, capabilities },
       serverless,
     },
   } = useKibana();
 
   const router = useObservabilityAIAssistantManagementRouter();
   const knowledgeBase = useKnowledgeBase();
+
+  const hasConnectorsAllPrivilege =
+    capabilities.actions?.show === true &&
+    capabilities.actions?.execute === true &&
+    capabilities.actions?.delete === true &&
+    capabilities.actions?.save === true;
 
   const {
     query: { tab },
@@ -41,7 +60,7 @@ export function SettingsPage() {
           text: i18n.translate(
             'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.observability',
             {
-              defaultMessage: 'AI Assistant for Observability and Search Settings',
+              defaultMessage: 'AI Assistant',
             }
           ),
         },
@@ -54,14 +73,14 @@ export function SettingsPage() {
           }),
           onClick: (e) => {
             e.preventDefault();
-            navigateToApp('management', { path: '/kibana/aiAssistantManagementSelection' });
+            navigateToApp('management', { path: '/ai/aiAssistantManagementSelection' });
           },
         },
         {
           text: i18n.translate(
             'xpack.observabilityAiAssistantManagement.breadcrumb.observability',
             {
-              defaultMessage: 'Observability',
+              defaultMessage: 'Observability and Search',
             }
           ),
         },
@@ -108,18 +127,79 @@ export function SettingsPage() {
     router.push('/', { path: '/', query: { tab: id } });
   };
 
+  const headerIconShadow = useEuiShadow('s');
+  const { euiTheme } = useEuiTheme();
+
   return (
     <div data-test-subj="aiAssistantSettingsPage">
-      <EuiTitle size="l">
-        <h2>
-          {i18n.translate(
-            'xpack.observabilityAiAssistantManagement.settingsPage.h2.settingsLabel',
-            {
-              defaultMessage: 'Settings',
-            }
-          )}
-        </h2>
-      </EuiTitle>
+      <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="none" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiAvatar
+                    iconType="logoObservability"
+                    iconSize="m"
+                    color="plain"
+                    name={i18n.translate(
+                      'xpack.observabilityAiAssistantManagement.settingsPage.observabilityAvatarLabel',
+                      {
+                        defaultMessage: 'Observability AI',
+                      }
+                    )}
+                    css={css`
+                      ${headerIconShadow};
+                    `}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiAvatar
+                    iconType="logoEnterpriseSearch"
+                    iconSize="m"
+                    color="plain"
+                    name={i18n.translate(
+                      'xpack.observabilityAiAssistantManagement.settingsPage.searchAvatarLabel',
+                      {
+                        defaultMessage: 'Enterprise Search AI',
+                      }
+                    )}
+                    css={css`
+                      ${headerIconShadow};
+                      margin-right: ${euiTheme.size.m};
+                    `}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="m">
+                <h2>
+                  <FormattedMessage
+                    id="xpack.observabilityAiAssistantManagement.settingsPage.h2.settingsLabel"
+                    defaultMessage="AI Assistant for Observability and Search"
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {hasConnectorsAllPrivilege ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="gear"
+              size="m"
+              onClick={() => navigateToApp('management', { path: 'ai/genAiSettings' })}
+              data-test-subj="genAiSettingsButton"
+            >
+              <FormattedMessage
+                id="xpack.observabilityAiAssistantManagement.settingsPage.genAiSettingsButton"
+                defaultMessage="GenAI Settings"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
