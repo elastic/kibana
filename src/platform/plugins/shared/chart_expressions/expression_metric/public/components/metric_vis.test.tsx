@@ -1102,7 +1102,7 @@ describe('MetricVisComponent', function () {
       'applies $id custom field format pattern when passed over',
       async ({ id, pattern, finalPattern }) => {
         await getFormattedMetrics(394.2393, 983123.984, { id, params: { pattern } });
-        expect(mockDeserialize).toHaveBeenCalledTimes(2);
+        expect(mockDeserialize).toHaveBeenCalledTimes(4);
         expect(mockDeserialize).toHaveBeenCalledWith({ id, params: { pattern: finalPattern } });
       }
     );
@@ -1116,14 +1116,14 @@ describe('MetricVisComponent', function () {
       async ({ id }) => {
         mockIsOverridden.mockReturnValueOnce(true);
         await getFormattedMetrics(394.2393, 983123.984, { id });
-        expect(mockDeserialize).toHaveBeenCalledTimes(2);
+        expect(mockDeserialize).toHaveBeenCalledTimes(4);
         expect(mockDeserialize).toHaveBeenCalledWith({ id });
       }
     );
 
     it('applies a custom duration configuration to the formatter', async () => {
       await getFormattedMetrics(394.2393, 983123.984, { id: 'duration' });
-      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledTimes(4);
       expect(mockDeserialize).toHaveBeenCalledWith({
         id: 'duration',
         params: { outputFormat: 'humanizePrecise', outputPrecision: 1, useShortSuffix: true },
@@ -1135,7 +1135,7 @@ describe('MetricVisComponent', function () {
         id: 'duration',
         params: { useShortSuffix: false },
       });
-      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledTimes(4);
       expect(mockDeserialize).toHaveBeenCalledWith({
         id: 'duration',
         params: { outputFormat: 'humanizePrecise', outputPrecision: 1, useShortSuffix: false },
@@ -1147,7 +1147,7 @@ describe('MetricVisComponent', function () {
         id: 'duration',
         params: { formatOverride: true, outputFormat: 'asSeconds' },
       });
-      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledTimes(4);
       expect(mockDeserialize).toHaveBeenCalledWith({
         id: 'duration',
         params: { formatOverride: true, outputFormat: 'asSeconds' },
@@ -1158,7 +1158,7 @@ describe('MetricVisComponent', function () {
       await getFormattedMetrics(394.2393, 983123.984, {
         id: 'bytes',
       });
-      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledTimes(4);
       expect(mockDeserialize).toHaveBeenCalledWith({
         id: 'bytes',
       });
@@ -1169,7 +1169,7 @@ describe('MetricVisComponent', function () {
         id: 'bytes',
         params: { pattern: '0.0bitd' },
       });
-      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledTimes(4);
       expect(mockDeserialize).toHaveBeenCalledWith({
         id: 'bytes',
         params: { pattern: '0.0bitd' },
@@ -1182,7 +1182,7 @@ describe('MetricVisComponent', function () {
         params: { pattern: `0,0bitd` },
       };
       await getFormattedMetrics(394.2393, 983123.984, legacyBitFormat);
-      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledTimes(4);
       expect(mockDeserialize).toHaveBeenCalledWith(legacyBitFormat);
     });
 
@@ -1193,7 +1193,7 @@ describe('MetricVisComponent', function () {
 
     it('still call the numeric formatter when no format is passed', async () => {
       await getFormattedMetrics(394.2393, 983123.984, undefined);
-      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledTimes(4);
       expect(mockDeserialize).toHaveBeenCalledWith({ id: 'number' });
       expect(screen.getByTitle('number-394.2393')).toBeInTheDocument();
       expect(screen.getByText('number-983123.984')).toBeInTheDocument();

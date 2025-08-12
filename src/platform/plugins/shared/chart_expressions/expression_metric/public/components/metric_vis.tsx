@@ -155,6 +155,7 @@ export const MetricVis = ({
     data.rows.length ? data.rows : [{ [primaryMetricColumn.id]: null }]
   ).slice(0, 1);
 
+  // TODO: optimize this so it doesn't run many times
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : firstRowForNonBreakdown
   ).map((row, rowIdx) => {
