@@ -10,7 +10,7 @@
 import React from 'react';
 import { StoryObj, Meta } from '@storybook/react';
 import { SelectionDropdown } from './selection_dropdown';
-import { DataCascadeProvider } from '../../data_cascade_provider';
+import { DataCascadeProvider } from '../../../store_provider';
 import { getESQLStatsQueryMeta } from '../../../lib';
 
 /**

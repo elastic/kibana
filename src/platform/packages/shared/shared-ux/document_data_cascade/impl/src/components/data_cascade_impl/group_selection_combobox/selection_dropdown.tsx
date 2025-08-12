@@ -25,7 +25,7 @@ import {
   euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDataCascadeState, useDataCascadeActions } from '../../store_provider';
+import { useDataCascadeState, useDataCascadeActions } from '../../../store_provider';
 
 const MAX_SELECTABLE_COLUMNS = 3;
 
