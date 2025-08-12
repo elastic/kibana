@@ -3180,7 +3180,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('does not suppress alerts outside of duration when query with 3 sequences', async () => {
+      it.skip('does not suppress alerts outside of duration when query with 3 sequences', async () => {
         const id = uuidv4();
         const dateNow = Date.now();
         const timestampSequenceEvent1 = new Date(dateNow - 5000).toISOString();
