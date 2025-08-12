@@ -8,12 +8,11 @@
 import { Streams } from '@kbn/streams-schema';
 import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
-import { ManageFeaturesFlyout } from './manage_features_flyout';
-import { FEATURE_IDENTIFIED_SYSTEM_ID } from './types';
+import { ManageSystemDescriptionFlyout } from './manage_system_description_flyout';
 
 const stories: Meta<{}> = {
-  title: 'Streams/ManageFeaturesFlyout',
-  component: ManageFeaturesFlyout,
+  title: 'Streams/ManageSystemDescriptionFlyout',
+  component: ManageSystemDescriptionFlyout,
 };
 
 export default stories;
@@ -35,9 +34,8 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
 
 export const Default: StoryFn<{}> = () => {
   return (
-    <ManageFeaturesFlyout
+    <ManageSystemDescriptionFlyout
       definition={logsStreamDefinition}
-      features={[]}
       onClose={() => {}}
       onSave={async () => {}}
     />
@@ -45,15 +43,13 @@ export const Default: StoryFn<{}> = () => {
 };
 
 export const WithExisting: StoryFn<{}> = () => {
+  const definition = {
+    ...logsStreamDefinition,
+    description: 'This is a SpringBoot application running Java 91',
+  };
   return (
-    <ManageFeaturesFlyout
-      definition={logsStreamDefinition}
-      features={[
-        {
-          id: FEATURE_IDENTIFIED_SYSTEM_ID,
-          feature: 'This is a SpringBoot application running Java 91',
-        },
-      ]}
+    <ManageSystemDescriptionFlyout
+      definition={definition}
       onClose={() => {}}
       onSave={async () => {}}
     />

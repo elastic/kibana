@@ -6,16 +6,15 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
-import { type IdentifiedFeatureGenerateResponse, type StreamFeature } from '@kbn/streams-schema';
+import { type IdentifiedSystemGenerateResponse } from '@kbn/streams-schema';
 import { useCallback } from 'react';
 import { useKibana } from './use_kibana';
 
 interface FeaturesApi {
-  upsertFeature: (feature: StreamFeature) => Promise<void>;
-  generate: (connectorId: string) => IdentifiedFeatureGenerateResponse;
+  generate: (connectorId: string) => IdentifiedSystemGenerateResponse;
 }
 
-export function useFeaturesApi({ name }: { name: string }): FeaturesApi {
+export function useSystemDescriptionGenerateApi({ name }: { name: string }): FeaturesApi {
   const {
     dependencies: {
       start: {
@@ -26,26 +25,10 @@ export function useFeaturesApi({ name }: { name: string }): FeaturesApi {
 
   const { signal } = useAbortController();
 
-  const upsertFeature = useCallback(
-    async (feature: StreamFeature) => {
-      await streamsRepositoryClient.fetch(
-        'PUT /api/streams/{name}/features/{featureId} 2023-10-31',
-        {
-          signal,
-          params: {
-            path: { name, featureId: feature.id },
-            body: { feature: feature.feature },
-          },
-        }
-      );
-    },
-    [name, streamsRepositoryClient, signal]
-  );
-
   const generate = useCallback(
     (connectorId: string) => {
       return streamsRepositoryClient.stream(
-        `GET /api/streams/{name}/features/_generate 2023-10-31`,
+        `GET /api/streams/{name}/description/_generate 2023-10-31`,
         {
           signal,
           params: { path: { name }, query: { connectorId } },
@@ -56,7 +39,6 @@ export function useFeaturesApi({ name }: { name: string }): FeaturesApi {
   );
 
   return {
-    upsertFeature,
     generate,
   };
 }

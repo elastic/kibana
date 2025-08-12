@@ -103,13 +103,7 @@ export {
   streamQuerySchema,
 } from './src/queries';
 
-export {
-  type StreamFeature,
-  streamFeatureSchema,
-  upsertStreamFeatureRequestSchema,
-} from './src/features';
-
-export type { IdentifiedFeatureGenerateResponse } from './src/api/features';
+export type { IdentifiedSystemGenerateResponse } from './src/api/features';
 
 export { findInheritedLifecycle, findInheritingStreams } from './src/helpers/lifecycle';
 

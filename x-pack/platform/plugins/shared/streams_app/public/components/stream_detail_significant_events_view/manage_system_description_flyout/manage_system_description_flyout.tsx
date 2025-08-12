@@ -20,43 +20,39 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamFeature, Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
-import { useFeaturesApi } from '../../../hooks/use_features_api';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useSystemDescriptionGenerateApi } from '../../../hooks/use_system_description_generate_api';
 import { useAIFeatures } from '../common/use_ai_features';
-import { FEATURE_IDENTIFIED_SYSTEM_ID } from './types';
 
 interface Props {
   definition: Streams.all.Definition;
-  features?: StreamFeature[];
   onClose: () => void;
-  onSave: (feature: string) => Promise<void>;
+  onSave: (description: string) => Promise<void>;
 }
 
-export function ManageFeaturesFlyout({ features, onClose, definition, onSave }: Props) {
+export function ManageSystemDescriptionFlyout({ onClose, definition, onSave }: Props) {
   const {
     core: { notifications, http },
   } = useKibana();
   const aiFeatures = useAIFeatures();
-  const { generate } = useFeaturesApi({ name: definition.name });
+  const { generate } = useSystemDescriptionGenerateApi({ name: definition.name });
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isGenerating, setIsGenerating] = React.useState(false);
-  const [identifiedSystem, setIdentifiedSystem] = React.useState<string>(
-    features?.find((f) => f.id === FEATURE_IDENTIFIED_SYSTEM_ID)?.feature ?? ''
-  );
+  const [description, setDescription] = React.useState<string>(definition.description);
 
   const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setIdentifiedSystem(e.target.value);
+    setDescription(e.target.value);
   };
 
   return (
-    <EuiFlyout aria-labelledby="manageFeaturesFlyout" onClose={() => onClose()} size="m">
+    <EuiFlyout aria-labelledby="manageSystemDescription" onClose={() => onClose()} size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2>
-            {i18n.translate('xpack.streams.streamDetailView.manageFeaturesFlyout.title', {
-              defaultMessage: 'Manage identified system features',
+            {i18n.translate('xpack.streams.streamDetailView.manageSystemDescription.title', {
+              defaultMessage: 'Manage system description',
             })}
           </h2>
         </EuiTitle>
@@ -69,7 +65,7 @@ export function ManageFeaturesFlyout({ features, onClose, definition, onSave }: 
             {!aiFeatures.loading && !aiFeatures.enabled && (
               <EuiToolTip
                 content={i18n.translate(
-                  'xpack.streams.manageFeaturesFlyout.aiAssistantNotEnabledTooltip',
+                  'xpack.streams.manageSystemDescription.aiAssistantNotEnabledTooltip',
                   {
                     defaultMessage:
                       'AI Assistant features are not enabled. To enable features, add an AI connector on the management page.',
@@ -83,7 +79,7 @@ export function ManageFeaturesFlyout({ features, onClose, definition, onSave }: 
                       `/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`
                     )}
                   >
-                    {i18n.translate('xpack.streams.manageFeaturesFlyout.aiAssistantNotEnabled', {
+                    {i18n.translate('xpack.streams.manageSystemDescription.aiAssistantNotEnabled', {
                       defaultMessage: 'Enable AI Assistant features',
                     })}
                   </EuiLink>
@@ -91,7 +87,7 @@ export function ManageFeaturesFlyout({ features, onClose, definition, onSave }: 
                   <EuiText>
                     <h3>
                       {i18n.translate(
-                        'xpack.streams.addSignificantEventFlyout.aiAssistantNotEnabledAskAdmin',
+                        'xpack.streams.manageSystemDescription.aiAssistantNotEnabledAskAdmin',
                         { defaultMessage: 'Ask your administrator to enable AI Assistant features' }
                       )}
                     </h3>
@@ -119,13 +115,13 @@ export function ManageFeaturesFlyout({ features, onClose, definition, onSave }: 
                       const generate$ = generate(aiFeatures?.selectedConnector!);
                       generate$.subscribe({
                         next: (result) => {
-                          setIdentifiedSystem(result.feature);
+                          setDescription(result.description);
                         },
                         error: (error) => {
                           notifications.showErrorDialog({
                             title: i18n.translate(
-                              'xpack.streams.manageFeaturesFlyout.generateErrorToastTitle',
-                              { defaultMessage: `Could not identify system features` }
+                              'xpack.streams.manageSystemDescription.generateErrorToastTitle',
+                              { defaultMessage: `Could not identify system description` }
                             ),
                             error,
                           });
@@ -134,8 +130,8 @@ export function ManageFeaturesFlyout({ features, onClose, definition, onSave }: 
                         complete: () => {
                           notifications.toasts.addSuccess({
                             title: i18n.translate(
-                              'xpack.streams.manageFeaturesFlyout.generateSuccessToastTitle',
-                              { defaultMessage: `Successfully identified system features` }
+                              'xpack.streams.manageSystemDescription.generateSuccessToastTitle',
+                              { defaultMessage: `Successfully identified system desciption` }
                             ),
                           });
                           setIsGenerating(false);
@@ -144,10 +140,13 @@ export function ManageFeaturesFlyout({ features, onClose, definition, onSave }: 
                     }}
                   >
                     {isGenerating
-                      ? i18n.translate('xpack.streams.manageFeaturesFlyout.detectingButtonLabel', {
-                          defaultMessage: 'Detecting...',
-                        })
-                      : i18n.translate('xpack.streams.manageFeaturesFlyout.detectButtonLabel', {
+                      ? i18n.translate(
+                          'xpack.streams.manageSystemDescription.detectingButtonLabel',
+                          {
+                            defaultMessage: 'Detecting...',
+                          }
+                        )
+                      : i18n.translate('xpack.streams.manageSystemDescription.detectButtonLabel', {
                           defaultMessage: 'Detect',
                         })}
                   </EuiButton>
@@ -156,9 +155,9 @@ export function ManageFeaturesFlyout({ features, onClose, definition, onSave }: 
                 <EuiTextArea
                   fullWidth
                   disabled={isGenerating}
-                  placeholder="Detected system features will appear here. You can edit them if needed."
-                  aria-label="stream system features"
-                  value={identifiedSystem}
+                  placeholder="System description generated will appear here. You can edit it if needed."
+                  aria-label="stream system description"
+                  value={description}
                   onChange={(e) => onChange(e)}
                 />
               </>
@@ -170,23 +169,26 @@ export function ManageFeaturesFlyout({ features, onClose, definition, onSave }: 
         <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
           <EuiButton color="text" onClick={() => onClose()} disabled={isSubmitting || isGenerating}>
             {i18n.translate(
-              'xpack.streams.streamDetailView.manageFeaturesFlyout.cancelButtonLabel',
+              'xpack.streams.streamDetailView.manageSystemDescription.cancelButtonLabel',
               { defaultMessage: 'Cancel' }
             )}
           </EuiButton>
           <EuiButton
             color="primary"
             fill
-            disabled={isSubmitting || isGenerating || !identifiedSystem?.trim()}
+            disabled={isSubmitting || isGenerating || !description?.trim()}
             isLoading={isSubmitting}
             onClick={() => {
               setIsSubmitting(true);
-              onSave(identifiedSystem!).finally(() => setIsSubmitting(false));
+              onSave(description!).finally(() => setIsSubmitting(false));
             }}
           >
-            {i18n.translate('xpack.streams.streamDetailView.manageFeaturesFlyout.saveButtonLabel', {
-              defaultMessage: 'Save',
-            })}
+            {i18n.translate(
+              'xpack.streams.streamDetailView.manageSystemDescription.saveButtonLabel',
+              {
+                defaultMessage: 'Save',
+              }
+            )}
           </EuiButton>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

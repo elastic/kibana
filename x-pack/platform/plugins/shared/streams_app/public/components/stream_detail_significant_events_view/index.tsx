@@ -9,7 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
-import { useFeaturesApi } from '../../hooks/use_features_api';
+import { useSystemDescriptionGenerateApi } from '../../hooks/use_system_description_generate_api';
 import { useFeaturesFetch } from '../../hooks/use_features_fetch';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
@@ -21,8 +21,8 @@ import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_si
 import type { SaveData } from './add_significant_event_flyout/types';
 import { ChangePointSummary } from './change_point_summary';
 import { SignificantEventsViewEmptyState } from './empty_state/empty_state';
-import { ManageFeaturesFlyout } from './manage_features_flyout/manage_features_flyout';
-import { FEATURE_IDENTIFIED_SYSTEM_ID } from './manage_features_flyout/types';
+import { ManageSystemDescriptionFlyout } from './manage_system_description_flyout/manage_system_description_flyout';
+import { FEATURE_IDENTIFIED_SYSTEM_ID } from './manage_system_description_flyout/types';
 import { SignificantEventsTable } from './significant_events_table';
 import { Timeline, TimelineEvent } from './timeline';
 import { formatChangePoint } from './utils/change_point';
@@ -54,7 +54,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const { upsertQuery, removeQuery, bulk } = useSignificantEventsApi({
     name: definition.stream.name,
   });
-  const { upsertFeature } = useFeaturesApi({ name: definition.stream.name });
+  const { upsertFeature } = useSystemDescriptionGenerateApi({ name: definition.stream.name });
   const featuresFetch = useFeaturesFetch({
     name: definition.stream.name,
   });
@@ -152,7 +152,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   ) : null;
 
   const identifySystemFlyout = isIdentifySystemFlyoutOpen ? (
-    <ManageFeaturesFlyout
+    <ManageSystemDescriptionFlyout
       definition={definition.stream}
       features={featuresFetch.value}
       onSave={async (feature: string) => {
