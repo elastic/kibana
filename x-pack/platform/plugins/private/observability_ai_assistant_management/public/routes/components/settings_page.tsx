@@ -99,7 +99,7 @@ export function SettingsPage() {
       setBreadcrumbs([
         {
           text: i18n.translate('xpack.observabilityAiAssistantManagement.breadcrumb.index', {
-            defaultMessage: 'AI Assistant',
+            defaultMessage: 'AI Assistants',
           }),
           onClick: (e) => {
             e.preventDefault();

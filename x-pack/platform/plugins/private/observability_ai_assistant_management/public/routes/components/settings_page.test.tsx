@@ -87,7 +87,7 @@ describe('Settings Page', () => {
 
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       {
-        text: 'AI Assistant',
+        text: 'AI Assistants',
         onClick: expect.any(Function),
       },
       {
@@ -106,7 +106,7 @@ describe('Settings Page', () => {
 
     await waitFor(() => {
       expect(setBreadcrumbs).toHaveBeenCalledWith([
-        expect.objectContaining({ text: 'AI Assistant' }),
+        expect.objectContaining({ text: 'AI Assistants' }),
         expect.objectContaining({ text: 'Observability' }),
       ]);
     });
@@ -124,7 +124,7 @@ describe('Settings Page', () => {
 
     await waitFor(() => {
       expect(setBreadcrumbs).toHaveBeenCalledWith([
-        expect.objectContaining({ text: 'AI Assistant' }),
+        expect.objectContaining({ text: 'AI Assistants' }),
         expect.objectContaining({ text: 'Search' }),
       ]);
     });
@@ -142,7 +142,7 @@ describe('Settings Page', () => {
 
     await waitFor(() => {
       expect(setBreadcrumbs).toHaveBeenCalledWith([
-        expect.objectContaining({ text: 'AI Assistant' }),
+        expect.objectContaining({ text: 'AI Assistants' }),
         expect.objectContaining({ text: 'Observability and Search' }),
       ]);
     });
