@@ -6,11 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  Location,
-  ESQLSourceResult,
-  ESQLFieldWithMetadata,
-} from '@kbn/esql-ast/src/commands_registry/types';
+import { Location, ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
+import { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type {
   ESQLControlVariable,
   IndexAutocompleteItem,
@@ -18,6 +15,7 @@ import type {
   RecommendedField,
   InferenceEndpointsAutocompleteResult,
   ESQLLicenseResult,
+  ESQLSourceResult,
 } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { CachedFunctionOptions } from '@kbn/esql/public';
@@ -64,6 +62,7 @@ export interface ESQLCallbacks {
     taskType: InferenceTaskType
   ) => Promise<InferenceEndpointsAutocompleteResult>;
   getLicense?: () => Promise<ESQLLicenseResult | undefined>;
+  getActiveProduct?: () => PricingProduct | undefined;
   /** Returns the current Kibana app ID, e.g. discover, dashboard etc. */
   getCurrentAppId?: () => Promise<string | undefined>;
 }
