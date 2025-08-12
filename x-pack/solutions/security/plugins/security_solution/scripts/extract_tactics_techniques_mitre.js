@@ -199,8 +199,19 @@ const extractSubtechniques = (mitreData) => {
 const buildMockThreatData = (tacticsData, techniques, subtechniques) => {
   const numberOfThreatsToGenerate = 4;
   const mockThreatData = [];
+  const generatedTechniqueIds = new Set();
   for (let i = 0; i < numberOfThreatsToGenerate; i++) {
-    const subtechnique = subtechniques[i * 50]; // Increase our interval to broaden the subtechnique types we're pulling data from a bit
+    let subtechnique;
+    let count = i * 50;
+    /**
+     * Since we're building from the subtechnique level -> up, we make sure there are no
+     * dupilicate techniques in the generated MITRE test data. This can cause flakiness in
+     * the tests as we don't expect the data to duplicated in the table
+     */
+    while (subtechnique == null || generatedTechniqueIds.has(subtechnique.techniqueId)){
+      subtechnique = subtechniques[count++];
+    }
+    generatedTechniqueIds.add(subtechnique.techniqueId)
     const technique = techniques.find((technique) => technique.id === subtechnique.techniqueId);
     const tactic = tacticsData.find((tactic) => tactic.shortName === technique.tactics[0]);
 
