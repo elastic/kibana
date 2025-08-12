@@ -22,5 +22,6 @@
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/test-subj-selector",
     "@kbn/test-suites-xpack-platform",
+    "@kbn/es-query",
   ]
 }

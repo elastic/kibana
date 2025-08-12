@@ -66,6 +66,5 @@
     "@kbn/securitysolution-endpoint-exceptions-common",
     "@kbn/securitysolution-lists-common",
     "@kbn/osquery-plugin",
-    "@kbn/es-query"
   ]
 }
