@@ -237,7 +237,7 @@ describe('dimension editor', () => {
       });
 
       it('fills with default vis text color', async () => {
-        const { rerender, staticColorPicker } = renderPrimaryMetricEditor({
+        const { staticColorPicker } = renderPrimaryMetricEditor({
           state: {
             ...metricAccessorState,
             palette: undefined, // color by value static
@@ -1110,7 +1110,7 @@ describe('dimension editor', () => {
         });
       });
 
-      describe('`apply color to` button group control', () => {
+      describe('`apply color to` controls', () => {
         it('should show `apply color to` button group when `Panel` option is selected', async () => {
           const { applyColorToBtnGroup, applyColorToOptions } = renderAdditionalSectionEditor({
             state: { ...stateWOTrend, showBar: false, maxAccessor: undefined },
@@ -1142,6 +1142,29 @@ describe('dimension editor', () => {
 
           await clickOnApplyColorToOption('background');
           expect(mockSetState).toHaveBeenCalledWith({ ...mockState, applyColorTo: 'background' });
+        });
+
+        it('should show help message when color by value static, supporting visualization is panel, apply color to value', () => {
+          renderAdditionalSectionEditor({
+            state: {
+              ...stateWOTrend,
+              maxAccessor: undefined,
+              palette: undefined,
+              applyColorTo: 'value',
+            },
+          });
+          expect(screen.getByText(/Color palette has been automatically adjusted for provide the required contrast for text elements/i))
+        });
+
+        it('should show help message when color by value dynamic, supporting visualization is panel, apply color to value', () => {
+          renderAdditionalSectionEditor({
+            state: {
+              ...stateWOTrend,
+              maxAccessor: undefined,
+              applyColorTo: 'value',
+            },
+          });
+          expect(screen.getByText(/Color scales might cause accessibility issues./i))
         });
       });
     });
