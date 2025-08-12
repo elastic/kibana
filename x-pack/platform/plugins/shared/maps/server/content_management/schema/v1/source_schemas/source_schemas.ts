@@ -53,7 +53,7 @@ export const EMSTMSSourceSchema = schema.object(
         defaultValue: false,
         meta: {
           description:
-            'When true, EMS TMS layer mirrows the Kibana theme, displaying light basemap tiles with light theme and dark basemap tiles with dark theme.',
+            'When true, EMS TMS layer mirrors the Kibana theme, displaying light basemap tiles with light theme and dark basemap tiles with dark theme.',
         },
       })
     ),
