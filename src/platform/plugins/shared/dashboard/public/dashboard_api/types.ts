@@ -61,7 +61,7 @@ export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 export interface DashboardCreationOptions {
   getInitialInput?: () => Partial<DashboardState & { viewMode?: ViewMode }>;
 
-  getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
+  getIncomingEmbeddables?: () => EmbeddablePackageState[] | undefined;
 
   useSearchSessionsIntegration?: boolean;
   searchSessionSettings?: {

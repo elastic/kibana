@@ -12,6 +12,7 @@ import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { omit } from 'lodash';
+import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
@@ -37,6 +38,7 @@ export type SaveModalContainerProps = {
   returnToOriginSwitchLabel?: string;
   onClose: () => void;
   onSave?: (saveProps: SaveProps) => void;
+  controlsInput?: ControlPanelsState;
   runSave?: (saveProps: SaveProps, options: { saveToLibrary: boolean }) => void;
   isSaveable?: boolean;
   getAppNameFromId?: () => string | undefined;
@@ -78,6 +80,7 @@ export function SaveModalContainer({
   lensServices,
   initialContext,
   managed,
+  controlsInput,
 }: SaveModalContainerProps) {
   let title = '';
   let description;
@@ -148,6 +151,7 @@ export function SaveModalContainer({
           redirectToOrigin,
           originatingApp,
           getOriginatingPath,
+          controlsInput,
           onAppLeave: () => {},
           ...lensServices,
         },
@@ -232,6 +236,7 @@ export type SaveVisualizationProps = Simplify<
     textBasedLanguageSave?: boolean;
     switchDatasource?: () => void;
     lensDocumentService: LensDocumentService;
+    controlsInput?: ControlPanelsState;
   } & ExtraProps &
     Pick<
       LensAppServices,
@@ -270,6 +275,7 @@ export const runSaveLensVisualization = async (
     switchDatasource,
     application,
     lensDocumentService,
+    controlsInput,
   } = props;
 
   if (!lastKnownDoc) {
@@ -373,6 +379,7 @@ export const runSaveLensVisualization = async (
         stateTransfer,
         originatingApp: props.originatingApp,
         getOriginatingPath: props.getOriginatingPath,
+        controlsInput,
       });
       return;
     }

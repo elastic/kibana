@@ -67,7 +67,7 @@ export function DashboardApp({
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [regenerateId, setRegenerateId] = useState(uuidv4());
-  const incomingEmbeddable = useMemo(() => {
+  const incomingEmbeddables = useMemo(() => {
     return embeddableService
       .getStateTransfer()
       .getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true);
@@ -76,7 +76,7 @@ export function DashboardApp({
   useEffect(() => {
     let canceled = false;
     // show dashboard when there is an incoming embeddable
-    if (incomingEmbeddable) {
+    if (incomingEmbeddables && incomingEmbeddables.length > 0) {
       return;
     }
 
@@ -93,7 +93,7 @@ export function DashboardApp({
     return () => {
       canceled = true;
     };
-  }, [incomingEmbeddable]);
+  }, [incomingEmbeddables]);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>(undefined);
 
   const showPlainSpinner = useObservable(coreServices.customBranding.hasCustomBranding$, false);
@@ -171,7 +171,7 @@ export function DashboardApp({
     };
 
     return Promise.resolve<DashboardCreationOptions>({
-      getIncomingEmbeddable: () => incomingEmbeddable,
+      getIncomingEmbeddables: () => incomingEmbeddables,
 
       // integrations
       useSessionStorageIntegration: true,
@@ -204,7 +204,7 @@ export function DashboardApp({
     validateOutcome,
     getScopedHistory,
     kbnUrlStateStorage,
-    incomingEmbeddable,
+    incomingEmbeddables,
   ]);
 
   useEffect(() => {

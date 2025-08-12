@@ -58,7 +58,7 @@ import { serializeLayout } from './serialize_layout';
 import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from './types';
 
 export function initializeLayoutManager(
-  incomingEmbeddable: EmbeddablePackageState | undefined,
+  incomingEmbeddables: EmbeddablePackageState[] | undefined,
   initialPanels: DashboardState['panels'],
   trackPanel: ReturnType<typeof initializeTrackPanel>,
   getReferences: (id: string) => Reference[]
@@ -146,30 +146,32 @@ export function initializeLayoutManager(
   // --------------------------------------------------------------------------------------
   // Place the incoming embeddable if there is one
   // --------------------------------------------------------------------------------------
-  if (incomingEmbeddable) {
-    const { serializedState, size, type } = incomingEmbeddable;
-    const uuid = incomingEmbeddable.embeddableId ?? v4();
-    const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
-    const sameType = existingPanel?.type === type;
+  if (incomingEmbeddables?.length) {
+    incomingEmbeddables.forEach((embeddablePackage) => {
+      const { serializedState, size, type } = embeddablePackage;
+      const uuid = embeddablePackage.embeddableId ?? v4();
+      const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
+      const sameType = existingPanel?.type === type;
 
-    const gridData = existingPanel ? existingPanel.gridData : placeIncomingPanel(uuid, size);
-    currentChildState[uuid] = {
-      rawState: {
-        ...(sameType && currentChildState[uuid] ? currentChildState[uuid].rawState : {}),
-        ...serializedState.rawState,
-      },
-      references: serializedState?.references,
-    };
+      const gridData = existingPanel ? existingPanel.gridData : placeIncomingPanel(uuid, size);
+      currentChildState[uuid] = {
+        rawState: {
+          ...(sameType && currentChildState[uuid] ? currentChildState[uuid].rawState : {}),
+          ...serializedState.rawState,
+        },
+        references: serializedState?.references,
+      };
 
-    layout$.next({
-      ...layout$.value,
-      panels: {
-        ...layout$.value.panels,
-        [uuid]: { gridData, type },
-      },
+      layout$.next({
+        ...layout$.value,
+        panels: {
+          ...layout$.value.panels,
+          [uuid]: { gridData, type },
+        },
+      });
+      trackPanel.setScrollToPanelId(uuid);
+      trackPanel.setHighlightPanelId(uuid);
     });
-    trackPanel.setScrollToPanelId(uuid);
-    trackPanel.setHighlightPanelId(uuid);
   }
 
   function getDashboardPanelFromId(panelId: string) {

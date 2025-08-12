@@ -17,11 +17,12 @@ import type {
 import { useEffect, useMemo, useState } from 'react';
 import { Observable, Subject, of } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import { cloneDeep, pick } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import useLatest from 'react-use/lib/useLatest';
+import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import { UnifiedHistogramChartProps } from '../components/chart/chart';
 import {
   UnifiedHistogramExternalVisContextStatus,
@@ -81,6 +82,11 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
    * The ES|QL variables to use for the chart
    */
   esqlVariables?: ESQLControlVariable[];
+
+  /**
+   * The current state of the controls
+   */
+  controlsState?: ControlPanelsState<ESQLControlState>;
   /**
    * The external custom Lens vis
    */
@@ -211,6 +217,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     table,
     externalVisContext,
     esqlVariables,
+    controlsState,
   } = props;
   const initialBreakdownField = useMemo(
     () =>
@@ -311,6 +318,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
           esqlVariables,
           input$,
           chart,
+          controlsState,
           isChartAvailable,
           requestParams,
           lensVisService,
@@ -325,6 +333,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     requestParams,
     stateProps,
     esqlVariables,
+    controlsState,
   ]);
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({
