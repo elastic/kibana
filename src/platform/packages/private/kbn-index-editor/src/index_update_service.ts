@@ -24,7 +24,6 @@ import {
   Subject,
   Subscription,
   combineLatest,
-  debounceTime,
   filter,
   from,
   map,
@@ -40,6 +39,7 @@ import {
   withLatestFrom,
   firstValueFrom,
   catchError,
+  exhaustMap,
 } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { Builder, BasicPrettyPrinter } from '@kbn/esql-ast';
@@ -147,6 +147,9 @@ export class IndexUpdateService {
 
   private readonly _isSaving$ = new BehaviorSubject<boolean>(false);
   public readonly isSaving$: Observable<boolean> = this._isSaving$.asObservable();
+
+  /** Subject to manually flush changes, e.g. on user click */
+  private readonly _flush$ = new Subject<number>();
 
   private readonly _isFetching$ = new BehaviorSubject<boolean>(false);
   public readonly isFetching$: Observable<boolean> = this._isFetching$.asObservable();
@@ -283,6 +286,20 @@ export class IndexUpdateService {
     shareReplay(1) // keep latest buffer for retries
   );
 
+  public readonly hasUnsavedChanges$: Observable<boolean> = this.bufferState$.pipe(
+    map((actions) =>
+      actions.some((action) =>
+        (
+          ['add-column', 'add-doc', 'delete-column', 'delete-doc'] as Array<keyof ActionMap>
+        ).includes(action.type)
+      )
+    )
+  );
+
+  public flush() {
+    this._flush$.next(Date.now());
+  }
+
   /** Doc updates/additions that are pending to be saved */
   public readonly savingDocs$: Observable<PendingSave> = this.bufferState$.pipe(
     map((updates) => {
@@ -415,15 +432,11 @@ export class IndexUpdateService {
   private listenForUpdates() {
     // Queue for bulk updates
     this._subscription.add(
-      this.bufferState$
+      combineLatest([this.bufferState$, this._flush$])
         .pipe(
           skipWhile(() => !this.isIndexCreated()),
-          tap((updates) => {
-            this._isSaving$.next(updates.length > 0);
-          }),
-          debounceTime(BUFFER_TIMEOUT_MS),
           filter((updates) => updates.length > 0),
-          switchMap((updates) => {
+          exhaustMap(([updates]) => {
             return from(this.bulkUpdate(updates)).pipe(
               withLatestFrom(this._rows$, this.dataView$),
               map(([response, rows, dataView]) => {
@@ -669,6 +682,11 @@ export class IndexUpdateService {
   /** Schedules documents for deletion */
   public deleteDoc(ids: string[]) {
     this.addAction('delete-doc', { ids });
+
+    // Remove rows with matching ids from _rows$
+    const currentRows = this._rows$.getValue();
+    const updatedRows = currentRows.filter((row) => !ids.includes(row.id));
+    this._rows$.next(updatedRows);
   }
 
   /**

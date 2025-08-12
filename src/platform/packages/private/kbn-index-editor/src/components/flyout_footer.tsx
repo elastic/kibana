@@ -32,19 +32,21 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
     services: { indexUpdateService, notifications },
   } = useKibana<KibanaContextExtra>();
 
-  const undoTimeLeft = useObservable(indexUpdateService.undoTimer$);
   const isSaving = useObservable(indexUpdateService.isSaving$, false);
   const isIndexCreated = useObservable(
     indexUpdateService.indexCreated$,
     indexUpdateService.isIndexCreated()
   );
-  const docsPendingToBeSaved = useObservable(indexUpdateService.savingDocs$, new Map());
+  const hasUnsavedChanges = useObservable(indexUpdateService.hasUnsavedChanges$, false);
 
   const { uploadStatus, onImportClick, canImport } = useFileUploadContext();
 
-  const undoInSeconds = undoTimeLeft ? `${Math.floor(undoTimeLeft / 1000)}s` : null;
-
   const createIndex = async () => {
+    if (isIndexCreated) {
+      indexUpdateService.flush();
+      return;
+    }
+
     try {
       await indexUpdateService.createIndex();
       onClose();
@@ -57,7 +59,8 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
     }
   };
 
-  const isSaveButtonVisible = !canImport && !isIndexCreated && !isSaving;
+  const isSaveButtonVisible =
+    (!canImport && !isIndexCreated && !isSaving) || (isIndexCreated && hasUnsavedChanges);
 
   return (
     <EuiFlyoutFooter>
@@ -73,33 +76,12 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
         <EuiFlexItem grow={true} />
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center">
-            {undoTimeLeft ? (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType={'editorUndo'}
-                  iconSize={'m'}
-                  iconSide={'left'}
-                  onClick={() => {
-                    // Undo the last change
-                    indexUpdateService.undo();
-                  }}
-                >
-                  <FormattedMessage
-                    id="indexEditor.flyout.footer.primaryButtonLabel.save"
-                    defaultMessage="Undo"
-                  />
-                  &nbsp;
-                  <span>{undoInSeconds}</span>
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            ) : null}
-
             {isSaveButtonVisible ? (
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={createIndex} disabled={!docsPendingToBeSaved.size}>
+                <EuiButton onClick={createIndex}>
                   <FormattedMessage
                     id="indexEditor.flyout.footer.primaryButtonLabel.saveIndex"
-                    defaultMessage="Save index"
+                    defaultMessage="Save changes"
                   />
                 </EuiButton>
               </EuiFlexItem>
