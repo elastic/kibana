@@ -202,8 +202,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const config = this.initializerContext.config.get<ConfigSchema>();
     if (config.search.sessions.enabled) {
       const sessionsConfig = config.search.sessions;
+
       registerSearchSessionsMgmt(
         core as CoreSetup<DataStartDependencies>,
+        getStartServices,
         {
           searchUsageCollector: this.usageCollector!,
           sessionsClient: this.sessionsClient,
