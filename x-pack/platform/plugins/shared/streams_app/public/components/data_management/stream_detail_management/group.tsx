@@ -7,6 +7,7 @@
 import React from 'react';
 import { Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
 import { Wrapper } from './wrapper';
@@ -30,8 +31,16 @@ export function GroupStreamDetailManagement({
   refreshDefinition: () => void;
 }) {
   const {
+    features: { groupStreams },
+  } = useStreamsPrivileges();
+
+  const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
+
+  if (!groupStreams?.enabled) {
+    return <RedirectTo path="/" />;
+  }
 
   const tabs = {
     overview: {

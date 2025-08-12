@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { badData, badRequest } from '@hapi/boom';
 import { Group, Streams } from '@kbn/streams-schema';
+import { OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS } from '@kbn/management-settings-ids';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { ASSET_TYPE, ASSET_UUID } from '../../../lib/streams/assets/fields';
@@ -75,12 +76,21 @@ const upsertGroupRoute = createServerRoute({
       group: Group.right,
     }),
   }),
-  handler: async ({ params, request, getScopedClients }) => {
+  handler: async ({ params, request, getScopedClients, context }) => {
     const { streamsClient, assetClient } = await getScopedClients({
       request,
     });
 
     if (!(await streamsClient.isStreamsEnabled())) {
+      throw badData('Streams are not enabled for Group streams.');
+    }
+
+    const core = await context.core;
+    const groupStreamsEnabled = await core.uiSettings.client.get(
+      OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS
+    );
+
+    if (!groupStreamsEnabled) {
       throw badData('Streams are not enabled for Group streams.');
     }
 

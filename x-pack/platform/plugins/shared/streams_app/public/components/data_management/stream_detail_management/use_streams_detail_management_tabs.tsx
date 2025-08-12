@@ -20,7 +20,7 @@ export function useStreamsDetailManagementTabs({
   refreshDefinition: () => void;
 }) {
   const {
-    features: { significantEvents },
+    features: { significantEvents, groupStreams },
   } = useStreamsPrivileges();
 
   const isSignificantEventsEnabled = !!significantEvents?.available;
@@ -34,12 +34,16 @@ export function useStreamsDetailManagementTabs({
         defaultMessage: 'Processing',
       }),
     },
-    relationships: {
-      content: <StreamDetailRelationshipsView definition={definition} />,
-      label: i18n.translate('xpack.streams.streamDetailView.relationshipsTab', {
-        defaultMessage: 'Relationships',
-      }),
-    },
+    ...(groupStreams?.enabled
+      ? {
+          relationships: {
+            content: <StreamDetailRelationshipsView definition={definition} />,
+            label: i18n.translate('xpack.streams.streamDetailView.relationshipsTab', {
+              defaultMessage: 'Relationships',
+            }),
+          },
+        }
+      : {}),
     ...(isSignificantEventsEnabled
       ? {
           significantEvents: {

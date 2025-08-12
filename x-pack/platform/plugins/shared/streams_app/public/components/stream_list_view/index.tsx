@@ -34,6 +34,7 @@ import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { GroupStreamModificationFlyout } from '../group_stream_modification_flyout/group_stream_modification_flyout';
 import { GroupStreamsCards } from './group_streams_cards';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -69,6 +70,10 @@ export function StreamListView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [streamsRepositoryClient, timeState.start, timeState.end]
   );
+
+  const {
+    features: { groupStreams },
+  } = useStreamsPrivileges();
 
   const overlayRef = React.useRef<OverlayRef | null>(null);
 
@@ -122,13 +127,15 @@ export function StreamListView() {
                 />
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => openGroupStreamModificationFlyout()}>
-                {i18n.translate('xpack.streams.streamsListView.createGroupStreamButtonLabel', {
-                  defaultMessage: 'Create group stream',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
+            {groupStreams?.enabled && (
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={() => openGroupStreamModificationFlyout()}>
+                  {i18n.translate('xpack.streams.streamsListView.createGroupStreamButtonLabel', {
+                    defaultMessage: 'Create group stream',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         }
         description={
@@ -162,7 +169,7 @@ export function StreamListView() {
         ) : (
           <>
             <StreamsTreeTable loading={streamsListFetch.loading} streams={streamsListFetch.value} />
-            <GroupStreamsCards streams={streamsListFetch.value} />
+            {groupStreams?.enabled && <GroupStreamsCards streams={streamsListFetch.value} />}
           </>
         )}
       </StreamsAppPageTemplate.Body>
