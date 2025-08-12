@@ -35,6 +35,11 @@ export interface BulkOverwriteTransformedDocumentsParams {
   useAliasToPreventAutoCreate?: boolean;
 }
 
+export interface BulkIndexSucceeded {
+  type: 'bulk_index_succeeded';
+  versionConflictErrors: estypes.ErrorCause[];
+}
+
 /**
  * Write the up-to-date transformed documents to the index, overwriting any
  * documents that are still on their outdated version.
@@ -51,7 +56,7 @@ export const bulkOverwriteTransformedDocuments =
     | TargetIndexHadWriteBlock
     | IndexNotFound
     | RequestEntityTooLargeException,
-    'bulk_index_succeeded'
+    BulkIndexSucceeded
   > =>
   () => {
     return client
@@ -74,13 +79,17 @@ export const bulkOverwriteTransformedDocuments =
       .then((res) => {
         // Filter out version_conflict_engine_exception since these just mean
         // that another instance already updated these documents
-        const errors: estypes.ErrorCause[] = (res.items ?? [])
+        const allErrors: estypes.ErrorCause[] = (res.items ?? [])
           .filter((item) => item.index?.error)
-          .map((item) => item.index!.error!)
-          .filter(({ type }) => type !== 'version_conflict_engine_exception');
+          .map((item) => item.index!.error!);
+
+        const errors = allErrors.filter(({ type }) => type !== 'version_conflict_engine_exception');
+        const versionConflictErrors = allErrors.filter(
+          ({ type }) => type === 'version_conflict_engine_exception'
+        );
 
         if (errors.length === 0) {
-          return Either.right('bulk_index_succeeded' as const);
+          return Either.right({ type: 'bulk_index_succeeded' as const, versionConflictErrors });
         } else {
           if (errors.every(isWriteBlockException)) {
             return Either.left({
