@@ -65,6 +65,7 @@ export const PolicyTemplateSelector = ({
         idSelected={selectedTemplate}
         onChange={(id: CloudSecurityPolicyTemplate) => setPolicyTemplate(id)}
         disabled={disabled}
+        name="policyTemplate"
       />
     </div>
   );
