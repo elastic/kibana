@@ -198,7 +198,11 @@ const getUpdateSignalStatusScript = (
   };
       ctx._source['${ALERT_WORKFLOW_STATUS_UPDATED_AT}'] = '${new Date().toISOString()}';
 
-      ${reason ? `ctx._source['${ALERT_WORKFLOW_REASON}'] = '${reason}';` : ''}
+      ${
+        reason
+          ? `ctx._source['${ALERT_WORKFLOW_REASON}'] = '${reason}';`
+          : `ctx._source.remove('${ALERT_WORKFLOW_REASON}')`
+      }
     }
     if (ctx._source.signal != null && ctx._source.signal.status != null) {
       ctx._source.signal.status = '${status}'
