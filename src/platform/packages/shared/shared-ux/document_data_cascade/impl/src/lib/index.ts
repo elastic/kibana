@@ -8,3 +8,9 @@
  */
 
 export { getESQLStatsQueryMeta } from './parse_esql';
+export {
+  getCascadeRowNodePath,
+  getCascadeRowNodePathValueRecord,
+  getCascadeRowLeafDataCacheKey,
+  getLeafIdFromCacheKey,
+} from './utils';

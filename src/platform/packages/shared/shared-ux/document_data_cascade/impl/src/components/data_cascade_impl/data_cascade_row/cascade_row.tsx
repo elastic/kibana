@@ -18,7 +18,7 @@ import {
   type GroupNode,
   useDataCascadeActions,
   useDataCascadeState,
-} from '../../store_provider';
+} from '../../../store_provider';
 import { getCascadeRowNodePath, getCascadeRowNodePathValueRecord } from '../../../lib/utils';
 import {
   styles as cascadeRowStyles,
@@ -226,7 +226,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
           {!isGroupNode && isRowExpanded && hasAllParentsExpanded && (
             <EuiFlexItem
               role="gridcell"
-              css={{
+              style={{
                 padding: `0 calc(${euiTheme.size[size]} * ${rowInstance.depth})`,
               }}
             >
