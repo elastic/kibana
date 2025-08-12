@@ -398,6 +398,8 @@ import type {
   CreateDashboardMigrationDashboardsRequestBodyInput,
   GetDashboardMigrationRequestParamsInput,
   GetDashboardMigrationResponse,
+  GetDashboardMigrationResourcesMissingRequestParamsInput,
+  GetDashboardMigrationResourcesMissingResponse,
   GetDashboardMigrationStatsRequestParamsInput,
   GetDashboardMigrationStatsResponse,
 } from '../siem_migrations/model/api/dashboards/dashboard_migration.gen';
@@ -1472,6 +1474,24 @@ finalize it.
     return this.kbnClient
       .request<GetDashboardMigrationResponse>({
         path: replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Identifies missing resources from all the dashboards of an existing SIEM dashboard migration
+   */
+  async getDashboardMigrationResourcesMissing(props: GetDashboardMigrationResourcesMissingProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationResourcesMissing`);
+    return this.kbnClient
+      .request<GetDashboardMigrationResourcesMissingResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/resources/missing',
+          props.params
+        ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -2983,6 +3003,9 @@ export interface GetAssetCriticalityRecordProps {
 }
 export interface GetDashboardMigrationProps {
   params: GetDashboardMigrationRequestParamsInput;
+}
+export interface GetDashboardMigrationResourcesMissingProps {
+  params: GetDashboardMigrationResourcesMissingRequestParamsInput;
 }
 export interface GetDashboardMigrationStatsProps {
   params: GetDashboardMigrationStatsRequestParamsInput;

@@ -16,6 +16,8 @@
 
 import { z } from '@kbn/zod';
 
+import { NonEmptyString } from '../../api/model/primitives.gen';
+
 /**
  * The GenAI connector id to use.
  */
@@ -97,4 +99,24 @@ export const MigrationLastExecution = z.object({
    * Indicates if the last execution was stopped by the user.
    */
   is_stopped: z.boolean().optional(),
+});
+
+/**
+ * The type of the resource
+ */
+export type SiemMigrationResourceType = z.infer<typeof SiemMigrationResourceType>;
+export const SiemMigrationResourceType = z.enum(['macro', 'lookup']);
+export type SiemMigrationResourceTypeEnum = typeof SiemMigrationResourceType.enum;
+export const SiemMigrationResourceTypeEnum = SiemMigrationResourceType.enum;
+
+/**
+ * A resource of a migration
+ */
+export type SiemMigrationResourceBase = z.infer<typeof SiemMigrationResourceBase>;
+export const SiemMigrationResourceBase = z.object({
+  type: SiemMigrationResourceType,
+  /**
+   * The name of the resource
+   */
+  name: NonEmptyString,
 });

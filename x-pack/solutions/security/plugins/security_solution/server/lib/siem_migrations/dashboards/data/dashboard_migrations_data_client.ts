@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { AuthenticatedUser, IScopedClusterClient } from '@kbn/core/server';
 import { DashboardMigrationsDataDashboardsClient } from './dashboard_migrations_dashboards_client';
+import { DashboardMigrationsDataResourcesClient } from './dashboard_migrations_data_resources_client';
 import { DashboardMigrationsDataMigrationClient } from './dashboard_migrations_migration_client';
 import type {
   DashboardMigrationIndexNameProviders,
@@ -17,6 +18,7 @@ import type {
 export class DashboardMigrationsDataClient {
   public readonly migrations: DashboardMigrationsDataMigrationClient;
   public readonly dashboards: DashboardMigrationsDataDashboardsClient;
+  public readonly resources: DashboardMigrationsDataResourcesClient;
 
   constructor(
     indexNameProviders: DashboardMigrationIndexNameProviders,
@@ -35,6 +37,13 @@ export class DashboardMigrationsDataClient {
     );
     this.dashboards = new DashboardMigrationsDataDashboardsClient(
       indexNameProviders.dashboards,
+      currentUser,
+      esScopedClient,
+      logger,
+      dependencies
+    );
+    this.resources = new DashboardMigrationsDataResourcesClient(
+      indexNameProviders.resources,
       currentUser,
       esScopedClient,
       logger,

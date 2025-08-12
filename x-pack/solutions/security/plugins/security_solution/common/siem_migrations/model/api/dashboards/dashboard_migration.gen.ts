@@ -19,6 +19,7 @@ import { z } from '@kbn/zod';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import { DashboardMigration, DashboardMigrationTaskStats } from '../../dashboard_migration.gen';
 import { SplunkOriginalDashboardExport } from '../../vendor/dashboards/splunk.gen';
+import { SiemMigrationResourceBase } from '../../common.gen';
 
 export type CreateDashboardMigrationRequestBody = z.infer<
   typeof CreateDashboardMigrationRequestBody
@@ -69,6 +70,24 @@ export type GetDashboardMigrationRequestParamsInput = z.input<
 
 export type GetDashboardMigrationResponse = z.infer<typeof GetDashboardMigrationResponse>;
 export const GetDashboardMigrationResponse = DashboardMigration;
+
+export type GetDashboardMigrationResourcesMissingRequestParams = z.infer<
+  typeof GetDashboardMigrationResourcesMissingRequestParams
+>;
+export const GetDashboardMigrationResourcesMissingRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type GetDashboardMigrationResourcesMissingRequestParamsInput = z.input<
+  typeof GetDashboardMigrationResourcesMissingRequestParams
+>;
+
+/**
+ * The identified resources missing
+ */
+export type GetDashboardMigrationResourcesMissingResponse = z.infer<
+  typeof GetDashboardMigrationResourcesMissingResponse
+>;
+export const GetDashboardMigrationResourcesMissingResponse = z.array(SiemMigrationResourceBase);
 
 export type GetDashboardMigrationStatsRequestParams = z.infer<
   typeof GetDashboardMigrationStatsRequestParams

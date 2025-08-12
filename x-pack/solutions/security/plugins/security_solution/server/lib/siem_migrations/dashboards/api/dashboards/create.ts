@@ -17,6 +17,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../../../common/utils/authz';
 import { withLicense } from '../../../common/utils/with_license';
 import { SiemMigrationAuditLogger } from '../../../common/utils/audit';
+import { findAndPersistDashboardResources } from '../utils/resource_retriever';
 
 export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -64,6 +65,21 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
             migrationId,
             originalDashboardsExport
           );
+
+          // TODO: This logic assumes that the `eai:data` field, which is an XML string, contains
+          // the queries. This will need to be refined with proper XML parsing to extract only
+          // the SPL queries from within the dashboard's XML definition.
+          for (const dashboard of originalDashboardsExport) {
+            const eaiData = dashboard.result?.['eai:data'];
+            if (eaiData && typeof eaiData === 'string') {
+              await findAndPersistDashboardResources(
+                migrationId,
+                eaiData,
+                dashboardMigrationsClient.data.resources
+              );
+            }
+          }
+
           return res.ok();
         } catch (error) {
           logger.error(`Error creating dashboards for migration ID ${migrationId}: ${error}`);

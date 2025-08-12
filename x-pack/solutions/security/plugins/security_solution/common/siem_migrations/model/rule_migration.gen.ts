@@ -18,7 +18,12 @@ import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
 import { RuleResponse } from '../../api/detection_engine/model/rule_schema/rule_schemas.gen';
-import { MigrationStatus, MigrationTaskStatus, MigrationLastExecution } from './common.gen';
+import {
+  MigrationStatus,
+  MigrationTaskStatus,
+  SiemMigrationResourceBase,
+  MigrationLastExecution,
+} from './common.gen';
 
 /**
  * The original rule vendor identifier.
@@ -450,26 +455,6 @@ export const RuleMigrationIntegrationStats = z.object({
 export type RuleMigrationAllIntegrationsStats = z.infer<typeof RuleMigrationAllIntegrationsStats>;
 export const RuleMigrationAllIntegrationsStats = z.array(RuleMigrationIntegrationStats);
 
-/**
- * The type of the rule migration resource.
- */
-export type RuleMigrationResourceType = z.infer<typeof RuleMigrationResourceType>;
-export const RuleMigrationResourceType = z.enum(['macro', 'lookup']);
-export type RuleMigrationResourceTypeEnum = typeof RuleMigrationResourceType.enum;
-export const RuleMigrationResourceTypeEnum = RuleMigrationResourceType.enum;
-
-/**
- * The rule migration resource basic information.
- */
-export type RuleMigrationResourceBase = z.infer<typeof RuleMigrationResourceBase>;
-export const RuleMigrationResourceBase = z.object({
-  type: RuleMigrationResourceType,
-  /**
-   * The resource name identifier.
-   */
-  name: z.string(),
-});
-
 export type RuleMigrationResourceContent = z.infer<typeof RuleMigrationResourceContent>;
 export const RuleMigrationResourceContent = z.object({
   /**
@@ -486,7 +471,7 @@ export const RuleMigrationResourceContent = z.object({
  * The rule migration resource data.
  */
 export type RuleMigrationResourceData = z.infer<typeof RuleMigrationResourceData>;
-export const RuleMigrationResourceData = RuleMigrationResourceBase.merge(
+export const RuleMigrationResourceData = SiemMigrationResourceBase.merge(
   RuleMigrationResourceContent
 );
 
@@ -494,7 +479,7 @@ export const RuleMigrationResourceData = RuleMigrationResourceBase.merge(
  * The rule migration resource document object.
  */
 export type RuleMigrationResource = z.infer<typeof RuleMigrationResource>;
-export const RuleMigrationResource = RuleMigrationResourceBase.merge(
+export const RuleMigrationResource = SiemMigrationResourceBase.merge(
   RuleMigrationResourceContent.partial()
 ).merge(
   z.object({

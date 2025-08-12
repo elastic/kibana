@@ -402,26 +402,6 @@ components:
 
     ## Rule migration resources
 
-    RuleMigrationResourceType:
-      type: string
-      description: The type of the rule migration resource.
-      enum:
-        - macro # Reusable part a query that can be customized and called from multiple rules
-        - lookup # A list of values that can be used inside queries as data enrichment or data source
-
-    RuleMigrationResourceBase:
-      type: object
-      description: The rule migration resource basic information.
-      required:
-        - type
-        - name
-      properties:
-        type:
-          $ref: '#/components/schemas/RuleMigrationResourceType'
-        name:
-          type: string
-          description: The resource name identifier.
-
     RuleMigrationResourceContent:
       type: object
       required:
@@ -437,13 +417,13 @@ components:
     RuleMigrationResourceData:
       description: The rule migration resource data.
       allOf:
-        - $ref: '#/components/schemas/RuleMigrationResourceBase'
+        - $ref: './common.schema.yaml#/components/schemas/SiemMigrationResourceBase'
         - $ref: '#/components/schemas/RuleMigrationResourceContent'
 
     RuleMigrationResource:
       description: The rule migration resource document object.
       allOf:
-        - $ref: '#/components/schemas/RuleMigrationResourceBase'
+        - $ref: './common.schema.yaml#/components/schemas/SiemMigrationResourceBase'
         - $ref: '#/components/schemas/RuleMigrationResourceContent'
           x-modify: partial
         - type: object

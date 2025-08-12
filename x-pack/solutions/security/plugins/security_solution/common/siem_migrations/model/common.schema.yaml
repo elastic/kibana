@@ -77,3 +77,22 @@ components:
           type: boolean
           description: Indicates if the last execution was stopped by the user.
 
+    SiemMigrationResourceType:
+      type: string
+      description: The type of the resource
+      enum:
+        - macro
+        - lookup
+
+    SiemMigrationResourceBase:
+      type: object
+      description: A resource of a migration
+      required:
+        - type
+        - name
+      properties:
+        type:
+          $ref: '#/components/schemas/SiemMigrationResourceType'
+        name:
+          description: The name of the resource
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
