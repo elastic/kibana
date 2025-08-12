@@ -111,10 +111,13 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols[PageObjects.datasetQuality.texts.datasetNameColumn];
       await datasetNameCol.sort('descending');
-      const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-      expect(datasetNameColCellTexts).to.eql(
-        [apacheAccessDatasetHumanName, ...datasetNames].reverse()
-      );
+
+      await retry.tryForTime(10000, async () => {
+        const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
+        expect(datasetNameColCellTexts).to.eql(
+          [apacheAccessDatasetHumanName, ...datasetNames].reverse()
+        );
+      });
 
       const namespaceCol = cols.Namespace;
       const namespaceColCellTexts = await namespaceCol.getCellTexts();
