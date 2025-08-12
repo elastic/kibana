@@ -37,6 +37,5 @@
     "@kbn/restorable-state",
     "@kbn/esql-ast",
     "@kbn/es-types",
-    "@kbn/field-types",
   ]
 }
