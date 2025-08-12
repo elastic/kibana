@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getCaseSuggestions } from '../../../containers/api';
@@ -39,7 +39,7 @@ export const useFetchSuggestion = (serviceName: string) => {
   };
 };
 
-export const Suggestions = React.memo(() => {
+export const CaseSuggestions = React.memo(() => {
   const { suggestions, isLoadingSuggestions } = useFetchSuggestion(MOCK_SERVICE_NAME);
 
   const { attachmentSuggestionRegistry } = useCasesContext();
@@ -50,14 +50,14 @@ export const Suggestions = React.memo(() => {
   }
 
   return (
-    <div>
+    <EuiFlexItem>
       {suggestions.map((suggestion) => {
         const component = components.find((c) => c.id === suggestion.id);
         if (!component) return null;
         return <component.children key={suggestion.id} suggestion={suggestion} />;
       })}
-    </div>
+    </EuiFlexItem>
   );
 });
 
-Suggestions.displayName = 'Suggestions';
+CaseSuggestions.displayName = 'CaseSuggestions';
