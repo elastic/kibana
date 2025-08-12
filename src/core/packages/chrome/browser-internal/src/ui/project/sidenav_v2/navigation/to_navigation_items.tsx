@@ -81,13 +81,14 @@ export const toNavigationItems = (
     const firstNode = navigationTree.body[0];
     if (!isRecentlyAccessedDefinition(firstNode)) {
       primaryNodes = firstNode.children ?? [];
-      if (primaryNodes[0].renderAs === 'home') {
-        logoNode = primaryNodes[0];
-        primaryNodes = primaryNodes.slice(1); // Remove the logo node from primary items
+      const homeNodeIndex = primaryNodes.findIndex((node) => node.renderAs === 'home');
+      if (homeNodeIndex !== -1) {
+        logoNode = primaryNodes[homeNodeIndex];
+        primaryNodes = primaryNodes.filter((_, index) => index !== homeNodeIndex); // Remove the logo node from primary items
         maybeMarkActive(logoNode, 0);
       } else {
         warnOnce(
-          `First body node is not a "home" node. It should be a logo node with solution logo, name and home page href. renderAs: "home" is expected, but got "${firstNode.renderAs}".`
+          `No "home" node found in primary nodes. There should be a logo node with solution logo, name and home page href. renderAs: "home" is expected.`
         );
       }
     }
