@@ -79405,9 +79405,9 @@ components:
     Security_Detections_API_ReasonEnum:
       description: The reason for closing the alerts
       enum:
-        - FALSE_POSITIVE
-        - DUPLICATE
-        - INVESTIGATION_REQUIRED
+        - false_positive
+        - duplicate
+        - investigation_required
       type: string
     Security_Detections_API_RelatedIntegration:
       description: |
