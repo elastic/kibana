@@ -114,8 +114,7 @@ export const performRuleInstallationHandler = async (
     }
 
     const { error: timelineInstallationError } = await performTimelinesInstallation(
-      ctx.securitySolution,
-      logger
+      ctx.securitySolution
     );
 
     const allErrors = aggregatePrebuiltRuleErrors(ruleErrors);

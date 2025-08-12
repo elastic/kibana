@@ -76,7 +76,7 @@ export const legacyCreatePrepackagedRules = async (
     throw new AggregateError(ruleCreationResult.errors, 'Error installing new prebuilt rules');
   }
 
-  const { result: timelinesResult } = await performTimelinesInstallation(context, logger);
+  const { result: timelinesResult } = await performTimelinesInstallation(context);
 
   await upgradePrebuiltRules(detectionRulesClient, rulesToUpdate, logger);
 

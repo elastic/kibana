@@ -211,8 +211,7 @@ export const performRuleUpgradeHandler = async (
 
     if (!isDryRun) {
       const { error: timelineInstallationError } = await performTimelinesInstallation(
-        ctx.securitySolution,
-        logger
+        ctx.securitySolution
       );
 
       if (timelineInstallationError) {
