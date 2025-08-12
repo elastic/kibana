@@ -25,6 +25,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RowColumnCreator } from './row_column_creator';
 import { getColumnInputRenderer } from './grid_custom_renderers/column_input_renderer';
 import { KibanaContextExtra } from '../types';
@@ -188,6 +189,27 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     }, {} as CustomGridColumnsConfiguration);
   }, [renderedColumns, props.dataView, indexUpdateService]);
 
+  const bulkActions = useMemo<
+    React.ComponentProps<typeof UnifiedDataTable>['customBulkActions']
+  >(() => {
+    return [
+      {
+        key: 'deleteSelected',
+        icon: 'trash',
+        label: (
+          <FormattedMessage
+            id="indexEditor.tableAction.removeDocsLabel"
+            defaultMessage="Delete selected"
+          />
+        ),
+        onClick: ({ selectedDocIds }) => {
+          indexUpdateService.deleteDoc(selectedDocIds);
+        },
+        'data-test-subj': 'indexEditorDeleteDocs',
+      },
+    ];
+  }, [indexUpdateService]);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s" css={{ overflow: 'hidden', height: '100%' }}>
       <EuiFlexItem grow={false}>
@@ -209,7 +231,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           showMultiFields={false}
           showColumnTokens
           showTimeCol
-          enableComparisonMode
+          enableComparisonMode={false}
           isPaginationEnabled
           showKeyboardShortcuts
           totalHits={props.totalHits}
@@ -230,6 +252,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           rowHeightState={rowHeight}
           onUpdateRowHeight={setRowHeight}
           controlColumnIds={props.controlColumnIds}
+          customBulkActions={bulkActions}
           css={css`
             .euiDataGridRowCell__content > div,
             .unifiedDataTable__cellValue {

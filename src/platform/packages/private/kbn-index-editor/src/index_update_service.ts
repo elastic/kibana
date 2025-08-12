@@ -59,9 +59,7 @@ interface DocUpdate {
   value: Record<string, any>;
 }
 
-type BulkUpdateOperations = Array<
-  { type: 'add-doc'; payload: DocUpdate } | { type: 'delete-doc'; payload: { id: string } }
->;
+type BulkUpdateOperations = Array<{ type: 'add-doc'; payload: DocUpdate } | DeleteDocAction>;
 
 function isDocUpdate(update: unknown): update is { type: 'add-doc'; payload: DocUpdate } {
   return (
@@ -69,7 +67,7 @@ function isDocUpdate(update: unknown): update is { type: 'add-doc'; payload: Doc
   );
 }
 
-function isDocDelete(update: unknown): update is { type: 'delete-doc'; payload: { id: string } } {
+function isDocDelete(update: unknown): update is DeleteDocAction {
   return (
     typeof update === 'object' &&
     update !== null &&
@@ -87,9 +85,14 @@ interface ColumnUpdate {
   previousName?: string;
 }
 
+interface DeleteDocAction {
+  type: 'delete-doc';
+  payload: { ids: string[] };
+}
+
 type Action =
   | { type: 'add-doc'; payload: DocUpdate }
-  | { type: 'delete-doc'; payload: { id: string } }
+  | DeleteDocAction
   | { type: 'undo' }
   | { type: 'saved'; payload: { response: any; updates: DocUpdate[] } }
   | { type: 'add-column' }
@@ -666,9 +669,9 @@ export class IndexUpdateService {
     this.addAction('add-doc', { id, value: parsedUpdate });
   }
 
-  /** Schedules a document for deletion */
-  public deleteDoc(id: string) {
-    this.addAction('delete-doc', { id });
+  /** Schedules documents for deletion */
+  public deleteDoc(ids: string[]) {
+    this.addAction('delete-doc', { ids });
   }
 
   /**
@@ -702,9 +705,13 @@ export class IndexUpdateService {
       return [{ index: {} }, doc];
     });
 
-    const deleteOperations = updates.filter(isDocDelete).map((v) => {
-      return [{ delete: { _id: v.payload.id } }];
-    });
+    const deleteOperations = updates
+      .filter(isDocDelete)
+      .map((v) => v.payload.ids)
+      .flat()
+      .map((id) => {
+        return [{ delete: { _id: id } }];
+      });
 
     const operations: BulkRequest['operations'] = [
       ...updateOperations,

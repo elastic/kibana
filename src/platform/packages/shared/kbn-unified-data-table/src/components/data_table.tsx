@@ -36,6 +36,7 @@ import {
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
   type UseEuiTheme,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -124,6 +125,14 @@ export enum DataLoadingState {
   loadingMore = 'loadingMore',
   loaded = 'loaded',
 }
+
+export type CustomBulkActions = Array<
+  Omit<React.ComponentProps<typeof EuiContextMenuItem>, 'onClick'> & {
+    onClick: (payload: { selectedDocIds: string[] }) => void;
+    label: React.ReactElement | string;
+    key: string;
+  }
+>;
 
 /**
  * Unified Data Table props
@@ -457,6 +466,10 @@ interface InternalUnifiedDataTableProps {
    * @param row
    */
   getRowIndicator?: ColorIndicatorControlColumnParams['getRowIndicator'];
+  /**
+   * Custom bulk action
+   */
+  customBulkActions: CustomBulkActions;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -539,6 +552,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdatePageIndex,
       disableCellActions = false,
       disableCellPopover = false,
+      customBulkActions,
     },
     ref
   ) => {
@@ -1059,6 +1073,7 @@ const InternalUnifiedDataTable = React.forwardRef<
               pageSize={unifiedDataTableContextValue.pageSize}
               toastNotifications={toastNotifications}
               columns={visibleColumns}
+              customBulkActions={customBulkActions}
             />
           )}
           {externalAdditionalControls}
@@ -1090,6 +1105,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       toastNotifications,
       visibleColumns,
       renderCustomToolbar,
+      customBulkActions,
     ]);
 
     const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
