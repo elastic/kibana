@@ -19,10 +19,7 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { getUpdateMinimalExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/update_exception_list_item_schema.mock';
 import { UpdateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
-import {
-  createUserAndRole,
-  deleteUserAndRole,
-} from '../../../../../../../common/services/security_solution';
+import { createUserAndRole, deleteUserAndRole } from '../../../../../../config/services/common';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

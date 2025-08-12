@@ -7,10 +7,7 @@
 
 import React from 'react';
 import { UnifiedSearchBar } from '../../../../components/shared/unified_search_bar';
-import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 
 export const SearchBar = () => {
-  const { applyFilterQuery } = useWaffleFiltersContext();
-
-  return <UnifiedSearchBar onQuerySubmit={applyFilterQuery} />;
+  return <UnifiedSearchBar />;
 };
