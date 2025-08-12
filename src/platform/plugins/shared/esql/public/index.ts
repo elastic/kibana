@@ -12,6 +12,7 @@ import { EsqlPlugin, type EsqlPluginStart } from './plugin';
 export { ESQLLangEditor } from './create_editor';
 export type { ESQLEditorProps, DataErrorsControl } from '@kbn/esql-editor';
 export type { EsqlPluginStart };
+export type { CachedFunctionOptions } from './util/cache';
 
 export function plugin() {
   return new EsqlPlugin();

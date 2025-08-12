@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+interface CachedFunctionOptions {
+  forceRefresh?: boolean;
+}
+
 /**
  * Given a non-parametrized async function, returns a function which caches the
  * result of that function. When a cached value is available, it returns
@@ -30,10 +34,10 @@ export const cacheNonParametrizedAsyncFunction = <T>(
   let lastCallTime = 0;
   let value: Promise<T> | undefined;
 
-  return () => {
+  return ({ forceRefresh = false }: CachedFunctionOptions = {}) => {
     const time = now();
 
-    if (time - lastCallTime > maxCacheDuration) {
+    if (forceRefresh || time - lastCallTime > maxCacheDuration) {
       value = undefined;
     }
 

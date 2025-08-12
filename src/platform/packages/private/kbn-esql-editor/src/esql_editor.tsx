@@ -672,7 +672,7 @@ const ESQLEditorInternal = function ESQLEditor({
     async (resultQuery: string) => {
       if (esqlCallbacks?.getJoinIndices) {
         // forces refresh
-        await esqlCallbacks?.getJoinIndices();
+        await esqlCallbacks?.getJoinIndices({ forceRefresh: true });
       }
       onQueryUpdate(resultQuery);
       // Need to force validation, as the query might be unchanged,

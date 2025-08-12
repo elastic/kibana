@@ -20,6 +20,8 @@ import type {
   ESQLLicenseResult,
 } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { CachedFunctionOptions } from '@kbn/esql/public';
+
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
 
@@ -50,7 +52,9 @@ export interface ESQLCallbacks {
   getFieldsMetadata?: Promise<PartialFieldsMetadataClient>;
   getVariables?: () => ESQLControlVariable[] | undefined;
   canSuggestVariables?: () => boolean;
-  getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getJoinIndices?: (
+    cacheOptions?: CachedFunctionOptions
+  ) => Promise<{ indices: IndexAutocompleteItem[] }>;
   getTimeseriesIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   getEditorExtensions?: (queryString: string) => Promise<{
     recommendedQueries: RecommendedQuery[];
