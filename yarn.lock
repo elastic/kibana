@@ -8328,6 +8328,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-metrics-grid@link:src/platform/packages/shared/kbn-unified-metrics-grid":
+  version "0.0.0"
+  uid ""
+
 "@kbn/unified-search-plugin@link:src/platform/plugins/shared/unified_search":
   version "0.0.0"
   uid ""

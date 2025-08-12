@@ -68,6 +68,7 @@ import {
 } from '../../state_management/redux';
 import { TABS_ENABLED } from '../../../../constants';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
+// import { DiscoverMetricsLayout } from './discover_metrics_layout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
 
@@ -344,6 +345,17 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
     return (
       <>
+        {/* Testing only: */}
+        {/* <DiscoverMetricsLayout
+          dataView={dataView}
+          stateContainer={stateContainer}
+          columns={currentColumns}
+          viewMode={viewMode}
+          onAddFilter={onFilter}
+          onFieldEdited={onFieldEdited}
+          onDropFieldToTable={onDropFieldToTable}
+          panelsToggle={panelsToggle}
+        /> */}
         <DiscoverHistogramLayout
           dataView={dataView}
           stateContainer={stateContainer}

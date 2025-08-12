@@ -2202,6 +2202,8 @@
       "@kbn/unified-field-list-examples-plugin/*": ["examples/unified_field_list_examples/*"],
       "@kbn/unified-histogram": ["src/platform/packages/shared/kbn-unified-histogram"],
       "@kbn/unified-histogram/*": ["src/platform/packages/shared/kbn-unified-histogram/*"],
+      "@kbn/unified-metrics-grid": ["src/platform/packages/shared/kbn-unified-metrics-grid"],
+      "@kbn/unified-metrics-grid/*": ["src/platform/packages/shared/kbn-unified-metrics-grid/*"],
       "@kbn/unified-search-plugin": ["src/platform/plugins/shared/unified_search"],
       "@kbn/unified-search-plugin/*": ["src/platform/plugins/shared/unified_search/*"],
       "@kbn/unified-tabs": ["src/platform/packages/shared/kbn-unified-tabs"],
