@@ -13,7 +13,7 @@ import {
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // Defined in CSP plugin
-const LATEST_FINDINGS_INDEX = 'security_solution-cloud_security_posture.misconfiguration_latest';
+const LATEST_FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 
 export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -45,7 +45,7 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
         findingsMock.map((finding) =>
           es.index({
             index: LATEST_FINDINGS_INDEX,
-            document: finding,
+            body: finding,
           })
         )
       );

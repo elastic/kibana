@@ -25,11 +25,6 @@ export function CspSecurityCommonProvider({ getPageObjects, getService }: FtrPro
             privileges: ['read'],
           },
           {
-            names: ['security_solution-cloud_security_posture.misconfiguration_latest'],
-            privileges: ['read'],
-          },
-
-          {
             names: ['logs-cloud_security_posture.scores-*'],
             privileges: ['read'],
           },
