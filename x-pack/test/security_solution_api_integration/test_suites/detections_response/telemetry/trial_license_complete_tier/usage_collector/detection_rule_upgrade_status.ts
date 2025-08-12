@@ -16,7 +16,7 @@ import {
   createPrebuiltRuleAssetSavedObjects,
   installPrebuiltRules,
 } from '../../../utils';
-import { deleteAllRules } from '../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../config/services/detections_response';
 
 /**
  * Test suite for detection rule upgrade status telemetry.

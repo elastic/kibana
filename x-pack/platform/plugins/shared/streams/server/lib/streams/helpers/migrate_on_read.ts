@@ -6,7 +6,6 @@
  */
 
 import { Streams } from '@kbn/streams-schema';
-import { BaseStream } from '@kbn/streams-schema/src/models/base';
 
 export function migrateOnRead(definition: Record<string, unknown>): Streams.all.Definition {
   let migratedDefinition = definition;
@@ -35,7 +34,5 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     };
     delete (migratedDefinition.ingest as { unwired?: {} }).unwired;
   }
-  Streams.all.Definition.asserts(migratedDefinition as unknown as BaseStream.Definition);
-
   return migratedDefinition as unknown as Streams.all.Definition;
 }

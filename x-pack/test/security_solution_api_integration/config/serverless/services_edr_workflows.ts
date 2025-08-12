@@ -7,6 +7,7 @@
 
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { SvlCommonApiServiceProvider } from '@kbn/test-suites-serverless/shared/services/svl_common_api';
+import { SearchSecureService } from '@kbn/test-suites-serverless/shared/services/search_secure';
 import { services as essServices } from '../ess/services_edr_workflows';
 import { SecuritySolutionServerlessSuperTest } from '../services/security_solution_serverless_supertest';
 import { SecuritySolutionServerlessUtils } from '../services/security_solution_serverless_utils';
@@ -17,4 +18,5 @@ export const svlServices = {
   securitySolutionUtils: SecuritySolutionServerlessUtils,
   svlUserManager: commonFunctionalServices.samlAuth,
   svlCommonApi: SvlCommonApiServiceProvider,
+  secureSearch: SearchSecureService,
 };

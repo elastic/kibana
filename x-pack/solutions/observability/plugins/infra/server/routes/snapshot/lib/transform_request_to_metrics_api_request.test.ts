@@ -64,7 +64,7 @@ const snapshotRequest: SnapshotRequest = {
   groupBy: [],
   nodeType: 'pod',
   timerange: { interval: '1m', to: 1605706200000, from: 1605705000000, lookbackSize: 5 },
-  filterQuery: '',
+  kuery: '',
   sourceId: 'default',
   accountId: '',
   region: '',
@@ -105,6 +105,11 @@ const metricsApiRequest: MetricsAPIRequest = {
       },
     },
   ],
+  filters: {
+    bool: {
+      filter: [],
+    },
+  },
   limit: 3000,
   alignDataToEnd: true,
   dropPartialBuckets: true,
