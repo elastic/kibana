@@ -7,7 +7,7 @@
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useEffect, useState } from 'react';
 
 export function AdvancedConfigKeyInput({
@@ -31,39 +31,40 @@ export function AdvancedConfigKeyInput({
 }) {
   // Handle key inputs with local state to avoid duplicated keys overwriting each other
   const [localKey, setLocalKey] = useState(configKey);
-  const touched = localKey !== configKey;
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const isFormInvalid = localKey !== configKey && Boolean(errorMsg);
 
   useEffect(() => {
     setLocalKey(configKey);
   }, [configKey]);
 
-  const getErrorMsg = useCallback(
-    (newKey: string) => {
-      if (newKey === '') {
-        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyEmptyError', {
-          defaultMessage: 'Key cannot be empty',
-        });
-      }
-      if (checkIfPredefinedConfigKeyExists(newKey)) {
-        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyPredefinedError', {
-          defaultMessage: 'This key is already predefined in the standard configuration above',
-        });
-      }
-      if (checkIfAdvancedConfigKeyExists(newKey, configKey)) {
-        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyDuplicateError', {
-          defaultMessage: 'This key is already used in another advanced configuration',
-        });
-      }
-      return null;
-    },
-    [configKey, checkIfAdvancedConfigKeyExists, checkIfPredefinedConfigKeyExists]
-  );
+  const getErrorMsg = (newKey: string) => {
+    if (newKey === '') {
+      return i18n.translate('xpack.apm.agentConfig.settingsPage.keyEmptyError', {
+        defaultMessage: 'Key cannot be empty',
+      });
+    }
+    if (checkIfPredefinedConfigKeyExists(newKey)) {
+      return i18n.translate('xpack.apm.agentConfig.settingsPage.keyPredefinedError', {
+        defaultMessage: 'This key is already predefined in the standard configuration above',
+      });
+    }
+    if (checkIfAdvancedConfigKeyExists(newKey, configKey)) {
+      return i18n.translate('xpack.apm.agentConfig.settingsPage.keyDuplicateError', {
+        defaultMessage: 'This key is already used in another advanced configuration',
+      });
+    }
+    return null;
+  };
 
   const handleKeyChange = (newKey: string) => {
-    setLocalKey(newKey);
     const errorKey = `key${id}`;
+    const formErrorMsg = getErrorMsg(newKey);
 
-    if (Boolean(getErrorMsg(newKey))) {
+    setLocalKey(newKey);
+    setErrorMsg(formErrorMsg);
+
+    if (Boolean(formErrorMsg)) {
       addValidationError(errorKey);
     } else {
       removeValidationError(errorKey);
@@ -78,8 +79,8 @@ export function AdvancedConfigKeyInput({
           ? i18n.translate('xpack.apm.agentConfig.settingsPage.keyLabel', { defaultMessage: 'key' })
           : undefined
       }
-      error={getErrorMsg(localKey)}
-      isInvalid={touched && Boolean(getErrorMsg(localKey))}
+      error={errorMsg}
+      isInvalid={isFormInvalid}
       fullWidth
     >
       <EuiFieldText
@@ -89,7 +90,7 @@ export function AdvancedConfigKeyInput({
         })}
         fullWidth
         value={localKey}
-        isInvalid={touched && Boolean(getErrorMsg(localKey))}
+        isInvalid={isFormInvalid}
         onChange={(e) => handleKeyChange(e.target.value)}
       />
     </EuiFormRow>
