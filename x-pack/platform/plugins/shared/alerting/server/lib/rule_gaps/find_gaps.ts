@@ -60,6 +60,8 @@ export const findGaps = async ({
   }
 };
 
+const FIND_GAPS_SEARCH_AFTER_MAX_RULES = 100
+
 /**
  * This function is used to find gaps using search after.
  * It's used when to be able process more than 10,000 gaps with stable sorting.
@@ -80,8 +82,8 @@ export const findGapsSearchAfter = async ({
 }> => {
   const { ruleIds, start, end, perPage, statuses, sortField, sortOrder } = params;
 
-  if (ruleIds.length > 100) {
-    throw new Error('ruleIds max size must be 100');
+  if (ruleIds.length > FIND_GAPS_SEARCH_AFTER_MAX_RULES) {
+    throw new Error(`ruleIds max size must be ${FIND_GAPS_SEARCH_AFTER_MAX_RULES}`);
   }
 
   try {
