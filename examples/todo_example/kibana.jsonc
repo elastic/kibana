@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/todo-plugin",
-  "owner": "@elastic/kibana-core",
+  "owner": "@elastic/kibana-data-discovery",
   "description": "A plugin which registers a very simple To Do application.",
   "plugin": {
     "id": "todo",

@@ -55,8 +55,8 @@ export const TodoItem = ({
     background-color: ${priorityColor};
     border-radius: 50%;
     display: block;
-    height: 12px;
-    width: 12px;
+    height: ${euiTheme.size.m};
+    width: ${euiTheme.size.m};
   `;
 
   const titleStyles = css`
