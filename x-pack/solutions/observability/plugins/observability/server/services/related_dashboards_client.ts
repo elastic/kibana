@@ -9,25 +9,16 @@ import { IContentClient } from '@kbn/content-management-plugin/server/types';
 import { SearchResponse } from '@kbn/content-management-plugin/server/core/crud';
 import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import { isDashboardPanel } from '@kbn/dashboard-plugin/common';
-import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
+import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 import type { LinkedDashboard, SuggestedDashboard } from '@kbn/observability-schema';
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
 import type { AlertData } from './alert_data';
-import { isSuggestedDashboardsValidPanelType, isLensVizAttributesForPanel } from './helpers';
+import { isSuggestedDashboardsValidPanelType } from './helpers';
 import { ReferencedPanelManager } from './referenced_panel_manager';
 import { SuggestedMatchedBy } from '@kbn/observability-schema/related_dashboards/schema/related_dashboard/v1';
 
 // How many managed dashboards to allow in the suggested list before we start filtering them out
 const MAX_SUGGESTED_MANAGED_DASHBOARDS = 5;
-// TODO: This is is missing many fields most likely, add more during review
-const SCORING_EXCLUDED_FIELDS = new Set<string>([
-  'tags',
-  'labels',
-  'event.action',
-  'event.kind',
-  '@timestamp',
-  '__records__',
-]);
 const TEXT_MATCH_LIMIT = 5;
 // TODO: We need to figure out a better way to handle this, hoping users have < 1000 dashboards is poor
 // Ideally we would match by fields and indices simultaneously
@@ -84,46 +75,26 @@ export class RelatedDashboardsClient {
   // 2. Full-text search matches based on the rule name associated with the alert.
   // The results from both searches are merged, scored, and sorted to provide a list of relevant dashboards.
   private async fetchSuggested(alert: AlertData): Promise<SuggestedDashboard[]> {
-    const alertFields = new Set(alert.getAllRelevantFields());
-    // Remove excluded fields from the alert fields, for unfiltered matches we'll only return
-    // Dashboards with panels that include these fields
-    alertFields.forEach((field) => {
-      if (SCORING_EXCLUDED_FIELDS.has(field)) {
-        alertFields.delete(field);
-      }
-    });
-
-    const searches: Promise<SuggestedDashboard[]>[] = [
-      this.unfilteredMatches(alertFields, alert.getRuleQueryIndex() || ''),
-    ];
-    // Run a full text search if we have a rule name
-    const ruleName = alert.getRuleName();
-    if (ruleName && ruleName.length > 0) {
-      searches.push(this.fetchSuggestedByTextMatch(ruleName));
-    }
-
-    // Search results may contain duplicates, so we need to merge them
-    // we also process them in parallel
-    const processing: Promise<any>[] = [];
+    // We're going to run two searches, storing the results in this map to dedup
     const dashboardsById = new Map<string, SuggestedDashboard>();
-    searches.forEach((search) => {
-      processing.push(
-        search.then((dashboards) => {
-          dashboards.forEach((dashboard) => {
-            const existing = dashboardsById.get(dashboard.id);
-            if (!existing) {
-              dashboardsById.set(dashboard.id, dashboard);
-            } else {
-              existing.matchedBy.fields.push(...(dashboard.matchedBy.fields || []));
-              existing.matchedBy.index.push(...(dashboard.matchedBy.index || []));
-              existing.matchedBy.textMatch =
-                (existing.matchedBy.textMatch || 0) + (dashboard.matchedBy.textMatch || 0);
-            }
-          });
-        })
-      );
-    });
-    await Promise.all(processing);
+    await Promise.all(
+      [
+        this.unfilteredMatches(alert.getAllRelevantFields(), alert.getRuleQueryIndex() || ''),
+        this.fetchSuggestedByTextMatch(alert.getRuleName() || ''),
+      ].map(async (search) => {
+        (await search).forEach((dashboard) => {
+          const existing = dashboardsById.get(dashboard.id);
+          if (!existing) {
+            dashboardsById.set(dashboard.id, dashboard);
+          } else {
+            existing.matchedBy.fields.push(...(dashboard.matchedBy.fields || []));
+            existing.matchedBy.index.push(...(dashboard.matchedBy.index || []));
+            existing.matchedBy.textMatch =
+              (existing.matchedBy.textMatch || 0) + (dashboard.matchedBy.textMatch || 0);
+          }
+        });
+      })
+    );
 
     // Return the dashboards sorted by score
     let matchedManagedDashboards = 0;
@@ -142,6 +113,11 @@ export class RelatedDashboardsClient {
   }
 
   private async fetchSuggestedByTextMatch(ruleName: string): Promise<SuggestedDashboard[]> {
+    // Return an empty array if the ruleName is an empty string or only whitespace
+    if (!ruleName || /^\s*$/.test(ruleName)) {
+      return [];
+    }
+
     // First do a text search and set a base score based on the rank in the results
     // We ignore the actual ES score... because the SO client doesn't expose it, so just assume
     // that the top 5 results are decent enough and weight linearly
@@ -152,15 +128,21 @@ export class RelatedDashboardsClient {
     });
     await this.addToPanelManagerFromSearch(textMatches);
 
-    return textMatches.result.hits.map((dashboard, idx) =>
-      dashboardToUnscoredSuggestedDashboard(dashboard, {
-        // Score these dashboards exclusively as text matches
-        textMatch: textMatches.result.hits.length - idx,
-        fields: [],
-        index: [],
-        isManaged: dashboard.managed || false,
-      })
-    );
+    const alert = await this.alertsClient.getAlertById(this.alertId);
+    if (!alert) {
+      return [];
+    }
+    const alertFields = alert.getAllRelevantFields();
+    const alertIndex = alert.getRuleQueryIndex() || '';
+
+    return textMatches.result.hits.map((dashboard, idx) => {
+      // Combine text match with field and index matches
+      const matchedBy = this.computeFieldAndIndexMatches(dashboard, alertFields, alertIndex);
+      // Add text match score
+      matchedBy.textMatch = textMatches.result.hits.length - idx;
+
+      return dashboardToUnscoredSuggestedDashboard(dashboard, matchedBy);
+    });
   }
 
   private async unfilteredMatches(
@@ -170,37 +152,47 @@ export class RelatedDashboardsClient {
     const unfilteredMatches = await this.dashboardClient.search({ limit: UNFILTERED_MATCH_LIMIT });
     await this.addToPanelManagerFromSearch(unfilteredMatches);
     return unfilteredMatches.result.hits.flatMap((dashboard) => {
-      const matchedBy: SuggestedMatchedBy = {
-        index: [],
-        fields: [],
-        textMatch: 0,
-        isManaged: dashboard.managed || false,
-      };
-      const panels = dashboard.attributes.panels.filter(isDashboardPanel);
-      // Aggregate all fields and indices from all panels
-      for (const panel of panels) {
-        this.referencedPanelManager.getPanelFields(panel).forEach((field) => {
-          if (alertFields.has(field)) {
-            matchedBy.fields?.push(field);
-          }
-        });
+      const matchedBy = this.computeFieldAndIndexMatches(dashboard, alertFields, alertIndex);
 
-        this.referencedPanelManager
-          .getPanelIndices(panel)
-          .forEach(
-            (index) =>
-              alertIndex === index &&
-              !matchedBy.index.includes(index) &&
-              matchedBy.index?.push(index)
-          );
-      }
-
-      if (matchedBy.fields.length === 0) {
-        return []; // don't return dashboards that don't match any fields
+      if (matchedBy.fields.length === 0 || matchedBy.index.length === 0) {
+        return []; // don't return dashboards that don't match any fields or indices
       }
 
       return dashboardToUnscoredSuggestedDashboard(dashboard, matchedBy);
     });
+  }
+
+  private computeFieldAndIndexMatches(
+    dashboard: Dashboard,
+    alertFields: Set<string>,
+    alertIndex: string
+  ): SuggestedMatchedBy {
+    const matchedBy: SuggestedMatchedBy = {
+      index: [],
+      fields: [],
+      textMatch: 0,
+      isManaged: dashboard.managed || false,
+    };
+
+    const panels = dashboard.attributes.panels.filter(isDashboardPanel);
+
+    // Aggregate all fields and indices from all panels
+    for (const panel of panels) {
+      this.referencedPanelManager.getPanelFields(panel).forEach((field) => {
+        if (alertFields.has(field)) {
+          matchedBy.fields?.push(field);
+        }
+      });
+
+      this.referencedPanelManager
+        .getPanelIndices(panel)
+        .forEach(
+          (index) =>
+            alertIndex === index && !matchedBy.index.includes(index) && matchedBy.index?.push(index)
+        );
+    }
+
+    return matchedBy;
   }
 
   private async addToPanelManagerFromSearch({ result: { hits } }: SearchResponse<Dashboard>) {
@@ -263,6 +255,11 @@ export class RelatedDashboardsClient {
 }
 
 function scoreMatch(matchedBy: SuggestedMatchedBy): number {
+  // return a score of zero if there are no indices matched
+  if (matchedBy.index.length === 0) {
+    return 0;
+  }
+
   // weight fields higher than indices
   let baseScore = 0;
   baseScore += matchedBy.fields.length * 3;

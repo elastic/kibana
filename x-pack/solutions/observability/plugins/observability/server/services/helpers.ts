@@ -49,15 +49,3 @@ export type ReferencedPanelAttributes =
 export type ReferencedPanelAttributesWithReferences = ReferencedPanelAttributes & {
   references: SavedObjectReference[];
 };
-
-export function isLensVizAttributesForPanel(attributes: unknown): attributes is LensAttributes {
-  if (!attributes) {
-    return false;
-  }
-  return (
-    Boolean(attributes) &&
-    typeof attributes === 'object' &&
-    'type' in attributes &&
-    attributes.type === 'lens'
-  );
-}

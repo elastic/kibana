@@ -8,11 +8,7 @@
 import { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
 import type { Logger, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
-import {
-  ReferencedPanelAttributes,
-  ReferencedPanelAttributesWithReferences,
-  isLensVizAttributesForPanel,
-} from './helpers';
+import { ReferencedPanelAttributes, ReferencedPanelAttributesWithReferences } from './helpers';
 
 /**
  * The ReferencedPanelManager class manages the relationship between dashboard panels and their references.
@@ -141,4 +137,16 @@ export class ReferencedPanelManager {
 
 function isLensAttributesState(state: unknown): state is LensAttributes['state'] {
   return typeof state === 'object' && state !== null && 'datasourceStates' in state;
+}
+
+function isLensVizAttributesForPanel(attributes: unknown): attributes is LensAttributes {
+  if (!attributes) {
+    return false;
+  }
+  return (
+    Boolean(attributes) &&
+    typeof attributes === 'object' &&
+    'type' in attributes &&
+    attributes.type === 'lens'
+  );
 }
