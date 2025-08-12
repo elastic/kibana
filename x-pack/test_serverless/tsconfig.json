@@ -99,6 +99,5 @@
     "@kbn/observability-plugin",
     "@kbn/response-ops-rule-params",
     "@kbn/telemetry-collection-manager-plugin",
-    "@kbn/security-solution-plugin",
   ]
 }
