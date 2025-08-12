@@ -32,7 +32,6 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
         },
         {
           link: 'discover',
-          icon: 'discoverApp',
         },
         defaultNavigationTree.dashboards(),
         {
