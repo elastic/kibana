@@ -175,7 +175,7 @@ export function ManageStreamDescriptionFlyout({ onClose, definition, onSave }: P
           <EuiButton
             color="primary"
             fill
-            disabled={isSubmitting || isGenerating || !description?.trim()}
+            disabled={isSubmitting || isGenerating}
             isLoading={isSubmitting}
             onClick={() => {
               setIsSubmitting(true);
