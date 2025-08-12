@@ -486,7 +486,7 @@ describe('getPackage', () => {
     });
   });
 
-  it('throws if there is an error in fetchArchiveBuffer', async () => {
+  it('should throw if there is an error in fetchArchiveBuffer', async () => {
     mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
     mockGetResponseStreamWithSize.mockRejectedValueOnce(new FleetError('Error fetching package'));
     mockStreamToBuffer.mockResolvedValue(Buffer.from('testpkg'));
@@ -506,7 +506,47 @@ describe('getPackage', () => {
     );
   });
 
-  it('tries to fetch package from cache if there is a RegistryConnectionError and there are packageInfo and packageAssets', async () => {
+  it('should try to retrieve from cache if there is a RegistryConnectionError and no bundled package', async () => {
+    mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
+    mockGetResponseStreamWithSize.mockRejectedValueOnce(
+      new RegistryConnectionError('Error connecting to EPR')
+    );
+    mockStreamToBuffer.mockResolvedValue(Buffer.from('testpkg'));
+    mockVerifyPackageArchiveSignature.mockResolvedValue('verified');
+    MockArchive.unpackBufferToAssetsMap.mockReturnValue({
+      assetsMap: new Map([
+        ['test-1.0.0/LICENSE.txt', Buffer.from('')],
+        ['test-1.0.0/changelog.yml', Buffer.from('')],
+        ['test-1.0.0/manifest.yml', Buffer.from('')],
+        ['test-1.0.0/docs/README.md', Buffer.from('')],
+      ]),
+      paths: [],
+      archiveIterator: {},
+    } as any);
+    MockArchive.getPackageInfo.mockReturnValue({ name: 'testpkg', version: '1.0.1' } as any);
+    mockGetPackageAssetsMapCache.mockReturnValue({
+      name: 'test',
+    } as any);
+    mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+    const result = await getPackage('testpkg', '1.0.1');
+    expect(result).toEqual({
+      archiveIterator: expect.any(Object),
+      assetsMap: new Map([
+        ['test-1.0.0/LICENSE.txt', Buffer.from('')],
+        ['test-1.0.0/changelog.yml', Buffer.from('')],
+        ['test-1.0.0/manifest.yml', Buffer.from('')],
+        ['test-1.0.0/docs/README.md', Buffer.from('')],
+      ]),
+      packageInfo: {
+        name: 'testpkg',
+        version: '1.0.1',
+      },
+      paths: [],
+      verificationResult: undefined,
+    });
+  });
+
+  it('should falls back to bundled package if there is a RegistryConnectionError', async () => {
     mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
     mockGetResponseStreamWithSize.mockRejectedValueOnce(
       new RegistryConnectionError('Error connecting to EPR')
@@ -529,7 +569,12 @@ describe('getPackage', () => {
     const result = await getPackage('testpkg', '1.0.1');
     expect(result).toEqual({
       archiveIterator: expect.any(Object),
-      assetsMap: new Map(),
+      assetsMap: new Map([
+        ['test-1.0.0/LICENSE.txt', Buffer.from('')],
+        ['test-1.0.0/changelog.yml', Buffer.from('')],
+        ['test-1.0.0/manifest.yml', Buffer.from('')],
+        ['test-1.0.0/docs/README.md', Buffer.from('')],
+      ]),
       packageInfo: {
         name: 'testpkg',
         version: '1.0.1',
@@ -539,7 +584,7 @@ describe('getPackage', () => {
     });
   });
 
-  it('throws if there is a RegistryConnectionError and it does not find packageInfo or packageAssets', async () => {
+  it('should throw if there is a RegistryConnectionError and could not find bundled package nor retrieve from cache ', async () => {
     mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
     mockGetResponseStreamWithSize.mockRejectedValueOnce(
       new RegistryConnectionError('Error connecting to EPR')
@@ -555,7 +600,7 @@ describe('getPackage', () => {
       packageInfo: undefined,
     } as any);
 
-    mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+    mockGetBundledPackageByName.mockResolvedValue(undefined);
     await expect(getPackage('testpkg', '1.0.1')).rejects.toThrowError(
       new PackageNotFoundError('Error while retrieving package from cache: testpkg-1.0.1 not found')
     );

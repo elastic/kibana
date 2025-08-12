@@ -398,8 +398,7 @@ export async function getPackage(
     let buffer;
     let archivePathToUse: string = '';
 
-    // use bundled package if available
-    if (airGappedUtils().isAirGapped) {
+    if (airGappedUtils().shouldSkipRegistryRequests) {
       const bundledPackage = await getBundledPackageByName(name);
       if (bundledPackage) {
         logger.debug('getPackage - use bundled package');
@@ -448,7 +447,39 @@ export async function getPackage(
     };
   } catch (error) {
     logger.warn(`getPackage failed with error: ${error}`);
+
     if (error instanceof RegistryConnectionError) {
+      let buffer;
+      let bundledArchivePath: string = '';
+      // use bundled package as fallback
+      const bundledPackage = await getBundledPackageByName(name);
+      if (bundledPackage) {
+        logger.debug('getPackage - falling back on bundled package');
+        buffer = await bundledPackage?.getBuffer();
+        bundledArchivePath = `${name}-${version}.zip`;
+
+        const contentType = ensureContentType(bundledArchivePath);
+        const { paths, assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
+          archiveBuffer: buffer,
+          contentType,
+          useStreaming: options?.useStreaming,
+        });
+        if (!packageInfo) {
+          packageInfo = await getPackageInfoFromArchiveOrCache(
+            name,
+            version,
+            buffer,
+            bundledArchivePath
+          );
+        }
+        return {
+          paths,
+          packageInfo,
+          assetsMap,
+          archiveIterator,
+          verificationResult,
+        };
+      }
       logger.debug('getPackage - falling back on values from cache');
       const assetsMap = getPackageAssetsMapCache(name, version);
 
