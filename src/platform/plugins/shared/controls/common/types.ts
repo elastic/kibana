@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ControlOutputOption, ControlValuesSource } from '@kbn/controls-constants';
 import type { ControlWidth } from '@kbn/controls-schemas';
 
 export type TimeSlice = [number, number];
@@ -26,4 +27,9 @@ export interface DefaultDataControlState extends DefaultControlState {
   dataViewId: string;
   fieldName: string;
   title?: string; // custom control label
+  output?: ControlOutputOption;
+  valuesSource?: ControlValuesSource;
+  esqlVariableString?: string;
+  esqlQuery?: string;
+  staticValues?: Array<{ value: string; text: string }>;
 }

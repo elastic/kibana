@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ControlOutputOption, ControlValuesSource } from '@kbn/controls-constants';
 import type { OptionsListControlState } from '../common/options_list';
 import type { DefaultDataControlState } from '../common/types';
 
@@ -14,6 +15,8 @@ export const mockDataControlState = {
   fieldName: 'sample field',
   dataViewId: 'sample id',
   value: ['0', '10'],
+  output: ControlOutputOption.DSL,
+  valuesSource: ControlValuesSource.DSL,
 } as DefaultDataControlState;
 
 export const mockOptionsListControlState = {

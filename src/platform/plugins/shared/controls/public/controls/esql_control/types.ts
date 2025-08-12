@@ -8,6 +8,7 @@
  */
 import { PublishesESQLVariable } from '@kbn/esql-types';
 import type { HasEditCapabilities, PublishesTitle } from '@kbn/presentation-publishing';
+import { DefaultDataControlState } from '../../../common';
 import type { DefaultControlApi } from '../types';
 import { OptionsListState } from '../data_controls/options_list_control/types';
 
@@ -32,4 +33,5 @@ export type OptionsListESQLUnusedState = HideExcludeUnusedState &
   DisableLoadSuggestionsUnusedState &
   DisableMultiSelectUnusedState &
   DisableInvalidSelectionsUnusedState &
-  Pick<OptionsListState, 'fieldName'>;
+  Pick<OptionsListState, 'fieldName'> &
+  Pick<Required<DefaultDataControlState>, 'output' | 'valuesSource'>;

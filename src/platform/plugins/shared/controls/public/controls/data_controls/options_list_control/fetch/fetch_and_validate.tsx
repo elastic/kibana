@@ -19,16 +19,21 @@ import {
 } from 'rxjs';
 
 import { PublishingSubject } from '@kbn/presentation-publishing';
+import { ControlValuesSource } from '@kbn/controls-constants';
+
 import {
   OptionsListSearchTechnique,
   OptionsListSortingType,
-} from '../../../../common/options_list';
-import { OptionsListSuccessResponse } from '../../../../common/options_list/types';
-import { isValidSearch } from '../../../../common/options_list/is_valid_search';
-import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
-import { ControlFetchContext } from '../../../control_group/control_fetch';
+} from '../../../../../common/options_list';
+import {
+  OptionsListRequest,
+  OptionsListSuccessResponse,
+} from '../../../../../common/options_list/types';
+import { isValidSearch } from '../../../../../common/options_list/is_valid_search';
+import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
+import { ControlFetchContext } from '../../../../control_group/control_fetch';
+import { OptionsListComponentApi, OptionsListControlApi } from '../types';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
-import { OptionsListComponentApi, OptionsListControlApi } from './types';
 
 export function fetchAndValidate$({
   api,
@@ -39,7 +44,16 @@ export function fetchAndValidate$({
   sort$,
   controlFetch$,
 }: {
-  api: Pick<OptionsListControlApi, 'dataViews$' | 'field$' | 'setBlockingError' | 'parentApi'> &
+  api: Pick<
+    OptionsListControlApi,
+    | 'valuesSource$'
+    | 'dataViews$'
+    | 'field$'
+    | 'esqlQuery$'
+    | 'staticValues$'
+    | 'setBlockingError'
+    | 'parentApi'
+  > &
     Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
@@ -55,8 +69,11 @@ export function fetchAndValidate$({
   let abortController: AbortController | undefined;
 
   return combineLatest([
+    api.valuesSource$,
     api.dataViews$,
     api.field$,
+    api.esqlQuery$,
+    api.staticValues$,
     controlFetch$(requestCache.clearCache),
     api.parentApi.allowExpensiveQueries$,
     api.parentApi.ignoreParentSettings$,
@@ -80,8 +97,11 @@ export function fetchAndValidate$({
     switchMap(
       async ([
         [
+          input,
           dataViews,
           field,
+          esqlQuery,
+          staticValues,
           controlFetchContext,
           allowExpensiveQueries,
           ignoreParentSettings,
@@ -93,36 +113,64 @@ export function fetchAndValidate$({
         runPastTimeout,
         selectedOptions,
       ]) => {
-        const dataView = dataViews?.[0];
-        if (
-          !dataView ||
-          !field ||
-          !isValidSearch({ searchString, fieldType: field.type, searchTechnique })
-        ) {
-          return { suggestions: [] };
+        let request: OptionsListRequest;
+        const isESQLValuesSource = input === ControlValuesSource.ESQL;
+        if (input === ControlValuesSource.STATIC) {
+          const suggestions =
+            staticValues
+              // Static searchTechnique is always 'wildcard'
+              ?.filter(
+                ({ text }) =>
+                  !searchString || text.toLowerCase().includes(searchString.toLowerCase())
+              )
+              .map(({ text, value }) => ({ value: text, key: value })) ?? [];
+          return {
+            suggestions,
+            totalCardinality: suggestions.length,
+            invalidSelections: selectedOptions?.filter(
+              (selection) => !suggestions.some(({ key }) => key === selection)
+            ),
+          };
+        } else if (isESQLValuesSource) {
+          if (!esqlQuery) return { suggestions: [] };
+          request = {
+            query: { esql: esqlQuery },
+            timeRange: controlFetchContext.timeRange,
+            searchString,
+            selectedOptions,
+          };
+        } else {
+          const dataView = dataViews?.[0];
+          if (
+            !dataView ||
+            !field ||
+            !isValidSearch({ searchString, fieldType: field.type, searchTechnique })
+          ) {
+            return { suggestions: [] };
+          }
+
+          /** Fetch the suggestions list + perform validation */
+          api.loadingSuggestions$.next(true);
+
+          request = {
+            sort,
+            dataView,
+            searchString,
+            runPastTimeout,
+            searchTechnique,
+            selectedOptions,
+            field: field.toSpec(),
+            size: requestSize,
+            allowExpensiveQueries,
+            ignoreValidations: ignoreParentSettings?.ignoreValidations,
+            ...controlFetchContext,
+          };
         }
-
-        /** Fetch the suggestions list + perform validation */
-        api.loadingSuggestions$.next(true);
-
-        const request = {
-          sort,
-          dataView,
-          searchString,
-          runPastTimeout,
-          searchTechnique,
-          selectedOptions,
-          field: field.toSpec(),
-          size: requestSize,
-          allowExpensiveQueries,
-          ignoreValidations: ignoreParentSettings?.ignoreValidations,
-          ...controlFetchContext,
-        };
-
         const newAbortController = new AbortController();
         abortController = newAbortController;
         try {
-          return await requestCache.runFetchRequest(request, newAbortController.signal);
+          const result = await requestCache.runFetchRequest(request, newAbortController.signal);
+          return result;
         } catch (error) {
           return { error };
         }

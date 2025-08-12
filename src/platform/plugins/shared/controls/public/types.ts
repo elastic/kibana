@@ -12,6 +12,7 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { PublishingSubject } from '@kbn/presentation-publishing';
+import { EsqlPluginStartBase } from '@kbn/esql-editor/src/types';
 
 export interface CanClearSelections {
   clearSelections: () => void;
@@ -35,4 +36,5 @@ export interface ControlsPluginStartDeps {
   uiActions: UiActionsStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  esql?: EsqlPluginStartBase;
 }
