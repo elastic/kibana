@@ -12,6 +12,7 @@ import { ConnectorStepImpl } from '../connector_step';
 import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import { ConnectorExecutor } from '../../connector_executor';
 import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 
 /**
  * Implements the execution logic for an atomic workflow step.
@@ -34,7 +35,8 @@ export class AtomicStepImpl implements StepImplementation {
     private node: AtomicGraphNode,
     private contextManager: WorkflowContextManager,
     private connectorExecutor: ConnectorExecutor,
-    private workflowState: WorkflowExecutionRuntimeManager
+    private workflowState: WorkflowExecutionRuntimeManager,
+    private workflowLogger: IWorkflowEventLogger
   ) {}
 
   async run(): Promise<void> {
@@ -45,7 +47,8 @@ export class AtomicStepImpl implements StepImplementation {
       this.node.configuration,
       this.contextManager,
       this.connectorExecutor,
-      this.workflowState
+      this.workflowState,
+      this.workflowLogger
     ).run();
   }
 }

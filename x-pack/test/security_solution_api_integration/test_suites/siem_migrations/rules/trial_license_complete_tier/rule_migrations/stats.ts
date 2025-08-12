@@ -100,7 +100,13 @@ export default ({ getService }: FtrProviderContext) => {
         expect.objectContaining({
           status: 'interrupted',
           id: migrationId1,
-          rules: { total: 42, pending: 4, processing: 3, completed: 33, failed: 2 },
+          rules: {
+            total: 42,
+            pending: 4,
+            processing: 3,
+            completed: 33,
+            failed: 2,
+          },
           last_execution: {
             is_aborted: false,
             started_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
@@ -112,7 +118,13 @@ export default ({ getService }: FtrProviderContext) => {
         expect.objectContaining({
           status: 'interrupted',
           id: migrationId2,
-          rules: { total: 28, pending: 2, processing: 5, completed: 14, failed: 7 },
+          rules: {
+            total: 28,
+            pending: 2,
+            processing: 5,
+            completed: 14,
+            failed: 7,
+          },
           last_execution: {
             is_aborted: false,
             started_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
@@ -145,7 +157,9 @@ export default ({ getService }: FtrProviderContext) => {
       const migrationRuleDocuments = getMigrationRuleDocuments(total, overrideCallback);
       await createMigrationRules(es, migrationRuleDocuments);
 
-      const response = await migrationRulesRoutes.translationStats({ migrationId });
+      const response = await migrationRulesRoutes.translationStats({
+        migrationId,
+      });
       expect(response.body).toEqual(
         expect.objectContaining({
           id: migrationId,
@@ -156,6 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
               result: { full: 4, partial: 5, untranslatable: 1 },
               installable: 4,
               prebuilt: 0,
+              missing_index: completed,
             },
             failed,
           },
