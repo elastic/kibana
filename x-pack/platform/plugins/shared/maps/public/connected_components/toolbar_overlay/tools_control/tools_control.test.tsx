@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ToolsControl } from './tools_control';
 
 const defaultProps = {
@@ -19,13 +20,25 @@ const defaultProps = {
 };
 
 test('renders', async () => {
-  const component = shallow(<ToolsControl {...defaultProps} />);
+  render(
+    <I18nProvider>
+      <ToolsControl {...defaultProps} />
+    </I18nProvider>
+  );
 
-  expect(component).toMatchSnapshot();
+  // Verify tools button is present
+  expect(screen.getByLabelText('Tools')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Tools' })).toBeInTheDocument();
 });
 
 test('Should render cancel button when drawing', async () => {
-  const component = shallow(<ToolsControl {...defaultProps} filterModeActive={true} />);
+  render(
+    <I18nProvider>
+      <ToolsControl {...defaultProps} filterModeActive={true} />
+    </I18nProvider>
+  );
 
-  expect(component).toMatchSnapshot();
+  // Verify tools button and cancel button are present when filter mode is active
+  expect(screen.getByLabelText('Tools')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
 });

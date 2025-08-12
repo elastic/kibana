@@ -18,7 +18,9 @@ jest.mock('../../../kibana_services', () => ({
 }));
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 
 import { LayerControl } from './layer_control';
 import { ILayer } from '../../../classes/layers/layer';
@@ -38,50 +40,83 @@ const defaultProps = {
 
 describe('LayerControl', () => {
   test('is rendered', () => {
-    const component = shallow(<LayerControl {...defaultProps} />);
+    render(
+      <I18nProvider>
+        <LayerControl {...defaultProps} />
+      </I18nProvider>
+    );
 
-    expect(component).toMatchSnapshot();
+    // Verify layer control elements are present
+    expect(screen.getByRole('heading', { name: 'Layers' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Hide all layers')).toBeInTheDocument();
+    expect(screen.getByLabelText('Show all layers')).toBeInTheDocument();
+    expect(screen.getByLabelText('Collapse layers panel')).toBeInTheDocument();
+    expect(screen.getByText('mockLayerTOC')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add layer' })).toBeInTheDocument();
   });
 
   test('should disable buttons when flyout is open', () => {
-    const component = shallow(<LayerControl {...defaultProps} isFlyoutOpen={true} />);
+    render(
+      <I18nProvider>
+        <LayerControl {...defaultProps} isFlyoutOpen={true} />
+      </I18nProvider>
+    );
 
-    expect(component).toMatchSnapshot();
+    // Verify layer control elements are still present but add layer button is disabled
+    expect(screen.getByRole('heading', { name: 'Layers' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add layer' })).toBeDisabled();
   });
 
   test('isReadOnly', () => {
-    const component = shallow(<LayerControl {...defaultProps} isReadOnly={true} />);
+    render(
+      <I18nProvider>
+        <LayerControl {...defaultProps} isReadOnly={true} />
+      </I18nProvider>
+    );
 
-    expect(component).toMatchSnapshot();
+    // Verify layer control elements are present but add layer button is not shown in read-only mode
+    expect(screen.getByRole('heading', { name: 'Layers' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Add layer' })).not.toBeInTheDocument();
   });
 
   describe('isLayerTOCOpen', () => {
     test('Should render expand button', () => {
-      const component = shallow(<LayerControl {...defaultProps} isLayerTOCOpen={false} />);
-      expect(component).toMatchSnapshot();
+      render(
+        <I18nProvider>
+          <LayerControl {...defaultProps} isLayerTOCOpen={false} />
+        </I18nProvider>
+      );
+      
+      // Verify expand button is present when TOC is closed
+      expect(screen.getByLabelText('Expand layers panel')).toBeInTheDocument();
+      expect(screen.queryByText('mockLayerTOC')).not.toBeInTheDocument();
     });
 
     test('Should render expand button with loading icon when layer is loading', () => {
-      const component = shallow(
-        <LayerControl
-          {...defaultProps}
-          isLayerTOCOpen={false}
-          layerList={[
-            {
-              hasErrors: () => {
-                return false;
-              },
-              hasWarnings: () => {
-                return false;
-              },
-              isLayerLoading: () => {
-                return true;
-              },
-            } as unknown as ILayer,
-          ]}
-        />
+      render(
+        <I18nProvider>
+          <LayerControl
+            {...defaultProps}
+            isLayerTOCOpen={false}
+            layerList={[
+              {
+                hasErrors: () => {
+                  return false;
+                },
+                hasWarnings: () => {
+                  return false;
+                },
+                isLayerLoading: () => {
+                  return true;
+                },
+              } as unknown as ILayer,
+            ]}
+          />
+        </I18nProvider>
       );
-      expect(component).toMatchSnapshot();
+      
+      // Verify expand button is present with loading state
+      expect(screen.getByLabelText('Expand layers panel')).toBeInTheDocument();
     });
 
     test('Should render expand button with error icon when layer has error', () => {
@@ -96,15 +131,18 @@ describe('LayerControl', () => {
           return false;
         },
       } as unknown as ILayer;
-      const component = shallow(
-        <LayerControl
-          {...defaultProps}
-          isLayerTOCOpen={false}
-          layerList={[mockLayerThatHasError]}
-        />
+      render(
+        <I18nProvider>
+          <LayerControl
+            {...defaultProps}
+            isLayerTOCOpen={false}
+            layerList={[mockLayerThatHasError]}
+          />
+        </I18nProvider>
       );
 
-      expect(component).toMatchSnapshot();
+      // Verify expand button is present with error state
+      expect(screen.getByLabelText('Expand layers panel')).toBeInTheDocument();
     });
   });
 });

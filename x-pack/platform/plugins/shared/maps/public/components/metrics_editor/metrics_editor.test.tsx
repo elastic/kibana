@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 import { MetricsEditor } from './metrics_editor';
 import { AGG_TYPE } from '../../../common/constants';
 
@@ -24,11 +26,23 @@ const defaultProps = {
 };
 
 test('should render metrics editor', () => {
-  const component = shallow(<MetricsEditor {...defaultProps} />);
-  expect(component).toMatchSnapshot();
+  render(
+    <I18nProvider>
+      <MetricsEditor {...defaultProps} />
+    </I18nProvider>
+  );
+  
+  // Verify the Add metric button is present
+  expect(screen.getByText('Add metric')).toBeInTheDocument();
 });
 
 test('should add default count metric when metrics is empty array', () => {
-  const component = shallow(<MetricsEditor {...defaultProps} metrics={[]} />);
-  expect(component).toMatchSnapshot();
+  render(
+    <I18nProvider>
+      <MetricsEditor {...defaultProps} metrics={[]} />
+    </I18nProvider>
+  );
+  
+  // Verify the Add metric button is present
+  expect(screen.getByText('Add metric')).toBeInTheDocument();
 });

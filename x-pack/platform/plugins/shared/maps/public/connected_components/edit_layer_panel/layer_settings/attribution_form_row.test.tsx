@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { ILayer } from '../../../classes/layers/layer';
 import { ISource } from '../../../classes/sources/source';
@@ -29,9 +31,15 @@ test('Should render null when layer source has attribution provider', () => {
       return sourceMock;
     },
   } as unknown as ILayer;
-  const component = shallow(<AttributionFormRow {...defaultProps} layer={layerMock} />);
+  
+  const { container } = render(
+    <I18nProvider>
+      <AttributionFormRow {...defaultProps} layer={layerMock} />
+    </I18nProvider>
+  );
 
-  expect(component).toMatchSnapshot();
+  // When source has attribution provider, component should render nothing
+  expect(container.firstChild).toBeNull();
 });
 
 test('Should render add form row when attribution not provided', () => {
@@ -48,9 +56,18 @@ test('Should render add form row when attribution not provided', () => {
       return {} as unknown as LayerDescriptor;
     },
   } as unknown as ILayer;
-  const component = shallow(<AttributionFormRow {...defaultProps} layer={layerMock} />);
+  
+  render(
+    <I18nProvider>
+      <AttributionFormRow {...defaultProps} layer={layerMock} />
+    </I18nProvider>
+  );
 
-  expect(component).toMatchSnapshot();
+  // Verify Attribution legend is present
+  expect(screen.getByText('Attribution')).toBeInTheDocument();
+  
+  // Verify Add attribution button is present
+  expect(screen.getByText('Add attribution')).toBeInTheDocument();
 });
 
 test('Should render edit form row when attribution not provided', () => {
@@ -72,7 +89,20 @@ test('Should render edit form row when attribution not provided', () => {
       } as unknown as LayerDescriptor;
     },
   } as unknown as ILayer;
-  const component = shallow(<AttributionFormRow {...defaultProps} layer={layerMock} />);
+  
+  render(
+    <I18nProvider>
+      <AttributionFormRow {...defaultProps} layer={layerMock} />
+    </I18nProvider>
+  );
 
-  expect(component).toMatchSnapshot();
+  // Verify Attribution legend is present
+  expect(screen.getByText('Attribution')).toBeInTheDocument();
+  
+  // Verify the attribution link is present
+  expect(screen.getByText('label1')).toBeInTheDocument();
+  
+  // Verify Edit and Clear buttons are present
+  expect(screen.getByText('Edit')).toBeInTheDocument();
+  expect(screen.getByText('Clear')).toBeInTheDocument();
 });

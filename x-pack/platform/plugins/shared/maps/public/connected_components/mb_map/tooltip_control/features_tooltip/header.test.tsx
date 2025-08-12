@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 import { Header } from './header';
 import { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
@@ -28,29 +30,50 @@ const defaultProps = {
 };
 
 test('render', async () => {
-  const component = shallow(<Header {...defaultProps} />);
+  render(
+    <I18nProvider>
+      <Header {...defaultProps} />
+    </I18nProvider>
+  );
 
-  // Ensure all promises resolve
-  await new Promise((resolve) => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
-
-  expect(component).toMatchSnapshot();
+  // Wait for layer name to load
+  await waitFor(() => {
+    expect(screen.getByText('myLayerName')).toBeInTheDocument();
+  });
+  
+  // Verify header elements are present
+  expect(screen.getByRole('heading', { name: 'myLayerName' })).toBeInTheDocument();
+  expect(screen.queryByLabelText('Close tooltip')).not.toBeInTheDocument();
 });
 
 test('isLocked', async () => {
-  const component = shallow(<Header {...defaultProps} isLocked={true} />);
+  render(
+    <I18nProvider>
+      <Header {...defaultProps} isLocked={true} />
+    </I18nProvider>
+  );
 
-  // Ensure all promises resolve
-  await new Promise((resolve) => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
-
-  expect(component).toMatchSnapshot();
+  // Wait for layer name to load
+  await waitFor(() => {
+    expect(screen.getByText('myLayerName')).toBeInTheDocument();
+  });
+  
+  // Verify header elements are present including close button when locked
+  expect(screen.getByRole('heading', { name: 'myLayerName' })).toBeInTheDocument();
+  expect(screen.getByLabelText('Close tooltip')).toBeInTheDocument();
 });
 
 // Test is sync to show render before async state is set.
 test('should only show close button when layer name is not yet loaded', () => {
-  const component = shallow(<Header {...defaultProps} isLocked={true} />);
-  expect(component).toMatchSnapshot();
+  render(
+    <I18nProvider>
+      <Header {...defaultProps} isLocked={true} />
+    </I18nProvider>
+  );
+  
+  // Verify close button is present immediately (before layer name loads)
+  expect(screen.getByLabelText('Close tooltip')).toBeInTheDocument();
+  
+  // Verify layer name is not yet present
+  expect(screen.queryByText('myLayerName')).not.toBeInTheDocument();
 });

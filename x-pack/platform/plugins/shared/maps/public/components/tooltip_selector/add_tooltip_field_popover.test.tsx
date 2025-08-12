@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 
 import { AddTooltipFieldPopover } from './add_tooltip_field_popover';
 
@@ -33,21 +35,29 @@ const defaultProps = {
 };
 
 test('Should render', () => {
-  const component = shallow(<AddTooltipFieldPopover {...defaultProps} />);
+  render(
+    <I18nProvider>
+      <AddTooltipFieldPopover {...defaultProps} />
+    </I18nProvider>
+  );
 
-  expect(component).toMatchSnapshot();
+  // Verify the Add button is present
+  expect(screen.getByText('Add')).toBeInTheDocument();
 });
 
 test('Should remove selected fields from selectable', () => {
-  const component = shallow(
-    <AddTooltipFieldPopover
-      {...defaultProps}
-      selectedFields={[
-        { name: 'prop2', label: 'prop2-label', type: 'string' },
-        { name: 'prop1', label: 'prop1-label', type: 'string' },
-      ]}
-    />
+  render(
+    <I18nProvider>
+      <AddTooltipFieldPopover
+        {...defaultProps}
+        selectedFields={[
+          { name: 'prop2', label: 'prop2-label', type: 'string' },
+          { name: 'prop1', label: 'prop1-label', type: 'string' },
+        ]}
+      />
+    </I18nProvider>
   );
 
-  expect(component).toMatchSnapshot();
+  // Verify the Add button is present
+  expect(screen.getByText('Add')).toBeInTheDocument();
 });

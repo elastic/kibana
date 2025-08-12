@@ -12,7 +12,9 @@ jest.mock('./toc_entry', () => ({
 }));
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 import { ILayer } from '../../../../classes/layers/layer';
 
 import { LayerTOC } from './layer_toc';
@@ -54,16 +56,27 @@ const defaultProps = {
 
 describe('LayerTOC', () => {
   test('is rendered', () => {
-    const component = shallow(<LayerTOC {...defaultProps} />);
+    render(
+      <I18nProvider>
+        <LayerTOC {...defaultProps} />
+      </I18nProvider>
+    );
 
-    expect(component).toMatchSnapshot();
+    // Verify the layer TOC container is present
+    expect(screen.getByTestId('mapLayerTOC')).toBeInTheDocument();
   });
 
   describe('props', () => {
     test('isReadOnly', () => {
-      const component = shallow(<LayerTOC {...defaultProps} isReadOnly={true} />);
+      render(
+        <I18nProvider>
+          <LayerTOC {...defaultProps} isReadOnly={true} />
+        </I18nProvider>
+      );
 
-      expect(component).toMatchSnapshot();
+      // Verify the layer TOC container is present and mocked entries are rendered
+      expect(screen.getByTestId('mapLayerTOC')).toBeInTheDocument();
+      expect(screen.getAllByText('mockTOCEntry')).toHaveLength(2);
     });
   });
 });

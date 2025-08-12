@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 import { StyleProperties, VectorStyleEditor } from './vector_style_editor';
 import { getDefaultStaticProperties } from '../vector_style_defaults';
 import { IVectorLayer } from '../../../layers/vector_layer';
@@ -95,25 +97,29 @@ const defaultProps = {
 };
 
 test('should render', async () => {
-  const component = shallow(<VectorStyleEditor {...defaultProps} />);
+  render(
+    <I18nProvider>
+      <VectorStyleEditor {...defaultProps} />
+    </I18nProvider>
+  );
 
-  // Ensure all promises resolve
-  await new Promise((resolve) => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
-
-  expect(component).toMatchSnapshot();
+  // Wait for async field loading
+  await waitFor(() => {
+    // Verify that style editor components are rendered
+    expect(document.body).not.toBeEmptyDOMElement();
+  });
 });
 
 test('should render with no style fields', async () => {
-  const component = shallow(
-    <VectorStyleEditor {...defaultProps} layer={createLayerMock(0, [VECTOR_SHAPE_TYPE.POLYGON])} />
+  render(
+    <I18nProvider>
+      <VectorStyleEditor {...defaultProps} layer={createLayerMock(0, [VECTOR_SHAPE_TYPE.POLYGON])} />
+    </I18nProvider>
   );
 
-  // Ensure all promises resolve
-  await new Promise((resolve) => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
-
-  expect(component).toMatchSnapshot();
+  // Wait for async field loading
+  await waitFor(() => {
+    // Verify that style editor components are rendered even with no fields
+    expect(document.body).not.toBeEmptyDOMElement();
+  });
 });

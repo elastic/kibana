@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 import { LABEL_POSITIONS } from '../../../../../../common/constants';
 import { LabelPositionEditor } from './label_position_editor';
 import { LabelPositionProperty } from '../../properties/label_position_property';
@@ -27,13 +29,43 @@ const defaultProps = {
 };
 
 test('should render', () => {
-  const component = shallow(<LabelPositionEditor {...defaultProps} />);
-  expect(component).toMatchSnapshot();
+  render(
+    <I18nProvider>
+      <LabelPositionEditor {...defaultProps} />
+    </I18nProvider>
+  );
+
+  // Verify the form label is present
+  expect(screen.getByText('Label position')).toBeInTheDocument();
+  
+  // Verify the select has the correct value
+  const select = screen.getByLabelText('Select label position');
+  expect(select).toHaveValue('TOP');
+  expect(select).not.toBeDisabled();
+  
+  // Verify all options are available in the select
+  expect(screen.getByRole('option', { name: 'Top' })).toBeInTheDocument();
+  expect(screen.getByRole('option', { name: 'Center' })).toBeInTheDocument();
+  expect(screen.getByRole('option', { name: 'Bottom' })).toBeInTheDocument();
 });
 
 test('should render as disabled when label is not set', () => {
-  const component = shallow(<LabelPositionEditor {...defaultProps} hasLabel={false} />);
-  expect(component).toMatchSnapshot();
+  render(
+    <I18nProvider>
+      <LabelPositionEditor {...defaultProps} hasLabel={false} />
+    </I18nProvider>
+  );
+
+  // Verify the form label is present
+  expect(screen.getByText('Label position')).toBeInTheDocument();
+  
+  // Verify the select is disabled
+  const select = screen.getByLabelText('Select label position');
+  expect(select).toBeDisabled();
+  
+  // Tooltip content is hidden, so just verify the component renders with disabled tooltip
+  const tooltip = document.querySelector('.euiToolTipAnchor');
+  expect(tooltip).toBeInTheDocument();
 });
 
 test('should render as disabled when label position is disabled', () => {
@@ -50,8 +82,21 @@ test('should render as disabled when label position is disabled', () => {
       return 'simulated disabled error';
     },
   } as unknown as LabelPositionProperty;
-  const component = shallow(
-    <LabelPositionEditor {...defaultProps} styleProperty={disabledLabelPosition} />
+  
+  render(
+    <I18nProvider>
+      <LabelPositionEditor {...defaultProps} styleProperty={disabledLabelPosition} />
+    </I18nProvider>
   );
-  expect(component).toMatchSnapshot();
+
+  // Verify the form label is present
+  expect(screen.getByText('Label position')).toBeInTheDocument();
+  
+  // Verify the select is disabled
+  const select = screen.getByLabelText('Select label position');
+  expect(select).toBeDisabled();
+  
+  // Tooltip content is hidden, so just verify the component renders with disabled tooltip
+  const tooltip = document.querySelector('.euiToolTipAnchor');
+  expect(tooltip).toBeInTheDocument();
 });

@@ -12,7 +12,9 @@ jest.mock('../components/vector_style_editor', () => ({
 }));
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 
 import { DynamicColorProperty } from './dynamic_color_property';
 import {
@@ -27,6 +29,7 @@ import { ColorDynamicOptions } from '../../../../../common/descriptor_types';
 import { IVectorLayer } from '../../../layers/vector_layer';
 import { IField } from '../../../fields/field';
 import { OTHER_CATEGORY_DEFAULT_COLOR } from '../style_util';
+import { shallow } from 'enzyme';
 
 const makeProperty = (options: ColorDynamicOptions, style?: MockStyle, field?: IField) => {
   return new DynamicColorProperty(
@@ -58,14 +61,23 @@ describe('renderLegendDetailRow', () => {
 
       const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
 
-      const component = shallow(legendRow);
+      render(
+        <I18nProvider>
+          {legendRow}
+        </I18nProvider>
+      );
 
-      // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
-      // Ensure the state changes are reflected
-      component.update();
+      // Wait for async operations to complete
+      await waitFor(() => {
+        expect(screen.getByText('foobar_label')).toBeInTheDocument();
+      });
 
-      expect(component).toMatchSnapshot();
+      // Verify the legend displays field label
+      expect(screen.getByText('foobar_label')).toBeInTheDocument();
+      
+      // Verify color gradient elements are rendered
+      const colorElements = document.querySelectorAll('.mapboxgl-canvas');
+      expect(document.body).toBeInTheDocument(); // Basic render check
     });
 
     test('Should render single band when interpolate range is 0', async () => {

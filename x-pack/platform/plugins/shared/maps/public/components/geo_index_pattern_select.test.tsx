@@ -27,7 +27,9 @@ jest.mock('../kibana_services', () => {
 });
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
 import { DataView } from '@kbn/data-plugin/common';
 import { GeoIndexPatternSelect } from './geo_index_pattern_select';
 
@@ -44,7 +46,12 @@ const defaultProps = {
 };
 
 test('should render', async () => {
-  const component = shallow(<GeoIndexPatternSelect {...defaultProps} />);
+  render(
+    <I18nProvider>
+      <GeoIndexPatternSelect {...defaultProps} />
+    </I18nProvider>
+  );
 
-  expect(component).toMatchSnapshot();
+  // Verify the form row label is present
+  expect(screen.getByText('Data view')).toBeInTheDocument();
 });
