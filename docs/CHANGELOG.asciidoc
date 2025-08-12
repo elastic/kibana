@@ -10,11 +10,13 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.18.5>>
 * <<release-notes-8.18.4>>
 * <<release-notes-8.18.3>>
 * <<release-notes-8.18.2>>
 * <<release-notes-8.18.1>>
 * <<release-notes-8.18.0>>
+* <<release-notes-8.17.10>>
 * <<release-notes-8.17.9>>
 * <<release-notes-8.17.8>>
 * <<release-notes-8.17.7>>
@@ -100,6 +102,43 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.18.5]]
+== {kib} 8.18.5
+
+The 8.18.5 release includes the following fixes.
+
+[float]
+[[fixes-v8.18.5]]
+=== Fixes
+Dashboards and Visualizations::
+* Fixes an issue with the plus sign `+` not being properly encoded when it's part of a date math expression ({kibana-pull}230469[#230469]).
+* Fixes an issue in Firefox preventing you from scrolling in the Lens editor flyout ({kibana-pull}228625[#228625]).
+* Fixes an issue preventing you from saving linked TSVB visualizations when changing data views ({kibana-pull}228685[#228685]).
+* Fixes a console error occurring when adding a Region map visualization to a dashboard ({kibana-pull}228669[#228669]).
+Data ingestion and Fleet::
+* Fixes an issue that could cause some SSL configurations set using the UI to be overridden ({kibana-pull}230758[#230758]).
+* Fixes an issue where the SSL configuration isn't properly added to agent policies with pre-configured output types ({kibana-pull}230211[#230211]).
+* Fixes agentless integrations using 'organization', 'division', or 'team' data fields being overwritten by package agentless metadata on the agent policy ({kibana-pull}230479[#230479]).
+Discover::
+* Improves performance of breakdown field search ({kibana-pull}229335[#229335]).
+* Enables the **Save query** button after making changes ({kibana-pull}229053[#229053]).
+* Fixes the field being picked for fetching stats in the sidebar popover ({kibana-pull}228969[#228969]).
+* Fixes an issue where some Discover **Copy to clipboard** actions only worked when accessing Kibana in a secure browser context ({kibana-pull}229531[#229531]).
+Elastic Observability solution::
+* Prevents from performing destructive actions using Elastic AI Assistant ({kibana-pull}229497[#229497]).
+* Fixes an issue with column sorting in the **Services** Errors table ({kibana-pull}229199[#229199]).
+* Fixes an issue with dependencies infinitely loading when no data exists ({kibana-pull}228094[#228094]).
+* Fixes an error in Uptime occurring when filters are missing in the parameters of a rule created using the API ({kibana-pull}229422[#229422]).
+Elastic Security solution::
+For the Elastic Security 8.18.5 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Fixes an issue with overlapping action icons in the **Data views** menu when on mobile ({kibana-pull}229771[#229771]).
+* Fixes a display issue with counter indicators on toast messages ({kibana-pull}229300[#229300]).
+* Fixes an issue leading to some features not being visible when updating a space solution view to Classic ({kibana-pull}230385[#230385]).
+Machine Learning::
+* Removes `removeIfExists` from the synchronization task scheduler ({kibana-pull}228783[#228783]).
+
 
 [[release-notes-8.18.4]]
 == {kib} 8.18.4
@@ -704,6 +743,33 @@ Machine Learning::
 * Anomaly Explorer: Fixes handling of job group IDs when opening from dashboard panels ({kibana-pull}203224[#203224]).
 * AiOps: Fixes Log Rate Analysis embeddable error on the Alerts page ({kibana-pull}203093[#203093]).
 * Initializes saved objects on trained model page load ({kibana-pull}201426[#201426]).
+
+[[release-notes-8.17.10]]
+== {kib} 8.17.10
+
+The 8.17.10 release includes the following fixes.
+
+[float]
+[[fixes-v8.17.10]]
+=== Fixes
+Dashboards and Visualizations::
+* Fixes an issue with the plus sign `+` not being properly encoded when it's part of a date math expression ({kibana-pull}230469[#230469]).
+* Fixes an issue in Firefox preventing you from scrolling in the Lens editor flyout ({kibana-pull}228625[#228625]).
+* Fixes an issue in reports where a PNG or PDF export would offset and clip part of the visualization in Lens ({kibana-pull}228603[#228603]).
+* Fixes an issue preventing you from saving linked TSVB visualizations when changing data views ({kibana-pull}228685[#228685]).
+Data ingestion and Fleet::
+* Fixes an issue that could cause some SSL configurations set using the UI to be overridden ({kibana-pull}230758[#230758]).
+* Fixes an issue where the SSL configuration isn't properly added to agent policies with pre-configured output types ({kibana-pull}230211[#230211]).
+Discover::
+* Fixes the field being picked for fetching stats in the sidebar popover ({kibana-pull}228969[#228969]).
+Elastic Observability solution::
+* Fixes an issue with column sorting in the **Services** Errors table ({kibana-pull}229199[#229199]).
+* Fixes an issue with dependencies infinitely loading when no data exists ({kibana-pull}228094[#228094]).
+Kibana platform::
+* Fixes a display issue with counter indicators on toast messages ({kibana-pull}229300[#229300]).
+* Fixes an issue leading to some features not being visible when updating a space solution view to Classic ({kibana-pull}230385[#230385]).
+* Decreases the loading time drastically when loading Index Management component templates ({kibana-pull}228709[#228709]).
+
 
 [[release-notes-8.17.9]]
 == {kib} 8.17.9
