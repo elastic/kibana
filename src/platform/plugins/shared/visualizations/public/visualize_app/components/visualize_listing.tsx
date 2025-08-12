@@ -134,6 +134,7 @@ const useTableListViewProps = (
       toastNotifications,
       visualizeCapabilities,
       contentManagement,
+      http,
       ...startServices
     },
   } = useKibana<VisualizeServices>();
@@ -212,12 +213,13 @@ const useTableListViewProps = (
             savedObjectsTagging,
             typesService: getTypes(),
             contentManagement,
+            http,
             ...startServices,
           }
         );
       }
     },
-    [savedObjectsTagging, contentManagement, startServices]
+    [savedObjectsTagging, contentManagement, http, startServices]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(

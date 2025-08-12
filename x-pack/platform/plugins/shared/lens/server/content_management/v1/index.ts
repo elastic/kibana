@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export * from './cm_services';
+export { LENS_ITEM_VERSION } from './constants';
+
+export * from './transforms';
+export * from './service';
+export * from './schema';
+export type * from './types';
+
+export type { LensSavedObjectV0, LensAttributesV0 } from './transforms';

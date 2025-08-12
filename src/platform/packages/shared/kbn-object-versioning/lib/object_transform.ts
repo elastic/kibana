@@ -57,7 +57,7 @@ const getTransformFns = <I = unknown, O = unknown>(
   let fn: ObjectTransform<I, O> | undefined;
   if (to > from) {
     while (i <= to) {
-      fn = migrationDefinition[i].up;
+      fn = migrationDefinition[i]?.up;
       if (fn) {
         fns.push(fn);
       }
@@ -65,7 +65,7 @@ const getTransformFns = <I = unknown, O = unknown>(
     }
   } else if (to < from) {
     while (i >= to) {
-      fn = migrationDefinition[i].down;
+      fn = migrationDefinition[i]?.down;
       if (fn) {
         fns.push(fn);
       }
@@ -126,7 +126,7 @@ export const initTransform =
         try {
           if (!migrationDefinition[requestVersion]) {
             return {
-              error: new Error(`Unvalid version to up transform from [${requestVersion}].`),
+              error: new Error(`Invalid version to up transform from [${requestVersion}].`),
               value: null,
             };
           }
@@ -142,7 +142,7 @@ export const initTransform =
 
           if (!migrationDefinition[targetVersion]) {
             return {
-              error: new Error(`Unvalid version to up transform to [${to}].`),
+              error: new Error(`Invalid version to up transform to [${to}].`),
               value: null,
             };
           }
@@ -170,21 +170,22 @@ export const initTransform =
         try {
           if (!migrationDefinition[requestVersion]) {
             return {
-              error: new Error(`Unvalid version to down transform to [${requestVersion}].`),
+              error: new Error(`Invalid version to down transform to [${requestVersion}].`),
               value: null,
             };
           }
 
           const fromVersion = getVersion(from);
 
-          if (!migrationDefinition[fromVersion]) {
+          // Only allow missing from definition for initial versioning (i.e. v0 → v1)
+          if (!migrationDefinition[fromVersion] && fromVersion !== 0) {
             return {
-              error: new Error(`Unvalid version to down transform from [${from}].`),
+              error: new Error(`Invalid version to down transform from [${from}].`),
               value: null,
             };
           }
 
-          if (validate) {
+          if (validate && fromVersion !== 0) {
             const error = validateFn(obj, fromVersion);
             if (error) {
               return { error, value: null };
