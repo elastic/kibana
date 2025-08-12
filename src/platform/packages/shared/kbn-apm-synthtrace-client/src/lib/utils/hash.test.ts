@@ -7,20 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-var forceRoot = require('./force');
+import { fnv1a32 } from './hash';
 
-describe('forceRoot', function () {
-  it('with flag', function () {
-    expect(forceRoot(['--allow-root'])).toBeTruthy();
-  });
+describe('fnv-plus', function () {
+  const hash1 = 'hello world';
+  const hash2 = 'the quick brown fox jumps over the lazy dog';
 
-  it('without flag', function () {
-    expect(forceRoot(['--foo'])).toBeFalsy();
-  });
+  describe('(32)', function () {
+    it('should generate a 32-bit hash if specified', function () {
+      const h1 = fnv1a32(hash1);
+      const h2 = fnv1a32(hash2);
 
-  test('retains argument', function () {
-    var args = ['--allow-root', 'foo'];
-    forceRoot(args);
-    expect(args.includes('--allow-root')).toBeTruthy();
+      expect(h1).toEqual(3582672807);
+      expect(h2).toEqual(4016652272);
+    });
   });
 });

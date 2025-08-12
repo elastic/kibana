@@ -754,7 +754,6 @@
       "groupName": "@elastic/fleet dependencies",
       "matchDepNames": [
         "exponential-backoff",
-        "@paralleldrive/cuid2",
         "isbinaryfile",
         "js-search",
         "openpgp",
@@ -1550,26 +1549,6 @@
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
-    },
-    {
-      "groupName": "bazel",
-      "matchDepNames": [],
-      "matchDepPatterns": [
-        "^@bazel"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": false
     },
     {
       "groupName": "typescript",
@@ -3958,25 +3937,6 @@
         "@types/cytoscape",
         "cytoscape",
         "cytoscape-dagre"
-      ],
-      "reviewers": [
-        "team:obs-ux-infra_services-team"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "fnv-plus",
-      "matchDepNames": [
-        "fnv-plus",
-        "@types/fnv-plus"
       ],
       "reviewers": [
         "team:obs-ux-infra_services-team"
