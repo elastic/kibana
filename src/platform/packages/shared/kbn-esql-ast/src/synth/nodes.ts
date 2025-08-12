@@ -76,3 +76,5 @@ export const par = (name: string): ESQLParamLiteral => {
 
   return SynthNode.from(node);
 };
+
+// TODO: Ability to create: (1) functions, (2) binary expressions
