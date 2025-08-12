@@ -25,45 +25,7 @@ export type GroupNode = DocWithId & {
 
 export type LeafNode = DocWithId;
 
-type ColumnGroups = Array<keyof Omit<GroupNode, 'children' | 'id'>>;
-
-type DispatchActionType =
-  | 'SET_INITIAL_STATE'
-  | 'SET_ACTIVE_CASCADE_GROUPS'
-  | 'RESET_ACTIVE_CASCADE_GROUPS'
-  | 'UPDATE_ROW_GROUP_NODE_DATA'
-  | 'UPDATE_ROW_GROUP_LEAF_DATA';
-
-export type IDispatchAction<G extends GroupNode, L extends Record<string, any>> =
-  | {
-      type: Extract<DispatchActionType, 'UPDATE_QUERY'>;
-      payload: string;
-    }
-  | {
-      type: Extract<DispatchActionType, 'SET_ACTIVE_CASCADE_GROUPS'>;
-      payload: ColumnGroups;
-    }
-  | {
-      type: Extract<DispatchActionType, 'SET_INITIAL_STATE'>;
-      payload: G[];
-    }
-  | {
-      type: Extract<DispatchActionType, 'RESET_ACTIVE_CASCADE_GROUPS'>;
-    }
-  | {
-      type: Extract<DispatchActionType, 'UPDATE_ROW_GROUP_NODE_DATA'>;
-      payload: {
-        id: string;
-        data: G[];
-      };
-    }
-  | {
-      type: Extract<DispatchActionType, 'UPDATE_ROW_GROUP_LEAF_DATA'>;
-      payload: {
-        cacheKey: string;
-        data: L[];
-      };
-    };
+export type ColumnGroups = Array<keyof Omit<GroupNode, 'children' | 'id'>>;
 
 export interface IStoreState<G extends GroupNode, L extends LeafNode> {
   readonly groupNodes: G[];
@@ -78,38 +40,35 @@ export interface IStoreState<G extends GroupNode, L extends LeafNode> {
   readonly currentGroupByColumns: ColumnGroups;
 }
 
-export const storeReducer = <G extends GroupNode = GroupNode, L extends LeafNode = LeafNode>(
-  state: IStoreState<G, L>,
-  action: IDispatchAction<G, L>
-) => {
-  switch (action.type) {
-    case 'SET_INITIAL_STATE': {
+export function createStoreReducers<G extends GroupNode, L extends LeafNode>() {
+  return {
+    setInitialState(state: IStoreState<G, L>, payload: G[]) {
       return produce(state, (draft) => {
-        draft.groupNodes = [...castDraft(action.payload)];
+        draft.groupNodes = [...castDraft(payload)];
       });
-    }
-    case 'SET_ACTIVE_CASCADE_GROUPS': {
+    },
+    setActiveCascadeGroups(state: IStoreState<G, L>, payload: ColumnGroups) {
       return produce(state, (draft) => {
-        draft.currentGroupByColumns = castDraft(action.payload);
+        draft.currentGroupByColumns = castDraft(payload);
       });
-    }
-    case 'RESET_ACTIVE_CASCADE_GROUPS': {
+    },
+    resetActiveCascadeGroups(state: IStoreState<G, L>) {
       return produce(state, (draft) => {
-        draft.currentGroupByColumns = state.groupByColumns.length ? [state.groupByColumns[0]] : [];
+        draft.currentGroupByColumns = draft.groupByColumns.length ? [draft.groupByColumns[0]] : [];
         draft.groupNodes.forEach((node) => {
           delete node.children;
         });
       });
-    }
-    case 'UPDATE_ROW_GROUP_NODE_DATA': {
+    },
+    updateRowGroupNodeData(state: IStoreState<G, L>, payload: { id: string; data: G[] }) {
       return produce(state, (draft) => {
         const stack: GroupNode[] = Array.isArray(draft.groupNodes)
           ? [...draft.groupNodes]
           : [draft.groupNodes];
         while (stack.length > 0) {
           const node = stack.pop()!;
-          if (node.id === action.payload.id) {
-            node.children = Array.isArray(action.payload.data) ? action.payload.data : [];
+          if (node.id === payload.id) {
+            node.children = Array.isArray(payload.data) ? payload.data : [];
             break; // Early exit after update
           }
           if (node.children && node.children.length > 0) {
@@ -117,14 +76,12 @@ export const storeReducer = <G extends GroupNode = GroupNode, L extends LeafNode
           }
         }
       });
-    }
-    case 'UPDATE_ROW_GROUP_LEAF_DATA': {
+    },
+    updateRowGroupLeafData(state: IStoreState<G, L>, payload: { cacheKey: string; data: L[] }) {
       return produce(state, (draft) => {
-        const { cacheKey, data } = action.payload;
+        const { cacheKey, data } = payload;
         draft.leafNodes.set(cacheKey, castDraft(data));
       });
-    }
-    default:
-      return state;
-  }
-};
+    },
+  } as const;
+}
