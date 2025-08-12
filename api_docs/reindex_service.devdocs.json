@@ -1,0 +1,400 @@
+{
+  "id": "reindexService",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "reindexService",
+        "id": "def-public.ReindexService",
+        "type": "Class",
+        "tags": [],
+        "label": "ReindexService",
+        "description": [],
+        "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "reindexService",
+            "id": "def-public.ReindexService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "reindexService",
+                "id": "def-public.ReindexService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "client",
+                "description": [],
+                "signature": [
+                  "HttpSetup"
+                ],
+                "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reindexService",
+            "id": "def-public.ReindexService.getReindexStatus",
+            "type": "Function",
+            "tags": [],
+            "label": "getReindexStatus",
+            "description": [],
+            "signature": [
+              "(indexName: string) => Promise<",
+              {
+                "pluginId": "esUiShared",
+                "scope": "public",
+                "docId": "kibEsUiSharedPluginApi",
+                "section": "def-public.SendRequestResponse",
+                "text": "SendRequestResponse"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/upgrade-assistant-pkg-common",
+                "scope": "common",
+                "docId": "kibKbnUpgradeAssistantPkgCommonPluginApi",
+                "section": "def-common.ReindexStatusResponse",
+                "text": "ReindexStatusResponse"
+              },
+              ", any>>"
+            ],
+            "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "reindexService",
+                "id": "def-public.ReindexService.getReindexStatus.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reindexService",
+            "id": "def-public.ReindexService.startReindex",
+            "type": "Function",
+            "tags": [],
+            "label": "startReindex",
+            "description": [],
+            "signature": [
+              "(indexName: string) => Promise<",
+              {
+                "pluginId": "esUiShared",
+                "scope": "public",
+                "docId": "kibEsUiSharedPluginApi",
+                "section": "def-public.SendRequestResponse",
+                "text": "SendRequestResponse"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/upgrade-assistant-pkg-common",
+                "scope": "common",
+                "docId": "kibKbnUpgradeAssistantPkgCommonPluginApi",
+                "section": "def-common.ReindexOperation",
+                "text": "ReindexOperation"
+              },
+              ", any>>"
+            ],
+            "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "reindexService",
+                "id": "def-public.ReindexService.startReindex.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reindexService",
+            "id": "def-public.ReindexService.cancelReindex",
+            "type": "Function",
+            "tags": [],
+            "label": "cancelReindex",
+            "description": [],
+            "signature": [
+              "(indexName: string) => Promise<",
+              {
+                "pluginId": "esUiShared",
+                "scope": "public",
+                "docId": "kibEsUiSharedPluginApi",
+                "section": "def-public.SendRequestResponse",
+                "text": "SendRequestResponse"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/upgrade-assistant-pkg-common",
+                "scope": "common",
+                "docId": "kibKbnUpgradeAssistantPkgCommonPluginApi",
+                "section": "def-common.ReindexOperationCancelResponse",
+                "text": "ReindexOperationCancelResponse"
+              },
+              ", any>>"
+            ],
+            "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "reindexService",
+                "id": "def-public.ReindexService.cancelReindex.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "reindexService",
+      "id": "def-public.ReindexServicePublicSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ReindexServicePublicSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/private/reindex_service/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "reindexService",
+          "id": "def-public.ReindexServicePublicSetup.reindexService",
+          "type": "Object",
+          "tags": [],
+          "label": "reindexService",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "reindexService",
+              "scope": "public",
+              "docId": "kibReindexServicePluginApi",
+              "section": "def-public.ReindexService",
+              "text": "ReindexService"
+            }
+          ],
+          "path": "x-pack/platform/plugins/private/reindex_service/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "reindexService",
+      "id": "def-public.ReindexServicePublicStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ReindexServicePublicStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/private/reindex_service/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "reindexService",
+          "id": "def-public.ReindexServicePublicStart.reindexService",
+          "type": "Object",
+          "tags": [],
+          "label": "reindexService",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "reindexService",
+              "scope": "public",
+              "docId": "kibReindexServicePluginApi",
+              "section": "def-public.ReindexService",
+              "text": "ReindexService"
+            }
+          ],
+          "path": "x-pack/platform/plugins/private/reindex_service/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "reindexService",
+        "id": "def-server.generateNewIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "generateNewIndexName",
+        "description": [
+          "\nProvides the index name to re-index into\n\n.foo -> .reindexed-v7-foo\nfoo => reindexed-v7-foo"
+        ],
+        "signature": [
+          "(indexName: string, versionService: ",
+          {
+            "pluginId": "@kbn/upgrade-assistant-pkg-server",
+            "scope": "server",
+            "docId": "kibKbnUpgradeAssistantPkgServerPluginApi",
+            "section": "def-server.Version",
+            "text": "Version"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/index_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "reindexService",
+            "id": "def-server.generateNewIndexName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "indexName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/index_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "reindexService",
+            "id": "def-server.generateNewIndexName.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "versionService",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/upgrade-assistant-pkg-server",
+                "scope": "server",
+                "docId": "kibKbnUpgradeAssistantPkgServerPluginApi",
+                "section": "def-server.Version",
+                "text": "Version"
+              }
+            ],
+            "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/index_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "reindexService",
+      "id": "def-server.ReindexServiceServerPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ReindexServiceServerPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/private/reindex_service/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "reindexService",
+          "id": "def-server.ReindexServiceServerPluginStart.cleanupReindexOperations",
+          "type": "Function",
+          "tags": [],
+          "label": "cleanupReindexOperations",
+          "description": [],
+          "signature": [
+            "(indexNames: string[]) => Promise<void>"
+          ],
+          "path": "x-pack/platform/plugins/private/reindex_service/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "reindexService",
+              "id": "def-server.ReindexServiceServerPluginStart.cleanupReindexOperations.$1",
+              "type": "Array",
+              "tags": [],
+              "label": "indexNames",
+              "description": [],
+              "signature": [
+                "string[]"
+              ],
+              "path": "x-pack/platform/plugins/private/reindex_service/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
