@@ -15,6 +15,7 @@ import React, { FC, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import useMount from 'react-use/lib/useMount';
 import { KibanaContextExtra } from '../types';
+import { INDEX_NAME_INVALID_CHARS, INDEX_NAME_INVALID_START_CHARS } from '../constants';
 
 export const IndexName: FC = () => {
   const {
@@ -88,11 +89,36 @@ export const IndexName: FC = () => {
 
   const startWithEditOpen = error.length > 0 || !indexNameValue;
 
+  const validateOnType = (value: string) => {
+    if (INDEX_NAME_INVALID_START_CHARS.some((char) => value.startsWith(char))) {
+      setError([
+        i18n.translate('indexEditor.indexName.invalidStartCharError', {
+          defaultMessage: 'Index name cannot start with {chars}',
+          values: { chars: INDEX_NAME_INVALID_START_CHARS.join(', ') },
+        }),
+      ]);
+      return;
+    }
+
+    if (INDEX_NAME_INVALID_CHARS.some((char) => value.includes(char))) {
+      setError([
+        i18n.translate('indexEditor.indexName.invalidCharsError', {
+          defaultMessage: 'Index name cannot contain {chars}',
+          values: { chars: INDEX_NAME_INVALID_CHARS.join(', ') },
+        }),
+      ]);
+      return;
+    }
+  };
+
   return (
     <EuiInlineEditTitle
       startWithEditOpen={startWithEditOpen}
       heading="h3"
       size={'m'}
+      css={{
+        maxWidth: '75%',
+      }}
       inputAriaLabel={i18n.translate('indexEditor.indexName.inputAriaLabel', {
         defaultMessage: 'Index name',
       })}
@@ -101,12 +127,19 @@ export const IndexName: FC = () => {
       })}
       defaultValue={indexNameValue ?? fileUploadIndexName}
       isReadOnly={isIndexCreated}
-      isInvalid={error !== null}
+      isInvalid={error.length > 0}
       isLoading={isLoading}
       editModeProps={{
         formRowProps: { error },
         cancelButtonProps: { onClick: () => setError([]) },
-        inputProps: { readOnly: isLoading },
+        inputProps: {
+          readOnly: isLoading,
+          autoFocus: true,
+          onChange: (e) => {
+            setError([]);
+            validateOnType(e.target.value);
+          },
+        },
       }}
       readModeProps={{
         'data-test-subj': 'indexNameReadMode',

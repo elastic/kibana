@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiLoadingSpinner, EuiProgress, transparentize, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiProgress,
+  transparentize,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -157,10 +164,12 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
   if (noResults && !showFilePreview) {
     content = (
-      <>
-        {content}
-        <EmptyPrompt />
-      </>
+      <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
+        <EuiFlexItem grow={false}>{content}</EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EmptyPrompt />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   } else if (showFilePreview) {
     content = <FilesPreview />;
@@ -170,7 +179,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
   return (
     <FileSelectorContext.Provider value={{ onFileSelectorClick }}>
-      <div {...getRootProps({ css: { height: '100%' } })}>
+      <div {...getRootProps({ css: { height: '100%', cursor: 'default' } })}>
         {isDragActive ? <div css={overlayDraggingFile} /> : null}
         {showLoadingOverlay ? loadingIndicator : null}
         <input {...getInputProps()} />

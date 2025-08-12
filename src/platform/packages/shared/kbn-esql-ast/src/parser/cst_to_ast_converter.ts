@@ -789,20 +789,22 @@ export class CstToAstConverter {
       const stringNode = this.toStringLiteral(stringContext);
 
       command.args.push(stringNode);
-      command.args.push(...this.fromCommandOptions(ctx.commandOptions()));
+      command.args.push(...this.fromDissectCommandOptions(ctx.dissectCommandOptions()));
     }
 
     return command;
   }
 
-  private fromCommandOptions(ctx: cst.CommandOptionsContext | undefined): ast.ESQLCommandOption[] {
+  private fromDissectCommandOptions(
+    ctx: cst.DissectCommandOptionsContext | undefined
+  ): ast.ESQLCommandOption[] {
     if (!ctx) {
       return [];
     }
 
     const options: ast.ESQLCommandOption[] = [];
 
-    for (const optionCtx of ctx.commandOption_list()) {
+    for (const optionCtx of ctx.dissectCommandOption_list()) {
       const option = this.toOption(
         this.sanitizeIdentifierString(optionCtx.identifier()).toLowerCase(),
         optionCtx
@@ -1176,45 +1178,31 @@ export class CstToAstConverter {
       command.args.push(unknownItem);
     }
 
-    const withCtx = ctx.WITH();
+    let inferenceId = Builder.expression.literal.string(
+      '',
+      { name: 'inferenceId' },
+      { incomplete: true }
+    );
 
-    let inferenceId: ast.ESQLSingleAstItem;
-    let withIncomplete = true;
+    const commandNamedParametersContext = ctx.commandNamedParameters();
+    if (commandNamedParametersContext) {
+      const namedParametersOption = this.fromCommandNamedParameters(commandNamedParametersContext);
 
-    const withText = withCtx?.getText();
-    const inferenceIdText = ctx._inferenceId?.getText();
-    if (withText?.includes('missing') && /(?:w|wi|wit|with)$/i.test(inferenceIdText)) {
-      // This case is when the WITH keyword is partially typed, and no inferenceId has been provided e.g. 'COMPLETION "prompt" WI'
-      // (the parser incorrectly recognizes the partial WITH keyword as the inferenceId)
-      inferenceId = Builder.identifier('', { incomplete: true });
-    } else {
-      if (!inferenceIdText) {
-        inferenceId = Builder.identifier('', { incomplete: true });
-      } else {
-        withIncomplete = false;
-        inferenceId = this.fromIdentifierOrParam(ctx._inferenceId)!;
+      const namedParameters = namedParametersOption.args[0] as ast.ESQLMap | undefined;
+
+      const inferenceIdParam = namedParameters?.entries.find(
+        (param) => param.key.valueUnquoted === 'inference_id'
+      )?.value as ast.ESQLStringLiteral;
+
+      if (inferenceIdParam) {
+        inferenceId = inferenceIdParam;
+        inferenceId.incomplete = inferenceIdParam.valueUnquoted?.length === 0;
       }
+
+      command.args.push(namedParametersOption);
     }
 
     command.inferenceId = inferenceId;
-
-    const optionWith = Builder.option(
-      {
-        name: 'with',
-        args: [inferenceId],
-      },
-      {
-        incomplete: withIncomplete,
-        ...(withCtx && ctx._inferenceId
-          ? {
-              location: getPosition(withCtx.symbol, ctx._inferenceId.stop),
-            }
-          : undefined),
-      }
-    );
-
-    command.args.push(optionWith);
-
     return command;
   }
 
@@ -1619,6 +1607,35 @@ export class CstToAstConverter {
       return this.collectInlineCast(ctx);
     }
     return this.fromParserRuleToUnknown(ctx);
+  }
+
+  private fromCommandNamedParameters(
+    ctx: cst.CommandNamedParametersContext
+  ): ast.ESQLCommandOption {
+    const withOption = this.toOption('with', ctx);
+
+    const withCtx = ctx.WITH();
+
+    if (!withCtx) {
+      withOption.incomplete = true;
+      return withOption;
+    }
+
+    const mapExpressionCtx = ctx.mapExpression();
+
+    if (!mapExpressionCtx) {
+      withOption.location.min = withCtx.symbol.start;
+      withOption.location.max = withCtx.symbol.stop;
+      withOption.incomplete = true;
+    }
+
+    const map = this.fromMapExpression(mapExpressionCtx);
+    withOption.args.push(map);
+    withOption.location.min = withCtx.symbol.start;
+    withOption.location.max = map.location.max;
+    withOption.incomplete = map.incomplete;
+
+    return withOption;
   }
 
   private collectInlineCast(ctx: cst.InlineCastContext): ast.ESQLInlineCast {
@@ -2123,24 +2140,32 @@ export class CstToAstConverter {
 
     for (const entryCtx of entryCtxs) {
       const entry = this.fromMapEntryExpression(entryCtx);
-
-      map.entries.push(entry);
+      if (entry) {
+        map.entries.push(entry);
+      } else {
+        map.incomplete = true;
+      }
     }
 
     return map;
   }
 
-  private fromMapEntryExpression(ctx: cst.EntryExpressionContext): ast.ESQLMapEntry {
+  private fromMapEntryExpression(ctx: cst.EntryExpressionContext): ast.ESQLMapEntry | undefined {
     const keyCtx = ctx._key;
     const valueCtx = ctx._value;
-    const key = this.toStringLiteral(keyCtx) as ast.ESQLStringLiteral;
-    const value = this.fromConstant(valueCtx) as ast.ESQLAstExpression;
-    const entry = Builder.expression.entry(key, value, {
-      location: getPosition(ctx.start, ctx.stop),
-      incomplete: Boolean(ctx.exception),
-    });
 
-    return entry;
+    if (keyCtx && valueCtx) {
+      const key = this.toStringLiteral(keyCtx) as ast.ESQLStringLiteral;
+
+      const value = this.fromConstant(valueCtx) as ast.ESQLAstExpression;
+
+      const entry = Builder.expression.entry(key, value, {
+        location: getPosition(ctx.start, ctx.stop),
+        incomplete: Boolean(ctx.exception),
+      });
+
+      return entry;
+    }
   }
 
   // ----------------------------------------------------- constant expressions
@@ -2339,17 +2364,12 @@ export class CstToAstConverter {
 
   private fromQualifiedIntegerLiteral(
     ctx: cst.QualifiedIntegerLiteralContext
-  ): ast.ESQLTimeInterval {
+  ): ast.ESQLTimeDurationLiteral | ast.ESQLDatePeriodLiteral {
     const value = ctx.integerValue().INTEGER_LITERAL().getText();
     const unit = ctx.UNQUOTED_IDENTIFIER().symbol.text;
     const parserFields = this.createParserFields(ctx);
-    const qualifiedInteger = Builder.expression.literal.qualifiedInteger(
-      Number(value),
-      unit,
-      parserFields
-    );
 
-    return qualifiedInteger;
+    return Builder.expression.literal.timespan(Number(value), unit, parserFields);
   }
 
   // ---------------------------------------- constant expression: "identifier"

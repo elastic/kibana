@@ -16,86 +16,92 @@ import {
   EuiSearchBar,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FilePicker } from './file_picker';
 import { KibanaContextExtra } from '../types';
+import { isPlaceholderColumn } from '../utils';
 
 export const QueryBar = () => {
   const {
     services: { share, data, indexUpdateService },
   } = useKibana<KibanaContextExtra>();
 
+  const dataView = useObservable(indexUpdateService.dataView$);
+  const esqlDiscoverQuery = useObservable(indexUpdateService.esqlDiscoverQuery$, '');
   const dataViewColumns = useObservable(indexUpdateService.dataTableColumns$);
   const isIndexCreated = useObservable(
     indexUpdateService.indexCreated$,
     indexUpdateService.isIndexCreated()
   );
 
-  const esqlQuery = useObservable(indexUpdateService.esqlQuery$);
-
   const [queryError, setQueryError] = useState<string>('');
 
   const activeColumns = useMemo(() => {
-    return dataViewColumns?.map((c) => c.name);
+    return dataViewColumns?.map((c) => c.name).filter((c) => !isPlaceholderColumn(c));
   }, [dataViewColumns]);
 
   const discoverLocator = useMemo(() => {
     return share?.url.locators.get('DISCOVER_APP_LOCATOR');
   }, [share?.url.locators]);
 
-  const discoverLink = esqlQuery
+  const discoverLink = esqlDiscoverQuery
     ? discoverLocator?.getRedirectUrl({
         timeRange: data.query.timefilter.timefilter.getTime(),
         query: {
-          esql: esqlQuery,
+          esql: esqlDiscoverQuery,
         },
         ...(activeColumns ? { columns: activeColumns } : {}),
       })
     : null;
 
-  if (!isIndexCreated) return null;
+  const isDiscoverButtonDisabled = !discoverLink;
+
+  if (!dataView) {
+    return null;
+  }
 
   return (
     <EuiFlexGroup alignItems={'flexStart'} gutterSize={'s'}>
       <EuiFlexItem grow>
-        {isIndexCreated ? (
-          <EuiFormRow isInvalid={!!queryError} error={queryError} fullWidth>
-            <EuiSearchBar
-              defaultQuery={''}
-              onChange={({ queryText, error }) => {
-                if (error) {
-                  setQueryError(error.message);
-                } else {
-                  setQueryError('');
-                  indexUpdateService.setQstr(queryText);
-                }
-              }}
-            />
-          </EuiFormRow>
-        ) : null}
+        <EuiFormRow isInvalid={!!queryError} error={queryError} fullWidth>
+          <EuiSearchBar
+            defaultQuery={''}
+            box={{
+              disabled: !isIndexCreated,
+            }}
+            onChange={({ queryText, error }) => {
+              if (error) {
+                setQueryError(error.message);
+              } else {
+                setQueryError('');
+                indexUpdateService.setQstr(queryText);
+              }
+            }}
+          />
+        </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <FilePicker />
       </EuiFlexItem>
-      {discoverLink ? (
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size={'m'}
-            color={'text'}
-            href={discoverLink}
-            target="_blank"
-            iconType={'discoverApp'}
-          >
-            <EuiText size="xs">
-              {i18n.translate('esqlDataGrid.openInDiscoverLabel', {
-                defaultMessage: 'Query this index',
-              })}
-            </EuiText>
-          </EuiButton>
-        </EuiFlexItem>
-      ) : null}
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          size={'m'}
+          color={'text'}
+          isDisabled={isDiscoverButtonDisabled}
+          href={discoverLink ?? undefined}
+          target="_blank"
+          iconType={'discoverApp'}
+        >
+          <EuiText size="xs">
+            <FormattedMessage
+              id="esqlDataGrid.openInDiscoverLabel"
+              defaultMessage="Query this index"
+            />
+          </EuiText>
+        </EuiButton>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
