@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SerializableRecord } from "@kbn/utility-types";
+
 /**
  * This API provides pass through context.
  * Pass through context is a generic mechanism to pass context
@@ -19,7 +21,7 @@
  * and use the state to show the alert from the alerting page.
  */
 export interface PassThroughContext {
-  getPassThroughContext: () => unknown | undefined;
+  getPassThroughContext: () => SerializableRecord | undefined;
 }
 
 /**

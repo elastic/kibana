@@ -49,6 +49,7 @@ import {
   loadAndRemoveDashboardState,
   startSyncingExpandedPanelState,
 } from './url';
+import { SerializableRecord } from '@kbn/utility-types';
 
 export interface DashboardAppProps {
   history: History;
@@ -190,7 +191,7 @@ export function DashboardApp({
       },
       getInitialInput,
       getPassThroughContext: () =>
-        (getScopedHistory().location.state as { passThroughContext?: unknown })?.passThroughContext,
+        (getScopedHistory().location.state as { passThroughContext?: SerializableRecord })?.passThroughContext,
       validateLoadedSavedObject: validateOutcome,
       fullScreenMode:
         kbnUrlStateStorage.get<{ fullScreenMode?: boolean }>(DASHBOARD_STATE_STORAGE_KEY)

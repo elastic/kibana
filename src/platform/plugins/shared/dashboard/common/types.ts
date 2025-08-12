@@ -89,6 +89,6 @@ export type DashboardLocatorParams = Partial<
      * Set to pass state from solution to embeddables.
      * See PassThroughContext presentation container interface for details
      */
-    passThroughContext?: unknown;
+    passThroughContext?: SerializableRecord;
   }
 >;
