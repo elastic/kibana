@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './latest';
+export type * from './latest';
 
 export { rawRuleSchema as rawRuleSchemaV1 } from './v1';
 export { rawRuleSchema as rawRuleSchemaV2 } from './v2';

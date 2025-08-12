@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 import { bootstrapPrebuiltRulesHandler } from './bootstrap_prebuilt_rules_handler';
 import { throttleRequests } from '../../../../../utils/throttle_requests';
 
-export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter) => {
+export const bootstrapPrebuiltRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
   router.versioned
     .post({
       access: 'internal',
@@ -32,6 +36,8 @@ export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter
         version: '1',
         validate: {},
       },
-      throttleRequests(bootstrapPrebuiltRulesHandler)
+      throttleRequests((context, request, response) => {
+        return bootstrapPrebuiltRulesHandler(context, request, response, logger);
+      })
     );
 };

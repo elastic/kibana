@@ -121,7 +121,7 @@ report.asciidoc
 # Yarn local mirror content
 .yarn-local-mirror
 
-# Bazel
+# Bazel | TODO: Remove later
 .ijwb
 /bazel
 /bazel-*
@@ -164,3 +164,5 @@ x-pack/test/security_solution_playwright/.auth/
 x-pack/test/security_solution_playwright/.env
 .codeql
 .dependency-graph-log.json
+
+.moon/cache

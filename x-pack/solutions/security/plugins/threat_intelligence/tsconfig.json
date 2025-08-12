@@ -34,7 +34,7 @@
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/core-ui-settings-browser",
     "@kbn/search-types",
-    "@kbn/charts-theme"
+    "@kbn/charts-theme",
   ],
   "exclude": ["target/**/*"]
 }

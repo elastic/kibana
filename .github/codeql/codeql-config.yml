@@ -37,7 +37,6 @@ paths-ignore:
   - legacy_rfcs
   - oas_docs
   - packages/kbn-babel-*
-  - packages/kbn-bazel-*
   - packages/kbn-capture-oas-snapshot-cli
   - packages/kbn-check-mappings-update-cli
   - packages/kbn-check-prod-native-modules-cli

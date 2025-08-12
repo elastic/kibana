@@ -10,5 +10,9 @@
     z-index: $euiZLevel3;
     top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0));
     background: $euiPageBackgroundColor;
+
+    @media (max-width: map-get($euiBreakpoints, 'm')) {
+      position: 'unset', // on smaller screens, the top nav should not be sticky
+    }
   }
 }
