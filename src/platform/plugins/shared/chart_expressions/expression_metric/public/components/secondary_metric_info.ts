@@ -186,10 +186,7 @@ function getDynamicColorInfo(
   };
 }
 
-/**
- * Computes the display information for the secondary metric
- * @returns An object with value, label, badgeColor and description for rendering.
- */
+/** Computes the display information for the Secondary Metric */
 export function getSecondaryMetricInfo({
   row,
   columns,

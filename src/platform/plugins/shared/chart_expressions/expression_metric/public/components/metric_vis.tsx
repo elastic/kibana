@@ -181,8 +181,9 @@ export const MetricVis = ({
         : config.metric.color ?? defaultColor;
 
     let secondaryMetricProps: SecondaryMetricProps | undefined;
-    const secondaryMetric = config.dimensions.secondaryMetric;
+    const { secondaryMetric } = config.dimensions;
     if (secondaryMetric) {
+      // Do not call getSecondaryMetricInfo if there is no Secondary Metric
       const secondaryMetricInfo = getSecondaryMetricInfo({
         row,
         columns: data.columns,
@@ -255,8 +256,10 @@ export const MetricVis = ({
       return metricWProgress;
     }
 
+    // Metric with number, without trend line and without progress bar
     return {
       ...baseMetric,
+      // Override the background and main value color when the color is applied to the value
       ...(config.metric.applyColorTo === 'value'
         ? { color: defaultColor, valueColor: tileColor }
         : { color: tileColor, valueColor: undefined }),

@@ -1110,6 +1110,7 @@ export function DimensionEditorAdditionalSection({
               legend={i18n.translate('xpack.lens.metric.supportingVis.applyColorTo', {
                 defaultMessage: 'Apply color to',
               })}
+              data-test-subj="lnsMetric_apply_color_to_buttons"
               options={[
                 {
                   id: `${buttonIdPrefix}background`,
