@@ -13,6 +13,7 @@ export const createDashboardsNavigationTree = (): NodeDefinition => ({
   id: SecurityPageName.dashboards,
   link: securityLink(SecurityPageName.dashboards),
   renderAs: 'item',
+  iconV2: 'dashboardApp',
   children: [
     {
       id: SecurityPageName.overview,

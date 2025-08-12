@@ -105,12 +105,14 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   link: 'discover',
+                  iconV2: 'discoverApp',
                 },
                 {
                   getIsActive: ({ pathNameSerialized, prepend }) => {
                     return pathNameSerialized.startsWith(prepend('/app/dashboards'));
                   },
                   link: 'dashboards',
+                  iconV2: 'dashboardApp',
                 },
                 {
                   children: [

@@ -46,12 +46,14 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Discover',
             }),
             link: 'discover',
+            iconV2: 'discoverApp',
           },
           {
             link: 'dashboards',
             getIsActive: ({ pathNameSerialized, prepend }) => {
               return pathNameSerialized.startsWith(prepend('/app/dashboards'));
             },
+            iconV2: 'dashboardApp',
           },
           {
             link: 'observability-overview:alerts',
