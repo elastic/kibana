@@ -205,6 +205,21 @@ describe('extractTemplate', () => {
     ]);
   });
 
+  it('finds a pattern no matter how inconsistent the logs are', async () => {
+    const { roots, delimiter } = await extractTemplate([
+      'abc_20251119123456',
+      '123 abc - INFO    - 123',
+      '123|abc|INFO   |123',
+      '2023-05-30 12:34:56 INFO  Service started on port 8080',
+      'App 123 started',
+      'Connection from 192.168.1.1 port 8080 established',
+    ]);
+    const { usefulTokens } = getUsefulTokens(roots, delimiter);
+
+    expect(delimiter).toBe('\\s');
+    expect(usefulTokens.map(([pattern]) => pattern)).toEqual(['GREEDYDATA']);
+  });
+
   describe('with LogHub sample data', () => {
     it('processes HealthApp logs correctly', async () => {
       const healthAppLogs = await getLogsFrom('HealthApp');

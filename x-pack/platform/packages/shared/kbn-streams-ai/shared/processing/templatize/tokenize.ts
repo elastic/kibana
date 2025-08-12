@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GROK_REGEX_MAP } from './get_pattern_regex_map';
+import { GROK_REGEX_MAP } from './constants';
 
 interface TokenProcessingResult {
   tokens: string[];

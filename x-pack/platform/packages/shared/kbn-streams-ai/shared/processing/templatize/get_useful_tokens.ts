@@ -6,9 +6,9 @@
  */
 
 import { uniq } from 'lodash';
-import { COLLAPSIBLE_PATTERNS, PATTERN_PRECEDENCE, TOKEN_SPLIT_CHARS } from './pattern_precedence';
+import { COLLAPSIBLE_PATTERNS, PATTERN_PRECEDENCE, TOKEN_SPLIT_CHARS } from './constants';
 import type { NormalizedColumn } from './normalize_tokens';
-import { GROK_REGEX_MAP } from './get_pattern_regex_map';
+import { GROK_REGEX_MAP } from './constants';
 
 function isCollapsibleToken(token: string) {
   return COLLAPSIBLE_PATTERNS.includes(token);
@@ -334,6 +334,51 @@ export function getGrokProcessor(
     description: reviewResult.log_source,
     patterns: [rootPattern],
     pattern_definitions: patternDefinitions,
+  };
+}
+
+export function mergeGrokProcessors(grokProcessors: GrokProcessorResult[]): GrokProcessorResult {
+  if (grokProcessors.length === 1) {
+    return grokProcessors[0];
+  }
+
+  const mergedPatterns: string[] = [];
+  const mergedPatternDefinitions: Record<string, string> = {};
+  const patternDefinitionCounters: Record<string, number> = {};
+
+  grokProcessors.forEach((processor) => {
+    const updatedPatterns = processor.patterns.map((pattern) => {
+      let updatedPattern = pattern;
+
+      Object.entries(processor.pattern_definitions).forEach(([key, value]) => {
+        if (!mergedPatternDefinitions[key]) {
+          // Add the pattern definition if it doesn't exist
+          mergedPatternDefinitions[key] = value;
+          patternDefinitionCounters[key] = 1; // Initialize counter for this pattern definition
+        } else {
+          // Rename the pattern definition if it already exists
+          const newKey = `${key}${++patternDefinitionCounters[key]}`;
+          mergedPatternDefinitions[newKey] = value;
+
+          // Update the pattern to use the renamed pattern definition
+          const regex = new RegExp(`%{${key}:`, 'g');
+          updatedPattern = updatedPattern.replace(regex, `%{${newKey}:`);
+        }
+      });
+
+      return updatedPattern;
+    });
+
+    // Append the updated patterns to the merged patterns array
+    mergedPatterns.push(...updatedPatterns);
+  });
+
+  const descriptions = uniq(grokProcessors.map((processor) => processor.description));
+
+  return {
+    description: descriptions.join(', '),
+    patterns: mergedPatterns,
+    pattern_definitions: mergedPatternDefinitions,
   };
 }
 

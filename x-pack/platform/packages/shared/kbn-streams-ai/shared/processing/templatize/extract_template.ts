@@ -8,12 +8,11 @@
 import { partition, pull } from 'lodash';
 import { maskCapturingBrackets } from './mask_capturing_brackets';
 import { maskQuotes } from './mask_quotes';
-import { FIRST_PASS_PATTERNS, PATTERN_PRECEDENCE, TOKEN_SPLIT_CHARS } from './pattern_precedence';
-import { ALL_CAPTURE_CHARS } from './split_on_capture_chars';
+import { FIRST_PASS_PATTERNS, PATTERN_PRECEDENCE, TOKEN_SPLIT_CHARS } from './constants';
+import { GROK_REGEX_MAP, ALL_CAPTURE_CHARS } from './constants';
 import { normalizeTokensForColumn } from './normalize_tokens';
 import { ExtractTemplateResult } from './types';
 import { findMatchingPatterns } from './find_matching_patterns';
-import { GROK_REGEX_MAP } from './get_pattern_regex_map';
 import { tokenize } from './tokenize';
 
 const FIRST_PASS_REGEXES = Object.fromEntries(
@@ -111,14 +110,14 @@ function findDelimiter(msgs: string[]): string {
 
   // If no delimiter was found with non-zero minimum occurrences
   // across all messages, default to whitespace
-  return highestMinCount > 0 ? bestDelimiter : '\\s+';
+  return highestMinCount > 0 ? bestDelimiter : '\\s';
 }
 
 /**
  * split on whitespace, but not on consective whitespace chars
  */
 function createDelimiterRegex(delimiter: string): RegExp {
-  if (delimiter === '\\s' || delimiter === '\\s+') {
+  if (delimiter === '\\s') {
     // Use lookahead to match only a single whitespace character
     return /(?<=\S) /g;
   }
@@ -139,13 +138,13 @@ function tokenizeLines(
   splitChars?: string[][]
 ) {
   const delimiterValue =
-    delimiter === '\\s' || delimiter === '\\s+'
+    delimiter === '\\s'
       ? ' '
       : delimiter === '\\t'
-      ? '\t'
-      : delimiter === '\\|'
-      ? '|'
-      : delimiter;
+        ? '\t'
+        : delimiter === '\\|'
+          ? '|'
+          : delimiter;
 
   return maskedMessages.map(({ literals, masked }, index) => {
     const original = messages[index];
@@ -180,8 +179,8 @@ function tokenizeLines(
             isLastTokenAcrossAllColumns
               ? undefined
               : isLastTokenInColumn
-              ? delimiterValue
-              : nextValue
+                ? delimiterValue
+                : nextValue
           );
           return {
             value,

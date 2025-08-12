@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { PATTERN_PRECEDENCE } from './pattern_precedence';
+import { PATTERN_PRECEDENCE } from './constants';
 import { NormalizedToken, normalizeTokensForColumn } from './normalize_tokens';
-import {} from './get_pattern_regex_map';
 import { findMatchingPatterns } from './find_matching_patterns';
 import { uniq } from 'lodash';
 

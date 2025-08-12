@@ -6,7 +6,17 @@
  */
 
 import { orderBy } from 'lodash';
-import { ALL_CAPTURE_CHARS } from './split_on_capture_chars';
+import { uniq } from 'lodash';
+import { BRACKET_PAIRS } from './mask_capturing_brackets';
+import { QUOTE_PAIRS } from './mask_quotes';
+import { buildGrokRegexMap } from '../grok/parse_patterns';
+
+const ALL_PAIRS = {
+  ...QUOTE_PAIRS,
+  ...BRACKET_PAIRS,
+};
+
+export const ALL_CAPTURE_CHARS = uniq(Object.entries(ALL_PAIRS).flat());
 
 // ^ , $ , \ , . , * , + , ? , ( , ) , [ , ] , { , } , and |
 export const TOKEN_SPLIT_CHARS = [
@@ -37,6 +47,8 @@ export const PATTERN_OVERRIDES: Record<string, string> = {
   ...splitCharsRegexes,
 };
 
+export const GROK_REGEX_MAP = buildGrokRegexMap(PATTERN_OVERRIDES);
+
 export const PATTERN_PRECEDENCE = [
   'LOGLEVEL',
   'UUID',
@@ -45,12 +57,12 @@ export const PATTERN_PRECEDENCE = [
   'WINDOWSMAC', // also matched by `MAC` but prefer specificity
   'COMMONMAC', // also matched by `MAC` but prefer specificity
   'MAC',
-  'IPV4', // matched by `IP` but prefer specificity
-  'IPV6', // matched by `IP` but prefer specificity
+  'IPV4', // also matched by `IP` but prefer specificity
+  'IPV6', // also matched by `IP` but prefer specificity
   'IP',
   'HOSTPORT',
-  // 'UNIXPATH', // matched by `PATH`
-  // 'WINPATH', // matched by `PATH`
+  // 'UNIXPATH', // also matched by `PATH`
+  // 'WINPATH', // also matched by `PATH`
   // 'PATH',
   'TTY',
   // 'URI',
@@ -75,7 +87,7 @@ export const PATTERN_PRECEDENCE = [
   // 'MONTHDAY', // too short, not useful
   // 'YEAR', // too short, not useful
   'INT',
-  // 'HOSTNAME',
+  // 'HOSTNAME', // too generic, not useful
   ...TOKEN_SPLIT_CHARS,
   'SPACE',
   'WORD',

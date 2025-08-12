@@ -14,11 +14,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiBadgeGroup,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GrokCollection, DraftGrokExpression } from '@kbn/grok-ui';
 import { UseFormSetValue, FieldValues, useWatch } from 'react-hook-form';
 import type { GrokProcessorResult } from '@kbn/streams-ai/shared/processing/templatize/get_useful_tokens';
+import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { selectPreviewRecords } from '../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
@@ -52,28 +55,33 @@ export const GrokPatternAISuggestions = ({
   const isValidField = useMemo(() => {
     return Boolean(
       fieldValue &&
-      previewDocuments.some(
-        (sample) => sample[fieldValue] && typeof sample[fieldValue] === 'string'
-      )
+        previewDocuments.some(
+          (sample) => sample[fieldValue] && typeof sample[fieldValue] === 'string'
+        )
     );
   }, [previewDocuments, fieldValue]);
 
   if (suggestionsState.value) {
     return (
       <GrokPatternSuggestion
-        suggestion={suggestionsState.value}
+        grokProcessor={suggestionsState.value.grokProcessor}
+        simulationResult={suggestionsState.value.simulationResult}
         onAccept={() => {
           if (suggestionsState.value) {
             setValue(
               'patterns',
-              suggestionsState.value.patterns.map(
+              suggestionsState.value.grokProcessor.patterns.map(
                 (value) => new DraftGrokExpression(grokCollection, value)
               ),
               { shouldValidate: true }
             );
-            setValue('pattern_definitions', suggestionsState.value.pattern_definitions, {
-              shouldValidate: true,
-            });
+            setValue(
+              'pattern_definitions',
+              suggestionsState.value.grokProcessor.pattern_definitions,
+              {
+                shouldValidate: true,
+              }
+            );
           }
           refreshSuggestions(null);
         }}
@@ -129,25 +137,28 @@ export const GrokPatternAISuggestions = ({
 };
 
 export interface GrokPatternSuggestionProps {
-  suggestion: GrokProcessorResult;
+  grokProcessor: GrokProcessorResult;
+  simulationResult: APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
   onAccept(): void;
   onDismiss(): void;
 }
 
 export function GrokPatternSuggestion({
-  suggestion,
+  grokProcessor,
+  simulationResult,
   onAccept,
   onDismiss,
 }: GrokPatternSuggestionProps) {
+  const processorMetrics = simulationResult.processors_metrics['grok-processor'];
   return (
     <EuiCallOut
       iconType="sparkles"
-      title={suggestion.description}
+      title={grokProcessor.description}
       color="primary"
       size="s"
       onDismiss={onDismiss}
     >
-      {suggestion.patterns.map((pattern, index) => (
+      {grokProcessor.patterns.map((pattern, index) => (
         <EuiCodeBlock key={pattern} paddingSize="none" language="regex" transparentBackground>
           {pattern}
         </EuiCodeBlock>
@@ -159,6 +170,32 @@ export function GrokPatternSuggestion({
         alignItems="flexStart"
         direction="column"
       >
+        <EuiFlexItem grow={false}>
+          <EuiBadgeGroup>
+            <EuiBadge color="hollow">
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.matchRateBadge',
+                {
+                  defaultMessage: '{percentage}% Matched',
+                  values: {
+                    percentage: (processorMetrics.parsed_rate * 100).toFixed(),
+                  },
+                }
+              )}
+            </EuiBadge>
+            <EuiBadge color="hollow">
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.fieldCountBadge',
+                {
+                  defaultMessage: '{count} Fields',
+                  values: {
+                    count: processorMetrics.detected_fields.length,
+                  },
+                }
+              )}
+            </EuiBadge>
+          </EuiBadgeGroup>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton iconType="check" onClick={onAccept} color="primary" size="s">
             {i18n.translate(

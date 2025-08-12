@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { GROK_REGEX_MAP } from './get_pattern_regex_map';
-import { PATTERN_PRECEDENCE } from './pattern_precedence';
+import { GROK_REGEX_MAP, PATTERN_PRECEDENCE } from './constants';
 
 /** --------------------------------------------------------------
  *  Helpers

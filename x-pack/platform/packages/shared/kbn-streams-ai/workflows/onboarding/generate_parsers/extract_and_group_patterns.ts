@@ -5,65 +5,58 @@
  * 2.0.
  */
 
-import { get, groupBy, mapValues, orderBy, shuffle, uniq } from 'lodash';
-import { FlattenRecord } from '@kbn/streams-schema';
+import { groupBy, mapValues, orderBy } from 'lodash';
 
-export function extractAndGroupPatterns({
-  samples,
-  field,
-}: {
-  samples: FlattenRecord[];
-  field: string;
-}) {
-  const evalPattern = (sample: string) => {
-    return sample
-      .replace(/[ \t\n]+/g, ' ')
-      .replace(/[A-Za-z]+/g, 'a')
-      .replace(/[0-9]+/g, '0')
-      .replace(/(a a)+/g, 'a')
-      .replace(/(a0)+/g, 'f')
-      .replace(/(f:)+/g, 'f:')
-      .replace(/0(.0)+/g, 'p');
-  };
+function evalPattern(sample: string) {
+  return sample
+    .replace(/[ \t\n]+/g, ' ')
+    .replace(/[A-Za-z]+/g, 'a')
+    .replace(/[0-9]+/g, '0')
+    .replace(/(a a)+/g, 'a')
+    .replace(/(a0)+/g, 'f')
+    .replace(/(f:)+/g, 'f:')
+    .replace(/0(.0)+/g, 'p');
+}
 
-  const NUMBER_PATTERN_CATEGORIES = 5;
-
-  const samplesWithPatterns = samples.flatMap((sample) => {
-    const value = get(sample, field);
-    if (typeof value !== 'string') {
-      return [];
-    }
+export function groupMessagesByPattern(
+  messages: string[],
+  params?: {
+    patternThreshold?: number;
+    minProbability?: number;
+    limit?: number;
+  }
+) {
+  const { patternThreshold = 6, minProbability = 0.03, limit = 3 } = params ?? {};
+  const samplesWithPatterns = messages.map((value) => {
     const pattern = evalPattern(value);
-    return [
-      {
-        document: sample,
-        fullPattern: pattern,
-        truncatedPattern: pattern.slice(0, 10),
-        fieldValue: get(sample, field) as string,
-      },
-    ];
+    return {
+      pattern,
+      truncatedPattern: pattern.slice(0, patternThreshold),
+      value,
+    };
   });
 
   // Group samples by their truncated patterns
   const groupedByTruncatedPattern = groupBy(samplesWithPatterns, 'truncatedPattern');
+
   // Process each group to create pattern summaries
   const patternSummaries = mapValues(
     groupedByTruncatedPattern,
     (samplesForTruncatedPattern, truncatedPattern) => {
-      const uniqueValues = uniq(samplesForTruncatedPattern.map(({ fieldValue }) => fieldValue));
-      const shuffledExamples = shuffle(uniqueValues);
-
       return {
         truncatedPattern,
-        count: samplesForTruncatedPattern.length,
-        exampleValues: shuffledExamples,
+        probability: samplesForTruncatedPattern.length / messages.length,
+        messages: samplesForTruncatedPattern.map(({ value }) => value),
       };
     }
   );
+
   // Convert to array, sort by count, and take top patterns
-  const patternsToProcess = orderBy(Object.values(patternSummaries), 'count', 'desc').slice(
-    0,
-    NUMBER_PATTERN_CATEGORIES
+  const patternsToProcess = orderBy(
+    Object.values(patternSummaries).filter(({ probability }) => probability >= minProbability),
+    'probability',
+    'desc'
   );
-  return patternsToProcess;
+
+  return patternsToProcess.slice(0, limit);
 }
