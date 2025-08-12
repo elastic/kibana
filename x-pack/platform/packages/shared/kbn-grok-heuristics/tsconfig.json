@@ -16,13 +16,8 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/streams-schema",
-    "@kbn/core",
     "@kbn/inference-common",
-    "@kbn/ai-tools",
     "@kbn/zod",
-    "@kbn/inference-prompt-utils",
-    "@kbn/std",
     "@kbn/tooling-log",
     "@kbn/sample-log-parser",
   ]
