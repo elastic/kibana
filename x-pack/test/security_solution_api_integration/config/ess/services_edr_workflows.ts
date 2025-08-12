@@ -15,7 +15,7 @@ import { RolesUsersProvider } from '../services/security_solution_edr_workflows_
 import {
   SecuritySolutionEndpointDataStreamHelpers,
   SecuritySolutionEndpointRegistryHelpers,
-} from '../../../common/services/security_solution';
+} from '../services/common';
 import { SecuritySolutionESSUtils } from '../services/security_solution_ess_utils';
 
 export const services = {

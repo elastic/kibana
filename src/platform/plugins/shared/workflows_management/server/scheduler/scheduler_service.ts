@@ -9,15 +9,15 @@
 
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import { Logger } from '@kbn/core/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { v4 as generateUuid } from 'uuid';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import {
+  convertToSerializableGraph,
+  convertToWorkflowGraph,
+} from '../../common/lib/build_execution_graph/build_execution_graph';
 import { WorkflowsService } from '../workflows_management/workflows_management_service';
 import { extractConnectorIds } from './lib/extract_connector_ids';
-import {
-  convertToWorkflowGraph,
-  convertToSerializableGraph,
-} from '../../common/lib/build_execution_graph/build_execution_graph';
 
 const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineModel[] => {
   return [];
@@ -60,7 +60,7 @@ export class SchedulerService {
     workflow: WorkflowExecutionEngineModel,
     inputs: Record<string, any>
   ): Promise<string> {
-    const executionGraph = convertToWorkflowGraph(workflow);
+    const executionGraph = convertToWorkflowGraph(workflow.definition);
     workflow.executionGraph = convertToSerializableGraph(executionGraph); // TODO: It's not good approach, it's temporary
     const connectorCredentials = await extractConnectorIds(this.actionsClient);
 
