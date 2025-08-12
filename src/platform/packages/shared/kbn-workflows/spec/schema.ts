@@ -87,6 +87,14 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
 });
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
+export const WaitStepSchema = BaseStepSchema.extend({
+  type: z.literal('wait'),
+  with: z.object({
+    duration: z.string().min(1), // e.g., '5s', '1m', '2h'
+  }),
+});
+export type WaitStep = z.infer<typeof WaitStepSchema>;
+
 export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
   foreach: z.string(),

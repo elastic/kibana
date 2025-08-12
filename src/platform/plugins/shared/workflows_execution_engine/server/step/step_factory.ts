@@ -22,6 +22,7 @@ import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/wor
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import { WaitStepImpl } from './wait_step/wait_step';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -56,6 +57,14 @@ export class StepFactory {
         return new ExitConditionBranchNodeImpl(step as any, workflowState);
       case 'exit-if':
         return new ExitIfNodeImpl(step as any, workflowState);
+      case 'wait':
+        return new WaitStepImpl(
+          step as any,
+          contextManager,
+          connectorExecutor,
+          workflowState,
+          workflowLogger
+        );
       case 'atomic':
         return new AtomicStepImpl(
           step as any,

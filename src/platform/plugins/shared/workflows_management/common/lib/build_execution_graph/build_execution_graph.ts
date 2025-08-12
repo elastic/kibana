@@ -38,7 +38,32 @@ function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep
     return visitForeachStep(graph, previousStep, currentStep);
   }
 
+  if (currentStep.type === 'wait' || currentStep.type === 'delay') {
+    return visitWaitStep(graph, previousStep, currentStep);
+  }
+
   return visitAtomicStep(graph, previousStep, currentStep);
+}
+
+export function visitWaitStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
+  const waitNode = {
+    id: getNodeId(currentStep),
+    type: 'wait',
+    configuration: {
+      ...currentStep,
+      type: 'wait',
+      with: {
+        duration: currentStep.with.duration || currentStep.with.delay,
+      },
+    },
+  };
+  graph.setNode(waitNode.id, waitNode);
+
+  if (previousStep) {
+    graph.setEdge(getNodeId(previousStep), waitNode.id);
+  }
+
+  return waitNode;
 }
 
 export function visitAtomicStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {

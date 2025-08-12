@@ -162,6 +162,8 @@ export class WorkflowExecutionRuntimeManager {
 
     this.workflowExecutionState.upsertStep(stepExecution);
     this.logStepStart(stepId);
+    // TODO: To think what to do here
+    await this.workflowExecutionState.flush();
   }
 
   public async finishStep(stepId: string): Promise<void> {
@@ -210,6 +212,7 @@ export class WorkflowExecutionRuntimeManager {
     };
     this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
     this.logWorkflowStart();
+    await this.workflowExecutionState.flush();
   }
 
   public async saveState(): Promise<void> {
