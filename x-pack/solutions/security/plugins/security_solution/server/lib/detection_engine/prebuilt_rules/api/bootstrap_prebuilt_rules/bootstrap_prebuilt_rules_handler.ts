@@ -87,8 +87,6 @@ export const bootstrapPrebuiltRulesHandler = async (
         version: securityAiPromptsResult.package.version,
         status: securityAiPromptsResult.status,
       });
-    } else {
-      logger.debug('bootstrapPrebuiltRulesHandler: Security AI prompts package failed to install');
     }
 
     const responseBody: BootstrapPrebuiltRulesResponse = {
