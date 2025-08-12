@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
+import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import {
   RULES_MANAGEMENT_TABLE,
   TAGS_PROPERTY_VALUE_ITEM,
   UPGRADE_ALL_RULES_BUTTON,
-} from '../../../../screens/alerts_detection_rules';
-import { expectRulesInTable, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
+} from '../../../../../screens/alerts_detection_rules';
+import { expectRulesInTable, goToRuleDetailsOf } from '../../../../../tasks/alerts_detection_rules';
 import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
-} from '../../../../tasks/api_calls/common';
-import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
-import { setUpRuleUpgrades } from '../../../../tasks/prebuilt_rules/setup_rule_upgrades';
-import { resetRulesTableState } from '../../../../tasks/common';
-import { login } from '../../../../tasks/login';
+} from '../../../../../tasks/api_calls/common';
+import { installMockPrebuiltRulesPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
+import { setUpRuleUpgrades } from '../../../../../tasks/prebuilt_rules/setup_rule_upgrades';
+import { resetRulesTableState } from '../../../../../tasks/common';
+import { login } from '../../../../../tasks/login';
 import {
   assertRulesNotPresentInRuleUpdatesTable,
   assertRuleUpgradeSuccessToastShown,
-} from '../../../../tasks/prebuilt_rules';
+} from '../../../../../tasks/prebuilt_rules';
 import {
   visitRulesManagementTable,
   visitRulesUpgradeTable,
-} from '../../../../tasks/rules_management';
-import { downgradeLicenseToBasic } from '../../../../tasks/license';
+} from '../../../../../tasks/rules_management';
+import { downgradeLicenseToBasic } from '../../../../../tasks/license';
 
 describe('Detection rules, Prebuilt Rules Upgrade Without Preview', { tags: ['@ess'] }, () => {
   before(() => {

@@ -13,8 +13,8 @@ import type { ReviewRuleUpgradeResponseBody } from '@kbn/security-solution-plugi
 import type { Threshold } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { getPrebuiltRuleMockOfType } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
-import { setUpRuleUpgrades } from '../../../../tasks/prebuilt_rules/setup_rule_upgrades';
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
+import { setUpRuleUpgrades } from '../../../../../tasks/prebuilt_rules/setup_rule_upgrades';
+import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import {
   UPDATE_PREBUILT_RULE_PREVIEW,
   UPDATE_PREBUILT_RULE_BUTTON,
@@ -22,17 +22,17 @@ import {
   PER_FIELD_DIFF_WRAPPER,
   PER_FIELD_DIFF_DEFINITION_SECTION,
   RULES_MANAGEMENT_TABLE,
-} from '../../../../screens/alerts_detection_rules';
-import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
-import { createSavedQuery, deleteSavedQueries } from '../../../../tasks/api_calls/saved_queries';
-import { fetchMachineLearningModules } from '../../../../tasks/api_calls/machine_learning';
-import { resetRulesTableState } from '../../../../tasks/common';
-import { login } from '../../../../tasks/login';
+} from '../../../../../screens/alerts_detection_rules';
+import { installMockPrebuiltRulesPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
+import { createSavedQuery, deleteSavedQueries } from '../../../../../tasks/api_calls/saved_queries';
+import { fetchMachineLearningModules } from '../../../../../tasks/api_calls/machine_learning';
+import { resetRulesTableState } from '../../../../../tasks/common';
+import { login } from '../../../../../tasks/login';
 import {
   assertRulesNotPresentInRuleUpdatesTable,
   assertRuleUpgradeSuccessToastShown,
   clickRuleUpdatesTab,
-} from '../../../../tasks/prebuilt_rules';
+} from '../../../../../tasks/prebuilt_rules';
 import {
   assertAlertSuppressionPropertiesShown,
   assertCommonPropertiesShown,
@@ -52,19 +52,19 @@ import {
   openPrebuiltRuleUpgradeFlyoutFor,
   selectPreviewTab,
   closePrebuiltRuleUpgradeFlyout,
-} from '../../../../tasks/prebuilt_rules_preview';
+} from '../../../../../tasks/prebuilt_rules_preview';
 import {
   visitRulesManagementTable,
   visitRulesUpgradeTable,
-} from '../../../../tasks/rules_management';
+} from '../../../../../tasks/rules_management';
 import {
   deleteAlertsAndRules,
   deleteDataView,
   deletePrebuiltRulesAssets,
   postDataView,
-} from '../../../../tasks/api_calls/common';
-import { enableRules, waitForRulesToFinishExecution } from '../../../../tasks/api_calls/rules';
-import { expectRulesInTable, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
+} from '../../../../../tasks/api_calls/common';
+import { enableRules, waitForRulesToFinishExecution } from '../../../../../tasks/api_calls/rules';
+import { expectRulesInTable, goToRuleDetailsOf } from '../../../../../tasks/alerts_detection_rules';
 import {
   acceptFieldValue,
   cancelFieldValue,
@@ -72,7 +72,7 @@ import {
   switchFieldToEditMode,
   toggleFieldAccordion,
   typeRuleName,
-} from '../../../../tasks/prebuilt_rules/prebuilt_rules_upgrade_flyout';
+} from '../../../../../tasks/prebuilt_rules/prebuilt_rules_upgrade_flyout';
 
 const PREVIEW_TABS = {
   OVERVIEW: 'Overview',

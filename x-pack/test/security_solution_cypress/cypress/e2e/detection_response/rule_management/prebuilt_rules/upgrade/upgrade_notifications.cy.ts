@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
+import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import {
   ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN,
   RULES_UPDATES_TAB,
   RULES_UPDATES_TABLE,
   UPDATE_PREBUILT_RULE_PREVIEW,
-} from '../../../../screens/alerts_detection_rules';
+} from '../../../../../screens/alerts_detection_rules';
 import {
   PREBUILT_RULES_UPGRADE_REMINDER_CALLOUT,
   SINGLE_PREBUILT_RULE_UPGRADE_REMINDER_CALLOUT,
-} from '../../../../screens/prebuilt_rules_upgrade';
-import { expectManagementTableRules } from '../../../../tasks/alerts_detection_rules';
+} from '../../../../../screens/prebuilt_rules_upgrade';
+import { expectManagementTableRules } from '../../../../../tasks/alerts_detection_rules';
 import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
-} from '../../../../tasks/api_calls/common';
+} from '../../../../../tasks/api_calls/common';
 import {
   installPrebuiltRuleAssets,
   installMockEmptyPrebuiltRulesPackage,
   installSpecificPrebuiltRulesRequest,
-} from '../../../../tasks/api_calls/prebuilt_rules';
-import { resetRulesTableState } from '../../../../tasks/common';
-import { login } from '../../../../tasks/login';
-import { visitRulesManagementTable } from '../../../../tasks/rules_management';
-import { visitRuleDetailsPage } from '../../../../tasks/rule_details';
-import { visitRuleEditPage } from '../../../../tasks/edit_rule';
-import { EDIT_RULE_SETTINGS_LINK } from '../../../../screens/rule_details';
+} from '../../../../../tasks/api_calls/prebuilt_rules';
+import { resetRulesTableState } from '../../../../../tasks/common';
+import { login } from '../../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
+import { visitRuleDetailsPage } from '../../../../../tasks/rule_details';
+import { visitRuleEditPage } from '../../../../../tasks/edit_rule';
+import { EDIT_RULE_SETTINGS_LINK } from '../../../../../screens/rule_details';
 
 describe(
   'Detection rules, Prebuilt Rules Upgrade Notifications',
