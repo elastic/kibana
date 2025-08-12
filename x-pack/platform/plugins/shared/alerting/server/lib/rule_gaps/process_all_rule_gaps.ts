@@ -66,8 +66,8 @@ const getNextRuleIdsToProcess = (
     .map(([ruleId]) => ruleId);
 };
 
-const PROCESS_ALL_RULE_GAPS_CONCURRENCY = 10
-const PROCESS_ALL_RULE_GAPS_CHUNK_SIZE = 10
+const PROCESS_ALL_RULE_GAPS_CONCURRENCY = 10;
+const PROCESS_ALL_RULE_GAPS_CHUNK_SIZE = 10;
 
 /**
  * Fetches all gaps using search_after pagination to process more than 10,000 gaps with stable sorting
@@ -89,10 +89,13 @@ export const processAllRuleGaps = async <T>({
 
     const { maxProcessedGapsPerRule } = options ?? {};
 
-    const overallProcessedCountsByRuleId = ruleIdsToProcess.reduce<Record<string, number>>((acc, ruleId) => {
-      acc[ruleId] = 0;
-      return acc;
-    }, {});
+    const overallProcessedCountsByRuleId = ruleIdsToProcess.reduce<Record<string, number>>(
+      (acc, ruleId) => {
+        acc[ruleId] = 0;
+        return acc;
+      },
+      {}
+    );
 
     try {
       while (true) {
@@ -122,7 +125,11 @@ export const processAllRuleGaps = async <T>({
           },
         });
 
-        const { data: gapsToProcess, searchAfter: nextSearchAfter, pitId: nextPitId } = gapsResponse;
+        const {
+          data: gapsToProcess,
+          searchAfter: nextSearchAfter,
+          pitId: nextPitId,
+        } = gapsResponse;
         pitId = nextPitId;
 
         if (gapsToProcess.length > 0) {
@@ -131,10 +138,7 @@ export const processAllRuleGaps = async <T>({
             maxProcessedGapsPerRule
           );
 
-          const processedCountsByRuleId = await processGapsBatch(
-            gapsToProcess,
-            limitsByRuleId
-          );
+          const processedCountsByRuleId = await processGapsBatch(gapsToProcess, limitsByRuleId);
 
           Object.entries(processedCountsByRuleId).forEach(([ruleId, processedCount]) => {
             overallProcessedCountsByRuleId[ruleId] += processedCount;
@@ -159,5 +163,7 @@ export const processAllRuleGaps = async <T>({
     }
   };
 
-  await pMap(chunk(ruleIds, PROCESS_ALL_RULE_GAPS_CHUNK_SIZE), processChunk, { concurrency: PROCESS_ALL_RULE_GAPS_CONCURRENCY });
+  await pMap(chunk(ruleIds, PROCESS_ALL_RULE_GAPS_CHUNK_SIZE), processChunk, {
+    concurrency: PROCESS_ALL_RULE_GAPS_CONCURRENCY,
+  });
 };

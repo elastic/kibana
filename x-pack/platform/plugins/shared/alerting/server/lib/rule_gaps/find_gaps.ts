@@ -60,7 +60,7 @@ export const findGaps = async ({
   }
 };
 
-const FIND_GAPS_SEARCH_AFTER_MAX_RULES = 100
+const FIND_GAPS_SEARCH_AFTER_MAX_RULES = 100;
 
 /**
  * This function is used to find gaps using search after.
