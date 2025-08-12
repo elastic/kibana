@@ -63,7 +63,13 @@ export enum SiemMigrationRetryFilter {
   NOT_FULLY_TRANSLATED = 'not_fully_translated',
 }
 
+// TODO: Refactor all uses of `RuleTranslationResult` -> `MigrationTranslationResult`
 export enum RuleTranslationResult {
+  FULL = 'full',
+  PARTIAL = 'partial',
+  UNTRANSLATABLE = 'untranslatable',
+}
+export enum MigrationTranslationResult {
   FULL = 'full',
   PARTIAL = 'partial',
   UNTRANSLATABLE = 'untranslatable',

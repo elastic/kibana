@@ -21,6 +21,7 @@ import {
   MigrationLastExecution,
   MigrationTranslationResult,
   MigrationStatus,
+  MigrationComments,
   MigrationTaskStats,
 } from './migration.gen';
 import { SplunkOriginalDashboardProperties } from './vendor/dashboards/splunk.gen';
@@ -88,7 +89,7 @@ export const OriginalDashboard = z.object({
   /**
    * The data of the dashboard in the specified format
    */
-  data: z.object({}),
+  data: z.string(),
   /**
    * The last updated timestamp of the dashboard
    */
@@ -160,6 +161,10 @@ export const DashboardMigrationDashboardData = z.object({
    */
   status: MigrationStatus.default('pending'),
   /**
+   * The comments for the migration including a summary from the LLM in markdown.
+   */
+  comments: MigrationComments.optional(),
+  /**
    * The moment of the last update
    */
   updated_at: z.string().optional(),
@@ -187,3 +192,24 @@ export const DashboardMigrationDashboard = z
  */
 export type DashboardMigrationTaskStats = z.infer<typeof DashboardMigrationTaskStats>;
 export const DashboardMigrationTaskStats = MigrationTaskStats;
+
+/**
+ * The dashboard migration task execution settings.
+ */
+export type DashboardMigrationTaskExecutionSettings = z.infer<
+  typeof DashboardMigrationTaskExecutionSettings
+>;
+export const DashboardMigrationTaskExecutionSettings = z.object({
+  /**
+   * The connector ID used in the last execution.
+   */
+  connector_id: z.string(),
+});
+
+/**
+ * Indicates the filter to retry the migrations dashboards translation
+ */
+export type DashboardMigrationRetryFilter = z.infer<typeof DashboardMigrationRetryFilter>;
+export const DashboardMigrationRetryFilter = z.enum(['failed', 'not_fully_translated']);
+export type DashboardMigrationRetryFilterEnum = typeof DashboardMigrationRetryFilter.enum;
+export const DashboardMigrationRetryFilterEnum = DashboardMigrationRetryFilter.enum;

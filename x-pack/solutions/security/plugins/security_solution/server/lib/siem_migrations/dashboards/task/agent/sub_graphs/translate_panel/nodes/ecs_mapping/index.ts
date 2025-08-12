@@ -4,6 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { MockRuleMigrationsTaskClient } from './mocks';
-export const RuleMigrationsTaskClient = MockRuleMigrationsTaskClient;
+export { getEcsMappingNode } from './ecs_mapping';

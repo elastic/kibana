@@ -7,12 +7,12 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { SIEM_RULE_MIGRATION_START_PATH } from '../../../../../common/siem_migrations/constants';
+import { SIEM_DASHBOARD_MIGRATION_START_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import {
-  StartRuleMigrationRequestBody,
-  StartRuleMigrationRequestParams,
-  type StartRuleMigrationResponse,
-} from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+  StartDashboardsMigrationRequestBody,
+  StartDashboardsMigrationRequestParams,
+  type StartDashboardsMigrationResponse,
+} from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
 import { authz } from '../../common/api/util/authz';
@@ -21,13 +21,13 @@ import { withLicense } from '../../common/api/util/with_license';
 import { createTracersCallbacks } from '../../common/api/util/tracing';
 import { withExistingDashboardMigration } from './util/with_existing_dashboard_migration';
 
-export const registerSiemRuleMigrationsStartRoute = (
+export const registerSiemDashboardMigrationsStartRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {
   router.versioned
     .post({
-      path: SIEM_RULE_MIGRATION_START_PATH,
+      path: SIEM_DASHBOARD_MIGRATION_START_PATH,
       access: 'internal',
       security: { authz },
     })
@@ -36,21 +36,18 @@ export const registerSiemRuleMigrationsStartRoute = (
         version: '1',
         validate: {
           request: {
-            params: buildRouteValidationWithZod(StartRuleMigrationRequestParams),
-            body: buildRouteValidationWithZod(StartRuleMigrationRequestBody),
+            params: buildRouteValidationWithZod(StartDashboardsMigrationRequestParams),
+            body: buildRouteValidationWithZod(StartDashboardsMigrationRequestBody),
           },
         },
       },
       withLicense(
         withExistingDashboardMigration(
-          async (context, req, res): Promise<IKibanaResponse<StartRuleMigrationResponse>> => {
+          async (context, req, res): Promise<IKibanaResponse<StartDashboardsMigrationResponse>> => {
             const migrationId = req.params.migration_id;
             const {
               langsmith_options: langsmithOptions,
-              settings: {
-                connector_id: connectorId,
-                skip_prebuilt_rules_matching: skipPrebuiltRulesMatching = false,
-              },
+              settings: { connector_id: connectorId },
               retry,
             } = req.body;
 
@@ -81,7 +78,7 @@ export const registerSiemRuleMigrationsStartRoute = (
               const { exists, started } = await dashboardMigrationsClient.task.start({
                 migrationId,
                 connectorId,
-                invocationConfig: { callbacks, configurable: { skipPrebuiltRulesMatching } },
+                invocationConfig: { callbacks },
               });
 
               if (!exists) {

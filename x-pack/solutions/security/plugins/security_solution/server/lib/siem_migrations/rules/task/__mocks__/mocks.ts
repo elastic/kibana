@@ -45,7 +45,7 @@ export const createRuleMigrationsTaskClientMock = () => ({
   stop: jest.fn().mockResolvedValue({ stopped: true }),
   getStats: jest.fn().mockResolvedValue({
     status: 'done',
-    rules: {
+    items: {
       total: 1,
       finished: 1,
       processing: 0,

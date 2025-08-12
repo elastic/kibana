@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export const getDashboardMigrationAgent = (params: object) => ({
-  // TODO: Implement the dashboard migration agent
-  invoke: (input: object, config?: object) => {},
-});
+export { getDashboardMigrationAgent } from './graph';

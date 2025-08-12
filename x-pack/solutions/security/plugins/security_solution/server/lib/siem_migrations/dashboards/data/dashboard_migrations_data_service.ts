@@ -73,6 +73,7 @@ export class DashboardMigrationsDataService extends SiemMigrationsBaseDataServic
     await Promise.all([
       this.adapters.dashboards.install({ ...params, logger: this.logger }),
       this.adapters.migrations.install({ ...params, logger: this.logger }),
+      this.adapters.resources.install({ ...params, logger: this.logger }),
     ]);
   }
 

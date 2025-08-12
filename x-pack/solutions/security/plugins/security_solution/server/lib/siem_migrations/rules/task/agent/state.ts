@@ -16,6 +16,7 @@ import type {
 import type { MigrationResources } from '../../../common/task/retrievers/resource_retriever';
 
 export const migrateRuleState = Annotation.Root({
+  id: Annotation<string>(),
   original_rule: Annotation<OriginalRule>(),
   resources: Annotation<MigrationResources>(),
   elastic_rule: Annotation<ElasticRulePartial>({

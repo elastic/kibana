@@ -85,7 +85,7 @@ export const getInlineSplQuery: NodeToolCreator<
 };
 
 const getUnsupportedComment = (query: string): string | undefined => {
-  const unsupportedText = '## Translation Summary\nCan not create custom translation.\n';
+  const unsupportedText = '## Translation Summary\nCan not create query translation.\n';
   if (query.includes(' inputlookup')) {
     return `${unsupportedText}Reason: \`inputlookup\` command is not supported.`;
   }

@@ -21,12 +21,8 @@ import { nullifyMissingProperties } from '../../common/task/util/nullify_missing
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import { SiemMigrationTaskRunner } from '../../common/task/siem_migrations_task_runner';
 import { RuleMigrationTelemetryClient } from './rule_migrations_telemetry_client';
-import type { MigrationResources } from '../../common/task/retrievers/resource_retriever';
 
-export interface RuleMigrationTaskInput
-  extends Pick<StoredRuleMigrationRule, 'id' | 'original_rule'> {
-  resources: MigrationResources;
-}
+export type RuleMigrationTaskInput = Pick<MigrateRuleState, 'id' | 'original_rule' | 'resources'>;
 export type RuleMigrationTaskOutput = MigrateRuleState;
 
 export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<

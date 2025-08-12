@@ -6,9 +6,9 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { RuleMigrationsRetriever } from '..';
+import type { DashboardMigrationsRetriever } from '..';
 
-export const createRuleMigrationsRetrieverMock = () => {
+export const createDashboardMigrationsRetrieverMock = () => {
   const mockResources = {
     initialize: jest.fn().mockResolvedValue(undefined),
     getResources: jest.fn().mockResolvedValue({}),
@@ -19,7 +19,7 @@ export const createRuleMigrationsRetrieverMock = () => {
     search: jest.fn().mockResolvedValue([]),
   };
 
-  const mockPrebuiltRules = {
+  const mockPrebuiltDashboards = {
     populateIndex: jest.fn().mockResolvedValue(undefined),
     search: jest.fn().mockResolvedValue([]),
   };
@@ -27,13 +27,13 @@ export const createRuleMigrationsRetrieverMock = () => {
   const mockRetriever = {
     resources: mockResources,
     integrations: mockIntegrations,
-    prebuiltRules: mockPrebuiltRules,
+    prebuiltDashboards: mockPrebuiltDashboards,
     initialize: jest.fn().mockResolvedValue(undefined),
   };
 
-  return mockRetriever as jest.Mocked<PublicMethodsOf<RuleMigrationsRetriever>>;
+  return mockRetriever as jest.Mocked<PublicMethodsOf<DashboardMigrationsRetriever>>;
 };
 
-export const MockRuleMigrationsRetriever = jest
+export const MockDashboardMigrationsRetriever = jest
   .fn()
-  .mockImplementation(() => createRuleMigrationsRetrieverMock());
+  .mockImplementation(() => createDashboardMigrationsRetrieverMock());

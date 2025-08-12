@@ -33,13 +33,15 @@ import type { SiemMigrationTaskEvaluatorClass } from './siem_migrations_task_eva
 export abstract class SiemMigrationsTaskClient<
   M extends MigrationDocument = StoredSiemMigration,
   I extends ItemDocument = ItemDocument,
-  C extends object = {}
+  P extends object = {}, // The migration task input parameters schema
+  C extends object = {}, // The migration task config schema
+  O extends object = {} // The migration task output schema
 > {
-  protected abstract readonly TaskRunnerClass: typeof SiemMigrationTaskRunner<M, I, C>;
-  protected abstract readonly EvaluatorClass?: SiemMigrationTaskEvaluatorClass<M, I, C>;
+  protected abstract readonly TaskRunnerClass: typeof SiemMigrationTaskRunner<M, I, P, C, O>;
+  protected abstract readonly EvaluatorClass?: SiemMigrationTaskEvaluatorClass<M, I, P, C, O>;
 
   constructor(
-    protected migrationsRunning: Map<string, SiemMigrationTaskRunner<M, I, C>>,
+    protected migrationsRunning: Map<string, SiemMigrationTaskRunner<M, I, P, C, O>>,
     private logger: Logger,
     private data: SiemMigrationsDataClient<M, I>,
     private currentUser: AuthenticatedUser,

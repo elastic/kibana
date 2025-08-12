@@ -10,6 +10,10 @@ import type {
   RuleMigration,
   RuleMigrationRule,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type {
+  RuleMigrationTaskInput,
+  RuleMigrationTaskOutput,
+} from './rule_migrations_task_runner';
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
 import { SiemMigrationsTaskClient } from '../../common/task/siem_migrations_task_client';
 import type { MigrateRuleConfigSchema } from './agent/types';
@@ -19,7 +23,9 @@ export type RuleMigrationsRunning = Map<string, RuleMigrationTaskRunner>;
 export class RuleMigrationsTaskClient extends SiemMigrationsTaskClient<
   RuleMigration,
   RuleMigrationRule,
-  MigrateRuleConfigSchema
+  RuleMigrationTaskInput,
+  MigrateRuleConfigSchema,
+  RuleMigrationTaskOutput
 > {
   protected readonly TaskRunnerClass = RuleMigrationTaskRunner;
   protected readonly EvaluatorClass = RuleMigrationTaskEvaluator;
