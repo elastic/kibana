@@ -17,6 +17,7 @@ import {
   isPair,
   isScalar,
   isSeq,
+  Node,
   parseDocument,
   Scalar,
   visit,
@@ -35,7 +36,9 @@ export function getYamlStringFromJSON(json: any) {
 export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
   yamlString: string,
   schema: T
-): z.SafeParseReturnType<z.input<T>, z.output<T>> {
+):
+  | z.SafeParseReturnType<z.input<T>, z.output<T>>
+  | { success: false; error: Error; data: undefined } {
   try {
     let error: Error | undefined;
     const doc = parseDocument(yamlString);
@@ -44,24 +47,26 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
     // TODO: replace with { stringKeys: true } parse options, when 'yaml' package updated to 2.6.1
     visit(doc, {
       Pair(_, pair) {
-        if (!isScalar(pair.key)) {
-          let actualType = 'unknown';
-          if (isMap(pair.key)) {
-            actualType = 'map';
-          } else if (isSeq(pair.key)) {
-            actualType = 'seq';
-          } else if (isAlias(pair.key)) {
-            actualType = 'alias';
-          } else if (isDocument(pair.key)) {
-            actualType = 'document';
-          } else if (isPair(pair.key)) {
-            actualType = 'pair';
-          } else if (isCollection(pair.key)) {
-            actualType = 'collection';
-          }
-          error = new Error(`Invalid key type: ${actualType} in range ${pair.key.range}`);
-          return visit.BREAK;
+        if (isScalar(pair.key)) {
+          return;
         }
+        let actualType = 'unknown';
+        const range = (pair.key as Node)?.range;
+        if (isMap(pair.key)) {
+          actualType = 'map';
+        } else if (isSeq(pair.key)) {
+          actualType = 'seq';
+        } else if (isAlias(pair.key)) {
+          actualType = 'alias';
+        } else if (isDocument(pair.key)) {
+          actualType = 'document';
+        } else if (isPair(pair.key)) {
+          actualType = 'pair';
+        } else if (isCollection(pair.key)) {
+          actualType = 'collection';
+        }
+        error = new Error(`Invalid key type: ${actualType} in ${range ? `range ${range}` : ''}`);
+        return visit.BREAK;
       },
     });
 
@@ -69,6 +74,7 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
       return {
         success: false,
         error,
+        data: undefined,
       };
     }
 
