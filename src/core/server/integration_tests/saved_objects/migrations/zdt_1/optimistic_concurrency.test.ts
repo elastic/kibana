@@ -32,7 +32,7 @@ interface TestSOType {
   keyword: string;
 }
 
-describe('ZDT upgrades - encountering conversion failures', () => {
+describe('ZDT upgrades - optimistic concurrency tests', () => {
   let esServer: TestElasticsearchUtils['es'];
 
   beforeAll(async () => {
@@ -47,44 +47,43 @@ describe('ZDT upgrades - encountering conversion failures', () => {
     await fs.unlink(logFilePath).catch(() => {});
   });
 
-  describe('optimistic concurrency tests', () => {
-    it('doesnt overwrite changes made while migrating', async () => {
-      const { runMigrations, savedObjectsRepository, client } = await prepareScenario({
-        discardCorruptObjects: false,
+  it('doesnt overwrite changes made while migrating', async () => {
+    const { runMigrations, savedObjectsRepository, client } = await prepareScenario({
+      discardCorruptObjects: false,
+    });
+
+    const originalBulkImplementation = client.bulk;
+    const spy = jest.spyOn(client, 'bulk');
+    spy.mockImplementation(function (this: typeof client, ...args) {
+      // let's run some updates before we run the bulk operations
+      return Promise.all(
+        ['a-0', 'a-3', 'a-4'].map((id) =>
+          savedObjectsRepository.update('sample_a', id, {
+            keyword: 'concurrent update that shouldnt be overwritten',
+          })
+        )
+      ).then(() => {
+        return originalBulkImplementation.apply(this, args);
       });
+    });
 
-      const originalBulkImplementation = client.bulk;
-      const spy = jest.spyOn(client, 'bulk');
-      spy.mockImplementation(function (this: typeof client, ...args) {
-        // let's run some updates before we run the bulk operations
-        return Promise.all(
-          ['a-0', 'a-3', 'a-4'].map((id) =>
-            savedObjectsRepository.update('sample_a', id, {
-              keyword: 'concurrent update that shouldnt be overwritten',
-            })
-          )
-        ).then(() => {
-          return originalBulkImplementation.apply(this, args);
-        });
-      });
+    await runMigrations();
 
-      await runMigrations();
+    const records = await parseLogFile(logFilePath);
+    expect(records).toContainLogEntry('-> DONE');
 
-      const records = await parseLogFile(logFilePath);
-      expect(records).toContainLogEntry('-> DONE');
+    const { saved_objects: sampleADocs } = await savedObjectsRepository.find<TestSOType>({
+      type: 'sample_a',
+    });
 
-      const { saved_objects: sampleADocs } = await savedObjectsRepository.find<TestSOType>({
-        type: 'sample_a',
-      });
-
-      expect(
-        sampleADocs
-          .map((doc) => ({
-            id: doc.id,
-            keyword: doc.attributes.keyword,
-          }))
-          .sort((a, b) => a.id.localeCompare(b.id))
-      ).toMatchInlineSnapshot(`
+    expect(
+      sampleADocs
+        .map((doc) => ({
+          id: doc.id,
+          keyword: doc.attributes.keyword,
+        }))
+        .sort((a, b) => a.id.localeCompare(b.id))
+    ).toMatchInlineSnapshot(`
         Array [
           Object {
             "id": "a-0",
@@ -108,7 +107,6 @@ describe('ZDT upgrades - encountering conversion failures', () => {
           },
         ]
       `);
-    });
   });
 
   const prepareScenario = async ({ discardCorruptObjects }: { discardCorruptObjects: boolean }) => {
