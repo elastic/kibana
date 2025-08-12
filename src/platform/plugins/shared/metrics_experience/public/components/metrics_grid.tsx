@@ -40,7 +40,7 @@ type MetricsGridProps = {
     }
 );
 
-export const MetricsGrid: React.FC<MetricsGridProps> = ({
+export const MetricsGrid = ({
   fields,
   timeRange,
   loading,
@@ -49,7 +49,7 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
   pivotOn,
   filters = [],
   displayDensity = 'normal',
-}) => {
+}: MetricsGridProps) => {
   // Determine number of columns based on display density
   const getColumns = () => {
     switch (displayDensity) {

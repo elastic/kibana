@@ -9,26 +9,6 @@
 
 import { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 
-export interface Dimension {
-  name: string;
-  type: string;
-  description?: string;
-}
-
-export interface MetricField {
-  name: string;
-  index: string; // TODO: Change this to `datastream`
-  dimensions: Array<Dimension>;
-  type: string;
-  time_series_metric?: string;
-  unit?: string;
-  description?: string;
-  source?: string;
-  stability?: string;
-  display?: string;
-  no_data?: boolean;
-}
-
 export type DataStreamFieldCapsMap = Map<
   string,
   Record<string, Record<string, FieldCapsFieldCapability>>

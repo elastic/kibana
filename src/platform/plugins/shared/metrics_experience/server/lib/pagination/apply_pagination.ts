@@ -7,14 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dimensionsRoutes } from './dimensions/route';
-import { metricDataApi as metricDataRoutes } from './api/data';
-import { fieldsRoutes } from './fields/route';
-
-export const routeRepository = {
-  ...dimensionsRoutes,
-  ...fieldsRoutes,
-  ...metricDataRoutes, // TODO: Remove once we integrate with Lens for the charts
-};
-
-export type MetricsExperienceRouteRepository = typeof routeRepository;
+export function applyPagination<T>({
+  metricFields,
+  page,
+  size,
+}: {
+  metricFields: T[];
+  page: number;
+  size: number;
+}) {
+  // For the first page, we need to start at Zero, for the remaining pages
+  // offset by 1 then multiply by size
+  const start = page === 1 ? page - 1 : (page - 1) * size;
+  const end = page * size;
+  return metricFields.slice(start, end);
+}

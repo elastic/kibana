@@ -8,8 +8,8 @@
  */
 
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
-import { getEcsFieldDescriptions } from './get_ecs_field_descriptions';
-import { Dimension } from '../types';
+import { getEcsFieldDescriptions } from '../fields/get_ecs_field_descriptions';
+import { Dimension } from '../../types';
 
 export function extractDimensions(
   fields: Record<string, Record<string, FieldCapsFieldCapability>>,

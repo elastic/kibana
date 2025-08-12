@@ -11,3 +11,5 @@ export { useMetricDataQuery } from './use_metric_data_query';
 export { useMetricFieldsQuery } from './use_metric_fields_query';
 export { useDimensionsQuery } from './use_dimensions_query';
 export { useEsqlAst } from './use_esql_ast';
+export { useKibana } from './use_kibana';
+export { useMetricsExperience } from './use_metrics_experience';

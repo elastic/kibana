@@ -16,11 +16,7 @@ interface PaginationProps {
   onPageChange: (pageIndex: number) => void;
 }
 
-export const Pagination: React.FC<PaginationProps> = ({
-  totalPages,
-  currentPage,
-  onPageChange,
-}) => {
+export const Pagination = ({ totalPages, currentPage, onPageChange }: PaginationProps) => {
   if (totalPages <= 1) {
     return null;
   }

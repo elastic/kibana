@@ -8,15 +8,9 @@
  */
 
 import { QueryFunctionContext, useInfiniteQuery } from '@tanstack/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEffect, useMemo } from 'react';
-import { MetricField } from '../types';
-
-interface MetricFieldsApiResponse {
-  fields: MetricField[];
-  total: number;
-  page: number;
-}
+import { MetricField } from '../../common/fields/types';
+import { useMetricsExperience } from './use_metrics_experience';
 
 export const useMetricFieldsQuery = (params?: {
   fields?: string[];
@@ -24,9 +18,7 @@ export const useMetricFieldsQuery = (params?: {
   from?: string;
   to?: string;
 }) => {
-  const {
-    services: { http },
-  } = useKibana();
+  const { callApi } = useMetricsExperience();
 
   const { hasNextPage, data, status, fetchNextPage, isLoading, isFetchingNextPage } =
     useInfiniteQuery({
@@ -34,21 +26,23 @@ export const useMetricFieldsQuery = (params?: {
       queryFn: async ({
         queryKey,
         pageParam = 1,
-      }: QueryFunctionContext<[string, string[]?, string?, string?, string?]>): Promise<
-        MetricFieldsApiResponse | undefined
-      > => {
+        signal,
+      }: QueryFunctionContext<[string, string[]?, string?, string?, string?], number>) => {
         try {
           const [, fields, index, from, to] = queryKey;
-          const url = '/internal/metrics_experience/fields';
-          const response = await http?.get<MetricFieldsApiResponse>(url, {
-            query: {
-              fields,
-              index,
-              from,
-              to,
-              page: pageParam,
-              size: 200,
+
+          const response = await callApi('GET /internal/metrics_experience/fields', {
+            params: {
+              query: {
+                fields,
+                index,
+                from,
+                to,
+                page: pageParam,
+                size: 200,
+              },
             },
+            signal,
           });
 
           if (!response) {
@@ -74,16 +68,8 @@ export const useMetricFieldsQuery = (params?: {
     }
   }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
-  const metricFieldsData = useMemo(() => {
-    const fieldData: MetricField[] = [];
-    if (data) {
-      for (const page of data?.pages) {
-        if (page) {
-          fieldData.push(...page.fields);
-        }
-      }
-      return fieldData;
-    }
+  const metricFieldsData = useMemo<MetricField[]>(() => {
+    return data?.pages?.filter(Boolean).flatMap((page) => page.fields) ?? [];
   }, [data]);
 
   return { data: metricFieldsData, status, isLoading };

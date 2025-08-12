@@ -14,10 +14,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MetricsGridSection } from './components/metrics_grid_section';
 import { store } from './store';
+import { MetricsExperienceProvider } from './context/metrics_experience_provider';
+import { MetricsExperienceService } from './types';
 
 interface ApplicationProps {
   appMountParameters: AppMountParameters;
   coreStart: CoreStart;
+
+  service: MetricsExperienceService;
 }
 
 const queryClient = new QueryClient({
@@ -31,14 +35,19 @@ const queryClient = new QueryClient({
   },
 });
 
-export const Application: React.FC<ApplicationProps> = ({ coreStart }) => {
+export const Application = ({ coreStart, service }: ApplicationProps) => {
   return (
     <KibanaContextProvider services={coreStart}>
-      <Provider store={store}>
-        <QueryClientProvider client={queryClient}>
-          <MetricsGridSection indexPattern="metrics-*" timeRange={{ from: 'now-1h', to: 'now' }} />
-        </QueryClientProvider>
-      </Provider>
+      <MetricsExperienceProvider value={service}>
+        <Provider store={store}>
+          <QueryClientProvider client={queryClient}>
+            <MetricsGridSection
+              indexPattern="metrics-*"
+              timeRange={{ from: 'now-1h', to: 'now' }}
+            />
+          </QueryClientProvider>
+        </Provider>
+      </MetricsExperienceProvider>
     </KibanaContextProvider>
   );
 };

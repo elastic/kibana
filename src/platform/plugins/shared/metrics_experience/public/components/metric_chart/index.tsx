@@ -10,7 +10,7 @@
 import React, { useMemo } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useMetricDataQuery } from '../../hooks';
-import { MetricField } from '../../types';
+import type { MetricField } from '../../../common/fields/types';
 import { createESQLQuery } from '../../utils';
 import { ChartContent } from './chart_content';
 import { ChartHeader } from './chart_header';

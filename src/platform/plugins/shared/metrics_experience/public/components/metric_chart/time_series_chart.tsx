@@ -49,7 +49,7 @@ interface TimeSeriesChartProps {
   colorIndex?: number;
 }
 
-export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
+export const TimeSeriesChart = ({
   data,
   timeRange,
   colorMode,
@@ -62,7 +62,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
   unit,
   showLegend = false,
   colorIndex,
-}) => {
+}: TimeSeriesChartProps) => {
   const { euiTheme } = useEuiTheme();
 
   // Create array of EUI vis colors for cycling

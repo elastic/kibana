@@ -31,13 +31,13 @@ interface DimensionsFilterProps {
   onApplyChanges?: () => void;
 }
 
-export const DimensionsFilter: React.FC<DimensionsFilterProps> = ({
+export const DimensionsFilter = ({
   fields,
   selectedDimensions,
   onDimensionChange,
   searchTerm,
   onApplyChanges,
-}) => {
+}: DimensionsFilterProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   // Extract all unique dimensions from fields that match the search term

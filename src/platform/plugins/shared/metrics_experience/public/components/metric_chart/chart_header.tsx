@@ -18,7 +18,7 @@ import {
   EuiTextTruncate,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { MetricField } from '../../types';
+import type { MetricField } from '../../../common/fields/types';
 import { MetricInsightsFlyout } from '../metrics_insights_flyout';
 
 interface ChartHeaderProps {
@@ -29,13 +29,13 @@ interface ChartHeaderProps {
   displayDensity?: 'normal' | 'compact' | 'row';
 }
 
-export const ChartHeader: React.FC<ChartHeaderProps> = ({
+export const ChartHeader = ({
   title,
   byDimension,
   esqlQuery,
   metric,
   displayDensity = 'normal',
-}) => {
+}: ChartHeaderProps) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   // Get title sizes based on display density

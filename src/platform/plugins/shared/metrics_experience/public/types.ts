@@ -7,16 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface MetricField {
-  name: string;
-  index: string;
-  dimensions: Array<{ name: string; type: string; description?: string }>;
-  type: string;
-  time_series_metric?: string;
-  unit?: string;
-  description?: string;
-  source?: string;
-  stability?: string;
-  display?: string;
-  no_data?: boolean;
+import type { Plugin as PluginClass } from '@kbn/core/public';
+import { MetricsExperienceRepositoryClient } from './api';
+
+export interface MetricsExperienceService {
+  callApi: MetricsExperienceRepositoryClient;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface MetricsExperiencePluginSetup {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface MetricsExperiencePluginStart {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface MetricsExperiencePluginSetupDependencies {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface MetricsExperiencePluginStartDependencies {}
+
+export type MetricsExperiencePluginClass = PluginClass<
+  MetricsExperiencePluginSetup,
+  MetricsExperiencePluginStart,
+  MetricsExperiencePluginSetupDependencies,
+  MetricsExperiencePluginStartDependencies
+>;

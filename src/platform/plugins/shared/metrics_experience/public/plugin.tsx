@@ -9,14 +9,16 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { createMetricsExperienceRepositoryClient } from './api';
+import { MetricsExperiencePluginClass, MetricsExperienceService } from './types';
 
 const MetricsExperienceApplication = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.Application }))
 );
 
-export class MetricsExperiencePlugin implements Plugin {
+export class MetricsExperiencePlugin implements MetricsExperiencePluginClass {
   public setup(core: CoreSetup) {
     // Register app
     core.application.register({
@@ -25,11 +27,17 @@ export class MetricsExperiencePlugin implements Plugin {
       async mount(appMountParameters: AppMountParameters) {
         const { element } = appMountParameters;
         const [coreStart] = await core.getStartServices();
+
+        const services: MetricsExperienceService = {
+          callApi: createMetricsExperienceRepositoryClient(core),
+        };
+
         ReactDOM.render(
           coreStart.rendering.addContext(
             <MetricsExperienceApplication
               coreStart={coreStart}
               appMountParameters={appMountParameters}
+              service={services}
             />
           ),
           element
@@ -37,6 +45,8 @@ export class MetricsExperiencePlugin implements Plugin {
         return () => ReactDOM.unmountComponentAtNode(element);
       },
     });
+
+    return {};
   }
 
   public start(_core: CoreStart) {

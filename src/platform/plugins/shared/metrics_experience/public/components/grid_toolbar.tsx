@@ -50,7 +50,7 @@ interface GridToolbarProps {
   };
 }
 
-export const GridToolbar: React.FC<GridToolbarProps> = ({ fields, indices, timeRange }) => {
+export const GridToolbar = ({ fields, indices, timeRange }: GridToolbarProps) => {
   // Get search state from Redux store
   const dispatch = useAppDispatch();
   const draftSearchTerm = useAppSelector(selectDraftSearchTerm);

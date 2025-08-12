@@ -7,11 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function joinArrayValues(record: Record<string, any> | undefined, delimiter: string = ',') {
-  const results: Record<string, string> = {};
-  if (!record) return results;
-  for (const [key, value] of Object.entries(record)) {
-    results[key] = Array.isArray(value) ? value.join(delimiter) : value;
+import type { MetricField } from '../../../common/fields/types';
+
+export function deduplicateFields(fields: MetricField[]): MetricField[] {
+  const map = new Map<string, MetricField>();
+
+  for (const field of fields) {
+    const base = field.name.startsWith('metrics.') ? field.name.slice(8) : field.name;
+
+    if (!map.has(base) || !field.name.startsWith('metrics.')) {
+      map.set(base, { ...field, name: base });
+    }
   }
-  return results;
+
+  return Array.from(map.values());
 }

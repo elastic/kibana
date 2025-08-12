@@ -25,25 +25,25 @@ import { useDimensionsQuery } from '../hooks';
 interface ValuesFilterProps {
   selectedDimensions: string[];
   selectedValues: string[];
-  onValueChange: (values: string[]) => void;
-  disabled?: boolean;
-  onApplyChanges?: () => void;
   indices?: string[];
+  disabled?: boolean;
   timeRange?: {
     from?: string;
     to?: string;
   };
+  onApplyChanges?: () => void;
+  onValueChange: (values: string[]) => void;
 }
 
-export const ValuesFilter: React.FC<ValuesFilterProps> = ({
+export const ValuesFilter = ({
   selectedDimensions,
   selectedValues,
   onValueChange,
-  disabled = false,
   onApplyChanges,
-  indices,
   timeRange,
-}) => {
+  disabled = false,
+  indices = [],
+}: ValuesFilterProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   // Query dimension values from API
