@@ -365,20 +365,20 @@ export class IndexUpdateService {
           }),
           debounceTime(BUFFER_TIMEOUT_MS),
           filter((updates) => updates.length > 0),
-          switchMap((updates) => {
-            return from(this.bulkUpdate(updates)).pipe(
+          switchMap((updates) =>
+            from(this.bulkUpdate(updates)).pipe(
               withLatestFrom(this._rows$, this.dataView$),
-              map(([response, rows, dataView]) => {
-                return { updates, response, rows, dataView };
-              })
-            );
-          })
+              switchMap(([response, rows, dataView]) =>
+                // Refresh the data view fields to get new columns types if any
+                from(this.data.dataViews.refreshFields(dataView, false, true)).pipe(
+                  map(() => ({ updates, response, rows, dataView }))
+                )
+              )
+            )
+          )
         )
         .subscribe({
           next: async ({ updates, response, rows, dataView }) => {
-            // Refresh the data view fields to get new columns types if any
-            await this.data.dataViews.refreshFields(dataView, false, true);
-
             const mappedResponse = response.items.reduce((acc, item, index) => {
               // Updates that were successful
               const updateItem = Object.values(item)[0] as BulkResponseItem;
