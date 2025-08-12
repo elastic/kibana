@@ -4,6 +4,70 @@ navigation_title: "Known issues"
 
 # Kibana known issues
 
+For Elastic {{observability}} known issues, refer to [Elastic Observability known issues](docs-content://release-notes/elastic-observability/known-issues.md).
+
+For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
+
+::::{dropdown} Reports created in non-default Kibana spaces aren't shown in the Reporting UI
+
+Applies to: {{stack}} 9.1.0, 9.1.1
+
+**Details**
+
+After creating a report in a non-default {{kib}} space, the document exists in the `.kibana-reporting` index but isn't shown in the Reporting UI.
+
+::::
+
+::::{dropdown} Issues with rules occur when xpack.alerting.rules.run.alerts.max is set to a value greater than 5000
+
+Applies to: {{stack}} 9.0.3, 9.0.4, 9.1.0
+
+**Details**
+
+If you've set `xpack.alerting.rules.run.alerts.max` to a value greater than `5000`, you will encounter `Result window is too large` error messages when a maintenance window is active.
+
+**Action**
+
+To mitigate the issue, set `xpack.alerting.rules.run.alerts.max` to a value equal to or less than `5000`.
+
+::::
+
+::::{dropdown} PDF and PNG reports time out and fail with an invalid header error if server.protocol is set to http2
+
+Applies to: {{stack}} 9.0.0
+
+**Details**
+
+If you've changed the [`server.protocol`](/reference/configuration-reference/general-settings.md) value to `http2`, PDF and PNG reports will fail when you export them from the dashboard, visualization, or Canvas workpad that you're generating a report for.
+
+**Action**
+
+To temporarily resolve the issue, set `server.protocol` to `http1`. 
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.0.0, 9.0.4, 9.1.0.
+
+::::
+
+::::{dropdown} Dashboard Copy link doesn't work when sharing from a space other than the default space
+
+Applies to: {{stack}} 9.0.3
+
+**Details**
+
+When attempting to share a dashboard from a space that isn't the default space, the **Copy link** action never completes.
+
+**Action**
+
+To avoid this error, don't upgrade {{kib}} to {{stack}} 9.0.3 or upgrade {{kib}} to {{stack}} 9.0.4 when available.
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.0.4.
+
+::::
+
 ::::{dropdown} Upgrading Kibana from 8.18.x to 9.0.2 fails due to a configuration conflict in the kibana.yml file
 
 Applies to: {{stack}} 9.0.2
