@@ -17,6 +17,7 @@ export const QuickstartsGroup = () => {
   const quickstarts = [
     {
       title: 'Search Basics',
+      i18nID: 'xpack.searchHomepage.connectToElasticsearch.quickstartBasicsDescription',
       description: 'Learn the basics of creating and searching an index.',
       request: quickstartExamples.basics,
     },
@@ -40,14 +41,9 @@ export const QuickstartsGroup = () => {
               <EuiCard
                 paddingSize="l"
                 title={quickstart.title}
-                description={i18n.translate(
-                  `xpack.searchHomepage.connectToElasticsearch.quickstart${quickstart.title
-                    .split(' ')
-                    .join('')}Description`,
-                  {
-                    defaultMessage: quickstart.description,
-                  }
-                )}
+                description={i18n.translate(quickstart.i18nID, {
+                  defaultMessage: quickstart.description,
+                })}
               >
                 <TryInConsoleButton
                   request={quickstart.request}

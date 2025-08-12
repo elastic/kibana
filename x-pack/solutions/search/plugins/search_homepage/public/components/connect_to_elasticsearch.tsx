@@ -70,14 +70,14 @@ export const ConnectToElasticsearch = () => {
             </EuiFlexGroup>
           </EuiFlexItem>
           {isQuickstartEnabled && (
-            <EuiFlexItem grow={false}>
-              <EuiHorizontalRule />
-            </EuiFlexItem>
-          )}
-          {isQuickstartEnabled && (
-            <EuiFlexItem grow={false}>
-              <QuickstartsGroup />
-            </EuiFlexItem>
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiHorizontalRule />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <QuickstartsGroup />
+              </EuiFlexItem>
+            </>
           )}
           <EuiFlexItem grow={false}>
             <EuiHorizontalRule />
