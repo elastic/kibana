@@ -28,7 +28,7 @@ async function evaluateEsqlQuery({
   const evaluation = await chatClient.evaluate(conversation, [
     ...(expected
       ? [
-          `Returns a ES|QL query that is functionally equivalent to:      
+          `Returns a ES|QL query that is functionally equivalent to:
       ${expected}. It's OK if column names are slightly different, as long as the expected end result is the same.`,
         ]
       : []),
