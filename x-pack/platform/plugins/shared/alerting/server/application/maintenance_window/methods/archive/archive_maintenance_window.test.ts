@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Frequency } from '@kbn/rrule';
 import moment from 'moment-timezone';
 import { archiveMaintenanceWindow } from './archive_maintenance_window';
 import {
@@ -16,6 +17,7 @@ import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
+import type { MaintenanceWindowAttributes } from '../../../../data/maintenance_window/types';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const uiSettings = uiSettingsServiceMock.createClient();
@@ -94,6 +96,13 @@ describe('MaintenanceWindowClient - archive', () => {
 
   it('should unarchive maintenance window', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    const rRule = {
+      tzid: 'UTC',
+      dtstart: '2023-02-26T00:00:00.000Z',
+      freq: Frequency.WEEKLY,
+      count: 4,
+    } as MaintenanceWindowAttributes['rRule'];
+
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
     });
@@ -101,6 +110,8 @@ describe('MaintenanceWindowClient - archive', () => {
     savedObjectsClient.get.mockResolvedValueOnce({
       attributes: {
         ...mockMaintenanceWindow,
+        rRule,
+        events: [],
         expirationDate: new Date().toISOString(),
       },
       version: '123',
@@ -128,9 +139,12 @@ describe('MaintenanceWindowClient - archive', () => {
       'test-id',
       {
         ...mockMaintenanceWindow,
+        rRule,
         events: [
           { gte: '2023-02-26T00:00:00.000Z', lte: '2023-02-26T01:00:00.000Z' },
           { gte: '2023-03-05T00:00:00.000Z', lte: '2023-03-05T01:00:00.000Z' },
+          { gte: '2023-03-12T00:00:00.000Z', lte: '2023-03-12T01:00:00.000Z' },
+          { gte: '2023-03-19T00:00:00.000Z', lte: '2023-03-19T01:00:00.000Z' },
         ],
         expirationDate: moment.utc().add(1, 'year').toISOString(),
         updatedAt: updatedMetadata.updatedAt,
