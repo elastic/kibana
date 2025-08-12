@@ -283,7 +283,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
       <FlyoutPanels.Item data-test-subj="indexPatternEditorFlyout" border="right">
         <FlyoutPanels.Content>
           <EuiTitle data-test-subj="flyoutTitle">
-            <h2 id="dataViewEditorFlyoutTitle">{editData && !isDuplicatingManaged ? editorTitleEditMode : editorTitle}</h2>
+            <h2 id="dataViewEditorFlyoutTitle">
+              {editData && !isDuplicatingManaged ? editorTitleEditMode : editorTitle}
+            </h2>
           </EuiTitle>
           {showManagementLink && !isDuplicatingManaged && editData && editData.id && (
             <EuiLink
