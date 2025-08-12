@@ -15,11 +15,7 @@ import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server
 import '../jest_matchers';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
 import { parseLogFile } from '../test_utils';
-import {
-  getBaseMigratorParams,
-  getSampleAType,
-  getSampleBType,
-} from '../fixtures/zdt_base.fixtures';
+import { getBaseMigratorParams, getSampleAType } from '../fixtures/zdt_base.fixtures';
 import {
   SavedObjectModelTransformationDoc,
   SavedObjectModelUnsafeTransformFn,
@@ -45,45 +41,48 @@ describe('ZDT upgrades - optimistic concurrency tests', () => {
 
   beforeEach(async () => {
     await fs.unlink(logFilePath).catch(() => {});
+    jest.clearAllMocks();
   });
 
-  it('doesnt overwrite changes made while migrating', async () => {
-    const { runMigrations, savedObjectsRepository, client } = await prepareScenario({
-      discardCorruptObjects: false,
-    });
+  it.each(['v2', 'zdt'] as const)(
+    'doesnt overwrite changes made while migrating (%s)',
+    async (migrationAlgorithm) => {
+      const { runMigrations, savedObjectsRepository, client } = await prepareScenario(
+        migrationAlgorithm
+      );
 
-    const originalBulkImplementation = client.bulk;
-    const spy = jest.spyOn(client, 'bulk');
-    spy.mockImplementation(function (this: typeof client, ...args) {
-      // let's run some updates before we run the bulk operations
-      return Promise.all(
-        ['a-0', 'a-3', 'a-4'].map((id) =>
-          savedObjectsRepository.update('sample_a', id, {
-            keyword: 'concurrent update that shouldnt be overwritten',
-          })
-        )
-      ).then(() => {
-        return originalBulkImplementation.apply(this, args);
+      const originalBulkImplementation = client.bulk;
+      const spy = jest.spyOn(client, 'bulk');
+      spy.mockImplementation(function (this: typeof client, ...args) {
+        // let's run some updates before we run the bulk operations
+        return Promise.all(
+          ['a-0', 'a-3', 'a-4'].map((id) =>
+            savedObjectsRepository.update('sample_a', id, {
+              keyword: 'concurrent update that shouldnt be overwritten',
+            })
+          )
+        ).then(() => {
+          return originalBulkImplementation.apply(this, args);
+        });
       });
-    });
 
-    await runMigrations();
+      await runMigrations();
 
-    const records = await parseLogFile(logFilePath);
-    expect(records).toContainLogEntry('-> DONE');
+      const records = await parseLogFile(logFilePath);
+      expect(records).toContainLogEntry('-> DONE');
 
-    const { saved_objects: sampleADocs } = await savedObjectsRepository.find<TestSOType>({
-      type: 'sample_a',
-    });
+      const { saved_objects: sampleADocs } = await savedObjectsRepository.find<TestSOType>({
+        type: 'sample_a',
+      });
 
-    expect(
-      sampleADocs
-        .map((doc) => ({
-          id: doc.id,
-          keyword: doc.attributes.keyword,
-        }))
-        .sort((a, b) => a.id.localeCompare(b.id))
-    ).toMatchInlineSnapshot(`
+      expect(
+        sampleADocs
+          .map((doc) => ({
+            id: doc.id,
+            keyword: doc.attributes.keyword,
+          }))
+          .sort((a, b) => a.id.localeCompare(b.id))
+      ).toMatchInlineSnapshot(`
         Array [
           Object {
             "id": "a-0",
@@ -107,9 +106,10 @@ describe('ZDT upgrades - optimistic concurrency tests', () => {
           },
         ]
       `);
-  });
+    }
+  );
 
-  const prepareScenario = async ({ discardCorruptObjects }: { discardCorruptObjects: boolean }) => {
+  const prepareScenario = async (migrationAlgorithm: 'zdt' | 'v2') => {
     await createBaseline();
 
     const typeA = getSampleAType();
@@ -135,13 +135,8 @@ describe('ZDT upgrades - optimistic concurrency tests', () => {
       },
     };
 
-    const baseParams = getBaseMigratorParams();
-    if (discardCorruptObjects) {
-      baseParams!.settings!.migrations!.discardCorruptObjects = '8.7.0';
-    }
-
     const { runMigrations, client, savedObjectsRepository } = await getKibanaMigratorTestKit({
-      ...baseParams,
+      ...getBaseMigratorParams({ migrationAlgorithm }),
       logFilePath,
       types: [typeA],
     });
@@ -152,7 +147,7 @@ describe('ZDT upgrades - optimistic concurrency tests', () => {
   const createBaseline = async () => {
     const { runMigrations, savedObjectsRepository, client } = await getKibanaMigratorTestKit({
       ...getBaseMigratorParams(),
-      types: [getSampleAType(), getSampleBType()],
+      types: [getSampleAType()],
     });
 
     try {
