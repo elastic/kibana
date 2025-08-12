@@ -31,41 +31,40 @@ export const createKeyInsightsPanelLensAttributes = ({
       visualization: {
         layerId: 'layer1',
         layerType: 'data',
-        metricAccessor: 'count',
+        metricAccessor: 'countId',
       },
       query: {
-        query: esqlQuery,
-        language: 'esql',
+        esql: '', // empty, because filters are applied directly to the lens.EmbeddableComponent
       },
-      filters: [{ query: filterQuery, meta: {} }],
+      filters: [], // empty, because filters are applied directly to the lens.EmbeddableComponent
       datasourceStates: {
         textBased: {
           layers: {
             layer1: {
-              columns: [
-                {
-                  columnId: 'count',
-                  fieldName: 'COUNT(*)',
-                  label,
-                  customLabel: true,
-                  params: {
-                    format: {
-                      id: 'number',
-                      params: {
-                        decimals: 0,
-                        compact: false,
-                      },
-                    },
-                  },
-                },
-              ],
+              index: dataViewId,
               query: {
                 esql: esqlQuery,
               },
+              columns: [
+                {
+                  columnId: 'countId',
+                  fieldName: 'count',
+                  label,
+                  customLabel: false,
+                },
+              ],
+              timeField: '@timestamp',
             },
           },
         },
       },
+      internalReferences: [
+        {
+          type: 'index-pattern',
+          id: dataViewId,
+          name: `indexpattern-datasource-layer-layer1`,
+        },
+      ],
       adHocDataViews: {
         [dataViewId]: {
           id: dataViewId,

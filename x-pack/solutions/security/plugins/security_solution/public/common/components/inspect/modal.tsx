@@ -50,7 +50,7 @@ interface Request {
   index: string[];
   allowNoIndices: boolean;
   ignoreUnavailable: boolean;
-  body: Record<string, unknown>;
+  body?: Record<string, unknown>;
 }
 
 interface Response {
@@ -94,7 +94,15 @@ const parseInspectStrings = function <T>(stringsArray: string[]): T[] {
   }
 };
 
-const manageStringify = (object: Record<string, unknown> | Response): string => {
+const stringifyRequest = (inspectRequest: Request | Record<string, unknown>) => {
+  const { body } = inspectRequest;
+  if (body == null) {
+    return manageStringify(inspectRequest); // No body, the entire request object is the "body"
+  }
+  return isString(body) ? body : manageStringify(body);
+};
+
+const manageStringify = (object: object): string => {
   try {
     return JSON.stringify(object, null, 2);
   } catch {
@@ -258,9 +266,7 @@ export const ModalInspectQuery = ({
                   isVirtualized
                   lineNumbers
                 >
-                  {isString(inspectRequest.body)
-                    ? inspectRequest.body
-                    : manageStringify(inspectRequest.body)}
+                  {stringifyRequest(inspectRequest)}
                 </EuiCodeBlock>
               </Fragment>
             ))

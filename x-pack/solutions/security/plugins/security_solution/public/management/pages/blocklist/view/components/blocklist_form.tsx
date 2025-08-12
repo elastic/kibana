@@ -552,6 +552,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
           fullWidth
         >
           <EuiFieldText
+            isInvalid={nameVisited && !!Object.keys(errorsRef.current.name).length}
             name="name"
             value={item.name}
             onChange={handleOnNameChange}

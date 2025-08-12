@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiTitle,
   useIsWithinMaxBreakpoint,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -39,6 +40,8 @@ import { MLModelTypeBadge } from './ml_model_type_badge';
 import { PipelinesLogic } from './pipelines_logic';
 
 export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const { http } = useValues(HttpLogic);
   const { indexName } = useValues(IndexNameLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
@@ -163,6 +166,8 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
           confirmButtonText={DELETE_BUTTON_LABEL}
           defaultFocusedButton="confirm"
           maxWidth
+          aria-labelledby={confirmModalTitleId}
+          titleProps={{ id: confirmModalTitleId }}
         >
           <EuiText>
             <p>

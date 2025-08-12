@@ -13,9 +13,7 @@ import { getPosition } from './helpers';
 import type { EditorError } from '../types';
 
 // These will need to be manually updated whenever the relevant grammar changes.
-const SYNTAX_ERRORS_TO_IGNORE = [
-  `mismatched input '<EOF>' expecting {'explain', 'row', 'from', 'show'}`,
-];
+const SYNTAX_ERRORS_TO_IGNORE = [`mismatched input '<EOF>' expecting {'row', 'from', 'show'}`];
 
 const REPLACE_DEV = /,{0,1}(?<!\s)\s*DEV_\w+\s*/g;
 const REPLACE_ORPHAN_COMMA = /{, /g;

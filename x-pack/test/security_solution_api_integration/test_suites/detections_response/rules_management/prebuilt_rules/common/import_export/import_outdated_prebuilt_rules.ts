@@ -10,11 +10,10 @@ import {
   createHistoricalPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
-  installMockPrebuiltRulesPackage,
   installPrebuiltRules,
   importRulesWithSuccess,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -61,10 +60,6 @@ export default ({ getService }: FtrProviderContext): void => {
   ];
 
   describe('@ess @serverless @skipInServerlessMKI Import multiple outdated prebuilt rules', () => {
-    before(async () => {
-      await installMockPrebuiltRulesPackage(es, supertest);
-    });
-
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
@@ -74,11 +69,6 @@ export default ({ getService }: FtrProviderContext): void => {
         PREBUILT_RULE_ASSET_C,
         PREBUILT_RULE_ASSET_D,
       ]);
-    });
-
-    after(async () => {
-      await deleteAllPrebuiltRuleAssets(es, log);
-      await deleteAllRules(supertest, log);
     });
 
     describe('without overwriting', () => {

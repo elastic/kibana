@@ -72,6 +72,7 @@ export const SubTypeParameter = ({
           return (
             <EuiFormRow label={subTypeField.label} error={error} isInvalid={isInvalid}>
               <EuiComboBox
+                isInvalid={isInvalid}
                 placeholder={i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.subTypeField.placeholderLabel',
                   {

@@ -235,7 +235,7 @@ export interface LangChainExecuteParams {
   contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
-  inferenceChatModelEnabled?: boolean;
+  inferenceChatModelDisabled?: boolean;
   isOssModel?: boolean;
   conversationId?: string;
   context: AwaitedProperties<
@@ -266,7 +266,7 @@ export const langChainExecute = async ({
   actionTypeId,
   connectorId,
   contentReferencesStore,
-  inferenceChatModelEnabled,
+  inferenceChatModelDisabled,
   isOssModel,
   context,
   actionsClient,
@@ -302,7 +302,7 @@ export const langChainExecute = async ({
   // get a scoped esClient for assistant memory
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
-  // convert the assistant messages to LangChain messages:
+  // convert the new messages to LangChain messages:
   const langChainMessages = getLangChainMessages(messages);
 
   const anonymizationFieldsDataClient =
@@ -335,7 +335,7 @@ export const langChainExecute = async ({
     esClient,
     llmTasks,
     inference,
-    inferenceChatModelEnabled,
+    inferenceChatModelDisabled,
     isStream,
     llmType: getLlmType(actionTypeId),
     isOssModel,

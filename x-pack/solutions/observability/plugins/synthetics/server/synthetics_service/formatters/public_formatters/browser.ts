@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { inlineSourceFormatter } from '../formatting_utils';
 import { DEFAULT_BROWSER_ADVANCED_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { BrowserFields, ConfigKey } from '../../../../common/runtime_types';
 import { Formatter, commonFormatters } from './common';
@@ -42,7 +43,7 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.PORT]: null,
   [ConfigKey.URLS]: null,
   [ConfigKey.METADATA]: objectFormatter,
-  [ConfigKey.SOURCE_INLINE]: null,
+  [ConfigKey.SOURCE_INLINE]: inlineSourceFormatter,
   [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
   [ConfigKey.JOURNEY_FILTERS_MATCH]: null,
   [ConfigKey.SYNTHETICS_ARGS]: arrayFormatter,

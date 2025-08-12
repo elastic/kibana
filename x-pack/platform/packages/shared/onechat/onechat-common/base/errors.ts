@@ -16,6 +16,7 @@ export enum OnechatErrorCode {
   toolNotFound = 'toolNotFound',
   agentNotFound = 'agentNotFound',
   conversationNotFound = 'conversationNotFound',
+  requestAborted = 'requestAborted',
 }
 
 const OnechatError = ServerSentEventError;
@@ -27,6 +28,8 @@ export type OnechatError<
   TCode extends OnechatErrorCode,
   TMeta extends Record<string, any> = Record<string, any>
 > = ServerSentEventError<TCode, TMeta>;
+
+export type SerializedOnechatError = ReturnType<OnechatError<OnechatErrorCode>['toJSON']>;
 
 export const isOnechatError = (err: unknown): err is OnechatError<OnechatErrorCode> => {
   return err instanceof OnechatError;
@@ -162,6 +165,25 @@ export const createConversationNotFoundError = ({
     customMessage ?? `Conversation ${conversationId} not found`,
     { ...meta, conversationId, statusCode: 404 }
   );
+};
+
+/**
+ * Represents an internal error
+ */
+export type OnechatRequestAbortedError = OnechatError<OnechatErrorCode.requestAborted>;
+
+/**
+ * Checks if the given error is a {@link OnechatRequestAbortedError}
+ */
+export const isRequestAbortedError = (err: unknown): err is OnechatRequestAbortedError => {
+  return isOnechatError(err) && err.code === OnechatErrorCode.requestAborted;
+};
+
+export const createRequestAbortedError = (
+  message: string,
+  meta?: Record<string, any>
+): OnechatRequestAbortedError => {
+  return new OnechatError(OnechatErrorCode.requestAborted, message, meta ?? {});
 };
 
 /**

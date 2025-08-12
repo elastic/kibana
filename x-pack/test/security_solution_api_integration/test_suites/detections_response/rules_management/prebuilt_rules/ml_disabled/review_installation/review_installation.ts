@@ -13,19 +13,15 @@ import {
   deleteAllPrebuiltRuleAssets,
   reviewPrebuiltRulesToInstall,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../config/services/detections_response';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
-  const config = getService('config');
-  const basic = config.get('esTestCluster.license') === 'basic';
 
   describe('@ess @serverless @skipInServerlessMKI Prebuilt rules installation review', function () {
-    if (basic) {
-      this.tags('skipFIPS');
-    }
+    this.tags('skipFIPS');
 
     beforeEach(async () => {
       await deleteAllRules(supertest, log);

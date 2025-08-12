@@ -97,7 +97,7 @@ describe('IndexSelectorModal', () => {
       wrapper: TestProviders,
     });
 
-    expect(screen.queryByLabelText('Select index')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Select index' })).toBeInTheDocument();
   });
 
   it('pre-selects indices when editDataSource is provided', () => {

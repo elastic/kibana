@@ -13,11 +13,11 @@ export const createNewConversation = (): Conversation => {
   const now = new Date().toISOString();
   return {
     id: newConversationId,
-    agentId: oneChatDefaultAgentId,
+    agent_id: oneChatDefaultAgentId,
     user: { id: '', username: '' },
     title: '',
-    createdAt: now,
-    updatedAt: now,
+    created_at: now,
+    updated_at: now,
     rounds: [],
   };
 };

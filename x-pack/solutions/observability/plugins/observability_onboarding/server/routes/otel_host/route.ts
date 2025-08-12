@@ -13,6 +13,7 @@ import { getAgentVersionInfo } from '../../lib/get_agent_version';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 import { createManagedOtlpServiceApiKey } from '../../lib/api_key/create_managed_otlp_service_api_key';
+import { getMangedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
 
 const setupFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/otel_host/setup',
@@ -59,7 +60,7 @@ const setupFlowRoute = createObservabilityOnboardingServerRoute({
       elasticsearchUrl: elasticsearchUrlList.length > 0 ? elasticsearchUrlList[0] : '',
       elasticAgentVersionInfo,
       apiKeyEncoded,
-      managedOtlpServiceUrl: plugins.observability.setup.managedOtlpServiceUrl ?? '',
+      managedOtlpServiceUrl: getMangedOtlpServiceUrl(plugins),
     };
   },
 });

@@ -72,9 +72,26 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       after(async () => {
+        const log = providerContext.getService('log');
         await es.indices.deleteDataStream({ name: DATASTREAM_NAME });
-        await es.indices.deleteAlias({ name: FROZEN_INDEX_NAME, index: `*${FROZEN_INDEX_NAME}*` });
-        await es.indices.deleteAlias({ name: COLD_INDEX_NAME, index: `*${COLD_INDEX_NAME}*` });
+
+        try {
+          await es.indices.deleteAlias({
+            name: FROZEN_INDEX_NAME,
+            index: `*${FROZEN_INDEX_NAME}*`,
+          });
+        } catch (e: any) {
+          // we should not fail a test on the tear down
+          log.error(`Failed to tear down ${FROZEN_INDEX_NAME}} (${e.toString()})`);
+        }
+
+        try {
+          await es.indices.deleteAlias({ name: COLD_INDEX_NAME, index: `*${COLD_INDEX_NAME}*` });
+        } catch (e: any) {
+          // we should not fail a test on the tear down
+          log.error(`Failed to tear down ${FROZEN_INDEX_NAME}} (${e.toString()})`);
+        }
+
         await dataView.delete('security-solution');
       });
 
@@ -109,6 +126,7 @@ export default function (providerContext: FtrProviderContext) {
       it('Should successfully trigger a host transform', async () => {
         const hostName: string = 'host-transform-test-ip';
         const testDocs: EcsHost[] = [
+          { name: '', ip: '3.3.3.3' }, // empty value to be ignored
           { name: hostName, ip: '1.1.1.1' },
           { name: hostName, ip: '2.2.2.2' },
         ];

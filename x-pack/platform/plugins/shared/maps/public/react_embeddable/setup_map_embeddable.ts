@@ -24,14 +24,20 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
   });
 
   embeddableSetup.registerAddFromLibraryType<MapAttributes>({
-    onAdd: (container, savedObject) => {
+    onAdd: async (container, savedObject) => {
+      const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
       container.addNewPanel<MapSerializedState>(
         {
           panelType: MAP_SAVED_OBJECT_TYPE,
           serializedState: {
-            rawState: {
-              savedObjectId: savedObject.id,
-            },
+            rawState: {},
+            references: [
+              {
+                name: SAVED_OBJECT_REF_NAME,
+                type: MAP_SAVED_OBJECT_TYPE,
+                id: savedObject.id,
+              },
+            ],
           },
         },
         true

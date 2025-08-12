@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal, EuiLink } from '@elastic/eui';
+import { EuiConfirmModal, EuiLink, htmlIdGenerator } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { routing } from '../../services/routing';
 import { resumeFollowerIndex } from '../../store/actions';
@@ -67,10 +67,14 @@ class FollowerIndexResumeProviderUi extends PureComponent {
           }
         );
 
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
+
     return (
       // eslint-disable-next-line jsx-a11y/mouse-events-have-key-events
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={title}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={this.closeConfirmModal}
         onConfirm={this.onConfirm}
         cancelButtonText={i18n.translate(

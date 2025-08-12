@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
+import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
 
 import { SettingsFlyout } from '.';
-import { ATTACK_DISCOVERY_SETTINGS } from './translations';
+import { ATTACK_DISCOVERY_SCHEDULE, ATTACK_DISCOVERY_SETTINGS } from './translations';
 import { getDefaultQuery } from '../helpers';
 import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
+import { SCHEDULE_TAB_ID, SETTINGS_TAB_ID } from './constants';
 import { useSourcererDataView } from '../../../sourcerer/containers';
+import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../sourcerer/containers');
+jest.mock('../use_kibana_feature_flags');
 jest.mock('react-router-dom', () => ({
   matchPath: jest.fn(),
   useLocation: jest.fn().mockReturnValue({
@@ -28,13 +31,34 @@ jest.mock('react-router-dom', () => ({
   withRouter: jest.fn(),
 }));
 
-const defaultProps = {
-  connectorId: undefined,
+const mockFilter = {
+  meta: {
+    disabled: false,
+    negate: false,
+    alias: null,
+    index: 'f06caf10-dfc1-4669-8f38-d11e4fcfc8af',
+    key: 'host.name',
+    field: 'host.name',
+    params: {
+      query: 'Host1',
+    },
+    type: 'phrase',
+  },
+  query: {
+    match_phrase: {
+      'host.name': 'Host1',
+    },
+  },
+};
+
+const createMockProps = (overrides = {}) => ({
+  connectorId: 'test-connector-id',
   end: undefined,
   filters: undefined,
   localStorageAttackDiscoveryMaxAlerts: undefined,
   onClose: jest.fn(),
   onConnectorIdSelected: jest.fn(),
+  onGenerate: jest.fn(),
   query: undefined,
   setEnd: jest.fn(),
   setFilters: jest.fn(),
@@ -43,224 +67,254 @@ const defaultProps = {
   setStart: jest.fn(),
   start: undefined,
   stats: null,
-};
+  ...overrides,
+});
 
-const customProps = {
-  connectorId: undefined,
-  end: 'now-15m',
-  filters: [
-    {
-      meta: {
-        disabled: false,
-        negate: false,
-        alias: null,
-        index: 'f06caf10-dfc1-4669-8f38-d11e4fcfc8af',
-        key: 'host.name',
-        field: 'host.name',
-        params: {
-          query: 'Host1',
-        },
-        type: 'phrase',
-      },
-      query: {
-        match_phrase: {
-          'host.name': 'Host1',
-        },
-      },
-    },
-  ],
-  localStorageAttackDiscoveryMaxAlerts: '123',
-  onClose: jest.fn(),
-  onConnectorIdSelected: jest.fn(),
-  query: { query: 'user.name : "user1" ', language: 'kuery' },
-  setEnd: jest.fn(),
-  setFilters: jest.fn(),
-  setLocalStorageAttackDiscoveryMaxAlerts: jest.fn(),
-  setQuery: jest.fn(),
-  setStart: jest.fn(),
-  start: 'now-45m',
-  stats: null,
-};
+const defaultProps = createMockProps();
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
   typeof useSourcererDataView
 >;
+const mockUseKibanaFeatureFlags = useKibanaFeatureFlags as jest.MockedFunction<
+  typeof useKibanaFeatureFlags
+>;
 const getBooleanValueMock = jest.fn();
+
+const setupMocks = (overrides = {}) => {
+  const defaultMockSetup = {
+    getBooleanValue: false,
+    attackDiscoveryAlertsEnabled: false,
+    assistantAttackDiscoverySchedulingEnabled: false,
+  };
+
+  const config = { ...defaultMockSetup, ...overrides };
+
+  getBooleanValueMock.mockReturnValue(config.getBooleanValue);
+
+  mockUseKibanaFeatureFlags.mockReturnValue({
+    attackDiscoveryAlertsEnabled: config.attackDiscoveryAlertsEnabled,
+  });
+
+  mockUseKibana.mockReturnValue({
+    services: {
+      featureFlags: {
+        getBooleanValue: getBooleanValueMock,
+      },
+      lens: {
+        EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
+      },
+      uiSettings: {
+        get: jest.fn(),
+      },
+      unifiedSearch: {
+        ui: {
+          SearchBar: () => <div data-test-subj="mockSearchBar" />,
+        },
+      },
+    },
+  } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+
+  mockUseSourcererDataView.mockReturnValue({
+    sourcererDataView: {},
+    loading: false,
+  } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
+};
+
+const renderComponent = (props = defaultProps) => {
+  return render(
+    <TestProviders>
+      <SettingsFlyout {...props} />
+    </TestProviders>
+  );
+};
+
+const clickButton = (testId: string) => {
+  const button = screen.getByTestId(testId);
+  fireEvent.click(button);
+};
+
+const testSaveButtonInvocations = (props: typeof defaultProps) => {
+  const assertions = [
+    { fn: props.setEnd, name: 'setEnd' },
+    { fn: props.setFilters, name: 'setFilters' },
+    { fn: props.setQuery, name: 'setQuery' },
+    { fn: props.setStart, name: 'setStart' },
+    {
+      fn: props.setLocalStorageAttackDiscoveryMaxAlerts,
+      name: 'setLocalStorageAttackDiscoveryMaxAlerts',
+    },
+    { fn: props.onClose, name: 'onClose' },
+  ];
+
+  return assertions.map(({ fn, name }) => ({
+    fn,
+    name,
+    test: () => expect(fn).toHaveBeenCalled(),
+  }));
+};
+
+const testResetButtonWithDefaults = (props: typeof defaultProps) => {
+  const defaultValues = [
+    { fn: props.setEnd, name: 'setEnd', value: DEFAULT_END },
+    { fn: props.setFilters, name: 'setFilters', value: [] },
+    { fn: props.setQuery, name: 'setQuery', value: getDefaultQuery() },
+    { fn: props.setStart, name: 'setStart', value: DEFAULT_START },
+    {
+      fn: props.setLocalStorageAttackDiscoveryMaxAlerts,
+      name: 'setLocalStorageAttackDiscoveryMaxAlerts',
+      value: `${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`,
+    },
+    { fn: props.onClose, name: 'onClose', value: undefined },
+  ];
+
+  return defaultValues.map(({ fn, name, value }) => ({
+    fn,
+    name,
+    value,
+    test: () => {
+      if (value === undefined) {
+        expect(fn).toHaveBeenCalled();
+      } else {
+        expect(fn).toHaveBeenCalledWith(value);
+      }
+    },
+  }));
+};
 
 describe('SettingsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    getBooleanValueMock.mockReturnValue(false);
-
-    mockUseKibana.mockReturnValue({
-      services: {
-        featureFlags: {
-          getBooleanValue: getBooleanValueMock,
-        },
-        lens: {
-          EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
-        },
-        uiSettings: {
-          get: jest.fn(),
-        },
-        unifiedSearch: {
-          ui: {
-            SearchBar: () => <div data-test-subj="mockSearchBar" />,
-          },
-        },
-      },
-    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
-
-    mockUseSourcererDataView.mockReturnValue({
-      sourcererDataView: {},
-      loading: false,
-    } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
+    setupMocks();
   });
 
   it('renders the flyout title', () => {
-    render(
-      <TestProviders>
-        <SettingsFlyout {...defaultProps} />
-      </TestProviders>
-    );
+    renderComponent();
 
-    expect(screen.getAllByTestId('title')[0]).toHaveTextContent(ATTACK_DISCOVERY_SETTINGS);
+    expect(screen.getByRole('heading', { name: ATTACK_DISCOVERY_SETTINGS })).toBeInTheDocument();
   });
 
   it('invokes onClose when the close button is clicked', () => {
-    render(
-      <TestProviders>
-        <SettingsFlyout {...defaultProps} />
-      </TestProviders>
-    );
+    renderComponent();
 
-    const closeButton = screen.getByTestId('euiFlyoutCloseButton');
-    fireEvent.click(closeButton);
+    clickButton('euiFlyoutCloseButton');
 
     expect(defaultProps.onClose).toHaveBeenCalled();
   });
 
   it('should not render Settings tab', () => {
+    renderComponent();
+
     expect(screen.queryByRole('tab', { name: 'Settings' })).not.toBeInTheDocument();
   });
 
   it('should not render Schedule tab', () => {
+    renderComponent();
+
     expect(screen.queryByRole('tab', { name: 'Schedule' })).not.toBeInTheDocument();
   });
 
   describe('when the save button is clicked', () => {
     beforeEach(() => {
-      render(
-        <TestProviders>
-          <SettingsFlyout {...defaultProps} />
-        </TestProviders>
-      );
-
-      const save = screen.getByTestId('save');
-      fireEvent.click(save);
+      renderComponent();
+      clickButton('save');
     });
 
-    it('invokes setEnd', () => {
-      expect(defaultProps.setEnd).toHaveBeenCalled();
-    });
+    const saveButtonTests = testSaveButtonInvocations(defaultProps);
 
-    it('invokes setFilters', () => {
-      expect(defaultProps.setFilters).toHaveBeenCalled();
-    });
-
-    it('invokes setQuery', () => {
-      expect(defaultProps.setQuery).toHaveBeenCalled();
-    });
-
-    it('invokes setStart', () => {
-      expect(defaultProps.setStart).toHaveBeenCalled();
-    });
-
-    it('invokes setLocalStorageAttackDiscoveryMaxAlerts', () => {
-      expect(defaultProps.setLocalStorageAttackDiscoveryMaxAlerts).toHaveBeenCalled();
-    });
-
-    it('invokes onClose', () => {
-      expect(defaultProps.onClose).toHaveBeenCalled();
+    saveButtonTests.forEach(({ name, test }) => {
+      it(`invokes ${name}`, test);
     });
   });
 
   describe('when the save button is clicked after the reset button is clicked', () => {
+    const localCustomProps = createMockProps({
+      end: 'now-15m',
+      filters: [mockFilter],
+      localStorageAttackDiscoveryMaxAlerts: '123',
+      query: { query: 'user.name : "user1" ', language: 'kuery' },
+      start: 'now-45m',
+    });
+
     beforeEach(() => {
-      render(
-        <TestProviders>
-          <SettingsFlyout {...customProps} />
-        </TestProviders>
-      );
-
-      const reset = screen.getByTestId('reset');
-      fireEvent.click(reset);
-
-      const save = screen.getByTestId('save');
-      fireEvent.click(save);
+      renderComponent(localCustomProps);
+      clickButton('reset');
+      clickButton('save');
     });
 
-    it('invokes setEnd with default `end` value', () => {
-      expect(customProps.setEnd).toHaveBeenCalledWith(DEFAULT_END);
-    });
+    const resetButtonTests = testResetButtonWithDefaults(localCustomProps);
 
-    it('invokes setFilters with default `filters` value', () => {
-      expect(customProps.setFilters).toHaveBeenCalledWith([]);
-    });
-
-    it('invokes setQuery with default `query` value', () => {
-      expect(customProps.setQuery).toHaveBeenCalledWith(getDefaultQuery());
-    });
-
-    it('invokes setStart with default `start` value', () => {
-      expect(customProps.setStart).toHaveBeenCalledWith(DEFAULT_START);
-    });
-
-    it('invokes setLocalStorageAttackDiscoveryMaxAlerts with default `maxAlerts` value', () => {
-      expect(customProps.setLocalStorageAttackDiscoveryMaxAlerts).toHaveBeenCalledWith(
-        `${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`
-      );
+    resetButtonTests.forEach(({ name, test, value }) => {
+      const testName =
+        value === undefined
+          ? `invokes ${name}`
+          : `invokes ${name} with default \`${name
+              .replace('set', '')
+              .replace('LocalStorageAttackDiscoveryMax', 'max')}\` value`;
+      it(testName, test);
     });
   });
 
   describe('when `securitySolution.assistantAttackDiscoverySchedulingEnabled` feature flag is enabled', () => {
     beforeEach(() => {
-      getBooleanValueMock.mockReturnValue(true);
-      render(
-        <TestProviders>
-          <SettingsFlyout {...defaultProps} />
-        </TestProviders>
-      );
-    });
-
-    it('should render Settings tab', () => {
-      expect(screen.getByRole('tab', { name: 'Settings' })).toBeInTheDocument();
-    });
-
-    it('should render Schedule tab', () => {
-      expect(screen.getByRole('tab', { name: 'Schedule' })).toBeInTheDocument();
-    });
-
-    it('should switch to Settings tab and show `AlertSelectionQuery`', async () => {
-      const scheduleTabButton = screen.getByRole('tab', { name: 'Schedule' });
-      act(() => {
-        fireEvent.click(scheduleTabButton); // clicking invokes tab switching
-      });
-      await waitFor(() => {
-        expect(screen.getByTestId('emptySchedule')).toBeInTheDocument();
+      setupMocks({
+        getBooleanValue: true,
+        assistantAttackDiscoverySchedulingEnabled: true,
       });
     });
 
-    it('should switch to Settings tab and show `AlertSelectionRange`', async () => {
-      const scheduleTabButton = screen.getByRole('tab', { name: 'Schedule' });
-      act(() => {
-        fireEvent.click(scheduleTabButton); // clicking invokes tab switching
-      });
-      await waitFor(() => {
-        expect(screen.getByTestId('createSchedule')).toBeInTheDocument();
+    it('renders the settings tab when defaultSelectedTabId is settings', () => {
+      renderComponent(createMockProps({ defaultSelectedTabId: SETTINGS_TAB_ID }));
+
+      expect(screen.getByRole('heading', { name: ATTACK_DISCOVERY_SETTINGS })).toBeInTheDocument();
+    });
+
+    it('renders the schedule tab when defaultSelectedTabId is schedule', async () => {
+      renderComponent(createMockProps({ defaultSelectedTabId: SCHEDULE_TAB_ID }));
+
+      expect(screen.getByRole('heading', { name: ATTACK_DISCOVERY_SCHEDULE })).toBeInTheDocument();
+    });
+  });
+
+  describe('when `attackDiscoveryAlertsEnabled` feature flag is disabled', () => {
+    beforeEach(() => {
+      setupMocks({
+        attackDiscoveryAlertsEnabled: false,
+        assistantAttackDiscoverySchedulingEnabled: false,
       });
     });
+
+    it('renders the flyout with smaller size and spacer', () => {
+      renderComponent();
+
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: /attack discovery settings/i })
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('when connectorId is undefined', () => {
+    it('save button is disabled', () => {
+      const propsWithUndefinedConnector = createMockProps({
+        connectorId: undefined,
+      });
+
+      renderComponent(propsWithUndefinedConnector);
+
+      const save = screen.getByTestId('save');
+      expect(save).toBeDisabled();
+    });
+  });
+
+  it('handles empty filters array', () => {
+    const propsWithEmptyFilters = createMockProps({
+      filters: [],
+    });
+
+    renderComponent(propsWithEmptyFilters);
+
+    const save = screen.getByTestId('save');
+    expect(save).toBeEnabled();
   });
 });

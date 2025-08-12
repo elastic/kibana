@@ -35,16 +35,8 @@ export {
   type ControlGroupRendererProps,
 } from './control_group/control_group_renderer';
 
-export {
-  CONTROL_GROUP_TYPE,
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-  TIME_SLIDER_CONTROL,
-  ESQL_CONTROL,
-} from '../common';
 export type {
   ControlGroupRuntimeState,
-  ControlGroupSerializedState,
   ControlPanelState,
   ControlPanelsState,
   DefaultDataControlState,

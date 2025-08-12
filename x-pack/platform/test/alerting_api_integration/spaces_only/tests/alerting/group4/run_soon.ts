@@ -24,8 +24,12 @@ export default function createRunSoonTests({ getService }: FtrProviderContext) {
       // Not 100% sure why, seems the rules need to be loaded separately to avoid the task
       // failing to load the rule during execution and deleting itself. Otherwise
       // we have flakiness
-      await esArchiver.load('x-pack/test/functional/es_archives/rules_scheduled_task_id/rules');
-      await esArchiver.load('x-pack/test/functional/es_archives/rules_scheduled_task_id/tasks');
+      await esArchiver.load(
+        'x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/rules'
+      );
+      await esArchiver.load(
+        'x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/tasks'
+      );
     });
 
     afterEach(async () => {
@@ -33,8 +37,12 @@ export default function createRunSoonTests({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rules_scheduled_task_id/tasks');
-      await esArchiver.unload('x-pack/test/functional/es_archives/rules_scheduled_task_id/rules');
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/tasks'
+      );
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/rules'
+      );
     });
 
     it('should successfully run rule where scheduled task id is different than rule id', async () => {

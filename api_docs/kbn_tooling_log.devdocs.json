@@ -1329,7 +1329,7 @@
         "label": "LOG_LEVEL_FLAGS",
         "description": [],
         "signature": [
-          "{ name: string; help: string; }[]"
+          "{ name: \"info\" | \"debug\" | \"silent\" | \"verbose\" | \"quiet\"; help: string; }[]"
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,

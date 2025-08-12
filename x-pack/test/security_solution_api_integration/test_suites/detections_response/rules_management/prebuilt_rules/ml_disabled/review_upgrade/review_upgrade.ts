@@ -13,7 +13,7 @@ import {
   deleteAllPrebuiltRuleAssets,
   reviewPrebuiltRulesToUpgrade,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import { createMlRuleThroughAlertingEndpoint } from '../utils';
 import { setUpRuleUpgrade } from '../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
 
@@ -21,8 +21,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
-  const config = getService('config');
-  const basic = config.get('esTestCluster.license') === 'basic';
   const deps = {
     es,
     supertest,
@@ -38,9 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
     const ruleId = 'ml-rule';
 
     describe(`rule is excluded from response`, function () {
-      if (basic) {
-        this.tags('skipFIPS');
-      }
+      this.tags('skipFIPS');
 
       it('if target is an ML rule', async () => {
         await createMlRuleThroughAlertingEndpoint(supertest, {

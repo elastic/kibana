@@ -25,8 +25,8 @@ export const getInfraContainerHref = (
 
   return containerId
     ? locator.getRedirectUrl({
-        assetType: 'container',
-        assetId: containerId,
+        entityType: 'container',
+        entityId: containerId,
       })
     : undefined;
 };
@@ -46,8 +46,8 @@ export const getInfraKubernetesHref = (
 
   return podId
     ? locator.getRedirectUrl({
-        assetType: 'pod',
-        assetId: podId,
+        entityType: 'pod',
+        entityId: podId,
       })
     : undefined;
 };

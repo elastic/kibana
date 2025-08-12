@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-export * from './src/types';
+export type * from './src/types';
 export * from './src/constants/navigation';
+export {
+  AWS_ORGANIZATION_ACCOUNT,
+  AWS_SINGLE_ACCOUNT,
+  GCP_ORGANIZATION_ACCOUNT,
+  GCP_SINGLE_ACCOUNT,
+} from './src/components/fleet_extensions/constants';
 export type { NavFilter } from './src/utils/query_utils';
 export { showErrorToast } from './src/utils/show_error_toast';
 export { encodeQuery, decodeQuery } from './src/utils/query_utils';
+export { CloudSetup } from './src/components/fleet_extensions/cloud_setup';
+export { AwsInputVarFields } from './src/components/fleet_extensions/aws_credentials_form/aws_input_var_fields';
 export { CspEvaluationBadge } from './src/components/csp_evaluation_badge';
 export { getSeverityStatusColor, getCvsScoreColor } from './src/utils/get_finding_colors';
 export { getSeverityText } from './src/utils/get_vulnerability_text';
@@ -26,3 +34,4 @@ export {
   getNonCveReferences,
 } from './src/utils/vulnerability_reference';
 export { getVulnerabilitiesQuery } from './src/utils/findings_query_builders';
+export { getGroupPanelTitle } from './src/utils/get_group_panel_title';

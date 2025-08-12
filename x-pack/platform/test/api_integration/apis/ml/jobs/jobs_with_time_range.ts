@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('jobs with time range', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
       const job = SINGLE_METRIC_JOB_CONFIG;
       const jobId = job.job_id;

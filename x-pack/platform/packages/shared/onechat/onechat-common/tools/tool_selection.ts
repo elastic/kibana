@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolDefinition } from './definition';
+import type { ToolDefinition, ToolType } from './definition';
 
 export type ToolSelectionRelevantFields = Pick<ToolDefinition, 'id' | 'type' | 'tags'>;
 
@@ -42,7 +42,7 @@ export interface ByIdsToolSelection {
   /**
    * The id of the provider to select tools from
    */
-  type?: string;
+  type?: ToolType;
   /**
    * List of individual tool ids to select.
    */

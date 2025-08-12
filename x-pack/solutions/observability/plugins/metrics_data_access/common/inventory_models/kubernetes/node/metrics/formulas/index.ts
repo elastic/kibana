@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MetricConfigMap } from '../../../../shared/metrics/types';
 import { nodeCpuCapacity, nodeCpuUsed } from './cpu';
 import { nodeDiskCapacity, nodeDiskUsed } from './disk';
 import { nodeMemoryCapacity, nodeMemoryUsed } from './memory';
@@ -19,4 +20,4 @@ export const formulas = {
   nodeMemoryUsed,
   nodePodCapacity,
   nodePodUsed,
-};
+} satisfies MetricConfigMap;

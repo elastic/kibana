@@ -49,7 +49,7 @@ import {
 
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
-const VISUALIZE_QUERY_NAME = 'visualize_query';
+const VISUALIZE_QUERY_FUNCTION_NAME = 'visualize_query';
 
 interface VisualizeESQLProps {
   /** Lens start contract, get the ES|QL charts suggestions api */
@@ -307,7 +307,7 @@ export function VisualizeESQL({
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
-                <EuiToolTip content={editVisualizationLabel}>
+                <EuiToolTip content={editVisualizationLabel} disableScreenReaderOutput>
                   <EuiButtonIcon
                     size="xs"
                     iconType="pencil"
@@ -322,7 +322,7 @@ export function VisualizeESQL({
                   />
                 </EuiToolTip>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={saveVisualizationLabel}>
+                  <EuiToolTip content={saveVisualizationLabel} disableScreenReaderOutput>
                     <EuiButtonIcon
                       size="xs"
                       iconType="save"
@@ -394,7 +394,7 @@ export function registerVisualizeQueryRenderFunction({
   pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
 }) {
   registerRenderFunction(
-    VISUALIZE_QUERY_NAME,
+    VISUALIZE_QUERY_FUNCTION_NAME,
     ({
       arguments: { query, userOverrides, intention },
       response,

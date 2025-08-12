@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import { RenameProcessorConfig, RenameProcessorDefinition } from '@kbn/streams-schema';
+import { DocLinksStart } from '@kbn/core/public';
 import { ALWAYS_CONDITION } from '../../../../../../util/condition';
 import { ConfigDrivenProcessorConfiguration, FieldConfiguration, FieldOptions } from '../types';
 import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../utils';
@@ -80,7 +81,7 @@ export const renameProcessorConfig: ConfigDrivenProcessorConfiguration<
       defaultMessage: 'Rename',
     }
   ),
-  getDocUrl: (esDocUrl: string) => {
+  getDocUrl: (docLinks: DocLinksStart) => {
     return (
       <FormattedMessage
         id="xpack.streams.streamDetailView.managementTab.enrichment.processor.renameHelpText"
@@ -91,7 +92,7 @@ export const renameProcessorConfig: ConfigDrivenProcessorConfiguration<
               data-test-subj="streamsAppAvailableProcessorsRenameLink"
               external
               target="_blank"
-              href={esDocUrl + 'rename-processor.html'}
+              href={docLinks.links.ingest.rename}
             >
               {i18n.translate('xpack.streams.availableProcessors.renameLinkLabel', {
                 defaultMessage: 'Renames an existing field.',

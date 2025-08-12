@@ -5,13 +5,6 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import type {
-  ThreatMapping,
-  ThreatMappingEntries,
-  ThreatIndex,
-  ThreatLanguageOrUndefined,
-  ThreatIndicatorPath,
-} from '@kbn/securitysolution-io-ts-alerting-types';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type {
   OpenPointInTimeResponse,
@@ -31,8 +24,17 @@ import type {
 import type { ThreatRuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 import type { ScheduleNotificationResponseActionsService } from '../../../rule_response_actions/schedule_notification_response_actions';
+import type {
+  ThreatMappingEntry,
+  ThreatMapping,
+  ThreatIndex,
+  ThreatMatchRuleOptionalFields,
+  ThreatIndicatorPath,
+} from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
+
+export type ThreatMappingEntries = ThreatMappingEntry[];
 
 export interface CreateThreatSignalsOptions {
   sharedParams: SecuritySharedParams<ThreatRuleParams>;
@@ -75,7 +77,6 @@ export interface CreateEventSignalOptions {
   threatPitId: OpenPointInTimeResponse['id'];
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
-  threatMatchedFields: ThreatMatchedFields;
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
   sortOrder?: SortOrderOrUndefined;
@@ -85,7 +86,6 @@ export interface CreateEventSignalOptions {
 type EntryKey = 'field' | 'value';
 
 export interface BuildThreatMappingFilterOptions {
-  chunkSize?: number;
   threatList: ThreatListItem[];
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
@@ -111,16 +111,10 @@ export interface CreateAndOrClausesOptions {
 }
 
 export interface BuildEntriesMappingFilterOptions {
-  chunkSize: number;
   threatList: ThreatListItem[];
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
   allowedFieldsForTermsQuery?: AllowedFieldsForTermsQuery;
-}
-
-export interface SplitShouldClausesOptions {
-  chunkSize: number;
-  should: BooleanFilter[];
 }
 
 export interface BooleanFilter {
@@ -151,7 +145,7 @@ export interface GetThreatListOptions {
 export interface ThreatListCountOptions {
   esClient: ElasticsearchClient;
   index: string[];
-  language: ThreatLanguageOrUndefined;
+  language: ThreatMatchRuleOptionalFields['threat_language'];
   query: string;
   threatFilters: unknown[];
   exceptionFilter: Filter | undefined;
@@ -178,6 +172,7 @@ interface BaseThreatNamedQuery {
   field: string;
   value: string;
   queryType: string;
+  negate?: boolean;
 }
 
 export interface ThreatMatchNamedQuery extends BaseThreatNamedQuery {
@@ -197,8 +192,10 @@ export interface BuildThreatEnrichmentOptions {
   threatFilters: unknown[];
   threatIndicatorPath: ThreatIndicatorPath;
   pitId: string;
-  reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   threatIndexFields: DataViewFieldBase[];
+  allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
+  threatMapping: ThreatMapping;
 }
 
 export interface EventsOptions {
@@ -221,7 +218,7 @@ export type EventItem = estypes.SearchHit<EventDoc>;
 export interface EventCountOptions {
   esClient: ElasticsearchClient;
   index: string[];
-  language: ThreatLanguageOrUndefined;
+  language: ThreatMatchRuleOptionalFields['threat_language'];
   query: string;
   filters: unknown[];
   tuple: RuleRangeTuple;
@@ -264,7 +261,7 @@ export interface AllowedFieldsForTermsQuery {
   threat: Record<string, boolean>;
 }
 
-export interface SignalValuesMap {
+export interface FieldAndValueToDocIdsMap {
   [field: string]: {
     [fieldValue: string]: string[];
   };
@@ -278,7 +275,7 @@ export interface GetAllowedFieldsForTermQuery {
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }
 
-export interface GetSignalValuesMap {
+export interface GetFieldAndValueToDocIdsMap {
   eventList: EventItem[];
   threatMatchedFields: ThreatMatchedFields;
 }

@@ -49,6 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retryTimeout = config.get('timeouts.try');
 
   // Failing: See https://github.com/elastic/kibana/issues/227748
+  // Failing: See https://github.com/elastic/kibana/issues/227748
   describe.skip('Embeddable alerts panel', () => {
     before(async () => {
       await sampleData.testResources.installAllKibanaSampleData();

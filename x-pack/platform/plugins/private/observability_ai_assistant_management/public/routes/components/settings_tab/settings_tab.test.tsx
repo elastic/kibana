@@ -10,7 +10,7 @@ import { render } from '../../../helpers/test_helper';
 import { SettingsTab } from './settings_tab';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
 import {
   useKnowledgeBase,
   useGenAIConnectors,
@@ -19,6 +19,7 @@ import {
 
 jest.mock('../../../hooks/use_app_context');
 jest.mock('../../../hooks/use_kibana');
+jest.mock('../../../hooks/use_product_doc');
 jest.mock('@kbn/ai-assistant/src/hooks');
 
 const useAppContextMock = useAppContext as jest.Mock;
@@ -56,10 +57,14 @@ describe('SettingsTab', () => {
       },
     });
     useKnowledgeBaseMock.mockReturnValue({
-      status: { value: { enabled: true, kbState: KnowledgeBaseState.READY } },
+      status: { value: { enabled: true, inferenceModelState: InferenceModelState.READY } },
       isInstalling: false,
       isPolling: false,
       isWarmingUpModel: false,
+      isProductDocInstalling: false,
+      isProductDocUninstalling: false,
+      installProductDoc: jest.fn().mockResolvedValue(undefined),
+      uninstallProductDoc: jest.fn().mockResolvedValue(undefined),
     });
     useGenAIConnectorsMock.mockReturnValue({ connectors: [{ id: 'test-connector' }] });
     useInferenceEndpointsMock.mockReturnValue({
@@ -100,7 +105,7 @@ describe('SettingsTab', () => {
 
   it('should show loading state when knowledge base is being updated', () => {
     useKnowledgeBaseMock.mockReturnValue({
-      status: { value: { enabled: true, kbState: KnowledgeBaseState.READY } },
+      status: { value: { enabled: true, inferenceModelState: InferenceModelState.READY } },
       isInstalling: true,
       isPolling: true,
       isWarmingUpModel: false,

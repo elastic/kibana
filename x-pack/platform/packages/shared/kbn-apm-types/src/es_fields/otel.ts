@@ -6,7 +6,9 @@
  */
 
 export const STATUS_CODE = 'status.code';
+export const OTEL_EVENT_NAME = 'event_name';
 export const ERROR_MESSAGE = 'error.message';
 export const EXCEPTION_TYPE = 'exception.type';
 export const EXCEPTION_MESSAGE = 'exception.message';
 export const DURATION = 'duration';
+export const KIND = 'kind';

@@ -45,7 +45,6 @@ export const createAssetsNavigationTree = (core: CoreStart): NodeDefinition => (
     },
     {
       id: SecurityPageName.endpoints,
-      link: securityLink(SecurityPageName.endpoints),
       title: i18nStrings.assets.endpoints.title,
       children: [
         {
@@ -60,6 +59,10 @@ export const createAssetsNavigationTree = (core: CoreStart): NodeDefinition => (
         {
           id: SecurityPageName.trustedApps,
           link: securityLink(SecurityPageName.trustedApps),
+        },
+        {
+          id: SecurityPageName.trustedDevices,
+          link: securityLink(SecurityPageName.trustedDevices),
         },
         {
           id: SecurityPageName.eventFilters,

@@ -14,7 +14,7 @@ import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
-import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { ObservabilityOnboardingFtrConfigName } from '../configs';
 import {
   FtrProviderContext,
@@ -103,12 +103,14 @@ export function createTestConfig(
         ...services,
         observabilityOnboardingFtrConfig: () => config,
         registry: RegistryProvider,
-        logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
-          new LogsSynthtraceEsClient({
-            client: context.getService('es'),
-            logger: createLogger(LogLevel.info),
-            refreshAfterIndex: true,
-          }),
+        logSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
+          const synthtraceClient = context.getService('synthtrace');
+
+          const { logsEsClient } = synthtraceClient.getClients(['logsEsClient']);
+
+          return logsEsClient;
+        },
+
         observabilityOnboardingApiClient: async (_: InheritedFtrProviderContext) => {
           const { username, password } = servers.kibana;
           const esUrl = format(esServer);

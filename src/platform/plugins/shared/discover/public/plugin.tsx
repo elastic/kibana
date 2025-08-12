@@ -209,6 +209,7 @@ export class DiscoverPlugin
         const { renderApp } = await import('./application');
         const unmount = renderApp({
           element: params.element,
+          onAppLeave: params.onAppLeave,
           services,
           customizationContext: defaultCustomizationContext,
         });
@@ -398,12 +399,20 @@ export class DiscoverPlugin
 
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
+        const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
         container.addNewPanel(
           {
             panelType: SEARCH_EMBEDDABLE_TYPE,
             serializedState: {
-              rawState: { savedObjectId: savedObject.id },
-              references: savedObject.references,
+              rawState: {},
+              references: [
+                ...savedObject.references,
+                {
+                  name: SAVED_OBJECT_REF_NAME,
+                  type: SEARCH_EMBEDDABLE_TYPE,
+                  id: savedObject.id,
+                },
+              ],
             },
           },
           true
@@ -442,6 +451,11 @@ export class DiscoverPlugin
         startServices,
         discoverServices,
       });
+    });
+
+    plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_TYPE, async () => {
+      const { searchEmbeddableTransforms } = await getEmbeddableServices();
+      return searchEmbeddableTransforms;
     });
   }
 }

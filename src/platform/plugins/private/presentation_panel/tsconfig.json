@@ -11,7 +11,6 @@
     "@kbn/presentation-publishing",
     "@kbn/i18n",
     "@kbn/kibana-react-plugin",
-    "@kbn/react-kibana-mount",
     "@kbn/presentation-containers",
     "@kbn/es-query",
     "@kbn/i18n-react",
@@ -30,6 +29,7 @@
     "@kbn/shared-ux-markdown",
     "@kbn/react-hooks",
     "@kbn/shared-ux-utility",
+    "@kbn/presentation-util"
   ],
   "exclude": ["target/**/*"]
 }

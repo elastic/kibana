@@ -258,6 +258,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                 <EuiSpacer size="xs" />
               </>
             )}
+
             {showFormErrors && (
               <>
                 <EuiCallOut
@@ -265,6 +266,13 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                   color="danger"
                   iconType="warning"
                   data-test-subj="connector-form-header-error-label"
+                  role="alert"
+                  aria-label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionConnectorAdd.connectorFormErrorDialog',
+                    {
+                      defaultMessage: 'Connector form error notification',
+                    }
+                  )}
                   title={i18n.translate(
                     'xpack.triggersActionsUI.sections.actionConnectorAdd.headerFormLabel',
                     {

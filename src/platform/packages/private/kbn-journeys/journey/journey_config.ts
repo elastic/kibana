@@ -14,10 +14,10 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { SynthtraceGenerator } from '@kbn/apm-synthtrace-client/src/types';
 import { Readable } from 'stream';
 import { BaseStepCtx } from './journey';
-import { SynthtraceClientType } from '../services/synthtrace';
+import { SynthtraceDataType } from '../services/synthtrace';
 
 interface JourneySynthtrace<T extends { '@timestamp'?: number | undefined }, O = any> {
-  type: SynthtraceClientType;
+  type: SynthtraceDataType;
   generator: (options: O) => Readable | SynthtraceGenerator<T>;
   options: O;
 }

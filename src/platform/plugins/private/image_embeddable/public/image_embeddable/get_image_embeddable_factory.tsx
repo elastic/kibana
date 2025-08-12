@@ -13,14 +13,14 @@ import { BehaviorSubject, map, merge } from 'rxjs';
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { PresentationContainer, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { initializeTitleManager, titleComparators } from '@kbn/presentation-publishing';
 
 import { IMAGE_CLICK_TRIGGER } from '../actions';
-import { openImageEditor } from '../components/image_editor/open_image_editor';
 import { ImageEmbeddable as ImageEmbeddableComponent } from '../components/image_embeddable';
 import { FileImageMetadata } from '../imports';
-import { filesService } from '../services/kibana_services';
+import { coreServices, filesService } from '../services/kibana_services';
 import { IMAGE_EMBEDDABLE_TYPE } from './constants';
 import { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
 
@@ -90,16 +90,25 @@ export const getImageEmbeddableFactory = ({
         ...unsavedChangesApi,
         dataLoading$,
         supportedTriggers: () => [IMAGE_CLICK_TRIGGER],
+
         onEdit: async () => {
-          try {
-            const newImageConfig = await openImageEditor({
-              parentApi: embeddable.parentApi as PresentationContainer,
-              initialImageConfig: imageConfig$.getValue(),
-            });
-            imageConfig$.next(newImageConfig);
-          } catch {
-            // swallow the rejection, since this just means the user closed without saving
-          }
+          openLazyFlyout({
+            core: coreServices,
+            parentApi,
+            loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+              const { getImageEditor } = await import(
+                '../components/image_editor/get_image_editor'
+              );
+              return await getImageEditor({
+                closeFlyout,
+                ariaLabelledBy,
+                initialImageConfig: imageConfig$.getValue(),
+                onSave: (newImageConfig: ImageConfig) => {
+                  imageConfig$.next(newImageConfig);
+                },
+              });
+            },
+          });
         },
         isEditingEnabled: () => true,
         getTypeDisplayName: () =>

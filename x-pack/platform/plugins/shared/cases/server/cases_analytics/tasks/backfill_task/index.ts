@@ -13,6 +13,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ConfigType } from '../../../config';
 import { ANALYTICS_BACKFILL_TASK_TYPE } from '../../../../common/constants';
 import type { CasesServerStartDependencies } from '../../../types';
 import { CaseAnalyticsIndexBackfillTaskFactory } from './backfill_task_factory';
@@ -22,10 +23,12 @@ export function registerCAIBackfillTask({
   taskManager,
   logger,
   core,
+  analyticsConfig,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   core: CoreSetup<CasesServerStartDependencies>;
+  analyticsConfig: ConfigType['analytics'];
 }) {
   const getESClient = async (): Promise<ElasticsearchClient> => {
     const [{ elasticsearch }] = await core.getStartServices();
@@ -37,7 +40,11 @@ export function registerCAIBackfillTask({
       title: 'Backfill cases analytics indexes.',
       maxAttempts: 3,
       createTaskRunner: (context: RunContext) => {
-        return new CaseAnalyticsIndexBackfillTaskFactory({ getESClient, logger }).create(context);
+        return new CaseAnalyticsIndexBackfillTaskFactory({
+          getESClient,
+          logger,
+          analyticsConfig,
+        }).create(context);
       },
     },
   });

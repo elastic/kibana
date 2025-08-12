@@ -65,6 +65,7 @@ export const AddDocumentsCodeExample = ({
     return exampleTexts.map((text) => generateSampleDocument(codeSampleMappings, text));
   }, [codeSampleMappings]);
   const { apiKey } = useSearchApiKey();
+
   const codeParams: IngestCodeSnippetParameters = useMemo(() => {
     return {
       indexName,

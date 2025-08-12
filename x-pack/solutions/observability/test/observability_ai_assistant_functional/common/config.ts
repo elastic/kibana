@@ -72,7 +72,6 @@ async function getTestConfig({
   const servers = testConfig.get('servers');
   const kibanaServer = servers.kibana as UrlObject;
   const services = testConfig.get('services') as InheritedServices;
-  const apmSynthtraceKibanaClient = services.apmSynthtraceKibanaClient();
   const allConfigs = testConfig.getAll() as Record<string, any>;
 
   return {
@@ -85,7 +84,7 @@ async function getTestConfig({
       kibana_ebt_server: KibanaEBTServerProvider,
       kibana_ebt_ui: KibanaEBTUIProvider,
       apmSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
-        getApmSynthtraceEsClient(context, apmSynthtraceKibanaClient),
+        getApmSynthtraceEsClient(context),
       observabilityAIAssistantUI: (context: InheritedFtrProviderContext) =>
         ObservabilityAIAssistantUIProvider(context),
       observabilityAIAssistantApi: async () => {

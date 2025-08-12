@@ -16,10 +16,10 @@ import {
 import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { AddRuleMigrationRulesInput } from '../../data/rule_migrations_data_rules_client';
-import { SiemMigrationAuditLogger } from '../util/audit';
-import { authz } from '../util/authz';
+import { SiemMigrationAuditLogger } from '../../../common/utils/audit';
+import { authz } from '../../../common/utils/authz';
 import { withExistingMigration } from '../util/with_existing_migration_id';
-import { withLicense } from '../util/with_license';
+import { withLicense } from '../../../common/utils/with_license';
 
 export const registerSiemRuleMigrationsCreateRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -47,14 +47,17 @@ export const registerSiemRuleMigrationsCreateRulesRoute = (
             const { migration_id: migrationId } = req.params;
             const originalRules = req.body;
             const rulesCount = originalRules.length;
-            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+              context.securitySolution,
+              'rules'
+            );
             try {
               const [firstOriginalRule] = originalRules;
               if (!firstOriginalRule) {
                 return res.noContent();
               }
               const ctx = await context.resolve(['securitySolution']);
-              const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+              const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
               await siemMigrationAuditLogger.logAddRules({
                 migrationId,
                 count: rulesCount,

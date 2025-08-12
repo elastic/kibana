@@ -27,7 +27,9 @@ export default ({ getService }: FtrProviderContext) => {
     const observability = getService('observability');
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
       const setup = async () => {
         await observability.alerts.common.setKibanaTimeZoneToUTC();
         await observability.alerts.common.navigateWithoutFilter();
@@ -36,47 +38,48 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/124681
-    describe.skip('Stat counters', () => {
+    describe('Stat counters', () => {
       beforeEach(async () => {
         const uniqueKey = generateUniqueKey();
 
-        const ruleToDisable = await createRule({
-          supertest,
-          objectRemover,
-          overwrites: { name: 'b', tags: [uniqueKey] },
-        });
-        await createRule({
-          supertest,
-          objectRemover,
-          overwrites: { name: 'c', tags: [uniqueKey] },
-        });
-        await createRule({
-          supertest,
-          objectRemover,
-          overwrites: { name: 'a', tags: [uniqueKey] },
-        });
-        await createRule({
-          supertest,
-          objectRemover,
-          overwrites: { name: 'd', tags: [uniqueKey] },
-        });
-        await createRule({
-          supertest,
-          objectRemover,
-          overwrites: { name: 'e', tags: [uniqueKey] },
-        });
-        const ruleToMute = await createRule({
-          supertest,
-          objectRemover,
-          overwrites: { name: 'f', tags: [uniqueKey] },
-        });
+        const names = ['a', 'b', 'c', 'd', 'e', 'f'];
+        const ids: string[] = [];
 
-        await disableRule({ supertest, alertId: ruleToDisable.id });
-        await muteRule({ supertest, alertId: ruleToMute.id });
+        for await (const name of names) {
+          const rule = await createRule({
+            supertest,
+            objectRemover,
+            overwrites: {
+              rule_type_id: 'apm.anomaly',
+              name,
+              consumer: 'alerts',
+              tags: [uniqueKey],
+              params: {
+                windowSize: 30,
+                windowUnit: 'm',
+                anomalySeverityType: 'critical',
+                anomalyDetectorTypes: ['txLatency', 'txThroughput', 'txFailureRate'],
+                environment: 'ENVIRONMENT_ALL',
+              },
+              schedule: {
+                interval: '1m',
+              },
+              actions: [],
+              alert_delay: {
+                active: 1,
+              },
+            },
+          });
+          ids.push(rule.id);
+        }
+
+        await disableRule({ supertest, alertId: ids[1] });
+        await muteRule({ supertest, alertId: ids[5] });
 
         await observability.alerts.common.navigateToTimeWithData();
       });

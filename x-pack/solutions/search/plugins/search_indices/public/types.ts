@@ -20,6 +20,7 @@ import type {
   IndexManagementPluginSetup,
   IndexManagementPluginStart,
 } from '@kbn/index-management-shared-types';
+import type { SampleDataIngestPluginStart } from '@kbn/sample-data-ingest/public';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { AvailableLanguages } from './code_examples';
@@ -51,6 +52,7 @@ export interface SearchIndicesAppPluginStartDependencies {
   share: SharePluginStart;
   serverless?: ServerlessPluginStart;
   usageCollection?: UsageCollectionStart;
+  sampleDataIngest?: SampleDataIngestPluginStart;
   indexManagement: IndexManagementPluginStart;
   searchNavigation?: SearchNavigationPluginStart;
 }

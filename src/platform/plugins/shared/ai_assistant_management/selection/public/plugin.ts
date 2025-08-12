@@ -12,6 +12,7 @@ import { type CoreSetup, Plugin, type CoreStart, PluginInitializerContext } from
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginSetup } from '@kbn/serverless/public';
+
 import { BehaviorSubject, Observable } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config';
 import { AIAssistantType } from '../common/ai_assistant_type';
@@ -68,27 +69,31 @@ export class AIAssistantManagementPlugin
           defaultMessage: 'Manage your AI Assistants.',
         }),
         icon: 'sparkles',
-        path: '/app/management/kibana/aiAssistantManagementSelection',
+        path: '/app/management/ai/aiAssistantManagementSelection',
         showOnHomePage: false,
         category: 'admin',
       });
     }
 
-    management.sections.section.kibana.registerApp({
+    management.sections.section.ai.registerApp({
       id: 'aiAssistantManagementSelection',
       title: i18n.translate('aiAssistantManagementSelection.managementSectionLabel', {
         defaultMessage: 'AI Assistants',
       }),
-      order: 1,
+      order: 2,
       keywords: ['ai'],
       mount: async (mountParams) => {
         const { mountManagementSection } = await import('./management_section/mount_section');
+        const securityAIAssistantEnabled = !!management?.sections.section.ai
+          .getAppsEnabled()
+          .find((app) => app.id === 'securityAiAssistantManagement' && app.enabled);
 
         return mountManagementSection({
           core,
           mountParams,
           kibanaBranch: this.kibanaBranch,
           buildFlavor: this.buildFlavor,
+          securityAIAssistantEnabled,
         });
       },
     });

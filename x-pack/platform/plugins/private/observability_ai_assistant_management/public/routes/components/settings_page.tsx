@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { useKnowledgeBase } from '@kbn/ai-assistant';
 import { SolutionView } from '@kbn/spaces-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { TabsRt } from '../config';
 import { useAppContext } from '../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab/settings_tab';
@@ -35,7 +36,7 @@ export function SettingsPage() {
   const { setBreadcrumbs } = useAppContext();
   const {
     services: {
-      application: { navigateToApp, isAppRegistered },
+      application: { navigateToApp, isAppRegistered, capabilities },
       serverless,
       spaces,
       cloud,
@@ -56,6 +57,12 @@ export function SettingsPage() {
   } else {
     currentSolution = currentSpaceSolution;
   }
+
+  const hasConnectorsAllPrivilege =
+    capabilities.actions?.show === true &&
+    capabilities.actions?.execute === true &&
+    capabilities.actions?.delete === true &&
+    capabilities.actions?.save === true;
 
   const {
     query: { tab },
@@ -94,7 +101,7 @@ export function SettingsPage() {
           }),
           onClick: (e) => {
             e.preventDefault();
-            navigateToApp('management', { path: '/kibana/aiAssistantManagementSelection' });
+            navigateToApp('management', { path: '/ai/aiAssistantManagementSelection' });
           },
         },
         {
@@ -172,21 +179,21 @@ export function SettingsPage() {
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            iconType="gear"
-            onClick={() => navigateToApp('management', { path: 'kibana/genAiSettings' })} // TODO: update path when available
-            data-test-subj="genAiSettingsLink"
-          >
-            {i18n.translate(
-              'xpack.observabilityAiAssistantManagement.settingsPage.genAiSettingsLinkLabel',
-              {
-                defaultMessage: 'GenAI Settings',
-              }
-            )}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        {hasConnectorsAllPrivilege ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="gear"
+              size="m"
+              onClick={() => navigateToApp('management', { path: 'ai/genAiSettings' })}
+              data-test-subj="genAiSettingsButton"
+            >
+              <FormattedMessage
+                id="xpack.observabilityAiAssistantManagement.settingsPage.genAiSettingsButton"
+                defaultMessage="GenAI Settings"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
 
       <EuiSpacer size="l" />

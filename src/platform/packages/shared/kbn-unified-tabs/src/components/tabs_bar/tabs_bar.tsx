@@ -265,7 +265,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
             {!!scrollRightButton && <EuiFlexItem grow={false}>{scrollRightButton}</EuiFlexItem>}
             {!hasReachedMaxItemsCount && (
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={addButtonLabel}>
+                <EuiToolTip content={addButtonLabel} disableScreenReaderOutput>
                   <EuiButtonIcon
                     data-test-subj="unifiedTabs_tabsBar_newTabBtn"
                     iconType="plus"

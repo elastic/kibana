@@ -54,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
       },
       {
         method: 'get',
-        path: `${ACTION_STATUS_ROUTE}?agent_ids=1,2`,
+        path: `${ACTION_STATUS_ROUTE}?agent_ids={agentId}`,
         version: '2023-10-31',
         body: undefined,
       },

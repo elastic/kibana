@@ -90,6 +90,7 @@
     "@kbn/data-service-server",
     "@kbn/controls-schemas",
     "@kbn/controls-constants",
+    "@kbn/presentation-util"
   ],
   "exclude": ["target/**/*"]
 }

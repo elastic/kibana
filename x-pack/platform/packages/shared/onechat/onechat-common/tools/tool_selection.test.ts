@@ -22,12 +22,12 @@ describe('toolMatchSelection', () => {
   };
 
   it('should return true if provider matches and toolId is included', () => {
-    const toolSelection: ByIdsToolSelection = { type: 'type1', tool_ids: ['toolA'] };
+    const toolSelection: ByIdsToolSelection = { type: 'type1' as ToolType, tool_ids: ['toolA'] };
     expect(toolMatchSelection(tool, toolSelection)).toBe(true);
   });
 
   it('should return false if type does not match', () => {
-    const toolSelection: ByIdsToolSelection = { type: 'type2', tool_ids: ['toolA'] };
+    const toolSelection: ByIdsToolSelection = { type: 'type2' as ToolType, tool_ids: ['toolA'] };
     expect(toolMatchSelection(tool, toolSelection)).toBe(false);
   });
 
@@ -96,7 +96,7 @@ describe('filterToolsBySelection', () => {
 
   it('should filter tools by provider', () => {
     const toolSelection: ByIdsToolSelection[] = [
-      { type: 'type1', tool_ids: [allToolsSelectionWildcard] },
+      { type: 'type1' as ToolType, tool_ids: [allToolsSelectionWildcard] },
     ];
     const result = filterToolsBySelection(tools, toolSelection);
     expect(result).toEqual([
@@ -114,7 +114,9 @@ describe('filterToolsBySelection', () => {
   });
 
   it('should filter tools by provider and specific tool_ids', () => {
-    const toolSelection: ByIdsToolSelection[] = [{ type: 'type1', tool_ids: ['toolA'] }];
+    const toolSelection: ByIdsToolSelection[] = [
+      { type: 'type1' as ToolType, tool_ids: ['toolA'] },
+    ];
     const result = filterToolsBySelection(tools, toolSelection);
     expect(result).toEqual([
       {
@@ -133,8 +135,8 @@ describe('filterToolsBySelection', () => {
 
   it('should handle multiple selections', () => {
     const toolSelection: ByIdsToolSelection[] = [
-      { type: 'type1', tool_ids: ['toolA'] },
-      { type: 'type2', tool_ids: [allToolsSelectionWildcard] },
+      { type: 'type1' as ToolType, tool_ids: ['toolA'] },
+      { type: 'type2' as ToolType, tool_ids: [allToolsSelectionWildcard] },
     ];
     const result = filterToolsBySelection(tools, toolSelection);
     expect(result).toEqual([

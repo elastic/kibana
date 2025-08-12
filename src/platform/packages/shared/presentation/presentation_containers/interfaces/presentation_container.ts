@@ -18,6 +18,7 @@ import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
 
 export interface PanelPackage<SerializedStateType extends object = object> {
   panelType: string;
+  maybePanelId?: string;
 
   /**
    * The serialized state of this panel.

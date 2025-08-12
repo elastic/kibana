@@ -10,21 +10,34 @@ import { EuiPanel } from '@elastic/eui';
 import { useGenAIConnectors, useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UISettings } from './ui_settings';
-import { ProductDocEntry } from './product_doc_entry';
+import { ProductDocSetting } from './product_doc_setting';
 import { ChangeKbModel } from './change_kb_model';
+import { getMappedInferenceId } from '../../../helpers/inference_utils';
 
 export function SettingsTab() {
   const { productDocBase } = useKibana().services;
 
   const knowledgeBase = useKnowledgeBase();
+  const currentlyDeployedInferenceId = getMappedInferenceId(
+    knowledgeBase.status.value?.currentInferenceId
+  );
+
   const connectors = useGenAIConnectors();
 
   return (
     <EuiPanel hasBorder grow={false}>
-      {productDocBase ? <ProductDocEntry /> : undefined}
+      {productDocBase ? (
+        <ProductDocSetting
+          knowledgeBase={knowledgeBase}
+          currentlyDeployedInferenceId={currentlyDeployedInferenceId}
+        />
+      ) : undefined}
 
       {knowledgeBase.status.value?.enabled && connectors.connectors?.length ? (
-        <ChangeKbModel knowledgeBase={knowledgeBase} />
+        <ChangeKbModel
+          knowledgeBase={knowledgeBase}
+          currentlyDeployedInferenceId={currentlyDeployedInferenceId}
+        />
       ) : undefined}
 
       <UISettings knowledgeBase={knowledgeBase} />

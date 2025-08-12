@@ -10,20 +10,30 @@ import {
   type UserIdAndName,
   type Conversation,
   createConversationNotFoundError,
+  ConversationWithoutRounds,
 } from '@kbn/onechat-common';
+import { isNotFoundError } from '@kbn/es-errors';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
   ConversationListOptions,
 } from '../../../common/conversations';
 import { ConversationStorage } from './storage';
-import { fromEs, toEs, createRequestToEs, updateConversation, type Document } from './converters';
+import {
+  fromEs,
+  fromEsWithoutRounds,
+  toEs,
+  createRequestToEs,
+  updateConversation,
+  type Document,
+} from './converters';
 
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
+  exists(conversationId: string): Promise<boolean>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
   update(conversation: ConversationUpdateRequest): Promise<Conversation>;
-  list(options?: ConversationListOptions): Promise<Conversation[]>;
+  list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
 }
 
 export const createClient = ({
@@ -45,23 +55,30 @@ class ConversationClientImpl implements ConversationClient {
     this.user = user;
   }
 
-  async list(options: ConversationListOptions = {}): Promise<Conversation[]> {
+  async list(options: ConversationListOptions = {}): Promise<ConversationWithoutRounds[]> {
     const { agentId } = options;
 
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1000,
+      _source: {
+        excludes: ['rounds'],
+      },
       query: {
         bool: {
           must: [
-            { term: { user_id: this.user.id } },
+            {
+              term: this.user.username
+                ? { user_name: this.user.username }
+                : { user_id: this.user.id },
+            },
             ...(agentId ? [{ term: { agent_id: agentId } }] : []),
           ],
         },
       },
     });
 
-    return response.hits.hits.map((hit) => fromEs(hit as Document));
+    return response.hits.hits.map((hit) => fromEsWithoutRounds(hit as Document));
   }
 
   async get(conversationId: string): Promise<Conversation> {
@@ -72,6 +89,19 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     return fromEs(document);
+  }
+
+  async exists(conversationId: string): Promise<boolean> {
+    try {
+      const document = await this.storage.getClient().get({ id: conversationId });
+      return hasAccess({ conversation: document, user: this.user });
+    } catch (error) {
+      // Only catch 404 errors (document not found), re-throw all others
+      if (isNotFoundError(error)) {
+        return false;
+      }
+      throw error;
+    }
   }
 
   async create(conversation: ConversationCreateRequest): Promise<Conversation> {
@@ -124,5 +154,7 @@ const hasAccess = ({
   conversation: Pick<Document, '_source'>;
   user: UserIdAndName;
 }) => {
-  return conversation._source!.user_id === user.id;
+  return (
+    conversation._source!.user_id === user.id || conversation._source!.user_name === user.username
+  );
 };

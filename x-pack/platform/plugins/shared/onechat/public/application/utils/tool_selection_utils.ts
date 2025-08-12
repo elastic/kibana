@@ -48,7 +48,7 @@ export const isAllToolsSelectedForType = (
  */
 export const filterOutTypeSelections = (
   selectedTools: ToolSelection[],
-  toolType: string,
+  toolType: ToolType,
   typeTools: ToolSelectionRelevantFields[]
 ): ToolSelection[] => {
   return selectedTools.filter((selection) => {
@@ -78,7 +78,7 @@ export const filterOutTypeSelections = (
  * Toggle selection for all tools of a specific type.
  */
 export const toggleTypeSelection = (
-  toolType: string,
+  toolType: ToolType,
   typeTools: ToolSelectionRelevantFields[],
   selectedTools: ToolSelection[]
 ): ToolSelection[] => {
@@ -109,7 +109,7 @@ export const toggleTypeSelection = (
  */
 export const toggleToolSelection = (
   toolId: string,
-  toolType: string,
+  toolType: ToolType,
   typeTools: ToolSelectionRelevantFields[],
   selectedTools: ToolSelection[]
 ): ToolSelection[] => {
