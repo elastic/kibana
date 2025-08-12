@@ -12,6 +12,7 @@ Review important information about the {kib} 8.x releases.
 
 * <<release-notes-8.18.5>>
 * <<release-notes-8.18.4>>
+* <<release-notes-8.18.3>>
 * <<release-notes-8.18.2>>
 * <<release-notes-8.18.1>>
 * <<release-notes-8.18.0>>
