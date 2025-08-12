@@ -35,6 +35,6 @@ export const suggestedDashboardSchema = z.object({
 });
 
 export type LinkedDashboard = z.output<typeof linkedDashboardSchema>;
-export type MatchedBy = z.output<typeof linkedDashboardSchema>['matchedBy'];
+export type SuggestedMatchedBy = z.output<typeof suggestedDashboardSchema>['matchedBy'];
 export type SuggestedDashboard = z.output<typeof suggestedDashboardSchema>;
 export type RelatedDashboard = LinkedDashboard | SuggestedDashboard;

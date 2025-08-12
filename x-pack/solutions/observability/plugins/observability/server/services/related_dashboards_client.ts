@@ -14,16 +14,21 @@ import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type { LinkedDashboard, SuggestedDashboard } from '@kbn/observability-schema';
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
 import type { AlertData } from './alert_data';
-import {
-  SuggestedDashboardsValidPanelType,
-  isSuggestedDashboardsValidPanelType,
-  isSuggestedDashboardsValidRuleTypeId,
-} from './helpers';
+import { SuggestedDashboardsValidPanelType, isSuggestedDashboardsValidPanelType } from './helpers';
 import { ReferencedPanelManager } from './referenced_panel_manager';
-import { MatchedBy } from '@kbn/observability-schema/related_dashboards/schema/related_dashboard/v1';
+import { SuggestedMatchedBy } from '@kbn/observability-schema/related_dashboards/schema/related_dashboard/v1';
 
-const MAX_SUGGESTED_MANAGED_DASHBOARDS = 3;
-const SCORING_EXCLUDED_FIELDS = ['tags', 'event.action', 'event.kind'];
+// How many managed dashboards to allow in the suggested list before we start filtering them out
+const MAX_SUGGESTED_MANAGED_DASHBOARDS = 5;
+// TODO: This is is missing many fields most likely, add more during review
+const SCORING_EXCLUDED_FIELDS = new Set<string>([
+  'tags',
+  'labels',
+  'event.action',
+  'event.kind',
+  '@timestamp',
+  '__records__',
+]);
 const TEXT_MATCH_LIMIT = 5;
 const UNFILTERED_MATCH_LIMIT = 1000;
 
@@ -72,131 +77,18 @@ export class RelatedDashboardsClient {
     };
   }
 
-  private getPanelIndicesMap: Record<
-    SuggestedDashboardsValidPanelType,
-    (panel: DashboardPanel) => Set<string> | undefined
-  > = {
-    lens: (panel: DashboardPanel) => {
-      let references = isLensVizAttributes(panel.panelConfig.attributes)
-        ? panel.panelConfig.attributes.references
-        : undefined;
-      if (!references && panel.panelIndex) {
-        references = this.referencedPanelManager.getByIndex(panel.panelIndex)?.references;
-      }
-      if (references?.length) {
-        return new Set(
-          references.filter((r) => r.name.match(`indexpattern`)).map((reference) => reference.id)
-        );
-      }
-    },
-  };
-
-  private getPanelFieldsMap: Record<
-    SuggestedDashboardsValidPanelType,
-    (panel: DashboardPanel) => Set<string> | undefined
-  > = {
-    lens: (panel: DashboardPanel) => {
-      let state: unknown = isLensVizAttributes(panel.panelConfig.attributes)
-        ? panel.panelConfig.attributes.state
-        : undefined;
-      if (!state && panel.panelIndex) {
-        state = this.referencedPanelManager.getByIndex(panel.panelIndex)?.state;
-      }
-      if (isLensAttributesState(state)) {
-        const fields = new Set<string>();
-        const dataSourceLayers = state.datasourceStates.formBased?.layers || {};
-        Object.values(dataSourceLayers).forEach((ds) => {
-          const columns = ds.columns;
-          Object.values(columns).forEach((col) => {
-            if ('sourceField' in col) {
-              fields.add(col.sourceField);
-            }
-          });
-        });
-        return fields;
-      }
-    },
-  };
-
-  private rankDashboards(alert: AlertData): SuggestedDashboard[] {
-    // TODO: Do we need this
-    if (!isSuggestedDashboardsValidRuleTypeId(alert.getRuleTypeId())) return [];
-
-    const suggestedDashboards = new Set<SuggestedDashboard>();
-
-    // Add dashboards that are text matches
-    this.dashboardsById.forEach((dashboard, id) => {
-      if (dashboard.score && dashboard.score > 0) {
-        suggestedDashboards.add({
-          id: dashboard.id,
-          title: dashboard.attributes.title,
-          description: dashboard.attributes.description,
-          tags: dashboard.attributes.tags,
-          matchedBy: { textMatch: dashboard.score, isManaged: dashboard.managed },
-          score: dashboard.score ?? 0,
-        });
-      }
-    });
-
-    // Add dashboards that are field matches
-    this.dashboardsForField(alert.getAllRelevantFields(), this.dashboardsById.values()).forEach(
-      (dashboard) => suggestedDashboards.add(dashboard)
-    );
-
-    // Add dashboards that are index matches
-    const ruleQueryIndex = alert.getRuleQueryIndex();
-    if (ruleQueryIndex) {
-      const { dashboards } = this.dashboardsForIndex(ruleQueryIndex, this.dashboardsById.values());
-      dashboards.forEach((dashboard) => suggestedDashboards.add(dashboard));
+  private getPanelIndices(panel: DashboardPanel): Set<string> | undefined {
+    let references = isLensVizAttributesForPanel(panel.panelConfig.attributes)
+      ? panel.panelConfig.attributes.references
+      : undefined;
+    if (!references && panel.panelIndex) {
+      references = this.referencedPanelManager.getByIndex(panel.panelIndex)?.references;
     }
-
-    const relevantDashboardsById = new Map<string, SuggestedDashboard>();
-    const index = alert.getRuleQueryIndex();
-
-    Object.values(this.dashboardsById)
-      .filter((d) => d.matchedBy.fields.size > 0 || d.matchedBy.index.size > 0 || d.textMatch > 0)
-      .forEach((d) => {
-        suggestedDashboards.add({
-          id: d.id,
-          title: d.attributes.title,
-          description: d.attributes.description,
-          tags: d.attributes.tags,
-          // If it has a pre-existing score, that's a text match
-          matchedBy: { textMatch: d.score, isManaged: d.managed },
-          score: d.score ?? 0,
-        });
-      });
-
-    suggestedDashboards.forEach((dashboard) => {
-      relevantDashboardsById.set(dashboard.id, {
-        ...dashboard,
-        matchedBy: {
-          ...relevantDashboardsById.get(dashboard.id)?.matchedBy,
-          ...dashboard.matchedBy,
-        },
-        score: scoreMatch(dashboard.matchedBy, allRelevantFields, index ? [index] : []),
-      });
-    });
-
-    let matchedManagedDashboards = 0;
-    const sortedDashboards = Array.from(relevantDashboardsById.values())
-      .sort((a, b) => {
-        return b.score - a.score;
-      })
-      .filter((d) => {
-        // Unmanaged dashboards (user created) always match
-        if (!d.matchedBy.isManaged) {
-          return true;
-        }
-        // Only allow as many managed dashboards as the quota allows
-        matchedManagedDashboards++;
-        if (matchedManagedDashboards > MAX_SUGGESTED_MANAGED_DASHBOARDS) {
-          return false;
-        }
-        return true;
-      });
-
-    return sortedDashboards;
+    if (references?.length) {
+      return new Set(
+        references.filter((r) => r.name.match(`indexpattern`)).map((reference) => reference.id)
+      );
+    }
   }
 
   private async fetchSuggested(alert: AlertData): Promise<SuggestedDashboard[]> {
@@ -208,24 +100,76 @@ export class RelatedDashboardsClient {
       defaultSearchOperator: 'OR',
       limit: TEXT_MATCH_LIMIT,
     });
-    for (const [index, dashboard] of textMatches.result.hits.entries()) {
-      // Declining initial score based on distance from the top of the results
-      dashboard.score = TEXT_MATCH_LIMIT - index;
-    }
-    await this.processDashboardSearch(textMatches);
+    await this.processDashboardPanels(textMatches);
+    const dashboardsById = new Map<string, SuggestedDashboard>();
+    textMatches.result.hits.forEach((dashboard, idx) =>
+      dashboardsById.set(
+        dashboard.id,
+        dashboardToUnscoredSuggestedDashboard(dashboard, {
+          // Score these dashboards exclusively as text matches
+          textMatch: textMatches.result.hits.length - idx,
+        })
+      )
+    );
 
     // Now match by fields and indices, these will use the previous score as a multiplier if relevant
-    const allMatches = await this.dashboardClient.search({ limit: UNFILTERED_MATCH_LIMIT });
-    await this.processDashboardSearch(allMatches);
+    const unfilteredMatches = await this.dashboardClient.search({ limit: UNFILTERED_MATCH_LIMIT });
+    await this.processDashboardPanels(unfilteredMatches);
+    unfilteredMatches.result.hits.forEach((dashboard) => {
+      const matchedBy: SuggestedMatchedBy = {};
+      const panels = dashboard.attributes.panels.filter(isDashboardPanel);
+      for (const panel of panels) {
+        const panelIndices = this.getPanelIndices(panel);
+        if (panelIndices) {
+          matchedBy.index = Array.from(panelIndices);
+        }
+        const panelFields = this.getPanelFields(panel);
+        if (panelFields) {
+          matchedBy.fields = Array.from(panelFields);
+        }
+      }
 
-    return this.rankDashboards(alert);
+      // Check if the dashboard was already scored by text match
+      let d =
+        dashboardsById.get(dashboard.id) || dashboardToUnscoredSuggestedDashboard(dashboard, {});
+      d.matchedBy.fields = matchedBy.fields || [];
+      d.matchedBy.index = matchedBy.index || [];
+    });
+
+    // Score all dashboards
+    for (const dashboard of dashboardsById.values()) {
+      if (
+        dashboard.matchedBy.fields?.length ||
+        dashboard.matchedBy.index?.length ||
+        dashboard.matchedBy.textMatch
+      ) {
+        dashboard.score = scoreMatch(
+          dashboard.matchedBy,
+          dashboard.matchedBy.fields || [],
+          dashboard.matchedBy.index || []
+        );
+      }
+    }
+
+    // Return the dashboards sorted by score
+    let matchedManagedDashboards = 0;
+    return (
+      Array.from(dashboardsById.values())
+        .sort((a, b) => b.score - a.score)
+        // Exclude managed dashboards if we already have MAX_SUGGESTED_MANAGED_DASHBOARDS matching
+        .filter((d) =>
+          d.matchedBy.isManaged
+            ? ++matchedManagedDashboards <= MAX_SUGGESTED_MANAGED_DASHBOARDS
+            : true
+        )
+    );
   }
 
-  private async processDashboardSearch(dsr: SearchResponse<Dashboard>, rankScore = false) {
+  private async processDashboardPanels(dsr: SearchResponse<Dashboard>) {
     const {
       result: { hits },
     } = dsr;
-    for (const [idx, dashboard] of hits.entries()) {
+    for (const dashboard of hits) {
       for (const panel of dashboard.attributes.panels) {
         if (
           isDashboardPanel(panel) &&
@@ -235,106 +179,36 @@ export class RelatedDashboardsClient {
           this.referencedPanelManager.addReferencedPanel({ dashboard, panel });
         }
       }
-
-      // For text matches we start the score based on their position in the results
-      if (rankScore) {
-        dashboard.score = hits.length - idx;
-      }
-      this.dashboardsById.set(dashboard.id, dashboard);
     }
 
     await this.referencedPanelManager.fetchReferencedPanels();
   }
 
-  private dashboardsForIndex(
-    index: string,
-    dashboards: Iterable<Dashboard>
-  ): {
-    dashboards: SuggestedDashboard[];
-  } {
-    const relevantDashboards: SuggestedDashboard[] = [];
-    for (const d of dashboards) {
-      const panels = d.attributes.panels.filter(isDashboardPanel);
-      const matchingPanels = this.panelsWithIndex(index, panels);
-      if (matchingPanels.length > 0) {
-        this.logger.debug(
-          () => `Found ${matchingPanels.length} panel(s) in dashboard ${d.id} using index ${index}`
-        );
-        relevantDashboards.push({
-          id: d.id,
-          title: d.attributes.title,
-          description: d.attributes.description,
-          tags: d.attributes.tags,
-          matchedBy: { index: [index] },
-          score: 0, // scores are computed when dashboards are deduplicated
-        });
-      }
+  private getPanelFields(panel: DashboardPanel): string[] {
+    if (panel.type !== 'lens') {
+      return [];
     }
-    return { dashboards: relevantDashboards };
-  }
 
-  private dashboardsForField(
-    fields: string[],
-    dashboards: Iterable<Dashboard>
-  ): SuggestedDashboard[] {
-    const relevantDashboards: SuggestedDashboard[] = [];
-    for (const d of dashboards) {
-      const panels = d.attributes.panels.filter(isDashboardPanel);
-      const matchingPanels = this.getPanelsByField(fields, panels);
-      const allMatchingFields = new Set(
-        matchingPanels.map((p) => Array.from(p.matchingFields)).flat()
-      );
-      if (matchingPanels.length > 0) {
-        this.logger.debug(
-          () =>
-            `Found ${matchingPanels.length} panel(s) in dashboard ${
-              d.id
-            } using field(s) ${Array.from(allMatchingFields).toString()}`
-        );
-        relevantDashboards.push({
-          id: d.id,
-          title: d.attributes.title,
-          description: d.attributes.description,
-          tags: d.attributes.tags,
-          matchedBy: { fields: Array.from(allMatchingFields) },
-          score: 0, // scores are computed when dashboards are deduplicated
-        });
-      }
+    let state: unknown = isLensVizAttributesForPanel(panel.panelConfig.attributes)
+      ? panel.panelConfig.attributes.state
+      : undefined;
+    if (!state && panel.panelIndex) {
+      state = this.referencedPanelManager.getByIndex(panel.panelIndex)?.state;
     }
-    return relevantDashboards;
-  }
-
-  private panelsWithIndex(index: string, panels: DashboardPanel[]): DashboardPanel[] {
-    const panelsByIndex = panels.filter((p) => this.getPanelIndices(p).has(index));
-    return panelsByIndex;
-  }
-
-  private getPanelsByField(
-    fields: string[],
-    panels: DashboardPanel[]
-  ): Array<{ matchingFields: Set<string>; panel: DashboardPanel }> {
-    const panelsByField = panels.reduce((acc, p) => {
-      const matchingFields = fields.filter((f) => this.getPanelFields(p).has(f));
-      if (matchingFields.length) {
-        acc.push({ matchingFields: new Set(matchingFields), panel: p });
-      }
-      return acc;
-    }, [] as Array<{ matchingFields: Set<string>; panel: DashboardPanel }>);
-    return panelsByField;
-  }
-
-  private getPanelIndices(panel: DashboardPanel): Set<string> {
-    const indices = isSuggestedDashboardsValidPanelType(panel.type)
-      ? this.getPanelIndicesMap[panel.type](panel)
-      : undefined;
-    return indices ?? new Set<string>();
-  }
-
-  private getPanelFields(panel: DashboardPanel): Set<string> {
-    const fields = isSuggestedDashboardsValidPanelType(panel.type)
-      ? this.getPanelFieldsMap[panel.type](panel)
-      : undefined;
-    return fields ?? new Set<string>();
+    if (isLensAttributesState(state)) {
+      const fields: string[] = [];
+      const dataSourceLayers = state.datasourceStates.formBased?.layers || {};
+      Object.values(dataSourceLayers).forEach((ds) => {
+        const columns = ds.columns;
+        Object.values(columns).forEach((col) => {
+          if ('sourceField' in col) {
+            fields.push(col.sourceField);
+          }
+        });
+      });
+      return fields;
+    }
+    return [];
   }
 
   private async getLinkedDashboards(ruleId: string): Promise<LinkedDashboard[]> {
@@ -380,7 +254,7 @@ export class RelatedDashboardsClient {
   }
 }
 
-function isLensVizAttributes(attributes: unknown): attributes is LensAttributes {
+function isLensVizAttributesForPanel(attributes: unknown): attributes is LensAttributes {
   if (!attributes) {
     return false;
   }
@@ -396,23 +270,15 @@ function isLensAttributesState(state: unknown): state is LensAttributes['state']
   return typeof state === 'object' && state !== null && 'datasourceStates' in state;
 }
 
-function scoreMatch(
-  matchedBy: MatchedBy & { textMatch?: number; isManaged?: boolean },
-  fields: string[],
-  index: string[]
-): number {
+function scoreMatch(matchedBy: SuggestedMatchedBy, fields: string[], index: string[]): number {
   // Filter out excluded fields
-  const filteredFields = fields.filter((field) => !SCORING_EXCLUDED_FIELDS.includes(field));
+  const allFields = fields.filter((field) => !SCORING_EXCLUDED_FIELDS.has(field));
+  const matchedByFields =
+    matchedBy?.fields?.filter((field) => !SCORING_EXCLUDED_FIELDS.has(field)) || [];
 
   // Calculate Jaccard similarity
   const matchingFields = new Set<string>();
-
-  // Get fields from matchedBy
-  if (matchedBy.fields) {
-    matchedBy.fields
-      .filter((field) => !SCORING_EXCLUDED_FIELDS.includes(field))
-      .forEach((field) => matchingFields.add(field));
-  }
+  matchedByFields.forEach((field) => matchingFields.add(field));
 
   // Get indexes from matchedBy
   if (matchedBy.index) {
@@ -425,7 +291,7 @@ function scoreMatch(
   }
 
   // Calculate Jaccard similarity for fields/indices
-  const setA = new Set<string>([...filteredFields, ...(index || [])]);
+  const setA = new Set<string>([...allFields, ...(index || [])]);
   const setB = matchingFields;
   const intersection = new Set([...setA].filter((item) => setB.has(item)));
   const union = new Set([...setA, ...setB]);
@@ -443,4 +309,23 @@ function scoreMatch(
   }
 
   return baseScore;
+}
+
+// Converts a dashboard to a SuggestedDashboard without scoring
+// This is useful for when we want to create a SuggestedDashboard without a score
+// and then later score it based on the fields and indices it matches.
+function dashboardToUnscoredSuggestedDashboard(
+  dashboard: Dashboard,
+  matchedBy: Omit<SuggestedMatchedBy, 'isManaged'>
+): SuggestedDashboard {
+  const fullMatchedBy: SuggestedMatchedBy = matchedBy as SuggestedMatchedBy;
+  fullMatchedBy.isManaged = dashboard.managed || false;
+  return {
+    id: dashboard.id,
+    title: dashboard.attributes.title,
+    description: dashboard.attributes.description,
+    tags: dashboard.attributes.tags,
+    matchedBy: fullMatchedBy,
+    score: 0,
+  };
 }
