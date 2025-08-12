@@ -20,8 +20,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
+import { isEmpty } from 'lodash';
 import { v4 } from 'uuid';
-import { useFeaturesFetch } from '../../../../hooks/use_features_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../../hooks/use_significant_events_api';
 import { useAIFeatures } from '../../common/use_ai_features';
@@ -41,7 +41,6 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
   } = useKibana();
   const aiFeatures = useAIFeatures();
   const { generate } = useSignificantEventsApi({ name: definition.name });
-  const featuresFetch = useFeaturesFetch({ name: definition.name });
 
   const contextMenuPopoverId = useGeneratedHtmlId();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -104,12 +103,12 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
       }),
       items: [
         {
-          name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.featuresBased', {
-            defaultMessage: 'Features based',
+          name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.descriptionBased', {
+            defaultMessage: 'Description based',
           }),
           icon: 'sparkles',
           onClick: () => onGenerateClick('zero_shot'),
-          disabled: !featuresFetch.value?.length,
+          disabled: isEmpty(definition.description),
         },
         {
           name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.logPatternsBased', {

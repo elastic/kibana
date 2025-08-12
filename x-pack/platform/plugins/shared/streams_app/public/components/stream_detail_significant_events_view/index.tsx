@@ -8,13 +8,13 @@ import { niceTimeFormatter } from '@elastic/charts';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StreamQueryKql, Streams } from '@kbn/streams-schema';
+import { omit } from 'lodash';
 import React, { useMemo, useState } from 'react';
-import { useSystemDescriptionGenerateApi } from '../../hooks/use_system_description_generate_api';
-import { useFeaturesFetch } from '../../hooks/use_features_fetch';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { useUpdateStreams } from '../../hooks/use_update_streams';
 import { LoadingPanel } from '../loading_panel';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
@@ -22,16 +22,16 @@ import type { SaveData } from './add_significant_event_flyout/types';
 import { ChangePointSummary } from './change_point_summary';
 import { SignificantEventsViewEmptyState } from './empty_state/empty_state';
 import { ManageSystemDescriptionFlyout } from './manage_system_description_flyout/manage_system_description_flyout';
-import { FEATURE_IDENTIFIED_SYSTEM_ID } from './manage_system_description_flyout/types';
 import { SignificantEventsTable } from './significant_events_table';
 import { Timeline, TimelineEvent } from './timeline';
 import { formatChangePoint } from './utils/change_point';
 
 interface Props {
   definition: Streams.all.GetResponse;
+  refreshDefinition: () => void;
 }
 
-export function StreamDetailSignificantEventsView({ definition }: Props) {
+export function StreamDetailSignificantEventsView({ definition, refreshDefinition }: Props) {
   const {
     core: { notifications },
   } = useKibana();
@@ -50,14 +50,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     start,
     end,
   });
-
   const { upsertQuery, removeQuery, bulk } = useSignificantEventsApi({
     name: definition.stream.name,
   });
-  const { upsertFeature } = useSystemDescriptionGenerateApi({ name: definition.stream.name });
-  const featuresFetch = useFeaturesFetch({
-    name: definition.stream.name,
-  });
+  const updateStream = useUpdateStreams(definition.stream.name);
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [isIdentifySystemFlyoutOpen, setIsIdentifySystemFlyoutOpen] = useState(false);
@@ -154,30 +150,33 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const identifySystemFlyout = isIdentifySystemFlyoutOpen ? (
     <ManageSystemDescriptionFlyout
       definition={definition.stream}
-      features={featuresFetch.value}
-      onSave={async (feature: string) => {
-        await upsertFeature({ id: FEATURE_IDENTIFIED_SYSTEM_ID, feature }).then(
+      onSave={async (description: string) => {
+        await updateStream({
+          queries: definition.queries,
+          dashboards: definition.dashboards,
+          stream: { ...omit(definition.stream, ['name']), description },
+        } as Streams.all.UpsertRequest).then(
           () => {
             notifications.toasts.addSuccess({
               title: i18n.translate(
-                'xpack.streams.significantEvents.manageFeatures.saveSuccessToastTitle',
-                { defaultMessage: `Successfully saved identified system feature` }
+                'xpack.streams.significantEvents.manageDescription.saveSuccessToastTitle',
+                { defaultMessage: `Successfully saved identified system description` }
               ),
             });
             setIsIdentifySystemFlyoutOpen(false);
+            refreshDefinition();
           },
           (error) => {
             notifications.showErrorDialog({
               title: i18n.translate(
-                'xpack.streams.significantEvents.manageFeatures.saveErrorToastTitle',
-                { defaultMessage: `Could not save identified system feature` }
+                'xpack.streams.significantEvents.manageDescription.saveErrorToastTitle',
+                { defaultMessage: `Could not save identified system description` }
               ),
               error,
             });
           }
         );
         setIsIdentifySystemFlyoutOpen(false);
-        featuresFetch.refresh();
       }}
       onClose={() => {
         setIsIdentifySystemFlyoutOpen(false);

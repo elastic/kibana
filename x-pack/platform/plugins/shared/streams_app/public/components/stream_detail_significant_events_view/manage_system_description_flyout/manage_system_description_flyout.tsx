@@ -121,7 +121,7 @@ export function ManageSystemDescriptionFlyout({ onClose, definition, onSave }: P
                           notifications.showErrorDialog({
                             title: i18n.translate(
                               'xpack.streams.manageSystemDescription.generateErrorToastTitle',
-                              { defaultMessage: `Could not identify system description` }
+                              { defaultMessage: `Could not generate system description` }
                             ),
                             error,
                           });
@@ -131,7 +131,7 @@ export function ManageSystemDescriptionFlyout({ onClose, definition, onSave }: P
                           notifications.toasts.addSuccess({
                             title: i18n.translate(
                               'xpack.streams.manageSystemDescription.generateSuccessToastTitle',
-                              { defaultMessage: `Successfully identified system desciption` }
+                              { defaultMessage: `Successfully generated system description` }
                             ),
                           });
                           setIsGenerating(false);
@@ -155,7 +155,7 @@ export function ManageSystemDescriptionFlyout({ onClose, definition, onSave }: P
                 <EuiTextArea
                   fullWidth
                   disabled={isGenerating}
-                  placeholder="System description generated will appear here. You can edit it if needed."
+                  placeholder="System description will appear here. You can edit it if needed."
                   aria-label="stream system description"
                   value={description}
                   onChange={(e) => onChange(e)}
@@ -180,7 +180,7 @@ export function ManageSystemDescriptionFlyout({ onClose, definition, onSave }: P
             isLoading={isSubmitting}
             onClick={() => {
               setIsSubmitting(true);
-              onSave(description!).finally(() => setIsSubmitting(false));
+              onSave(description).finally(() => setIsSubmitting(false));
             }}
           >
             {i18n.translate(
