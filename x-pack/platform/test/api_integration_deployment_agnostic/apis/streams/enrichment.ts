@@ -37,8 +37,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
         if: {
           field: 'resource.attributes.host.name',
-          operator: 'eq' as const,
-          value: 'routeme',
+          eq: 'routeme',
         },
       };
       // We use a forked stream as processing changes cannot be made to the root stream

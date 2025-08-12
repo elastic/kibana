@@ -15,12 +15,14 @@ import {
 
 export function migrateOnRead(definition: Record<string, unknown>): Streams.all.Definition {
   let migratedDefinition = definition;
+  let hasBeenMigrated = false;
   // Add required description
   if (typeof migratedDefinition.description !== 'string') {
     migratedDefinition = {
       ...migratedDefinition,
       description: '',
     };
+    hasBeenMigrated = true;
   }
   // Rename unwired to classic
   if (
@@ -39,6 +41,7 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
       },
     };
     delete (migratedDefinition.ingest as { unwired?: {} }).unwired;
+    hasBeenMigrated = true;
   }
 
   // Migrate routing "if" Condition to Streamlang
@@ -54,6 +57,7 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     )
   ) {
     migratedDefinition = migrateRoutingIfConditionToStreamlang(migratedDefinition);
+    hasBeenMigrated = true;
   }
 
   // Migrate old flat processing array to Streamlang DSL
@@ -63,9 +67,12 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     Array.isArray((migratedDefinition.ingest as { processing?: unknown }).processing)
   ) {
     migratedDefinition = migrateOldProcessingArrayToStreamlang(migratedDefinition);
+    hasBeenMigrated = true;
   }
 
-  Streams.all.Definition.asserts(migratedDefinition as unknown as BaseStream.Definition);
+  if (hasBeenMigrated) {
+    Streams.all.Definition.asserts(migratedDefinition as unknown as BaseStream.Definition);
+  }
 
   return migratedDefinition as unknown as Streams.all.Definition;
 }
