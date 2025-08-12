@@ -11,7 +11,13 @@ import { once } from 'lodash';
 import { enableMapSet } from 'immer';
 import React, { createContext, useContext, type PropsWithChildren } from 'react';
 import { useCreateStore, type ActionsFromReducers } from './store';
-import { type GroupNode, type LeafNode, type IStoreState, createStoreReducers } from './reducers';
+import {
+  type GroupNode,
+  type LeafNode,
+  type IStoreState,
+  type TableState,
+  createStoreReducers,
+} from './reducers';
 export type { GroupNode, LeafNode, IStoreState } from './reducers';
 
 interface IDataCascadeProviderProps {
@@ -68,6 +74,7 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
 
   const { state, actions } = useCreateStore({
     initialState: {
+      table: {} as TableState,
       groupNodes: [] as G[],
       leafNodes: new Map<string, L[]>(), // TODO: consider externalizing this so the consumer might provide their own external cache
       groupByColumns: cascadeGroups,

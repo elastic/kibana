@@ -82,6 +82,8 @@ export const useCreateStore = <S extends Record<string, unknown>, R extends Redu
     get state() {
       return state;
     },
-    actions: actionsRef.current,
+    get actions() {
+      return actionsRef.current;
+    },
   };
 };

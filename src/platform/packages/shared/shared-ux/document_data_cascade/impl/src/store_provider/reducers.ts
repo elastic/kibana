@@ -8,6 +8,9 @@
  */
 
 import { castDraft, produce } from 'immer';
+import type { TableState, ExpandedState } from '@tanstack/react-table';
+export type { TableState } from '@tanstack/react-table';
+import { getLeafIdFromCacheKey } from '../lib/utils';
 
 /**
  * Represents a document, with a base expectation that specifies
@@ -28,7 +31,14 @@ export type LeafNode = DocWithId;
 export type ColumnGroups = Array<keyof Omit<GroupNode, 'children' | 'id'>>;
 
 export interface IStoreState<G extends GroupNode, L extends LeafNode> {
+  table: TableState;
+  /**
+   * Record of group nodes that can be displayed in the table.
+   */
   readonly groupNodes: G[];
+  /**
+   * Record of leaf nodes that can be displayed in the table.
+   */
   readonly leafNodes: Map<string, L[]>;
   /**
    * The available columns that can be used to group the data.
@@ -50,6 +60,18 @@ export function createStoreReducers<G extends GroupNode, L extends LeafNode>() {
     setActiveCascadeGroups(state: IStoreState<G, L>, payload: ColumnGroups) {
       return produce(state, (draft) => {
         draft.currentGroupByColumns = castDraft(payload);
+        // close out any previously expanded leaf row on group changes
+        // since that render would be invalid with the new group change
+        for (const cacheKey of draft.leafNodes.keys()) {
+          const leafId = getLeafIdFromCacheKey(cacheKey);
+          if (
+            draft.table.expanded &&
+            typeof draft.table.expanded !== 'boolean' &&
+            draft.table.expanded[leafId]
+          ) {
+            delete draft.table.expanded[leafId];
+          }
+        }
       });
     },
     resetActiveCascadeGroups(state: IStoreState<G, L>) {
@@ -81,6 +103,11 @@ export function createStoreReducers<G extends GroupNode, L extends LeafNode>() {
       return produce(state, (draft) => {
         const { cacheKey, data } = payload;
         draft.leafNodes.set(cacheKey, castDraft(data));
+      });
+    },
+    setExpandedRows(state: IStoreState<G, L>, payload: ExpandedState) {
+      return produce(state, (draft) => {
+        draft.table.expanded = payload;
       });
     },
   } as const;

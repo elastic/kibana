@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
 import { DataCascade, DataCascadeRow, DataCascadeRowCell } from '.';
-import { getESQLStatsQueryMeta } from '../lib/parse_esql';
+import { getESQLStatsQueryMeta } from './src/lib/parse_esql';
 
 /**
  * @description story for data document cascade component which allows rendering of data in a quasi tree structure',
@@ -103,6 +103,7 @@ export const CascadeGridImplementation: StoryObj<
               // eslint-disable-next-line no-console -- Handle group by change if needed
               console.log('Group By Changed:', groupBy);
             }}
+            stickyGroupRoot
           >
             <DataCascadeRow
               onCascadeGroupNodeExpanded={async ({ row, nodePath, nodePathMap }) => {
