@@ -103,11 +103,11 @@ export const Graph = memo<GraphProps>(
     const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
 
-    // Find starting nodes (nodes that are not targets of any existing edge in the graph)
-    const startingNodeIds = useMemo(() => {
-      const targetNodeIds = new Set(edges.map((edge) => edge.target));
-      return nodes.filter((node) => !targetNodeIds.has(node.id)).map((node) => node.id);
-    }, [nodes, edges]);
+    // Filter the ids of those nodes that have origin events
+    const nodesWithOriginEvents = useMemo(
+      () => nodes.filter((node) => node.hasOriginEvents).map((node) => node.id),
+      [nodes]
+    );
 
     useEffect(() => {
       // On nodes or edges changes reset the graph and re-layout
@@ -174,7 +174,7 @@ export const Graph = memo<GraphProps>(
         >
           {interactive && (
             <Panel position="bottom-right">
-              <Controls fitViewOptions={fitViewOptions} nodeIdsToCenter={startingNodeIds} />
+              <Controls fitViewOptions={fitViewOptions} nodeIdsToCenter={nodesWithOriginEvents} />
             </Panel>
           )}
           {children}
