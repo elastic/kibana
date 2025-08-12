@@ -8,21 +8,16 @@
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from 'expect';
 import { Readable } from 'node:stream';
-import { serviceMap, timerange, apm, ApmFields, httpExitSpan } from '@kbn/apm-synthtrace-client';
-import { compact } from 'lodash';
+import {
+  serviceMap,
+  timerange,
+  apm,
+  ApmFields,
+  httpExitSpan,
+  Serializable,
+} from '@kbn/apm-synthtrace-client';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-
-function getSpanLinksFromEvents(events: ApmFields[]) {
-  return compact(
-    events
-      .filter((event) => event['span.type'] === 'messaging')
-      .map((event) => {
-        const spanId = event['span.id'];
-        return spanId ? { span: { id: spanId }, trace: { id: event['trace.id']! } } : undefined;
-      })
-  );
-}
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
@@ -141,7 +136,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       describe('when the exit span does not have a span.destination.service.resource field', () => {
-        let traceId: string;
+        let traceId: string | undefined;
         let response: {
           status: number;
           body: APIReturnType<'POST /internal/apm/diagnostics/service-map'>;
@@ -245,7 +240,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                   end,
                   sourceNode: 'web',
                   destinationNode: 'frontend-proxy',
-                  traceId,
+                  ...(traceId && { traceId }),
                 },
               },
             });
@@ -266,11 +261,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
 
           it('detects trace correlation between services even without an exit span', () => {
-            expect(response.body.analysis.traceCorrelation.found).toBe(true);
-            expect(response.body.analysis.traceCorrelation.foundInDestinationNode).toBe(true);
-            expect(response.body.analysis.traceCorrelation.foundInSourceNode).toBe(true);
-            expect(response.body.analysis.traceCorrelation.sourceNodeDocumentCount).toBe(3);
-            expect(response.body.analysis.traceCorrelation.destinationNodeDocumentCount).toBe(1);
+            expect(response.body.analysis.traceCorrelation?.found).toBe(true);
+            expect(response.body.analysis?.traceCorrelation?.foundInDestinationNode).toBe(true);
+            expect(response.body.analysis?.traceCorrelation?.foundInSourceNode).toBe(true);
+            expect(response.body.analysis?.traceCorrelation?.sourceNodeDocumentCount).toBe(3);
+            expect(response.body.analysis?.traceCorrelation?.destinationNodeDocumentCount).toBe(1);
           });
         });
       });
