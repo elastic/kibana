@@ -89,11 +89,11 @@ export function SloEditPage() {
       data-test-subj="slosEditPage"
     >
       <HeaderMenu />
-      {isEditMode && isLoadingSlo && (
+      {isEditMode && isLoadingSlo ? (
         <EuiLoadingSpinner size="xl" data-test-subj="sloEditLoadingSpinner" />
+      ) : (
+        <SloEditForm slo={slo} />
       )}
-
-      {(!isEditMode || !isLoadingSlo) && <SloEditForm slo={slo} />}
     </ObservabilityPageTemplate>
   );
 }
