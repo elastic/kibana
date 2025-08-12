@@ -30,7 +30,6 @@ import { useIntersectingState } from '../../hooks/use_intersecting_state';
 
 const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
-
 export const Logs = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { getDateRangeInTimestamp, dateRange, autoRefresh } = useDatePickerContext();
