@@ -9,6 +9,7 @@
 
 import type { TelemetryConfig } from '@kbn/telemetry-config';
 import type { Instrumentation } from '@opentelemetry/instrumentation';
+import type { MonitoringCollectionConfig } from '@kbn/metrics-config';
 
 jest.mock('@opentelemetry/instrumentation', () => {
   const originalPkg = jest.requireActual('@opentelemetry/instrumentation');
@@ -28,41 +29,104 @@ jest.mock('@kbn/apm-config-loader', () => {
   };
 });
 
-import { REPO_ROOT } from '@kbn/repo-info';
-import { initTelemetry } from '..';
+import { REPO_ROOT, PKG_JSON } from '@kbn/repo-info';
 import type { DeepPartial } from '@kbn/utility-types';
 import { ApmConfiguration } from '@kbn/apm-config-loader/src/config';
+import { resources } from '@elastic/opentelemetry-node/sdk';
+import { initTelemetry } from '..';
+
+interface KibanaRawConfig {
+  monitoring_collection?: Partial<MonitoringCollectionConfig>;
+  telemetry?: Partial<TelemetryConfig>;
+}
 
 describe('initTelemetry', () => {
-  describe('auto-instrumentations', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-    test.each<[string, DeepPartial<TelemetryConfig>, string[]]>([
-      ['telemetry is disabled', { enabled: false }, []],
+  describe('resource attributes', () => {
+    test('ensure naming consistency', () => {
+      const apmConfig = new ApmConfiguration(
+        REPO_ROOT,
+        { elastic: { apm: { environment: 'test-environment' } } },
+        false
+      );
+
+      const { loadConfiguration } = jest.requireMock('@kbn/apm-config-loader');
+      loadConfiguration.mockImplementationOnce(() => apmConfig);
+
+      const resourceFromAttributesSpy = jest.spyOn(resources, 'resourceFromAttributes');
+
+      initTelemetry([], REPO_ROOT, false, 'test-service');
+
+      expect(resourceFromAttributesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          // Using expect.objectContaining to ignore other attributes introduced by CI adding apmConfig.globalLabels
+          'service.name': 'test-service',
+          'service.version': PKG_JSON.version,
+          'service.instance.id': undefined,
+          'deployment.environment.name': apmConfig.getConfig('test-service').environment, // using this reference because CI overrides the config via environment vars
+          git_rev: expect.any(String),
+        })
+      );
+    });
+  });
+
+  describe('auto-instrumentations', () => {
+    test.each<[string, DeepPartial<KibanaRawConfig>, string[]]>([
+      ['telemetry is disabled', { telemetry: { enabled: false } }, []],
       [
         'telemetry is enabled but tracing and metrics are disabled',
-        { enabled: true, tracing: { enabled: false }, metrics: { enabled: false } },
+        {
+          telemetry: {
+            enabled: true,
+            tracing: { enabled: false },
+            metrics: { enabled: false },
+          },
+          monitoring_collection: { enabled: false },
+        },
         [],
       ],
       [
         'only telemetry tracing is enabled',
-        { enabled: true, tracing: { enabled: true }, metrics: { enabled: false } },
+        {
+          telemetry: { enabled: true, tracing: { enabled: true }, metrics: { enabled: false } },
+          monitoring_collection: { enabled: false },
+        },
         [],
       ],
       [
         'only telemetry metrics is enabled',
-        { enabled: true, tracing: { enabled: false }, metrics: { enabled: true } },
+        {
+          telemetry: { enabled: true, tracing: { enabled: false }, metrics: { enabled: true } },
+          monitoring_collection: { enabled: false },
+        },
         [
           // This test will scream at us if any of these have been removed or renamed and no-longer registered
           '@opentelemetry/instrumentation-runtime-node',
         ],
       ],
+      [
+        'only monitoring collection metrics is enabled',
+        {
+          telemetry: { enabled: true, tracing: { enabled: false }, metrics: { enabled: false } },
+          monitoring_collection: { enabled: true },
+        },
+        ['@opentelemetry/instrumentation-runtime-node'],
+      ],
+      [
+        'telemetry metrics and monitoring collection metrics are enabled',
+        {
+          telemetry: { enabled: true, tracing: { enabled: false }, metrics: { enabled: true } },
+          monitoring_collection: { enabled: true },
+        },
+        ['@opentelemetry/instrumentation-runtime-node'],
+      ],
     ])('validate registered instrumentations when %s', (_, config, expected) => {
       const { loadConfiguration } = jest.requireMock('@kbn/apm-config-loader');
       loadConfiguration.mockImplementation(
-        () => new ApmConfiguration(REPO_ROOT, { telemetry: config as TelemetryConfig }, false)
+        () => new ApmConfiguration(REPO_ROOT, config as KibanaRawConfig, false)
       );
 
       initTelemetry([], REPO_ROOT, false, 'test-service');

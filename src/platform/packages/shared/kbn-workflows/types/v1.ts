@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { WorkflowYaml, WorkflowYamlSchema } from '../spec/schema';
+import { WorkflowSchema, WorkflowYaml } from '../spec/schema';
 
 export enum ExecutionStatus {
   // In progress
@@ -35,6 +35,8 @@ export interface EsWorkflowExecution {
   finishedAt: string;
   duration: number;
   triggeredBy?: string; // 'manual' or 'scheduled'
+  traceId?: string; // APM trace ID for observability
+  entryTransactionId?: string; // APM root transaction ID for trace embeddable
 }
 
 export interface ProviderInput {
@@ -123,7 +125,7 @@ export const EsWorkflowSchema = z.object({
   createdBy: z.string(),
   lastUpdatedAt: z.date(),
   lastUpdatedBy: z.string(),
-  definition: WorkflowYamlSchema,
+  definition: WorkflowSchema,
   yaml: z.string(),
 });
 
