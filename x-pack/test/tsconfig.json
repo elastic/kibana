@@ -33,7 +33,6 @@
     "@kbn/rule-data-utils",
     "@kbn/test-subj-selector",
     "@kbn/rison",
-    "@kbn/es-query",
     "@kbn/core-http-common",
     "@kbn/dataset-quality-plugin",
     "@kbn/ftr-common-functional-ui-services",
