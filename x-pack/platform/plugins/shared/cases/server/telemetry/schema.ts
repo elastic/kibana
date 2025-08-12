@@ -119,7 +119,12 @@ export const casesSchema: CasesTelemetrySchema = {
   },
   userActions: { all: { ...countSchema, maxOnACase: long } },
   comments: { all: { ...countSchema, maxOnACase: long } },
-  alerts: { all: { ...countSchema, maxOnACase: long } },
+  alerts: {
+    all: { ...countSchema, maxOnACase: long },
+    obs: { ...countSchema, maxOnACase: long },
+    sec: { ...countSchema, maxOnACase: long },
+    cases: { ...countSchema, maxOnACase: long },
+  },
   connectors: {
     all: {
       all: { totalAttached: long },
