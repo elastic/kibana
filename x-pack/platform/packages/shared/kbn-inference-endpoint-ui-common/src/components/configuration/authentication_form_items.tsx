@@ -8,7 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ConfigEntryView } from '../../types/types';
+import type { ConfigEntryView } from '../../types/types';
 import { ItemFormRow } from './item_form_row';
 
 interface AuthenticationFormItemsProps {

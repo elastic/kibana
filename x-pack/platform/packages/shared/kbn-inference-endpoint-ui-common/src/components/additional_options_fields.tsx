@@ -143,7 +143,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
   return (
     <EuiAccordion
       id="inferenceAdditionalOptions"
-      data-test-subj="inference-endpoint-additional-options"
+      data-test-subj="inference-endpoint-additional-settings"
       buttonProps={{ css: buttonCss }}
       css={accordionCss}
       element="fieldset"
@@ -156,7 +156,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
       buttonContent={
         <EuiTextColor
           color={euiTheme.colors.primary}
-          data-test-subj="inference-endpoint-additional-options-button"
+          data-test-subj="inference-endpoint-additional-settings-button"
         >
           <FormattedMessage
             id="xpack.inferenceEndpointUICommon.components.additionalInfo.additionalSettingsLabel"
