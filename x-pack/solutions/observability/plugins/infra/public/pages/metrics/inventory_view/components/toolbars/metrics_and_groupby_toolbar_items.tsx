@@ -37,7 +37,7 @@ export const MetricsAndGroupByToolbarItems = ({
 
   const schemas: DataSchemaFormat[] = useMemo(
     () => timeRangeMetadata?.schemas || [],
-    [timeRangeMetadata]
+    [timeRangeMetadata?.schemas]
   );
 
   useEffect(() => {

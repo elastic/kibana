@@ -56,6 +56,7 @@ export const esqlFunctionNames = [
   'DATE_FORMAT',
   'DATE_PARSE',
   'DATE_TRUNC',
+  'DAY_NAME',
   'E',
   'ENDS_WITH',
   'EXP',
