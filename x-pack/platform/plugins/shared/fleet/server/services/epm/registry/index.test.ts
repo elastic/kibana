@@ -256,6 +256,15 @@ describe('fetchInfo', () => {
     });
   });
 
+  it('falls back to bundled package when isAirGapped config == true', async () => {
+    mockGetConfig.mockReturnValue({
+      isAirGapped: true,
+    });
+
+    const fetchedInfo = await fetchInfo('test-package', '1.0.0');
+    expect(fetchedInfo).toBeTruthy();
+  });
+
   it('falls back to bundled package when one exists', async () => {
     const fetchedInfo = await fetchInfo('test-package', '1.0.0');
     expect(fetchedInfo).toBeTruthy();
@@ -416,11 +425,16 @@ describe('getPackage', () => {
     jest.resetAllMocks();
   });
 
-  it('should return bundled package if available', async () => {
+  it('should return bundled package if isAirGapped = true', async () => {
     mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
     mockGetResponseStreamWithSize.mockResolvedValue({ stream: {}, size: 1000 });
     mockStreamToBuffer.mockResolvedValue(Buffer.from('testpkg'));
     mockVerifyPackageArchiveSignature.mockResolvedValue('verified');
+    mockGetConfig.mockReturnValue({
+      isAirGapped: true,
+      enabled: true,
+      agents: { enabled: true, elasticsearch: {} },
+    });
     MockArchive.unpackBufferToAssetsMap.mockReturnValue({
       assetsMap: new Map(),
       paths: [],
@@ -444,7 +458,7 @@ describe('getPackage', () => {
     });
   });
 
-  it('should return registry package if bundled not available', async () => {
+  it('should return registry package', async () => {
     mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
     mockGetResponseStreamWithSize.mockResolvedValue({ stream: {}, size: 1000 });
     mockStreamToBuffer.mockResolvedValue(Buffer.from('testpkg'));

@@ -204,10 +204,12 @@ export async function fetchInfo(
 ): Promise<RegistryPackage | ArchivePackage> {
   const registryUrl = getRegistryUrl();
   let archivePackage;
-  // if there is a bundled package, use the bundled version
-  archivePackage = await getBundledArchive(pkgName, pkgVersion);
-  if (archivePackage) {
-    return archivePackage.packageInfo;
+  // if isAirGapped config enabled and bundled package, use the bundled version
+  if (airGappedUtils().shouldSkipRegistryRequests) {
+    archivePackage = await getBundledArchive(pkgName, pkgVersion);
+    if (archivePackage) {
+      return archivePackage.packageInfo;
+    }
   }
 
   try {
@@ -387,7 +389,6 @@ export async function getPackage(
 }> {
   const logger = appContextService.getLogger();
   let packageInfo: ArchivePackage | undefined = getPackageInfo({ name, version });
-  const bundledPackage = await getBundledPackageByName(name);
 
   let verificationResult: PackageVerificationResult | undefined = getVerificationResult({
     name,
@@ -398,10 +399,13 @@ export async function getPackage(
     let archivePathToUse: string = '';
 
     // use bundled package if available
-    if (bundledPackage) {
-      logger.debug('getPackage - use bundled package');
-      buffer = await bundledPackage?.getBuffer();
-      archivePathToUse = `${name}-${version}.zip`;
+    if (airGappedUtils().isAirGapped) {
+      const bundledPackage = await getBundledPackageByName(name);
+      if (bundledPackage) {
+        logger.debug('getPackage - use bundled package');
+        buffer = await bundledPackage?.getBuffer();
+        archivePathToUse = `${name}-${version}.zip`;
+      }
     }
     const {
       archiveBuffer,
