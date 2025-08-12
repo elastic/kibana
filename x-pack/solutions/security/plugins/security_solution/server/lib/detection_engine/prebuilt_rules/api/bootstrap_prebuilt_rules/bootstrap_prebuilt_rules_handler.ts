@@ -48,10 +48,6 @@ export const bootstrapPrebuiltRulesHandler = async (
       ],
     };
 
-    logger.debug(
-      `bootstrapPrebuiltRulesHandler: Total packages installed: ${packageResults.length}`
-    );
-
     return response.ok({
       body: responseBody,
     });
