@@ -12,6 +12,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     { "path": "../security_solution_endpoint/tsconfig.json" },
+    "x-pack/solutions/security/test/security_solution_ftr",
     "@kbn/dev-utils",
     "@kbn/test",
     "@kbn/expect",
