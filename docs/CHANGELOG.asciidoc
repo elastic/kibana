@@ -104,7 +104,12 @@ include::upgrade-notes.asciidoc[]
 [[release-notes-8.18.4]]
 == {kib} 8.18.4
 
-The 8.18.4 release includes the following fixes.
+The 8.18.4 release includes the following known issues and fixes.
+
+[float]
+[[known-issues-8.18.4]]
+=== Known issues
+include::CHANGELOG.asciidoc[tag=known-issue-230275]
 
 [float]
 [[fixes-v8.18.4]]
@@ -139,16 +144,29 @@ Search::
 [[release-notes-8.18.3]]
 == {kib} 8.18.3
 
-The 8.18.3 release includes the following fixes.
+The 8.18.3 release includes the following known issues and fixes.
 
 IMPORTANT: The 8.18.3 release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory for more details].
 
 [float]
 [[known-issues-8.18.3]]
 === Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 include::CHANGELOG.asciidoc[tag=known-issue-227976]
 include::CHANGELOG.asciidoc[tag=known-issue-1508]
 include::CHANGELOG.asciidoc[tag=known-issue-2088]
+
+// tag::known-issue-230275[]
+.Issues with rules occur when xpack.alerting.rules.run.alerts.max is set to a value greater than 5000.
+[%collapsible]
+====
+*Details* +
+If you've set `xpack.alerting.rules.run.alerts.max` to a value greater than `5000`, you will encounter `Result window is too large` error messages when a maintenance window is active.
+*Workaround* +
+To mitigate the issue, set `xpack.alerting.rules.run.alerts.max` to a value equal to or less than `5000`.
+====
+// end::known-issue-230275[]
 
 [float]
 [[enhancement-v8.18.3]]
@@ -219,6 +237,7 @@ The 8.18.2 release includes the following known issues and fixes.
 [[known-issues-8.18.2]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 include::CHANGELOG.asciidoc[tag=known-issue-320]
 include::CHANGELOG.asciidoc[tag=known-issue-1508]
 include::CHANGELOG.asciidoc[tag=known-issue-2088]
@@ -273,6 +292,7 @@ The 8.18.1 release includes the following known issues, enhancements and fixes.
 [[known-issues-8.18.1]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 include::CHANGELOG.asciidoc[tag=known-issue-320]
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
 include::CHANGELOG.asciidoc[tag=known-issue-1508]
@@ -316,6 +336,8 @@ Review the following information about the {kib} 8.18.0 release.
 [float]
 [[known-issues-8.18.0]]
 === Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 // tag::known-issue-320[]
 .Errors in rule executions occur when maintenance windows have filters.
@@ -709,13 +731,16 @@ Machine Learning::
 [[release-notes-8.17.8]]
 == {kib} 8.17.8
 
-The 8.17.8 release includes the following fixes and known issues.
+The 8.17.8 release includes the following known issues and fixes.
 
 IMPORTANT: The 8.17.8 release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory for more details].
 
 [float]
 [[known-issues-8.17.8]]
 === Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
+
 
 // tag::known-issue-227976[]
 .Dashboard Copy link doesn't work when sharing from a space other than the default space
@@ -764,7 +789,13 @@ Installation and upgrade::
 [[release-notes-8.17.7]]
 == {kib} 8.17.7
 
-The 8.17.7 release includes the following enhancements and fixes.
+The 8.17.7 release includes the following known issues, enhancements, and fixes.
+
+[float]
+[[known-issues-8.17.7]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[enhancement-v8.17.7]]
@@ -798,13 +829,14 @@ Kibana security::
 The 8.17.6 release contains fixes for potential security vulnerabilities. See our https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
 ====
 
-The 8.17.6 release includes the following enhancements and fixes.
+The 8.17.6 release includes the following known issues, enhancements, and fixes.
 
 [float]
 [[known-issues-8.17.6]]
 === Known issues
 
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[enhancement-v8.17.6]]
@@ -844,13 +876,14 @@ Management::
 [[release-notes-8.17.5]]
 == {kib} 8.17.5
 
-The 8.17.5 release includes the following enhancements and fixes.
+The 8.17.5 release includes the following known issues, enhancements, and fixes.
 
 [float]
 [[known-issues-8.17.5]]
 === Known issues
 
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[enhancement-v8.17.5]]
@@ -895,13 +928,14 @@ Management::
 [[release-notes-8.17.4]]
 == {kib} 8.17.4
 
-The 8.17.4 release includes the following fixes.
+The 8.17.4 release includes the following known issues and bug fixes.
 
 [float]
 [[known-issues-8.17.4]]
 === Known issues
 
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.17.4]]
@@ -920,13 +954,14 @@ Management::
 
 [[release-notes-8.17.3]]
 == {kib} 8.17.3
-The 8.17.3 release includes the following bug fixes.
+The 8.17.3 release includes the following known issues and bug fixes.
 
 [float]
 [[known-issues-8.17.3]]
 === Known issues
 
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.17.3]]
@@ -947,13 +982,14 @@ Sharing::
 
 [[release-notes-8.17.2]]
 == {kib} 8.17.2
-The 8.17.2 release includes the following bug fixes.
+The 8.17.2 release includes the following known issues and bug fixes.
 
 [float]
 [[known-issues-8.17.2]]
 === Known issues
 
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.17.2]]
@@ -976,6 +1012,8 @@ The 8.17.1 release includes the following known issues, enhancements, and bug fi
 include::CHANGELOG.asciidoc[tag=known-issue-206400]
 
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[enhancement-v8.17.1]]
@@ -1013,6 +1051,8 @@ The 8.17.0 release includes the following known issues.
 include::CHANGELOG.asciidoc[tag=known-issue-187254]
 
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 // tag::known-issue-206400[]
 .Upgrade Assistant displays configured source mode in mappings as critical deprecation issue.
@@ -1159,7 +1199,13 @@ Kibana platform::
 [[release-notes-8.16.6]]
 == {kib} 8.16.6
 
-The 8.16.6 release includes the following enhancements and fixes.
+The 8.16.6 release includes the following known issues, enhancements, and fixes.
+
+[float]
+[[known-issues-8.16.6]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[enhancement-v8.16.6]]
@@ -1190,7 +1236,13 @@ Management::
 [[release-notes-8.16.5]]
 == {kib} 8.16.5
 
-The 8.16.5 release includes the following enhancements and bug fixes.
+The 8.16.5 release includes the following known issues, enhancements, and bug fixes.
+
+[float]
+[[known-issues-8.16.5]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[enhancement-v8.16.5]]
@@ -1226,7 +1278,13 @@ Machine Learning::
 [[release-notes-8.16.4]]
 == {kib} 8.16.4
 
-The 8.16.4 release includes the following bug fixes.
+The 8.16.4 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.16.4]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.16.4]]
@@ -1257,10 +1315,17 @@ Kibana security::
 * Fixes breaks in YAML parsing by using single quotes in Structured log template ({kibana-pull}209736[#209736]).
 * Adds missing fields to input manifest templates ({kibana-pull}208768[#208768]).
 * Adds missing fields into AWS S3 manifest ({kibana-pull}208080[#208080]).
+
 [[release-notes-8.16.3]]
 == {kib} 8.16.3
 
-The 8.16.3 release includes the following bug fixes.
+The 8.16.3 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.16.3]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.16.3]]
@@ -1285,7 +1350,13 @@ Kibana security::
 [[release-notes-8.16.2]]
 == {kib} 8.16.2
 
-The 8.16.2 release includes the following enhancements and bug fixes.
+The 8.16.2 release includes the following known issues, enhancements, and bug fixes.
+
+[float]
+[[known-issues-8.16.2]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[enhancement-v8.16.2]]
@@ -1331,7 +1402,13 @@ Machine Learning::
 [[release-notes-8.16.1]]
 == {kib} 8.16.1
 
-The 8.16.1 release includes the following bug fixes.
+The 8.16.1 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.16.1]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.16.1]]
@@ -1361,6 +1438,7 @@ The 8.16.0 release includes the following known issues.
 === Known issues
 
 include::CHANGELOG.asciidoc[tag=known-issue-187254]
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [discrete]
 [[known-199902]]
@@ -1769,7 +1847,13 @@ Management::
 [[release-notes-8.15.5]]
 == {kib} 8.15.5
 
-The 8.15.5 release includes the following bug fixes.
+The 8.15.5 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.15.5]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.15.5]]
@@ -1790,7 +1874,13 @@ Platform::
 [[release-notes-8.15.4]]
 == {kib} 8.15.4
 
-The 8.15.4 release includes the following bug fixes.
+The 8.15.4 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.15.4]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.15.4]]
@@ -1818,7 +1908,13 @@ Management::
 [[release-notes-8.15.3]]
 == {kib} 8.15.3
 
-The 8.15.3 release includes the following bug fixes.
+The 8.15.3 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.15.3]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.15.3]]
@@ -1855,7 +1951,13 @@ Machine Learning::
 [[release-notes-8.15.2]]
 == {kib} 8.15.2
 
-The 8.15.2 release includes the following enhancements and bug fixes.
+The 8.15.2 release includes the following known issues, enhancements, and bug fixes.
+
+[float]
+[[known-issues-8.15.2]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[enhancement-v8.15.2]]
@@ -1902,7 +2004,13 @@ Machine Learning::
 [[release-notes-8.15.1]]
 == {kib} 8.15.1
 
-The 8.15.1 release includes the following bug fixes.
+The 8.15.1 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.15.1]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 // [float]
 // [[enhancement-v8.15.1]]
@@ -1984,6 +2092,22 @@ If you used the *Incoming Webhook* app in Microsoft Teams to generate a webhook 
 Use the *Workflows* app in Microsoft Teams to create a new webhook URL, as described in <<configuring-teams>>.
 Update your Microsoft Teams connector to use the new URL before the end of December 2024.
 ====
+
+// tag::known-issue-1991[]
+.PDF and PNG reports time out and fail with an invalid header error if server.protocol is set to http2
+[%collapsible]
+====
+*Details* +
+If you've changed the <<settings,`server.protocol`>> value to `http2`, PDF and PNG reports will fail when you export them from the dashboard, visualization, or Canvas workpad that you're generating a report for.
+
+*Workaround* +
+To temporarily resolve the issue, set `server.protocol` to `http1`. 
+
+*Resolved* +
+This issue is resolved in 8.17.9, 8.18.4, 8.19.0 and later. 
+
+====
+// end::known-issue-1991[]
 
 [discrete]
 [[known-189283]]
