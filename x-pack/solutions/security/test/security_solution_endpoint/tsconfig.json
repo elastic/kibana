@@ -10,7 +10,6 @@
   },
   "include": [
     "**/*",
-    "../security_solution_ftr/**/*",
     "../../../../../typings/**/*",
     "../../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
@@ -18,6 +17,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    { "path": "../security_solution_ftr/tsconfig.json" },
     "@kbn/expect",
     "@kbn/security-solution-plugin",
     "@kbn/repo-info",
