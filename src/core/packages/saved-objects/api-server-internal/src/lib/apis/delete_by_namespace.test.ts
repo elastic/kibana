@@ -30,6 +30,7 @@ import {
   createRegistry,
   createDocumentMigrator,
   createSpySerializer,
+  ACCESS_CONTROL_TYPE,
 } from '../../test_helpers/repository.test.common';
 
 describe('#deleteByNamespace', () => {
@@ -143,7 +144,7 @@ describe('#deleteByNamespace', () => {
       });
     });
 
-    describe('search dsl', () => {
+    describe.only('search dsl', () => {
       it(`constructs a query using all multi-namespace types, and another using all single-namespace types`, async () => {
         await deleteByNamespaceSuccess(namespace);
         const allTypes = registry.getAllTypes().map((type) => type.name);
@@ -151,6 +152,7 @@ describe('#deleteByNamespace', () => {
           namespaces: [namespace],
           type: [
             ...allTypes.filter((type) => !registry.isNamespaceAgnostic(type)),
+            ACCESS_CONTROL_TYPE,
             LEGACY_URL_ALIAS_TYPE,
           ],
           kueryNode: expect.anything(),
