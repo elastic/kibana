@@ -8,7 +8,7 @@
 import {
   AttachmentType,
   type SuggestionContext,
-  type SuggestionResponse,
+  type SuggestionHandlerResponse,
 } from '@kbn/cases-plugin/common';
 import type { SuggestionType } from '@kbn/cases-plugin/server';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
@@ -47,7 +47,7 @@ export function getSLOByServiceName(
       }: {
         context: SuggestionContext;
         request: KibanaRequest;
-      }): Promise<SuggestionResponse<SLOSuggestion>> => {
+      }): Promise<SuggestionHandlerResponse<SLOSuggestion>> => {
         const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
 
         if (!serviceName) {

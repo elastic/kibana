@@ -10,7 +10,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import React from 'react';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQuery } from '@tanstack/react-query';
-import type { SuggestionResponse } from '../../../../common';
+import type { SuggestionHandlerResponse } from '../../../../common';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 
 const MOCK_SERVICE_NAME = 'slo';
@@ -21,8 +21,8 @@ const fetchSuggestions = async ({
 }: {
   http: HttpSetup;
   serviceName: string;
-}): Promise<SuggestionResponse<Record<string, unknown>>> => {
-  return http.post<SuggestionResponse<Record<string, unknown>>>(
+}): Promise<SuggestionHandlerResponse<Record<string, unknown>>> => {
+  return http.post<SuggestionHandlerResponse<Record<string, unknown>>>(
     '/internal/case_suggestions/_find',
     {
       body: JSON.stringify({
@@ -51,19 +51,19 @@ export const useFetchSuggestion = (serviceName: string) => {
   });
 
   return {
-    isLoadingSloSuggestions: isLoading,
+    isLoadingSuggestions: isLoading,
     suggestions: data?.suggestions || [],
     refetchSuggestions: refetch,
   };
 };
 
 export const Suggestions = React.memo(() => {
-  const { suggestions, isLoadingSloSuggestions } = useFetchSuggestion(MOCK_SERVICE_NAME);
+  const { suggestions, isLoadingSuggestions } = useFetchSuggestion(MOCK_SERVICE_NAME);
 
   const { attachmentSuggestionRegistry } = useCasesContext();
   const components = attachmentSuggestionRegistry.list();
 
-  if (isLoadingSloSuggestions) {
+  if (isLoadingSuggestions) {
     return <EuiLoadingSpinner size="m" />;
   }
 
