@@ -78,7 +78,6 @@ export const getSampleAType = () => {
   return createType({
     name: 'sample_a',
     mappings: {
-      dynamic: 'false',
       properties: {
         keyword: { type: 'keyword' },
         boolean: { type: 'boolean' },
