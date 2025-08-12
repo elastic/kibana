@@ -23,13 +23,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 9.1.2 [kibana-9.1.2-release-notes]
 
-% ::::{NOTE}
-% ::::
-
-### Features and enhancements [kibana-9.1.2-features-enhancements]
-
-**Kibana security**:
-* Adds a link to the Automatic Import documentation in the log description and related error message to clarify which log formats are supported [#229375]({{kib-pull}}229375).
 
 ### Fixes [kibana-9.1.2-fixes]
 
