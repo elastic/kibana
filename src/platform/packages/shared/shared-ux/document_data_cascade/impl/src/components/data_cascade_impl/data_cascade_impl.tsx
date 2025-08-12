@@ -32,10 +32,10 @@ import { useVirtualizer, defaultRangeExtractor } from '@tanstack/react-virtual';
 import { SelectionDropdown } from './group_selection_combobox/selection_dropdown';
 import {
   useDataCascadeState,
-  useDataCascadeDispatch,
+  useDataCascadeActions,
   type GroupNode,
   type LeafNode,
-} from '../data_cascade_provider';
+} from '../store_provider';
 import { CascadeRowPrimitive, type CascadeRowPrimitiveProps } from './data_cascade_row';
 import {
   CascadeRowCellPrimitive,
@@ -121,7 +121,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   }
 
   const { euiTheme } = useEuiTheme();
-  const dispatch = useDataCascadeDispatch<G, L>();
+  const actions = useDataCascadeActions<G, L>();
   const state = useDataCascadeState<G, L>();
   const columnHelper = createColumnHelper<G>();
   const [expanded, setExpanded] = useState<ExpandedState>({});
@@ -135,11 +135,8 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   const styles = useMemo(() => dataCascadeImplStyles(euiTheme), [euiTheme]);
 
   useEffect(() => {
-    dispatch({
-      type: 'SET_INITIAL_STATE',
-      payload: data,
-    });
-  }, [data, dispatch]);
+    actions.setInitialState(data);
+  }, [data, actions]);
 
   const table = useReactTable<G>({
     data: state.groupNodes,

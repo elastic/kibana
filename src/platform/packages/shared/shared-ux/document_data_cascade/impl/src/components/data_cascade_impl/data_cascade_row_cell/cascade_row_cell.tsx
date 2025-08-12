@@ -15,8 +15,8 @@ import {
   type GroupNode,
   type LeafNode,
   useDataCascadeState,
-  useDataCascadeDispatch,
-} from '../../data_cascade_provider';
+  useDataCascadeActions,
+} from '../../store_provider';
 
 interface OnCascadeLeafNodeExpandedArgs<G extends GroupNode> {
   row: Row<G>;
@@ -64,7 +64,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   size,
 }: CascadeRowCellPrimitiveProps<G, L>) {
   const { leafNodes, currentGroupByColumns } = useDataCascadeState<G, L>();
-  const dispatch = useDataCascadeDispatch<G, L>();
+  const actions = useDataCascadeActions<G, L>();
   const hasPendingRequest = useRef<boolean>(false);
   const [isPendingRowLeafDataFetch, setRowLeafDataFetch] = useState<boolean>(false);
 
@@ -98,12 +98,9 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
         return;
       }
 
-      dispatch({
-        type: 'UPDATE_ROW_GROUP_LEAF_DATA',
-        payload: {
-          cacheKey: leafCacheKey,
-          data: groupLeafData,
-        },
+      actions.updateRowGroupLeafData({
+        cacheKey: leafCacheKey,
+        data: groupLeafData,
       });
     };
 
@@ -111,7 +108,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       // eslint-disable-next-line no-console -- added for debugging purposes
       console.error('Error fetching data for leaf node', error);
     });
-  }, [dispatch, leafCacheKey, nodePath, nodePathMap, onCascadeLeafNodeExpanded, row]);
+  }, [actions, leafCacheKey, nodePath, nodePathMap, onCascadeLeafNodeExpanded, row]);
 
   const fetchCascadeRowGroupLeafData = useCallback(() => {
     if (!hasPendingRequest.current) {
