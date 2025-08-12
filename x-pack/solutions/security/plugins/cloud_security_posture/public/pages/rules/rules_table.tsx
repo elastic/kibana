@@ -303,6 +303,9 @@ const RuleStateSwitch = ({ rule }: { rule: CspBenchmarkRulesWithStates }) => {
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
         <EuiSwitch
+          aria-label={i18n.translate('xpack.csp.rules.rulesTable.enabledColumnLabel', {
+            defaultMessage: 'Rule Enabled',
+          })}
           className="eui-textTruncate"
           checked={!isRuleMuted}
           onChange={changeCspRuleStateFn}
