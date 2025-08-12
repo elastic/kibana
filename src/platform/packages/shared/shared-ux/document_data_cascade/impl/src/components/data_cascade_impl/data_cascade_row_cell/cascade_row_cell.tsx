@@ -10,22 +10,26 @@
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, type EuiThemeShape } from '@elastic/eui';
 import type { CellContext, Row } from '@tanstack/react-table';
-import { getCascadeRowNodePath, getCascadeRowNodePathValueRecord } from '../../../lib/utils';
+import {
+  getCascadeRowNodePath,
+  getCascadeRowNodePathValueRecord,
+  getCascadeRowLeafDataCacheKey,
+} from '../../../lib/utils';
 import {
   type GroupNode,
   type LeafNode,
   useDataCascadeState,
   useDataCascadeActions,
-} from '../../store_provider';
+} from '../../../store_provider';
 
 interface OnCascadeLeafNodeExpandedArgs<G extends GroupNode> {
   row: Row<G>;
   /**
-   * @description The path of the row that was expanded in the group by hierarchy.
+   * The path of the row that was expanded in the group by hierarchy.
    */
   nodePath: string[];
   /**
-   * @description KV record of the path values for the row node.
+   * KV record of the path values for the row node.
    */
   nodePathMap: Record<string, string>;
 }
@@ -33,28 +37,14 @@ interface OnCascadeLeafNodeExpandedArgs<G extends GroupNode> {
 export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends LeafNode>
   extends CellContext<G, unknown> {
   /**
-   * @description Size of the row cell
+   * Size of the row cell
    */
   size: keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
   /**
-   * @description Callback invoked when a leaf node gets expanded, which can be used to fetch data for leaf nodes.
+   * Callback invoked when a leaf node gets expanded, which can be used to fetch data for leaf nodes.
    */
   onCascadeLeafNodeExpanded: (args: OnCascadeLeafNodeExpandedArgs<G>) => Promise<L[]>;
   children: (args: { data: L[] | null }) => React.ReactNode;
-}
-
-/**
- * @description This function generates a cache key to persist and retrieve the leaf data of a cascade row.
- */
-export function getCascadeRowLeafDataCacheKey(
-  nodePath: string[],
-  nodePathMap: Record<string, string>,
-  leafId: string
-) {
-  return nodePath
-    .map((path) => nodePathMap[path])
-    .concat(leafId)
-    .join(':');
 }
 
 export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>({

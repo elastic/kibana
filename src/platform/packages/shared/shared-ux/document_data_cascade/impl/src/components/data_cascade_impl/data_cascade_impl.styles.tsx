@@ -10,8 +10,12 @@
 import { css } from '@emotion/react';
 import { type UseEuiTheme } from '@elastic/eui';
 
+export const overflowYAuto = css({ overflowY: 'auto' });
+
+export const relativePosition = css({ position: 'relative' });
+
 export const dataCascadeImplStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
-  container: {},
+  container: css({ flex: '1 1 auto' }),
   cascadeHeaderWrapper: css({
     padding: euiTheme.size.s,
   }),
@@ -21,9 +25,10 @@ export const dataCascadeImplStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
     zIndex: euiTheme.levels.header,
     background: euiTheme.colors.backgroundBaseSubdued,
   }),
-  cascadeTreeGridHeaderStickyRenderSlot: css({
-    position: 'relative',
+  cascadeTreeGridHeaderScrolled: css({
+    borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
   }),
+  cascadeTreeGridHeaderStickyRenderSlot: css(relativePosition, {}),
   cascadeTreeGridWrapper: css({
     background: euiTheme.colors.backgroundBaseSubdued,
   }),

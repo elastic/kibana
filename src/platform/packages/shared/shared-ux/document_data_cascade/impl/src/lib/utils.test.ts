@@ -9,7 +9,7 @@
 
 import { faker } from '@faker-js/faker';
 import { type Row } from '@tanstack/react-table';
-import { type GroupNode } from '../components/data_cascade_provider';
+import { type GroupNode } from '../store_provider';
 import { getCascadeRowNodePath, getCascadeRowNodePathValueRecord } from './utils';
 
 describe('cascade row utils', () => {
