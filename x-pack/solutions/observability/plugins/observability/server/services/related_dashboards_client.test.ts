@@ -81,7 +81,7 @@ describe('RelatedDashboardsClient', () => {
       // @ts-ignore next-line
       alertsClient.getAlertById.mockResolvedValue(null);
 
-      await expect(client.fetchRelatedDashboards()).rejects.toThrow(
+      await expect(client.fetch()).rejects.toThrow(
         `Alert with id ${alertId} not found. Could not fetch related dashboards.`
       );
     });
@@ -96,7 +96,7 @@ describe('RelatedDashboardsClient', () => {
         },
       });
 
-      const result = await client.fetchRelatedDashboards();
+      const result = await client.fetch();
 
       expect(result.suggestedDashboards).toEqual([]);
       expect(alertsClient.getAlertById).toHaveBeenCalledWith(alertId);
@@ -177,7 +177,7 @@ describe('RelatedDashboardsClient', () => {
         },
       });
 
-      const result = await client.fetchRelatedDashboards();
+      const result = await client.fetch();
 
       expect(result.suggestedDashboards).toEqual([
         {
@@ -236,7 +236,7 @@ describe('RelatedDashboardsClient', () => {
         },
       });
 
-      const { suggestedDashboards } = await client.fetchRelatedDashboards();
+      const { suggestedDashboards } = await client.fetch();
 
       expect(suggestedDashboards).toHaveLength(10);
     });
@@ -285,7 +285,7 @@ describe('RelatedDashboardsClient', () => {
         },
       });
 
-      const { suggestedDashboards } = await client.fetchRelatedDashboards();
+      const { suggestedDashboards } = await client.fetch();
 
       expect(suggestedDashboards).toHaveLength(1);
       // should return only one dashboard even though it was found by both internal methods
@@ -307,7 +307,7 @@ describe('RelatedDashboardsClient', () => {
       } as unknown as AlertData;
       alertsClient.getAlertById.mockResolvedValue(mockAlert);
 
-      const result = await client.fetchRelatedDashboards();
+      const result = await client.fetch();
 
       expect(result.suggestedDashboards).toEqual([]);
       expect(mockAlert.getRuleTypeId).toHaveBeenCalled();
@@ -836,7 +836,7 @@ describe('RelatedDashboardsClient', () => {
         },
       });
 
-      const { suggestedDashboards, linkedDashboards } = await client.fetchRelatedDashboards();
+      const { suggestedDashboards, linkedDashboards } = await client.fetch();
       expect(linkedDashboards).toHaveLength(1);
       expect(linkedDashboards).toEqual([
         {

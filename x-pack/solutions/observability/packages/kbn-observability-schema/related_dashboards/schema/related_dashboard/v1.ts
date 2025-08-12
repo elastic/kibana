@@ -26,10 +26,10 @@ export const linkedDashboardSchema = z.object({
 export const suggestedDashboardSchema = z.object({
   ...commonDashboardSchema,
   matchedBy: z.object({
-    fields: z.array(z.string()).optional(),
-    index: z.array(z.string()).optional(),
-    textMatch: z.number().optional(),
-    isManaged: z.boolean().optional(),
+    fields: z.array(z.string()),
+    index: z.array(z.string()),
+    textMatch: z.number(),
+    isManaged: z.boolean(),
   }),
   score: z.number(),
 });

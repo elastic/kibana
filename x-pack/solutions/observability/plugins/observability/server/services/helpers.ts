@@ -11,6 +11,7 @@ import {
   LensSavedObjectAttributes,
 } from '@kbn/lens-plugin/common/content_management';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 
 const SUGGESTED_DASHBOARDS_VALID_RULE_TYPE_IDS = [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID] as const;
 
@@ -48,3 +49,15 @@ export type ReferencedPanelAttributes =
 export type ReferencedPanelAttributesWithReferences = ReferencedPanelAttributes & {
   references: SavedObjectReference[];
 };
+
+export function isLensVizAttributesForPanel(attributes: unknown): attributes is LensAttributes {
+  if (!attributes) {
+    return false;
+  }
+  return (
+    Boolean(attributes) &&
+    typeof attributes === 'object' &&
+    'type' in attributes &&
+    attributes.type === 'lens'
+  );
+}
