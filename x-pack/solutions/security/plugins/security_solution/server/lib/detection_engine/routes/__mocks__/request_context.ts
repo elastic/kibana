@@ -45,10 +45,10 @@ import { packageServiceMock } from '@kbn/fleet-plugin/server/services/epm/packag
 import type { EndpointInternalFleetServicesInterface } from '../../../../endpoint/services/fleet';
 import { siemMigrationsServiceMock } from '../../../siem_migrations/__mocks__/mocks';
 import { AssetInventoryDataClientMock } from '../../../asset_inventory/asset_inventory_data_client.mock';
-import { privilegeMonitorDataClientMock } from '../../../entity_analytics/privilege_monitoring/privilege_monitoring_data_client.mock';
 import { createProductFeaturesServiceMock } from '../../../product_features_service/mocks';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { padPackageInstallationClientMock } from '../../../entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client.mock';
+import { privilegeMonitorDataClientMock } from '../../../entity_analytics/privilege_monitoring/engine/data_client.mock';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
