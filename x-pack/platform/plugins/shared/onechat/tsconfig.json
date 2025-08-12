@@ -59,5 +59,6 @@
     "@kbn/core-http-server-mocks",
     "@kbn/cloud-plugin",
     "@kbn/es-errors",
+    "@kbn/kibana-utils-plugin",
   ]
 }
