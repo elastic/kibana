@@ -16,42 +16,40 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const privMonUtils = PrivMonUtils(getService);
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
+  const retry = getService('retry');
   const spaces = getService('spaces');
   const customSpace = 'privmontestspace';
-  
-  const es = getService('es');
-    const retry = getService('retry');
+  const supertest = getService('supertest');
 
-    const createUserIndex = async (indexName: string) =>
-      es.indices.create({
-        index: indexName,
-        mappings: {
-          properties: {
-            user: {
-              properties: {
-                name: {
-                  type: 'keyword',
-                  fields: {
-                    text: { type: 'text' },
-                  },
+  const createUserIndex = async (indexName: string) =>
+    es.indices.create({
+      index: indexName,
+      mappings: {
+        properties: {
+          user: {
+            properties: {
+              name: {
+                type: 'keyword',
+                fields: {
+                  text: { type: 'text' },
                 },
-                role: {
-                  type: 'keyword',
-                },
+              },
+              role: {
+                type: 'keyword',
               },
             },
           },
         },
-      });
+      },
+    });
 
-    const waitForPrivMonUsersToBeSynced = async (length = 1) =>
-      retry.waitForWithTimeout('Wait for PrivMon users to be synced', 90000, async () => {
-        const res = await api.listPrivMonUsers({ query: {} });
-        log.info(`PrivMon users sync check: found ${res.body.length} users`);
-        return res.body.length >= length; // wait until we have at least one user
-      });
-
+  const waitForPrivMonUsersToBeSynced = async (length = 1) =>
+    retry.waitForWithTimeout('Wait for PrivMon users to be synced', 90000, async () => {
+      const res = await api.listPrivMonUsers({ query: {} });
+      log.info(`PrivMon users sync check: found ${res.body.length} users`);
+      return res.body.length >= length; // wait until we have at least one user
+    });
 
   async function getPrivMonSoStatus(space: string = 'default') {
     return kibanaServer.savedObjects.find({
@@ -73,20 +71,13 @@ export default ({ getService }: FtrProviderContext) => {
         disabledFeatures: [],
       });
       await dataViewWithNamespace.create('security-solution');
+      await enablePrivmonSetting(kibanaServer);
     });
 
     after(async () => {
       await dataView.delete('security-solution');
       await dataViewWithNamespace.delete('security-solution');
       await spaces.delete(customSpace);
-    });
-    
-  describe('@ess Entity Privilege Monitoring APIs', () => {
-    before(async () => {
-      await enablePrivmonSetting(kibanaServer);
-    });
-
-    after(async () => {
       await disablePrivmonSetting(kibanaServer);
     });
 
@@ -144,8 +135,8 @@ export default ({ getService }: FtrProviderContext) => {
           log.error(JSON.stringify(res.body));
         }
 
-        expect(res.status).eql(200);
-        expect(res.body.status).to.eql('disabled');
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe('disabled');
       });
 
       it('should disable the privilege monitoring engine in custom space', async () => {
@@ -160,8 +151,8 @@ export default ({ getService }: FtrProviderContext) => {
           log.error(JSON.stringify(res.body));
         }
 
-        expect(res.status).eql(200);
-        expect(res.body.status).to.eql('disabled');
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe('disabled');
       });
 
       it('should not disable when setting is disabled in default space', async () => {
@@ -169,7 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
         await disablePrivmonSetting(kibanaServer);
 
         const res = await api.disableMonitoringEngine();
-        expect(res.status).eql(500);
+        expect(res.status).toBe(500);
       });
 
       it('should not disable when setting is disabled in custom space', async () => {
@@ -177,7 +168,7 @@ export default ({ getService }: FtrProviderContext) => {
         await disablePrivmonSetting(kibanaServer, customSpace);
 
         const res = await api.disableMonitoringEngine(customSpace);
-        expect(res.status).eql(500);
+        expect(res.status).toBe(500);
       });
     });
 
@@ -201,47 +192,47 @@ export default ({ getService }: FtrProviderContext) => {
         // Initialize engine
         log.info('Initializing privilege monitoring engine');
         const initRes = await api.initMonitoringEngine();
-        expect(initRes.status).eql(200);
-        expect(initRes.body.status).to.eql('started');
+        expect(initRes.status).toBe(200);
+        expect(initRes.body.status).toBe('started');
 
         const soStatus = await getPrivMonSoStatus();
-        expect(soStatus.saved_objects[0].attributes.status).to.eql('started');
+        expect(soStatus.saved_objects[0].attributes.status).toBe('started');
 
         // Disable engine
         log.info('Disabling privilege monitoring engine');
         const disableRes = await api.disableMonitoringEngine();
-        expect(disableRes.status).eql(200);
-        expect(disableRes.body.status).to.eql('disabled');
+        expect(disableRes.status).toBe(200);
+        expect(disableRes.body.status).toBe('disabled');
 
         const soStatusAfterDisable = await getPrivMonSoStatus();
-        expect(soStatusAfterDisable.saved_objects[0].attributes.status).to.eql('disabled');
+        expect(soStatusAfterDisable.saved_objects[0].attributes.status).toBe('disabled');
 
         // Test re-disabling (should be idempotent)
         log.info('Re-disabling privilege monitoring engine');
         const reDisableRes = await api.disableMonitoringEngine();
-        expect(reDisableRes.status).eql(200);
-        expect(reDisableRes.body.status).to.eql('disabled');
+        expect(reDisableRes.status).toBe(200);
+        expect(reDisableRes.body.status).toBe('disabled');
 
         const soStatusAfterReDisable = await getPrivMonSoStatus();
-        expect(soStatusAfterReDisable.saved_objects[0].attributes.status).to.eql('disabled');
+        expect(soStatusAfterReDisable.saved_objects[0].attributes.status).toBe('disabled');
 
         // Re-initialize after disable
         log.info('Initializing privilege monitoring engine after disable');
         const initResAfterDisable = await api.initMonitoringEngine();
-        expect(initResAfterDisable.status).eql(200);
-        expect(initResAfterDisable.body.status).to.eql('started');
+        expect(initResAfterDisable.status).toBe(200);
+        expect(initResAfterDisable.body.status).toBe('started');
 
         const soStatusOnInitAfterDisable = await getPrivMonSoStatus();
-        expect(soStatusOnInitAfterDisable.saved_objects[0].attributes.status).to.eql('started');
+        expect(soStatusOnInitAfterDisable.saved_objects[0].attributes.status).toBe('started');
 
         // Test re-initializing (should be idempotent)
         log.info('Re-initializing privilege monitoring engine after disable');
         const reInitRes = await api.initMonitoringEngine();
-        expect(reInitRes.status).eql(200);
-        expect(reInitRes.body.status).to.eql('started');
+        expect(reInitRes.status).toBe(200);
+        expect(reInitRes.body.status).toBe('started');
 
         const soStatusAfterReInit = await getPrivMonSoStatus();
-        expect(soStatusAfterReInit.saved_objects[0].attributes.status).to.eql('started');
+        expect(soStatusAfterReInit.saved_objects[0].attributes.status).toBe('started');
       });
     });
 
@@ -265,51 +256,57 @@ export default ({ getService }: FtrProviderContext) => {
         // Initialize engine in custom space
         log.info('Initializing privilege monitoring engine in custom space');
         const initRes = await api.initMonitoringEngine(customSpace);
-        expect(initRes.status).eql(200);
-        expect(initRes.body.status).to.eql('started');
+        expect(initRes.status).toBe(200);
+        expect(initRes.body.status).toBe('started');
 
         const soStatus = await getPrivMonSoStatus(customSpace);
-        expect(soStatus.saved_objects[0].attributes.status).to.eql('started');
+        expect(soStatus.saved_objects[0].attributes.status).toBe('started');
 
         // Disable engine in custom space
         log.info('Disabling privilege monitoring engine in custom space');
         const disableRes = await api.disableMonitoringEngine(customSpace);
-        expect(disableRes.status).eql(200);
-        expect(disableRes.body.status).to.eql('disabled');
+        expect(disableRes.status).toBe(200);
+        expect(disableRes.body.status).toBe('disabled');
 
         const soStatusAfterDisable = await getPrivMonSoStatus(customSpace);
-        expect(soStatusAfterDisable.saved_objects[0].attributes.status).to.eql('disabled');
+        expect(soStatusAfterDisable.saved_objects[0].attributes.status).toBe('disabled');
 
         // Test re-disabling (should be idempotent)
         log.info('Re-disabling privilege monitoring engine in custom space');
         const reDisableRes = await api.disableMonitoringEngine(customSpace);
-        expect(reDisableRes.status).eql(200);
-        expect(reDisableRes.body.status).to.eql('disabled');
+        expect(reDisableRes.status).toBe(200);
+        expect(reDisableRes.body.status).toBe('disabled');
 
         const soStatusAfterReDisable = await getPrivMonSoStatus(customSpace);
-        expect(soStatusAfterReDisable.saved_objects[0].attributes.status).to.eql('disabled');
+        expect(soStatusAfterReDisable.saved_objects[0].attributes.status).toBe('disabled');
 
         // Re-initialize after disable
         log.info('Initializing privilege monitoring engine after disable in custom space');
         const initResAfterDisable = await api.initMonitoringEngine(customSpace);
-        expect(initResAfterDisable.status).eql(200);
-        expect(initResAfterDisable.body.status).to.eql('started');
+        expect(initResAfterDisable.status).toBe(200);
+        expect(initResAfterDisable.body.status).toBe('started');
 
         const soStatusOnInitAfterDisable = await getPrivMonSoStatus(customSpace);
-        expect(soStatusOnInitAfterDisable.saved_objects[0].attributes.status).to.eql('started');
+        expect(soStatusOnInitAfterDisable.saved_objects[0].attributes.status).toBe('started');
 
         // Test re-initializing (should be idempotent)
         log.info('Re-initializing privilege monitoring engine after disable in custom space');
         const reInitRes = await api.initMonitoringEngine(customSpace);
-        expect(reInitRes.status).eql(200);
-        expect(reInitRes.body.status).to.eql('started');
+        expect(reInitRes.status).toBe(200);
+        expect(reInitRes.body.status).toBe('started');
 
         const soStatusAfterReInit = await getPrivMonSoStatus(customSpace);
-        expect(soStatusAfterReInit.saved_objects[0].attributes.status).to.eql('started');
+        expect(soStatusAfterReInit.saved_objects[0].attributes.status).toBe('started');
       });
     });
 
     describe('init', () => {
+      beforeEach(async () => {
+        await enablePrivmonSetting(kibanaServer);
+      });
+      afterEach(async () => {
+        await disablePrivmonSetting(kibanaServer);
+      });
       it('should be able to be called multiple times', async () => {
         log.info(`Initializing Privilege Monitoring engine`);
         const res1 = await api.initMonitoringEngine();
@@ -351,6 +348,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       beforeEach(async () => {
         await createUserIndex(indexName);
+        await enablePrivmonSetting(kibanaServer);
       });
 
       afterEach(async () => {
@@ -359,6 +357,7 @@ export default ({ getService }: FtrProviderContext) => {
         } catch (err) {
           log.warning(`Failed to clean up in afterEach: ${err.message}`);
         }
+        await disablePrivmonSetting(kibanaServer);
       });
 
       it('should sync plain index', async () => {
