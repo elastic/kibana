@@ -92,64 +92,6 @@ describe(
         goToEsqlTab();
         cy.get(GET_LOCAL_SHOW_DATES_BUTTON(DISCOVER_CONTAINER)).should('be.disabled'); // default state
       });
-      it.skip('should save/restore esql tab dataview/timerange/filter/query/columns when saving/resoring timeline', () => {
-        const timelineSuffix = Date.now();
-        const timelineName = `DataView timeline-${timelineSuffix}`;
-        const column1 = 'event.category';
-        const column2 = 'ecs.version';
-        assertFieldsAreLoaded();
-        addFieldToTable(column1);
-        addFieldToTable(column2);
-
-        // create a custom timeline
-        addNameToTimelineAndSave(timelineName);
-        cy.wait(`@${TIMELINE_PATCH_REQ}`)
-          .its(TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH)
-          .then((timelineId) => {
-            cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
-            // create an empty timeline
-            createNewTimeline();
-            // switch to old timeline
-            openTimelineFromSettings();
-            openTimelineById(timelineId);
-            goToEsqlTab();
-            cy.get(LOADING_INDICATOR).should('not.exist');
-            verifyDiscoverEsqlQuery(esqlQuery);
-            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
-            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
-            cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
-              'have.text',
-              INITIAL_START_DATE
-            );
-          });
-      });
-      it.skip('should save/restore esql tab dataview/timerange/filter/query/columns when timeline is opened via url', () => {
-        const timelineSuffix = Date.now();
-        const timelineName = `DataView timeline-${timelineSuffix}`;
-        const column1 = 'event.category';
-        const column2 = 'ecs.version';
-        addDiscoverEsqlQuery(esqlQuery);
-        assertFieldsAreLoaded();
-        addFieldToTable(column1);
-        addFieldToTable(column2);
-
-        // create a custom timeline
-        addNameToTimelineAndSave(timelineName);
-        cy.wait(`@${TIMELINE_PATCH_REQ}`)
-          .its(TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH)
-          .then((timelineId) => {
-            cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
-            // reload the page with the exact url
-            cy.reload();
-            verifyDiscoverEsqlQuery(esqlQuery);
-            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
-            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
-            cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
-              'have.text',
-              INITIAL_START_DATE
-            );
-          });
-      });
       it('should save/restore esql tab ES|QL when saving timeline', () => {
         const timelineSuffix = Date.now();
         const timelineName = `ES|QL timeline-${timelineSuffix}`;
