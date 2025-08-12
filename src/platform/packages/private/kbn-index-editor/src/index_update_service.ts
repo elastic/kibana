@@ -366,14 +366,13 @@ export class IndexUpdateService {
           debounceTime(BUFFER_TIMEOUT_MS),
           filter((updates) => updates.length > 0),
           switchMap((updates) =>
-            from(this.bulkUpdate(updates)).pipe(
-              withLatestFrom(this._rows$, this.dataView$),
-              switchMap(([response, rows, dataView]) =>
-                // Refresh the data view fields to get new columns types if any
-                from(this.data.dataViews.refreshFields(dataView, false, true)).pipe(
-                  map(() => ({ updates, response, rows, dataView }))
-                )
-              )
+            from(this.bulkUpdate(updates)).pipe(map((response) => ({ updates, response })))
+          ),
+          withLatestFrom(this._rows$, this.dataView$),
+          switchMap(([{ updates, response }, rows, dataView]) =>
+            // Refresh the data view fields to get new columns types if any
+            from(this.data.dataViews.refreshFields(dataView, false, true)).pipe(
+              map(() => ({ updates, response, rows, dataView }))
             )
           )
         )
