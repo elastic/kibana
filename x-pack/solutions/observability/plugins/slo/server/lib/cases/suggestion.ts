@@ -102,7 +102,7 @@ export function getSLOByServiceName(
           return {
             suggestions: [
               {
-                id: 'example',
+                id: 'slo',
                 description: `Found ${suggestions.length} SLOs linked to service "${serviceName}"`,
                 data: suggestions.map((suggestion) => ({
                   description: `SLO "${suggestion.name}" is ${suggestion.status}`,
@@ -110,6 +110,7 @@ export function getSLOByServiceName(
                     id: suggestion.id,
                     name: suggestion.name,
                     instanceId: suggestion.instanceId,
+                    status: suggestion.status,
                   },
                   attachment: {
                     type: AttachmentType.persistableState,
