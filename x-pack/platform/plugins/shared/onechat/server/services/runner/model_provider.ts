@@ -8,11 +8,10 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ModelProvider, ScopedModel } from '@kbn/onechat-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { MODEL_TELEMETRY_METADATA } from '../../telemetry';
 
 export interface CreateModelProviderOpts {
   inference: InferenceServerStart;
-  actions: ActionsPluginStart;
   request: KibanaRequest;
   defaultConnectorId?: string;
 }
@@ -36,7 +35,7 @@ export const createModelProviderFactory: CreateModelProviderFactoryFn = (factory
 };
 
 /**
- * Utility function to creates a {@link ModelProvider}
+ * Utility function to create a {@link ModelProvider}
  */
 export const createModelProvider = ({
   inference,
@@ -55,7 +54,9 @@ export const createModelProvider = ({
     const chatModel = await inference.getChatModel({
       request,
       connectorId,
-      chatModelOptions: {},
+      chatModelOptions: {
+        telemetryMetadata: MODEL_TELEMETRY_METADATA,
+      },
     });
 
     const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
