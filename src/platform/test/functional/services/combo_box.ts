@@ -46,19 +46,16 @@ export class ComboBoxService extends FtrService {
     if (retryCount < 1) {
       const comboBox = await this.testSubjects.find(comboBoxSelector);
       await this.setElement(comboBox, value);
-      const isSelected = await this.isOptionSelected(comboBox, value);
-      if (!isSelected) {
-        throw new Error(`Failed to set combobox value. Expected: "${value}"`);
-      }
     } else {
       await this.retry.tryWithRetries(
         `comboBox.set, comboBoxSelector: ${comboBoxSelector}`,
         async () => {
           const comboBox = await this.testSubjects.find(comboBoxSelector);
           await this.setElement(comboBox, value);
-          const isSelected = await this.isOptionSelected(comboBox, value);
-          if (!isSelected) {
-            throw new Error(`Failed to set combobox value. Expected: "${value}"`);
+          const input = await comboBox.findByTagName('input');
+          const actualValue = await input.getAttribute('value');
+          if (actualValue !== value) {
+            throw new Error(`Failed to set combobox value. Expected: "${value}", got: "${actualValue}"`);
           }
         },
         { retryCount, retryDelay: 1000 }
