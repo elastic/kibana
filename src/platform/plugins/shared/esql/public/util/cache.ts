@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-interface CachedFunctionOptions {
+export interface CachedFunctionOptions {
   forceRefresh?: boolean;
 }
 
