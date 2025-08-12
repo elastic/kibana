@@ -847,7 +847,7 @@ const reportingFeatures: {
             includeIn: 'all',
             savedObject: { all: ['scheduled_report'], read: [] },
             management: { insightsAndAlerting: ['reporting'] },
-            api: ['downloadCsv'],
+            api: ['downloadCsv'], // NOTE: 'downloadCsv' is not used as an access control tag by any API endpoint. Should this be `generateReport`?
             ui: ['downloadCsv'],
             ...(version === 'v1' && {
               replacedBy: [{ feature: 'dashboard_v2', privileges: ['download_csv_report'] }],
