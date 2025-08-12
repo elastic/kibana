@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 import { filterWithLabelSchema } from './filter';
 
 // @TODO: move it to shared type/values package
@@ -314,10 +314,10 @@ export const bucketOperationDefinitionSchema = schema.oneOf([
   bucketFilterOperationSchema,
 ]);
 
-export type LensApiBucketOperations = typeof bucketOperationDefinitionSchema.type;
+export type LensApiBucketOperations = TypeOf<typeof bucketOperationDefinitionSchema>;
 
-export type LensApiDateHistogramOperation = typeof bucketDateHistogramOperationSchema.type;
-export type LensApiTermsOperation = typeof bucketTermsOperationSchema.type;
-export type LensApiHistogramOperation = typeof bucketHistogramOperationSchema.type;
-export type LensApiRangeOperation = typeof bucketRangesOperationSchema.type;
-export type LensApiFilterOperation = typeof bucketFilterOperationSchema.type;
+export type LensApiDateHistogramOperation = TypeOf<typeof bucketDateHistogramOperationSchema>;
+export type LensApiTermsOperation = TypeOf<typeof bucketTermsOperationSchema>;
+export type LensApiHistogramOperation = TypeOf<typeof bucketHistogramOperationSchema>;
+export type LensApiRangeOperation = TypeOf<typeof bucketRangesOperationSchema>;
+export type LensApiFilterOperation = TypeOf<typeof bucketFilterOperationSchema>;

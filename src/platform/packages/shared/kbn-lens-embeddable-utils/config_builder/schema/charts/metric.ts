@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
+
 import {
   countMetricOperationSchema,
   counterRateOperationSchema,
@@ -96,7 +97,7 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
     )
   ),
   /**
-   * Whether to fit the value`
+   * Whether to fit the value
    */
   fit: schema.maybe(
     schema.boolean({ meta: { description: 'Whether to fit the value' }, defaultValue: false })
@@ -182,41 +183,36 @@ export const metricStateSchema = schema.allOf([
      * Primary value configuration, must define operation.
      */
     metric: schema.oneOf([
-      // oneOf allows only 12 items
-      schema.oneOf([
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, countMetricOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, uniqueCountMetricOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, metricOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, lastValueOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, percentileOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, percentileRanksOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, differencesOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, movingAverageOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, cumulativeSumOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, counterRateOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, staticOperationDefinitionSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, formulaOperationDefinitionSchema]),
-      ]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, counterRateOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, countMetricOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, cumulativeSumOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, differencesOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, formulaOperationDefinitionSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, lastValueOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, metricOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, movingAverageOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, percentileOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, percentileRanksOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, staticOperationDefinitionSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, uniqueCountMetricOperationSchema]),
     ]),
     /**
      * Secondary value configuration, must define operation.
      */
     secondary_metric: schema.maybe(
       schema.oneOf([
-        schema.oneOf([
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, uniqueCountMetricOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, metricOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, lastValueOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, percentileOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, percentileRanksOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, differencesOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, movingAverageOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, cumulativeSumOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, counterRateOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, staticOperationDefinitionSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, formulaOperationDefinitionSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, countMetricOperationSchema]),
-        ]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, counterRateOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, countMetricOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, cumulativeSumOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, differencesOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, formulaOperationDefinitionSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, lastValueOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, metricOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, movingAverageOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, percentileOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, percentileRanksOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, staticOperationDefinitionSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, uniqueCountMetricOperationSchema]),
       ])
     ),
     /**
@@ -225,13 +221,13 @@ export const metricStateSchema = schema.allOf([
     breakdown_by: schema.maybe(
       schema.oneOf([
         schema.allOf([metricStateBreakdownByOptionsSchema, bucketDateHistogramOperationSchema]),
-        schema.allOf([metricStateBreakdownByOptionsSchema, bucketTermsOperationSchema]),
+        schema.allOf([metricStateBreakdownByOptionsSchema, bucketFilterOperationSchema]),
         schema.allOf([metricStateBreakdownByOptionsSchema, bucketHistogramOperationSchema]),
         schema.allOf([metricStateBreakdownByOptionsSchema, bucketRangesOperationSchema]),
-        schema.allOf([metricStateBreakdownByOptionsSchema, bucketFilterOperationSchema]),
+        schema.allOf([metricStateBreakdownByOptionsSchema, bucketTermsOperationSchema]),
       ])
     ),
   }),
 ]);
 
-export type MetricState = typeof metricStateSchema.type;
+export type MetricState = TypeOf<typeof metricStateSchema>;
