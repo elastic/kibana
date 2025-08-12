@@ -52,7 +52,7 @@ const createMockModel = (value: string, cursorOffset: number) => {
 function testCompletion(
   completionProvider: monaco.languages.CompletionItemProvider,
   yamlContent: string,
-  expectedSuggestions: string[]
+  expectedSuggestions: string[] | ((suggestion: monaco.languages.CompletionItem) => boolean)
 ) {
   const cursorOffset = yamlContent.indexOf('|<-');
   const mockModel = createMockModel(yamlContent, cursorOffset);
@@ -78,7 +78,19 @@ function testCompletion(
   const labels =
     completionList?.suggestions.map((s: monaco.languages.CompletionItem) => s.label) || [];
   // checking for sorted arrays to avoid flakiness, since the order of suggestions is not guaranteed
-  expect(labels.sort()).toEqual(expectedSuggestions.sort());
+  if (typeof expectedSuggestions === 'function') {
+    for (const suggestion of completionList?.suggestions || []) {
+      if (!expectedSuggestions(suggestion)) {
+        throw new Error(
+          `Suggestion ${suggestion.label} does not match expected function: ${JSON.stringify(
+            suggestion
+          )}`
+        );
+      }
+    }
+  } else {
+    expect(labels.sort()).toEqual(expectedSuggestions.sort());
+  }
 }
 
 describe('getCompletionItemProvider', () => {
@@ -98,7 +110,7 @@ describe('getCompletionItemProvider', () => {
   const completionProvider = getCompletionItemProvider(workflowSchema);
 
   describe('Integration tests', () => {
-    it('should provide basic completions with mustache', () => {
+    it('should provide basic completions inside variable expression', () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -108,12 +120,36 @@ steps:
   - name: step1
     type: console.log  
     with:
-      message: "{{<-}}"
+      message: "{{|<-}}"
 `.trim();
-      testCompletion(completionProvider, yamlContent, ['consts']);
+
+      testCompletion(completionProvider, yamlContent, [
+        'consts',
+        'event',
+        'now',
+        'steps',
+        'workflowRunId',
+      ]);
     });
 
-    it('should provide basic completions with @', () => {
+    it('should provide completions after @ and quote insertText automatically if cursor is in plain scalar', () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: step1
+    type: console.log  
+    with:
+      message: @|<-
+`.trim();
+      testCompletion(completionProvider, yamlContent, (suggestion) => {
+        return suggestion.insertText.startsWith('"') && suggestion.insertText.endsWith('"');
+      });
+    });
+
+    it('should provide basic completions with @ and not quote insertText automatically if cursor is in string', () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -126,7 +162,16 @@ steps:
       message: "@<-"
 `.trim();
 
-      testCompletion(completionProvider, yamlContent, ['consts']);
+      testCompletion(completionProvider, yamlContent, [
+        'consts',
+        'event',
+        'now',
+        'steps',
+        'workflowRunId',
+      ]);
+      testCompletion(completionProvider, yamlContent, (suggestion) => {
+        return !suggestion.insertText.startsWith('"') && !suggestion.insertText.endsWith('"');
+      });
     });
 
     it('should provide const completion', () => {
@@ -209,6 +254,38 @@ steps:
 `.trim();
 
       testCompletion(completionProvider, yamlContent, ['apiUrl']);
+    });
+
+    it('should provide completions with brackets for keys in kebab-case and use quote type opposite to the one in the string', () => {
+      const yamlContentDoubleQuote = `
+version: "1"
+name: "test"
+consts:
+  api-url: "https://api.example.com"
+steps:
+  - name: step0
+    type: console.log  
+    with:
+      message: "{{consts.|<-}}"
+`.trim();
+      testCompletion(completionProvider, yamlContentDoubleQuote, (suggestion) => {
+        return suggestion.insertText === "['api-url']";
+      });
+
+      const yamlContentSingleQuote = `
+      version: "1"
+      name: "test"
+      consts:
+        api-url: "https://api.example.com"
+      steps:
+        - name: step0
+          type: console.log  
+          with:
+            message: '{{consts.|<-}}'
+      `.trim();
+      testCompletion(completionProvider, yamlContentSingleQuote, (suggestion) => {
+        return suggestion.insertText === '["api-url"]';
+      });
     });
   });
 
@@ -301,7 +378,7 @@ steps:
         expect(result.match).toBeNull();
       });
 
-      it('should return null for incomplete braces', () => {
+      it('should return null for incomplete brackets', () => {
         const result = parseLineForCompletion('message: "{ consts.api }');
         expect(result.matchType).toBeNull();
         expect(result.fullKey).toBe('');
