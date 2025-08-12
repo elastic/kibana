@@ -115,7 +115,7 @@ interface ProtectionRadioProps extends PolicyFormComponentCommonProps {
   protectionMode: ProtectionModes;
   osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
   label: string;
-  name?: string;
+  name: string;
 }
 
 const ProtectionRadio = React.memo(
