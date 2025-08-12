@@ -55,7 +55,9 @@ export class ComboBoxService extends FtrService {
           const input = await comboBox.findByTagName('input');
           const actualValue = await input.getAttribute('value');
           if (actualValue !== value) {
-            throw new Error(`Failed to set combobox value. Expected: "${value}", got: "${actualValue}"`);
+            throw new Error(
+              `Failed to set combobox value. Expected: "${value}", got: "${actualValue}"`
+            );
           }
         },
         { retryCount, retryDelay: 1000 }
