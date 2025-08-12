@@ -192,8 +192,7 @@ export default function (providerContext: FtrProviderContext) {
         await installPackage(pkgName, pkgUpdateVersion);
       });
 
-      // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/230902
-      describe.skip('When enabling experimental data stream features', () => {
+      describe('When enabling experimental data stream features', () => {
         let agentPolicyId: string;
         let packagePolicyId: string;
 

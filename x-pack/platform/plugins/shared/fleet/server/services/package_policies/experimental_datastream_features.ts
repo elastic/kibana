@@ -199,8 +199,17 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       });
     }
 
-    const indexTemplate = indexTemplateRes.index_templates[0].index_template;
-    let updatedIndexTemplate = indexTemplate as IndexTemplate;
+    const rawIndexTemplate = indexTemplateRes.index_templates[0].index_template;
+
+    // Remove system-managed properties (dates) that cannot be set during create/update of index templates
+    const {
+      created_date: createdDate,
+      created_date_millis: createdDateMillis,
+      modified_date: modifiedDate,
+      modified_date_millis: modifiedDateMillis,
+      ...indexTemplate
+    } = rawIndexTemplate as IndexTemplate;
+    let updatedIndexTemplate = indexTemplate;
 
     if (isTSDBOptInChanged) {
       const indexTemplateBody = {
