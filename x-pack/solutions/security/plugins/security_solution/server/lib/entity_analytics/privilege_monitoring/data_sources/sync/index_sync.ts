@@ -9,6 +9,7 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniq } from 'lodash';
+import { uniqBy } from 'lodash/fp';
 import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
 import type { PrivMonBulkUser } from '../../types';
 
@@ -127,43 +128,34 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
 
     const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
     while (true) {
-      const response = await searchService.searchUsernamesInIndex({
-        indexName,
-        batchSize,
-        searchAfter,
-        query,
-      });
+      const { users: batchedUsers, searchAfter: newSearchAfter } =
+        await searchService.searchUsernamesInIndex({
+          indexName,
+          batchSize,
+          searchAfter,
+          query,
+        });
 
-      const hits = response.hits.hits;
-      if (hits.length === 0) break;
+      if (batchedUsers.length === 0) break;
 
-      const batchUsernames = hits
-        .map((hit) => hit._source?.user?.name)
-        .filter((username): username is string => !!username);
-      allUsernames.push(...batchUsernames); // Collect usernames from this batch
-      const batchUniqueUsernames = uniq(batchUsernames); // Ensure uniqueness within the batch
+      const batchedUniqueUser = uniqBy((user) => user.name, batchedUsers);
+      const batchedUniqueUsernames = batchedUniqueUser.map((user) => user.name);
+      allUsernames.push(...batchedUniqueUsernames); // Collect usernames from this batch
 
       dataClient.log(
         'debug',
-        `Found ${batchUniqueUsernames.length} unique usernames in ${batchUsernames.length} hits.`
+        `Found ${batchedUniqueUsernames.length} unique usernames in ${batchedUsers.length} hits.`
       );
 
-      const existingUserRes = await searchService.getMonitoredUsers(batchUsernames);
-
-      const existingUserMap = new Map<string, string | undefined>();
-      for (const hit of existingUserRes.hits.hits) {
-        const username = hit._source?.user?.name;
-        dataClient.log('info', `Found existing user: ${username} with ID: ${hit._id}`);
-        if (username) existingUserMap.set(username, hit._id);
-      }
-
-      const usersToWrite: PrivMonBulkUser[] = batchUniqueUsernames.map((username) => ({
-        username,
+      const existingUserMap = await searchService.getMonitoredUsers(batchedUniqueUsernames);
+      const usersToWrite: PrivMonBulkUser[] = batchedUniqueUser.map((user) => ({
+        username: user.name,
+        label: user.label,
         sourceId,
-        existingUserId: existingUserMap.get(username),
+        existingUserId: existingUserMap.get(user.name),
       }));
 
-      if (usersToWrite.length === 0) return batchUsernames;
+      if (usersToWrite.length === 0) return batchedUniqueUsernames;
 
       const ops = bulkUtilsService.bulkUpsertOperations(usersToWrite, dataClient.index);
       dataClient.log('debug', `Executing bulk operations for ${usersToWrite.length} users`);
@@ -173,7 +165,7 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
       } catch (error) {
         dataClient.log('error', `Error executing bulk operations: ${error}`);
       }
-      searchAfter = hits[hits.length - 1].sort;
+      searchAfter = newSearchAfter;
     }
     return uniq(allUsernames); // Return all unique usernames collected across batches;
   };

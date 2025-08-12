@@ -28,14 +28,15 @@ export const bulkUpsertOperationsFactory =
   (dataClient: PrivilegeMonitoringDataClient) =>
   (users: PrivMonBulkUser[], userIndexName: string): object[] => {
     const ops: object[] = [];
-    dataClient.log('info', `Building bulk operations for ${users.length} users`);
+    dataClient.log('debug', `Building bulk operations for ${users.length} users`);
     for (const user of users) {
       if (user.existingUserId) {
         // Update user with painless script
         dataClient.log(
-          'info',
+          'debug',
           `Updating existing user: ${user.username} with ID: ${user.existingUserId}`
         );
+
         ops.push(
           { update: { _index: userIndexName, _id: user.existingUserId } },
           {
@@ -54,21 +55,46 @@ export const bulkUpsertOperationsFactory =
                 ctx._source.labels.sources.add("index");
               }
 
+              if (params.ea_label.value != null) {
+                if (ctx._source.entity_analytics_monitoring == null) {
+                  ctx._source.entity_analytics_monitoring = new HashMap();
+                }
+                if (ctx._source.entity_analytics_monitoring.labels == null) {
+                  ctx._source.entity_analytics_monitoring.labels = new ArrayList();
+                }
+
+                ctx._source.entity_analytics_monitoring.labels.removeIf(l -> l.field == params.ea_label.field && l.source == params.ea_label.source);
+                ctx._source.entity_analytics_monitoring.labels.add(params.ea_label);
+              }
+
               ctx._source.user.is_privileged = true;
             `,
               params: {
                 source_id: user.sourceId,
+                ea_label: {
+                  field: 'label',
+                  source: user.sourceId,
+                  value: user.label,
+                },
               },
             },
           }
         );
       } else {
-        // New user — create
-        dataClient.log('info', `Creating new user: ${user.username}`);
+        dataClient.log('debug', `Creating new user: ${user.username}`);
         ops.push(
           { index: { _index: userIndexName } },
           {
             user: { name: user.username, is_privileged: true },
+            entity_analytics_monitoring: {
+              labels: [
+                {
+                  field: 'label',
+                  source: user.sourceId,
+                  value: user.label,
+                },
+              ],
+            },
             labels: {
               sources: ['index'],
               source_ids: [user.sourceId],
@@ -77,6 +103,6 @@ export const bulkUpsertOperationsFactory =
         );
       }
     }
-    dataClient.log('info', `Built ${ops.length} bulk operations for users`);
+    dataClient.log('debug', `Built ${ops.length} bulk operations for users`);
     return ops;
   };

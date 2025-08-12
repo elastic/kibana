@@ -29,7 +29,7 @@ export const bulkSoftDeleteOperationsFactory =
   (dataClient: PrivilegeMonitoringDataClient) =>
   (users: PrivMonBulkUser[], userIndexName: string): object[] => {
     const ops: object[] = [];
-    dataClient.log('info', `Building bulk operations for soft delete users`);
+    dataClient.log('debug', `Building bulk operations for soft delete users`);
     for (const user of users) {
       ops.push(
         { update: { _index: userIndexName, _id: user.existingUserId } },
@@ -48,6 +48,13 @@ export const bulkSoftDeleteOperationsFactory =
 
             if (ctx._source.labels?.sources == null || ctx._source.labels.sources.isEmpty()) {
               ctx._source.user.is_privileged = false;
+            }
+
+            if (ctx._source.entity_analytics_monitoring != null && ctx._source.entity_analytics_monitoring.labels != null) {
+              ctx._source.entity_analytics_monitoring.labels.removeIf(label -> label.source == params.source_id);
+              if (ctx._source.entity_analytics_monitoring.labels.isEmpty()) {
+                ctx._source.remove('entity_analytics_monitoring');
+              }
             }
           `,
             params: {
