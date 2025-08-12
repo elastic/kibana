@@ -61,7 +61,5 @@ export type OptionsListComponentApi = PublishesField &
     deselectAll: (keys: string[]) => void;
     defaultTitle$?: PublishingSubject<string | undefined>;
     uuid: string;
-    parentApi: {
-      allowExpensiveQueries$: PublishingSubject<boolean>;
-    };
+    parentApi?: unknown;
   };

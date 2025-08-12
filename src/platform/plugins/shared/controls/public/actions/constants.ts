@@ -10,3 +10,5 @@
 export const ACTION_EDIT_CONTROL = 'editDataControl';
 export const ACTION_CLEAR_CONTROL = 'clearControl';
 export const ACTION_DELETE_CONTROL = 'deleteControl';
+
+export const ADD_OPTIONS_LIST_ACTION_ID = 'addOptionsList';

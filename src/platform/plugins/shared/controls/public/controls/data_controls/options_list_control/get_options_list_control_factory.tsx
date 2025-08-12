@@ -72,7 +72,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
       );
     },
     CustomOptionsComponent: OptionsListEditorOptions,
-    buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
+    buildControl: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       /** Serializable state - i.e. the state that is saved with the control */
       const editorStateManager = initializeEditorStateManager(initialState);
 
@@ -94,7 +94,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         initialState,
         editorStateManager.getLatestState,
         editorStateManager.reinitializeState,
-        controlGroupApi
+        parentApi
       );
 
       const selectionsManager = initializeSelectionsManager(initialState);
@@ -161,14 +161,13 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           loadMoreSubject,
           loadingSuggestions$,
           debouncedSearchString,
-          parentApi: controlGroupApi,
+          parentApi,
         },
         requestSize$: temporaryStateManager.api.requestSize$,
         runPastTimeout$: editorStateManager.api.runPastTimeout$,
         selectedOptions$: selectionsManager.api.selectedOptions$,
         searchTechnique$: editorStateManager.api.searchTechnique$,
         sort$,
-        controlFetch$: (onReload: () => void) => controlGroupApi.controlFetch$(uuid, onReload),
       }).subscribe((result) => {
         // if there was an error during fetch, set suggestion load error and return early
         if (Object.hasOwn(result, 'error')) {
@@ -270,7 +269,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
 
       const unsavedChangesApi = initializeUnsavedChanges<OptionsListControlState>({
         uuid,
-        parentApi: controlGroupApi,
+        parentApi,
         serializeState,
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
@@ -347,9 +346,10 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         deselectOption: (key: string | undefined) => {
           const field = api.field$.getValue();
           if (!key || !field) {
-            api.setBlockingError(
-              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
-            );
+            // TODO figure out the blocking error problem...
+            // api.setBlockingError(
+            //   new Error(OptionsListStrings.control.getInvalidSelectionMessage())
+            // );
             return;
           }
 
@@ -375,9 +375,10 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         makeSelection: (key: string | undefined, showOnlySelected: boolean) => {
           const field = api.field$.getValue();
           if (!key || !field) {
-            api.setBlockingError(
-              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
-            );
+            // TODO figure out the blocking error problem...
+            // api.setBlockingError(
+            //   new Error(OptionsListStrings.control.getInvalidSelectionMessage())
+            // );
             return;
           }
 
@@ -415,9 +416,10 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         selectAll: (keys: string[]) => {
           const field = api.field$.getValue();
           if (keys.length < 1 || !field) {
-            api.setBlockingError(
-              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
-            );
+            // TODO figure out the blocking error problem...
+            // api.setBlockingError(
+            //   new Error(OptionsListStrings.control.getInvalidSelectionMessage())
+            // );
             return;
           }
 
@@ -428,9 +430,10 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         deselectAll: (keys: string[]) => {
           const field = api.field$.getValue();
           if (keys.length < 1 || !field) {
-            api.setBlockingError(
-              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
-            );
+            // TODO figure out the blocking error problem...
+            // api.setBlockingError(
+            //   new Error(OptionsListStrings.control.getInvalidSelectionMessage())
+            // );
             return;
           }
 

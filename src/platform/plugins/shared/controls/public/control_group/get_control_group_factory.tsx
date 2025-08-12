@@ -128,7 +128,7 @@ export const getControlGroupEmbeddableFactory = () => {
               });
               settings?.onSave?.();
             },
-            controlGroupApi: api,
+            parentApi,
           });
         },
         serializeState,

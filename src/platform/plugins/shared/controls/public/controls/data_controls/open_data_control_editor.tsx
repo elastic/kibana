@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { DefaultDataControlState } from '../../../common';
 import { coreServices } from '../../services/kibana_services';
-import type { ControlGroupApi } from '../../control_group/types';
+import { apiHasParentApi } from '@kbn/presentation-publishing';
 
 export const openDataControlEditor = <
   State extends DefaultDataControlState = DefaultDataControlState
@@ -24,14 +24,14 @@ export const openDataControlEditor = <
   controlId,
   initialDefaultPanelTitle,
   onSave,
-  controlGroupApi,
+  parentApi,
 }: {
   initialState: Partial<State>;
   controlType?: string;
   controlId?: string;
   initialDefaultPanelTitle?: string;
   onSave: ({ type, state }: { type: string; state: Partial<State> }) => void;
-  controlGroupApi: ControlGroupApi;
+  parentApi?: unknown;
 }) => {
   const onCancel = (newState: Partial<State>, closeFlyout: () => void) => {
     if (deepEqual(initialState, newState)) {
@@ -65,13 +65,13 @@ export const openDataControlEditor = <
 
   openLazyFlyout({
     core: coreServices,
-    parentApi: controlGroupApi.parentApi,
+    parentApi: apiHasParentApi(parentApi) ? parentApi.parentApi : parentApi, // todo, make this more elegant. This is meant to always get the Dashboard.
     loadContent: async ({ closeFlyout }) => {
       const { DataControlEditor } = await import('./data_control_editor');
       return (
         <DataControlEditor<State>
           ariaLabelledBy="control-editor-title-input"
-          controlGroupApi={controlGroupApi}
+          parentApi={parentApi}
           initialState={initialState}
           controlType={controlType}
           controlId={controlId}

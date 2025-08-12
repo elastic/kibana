@@ -43,11 +43,12 @@ export const OptionsListPopoverFooter = () => {
   const { euiTheme } = useEuiTheme();
   const { componentApi } = useOptionsListContext();
 
-  const [exclude, loading, allowExpensiveQueries] = useBatchedPublishingSubjects(
+  const [exclude, loading] = useBatchedPublishingSubjects(
     componentApi.exclude$,
-    componentApi.dataLoading$,
-    componentApi.parentApi.allowExpensiveQueries$
+    componentApi.dataLoading$
   );
+  // TODO Fix allowExpensiveQueries
+  const allowExpensiveQueries = true;
 
   return (
     <>

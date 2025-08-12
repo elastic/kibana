@@ -17,7 +17,6 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { DefaultDataControlState } from '../../../common';
-import { ControlGroupApi } from '../../control_group/types';
 import { ControlFactory, DefaultControlApi } from '../types';
 import { PublishesAsyncFilters } from './publishes_async_filters';
 
@@ -42,7 +41,7 @@ export interface CustomOptionsComponentProps<
   field: DataViewField;
   updateState: (newState: Partial<State>) => void;
   setControlEditorValid: (valid: boolean) => void;
-  controlGroupApi: ControlGroupApi;
+  parentApi?: unknown;
 }
 
 export interface DataControlFactory<

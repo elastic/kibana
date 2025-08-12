@@ -10,7 +10,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { EuiFormRow, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 import type {
   OptionsListControlState,
@@ -72,11 +71,10 @@ export const OptionsListEditorOptions = ({
   initialState,
   field,
   updateState,
-  controlGroupApi,
+  parentApi,
 }: CustomOptionsComponentProps<OptionsListControlState>) => {
-  const allowExpensiveQueries = useStateFromPublishingSubject(
-    controlGroupApi.allowExpensiveQueries$
-  );
+  // TODO - fetch allowExpensiveQueries setting from parent API. Defaults to true.
+  const allowExpensiveQueries = true;
 
   const [singleSelect, setSingleSelect] = useState<boolean>(initialState.singleSelect ?? false);
   const [runPastTimeout, setRunPastTimeout] = useState<boolean>(
