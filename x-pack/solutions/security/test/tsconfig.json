@@ -24,6 +24,7 @@
     "security_solution_api_integration/**/*",
     "security_solution_endpoint/**/*",
     "security_solution_ftr/**/*",
+    "functional/**/*",
     "*/packages/**/*",
     "*/*/packages/**/*",
   ],
