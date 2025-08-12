@@ -19,7 +19,7 @@ import xpackSearchTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/s
 import xpackSecurityTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_security.json';
 import { assertTelemetryPayload } from '@kbn/telemetry-tools';
 import type { TelemetrySchemaObject } from '@kbn/telemetry-tools/src/schema_ftr_validations/schema_to_config_schema';
-import type { UsageStatsPayloadTestFriendly } from '@kbn/test-suites-xpack/api_integration/services/usage_api';
+import type { UsageStatsPayloadTestFriendly } from '../../../../shared/services/usage_api';
 import type { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 

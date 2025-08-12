@@ -507,7 +507,7 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]unified_components[\/\\]data_table[\/\\]custom_timeline_data_grid_body.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]unified_components[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]unified_components[\/\\]styles.tsx/,
-    /x-pack[\/\\]test[\/\\]plugin_functional[\/\\]plugins[\/\\]resolver_test[\/\\]public[\/\\]applications[\/\\]resolver_test[\/\\]index.tsx/,
+    /x-pack[\/\\]solutions[\/\\]security[\/\\]test[\/\\]plugin_functional[\/\\]plugins[\/\\]resolver_test[\/\\]public[\/\\]applications[\/\\]resolver_test[\/\\]index.tsx/,
     /src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]react[\/\\]kibana_context[\/\\]styled[\/\\]styled_provider.tsx/,
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]elasticsearch_dotnet[\/\\]elasticsearch_dotnet_readme.tsx/,
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]elasticsearch_go[\/\\]elasticsearch_go_readme.tsx/,

@@ -9,12 +9,9 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { createPackagePolicy } from '@kbn/test-suites-xpack-security/api_integration/apis/cloud_security_posture/helper';
-import { EsIndexDataProvider } from '@kbn/test-suites-xpack-security/cloud_security_posture_api/utils';
-import {
-  findingsMockData,
-  vulnerabilityMockData,
-} from '@kbn/test-suites-xpack-security/api_integration/apis/cloud_security_posture/mock_data';
+import { createPackagePolicy } from '../helper';
+import { EsIndexDataProvider } from '../utils';
+import { findingsMockData, vulnerabilityMockData } from '../mock_data';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../../shared/services';
 

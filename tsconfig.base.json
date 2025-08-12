@@ -126,8 +126,6 @@
       "@kbn/babel-transform/*": ["src/platform/packages/private/kbn-babel-transform/*"],
       "@kbn/banners-plugin": ["x-pack/platform/plugins/private/banners"],
       "@kbn/banners-plugin/*": ["x-pack/platform/plugins/private/banners/*"],
-      "@kbn/bazel-runner": ["packages/kbn-bazel-runner"],
-      "@kbn/bazel-runner/*": ["packages/kbn-bazel-runner/*"],
       "@kbn/bfetch-error": ["src/platform/packages/shared/kbn-bfetch-error"],
       "@kbn/bfetch-error/*": ["src/platform/packages/shared/kbn-bfetch-error/*"],
       "@kbn/bfetch-explorer-plugin": ["examples/bfetch_explorer"],
@@ -1040,8 +1038,8 @@
       "@kbn/global-search-plugin/*": ["x-pack/platform/plugins/shared/global_search/*"],
       "@kbn/global-search-providers-plugin": ["x-pack/platform/plugins/private/global_search_providers"],
       "@kbn/global-search-providers-plugin/*": ["x-pack/platform/plugins/private/global_search_providers/*"],
-      "@kbn/global-search-test-plugin": ["x-pack/test/plugin_functional/plugins/global_search_test"],
-      "@kbn/global-search-test-plugin/*": ["x-pack/test/plugin_functional/plugins/global_search_test/*"],
+      "@kbn/global-search-test-plugin": ["x-pack/platform/test/plugin_functional/plugins/global_search_test"],
+      "@kbn/global-search-test-plugin/*": ["x-pack/platform/test/plugin_functional/plugins/global_search_test/*"],
       "@kbn/graph-plugin": ["x-pack/platform/plugins/private/graph"],
       "@kbn/graph-plugin/*": ["x-pack/platform/plugins/private/graph/*"],
       "@kbn/grid-example-plugin": ["examples/grid_example"],
@@ -1546,8 +1544,8 @@
       "@kbn/resizable-layout/*": ["src/platform/packages/shared/kbn-resizable-layout/*"],
       "@kbn/resizable-layout-examples-plugin": ["examples/resizable_layout_examples"],
       "@kbn/resizable-layout-examples-plugin/*": ["examples/resizable_layout_examples/*"],
-      "@kbn/resolver-test-plugin": ["x-pack/test/plugin_functional/plugins/resolver_test"],
-      "@kbn/resolver-test-plugin/*": ["x-pack/test/plugin_functional/plugins/resolver_test/*"],
+      "@kbn/resolver-test-plugin": ["x-pack/solutions/security/test/plugin_functional/plugins/resolver_test"],
+      "@kbn/resolver-test-plugin/*": ["x-pack/solutions/security/test/plugin_functional/plugins/resolver_test/*"],
       "@kbn/response-ops-alerts-apis": ["src/platform/packages/shared/response-ops/alerts-apis"],
       "@kbn/response-ops-alerts-apis/*": ["src/platform/packages/shared/response-ops/alerts-apis/*"],
       "@kbn/response-ops-alerts-delete": ["src/platform/packages/shared/response-ops/alerts-delete"],
@@ -2200,6 +2198,7 @@
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
       // We should be able to remove this once we support cjs/esm interop.
       "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],
+      "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

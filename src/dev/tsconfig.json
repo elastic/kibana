@@ -29,7 +29,6 @@
     "@kbn/dev-utils",
     "@kbn/utils",
     "@kbn/optimizer",
-    "@kbn/bazel-runner",
     "@kbn/peggy",
     "@kbn/babel-transform",
     "@kbn/import-resolver",

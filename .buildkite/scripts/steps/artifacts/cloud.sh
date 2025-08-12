@@ -93,4 +93,4 @@ export TEST_BROWSER_HEADLESS=1
 export NODE_TLS_REJECT_UNAUTHORIZED=0
 
 echo "--- FTR - Reporting"
-node --no-warnings scripts/functional_test_runner.js --config x-pack/test/functional/apps/visualize/config.ts --include-tag=smoke --quiet
+node --no-warnings scripts/functional_test_runner.js --config x-pack/platform/test/functional/apps/visualize/config.ts --include-tag=smoke --quiet
