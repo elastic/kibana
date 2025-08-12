@@ -154,12 +154,7 @@ export function SettingsPage() {
 
   return (
     <div data-test-subj="aiAssistantSettingsPage">
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-        gutterSize="s"
-        responsive={false}
-      >
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} direction="row">
           {logos.map((logo) => (
             <EuiFlexItem key={logo} grow={false}>
