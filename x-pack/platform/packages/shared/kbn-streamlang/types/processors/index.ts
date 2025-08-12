@@ -147,43 +147,28 @@ export const renameProcessorSchema = processorBaseWithWhereSchema.extend({
  * Set processor
  */
 
-export interface SetProcessorBase extends ProcessorBaseWithWhere {
+export interface SetProcessor extends ProcessorBaseWithWhere {
   action: 'set';
   to: string;
   override?: boolean;
+  // One of these must be provided, and this is enforced via the Zod schema refinement.
+  // We can't use a union type as this means we can't use a discriminated union.
+  value?: string;
+  copy_from?: string;
 }
 
-export interface SetValueProcessor extends SetProcessorBase {
-  value: string;
-  copy_from?: never;
-}
-
-export interface SetCopyFromProcessor extends SetProcessorBase {
-  value?: never;
-  copy_from: string;
-}
-
-export type SetProcessor = SetValueProcessor | SetCopyFromProcessor;
-
-const setProcessorBaseSchema = processorBaseWithWhereSchema.extend({
-  action: z.literal('set'),
-  to: NonEmptyString,
-  override: z.optional(z.boolean()),
-});
-
-const setValueSchema = setProcessorBaseSchema.extend({
-  value: NonEmptyString,
-  copy_from: z.undefined(),
-});
-
-const setCopyFromSchema = setProcessorBaseSchema.extend({
-  value: z.undefined(),
-  copy_from: NonEmptyString,
-});
-
-const valueXorCopyFromSchema = z.union([setValueSchema, setCopyFromSchema]);
-
-export const setProcessorSchema = valueXorCopyFromSchema satisfies z.Schema<SetProcessor>;
+const setProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('set'),
+    to: NonEmptyString,
+    override: z.optional(z.boolean()),
+    value: z.optional(NonEmptyString),
+    copy_from: z.optional(NonEmptyString),
+  })
+  .refine((obj) => (obj.value && !obj.copy_from) || (!obj.value && obj.copy_from), {
+    message: 'Set processor must have either value or copy_from, but not both.',
+    path: ['value', 'copy_from'],
+  }) satisfies z.Schema<SetProcessor>;
 
 /**
  * Append processor
@@ -212,20 +197,12 @@ export type StreamlangProcessorDefinition =
   | AppendProcessor
   | ManualIngestPipelineProcessor;
 
-export type ProcessorDefinitionWithId = StreamlangProcessorDefinition & { id: string };
-
 export const streamlangProcessorSchema = z.discriminatedUnion('action', [
   grokProcessorSchema,
   dissectProcessorSchema,
   dateProcessorSchema,
   renameProcessorSchema,
-  // Instead of setProcessorSchema (which is a union), use its two underlying schemas:
-  setValueSchema,
-  setCopyFromSchema,
-  setProcessorBaseSchema.extend({
-    value: z.undefined(),
-    copy_from: NonEmptyString,
-  }),
+  setProcessorSchema.innerType(),
   appendProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
