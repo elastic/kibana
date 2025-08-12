@@ -138,7 +138,7 @@ export function SettingsPage({
             currentKey === oldKey ? [key, currentValue] : [currentKey, currentValue]
           )
         );
-      } else if (key === '' && value === '') {
+      } else if (key === '' && value === '' && prev.settings[''] === undefined) {
         // Handle new row at the top of the list
         updatedSettings = { ['']: '', ...prev.settings };
       } else {
