@@ -16,7 +16,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
-    "@kbn/actions-plugin",
     "@kbn/config-schema",
     "@kbn/inference-plugin",
     "@kbn/onechat-server",

@@ -20,7 +20,6 @@ import { firstValueFrom, toArray, of } from 'rxjs';
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { AgentMode } from '@kbn/onechat-common';
 import {
@@ -37,7 +36,6 @@ const createChatModel = (): InferenceChatModel => {
 
 describe('ChatService', () => {
   let inference: ReturnType<typeof inferenceMock.createStartContract>;
-  let actions: ReturnType<typeof actionsMock.createStart>;
   let logger: MockedLogger;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let agentService: ReturnType<typeof createAgentsServiceStartMock>;
@@ -49,14 +47,12 @@ describe('ChatService', () => {
     logger = loggerMock.create();
     request = httpServerMock.createKibanaRequest();
     inference = inferenceMock.createStartContract();
-    actions = actionsMock.createStart();
     agentService = createAgentsServiceStartMock();
     conversationService = createConversationServiceMock();
 
     chatService = createChatService({
       inference,
       logger,
-      actions,
       agentService,
       conversationService,
     });
