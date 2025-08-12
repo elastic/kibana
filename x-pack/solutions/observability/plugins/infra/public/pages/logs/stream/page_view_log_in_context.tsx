@@ -31,7 +31,6 @@ import { useViewportDimensions } from '../../../hooks/use_viewport_dimensions';
 
 const MODAL_MARGIN = 25;
 
-
 export const PageViewLogInContext: React.FC = () => {
   const {
     services: {

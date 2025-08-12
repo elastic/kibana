@@ -122,11 +122,13 @@ export const Logs = () => {
   return (
     <>
       {/* z-index override so DocViewer flyout is being visible */}
-      <Global styles={css`
+      <Global
+        styles={css`
           .DiscoverFlyout {
             z-index: 6000 !important;
           }
-        `} />
+        `}
+      />
       <EuiFlexGroup direction="column" ref={ref}>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
