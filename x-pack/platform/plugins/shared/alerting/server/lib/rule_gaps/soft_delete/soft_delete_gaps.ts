@@ -48,10 +48,13 @@ export const softDeleteGaps = async (params: SoftDeleteGapsParams) => {
         hasErrors = true;
       }
 
-      return Object.entries(groupBy(fetchedGaps, 'ruleId')).reduce<Record<string, number>>((acc, [ruleId, gaps]) => {
-        acc[ruleId] = gaps.length;
-        return acc;
-      }, {});
+      return Object.entries(groupBy(fetchedGaps, 'ruleId')).reduce<Record<string, number>>(
+        (acc, [ruleId, gaps]) => {
+          acc[ruleId] = gaps.length;
+          return acc;
+        },
+        {}
+      );
     };
 
     await processAllRuleGaps({
