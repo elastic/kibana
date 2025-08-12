@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { YAMLParseError, parseDocument } from 'yaml';
+import { Scalar, YAMLParseError, isScalar, parseDocument } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
-import { MUSTACHE_REGEX_GLOBAL, UNFINISHED_MUSTACHE_REGEX_GLOBAL } from './regex';
+import {
+  MUSTACHE_REGEX_GLOBAL,
+  PROPERTY_PATH_REGEX,
+  UNFINISHED_MUSTACHE_REGEX_GLOBAL,
+} from '../../../../common/lib/regex';
 import { getSchemaAtPath, parsePath } from '../../../../common/lib/zod_utils';
 
 export interface LineParseResult {
@@ -78,16 +82,26 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
 }
 
 export function getSuggestion(
-  parseResult: LineParseResult,
   key: string,
   context: monaco.languages.CompletionContext,
   range: monaco.IRange,
+  scalarType: Scalar.Type | null,
   type: string,
   description?: string
 ): monaco.languages.CompletionItem {
+  let keyToInsert = key;
   const isAt = context.triggerCharacter === '@';
   const isBracket = context.triggerCharacter === '{';
-  let insertText = key;
+  const keyCouldAccessedByDot = PROPERTY_PATH_REGEX.test(key);
+  const removeDot = isAt || !keyCouldAccessedByDot;
+
+  if (!keyCouldAccessedByDot) {
+    // we need to use opposite quote type if we are in a string
+    const q = scalarType === 'QUOTE_DOUBLE' ? "'" : '"';
+    keyToInsert = `[${q}${key}${q}]`;
+  }
+
+  let insertText = keyToInsert;
   let insertTextRules = monaco.languages.CompletionItemInsertTextRule.None;
   if (isAt) {
     insertText = `{{ ${key}$0 }}`;
@@ -97,6 +111,10 @@ export function getSuggestion(
     insertText = `{ ${key}$0 }`;
     insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
   }
+  if (scalarType === 'PLAIN') {
+    // if we are in a plain scalar, we need to add quotes otherwise template expression will break yaml
+    insertText = `"${insertText}"`;
+  }
   // $0 is the cursor position
   return {
     label: key,
@@ -105,7 +123,7 @@ export function getSuggestion(
     insertText,
     detail: `${type}` + (description ? `: ${description}` : ''),
     insertTextRules,
-    additionalTextEdits: isAt
+    additionalTextEdits: removeDot
       ? [
           {
             // remove the @
@@ -153,6 +171,9 @@ export function getCompletionItemProvider(
         }
         const workflowGraph = getWorkflowGraph(result.data);
         const path = getCurrentPath(yamlDocument, absolutePosition);
+        const yamlNode = yamlDocument.getIn(path, true);
+        const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
+
         let context: z.ZodType = getContextSchemaForPath(result.data, workflowGraph, path);
 
         const lineUpToCursor = line.substring(0, position.column - 1);
@@ -179,14 +200,17 @@ export function getCompletionItemProvider(
             return;
           }
           const current = getSchemaAtPath(context, key);
+          const propertyTypeName = (current?._def as any)?.typeName
+            ?.toLowerCase()
+            .replace('zod', '');
           suggestions.push(
             getSuggestion(
-              parseResult,
               key,
               completionContext,
               range,
-              (current?._def as any)?.typeName?.toLowerCase().replace('zod', '') || '',
-              current.description
+              scalarType,
+              propertyTypeName,
+              current?.description
             )
           );
         });

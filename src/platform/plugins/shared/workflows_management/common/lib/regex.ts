@@ -9,3 +9,9 @@
 
 export const MUSTACHE_REGEX_GLOBAL = /\{\{\s*(?<key>\S*?)\s*\}\}/g;
 export const UNFINISHED_MUSTACHE_REGEX_GLOBAL = /\{\{\s*(?<key>\S*?)\s*$/g;
+
+export const ALLOWED_KEY_REGEX =
+  /^[a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*|\[\s*(?:\d+|"[^"]*"|'[^']*')\s*\])*(?:\s*\|.*)?$/;
+
+export const PROPERTY_PATH_REGEX =
+  /^[a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*|\[\s*(?:\d+|"[^"]*"|'[^']*')\s*\])*$/;
