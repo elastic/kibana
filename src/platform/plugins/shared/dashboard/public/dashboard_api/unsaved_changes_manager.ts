@@ -12,6 +12,7 @@ import { HasLastSavedChildState, childrenUnsavedChanges$ } from '@kbn/presentati
 import {
   PublishesSavedObjectId,
   PublishingSubject,
+  ViewMode,
   apiHasSerializableState,
 } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
@@ -31,10 +32,8 @@ import {
 } from '../services/dashboard_backup_service';
 import { initializeLayoutManager } from './layout_manager';
 import { initializeSettingsManager } from './settings_manager';
-import { DashboardCreationOptions } from './types';
 import { DashboardState } from '../../common';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
-import { initializeViewModeManager } from './view_mode_manager';
 import {
   CONTROL_GROUP_EMBEDDABLE_ID,
   initializeControlGroupManager,
@@ -47,19 +46,19 @@ export function initializeUnsavedChangesManager({
   savedObjectId$,
   lastSavedState,
   settingsManager,
-  viewModeManager,
-  creationOptions,
+  viewMode$,
+  storeUnsavedChanges,
   controlGroupManager,
   getReferences,
   unifiedSearchManager,
 }: {
   lastSavedState: DashboardState;
-  creationOptions?: DashboardCreationOptions;
+  storeUnsavedChanges?: boolean;
   getReferences: (id: string) => Reference[];
   savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
   controlGroupManager: ReturnType<typeof initializeControlGroupManager>;
   layoutManager: ReturnType<typeof initializeLayoutManager>;
-  viewModeManager: ReturnType<typeof initializeViewModeManager>;
+  viewMode$: PublishingSubject<ViewMode>;
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
 }): {
@@ -103,7 +102,7 @@ export function initializeUnsavedChangesManager({
   );
 
   const unsavedChangesSubscription = combineLatest([
-    viewModeManager.api.viewMode$,
+    viewMode$,
     dashboardStateChanges$,
     hasPanelChanges$,
     controlGroupManager.api.controlGroupApi$.pipe(
@@ -122,8 +121,7 @@ export function initializeUnsavedChangesManager({
         hasUnsavedChanges$.next(hasUnsavedChanges);
       }
 
-      // backup unsaved changes if configured to do so
-      if (creationOptions?.useSessionStorageIntegration) {
+      if (storeUnsavedChanges) {
         const dashboardBackupState: DashboardBackupState = omit(dashboardChanges ?? {}, [
           'timeRange',
           'refreshInterval',
@@ -132,7 +130,7 @@ export function initializeUnsavedChangesManager({
         // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
         dashboardBackupState.viewMode = viewMode;
         // Backup latest state from children that have unsaved changes
-        if (hasPanelChanges || hasControlGroupChanges) {
+        if (hasPanelChanges || hasControlGroupChanges || dashboardChanges.panels) {
           const { panels, references } = layoutManager.internalApi.serializeLayout();
           const { controlGroupInput, controlGroupReferences } =
             controlGroupManager.internalApi.serializeControlGroup();
