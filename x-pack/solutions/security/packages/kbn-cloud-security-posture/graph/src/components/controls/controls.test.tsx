@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { Controls, ControlsProps } from './controls';
-import { EuiThemeProvider } from '@elastic/eui';
 import { useStore, useReactFlow } from '@xyflow/react';
+import { EuiThemeProvider } from '@elastic/eui';
+import { Controls, ControlsProps } from './controls';
 
 const defaultProps: ControlsProps = {
   showZoom: true,
