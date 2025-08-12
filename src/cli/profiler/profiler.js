@@ -86,7 +86,7 @@ const profiler = new Profiler(logger);
 profiler.toggle();
 setTimeout(() => {
   profiler.toggle();
-}, 60_000);
+}, 30_000);
 
 export default function (program) {
   program
