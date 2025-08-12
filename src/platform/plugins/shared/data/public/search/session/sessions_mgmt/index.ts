@@ -18,8 +18,7 @@ import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
 import type { SearchSessionsConfigSchema } from '../../../../server/config';
 
-// We want to expose the table from the start contract so we can use it in some other places
-export { SearchSessionsMgmtTable } from './components/table';
+export { openSearchSessionsFlyout } from './flyout/get_flyout';
 
 export interface IManagementSectionsPluginsSetup {
   management: ManagementSetup;
