@@ -208,10 +208,10 @@ const buildMockThreatData = (tacticsData, techniques, subtechniques) => {
      * dupilicate techniques in the generated MITRE test data. This can cause flakiness in
      * the tests as we don't expect the data to duplicated in the table
      */
-    while (subtechnique == null || generatedTechniqueIds.has(subtechnique.techniqueId)){
+    while (subtechnique == null || generatedTechniqueIds.has(subtechnique.techniqueId)) {
       subtechnique = subtechniques[count++];
     }
-    generatedTechniqueIds.add(subtechnique.techniqueId)
+    generatedTechniqueIds.add(subtechnique.techniqueId);
     const technique = techniques.find((technique) => technique.id === subtechnique.techniqueId);
     const tactic = tacticsData.find((tactic) => tactic.shortName === technique.tactics[0]);
 
