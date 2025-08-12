@@ -209,7 +209,13 @@ export default function (providerContext: FtrProviderContext) {
 
       // now check the package component template was created correctly
       const packageComponentTemplate = await getComponentTemplate('logs-dataset1@package');
-      expect(packageComponentTemplate).eql({
+      const {
+        created_date_millis: createdDateMillis,
+        modified_date_millis: modifiedDateMillis,
+        ...definitionWithouTimestamps
+      } = packageComponentTemplate!.component_template as any;
+      expect(packageComponentTemplate!.name).eql('logs-dataset1@package');
+      expect(definitionWithouTimestamps).eql({
         name: 'logs-dataset1@package',
         component_template: {
           template: {
