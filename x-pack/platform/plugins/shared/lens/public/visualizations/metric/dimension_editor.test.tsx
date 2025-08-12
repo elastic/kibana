@@ -1054,6 +1054,32 @@ describe('dimension editor', () => {
 
           expectCalledBefore(mockSetState, props.removeLayer as jest.Mock);
         });
+
+        it('selects trendline from panel with apply color to value', async () => {
+          const { clickOnSupportingVis } = renderAdditionalSectionEditor({
+            state: {
+              ...stateWOTrend,
+              applyColorTo: 'value',
+            },
+          });
+          await clickOnSupportingVis('trendline');
+          expect(mockSetState).toHaveBeenCalledWith(
+            expect.objectContaining({ applyColorTo: 'background' })
+          );
+        });
+
+        it('selects bar from panel with apply color to value', async () => {
+          const { clickOnSupportingVis } = renderAdditionalSectionEditor({
+            state: {
+              ...metricAccessorState,
+              applyColorTo: 'value',
+            },
+          });
+          await clickOnSupportingVis('bar');
+          expect(mockSetState).toHaveBeenCalledWith(
+            expect.objectContaining({ applyColorTo: 'background' })
+          );
+        });
       });
 
       describe('progress bar direction controls', () => {
