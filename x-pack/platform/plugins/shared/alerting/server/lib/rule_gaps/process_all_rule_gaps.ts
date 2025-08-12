@@ -38,7 +38,7 @@ export const PROCESS_GAPS_DEFAULT_PAGE_SIZE = 500;
 const DEFAULT_MAX_ITERATIONS = 10000;
 
 const getProcessingLimitsByRuleId = (
-  processedGapsCountByRuleId: Record<string, number>,
+  countsByRuleId: Record<string, number>,
   maxProcessedGapsPerRule?: number
 ) => {
   const limits: Record<string, number> = {};
@@ -46,30 +46,28 @@ const getProcessingLimitsByRuleId = (
     return {};
   }
 
-  Object.keys(processedGapsCountByRuleId).forEach((ruleId) => {
-    limits[ruleId] = maxProcessedGapsPerRule - processedGapsCountByRuleId[ruleId];
+  Object.keys(countsByRuleId).forEach((ruleId) => {
+    limits[ruleId] = maxProcessedGapsPerRule - countsByRuleId[ruleId];
   });
 
   return limits;
 };
 
 const getNextRuleIdsToProcess = (
-  processedGapsCountByRuleId: Record<string, number>,
-  processedGapsByRuleId: Record<string, number>,
+  overallProcessedCountsByRuleId: Record<string, number>,
   maxProcessedGapsPerRule?: number
 ) => {
   if (!maxProcessedGapsPerRule) {
-    return Object.keys(processedGapsCountByRuleId);
+    return Object.keys(overallProcessedCountsByRuleId);
   }
 
-  Object.entries(processedGapsByRuleId).forEach(([ruleId, processedCount]) => {
-    processedGapsCountByRuleId[ruleId] += processedCount;
-  });
-
-  return Object.entries(processedGapsCountByRuleId)
+  return Object.entries(overallProcessedCountsByRuleId)
     .filter(([_, count]) => count < maxProcessedGapsPerRule)
     .map(([ruleId]) => ruleId);
 };
+
+const PROCESS_ALL_RULE_GAPS_CONCURRENCY = 10
+const PROCESS_ALL_RULE_GAPS_CHUNK_SIZE = 10
 
 /**
  * Fetches all gaps using search_after pagination to process more than 10,000 gaps with stable sorting
@@ -84,27 +82,23 @@ export const processAllRuleGaps = async <T>({
   eventLogClient,
   processGapsBatch,
 }: ProcessAllRuleGapsParams<T>): Promise<void> => {
-  const processChunk = async (ruleIdsChunk: string[]) => {
-    let ruleIdsToProcess = ruleIdsChunk;
+  const processChunk = async (ruleIdsToProcess: string[]) => {
     let searchAfter: SortResults[] | undefined;
     let pitId: string | undefined;
     let iterationCount = 0;
 
     const { maxProcessedGapsPerRule } = options ?? {};
 
-    const processedGapsCountByRuleId = ruleIdsToProcess.reduce<Record<string, number>>(
-      (acc, ruleId) => {
-        acc[ruleId] = 0;
-        return acc;
-      },
-      {}
-    );
+    const overallProcessedCountsByRuleId = ruleIdsToProcess.reduce<Record<string, number>>((acc, ruleId) => {
+      acc[ruleId] = 0;
+      return acc;
+    }, {});
 
     try {
       while (true) {
         if (iterationCount >= DEFAULT_MAX_ITERATIONS) {
           logger.warn(
-            `Circuit breaker triggered: Reached maximum number of iterations (${DEFAULT_MAX_ITERATIONS}) while processing gaps for rules ${ruleIdsChunk.join(
+            `Circuit breaker triggered: Reached maximum number of iterations (${DEFAULT_MAX_ITERATIONS}) while processing gaps for rules ${ruleIdsToProcess.join(
               ', '
             )}`
           );
@@ -128,25 +122,26 @@ export const processAllRuleGaps = async <T>({
           },
         });
 
-        const { data: gaps, searchAfter: nextSearchAfter, pitId: nextPitId } = gapsResponse;
+        const { data: gapsToProcess, searchAfter: nextSearchAfter, pitId: nextPitId } = gapsResponse;
         pitId = nextPitId;
 
-        const gapsToProcess = gaps;
-
         if (gapsToProcess.length > 0) {
-          const processingLimitsByRuleId = getProcessingLimitsByRuleId(
-            processedGapsCountByRuleId,
+          const limitsByRuleId = getProcessingLimitsByRuleId(
+            overallProcessedCountsByRuleId,
             maxProcessedGapsPerRule
           );
 
-          const processedGapsByRuleId = await processGapsBatch(
+          const processedCountsByRuleId = await processGapsBatch(
             gapsToProcess,
-            processingLimitsByRuleId
+            limitsByRuleId
           );
 
+          Object.entries(processedCountsByRuleId).forEach(([ruleId, processedCount]) => {
+            overallProcessedCountsByRuleId[ruleId] += processedCount;
+          });
+
           ruleIdsToProcess = getNextRuleIdsToProcess(
-            processedGapsCountByRuleId,
-            processedGapsByRuleId,
+            overallProcessedCountsByRuleId,
             maxProcessedGapsPerRule
           );
         }
@@ -164,5 +159,5 @@ export const processAllRuleGaps = async <T>({
     }
   };
 
-  await pMap(chunk(ruleIds, 10), processChunk, { concurrency: 10 });
+  await pMap(chunk(ruleIds, PROCESS_ALL_RULE_GAPS_CHUNK_SIZE), processChunk, { concurrency: PROCESS_ALL_RULE_GAPS_CONCURRENCY });
 };
