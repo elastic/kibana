@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { GrokCollection, DraftGrokExpression } from '@kbn/grok-ui';
 import { UseFormSetValue, FieldValues, useWatch } from 'react-hook-form';
-import type { GrokProcessorResult } from '@kbn/streams-ai/shared/processing/templatize/get_useful_tokens';
+import type { GrokProcessorResult } from '@kbn/grok-heuristics';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { selectPreviewRecords } from '../../state_management/simulation_state_machine/selectors';

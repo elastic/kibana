@@ -1,8 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/streams-ai-cli",
-  "owner": "@elastic/obs-ai-assistant",
-  "group": "platform",
-  "visibility": "shared",
-  "devOnly": true
-}

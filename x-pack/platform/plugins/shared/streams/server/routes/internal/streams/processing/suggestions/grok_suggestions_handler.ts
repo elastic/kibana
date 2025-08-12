@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { IScopedClusterClient } from '@kbn/core/server';
-import { ReviewFieldsPrompt } from '@kbn/streams-ai/workflows/onboarding/generate_parsers/prompts';
+import { ReviewFieldsPrompt } from '@kbn/grok-heuristics';
 import { InferenceClient } from '@kbn/inference-common';
 import { Streams } from '@kbn/streams-schema';
 import { StreamsClient } from '../../../../../lib/streams/client';

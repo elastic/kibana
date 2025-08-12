@@ -14,10 +14,10 @@ import {
   getReviewFields,
   getGrokProcessor,
   mergeGrokProcessors,
+  groupMessagesByPattern,
+  syncExtractTemplate,
   type GrokProcessorResult,
-} from '@kbn/streams-ai/shared/processing/templatize/get_useful_tokens';
-import { groupMessagesByPattern } from '@kbn/streams-ai/workflows/onboarding/generate_parsers/extract_and_group_patterns';
-import { syncExtractTemplate } from '@kbn/streams-ai/shared/processing/templatize/extract_template';
+} from '@kbn/grok-heuristics';
 import { get } from 'lodash';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { showErrorToast } from '../../../../../hooks/use_streams_app_fetch';

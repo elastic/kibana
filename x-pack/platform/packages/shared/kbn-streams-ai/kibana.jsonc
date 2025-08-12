@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/streams-ai",
-  "owner": "@elastic/obs-ai-assistant",
-  "group": "platform",
-  "visibility": "shared"
-}

@@ -31,13 +31,13 @@ import yargs from 'yargs/yargs';
 import { flattenObject } from '@kbn/object-utils';
 import { get } from 'lodash';
 import {
+  ReviewFields,
   getUsefulTokens,
   getReviewFields,
   getGrokProcessor,
   getGrokPattern,
-  ReviewFields,
-} from '@kbn/streams-ai/shared/processing/templatize/get_useful_tokens';
-import { syncExtractTemplate } from '@kbn/streams-ai/shared/processing/templatize/extract_template';
+  syncExtractTemplate,
+} from '@kbn/grok-heuristics';
 import { getLogGroups } from '../server/routes/internal/streams/processing/get_log_groups';
 
 const ES_URL = 'http://localhost:9200';
