@@ -24,19 +24,8 @@ import { PrivateLocationTestService } from '../../services/synthetics_private_lo
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
 
-export const LOCAL_LOCATION = {
-  id: 'dev',
-  label: 'Dev Service',
-  geo: {
-    lat: 0,
-    lon: 0,
-  },
-  isServiceManaged: true,
-};
-
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('SyncGlobalParams', function () {
-    this.tags('skipCloud');
     const supertestAPI = getService('supertestWithoutAuth');
     const supertestWithAuth = getService('supertest');
     const kServer = getService('kibanaServer');
@@ -114,7 +103,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       };
 
-      newMonitor.locations.push(pvtLoc);
+      newMonitor.locations = [pvtLoc];
 
       const apiResponse = await addMonitorAPI(newMonitor);
 
@@ -124,7 +113,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           [ConfigKey.KIBANA_SPACES]: ['default'],
           [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
           [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-          locations: [LOCAL_LOCATION, pvtLoc],
+          locations: [pvtLoc],
         })
       );
       newMonitorId = apiResponse.rawBody.id;
@@ -218,7 +207,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           lon: 0,
         },
       };
-      newMonitor.locations.push(pvtLoc);
+      newMonitor.locations = [pvtLoc];
 
       newMonitor.proxy_url = '${test}';
 
@@ -229,7 +218,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...newMonitor,
           [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
           [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-          locations: [LOCAL_LOCATION, pvtLoc],
+          locations: [pvtLoc],
         })
       );
       newHttpMonitorId = apiResponse.rawBody.id;
