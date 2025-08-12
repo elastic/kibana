@@ -85,7 +85,7 @@ export const DegradedFieldInfo = () => {
                 <span>{degradedFieldAnalysis?.fieldMapping?.ignore_above}</span>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-values">
               <EuiTitle size="xxs">
                 <span>{degradedFieldValuesColumnName}</span>
               </EuiTitle>
