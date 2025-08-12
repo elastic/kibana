@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { WorkflowYaml, getStepId } from '@kbn/workflows';
+import { WorkflowContext, WorkflowYaml, getStepId } from '@kbn/workflows';
 import _ from 'lodash';
 import { getAllPredecessors } from '../../../shared/lib/graph_utils';
 import { WorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
@@ -17,6 +17,10 @@ import { inferZodType } from '../../../../common/lib/zod_utils';
 
 function getRootContextSchema(definition: WorkflowYaml) {
   return z.object({
+    workflowRunId: z.string(),
+    now: z.date(),
+    event: z.any(),
+    steps: z.object({}),
     consts: z.object({
       ...Object.fromEntries(
         Object.entries(definition.consts ?? {}).map(([key, value]) => [key, inferZodType(value)])
@@ -90,5 +94,5 @@ export function getContextSchemaForPath(
       steps: outputsSchema,
     });
   }
-  return contextSchema;
+  return contextSchema satisfies z.ZodType<WorkflowContext>;
 }

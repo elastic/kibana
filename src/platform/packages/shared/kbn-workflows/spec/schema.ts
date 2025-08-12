@@ -256,3 +256,24 @@ export const WorkflowSchema = z.object({
 });
 
 export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
+
+export const WorkflowContextSchema = z.object({
+  workflowRunId: z.string(),
+  event: z.any().optional(),
+  consts: z.record(z.string(), z.any()).optional(),
+  steps: z.record(
+    z.string(),
+    z.object({
+      output: z.any().optional(),
+      error: z.any().optional(),
+    })
+  ),
+  foreach: z
+    .object({
+      item: z.any(),
+    })
+    .optional(),
+  now: z.date().optional(),
+});
+
+export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;

@@ -9,7 +9,7 @@
 
 import { graphlib } from '@dagrejs/dagre';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { WorkflowSchema } from '@kbn/workflows';
+import { WorkflowContext, WorkflowSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 import { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 
@@ -26,26 +26,26 @@ export interface ContextManagerInit {
 }
 
 export class WorkflowContextManager {
-  private context: Record<string, any>; // Make it strongly typed
+  // 'now' will be added by the templating engine
+  private context: Omit<WorkflowContext, 'now'>;
   private workflowExecutionGraph: graphlib.Graph;
   private workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 
   constructor(init: ContextManagerInit) {
     this.context = {
       workflowRunId: init.workflowRunId,
-      workflow: init.workflow,
       event: init.event,
       consts: init.workflow.consts,
+      steps: {},
     };
 
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionRuntime = init.workflowExecutionRuntime;
   }
 
-  public getContext(): Record<string, any> {
-    const stepContex: Record<string, any> = {
+  public getContext() {
+    const stepContext: WorkflowContext = {
       ...this.context,
-      steps: {},
     };
 
     const visited = new Set<string>();
@@ -53,15 +53,15 @@ export class WorkflowContextManager {
       if (visited.has(nodeId)) return;
       visited.add(nodeId);
 
-      stepContex.steps[nodeId] = {};
+      stepContext.steps[nodeId] = {};
       const stepResult = this.workflowExecutionRuntime.getStepResult(nodeId);
       if (stepResult) {
-        stepContex.steps[nodeId] = stepResult;
+        stepContext.steps[nodeId] = stepResult;
       }
 
       const stepState = this.workflowExecutionRuntime.getStepState(nodeId);
       if (stepState) {
-        stepContex.steps[nodeId] = stepState;
+        stepContext.steps[nodeId] = stepState;
       }
 
       const preds = this.workflowExecutionGraph.predecessors(nodeId) || [];
@@ -73,10 +73,10 @@ export class WorkflowContextManager {
     const directPredecessors = this.workflowExecutionGraph.predecessors(currentNodeId) || [];
     directPredecessors.forEach((nodeId) => collectPredecessors(nodeId));
 
-    return stepContex;
+    return stepContext;
   }
 
   public getContextKey(key: string): any {
-    return this.context[key];
+    return this.context[key as keyof typeof this.context];
   }
 }
