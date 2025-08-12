@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { merge } from 'lodash';
 import {
   NewPackagePolicy,
   NewPackagePolicyInput,
@@ -24,9 +25,11 @@ import {
 } from '../../../common/constants';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 import {
+  getDeploymentType,
   getMaxPackageName,
   getPostureInputHiddenVars,
   getPosturePolicy,
+  getPostureType,
   getVulnMgmtCloudFormationDefaultValue,
   hasErrors,
   isPostureInput,
@@ -172,7 +175,6 @@ const getFormState = (
   if (policyTemplate === 'cspm' && !hasErrors(validationResults)) {
     return true; // CSPM is valid if formState is INVALID but no required vars are invalid
   }
-
   return false; // Default to false for other cases
 };
 
@@ -217,13 +219,24 @@ export const useLoadFleetExtension = ({
       isExtensionLoaded?: boolean;
       isValid?: boolean;
     }) => {
+      const selectedInput = getSelectedOption(updatedPolicy.inputs, input.policy_template);
+
+      // This is unique to the CSPM policy template, where we need to set the deployment and posture vars
+      const newUpdatedPolicy = {
+        ...updatedPolicy,
+        vars: merge({}, updatedPolicy.vars, {
+          deployment: { value: getDeploymentType(selectedInput.type) },
+          posture: { value: getPostureType(selectedInput.type) },
+        }),
+      };
+      // Update the policy with the new
       onChange({
         isValid: isValid !== undefined ? isValid : isValidFormState,
-        updatedPolicy,
+        updatedPolicy: newUpdatedPolicy,
         isExtensionLoaded: isExtensionLoaded !== undefined ? isExtensionLoaded : !isLoading,
       });
     },
-    [isLoading, isValidFormState, onChange]
+    [isValidFormState, input.policy_template, onChange, isLoading]
   );
 
   const setEnabledPolicyInput = useCallback(

@@ -7,7 +7,6 @@
 
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { kbnServerArgs as fleetKbnServerArgs } from '../../../api_integration/services/default_fleet_setup';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from './constants';
 import { createTestConfig } from '../../config.base';
 
 // TODO: Remove the agentless default config once Serverless API is merged  and default policy is deleted
@@ -20,7 +19,7 @@ export default createTestConfig({
     ...fleetKbnServerArgs, // Needed for correct serverless default Fleet Server and ES output
 
     `--xpack.fleet.packages.0.name=cloud_security_posture`,
-    `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_POSTURE_PACKAGE_VERSION}`,
+    `--xpack.fleet.packages.0.version=latest`,
     `--xpack.fleet.agentless.enabled=true`,
     `--xpack.fleet.internal.fleetServerStandalone=true`,
 
