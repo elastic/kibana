@@ -65,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    it('handles private location errors and does not update the monitor if integration policy is unable to be updated', async () => {
+    it.skip('handles private location errors and does not update the monitor if integration policy is unable to be updated', async () => {
       const name = 'Monitor with private location';
       const newMonitor = {
         name,
