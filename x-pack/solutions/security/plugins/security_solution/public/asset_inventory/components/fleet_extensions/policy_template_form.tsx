@@ -39,6 +39,10 @@ export const CloudAssetInventoryPolicyTemplateForm =
       const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '0.18.0';
       const { cloud, uiSettings } = useKibana().services;
       const isValidFormState = !hasErrors(validationResults);
+      const showCloudConnectors = semverGte(
+        packageInfo.version,
+        CLOUD_CONNECTOR_VERSION_ENABLED_ESS
+      );
 
       const CLOUD_SETUP_MAPPING: CloudSetupConfig = {
         policyTemplate: ASSET_POLICY_TEMPLATE,
@@ -55,25 +59,25 @@ export const CloudAssetInventoryPolicyTemplateForm =
         ),
         overviewPath: `https://ela.st/cloud-asset-discovery-overview`,
         getStartedPath: `https://ela.st/cloud-asset-discovery-get-started`,
-        showCloudConnectors: semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS),
+        showCloudConnectors,
         showCloudTemplates: true,
         providers: {
           aws: {
             type: CLOUDBEAT_AWS,
             enableOrganization: true,
-            getStartedPath: `https://www.elastic.co/guide/en/security/current/cloud-asset-discovery-get-started.html`,
+            getStartedPath: `https://ela.st/cloud-asset-discovery-get-started-aws.html`,
           },
           gcp: {
             type: CLOUDBEAT_GCP,
             enableOrganization: true,
-            getStartedPath: `https://www.elastic.co/guide/en/security/current/cloud-asset-discovery-get-started.html`,
+            getStartedPath: `https://ela.st/cloud-asset-discovery-get-started-gcp.html`,
             enabled: true,
           },
           azure: {
             type: CLOUDBEAT_AZURE,
             enabled: true,
             enableOrganization: true,
-            getStartedPath: `https://www.elastic.co/guide/en/security/current/cloud-asset-discovery-get-started.html`,
+            getStartedPath: `https://ela.st/cloud-asset-discovery-get-started-azure.html`,
             manualFieldsEnabled: true,
           },
         },
