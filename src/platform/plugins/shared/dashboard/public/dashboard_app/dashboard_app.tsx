@@ -139,6 +139,7 @@ export function DashboardApp({
    */
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+
     const getInitialInput = () => {
       let stateFromLocator: Partial<DashboardState> = {};
       try {
@@ -188,6 +189,8 @@ export function DashboardApp({
         removeSessionIdFromUrl: () => removeSearchSessionIdFromURL(kbnUrlStateStorage),
       },
       getInitialInput,
+      getPassThroughContext: () =>
+        (getScopedHistory().location.state as { passThroughContext?: unknown })?.passThroughContext,
       validateLoadedSavedObject: validateOutcome,
       fullScreenMode:
         kbnUrlStateStorage.get<{ fullScreenMode?: boolean }>(DASHBOARD_STATE_STORAGE_KEY)
