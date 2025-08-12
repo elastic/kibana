@@ -53,7 +53,7 @@ describe('toNavigationItems', () => {
     expect(consoleWarnSpy.mock.calls[0][0]).toMatchInlineSnapshot(`
       "
       === Navigation Warnings ===
-      • First body node is not a \\"home\\" node. It should be a logo node with solution logo, name and home page href. renderAs: \\"home\\" is expected, but got \\"undefined\\".
+      • No \\"home\\" node found in primary nodes. There should be a logo node with solution logo, name and home page href. renderAs: \\"home\\" is expected.
       • Navigation item is missing. Using fallback value: \\"/missing-href-😭\\".
       • Navigation item is missing. Using fallback value: \\"logoKibana\\".
       • Navigation item is missing. Using fallback value: \\"kibana\\".
