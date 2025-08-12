@@ -296,6 +296,20 @@ describe('IndexManager', () => {
     });
   });
 
+  describe('hasIndex', () => {
+    const indexName = 'test-index';
+
+    it('should return true when index exists', async () => {
+      esClient.indices.exists.mockResolvedValue(true);
+
+      const result = await indexManager.hasIndex({ indexName, esClient });
+
+      expect(result).toBe(true);
+      expect(esClient.indices.exists).toHaveBeenCalledWith({ index: indexName });
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+  });
+
   it('should initialize with correct properties', () => {
     const customLogger = loggerMock.create();
     const customInferenceId = 'custom-inference';

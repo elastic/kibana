@@ -12,6 +12,7 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutResizable,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -29,16 +30,19 @@ interface Props {
 }
 
 export function QueryDocumentsFlyout({ name, dataView, searchBarProps, onCloseFlyout }: Props) {
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
     <EuiFlyoutResizable
       onClose={() => onCloseFlyout()}
       size="1050px"
       minWidth={500}
       maxWidth={1200}
+      aria-labelledby={flyoutTitleId}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={flyoutTitleId}>
             {i18n.translate('xpack.slo.queryBuilder.h2.documentsLabel', {
               defaultMessage: 'Documents for {indexPattern}',
               values: { indexPattern: dataView.getIndexPattern() },
