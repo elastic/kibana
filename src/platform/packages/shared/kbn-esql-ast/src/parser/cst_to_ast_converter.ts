@@ -1313,14 +1313,6 @@ export class CstToAstConverter {
 
   // -------------------------------------------------------------- expressions
 
-  private toExpression(ctx: cst.QualifiedNamePatternContext): ast.ESQLAstExpression {
-    if (ctx instanceof cst.QualifiedNamePatternContext) {
-      return this.fromQualifiedNamePattern(ctx);
-    }
-
-    return this.toColumn(ctx);
-  }
-
   private toColumnsFromCommand(
     ctx:
       | cst.KeepCommandContext
