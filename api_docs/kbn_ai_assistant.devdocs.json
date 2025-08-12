@@ -1844,15 +1844,17 @@
               "InferenceInferenceEndpointInfo",
               " | undefined; modelStats?: Partial<",
               "MlTrainedModelStats",
-              "> | undefined; kbState: ",
+              "> | undefined; inferenceModelState: ",
               {
                 "pluginId": "observabilityAIAssistant",
                 "scope": "common",
                 "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-common.KnowledgeBaseState",
-                "text": "KnowledgeBaseState"
+                "section": "def-common.InferenceModelState",
+                "text": "InferenceModelState"
               },
-              "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }> & { refresh: () => void; }"
+              "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; productDocStatus: ",
+              "InstallationStatus",
+              "; }> & { refresh: () => void; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,
@@ -1954,6 +1956,92 @@
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.isProductDocInstalling",
+            "type": "boolean",
+            "tags": [],
+            "label": "isProductDocInstalling",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.isProductDocUninstalling",
+            "type": "boolean",
+            "tags": [],
+            "label": "isProductDocUninstalling",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.installProductDoc",
+            "type": "Function",
+            "tags": [],
+            "label": "installProductDoc",
+            "description": [],
+            "signature": [
+              "(inferenceId: string) => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseKnowledgeBaseResult.installProductDoc.$1",
+                "type": "string",
+                "tags": [],
+                "label": "inferenceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.uninstallProductDoc",
+            "type": "Function",
+            "tags": [],
+            "label": "uninstallProductDoc",
+            "description": [],
+            "signature": [
+              "(inferenceId: string) => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseKnowledgeBaseResult.uninstallProductDoc.$1",
+                "type": "string",
+                "tags": [],
+                "label": "inferenceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

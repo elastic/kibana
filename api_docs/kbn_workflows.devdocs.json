@@ -90,7 +90,7 @@
         "label": "getForEachStepSchema",
         "description": [],
         "signature": [
-          "(stepSchema: Zod.ZodType<any, Zod.ZodTypeDef, any>) => Zod.ZodObject<Zod.objectUtil.extendShape<{ name: Zod.ZodString; if: Zod.ZodOptional<Zod.ZodString>; foreach: Zod.ZodOptional<Zod.ZodString>; 'on-failure': Zod.ZodOptional<Zod.ZodObject<{ retry: Zod.ZodObject<{ 'max-attempts': Zod.ZodNumber; delay: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { delay: number; 'max-attempts': number; }, { delay: number; 'max-attempts': number; }>; 'fallback-step': Zod.ZodString; continue: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }>>; timeout: Zod.ZodOptional<Zod.ZodNumber>; }, { type: Zod.ZodLiteral<\"foreach\">; foreach: Zod.ZodString; steps: Zod.ZodArray<Zod.ZodType<any, Zod.ZodTypeDef, any>, \"many\">; }>, \"strip\", Zod.ZodTypeAny, { type: \"foreach\"; name: string; steps: any[]; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }, { type: \"foreach\"; name: string; steps: any[]; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }>"
+          "(stepSchema: Zod.ZodType<any, Zod.ZodTypeDef, any>, loose?: boolean) => Zod.ZodObject<Zod.objectUtil.extendShape<{ name: Zod.ZodString; if: Zod.ZodOptional<Zod.ZodString>; foreach: Zod.ZodOptional<Zod.ZodString>; 'on-failure': Zod.ZodOptional<Zod.ZodObject<{ retry: Zod.ZodObject<{ 'max-attempts': Zod.ZodNumber; delay: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { delay: number; 'max-attempts': number; }, { delay: number; 'max-attempts': number; }>; 'fallback-step': Zod.ZodString; continue: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }>>; timeout: Zod.ZodOptional<Zod.ZodNumber>; }, { type: Zod.ZodLiteral<\"foreach\">; foreach: Zod.ZodString; steps: Zod.ZodArray<Zod.ZodType<any, Zod.ZodTypeDef, any>, \"many\">; }>, \"strip\", Zod.ZodTypeAny, { type: \"foreach\"; name: string; steps: any[]; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }, { type: \"foreach\"; name: string; steps: any[]; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }> | Zod.ZodObject<{ type: Zod.ZodLiteral<\"foreach\">; name: Zod.ZodOptional<Zod.ZodString>; timeout: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodNumber>>; steps: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<any, Zod.ZodTypeDef, any>, \"many\">>; if: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodString>>; foreach: Zod.ZodOptional<Zod.ZodString>; \"on-failure\": Zod.ZodOptional<Zod.ZodOptional<Zod.ZodObject<{ retry: Zod.ZodObject<{ 'max-attempts': Zod.ZodNumber; delay: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { delay: number; 'max-attempts': number; }, { delay: number; 'max-attempts': number; }>; 'fallback-step': Zod.ZodString; continue: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }>>>; }, \"strip\", Zod.ZodTypeAny, { type: \"foreach\"; name?: string | undefined; timeout?: number | undefined; steps?: any[] | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }, { type: \"foreach\"; name?: string | undefined; timeout?: number | undefined; steps?: any[] | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -110,6 +110,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.getForEachStepSchema.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "loose",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -123,7 +138,7 @@
         "label": "getIfStepSchema",
         "description": [],
         "signature": [
-          "(stepSchema: Zod.ZodType<any, Zod.ZodTypeDef, any>) => Zod.ZodObject<Zod.objectUtil.extendShape<{ name: Zod.ZodString; if: Zod.ZodOptional<Zod.ZodString>; foreach: Zod.ZodOptional<Zod.ZodString>; 'on-failure': Zod.ZodOptional<Zod.ZodObject<{ retry: Zod.ZodObject<{ 'max-attempts': Zod.ZodNumber; delay: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { delay: number; 'max-attempts': number; }, { delay: number; 'max-attempts': number; }>; 'fallback-step': Zod.ZodString; continue: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }>>; timeout: Zod.ZodOptional<Zod.ZodNumber>; }, { type: Zod.ZodLiteral<\"if\">; condition: Zod.ZodString; steps: Zod.ZodArray<Zod.ZodType<any, Zod.ZodTypeDef, any>, \"many\">; else: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<any, Zod.ZodTypeDef, any>, \"many\">>; }>, \"strip\", Zod.ZodTypeAny, { type: \"if\"; name: string; steps: any[]; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: any[] | undefined; }, { type: \"if\"; name: string; steps: any[]; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: any[] | undefined; }>"
+          "(stepSchema: Zod.ZodType<any, Zod.ZodTypeDef, any>, loose?: boolean) => Zod.ZodObject<Zod.objectUtil.extendShape<{ name: Zod.ZodString; if: Zod.ZodOptional<Zod.ZodString>; foreach: Zod.ZodOptional<Zod.ZodString>; 'on-failure': Zod.ZodOptional<Zod.ZodObject<{ retry: Zod.ZodObject<{ 'max-attempts': Zod.ZodNumber; delay: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { delay: number; 'max-attempts': number; }, { delay: number; 'max-attempts': number; }>; 'fallback-step': Zod.ZodString; continue: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }>>; timeout: Zod.ZodOptional<Zod.ZodNumber>; }, { type: Zod.ZodLiteral<\"if\">; condition: Zod.ZodString; steps: Zod.ZodArray<Zod.ZodType<any, Zod.ZodTypeDef, any>, \"many\">; else: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<any, Zod.ZodTypeDef, any>, \"many\">>; }>, \"strip\", Zod.ZodTypeAny, { type: \"if\"; name: string; steps: any[]; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: any[] | undefined; }, { type: \"if\"; name: string; steps: any[]; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: any[] | undefined; }> | Zod.ZodObject<{ type: Zod.ZodLiteral<\"if\">; name: Zod.ZodOptional<Zod.ZodString>; timeout: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodNumber>>; steps: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<any, Zod.ZodTypeDef, any>, \"many\">>; if: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodString>>; condition: Zod.ZodOptional<Zod.ZodString>; foreach: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodString>>; \"on-failure\": Zod.ZodOptional<Zod.ZodOptional<Zod.ZodObject<{ retry: Zod.ZodObject<{ 'max-attempts': Zod.ZodNumber; delay: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { delay: number; 'max-attempts': number; }, { delay: number; 'max-attempts': number; }>; 'fallback-step': Zod.ZodString; continue: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }>>>; else: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<any, Zod.ZodTypeDef, any>, \"many\">>>; }, \"strip\", Zod.ZodTypeAny, { type: \"if\"; name?: string | undefined; timeout?: number | undefined; steps?: any[] | undefined; if?: string | undefined; condition?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: any[] | undefined; }, { type: \"if\"; name?: string | undefined; timeout?: number | undefined; steps?: any[] | undefined; if?: string | undefined; condition?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: any[] | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -138,6 +153,21 @@
             "description": [],
             "signature": [
               "Zod.ZodType<any, Zod.ZodTypeDef, any>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.getIfStepSchema.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "loose",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
             "deprecated": false,
@@ -193,7 +223,7 @@
         "label": "getMergeStepSchema",
         "description": [],
         "signature": [
-          "(stepSchema: Zod.ZodType<any, Zod.ZodTypeDef, any>) => Zod.ZodObject<Zod.objectUtil.extendShape<{ name: Zod.ZodString; if: Zod.ZodOptional<Zod.ZodString>; foreach: Zod.ZodOptional<Zod.ZodString>; 'on-failure': Zod.ZodOptional<Zod.ZodObject<{ retry: Zod.ZodObject<{ 'max-attempts': Zod.ZodNumber; delay: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { delay: number; 'max-attempts': number; }, { delay: number; 'max-attempts': number; }>; 'fallback-step': Zod.ZodString; continue: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }>>; timeout: Zod.ZodOptional<Zod.ZodNumber>; }, { type: Zod.ZodLiteral<\"merge\">; sources: Zod.ZodArray<Zod.ZodString, \"many\">; steps: Zod.ZodArray<Zod.ZodType<any, Zod.ZodTypeDef, any>, \"many\">; }>, \"strip\", Zod.ZodTypeAny, { type: \"merge\"; name: string; sources: string[]; steps: any[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }, { type: \"merge\"; name: string; sources: string[]; steps: any[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }>"
+          "(stepSchema: Zod.ZodType<any, Zod.ZodTypeDef, any>, loose?: boolean) => Zod.ZodObject<Zod.objectUtil.extendShape<{ name: Zod.ZodString; if: Zod.ZodOptional<Zod.ZodString>; foreach: Zod.ZodOptional<Zod.ZodString>; 'on-failure': Zod.ZodOptional<Zod.ZodObject<{ retry: Zod.ZodObject<{ 'max-attempts': Zod.ZodNumber; delay: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { delay: number; 'max-attempts': number; }, { delay: number; 'max-attempts': number; }>; 'fallback-step': Zod.ZodString; continue: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }>>; timeout: Zod.ZodOptional<Zod.ZodNumber>; }, { type: Zod.ZodLiteral<\"merge\">; sources: Zod.ZodArray<Zod.ZodString, \"many\">; steps: Zod.ZodArray<Zod.ZodType<any, Zod.ZodTypeDef, any>, \"many\">; }>, \"strip\", Zod.ZodTypeAny, { type: \"merge\"; name: string; sources: string[]; steps: any[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }, { type: \"merge\"; name: string; sources: string[]; steps: any[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }> | Zod.ZodObject<{ type: Zod.ZodLiteral<\"merge\">; name: Zod.ZodOptional<Zod.ZodString>; timeout: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodNumber>>; sources: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; steps: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<any, Zod.ZodTypeDef, any>, \"many\">>; if: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodString>>; foreach: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodString>>; \"on-failure\": Zod.ZodOptional<Zod.ZodOptional<Zod.ZodObject<{ retry: Zod.ZodObject<{ 'max-attempts': Zod.ZodNumber; delay: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { delay: number; 'max-attempts': number; }, { delay: number; 'max-attempts': number; }>; 'fallback-step': Zod.ZodString; continue: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }>>>; }, \"strip\", Zod.ZodTypeAny, { type: \"merge\"; name?: string | undefined; timeout?: number | undefined; sources?: string[] | undefined; steps?: any[] | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }, { type: \"merge\"; name?: string | undefined; timeout?: number | undefined; sources?: string[] | undefined; steps?: any[] | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -213,6 +243,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.getMergeStepSchema.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "loose",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -226,7 +271,7 @@
         "label": "getParallelStepSchema",
         "description": [],
         "signature": [
-          "(stepSchema: Zod.ZodType<any, Zod.ZodTypeDef, any>) => Zod.ZodObject<Zod.objectUtil.extendShape<{ name: Zod.ZodString; if: Zod.ZodOptional<Zod.ZodString>; foreach: Zod.ZodOptional<Zod.ZodString>; 'on-failure': Zod.ZodOptional<Zod.ZodObject<{ retry: Zod.ZodObject<{ 'max-attempts': Zod.ZodNumber; delay: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { delay: number; 'max-attempts': number; }, { delay: number; 'max-attempts': number; }>; 'fallback-step': Zod.ZodString; continue: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }>>; timeout: Zod.ZodOptional<Zod.ZodNumber>; }, { type: Zod.ZodLiteral<\"parallel\">; branches: Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; steps: Zod.ZodArray<Zod.ZodType<any, Zod.ZodTypeDef, any>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { name: string; steps: any[]; }, { name: string; steps: any[]; }>, \"many\">; }>, \"strip\", Zod.ZodTypeAny, { type: \"parallel\"; name: string; branches: { name: string; steps: any[]; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }, { type: \"parallel\"; name: string; branches: { name: string; steps: any[]; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }>"
+          "(stepSchema: Zod.ZodType<any, Zod.ZodTypeDef, any>, loose?: boolean) => Zod.ZodObject<Zod.objectUtil.extendShape<{ name: Zod.ZodString; if: Zod.ZodOptional<Zod.ZodString>; foreach: Zod.ZodOptional<Zod.ZodString>; 'on-failure': Zod.ZodOptional<Zod.ZodObject<{ retry: Zod.ZodObject<{ 'max-attempts': Zod.ZodNumber; delay: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { delay: number; 'max-attempts': number; }, { delay: number; 'max-attempts': number; }>; 'fallback-step': Zod.ZodString; continue: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }>>; timeout: Zod.ZodOptional<Zod.ZodNumber>; }, { type: Zod.ZodLiteral<\"parallel\">; branches: Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; steps: Zod.ZodArray<Zod.ZodType<any, Zod.ZodTypeDef, any>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { name: string; steps: any[]; }, { name: string; steps: any[]; }>, \"many\">; }>, \"strip\", Zod.ZodTypeAny, { type: \"parallel\"; name: string; branches: { name: string; steps: any[]; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }, { type: \"parallel\"; name: string; branches: { name: string; steps: any[]; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }> | Zod.ZodObject<{ type: Zod.ZodLiteral<\"parallel\">; name: Zod.ZodOptional<Zod.ZodString>; timeout: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodNumber>>; if: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodString>>; foreach: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodString>>; \"on-failure\": Zod.ZodOptional<Zod.ZodOptional<Zod.ZodObject<{ retry: Zod.ZodObject<{ 'max-attempts': Zod.ZodNumber; delay: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { delay: number; 'max-attempts': number; }, { delay: number; 'max-attempts': number; }>; 'fallback-step': Zod.ZodString; continue: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }, { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; }>>>; branches: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; steps: Zod.ZodArray<Zod.ZodType<any, Zod.ZodTypeDef, any>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { name: string; steps: any[]; }, { name: string; steps: any[]; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { type: \"parallel\"; name?: string | undefined; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; branches?: { name: string; steps: any[]; }[] | undefined; }, { type: \"parallel\"; name?: string | undefined; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; branches?: { name: string; steps: any[]; }[] | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -243,6 +288,54 @@
               "Zod.ZodType<any, Zod.ZodTypeDef, any>"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.getParallelStepSchema.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "loose",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.getStepId",
+        "type": "Function",
+        "tags": [],
+        "label": "getStepId",
+        "description": [],
+        "signature": [
+          "(stepName: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/lib/generate_yaml_schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.getStepId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "stepName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/spec/lib/generate_yaml_schema.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -475,6 +568,34 @@
             "type": "string",
             "tags": [],
             "label": "triggeredBy",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowExecution.traceId",
+            "type": "string",
+            "tags": [],
+            "label": "traceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowExecution.entryTransactionId",
+            "type": "string",
+            "tags": [],
+            "label": "entryTransactionId",
             "description": [],
             "signature": [
               "string | undefined"
