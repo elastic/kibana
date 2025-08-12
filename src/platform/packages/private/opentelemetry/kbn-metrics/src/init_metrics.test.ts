@@ -30,7 +30,6 @@ jest.mock('@elastic/opentelemetry-node/sdk', () => {
 
 import { resources } from '@elastic/opentelemetry-node/sdk';
 import { PrometheusExporter, initMetrics } from '..';
-import type { MetricsExporterConfig } from '@kbn/metrics-config';
 
 describe('initMetrics', () => {
   const resource = resources.resourceFromAttributes({});
@@ -39,21 +38,9 @@ describe('initMetrics', () => {
 
   const { metrics } = jest.requireActual('@elastic/opentelemetry-node/sdk');
 
-  const exporters: MetricsExporterConfig[] = [
-    {
-      grpc: {
-        url: 'http://remote',
-        headers: { Authorization: '1234' },
-        temporalityPreference: 'delta',
-      },
-    },
-    {
-      http: {
-        url: 'http://remote-http',
-        headers: { Authorization: '1234' },
-        temporalityPreference: 'cumulative',
-      },
-    },
+  const exporters = [
+    { grpc: { url: 'http://remote', headers: { Authorization: '1234' } } },
+    { http: { url: 'http://remote-http', headers: { Authorization: '1234' } } },
   ];
 
   beforeEach(() => {
