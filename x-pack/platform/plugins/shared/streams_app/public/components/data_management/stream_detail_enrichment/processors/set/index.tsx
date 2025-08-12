@@ -19,6 +19,7 @@ export const SetProcessorForm = () => {
   return (
     <>
       <ProcessorFieldSelector
+        fieldKey="to"
         helpText={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.setFieldHelpText',
           { defaultMessage: 'The field to insert, upsert, or update.' }
