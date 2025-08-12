@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from "@kbn/utility-types";
+import { SerializableRecord } from '@kbn/utility-types';
 
 /**
  * This API provides pass through context.
