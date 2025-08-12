@@ -30,25 +30,32 @@ export class ComboBoxService extends FtrService {
    *
    * @param comboBoxSelector data-test-subj selector
    * @param value option text
+   * @param options optional configuration
+   * @param options.maxRetries maximum number of retry attempts (default: 0)
    */
 
-  public async set(comboBoxSelector: string, value: string): Promise<void> {
-    this.log.debug(`comboBox.set, comboBoxSelector: ${comboBoxSelector}`);
-    const comboBox = await this.testSubjects.find(comboBoxSelector);
-    await this.setElement(comboBox, value);
-  }
-
-  /**
-   * Finds combobox element and sets specified value with retry logic for stale element handling
-   *
-   * @param comboBoxSelector data-test-subj selector
-   * @param value option text
-   */
-  public async setWithRetry(comboBoxSelector: string, value: string): Promise<void> {
-    this.log.debug(`comboBox.setWithRetry, comboBoxSelector: ${comboBoxSelector}`);
-    await this.retry.try(async () => {
-      await this.set(comboBoxSelector, value);
-    });
+  public async set(
+    comboBoxSelector: string,
+    value: string,
+    options: { maxRetries?: number } = {}
+  ): Promise<void> {
+    const { maxRetries = 0 } = options;
+    this.log.debug(
+      `comboBox.set, comboBoxSelector: ${comboBoxSelector}, maxRetries: ${maxRetries}`
+    );
+    if (maxRetries < 1) {
+      const comboBox = await this.testSubjects.find(comboBoxSelector);
+      await this.setElement(comboBox, value);
+    } else {
+      await this.retry.tryWithRetries(
+        `comboBox.set, comboBoxSelector: ${comboBoxSelector}`,
+        async () => {
+          const comboBox = await this.testSubjects.find(comboBoxSelector);
+          await this.setElement(comboBox, value);
+        },
+        { retryCount: maxRetries, retryDelay: 200 }
+      );
+    }
   }
 
   public async setForLastInput(comboBoxSelector: string, value: string): Promise<void> {

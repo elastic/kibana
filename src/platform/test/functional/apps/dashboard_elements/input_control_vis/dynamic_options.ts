@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not fetch new options when non-string is filtered', async () => {
-        await comboBox.setWithRetry('fieldSelect-0', 'clientip');
+        await comboBox.set('fieldSelect-0', 'clientip', { maxRetries: 2 });
         await visEditor.clickGo();
 
         const initialOptions = await comboBox.getOptionsList('listControlSelect0');
@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           navigateToVisualize: false,
         });
         await header.waitUntilLoadingHasFinished();
-        await comboBox.setWithRetry('listControlSelect0', 'win 7');
+        await comboBox.set('listControlSelect0', 'win 7', { maxRetries: 2 });
       });
 
       it('should fetch new options when string field is filtered', async () => {
