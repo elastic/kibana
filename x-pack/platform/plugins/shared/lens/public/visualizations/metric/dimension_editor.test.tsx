@@ -6,13 +6,7 @@
  */
 
 import React from 'react';
-import {
-  render,
-  screen,
-  waitFor,
-  getByTitle,
-  queryByRole,
-} from '@testing-library/react';
+import { render, screen, waitFor, getByTitle, queryByRole } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -1062,6 +1056,32 @@ describe('dimension editor', () => {
 
           expectCalledBefore(mockSetState, props.removeLayer as jest.Mock);
         });
+
+        it('selects trendline from panel with apply color to value', async () => {
+          const { clickOnSupportingVis } = renderAdditionalSectionEditor({
+            state: {
+              ...stateWOTrend,
+              applyColorTo: 'value',
+            },
+          });
+          await clickOnSupportingVis('trendline');
+          expect(mockSetState).toHaveBeenCalledWith(
+            expect.objectContaining({ applyColorTo: 'background' })
+          );
+        });
+
+        it('selects bar from panel with apply color to value', async () => {
+          const { clickOnSupportingVis } = renderAdditionalSectionEditor({
+            state: {
+              ...metricAccessorState,
+              applyColorTo: 'value',
+            },
+          });
+          await clickOnSupportingVis('bar');
+          expect(mockSetState).toHaveBeenCalledWith(
+            expect.objectContaining({ applyColorTo: 'background' })
+          );
+        });
       });
 
       describe('progress bar direction controls', () => {
@@ -1094,8 +1114,7 @@ describe('dimension editor', () => {
 
       describe('`apply color to` button group control', () => {
         it('should show `apply color to` button group when `Panel` option is selected', async () => {
-          const { applyColorToBtnGroup, applyColorToOptions } = 
-          renderAdditionalSectionEditor({ 
+          const { applyColorToBtnGroup, applyColorToOptions } = renderAdditionalSectionEditor({
             state: { ...stateWOTrend, showBar: false, maxAccessor: undefined },
           });
           expect(applyColorToBtnGroup).toBeInTheDocument();
@@ -1117,16 +1136,16 @@ describe('dimension editor', () => {
         });
 
         it('should toggle options', async () => {
-          const mockState =  { ...stateWOTrend, showBar: false, maxAccessor: undefined };
-          const { clickOnApplyColorToOption } =  renderAdditionalSectionEditor({ state: mockState });
-          
+          const mockState = { ...stateWOTrend, showBar: false, maxAccessor: undefined };
+          const { clickOnApplyColorToOption } = renderAdditionalSectionEditor({ state: mockState });
+
           await clickOnApplyColorToOption('value');
           expect(mockSetState).toHaveBeenCalledWith({ ...mockState, applyColorTo: 'value' });
-          
+
           await clickOnApplyColorToOption('background');
           expect(mockSetState).toHaveBeenCalledWith({ ...mockState, applyColorTo: 'background' });
         });
-      })
+      });
     });
   });
 });

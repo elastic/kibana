@@ -987,6 +987,7 @@ export function DimensionEditorAdditionalSection({
                 label: i18n.translate('xpack.lens.metric.supportingVisualization.panel', {
                   defaultMessage: 'Panel',
                 }),
+                value: 'panel',
               },
               {
                 id: `${buttonIdPrefix}trendline`,
@@ -994,6 +995,7 @@ export function DimensionEditorAdditionalSection({
                   defaultMessage: 'Line',
                 }),
                 isDisabled: !supportsTrendline,
+                value: 'trendline',
               },
               {
                 id: `${buttonIdPrefix}bar`,
@@ -1001,33 +1003,24 @@ export function DimensionEditorAdditionalSection({
                   defaultMessage: 'Bar',
                 }),
                 isDisabled: !state.maxAccessor,
+                value: 'bar',
               },
             ]}
             idSelected={`${buttonIdPrefix}${selectedSupportingVisualization}`}
-            onChange={(id) => {
-              const supportingVisualizationType = id.split('--')[1] as SupportingVisType;
-              switch (supportingVisualizationType) {
-                case 'trendline':
-                  setState({
-                    ...state,
-                    showBar: false,
-                  });
-                  addLayer('metricTrendline');
-                  break;
-                case 'bar':
-                  setState({
-                    ...state,
-                    showBar: true,
-                  });
-                  if (state.trendlineLayerId) removeLayer(state.trendlineLayerId);
-                  break;
-                case 'panel':
-                  setState({
-                    ...state,
-                    showBar: false,
-                  });
-                  if (state.trendlineLayerId) removeLayer(state.trendlineLayerId);
-                  break;
+            onChange={(_id, value) => {
+              const supportingVisualizationType = value as SupportingVisType;
+              if (supportingVisualizationType == supportingVisualization(state)) return;
+
+              setState({
+                ...state,
+                showBar: supportingVisualizationType === 'bar',
+                applyColorTo: metricStateDefaults.applyColorTo,
+              });
+
+              if (supportingVisualizationType === 'trendline') {
+                addLayer('metricTrendline');
+              } else if (state.trendlineLayerId) {
+                removeLayer(state.trendlineLayerId);
               }
             }}
           />
