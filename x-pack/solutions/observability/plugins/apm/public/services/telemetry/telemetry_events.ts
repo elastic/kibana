@@ -34,4 +34,63 @@ const searchQuerySubmittedEventType: TelemetryEvent = {
   },
 };
 
-export const apmTelemetryEventBasedTypes = [searchQuerySubmittedEventType];
+const agentConfigurationChangedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.AGENT_CONFIGURATION_CHANGED,
+  schema: {
+    agentName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the agent (e.g., java, nodejs, all)',
+      },
+    },
+    environment: {
+      type: 'keyword',
+      _meta: {
+        description: 'The environment for which the agent configuration was changed or all',
+      },
+    },
+    predefinedSettings: {
+      type: 'array',
+      items: {
+        properties: {
+          key: {
+            type: 'keyword',
+            _meta: {
+              description: 'The key of the predefined setting that was changed',
+            },
+          },
+          value: {
+            type: 'keyword',
+            _meta: {
+              description: 'The value of the predefined setting that was changed',
+            },
+          },
+        },
+      },
+    },
+    advancedSettings: {
+      type: 'array',
+      items: {
+        properties: {
+          key: {
+            type: 'keyword',
+            _meta: {
+              description: 'The key of the predefined setting that was changed',
+            },
+          },
+          value: {
+            type: 'keyword',
+            _meta: {
+              description: 'The value of the predefined setting that was changed',
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+export const apmTelemetryEventBasedTypes = [
+  searchQuerySubmittedEventType,
+  agentConfigurationChangedEventType,
+];

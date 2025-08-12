@@ -49,6 +49,7 @@ export async function saveConfig({
         values: { serviceName: getOptionLabel(config.service.name) },
       }),
     });
+    return true;
   } catch (error) {
     toasts.addDanger({
       title: i18n.translate('xpack.apm.agentConfig.saveConfig.failed.title', {
@@ -63,5 +64,6 @@ export async function saveConfig({
         },
       }),
     });
+    return false;
   }
 }
