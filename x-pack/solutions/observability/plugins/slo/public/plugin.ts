@@ -39,6 +39,7 @@ import type {
 } from './types';
 import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
 import { registerSloUiActions } from './ui_actions/register_ui_actions';
+import { SloDetailsHistoryLocatorDefinition } from './locators/slo_details_history';
 
 export class SLOPlugin
   implements Plugin<SLOPublicSetup, SLOPublicStart, SLOPublicPluginsSetup, SLOPublicPluginsStart>
@@ -62,6 +63,9 @@ export class SLOPlugin
     const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
     const sloDetailsLocator = plugins.share.url.locators.create(new SloDetailsLocatorDefinition());
+    const sloDetailsHistoryLocator = plugins.share.url.locators.create(
+      new SloDetailsHistoryLocatorDefinition()
+    );
     const sloEditLocator = plugins.share.url.locators.create(new SloEditLocatorDefinition());
     const sloListLocator = plugins.share.url.locators.create(new SloListLocatorDefinition());
 
@@ -191,6 +195,7 @@ export class SLOPlugin
 
     return {
       sloDetailsLocator,
+      sloDetailsHistoryLocator,
       sloEditLocator,
       sloListLocator,
     };

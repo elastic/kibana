@@ -49,7 +49,6 @@ export class SearchSessionsMgmtApp {
 
     const api = new SearchSessionsMgmtAPI(setupDeps.sessionsClient, this.config, {
       notifications,
-      locators: pluginsStart.share.url.locators,
       application,
       usageCollector: setupDeps.searchUsageCollector,
     });
