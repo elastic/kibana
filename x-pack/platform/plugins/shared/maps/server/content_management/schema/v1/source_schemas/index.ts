@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { TableSource, type TableSourceDescriptor } from './table_source';
+export type * from './types';
