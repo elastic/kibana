@@ -36,6 +36,8 @@ export abstract class NumeralFormat extends FieldFormat {
   });
 
   protected getConvertedValue(val: number | string | object): string {
+    const originalVal = val;
+
     if (val === -Infinity) return '-∞';
     if (val === +Infinity) return '+∞';
     if (typeof val === 'object') {
@@ -43,6 +45,18 @@ export abstract class NumeralFormat extends FieldFormat {
       return JSON.stringify(val);
     } else if (typeof val !== 'number') {
       val = parseFloat(val);
+    }
+
+    if (isNaN(val) && typeof originalVal === 'string') {
+      // If the value is a string that cannot be parsed as a number, try to parse it as a JSON object
+      try {
+        const parsedVal = JSON.parse(originalVal);
+        if (typeof parsedVal === 'object' && parsedVal !== null) {
+          return originalVal; // Return the original string if it's a JSON object
+        }
+      } catch {
+        // If parsing fails, we return continue
+      }
     }
 
     if (isNaN(val)) return '';
