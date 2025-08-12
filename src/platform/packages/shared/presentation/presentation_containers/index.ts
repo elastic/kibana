@@ -35,3 +35,4 @@ export {
   type PresentationContainer,
 } from './interfaces/presentation_container';
 export { apiPublishesSettings, type PublishesSettings } from './interfaces/publishes_settings';
+export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/can_focus_panel';

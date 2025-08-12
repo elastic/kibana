@@ -154,6 +154,8 @@ exports[`Error HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 
 exports[`Error INDEX 1`] = `undefined`;
 
+exports[`Error KIND 1`] = `undefined`;
+
 exports[`Error KUBERNETES 1`] = `undefined`;
 
 exports[`Error KUBERNETES_CONTAINER_ID 1`] = `undefined`;
@@ -548,6 +550,8 @@ exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 exports[`Span HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 
 exports[`Span INDEX 1`] = `undefined`;
+
+exports[`Span KIND 1`] = `undefined`;
 
 exports[`Span KUBERNETES 1`] = `undefined`;
 
@@ -947,6 +951,8 @@ exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 exports[`Transaction HTTP_RESPONSE_STATUS_CODE 1`] = `200`;
 
 exports[`Transaction INDEX 1`] = `undefined`;
+
+exports[`Transaction KIND 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES 1`] = `
 Object {

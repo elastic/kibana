@@ -9,7 +9,6 @@
     "server": true,
     "browser": true,
     "optionalPlugins": [
-      "indexManagement",
       "fieldsMetadata",
       "usageCollection",
       "licensing"
