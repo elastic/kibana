@@ -79,9 +79,11 @@ export const QualityIssueFieldInfo = ({
               />
               <Axis id="doc_count_y_axis" position={Position.Left} />
               <BarSeries
-                id="barseries"
+                id="Doc count"
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
+                yNice={true}
+                xNice={true}
                 xAccessor="x"
                 yAccessors={['y']}
                 data={fieldList?.timeSeries}
