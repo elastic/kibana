@@ -41,7 +41,7 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
 
   const { uploadStatus, onImportClick, canImport } = useFileUploadContext();
 
-  const createIndex = async () => {
+  const onSave = async () => {
     if (isIndexCreated) {
       indexUpdateService.flush();
       return;
@@ -60,7 +60,8 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
   };
 
   const isSaveButtonVisible =
-    (!canImport && !isIndexCreated && !isSaving) || (isIndexCreated && hasUnsavedChanges);
+    (!isSaving && !canImport && !isIndexCreated) ||
+    (!isSaving && isIndexCreated && hasUnsavedChanges);
 
   return (
     <EuiFlyoutFooter>
@@ -78,7 +79,7 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
           <EuiFlexGroup gutterSize="s" alignItems="center">
             {isSaveButtonVisible ? (
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={createIndex}>
+                <EuiButton onClick={onSave}>
                   <FormattedMessage
                     id="indexEditor.flyout.footer.primaryButtonLabel.saveIndex"
                     defaultMessage="Save changes"

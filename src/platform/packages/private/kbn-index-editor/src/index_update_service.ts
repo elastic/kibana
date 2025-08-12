@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  BulkRequest,
-  BulkResponse,
-  BulkResponseItem,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart } from '@kbn/core/public';
 import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -435,62 +431,55 @@ export class IndexUpdateService {
       combineLatest([this.bufferState$, this._flush$])
         .pipe(
           skipWhile(() => !this.isIndexCreated()),
-          filter((updates) => updates.length > 0),
+          filter(([updates]) => updates.length > 0),
+          tap(() => {
+            this._isSaving$.next(true);
+          }),
           exhaustMap(([updates]) => {
             return from(this.bulkUpdate(updates)).pipe(
-              withLatestFrom(this._rows$, this.dataView$),
-              map(([response, rows, dataView]) => {
-                return { updates, response, rows, dataView };
+              catchError((errors) => {
+                return of({ errors } as BulkResponse);
+              }),
+              withLatestFrom(this._rows$, this.dataView$, this.savingDocs$),
+              map(([response, rows, dataView, savingDocs]) => {
+                return { updates, response, rows, dataView, savingDocs };
               })
             );
           })
         )
         .subscribe({
-          next: ({ updates: bulkUpdateOperations, response, rows, dataView }) => {
-            const mappedResponse = response.items.reduce((acc, item, index) => {
-              // Updates that were successful
-              const updateItem = Object.values(item)[0] as BulkResponseItem;
-              const bulkUpdateOperation = bulkUpdateOperations[index];
-              if (!isDocUpdate(bulkUpdateOperation)) {
-                return acc;
-              }
-              const updateValue = bulkUpdateOperation.payload.value;
-              if (updateItem.status === 200 && updateItem._id) {
-                const docId = updateItem._id;
-                const e = acc.get(docId) ?? {};
-                acc.set(docId, { ...e, ...updateValue });
-              }
-              return acc;
-            }, new Map<string, any>());
+          next: ({ updates: bulkUpdateOperations, response, rows, savingDocs, dataView }) => {
+            this._isSaving$.next(false);
+
+            const savedIds = new Set(
+              response.items
+                .filter((v) => !v.delete && Object.values(v)[0].status === 200)
+                .map((v) => Object.values(v)[0]._id)
+            );
 
             this._rows$.next(
               rows.map((row) => {
-                const docId = row.raw._id;
-                const mergedSource = { ...row.raw._source, ...(mappedResponse.get(docId!) ?? {}) };
+                const update =
+                  savedIds.has(row.id) && savingDocs.has(row.id)
+                    ? savingDocs.get(row.id) ?? {}
+                    : {};
+                const mergedSource = { ...row.raw, ...update };
 
-                return buildDataTableRecord(
-                  {
-                    ...row.raw,
-                    _source: mergedSource,
-                  },
-                  dataView
-                );
+                return { ...row, raw: mergedSource, flattened: mergedSource };
               })
             );
+
+            if (response.errors) {
+              // TODO Display errors in the callout
+            }
 
             // Clear the buffer after successful update
             this.addAction('saved', {
               response,
               updates: bulkUpdateOperations.filter(isDocUpdate).map((update) => update.payload),
             });
-
-            this._isSaving$.next(false);
-
-            // TODO handle index docs
           },
           error: (err) => {
-            // TODO handle API errors
-
             this._isSaving$.next(false);
           },
         })
