@@ -174,13 +174,9 @@ describe('fetchGraph', () => {
     const query = esqlCallArgs[0].query;
 
     expect(query).toContain(`ENRICH ${getEnrichPolicyId()} ON actor.entity.id`);
-    expect(query).toContain(
-      `WITH actorEntityName = entity.name, actorEntityType = entity.type, actorSourceId = doc_id, actorSourceIndex = doc_index`
-    );
+    expect(query).toContain(`WITH actorEntityName = entity.name, actorEntityType = entity.type`);
     expect(query).toContain(`ENRICH ${getEnrichPolicyId()} ON target.entity.id`);
-    expect(query).toContain(
-      `WITH targetEntityName = entity.name, targetEntityType = entity.type, targetSourceId = doc_id, targetSourceIndex = doc_index`
-    );
+    expect(query).toContain(`WITH targetEntityName = entity.name, targetEntityType = entity.type`);
 
     expect(query).toContain('EVAL actorDocData = CONCAT');
     expect(query).toContain('actor.entity.id');

@@ -831,9 +831,9 @@ export default function (providerContext: FtrProviderContext) {
             conflicts: 'proceed',
           });
 
-          await spacesService.delete(customNamespaceId);
-          await dataView.delete('security-solution-default');
+          await dataView.delete('security-solution');
           await customSpaceDataView.delete('security-solution');
+          await spacesService.delete(customNamespaceId);
         });
 
         it('should contain entity data when asset inventory is enabled', async () => {

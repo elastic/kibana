@@ -95,7 +95,7 @@ export const GraphVisualization: React.FC = memo(() => {
         openPreviewPanel({
           id: GenericEntityPanelKey,
           params: {
-            entityDocId: documentData.sourceDocId,
+            entityId: documentData.id,
             scopeId,
             isPreviewMode: true,
             banner: GENERIC_ENTITY_PREVIEW_BANNER,

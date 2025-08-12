@@ -21,8 +21,7 @@ import {
 } from '../../../entity_analytics/components/entity_details_flyout';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from '../generic_right/constants';
 
-export interface GenericEntityDetailsPanelProps extends Record<string, unknown> {
-  entityDocId: string;
+interface BaseGenericEntityDetailsPanelProps {
   value: string;
   field: string;
   scopeId: string;
@@ -34,6 +33,14 @@ export interface GenericEntityDetailsPanelProps extends Record<string, unknown> 
     subTab?: CspInsightLeftPanelSubTab;
   };
 }
+
+export type GenericEntityDetailsPanelProps = BaseGenericEntityDetailsPanelProps &
+  (
+    | { entityDocId: string; entityId?: never }
+    | { entityDocId?: never; entityId: string }
+    | { entityDocId: string; entityId: string }
+  ) &
+  Record<string, unknown>;
 
 export interface GenericEntityDetailsExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'generic_entity_details';
@@ -71,6 +78,7 @@ const useSelectedTab = (params: GenericEntityDetailsPanelProps, tabs: LeftPanelT
 export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps) => {
   const {
     entityDocId,
+    entityId,
     field,
     value,
     hasMisconfigurationFindings,
@@ -78,7 +86,11 @@ export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps
     hasNonClosedAlerts,
     scopeId,
   } = params;
-  const { getGenericEntity } = useGetGenericEntity(entityDocId);
+  // Ensure we have both parameters for the hook
+  const docId = entityDocId || '';
+  const entityIdParam = entityId || '';
+
+  const { getGenericEntity } = useGetGenericEntity({ docId, entityId: entityIdParam });
   const source = getGenericEntity.data?._source;
 
   const tabs: LeftPanelTabsType = useMemo(() => {

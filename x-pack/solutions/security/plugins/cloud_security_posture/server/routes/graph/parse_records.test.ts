@@ -409,13 +409,13 @@ describe('parseRecords', () => {
         action: 'connect',
         actorIds: ['user1', 'host1'],
         actorsDocData: [
-          '{"id":"user1","type":"entity","sourceDocId":"doc1","index":"logs-user-assets","entity":{"name":"John Doe","type":"Identity"}}',
-          '{"id":"host1","type":"entity","sourceDocId":"doc2","index":"logs-assets","entity":{"name":"server-01","type":"host"}}',
-          '{"id":"user2","type":"entity","sourceDocId":"doc3","index":"logs-assets","entity":{"name":"Jane Doe","type":"Identity"}}',
+          '{"id":"user1","type":"entity","entity":{"name":"John Doe","type":"Identity"}}',
+          '{"id":"host1","type":"entity","entity":{"name":"server-01","type":"host"}}',
+          '{"id":"user2","type":"entity","entity":{"name":"Jane Doe","type":"Identity"}}',
         ],
         targetsDocData: [
-          '{"id":"service1","type":"entity","sourceDocId":"doc4","index":"logs-assets","entity":{"name":"web-service","type":"service"}}',
-          '{"id":"host1","type":"entity","sourceDocId":"doc5","index":"logs-assets","entity":{"name":"server-01-updated","type":"host"}}',
+          '{"id":"service1","type":"entity","entity":{"name":"web-service","type":"service"}}',
+          '{"id":"host1","type":"entity","entity":{"name":"server-01-updated","type":"host"}}',
         ],
         badge: 1,
         docs: ['{"foo":"bar"}'],
@@ -434,8 +434,6 @@ describe('parseRecords', () => {
     expect(user1Node.documentsData[0]).toMatchObject({
       id: 'user1',
       type: 'single-entity',
-      sourceDocId: 'doc1',
-      index: 'logs-user-assets',
       entity: {
         name: 'John Doe',
         type: 'Identity',
@@ -449,8 +447,6 @@ describe('parseRecords', () => {
     expect(host1Node.documentsData[0]).toMatchObject({
       id: 'host1',
       type: 'single-entity',
-      sourceDocId: 'doc2',
-      index: 'logs-assets',
       entity: {
         name: 'server-01',
         type: 'host',
@@ -459,8 +455,6 @@ describe('parseRecords', () => {
     expect(host1Node.documentsData[1]).toMatchObject({
       id: 'host1',
       type: 'single-entity',
-      sourceDocId: 'doc5',
-      index: 'logs-assets',
       entity: {
         name: 'server-01-updated',
         type: 'host',
@@ -474,8 +468,6 @@ describe('parseRecords', () => {
     expect(service1Node.documentsData[0]).toMatchObject({
       id: 'service1',
       type: 'single-entity',
-      sourceDocId: 'doc4',
-      index: 'logs-assets',
       entity: {
         name: 'web-service',
         type: 'service',
@@ -493,12 +485,8 @@ describe('parseRecords', () => {
       {
         action: 'login',
         actorIds: ['user1'],
-        actorsDocData: [
-          '{"id":"user2","type":"entity","index":"test","entity":{"name":"Different User","type":"Identity"}}',
-        ],
-        targetsDocData: [
-          '{"id":"service2","type":"entity","index":"test","entity":{"name":"Different Service","type":"service"}}',
-        ],
+        actorsDocData: [],
+        targetsDocData: [],
         badge: 1,
         docs: ['{"foo":"bar"}'],
         isOrigin: true,
