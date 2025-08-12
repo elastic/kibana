@@ -10,6 +10,7 @@
   },
   "include": [
     "**/*",
+    "../security_solution_ftr/**/*",
     "../../../../../typings/**/*",
     "../../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
