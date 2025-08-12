@@ -63,6 +63,13 @@ export const INDEX_MAP_BEFORE_SPLIT: IndexMap = {
           },
         },
       },
+      'ui-metric': {
+        properties: {
+          count: {
+            type: 'integer',
+          },
+        },
+      },
       application_usage_totals: {
         dynamic: false,
         properties: {},
