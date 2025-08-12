@@ -217,7 +217,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/180641
-    it.skip('classifies verification_exception errors as user errors', async () => {
+    it('classifies verification_exception errors as user errors', async () => {
       await getMetricsRequest(request, true);
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*']),
