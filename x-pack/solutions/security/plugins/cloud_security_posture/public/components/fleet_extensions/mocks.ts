@@ -141,12 +141,12 @@ const getPolicyMock = (
   const mockPackagePolicy = createNewPackagePolicyMock();
 
   const awsVarsMock = {
-    access_key_id: { type: 'text' },
-    secret_access_key: { type: 'password', isSecret: true },
-    session_token: { type: 'text' },
-    shared_credential_file: { type: 'text' },
-    credential_profile_name: { type: 'text' },
-    role_arn: { type: 'text' },
+    'aws.access_key_id': { type: 'text' },
+    'aws.secret_access_key': { type: 'password', isSecret: true },
+    'aws.session_token': { type: 'text' },
+    'aws.shared_credential_file': { type: 'text' },
+    'aws.credential_profile_name': { type: 'text' },
+    'aws.role_arn': { type: 'text' },
     'aws.credentials.type': { value: 'cloud_formation', type: 'text' },
   };
 
@@ -282,7 +282,7 @@ export const getPackageInfoMock = () => {
             title: 'CIS AWS Benchmark',
             vars: [
               {
-                name: 'secret_access_key',
+                name: 'aws.secret_access_key',
                 title: 'Secret Access Key',
                 secret: true,
                 type: 'text' as RegistryVarType,

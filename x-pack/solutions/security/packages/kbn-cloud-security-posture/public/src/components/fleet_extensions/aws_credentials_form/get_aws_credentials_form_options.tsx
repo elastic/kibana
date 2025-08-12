@@ -165,7 +165,7 @@ export const getAwsCredentialsFormOptions = (): Omit<AwsOptions, 'cloud_connecto
     }),
     info: AssumeRoleDescription,
     fields: {
-      role_arn: {
+      'aws.role_arn': {
         label: i18n.translate('securitySolutionPackages.awsIntegration.roleArnLabel', {
           defaultMessage: 'Role ARN',
         }),
@@ -179,8 +179,11 @@ export const getAwsCredentialsFormOptions = (): Omit<AwsOptions, 'cloud_connecto
     }),
     info: DirectAccessKeysDescription,
     fields: {
-      access_key_id: { label: AWS_FIELD_LABEL.access_key_id, dataTestSubj: 'awsDirectAccessKeyId' },
-      secret_access_key: {
+      'aws.access_key_id': {
+        label: AWS_FIELD_LABEL.access_key_id,
+        dataTestSubj: 'awsDirectAccessKeyId',
+      },
+      'aws.secret_access_key': {
         label: AWS_FIELD_LABEL.secret_access_key,
         type: 'password',
         dataTestSubj: 'awsDirectAccessSecretKey',
@@ -194,17 +197,17 @@ export const getAwsCredentialsFormOptions = (): Omit<AwsOptions, 'cloud_connecto
       defaultMessage: 'Temporary keys',
     }),
     fields: {
-      access_key_id: {
+      'aws.access_key_id': {
         label: AWS_FIELD_LABEL.access_key_id,
         dataTestSubj: 'awsTemporaryKeysAccessKeyId',
       },
-      secret_access_key: {
+      'aws.secret_access_key': {
         label: AWS_FIELD_LABEL.secret_access_key,
         type: 'password',
         dataTestSubj: 'awsTemporaryKeysSecretAccessKey',
         isSecret: true,
       },
-      session_token: {
+      'aws.session_token': {
         label: i18n.translate('securitySolutionPackages.awsIntegration.sessionTokenLabel', {
           defaultMessage: 'Session Token',
         }),
@@ -218,13 +221,13 @@ export const getAwsCredentialsFormOptions = (): Omit<AwsOptions, 'cloud_connecto
     }),
     info: SharedCredentialsDescription,
     fields: {
-      shared_credential_file: {
+      'aws.shared_credential_file': {
         label: i18n.translate('securitySolutionPackages.awsIntegration.sharedCredentialFileLabel', {
           defaultMessage: 'Shared Credential File',
         }),
         dataTestSubj: 'awsSharedCredentialFile',
       },
-      credential_profile_name: {
+      'aws.credential_profile_name': {
         label: i18n.translate(
           'securitySolutionPackages.awsIntegration.credentialProfileNameLabel',
           {
@@ -252,7 +255,7 @@ export const getAwsCloudConnectorsCredentialsFormOptions = (): Omit<
     }),
     info: AssumeRoleDescription,
     fields: {
-      role_arn: {
+      'aws.role_arn': {
         label: i18n.translate('securitySolutionPackages.awsIntegration.roleArnLabel', {
           defaultMessage: 'Role ARN',
         }),
@@ -275,8 +278,11 @@ export const getAwsCloudConnectorsCredentialsFormOptions = (): Omit<
     }),
     info: DirectAccessKeysDescription,
     fields: {
-      access_key_id: { label: AWS_FIELD_LABEL.access_key_id, dataTestSubj: 'awsDirectAccessKeyId' },
-      secret_access_key: {
+      'aws.access_key_id': {
+        label: AWS_FIELD_LABEL.access_key_id,
+        dataTestSubj: 'awsDirectAccessKeyId',
+      },
+      'aws.secret_access_key': {
         label: AWS_FIELD_LABEL.secret_access_key,
         type: 'password',
         dataTestSubj: 'awsDirectAccessSecretKey',
@@ -290,17 +296,17 @@ export const getAwsCloudConnectorsCredentialsFormOptions = (): Omit<
       defaultMessage: 'Temporary keys',
     }),
     fields: {
-      access_key_id: {
+      'aws.access_key_id': {
         label: AWS_FIELD_LABEL.access_key_id,
         dataTestSubj: 'awsTemporaryKeysAccessKeyId',
       },
-      secret_access_key: {
+      'aws.secret_access_key': {
         label: AWS_FIELD_LABEL.secret_access_key,
         type: 'password',
         dataTestSubj: 'awsTemporaryKeysSecretAccessKey',
         isSecret: true,
       },
-      session_token: {
+      'aws.session_token': {
         label: i18n.translate('securitySolutionPackages.awsIntegration.sessionTokenLabel', {
           defaultMessage: 'Session Token',
         }),
@@ -320,8 +326,11 @@ export const getAwsAgentlessFormOptions = (): Omit<
     }),
     info: DirectAccessKeysDescription,
     fields: {
-      access_key_id: { label: AWS_FIELD_LABEL.access_key_id, dataTestSubj: 'awsDirectAccessKeyId' },
-      secret_access_key: {
+      'aws.access_key_id': {
+        label: AWS_FIELD_LABEL.access_key_id,
+        dataTestSubj: 'awsDirectAccessKeyId',
+      },
+      'aws.secret_access_key': {
         label: AWS_FIELD_LABEL.secret_access_key,
         type: 'password',
         dataTestSubj: 'awsDirectAccessSecretKey',
@@ -335,17 +344,17 @@ export const getAwsAgentlessFormOptions = (): Omit<
       defaultMessage: 'Temporary keys',
     }),
     fields: {
-      access_key_id: {
+      'aws.access_key_id': {
         label: AWS_FIELD_LABEL.access_key_id,
         dataTestSubj: 'awsTemporaryKeysAccessKeyId',
       },
-      secret_access_key: {
+      'aws.secret_access_key': {
         label: AWS_FIELD_LABEL.secret_access_key,
         type: 'password',
         dataTestSubj: 'awsTemporaryKeysSecretAccessKey',
         isSecret: true,
       },
-      session_token: {
+      'aws.session_token': {
         label: i18n.translate('securitySolutionPackages.awsIntegration.sessionTokenLabel', {
           defaultMessage: 'Session Token',
         }),

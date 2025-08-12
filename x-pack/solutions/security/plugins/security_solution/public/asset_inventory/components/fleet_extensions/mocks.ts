@@ -19,9 +19,10 @@ export const getMockPolicyAzure = (vars?: PackagePolicyConfigRecord) =>
   getPolicyMock(CLOUDBEAT_AZURE, 'azure', vars);
 export const getMockPackageInfo = () => getPackageInfoMock();
 
-export const getMockPackageInfoAssetInventoryAWS = () => {
+export const getMockPackageInfoAWS = () => {
   return {
     name: 'cloud_asset_inventory',
+    version: '1.0.0',
     policy_templates: [
       {
         title: '',
@@ -47,9 +48,10 @@ export const getMockPackageInfoAssetInventoryAWS = () => {
   } as PackageInfo;
 };
 
-export const getMockPackageInfoAssetGCP = () => {
+export const getMockPackageInfoGCP = () => {
   return {
     name: 'cloud_asset_inventory',
+    version: '1.0.0',
     policy_templates: [
       {
         title: '',
@@ -78,6 +80,7 @@ export const getMockPackageInfoAssetGCP = () => {
 export const getMockPackageInfoAssetAzure = () => {
   return {
     name: 'cloud_asset_inventory',
+    version: '1.0.0',
     policy_templates: [
       {
         title: '',
@@ -168,6 +171,11 @@ const getPolicyMock = (
       {
         type: CLOUDBEAT_GCP,
         policy_template: 'asset_inventory',
+        config: {
+          cloud_shell_url: {
+            value: 'https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=',
+          },
+        },
         enabled: type === CLOUDBEAT_GCP,
         streams: [
           {
@@ -195,6 +203,7 @@ const getPolicyMock = (
 
 export const getPackageInfoMock = () => {
   return {
+    version: '1.0.0',
     data_streams: [
       {
         dataset: 'cloud_asset_inventory.asset_inventory',
@@ -275,7 +284,6 @@ export const getPackageInfoMock = () => {
       },
     ],
     format_version: '3.3.2',
-    version: '0.0.0',
     name: 'cloud_asset_inventory',
     description: 'Discover and Create Cloud Assets Inventory',
     owner: {
