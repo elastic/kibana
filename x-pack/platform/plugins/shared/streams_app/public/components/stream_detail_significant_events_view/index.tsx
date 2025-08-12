@@ -21,7 +21,7 @@ import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_si
 import type { SaveData } from './add_significant_event_flyout/types';
 import { ChangePointSummary } from './change_point_summary';
 import { SignificantEventsViewEmptyState } from './empty_state/empty_state';
-import { ManageSystemDescriptionFlyout } from './manage_system_description_flyout/manage_system_description_flyout';
+import { ManageStreamDescriptionFlyout } from './manage_stream_description_flyout/manage_stream_description_flyout';
 import { SignificantEventsTable } from './significant_events_table';
 import { Timeline, TimelineEvent } from './timeline';
 import { formatChangePoint } from './utils/change_point';
@@ -56,7 +56,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
   const updateStream = useUpdateStreams(definition.stream.name);
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
-  const [isIdentifySystemFlyoutOpen, setIsIdentifySystemFlyoutOpen] = useState(false);
+  const [isManageDescriptionFlyoutOpen, setIsManageDescriptionFlyoutOpen] = useState(false);
 
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
 
@@ -147,8 +147,8 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
     />
   ) : null;
 
-  const identifySystemFlyout = isIdentifySystemFlyoutOpen ? (
-    <ManageSystemDescriptionFlyout
+  const manageDescriptionFlyout = isManageDescriptionFlyoutOpen ? (
+    <ManageStreamDescriptionFlyout
       definition={definition.stream}
       onSave={async (description: string) => {
         await updateStream({
@@ -160,26 +160,26 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
             notifications.toasts.addSuccess({
               title: i18n.translate(
                 'xpack.streams.significantEvents.manageDescription.saveSuccessToastTitle',
-                { defaultMessage: `Successfully saved identified system description` }
+                { defaultMessage: `Successfully saved stream description` }
               ),
             });
-            setIsIdentifySystemFlyoutOpen(false);
+            setIsManageDescriptionFlyoutOpen(false);
             refreshDefinition();
           },
           (error) => {
             notifications.showErrorDialog({
               title: i18n.translate(
                 'xpack.streams.significantEvents.manageDescription.saveErrorToastTitle',
-                { defaultMessage: `Could not save identified system description` }
+                { defaultMessage: `Could not save stream description` }
               ),
               error,
             });
           }
         );
-        setIsIdentifySystemFlyoutOpen(false);
+        setIsManageDescriptionFlyoutOpen(false);
       }}
       onClose={() => {
-        setIsIdentifySystemFlyoutOpen(false);
+        setIsManageDescriptionFlyoutOpen(false);
       }}
     />
   ) : null;
@@ -193,11 +193,11 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
             setQueryToEdit(undefined);
           }}
           onIdentifySystemClick={() => {
-            setIsIdentifySystemFlyoutOpen(true);
+            setIsManageDescriptionFlyoutOpen(true);
           }}
         />
         {editFlyout}
-        {identifySystemFlyout}
+        {manageDescriptionFlyout}
       </>
     );
   }
@@ -215,7 +215,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     onClick={() => {
-                      setIsIdentifySystemFlyoutOpen(true);
+                      setIsManageDescriptionFlyoutOpen(true);
                     }}
                     iconType="sparkles"
                   >
@@ -265,7 +265,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
         </EuiFlexItem>
       </EuiFlexGroup>
       {editFlyout}
-      {identifySystemFlyout}
+      {manageDescriptionFlyout}
     </>
   );
 }

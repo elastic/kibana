@@ -10,11 +10,9 @@ import { type IdentifiedSystemGenerateResponse } from '@kbn/streams-schema';
 import { useCallback } from 'react';
 import { useKibana } from './use_kibana';
 
-interface FeaturesApi {
-  generate: (connectorId: string) => IdentifiedSystemGenerateResponse;
-}
+type GenerateApi = (connectorId: string) => IdentifiedSystemGenerateResponse;
 
-export function useSystemDescriptionGenerateApi({ name }: { name: string }): FeaturesApi {
+export function useDescriptionGenerateApi({ name }: { name: string }): GenerateApi {
   const {
     dependencies: {
       start: {
@@ -25,7 +23,7 @@ export function useSystemDescriptionGenerateApi({ name }: { name: string }): Fea
 
   const { signal } = useAbortController();
 
-  const generate = useCallback(
+  return useCallback(
     (connectorId: string) => {
       return streamsRepositoryClient.stream(
         `GET /api/streams/{name}/description/_generate 2023-10-31`,
@@ -37,8 +35,4 @@ export function useSystemDescriptionGenerateApi({ name }: { name: string }): Fea
     },
     [name, streamsRepositoryClient, signal]
   );
-
-  return {
-    generate,
-  };
 }

@@ -22,8 +22,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
+import { useDescriptionGenerateApi } from '../../../hooks/use_description_generate_api';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useSystemDescriptionGenerateApi } from '../../../hooks/use_system_description_generate_api';
 import { useAIFeatures } from '../common/use_ai_features';
 
 interface Props {
@@ -32,12 +32,12 @@ interface Props {
   onSave: (description: string) => Promise<void>;
 }
 
-export function ManageSystemDescriptionFlyout({ onClose, definition, onSave }: Props) {
+export function ManageStreamDescriptionFlyout({ onClose, definition, onSave }: Props) {
   const {
     core: { notifications, http },
   } = useKibana();
   const aiFeatures = useAIFeatures();
-  const { generate } = useSystemDescriptionGenerateApi({ name: definition.name });
+  const generate = useDescriptionGenerateApi({ name: definition.name });
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [description, setDescription] = React.useState<string>(definition.description);
@@ -47,12 +47,12 @@ export function ManageSystemDescriptionFlyout({ onClose, definition, onSave }: P
   };
 
   return (
-    <EuiFlyout aria-labelledby="manageSystemDescription" onClose={() => onClose()} size="m">
+    <EuiFlyout aria-labelledby="manageStreamDescription" onClose={() => onClose()} size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2>
-            {i18n.translate('xpack.streams.streamDetailView.manageSystemDescription.title', {
-              defaultMessage: 'Manage system description',
+            {i18n.translate('xpack.streams.streamDetailView.manageStreamDescription.title', {
+              defaultMessage: 'Manage stream description',
             })}
           </h2>
         </EuiTitle>
@@ -65,7 +65,7 @@ export function ManageSystemDescriptionFlyout({ onClose, definition, onSave }: P
             {!aiFeatures.loading && !aiFeatures.enabled && (
               <EuiToolTip
                 content={i18n.translate(
-                  'xpack.streams.manageSystemDescription.aiAssistantNotEnabledTooltip',
+                  'xpack.streams.manageStreamDescription.aiAssistantNotEnabledTooltip',
                   {
                     defaultMessage:
                       'AI Assistant features are not enabled. To enable features, add an AI connector on the management page.',
@@ -79,7 +79,7 @@ export function ManageSystemDescriptionFlyout({ onClose, definition, onSave }: P
                       `/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`
                     )}
                   >
-                    {i18n.translate('xpack.streams.manageSystemDescription.aiAssistantNotEnabled', {
+                    {i18n.translate('xpack.streams.manageStreamDescription.aiAssistantNotEnabled', {
                       defaultMessage: 'Enable AI Assistant features',
                     })}
                   </EuiLink>
@@ -87,7 +87,7 @@ export function ManageSystemDescriptionFlyout({ onClose, definition, onSave }: P
                   <EuiText>
                     <h3>
                       {i18n.translate(
-                        'xpack.streams.manageSystemDescription.aiAssistantNotEnabledAskAdmin',
+                        'xpack.streams.manageStreamDescription.aiAssistantNotEnabledAskAdmin',
                         { defaultMessage: 'Ask your administrator to enable AI Assistant features' }
                       )}
                     </h3>
@@ -120,8 +120,8 @@ export function ManageSystemDescriptionFlyout({ onClose, definition, onSave }: P
                         error: (error) => {
                           notifications.showErrorDialog({
                             title: i18n.translate(
-                              'xpack.streams.manageSystemDescription.generateErrorToastTitle',
-                              { defaultMessage: `Could not generate system description` }
+                              'xpack.streams.manageStreamDescription.generateErrorToastTitle',
+                              { defaultMessage: `Could not generate stream description` }
                             ),
                             error,
                           });
@@ -130,8 +130,8 @@ export function ManageSystemDescriptionFlyout({ onClose, definition, onSave }: P
                         complete: () => {
                           notifications.toasts.addSuccess({
                             title: i18n.translate(
-                              'xpack.streams.manageSystemDescription.generateSuccessToastTitle',
-                              { defaultMessage: `Successfully generated system description` }
+                              'xpack.streams.manageStreamDescription.generateSuccessToastTitle',
+                              { defaultMessage: `Successfully generated stream description` }
                             ),
                           });
                           setIsGenerating(false);
@@ -141,22 +141,21 @@ export function ManageSystemDescriptionFlyout({ onClose, definition, onSave }: P
                   >
                     {isGenerating
                       ? i18n.translate(
-                          'xpack.streams.manageSystemDescription.detectingButtonLabel',
-                          {
-                            defaultMessage: 'Detecting...',
-                          }
+                          'xpack.streams.manageStreamDescription.generatingButtonLabel',
+                          { defaultMessage: 'Generating...' }
                         )
-                      : i18n.translate('xpack.streams.manageSystemDescription.detectButtonLabel', {
-                          defaultMessage: 'Detect',
-                        })}
+                      : i18n.translate(
+                          'xpack.streams.manageStreamDescription.generateButtonLabel',
+                          { defaultMessage: 'Generate' }
+                        )}
                   </EuiButton>
                 </EuiFlexGroup>
 
                 <EuiTextArea
                   fullWidth
                   disabled={isGenerating}
-                  placeholder="System description will appear here. You can edit it if needed."
-                  aria-label="stream system description"
+                  placeholder="The generated stream description will appear here. You can edit it if needed. This description is used to generate significant events definitions in your stream."
+                  aria-label="stream description"
                   value={description}
                   onChange={(e) => onChange(e)}
                 />
@@ -169,7 +168,7 @@ export function ManageSystemDescriptionFlyout({ onClose, definition, onSave }: P
         <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
           <EuiButton color="text" onClick={() => onClose()} disabled={isSubmitting || isGenerating}>
             {i18n.translate(
-              'xpack.streams.streamDetailView.manageSystemDescription.cancelButtonLabel',
+              'xpack.streams.streamDetailView.manageStreamDescription.cancelButtonLabel',
               { defaultMessage: 'Cancel' }
             )}
           </EuiButton>
@@ -184,7 +183,7 @@ export function ManageSystemDescriptionFlyout({ onClose, definition, onSave }: P
             }}
           >
             {i18n.translate(
-              'xpack.streams.streamDetailView.manageSystemDescription.saveButtonLabel',
+              'xpack.streams.streamDetailView.manageStreamDescription.saveButtonLabel',
               {
                 defaultMessage: 'Save',
               }
