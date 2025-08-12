@@ -177,7 +177,6 @@ export const initTransform =
 
           const fromVersion = getVersion(from);
 
-          // Only allow missing from definition for initial versioning (i.e. v0 → v1)
           if (!migrationDefinition[fromVersion]) {
             return {
               error: new Error(`Invalid version to down transform from [${from}].`),

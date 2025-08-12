@@ -25,8 +25,6 @@ import {
 export class LensClient {
   constructor(private http: HttpStart) {}
 
-  // TODO add error handling logic with try/catch
-
   async get(id: string) {
     const { data, meta } = await this.http.get<LensGetResponseBody>(`${LENS_VIS_API_PATH}/${id}`, {
       version: LENS_API_VERSION,

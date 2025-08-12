@@ -229,7 +229,6 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
 
   mSearch?: {
     savedObjectType: string;
-    // TODO: fix this typing, this does not always return the full Item
     toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult) => Types['Item'];
     additionalSearchFields?: string[];
   };

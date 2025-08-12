@@ -14,7 +14,7 @@ import type {
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import { HttpStart } from '@kbn/data-view-editor-plugin/public/shared_imports';
+import type { HttpStart } from '@kbn/data-view-editor-plugin/public/shared_imports';
 import { BaseVisType } from './base_vis_type';
 import { VisualizationSavedObject } from '../../common';
 

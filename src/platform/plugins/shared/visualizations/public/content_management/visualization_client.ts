@@ -69,9 +69,6 @@ const deleteVisualization = async (id: string) => {
 const search = async (query: SearchQuery = {}, options?: VisualizationSearchQuery) => {
   if (options && options.types && options.types.length > 1) {
     const { types } = options;
-    // TODO: Fix types - This assumes the return types are all VisualizationSavedObject but that is false
-    // these can be any content type provided. There should be a separate mSearch method that returns
-    // saved objects with generic shared attributes (i.e. `title`, `description`) needed to list items.
     return getContentManagement().client.mSearch<VisualizationSearchOut['hits'][number]>({
       contentTypes: types.map((type) => ({ contentTypeId: type })),
       query,
