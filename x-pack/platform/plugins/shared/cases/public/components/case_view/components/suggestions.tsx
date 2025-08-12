@@ -6,26 +6,20 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { HttpSetup } from '@kbn/core/public';
 import React from 'react';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQuery } from '@tanstack/react-query';
-import type { SuggestionHandlerResponse } from '../../../../common';
+import { getCaseSuggestions } from '../../../containers/api';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 
 const MOCK_SERVICE_NAME = 'slo';
 
-const fetchSuggestions = async ({
-  http,
-  serviceName,
-}: {
-  http: HttpSetup;
-  serviceName: string;
-}): Promise<SuggestionHandlerResponse<Record<string, unknown>>> => {
-  return http.post<SuggestionHandlerResponse<Record<string, unknown>>>(
-    '/internal/case_suggestions/_find',
-    {
-      body: JSON.stringify({
+export const getSuggestionsQueryKey = (serviceName: string) => ['suggestions', serviceName];
+
+export const useFetchSuggestion = (serviceName: string) => {
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: getSuggestionsQueryKey(serviceName),
+    queryFn: () =>
+      getCaseSuggestions({
         owners: ['observability'],
         context: {
           timeRange: {
@@ -35,18 +29,6 @@ const fetchSuggestions = async ({
           'service.name': serviceName,
         },
       }),
-    }
-  );
-};
-
-export const getSuggestionsQueryKey = (serviceName: string) => ['suggestions', serviceName];
-
-export const useFetchSuggestion = (serviceName: string) => {
-  const { http } = useKibana().services;
-
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: getSuggestionsQueryKey(serviceName),
-    queryFn: () => fetchSuggestions({ http, serviceName }),
     refetchOnWindowFocus: false,
   });
 
