@@ -25,7 +25,7 @@ import {
   euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDataCascadeState, useDataCascadeDispatch } from '../../data_cascade_provider';
+import { useDataCascadeState, useDataCascadeActions } from '../../store_provider';
 
 const MAX_SELECTABLE_COLUMNS = 3;
 
@@ -37,14 +37,14 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
   const [isPopoverOpen, setPopover] = useState(false);
   const [availableColumnsIsOpen, setAvailableColumnsIsOpen] = useState(false);
   const { groupByColumns, currentGroupByColumns } = useDataCascadeState();
-  const dispatch = useDataCascadeDispatch();
+  const actions = useDataCascadeActions();
 
   const persistGroupByColumnSelection = useCallback(
     (groupByColumn: string[]) => {
-      dispatch({ type: 'SET_ACTIVE_CASCADE_GROUPS', payload: groupByColumn });
+      actions.setActiveCascadeGroups(groupByColumn);
       onSelectionChange?.(groupByColumn);
     },
-    [dispatch, onSelectionChange]
+    [actions, onSelectionChange]
   );
 
   const onButtonClick = () => {
@@ -61,7 +61,7 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
   };
 
   const clearSelectedGroupByColumn = () => {
-    dispatch({ type: 'RESET_ACTIVE_CASCADE_GROUPS' });
+    actions.resetActiveCascadeGroups();
   };
 
   const onDragEnd = useCallback<ComponentProps<typeof EuiDragDropContext>['onDragEnd']>(
