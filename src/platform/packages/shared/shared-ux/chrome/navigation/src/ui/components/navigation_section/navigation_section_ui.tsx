@@ -419,7 +419,9 @@ function nodeToEuiCollapsibleNavProps(
       onClick,
       css: [sectionStyles.euiCollapsibleNavSubItem, sectionStyles.euiAccordionChildWrapper],
       className: classnames([isSelected ? 'isSelected' : undefined]),
-      icon: navNode.icon,
+      // intentionally not using `navNode.icon` here, as it is shouldn't be used for top level items in the old nav
+      // but can be present in the navNode object for the new nav
+      // icon: navNode.icon,
       // @ts-expect-error title accepts JSX elements and they render correctly but the type definition expects a string
       title: navNode.withBadge ? <SubItemTitle item={navNode} /> : navNode.title,
       ['data-test-subj']: dataTestSubj,
