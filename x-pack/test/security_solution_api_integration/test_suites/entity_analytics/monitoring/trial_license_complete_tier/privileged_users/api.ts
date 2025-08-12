@@ -119,7 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(res.status).eql(200);
-        expect(res.body).to.eql({ aknowledged: true });
+        expect(res.body).to.eql({ acknowledged: true });
       });
     });
 

@@ -147,19 +147,43 @@ export const renameProcessorSchema = processorBaseWithWhereSchema.extend({
  * Set processor
  */
 
-export interface SetProcessor extends ProcessorBaseWithWhere {
+export interface SetProcessorBase extends ProcessorBaseWithWhere {
   action: 'set';
   to: string;
-  value: string;
   override?: boolean;
 }
 
-export const setProcessorSchema = processorBaseWithWhereSchema.extend({
+export interface SetValueProcessor extends SetProcessorBase {
+  value: string;
+  copy_from?: never;
+}
+
+export interface SetCopyFromProcessor extends SetProcessorBase {
+  value?: never;
+  copy_from: string;
+}
+
+export type SetProcessor = SetValueProcessor | SetCopyFromProcessor;
+
+const setProcessorBaseSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('set'),
   to: NonEmptyString,
-  value: NonEmptyString,
   override: z.optional(z.boolean()),
-}) satisfies z.Schema<SetProcessor>;
+});
+
+const setValueSchema = setProcessorBaseSchema.extend({
+  value: NonEmptyString,
+  copy_from: z.undefined(),
+});
+
+const setCopyFromSchema = setProcessorBaseSchema.extend({
+  value: z.undefined(),
+  copy_from: NonEmptyString,
+});
+
+const valueXorCopyFromSchema = z.union([setValueSchema, setCopyFromSchema]);
+
+export const setProcessorSchema = valueXorCopyFromSchema satisfies z.Schema<SetProcessor>;
 
 /**
  * Append processor
@@ -195,18 +219,15 @@ export const streamlangProcessorSchema = z.discriminatedUnion('action', [
   dissectProcessorSchema,
   dateProcessorSchema,
   renameProcessorSchema,
-  setProcessorSchema,
+  // Instead of setProcessorSchema (which is a union), use its two underlying schemas:
+  setValueSchema,
+  setCopyFromSchema,
+  setProcessorBaseSchema.extend({
+    value: z.undefined(),
+    copy_from: NonEmptyString,
+  }),
   appendProcessorSchema,
   manualIngestPipelineProcessorSchema,
-]);
-
-export const processorWithIdDefinitionSchema: z.ZodType<ProcessorDefinitionWithId> = z.union([
-  dateProcessorSchema.merge(z.object({ id: z.string() })),
-  dissectProcessorSchema.merge(z.object({ id: z.string() })),
-  grokProcessorSchema.merge(z.object({ id: z.string() })),
-  manualIngestPipelineProcessorSchema.merge(z.object({ id: z.string() })),
-  renameProcessorSchema.merge(z.object({ id: z.string() })),
-  setProcessorSchema.merge(z.object({ id: z.string() })),
 ]);
 
 export const isGrokProcessorDefinition = createIsNarrowSchema(

@@ -26,6 +26,7 @@ import {
   DateFormState,
   ManualIngestPipelineFormState,
   EnrichmentDataSourceWithUIAttributes,
+  SetFormState,
 } from './types';
 import { configDrivenProcessors } from './processors/config_driven';
 import {
@@ -38,7 +39,7 @@ import { ProcessorResources } from './state_management/processor_state_machine';
 /**
  * These are processor types with specialised UI. Other processor types are handled by a generic config-driven UI.
  */
-export const SPECIALISED_TYPES = ['date', 'dissect', 'grok'];
+export const SPECIALISED_TYPES = ['date', 'dissect', 'grok', 'set'];
 
 interface FormStateDependencies {
   grokCollection: StreamEnrichmentContextType['grokCollection'];
@@ -129,6 +130,15 @@ const defaultManualIngestPipelineProcessorFormState = (): ManualIngestPipelineFo
   where: ALWAYS_CONDITION,
 });
 
+const defaultSetProcessorFormState = (): SetFormState => ({
+  action: 'set' as const,
+  to: '',
+  value: '',
+  ignore_failure: false,
+  override: true,
+  where: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -144,6 +154,7 @@ const defaultProcessorFormStateByType: Record<
   dissect: defaultDissectProcessorFormState,
   grok: defaultGrokProcessorFormState,
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
+  set: defaultSetProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -176,7 +187,8 @@ export const getFormStateFrom = (
   if (
     processor.action === 'dissect' ||
     processor.action === 'manual_ingest_pipeline' ||
-    processor.action === 'date'
+    processor.action === 'date' ||
+    processor.action === 'set'
   ) {
     return structuredClone({
       ...processor,
@@ -263,6 +275,31 @@ export const convertFormStateToProcessor = (
     };
   }
 
+  if (formState.action === 'set') {
+    const { to, value, copy_from, ignore_failure, override } = formState;
+
+    const getValueOrCopyFrom = () => {
+      if (typeof copy_from === 'string' && !isEmpty(copy_from)) {
+        return { copy_from };
+      }
+      if (typeof value === 'string' && !isEmpty(value)) {
+        return { value };
+      }
+      return { value: '' };
+    };
+
+    return {
+      processorDefinition: {
+        action: 'set',
+        where: formState.where,
+        to,
+        ...getValueOrCopyFrom(),
+        override,
+        ignore_failure,
+      },
+    };
+  }
+
   if (configDrivenProcessors[formState.action]) {
     return {
       processorDefinition: configDrivenProcessors[formState.action].convertFormStateToConfig(
@@ -286,6 +323,7 @@ export const isDissectProcessor = createProcessorGuardByType('dissect');
 export const isManualIngestPipelineJsonProcessor =
   createProcessorGuardByType('manual_ingest_pipeline');
 export const isGrokProcessor = createProcessorGuardByType('grok');
+export const isSetProcessor = createProcessorGuardByType('set');
 
 const createId = htmlIdGenerator();
 

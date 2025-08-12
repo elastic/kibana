@@ -11,6 +11,7 @@ import {
   DissectProcessor,
   GrokProcessor,
   ManualIngestPipelineProcessor,
+  SetProcessor,
 } from '@kbn/streamlang';
 import { EnrichmentDataSource } from '../../../../common/url_schema';
 import { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
@@ -27,11 +28,14 @@ export type DissectFormState = DissectProcessor;
 export type DateFormState = DateProcessor;
 export type ManualIngestPipelineFormState = ManualIngestPipelineProcessor;
 
+export type SetFormState = SetProcessor;
+
 export type SpecialisedFormState =
   | GrokFormState
   | DissectFormState
   | DateFormState
-  | ManualIngestPipelineFormState;
+  | ManualIngestPipelineFormState
+  | SetFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
 

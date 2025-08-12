@@ -7,10 +7,8 @@
 
 import { appendProcessorConfig } from './configs/append';
 import { renameProcessorConfig } from './configs/rename';
-import { setProcessorConfig } from './configs/set';
 
 export const configDrivenProcessors = {
   rename: renameProcessorConfig,
-  set: setProcessorConfig,
   append: appendProcessorConfig,
 };
