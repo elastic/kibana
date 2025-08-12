@@ -12,7 +12,6 @@ import type { Filter } from '@kbn/es-query';
 import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');

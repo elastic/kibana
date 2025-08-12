@@ -6,10 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  InternalRequestHeader,
-  RoleCredentials,
-} from '@kbn/ftr-common-functional-services';
+import { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
