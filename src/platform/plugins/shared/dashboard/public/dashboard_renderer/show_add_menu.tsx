@@ -123,6 +123,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
             defaultMessage: 'Add collapsible section',
           }),
           icon: 'section',
+          'data-test-subj': 'dashboardAddCollapsibleSectionButton',
           onClick: () => {
             dashboardApi.addNewSection();
             closePopover();
@@ -133,6 +134,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
             defaultMessage: 'Add control',
           }),
           icon: 'controlsHorizontal',
+          'data-test-subj': 'dashboardAddControlButton',
           panel: 1,
         },
         {
@@ -142,6 +144,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
               defaultMessage: 'Add from library',
             }
           ),
+          'data-test-subj': 'dashboardAddFromLibraryButton',
           icon: 'folderOpen',
           onClick: () => {
             addFromLibrary(dashboardApi);
