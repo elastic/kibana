@@ -110,6 +110,7 @@ export class ObservabilityAIAssistantService {
       esClient: {
         asInternalUser,
       },
+      productDoc: plugins.productDocBase.management,
     });
 
     return new ObservabilityAIAssistantClient({
@@ -150,12 +151,15 @@ export class ObservabilityAIAssistantService {
   }): Promise<ChatFunctionClient> {
     const fnClient = new ChatFunctionClient(screenContexts);
 
+    const [, pluginsStart] = await this.core.getStartServices();
+
     const params = {
       signal,
       functions: fnClient,
       resources,
       client,
       scopes,
+      pluginsStart,
     };
 
     await Promise.all(
