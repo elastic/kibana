@@ -21,3 +21,9 @@ export const MAINTENANCE_WINDOW_NO_CATEGORY_TITLE = i18n.translate(
     defaultMessage: 'One or more maintenance windows are running',
   }
 );
+export const MAINTENANCE_WINDOW_PAGE_LINK_TEXT = i18n.translate(
+  'alertsUIShared.maintenanceWindowCallout.maintenanceWindowPageLinkText',
+  {
+    defaultMessage: 'Go to Maintenance Windows',
+  }
+);

@@ -278,7 +278,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     },
     async (context, request, response) => {
       try {
-        const { from, to, dataSource, kuery } = request.query;
+        const { from, to, dataSource, kuery, filters } = request.query;
         const infraMetricsClient = await getInfraMetricsClient({
           request,
           libs,
@@ -311,7 +311,11 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
                     ...termsQuery(METRICSET_MODULE, inventoryModel.requiredIntegration.beats),
                   ],
                   minimum_should_match: 1,
-                  filter: [...rangeQuery(from, to), ...kqlQuery(kuery)],
+                  filter: [
+                    ...rangeQuery(from, to),
+                    ...kqlQuery(kuery),
+                    ...(filters ? [filters] : []),
+                  ],
                 },
               },
             },
@@ -325,6 +329,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
                     ...termQuery(DATASTREAM_DATASET, inventoryModel.requiredIntegration.otel),
                     ...rangeQuery(from, to),
                     ...kqlQuery(kuery),
+                    ...(filters ? [filters] : []),
                   ],
                 },
               },
