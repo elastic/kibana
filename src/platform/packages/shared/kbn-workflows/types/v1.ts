@@ -59,8 +59,9 @@ export interface EsWorkflowStepExecution {
   completedAt?: string;
   executionTimeMs?: number;
   topologicalIndex: number;
-  error?: string;
-  output?: Record<string, any>;
+  error?: string | null;
+  output?: Record<string, any> | null;
+  state?: Record<string, any>;
 }
 
 export enum WorkflowStatus {

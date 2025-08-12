@@ -35,6 +35,7 @@ import { StepFactory } from './step/step_factory';
 import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
 import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
+import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -106,13 +107,18 @@ export class WorkflowsExecutionEnginePlugin
         }
       );
 
+      const workflowExecutionState = new WorkflowExecutionState(
+        workflowExecution as EsWorkflowExecution,
+        workflowExecutionRepository,
+        stepExecutionRepository
+      );
+
       // Create workflow runtime first (simpler, fewer dependencies)
       const workflowRuntime = new WorkflowExecutionRuntimeManager({
         workflowExecution: workflowExecution as EsWorkflowExecution,
-        workflowExecutionRepository,
-        stepExecutionRepository,
         workflowExecutionGraph,
         workflowLogger,
+        workflowExecutionState,
       });
 
       const contextManager = new WorkflowContextManager({
@@ -129,33 +135,7 @@ export class WorkflowsExecutionEnginePlugin
       // Log workflow execution start
       await workflowRuntime.start();
 
-      do {
-        const currentNode = workflowRuntime.getCurrentStep();
-
-        const step = new StepFactory().create(
-          currentNode as any,
-          contextManager,
-          connectorExecutor,
-          workflowRuntime,
-          workflowLogger
-        );
-
-        try {
-          await step.run();
-        } catch (error) {
-          // If an unhandled error occurs in a step, the workflow execution is terminated
-          workflowLogger.logError(
-            `Error executing step ${currentNode.id} (${currentNode.name}): ${error.message}`
-          );
-          await workflowRuntime.setStepResult(currentNode.id, {
-            output: null,
-            error: String(error),
-          });
-          await workflowRuntime.finishStep(currentNode.id);
-          await workflowRuntime.fail(error);
-          break;
-        }
-      } while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING);
+      await run(workflowRuntime, contextManager, connectorExecutor, workflowLogger);
     };
 
     return {
@@ -164,4 +144,52 @@ export class WorkflowsExecutionEnginePlugin
   }
 
   public stop() {}
+}
+
+async function run(
+  workflowRuntime: WorkflowExecutionRuntimeManager,
+  contextManager: WorkflowContextManager,
+  connectorExecutor: ConnectorExecutor,
+  workflowLogger: WorkflowEventLogger
+) {
+  do {
+    const currentNode = workflowRuntime.getCurrentStep();
+
+    const step = new StepFactory().create(
+      currentNode as any,
+      contextManager,
+      connectorExecutor,
+      workflowRuntime,
+      workflowLogger
+    );
+
+    try {
+      await step.run();
+    } catch (error) {
+      // If an unhandled error occurs in a step, the workflow execution is terminated
+      workflowLogger.logError(
+        `Error executing step ${currentNode.id} (${currentNode.name}): ${error.message}`
+      );
+      await workflowRuntime.setStepResult(currentNode.id, {
+        output: null,
+        error: String(error),
+      });
+      await workflowRuntime.finishStep(currentNode.id);
+      break;
+    } finally {
+      try {
+        await workflowRuntime.saveState(); // Ensure state is updated after each step
+      } catch (error) {
+        workflowLogger.logError(
+          `Error saving state after step ${currentNode.id} (${currentNode.name}): ${error.message}`
+        );
+      }
+    }
+
+    // If the currentStepIndex has not explicitly changed (by a node), go to the next step
+    if (currentNode.id === workflowRuntime.getCurrentStep()?.id) {
+      // If the step is still the current step, finish it
+      workflowRuntime.goToNextStep();
+    }
+  } while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING);
 }

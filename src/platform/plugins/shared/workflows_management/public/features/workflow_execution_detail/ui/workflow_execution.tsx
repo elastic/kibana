@@ -90,7 +90,7 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     }
 
     const intervalId = setInterval(() => {
-      if (workflowExecution.status === ExecutionStatus.RUNNING) {
+      if ([ExecutionStatus.RUNNING, ExecutionStatus.PENDING].includes(workflowExecution.status)) {
         refetch();
         return;
       }
