@@ -24,6 +24,7 @@ import {
   SavedObjectModelTransformationDoc,
   SavedObjectModelUnsafeTransformFn,
 } from '@kbn/core-saved-objects-server';
+import * as bulkOverwriteModule from '@kbn/core-saved-objects-migration-server-internal/src/actions/bulk_overwrite_transformed_documents';
 
 export const logFilePath = Path.join(__dirname, 'optimistic_concurrency.test.log');
 
@@ -47,6 +48,22 @@ describe('ZDT upgrades - encountering conversion failures', () => {
       const { runMigrations, savedObjectsRepository } = await prepareScenario({
         discardCorruptObjects: false,
       });
+      const originalImplementation = bulkOverwriteModule.bulkOverwriteTransformedDocuments;
+
+      const spy = jest.spyOn(bulkOverwriteModule, 'bulkOverwriteTransformedDocuments');
+
+      spy.mockImplementation((...args) => {
+        return () =>
+          Promise.all(
+            ['a-0', 'a-3', 'a-4'].map((id) =>
+              savedObjectsRepository.update('sample_a', id, {
+                keyword: 'concurrent update that shouldnt be overwritten',
+              })
+            )
+          ).then(() => {
+            return originalImplementation(...args)();
+          });
+      });
 
       await runMigrations();
 
@@ -60,31 +77,216 @@ describe('ZDT upgrades - encountering conversion failures', () => {
         type: 'sample_b',
       });
 
-      expect(sampleADocs.map((doc) => doc.attributes)).toMatchInlineSnapshot(`
+      expect(sampleADocs).toMatchInlineSnapshot(`
         Array [
           Object {
-            "boolean": true,
-            "keyword": "updated by the migrator",
+            "attributes": Object {
+              "boolean": true,
+              "keyword": "concurrent update that shouldnt be overwritten",
+            },
+            "coreMigrationVersion": "8.8.0",
+            "created_at": "2025-08-12T09:37:18.267Z",
+            "id": "a-4",
+            "managed": false,
+            "namespaces": Array [
+              "default",
+            ],
+            "references": Array [],
+            "score": 0,
+            "sort": undefined,
+            "type": "sample_a",
+            "typeMigrationVersion": "10.2.0",
+            "updated_at": "2025-08-12T09:37:25.650Z",
+            "version": "WzIwLDFd",
           },
           Object {
-            "boolean": true,
-            "keyword": "updated by the migrator",
+            "attributes": Object {
+              "boolean": true,
+              "keyword": "concurrent update that shouldnt be overwritten",
+            },
+            "coreMigrationVersion": "8.8.0",
+            "created_at": "2025-08-12T09:37:18.267Z",
+            "id": "a-3",
+            "managed": false,
+            "namespaces": Array [
+              "default",
+            ],
+            "references": Array [],
+            "score": 0,
+            "sort": undefined,
+            "type": "sample_a",
+            "typeMigrationVersion": "10.2.0",
+            "updated_at": "2025-08-12T09:37:25.651Z",
+            "version": "WzIyLDFd",
           },
           Object {
-            "boolean": true,
-            "keyword": "updated by the migrator",
+            "attributes": Object {
+              "boolean": true,
+              "keyword": "concurrent update that shouldnt be overwritten",
+            },
+            "coreMigrationVersion": "8.8.0",
+            "created_at": "2025-08-12T09:37:18.267Z",
+            "id": "a-0",
+            "managed": false,
+            "namespaces": Array [
+              "default",
+            ],
+            "references": Array [],
+            "score": 0,
+            "sort": undefined,
+            "type": "sample_a",
+            "typeMigrationVersion": "10.2.0",
+            "updated_at": "2025-08-12T09:37:25.651Z",
+            "version": "WzIxLDFd",
           },
           Object {
-            "boolean": true,
-            "keyword": "updated by the migrator",
+            "attributes": Object {
+              "boolean": true,
+              "keyword": "updated by the migrator",
+            },
+            "coreMigrationVersion": "8.8.0",
+            "created_at": "2025-08-12T09:37:18.267Z",
+            "id": "a-1",
+            "managed": false,
+            "namespaces": Array [
+              "default",
+            ],
+            "references": Array [],
+            "score": 0,
+            "sort": undefined,
+            "type": "sample_a",
+            "typeMigrationVersion": "10.2.0",
+            "updated_at": "2025-08-12T09:37:18.267Z",
+            "version": "WzIzLDFd",
           },
           Object {
-            "boolean": true,
-            "keyword": "updated by the migrator",
+            "attributes": Object {
+              "boolean": true,
+              "keyword": "updated by the migrator",
+            },
+            "coreMigrationVersion": "8.8.0",
+            "created_at": "2025-08-12T09:37:18.267Z",
+            "id": "a-2",
+            "managed": false,
+            "namespaces": Array [
+              "default",
+            ],
+            "references": Array [],
+            "score": 0,
+            "sort": undefined,
+            "type": "sample_a",
+            "typeMigrationVersion": "10.2.0",
+            "updated_at": "2025-08-12T09:37:18.267Z",
+            "version": "WzI0LDFd",
           },
         ]
       `);
-      expect(sampleBDocs.map((doc) => doc.id).sort()).toEqual(['b-0', 'b-1', 'b-2', 'b-3', 'b-4']);
+
+      // This ones shouldn't change
+      expect(sampleBDocs).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "attributes": Object {
+              "text": "i am number 0",
+              "text2": "some static text",
+            },
+            "coreMigrationVersion": "8.8.0",
+            "created_at": "2025-08-12T09:37:19.176Z",
+            "id": "b-0",
+            "managed": false,
+            "namespaces": Array [
+              "default",
+            ],
+            "references": Array [],
+            "score": 0,
+            "sort": undefined,
+            "type": "sample_b",
+            "typeMigrationVersion": "10.2.0",
+            "updated_at": "2025-08-12T09:37:19.176Z",
+            "version": "WzI1LDFd",
+          },
+          Object {
+            "attributes": Object {
+              "text": "i am number 1",
+              "text2": "some static text",
+            },
+            "coreMigrationVersion": "8.8.0",
+            "created_at": "2025-08-12T09:37:19.176Z",
+            "id": "b-1",
+            "managed": false,
+            "namespaces": Array [
+              "default",
+            ],
+            "references": Array [],
+            "score": 0,
+            "sort": undefined,
+            "type": "sample_b",
+            "typeMigrationVersion": "10.2.0",
+            "updated_at": "2025-08-12T09:37:19.176Z",
+            "version": "WzI2LDFd",
+          },
+          Object {
+            "attributes": Object {
+              "text": "i am number 2",
+              "text2": "some static text",
+            },
+            "coreMigrationVersion": "8.8.0",
+            "created_at": "2025-08-12T09:37:19.176Z",
+            "id": "b-2",
+            "managed": false,
+            "namespaces": Array [
+              "default",
+            ],
+            "references": Array [],
+            "score": 0,
+            "sort": undefined,
+            "type": "sample_b",
+            "typeMigrationVersion": "10.2.0",
+            "updated_at": "2025-08-12T09:37:19.176Z",
+            "version": "WzI3LDFd",
+          },
+          Object {
+            "attributes": Object {
+              "text": "i am number 3",
+              "text2": "some static text",
+            },
+            "coreMigrationVersion": "8.8.0",
+            "created_at": "2025-08-12T09:37:19.176Z",
+            "id": "b-3",
+            "managed": false,
+            "namespaces": Array [
+              "default",
+            ],
+            "references": Array [],
+            "score": 0,
+            "sort": undefined,
+            "type": "sample_b",
+            "typeMigrationVersion": "10.2.0",
+            "updated_at": "2025-08-12T09:37:19.176Z",
+            "version": "WzI4LDFd",
+          },
+          Object {
+            "attributes": Object {
+              "text": "i am number 4",
+              "text2": "some static text",
+            },
+            "coreMigrationVersion": "8.8.0",
+            "created_at": "2025-08-12T09:37:19.176Z",
+            "id": "b-4",
+            "managed": false,
+            "namespaces": Array [
+              "default",
+            ],
+            "references": Array [],
+            "score": 0,
+            "sort": undefined,
+            "type": "sample_b",
+            "typeMigrationVersion": "10.2.0",
+            "updated_at": "2025-08-12T09:37:19.176Z",
+            "version": "WzI5LDFd",
+          },
+        ]
+      `);
     });
   });
 
