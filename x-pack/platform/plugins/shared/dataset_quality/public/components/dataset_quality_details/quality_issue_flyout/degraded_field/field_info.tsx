@@ -85,15 +85,19 @@ export const DegradedFieldInfo = () => {
                 <span>{degradedFieldAnalysis?.fieldMapping?.ignore_above}</span>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-values">
-              <EuiTitle size="xxs">
-                <span>{degradedFieldValuesColumnName}</span>
-              </EuiTitle>
-              {degradedFieldValues?.values.map((value, idx) => {
+            <EuiTitle size="xxs">
+              <span>{degradedFieldValuesColumnName}</span>
+            </EuiTitle>
+            <EuiFlexGroup
+              direction="column"
+              gutterSize="m"
+              data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-values"
+            >
+              {degradedFieldValues?.values.map((value) => {
                 return (
-                  <div key={idx} css={{ lineHeight: '1.6', width: '100%' }}>
-                    <ExpandableTruncatedText text={value} />
-                  </div>
+                  <EuiFlexItem css={{ lineHeight: '1.6', width: '100%' }}>
+                    <ExpandableTruncatedText text={value} truncatedTextLength={95} />
+                  </EuiFlexItem>
                 );
               })}
             </EuiFlexGroup>
