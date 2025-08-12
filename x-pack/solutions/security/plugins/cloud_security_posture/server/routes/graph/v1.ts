@@ -36,7 +36,7 @@ export const getGraph = async ({
   showUnknownTarget,
   nodesLimit,
 }: GetGraphParams): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
-  indexPatterns = indexPatterns ?? ['logs-*'];
+  indexPatterns = indexPatterns ?? [`.alerts-security.alerts-${spaceId}`, 'logs-*'];
 
   logger.trace(
     `Fetching graph for [originEventIds: ${originEventIds.join(
