@@ -7,20 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Fields } from '@elastic/elasticsearch/lib/api/types';
-import { type ElasticsearchClient, type Logger } from '@kbn/core/server';
+import type { Fields } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger } from '@kbn/core/server';
 import { isNumber } from 'lodash';
-import { type MetricField } from '../types';
-import { deduplicateFields } from './deduplicate_fields';
-import { getEcsFieldDescriptions } from './get_ecs_field_descriptions';
-import { extractMetricFields } from './extract_metric_fields';
-import { sampleAndProcessMetricFields } from './sample_metric_documents';
-import { extractDimensions } from './extract_dimensions';
-import { buildMetricField } from './build_metric_field';
-import { retrieveFieldCaps } from './retrieve_fieldcaps';
-import { applyPagination } from './apply_pagination';
+import { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import type { MetricField, MetricFieldsResponse } from '../../../common/fields/types';
+import { deduplicateFields } from '../../lib/fields/deduplicate_fields';
+import { getEcsFieldDescriptions } from '../../lib/fields/get_ecs_field_descriptions';
+import { extractMetricFields } from '../../lib/fields/extract_metric_fields';
+import { sampleAndProcessMetricFields } from '../../lib/fields/sample_metric_documents';
+import { extractDimensions } from '../../lib/dimensions/extract_dimensions';
+import { buildMetricField } from '../../lib/fields/build_metric_field';
+import { retrieveFieldCaps } from '../../lib/fields/retrieve_fieldcaps';
+import { applyPagination } from '../../lib/pagination/apply_pagination';
 
-export async function fetchMetricFields({
+export async function getMetricFields({
   indexPattern,
   fields = '*',
   from,
@@ -30,7 +31,7 @@ export async function fetchMetricFields({
   size,
   logger,
 }: {
-  esClient: ElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   indexPattern: string;
   fields?: Fields;
   from: string;
@@ -38,12 +39,12 @@ export async function fetchMetricFields({
   page: number;
   size: number;
   logger: Logger;
-}): Promise<{ fields: MetricField[]; total: number; error?: string }> {
+}): Promise<MetricFieldsResponse> {
   if (!indexPattern) return { fields: [], total: 0 };
 
   // Wait for all field caps requests to complete
   const dataStreamFieldCapsMap = await retrieveFieldCaps({
-    esClient,
+    esClient: esClient.client,
     indexPattern,
     to,
     from,
@@ -64,18 +65,15 @@ export async function fetchMetricFields({
     const allDimensions = extractDimensions(fieldCaps);
 
     // Build initial data stream objects for deduplication
-    const initialFields: MetricField[] = [];
-    for (const { fieldName, type, typeInfo } of metricFields) {
-      initialFields.push(
-        buildMetricField({
-          name: fieldName,
-          index: dataStreamName, // Use data stream name as index value
-          dimensions: allDimensions, // Use all dimensions initially
-          type,
-          typeInfo,
-        })
-      );
-    }
+    const initialFields = metricFields.map(({ fieldName, type, typeInfo }) =>
+      buildMetricField({
+        name: fieldName,
+        index: dataStreamName,
+        dimensions: allDimensions,
+        type,
+        typeInfo,
+      })
+    );
 
     // Deduplicate fields before sampling to reduce work
     const deduped = deduplicateFields(initialFields);
@@ -112,7 +110,6 @@ export async function fetchMetricFields({
       dimensions: field.dimensions.sort((a, b) => a.name.localeCompare(b.name)),
     };
   });
-  // Sort fields alphabetically by name
 
   return { fields: finalFields, total: allMetricFields.length };
 }

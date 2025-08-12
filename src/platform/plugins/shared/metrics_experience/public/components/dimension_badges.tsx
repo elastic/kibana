@@ -22,11 +22,11 @@ interface DimensionBadgesProps {
   maxDisplay?: number;
 }
 
-export const DimensionBadges: React.FC<DimensionBadgesProps> = ({
+export const DimensionBadges = ({
   dimensions,
   metricName,
   maxDisplay = 10,
-}) => {
+}: DimensionBadgesProps) => {
   // Extract top-level namespace from metric name (e.g., "system" from "system.network.in.bytes")
   const topLevelNamespace = metricName.split('.')[0] + '.';
 

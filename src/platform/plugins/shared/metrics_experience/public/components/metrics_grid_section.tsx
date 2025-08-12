@@ -32,11 +32,7 @@ interface MetricsGridSectionProps {
   timeRange: { from?: string; to?: string };
 }
 
-export const MetricsGridSection: React.FC<MetricsGridSectionProps> = ({
-  indexPattern,
-  timeRange,
-}) => {
-  // Get EUI theme for styling
+export const MetricsGridSection = ({ indexPattern, timeRange }: MetricsGridSectionProps) => {
   const { euiTheme } = useEuiTheme();
 
   // Get grid-specific state from Redux store

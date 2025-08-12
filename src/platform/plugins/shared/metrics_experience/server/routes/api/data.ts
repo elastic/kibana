@@ -16,7 +16,7 @@
 import { z } from '@kbn/zod';
 import { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { createRoute } from '../create_route';
-import { extractDimensionsFromESQL } from '../../lib/extract_dimensions_from_esql';
+import { extractDimensionsFromESQL } from '../../lib/dimensions/extract_dimensions_from_esql';
 
 export const metricDataApi = createRoute({
   endpoint: 'POST /internal/metrics_experience/data',

@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { type Logger } from '@kbn/core/server';
-import {
-  ErrorResponseBase,
-  MsearchMultiSearchResult,
-  MsearchRequestItem,
-} from '@elastic/elasticsearch/lib/api/types';
-import { DataStreamFieldCapsMap, Dimension, MetricField } from '../types';
-import { extractDimensions } from './extract_dimensions';
+import { ErrorResponseBase, MsearchRequestItem } from '@elastic/elasticsearch/lib/api/types';
+import { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import { estypes } from '@elastic/elasticsearch';
+import { InferSearchResponseOf } from '@kbn/es-types';
+import { DataStreamFieldCapsMap } from '../../types';
+import type { Dimension } from '../../../common/dimensions/types';
+import type { MetricField } from '../../../common/fields/types';
+import { extractDimensions } from '../dimensions/extract_dimensions';
 
 export type SampleMetricDocumentsResults = Promise<Map<string, string[]>>;
 
@@ -24,26 +24,35 @@ function isErrorResponseBase(subject: any): subject is ErrorResponseBase {
 }
 
 function processSampleMetricDocuments(
-  response: MsearchMultiSearchResult<{ fields: Record<string, any> }>,
+  response: {
+    responses: InferSearchResponseOf<
+      {
+        fields: Record<string, any>;
+      },
+      estypes.MsearchRequest
+    >[];
+  },
   metricFields: MetricField[],
   logger: Logger
 ) {
-  const metricsDocumentMap = new Map<string, string[]>();
-
   // Process responses for each metric
-  for (let i = 0; i < metricFields.length; i++) {
-    const metricName = metricFields[i].name;
-    const searchResult = response.responses[i];
-    if (isErrorResponseBase(searchResult)) {
-      logger.error(`Error sampling document for metric ${metricName}: ${searchResult.error}`);
-      metricsDocumentMap.set(metricName, []);
-      continue;
-    }
-    if (searchResult && searchResult.hits.hits?.length > 0) {
-      const fields = searchResult.hits.hits[0].fields || {};
-      metricsDocumentMap.set(metricName, Object.keys(fields));
-    }
-  }
+  const metricsDocumentMap = new Map<string, string[]>(
+    metricFields.map(({ name }, index) => {
+      const searchResult = response.responses[index];
+
+      if (isErrorResponseBase(searchResult)) {
+        logger.error(`Error sampling document for metric ${name}: ${searchResult.error}`);
+        return [name, []];
+      }
+
+      if (searchResult?.hits.hits?.length) {
+        const fields = searchResult.hits.hits[0].fields ?? {};
+        return [name, Object.keys(fields)];
+      }
+
+      return [name, []];
+    })
+  );
 
   return metricsDocumentMap;
 }
@@ -53,7 +62,7 @@ export async function sampleMetricDocuments({
   metricFields,
   logger,
 }: {
-  esClient: ElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   metricFields: MetricField[];
   logger: Logger;
 }): SampleMetricDocumentsResults {
@@ -74,11 +83,15 @@ export async function sampleMetricDocuments({
             field,
           },
         },
-        _source: true,
+        _source: false,
         fields: dimensions.map((dimension) => dimension.name),
       });
     }
-    const response = await esClient.msearch<{ fields: Record<string, any> }>({ body });
+    const response = await esClient.msearch<{ fields: Record<string, any> }>(
+      'sample_metrics_documents',
+      { body }
+    );
+
     return processSampleMetricDocuments(response, metricFields, logger);
   } catch (error) {
     const metricsDocumentMap = new Map<string, string[]>();
@@ -95,7 +108,7 @@ export async function sampleAndProcessMetricFields({
   dataStreamFieldCapsMap,
   logger,
 }: {
-  esClient: ElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   metricFields: MetricField[];
   dataStreamFieldCapsMap: DataStreamFieldCapsMap;
   logger: Logger;

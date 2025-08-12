@@ -23,7 +23,7 @@ import {
   EuiFlyoutHeader,
 } from '@elastic/eui';
 import React from 'react';
-import { MetricField } from '../types';
+import type { MetricField } from '../../common/fields/types';
 import { categorizeDimensions } from '../utils';
 import { DimensionBadges } from './dimension_badges';
 
@@ -34,12 +34,12 @@ interface MetricInsightsFlyoutProps {
   onClose: () => void;
 }
 
-export const MetricInsightsFlyout: React.FC<MetricInsightsFlyoutProps> = ({
+export const MetricInsightsFlyout = ({
   metric,
   esqlQuery,
   isOpen,
   onClose,
-}) => {
+}: MetricInsightsFlyoutProps) => {
   if (!isOpen) return null;
 
   const { requiredDimensions, optionalDimensions } = categorizeDimensions(

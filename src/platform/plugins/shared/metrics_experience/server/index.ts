@@ -11,6 +11,8 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 
 import { config, configSchema } from './config';
 
+export type { MetricsExperienceRouteRepository } from './routes';
+
 const plugin = async (initContext: PluginInitializerContext) => {
   const { MetricsExperiencePlugin } = await import('./plugin');
   return new MetricsExperiencePlugin(initContext);

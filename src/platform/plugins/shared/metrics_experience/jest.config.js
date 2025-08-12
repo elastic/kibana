@@ -12,5 +12,5 @@ const path = require('path');
 module.exports = {
   preset: '@kbn/test',
   rootDir: path.resolve(__dirname, '../../../../..'),
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/apm_sources_access'],
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/metrics_experience'],
 };

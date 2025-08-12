@@ -8,36 +8,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { HttpStart } from '@kbn/core/public';
-
-interface DimensionValue {
-  value: string;
-  field: string;
-}
-
-interface DimensionsRequest {
-  http?: HttpStart;
-  dimensions: string[];
-  indices?: string[];
-  from?: string;
-  to?: string;
-}
-
-interface DimensionsResponse {
-  values: DimensionValue[];
-}
-
-const fetchDimensionValues = async ({
-  http,
-  ...rest
-}: DimensionsRequest): Promise<DimensionValue[]> => {
-  const response = await http?.post<DimensionsResponse>('/internal/metrics_experience/dimensions', {
-    body: JSON.stringify(rest),
-  });
-
-  return response?.values || [];
-};
+import { useMetricsExperience } from './use_metrics_experience';
 
 export const useDimensionsQuery = (params: {
   dimensions: string[];
@@ -45,12 +16,24 @@ export const useDimensionsQuery = (params: {
   from?: string;
   to?: string;
 }) => {
-  const {
-    services: { http },
-  } = useKibana();
+  const { callApi } = useMetricsExperience();
+
   return useQuery({
     queryKey: ['dimensionValues', params],
-    queryFn: () => fetchDimensionValues({ ...params, http }),
+    queryFn: async ({ signal }) => {
+      const { dimensions, ...rest } = params;
+      const response = await callApi('GET /internal/metrics_experience/dimensions', {
+        params: {
+          query: {
+            dimensions: JSON.stringify(dimensions),
+            ...rest,
+          },
+        },
+        signal,
+      });
+
+      return response?.values || [];
+    },
     enabled: params.dimensions.length > 0, // Only fetch when dimensions are selected
     staleTime: 5 * 60 * 1000, // 5 minutes - dimension values change more frequently than fields
   });

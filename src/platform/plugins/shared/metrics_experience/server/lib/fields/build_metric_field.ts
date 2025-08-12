@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
-import { Dimension, type MetricField } from '../types';
+import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
+import type { Dimension } from '../../../common/dimensions/types';
+import type { MetricField } from '../../../common/fields/types';
 
 export function buildMetricField({
   name,

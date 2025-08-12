@@ -14,7 +14,7 @@ interface MetricsCountProps {
   count: number;
 }
 
-export const MetricsCount: React.FC<MetricsCountProps> = ({ count }) => {
+export const MetricsCount = ({ count }: MetricsCountProps) => {
   return (
     <>
       <EuiSpacer size="xs" />

@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dimensionsRoutes } from './dimensions/route';
-import { metricDataApi as metricDataRoutes } from './api/data';
-import { fieldsRoutes } from './fields/route';
+import { createContext } from 'react';
+import type { MetricsExperienceService } from '../types';
 
-export const routeRepository = {
-  ...dimensionsRoutes,
-  ...fieldsRoutes,
-  ...metricDataRoutes, // TODO: Remove once we integrate with Lens for the charts
-};
+export const MetricsExperienceContext = createContext<MetricsExperienceService | undefined>(
+  undefined
+);
 
-export type MetricsExperienceRouteRepository = typeof routeRepository;
+export const MetricsExperienceProvider = MetricsExperienceContext.Provider;

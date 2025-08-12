@@ -8,10 +8,11 @@
  */
 
 import { z } from '@kbn/zod';
-import { fetchMetricFields } from '../../lib/fetch_metric_fields';
+import { createTracedEsClient } from '@kbn/traced-es-client';
+import { getMetricFields } from './get_metric_fields';
 import { createRoute } from '../create_route';
 
-export const fieldsApi = createRoute({
+export const getFieldsRoute = createRoute({
   endpoint: 'GET /internal/metrics_experience/fields',
   security: { authz: { requiredPrivileges: ['read'] } },
   params: z.object({
@@ -19,17 +20,22 @@ export const fieldsApi = createRoute({
       index: z.string().default('metrics-*'),
       to: z.string().default('now'),
       from: z.string().default('now-15m'),
-      fields: z.string().default('*'),
-      page: z.string().default('1'),
-      size: z.string().default('100'),
+      fields: z.union([z.string(), z.array(z.string())]).default('*'),
+      page: z.coerce.number().int().positive().default(1),
+      size: z.coerce.number().int().positive().default(100),
     }),
   }),
-  handler: async ({ context, params, logger, response }) => {
+  handler: async ({ context, params, logger }) => {
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const page = parseInt(params.query.page, 10);
-    const size = parseInt(params.query.size, 10);
-    const { fields, total } = await fetchMetricFields({
-      esClient,
+    const page = params.query.page;
+    const size = params.query.size;
+
+    const { fields, total } = await getMetricFields({
+      esClient: createTracedEsClient({
+        logger,
+        client: esClient,
+        plugin: 'metrics_experience',
+      }),
       indexPattern: params.query.index,
       from: params.query.from,
       to: params.query.to,
@@ -46,3 +52,7 @@ export const fieldsApi = createRoute({
     };
   },
 });
+
+export const fieldsRoutes = {
+  ...getFieldsRoute,
+};

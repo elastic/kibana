@@ -13,6 +13,8 @@
     "@kbn/esql-ast",
     "@kbn/shared-ux-utility",
     "@kbn/core-elasticsearch-server",
+    "@kbn/server-route-repository-client",
+    "@kbn/traced-es-client",
     "@kbn/es-query",
     "@kbn/datemath",
     "@kbn/discover-utils",
@@ -20,4 +22,3 @@
     "@kbn/zod"
   ]
 }
-

@@ -13,10 +13,10 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@tanstack/react-query';
-import { HttpStart } from '@kbn/core/public';
 import { createESQLQuery } from '../utils/create_esql_query';
+import { useMetricsExperience } from './use_metrics_experience';
+import { MetricsExperienceRepositoryClient } from '../api';
 
 interface ChartData {
   x: number;
@@ -42,17 +42,11 @@ interface UseMetricDataParams {
   index?: string;
   dimensions?: string[];
   filters?: Array<{ field: string; value: string }>;
-  http?: HttpStart;
-}
-
-interface DataApiResponse {
-  data: ChartData[];
-  esql: string;
-  hasDimensions: boolean;
+  callApi: MetricsExperienceRepositoryClient;
 }
 
 const fetchMetricData = async ({
-  http,
+  callApi,
   metricName,
   esqlQuery,
   timeRange,
@@ -60,7 +54,7 @@ const fetchMetricData = async ({
   index,
   dimensions,
   filters,
-}: UseMetricDataParams): Promise<MetricDataResult> => {
+}: UseMetricDataParams) => {
   // Convert EUI date strings to ISO strings for API
   const fromDate = dateMath.parse(timeRange.from || 'now-1h');
   const toDate = dateMath.parse(timeRange.to || 'now', { roundUp: true });
@@ -80,17 +74,19 @@ const fetchMetricData = async ({
       filters,
     });
 
-  const response = await http?.post<DataApiResponse>('/internal/metrics_experience/data', {
-    body: JSON.stringify({
-      from: fromDate.toISOString(),
-      to: toDate.toISOString(),
-      esql,
-      filters: filters || [], // Include filters array
-    }),
+  const response = await callApi('POST /internal/metrics_experience/data', {
+    params: {
+      body: {
+        from: fromDate.toISOString(),
+        to: toDate.toISOString(),
+        esql,
+        filters: filters || [], // Include filters array
+      },
+    },
   });
 
   return {
-    data: response?.data || [],
+    data: (response?.data || []) as MetricDataResult['data'],
     esqlQuery: response?.esql || '',
     hasDimensions: response?.hasDimensions || false,
   };
@@ -104,10 +100,9 @@ export const useMetricDataQuery = ({
   index,
   dimensions,
   filters,
-}: UseMetricDataParams) => {
-  const {
-    services: { http },
-  } = useKibana();
+}: Omit<UseMetricDataParams, 'callApi'>) => {
+  const { callApi } = useMetricsExperience();
+
   return useQuery({
     queryKey: [
       'metricData',
@@ -122,7 +117,7 @@ export const useMetricDataQuery = ({
     ],
     queryFn: () =>
       fetchMetricData({
-        http,
+        callApi,
         metricName,
         esqlQuery,
         timeRange,

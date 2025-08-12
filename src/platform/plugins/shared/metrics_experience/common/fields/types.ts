@@ -7,20 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MetricField } from '../types';
+import { Dimension } from '../dimensions/types';
 
-export function applyPagination({
-  metricFields,
-  page,
-  size,
-}: {
-  metricFields: MetricField[];
-  page: number;
-  size: number;
-}) {
-  // For the first page, we need to start at Zero, for the remaining pages
-  // offset by 1 then multiply by size
-  const start = page === 1 ? page - 1 : (page - 1) * size;
-  const end = page * size;
-  return metricFields.slice(start, end);
+export interface MetricField {
+  name: string;
+  index: string; // TODO: Change this to `datastream`
+  dimensions: Array<Dimension>;
+  type: string;
+  time_series_metric?: string;
+  unit?: string;
+  description?: string;
+  source?: string;
+  stability?: string;
+  display?: string;
+  no_data?: boolean;
+}
+
+export interface MetricFieldsResponse {
+  fields: MetricField[];
+  total: number;
+  error?: string;
 }
