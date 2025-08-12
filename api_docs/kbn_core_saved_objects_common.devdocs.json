@@ -1288,12 +1288,12 @@
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
           },
           {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/common/types.ts"
+            "plugin": "@kbn/upgrade-assistant-pkg-common",
+            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts"
           },
           {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/common/types.ts"
+            "plugin": "@kbn/upgrade-assistant-pkg-common",
+            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts"
           },
           {
             "plugin": "savedObjectsTagging",

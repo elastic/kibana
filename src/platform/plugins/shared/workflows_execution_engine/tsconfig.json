@@ -18,6 +18,8 @@
     "@kbn/workflows",
     "@kbn/task-manager-plugin",
     "@kbn/zod",
+    "@kbn/apm-utils",
+    "@kbn/es-query",
   ],
   "exclude": [
     "target/**/*"
