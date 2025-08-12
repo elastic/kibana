@@ -40,7 +40,6 @@ export function GroupStreamModificationFlyout({
   const [formData, setFormData] = React.useState({
     name: existingStream?.name ?? '',
     description: existingStream?.description ?? '',
-    category: existingStream?.group.category ?? '',
     owner: existingStream?.group.owner ?? '',
     tier: existingStream?.group.tier.toString() ?? '1',
     relationships:
@@ -148,7 +147,7 @@ export function GroupStreamModificationFlyout({
               // name: formData.name,
               description: formData.description,
               group: {
-                category: formData.category,
+                type: 'group',
                 owner: formData.owner,
                 tier: parseInt(
                   formData.tier,
@@ -226,27 +225,6 @@ export function GroupStreamModificationFlyout({
             name="description"
             value={formData.description}
             onChange={handleInputChange}
-          />
-        </EuiFormRow>
-        <EuiFormRow label="Category">
-          <EuiComboBox
-            placeholder="Select or create a category"
-            singleSelection={{ asPlainText: true }}
-            options={[
-              { label: 'products' },
-              { label: 'applications' },
-              { label: 'services' },
-              { label: 'infrastructure' },
-              { label: 'orgs' },
-              { label: 'GitHub' },
-            ]}
-            selectedOptions={formData.category ? [{ label: formData.category }] : []}
-            onChange={(selectedOptions) =>
-              setFormData({ ...formData, category: selectedOptions[0]?.label || '' })
-            }
-            onCreateOption={(searchValue) =>
-              setFormData({ ...formData, category: searchValue.trim() })
-            }
           />
         </EuiFormRow>
         <EuiFormRow

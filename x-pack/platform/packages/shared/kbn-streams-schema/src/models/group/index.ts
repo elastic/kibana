@@ -22,7 +22,7 @@ const streamRelationshipSchema = z.object({
 });
 
 export interface Group {
-  category: string;
+  type: 'group';
   owner: string;
   tier: 1 | 2 | 3 | 4;
   tags: string[];
@@ -35,7 +35,7 @@ export interface Group {
 export const Group: Validation<unknown, Group> = validation(
   z.unknown(),
   z.object({
-    category: z.string(),
+    type: z.literal('group'),
     owner: z.string(),
     tier: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
     tags: z.array(z.string()),

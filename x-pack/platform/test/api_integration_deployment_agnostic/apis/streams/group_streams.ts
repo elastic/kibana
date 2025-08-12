@@ -287,7 +287,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
 function createGroupStreamDefinition(members: string[]) {
   return {
-    category: 'test',
+    type: 'group',
     owner: 'test_user',
     tier: 1,
     tags: [],

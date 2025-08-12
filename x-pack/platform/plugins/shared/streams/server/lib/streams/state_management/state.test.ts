@@ -62,7 +62,7 @@ describe('State', () => {
       name: 'group_stream',
       description: '',
       group: {
-        category: 'test',
+        type: 'group',
         owner: 'test_user',
         tier: 1,
         tags: [],
@@ -131,7 +131,7 @@ describe('State', () => {
                 description: '',
                 name: 'whatever',
                 group: {
-                  category: 'test',
+                  type: 'group',
                   owner: 'test_user',
                   tier: 1,
                   tags: [],
@@ -170,7 +170,7 @@ describe('State', () => {
                 description: '',
                 name: 'new_group_stream',
                 group: {
-                  category: 'test',
+                  type: 'group',
                   owner: 'test_user',
                   tier: 1,
                   tags: [],
@@ -209,7 +209,7 @@ describe('State', () => {
                 name: 'stream_that_fails',
                 description: 'Something went wrong',
                 group: {
-                  category: 'test',
+                  type: 'group',
                   owner: 'test_user',
                   tier: 1,
                   tags: [],
@@ -332,7 +332,7 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
               name: 'and_another',
               description: '',
               group: {
-                category: 'test',
+                type: 'group',
                 owner: 'test_user',
                 tier: 1,
                 tags: [],
