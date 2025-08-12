@@ -234,7 +234,7 @@ export class IndexUpdateService {
     return queryText;
   }
 
-  // Accumulate updates in buffer with undo
+  // Accumulate actions in a buffer
   private bufferState$: Observable<BulkUpdateOperations> = this._actions$.pipe(
     scan((acc: BulkUpdateOperations, action: Action) => {
       switch (action.type) {
@@ -246,7 +246,6 @@ export class IndexUpdateService {
           return acc.slice(0, -1); // remove last
         case 'saved':
           // Clear the buffer after save
-          // TODO check for update response
           return [];
         case 'discard-unsaved-values':
           return [];
@@ -284,7 +283,7 @@ export class IndexUpdateService {
     shareReplay(1) // keep latest buffer for retries
   );
 
-  /** Docs that are pending to be saved*/
+  /** Doc updates/additions that are pending to be saved */
   public readonly savingDocs$: Observable<PendingSave> = this.bufferState$.pipe(
     map((updates) => {
       return updates
@@ -435,8 +434,6 @@ export class IndexUpdateService {
         )
         .subscribe({
           next: ({ updates: bulkUpdateOperations, response, rows, dataView }) => {
-            // TODO do we need to re-fetch docs using _mget, in order to retrieve a full doc update?
-
             const mappedResponse = response.items.reduce((acc, item, index) => {
               // Updates that were successful
               const updateItem = Object.values(item)[0] as BulkResponseItem;
@@ -539,9 +536,9 @@ export class IndexUpdateService {
             const columnNames = columns.map(({ name }) => name);
             const resultRows: DataTableRecord[] = values
               .map((row) => zipObject(columnNames, row))
-              .map((row, idx: number) => {
+              .map((row) => {
                 return {
-                  id: String(idx),
+                  id: row._id,
                   raw: row,
                   flattened: row,
                 } as unknown as DataTableRecord;
