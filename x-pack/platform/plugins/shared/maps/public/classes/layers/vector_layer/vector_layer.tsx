@@ -16,6 +16,7 @@ import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } fro
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Writable } from '@kbn/utility-types';
 import { AbstractLayer } from '../layer';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
@@ -49,6 +50,7 @@ import {
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,
+  JoinSourceDescriptor,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
 import { isESVectorTileSource } from '../../sources/es_source';
@@ -208,7 +210,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
         // right.id is uuid used to track requests in inspector
         const clonedJoinId = uuidv4();
-        joinDescriptor.right.id = clonedJoinId;
+        (joinDescriptor.right as Writable<JoinSourceDescriptor>).id = clonedJoinId;
 
         // Update all data driven styling properties using join fields
         if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {
