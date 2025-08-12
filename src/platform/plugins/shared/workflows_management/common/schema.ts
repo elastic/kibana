@@ -20,9 +20,7 @@ const connectors: ConnectorContract[] = [
         message: z.string(),
       })
       .required(),
-    outputSchema: z.object({
-      message: z.string(),
-    }),
+    outputSchema: z.string(),
   },
   {
     type: 'slack',
