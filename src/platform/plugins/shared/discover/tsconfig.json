@@ -113,7 +113,8 @@
     "@kbn/esql-editor",
     "@kbn/controls-plugin",
     "@kbn/esql-types",
-    "@kbn/controls-constants"
+    "@kbn/controls-constants",
+    "@kbn/core-application-browser"
   ],
   "exclude": ["target/**/*"]
 }
