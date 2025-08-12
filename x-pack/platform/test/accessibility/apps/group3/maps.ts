@@ -126,6 +126,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('keyboard navigation', () => {
+      before(async () => {
+        await common.navigateToApp('maps');
+        await maps.loadSavedMap('[Flights] Origin Time Delayed');
+      });
       it('allows the user to tab directly from the open timeslider button to the timeslider', async function () {
         await testSubjects.click('timesliderToggleButton');
         await testSubjects.exists('mapTimeslider');
@@ -133,6 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await hasFocus('timeSlider-previousTimeWindow'));
         // Close the timeslider
         await testSubjects.click('timesliderToggleButton');
+        await a11y.testAppSnapshot();
       });
     });
 
@@ -141,11 +146,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('addLayerButton');
         await testSubjects.exists('mapContainerFlyoutCloseButton');
         expect(await hasFocus('mapContainerFlyoutCloseButton'));
+        await a11y.testAppSnapshot();
       });
 
       it('returns focus to the Add Layer button when closing the Add Layer flyout', async function () {
         await testSubjects.click('mapContainerFlyoutCloseButton');
         expect(await hasFocus('addLayerButton'));
+        await a11y.testAppSnapshot();
       });
 
       it('focuses flyout close button after clicking Edit Layer', async function () {
@@ -153,23 +160,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('editLayerSettingsButton');
         await testSubjects.exists('mapContainerFlyoutCloseButton');
         expect(await hasFocus('mapContainerFlyoutCloseButton'));
+        await a11y.testAppSnapshot();
       });
 
       it('returns focus to the Edit Layer button when closing the Edit Layer flyout', async function () {
         await testSubjects.click('mapContainerFlyoutCloseButton');
         await testSubjects.exists('editLayerSettingsButton');
         expect(await hasFocus('editLayerSettingsButton'));
+        await a11y.testAppSnapshot();
       });
 
       it('focuses flyout close button after clicking Settings', async function () {
         await testSubjects.click('openSettingsButton');
         await testSubjects.exists('mapContainerFlyoutCloseButton');
         expect(await hasFocus('mapContainerFlyoutCloseButton'));
+        await a11y.testAppSnapshot();
       });
 
       it('returns focus to the Settings button when closing the Settings flyout', async function () {
         await testSubjects.click('mapContainerFlyoutCloseButton');
         expect(await hasFocus('openSettingsButton'));
+        await a11y.testAppSnapshot();
       });
     });
   });
