@@ -13,11 +13,8 @@ import { getIndexNameFromLoad } from '../../../../../utils';
 import {
   createAlertsIndex,
   deleteAllAlerts,
-} from '../../../../../../../../common/utils/security_solution';
-import {
-  createUserAndRole,
-  deleteUserAndRole,
-} from '../../../../../../../../common/services/security_solution';
+} from '../../../../../../../config/services/detections_response';
+import { createUserAndRole, deleteUserAndRole } from '../../../../../../../config/services/common';
 
 import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
@@ -45,13 +42,17 @@ export default ({ getService }: FtrProviderContext): void => {
     let legacyAlertsIndexName: string;
     beforeEach(async () => {
       legacyAlertsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/signals/legacy_signals_index'
+        )
       );
       await createAlertsIndex(supertest, log);
     });
 
     afterEach(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/signals/legacy_signals_index'
+      );
       await deleteAllAlerts(supertest, log, es);
     });
 
@@ -68,7 +69,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it("returns the mappings version and a breakdown of alerts' version", async () => {
       const outdatedIndexName = getIndexNameFromLoad(
-        await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/signals/outdated_signals_index'
+        )
       );
 
       const indices = await getAlertsMigrationStatus({ from: '2020-10-10' });
@@ -99,7 +102,9 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       ]);
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/signals/outdated_signals_index'
+      );
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {

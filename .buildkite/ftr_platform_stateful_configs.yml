@@ -138,6 +138,7 @@ enabled:
   - x-pack/platform/test/localization/config.ja_jp.ts
   - x-pack/platform/test/localization/config.fr_fr.ts
   - x-pack/platform/test/localization/config.zh_cn.ts
+  - x-pack/platform/test/localization/config.de_de.ts
   - x-pack/platform/test/alerting_api_integration/basic/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group1/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/config.ts
@@ -245,6 +246,7 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/memory_usage/config.ts
   - x-pack/platform/test/functional/apps/monitoring/config.ts
   - x-pack/platform/test/functional/apps/painless_lab/config.ts
+  - x-pack/platform/test/functional/apps/product_intercept/config.ts
   - x-pack/platform/test/functional/apps/remote_clusters/config.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/platform/test/functional/apps/rollup_job/config.ts
@@ -271,6 +273,7 @@ enabled:
   - x-pack/platform/test/functional/config.upgrade_assistant.ts
   - x-pack/platform/test/functional_cloud/config.ts
   - x-pack/platform/test/functional_cloud/saml.config.ts
+  - x-pack/platform/test/functional_cloud/intercepts.config.ts
   - x-pack/platform/test/licensing_plugin/config.public.ts
   - x-pack/platform/test/licensing_plugin/config.ts
   - x-pack/platform/test/plugin_functional/config.ts

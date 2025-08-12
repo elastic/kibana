@@ -120,6 +120,20 @@ export const createStackManagementNavigationTree = (): NodeDefinition => ({
           ],
         },
         {
+          title: i18nStrings.stackManagement.ai.title,
+          breadcrumbStatus: 'hidden',
+          children: [
+            {
+              link: 'management:genAiSettings',
+              breadcrumbStatus: 'hidden',
+            },
+            {
+              link: 'management:securityAiAssistantManagement',
+              breadcrumbStatus: 'hidden',
+            },
+          ],
+        },
+        {
           title: i18nStrings.stackManagement.content.title,
           breadcrumbStatus: 'hidden',
           children: [
@@ -159,16 +173,13 @@ export const createStackManagementNavigationTree = (): NodeDefinition => ({
               link: 'management:settings',
               breadcrumbStatus: 'hidden',
             },
-            {
-              link: 'management:securityAiAssistantManagement',
-              breadcrumbStatus: 'hidden',
-            },
           ],
         },
       ],
     },
     {
-      link: 'integrations',
+      id: `external-integrations`,
+      link: securityLink(SecurityPageName.configurationsIntegrations),
     },
     {
       cloudLink: 'billingAndSub',

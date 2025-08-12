@@ -148,7 +148,7 @@ components:
           description:  The moment migration was created
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         last_execution:
-          description: The last execution of the rule migration task.
+          description: The last execution details of a rule migration task.
           $ref: '#/components/schemas/RuleMigrationLastExecution'
 
 
@@ -194,7 +194,7 @@ components:
           $ref: '#/components/schemas/RuleMigrationTranslationResult'
         status:
           description: The status of the rule migration process.
-          $ref: '#/components/schemas/RuleMigrationStatus'
+          $ref: './common.schema.yaml#/components/schemas/MigrationStatus'
           default: pending
         comments:
           description: The comments for the migration including a summary from the LLM in markdown.
@@ -225,7 +225,7 @@ components:
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         status:
           description: Indicates if the migration task status.
-          $ref: '#/components/schemas/RuleMigrationTaskStatus'
+          $ref: './common.schema.yaml#/components/schemas/MigrationTaskStatus'
         rules:
           type: object
           description: The rules migration stats.
@@ -261,16 +261,6 @@ components:
           description: The last execution of the migration task.
           $ref: '#/components/schemas/RuleMigrationLastExecution'
 
-    RuleMigrationTaskStatus:
-      type: string
-      description: The status of the migration task.
-      enum: # should match SiemMigrationTaskStatus enum at ../constants.ts
-        - ready
-        - running
-        - stopped
-        - finished
-        - interrupted
-
     RuleMigrationTranslationStats:
       type: object
       description: The rule migration translation stats object.
@@ -300,6 +290,7 @@ components:
                 - result
                 - installable
                 - prebuilt
+                - missing_index
               properties:
                 total:
                   type: integer
@@ -327,6 +318,9 @@ components:
                 prebuilt:
                   type: integer
                   description: The number of rules that have been successfully translated and matched Elastic prebuilt rules.
+                missing_index:
+                  type: integer
+                  description: The number of rules that have the placeholder for the missing index pattern in the query.
             failed:
               type: integer
               description: The number of rules that have failed translation.
@@ -337,15 +331,6 @@ components:
         - full
         - partial
         - untranslatable
-
-    RuleMigrationStatus:
-      type: string
-      description: The status of each rule migration.
-      enum: # should match SiemMigrationsStatus enum at ../constants.ts
-        - pending
-        - processing
-        - completed
-        - failed
 
     RuleMigrationComment:
       type: object
@@ -480,29 +465,16 @@ components:
               description: The user who last updated the resource
 
     RuleMigrationLastExecution:
-      type: object
       description: The last execution of the rule migration task.
-      properties:
-        started_at:
-          type: string
-          description: The moment the last execution started.
-        finished_at:
-          type: string
-          nullable: true
-          description: The moment the last execution finished.
-        connector_id:
-          type: string
-          description: The connector ID used for the last execution.
-        error:
-          type: string
-          nullable: true
-          description: The error message if the last execution failed.
-        is_stopped:
-          type: boolean
-          description: Indicates if the last execution was stopped by the user.
-        skip_prebuilt_rules_matching:
-          type: boolean
-          description: Indicates if the last execution skipped pre-built rule matching.
+      allOf:
+        - type: object
+          required:
+            - connector_id
+          properties:
+            skip_prebuilt_rules_matching:
+              type: boolean
+              description: Indicates if the last execution skipped matching prebuilt rules.
+        - $ref: './common.schema.yaml#/components/schemas/MigrationLastExecution'
 
     RuleMigrationTaskExecutionSettings:
       type: object

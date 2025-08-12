@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }) {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
-      await setup('x-pack/test/functional/es_archives/monitoring/ent_search/with_es', {
+      await setup('x-pack/platform/test/fixtures/es_archives/monitoring/ent_search/with_es', {
         from: 'Oct 15, 2021 @ 14:00:00.000',
         to: 'Oct 15, 2021 @ 22:00:00.000',
       });

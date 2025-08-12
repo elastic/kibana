@@ -6,7 +6,7 @@
  */
 
 import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import { DataSchemaFormat } from './types';
+import type { DataSchemaFormat } from './types';
 import type {
   AggregationConfig,
   BaseMetricsCatalog,
@@ -23,15 +23,17 @@ export class MetricsCatalog<TConfig extends MetricConfigMap>
   private readonly catalog: ResolvedMetricMap<TConfig>;
   private readonly includeLegacyMetrics: boolean;
   private readonly legacyMetrics: Set<keyof TConfig>;
+  private readonly _schema: DataSchemaFormat;
 
   constructor(
     configCatalog: TConfig,
-    private readonly schema: DataSchemaFormat = DataSchemaFormat.ECS,
+    schema: DataSchemaFormat = 'ecs',
     options?: {
       includeLegacyMetrics?: boolean;
       legacyMetrics?: Array<keyof TConfig>;
     }
   ) {
+    this._schema = schema;
     const { includeLegacyMetrics = true, legacyMetrics = [] } = options ?? {};
 
     this.includeLegacyMetrics = includeLegacyMetrics;
@@ -39,6 +41,11 @@ export class MetricsCatalog<TConfig extends MetricConfigMap>
 
     this.catalog = this.resolveSchemaMetrics(configCatalog);
   }
+
+  public get schema(): DataSchemaFormat {
+    return this._schema;
+  }
+
   get<K extends keyof ResolvedMetricMap<TConfig>>(key: K): ResolvedMetricMap<TConfig>[K];
   get(key: string): UnwrapRawConfig<TConfig, keyof TConfig> | undefined;
   get(key: string): UnwrapRawConfig<TConfig, keyof TConfig> | undefined {

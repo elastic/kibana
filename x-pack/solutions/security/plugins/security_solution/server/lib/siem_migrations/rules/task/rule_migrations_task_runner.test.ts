@@ -8,7 +8,7 @@
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import type { AuthenticatedUser } from '@kbn/core/server';
-import type { SiemRuleMigrationsClientDependencies, StoredRuleMigration } from '../types';
+import type { RuleMigrationsClientDependencies, StoredRuleMigration } from '../types';
 import { createRuleMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -40,13 +40,13 @@ jest.mock('./agent', () => ({
 // Mock dependencies
 const mockLogger = loggerMock.create();
 
-const mockDependencies: jest.Mocked<SiemRuleMigrationsClientDependencies> = {
+const mockDependencies: jest.Mocked<RuleMigrationsClientDependencies> = {
   rulesClient: {},
   savedObjectsClient: {},
   inferenceClient: {},
   actionsClient: {},
   telemetry: {},
-} as unknown as SiemRuleMigrationsClientDependencies;
+} as unknown as RuleMigrationsClientDependencies;
 
 const mockUser = {} as unknown as AuthenticatedUser;
 const ruleId = 'test-rule-id';
