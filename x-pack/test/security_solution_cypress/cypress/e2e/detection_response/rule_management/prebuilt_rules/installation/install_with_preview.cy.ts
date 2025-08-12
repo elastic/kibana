@@ -7,32 +7,33 @@
 
 import { omit } from 'lodash';
 import type { Filter } from '@kbn/es-query';
-import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import type { Threshold } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
-import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
-
-import { expectRulesInTable } from '../../../../tasks/alerts_detection_rules';
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
+import {
+  AlertSuppression,
+  type ThreatMapping,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
+import { expectRulesInTable } from '../../../../../tasks/alerts_detection_rules';
+import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import {
   INSTALL_PREBUILT_RULE_BUTTON,
   INSTALL_PREBUILT_RULE_PREVIEW,
   RULES_MANAGEMENT_TABLE,
-} from '../../../../screens/alerts_detection_rules';
-import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../../screens/breadcrumbs';
+} from '../../../../../screens/alerts_detection_rules';
+import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../../../screens/breadcrumbs';
 import {
   installMockPrebuiltRulesPackage,
   installPrebuiltRuleAssets,
-} from '../../../../tasks/api_calls/prebuilt_rules';
-import { createSavedQuery, deleteSavedQueries } from '../../../../tasks/api_calls/saved_queries';
-import { fetchMachineLearningModules } from '../../../../tasks/api_calls/machine_learning';
-import { resetRulesTableState } from '../../../../tasks/common';
-import { login } from '../../../../tasks/login';
+} from '../../../../../tasks/api_calls/prebuilt_rules';
+import { createSavedQuery, deleteSavedQueries } from '../../../../../tasks/api_calls/saved_queries';
+import { fetchMachineLearningModules } from '../../../../../tasks/api_calls/machine_learning';
+import { resetRulesTableState } from '../../../../../tasks/common';
+import { login } from '../../../../../tasks/login';
 import {
   assertRuleInstallationSuccessToastShown,
   assertRulesNotPresentInAddPrebuiltRulesTable,
   clickAddElasticRulesButton,
-} from '../../../../tasks/prebuilt_rules';
+} from '../../../../../tasks/prebuilt_rules';
 import {
   assertAlertSuppressionPropertiesShown,
   assertCommonPropertiesShown,
@@ -50,14 +51,14 @@ import {
   assertWindowSizePropertyShown,
   closePrebuiltRuleInstallFlyout,
   openPrebuiltRuleInstallFlyoutFor,
-} from '../../../../tasks/prebuilt_rules_preview';
-import { visitAddRulesPage } from '../../../../tasks/rules_management';
+} from '../../../../../tasks/prebuilt_rules_preview';
+import { visitAddRulesPage } from '../../../../../tasks/rules_management';
 import {
   deleteAlertsAndRules,
   deleteDataView,
   deletePrebuiltRulesAssets,
   postDataView,
-} from '../../../../tasks/api_calls/common';
+} from '../../../../../tasks/api_calls/common';
 
 describe(
   'Detection rules, Prebuilt Rules Installation workflow',

@@ -6,14 +6,17 @@
  */
 
 import { BOOTSTRAP_PREBUILT_RULES_URL } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { installSinglePrebuiltRule } from '../../../../tasks/prebuilt_rules/install_prebuilt_rules';
-import { resetRulesTableState } from '../../../../tasks/common';
-import { RULE_NAME } from '../../../../screens/alerts_detection_rules';
-import { deletePrebuiltRulesFleetPackage } from '../../../../tasks/api_calls/prebuilt_rules';
-import { login } from '../../../../tasks/login';
-import { visitAddRulesPage, visitRulesManagementTable } from '../../../../tasks/rules_management';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import { expectManagementTableRules } from '../../../../tasks/alerts_detection_rules';
+import { installSinglePrebuiltRule } from '../../../../../tasks/prebuilt_rules/install_prebuilt_rules';
+import { resetRulesTableState } from '../../../../../tasks/common';
+import { RULE_NAME } from '../../../../../screens/alerts_detection_rules';
+import { deletePrebuiltRulesFleetPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
+import { login } from '../../../../../tasks/login';
+import {
+  visitAddRulesPage,
+  visitRulesManagementTable,
+} from '../../../../../tasks/rules_management';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import { expectManagementTableRules } from '../../../../../tasks/alerts_detection_rules';
 
 const PREBUILT_RULES_PACKAGE_INSTALLATION_TIMEOUT_MS = 120000; // 2 minutes
 
