@@ -28,7 +28,6 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MessageImporter } from '@kbn/file-upload-plugin/public';
-import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import type { KibanaContextExtra } from '../types';
 
 interface FilePreviewItem {
@@ -262,17 +261,13 @@ export type ResultsPreviewProps = Omit<FilePreviewItem, 'fileName'>;
 const ResultsPreview: FC<ResultsPreviewProps> = ({ filePreview, mappings, columnNames }) => {
   const columns = useMemo<Array<EuiBasicTableColumn<object>>>(() => {
     return columnNames.map((name) => {
-      let dataType: string = castEsToKbnFieldTypeName(mappings.properties[name]?.type);
-      if (!['string', 'number', 'boolean', 'date'].includes(dataType)) {
-        dataType = 'auto';
-      }
       return {
         field: name,
         name,
-        dataType,
+        dataType: 'auto',
       };
     });
-  }, [columnNames, mappings.properties]);
+  }, [columnNames]);
 
   const items = useMemo(() => {
     return (
