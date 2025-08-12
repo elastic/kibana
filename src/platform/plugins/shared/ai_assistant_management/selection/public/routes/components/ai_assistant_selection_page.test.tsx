@@ -34,7 +34,8 @@ describe('AiAssistantSelectionPage', () => {
 
   const renderComponent = (
     capabilities: CoreStart['application']['capabilities'],
-    securityAIAssistantEnabled = true
+    securityAIAssistantEnabled = true,
+    observabilityAIAssistantEnabled = true
   ) => {
     (useAppContext as jest.Mock).mockReturnValue({
       capabilities,
@@ -43,6 +44,7 @@ describe('AiAssistantSelectionPage', () => {
       kibanaBranch: 'main',
       buildFlavor: 'ess',
       securityAIAssistantEnabled,
+      observabilityAIAssistantEnabled,
     });
     render(<AiAssistantSelectionPage />, {
       wrapper: I18nProvider,
@@ -71,7 +73,7 @@ describe('AiAssistantSelectionPage', () => {
   describe('Observability AI Assistant Card', () => {
     describe('when the feature is disabled', () => {
       it('displays the disabled callout', () => {
-        renderComponent(generateMockCapabilities(false));
+        renderComponent(generateMockCapabilities(false), false, false);
         expect(
           screen.getByTestId('pluginsAiAssistantSelectionPageObservabilityDocumentationCallout')
         ).toBeInTheDocument();
