@@ -434,3 +434,7 @@ export const getCategorizeField = (esql: string): string[] => {
 
   return columns;
 };
+
+export function isCategorizeQuery(query: string): boolean {
+  return getCategorizeField(query).length > 0;
+}

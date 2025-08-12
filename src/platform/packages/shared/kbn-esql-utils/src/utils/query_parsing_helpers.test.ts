@@ -25,6 +25,7 @@ import {
   getArgsFromRenameFunction,
   getCategorizeField,
   findClosestColumn,
+  isCategorizeQuery,
 } from './query_parsing_helpers';
 import { monaco } from '@kbn/monaco';
 import { ESQLColumn, parse, walk } from '@kbn/esql-ast';
@@ -960,6 +961,52 @@ describe('esql query helpers', () => {
       const esql = 'FROM index | STATS COUNT() BY field1';
       const expected: string[] = [];
       expect(getCategorizeField(esql)).toEqual(expected);
+    });
+  });
+
+  describe('isCategorizeQuery', () => {
+    it('should return true if the query has categorize function', () => {
+      expect(isCategorizeQuery('FROM index | STATS COUNT() BY categorize(field1)')).toBe(true);
+    });
+
+    it('should return true if the query has categorize with renamed output', () => {
+      expect(
+        isCategorizeQuery('FROM index | STATS COUNT() BY pattern = categorize(field1)')
+      ).toBeTruthy();
+    });
+
+    it('should return true if the query has categorize in uppercase', () => {
+      expect(isCategorizeQuery('FROM index | STATS COUNT() BY CATEGORIZE(message)')).toBe(true);
+    });
+
+    it('should return true if the query has categorize among multiple breakdowns', () => {
+      expect(
+        isCategorizeQuery('FROM index | STATS COUNT() BY field2, categorize(field1), field3')
+      ).toBe(true);
+    });
+
+    it('should return true for a complex query with categorize', () => {
+      const esql =
+        'FROM index | STATS count_per_day = COUNT() BY Pattern=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day)';
+      expect(isCategorizeQuery(esql)).toBe(true);
+    });
+
+    it('should return false if no categorize function is present', () => {
+      expect(isCategorizeQuery('FROM index | STATS COUNT() BY field1')).toBe(false);
+    });
+
+    it('should return false for an empty query', () => {
+      expect(isCategorizeQuery('')).toBe(false);
+    });
+
+    it('should return false if categorize is only in a comment', () => {
+      expect(
+        isCategorizeQuery('FROM index | STATS COUNT() BY field1 /* categorize(field1) */')
+      ).toBe(false);
+    });
+
+    it('should return false if categorize is in a string literal', () => {
+      expect(isCategorizeQuery('FROM index | WHERE field = "categorize(message)"')).toBe(false);
     });
   });
 });
