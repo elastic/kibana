@@ -248,7 +248,7 @@ export class SLOPlugin
       logFactory: this.initContext.logger,
     });
 
-    core.getStartServices().then(([coreStart, pluginsStart]) => {
+    core.getStartServices().then(([coreStart]) => {
       plugins.cases?.attachmentFramework.registerSuggestion(
         getSLOByServiceName(coreStart, this.initContext.logger.get('cases-suggestion'))
       );

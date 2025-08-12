@@ -73,6 +73,7 @@ export class CasesUiPlugin
     const storage = this.storage;
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
+    const attachmentSuggestionRegistry = this.attachmentSuggestionRegistry;
 
     registerInternalAttachments(
       externalReferenceAttachmentTypeRegistry,
@@ -115,6 +116,7 @@ export class CasesUiPlugin
             kibanaVersion,
             externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry,
+            attachmentSuggestionRegistry,
           });
         },
       });
@@ -156,6 +158,7 @@ export class CasesUiPlugin
     const getCasesContext = getCasesContextLazy({
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+      attachmentSuggestionRegistry: this.attachmentSuggestionRegistry,
       getFilesClient: plugins.files.filesClientFactory.asScoped,
     });
 
@@ -163,6 +166,7 @@ export class CasesUiPlugin
       {
         externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+        attachmentSuggestionRegistry: this.attachmentSuggestionRegistry,
         getFilesClient: plugins.files.filesClientFactory.asScoped,
       },
       {
@@ -182,6 +186,7 @@ export class CasesUiPlugin
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
             getFilesClient: plugins.files.filesClientFactory.asScoped,
+            attachmentSuggestionRegistry: this.attachmentSuggestionRegistry,
           }),
         getCasesContext,
         getRecentCases: (props) =>
@@ -190,6 +195,7 @@ export class CasesUiPlugin
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
             getFilesClient: plugins.files.filesClientFactory.asScoped,
+            attachmentSuggestionRegistry: this.attachmentSuggestionRegistry,
           }),
         // @deprecated Please use the hook useCasesAddToExistingCaseModal
         getAllCasesSelectorModal: (props) =>
@@ -198,6 +204,7 @@ export class CasesUiPlugin
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
             getFilesClient: plugins.files.filesClientFactory.asScoped,
+            attachmentSuggestionRegistry: this.attachmentSuggestionRegistry,
           }),
       },
       hooks: {
