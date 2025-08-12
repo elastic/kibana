@@ -34,7 +34,7 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
             documentsData: [
               {
                 id: '1',
-                type: 'singleentity',
+                type: 'single-entity',
                 sourceDocId: 'YboN3HMzWeEP4tP8xOlatgEAAAAAAAAA',
                 index: '.entities.v1.latest.security_generic_default',
               },
