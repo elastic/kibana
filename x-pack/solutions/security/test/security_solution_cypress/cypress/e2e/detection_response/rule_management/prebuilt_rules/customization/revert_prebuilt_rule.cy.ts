@@ -5,34 +5,37 @@
  * 2.0.
  */
 
-import { RULE_CUSTOMIZATIONS_DIFF_FLYOUT } from '../../../../screens/rule_details_flyout';
-import { RULE_UPGRADE_PER_FIELD_DIFF_LABEL } from '../../../../screens/rule_updates';
-import { POPOVER_ACTIONS_TRIGGER_BUTTON, RULE_NAME_HEADER } from '../../../../screens/rule_details';
-import { getIndexPatterns, getNewRule } from '../../../../objects/rule';
+import { RULE_CUSTOMIZATIONS_DIFF_FLYOUT } from '../../../../../screens/rule_details_flyout';
+import { RULE_UPGRADE_PER_FIELD_DIFF_LABEL } from '../../../../../screens/rule_updates';
+import {
+  POPOVER_ACTIONS_TRIGGER_BUTTON,
+  RULE_NAME_HEADER,
+} from '../../../../../screens/rule_details';
+import { getIndexPatterns, getNewRule } from '../../../../../objects/rule';
 import {
   expectModifiedRuleBadgeToNotBeDisplayed,
   revertRuleFromDetailsPage,
-} from '../../../../tasks/alerts_detection_rules';
+} from '../../../../../tasks/alerts_detection_rules';
 import {
   RULE_DETAILS_REVERT_RULE_BTN,
   RULE_DETAILS_REVERT_RULE_TOOLTIP,
   RULE_NAME,
   TOASTER_MESSAGE,
-} from '../../../../screens/alerts_detection_rules';
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
+} from '../../../../../screens/alerts_detection_rules';
+import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
-} from '../../../../tasks/api_calls/common';
+} from '../../../../../tasks/api_calls/common';
 import {
   createAndInstallMockedPrebuiltRules,
   preventPrebuiltRulesPackageInstallation,
-} from '../../../../tasks/api_calls/prebuilt_rules';
-import { createRule, patchRule } from '../../../../tasks/api_calls/rules';
+} from '../../../../../tasks/api_calls/prebuilt_rules';
+import { createRule, patchRule } from '../../../../../tasks/api_calls/rules';
 
-import { login } from '../../../../tasks/login';
+import { login } from '../../../../../tasks/login';
 
-import { visitRulesManagementTable } from '../../../../tasks/rules_management';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 describe(
   'Detection rules, Prebuilt Rules reversion workflow',
   {

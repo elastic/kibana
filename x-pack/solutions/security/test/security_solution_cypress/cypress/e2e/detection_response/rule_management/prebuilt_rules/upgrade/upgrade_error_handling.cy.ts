@@ -8,26 +8,26 @@
 import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
-} from '../../../../tasks/api_calls/common';
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
+} from '../../../../../tasks/api_calls/common';
+import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import {
   getUpgradeSingleRuleButtonByRuleId,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   UPGRADE_ALL_RULES_BUTTON,
   UPGRADE_SELECTED_RULES_BUTTON,
-} from '../../../../screens/alerts_detection_rules';
-import { selectRulesByName } from '../../../../tasks/alerts_detection_rules';
-import { preventPrebuiltRulesPackageInstallation } from '../../../../tasks/api_calls/prebuilt_rules';
-import { setUpRuleUpgrades } from '../../../../tasks/prebuilt_rules/setup_rule_upgrades';
-import { login } from '../../../../tasks/login';
+} from '../../../../../screens/alerts_detection_rules';
+import { selectRulesByName } from '../../../../../tasks/alerts_detection_rules';
+import { preventPrebuiltRulesPackageInstallation } from '../../../../../tasks/api_calls/prebuilt_rules';
+import { setUpRuleUpgrades } from '../../../../../tasks/prebuilt_rules/setup_rule_upgrades';
+import { login } from '../../../../../tasks/login';
 import {
   interceptUpgradeRequestToFail,
   assertUpgradeRequestIsComplete,
   assertRuleUpgradeFailureToastShown,
   assertRuleUpgradeSuccessToastShown,
   interceptUpgradeRequestToFailPartially,
-} from '../../../../tasks/prebuilt_rules';
-import { visitRulesUpgradeTable } from '../../../../tasks/rules_management';
+} from '../../../../../tasks/prebuilt_rules';
+import { visitRulesUpgradeTable } from '../../../../../tasks/rules_management';
 
 describe(
   'Detection rules, Prebuilt Rules Upgrade - Error handling',

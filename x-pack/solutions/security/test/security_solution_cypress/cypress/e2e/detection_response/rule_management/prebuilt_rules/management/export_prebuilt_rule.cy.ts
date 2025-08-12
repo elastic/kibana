@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { bulkExportRules } from '../../../../tasks/rules_bulk_actions';
-import { exportRuleFromDetailsPage, visitRuleDetailsPage } from '../../../../tasks/rule_details';
-import { getCustomQueryRuleParams, getIndexPatterns } from '../../../../objects/rule';
+import { bulkExportRules } from '../../../../../tasks/rules_bulk_actions';
+import { exportRuleFromDetailsPage, visitRuleDetailsPage } from '../../../../../tasks/rule_details';
+import { getCustomQueryRuleParams, getIndexPatterns } from '../../../../../objects/rule';
 import {
   expectManagementTableRules,
   importRules,
   selectAllRules,
   selectRulesByName,
-} from '../../../../tasks/alerts_detection_rules';
-import { TOASTER, SUCCESS_TOASTER_BODY } from '../../../../screens/alerts_detection_rules';
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
+} from '../../../../../tasks/alerts_detection_rules';
+import { TOASTER, SUCCESS_TOASTER_BODY } from '../../../../../screens/alerts_detection_rules';
+import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
-} from '../../../../tasks/api_calls/common';
+} from '../../../../../tasks/api_calls/common';
 import {
   createAndInstallMockedPrebuiltRules,
   installMockPrebuiltRulesPackage,
-} from '../../../../tasks/api_calls/prebuilt_rules';
-import { createRule, patchRule } from '../../../../tasks/api_calls/rules';
-import { login } from '../../../../tasks/login';
-import { visitRulesManagementTable } from '../../../../tasks/rules_management';
+} from '../../../../../tasks/api_calls/prebuilt_rules';
+import { createRule, patchRule } from '../../../../../tasks/api_calls/rules';
+import { login } from '../../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 const PREBUILT_RULE_ID = 'test-prebuilt-rule-a';
 

@@ -7,9 +7,9 @@
 
 import { getPrebuiltRuleMockOfType } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { IS_SERVERLESS } from '../../../../env_var_names_constants';
-import { waitForPageTitleToBeShown } from '../../../../tasks/alert_assignments';
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
+import { IS_SERVERLESS } from '../../../../../env_var_names_constants';
+import { waitForPageTitleToBeShown } from '../../../../../tasks/alert_assignments';
+import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import {
   getReviewSingleRuleButtonByRuleId,
   getUpgradeSingleRuleButtonByRuleId,
@@ -24,31 +24,31 @@ import {
   CONFLICTS_MODAL_CANCEL,
   RULES_UPDATES_TABLE,
   MODIFIED_RULE_BADGE,
-} from '../../../../screens/alerts_detection_rules';
+} from '../../../../../screens/alerts_detection_rules';
 import {
   expectRulesInTable,
   goToRuleDetailsOf,
   selectRulesByName,
-} from '../../../../tasks/alerts_detection_rules';
+} from '../../../../../tasks/alerts_detection_rules';
 import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
-} from '../../../../tasks/api_calls/common';
-import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
-import { setUpRuleUpgrades } from '../../../../tasks/prebuilt_rules/setup_rule_upgrades';
-import { resetRulesTableState } from '../../../../tasks/common';
-import { login } from '../../../../tasks/login';
+} from '../../../../../tasks/api_calls/common';
+import { installMockPrebuiltRulesPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
+import { setUpRuleUpgrades } from '../../../../../tasks/prebuilt_rules/setup_rule_upgrades';
+import { resetRulesTableState } from '../../../../../tasks/common';
+import { login } from '../../../../../tasks/login';
 import {
   assertRulesNotPresentInRuleUpdatesTable,
   assertRuleUpgradeSuccessToastShown,
   assertUpgradeRequestIsComplete,
   clickRuleUpdatesTab,
   filterPrebuiltRulesUpdateTableByRuleCustomization,
-} from '../../../../tasks/prebuilt_rules';
+} from '../../../../../tasks/prebuilt_rules';
 import {
   visitRulesManagementTable,
   visitRulesUpgradeTable,
-} from '../../../../tasks/rules_management';
+} from '../../../../../tasks/rules_management';
 
 describe(
   'Detection rules, Prebuilt Rules Upgrade Without Preview',
