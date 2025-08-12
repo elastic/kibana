@@ -8,8 +8,8 @@
 import type { Observable } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 
-type IdentifiedFeatureGenerateResponse = Observable<
-  ServerSentEventBase<'identified_feature', { feature: string }>
+type IdentifiedSystemGenerateResponse = Observable<
+  ServerSentEventBase<'identified_system', { description: string }>
 >;
 
-export type { IdentifiedFeatureGenerateResponse };
+export type { IdentifiedSystemGenerateResponse };

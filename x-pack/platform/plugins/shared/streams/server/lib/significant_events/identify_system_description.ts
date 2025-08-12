@@ -27,7 +27,7 @@ interface Dependencies {
   logger: Logger;
 }
 
-export function identifySystemFeatures(
+export function identifySystemDescription(
   params: Params,
   dependencies: Dependencies
 ): Observable<string> {

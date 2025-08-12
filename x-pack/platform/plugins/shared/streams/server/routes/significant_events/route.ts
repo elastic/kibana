@@ -44,7 +44,9 @@ async function assertLicenseAndPricingTier(
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
-export const dateFromString = z.string().transform((input) => new Date(input));
+export const dateFromString: z.ZodEffects<z.ZodString, Date, string> = z
+  .string()
+  .transform((input) => new Date(input));
 export const durationSchema = z.string().transform((value) => {
   const match = value.match(/^(\d+)([mhd])$/);
   if (!match) {
