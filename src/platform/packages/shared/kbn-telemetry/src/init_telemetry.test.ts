@@ -113,7 +113,7 @@ describe('initTelemetry', () => {
           telemetry: { enabled: true, tracing: { enabled: false }, metrics: { enabled: false } },
           monitoring_collection: { enabled: true },
         },
-        ['@opentelemetry/instrumentation-runtime-node'],
+        [],
       ],
       [
         'telemetry metrics and monitoring collection metrics are enabled',
