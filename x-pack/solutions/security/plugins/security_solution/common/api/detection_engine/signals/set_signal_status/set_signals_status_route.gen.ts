@@ -23,7 +23,7 @@ import { AlertStatus } from '../../../model/alert.gen';
  * The reason for closing the alerts
  */
 export type ReasonEnum = z.infer<typeof ReasonEnum>;
-export const ReasonEnum = z.enum(['FALSE_POSITIVE', 'DUPLICATE', 'INVESTIGATION_REQUIRED']);
+export const ReasonEnum = z.enum(['false_positive', 'duplicate', 'investigation_required']);
 export type ReasonEnumEnum = typeof ReasonEnum.enum;
 export const ReasonEnumEnum = ReasonEnum.enum;
 
