@@ -14,8 +14,7 @@
     "../../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
   "exclude": [
-    "target/**/*",
-    "../functional/**/*"
+    "target/**/*"
   ],
   "kbn_references": [
     "@kbn/test",
