@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
+import { EsqlToolDefinition } from '@kbn/onechat-common';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import { useExecuteTool } from '../../../hooks/tools/use_execute_tools';
@@ -29,11 +29,11 @@ import type { ExecuteToolResponse } from '../../../../../common/http_api/tools';
 interface OnechatTestToolFlyoutProps {
   isOpen: boolean;
   isLoading?: boolean;
-  tool?: EsqlToolDefinitionWithSchema;
+  tool?: EsqlToolDefinition;
   onClose: () => void;
 }
 
-const getParameters = (tool: EsqlToolDefinitionWithSchema | undefined) => {
+const getParameters = (tool: EsqlToolDefinition | undefined) => {
   if (!tool) return [];
 
   const fields: Array<{ name: string; label: string; value: string; type: string }> = [];
@@ -83,6 +83,7 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyoutProps> = ({
     if (!tool?.id) return;
 
     const toolParams: Record<string, any> = {};
+    
     getParameters(tool).forEach((field) => {
       if (formData[field.name]) {
         let value = formData[field.name];
@@ -107,7 +108,11 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyoutProps> = ({
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2 id="testFlyoutTitle">Test Tool</h2>
+              <h2 id="testFlyoutTitle">
+                {i18n.translate('xpack.onechat.tools.testFlyout.title', {
+                  defaultMessage: 'Test Tool',
+                })}
+              </h2>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -147,16 +152,17 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyoutProps> = ({
                 </EuiFormRow>
               ))}
               <EuiSpacer size="m" />
-              <EuiFlexGroup>
-                <EuiFlexItem>
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
                   <EuiButton
+                    size="s"
                     fill
                     onClick={handleExecute}
                     isLoading={isExecuting}
                     disabled={!tool?.id}
                   >
                     {i18n.translate('xpack.onechat.tools.testTool.executeButton', {
-                      defaultMessage: 'Execute',
+                      defaultMessage: 'Submit',
                     })}
                   </EuiButton>
                 </EuiFlexItem>

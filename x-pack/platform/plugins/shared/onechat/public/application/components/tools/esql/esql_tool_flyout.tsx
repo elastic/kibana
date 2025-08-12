@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
+import { EsqlToolDefinition, EsqlToolDefinitionWithSchema, EsqlToolParam, ToolType } from '@kbn/onechat-common';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { transformEsqlToolToFormData } from '../../../utils/transform_esql_form_data';
@@ -159,7 +159,21 @@ export const OnechatEsqlToolFlyout: React.FC<OnechatEsqlToolFlyoutProps> = ({
       <OnechatTestFlyout
         isOpen={showTestFlyout}
         isLoading={isLoading}
-        tool={tool}
+        tool={{
+          id: form.getValues().name,
+          type: ToolType.esql,
+          description: form.getValues().description,
+          tags: form.getValues().tags,
+          configuration: {
+            query: form.getValues().esql,
+            params: Object.fromEntries(
+              form.getValues().params.map((param) => [
+                param.name,
+                {type: param.type, description: param.description}
+              ])
+            )
+          }
+        }}
         onClose={() => setShowTestFlyout(false)}
       />
       <EuiFlyout
