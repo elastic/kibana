@@ -31,6 +31,5 @@
     "@kbn/spaces-plugin",
     "@kbn/scout-info",
     "@kbn/test-suites-xpack-platform",
-    "@kbn/es-query",
   ]
 }
