@@ -54,7 +54,6 @@ import {
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
 import { DashboardLayout } from './layout_manager/types';
-import { SerializableRecord } from '@kbn/utility-types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -63,7 +62,7 @@ export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 export interface DashboardCreationOptions {
   getInitialInput?: () => Partial<DashboardState & { viewMode?: ViewMode }>;
 
-  getPassThroughContext?: () => SerializableRecord | undefined;
+  getPassThroughContext?: PassThroughContext['getPassThroughContext'];
 
   getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
 
