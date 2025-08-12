@@ -56,6 +56,7 @@ export const getConversationWithNewMessage = async (params: Params) => {
           replacements: params.replacements,
         }),
         role,
+        user: existingConversation.createdBy,
         timestamp: new Date().toISOString(),
       };
     }),
