@@ -738,7 +738,8 @@ export class TaskRunner<
         ruleTypeId: this.ruleType.id,
         ruleId,
       }),
-      shouldDisableTask,
+      // added this way so we don't add shouldDisableTask: false explicitly
+      ...(shouldDisableTask ? { shouldDisableTask } : {}),
     };
   }
 
