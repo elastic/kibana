@@ -24,7 +24,6 @@ import {
   SavedObjectModelTransformationDoc,
   SavedObjectModelUnsafeTransformFn,
 } from '@kbn/core-saved-objects-server';
-import * as bulkOverwriteModule from '@kbn/core-saved-objects-migration-server-internal/src/actions/bulk_overwrite_transformed_documents';
 
 export const logFilePath = Path.join(__dirname, 'optimistic_concurrency.test.log');
 
@@ -50,24 +49,23 @@ describe('ZDT upgrades - encountering conversion failures', () => {
 
   describe('optimistic concurrency tests', () => {
     it('doesnt overwrite changes made while migrating', async () => {
-      const { runMigrations, savedObjectsRepository } = await prepareScenario({
+      const { runMigrations, savedObjectsRepository, client } = await prepareScenario({
         discardCorruptObjects: false,
       });
-      const originalImplementation = bulkOverwriteModule.bulkOverwriteTransformedDocuments;
 
-      const spy = jest.spyOn(bulkOverwriteModule, 'bulkOverwriteTransformedDocuments');
-
-      spy.mockImplementation((...args) => {
-        return () =>
-          Promise.all(
-            ['a-0', 'a-3', 'a-4'].map((id) =>
-              savedObjectsRepository.update('sample_a', id, {
-                keyword: 'concurrent update that shouldnt be overwritten',
-              })
-            )
-          ).then(() => {
-            return originalImplementation(...args)();
-          });
+      const originalBulkImplementation = client.bulk;
+      const spy = jest.spyOn(client, 'bulk');
+      spy.mockImplementation(function (this: typeof client, ...args) {
+        // let's run some updates before we run the bulk operations
+        return Promise.all(
+          ['a-0', 'a-3', 'a-4'].map((id) =>
+            savedObjectsRepository.update('sample_a', id, {
+              keyword: 'concurrent update that shouldnt be overwritten',
+            })
+          )
+        ).then(() => {
+          return originalBulkImplementation.apply(this, args);
+        });
       });
 
       await runMigrations();
