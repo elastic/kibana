@@ -898,12 +898,12 @@ const getLegacyTransformNameForInstallation = (
 
 // If destinationIndex is defined, use it to derive the data type depending on if it matches one of the known
 // patterns with preset component templates. Defaults to `logs` type if no destinationIndex is provided.
-const getTransformDestinationDataType = (
+export const getTransformDestinationDataType = (
   destinationIndex?: string
 ): DestinationIndexTemplateInstallation['type'] => {
   const dataType = destinationIndex
     ? destinationIndex.match(/^(logs|metrics|traces|synthetics)-.*-.*$/)
-      ? destinationIndex.split('.')[0]
+      ? destinationIndex.split('-')[0]
       : 'logs'
     : 'logs';
   return dataType as DestinationIndexTemplateInstallation['type'];
