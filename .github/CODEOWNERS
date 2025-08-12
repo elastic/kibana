@@ -718,6 +718,7 @@ src/platform/plugins/shared/content_management @elastic/appex-sharedux
 src/platform/plugins/shared/controls @elastic/kibana-presentation
 src/platform/plugins/shared/custom_integrations @elastic/fleet
 src/platform/plugins/shared/dashboard @elastic/kibana-presentation
+src/platform/plugins/shared/dashboard_markdown @elastic/kibana-presentation
 src/platform/plugins/shared/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/platform/plugins/shared/data_view_editor @elastic/kibana-data-discovery
 src/platform/plugins/shared/data_view_field_editor @elastic/kibana-data-discovery
@@ -1671,6 +1672,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 ### END Observability Plugins
 
 # Presentation
+/src/platform/test/functional/page_objects/markdown_vis.ts @elastic/kibana-presentation
 /src/platform/test/functional/page_objects/unified_search_page.ts @elastic/kibana-presentation
 /src/platform/test/functional/fixtures/kbn_archiver/dashboard_error_cases.json @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/201648#discussion_r1859020986
 /x-pack/platform/test/fixtures/es_archives/getting_started/shakespeare @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/201648#discussion_r1860319853
