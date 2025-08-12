@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { downgradeLicenseToBasic } from '../../../../tasks/license';
-import { setUpRuleUpgrades } from '../../../../tasks/prebuilt_rules/setup_rule_upgrades';
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
+import { downgradeLicenseToBasic } from '../../../../../tasks/license';
+import { setUpRuleUpgrades } from '../../../../../tasks/prebuilt_rules/setup_rule_upgrades';
+import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import {
   UPDATE_PREBUILT_RULE_PREVIEW,
   UPDATE_PREBUILT_RULE_BUTTON,
   FIELD_UPGRADE_WRAPPER,
   RULES_MANAGEMENT_TABLE,
   TAGS_PROPERTY_VALUE_ITEM,
-} from '../../../../screens/alerts_detection_rules';
-import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
-import { resetRulesTableState } from '../../../../tasks/common';
-import { login } from '../../../../tasks/login';
+} from '../../../../../screens/alerts_detection_rules';
+import { installMockPrebuiltRulesPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
+import { resetRulesTableState } from '../../../../../tasks/common';
+import { login } from '../../../../../tasks/login';
 import {
   assertRulesNotPresentInRuleUpdatesTable,
   assertRuleUpgradeSuccessToastShown,
-} from '../../../../tasks/prebuilt_rules';
-import { openPrebuiltRuleUpgradeFlyoutFor } from '../../../../tasks/prebuilt_rules_preview';
+} from '../../../../../tasks/prebuilt_rules';
+import { openPrebuiltRuleUpgradeFlyoutFor } from '../../../../../tasks/prebuilt_rules_preview';
 import {
   visitRulesManagementTable,
   visitRulesUpgradeTable,
-} from '../../../../tasks/rules_management';
+} from '../../../../../tasks/rules_management';
 import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
-} from '../../../../tasks/api_calls/common';
-import { expectRulesInTable, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
+} from '../../../../../tasks/api_calls/common';
+import { expectRulesInTable, goToRuleDetailsOf } from '../../../../../tasks/alerts_detection_rules';
 
 describe(
   'Detection rules, Prebuilt Rules Upgrade With Preview (Basic License)',
