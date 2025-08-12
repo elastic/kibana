@@ -14,27 +14,25 @@ import {
   type Streams,
 } from '@kbn/streams-schema';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import { isEmpty } from 'lodash';
 import moment from 'moment';
 import { Observable } from 'rxjs';
-import type { AssetClient } from '../streams/assets/asset_client';
+import { isKqlQueryValid } from '../../routes/internal/esql/query_helpers';
 import KQL_GUIDE from './prompts/kql_guide.text';
 
 const DEFAULT_SHORT_LOOKBACK = moment.duration(24, 'hours');
-const DEFAULT_LONG_LOOKBACK = moment.duration(7, 'days');
 
 interface Params {
   definition: Streams.all.Definition;
   connectorId: string;
   currentDate?: Date;
   shortLookback?: moment.Duration;
-  longLookback?: moment.Duration;
 }
 
 interface Dependencies {
   inferenceClient: InferenceClient;
   esClient: TracedElasticsearchClient;
   logger: Logger;
-  assetClient: AssetClient;
 }
 
 export function generateUsingZeroShot(
@@ -50,14 +48,10 @@ export function generateUsingZeroShot(
           currentDate = new Date(),
           shortLookback = DEFAULT_SHORT_LOOKBACK,
         } = params;
-        const { inferenceClient, esClient, logger, assetClient } = dependencies;
+        const { inferenceClient, esClient, logger } = dependencies;
 
-        const features = await assetClient.bulkGetByIds(definition.name, 'feature', [
-          'identified_system',
-        ]);
-        const identifiedSystem = features[0]?.feature.feature;
-
-        if (!identifiedSystem) {
+        const identifiedSystem = definition.description;
+        if (isEmpty(identifiedSystem)) {
           return;
         }
 
@@ -94,7 +88,7 @@ export function generateUsingZeroShot(
           input: `You are an expert log analysis system. You previously identified the system that generated the logs as {identified_system}.
 
 ## Identified System
-${JSON.stringify(identifiedSystem)}
+${identifiedSystem}
 
 ## Context
 - Index Name: ${definition.name}
@@ -147,7 +141,7 @@ Remember to focus exclusively on queries that are specific to the identified sys
           } as const,
         });
 
-        subscriber.next(zeroShotQueries.queries);
+        subscriber.next(zeroShotQueries.queries.filter((query) => isKqlQueryValid(query.kql)));
       } catch (error) {
         subscriber.error(error);
       } finally {

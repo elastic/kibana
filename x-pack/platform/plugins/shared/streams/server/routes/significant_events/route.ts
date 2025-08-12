@@ -220,7 +220,7 @@ const generateSignificantEventsRoute = createServerRoute({
     server,
     logger,
   }): Promise<SignificantEventsGenerateResponse> => {
-    const { streamsClient, scopedClusterClient, assetClient, licensing, inferenceClient } =
+    const { streamsClient, scopedClusterClient, licensing, inferenceClient } =
       await getScopedClients({ request });
     await assertLicenseAndPricingTier(server, licensing);
 
@@ -246,7 +246,6 @@ const generateSignificantEventsRoute = createServerRoute({
         },
         {
           inferenceClient,
-          assetClient,
           esClient: createTracedEsClient({
             client: scopedClusterClient.asCurrentUser,
             logger,

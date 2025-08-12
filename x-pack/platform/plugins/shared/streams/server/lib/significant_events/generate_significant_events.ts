@@ -18,7 +18,6 @@ import moment from 'moment';
 import { Observable } from 'rxjs';
 import { v4 } from 'uuid';
 import { isKqlQueryValid } from '../../routes/internal/esql/query_helpers';
-import type { AssetClient } from '../streams/assets/asset_client';
 import { verifyQueries } from './helpers/verify_queries';
 import INSTRUCTION from './prompts/generate_queries_instruction.text';
 import KQL_GUIDE from './prompts/kql_guide.text';
@@ -38,7 +37,6 @@ interface Dependencies {
   inferenceClient: InferenceClient;
   esClient: TracedElasticsearchClient;
   logger: Logger;
-  assetClient: AssetClient;
 }
 
 export function generateSignificantEventDefinitions(
