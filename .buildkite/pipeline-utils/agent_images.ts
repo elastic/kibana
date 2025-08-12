@@ -22,7 +22,7 @@ const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
 
 const FIPS_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
-  image: 'family/kibana-fips-ubuntu-2004',
+  image: 'family/kibana-fips-ubuntu-2404',
   imageProject: ELASTIC_IMAGES_PROD_PROJECT,
 };
 
