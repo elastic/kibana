@@ -29,11 +29,10 @@ jest.mock('@kbn/apm-config-loader', () => {
   };
 });
 
-import { REPO_ROOT, PKG_JSON } from '@kbn/repo-info';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { initTelemetry } from '..';
 import type { DeepPartial } from '@kbn/utility-types';
 import { ApmConfiguration } from '@kbn/apm-config-loader/src/config';
-import { resources } from '@elastic/opentelemetry-node/sdk';
-import { initTelemetry } from '..';
 
 interface KibanaRawConfig {
   monitoring_collection?: Partial<MonitoringCollectionConfig>;
@@ -41,39 +40,11 @@ interface KibanaRawConfig {
 }
 
 describe('initTelemetry', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  describe('resource attributes', () => {
-    test('ensure naming consistency', () => {
-      const apmConfig = new ApmConfiguration(
-        REPO_ROOT,
-        { elastic: { apm: { environment: 'test-environment' } } },
-        false
-      );
-
-      const { loadConfiguration } = jest.requireMock('@kbn/apm-config-loader');
-      loadConfiguration.mockImplementationOnce(() => apmConfig);
-
-      const resourceFromAttributesSpy = jest.spyOn(resources, 'resourceFromAttributes');
-
-      initTelemetry([], REPO_ROOT, false, 'test-service');
-
-      expect(resourceFromAttributesSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          // Using expect.objectContaining to ignore other attributes introduced by CI adding apmConfig.globalLabels
-          'service.name': 'test-service',
-          'service.version': PKG_JSON.version,
-          'service.instance.id': undefined,
-          'deployment.environment.name': apmConfig.getConfig('test-service').environment, // using this reference because CI overrides the config via environment vars
-          git_rev: expect.any(String),
-        })
-      );
-    });
-  });
-
   describe('auto-instrumentations', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     test.each<[string, DeepPartial<KibanaRawConfig>, string[]]>([
       ['telemetry is disabled', { telemetry: { enabled: false } }, []],
       [

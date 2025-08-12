@@ -14,10 +14,7 @@ import type { InstrumentaionsMap } from '@elastic/opentelemetry-node/types/instr
 import { resources, getInstrumentations } from '@elastic/opentelemetry-node/sdk';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
-import {
-  ATTR_SERVICE_INSTANCE_ID,
-  ATTR_DEPLOYMENT_ENVIRONMENT_NAME,
-} from '@opentelemetry/semantic-conventions/incubating';
+import { ATTR_SERVICE_INSTANCE_ID, ATTR_SERVICE_NAMESPACE } from '@kbn/opentelemetry-attributes';
 
 /**
  *
@@ -46,9 +43,7 @@ export const initTelemetry = (
     [ATTR_SERVICE_NAME]: apmConfig.serviceName,
     [ATTR_SERVICE_VERSION]: apmConfig.serviceVersion,
     [ATTR_SERVICE_INSTANCE_ID]: apmConfig.serviceNodeName,
-    // Reverse-mapping APM Server transformations:
-    // https://github.com/elastic/apm-data/blob/2f9cdbf722e5be5bf77d99fbcaab7a70a7e83fff/input/otlp/metadata.go#L69-L74
-    [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: apmConfig.environment,
+    [ATTR_SERVICE_NAMESPACE]: apmConfig.environment,
     ...(apmConfig.globalLabels as Record<string, unknown>),
   });
 
