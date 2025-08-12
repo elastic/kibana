@@ -89,7 +89,7 @@ describe('unsavedChangesManager', () => {
 
   describe('onUnsavedChanges', () => {
     describe('session state', () => {
-      test('should store unsaved panel changes and references when only layout changes', (done) => {
+      test('should backup unsaved panel changes and references when only layout changes', (done) => {
         initializeUnsavedChangesManager({
           viewMode$,
           storeUnsavedChanges: true,
@@ -100,17 +100,6 @@ describe('unsavedChangesManager', () => {
           settingsManager: settingsManagerMock,
           unifiedSearchManager: unifiedSearchManagerMock,
           getReferences,
-        });
-
-        layoutUnsavedChanges$.next({
-          panels: [
-            {
-              type: 'testType',
-              panelConfig: {
-                title: 'New panel',
-              },
-            } as unknown as DashboardPanel,
-          ],
         });
 
         setBackupStateMock.mockImplementation((id, backupState) => {
@@ -136,6 +125,17 @@ describe('unsavedChangesManager', () => {
             }
           `);
           done();
+        });
+
+        layoutUnsavedChanges$.next({
+          panels: [
+            {
+              type: 'testType',
+              panelConfig: {
+                title: 'New panel',
+              },
+            } as unknown as DashboardPanel,
+          ],
         });
       });
     });
