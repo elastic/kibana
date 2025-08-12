@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { EndpointTestResources } from '../../../security_solution_endpoint/services/endpoint';
 import { EndpointArtifactsTestResources } from '../../../security_solution_endpoint/services/endpoint_artifacts';
 import { EndpointPolicyTestResourcesProvider } from '../../../security_solution_endpoint/services/endpoint_policy';
@@ -28,4 +29,5 @@ export const services = {
   endpointDataStreamHelpers: SecuritySolutionEndpointDataStreamHelpers,
   endpointRegistryHelpers: SecuritySolutionEndpointRegistryHelpers,
   securitySolutionUtils: SecuritySolutionESSUtils,
+  samlAuth: commonFunctionalServices.samlAuth,
 };
