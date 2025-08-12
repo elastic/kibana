@@ -754,7 +754,9 @@ export class TaskManagerRunner implements TaskRunner {
         const setDisabled = fieldUpdates.status === TaskStatus.ShouldDisable ? true : false;
         if (setDisabled) {
           const label = `${this.taskType}:${this.instance.task.id}`;
-          this.logger.warn(`disabling task ${label} as it indicated it should disable itself`);
+          this.logger.warn(`Disabling task ${label} as it indicated it should disable itself`, {
+            tags: [this.taskType],
+          });
         }
 
         partialTask = {

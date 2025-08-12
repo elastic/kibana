@@ -706,7 +706,7 @@ export class TaskRunner<
 
       runRuleResult = asErr(err);
       schedule = asErr(err);
-      shouldDisableTask = err.reason === 'disabled';
+      shouldDisableTask = err.reason === RuleExecutionStatusErrorReasons.Disabled;
     }
 
     await withAlertingSpan('alerting:process-run-results-and-update-rule', () =>
