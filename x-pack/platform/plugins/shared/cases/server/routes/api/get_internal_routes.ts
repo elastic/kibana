@@ -25,6 +25,7 @@ import { similarCaseRoute } from './cases/similar';
 import { patchObservableRoute } from './observables/patch_observable';
 import { deleteObservableRoute } from './observables/delete_observable';
 import { findUserActionsRoute } from './internal/find_user_actions';
+import { findSuggestionsRoute } from './suggestions/find_suggestions';
 
 export const getInternalRoutes = (userProfileService: UserProfileService) =>
   [
@@ -46,4 +47,5 @@ export const getInternalRoutes = (userProfileService: UserProfileService) =>
     deleteObservableRoute,
     similarCaseRoute,
     findUserActionsRoute,
+    findSuggestionsRoute,
   ] as CaseRoute[];

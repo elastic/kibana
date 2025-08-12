@@ -39,6 +39,8 @@ import type {
 } from './types';
 import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
 import { registerSloUiActions } from './ui_actions/register_ui_actions';
+import type { SLOSuggestion } from '../common/cases/suggestions';
+import { sloSuggestionDefinition } from './cases/suggestion_definition';
 
 export class SLOPlugin
   implements Plugin<SLOPublicSetup, SLOPublicStart, SLOPublicPluginsSetup, SLOPublicPluginsStart>
@@ -188,6 +190,8 @@ export class SLOPlugin
       }
     };
     registerEmbeddables();
+
+    plugins.cases?.attachmentFramework.registerSuggestion<SLOSuggestion>(sloSuggestionDefinition);
 
     return {
       sloDetailsLocator,
