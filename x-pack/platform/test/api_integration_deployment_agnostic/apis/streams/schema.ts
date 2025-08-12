@@ -105,8 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           if: {
             field: 'attributes.log.logger',
-            operator: 'eq' as const,
-            value: 'nginx',
+            eq: 'nginx',
           },
         };
 

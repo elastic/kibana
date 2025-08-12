@@ -42,8 +42,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           if: {
             field: 'resource.attributes.host.name',
-            operator: 'eq' as const,
-            value: 'routeme',
+            eq: 'routeme',
           },
         };
         const stream2 = {
@@ -52,8 +51,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           if: {
             field: 'resource.attributes.host.name',
-            operator: 'eq' as const,
-            value: 'routeme2',
+            eq: 'routeme2',
           },
         };
         const responses = await Promise.allSettled([
@@ -114,8 +112,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: { name: 'logs.existingindex' },
           if: {
             field: 'resource.attributes.host.name',
-            operator: 'eq' as const,
-            value: 'routeme',
+            eq: 'routeme',
           },
         };
         await forkStream(apiClient, 'logs', stream, 400);
@@ -126,8 +123,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: { name: 'logs.existingstream' },
           if: {
             field: 'resource.attributes.host.name',
-            operator: 'eq' as const,
-            value: 'routeme',
+            eq: 'routeme',
           },
         };
         await forkStream(apiClient, 'logs', stream, 409);

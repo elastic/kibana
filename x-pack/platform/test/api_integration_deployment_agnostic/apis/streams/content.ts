@@ -370,8 +370,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             destination: 'logs.branch_c.nested',
             if: {
               field: 'resource.attributes.hello',
-              operator: 'eq',
-              value: 'yes',
+              eq: 'yes',
             },
           },
         ]);
