@@ -167,6 +167,48 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.apiCanFocusPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "apiCanFocusPanel",
+        "description": [
+          "\nA type guard which can be used to determine if a given API can focus a child panel"
+        ],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.CanFocusPanel",
+            "text": "CanFocusPanel"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.apiCanFocusPanel.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
         "id": "def-public.apiHasLastSavedChildState",
         "type": "Function",
         "tags": [],
@@ -564,7 +606,7 @@
         "label": "initializeUnsavedChanges",
         "description": [],
         "signature": [
-          "<StateType extends object = object>({ uuid, onReset, parentApi, getComparators, defaultState, serializeState, anyStateChange$, }: { uuid: string; parentApi: unknown; anyStateChange$: ",
+          "<StateType extends object = object>({ uuid, onReset, parentApi, getComparators, defaultState, serializeState, anyStateChange$, checkRefEquality, }: { uuid: string; parentApi: unknown; anyStateChange$: ",
           "Observable",
           "<void>; serializeState: () => ",
           {
@@ -598,7 +640,7 @@
             "section": "def-common.MaybePromise",
             "text": "MaybePromise"
           },
-          "<void>; }) => ",
+          "<void>; checkRefEquality?: boolean | undefined; }) => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -616,7 +658,7 @@
             "id": "def-public.initializeUnsavedChanges.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  uuid,\n  onReset,\n  parentApi,\n  getComparators,\n  defaultState,\n  serializeState,\n  anyStateChange$,\n}",
+            "label": "{\n  uuid,\n  onReset,\n  parentApi,\n  getComparators,\n  defaultState,\n  serializeState,\n  anyStateChange$,\n  checkRefEquality,\n}",
             "description": [],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
             "deprecated": false,
@@ -778,6 +820,20 @@
                   }
                 ],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/presentation-containers",
+                "id": "def-public.initializeUnsavedChanges.$1.checkRefEquality",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "checkRefEquality",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -1210,6 +1266,54 @@
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.CanFocusPanel",
+        "type": "Interface",
+        "tags": [],
+        "label": "CanFocusPanel",
+        "description": [
+          "\nThis API can focus a child panel"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.CanFocusPanel.setFocusedPanelId",
+            "type": "Function",
+            "tags": [],
+            "label": "setFocusedPanelId",
+            "description": [],
+            "signature": [
+              "(panelId?: string | undefined) => void"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-containers",
+                "id": "def-public.CanFocusPanel.setFocusedPanelId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "panelId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

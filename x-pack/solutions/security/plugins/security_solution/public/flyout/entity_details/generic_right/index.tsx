@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
@@ -14,7 +14,13 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
+import { buildEntityNameFilter } from '../../../../common/search_strategy';
+import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
+import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
+import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
+import type { Refetch } from '../../../common/types';
 import {
   EntityDetailsLeftPanelTab,
   type EntityDetailsPath,
@@ -28,6 +34,7 @@ import { GenericEntityFlyoutContent } from './content';
 import { GenericEntityFlyoutFooter } from './footer';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
+import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 
 interface CommonError {
   body: {
@@ -58,21 +65,24 @@ export interface GenericEntityPanelExpandableFlyoutProps extends FlyoutPanelProp
   params: GenericEntityPanelProps;
 }
 
+export const GENERIC_PANEL_RISK_SCORE_QUERY_ID = 'genericPanelRiskScoreQuery';
+
 export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
 
   const { getGenericEntity } = useGetGenericEntity(entityDocId);
+  const genericInsightsValue = getGenericEntity.data?._source?.entity.id;
   const { getAssetCriticality } = useGenericEntityCriticality({
-    enabled: !!getGenericEntity.data?._source?.entity.id,
+    enabled: !!genericInsightsValue,
     idField: EntityIdentifierFields.generic,
     // @ts-ignore since this query is only enabled when the entity.id exists, we can safely assume that idValue won't be undefined
-    idValue: getGenericEntity.data?._source?.entity.id,
+    idValue: genericInsightsValue,
   });
 
   const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
     insightsField: 'related.entity',
-    insightsValue: getGenericEntity.data?._source?.entity.id || '',
+    insightsValue: genericInsightsValue || '',
     entityDocId,
     scopeId,
   });
@@ -80,6 +90,36 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
   const openGenericEntityDetailsPanelByPath = (path: EntityDetailsPath) => {
     return openGenericEntityDetails(path);
   };
+
+  const genericNameFilterQuery = useMemo(
+    () =>
+      genericInsightsValue
+        ? buildEntityNameFilter(EntityType.generic, [genericInsightsValue])
+        : undefined,
+    [genericInsightsValue]
+  );
+
+  const riskScoreState = useRiskScore({
+    riskEntity: EntityType.generic,
+    filterQuery: genericNameFilterQuery,
+    onlyLatest: false,
+    pagination: FIRST_RECORD_PAGINATION,
+  });
+
+  const { refetch } = riskScoreState;
+
+  const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
+
+  const refetchRiskScore = useCallback(() => {
+    refetch();
+    (refetchRiskInputsTab as Refetch | null)?.();
+  }, [refetch, refetchRiskInputsTab]);
+
+  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
+    EntityType.generic,
+    genericInsightsValue || '',
+    { onSuccess: refetchRiskScore }
+  );
 
   useEffect(() => {
     if (getGenericEntity.data?._id) {
@@ -90,7 +130,11 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
   if (getGenericEntity.isLoading || getAssetCriticality.isLoading) {
     return (
       <>
-        <EuiLoadingSpinner size="xxl" css={{ position: 'absolute', inset: '50%' }} />
+        <EuiLoadingSpinner
+          size="xxl"
+          css={{ position: 'absolute', inset: '50%' }}
+          data-test-subj="generic-flyout-loading"
+        />
       </>
     );
   }
@@ -101,6 +145,7 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
         <EuiEmptyPrompt
           color="danger"
           iconType="warning"
+          data-test-subj="generic-right-flyout-error-prompt"
           title={
             <h2>
               <FormattedMessage
@@ -146,6 +191,7 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
         openGenericEntityDetailsPanelByPath={openGenericEntityDetailsPanelByPath}
         insightsField={'related.entity'}
         insightsValue={source.entity.id}
+        onAssetCriticalityChange={calculateEntityRiskScore}
       />
       {assetInventoryEnabled && <GenericEntityFlyoutFooter entityId={entity.id} />}
     </>

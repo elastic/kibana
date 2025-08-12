@@ -10,7 +10,7 @@ import type {
   IScopedClusterClient,
   AuthenticatedUser,
 } from '@kbn/core/server';
-import type { SiemRuleMigrationsClientDependencies, RuleMigrationIntegration } from '../types';
+import type { RuleMigrationIntegration, RuleMigrationsClientDependencies } from '../types';
 import type { PackageList, PackageListItem, RegistryDataStream } from '@kbn/fleet-plugin/common';
 import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { packageServiceMock } from '@kbn/fleet-plugin/server/services/epm/package_service.mock';
@@ -50,7 +50,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
   const mockGetPackages = mockPackageService.asInternalUser.getPackages;
   const dependencies = {
     packageService: mockPackageService,
-  } as unknown as SiemRuleMigrationsClientDependencies;
+  } as unknown as RuleMigrationsClientDependencies;
 
   let client: RuleMigrationsDataIntegrationsClient;
 
@@ -90,7 +90,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
         currentUser,
         esScopedClientMock,
         logger,
-        { packageService: undefined } as unknown as SiemRuleMigrationsClientDependencies
+        { packageService: undefined } as unknown as RuleMigrationsClientDependencies
       );
 
       const result = await brokenClient.getSecurityLogsPackages();
@@ -171,7 +171,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
         currentUser,
         esScopedClientMock,
         logger,
-        { packageService: undefined } as unknown as SiemRuleMigrationsClientDependencies
+        { packageService: undefined } as unknown as RuleMigrationsClientDependencies
       );
 
       await noPackageClient.populate();

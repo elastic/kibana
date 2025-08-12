@@ -17,6 +17,7 @@ import {
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
+import { createEngineStatusService } from '../engine/status_service';
 
 export const disablePrivilegeMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -59,7 +60,10 @@ export const disablePrivilegeMonitoringEngineRoute = (
         );
 
         try {
-          const body = await secSol.getPrivilegeMonitoringDataClient().disable();
+          const dataClient = secSol.getPrivilegeMonitoringDataClient();
+          const soClient = dataClient.getScopedSoClient(request);
+          const statusService = createEngineStatusService(dataClient, soClient);
+          const body = await statusService.disable();
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);

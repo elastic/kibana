@@ -68,6 +68,10 @@ export interface ISearchStart {
    */
   showWarnings: (adapter: RequestAdapter, cb?: WarningHandlerCallback) => void;
   /**
+   * Shows a flyout with a table to manage search sessions.
+   */
+  showSearchSessionsFlyout: () => void;
+  /**
    * high level search
    * {@link ISearchStartSearchSource}
    */

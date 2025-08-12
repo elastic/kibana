@@ -84,6 +84,13 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsCrowdstrikeManualHostIsolationEnabled: true,
 
   /**
+   * `runscript` response actions for SentinelOne hosts.
+   *
+   * Release: 9.2.0 (earlier for serverless)
+   */
+  responseActionsSentinelOneRunScriptEnabled: false,
+
+  /**
    * Space awareness for Elastic Defend management.
    * Feature depends on Fleet's corresponding features also being enabled:
    * - `subfeaturePrivileges`
@@ -204,6 +211,11 @@ export const allowedExperimentalValues = Object.freeze({
   bulkEditAlertSuppressionEnabled: true,
 
   /**
+   * Enables the ability to use does not match condition for indicator match rules
+   */
+  doesNotMatchForIndicatorMatchRuleEnabled: false,
+
+  /**
    * Enables the new data ingestion hub
    */
   dataIngestionHubEnabled: false,
@@ -274,6 +286,17 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables advanced mode for Trusted Apps creation and update
    */
   trustedAppsAdvancedMode: false,
+
+  /**
+   * Enables Trusted Devices artifact management for device control protections.
+   * Allows users to manage trusted USB and external devices
+   */
+  trustedDevices: false,
+
+  /**
+   * Enables the ability to import and migration dashboards through automatic migration service
+   */
+  automaticDashboardsMigration: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -289,7 +312,6 @@ const disableExperimentalPrefix = 'disable:' as const;
  * Use the `disable:` prefix to disable a feature.
  *
  * @param configValue
- * @throws SecuritySolutionInvalidExperimentalValue
  */
 export const parseExperimentalConfigValue = (
   configValue: string[]

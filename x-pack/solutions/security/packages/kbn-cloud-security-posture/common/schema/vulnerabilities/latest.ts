@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './csp_vulnerability_finding';
+export type * from './csp_vulnerability_finding';

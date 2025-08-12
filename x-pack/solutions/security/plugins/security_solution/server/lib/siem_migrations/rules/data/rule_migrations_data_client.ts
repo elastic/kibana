@@ -11,7 +11,7 @@ import { RuleMigrationsDataPrebuiltRulesClient } from './rule_migrations_data_pr
 import { RuleMigrationsDataResourcesClient } from './rule_migrations_data_resources_client';
 import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
 import { RuleMigrationsDataLookupsClient } from './rule_migrations_data_lookups_client';
-import type { IndexNameProviders, SiemRuleMigrationsClientDependencies } from '../types';
+import type { RuleMigrationIndexNameProviders, RuleMigrationsClientDependencies } from '../types';
 import { RuleMigrationsDataMigrationClient } from './rule_migrations_data_migration_client';
 
 export class RuleMigrationsDataClient {
@@ -26,12 +26,12 @@ export class RuleMigrationsDataClient {
   public readonly lookups: RuleMigrationsDataLookupsClient;
 
   constructor(
-    indexNameProviders: IndexNameProviders,
+    indexNameProviders: RuleMigrationIndexNameProviders,
     currentUser: AuthenticatedUser,
     esScopedClient: IScopedClusterClient,
     logger: Logger,
     spaceId: string,
-    dependencies: SiemRuleMigrationsClientDependencies
+    dependencies: RuleMigrationsClientDependencies
   ) {
     this.migrations = new RuleMigrationsDataMigrationClient(
       indexNameProviders.migrations,

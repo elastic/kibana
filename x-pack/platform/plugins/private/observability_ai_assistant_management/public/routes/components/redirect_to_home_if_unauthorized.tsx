@@ -8,6 +8,7 @@
 import React, { ReactNode } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { aiAssistantCapabilities } from '@kbn/observability-ai-assistant-plugin/public';
+
 export function RedirectToHomeIfUnauthorized({
   coreStart,
   children,
@@ -20,7 +21,7 @@ export function RedirectToHomeIfUnauthorized({
   } = coreStart;
 
   const allowed =
-    (capabilities?.management.kibana.observabilityAiAssistantManagement &&
+    (capabilities?.management.ai.observabilityAiAssistantManagement &&
       capabilities?.observabilityAIAssistant?.[aiAssistantCapabilities.show]) ??
     false;
 
