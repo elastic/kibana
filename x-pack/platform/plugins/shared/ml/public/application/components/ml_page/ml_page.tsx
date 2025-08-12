@@ -7,12 +7,18 @@
 
 import type { FC } from 'react';
 import React, { createContext, useEffect, useMemo, useState } from 'react';
-import { createHtmlPortalNode, type HtmlPortalNode } from 'react-reverse-portal';
+import { createHtmlPortalNode, type HtmlPortalNode, OutPortal } from 'react-reverse-portal';
 import { Redirect, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Subscription } from 'rxjs';
 import type { EuiPaddingSize } from '@elastic/eui';
-import { EuiPageSection, EuiPageHeader } from '@elastic/eui';
+import {
+  EuiPageSection,
+  EuiPageHeader,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageHeaderSection,
+} from '@elastic/eui';
 import { map, distinctUntilChanged } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
@@ -52,14 +58,26 @@ const ML_APP_SELECTOR = '[data-test-subj="mlApp"]';
 
 export const MlPageControlsContext = createContext<{
   headerPortal: HtmlPortalNode;
+  leftHeaderPortal: HtmlPortalNode;
+  rightHeaderPortal: HtmlPortalNode;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   setIsHeaderMounted: (v: boolean) => void;
   isHeaderMounted: boolean;
+  isLeftSectionMounted: boolean;
+  setIsLeftSectionMounted: (v: boolean) => void;
+  isRightSectionMounted: boolean;
+  setIsRightSectionMounted: (v: boolean) => void;
 }>({
   setHeaderActionMenu: () => {},
   headerPortal: createHtmlPortalNode(),
+  leftHeaderPortal: createHtmlPortalNode(),
+  rightHeaderPortal: createHtmlPortalNode(),
   isHeaderMounted: false,
   setIsHeaderMounted: () => {},
+  isLeftSectionMounted: false,
+  setIsLeftSectionMounted: () => {},
+  isRightSectionMounted: false,
+  setIsRightSectionMounted: () => {},
 });
 
 /**
@@ -109,7 +127,11 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
     const { showMLNavMenu } = useEnabledFeatures();
 
     const headerPortalNode = useMemo(() => createHtmlPortalNode(), []);
+    const leftHeaderPortalNode = useMemo(() => createHtmlPortalNode(), []);
+    const rightHeaderPortalNode = useMemo(() => createHtmlPortalNode(), []);
     const [isHeaderMounted, setIsHeaderMounted] = useState(false);
+    const [isLeftSectionMounted, setIsLeftSectionMounted] = useState(false);
+    const [isRightSectionMounted, setIsRightSectionMounted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
@@ -172,13 +194,36 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
 
     const activeRoute = useActiveRoute(routeList);
 
-    const rightSideItems = useMemo(() => {
-      return [
-        ...(activeRoute.enableDatePicker
-          ? [<DatePickerWrapper isLoading={isLoading} width="full" />]
-          : []),
-      ];
-    }, [activeRoute.enableDatePicker, isLoading]);
+    const headerChildren = (
+      <>
+        <EuiPageHeaderSection>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            {isLeftSectionMounted ? (
+              <EuiFlexItem grow={false}>
+                <OutPortal node={leftHeaderPortalNode} />
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={true}>
+              <MlPageHeaderRenderer />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageHeaderSection>
+        <EuiPageHeaderSection>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            {isRightSectionMounted ? (
+              <EuiFlexItem grow={false}>
+                <OutPortal node={rightHeaderPortalNode} />
+              </EuiFlexItem>
+            ) : null}
+            {activeRoute.enableDatePicker ? (
+              <EuiFlexItem grow={false}>
+                <DatePickerWrapper isLoading={isLoading} width="full" />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </EuiPageHeaderSection>
+      </>
+    );
 
     useDocTitle(activeRoute);
 
@@ -204,8 +249,14 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
         value={{
           setHeaderActionMenu: pageDeps.setHeaderActionMenu,
           headerPortal: headerPortalNode,
+          leftHeaderPortal: leftHeaderPortalNode,
+          rightHeaderPortal: rightHeaderPortalNode,
           setIsHeaderMounted,
           isHeaderMounted,
+          isLeftSectionMounted,
+          setIsLeftSectionMounted,
+          isRightSectionMounted,
+          setIsRightSectionMounted,
         }}
       >
         {entryPoint === undefined ? (
@@ -226,8 +277,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
                 : undefined
             }
             pageHeader={{
-              pageTitle: <MlPageHeaderRenderer />,
-              rightSideItems,
+              children: headerChildren,
               restrictWidth: false,
             }}
           >
@@ -240,7 +290,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
           </KibanaPageTemplate>
         ) : (
           <>
-            <EuiPageHeader pageTitle={<MlPageHeaderRenderer />} rightSideItems={rightSideItems} />
+            <EuiPageHeader children={headerChildren} />
             <CommonPageWrapper
               headerPortal={headerPortalNode}
               setIsHeaderMounted={setIsHeaderMounted}

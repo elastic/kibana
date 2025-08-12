@@ -14,6 +14,7 @@ import { useMlKibana } from '../../contexts/kibana';
 import { useDataSource } from '../../contexts/ml';
 import { MlPageHeader } from '../../components/page_header';
 import { TechnicalPreviewBadge } from '../../components/technical_preview_badge';
+import { PageTitle } from '../../components/page_title';
 
 export const DataDriftPage: FC = () => {
   const {
@@ -36,9 +37,13 @@ export const DataDriftPage: FC = () => {
       <MlPageHeader>
         <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
           <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.ml.dataDruiftWithDocCount.pageHeader"
-              defaultMessage="Data drift"
+            <PageTitle
+              title={
+                <FormattedMessage
+                  id="xpack.ml.dataDruiftWithDocCount.pageHeader"
+                  defaultMessage="Data drift"
+                />
+              }
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

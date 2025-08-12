@@ -5,34 +5,49 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren, ReactNode } from 'react';
 import React, { useContext, useEffect } from 'react';
 import { InPortal, OutPortal } from 'react-reverse-portal';
 import { EuiSkeletonText } from '@elastic/eui';
 import { MlPageControlsContext } from '../ml_page/ml_page';
 
-/**
- * Component for setting the page header content.
- */
-export const MlPageHeader: FC<PropsWithChildren<unknown>> = ({ children }) => {
-  const { headerPortal, setIsHeaderMounted } = useContext(MlPageControlsContext);
+export const MlPageHeader: FC<
+  PropsWithChildren<{
+    leftSideItems?: ReactNode | ReactNode[];
+    rightSideItems?: ReactNode | ReactNode[];
+  }>
+> = ({ children, leftSideItems, rightSideItems }) => {
+  const {
+    headerPortal,
+    leftHeaderPortal,
+    rightHeaderPortal,
+    setIsHeaderMounted,
+    setIsLeftSectionMounted,
+    setIsRightSectionMounted,
+  } = useContext(MlPageControlsContext);
 
   useEffect(() => {
     setIsHeaderMounted(true);
+    setIsLeftSectionMounted(!!leftSideItems);
+    setIsRightSectionMounted(!!rightSideItems);
     return () => {
       setIsHeaderMounted(false);
+      setIsLeftSectionMounted(false);
+      setIsRightSectionMounted(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [leftSideItems, rightSideItems]);
 
-  return <InPortal node={headerPortal}>{children}</InPortal>;
+  return (
+    <>
+      <InPortal node={headerPortal}>{children}</InPortal>
+      {leftSideItems ? <InPortal node={leftHeaderPortal}>{leftSideItems}</InPortal> : null}
+      {rightSideItems ? <InPortal node={rightHeaderPortal}>{rightSideItems}</InPortal> : null}
+    </>
+  );
 };
 
-/**
- * Renders content of the {@link MlPageHeader}
- */
 export const MlPageHeaderRenderer: FC = () => {
   const { headerPortal, isHeaderMounted } = useContext(MlPageControlsContext);
-
   return isHeaderMounted ? <OutPortal node={headerPortal} /> : <EuiSkeletonText lines={1} />;
 };
