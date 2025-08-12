@@ -9,4 +9,5 @@ export interface SLOSuggestion {
   id: string;
   instanceId: string;
   name: string;
+  status: string;
 }

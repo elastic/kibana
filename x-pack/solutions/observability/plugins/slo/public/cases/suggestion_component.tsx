@@ -9,20 +9,16 @@ import type { SuggestionChildrenProps } from '@kbn/cases-plugin/public';
 import React from 'react';
 import type { SLOSuggestion } from '../../common/cases/suggestions';
 
-export const SLOSuggestionChildren: React.FC<SuggestionChildrenProps<SLOSuggestion>> = (
-  props: SuggestionChildrenProps<SLOSuggestion>
-) => {
+export function SLOSuggestionChildren(props: SuggestionChildrenProps<SLOSuggestion>) {
   const { suggestion } = props;
   return (
     <div>
       {suggestion.data.map((slo) => (
         <div key={slo.payload.id}>
           <h2>{slo.payload.name}</h2>
+          <h2>{slo.payload.status}</h2>
         </div>
       ))}
     </div>
   );
-};
-
-// eslint-disable-next-line import/no-default-export
-export default SLOSuggestionChildren;
+}

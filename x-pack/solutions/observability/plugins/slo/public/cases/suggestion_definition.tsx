@@ -12,5 +12,9 @@ import type { SLOSuggestion } from '../../common/cases/suggestions';
 export const sloSuggestionDefinition: SuggestionType<SLOSuggestion> = {
   id: 'slo',
   owner: 'observability',
-  children: React.lazy(() => import('./suggestion_component')),
+  children: React.lazy(() =>
+    import('./suggestion_component').then((m) => ({
+      default: m.SLOSuggestionChildren,
+    }))
+  ),
 };
