@@ -25,11 +25,12 @@ import { usePopoverOpen } from './use_popover_open';
 import { useKeyboardManagement } from './use_keyboard_management';
 import { usePopoverHover } from './use_popover_hover';
 import { usePersistentPopover } from './use_persistent_popover';
-
-const TOP_BAR_HEIGHT = 48;
-const TOP_BAR_POPOVER_GAP = 8;
-const BOTTOM_POPOVER_GAP = 4;
-const POPOVER_OFFSET = 5;
+import {
+  BOTTOM_POPOVER_GAP,
+  POPOVER_OFFSET,
+  TOP_BAR_HEIGHT,
+  TOP_BAR_POPOVER_GAP,
+} from '../../constants';
 
 export interface SideNavPopoverProps {
   container: HTMLElement;

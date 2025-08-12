@@ -12,8 +12,6 @@ import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
-import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 import { getCustomMetricLabel } from '../../../../../../common/formatters/get_custom_metric_label';
 import type { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
 import { useSourceContext } from '../../../../../containers/metrics_source';
@@ -36,12 +34,11 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   // prevents auto-refresh from cancelling ongoing requests to fetch the data for the tooltip
   const requestCurrentTime = useRef(currentTime);
   const model = findInventoryModel(nodeType);
-  const { customMetrics } = useWaffleOptionsContext();
-  const config = usePluginConfig();
+  const { customMetrics, preferredSchema } = useWaffleOptionsContext();
 
   const requestMetrics = model.metrics
     .getWaffleMapTooltipMetrics({
-      schema: config.featureFlags.hostOtelEnabled ? DataSchemaFormat.SEMCONV : DataSchemaFormat.ECS,
+      schema: preferredSchema ?? 'ecs',
     })
     .map((type) => ({ type }))
     .concat(customMetrics) as Array<
@@ -50,15 +47,9 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
       }
     | SnapshotCustomMetricInput
   >;
-  const query = JSON.stringify({
-    bool: {
-      filter: {
-        match_phrase: { [model.fields.id]: node.id },
-      },
-    },
-  });
+
   const { nodes, loading } = useSnapshot({
-    filterQuery: query,
+    kuery: `"${model.fields.id}": ${node.id}`,
     metrics: requestMetrics,
     groupBy: [],
     nodeType,
@@ -66,6 +57,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
     currentTime: requestCurrentTime.current,
     accountId: '',
     region: '',
+    schema: preferredSchema,
   });
 
   const dataNode = first(nodes);

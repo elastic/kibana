@@ -27,6 +27,7 @@ import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/gener
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
 import { ESQLLicenseType } from '@kbn/esql-types';
+import { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { getLocationFromCommandOrOptionName } from '../../shared/types';
 import * as autocomplete from '../autocomplete';
@@ -139,7 +140,8 @@ export function getFunctionSignaturesByReturnType(
   ignored?: string[],
   option?: string,
   hasMinimumLicenseRequired = (license?: ESQLLicenseType | undefined): boolean =>
-    license === 'platinum'
+    license === 'platinum',
+  activeProduct?: PricingProduct
 ): PartialSuggestionWithText[] {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType
@@ -168,53 +170,66 @@ export function getFunctionSignaturesByReturnType(
   const locations = Array.isArray(location) ? location : [location];
 
   return deduped
-    .filter(({ signatures, ignoreAsSuggestion, locationsAvailable }) => {
-      const hasRestrictedSignature = signatures.some((signature) => signature.license);
-      if (hasRestrictedSignature) {
-        const availableSignatures = signatures.filter((signature) => {
-          if (!signature.license) return true;
-          return hasMinimumLicenseRequired(
-            signature.license.toLocaleLowerCase() as ESQLLicenseType
-          );
-        });
+    .filter(
+      ({ signatures, ignoreAsSuggestion, locationsAvailable, observabilityTier, license }) => {
+        const hasRestrictedSignature = signatures.some((signature) => signature.license);
+        if (hasRestrictedSignature) {
+          const availableSignatures = signatures.filter((signature) => {
+            if (!signature.license) return true;
+            return hasMinimumLicenseRequired(
+              signature.license.toLocaleLowerCase() as ESQLLicenseType
+            );
+          });
 
-        if (availableSignatures.length === 0) {
+          if (availableSignatures.length === 0) {
+            return false;
+          }
+        }
+
+        const hasObservabilityAccess = !(
+          observabilityTier &&
+          activeProduct &&
+          activeProduct.type === 'observability' &&
+          activeProduct.tier !== observabilityTier.toLowerCase()
+        );
+
+        if (!hasObservabilityAccess) {
           return false;
         }
-      }
 
-      if (ignoreAsSuggestion) {
-        return false;
-      }
-      if (
-        !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
-          (loc) => locationsAvailable.includes(loc)
-        )
-      ) {
-        return false;
-      }
-      const filteredByReturnType = signatures.filter(
-        ({ returnType }) =>
-          expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
-      );
-      if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
-        return false;
-      }
-      if (paramsTypes?.length) {
-        return filteredByReturnType.some(
-          ({ params }) =>
-            !params.length ||
-            (paramsTypes.length <= params.length &&
-              paramsTypes.every(
-                (expectedType, i) =>
-                  expectedType === 'any' ||
-                  params[i].type === 'any' ||
-                  expectedType === params[i].type
-              ))
+        if (ignoreAsSuggestion) {
+          return false;
+        }
+        if (
+          !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
+            (loc) => locationsAvailable.includes(loc)
+          )
+        ) {
+          return false;
+        }
+        const filteredByReturnType = signatures.filter(
+          ({ returnType }) =>
+            expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
         );
+        if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
+          return false;
+        }
+        if (paramsTypes?.length) {
+          return filteredByReturnType.some(
+            ({ params }) =>
+              !params.length ||
+              (paramsTypes.length <= params.length &&
+                paramsTypes.every(
+                  (expectedType, i) =>
+                    expectedType === 'any' ||
+                    params[i].type === 'any' ||
+                    expectedType === params[i].type
+                ))
+          );
+        }
+        return true;
       }
-      return true;
-    })
+    )
     .filter(({ name }) => {
       if (ignored?.length) {
         return !ignored?.includes(name);
@@ -274,7 +289,8 @@ export function createCustomCallbackMocks(
     matchField: string;
     enrichFields: string[];
   }>,
-  customLicenseType = 'platinum'
+  customLicenseType = 'platinum',
+  customActiveProduct?: PricingProduct
 ): ESQLCallbacks {
   const finalColumnsSinceLastCommand =
     customColumnsSinceLastCommand ||
@@ -307,6 +323,7 @@ export function createCustomCallbackMocks(
     getLicense: jest.fn(async () => ({
       hasAtLeast: (requiredLevel: string) => customLicenseType === requiredLevel,
     })),
+    getActiveProduct: jest.fn(() => customActiveProduct),
     getCurrentAppId: jest.fn(async () => 'discover'),
   };
 }

@@ -18,7 +18,7 @@ import React, {
 } from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import './data_table.scss';
+import { css } from '@emotion/react';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   EuiDataGridSorting,
@@ -35,7 +35,9 @@ import {
   EuiDataGridStyle,
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
+  type UseEuiTheme,
 } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   useDataGridColumnsCellActions,
@@ -540,6 +542,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     },
     ref
   ) => {
+    const styles = useMemoCss(componentStyles);
     const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
       services;
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
@@ -1250,7 +1253,11 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     if (!rowCount && loadingState === DataLoadingState.loading) {
       return (
-        <div className="euiDataGrid__loading" data-test-subj="unifiedDataTableLoading">
+        <div
+          className="euiDataGrid__loading"
+          css={styles.loadingAndEmpty}
+          data-test-subj="unifiedDataTableLoading"
+        >
           <EuiText size="xs" color="subdued">
             <EuiLoadingSpinner />
             <EuiSpacer size="s" />
@@ -1267,6 +1274,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       return (
         <div
           className="euiDataGrid__noResults"
+          css={styles.loadingAndEmpty}
           data-render-complete={isRenderComplete}
           data-shared-item=""
           data-title={searchTitle}
@@ -1287,7 +1295,7 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     return (
       <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
-        <span className="unifiedDataTable__inner">
+        <span className="unifiedDataTable__inner" css={styles.dataTableInner}>
           <div
             ref={setDataGridWrapper}
             key={isCompareActive ? 'comparisonTable' : 'docTable'}
@@ -1299,7 +1307,7 @@ const InternalUnifiedDataTable = React.forwardRef<
             data-description={searchDescription}
             data-document-number={displayedRows.length}
             className={classnames(className, 'unifiedDataTable__table')}
-            css={inTableSearchTermCss}
+            css={[styles.dataTable, inTableSearchTermCss]}
           >
             {isCompareActive ? (
               <CompareDocuments
@@ -1397,3 +1405,79 @@ const InternalUnifiedDataTable = React.forwardRef<
 export const UnifiedDataTable = withRestorableState(InternalUnifiedDataTable);
 
 export type UnifiedDataTableProps = ComponentProps<typeof UnifiedDataTable>;
+
+const componentStyles = {
+  loadingAndEmpty: css({
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: '1 0 100%',
+    height: '100%',
+    width: '100%',
+  }),
+  dataTableInner: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'flex',
+      flexDirection: 'column',
+      flexWrap: 'nowrap',
+      height: '100%',
+      '.unifiedDataTable__cell--highlight': {
+        backgroundColor: euiTheme.colors.backgroundBaseWarning,
+      },
+      '.unifiedDataTable__cell--expanded': {
+        backgroundColor: euiTheme.colors.highlight,
+      },
+      '.euiDataGrid__content': {
+        background: 'transparent',
+      },
+      '.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
+        borderTop: 'none',
+      },
+      '.euiDataGrid--headerUnderline .euiDataGridHeader': {
+        borderBottom: euiTheme.border.thin,
+      },
+      '.euiDataGridRowCell--controlColumn .euiDataGridRowCell__content, .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id="openDetails"], .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id="select"], .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id^="additionalRowControl_"], .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id^="additionalRowControl_"]':
+        {
+          paddingLeft: 0,
+          paddingRight: 0,
+          borderLeft: 0,
+          borderRight: 0,
+        },
+      '.euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id="additionalRowControl_menuControl"] .euiDataGridRowCell__content':
+        {
+          paddingBottom: 0,
+        },
+      '.euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id="select"]':
+        {
+          paddingLeft: euiTheme.size.xs,
+          paddingRight: 0,
+        },
+      '.euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id="colorIndicator"], .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id="colorIndicator"]':
+        {
+          padding: 0,
+          borderLeft: 0,
+          borderRight: 0,
+        },
+      '.euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id="colorIndicator"] .euiDataGridRowCell__content':
+        {
+          height: '100%',
+          borderBottom: 0,
+        },
+      '.euiDataGrid--rowHoverHighlight .euiDataGridRow:hover': {
+        backgroundColor: euiTheme.colors.lightestShade, // we keep using a deprecated shade until a proper token is available
+      },
+      '.euiDataGrid__scrollOverlay .euiDataGrid__scrollBarOverlayRight': {
+        backgroundColor: 'transparent', // otherwise the grid scrollbar border visually conflicts with the grid toolbar controls
+      },
+      '.euiDataGridRowCell__content--autoHeight, .euiDataGridRowCell__content--lineCountHeight, .euiDataGridHeaderCell__content':
+        {
+          whiteSpace: 'pre-wrap',
+        },
+    }),
+  dataTable: css({
+    flexGrow: 1,
+    flexShrink: 1,
+    minHeight: 0,
+  }),
+};
