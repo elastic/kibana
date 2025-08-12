@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
@@ -77,7 +77,7 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
 
   // forces the default view to be set with what the time range metadata endpoint returns
   const preferredSchemaValue =
-    savedView.id === staticInventoryViewId
+    nodeType === 'host' && savedView.id === staticInventoryViewId
       ? preferredSchema ?? null
       : // otherwise, use the preferred schema from the saved view
         preferredSchema;
@@ -111,15 +111,28 @@ export const useWaffleOptions = () => {
     writeDefaultState: true,
   });
 
-  const previousViewId = useRef<string | undefined>(currentView?.id);
+  const [preferredSchema, setPreferredSchema] = useState<DataSchemaFormat | null>(null);
+
+  const previousViewId = useRef<string>(currentView?.id ?? staticInventoryViewId);
   useEffect(() => {
     if (currentView && currentView.id !== previousViewId.current) {
       const state = mapInventoryViewToState(currentView);
       updateTopbarMenuVisibilityBySchema(state.preferredSchema);
       setUrlState(state);
       previousViewId.current = currentView.id;
+
+      setPreferredSchema(currentView?.attributes.preferredSchema ?? null);
     }
   }, [currentView, setUrlState, updateTopbarMenuVisibilityBySchema]);
+
+  // there is a lot going on with the url state management on this hook
+  // when the state resets, many things need to be synchronized
+  // to avoid problems, we sync the url state manually.
+  useEffect(() => {
+    if (urlState.preferredSchema !== preferredSchema) {
+      setUrlState((previous) => ({ ...previous, preferredSchema }));
+    }
+  }, [preferredSchema, setUrlState, urlState.preferredSchema]);
 
   const changeMetric = useCallback(
     (metric: SnapshotMetricInput) => setUrlState((previous) => ({ ...previous, metric })),
@@ -191,15 +204,13 @@ export const useWaffleOptions = () => {
   );
 
   const changePreferredSchema = useCallback(
-    (preferredSchema: DataSchemaFormat | null) => {
-      setUrlState((previous) => ({
-        ...previous,
-        preferredSchema,
-      }));
-
-      updateTopbarMenuVisibilityBySchema(preferredSchema);
+    (schema: DataSchemaFormat | null) => {
+      // the URL state can't be patched here because when the page reloads via clicking on the side nav
+      // this will be called before the hydration of the URL state, causing the page to crash
+      setPreferredSchema(schema);
+      updateTopbarMenuVisibilityBySchema(schema);
     },
-    [setUrlState, updateTopbarMenuVisibilityBySchema]
+    [setPreferredSchema, updateTopbarMenuVisibilityBySchema]
   );
 
   const { inventoryPrefill } = useAlertPrefillContext();
