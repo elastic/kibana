@@ -21,6 +21,7 @@ export type {
   CasePatchRequest,
   GetRelatedCasesByAlertResponse,
   UserActionFindResponse,
+  SuggestionResponse,
 } from './types/api';
 export type { Case, Cases, RelatedCase } from './types/domain';
 export type {
@@ -61,10 +62,18 @@ export {
   ASSIGN_CASE_CAPABILITY,
 } from './constants';
 
-export type { AttachmentAttributes } from './types/domain';
-export { ConnectorTypes, AttachmentType, ExternalReferenceStorageType } from './types/domain';
+export type { AttachmentAttributes, CaseAttachmentWithoutOwner } from './types/domain';
+export {
+  ConnectorTypes,
+  AttachmentType,
+  ExternalReferenceStorageType,
+  type SuggestionHandlerResponse,
+  type SuggestionContext,
+  type SuggestionItem,
+} from './types/domain';
 export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl, throwErrors } from './api';
 export { createUICapabilities, type CasesUiCapabilities } from './utils/capabilities';
 export { getApiTags, type CasesApiTags } from './utils/api_tags';
 export { CaseMetricsFeature } from './types/api';
+export type { SuggestionRequest } from './types/api/suggestion/v1';
 export type { SingleCaseMetricsResponse, CasesMetricsResponse } from './types/api';
