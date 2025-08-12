@@ -127,42 +127,29 @@ export function SettingsPage({
 
   const handleChange = (key: string, value: string, oldKey?: string) => {
     setNewConfig((prev) => {
+      let updatedSettings: Record<string, string>;
+
       if (oldKey !== undefined) {
+        // Handle key change
+
         // Maintain the order by recreating the config object while preserving key positions
-        const newConfigs: Record<string, string> = {};
-
-        Object.entries(prev.settings).forEach(([currentKey, currentVal]) => {
-          if (currentKey === oldKey) {
-            // Replace the old key with the new key at the same position
-            newConfigs[key] = value;
-          } else {
-            // Keep other keys in their original positions
-            newConfigs[currentKey] = currentVal;
-          }
-        });
-
-        return {
-          ...prev,
-          settings: newConfigs,
-        };
+        updatedSettings = Object.fromEntries(
+          Object.entries(prev.settings).map(([currentKey, currentValue]) =>
+            currentKey === oldKey ? [key, currentValue] : [currentKey, currentValue]
+          )
+        );
       } else if (key === '' && value === '') {
-        // Add new empty setting at the top
-        return {
-          ...prev,
-          settings: {
-            ['']: '',
-            ...prev.settings,
-          },
-        };
+        // Handle new row at the top of the list
+        updatedSettings = { ['']: '', ...prev.settings };
       } else {
-        return {
-          ...prev,
-          settings: {
-            ...prev.settings,
-            [key]: value,
-          },
-        };
+        // Handle value change
+        updatedSettings = { ...prev.settings, [key]: value };
       }
+
+      return {
+        ...prev,
+        settings: updatedSettings,
+      };
     });
   };
 

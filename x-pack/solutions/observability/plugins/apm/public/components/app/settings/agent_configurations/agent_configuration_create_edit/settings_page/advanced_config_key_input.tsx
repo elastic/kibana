@@ -75,9 +75,7 @@ export function AdvancedConfigKeyInput({
     <EuiFormRow
       label={
         showLabel
-          ? i18n.translate('xpack.apm.agentConfig.settingsPage.keyLabel', {
-              defaultMessage: 'key',
-            })
+          ? i18n.translate('xpack.apm.agentConfig.settingsPage.keyLabel', { defaultMessage: 'key' })
           : undefined
       }
       error={getErrorMsg(localKey)}
