@@ -10,9 +10,10 @@ import { EuiButton, EuiDescriptionList, EuiLink, EuiSpacer } from '@elastic/eui'
 import React from 'react';
 import { OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { i18n } from '@kbn/i18n';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
-import { GroupStreamModificationFlyout } from '../../group_stream_creation_flyout/group_stream_creation_flyout';
+import { GroupStreamModificationFlyout } from '../../group_stream_modification_flyout/group_stream_modification_flyout';
 
 export const GroupStreamDetailView = ({
   definition,
@@ -77,35 +78,55 @@ export const GroupStreamDetailView = ({
               {prev}, {curr}
             </>
           ))
-      : 'None';
+      : i18n.translate('xpack.streamsApp.groupStreamDetailView.noneLabel', {
+          defaultMessage: 'None',
+        });
 
   const meta = [
     {
-      title: 'Description',
+      title: i18n.translate('xpack.streamsApp.groupStreamDetailView.descriptionLabel', {
+        defaultMessage: 'Description',
+      }),
       description: stream.description,
     },
     {
-      title: 'Owner',
+      title: i18n.translate('xpack.streamsApp.groupStreamDetailView.ownerLabel', {
+        defaultMessage: 'Owner',
+      }),
       description: stream.group.owner,
     },
     {
-      title: 'Tier',
+      title: i18n.translate('xpack.streamsApp.groupStreamDetailView.tierLabel', {
+        defaultMessage: 'Tier',
+      }),
       description: stream.group.tier,
     },
     {
-      title: 'Tags',
-      description: stream.group.tags.length ? stream.group.tags.join(', ') : 'None',
+      title: i18n.translate('xpack.streamsApp.groupStreamDetailView.tagsLabel', {
+        defaultMessage: 'Tags',
+      }),
+      description: stream.group.tags.length
+        ? stream.group.tags.join(', ')
+        : i18n.translate('xpack.streamsApp.groupStreamDetailView.noneLabel', {
+            defaultMessage: 'None',
+          }),
     },
     {
-      title: 'Runbook links',
+      title: i18n.translate('xpack.streamsApp.groupStreamDetailView.runbookLinksLabel', {
+        defaultMessage: 'Runbook links',
+      }),
       description: renderLinks(stream.group.runbook_links),
     },
     {
-      title: 'Documentation links',
+      title: i18n.translate('xpack.streamsApp.groupStreamDetailView.documentationLinksLabel', {
+        defaultMessage: 'Documentation links',
+      }),
       description: renderLinks(stream.group.documentation_links),
     },
     {
-      title: 'Repository links',
+      title: i18n.translate('xpack.streamsApp.groupStreamDetailView.repositoryLinksLabel', {
+        defaultMessage: 'Repository links',
+      }),
       description: renderLinks(stream.group.repository_links),
     },
   ];
@@ -119,7 +140,9 @@ export const GroupStreamDetailView = ({
           openGroupStreamModificationFlyout(stream);
         }}
       >
-        Edit
+        {i18n.translate('xpack.streamsApp.groupStreamDetailView.editButtonLabel', {
+          defaultMessage: 'Edit',
+        })}
       </EuiButton>
     </div>
   );

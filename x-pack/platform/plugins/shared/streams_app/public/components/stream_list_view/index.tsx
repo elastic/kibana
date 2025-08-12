@@ -32,7 +32,7 @@ import { StreamsTreeTable } from './tree_table';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
 import { useTimefilter } from '../../hooks/use_timefilter';
-import { GroupStreamModificationFlyout } from '../group_stream_creation_flyout/group_stream_creation_flyout';
+import { GroupStreamModificationFlyout } from '../group_stream_modification_flyout/group_stream_modification_flyout';
 import { GroupStreamsCards } from './group_streams_cards';
 
 export function StreamListView() {
@@ -124,7 +124,9 @@ export function StreamListView() {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton onClick={() => openGroupStreamModificationFlyout()}>
-                Create group stream
+                {i18n.translate('xpack.streams.streamsListView.createGroupStreamButtonLabel', {
+                  defaultMessage: 'Create group stream',
+                })}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

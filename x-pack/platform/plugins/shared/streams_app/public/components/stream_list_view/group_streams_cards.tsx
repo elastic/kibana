@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { Streams } from '@kbn/streams-schema';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { StatefulStreamsAppRouter, useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 export function GroupStreamsCards({
@@ -36,41 +37,11 @@ export function GroupStreamsCards({
     return null;
   }
 
-  // group by category
-  const groupedStreams = groupStreams.reduce((acc, stream) => {
-    const category = stream.group.category;
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(stream);
-    return acc;
-  }, {} as Record<string, Streams.GroupStream.Definition[]>);
-
-  // order categories: products, applications, services, infrastructure, orgs, then alphabetical for remaining categories
-  const explicitOrder = ['products', 'applications', 'services', 'infrastructure', 'orgs'];
-  const allCategories = Object.keys(groupedStreams);
-  const orderedCategories = explicitOrder
-    .filter((c) => allCategories.includes(c))
-    .concat(
-      allCategories.filter((c) => !explicitOrder.includes(c)).sort((a, b) => a.localeCompare(b))
-    );
-
-  // render each category
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      {orderedCategories.map((category) => (
-        <EuiFlexItem key={category} grow={false}>
-          <EuiText size="m">
-            <h2>{category}</h2>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup direction="row" wrap>
-            {groupedStreams[category].map((stream) => (
-              <EuiFlexItem key={stream.name} grow={false}>
-                <GroupStreamCard stream={stream} router={router} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+    <EuiFlexGroup gutterSize="m" alignItems="flexStart">
+      {groupStreams.map((stream) => (
+        <EuiFlexItem key={stream.name} grow={false}>
+          <GroupStreamCard stream={stream} router={router} />
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>
@@ -97,8 +68,18 @@ function GroupStreamCard({
       <EuiSpacer size="m" />
       <EuiText size="xs">
         <p>{stream.description}</p>
-        <p>Owner: {stream.group.owner}</p>
-        <p>Tier: {stream.group.tier}</p>
+        <p>
+          {i18n.translate('streamsApp.streamList.groupStreamCard.ownerLabel', {
+            defaultMessage: 'Owner: {owner}',
+            values: { owner: stream.group.owner },
+          })}
+        </p>
+        <p>
+          {i18n.translate('streamsApp.streamList.groupStreamCard.tierLabel', {
+            defaultMessage: 'Tier: {tier}',
+            values: { tier: stream.group.tier },
+          })}
+        </p>
       </EuiText>
       <EuiSpacer size="m" />
       {stream.group.tags.map((tag) => (

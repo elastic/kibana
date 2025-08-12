@@ -8,8 +8,15 @@
 import React, { useState } from 'react';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { Streams } from '@kbn/streams-schema';
-import { EuiListGroup, EuiListGroupItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
+import { i18n } from '@kbn/i18n';
 import { useDashboardsFetch } from '../../../hooks/use_dashboards_fetch';
 
 export function LinkedDashboardsView({ definition }: { definition: Streams.all.GetResponse }) {
@@ -18,7 +25,7 @@ export function LinkedDashboardsView({ definition }: { definition: Streams.all.G
   const [selectedDashboard, setSelectedDashboard] = useState<string | null>(null);
 
   if (dashboardsFetch.loading) {
-    return 'Loading...';
+    return <EuiLoadingSpinner />;
   }
 
   return dashboardsFetch.value && dashboardsFetch.value.dashboards.length ? (
@@ -36,7 +43,9 @@ export function LinkedDashboardsView({ definition }: { definition: Streams.all.G
       )}
     </>
   ) : (
-    'No linked dashboards'
+    i18n.translate('streamsApp.linkedDashboardsView.noLinkedDashboardsLabel', {
+      defaultMessage: 'No linked dashboards',
+    })
   );
 }
 

@@ -17,6 +17,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { NotificationsStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { Streams } from '@kbn/streams-schema';
@@ -165,14 +166,25 @@ export function GroupStreamModificationFlyout({
         signal,
       })
       .then(() => {
-        notifications.toasts.addSuccess({
-          title: `Group stream ${existingStream ? 'updated' : 'created'} successfully`,
-        });
+        const successTitle = existingStream
+          ? i18n.translate('streamsApp.groupStreamModificationFlyout.updatedSuccessToast', {
+              defaultMessage: 'Group stream updated successfully',
+            })
+          : i18n.translate('streamsApp.groupStreamModificationFlyout.createdSuccessToast', {
+              defaultMessage: 'Group stream created successfully',
+            });
+        notifications.toasts.addSuccess({ title: successTitle });
         refresh();
       })
       .catch((error) => {
         notifications.toasts.addError(error, {
-          title: `Failed to ${existingStream ? 'update' : 'create'} group stream`,
+          title: existingStream
+            ? i18n.translate('streamsApp.groupStreamModificationFlyout.updateFailedToast', {
+                defaultMessage: 'Failed to update group stream',
+              })
+            : i18n.translate('streamsApp.groupStreamModificationFlyout.createFailedToast', {
+                defaultMessage: 'Failed to create group stream',
+              }),
         });
       });
   }
@@ -184,13 +196,32 @@ export function GroupStreamModificationFlyout({
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{existingStream ? 'Edit group' : 'Create group'}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {existingStream
+            ? i18n.translate('streamsApp.groupStreamModificationFlyout.editTitle', {
+                defaultMessage: 'Edit group',
+              })
+            : i18n.translate('streamsApp.groupStreamModificationFlyout.createTitle', {
+                defaultMessage: 'Create group',
+              })}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiFormRow label="Stream Name" helpText="Enter a unique stream name">
+        <EuiFormRow
+          label={i18n.translate('streamsApp.groupStreamModificationFlyout.streamNameLabel', {
+            defaultMessage: 'Stream Name',
+          })}
+          helpText={i18n.translate('streamsApp.groupStreamModificationFlyout.streamNameHelpText', {
+            defaultMessage: 'Enter a unique stream name',
+          })}
+        >
           <EuiFieldText name="name" value={formData.name} onChange={handleInputChange} />
         </EuiFormRow>
-        <EuiFormRow label="Description">
+        <EuiFormRow
+          label={i18n.translate('streamsApp.groupStreamModificationFlyout.descriptionLabel', {
+            defaultMessage: 'Description',
+          })}
+        >
           <EuiFieldText
             name="description"
             value={formData.description}
@@ -218,10 +249,18 @@ export function GroupStreamModificationFlyout({
             }
           />
         </EuiFormRow>
-        <EuiFormRow label="Owner">
+        <EuiFormRow
+          label={i18n.translate('streamsApp.groupStreamModificationFlyout.ownerLabel', {
+            defaultMessage: 'Owner',
+          })}
+        >
           <EuiFieldText name="owner" value={formData.owner} onChange={handleInputChange} />
         </EuiFormRow>
-        <EuiFormRow label="Tier">
+        <EuiFormRow
+          label={i18n.translate('streamsApp.groupStreamModificationFlyout.tierLabel', {
+            defaultMessage: 'Tier',
+          })}
+        >
           <EuiSelect
             name="tier"
             value={formData.tier}
@@ -235,14 +274,29 @@ export function GroupStreamModificationFlyout({
           />
         </EuiFormRow>
         <EuiFormRow
-          label="Tags"
-          helpText="Enter tags (letters only)"
+          label={i18n.translate('streamsApp.groupStreamModificationFlyout.tagsLabel', {
+            defaultMessage: 'Tags',
+          })}
+          helpText={i18n.translate('streamsApp.groupStreamModificationFlyout.tagsHelpText', {
+            defaultMessage: 'Enter tags (letters only)',
+          })}
           isInvalid={tagsInvalid}
-          error={tagsInvalid ? 'Only letters are allowed' : undefined}
+          error={
+            tagsInvalid
+              ? i18n.translate('streamsApp.groupStreamModificationFlyout.tagsError', {
+                  defaultMessage: 'Only letters are allowed',
+                })
+              : undefined
+          }
         >
           <EuiComboBox
             noSuggestions
-            placeholder="Create some tags (letters only)"
+            placeholder={i18n.translate(
+              'streamsApp.groupStreamModificationFlyout.tagsPlaceholder',
+              {
+                defaultMessage: 'Create some tags (letters only)',
+              }
+            )}
             selectedOptions={selectedTags}
             onCreateOption={onCreateOption}
             onChange={onComboChange}
@@ -250,36 +304,93 @@ export function GroupStreamModificationFlyout({
             isInvalid={tagsInvalid}
           />
         </EuiFormRow>
-        <EuiFormRow label="Runbook Links" helpText="Enter runbook links">
+        <EuiFormRow
+          label={i18n.translate('streamsApp.groupStreamModificationFlyout.runbookLinksLabel', {
+            defaultMessage: 'Runbook Links',
+          })}
+          helpText={i18n.translate(
+            'streamsApp.groupStreamModificationFlyout.runbookLinksHelpText',
+            {
+              defaultMessage: 'Enter runbook links',
+            }
+          )}
+        >
           <EuiComboBox
             noSuggestions
-            placeholder="Add runbook links"
+            placeholder={i18n.translate(
+              'streamsApp.groupStreamModificationFlyout.runbookLinksPlaceholder',
+              {
+                defaultMessage: 'Add runbook links',
+              }
+            )}
             selectedOptions={selectedRunbookLinks}
             onCreateOption={onCreateRunbookOption}
             onChange={onRunbookComboChange}
           />
         </EuiFormRow>
-        <EuiFormRow label="Documentation Links" helpText="Enter documentation links">
+        <EuiFormRow
+          label={i18n.translate(
+            'streamsApp.groupStreamModificationFlyout.documentationLinksLabel',
+            {
+              defaultMessage: 'Documentation Links',
+            }
+          )}
+          helpText={i18n.translate(
+            'streamsApp.groupStreamModificationFlyout.documentationLinksHelpText',
+            {
+              defaultMessage: 'Enter documentation links',
+            }
+          )}
+        >
           <EuiComboBox
             noSuggestions
-            placeholder="Add documentation links"
+            placeholder={i18n.translate(
+              'streamsApp.groupStreamModificationFlyout.documentationLinksPlaceholder',
+              {
+                defaultMessage: 'Add documentation links',
+              }
+            )}
             selectedOptions={selectedDocLinks}
             onCreateOption={onCreateDocOption}
             onChange={onDocComboChange}
           />
         </EuiFormRow>
-        <EuiFormRow label="Repository Links" helpText="Enter repository links">
+        <EuiFormRow
+          label={i18n.translate('streamsApp.groupStreamModificationFlyout.repositoryLinksLabel', {
+            defaultMessage: 'Repository Links',
+          })}
+          helpText={i18n.translate(
+            'streamsApp.groupStreamModificationFlyout.repositoryLinksHelpText',
+            {
+              defaultMessage: 'Enter repository links',
+            }
+          )}
+        >
           <EuiComboBox
             noSuggestions
-            placeholder="Add repository links"
+            placeholder={i18n.translate(
+              'streamsApp.groupStreamModificationFlyout.repositoryLinksPlaceholder',
+              {
+                defaultMessage: 'Add repository links',
+              }
+            )}
             selectedOptions={selectedRepoLinks}
             onCreateOption={onCreateRepoOption}
             onChange={onRepoComboChange}
           />
         </EuiFormRow>
-        <EuiFormRow label="Relationships">
+        <EuiFormRow
+          label={i18n.translate('streamsApp.groupStreamModificationFlyout.relationshipsLabel', {
+            defaultMessage: 'Relationships',
+          })}
+        >
           <EuiComboBox
-            placeholder="Select relationships"
+            placeholder={i18n.translate(
+              'streamsApp.groupStreamModificationFlyout.relationshipsPlaceholder',
+              {
+                defaultMessage: 'Select relationships',
+              }
+            )}
             options={streamsOptions}
             selectedOptions={formData.relationships}
             onChange={(options) => {
@@ -289,7 +400,13 @@ export function GroupStreamModificationFlyout({
         </EuiFormRow>
         <EuiSpacer size="m" />
         <EuiButton onClick={modifyGroupStream} fill>
-          {existingStream ? 'Update' : 'Create'}
+          {existingStream
+            ? i18n.translate('streamsApp.groupStreamModificationFlyout.updateButtonLabel', {
+                defaultMessage: 'Update',
+              })
+            : i18n.translate('streamsApp.groupStreamModificationFlyout.createButtonLabel', {
+                defaultMessage: 'Create',
+              })}
         </EuiButton>
       </EuiModalBody>
     </>
