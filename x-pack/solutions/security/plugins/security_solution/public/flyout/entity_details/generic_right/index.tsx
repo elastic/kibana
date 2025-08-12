@@ -53,13 +53,19 @@ export const isCommonError = (error: unknown): error is CommonError => {
   return true;
 };
 
-export interface GenericEntityPanelProps {
-  entityDocId: string;
+interface BaseGenericEntityPanelProps {
   scopeId: string;
   isPreviewMode?: boolean;
   /** this is because FlyoutPanelProps defined params as Record<string, unknown> {@link FlyoutPanelProps#params} */
   [key: string]: unknown;
 }
+
+export type GenericEntityPanelProps = BaseGenericEntityPanelProps &
+  (
+    | { entityDocId: string; entityId?: never }
+    | { entityDocId?: never; entityId: string }
+    | { entityDocId: string; entityId: string }
+  );
 
 export interface GenericEntityPanelExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'generic-entity-panel';
@@ -70,12 +76,17 @@ export const GENERIC_PANEL_RISK_SCORE_QUERY_ID = 'genericPanelRiskScoreQuery';
 
 export const GenericEntityPanel = ({
   entityDocId,
+  entityId,
   scopeId,
   isPreviewMode,
 }: GenericEntityPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
-  const { getGenericEntity } = useGetGenericEntity(entityDocId);
+  // Ensure we have both parameters for the hook
+  const docId = entityDocId || '';
+  const entityIdParam = entityId || '';
+
+  const { getGenericEntity } = useGetGenericEntity({ docId, entityId: entityIdParam });
   const genericInsightsValue = getGenericEntity.data?._source?.entity.id;
   const { getAssetCriticality } = useGenericEntityCriticality({
     enabled: !!genericInsightsValue,
@@ -87,7 +98,8 @@ export const GenericEntityPanel = ({
   const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
     insightsField: 'related.entity',
     insightsValue: genericInsightsValue || '',
-    entityDocId,
+    entityDocId: docId,
+    entityId: entityIdParam,
     scopeId,
   });
 
