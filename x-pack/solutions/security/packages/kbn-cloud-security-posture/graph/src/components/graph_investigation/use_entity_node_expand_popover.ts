@@ -9,7 +9,6 @@ import type React from 'react';
 import { useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { useNodeExpandGraphPopover } from './use_node_expand_graph_popover';
 import { getNodeDocumentMode, type NodeProps } from '../../..';
 import {
@@ -91,12 +90,8 @@ export const useEntityNodeExpandPopover = (
         ? 'hide'
         : 'show';
 
-      const shouldShowEntityDetailsListItem =
-        onShowEntityDetailsClick && getNodeDocumentMode(node.data) === 'single-entity';
-
-      const isEntityDetailsDisabled =
-        !shouldShowEntityDetailsListItem ||
-        !(node.data.documentsData as NodeDocumentDataModel[])?.[0]?.sourceDocId;
+      const shouldDisableEntityDetailsListItem =
+        !onShowEntityDetailsClick || getNodeDocumentMode(node.data) !== 'single-entity';
 
       return [
         {
@@ -178,7 +173,7 @@ export const useEntityNodeExpandPopover = (
               defaultMessage: 'Show entity details',
             }
           ),
-          disabled: isEntityDetailsDisabled,
+          disabled: shouldDisableEntityDetailsListItem,
           onClick: () => {
             onShowEntityDetailsClick?.(node);
           },

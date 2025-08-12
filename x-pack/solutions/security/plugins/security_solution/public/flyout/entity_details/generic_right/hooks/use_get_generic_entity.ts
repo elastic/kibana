@@ -19,26 +19,34 @@ type GenericEntityResponse = IKibanaSearchResponse<estypes.SearchResponse<Generi
 
 const fetchGenericEntity = async (
   dataService: DataPublicPluginStart,
-  docId: string
+  { docId, entityId }: { docId: string; entityId: string }
 ): Promise<GenericEntityResponse> => {
+  let termQuery;
+
+  if (docId) {
+    termQuery = { _id: docId };
+  } else if (entityId) {
+    termQuery = { 'entity.id': entityId };
+  }
+
   return lastValueFrom(
     dataService.search.search<GenericEntityRequest, GenericEntityResponse>({
       params: {
         index: ASSET_INVENTORY_INDEX_PATTERN,
         query: {
-          term: { _id: docId },
+          term: termQuery,
         },
       },
     })
   );
 };
 
-export const useGetGenericEntity = (docId: string) => {
+export const useGetGenericEntity = ({ docId, entityId }: { docId: string; entityId: string }) => {
   const { data: dataService } = useKibana().services;
 
   const getGenericEntity = useQuery({
-    queryKey: ['use-get-generic-entity-key', docId],
-    queryFn: () => fetchGenericEntity(dataService, docId),
+    queryKey: ['use-get-generic-entity-key', docId, entityId],
+    queryFn: () => fetchGenericEntity(dataService, { docId, entityId }),
     select: (response) => response.rawResponse.hits.hits[0], // extracting result out of ES
   });
 

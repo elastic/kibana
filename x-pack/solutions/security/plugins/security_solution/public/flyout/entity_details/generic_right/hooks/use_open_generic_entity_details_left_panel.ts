@@ -18,11 +18,13 @@ export const useOpenGenericEntityDetailsLeftPanel = ({
   insightsField,
   insightsValue,
   entityDocId,
+  entityId,
   scopeId,
 }: {
   insightsField: string;
   insightsValue: string;
   entityDocId: string;
+  entityId: string;
   scopeId: string;
 }) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
@@ -42,6 +44,7 @@ export const useOpenGenericEntityDetailsLeftPanel = ({
       id: GenericEntityDetailsPanelKey,
       params: {
         entityDocId,
+        entityId,
         field: insightsField,
         value: insightsValue,
         scopeId,
