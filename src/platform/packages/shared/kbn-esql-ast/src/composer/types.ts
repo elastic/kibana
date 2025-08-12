@@ -8,7 +8,7 @@
  */
 
 import type * as synth from '../synth';
-import type { ESQLOrderExpression } from '../types';
+import type { ESQLOrderExpression, ESQLSource } from '../types';
 import type { ComposerQuery } from './composer_query';
 import type { ParameterHole } from './parameter_hole';
 
@@ -64,8 +64,16 @@ export type ComposerTag<Return> = <T extends ComposerQueryTagHole[]>(
    */
   ...holes: { [K in keyof T]: T[K] extends ParameterShorthandHole ? SingleKey<T[K]> : T[K] }
 ) => Return;
+
+export type ParametrizedComposerTag<Return> = (
+  paramsValues?: Record<string, unknown>
+) => ComposerTag<Return> & ComposerQueryGenerator<Return>;
 export type ComposerQueryTag = ComposerTag<ComposerQuery>;
-export type ComposerQueryGenerator = (query: string) => ComposerQuery;
+export type ParametrizedComposerQueryTag = ParametrizedComposerTag<ComposerQuery>;
+export type ComposerQueryGenerator<Return = ComposerQuery> = (
+  query: string,
+  paramsValues?: Record<string, unknown>
+) => Return;
 
 type SynthMethods = typeof import('../synth');
 
@@ -75,7 +83,29 @@ type SynthMethods = typeof import('../synth');
  */
 export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par'> {
   par: (value: unknown, name?: string) => ParameterHole;
+
+  /**
+   * Creates a new {@link ComposerQuery} instance with a `FROM` command with
+   * the specified list of sources.
+   *
+   * Example:
+   *
+   * ```typescript
+   * const query = esql.from('kibana_ecommerce_index', 'kibana_logs_index');
+   * // FROM kibana_ecommerce_index, kibana_logs_index
+   * ```
+   *
+   * @param source The source to use in the `FROM` command, at least one source
+   *     is required.
+   * @param moreSources Additional sources to include in the `FROM` command.
+   */
+  from: (
+    source: ComposerSourceShorthand,
+    ...moreSources: ComposerSourceShorthand[]
+  ) => ComposerQuery;
 }
+
+export type ComposerSourceShorthand = string | ESQLSource;
 
 /**
  * A shorthand for specifying a sort condition.

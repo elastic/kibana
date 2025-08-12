@@ -88,6 +88,41 @@ export class ComposerQuery {
   };
 
   /**
+   * Specifies the columns to drop from the result set. Appends a `DROP` command.
+   * Equivalent to calling `.pipe` with a `DROP` command.
+   *
+   * ```typescript
+   * query.pipe`DROP {['order', 'id']}`; // DROP order.id
+   * ```
+   *
+   * Columns can be a list of column names. To specify nested columns, use the
+   * shorthand syntax `['user', 'name']` for `user.name`.
+   *
+   * For example:
+   *
+   * ```typescript
+   * query.drop('my-column', ['order', 'id']); // DROP `my-column`, order.id
+   * ```
+   *
+   * Column name parts are automatically escaped if they contain special
+   * characters.
+   *
+   * @param column The first column to drop.
+   * @param columns Additional columns to drop.
+   * @returns The updated ComposerQuery instance.
+   */
+  public readonly drop = (
+    column: string | synth.SynthColumnShorthand,
+    ...columns: Array<string | synth.SynthColumnShorthand>
+  ): ComposerQuery => {
+    const nodes = [column, ...columns].map((name) => {
+      return Builder.expression.column(name);
+    });
+
+    return this.pipe`DROP ${nodes}`;
+  };
+
+  /**
    * Specifies the columns to sort by. Appends a `SORT` command. Equivalent to
    * calling `.pipe` with a `SORT` command.
    *
@@ -134,23 +169,15 @@ export class ComposerQuery {
     return this.pipe`SORT ${nodes}`;
   };
 
-  public readonly where: ComposerQueryTag = (templateOrQuery: unknown, ...holes: unknown[]) => {
-    const tag = ((_templateOrQuery, ..._holes: ComposerQueryTagHole[]) => {
-      if (Array.isArray(_holes)) processTemplateHoles(_holes, this.params);
+  public readonly where: ComposerQueryTag = (templateOrQuery, ...holes) => {
+    if (Array.isArray(holes)) processTemplateHoles(holes, this.params);
 
-      const expression = synth.exp(
-        _templateOrQuery as TemplateStringsArray,
-        ...(_holes as synth.SynthTemplateHole[])
-      );
+    const expression = synth.exp(
+      templateOrQuery as TemplateStringsArray,
+      ...(holes as synth.SynthTemplateHole[])
+    );
 
-      return this.pipe`WHERE ${expression}`;
-    }) as ComposerQueryTag;
-
-    if (Array.isArray(templateOrQuery)) {
-      return tag(templateOrQuery as any, ...(holes as ComposerQueryTagHole[]));
-    }
-
-    return tag as any;
+    return this.pipe`WHERE ${expression}`;
   };
 
   public inlineParams(): this {
@@ -161,6 +188,29 @@ export class ComposerQuery {
   public command() {
     // TODO: Select a command from the query.
     throw new Error('not implemented');
+  }
+
+  /**
+   * Returns a record of all parameters used in the query, where keys are
+   * parameter names and values are the corresponding parameter values.
+   */
+  public getParams(): Record<string, unknown> {
+    const params: Record<string, unknown> = {};
+
+    for (const [name, value] of this.params.entries()) {
+      params[name] = value;
+    }
+
+    return params;
+  }
+
+  public setParam(name: string, value: unknown): this {
+    if (this.params.has(name)) {
+      throw new Error(`Parameter "${name}" already exists in the query.`);
+    }
+
+    this.params.set(name, value);
+    return this;
   }
 
   /**
