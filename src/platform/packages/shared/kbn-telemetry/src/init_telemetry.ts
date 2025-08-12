@@ -62,14 +62,16 @@ export const initTelemetry = (
     if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {
       initMetrics({ resource, metricsConfig: telemetryConfig.metrics, monitoringCollectionConfig });
 
-      // Provides metrics about the Event Loop, GC Collector, and Heap stats.
-      desiredInstrumentations.add('@opentelemetry/instrumentation-runtime-node');
-
       // Uncomment the ones below when we clarify the performance impact of having them enabled
       // // HTTP Server and Client durations
       // desiredInstrumentations.add('@opentelemetry/instrumentation-http');
       // // Undici client's request duration
       // desiredInstrumentations.add('@opentelemetry/instrumentation-undici');
+    }
+
+    if (telemetryConfig.metrics.enabled) {
+      // Provides metrics about the Event Loop, GC Collector, and Heap stats.
+      desiredInstrumentations.add('@opentelemetry/instrumentation-runtime-node');
     }
 
     if (desiredInstrumentations.size > 0) {
