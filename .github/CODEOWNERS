@@ -2190,10 +2190,6 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/serverless/**/test_suites/platform_security/ @elastic/kibana-security
 /x-pack/test_serverless/**/test_suites/observability/platform_security/ @elastic/kibana-security
 /src/core/packages/http/server-internal/src/cdn_config/ @elastic/kibana-security @elastic/kibana-core
-/x-pack/solutions/security/test/serverless/functional/configs/config.ts @elastic/kibana-security @elastic/appex-qa
-/x-pack/solutions/security/test/serverless/functional/configs/config.mki_only.ts @elastic/kibana-security @elastic/appex-qa
-/x-pack/solutions/security/test/serverless/functional/configs/index.mki_only.ts @elastic/kibana-security @elastic/appex-qa @elastic/kibana-cloud-security-posture
-/x-pack/solutions/security/test/serverless/functional/configs/config.feature_flags.ts @elastic/kibana-security
 /x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts @elastic/kibana-security
 /x-pack/platform/test/serverless/functional/test_suites/spaces/multiple_spaces_enabled.ts @elastic/kibana-security
 /x-pack/platform/test/serverless/functional/page_objects/svl_management_page.ts @elastic/kibana-security
@@ -2429,10 +2425,13 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test/security_solution_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
 /x-pack/platform/test/fixtures/es_archives/auditbeat/default @elastic/security-solution
-
 /x-pack/solutions/security/test/serverless/functional/test_suites/constants.ts @elastic/security-solution
 /x-pack/solutions/security/test/serverless/api_integration/test_suites/ @elastic/security-solution
 /x-pack/solutions/security/test/serverless/ @elastic/security-solution
+/x-pack/solutions/security/test/serverless/functional/configs/config.ts @elastic/security-solution @elastic/appex-qa
+/x-pack/solutions/security/test/serverless/functional/configs/config.mki_only.ts @elastic/security-solution @elastic/appex-qa
+/x-pack/solutions/security/test/serverless/functional/configs/index.mki_only.ts @elastic/security-solution @elastic/appex-qa @elastic/kibana-cloud-security-posture
+/x-pack/solutions/security/test/serverless/functional/configs/config.feature_flags.ts @elastic/security-solution
 
 #CC# /x-pack/solutions/security/plugins/security_solution/ @elastic/security-solution
 /x-pack/platform/test/fixtures/es_archives/cases/signals/duplicate_ids @elastic/kibana-cases
