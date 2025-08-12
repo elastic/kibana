@@ -31,7 +31,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     });
 
     beforeEach(async () => {
-      await common.navigateToApp('home');
       await common.navigateToApp('discover');
       await discover.waitUntilTabIsLoaded();
     });
