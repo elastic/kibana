@@ -44,7 +44,7 @@ function removeEmpty(obj: { [key: string]: any }) {
 }
 
 export function SettingsPage({
-  untouchedConfig,
+  initialConfig,
   unsavedChanges,
   newConfig,
   setNewConfig,
@@ -52,7 +52,7 @@ export function SettingsPage({
   isEditMode,
   onClickEdit,
 }: {
-  untouchedConfig?: FetcherResult<AgentConfiguration>;
+  initialConfig?: FetcherResult<AgentConfiguration>;
   unsavedChanges: Record<string, string>;
   newConfig: AgentConfigurationIntake;
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
@@ -68,7 +68,7 @@ export function SettingsPage({
   const [removedConfigCount, setRemovedConfigCount] = useState<number>(0);
   const [validationErrors, setValidationErrors] = useState<Set<string>>(new Set<string>());
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
-  const status = untouchedConfig?.status;
+  const status = initialConfig?.status;
   const isLoading = status === FETCH_STATUS.LOADING;
   const isAdvancedConfigSupported =
     newConfig.agent_name && isEDOTAgentName(newConfig.agent_name as AgentName);
@@ -155,7 +155,7 @@ export function SettingsPage({
 
   const handleDelete = (key: string, id: number) => {
     // Detect removed config only when the key-value already existed before
-    if (key in (untouchedConfig?.data?.settings ?? {})) {
+    if (key in (initialConfig?.data?.settings ?? {})) {
       setRemovedConfigCount((prev) => prev + 1);
     }
     removeValidationError(`key${id}`);
