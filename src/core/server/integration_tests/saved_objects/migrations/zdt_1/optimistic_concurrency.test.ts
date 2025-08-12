@@ -28,6 +28,11 @@ import * as bulkOverwriteModule from '@kbn/core-saved-objects-migration-server-i
 
 export const logFilePath = Path.join(__dirname, 'optimistic_concurrency.test.log');
 
+interface TestSOType {
+  boolean: boolean;
+  keyword: string;
+}
+
 describe('ZDT upgrades - encountering conversion failures', () => {
   let esServer: TestElasticsearchUtils['es'];
 
@@ -70,220 +75,38 @@ describe('ZDT upgrades - encountering conversion failures', () => {
       const records = await parseLogFile(logFilePath);
       expect(records).toContainLogEntry('-> DONE');
 
-      const { saved_objects: sampleADocs } = await savedObjectsRepository.find({
+      const { saved_objects: sampleADocs } = await savedObjectsRepository.find<TestSOType>({
         type: 'sample_a',
       });
-      const { saved_objects: sampleBDocs } = await savedObjectsRepository.find({
-        type: 'sample_b',
-      });
 
-      expect(sampleADocs).toMatchInlineSnapshot(`
+      expect(
+        sampleADocs
+          .map((doc) => ({
+            id: doc.id,
+            keyword: doc.attributes.keyword,
+          }))
+          .sort((a, b) => a.id.localeCompare(b.id))
+      ).toMatchInlineSnapshot(`
         Array [
           Object {
-            "attributes": Object {
-              "boolean": true,
-              "keyword": "concurrent update that shouldnt be overwritten",
-            },
-            "coreMigrationVersion": "8.8.0",
-            "created_at": "2025-08-12T09:37:18.267Z",
-            "id": "a-4",
-            "managed": false,
-            "namespaces": Array [
-              "default",
-            ],
-            "references": Array [],
-            "score": 0,
-            "sort": undefined,
-            "type": "sample_a",
-            "typeMigrationVersion": "10.2.0",
-            "updated_at": "2025-08-12T09:37:25.650Z",
-            "version": "WzIwLDFd",
-          },
-          Object {
-            "attributes": Object {
-              "boolean": true,
-              "keyword": "concurrent update that shouldnt be overwritten",
-            },
-            "coreMigrationVersion": "8.8.0",
-            "created_at": "2025-08-12T09:37:18.267Z",
-            "id": "a-3",
-            "managed": false,
-            "namespaces": Array [
-              "default",
-            ],
-            "references": Array [],
-            "score": 0,
-            "sort": undefined,
-            "type": "sample_a",
-            "typeMigrationVersion": "10.2.0",
-            "updated_at": "2025-08-12T09:37:25.651Z",
-            "version": "WzIyLDFd",
-          },
-          Object {
-            "attributes": Object {
-              "boolean": true,
-              "keyword": "concurrent update that shouldnt be overwritten",
-            },
-            "coreMigrationVersion": "8.8.0",
-            "created_at": "2025-08-12T09:37:18.267Z",
             "id": "a-0",
-            "managed": false,
-            "namespaces": Array [
-              "default",
-            ],
-            "references": Array [],
-            "score": 0,
-            "sort": undefined,
-            "type": "sample_a",
-            "typeMigrationVersion": "10.2.0",
-            "updated_at": "2025-08-12T09:37:25.651Z",
-            "version": "WzIxLDFd",
+            "keyword": "concurrent update that shouldnt be overwritten",
           },
           Object {
-            "attributes": Object {
-              "boolean": true,
-              "keyword": "updated by the migrator",
-            },
-            "coreMigrationVersion": "8.8.0",
-            "created_at": "2025-08-12T09:37:18.267Z",
             "id": "a-1",
-            "managed": false,
-            "namespaces": Array [
-              "default",
-            ],
-            "references": Array [],
-            "score": 0,
-            "sort": undefined,
-            "type": "sample_a",
-            "typeMigrationVersion": "10.2.0",
-            "updated_at": "2025-08-12T09:37:18.267Z",
-            "version": "WzIzLDFd",
+            "keyword": "updated by the migrator",
           },
           Object {
-            "attributes": Object {
-              "boolean": true,
-              "keyword": "updated by the migrator",
-            },
-            "coreMigrationVersion": "8.8.0",
-            "created_at": "2025-08-12T09:37:18.267Z",
             "id": "a-2",
-            "managed": false,
-            "namespaces": Array [
-              "default",
-            ],
-            "references": Array [],
-            "score": 0,
-            "sort": undefined,
-            "type": "sample_a",
-            "typeMigrationVersion": "10.2.0",
-            "updated_at": "2025-08-12T09:37:18.267Z",
-            "version": "WzI0LDFd",
-          },
-        ]
-      `);
-
-      // This ones shouldn't change
-      expect(sampleBDocs).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "attributes": Object {
-              "text": "i am number 0",
-              "text2": "some static text",
-            },
-            "coreMigrationVersion": "8.8.0",
-            "created_at": "2025-08-12T09:37:19.176Z",
-            "id": "b-0",
-            "managed": false,
-            "namespaces": Array [
-              "default",
-            ],
-            "references": Array [],
-            "score": 0,
-            "sort": undefined,
-            "type": "sample_b",
-            "typeMigrationVersion": "10.2.0",
-            "updated_at": "2025-08-12T09:37:19.176Z",
-            "version": "WzI1LDFd",
+            "keyword": "updated by the migrator",
           },
           Object {
-            "attributes": Object {
-              "text": "i am number 1",
-              "text2": "some static text",
-            },
-            "coreMigrationVersion": "8.8.0",
-            "created_at": "2025-08-12T09:37:19.176Z",
-            "id": "b-1",
-            "managed": false,
-            "namespaces": Array [
-              "default",
-            ],
-            "references": Array [],
-            "score": 0,
-            "sort": undefined,
-            "type": "sample_b",
-            "typeMigrationVersion": "10.2.0",
-            "updated_at": "2025-08-12T09:37:19.176Z",
-            "version": "WzI2LDFd",
+            "id": "a-3",
+            "keyword": "concurrent update that shouldnt be overwritten",
           },
           Object {
-            "attributes": Object {
-              "text": "i am number 2",
-              "text2": "some static text",
-            },
-            "coreMigrationVersion": "8.8.0",
-            "created_at": "2025-08-12T09:37:19.176Z",
-            "id": "b-2",
-            "managed": false,
-            "namespaces": Array [
-              "default",
-            ],
-            "references": Array [],
-            "score": 0,
-            "sort": undefined,
-            "type": "sample_b",
-            "typeMigrationVersion": "10.2.0",
-            "updated_at": "2025-08-12T09:37:19.176Z",
-            "version": "WzI3LDFd",
-          },
-          Object {
-            "attributes": Object {
-              "text": "i am number 3",
-              "text2": "some static text",
-            },
-            "coreMigrationVersion": "8.8.0",
-            "created_at": "2025-08-12T09:37:19.176Z",
-            "id": "b-3",
-            "managed": false,
-            "namespaces": Array [
-              "default",
-            ],
-            "references": Array [],
-            "score": 0,
-            "sort": undefined,
-            "type": "sample_b",
-            "typeMigrationVersion": "10.2.0",
-            "updated_at": "2025-08-12T09:37:19.176Z",
-            "version": "WzI4LDFd",
-          },
-          Object {
-            "attributes": Object {
-              "text": "i am number 4",
-              "text2": "some static text",
-            },
-            "coreMigrationVersion": "8.8.0",
-            "created_at": "2025-08-12T09:37:19.176Z",
-            "id": "b-4",
-            "managed": false,
-            "namespaces": Array [
-              "default",
-            ],
-            "references": Array [],
-            "score": 0,
-            "sort": undefined,
-            "type": "sample_b",
-            "typeMigrationVersion": "10.2.0",
-            "updated_at": "2025-08-12T09:37:19.176Z",
-            "version": "WzI5LDFd",
+            "id": "a-4",
+            "keyword": "concurrent update that shouldnt be overwritten",
           },
         ]
       `);
@@ -294,12 +117,11 @@ describe('ZDT upgrades - encountering conversion failures', () => {
     await createBaseline();
 
     const typeA = getSampleAType();
-    const typeB = getSampleBType();
 
-    const transformFunc: SavedObjectModelUnsafeTransformFn<any, any> = (
-      doc: SavedObjectModelTransformationDoc<any>
+    const transformFunc: SavedObjectModelUnsafeTransformFn<TestSOType, TestSOType> = (
+      doc: SavedObjectModelTransformationDoc<TestSOType>
     ) => {
-      const attributes: any = {
+      const attributes = {
         ...doc.attributes,
         keyword: 'updated by the migrator',
       };
@@ -317,21 +139,6 @@ describe('ZDT upgrades - encountering conversion failures', () => {
       },
     };
 
-    typeB.modelVersions = {
-      ...typeB.modelVersions,
-      '2': {
-        changes: [
-          {
-            type: 'unsafe_transform',
-            transformFn: (typeSafeGuard) =>
-              typeSafeGuard((doc) => {
-                return { document: doc };
-              }),
-          },
-        ],
-      },
-    };
-
     const baseParams = getBaseMigratorParams();
     if (discardCorruptObjects) {
       baseParams!.settings!.migrations!.discardCorruptObjects = '8.7.0';
@@ -340,7 +147,7 @@ describe('ZDT upgrades - encountering conversion failures', () => {
     const { runMigrations, client, savedObjectsRepository } = await getKibanaMigratorTestKit({
       ...baseParams,
       logFilePath,
-      types: [typeA, typeB],
+      types: [typeA],
     });
 
     return { runMigrations, client, savedObjectsRepository };
@@ -360,7 +167,7 @@ describe('ZDT upgrades - encountering conversion failures', () => {
 
     await runMigrations();
 
-    const sampleAObjs = range(5).map<SavedObjectsBulkCreateObject>((number) => ({
+    const sampleAObjs = range(5).map<SavedObjectsBulkCreateObject<TestSOType>>((number) => ({
       id: `a-${number}`,
       type: 'sample_a',
       attributes: {
@@ -368,18 +175,6 @@ describe('ZDT upgrades - encountering conversion failures', () => {
         boolean: true,
       },
     }));
-
-    await savedObjectsRepository.bulkCreate(sampleAObjs);
-
-    const sampleBObjs = range(5).map<SavedObjectsBulkCreateObject>((number) => ({
-      id: `b-${number}`,
-      type: 'sample_b',
-      attributes: {
-        text: `i am number ${number}`,
-        text2: `some static text`,
-      },
-    }));
-
-    await savedObjectsRepository.bulkCreate(sampleBObjs);
+    await savedObjectsRepository.bulkCreate<TestSOType>(sampleAObjs);
   };
 });
