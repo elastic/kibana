@@ -16,9 +16,9 @@ import { type CascadeRowCellPrimitiveProps } from '../data_cascade_row_cell/casc
 import {
   type LeafNode,
   type GroupNode,
-  useDataCascadeDispatch,
+  useDataCascadeActions,
   useDataCascadeState,
-} from '../../data_cascade_provider';
+} from '../../store_provider';
 import { getCascadeRowNodePath, getCascadeRowNodePathValueRecord } from '../../../lib/utils';
 import {
   styles as cascadeRowStyles,
@@ -91,7 +91,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   virtualRowStyle,
 }: CascadeRowPrimitiveProps<G, L>) {
   const { euiTheme } = useEuiTheme();
-  const dispatch = useDataCascadeDispatch<G, L>();
+  const actions = useDataCascadeActions<G, L>();
   const { currentGroupByColumns } = useDataCascadeState<G, L>();
   const [isPendingRowGroupDataFetch, setRowGroupDataFetch] = useState<boolean>(false);
 
@@ -120,19 +120,16 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
       if (!groupNodeData) {
         return;
       }
-      dispatch({
-        type: 'UPDATE_ROW_GROUP_NODE_DATA',
-        payload: {
-          id: rowInstance.id,
-          data: groupNodeData,
-        },
+      actions.updateRowGroupNodeData({
+        id: rowInstance.id,
+        data: groupNodeData,
       });
     };
     return dataFetchFn().catch((error) => {
       // eslint-disable-next-line no-console -- added for debugging purposes
       console.error('Error fetching data for row with ID: %s', rowInstance.id, error);
     });
-  }, [dispatch, onCascadeGroupNodeExpanded, rowInstance, currentGroupByColumns]);
+  }, [actions, onCascadeGroupNodeExpanded, rowInstance, currentGroupByColumns]);
 
   const fetchCascadeRowGroupNodeData = useCallback(() => {
     setRowGroupDataFetch(true);
