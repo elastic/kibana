@@ -80,17 +80,15 @@ export function ContentFrameworkTable({
           {name}
         </EuiFlexItem>
 
-        {description && (
-          <EuiFlexItem grow={false}>
-            <EuiIconTip
-              title={id}
-              content={description}
-              size="s"
-              color="subdued"
-              aria-label={`${id}: ${description}`}
-            />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            title={id}
+            content={description ? <>{description}</> : null}
+            size="s"
+            color="subdued"
+            aria-label={description ? `${id}: ${description}` : id}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   };
