@@ -654,8 +654,13 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
+          const totalHits =
+            typeof sessionResponse.hits.total === 'number'
+              ? sessionResponse.hits.total
+              : sessionResponse.hits.total?.value;
+
           // There should be only one intermediate session with all requestIds in it
-          expect(sessionResponse.hits.hits.length).to.equal(1);
+          expect(totalHits).to.equal(1);
 
           const sources = sessionResponse.hits.hits.map((hit) => {
             if (!hit._source) {
