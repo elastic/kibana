@@ -19,12 +19,15 @@ import {
   ChatCompleteMetadata,
   ChatCompleteOptions,
   ChatCompleteAPI,
+  ChatCompletionEventType,
 } from '@kbn/inference-common';
 import { correctCommonEsqlMistakes, generateFakeToolCallId } from '../../../../common';
 import { INLINE_ESQL_QUERY_REGEX } from '../../../../common/tasks/nl_to_esql/constants';
 import { EsqlDocumentBase } from '../doc_base';
 import { requestDocumentationSchema } from './shared';
 import type { NlToEsqlTaskEvent } from '../types';
+
+const MAX_CALLS = 5;
 
 export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   chatCompleteApi,
@@ -52,9 +55,34 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
 } & Pick<ChatCompleteOptions, 'maxRetries' | 'retryConfiguration' | 'functionCalling'>) => {
   return function askLlmToRespond({
     documentationRequest: { commands, functions },
+    callCount = 0,
   }: {
     documentationRequest: { commands?: string[]; functions?: string[] };
+    callCount?: number;
   }): Observable<NlToEsqlTaskEvent<TToolOptions>> {
+    // Ensure askLlmToRespond is not called more than MAX_CALLS times
+    if (callCount >= MAX_CALLS) {
+      const stringifiedRequest = JSON.stringify(
+        {
+          commands,
+          functions,
+        },
+        null,
+        2
+      );
+      logger.debug(`Maximum ${MAX_CALLS} calls reached for askLlmToRespond: ${stringifiedRequest}`);
+      return of({
+        type: ChatCompletionEventType.ChatCompletionMessage,
+        id: 'exit_loop',
+        content: `Reached the maximum number of documentation requests${
+          commands && commands.length > 0 ? ` for commands [${commands?.join(', ')}]` : ''
+        }${
+          functions && functions.length > 0 ? ` | functions [${functions?.join(', ')}]` : ''
+        } (${MAX_CALLS}).`,
+        toolCalls: [],
+      } as NlToEsqlTaskEvent<TToolOptions>);
+    }
+
     const keywords = [...(commands ?? []), ...(functions ?? [])];
     const requestedDocumentation = docBase.getDocumentation(keywords);
     const fakeRequestDocsToolCall = createFakeTooCall(commands, functions);
@@ -158,6 +186,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
                   commands: args.commands,
                   functions: args.functions,
                 },
+                callCount: callCount + 1,
               });
             }
           }
