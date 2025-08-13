@@ -77,7 +77,7 @@ export class ElasticsearchCircuitBreaker extends BaseCircuitBreaker {
         const jvm = node.jvm;
         const os = node.os;
 
-        if (jvm?.mem?.heap_used_percent && os?.cpu?.percent) {
+        if (jvm?.mem?.heap_used_percent !== undefined && os?.cpu?.percent !== undefined) {
           const heapUsedPercent = jvm.mem.heap_used_percent;
           const cpuPercent = os.cpu.percent;
 
