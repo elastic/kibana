@@ -157,6 +157,8 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
     [getChartConfigAccessor]
   );
 
+  // I didn't want to touch the UnifiedHistogramWrapper. Instead we route the code to render another component
+  // This causes some code duplication, which we might solve encapsulating components/logic in reausable hooks/components
   return chartSectionConfig.replaceDefaultHistogram ? (
     <CustomChartSectionWrapper
       stateContainer={stateContainer}
@@ -231,6 +233,11 @@ const UnifiedHistogramWrapper = ({ stateContainer, panelsToggle }: UnifiedHistog
   );
 };
 
+/**
+ * Custom chart section wrapper for the unified histogram. Many of the hooks here were extracted from `useUnifiedHistogram`
+ * There are many things happening on `useUnifiedHistogram` but I'm not sure if they're all necessary for custom components.
+ * We should probably centralize the basic logic somewhere else
+ */
 const CustomChartSectionWrapper = ({
   stateContainer,
   panelsToggle,
@@ -245,12 +252,13 @@ const CustomChartSectionWrapper = ({
 
   const [input$] = useState(() => new Subject<UnifiedHistogramInputMessage>());
 
+  // Extracted from useUnifiedHistogram
   const [stateService] = useState(() => {
     const { services, initialState, localStorageKeyPrefix } = restProps;
     return createStateService({ services, initialState, localStorageKeyPrefix });
   });
 
-  // Load async services and initialize API
+  // Extracted from useUnifiedHistogram
   useMount(async () => {
     setUnifiedHistogramApi({
       fetch: () => {
@@ -268,8 +276,11 @@ const CustomChartSectionWrapper = ({
   });
 
   const { euiTheme } = useEuiTheme();
+
+  // TODO: Figure out a way to calculate this in a more dynamic way
   const defaultTopPanelHeight = euiTheme.base * 30;
 
+  // Extracted from useUnifiedHistogram
   const { onTopPanelHeightChange, chart } = useStateProps({
     services: restProps.services,
     localStorageKeyPrefix: restProps.localStorageKeyPrefix,
@@ -287,7 +298,9 @@ const CustomChartSectionWrapper = ({
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({
       onTopPanelHeightChange,
+      // always available?
       isChartAvailable: true,
+      // we need this to control the chart section visibility
       chart,
       topPanelHeight: defaultTopPanelHeight,
     }),
@@ -304,7 +317,7 @@ const CustomChartSectionWrapper = ({
   const renderCustomChartToggleActions = useCallback(
     () =>
       React.isValidElement(panelsToggle)
-        ? React.cloneElement(panelsToggle, { renderedFor: 'histogram' })
+        ? React.cloneElement(panelsToggle, { renderedFor: 'histogram' }) // should we have a another `renderedFor` option?
         : panelsToggle,
     [panelsToggle]
   );
