@@ -210,7 +210,7 @@ export const AssistantHeader: React.FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems={'center'} justifyContent="spaceBetween">
-              <EuiFlexItem data-test-subj="heyhey1">
+              <EuiFlexItem>
                 <ElasticLLMCostAwarenessTour
                   isDisabled={isDisabled}
                   selectedConnectorId={selectedConnectorId}
@@ -227,7 +227,7 @@ export const AssistantHeader: React.FC<Props> = ({
                 </ElasticLLMCostAwarenessTour>
               </EuiFlexItem>
               {!isNewConversation && (
-                <EuiFlexItem data-test-subj="heyhey2">
+                <EuiFlexItem>
                   <div id={AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID}>
                     <ConversationSettingsMenu
                       isConversationOwner={isConversationOwner}
@@ -240,7 +240,7 @@ export const AssistantHeader: React.FC<Props> = ({
                   </div>
                 </EuiFlexItem>
               )}
-              <EuiFlexItem data-test-subj="heyhey3">
+              <EuiFlexItem>
                 <AssistantSettingsContextMenu isDisabled={isDisabled} />
               </EuiFlexItem>
             </EuiFlexGroup>

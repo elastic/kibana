@@ -18,11 +18,13 @@ import * as i18n from './translations';
 
 type ListGroupAction = EuiContextMenuItemProps & { key: string };
 
-interface ConversationSidePanelContextMenuProps  {
+interface ConversationSidePanelContextMenuProps {
   actions: ListGroupAction[];
 }
 
-export const ConversationSidePanelContextMenu = ({ actions }: ConversationSidePanelContextMenuProps) => {
+export const ConversationSidePanelContextMenu = ({
+  actions,
+}: ConversationSidePanelContextMenuProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
   const buttonId = useGeneratedHtmlId({ prefix: 'listGroupItemActionsButton' });
@@ -52,7 +54,7 @@ export const ConversationSidePanelContextMenu = ({ actions }: ConversationSidePa
           size="xs"
           iconType="boxesVertical"
           iconSize="s"
-          aria-label{i18n.CONVERSATION_CONTEXT_MENU}
+          aria-label={i18n.CONVERSATION_CONTEXT_MENU}
           aria-haspopup="true"
           aria-controls={menuId}
           aria-expanded={isPopoverOpen}
