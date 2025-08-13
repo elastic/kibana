@@ -109,9 +109,17 @@ export class IndexUpdateService {
     this.listenForUpdates();
   }
 
+  /** Indicates the service has been completed */
+  private readonly _completed$ = new Subject<{
+    indexName: string | null;
+    isIndexCreated: boolean;
+  }>();
+  public readonly completed$ = this._completed$.asObservable();
+
   private _indexName$ = new BehaviorSubject<string | null>(null);
   public readonly indexName$: Observable<string | null> = this._indexName$.asObservable();
 
+  /** User input query */
   private readonly _qstr$ = new BehaviorSubject<string>('');
   public readonly qstr$: Observable<string> = this._qstr$.asObservable();
   public setQstr(queryString: string) {
@@ -294,6 +302,7 @@ export class IndexUpdateService {
 
   public flush() {
     this._flush$.next(Date.now());
+    return this;
   }
 
   /** Doc updates/additions that are pending to be saved */
@@ -448,8 +457,15 @@ export class IndexUpdateService {
           })
         )
         .subscribe({
-          next: ({ updates: bulkUpdateOperations, response, rows, savingDocs, dataView }) => {
+          next: ({ updates: bulkUpdateOperations, response, rows, savingDocs }) => {
             this._isSaving$.next(false);
+
+            if (!response.errors) {
+              this.destroy();
+              // Close the flyout after successful save
+            }
+
+            // TODO Display errors in the callout
 
             const savedIds = new Set(
               response.items
@@ -468,10 +484,6 @@ export class IndexUpdateService {
                 return { ...row, raw: mergedSource, flattened: mergedSource };
               })
             );
-
-            if (response.errors) {
-              // TODO Display errors in the callout
-            }
 
             // Clear the buffer after successful update
             this.addAction('saved', {
@@ -783,6 +795,12 @@ export class IndexUpdateService {
   }
 
   public destroy() {
+    this._completed$.next({
+      indexName: this.getIndexName(),
+      isIndexCreated: this.isIndexCreated(),
+    });
+    this._completed$.complete();
+
     this._subscription.unsubscribe();
     // complete all subjects
     this._isSaving$.complete();

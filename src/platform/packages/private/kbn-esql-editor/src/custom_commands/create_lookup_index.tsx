@@ -277,10 +277,10 @@ export const useLookupIndexCommand = (
   const onFlyoutClose = useCallback(
     async (
       initialIndexName: string | undefined,
-      resultIndexName: string,
+      resultIndexName: string | null,
       indexCreated: boolean
     ) => {
-      if (!indexCreated) return;
+      if (!indexCreated || resultIndexName === null) return;
 
       const cursorPosition = editorRef.current?.getPosition();
 
