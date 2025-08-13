@@ -9,7 +9,7 @@
 
 import type { DatatableColumn, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
-type TextBasedColumnTypes = Record<string, DatatableColumnMeta>;
+type TextBasedColumnTypes = Record<string, DatatableColumnMeta & { variable?: string }>;
 
 /**
  * Columns meta for text based searches
@@ -19,7 +19,10 @@ export const getTextBasedColumnsMeta = (
   textBasedColumns: DatatableColumn[]
 ): TextBasedColumnTypes => {
   return textBasedColumns.reduce<TextBasedColumnTypes>((map, next) => {
-    map[next.name] = next.meta;
+    map[next.name] = {
+      ...next.meta,
+      ...(next.variable && { variable: next.variable }),
+    };
     return map;
   }, {});
 };

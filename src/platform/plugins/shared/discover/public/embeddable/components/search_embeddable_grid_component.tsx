@@ -104,7 +104,30 @@ export function SearchEmbeddableGridComponent({
     [dataView, isEsql, savedSearch.sort]
   );
 
-  const originalColumns = useMemo(() => savedSearch.columns ?? [], [savedSearch.columns]);
+  const originalColumns = useMemo(() => {
+    if (isEsql && columnsMeta) {
+      const columnsFromRequest = Object.keys(columnsMeta);
+      const isDrivenByVariable = Object.entries(columnsMeta).find(([, meta]) => meta.variable);
+
+      if (isDrivenByVariable) {
+        // find the savedSearch.columns which doesn't exist in columnsFromRequest and replace it with the isDrivenByVariable
+        const variableDrivenColumnName = isDrivenByVariable[0];
+        const updatedColumns = (savedSearch.columns ?? []).map((columnName) => {
+          // If this column from savedSearch doesn't exist in the current request columns,
+          // replace it with the variable-driven column
+          if (!columnsFromRequest.includes(columnName)) {
+            return variableDrivenColumnName;
+          }
+          return columnName;
+        });
+
+        // Remove duplicates and return
+        return Array.from(new Set(updatedColumns));
+      }
+    }
+
+    return savedSearch.columns ?? [];
+  }, [columnsMeta, isEsql, savedSearch.columns]);
 
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({
     capabilities: discoverServices.capabilities,
