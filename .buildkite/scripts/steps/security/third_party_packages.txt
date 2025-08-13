@@ -5,5 +5,3 @@ tree-dump
 @a2a-js/sdk
 @opentelemetry/exporter-metrics-otlp-http
 inversify
-density-clustering
-@types/density-clustering
