@@ -69,7 +69,6 @@ export const getNodeInfo = async (
         'agent.*',
         'container.*',
         'resource.attributes.*',
-        'labels.*',
         TIMESTAMP_FIELD,
       ],
       sort: [{ [TIMESTAMP_FIELD]: 'desc' }],
