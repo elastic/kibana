@@ -28,6 +28,7 @@ exports[`scaling form should disable clusters option when clustering is not supp
         checked={false}
         id="MVT"
         label="Use vector tiles"
+        name="scalingType"
         onChange={[Function]}
       />
       <EuiToolTip
@@ -42,6 +43,7 @@ exports[`scaling form should disable clusters option when clustering is not supp
           disabled={true}
           id="CLUSTERS"
           label="Show clusters when results exceed 10,000"
+          name="scalingType"
           onChange={[Function]}
         />
       </EuiToolTip>
@@ -49,6 +51,7 @@ exports[`scaling form should disable clusters option when clustering is not supp
         checked={true}
         id="LIMIT"
         label="Limit results to 10,000"
+        name="scalingType"
         onChange={[Function]}
       />
     </div>
@@ -92,6 +95,7 @@ exports[`scaling form should render 1`] = `
         checked={false}
         id="MVT"
         label="Use vector tiles"
+        name="scalingType"
         onChange={[Function]}
       />
       <EuiRadio
@@ -99,12 +103,14 @@ exports[`scaling form should render 1`] = `
         disabled={false}
         id="CLUSTERS"
         label="Show clusters when results exceed 10,000"
+        name="scalingType"
         onChange={[Function]}
       />
       <EuiRadio
         checked={true}
         id="LIMIT"
         label="Limit results to 10,000"
+        name="scalingType"
         onChange={[Function]}
       />
     </div>

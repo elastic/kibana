@@ -17,7 +17,7 @@ import {
   type RuntimeStateManager,
 } from '../redux';
 import { createTabsStorageManager } from '../tabs_storage_manager';
-import { TABS_ENABLED } from '../../../../constants';
+import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 
@@ -37,12 +37,16 @@ export const useStateManagers = ({
   urlStateStorage,
   customizationContext,
 }: UseStateManagers): UseStateManagersReturn => {
+  const tabsEnabled = services.core.featureFlags?.getBooleanValue(
+    TABS_ENABLED_FEATURE_FLAG_KEY,
+    false
+  );
   // syncing with the _t part URL
   const [tabsStorageManager] = useState(() =>
     createTabsStorageManager({
       urlStateStorage,
       storage: services.storage,
-      enabled: TABS_ENABLED,
+      enabled: tabsEnabled,
     })
   );
 
