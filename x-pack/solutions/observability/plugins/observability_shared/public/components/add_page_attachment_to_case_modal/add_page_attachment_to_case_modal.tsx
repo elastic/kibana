@@ -147,10 +147,7 @@ function AddToCaseButtonContent({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <AddToCaseComment
-          onCommentChange={(change) => setComment(change)}
-          comment={comment}
-        />
+        <AddToCaseComment onCommentChange={(change) => setComment(change)} comment={comment} />
       </EuiModalBody>
     </EuiConfirmModal>
   ) : null;
