@@ -29,7 +29,7 @@ export class StepExecutionRepository {
       query: {
         match: { workflowRunId: executionId },
       },
-      sort: 'startedAt:dsc',
+      sort: 'startedAt:desc',
     });
 
     return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);

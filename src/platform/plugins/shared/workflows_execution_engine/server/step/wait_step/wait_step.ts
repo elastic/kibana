@@ -121,10 +121,6 @@ export class WaitStepImpl implements StepImplementation {
       );
     }
 
-    if (!duration || typeof duration !== 'string' || !validDurationRegex.test(duration)) {
-      throw new Error(`Invalid duration format: ${duration}`);
-    }
-
     const durationComponentsRegex = /(\d+)(ms|s|m|h|d|w)(?![a-zA-Z])/g;
     let match;
     while ((match = durationComponentsRegex.exec(duration)) !== null) {
