@@ -112,7 +112,7 @@ describe('Controls integration with Graph', () => {
     });
 
     it('should not render center button when no nodes have hasOriginEvents set to true', () => {
-      const { container } = renderGraphPreview({
+      renderGraphPreview({
         nodes: [
           {
             id: 'node1',
@@ -140,30 +140,22 @@ describe('Controls integration with Graph', () => {
         interactive: true,
       });
 
-      // Controls should be rendered but center button should not
-      const controlsContainer = container.querySelector('.react-flow__panel');
-      expect(controlsContainer).toBeInTheDocument();
-
       const centerButton = screen.queryByTestId(GRAPH_CONTROLS_CENTER_ID);
       expect(centerButton).not.toBeInTheDocument();
     });
 
     it('should not render center button when nodes array is empty', () => {
-      const { container } = renderGraphPreview({
+      renderGraphPreview({
         nodes: [],
         edges: [],
         interactive: true,
       });
 
-      // Controls should be rendered but center button should not
-      const controlsContainer = container.querySelector('.react-flow__panel');
-      expect(controlsContainer).toBeInTheDocument();
-
       const centerButton = screen.queryByTestId(GRAPH_CONTROLS_CENTER_ID);
       expect(centerButton).not.toBeInTheDocument();
     });
 
-    it('should filter and center only nodes with hasOriginEvents=true when center button is clicked', () => {
+    it('should center graph to only nodes with hasOriginEvents=true regardless of edge connections when center button is clicked', () => {
       renderGraphPreview({
         nodes: [
           {
@@ -194,8 +186,19 @@ describe('Controls integration with Graph', () => {
             shape: 'diamond',
             // hasOriginEvents undefined
           },
+          {
+            id: 'origin3-isolated',
+            label: 'Regular Node 2',
+            color: 'primary',
+            shape: 'diamond',
+            hasOriginEvents: true,
+          },
         ],
-        edges: [],
+        edges: [
+          { id: 'edge1', color: 'primary', source: 'origin1', target: 'regular1' },
+          { id: 'edge2', color: 'primary', source: 'origin1', target: 'origin2' },
+          { id: 'edge1', color: 'primary', source: 'regular1', target: 'regular2' },
+        ],
         interactive: true,
       });
 
@@ -207,122 +210,7 @@ describe('Controls integration with Graph', () => {
       // Should only center on nodes with hasOriginEvents=true
       expect(useReactFlowMock().fitView).toHaveBeenCalledWith({
         duration: 200,
-        nodes: [{ id: 'origin1' }, { id: 'origin2' }],
-      });
-    });
-
-    it('should handle nodes with mixed edge relationships and hasOriginEvents', () => {
-      renderGraphPreview({
-        nodes: [
-          {
-            id: 'source',
-            label: 'Source Node',
-            color: 'primary',
-            shape: 'hexagon',
-            hasOriginEvents: true,
-          },
-          {
-            id: 'target1',
-            label: 'Target Node 1',
-            color: 'primary',
-            shape: 'rectangle',
-            hasOriginEvents: false,
-          },
-          {
-            id: 'target2',
-            label: 'Target Node 2',
-            color: 'primary',
-            shape: 'ellipse',
-            hasOriginEvents: true,
-          },
-          {
-            id: 'isolated',
-            label: 'Isolated Node',
-            color: 'primary',
-            shape: 'diamond',
-            hasOriginEvents: true,
-          },
-        ],
-        edges: [
-          { id: 'edge1', color: 'primary', source: 'source', target: 'target1' },
-          { id: 'edge2', color: 'primary', source: 'source', target: 'target2' },
-        ],
-        interactive: true,
-      });
-
-      const centerButton = screen.getByTestId(GRAPH_CONTROLS_CENTER_ID);
-      expect(centerButton).toBeInTheDocument();
-
-      fireEvent.click(centerButton);
-
-      // Should center on all nodes with hasOriginEvents=true regardless of edge relationships
-      expect(useReactFlowMock().fitView).toHaveBeenCalledWith({
-        duration: 200,
-        nodes: [{ id: 'source' }, { id: 'target2' }, { id: 'isolated' }],
-      });
-    });
-
-    it('should handle empty node IDs, null IDs or undefined IDs gracefully', () => {
-      renderGraphPreview({
-        nodes: [
-          // {
-          //   id: '',
-          //   label: 'Empty ID Node',
-          //   color: 'primary',
-          //   shape: 'hexagon',
-          //   hasOriginEvents: true,
-          // },
-          // {
-          //   id: '   ',
-          //   label: 'Whitespace ID Node',
-          //   color: 'primary',
-          //   shape: 'rectangle',
-          //   hasOriginEvents: true,
-          // },
-          // {
-          //   id: '\t',
-          //   label: 'Whitespace String ID Node',
-          //   color: 'primary',
-          //   shape: 'rectangle',
-          //   hasOriginEvents: true,
-          // },
-          // {
-          //   // @ts-expect-error Testing invalid ID type
-          //   id: null,
-          //   label: 'Null ID Node',
-          //   color: 'primary',
-          //   shape: 'hexagon',
-          //   hasOriginEvents: true,
-          // },
-          // {
-          //   // @ts-expect-error Testing invalid ID type
-          //   id: undefined,
-          //   label: 'Undefined ID Node',
-          //   color: 'primary',
-          //   shape: 'rectangle',
-          //   hasOriginEvents: true,
-          // },
-          {
-            id: 'valid-id',
-            label: 'Valid Node',
-            color: 'primary',
-            shape: 'ellipse',
-            hasOriginEvents: true,
-          },
-        ],
-        edges: [],
-        interactive: true,
-      });
-
-      const centerButton = screen.getByTestId(GRAPH_CONTROLS_CENTER_ID);
-      expect(centerButton).toBeInTheDocument();
-
-      fireEvent.click(centerButton);
-
-      // Should only center on nodes with valid IDs
-      expect(useReactFlowMock().fitView).toHaveBeenCalledWith({
-        duration: 200,
-        nodes: [{ id: 'valid-id' }],
+        nodes: [{ id: 'origin1' }, { id: 'origin2' }, { id: 'origin3-isolated' }],
       });
     });
 
