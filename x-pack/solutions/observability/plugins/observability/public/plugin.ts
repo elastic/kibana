@@ -6,10 +6,10 @@
  */
 
 import {
+  type CasesPublicSetup,
   CasesDeepLinkId,
   CasesPublicStart,
   getCasesDeepLinks,
-  CasesPublicSetup,
 } from '@kbn/cases-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
