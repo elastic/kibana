@@ -7,5 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DiscoverSessionTab, DiscoverSessionTabAttributes } from './schema';
-export { getSavedSearchObjectType } from './search';
+import { schema } from '@kbn/config-schema';
+import { metricStateSchema } from './charts/metric';
+
+export const lensApiStateSchema = schema.oneOf([metricStateSchema]);
+
+export type LensApiState = typeof lensApiStateSchema.type;
+
+export type { MetricState } from './charts/metric';
+
+export type NarrowByType<T, U> = T extends { type: U } ? T : never;
