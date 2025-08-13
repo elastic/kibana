@@ -97,9 +97,9 @@ export async function generateSignificantEventDefinitions(
 
   if (logPatterns?.length) {
     logger.debug(() => {
-      return `Found ${logPatterns?.length} log patterns:
-      
-      ${logPatterns.map((pattern) => `- ${pattern.sample} (${pattern.count})`).join('\n')}
+      return `Found ${logPatterns?.length} log patterns: ${logPatterns
+        .map((pattern) => `- ${pattern.sample} (${pattern.count})`)
+        .join('\n')}
       `;
     });
   }
