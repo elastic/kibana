@@ -150,7 +150,13 @@ export function AiAssistantSelectionPage() {
             display="plain"
             hasBorder
             icon={
-              <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="m">
+              <EuiFlexGroup
+                gutterSize="m"
+                alignItems="center"
+                responsive={false}
+                direction="row"
+                justifyContent="center"
+              >
                 <EuiFlexItem grow={false}>
                   <EuiIcon size="xxl" type="logoObservability" />
                 </EuiFlexItem>
