@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { UserProfilesProvider } from '@kbn/content-management-user-profiles';
 import { i18n } from '@kbn/i18n';
@@ -80,15 +80,17 @@ const FavoritesList = ({
   selectedId,
 }: FavoritesListProps) => {
   const favorites = useFavorites();
-  // Build a stable key to remount the finder when either the active tab changes
-  // or the set of favorite ids changes (ensures filtering is applied because the
-  // underlying SavedObjectFinder only filters during its fetch cycle).
-  const favoritesVersion = useMemo(
-    () => (favorites.data?.favoriteIds ? favorites.data.favoriteIds.slice().sort().join('|') : 'none'),
-    [favorites.data?.favoriteIds]
-  );
-  const finderKey = `${activeTab}-${favoritesVersion}`;
   const favoriteIds = favorites.data?.favoriteIds || [];
+  const [prevFavoriteIds, setPrevFavoriteIds] = useState<string[]>([]);
+  // Preserve last successful favorites to avoid flicker when switching tabs or during refetch
+  useEffect(() => {
+    if (favoriteIds.length) {
+      setPrevFavoriteIds(favoriteIds);
+    }
+  }, [favoriteIds]);
+  const effectiveFavoriteIds = favorites.isLoading && prevFavoriteIds.length
+    ? prevFavoriteIds
+    : favoriteIds;
   const favoriteCount = favoriteIds.length;
 
   return (
@@ -107,8 +109,6 @@ const FavoritesList = ({
         >
           {i18n.translate('discover.openSession.tabAll', { defaultMessage: 'All' })}
         </EuiTab>
-    {/* Spacer to separate tabs from the search bar */}
-    <EuiSpacer size="s" />
         <EuiTab
           onClick={() => setActiveTab('starred')}
           isSelected={activeTab === 'starred'}
@@ -122,8 +122,10 @@ const FavoritesList = ({
           )}
         </EuiTab>
       </EuiTabs>
+      {/* Gap below tabs to separate from search bar */}
+      <div style={{ height: 8 }} />
       <SavedObjectFinder
-        key={finderKey}
+        key={activeTab}
         id="discoverOpenSearch"
         services={{ savedObjectsTagging, contentClient, uiSettings }}
         onChoose={(id: string) => onOpen(id)}
@@ -163,24 +165,35 @@ const FavoritesList = ({
           },
         ]}
         noItemsMessage={
-          activeTab === 'starred' ? (
-            <EuiEmptyPrompt
-              title={<h4>{i18n.translate('discover.openSession.noStarredTitle', { defaultMessage: 'No starred sessions yet' })}</h4>}
-              body={
-                <p>
-                  {i18n.translate('discover.openSession.noStarredBody', {
-                    defaultMessage: 'Star sessions you frequently open to quickly find them here.',
-                  })}
-                </p>
-              }
-              data-test-subj="discoverSessionsStarredEmpty"
-            />
-          ) : (
-            <FormattedMessage
-              id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
-              defaultMessage="No matching Discover sessions found."
-            />
-          )
+          activeTab === 'starred'
+            ? favorites.isLoading
+              ? null // suppress empty state while loading to prevent flicker
+              : (
+                  <EuiEmptyPrompt
+                    title={
+                      <h4>
+                        {i18n.translate('discover.openSession.noStarredTitle', {
+                          defaultMessage: 'No starred sessions yet',
+                        })}
+                      </h4>
+                    }
+                    body={
+                      <p>
+                        {i18n.translate('discover.openSession.noStarredBody', {
+                          defaultMessage:
+                            'Star sessions you frequently open to quickly find them here.',
+                        })}
+                      </p>
+                    }
+                    data-test-subj="discoverSessionsStarredEmpty"
+                  />
+                )
+            : (
+                <FormattedMessage
+                  id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
+                  defaultMessage="No matching Discover sessions found."
+                />
+              )
         }
         savedObjectMetaData={[
           {
@@ -197,10 +210,8 @@ const FavoritesList = ({
                 : '',
             showSavedObject: (so: any) => {
               if (activeTab === 'all') return true;
-              // While loading, show nothing in Starred tab to avoid flashing all items
-              if (favorites.isLoading) return false;
               if (favorites.error) return false;
-              return favoriteIds.includes(so.id);
+              return effectiveFavoriteIds.includes(so.id);
             },
           },
         ]}
