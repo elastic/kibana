@@ -26,7 +26,7 @@ import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/
 import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
-import { ESQLLicenseType } from '@kbn/esql-types';
+import { LicenseType } from '@kbn/licensing-types';
 import { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { getLocationFromCommandOrOptionName } from '../../shared/types';
@@ -139,7 +139,7 @@ export function getFunctionSignaturesByReturnType(
   paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
   option?: string,
-  hasMinimumLicenseRequired = (license?: ESQLLicenseType | undefined): boolean =>
+  hasMinimumLicenseRequired = (license?: LicenseType | undefined): boolean =>
     license === 'platinum',
   activeProduct?: PricingProduct
 ): PartialSuggestionWithText[] {
@@ -176,9 +176,7 @@ export function getFunctionSignaturesByReturnType(
         if (hasRestrictedSignature) {
           const availableSignatures = signatures.filter((signature) => {
             if (!signature.license) return true;
-            return hasMinimumLicenseRequired(
-              signature.license.toLocaleLowerCase() as ESQLLicenseType
-            );
+            return hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as LicenseType);
           });
 
           if (availableSignatures.length === 0) {

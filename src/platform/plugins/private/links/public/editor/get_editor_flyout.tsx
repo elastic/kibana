@@ -23,6 +23,7 @@ export interface EditorState {
   links?: ResolvedLink[];
   savedObjectId?: string;
   title?: string;
+  error?: Error;
 }
 
 export function getEditorFlyout({
@@ -66,6 +67,7 @@ export function getEditorFlyout({
           closeFlyout();
         } else {
           const saveResult = await runSaveToLibrary(newState);
+          if (saveResult?.error) throw saveResult.error;
           onCompleteEdit?.(saveResult);
           // If saveResult is undefined, the user cancelled the save as modal and we should not close the flyout
           if (saveResult) closeFlyout();
