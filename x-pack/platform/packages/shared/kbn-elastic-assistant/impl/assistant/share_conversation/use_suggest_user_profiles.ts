@@ -15,6 +15,7 @@ import {
   SuggestUsersResponse,
 } from '@kbn/elastic-assistant-common';
 import type { HttpStart, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import * as i18n from './translations';
 import { useAssistantContext } from '../../..';
 
 type Props = Omit<SuggestUserProfilesArgs, 'signal' | 'http'> & {
@@ -67,7 +68,7 @@ export const useSuggestUserProfiles = ({
           toasts?.addError(
             error.body && error.body.message ? new Error(error.body.message) : error,
             {
-              title: 'Make this i18n',
+              title: i18n.ERROR_SUGGEST,
             }
           );
         }

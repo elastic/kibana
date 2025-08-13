@@ -78,10 +78,10 @@ export const WITH_SELECTED = i18n.translate(
     defaultMessage: 'Only with selected users',
   }
 );
-export const INPUT_PLACEHOLDER = i18n.translate(
+export const ERROR_SUGGEST = i18n.translate(
   'xpack.elasticAssistant.assistant.visibility.inputPlaceholder',
   {
-    defaultMessage: 'Add a name or email address',
+    defaultMessage: 'An error occurred while fetching user suggestions.',
   }
 );
 export const ADD = i18n.translate('xpack.elasticAssistant.assistant.visibility.add', {

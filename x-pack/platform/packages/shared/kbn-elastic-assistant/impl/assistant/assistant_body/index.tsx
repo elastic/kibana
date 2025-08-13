@@ -39,7 +39,7 @@ interface Props {
   handleOnConversationSelected: ({ cId }: { cId: string }) => Promise<void>;
   isAssistantEnabled: boolean;
   isConversationOwner: boolean;
-  isConversationShared: boolean;
+  conversationShared: 'not_shared' | 'globally_shared' | 'selected_shared';
   isSettingsModalVisible: boolean;
   isWelcomeSetup: boolean;
   isLoading: boolean;
@@ -58,7 +58,7 @@ export const AssistantBody: FunctionComponent<Props> = ({
   setCurrentSystemPromptId,
   http,
   isConversationOwner,
-  isConversationShared,
+  conversationShared,
   isAssistantEnabled,
   isLoading,
   isSettingsModalVisible,
@@ -149,8 +149,11 @@ export const AssistantBody: FunctionComponent<Props> = ({
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {isConversationOwner && isConversationShared && (
-          <SharedConversationOwnerCallout id={currentConversation?.id ?? ''} />
+        {isConversationOwner && conversationShared !== 'not_shared' && (
+          <SharedConversationOwnerCallout
+            id={currentConversation?.id ?? ''}
+            isGloballyShared={conversationShared === 'globally_shared'}
+          />
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>

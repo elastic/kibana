@@ -26,8 +26,7 @@ export const suggestUsersRoute = (router: ElasticAssistantPluginRouter, logger: 
       path: ELASTIC_USERS_SUGGEST_URL,
       security: {
         authz: {
-          // TODO is suggestUserProfiles a thing? got it from the docs
-          requiredPrivileges: ['elasticAssistant', 'suggestUserProfiles'],
+          requiredPrivileges: ['elasticAssistant'],
         },
       },
     })

@@ -14,6 +14,13 @@ export const CONVERSATION_SHARED_TITLE = i18n.translate(
   }
 );
 
+export const CONVERSATION_SHARED_SELECTED_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.ownership.titleSelected',
+  {
+    defaultMessage: 'This conversation is shared with selected team members.',
+  }
+);
+
 export const DISABLED_OWNERSHIP = i18n.translate(
   'xpack.elasticAssistant.assistant.ownership.disabled',
   {
@@ -25,5 +32,12 @@ export const OWNERSHIP_CALLOUT = i18n.translate(
   'xpack.elasticAssistant.assistant.ownership.callout',
   {
     defaultMessage: `Any further edits you do to this conversation will be shared with the rest of the team.`,
+  }
+);
+
+export const OWNERSHIP_CALLOUT_SELECTED = i18n.translate(
+  'xpack.elasticAssistant.assistant.ownership.calloutSelected',
+  {
+    defaultMessage: `Any further edits you do to this conversation will be shared with the selected team members.`,
   }
 );

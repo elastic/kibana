@@ -16,12 +16,11 @@ import {
   EuiButtonGroup,
   EuiSpacer,
   EuiText,
-  EuiCopy,
 } from '@elastic/eui';
 import { UserProfile } from '@kbn/core-user-profile-common';
+import { COPY_URL } from '../use_conversation/translations';
 import { UserProfilesList } from './user_profiles_list';
 import { useConversation } from '../use_conversation';
-import { COPY_URL } from '../settings/settings_context_menu/translations';
 import * as i18n from './translations';
 import { Conversation, useAssistantContext } from '../../..';
 import { UserProfilesSearch } from './user_profiles_search';
@@ -52,7 +51,7 @@ const ShareModalComponent: React.FC<Props> = ({
   setIsModalOpen,
   selectedConversation,
 }) => {
-  const { updateConversationUsers } = useConversation();
+  const { copyConversationUrl, updateConversationUsers } = useConversation();
   const [sharingOption, setSharingOption] = useState<'everyone' | 'selected'>(
     isSharedGlobal ? 'everyone' : 'selected'
   );
@@ -75,7 +74,10 @@ const ShareModalComponent: React.FC<Props> = ({
     setSelectedUsers(conversationUsers.map(({ uid }) => uid));
     setNextSelectedUsers(conversationUsers);
   }, [currentUser?.id, currentUser?.name, selectedConversation?.users]);
-
+  const handleCopyUrl = useCallback(
+    () => copyConversationUrl(selectedConversation),
+    [copyConversationUrl, selectedConversation]
+  );
   const accessText = useMemo(
     () => (sharingOption === 'everyone' ? i18n.EVERYONE : i18n.ONLY_SELECTED),
     [sharingOption]
@@ -172,13 +174,9 @@ const ShareModalComponent: React.FC<Props> = ({
 
         <EuiSpacer size="m" />
 
-        <EuiCopy textToCopy="https://your.app/share-link">
-          {(copy) => (
-            <EuiButton iconType="copyClipboard" onClick={copy}>
-              {COPY_URL}
-            </EuiButton>
-          )}
-        </EuiCopy>
+        <EuiButton iconType="copyClipboard" onClick={handleCopyUrl}>
+          {COPY_URL}
+        </EuiButton>
       </EuiModalBody>
 
       <EuiModalFooter>

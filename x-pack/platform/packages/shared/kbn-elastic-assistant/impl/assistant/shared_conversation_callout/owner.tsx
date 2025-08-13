@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiCallOut, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -20,7 +20,10 @@ import * as i18n from './translations';
  * Renders a chat window with a prompt input and a chat history, along with
  * quick prompts for common actions, settings, and prompt context providers.
  */
-const SharedConversationOwnerCalloutComponent: React.FC<{ id: string }> = ({ id }) => {
+const SharedConversationOwnerCalloutComponent: React.FC<{
+  id: string;
+  isGloballyShared: boolean;
+}> = ({ id, isGloballyShared }) => {
   const { euiTheme } = useEuiTheme();
   const localStorageId = `${DEFAULT_ASSISTANT_NAMESPACE}.${SHARED_CONVERSATION_CALLOUT}.owner.${id}`;
   const [localStorageShowConversation, setLocalStorageShowConversation] = useLocalStorage<boolean>(
@@ -30,6 +33,19 @@ const SharedConversationOwnerCalloutComponent: React.FC<{ id: string }> = ({ id 
   const onDismiss = useCallback(() => {
     setLocalStorageShowConversation(false);
   }, [setLocalStorageShowConversation]);
+  const { description, title } = useMemo(
+    () =>
+      isGloballyShared
+        ? {
+            title: i18n.CONVERSATION_SHARED_TITLE,
+            description: i18n.OWNERSHIP_CALLOUT,
+          }
+        : {
+            title: i18n.CONVERSATION_SHARED_SELECTED_TITLE,
+            description: i18n.OWNERSHIP_CALLOUT_SELECTED,
+          },
+    [isGloballyShared]
+  );
   return localStorageShowConversation ? (
     <EuiCallOut
       css={css`
@@ -37,11 +53,11 @@ const SharedConversationOwnerCalloutComponent: React.FC<{ id: string }> = ({ id 
         padding: ${euiTheme.size.m};
       `}
       size="s"
-      title={i18n.CONVERSATION_SHARED_TITLE}
+      title={title}
       iconType="users"
       onDismiss={onDismiss}
     >
-      {i18n.OWNERSHIP_CALLOUT}
+      {description}
     </EuiCallOut>
   ) : null;
 };
