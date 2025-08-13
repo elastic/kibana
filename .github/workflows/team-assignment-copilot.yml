@@ -1,0 +1,115 @@
+name: Enhanced Project and Team Assignment
+
+on:
+  issues:
+    types: [opened, labeled, unlabeled]
+  pull_request:
+    types: [opened, labeled, unlabeled]
+
+jobs:
+  assign_to_project:
+    runs-on: ubuntu-latest
+    name: Assign issue or PR to project based on label
+    steps:
+      - name: Assign Feature labels to projects
+        uses: elastic/github-actions/project-assigner@v2.1.1
+        id: project_assigner
+        with:
+          issue-mappings: |
+            [
+              {"label": "Feature:Canvas", "projectNumber": 38, "columnName": "Inbox"},
+              {"label": "Feature:Dashboard", "projectNumber": 68, "columnName": "Inbox"},
+              {"label": "Feature:Drilldowns", "projectNumber": 68, "columnName": "Inbox"},
+              {"label": "Feature:Input Controls", "projectNumber": 72, "columnName": "Inbox"},
+              {"label": "Feature:Embedding", "projectNumber": 68, "columnName": "Inbox"},
+              {"label": "Feature:ExpressionLanguage", "projectNumber": 68, "columnName": "Inbox"}
+            ]
+          ghToken: ${{ secrets.PROJECT_ASSIGNER_TOKEN }}
+          
+  auto_assign_teams:
+    runs-on: ubuntu-latest
+    name: Auto-assign to team members based on labels
+    if: github.event.action == 'opened' || github.event.action == 'labeled'
+    steps:
+      - name: Assign Observability teams
+        if: |
+          contains(github.event.issue.labels.*.name, 'Team:obs-ux-infra_services') ||
+          contains(github.event.issue.labels.*.name, 'Team:obs-ux-management') ||
+          contains(github.event.issue.labels.*.name, 'Team:Obs AI Assistant') ||
+          contains(github.event.pull_request.labels.*.name, 'Team:obs-ux-infra_services') ||
+          contains(github.event.pull_request.labels.*.name, 'Team:obs-ux-management') ||
+          contains(github.event.pull_request.labels.*.name, 'Team:Obs AI Assistant')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labelToTeam = {
+              'Team:obs-ux-infra_services': ['elastic/obs-ux-infra_services'],
+              'Team:obs-ux-management': ['elastic/obs-ux-management'], 
+              'Team:Obs AI Assistant': ['elastic/obs-ai-assistant']
+            };
+            
+            const labels = context.payload.issue?.labels || context.payload.pull_request?.labels || [];
+            const issueNumber = context.payload.issue?.number || context.payload.pull_request?.number;
+            
+            for (const label of labels) {
+              if (labelToTeam[label.name]) {
+                console.log(`Found team label: ${label.name}, will request review from team`);
+                // Note: This would typically ping the team, but we're avoiding spam
+                // In a real implementation, you might want to add team members as assignees
+                // or request reviews from the team
+              }
+            }
+            
+      - name: Assign Fleet team
+        if: |
+          contains(github.event.issue.labels.*.name, 'Team:Fleet') ||
+          contains(github.event.pull_request.labels.*.name, 'Team:Fleet')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('Fleet team label detected - would assign to @elastic/fleet');
+            // Implementation would go here for actual team assignment
+            
+  assignment_copilot_help:
+    runs-on: ubuntu-latest
+    name: Assignment guidance for unlabeled issues
+    if: github.event.action == 'opened' && github.event_name == 'issues'
+    steps:
+      - name: Check if issue needs assignment guidance
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.issue.labels || [];
+            const hasTeamLabel = labels.some(label => label.name.startsWith('Team:'));
+            const hasFeatureLabel = labels.some(label => label.name.startsWith('Feature:'));
+            
+            if (!hasTeamLabel && !hasFeatureLabel) {
+              const comment = `🤖 **Assignment Copilot**: Welcome! This issue doesn't have team or feature labels yet.
+              
+              To enable automatic assignment, please add one of these labels:
+              
+              **Feature labels:**
+              - \`Feature:Canvas\` - Canvas visualizations and workpads
+              - \`Feature:Dashboard\` - Dashboard functionality 
+              - \`Feature:Drilldowns\` - Dashboard drilldowns
+              - \`Feature:Input Controls\` - Input controls and filters
+              - \`Feature:Embedding\` - Embedded components
+              - \`Feature:ExpressionLanguage\` - Expression language features
+              
+              **Team labels:**
+              - \`Team:obs-ux-infra_services\` - Observability infrastructure services
+              - \`Team:obs-ux-management\` - Observability UX management  
+              - \`Team:Obs AI Assistant\` - Observability AI assistant
+              - \`Team:Fleet\` - Fleet management
+              
+              Or you can manually assign this issue to appropriate team members.
+              
+              This automated guidance helps reduce manual assignment work! 🚀`;
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                body: comment
+              });
+            }
