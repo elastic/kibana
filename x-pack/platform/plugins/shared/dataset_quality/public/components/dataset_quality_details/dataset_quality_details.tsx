@@ -36,18 +36,18 @@ export default function DatasetQualityDetails() {
         <EuiFlexItem grow={false}>
           {view === 'classic' && (
             <>
-             <Header
-            isAlertFlyoutOpen={ruleType === DEGRADED_DOCS_RULE_TYPE_ID}
-            closeAlertFlyout={() => setRuleType(null)}
-          />
-          <EuiHorizontalRule />
+              <Header
+                isAlertFlyoutOpen={ruleType === DEGRADED_DOCS_RULE_TYPE_ID}
+                closeAlertFlyout={() => setRuleType(null)}
+              />
+              <EuiHorizontalRule />
             </>
           )}
           <Overview openAlertFlyout={() => setRuleType(DEGRADED_DOCS_RULE_TYPE_ID)} />
           {view === 'classic' && (
             <>
-                       <EuiHorizontalRule />
-          <Details />
+              <EuiHorizontalRule />
+              <Details />
             </>
           )}
         </EuiFlexItem>

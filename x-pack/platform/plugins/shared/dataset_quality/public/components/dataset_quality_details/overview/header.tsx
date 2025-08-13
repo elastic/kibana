@@ -24,7 +24,7 @@ export default function OverviewHeader({
 }: {
   handleRefresh: (refreshProps: OnRefreshProps) => void;
 }) {
-  const { timeRange, updateTimeRange, view } = useDatasetQualityDetailsState();
+  const { timeRange, updateTimeRange } = useDatasetQualityDetailsState();
 
   const onTimeChange = useCallback(
     ({ isInvalid, ...timeRangeProps }: OnTimeChangeProps) => {
@@ -37,23 +37,6 @@ export default function OverviewHeader({
 
   return (
     <EuiFlexGroup alignItems="center" wrap={true}>
-      {view === 'classic' && (
-        <EuiFlexGroup
-          css={css`
-            flex-grow: 1;
-          `}
-          justifyContent="flexStart"
-          alignItems="center"
-          gutterSize="xs"
-        >
-          <EuiTitle size="s">
-            <span>{overviewHeaderTitle}</span>
-          </EuiTitle>
-          <EuiToolTip content={overviewTitleTooltip}>
-            <EuiIcon size="m" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </EuiToolTip>
-        </EuiFlexGroup>
-      )}
       <EuiFlexGroup
         css={css`
           flex-grow: 1;

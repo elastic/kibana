@@ -34,6 +34,7 @@ export interface DatasetQualityPluginStart {
   createDatasetQualityController: CreateDatasetQualityController;
   DatasetQualityDetails: ComponentType<DatasetQualityDetailsProps>;
   createDatasetQualityDetailsController: CreateDatasetQualityDetailsController;
+  DatasetQualityIndicator: ComponentType<DatasetQualityDetailsProps>;
 }
 
 export interface DatasetQualityStartDeps {

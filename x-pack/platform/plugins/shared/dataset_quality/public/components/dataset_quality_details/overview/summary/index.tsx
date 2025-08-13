@@ -16,12 +16,13 @@ import {
   overviewPanelTitleResources,
 } from '../../../../../common/translations';
 import { useOverviewSummaryPanel } from '../../../../hooks/use_overview_summary_panel';
+import { useDatasetQualityDetailsState } from '../../../../hooks/use_dataset_quality_details_state';
 import { Panel, PanelIndicator } from './panel';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function Summary() {
-  const { canShowFailureStoreInfo, view } = useDatasetQualityDetailsState();
+  const { view } = useDatasetQualityDetailsState();
   const {
     isSummaryPanelLoading,
     totalDocsCount,
@@ -32,35 +33,35 @@ export default function Summary() {
   } = useOverviewSummaryPanel();
   return (
     <EuiFlexGroup gutterSize="m">
-        {view === 'classic' && (
+      {view === 'classic' && (
         <>
-      <Panel title={overviewPanelTitleDocuments}>
-        <PanelIndicator
-          label={overviewPanelDocumentsIndicatorTotalCount}
-          value={totalDocsCount}
-          isLoading={isSummaryPanelLoading}
-        />
-        <PanelIndicator
-          label={overviewPanelDocumentsIndicatorSize}
-          value={sizeInBytes}
-          isLoading={isSummaryPanelLoading}
-          userHasPrivilege={isUserAllowedToSeeSizeInBytes}
-        />
-      </Panel>
-      <Panel title={overviewPanelTitleResources}>
-        <PanelIndicator
-          label={overviewPanelResourcesIndicatorServices}
-          value={totalServicesCount}
-          isLoading={isSummaryPanelLoading}
-        />
-        <PanelIndicator
-          label={overviewPanelResourcesIndicatorSize}
-          value={totalHostsCount}
-          isLoading={isSummaryPanelLoading}
-        />
-      </Panel>
-            </>
-           )}
+          <Panel title={overviewPanelTitleDocuments}>
+            <PanelIndicator
+              label={overviewPanelDocumentsIndicatorTotalCount}
+              value={totalDocsCount}
+              isLoading={isSummaryPanelLoading}
+            />
+            <PanelIndicator
+              label={overviewPanelDocumentsIndicatorSize}
+              value={sizeInBytes}
+              isLoading={isSummaryPanelLoading}
+              userHasPrivilege={isUserAllowedToSeeSizeInBytes}
+            />
+          </Panel>
+          <Panel title={overviewPanelTitleResources}>
+            <PanelIndicator
+              label={overviewPanelResourcesIndicatorServices}
+              value={totalServicesCount}
+              isLoading={isSummaryPanelLoading}
+            />
+            <PanelIndicator
+              label={overviewPanelResourcesIndicatorSize}
+              value={totalHostsCount}
+              isLoading={isSummaryPanelLoading}
+            />
+          </Panel>
+        </>
+      )}
     </EuiFlexGroup>
   );
 }

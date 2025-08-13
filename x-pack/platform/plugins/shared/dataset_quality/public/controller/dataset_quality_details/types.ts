@@ -52,3 +52,8 @@ export interface DatasetQualityDetailsController {
   state$: Observable<DatasetQualityDetailsPublicState>;
   service: DatasetQualityDetailsControllerStateService;
 }
+
+export interface DatasetQualityIndicatorController {
+  state$: Observable<DatasetQualityDetailsPublicState>;
+  service: DatasetQualityDetailsControllerStateService;
+}

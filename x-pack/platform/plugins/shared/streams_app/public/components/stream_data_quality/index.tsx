@@ -5,48 +5,19 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Streams } from '@kbn/streams-schema';
-import {
-  DatasetQualityDetailsController,
-  DatasetQualityView,
-} from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
+import { useDatasetQualityController } from '../../hooks/use_dataset_quality_controller';
 
 export function StreamDetailDataQuality({
   definition,
-  refreshDefinition,
 }: {
   definition: Streams.ingest.all.GetResponse;
-  refreshDefinition: () => void;
 }) {
   const { datasetQuality } = useKibana().dependencies.start;
-
-  const [controller, setController] = useState<DatasetQualityDetailsController>();
-
-  useEffect(() => {
-    async function getDatasetQualityDetailsController() {
-      const initialState = {
-        dataStream: definition.stream.name,
-        view: 'streams' as DatasetQualityView,
-      };
-
-      const datasetQualityDetailsController =
-        await datasetQuality.createDatasetQualityDetailsController({
-          initialState,
-        });
-      datasetQualityDetailsController.service.start();
-
-      setController(datasetQualityDetailsController);
-
-      return () => {
-        datasetQualityDetailsController.service.stop();
-      };
-    }
-
-    getDatasetQualityDetailsController();
-  }, [datasetQuality, definition.stream.name]);
+  const controller = useDatasetQualityController(definition);
 
   return controller ? (
     <datasetQuality.DatasetQualityDetails controller={controller} />

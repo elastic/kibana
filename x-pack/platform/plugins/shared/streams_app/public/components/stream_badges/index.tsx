@@ -20,6 +20,7 @@ import React from 'react';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
+import { useDatasetQualityController } from '../../hooks/use_dataset_quality_controller';
 
 const DataRetentionTooltip: React.FC<{ children: React.ReactElement }> = ({ children }) => (
   <EuiToolTip
@@ -167,5 +168,22 @@ export function DiscoverBadgeButton({
         { defaultMessage: 'Open in Discover' }
       )}
     />
+  );
+}
+
+export function StreamDetailDataQualityIndicator({
+  definition,
+}: {
+  definition: Streams.ingest.all.GetResponse;
+}) {
+  const { datasetQuality } = useKibana().dependencies.start;
+  const controller = useDatasetQualityController(definition);
+
+  return controller ? (
+    <datasetQuality.DatasetQualityIndicator controller={controller} />
+  ) : (
+    i18n.translate('xpack.streams.streamQualityDetails.loadingMessage', {
+      defaultMessage: 'Loading...',
+    })
   );
 }
