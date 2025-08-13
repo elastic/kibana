@@ -83,7 +83,7 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
   } catch (error) {
     return {
       success: false,
-      error: error as z.ZodError,
+      error,
     };
   }
 }
