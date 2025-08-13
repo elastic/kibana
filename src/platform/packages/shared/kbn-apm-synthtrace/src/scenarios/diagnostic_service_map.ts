@@ -104,9 +104,6 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           );
       });
 
-      // Uncomment the following line to check how the service map should look like
-      // return withClient(apmEsClient, traces);
-
       const unserialized = Array.from(traces);
 
       const serialized = unserialized
