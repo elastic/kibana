@@ -23,7 +23,7 @@ import { SvlComponentTemplateHelpers } from './index_management/svl_component_te
 import { SvlTemplatesHelpers } from './index_management/svl_templates.helpers';
 import { SvlTemplatesApi } from './index_management/svl_templates.api';
 import { SvlMappingsApi } from './index_management/svl_mappings.api';
-import { SynthtraceClientProvider } from './synthtrace';
+import { SynthtraceProvider } from './synthtrace';
 import { SvlClusterNodesApi } from './index_management/svl_cluster_nodes.api';
 
 export const services = {
@@ -34,7 +34,7 @@ export const services = {
   ...svlSharedServices,
   samlTools: SamlToolsProvider,
   svlCases: SvlCasesServiceProvider,
-  synthtrace: SynthtraceClientProvider,
+  synthtrace: SynthtraceProvider,
   svlEnrichPoliciesApi: SvlEnrichPoliciesApi,
   svlSettingsApi: SvlSettingsApi,
   svlIndicesApi: SvlIndicesApi,
