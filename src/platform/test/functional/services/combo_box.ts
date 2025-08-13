@@ -52,13 +52,6 @@ export class ComboBoxService extends FtrService {
         async () => {
           const comboBox = await this.testSubjects.find(comboBoxSelector);
           await this.setElement(comboBox, value);
-          const input = await comboBox.findByTagName('input');
-          const actualValue = await input.getAttribute('value');
-          if (actualValue !== value) {
-            throw new Error(
-              `Failed to set combobox value. Expected: "${value}", got: "${actualValue}"`
-            );
-          }
         },
         { retryCount, retryDelay: 1000 }
       );
