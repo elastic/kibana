@@ -15,6 +15,9 @@ vcs:
 hasher:
   batchSize: 1500
 
+pipeline:
+  installDependencies: false
+
 # https://moonrepo.dev/docs/guides/remote-cache
 # Auth credentials will be missing on local environments, but that's OK.
 unstable_remote:
@@ -23,3 +26,5 @@ unstable_remote:
   auth:
     headers:
       Authorization: "Basic ${MOON_REMOTE_CACHE_TOKEN}"
+
+telemetry: false

@@ -11,12 +11,12 @@ node:
     version: 1.22.21
     installArgs:
       - '--non-interactive'
-  inferTasksFromScripts: true
+  inferTasksFromScripts: true # Automatically infer tasks from package.json scripts.
   dependencyVersionFormat: link
   rootPackageOnly: true # without this, moon would want to install deps in each project
   syncPackageManagerField: true
   syncVersionManagerConfig: nvm
-  dedupeOnLockfileChange: false # maybe we should set this to true, and use this over our own logic?
+  dedupeOnLockfileChange: true # Dedupe dependencies when the lockfile changes.
   syncProjectWorkspaceDependencies: false
 
 # Configures how moon integrates with TypeScript.
