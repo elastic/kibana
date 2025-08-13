@@ -196,7 +196,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
         max$,
       ])
         .pipe(debounceTime(0))
-        .subscribe(([dataViews, fieldName, value, min, max]) => {
+        .subscribe(([dataViews, fieldName, value]) => {
           const dataView = dataViews?.[0];
           const dataViewField =
             dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
