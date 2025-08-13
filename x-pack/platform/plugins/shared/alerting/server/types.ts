@@ -16,7 +16,7 @@ import type {
 import type { z } from '@kbn/zod';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import type {
   IScopedClusterClient,
   SavedObjectAttributes,

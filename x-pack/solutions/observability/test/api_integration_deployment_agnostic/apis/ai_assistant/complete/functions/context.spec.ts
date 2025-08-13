@@ -9,11 +9,11 @@ import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import {
+  CONTEXT_FUNCTION_NAME,
   KnowledgeBaseEntry,
   MessageAddEvent,
   MessageRole,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/context';
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { RecalledSuggestion } from '@kbn/observability-ai-assistant-plugin/server/functions/context/utils/recall_and_score';
 import { SCORE_SUGGESTIONS_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/utils/score_suggestions';

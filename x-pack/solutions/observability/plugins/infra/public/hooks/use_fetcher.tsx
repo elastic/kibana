@@ -28,6 +28,7 @@ export interface FetcherOptions {
   showToastOnError?: boolean;
   requestObservable$?: BehaviorSubject<(() => any) | undefined>;
   autoFetch?: boolean;
+  reloadRequestTimeUpdateEnabled?: boolean;
 }
 
 type InferApiCallReturnType<Fn> = Fn extends (callApi: ApiCallClient) => Promise<infer R>
@@ -105,6 +106,7 @@ export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Pro
     autoFetch = true,
     preservePreviousData = true,
     showToastOnError = true,
+    reloadRequestTimeUpdateEnabled = true,
     requestObservable$,
   } = options;
 
@@ -201,11 +203,11 @@ export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Pro
 
   useEffect(() => {
     // Allows the caller of useFetcher to control when the fetch can be triggered
-    if (autoFetch) {
+    if (autoFetch && reloadRequestTimeUpdateEnabled) {
       setCachedReloadRequestTime(reloadRequestTime);
     }
     autoFetchRef.current = autoFetch;
-  }, [autoFetch, reloadRequestTime]);
+  }, [autoFetch, reloadRequestTime, reloadRequestTimeUpdateEnabled]);
 
   useEffect(() => {
     return () => {

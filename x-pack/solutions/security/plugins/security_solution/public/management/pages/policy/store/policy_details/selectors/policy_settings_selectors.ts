@@ -7,7 +7,7 @@
 
 import { matchPath } from 'react-router-dom';
 import { createSelector } from 'reselect';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../../common/license/policy_config';
 import type { PolicyDetailsState } from '../../../types';
 import type {
@@ -25,6 +25,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_DEVICES_PATH,
 } from '../../../../../common/constants';
 import type { ManagementRoutePolicyDetailsParams } from '../../../../../types';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
@@ -33,6 +34,7 @@ import {
   isOnPolicyEventFiltersView,
   isOnHostIsolationExceptionsView,
   isOnPolicyFormView,
+  isOnPolicyTrustedDevicesView,
   isOnBlocklistsView,
   isOnProtectionUpdatesView,
 } from './policy_common_selectors';
@@ -96,6 +98,7 @@ export const needsToRefresh = (state: Immutable<PolicyDetailsState>): boolean =>
 export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) =>
   isOnPolicyFormView(state) ||
   isOnPolicyTrustedAppsView(state) ||
+  isOnPolicyTrustedDevicesView(state) ||
   isOnPolicyEventFiltersView(state) ||
   isOnHostIsolationExceptionsView(state) ||
   isOnBlocklistsView(state) ||
@@ -115,6 +118,7 @@ export const policyIdFromParams: (state: Immutable<PolicyDetailsState>) => strin
         path: [
           MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+          MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_DEVICES_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
