@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export * from './detections_response';
-export * from './spaces';
+export * from './create_rule';
+export * from './delete_all_rules';
+export * from './delete_rule';
+export * from './get_rule_for_alert_testing';
+export * from './wait_for_rule_status';
+export * from './manual_run';
