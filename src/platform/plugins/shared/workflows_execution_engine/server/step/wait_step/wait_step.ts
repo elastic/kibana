@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { WaitGraphNode } from '@kbn/workflows';
 import { StepImplementation } from '../step_base';
 import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
@@ -16,7 +17,7 @@ export class WaitStepImpl implements StepImplementation {
   private durationCache: number | null = null;
 
   constructor(
-    private node: any,
+    private node: WaitGraphNode,
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger,
     private workflowTaskManager: WorkflowTaskManager
@@ -36,14 +37,10 @@ export class WaitStepImpl implements StepImplementation {
       return this.durationCache;
     }
 
-    if (typeof this.node.configuration.with.duration === 'number') {
-      return (this.durationCache = this.node.configuration.with.duration);
-    }
-
     return (this.durationCache = this.parseDuration(this.node.configuration.with.duration));
   }
 
-  private async handleShortDuration(): Promise<void> {
+  public async handleShortDuration(): Promise<void> {
     await this.workflowRuntime.startStep(this.node.id);
     this.logStartWait();
     const durationInMs = this.getDurationInMs();
@@ -53,7 +50,7 @@ export class WaitStepImpl implements StepImplementation {
     this.workflowRuntime.goToNextStep();
   }
 
-  private handleLongDuration(): Promise<void> {
+  public handleLongDuration(): Promise<void> {
     const stepState = this.workflowRuntime.getStepState(this.node.id);
 
     if (stepState?.resumeExecutionTaskId) {
@@ -109,9 +106,28 @@ export class WaitStepImpl implements StepImplementation {
     };
 
     let total = 0;
-    const regex = /(\d+)(ms|[smhdw])/g;
+    // Regular expression to validate the duration format and order (w, d, h, m, s, ms)
+    const validDurationRegex = /^(?:(\d+w)?(\d+d)?(\d+h)?(\d+m)?(\d+s)?(\d+ms)?)$/;
+    const orderValidationRegex = /^(?:\d+w)?(?:\d+d)?(?:\d+h)?(?:\d+m)?(?:\d+s)?(?:\d+ms)?$/;
+
+    if (
+      !duration ||
+      typeof duration !== 'string' ||
+      !validDurationRegex.test(duration) ||
+      !orderValidationRegex.test(duration)
+    ) {
+      throw new Error(
+        `Invalid duration format: ${duration}. Use format like "1w2d3h4m5s6ms" with units in descending order.`
+      );
+    }
+
+    if (!duration || typeof duration !== 'string' || !validDurationRegex.test(duration)) {
+      throw new Error(`Invalid duration format: ${duration}`);
+    }
+
+    const durationComponentsRegex = /(\d+)(ms|s|m|h|d|w)(?![a-zA-Z])/g;
     let match;
-    while ((match = regex.exec(duration)) !== null) {
+    while ((match = durationComponentsRegex.exec(duration)) !== null) {
       const value = Number(match[1]);
       const unit = match[2];
       const multiplier = units[unit as keyof typeof units];
