@@ -42,7 +42,7 @@ import {
   startMetadataTransforms,
   stopMetadataTransforms,
 } from '@kbn/security-solution-plugin/common/endpoint/utils/transforms';
-import { FtrService } from '../../functional/ftr_provider_context';
+import { FtrService } from '../configs/ftr_provider_context';
 
 export type IndexedHostsAndAlertsResponseExtended = IndexedHostsAndAlertsResponse & {
   unloadEndpointData(): Promise<DeleteIndexedHostsAndAlertsResponse>;

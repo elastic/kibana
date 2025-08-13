@@ -31,7 +31,7 @@ import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint
 import TestAgent from 'supertest/lib/agent';
 import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { isArtifactGlobal } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
-import { FtrService } from '../../functional/ftr_provider_context';
+import { FtrService } from '../configs/ftr_provider_context';
 import { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations/mocks';
 
 export interface ArtifactTestData {

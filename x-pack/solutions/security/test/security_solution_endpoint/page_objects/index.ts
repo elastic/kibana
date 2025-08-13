@@ -6,7 +6,7 @@
  */
 
 import { SvlCommonPageProvider } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects/svl_common_page';
-import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page_objects';
+import { pageObjects as platformPageObjects } from '@kbn/test-suites-xpack-platform/functional/page_objects';
 import { EndpointPageProvider } from './endpoint_page';
 import { EndpointPageUtils } from './page_utils';
 import { IngestManagerCreatePackagePolicy } from './ingest_manager_create_package_policy_page';
@@ -20,7 +20,7 @@ import { FleetIntegrations } from './fleet_integrations_page';
 import { ArtifactEntriesListPageProvider } from './artifact_entries_list_page';
 
 export const pageObjects = {
-  ...xpackFunctionalPageObjects,
+  ...platformPageObjects,
 
   endpoint: EndpointPageProvider,
   endpointPageUtils: EndpointPageUtils,

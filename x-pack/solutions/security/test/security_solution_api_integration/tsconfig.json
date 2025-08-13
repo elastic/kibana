@@ -2,7 +2,7 @@
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["node", "jest", "@kbn/ambient-ftr-types"]
+    "types": ["node", "jest", "@kbn/ambient-ftr-types"],
   },
   "include": [
     "**/*",

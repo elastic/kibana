@@ -8,7 +8,7 @@
 import { EntityType } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/common.gen';
 import expect from '@kbn/expect';
 import { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
-import { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { elasticAssetCheckerFactory } from './elastic_asset_checker';
 
 export const EntityStoreUtils = (

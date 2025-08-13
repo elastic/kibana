@@ -15,7 +15,7 @@ import {
 } from '@kbn/security-solution-plugin/common/api/timeline';
 import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { FtrService } from '../../functional/ftr_provider_context';
+import { FtrService } from '../configs/ftr_provider_context';
 
 export class TimelineTestService extends FtrService {
   private readonly supertest = this.ctx.getService('supertest');

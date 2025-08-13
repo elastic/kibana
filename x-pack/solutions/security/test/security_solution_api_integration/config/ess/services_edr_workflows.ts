@@ -6,11 +6,11 @@
  */
 
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { services as xPackAPIServices } from '@kbn/test-suites-xpack-platform/api_integration/services';
 import { EndpointTestResources } from '../../../security_solution_endpoint/services/endpoint';
 import { EndpointArtifactsTestResources } from '../../../security_solution_endpoint/services/endpoint_artifacts';
 import { EndpointPolicyTestResourcesProvider } from '../../../security_solution_endpoint/services/endpoint_policy';
 
-import { services as xPackAPIServices } from '../../../api_integration/services';
 import { ResolverGeneratorProvider } from '../services/security_solution_edr_workflows_resolver';
 import { RolesUsersProvider } from '../services/security_solution_edr_workflows_roles_users';
 import {
