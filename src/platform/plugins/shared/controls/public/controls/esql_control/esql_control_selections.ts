@@ -38,7 +38,16 @@ export const selectionComparators: StateComparators<
   >
 > = {
   selectedOptions: selectedOptionsComparatorFunction,
-  availableOptions: 'referenceEquality',
+  availableOptions: (a, b, lastState, currentState) => {
+    // Only compare availableOptions for static values controls; values from query fetch these at runtime
+    if (
+      lastState?.controlType === currentState?.controlType &&
+      currentState?.controlType === EsqlControlType.VALUES_FROM_QUERY
+    ) {
+      return true;
+    }
+    return deepEqual(a ?? [], b ?? []);
+  },
   variableName: 'referenceEquality',
   variableType: 'referenceEquality',
   controlType: 'referenceEquality',

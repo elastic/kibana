@@ -49,7 +49,7 @@ export interface ESQLControlState {
   grow?: boolean;
   width?: ControlWidthOptions;
   title: string;
-  availableOptions: string[];
+  availableOptions?: string[];
   selectedOptions: string[];
   variableName: string;
   variableType: ESQLVariableType;
