@@ -7,10 +7,10 @@
 
 import { niceTimeFormatter } from '@elastic/charts';
 import { EuiFlexGroup, EuiPanel, EuiText } from '@elastic/eui';
+import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
-import type { TimeRange } from '@kbn/es-query';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { SparkPlot } from '../../../spark_plot';
 import { useSignificantEventPreviewFetch } from '../manual_flow_form/use_significant_event_preview_fetch';
@@ -69,6 +69,7 @@ export function PreviewDataSparkPlot({
           timeseries={sparkPlotData.timeseries}
           annotations={sparkPlotData.annotations}
           xFormatter={xFormatter}
+          compressed={false}
         />
       </EuiFlexGroup>
     </EuiPanel>
