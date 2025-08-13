@@ -29,9 +29,11 @@ interface Dependencies {
   logger: Logger;
 }
 
-interface VerifiedQueries {
+export type VerifiedQuery = Query & { count: number };
+
+export interface VerifiedQueries {
   totalCount: number;
-  queries: Array<Query & { count: number }>;
+  queries: Array<VerifiedQuery>;
 }
 
 export async function verifyQueries(

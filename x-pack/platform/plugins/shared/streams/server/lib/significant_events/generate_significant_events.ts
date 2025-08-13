@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { describeDataset, getLogPatterns, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
 import { Logger } from '@kbn/core/server';
-import { ShortIdTable, type InferenceClient } from '@kbn/inference-common';
-import {
-  getIndexPatternsForStream,
-  type GeneratedSignificantEventQuery,
-  type Streams,
-} from '@kbn/streams-schema';
+import { type InferenceClient } from '@kbn/inference-common';
+import { type GeneratedSignificantEventQuery, type Streams } from '@kbn/streams-schema';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
-import { v4 } from 'uuid';
 import { isKqlQueryValid } from '../../routes/internal/esql/query_helpers';
+import { analyzeDataset } from './helpers/analyze_dataset';
+import { assignShortIds } from './helpers/assign_short_ids';
+import { getLogPatterns } from './helpers/get_log_patterns';
 import { verifyQueries } from './helpers/verify_queries';
 import INSTRUCTION from './prompts/generate_queries_instruction.text';
 import KQL_GUIDE from './prompts/kql_guide.text';
@@ -57,52 +54,17 @@ export async function generateSignificantEventDefinitions(
   const start = mstart.valueOf();
   const end = mend.valueOf();
 
-  const analysis = await describeDataset({
-    esClient: esClient.client,
-    start,
-    end,
-    index: getIndexPatternsForStream(definition),
-  });
-
-  const short = sortAndTruncateAnalyzedFields(analysis);
-
-  const textFields = analysis.fields
-    .filter((field) => field.types.includes('text'))
-    .map((field) => field.name);
-
-  const categorizationField = textFields.includes('message')
-    ? 'message'
-    : textFields.includes('body.text')
-    ? 'body.text'
-    : undefined;
-
   const lookbackStart = mend.clone().subtract(longLookback).valueOf();
 
-  const logPatterns = categorizationField
-    ? await getLogPatterns({
-        start: lookbackStart,
-        end,
-        esClient,
-        fields: [categorizationField],
-        index: getIndexPatternsForStream(definition),
-        includeChanges: true,
-        metadata: [],
-      }).then((results) => {
-        return results.map((result) => {
-          const { sample, count, regex } = result;
-          return { count, sample, regex };
-        });
-      })
-    : undefined;
+  const { categorizationField, short } = await analyzeDataset(
+    { start, end, definition },
+    { esClient }
+  );
 
-  if (logPatterns?.length) {
-    logger.debug(() => {
-      return `Found ${logPatterns?.length} log patterns: ${logPatterns
-        .map((pattern) => `- ${pattern.sample} (${pattern.count})`)
-        .join('\n')}
-      `;
-    });
-  }
+  const logPatterns = await getLogPatterns(
+    { categorizationField, lookbackStart, end, definition },
+    { esClient, logger }
+  );
 
   const chunks = [
     INSTRUCTION,
@@ -173,15 +135,7 @@ Quality over quantity - aim for queries that have high signal-to-noise ratio.
     { esClient, logger }
   );
 
-  const idLookupTable = new ShortIdTable();
-  const queriesWithShortIds = verifiedQueries.queries.map((query) => {
-    const id = v4();
-    return {
-      id,
-      shortId: idLookupTable.take(id),
-      ...query,
-    };
-  });
+  const { queriesWithShortIds, queriesByShortId } = assignShortIds(verifiedQueries);
 
   const { output: selectedQueries } = await inferenceClient.output({
     id: 'verify_kql_queries',
@@ -200,12 +154,7 @@ Now I need you to analyze these results and prioritize the most operationally re
 ## Queries
 ${JSON.stringify(
   queriesWithShortIds.map(({ shortId, kql, title, count }) => {
-    return {
-      id: shortId,
-      kql,
-      title,
-      count,
-    };
+    return { id: shortId, kql, title, count };
   })
 )}`,
     ].join('\n\n'),
@@ -228,10 +177,6 @@ ${JSON.stringify(
       required: ['queries'],
     } as const,
   });
-
-  const queriesByShortId = new Map(
-    queriesWithShortIds.map(({ shortId, ...query }) => [shortId, query])
-  );
 
   const selected = selectedQueries.queries.flatMap(({ id }) => {
     const query = queriesByShortId.get(id);
