@@ -582,13 +582,15 @@ export default function ({ getService }: FtrProviderContext) {
           // Wait for the index to be available
           await es.cluster.health({
             index: '.kibana_security_session*',
-            wait_for_status: 'yellow',
+            wait_for_status: 'green',
           });
 
           // Delete all sessions directly using the ES client
           await es.deleteByQuery({
             index: '.kibana_security_session*',
-            refresh: true, // Refresh index immediately after deletion
+            refresh: true,
+            conflicts: 'proceed',
+            wait_for_completion: true,
             query: {
               match_all: {}, // Delete all documents
             },
@@ -652,6 +654,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
+          // There should be only one intermediate session with all requestIds in it
           expect(sessionResponse.hits.hits.length).to.equal(1);
 
           const sources = sessionResponse.hits.hits.map((hit) => {
