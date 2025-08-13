@@ -34,6 +34,7 @@ export const createAgentGraph = ({
   tools,
   customInstructions,
   noPrompt,
+  logger,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
@@ -72,6 +73,7 @@ export const createAgentGraph = ({
 
   const toolHandler = async (state: StateType) => {
     const toolNodeResult = await toolNode.invoke(state.addedMessages);
+
     return {
       addedMessages: [...toolNodeResult],
     };

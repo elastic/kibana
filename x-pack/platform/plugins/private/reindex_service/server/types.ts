@@ -14,6 +14,7 @@ import {
   ReindexServiceScopedClient,
   ReindexServiceScopedClientArgs,
 } from './src/lib/reindex_service_wrapper';
+
 import { CredentialStore } from './src/lib/credential_store';
 
 export interface RouteDependencies {

@@ -132,7 +132,6 @@
     "@kbn/apm-synthtrace",
     "@kbn/streams-schema",
     "@kbn/streams-plugin",
-    "@kbn/es-errors",
     "@kbn/content-packs-schema",
     "@kbn/utility-types",
     "@kbn/server-route-repository-utils",
@@ -162,5 +161,9 @@
     "@kbn/data-view-field-editor-plugin",
     "@kbn/response-ops-rule-params",
     "@kbn/remote-clusters-plugin",
+    "@kbn/console-plugin",
+    "@kbn/serverless-common-settings",
+    "@kbn/core-saved-objects-import-export-server-internal",
+    "@kbn/product-intercept-plugin",
   ]
 }

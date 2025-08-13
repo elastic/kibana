@@ -26,7 +26,7 @@ const getAutocompleteDiff = (
 
 export function Settings() {
   const {
-    services: { settings, autocompleteInfo },
+    services: { settings, autocompleteInfo, esHostService },
   } = useServicesContext();
 
   const dispatch = useEditorActionContext();
@@ -95,6 +95,7 @@ export function Settings() {
         refreshAutocompleteSettings(settings, selectedSettings)
       }
       settings={settings.toJSON()}
+      esHostService={esHostService}
     />
   );
 }

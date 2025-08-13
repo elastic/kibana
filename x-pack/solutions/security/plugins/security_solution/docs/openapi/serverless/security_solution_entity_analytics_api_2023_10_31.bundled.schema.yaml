@@ -376,11 +376,7 @@ paths:
                     required:
                       - status
                   status:
-                    oneOf:
-                      - $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
-                      - enum:
-                          - not_found
-                        type: string
+                    $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
                 required:
                   - status
           description: Successful response
@@ -491,7 +487,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  aknowledged:
+                  acknowledged:
                     description: Indicates if the deletion was successful
                     type: boolean
                   message:
@@ -1832,12 +1828,10 @@ components:
         - status
     PrivilegeMonitoringEngineStatus:
       enum:
-        - installing
         - started
-        - stopped
-        - updating
         - error
         - disabled
+        - not_installed
       type: string
     PrivmonUserCsvUploadErrorItem:
       type: object

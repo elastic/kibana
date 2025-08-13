@@ -21,12 +21,13 @@ pageLoadAssetSize:
   contentConnectors: 33036
   contentManagement: 8350
   controls: 13000
-  core: 533948
+  core: 602071
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
   dashboardEnhanced: 12500
-  data: 445173
+  dashboardMarkdown: 5134
+  data: 453742
   dataQuality: 10387
   datasetQuality: 27203
   dataUsage: 8926
@@ -66,6 +67,7 @@ pageLoadAssetSize:
   filesManagement: 5270
   fileUpload: 16910
   fleet: 187942
+  genAiSettings: 4981
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
@@ -111,8 +113,8 @@ pageLoadAssetSize:
   observabilityAiAssistantManagement: 6438
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
-  observabilityShared: 75486
-  onechat: 12203
+  observabilityShared: 82382
+  onechat: 14281
   osquery: 47588
   painlessLab: 6299
   presentationPanel: 11484
@@ -181,7 +183,7 @@ pageLoadAssetSize:
   visDefaultEditor: 35080
   visTypeGauge: 13006
   visTypeHeatmap: 12457
-  visTypeMarkdown: 9000
+  visTypeMarkdown: 8817
   visTypeMetric: 11966
   visTypePie: 9939
   visTypeTable: 18999
@@ -198,4 +200,4 @@ pageLoadAssetSize:
   wciSalesforce: 8506
   workchatApp: 12411
   workchatFramework: 5706
-  workflowsManagement: 474675
+  workflowsManagement: 5768

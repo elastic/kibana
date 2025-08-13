@@ -85,14 +85,15 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               ]
             : []),
           {
-            id: 'apm',
-            link: 'apm:services',
+            id: 'applications',
             title: i18n.translate('xpack.observability.obltNav.applications', {
               defaultMessage: 'Applications',
             }),
             renderAs: 'panelOpener',
             children: [
               {
+                id: 'apm',
+                link: 'apm:services',
                 children: [
                   {
                     link: 'apm:service-map',
@@ -458,9 +459,15 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                       { link: 'management:objects' },
                       { link: 'management:tags' },
                       { link: 'management:search_sessions' },
-                      { link: 'management:aiAssistantManagementSelection' },
                       { link: 'management:spaces' },
                       { link: 'management:settings' },
+                    ],
+                  },
+                  {
+                    title: 'AI',
+                    children: [
+                      { link: 'management:genAiSettings' },
+                      { link: 'management:aiAssistantManagementSelection' },
                     ],
                   },
                   {

@@ -43,8 +43,7 @@ export class EsqlDocumentBase {
     }: GetDocsOptions = {}
   ) {
     const keywords = rawKeywords.map((raw) => {
-      // LOOKUP JOIN  has space so we want to retain as is
-      let keyword = raw.toLowerCase().includes('join') ? raw : format(raw);
+      let keyword = format(raw);
       if (resolveAliases) {
         keyword = tryResolveAlias(keyword);
       }

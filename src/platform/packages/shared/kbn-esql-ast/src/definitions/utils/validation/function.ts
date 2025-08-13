@@ -18,10 +18,6 @@ import {
   ESQLParamLiteral,
 } from '../../../types';
 import { isAssignment, isInlineCast } from '../../../ast/is';
-import {
-  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
-  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
-} from '../../constants';
 import { getMessageFromId, errors, getFunctionDefinition, getColumnForASTNode } from '..';
 import {
   FunctionParameter,
@@ -41,15 +37,10 @@ import {
   getParamAtPosition,
 } from '../expressions';
 import { isArrayType } from '../operators';
-import {
-  compareTypesWithLiterals,
-  doesLiteralMatchParameterType,
-  inKnownTimeInterval,
-} from '../literals';
+import { doesLiteralMatchParameterType } from '../literals';
 import { getQuotedColumnName, getColumnExists } from '../columns';
 import {
   isLiteral,
-  isTimeInterval,
   isFunctionExpression,
   isColumn,
   isList,
@@ -69,7 +60,7 @@ export function getAllArrayValues(arg: ESQLAstItem) {
       if (subArg.type === 'literal') {
         values.push(String(subArg.value));
       }
-      if (isColumn(subArg) || isTimeInterval(subArg)) {
+      if (isColumn(subArg)) {
         values.push(subArg.name);
       }
       if (subArg.type === 'function') {
@@ -103,9 +94,6 @@ export function getAllArrayTypes(
           userDefinedColumns: context.userDefinedColumns,
         });
         types.push(hit?.type || 'unsupported');
-      }
-      if (subArg.type === 'timeInterval') {
-        types.push('time_duration');
       }
       if (subArg.type === 'function') {
         if (isSupportedFunction(subArg.name, parentCommand).supported) {
@@ -167,9 +155,6 @@ export function checkFunctionArgMatchesDefinition(
           bothStringTypes(parameterType, signature.returnType)
       );
     }
-  }
-  if (arg.type === 'timeInterval') {
-    return parameterType === 'time_duration' && inKnownTimeInterval(arg.unit);
   }
   if (arg.type === 'column') {
     const hit = getColumnForASTNode(arg, {
@@ -319,8 +304,6 @@ function unwrapArrayOneLevel(type: FunctionParameterType): FunctionParameterType
   return isArrayType(type) ? (type.slice(0, -2) as FunctionParameterType) : type;
 }
 
-const NO_MESSAGE: ESQLMessage[] = [];
-
 /**
  * Performs validation on a function
  */
@@ -333,7 +316,6 @@ export function validateFunction({
   forceConstantOnly = false,
   isNested,
   parentAst,
-  currentCommandIndex,
 }: {
   fn: ESQLFunction;
   parentCommand: string;
@@ -343,7 +325,6 @@ export function validateFunction({
   forceConstantOnly?: boolean;
   isNested?: boolean;
   parentAst?: ESQLCommand[];
-  currentCommandIndex?: number;
 }): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
 
@@ -357,20 +338,6 @@ export function validateFunction({
 
   const isFnSupported = isSupportedFunction(fn.name, parentCommand, parentOption);
 
-  if (typeof textSearchFunctionsValidators[fn.name] === 'function') {
-    const validator = textSearchFunctionsValidators[fn.name];
-    messages.push(
-      ...validator({
-        fn,
-        parentCommand,
-        parentOption,
-        context,
-        isNested,
-        parentAst,
-        currentCommandIndex,
-      })
-    );
-  }
   if (!isFnSupported.supported) {
     if (isFnSupported.reason === 'unknownFunction') {
       messages.push(errors.unknownFunction(fn));
@@ -537,13 +504,7 @@ export function validateFunction({
       }
     }
   }
-  // check if the definition has some specific validation to apply:
-  if (fnDefinition.validate) {
-    const payloads = fnDefinition.validate(fn);
-    if (payloads.length) {
-      messages.push(...payloads);
-    }
-  }
+
   // at this point we're sure that at least one signature is matching
   const failingSignatures: ESQLMessage[][] = [];
   let relevantFuncSignatures = matchingSignatures;
@@ -558,9 +519,7 @@ export function validateFunction({
             const arg = enrichedArgs[idx];
 
             if (isLiteral(arg)) {
-              return (
-                dataType === arg.literalType || compareTypesWithLiterals(dataType, arg.literalType)
-              );
+              return dataType === arg.literalType;
             }
             return false; // Non-literal arguments don't match
           })
@@ -686,35 +645,7 @@ function validateFunctionLiteralArg(
       );
     }
   }
-  if (isTimeInterval(argument)) {
-    // check first if it's a valid interval string
-    if (!inKnownTimeInterval(argument.unit)) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownInterval',
-          values: {
-            value: argument.unit,
-          },
-          locations: argument.location,
-        })
-      );
-    } else {
-      if (!checkFunctionArgMatchesDefinition(argument, parameter, context, parentCommand)) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'wrongArgumentType',
-            values: {
-              name: astFunction.name,
-              argType: parameter.type as string,
-              value: argument.name,
-              givenType: 'duration',
-            },
-            locations: argument.location,
-          })
-        );
-      }
-    }
-  }
+
   return messages;
 }
 
@@ -836,19 +767,7 @@ function validateFunctionColumnArg(
   }
 
   if (actualArg.name === '*') {
-    // if function does not support wildcards return a specific error
-    if (!('supportsWildcard' in parameterDefinition) || !parameterDefinition.supportsWildcard) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'noWildcardSupportAsArg',
-          values: {
-            name: astFunction.name,
-          },
-          locations: actualArg.location,
-        })
-      );
-    }
-
+    // special case for COUNT(*)
     return messages;
   }
 
@@ -887,88 +806,6 @@ function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
 // #endregion
 
 // #region Specific functions
-
-function validateIfHasUnsupportedCommandPrior(
-  fn: ESQLFunction,
-  parentAst: ESQLCommand[] = [],
-  unsupportedCommands: Set<string>,
-  currentCommandIndex?: number
-) {
-  if (currentCommandIndex === undefined) {
-    return NO_MESSAGE;
-  }
-  const unsupportedCommandsPrior = parentAst.filter(
-    (cmd, idx) => idx <= currentCommandIndex && unsupportedCommands.has(cmd.name)
-  );
-
-  if (unsupportedCommandsPrior.length > 0) {
-    return [
-      getMessageFromId({
-        messageId: 'fnUnsupportedAfterCommand',
-        values: {
-          function: fn.name.toUpperCase(),
-          command: unsupportedCommandsPrior[0].name.toUpperCase(),
-        },
-        locations: fn.location,
-      }),
-    ];
-  }
-  return NO_MESSAGE;
-}
-
-const validateMatchFunction: FunctionValidator = ({
-  fn,
-  parentCommand,
-  parentAst,
-  currentCommandIndex,
-}) => {
-  if (fn.name === 'match') {
-    if (parentCommand !== 'where') {
-      return [
-        getMessageFromId({
-          messageId: 'onlyWhereCommandSupported',
-          values: { fn: fn.name },
-          locations: fn.location,
-        }),
-      ];
-    }
-    return validateIfHasUnsupportedCommandPrior(
-      fn,
-      parentAst,
-      UNSUPPORTED_COMMANDS_BEFORE_MATCH,
-      currentCommandIndex
-    );
-  }
-  return NO_MESSAGE;
-};
-
-type FunctionValidator = (args: {
-  fn: ESQLFunction;
-  parentCommand: string;
-  parentOption?: string;
-  context: ICommandContext;
-  forceConstantOnly?: boolean;
-  isNested?: boolean;
-  parentAst?: ESQLCommand[];
-  currentCommandIndex?: number;
-}) => ESQLMessage[];
-
-const validateQSTRFunction: FunctionValidator = ({ fn, parentAst, currentCommandIndex }) => {
-  if (fn.name === 'qstr') {
-    return validateIfHasUnsupportedCommandPrior(
-      fn,
-      parentAst,
-      UNSUPPORTED_COMMANDS_BEFORE_QSTR,
-      currentCommandIndex
-    );
-  }
-  return NO_MESSAGE;
-};
-
-const textSearchFunctionsValidators: Record<string, FunctionValidator> = {
-  match: validateMatchFunction,
-  qstr: validateQSTRFunction,
-};
 
 export function isSupportedFunction(
   name: string,

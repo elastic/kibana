@@ -6,8 +6,10 @@
  */
 
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { TIMESTAMP_FIELD } from '../../../common/constants';
-import type { MetricsAPIRequest, MetricsAPIResponse } from '../../../common/http_api/metrics_api';
+import { castArray } from 'lodash';
+import { existsQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import type { estypes } from '@elastic/elasticsearch';
+import type { MetricsAPIResponse, MetricsAPIRequest } from '../../../common';
 import type {
   ESSearchClient,
   MetricsESResponse,
@@ -38,26 +40,18 @@ export const fetchMetrics = async (
   };
   const hasGroupBy = Array.isArray(options.groupBy) && options.groupBy.length > 0;
   const groupInstanceFilter =
-    options.groupInstance?.reduce<Array<Record<string, unknown>>>((acc, group, index) => {
+    options.groupInstance?.reduce<estypes.QueryDslQueryContainer[]>((acc, group, index) => {
       const key = options.groupBy?.[index];
       if (key && group) {
-        acc.push({ term: { [key]: group } });
+        acc.push(...termQuery(key, group));
       }
       return acc;
     }, []) ?? [];
-  const filter: Array<Record<string, any>> = [
-    {
-      range: {
-        [TIMESTAMP_FIELD]: {
-          gte: options.timerange.from,
-          lte: options.timerange.to,
-          format: 'epoch_millis',
-        },
-      },
-    },
-    ...(options.groupBy?.map((field) => ({ exists: { field } })) ?? []),
-    ...groupInstanceFilter,
-  ];
+
+  const groupByFilter =
+    options.groupBy
+      ?.filter((field): field is string => !!field)
+      .flatMap((field) => existsQuery(field)) ?? [];
 
   const params = {
     allow_no_indices: true,
@@ -65,7 +59,16 @@ export const fetchMetrics = async (
     index: options.indexPattern,
     body: {
       size: 0,
-      query: { bool: { filter: [...filter, ...(options.filters ?? [])] } },
+      query: {
+        bool: {
+          filter: [
+            ...castArray(options.filters),
+            ...rangeQuery(options.timerange.from, options.timerange.to),
+            ...groupByFilter,
+            ...groupInstanceFilter,
+          ],
+        },
+      },
       aggs: hasGroupBy ? createCompositeAggregations(options) : createAggregations(options),
     },
   };
