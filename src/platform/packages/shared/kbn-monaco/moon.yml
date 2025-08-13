@@ -30,3 +30,13 @@ tasks:
       - 'build'
     outputs:
       - /target/build/src/platform/packages/shared/kbn-monaco
+  watch-webpack:
+    type: run
+    options:
+      persistent: true
+    command: yarn
+    args:
+      - build
+      - --watch
+    outputs:
+      - /target/build/src/platform/packages/shared/kbn-monaco

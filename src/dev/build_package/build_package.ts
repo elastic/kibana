@@ -95,7 +95,7 @@ async function buildPackage(
     path.resolve(packageRoot, 'webpack.config.js'),
     '--output-path',
     outPath,
-    '--stats=errors-only',
+    '--stats=minimal',
   ];
 
   const isDist =
