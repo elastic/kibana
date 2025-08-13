@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { useDatasetDetailsTelemetry, useDatasetQualityDetailsState } from '../../hooks';
 import { DataStreamNotFoundPrompt } from './index_not_found_prompt';
 import { Header } from './header';
@@ -22,6 +23,8 @@ export default function DatasetQualityDetails() {
     useDatasetQualityDetailsState();
   const { startTracking } = useDatasetDetailsTelemetry();
 
+  const [ruleType, setRuleType] = useState<typeof DEGRADED_DOCS_RULE_TYPE_ID | null>(null);
+
   useEffect(() => {
     startTracking();
   }, [startTracking]);
@@ -33,15 +36,18 @@ export default function DatasetQualityDetails() {
         <EuiFlexItem grow={false}>
           {view === 'classic' && (
             <>
-              <Header />
-              <EuiHorizontalRule />
+             <Header
+            isAlertFlyoutOpen={ruleType === DEGRADED_DOCS_RULE_TYPE_ID}
+            closeAlertFlyout={() => setRuleType(null)}
+          />
+          <EuiHorizontalRule />
             </>
           )}
-          <Overview />
+          <Overview openAlertFlyout={() => setRuleType(DEGRADED_DOCS_RULE_TYPE_ID)} />
           {view === 'classic' && (
             <>
-              <EuiHorizontalRule />
-              <Details />
+                       <EuiHorizontalRule />
+          <Details />
             </>
           )}
         </EuiFlexItem>

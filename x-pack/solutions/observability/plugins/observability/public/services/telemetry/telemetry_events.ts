@@ -33,4 +33,21 @@ const alertDetailsPageView: TelemetryEvent = {
   },
 };
 
-export const events: TelemetryEvent[] = [relatedAlertsLoaded, alertDetailsPageView];
+const relatedAlertAddedToCase: TelemetryEvent = {
+  eventType: TelemetryEventTypes.RELATED_ALERT_ADDED_TO_CASE,
+  schema: {
+    new_case_created: {
+      type: 'boolean' as const,
+      _meta: {
+        description: 'Whether a case was created when adding an alert to a case',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const events: TelemetryEvent[] = [
+  relatedAlertsLoaded,
+  alertDetailsPageView,
+  relatedAlertAddedToCase,
+];

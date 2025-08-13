@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type QualityIndicators = 'good' | 'poor' | 'degraded';
+export type QualityIndicators = 'good' | 'poor' | 'warning';
 export type InfoIndicators = 'success' | 'danger' | 'warning';
