@@ -5448,6 +5448,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dashboard-markdown@link:src/platform/plugins/shared/dashboard_markdown":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dashboard-plugin@link:src/platform/plugins/shared/dashboard":
   version "0.0.0"
   uid ""
@@ -5972,6 +5976,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/failure-store-modal@link:x-pack/platform/packages/shared/kbn-failure-store-modal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/feature-controls-examples-plugin@link:examples/feature_control_examples":
   version "0.0.0"
   uid ""
@@ -6077,6 +6085,10 @@
   uid ""
 
 "@kbn/gen-ai-functional-testing@link:src/platform/packages/private/kbn-gen-ai-functional-testing":
+  version "0.0.0"
+  uid ""
+
+"@kbn/gen-ai-settings-plugin@link:x-pack/platform/plugins/private/gen_ai_settings":
   version "0.0.0"
   uid ""
 
@@ -6433,6 +6445,10 @@
   uid ""
 
 "@kbn/licensing-plugin@link:x-pack/platform/plugins/shared/licensing":
+  version "0.0.0"
+  uid ""
+
+"@kbn/licensing-types@link:src/platform/packages/shared/kbn-licensing-types":
   version "0.0.0"
   uid ""
 
