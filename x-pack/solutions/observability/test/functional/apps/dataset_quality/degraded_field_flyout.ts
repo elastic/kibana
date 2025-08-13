@@ -476,7 +476,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         it('should display count from latest backing index when current issues toggle is on in the table and in the flyout', async () => {
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: degradedDatasetWithLimitDataStreamName,
-            expandedDegradedField: 'test_field',
             showCurrentQualityIssues: true,
           });
 
