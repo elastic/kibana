@@ -43,7 +43,7 @@ interface UnspecifiedFlags {
 /**
  * Infer the type of Flags from FlagOptions. Inference only kicks in when
  * either `string` or `boolean` consists of string literals (which only
- * is the case when the flag options are tagged with the `as const` modifier.
+ * is the case when the flag options are tagged with the `as const` modifier.)
  * Otherwise the type we create is too specific and we'd have to use `as const`
  * everywhere.
  */
