@@ -6,7 +6,7 @@
  */
 
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { LicenseType } from '@kbn/licensing-types';
 import { FeatureKibanaPrivilegesReference } from './feature_kibana_privileges_reference';
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 

@@ -43,6 +43,7 @@
     "@kbn/datemath",
     "@kbn/security-plugin-types-common",
     "@kbn/ml-trained-models-utils",
+    "@kbn/licensing-types",
     "@kbn/product-doc-base-plugin"
   ]
 }
