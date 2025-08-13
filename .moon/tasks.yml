@@ -7,6 +7,5 @@ fileGroups:
     - "!yarn.lock"
   "globalTsConfigs":
     - "/tsconfig.json"
-    - "/tsconfig.options.json"
     - "/tsconfig.base.json"
-    - "/tsconfig.moonbase.json"
+    - "/tsconfig.browser.json"
