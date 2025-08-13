@@ -89,7 +89,7 @@ export async function getResponseStream(
     if (res) {
       return res?.body;
     }
-    throw new RegistryResponseError('responseStream not found');
+    throw new RegistryResponseError('getResponseStream - Error connecting to the registry');
   } catch (error) {
     logger.error(`getResponseStream error: ${error}`);
     throw error;
@@ -112,7 +112,7 @@ export async function getResponseStreamWithSize(
         size: contentLength && !isNaN(contentLength) ? contentLength : undefined,
       };
     }
-    throw new RegistryResponseError('responseStream not found');
+    throw new RegistryResponseError('getResponseStreamWithSize - Error connecting to the registry');
   } catch (error) {
     logger.error(`getResponseStream error: ${error}`);
     throw error;
