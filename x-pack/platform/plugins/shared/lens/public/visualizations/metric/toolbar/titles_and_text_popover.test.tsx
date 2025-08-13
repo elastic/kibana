@@ -138,11 +138,11 @@ describe('TitlesAndTextPopover', () => {
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
     textOptionsButton.click();
 
-    const valueAlignBtnGroup = new EuiButtonGroupTestHarness('lens-primary-metric-alignment-btn');
+    const primaryAlignBtnGroup = new EuiButtonGroupTestHarness('lens-primary-metric-alignment-btn');
 
-    valueAlignBtnGroup.select('Center');
-    valueAlignBtnGroup.select('Left');
-    valueAlignBtnGroup.select('Right');
+    primaryAlignBtnGroup.select('Center');
+    primaryAlignBtnGroup.select('Left');
+    primaryAlignBtnGroup.select('Right');
 
     expect(mockSetState.mock.calls.map(([s]) => s.primaryAlign)).toEqual([
       'center',
@@ -156,11 +156,11 @@ describe('TitlesAndTextPopover', () => {
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
     textOptionsButton.click();
 
-    const valueAlignBtnGroup = new EuiButtonGroupTestHarness('lens-secondary-metric-alignment-btn');
+    const secondaryAlignBtnGroup = new EuiButtonGroupTestHarness('lens-secondary-metric-alignment-btn');
 
-    valueAlignBtnGroup.select('Center');
-    valueAlignBtnGroup.select('Left');
-    valueAlignBtnGroup.select('Right');
+    secondaryAlignBtnGroup.select('Center');
+    secondaryAlignBtnGroup.select('Left');
+    secondaryAlignBtnGroup.select('Right');
 
     expect(mockSetState.mock.calls.map(([s]) => s.secondaryAlign)).toEqual([
       'center',
@@ -231,5 +231,37 @@ describe('TitlesAndTextPopover', () => {
     expect(screen.queryByTestId('lens-icon-alignment-btn')).not.toBeInTheDocument();
   });
 
-  // TODO: Test automatic settings update when some options are triggered
+  it('should set title weight normal when primary metric postion is selected to top', () => {
+    renderToolbarOptions({ ...fullState });
+    const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
+    textOptionsButton.click();
+
+    const positionBtnGroup = new EuiButtonGroupTestHarness('lens-primary-position-btn');
+    
+    positionBtnGroup.select('Top');
+    
+    expect(mockSetState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        primaryPosition: 'top',
+        titleWeight: 'normal',
+      })
+    );
+  });
+
+  it('should set title weight bold when primary metric postion is selected to bottom', () => {
+    renderToolbarOptions({ ...fullState });
+    const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
+    textOptionsButton.click();
+
+    const positionBtnGroup = new EuiButtonGroupTestHarness('lens-primary-position-btn');
+
+    positionBtnGroup.select('Bottom');
+    
+    expect(mockSetState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        primaryPosition: 'bottom',
+        titleWeight: 'bold',
+      })
+    );
+  });
 });

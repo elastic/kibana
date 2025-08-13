@@ -61,6 +61,7 @@ export function PrimaryPositionOption({
       <EuiButtonGroup
         isFullWidth
         legend={label}
+        data-test-subj="lens-primary-position-btn"
         buttonSize="compressed"
         idSelected={value}
         options={primaryPositionModes}
