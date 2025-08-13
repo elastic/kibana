@@ -26,7 +26,10 @@ import type {
 } from '@kbn/core-chrome-browser/src';
 import type { Location } from 'history';
 import type { MouseEventHandler } from 'react';
-import { SideNavigationSection } from '@kbn/core-chrome-browser/src/project_navigation';
+import type {
+  SideNavigationSection,
+  SideNavVersion,
+} from '@kbn/core-chrome-browser/src/project_navigation';
 import { getPresets } from './navigation_presets';
 
 const wrapIdx = (index: number): string => `[${index}]`;
@@ -375,7 +378,7 @@ export const parseNavigationTree = (
   }: {
     deepLinks: Record<string, ChromeNavLink>;
     cloudLinks: CloudLinks;
-    sideNavVersion?: 'v1' | 'v2';
+    sideNavVersion?: SideNavVersion;
   }
 ): {
   navigationTree: ChromeProjectNavigationNode[];
