@@ -27,7 +27,10 @@ import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import { MetricsSettingsPage } from './settings';
 import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_alert_dropdown';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
-import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
+import {
+  InfraMLCapabilitiesProvider,
+  useInfraMLCapabilitiesContext,
+} from '../../containers/ml/infra_ml_capabilities';
 import { AnomalyDetectionFlyout } from '../../components/ml/anomaly_detection/anomaly_detection_flyout';
 import { HeaderActionMenuContext } from '../../containers/header_action_menu_provider';
 import { NotFoundPage } from '../404';
@@ -160,12 +163,15 @@ export const InfrastructurePage = () => {
 
 const HeaderLinkAnomalyFlyoutRoute = ({ path }: { path: string }) => {
   const isInventory = path !== '/inventory';
+  const { isTopbarMenuVisible } = useInfraMLCapabilitiesContext();
   return (
     <Route
       path={path}
-      render={() => (
-        <AnomalyDetectionFlyout hideJobType={isInventory} hideSelectGroup={isInventory} />
-      )}
+      render={() =>
+        isTopbarMenuVisible ? (
+          <AnomalyDetectionFlyout hideJobType={isInventory} hideSelectGroup={isInventory} />
+        ) : null
+      }
     />
   );
 };
