@@ -187,6 +187,7 @@ export interface UnifiedHistogramVisContext {
   suggestionType: UnifiedHistogramSuggestionType;
 }
 
+// A shared interface for communication between Discover and custom components.
 export interface ChartSectionContext {
   /**
    * The current search session ID

@@ -31,6 +31,7 @@ import {
 import type { ChartSectionContext } from '@kbn/unified-histogram/types';
 import React, { useCallback, useMemo } from 'react';
 
+// Dummy component to demonstrate how the actual metrics experience grid will hook into discover state and event handlers
 export const DummyMetricsGrid = ({
   dataView,
   renderToggleActions,
@@ -114,6 +115,8 @@ export const DummyMetricsGrid = ({
     [fields, setBreakdown]
   );
 
+  // The structure here is VERY similar to that of the `chart.tsx` component
+  // Perhaps there should be a shared template for this?
   return (
     <EuiFlexGroup
       className="metricsExperience__chart"
@@ -137,6 +140,8 @@ export const DummyMetricsGrid = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
                 <div>
+                  {/* if we need to use <ToolbarSelector /> for our custom dropdowns, 
+                  this component needs to be moved to another package  */}
                   <ToolbarSelector
                     data-test-subj="metricsExperienceBreakdownSelector"
                     data-selected-value=""
