@@ -142,6 +142,7 @@ export async function getSourceSpanIds({
     aggs: {
       sample_docs: {
         composite: {
+          size: 1000,
           sources: asMutableArray([
             {
               serviceName: {
