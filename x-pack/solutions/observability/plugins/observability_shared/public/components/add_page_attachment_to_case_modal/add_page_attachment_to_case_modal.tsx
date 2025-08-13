@@ -54,7 +54,7 @@ export function AddPageAttachmentToCaseModal({
     return casesPermissions.read && casesPermissions.update && casesPermissions.push;
   }, [casesPermissions]);
 
-  const CasesContext = getCasesContext ? getCasesContext() : React.Fragment;
+  const CasesContext = getCasesContext();
 
   useEffect(() => {
     if (!hasCasesPermissions) {
