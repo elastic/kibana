@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import type { DistributiveOmit } from '@elastic/eui';
 import { limitedStringSchema, mimeTypeString } from '../../../schema';
 import { jsonValueRt } from '../../../api';
 import { UserRt } from '../user/v1';
@@ -364,3 +365,13 @@ export type AttachmentAttributesWithoutRefs = rt.TypeOf<typeof AttachmentAttribu
 export type AttachmentPatchAttributes = rt.TypeOf<typeof AttachmentPatchAttributesRt>;
 export type Attachment = rt.TypeOf<typeof AttachmentRt>;
 export type Attachments = rt.TypeOf<typeof AttachmentsRt>;
+
+export type SupportedCaseAttachment =
+  | AlertAttachmentPayload
+  | UserCommentAttachmentPayload
+  | PersistableStateAttachmentPayload
+  | ExternalReferenceNoSOAttachmentPayload
+  | ExternalReferenceSOAttachmentPayload;
+
+export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;
+export type CaseAttachmentsWithoutOwner = CaseAttachmentWithoutOwner[];
