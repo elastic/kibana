@@ -24,6 +24,7 @@ import { getEntityStats } from './entities_stats_collector';
 import { getEntitiesTypeStats } from './entities_type_stats_collector';
 import { getAssetCriticalityStats } from './asset_criticality_stats_collector';
 import { getEntitySourceStats } from './entity_source_stats_collector';
+import { getEntityStoreStats } from './entity_store_stats_collector';
 
 export function registerAssetInventoryUsageCollector(
   logger: Logger,
@@ -75,7 +76,7 @@ export function registerAssetInventoryUsageCollector(
         awaitPromiseSafe('Entities', getEntityStats(esClient, '.entities.v1.latest*', logger)),
         awaitPromiseSafe('Entities Type', getEntitiesTypeStats(esClient, logger)),
         // Fix this
-        awaitPromiseSafe('Entity Store', getEntitySourceStats(esClient, logger)),
+        awaitPromiseSafe('Entity Store', getEntityStoreStats(esClient, logger)),
         awaitPromiseSafe('Entity Source', getEntitySourceStats(esClient, logger)),
         awaitPromiseSafe('Asset Criticality', getAssetCriticalityStats(esClient, logger)),
       ]);

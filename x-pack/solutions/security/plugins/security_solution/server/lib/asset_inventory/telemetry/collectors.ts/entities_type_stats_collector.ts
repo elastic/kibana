@@ -17,8 +17,8 @@ export const getEntityTypeAggsQuery = (index: string) => ({
   aggs: {
     entity_type_terms: {
       terms: {
-        field: 'entity.EngineMetadata.Type',
-        size: 5,
+        field: 'entity.type',
+        size: 100,
         order: {
           last_doc_timestamp: 'desc' as const,
         },
