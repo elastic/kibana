@@ -109,6 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           feature: {
             dashboard: dashboards,
+            discover: ['all'],
           },
           spaces: ['another-space'],
         },
