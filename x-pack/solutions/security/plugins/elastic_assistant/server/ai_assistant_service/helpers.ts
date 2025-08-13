@@ -59,6 +59,7 @@ export const pipelineExists = async ({ esClient, id }: PipelineExistsParams): Pr
 interface CreatePipelineParams {
   esClient: ElasticsearchClient;
   id: string;
+  logger: Logger;
 }
 
 /**
@@ -67,10 +68,11 @@ interface CreatePipelineParams {
  * @param params params
  * @param params.esClient Elasticsearch client with privileges to check for ingest pipelines
  * @param params.id ID of the ingest pipeline
+ * @param params.logger Logger instance for error reporting
  *
  * @returns Promise<boolean> indicating whether the pipeline was created
  */
-export const createPipeline = async ({ esClient, id }: CreatePipelineParams): Promise<boolean> => {
+export const createPipeline = async ({ esClient, id, logger }: CreatePipelineParams): Promise<boolean> => {
   try {
     const response = await esClient.ingest.putPipeline(
       knowledgeBaseIngestPipeline({
@@ -80,7 +82,7 @@ export const createPipeline = async ({ esClient, id }: CreatePipelineParams): Pr
 
     return response.acknowledged;
   } catch (e) {
-    // TODO: log error or just use semantic_text already
+    logger.warn(`Failed to create ingest pipeline '${id}': ${e instanceof Error ? e.message : String(e)}`);
     return false;
   }
 };
@@ -88,19 +90,30 @@ export const createPipeline = async ({ esClient, id }: CreatePipelineParams): Pr
 interface DeletePipelineParams {
   esClient: ElasticsearchClient;
   id: string;
+  logger: Logger;
 }
 
 /**
  * Delete ingest pipeline for ELSER in Elasticsearch
  *
- * @returns Promise<boolean> indicating whether the pipeline was created
+ * @param params params
+ * @param params.esClient Elasticsearch client with privileges to delete ingest pipelines
+ * @param params.id ID of the ingest pipeline
+ * @param params.logger Logger instance for error reporting
+ *
+ * @returns Promise<boolean> indicating whether the pipeline was deleted
  */
-export const deletePipeline = async ({ esClient, id }: DeletePipelineParams): Promise<boolean> => {
-  const response = await esClient.ingest.deletePipeline({
-    id,
-  });
+export const deletePipeline = async ({ esClient, id, logger }: DeletePipelineParams): Promise<boolean> => {
+  try {
+    const response = await esClient.ingest.deletePipeline({
+      id,
+    });
 
-  return response.acknowledged;
+    return response.acknowledged;
+  } catch (e) {
+    logger.warn(`Failed to delete ingest pipeline '${id}': ${e instanceof Error ? e.message : String(e)}`);
+    return false;
+  }
 };
 
 export const removeLegacyQuickPrompt = async (esClient: ElasticsearchClient) => {
