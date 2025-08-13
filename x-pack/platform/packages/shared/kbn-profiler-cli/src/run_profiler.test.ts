@@ -128,22 +128,6 @@ describe('@kbn/profiler-cli real-process tests', () => {
   `);
   }
 
-  function startFakeShortLivedProcess(): FakeProcess {
-    // Start a process that does some work and exits
-    return startProcess(`
-    console.log('Short-lived process starting');
-    
-    // Simulate some CPU work
-    let result = 0;
-    for (let i = 0; i < 1000000; i++) {
-      result += Math.sqrt(i);
-    }
-    
-    console.log('Work completed, result:', result);
-    process.exit(0);
-  `);
-  }
-
   beforeEach(() => {
     mockedExeca.command.mockClear();
   });
