@@ -5,30 +5,33 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type {
+  Logger,
+  IKibanaResponse,
+  KibanaRequest,
+  KibanaResponseFactory,
+} from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { BootstrapPrebuiltRulesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
-import {
-  installEndpointPackage,
-  installPrebuiltRulesPackage,
-} from '../install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
+import { installPrebuiltRulesPackage } from '../../logic/integrations/install_prebuilt_rules_package';
+import { installEndpointPackage } from '../../logic/integrations/install_endpoint_package';
 
 export const bootstrapPrebuiltRulesHandler = async (
   context: SecuritySolutionRequestHandlerContext,
   _: KibanaRequest,
-  response: KibanaResponseFactory
+  response: KibanaResponseFactory,
+  logger: Logger
 ): Promise<IKibanaResponse<BootstrapPrebuiltRulesResponse>> => {
   const siemResponse = buildSiemResponse(response);
 
   try {
     const ctx = await context.resolve(['securitySolution']);
     const securityContext = ctx.securitySolution;
-    const config = securityContext.getConfig();
 
-    const prebuiltRulesResult = await installPrebuiltRulesPackage(config, securityContext);
-    const endpointResult = await installEndpointPackage(config, securityContext);
+    const prebuiltRulesResult = await installPrebuiltRulesPackage(securityContext, logger);
+    const endpointResult = await installEndpointPackage(securityContext, logger);
 
     const responseBody: BootstrapPrebuiltRulesResponse = {
       packages: [
@@ -49,6 +52,7 @@ export const bootstrapPrebuiltRulesHandler = async (
       body: responseBody,
     });
   } catch (err) {
+    logger.error(`bootstrapPrebuiltRulesHandler: Caught error:`, err);
     const error = transformError(err);
     return siemResponse.error({
       body: error.message,

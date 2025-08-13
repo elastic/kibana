@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { chunk, partition } from 'lodash/fp';
 import { extname } from 'path';
@@ -42,7 +42,11 @@ import { createPrebuiltRuleObjectsClient } from '../../../../prebuilt_rules/logi
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
-export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
+export const importRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  config: ConfigType,
+  logger: Logger
+) => {
   router.versioned
     .post({
       access: 'public',
@@ -148,10 +152,10 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           );
 
           const ruleSourceImporter = createRuleSourceImporter({
-            config,
             context: ctx.securitySolution,
             prebuiltRuleAssetsClient: createPrebuiltRuleAssetsClient(savedObjectsClient),
             prebuiltRuleObjectsClient: createPrebuiltRuleObjectsClient(rulesClient),
+            logger,
           });
 
           const [parsedRules, parsedRuleErrors] = partition(
@@ -215,6 +219,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
 
           return response.ok({ body: ImportRulesResponse.parse(importRulesResponse) });
         } catch (err) {
+          logger.error(`importRulesRoute: Caught error:`, err);
           const error = transformError(err);
           return siemResponse.error({
             body: error.message,

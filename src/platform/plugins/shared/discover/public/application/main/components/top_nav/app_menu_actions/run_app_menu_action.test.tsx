@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
-import { AppMenuActionSubmenuCustom, AppMenuActionType, AppMenuItem } from '@kbn/discover-utils';
+import type { AppMenuActionSubmenuCustom, AppMenuItem } from '@kbn/discover-utils';
+import { AppMenuActionType } from '@kbn/discover-utils';
 import { discoverServiceMock } from '../../../../../__mocks__/services';
 import { runAppMenuAction, runAppMenuPopoverAction } from './run_app_menu_action';
 

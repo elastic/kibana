@@ -9,7 +9,7 @@
 
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
+import type { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';

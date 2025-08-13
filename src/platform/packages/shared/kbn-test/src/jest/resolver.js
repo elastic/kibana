@@ -79,6 +79,13 @@ module.exports = (request, options) => {
     return Path.resolve(__dirname, 'mocks/react_dom_client_mock.ts');
   }
 
+  if (request === 'ts-api-utils') {
+    return resolve.sync('ts-api-utils/lib/index.cjs', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
   if (request === `elastic-apm-node`) {
     return APM_AGENT_MOCK;
   }
