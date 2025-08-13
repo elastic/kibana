@@ -19,6 +19,7 @@ import {
   FailedDocsErrorsResponse,
   NonAggregatableDatasets,
   UpdateFieldLimitResponse,
+  UpdateFailureStoreResponse,
 } from '../../../common/api_types';
 import { indexNameToDataStreamParts } from '../../../common/utils';
 import { IDataStreamDetailsClient } from '../../services/data_stream_details';
@@ -40,6 +41,8 @@ import {
   fetchIntegrationDashboardsFailedNotifier,
   rolloverDataStreamFailedNotifier,
   updateFieldLimitFailedNotifier,
+  updateFailureStoreFailedNotifier,
+  updateFailureStoreSuccessNotifier,
 } from './notifications';
 import {
   filterIssues,
@@ -530,6 +533,36 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 ],
               },
             },
+            failureStoreUpdate: {
+              initial: 'idle',
+              states: {
+                idle: {
+                  on: {
+                    UPDATE_FAILURE_STORE: {
+                      target: 'updating',
+                      actions: ['storeFailureStoreUpdateParams'],
+                    },
+                  },
+                },
+                updating: {
+                  invoke: {
+                    src: 'updateFailureStore',
+                    onDone: {
+                      target: 'idle',
+                      actions: [
+                        'storeFailureStoreUpdateResponse',
+                        'notifyUpdateFailureStoreSuccess',
+                        'raiseForceDataStreamDetailsRefresh',
+                      ],
+                    },
+                    onError: {
+                      target: 'idle',
+                      actions: ['storeFailureStoreUpdateError', 'notifyUpdateFailureStoreFailed'],
+                    },
+                  },
+                },
+              },
+            },
           },
         },
         indexNotFound: {
@@ -706,6 +739,45 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
           fieldLimit: undefined,
         })),
         raiseForceTimeRangeRefresh: raise('UPDATE_TIME_RANGE'),
+        storeFailureStoreUpdateParams: assign((_, event) => {
+          return 'failureStoreEnabled' in event
+            ? {
+                failureStoreUpdate: {
+                  params: {
+                    dataStream: '',
+                    failureStoreEnabled: event.failureStoreEnabled,
+                    customRetentionPeriod: event.customRetentionPeriod,
+                  },
+                },
+              }
+            : {};
+        }),
+        storeFailureStoreUpdateResponse: assign(
+          (context, event: DoneInvokeEvent<UpdateFailureStoreResponse>) => {
+            return 'data' in event
+              ? {
+                  failureStoreUpdate: {
+                    ...context.failureStoreUpdate,
+                    result: event.data,
+                    error: false,
+                  },
+                }
+              : {};
+          }
+        ),
+        storeFailureStoreUpdateError: assign((context) => {
+          return {
+            failureStoreUpdate: {
+              ...context.failureStoreUpdate,
+              error: true,
+            },
+          };
+        }),
+        raiseForceDataStreamDetailsRefresh: (context) =>
+          raise({
+            type: 'UPDATE_TIME_RANGE',
+            timeRange: context.timeRange,
+          } as DatasetQualityDetailsControllerEvent),
       },
       guards: {
         checkIfActionForbidden: (_, event) => {
@@ -817,6 +889,9 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         updateFieldLimitFailedNotifier(toasts, event.data),
       notifyRolloverDataStreamError: (context, event: DoneInvokeEvent<Error>) =>
         rolloverDataStreamFailedNotifier(toasts, event.data, context.dataStream),
+      notifyUpdateFailureStoreSuccess: () => updateFailureStoreSuccessNotifier(toasts),
+      notifyUpdateFailureStoreFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        updateFailureStoreFailedNotifier(toasts, event.data),
     },
     services: {
       checkDatasetIsAggregatable: (context) => {
@@ -959,6 +1034,21 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return dataStreamDetailsClient.rolloverDataStream({
           dataStream: context.dataStream,
         });
+      },
+      updateFailureStore: (context) => {
+        if (
+          'failureStoreUpdate' in context &&
+          context.failureStoreUpdate &&
+          context.failureStoreUpdate.params
+        ) {
+          return dataStreamDetailsClient.updateFailureStore({
+            dataStream: context.dataStream,
+            failureStoreEnabled: context.failureStoreUpdate.params.failureStoreEnabled,
+            customRetentionPeriod: context.failureStoreUpdate.params.customRetentionPeriod,
+          });
+        }
+
+        return Promise.resolve();
       },
     },
   });

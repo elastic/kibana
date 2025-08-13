@@ -23,12 +23,14 @@ export async function getDataStreamDetails({
   start,
   end,
   isServerless,
+  esClientInternalUser,
 }: {
   esClient: IScopedClusterClient;
   dataStream: string;
   start: number;
   end: number;
   isServerless: boolean;
+  esClientInternalUser: ElasticsearchClient;
 }): Promise<DataStreamDetails> {
   throwIfInvalidDataStreamParams(dataStream);
 
@@ -49,6 +51,7 @@ export async function getDataStreamDetails({
         await getDataStreams({
           esClient: esClientAsCurrentUser,
           datasetQuery: dataStream,
+          esClientInternalUser,
         })
       ).dataStreams[0]
     : undefined;
@@ -92,6 +95,8 @@ export async function getDataStreamDetails({
         canMonitor: dataStreamPrivileges.monitor,
         canReadFailureStore: dataStreamPrivileges[FAILURE_STORE_PRIVILEGE],
       },
+      defaultRetentionPeriod: esDataStream?.defaultRetentionPeriod,
+      customRetentionPeriod: esDataStream?.customRetentionPeriod,
     };
   } catch (e) {
     // Respond with empty object if data stream does not exist
@@ -166,6 +171,9 @@ async function getDataStreamSummaryStats(
     hosts: getTermsFromAgg(hostsAgg, response.aggregations),
   };
 }
+
+// Cluster default failure store
+// esClient.cluster.
 
 async function getMeteringAvgDocSizeInBytes(esClient: ElasticsearchClient, index: string) {
   const meteringStats = await getDataStreamsMeteringStats({

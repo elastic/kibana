@@ -331,6 +331,13 @@ export const overviewPanelDatasetQualityIndicatorFailedDocs = i18n.translate(
   }
 );
 
+export const overviewPanelDatasetQualityIndicatorNoFailureStore = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.datasetQuality.noFailureStore',
+  {
+    defaultMessage: 'No failure store',
+  }
+);
+
 export const overviewDegradedFieldsTableLoadingText = i18n.translate(
   'xpack.datasetQuality.details.degradedFieldsTableLoadingText',
   {

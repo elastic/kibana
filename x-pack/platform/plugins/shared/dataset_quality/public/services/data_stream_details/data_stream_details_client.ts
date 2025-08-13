@@ -27,6 +27,8 @@ import {
   qualityIssueBaseRT,
   UpdateFieldLimitResponse,
   updateFieldLimitResponseRt,
+  UpdateFailureStoreResponse,
+  updateFailureStoreResponseRt,
 } from '../../../common/api_types';
 import {
   DataStreamDetails,
@@ -305,6 +307,36 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
       dataStreamRolloverResponseRt,
       (message: string) =>
         new DatasetQualityError(`Failed to decode rollover response: ${message}"`)
+    )(response);
+  }
+
+  public async updateFailureStore({
+    dataStream,
+    failureStoreEnabled,
+    customRetentionPeriod,
+  }: {
+    dataStream: string;
+    failureStoreEnabled: boolean;
+    customRetentionPeriod?: string;
+  }): Promise<UpdateFailureStoreResponse> {
+    const response = await this.http
+      .put<UpdateFailureStoreResponse>(
+        `/internal/dataset_quality/data_streams/${dataStream}/update_failure_store`,
+        {
+          body: JSON.stringify({
+            failureStoreEnabled,
+            customRetentionPeriod,
+          }),
+        }
+      )
+      .catch((error) => {
+        throw new DatasetQualityError(`Failed to update failure store": ${error}`, error);
+      });
+
+    return decodeOrThrow(
+      updateFailureStoreResponseRt,
+      (message: string) =>
+        new DatasetQualityError(`Failed to decode update failure store response: ${message}"`)
     )(response);
   }
 }

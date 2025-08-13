@@ -26,25 +26,19 @@ export function Card({
 }) {
   const { euiTheme } = useEuiTheme();
 
-  return (
-    <EuiButtonEmpty
-      isDisabled={isDisabled}
-      onClick={onClick}
-      css={css`
-        height: 100%;
-        min-width: 300px;
-        border: ${isSelected
-          ? `${euiTheme.border.width.thick} solid ${euiTheme.colors.borderStrongPrimary}`
-          : 'none'};
-        background-color: ${isSelected ? euiTheme.colors.backgroundLightPrimary : 'inherit'};
-      `}
-      contentProps={{
-        css: css`
-          justify-content: flex-start;
-        `,
-      }}
-      data-test-subj={`datasetQualityDetailsSummaryKpiCard-${title}`}
-    >
+  const style = css`
+    height: 100%;
+    min-width: 300px;
+    border: ${isSelected
+      ? `${euiTheme.border.width.thick} solid ${euiTheme.colors.borderStrongPrimary}`
+      : 'none'};
+    background-color: ${isSelected ? euiTheme.colors.backgroundLightPrimary : 'inherit'};
+  `;
+
+  const dataTestSubject = `datasetQualityDetailsSummaryKpiCard-${title}`;
+
+  const content = (
+    <>
       <EuiText textAlign="left">{title}</EuiText>
       <EuiSpacer size="xs" />
       <EuiText textAlign="left" data-test-subj={`datasetQualityDetailsSummaryKpiValue-${title}`}>
@@ -52,6 +46,26 @@ export function Card({
       </EuiText>
       <EuiSpacer size="xs" />
       <EuiText textAlign="left">{footer}</EuiText>
+    </>
+  );
+
+  return onClick ? (
+    <EuiButtonEmpty
+      isDisabled={isDisabled}
+      onClick={onClick}
+      css={style}
+      contentProps={{
+        css: css`
+          justify-content: flex-start;
+        `,
+      }}
+      data-test-subj={dataTestSubject}
+    >
+      {content}
     </EuiButtonEmpty>
+  ) : (
+    <div css={style} data-test-subj={dataTestSubject}>
+      {content}
+    </div>
   );
 }

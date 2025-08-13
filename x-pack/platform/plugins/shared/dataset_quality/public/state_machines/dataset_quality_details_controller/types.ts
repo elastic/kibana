@@ -20,6 +20,7 @@ import {
   NonAggregatableDatasets,
   QualityIssue,
   UpdateFieldLimitResponse,
+  UpdateFailureStoreResponse,
 } from '../../../common/api_types';
 import { IntegrationType } from '../../../common/data_stream_details';
 import { TableCriteria, TimeRangeConfig } from '../../../common/types';
@@ -60,6 +61,16 @@ export interface FieldLimit {
   error?: boolean;
 }
 
+export interface FailureStoreUpdate {
+  params?: {
+    dataStream: string;
+    failureStoreEnabled: boolean;
+    customRetentionPeriod?: string;
+  };
+  result?: UpdateFailureStoreResponse;
+  error?: boolean;
+}
+
 export interface WithDefaultControllerState {
   dataStream: string;
   qualityIssues: QualityIssuesTableConfig;
@@ -77,6 +88,7 @@ export interface WithDefaultControllerState {
   };
   isNonAggregatable?: boolean;
   fieldLimit?: FieldLimit;
+  failureStoreUpdate?: FailureStoreUpdate;
 }
 
 export interface WithDataStreamDetails {
@@ -229,6 +241,14 @@ export type DatasetQualityDetailsControllerTypeState =
         WithDegradeFieldAnalysis &
         WithNewFieldLimit &
         WithNewFieldLimitResponse;
+    }
+  | {
+      value: 'initializing.failureStoreUpdate.idle';
+      context: WithDefaultControllerState;
+    }
+  | {
+      value: 'initializing.failureStoreUpdate.updating';
+      context: WithDefaultControllerState;
     };
 
 export type DatasetQualityDetailsControllerContext =
@@ -275,6 +295,11 @@ export type DatasetQualityDetailsControllerEvent =
   | {
       type: 'ROLLOVER_DATA_STREAM';
     }
+  | {
+      type: 'UPDATE_FAILURE_STORE';
+      failureStoreEnabled: boolean;
+      customRetentionPeriod?: string;
+    }
   | DoneInvokeEvent<NonAggregatableDatasets>
   | DoneInvokeEvent<DataStreamDetails>
   | DoneInvokeEvent<Error>
@@ -288,4 +313,5 @@ export type DatasetQualityDetailsControllerEvent =
   | DoneInvokeEvent<DegradedFieldAnalysis>
   | DoneInvokeEvent<UpdateFieldLimitResponse>
   | DoneInvokeEvent<DataStreamRolloverResponse>
+  | DoneInvokeEvent<UpdateFailureStoreResponse>
   | DoneInvokeEvent<IntegrationType>;

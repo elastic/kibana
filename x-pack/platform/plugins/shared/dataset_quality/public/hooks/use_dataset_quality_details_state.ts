@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useSelector } from '@xstate/react';
 import { OnRefreshProps } from '@elastic/eui';
 import { DEFAULT_DATEPICKER_REFRESH } from '../../common/constants';
@@ -140,7 +140,12 @@ export const useDatasetQualityDetailsState = () => {
     integrationDashboardsLoading: state.matches(
       'initializing.checkAndLoadIntegrationAndDashboards.loadingIntegrationDashboards'
     ),
+    failureStoreUpdating: state.matches('initializing.failureStoreUpdate.updating'),
   }));
+
+  const failureStoreUpdateResult = useSelector(service, (state) =>
+    'failureStoreUpdate' in state.context ? state.context.failureStoreUpdate : undefined
+  );
 
   const isQualityIssueFlyoutOpen = useSelector(service, (state) =>
     state.matches('initializing.qualityIssueFlyout.open')
@@ -160,8 +165,41 @@ export const useDatasetQualityDetailsState = () => {
     [service]
   );
 
+  const updateFailureStore = useCallback(
+    ({
+      failureStoreEnabled,
+      customRetentionPeriod,
+    }: {
+      failureStoreEnabled: boolean;
+      customRetentionPeriod?: string;
+    }) => {
+      service.send({
+        type: 'UPDATE_FAILURE_STORE',
+        failureStoreEnabled,
+        customRetentionPeriod,
+      });
+    },
+    [service]
+  );
+
+  // Refresh when failure store update completes successfully
+  useEffect(() => {
+    if (failureStoreUpdateResult?.result && !failureStoreUpdateResult?.error) {
+      service.send({
+        type: 'UPDATE_TIME_RANGE',
+        timeRange: {
+          from: timeRange.from,
+          to: timeRange.to,
+          refresh: { ...DEFAULT_DATEPICKER_REFRESH, value: timeRange.refresh.value },
+        },
+      });
+    }
+  }, [failureStoreUpdateResult, service, timeRange]);
+
   const hasFailureStore = Boolean(dataStreamDetails?.hasFailureStore);
   const canShowFailureStoreInfo = canUserReadFailureStore && hasFailureStore;
+  const defaultRetentionPeriod = dataStreamDetails?.defaultRetentionPeriod;
+  const customRetentionPeriod = dataStreamDetails?.customRetentionPeriod;
 
   return {
     service,
@@ -180,6 +218,7 @@ export const useDatasetQualityDetailsState = () => {
     timeRange,
     loadingState,
     updateTimeRange,
+    updateFailureStore,
     dataStreamSettings,
     integrationDetails,
     canUserAccessDashboards,
@@ -189,5 +228,8 @@ export const useDatasetQualityDetailsState = () => {
     canShowFailureStoreInfo,
     expandedQualityIssue,
     isQualityIssueFlyoutOpen,
+    defaultRetentionPeriod,
+    customRetentionPeriod,
+    failureStoreUpdateResult,
   };
 };
