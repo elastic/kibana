@@ -173,21 +173,15 @@ export const useLookupIndexCommand = (
   const lookupIndexBadgeStyle = css`
     .${lookupIndexBaseBadgeClassName} {
       white-space: nowrap;
-      text-decoration: none;
-      border-radius: ${euiTheme.border.radius.small};
       text-align: start;
-      border-width: ${euiTheme.border.thin};
-      color: ${euiTheme.colors.text};
+      color: ${euiTheme.colors.textParagraph};
     }
 
     .${lookupIndexAddBadgeClassName} {
-      border-color: ${euiTheme.colors.backgroundBaseDanger};
-      background-color: ${euiTheme.colors.backgroundBaseDanger};
     }
 
     .${lookupIndexEditBadgeClassName} {
-      border-color: ${euiTheme.colors.backgroundBasePrimary};
-      background-color: ${euiTheme.colors.backgroundBasePrimary};
+      text-decoration: underline dotted ${euiTheme.colors.textParagraph};
     }
   `;
 
