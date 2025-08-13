@@ -659,6 +659,12 @@ export default function ({ getService }: FtrProviderContext) {
               ? sessionResponse.hits.total
               : sessionResponse.hits.total?.value;
 
+          const sessionIds = sessionResponse.hits.hits.map((hit) => {
+            return hit._id;
+          });
+
+          expect(sessionIds).to.eql(['']);
+
           // There should be only one intermediate session with all requestIds in it
           expect(totalHits).to.equal(1);
 
