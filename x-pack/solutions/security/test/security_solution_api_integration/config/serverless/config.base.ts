@@ -52,7 +52,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           ...(options.kbnTestServerArgs || []),
           `--plugin-path=${path.resolve(
             __dirname,
-            '../../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
+            '../../../../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
           )}`,
         ],
         env: {
