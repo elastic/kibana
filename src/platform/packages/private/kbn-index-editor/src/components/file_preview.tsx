@@ -16,16 +16,16 @@ import {
   EuiTabbedContent,
   type EuiTabbedContentTab,
   EuiTitle,
+  EuiBasicTable,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DataLoadingState, DataTableColumnsMeta, UnifiedDataTable } from '@kbn/unified-data-table';
 import React, { FC, Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { buildDataTableRecord, DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import { noop } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MessageImporter } from '@kbn/file-upload-plugin/public';
 import type { KibanaContextExtra } from '../types';
@@ -258,47 +258,24 @@ export const FilesPreview: FC = () => {
 
 export type ResultsPreviewProps = Omit<FilePreviewItem, 'fileName'>;
 
-const ResultsPreview: FC<ResultsPreviewProps> = ({
-  filePreview,
-  dataView,
-  mappings,
-  columnNames,
-}) => {
-  const {
-    services: {
-      data,
-      theme,
-      uiSettings,
-      notifications,
-      dataViewFieldEditor,
-      fieldFormats,
-      storage,
-    },
-  } = useKibana<KibanaContextExtra>();
-
-  const services = useMemo(() => {
-    return {
-      data,
-      theme,
-      uiSettings,
-      toastNotifications: notifications?.toasts,
-      dataViewFieldEditor,
-      fieldFormats,
-      storage,
-    };
-  }, [data, theme, uiSettings, notifications?.toasts, dataViewFieldEditor, fieldFormats, storage]);
-
-  const columnsMeta = useMemo(() => {
-    return columnNames.reduce((acc, columnName) => {
-      const typeFromMapping = mappings.properties[columnName]?.type || 'unknown';
-
-      acc[columnName] = {
-        type: 'string',
-        esType: typeFromMapping,
+const ResultsPreview: FC<ResultsPreviewProps> = ({ filePreview, columnNames }) => {
+  const columns = useMemo<Array<EuiBasicTableColumn<object>>>(() => {
+    return columnNames.map((name) => {
+      return {
+        field: name,
+        name,
+        dataType: 'auto',
       };
-      return acc;
-    }, {} as DataTableColumnsMeta);
-  }, [columnNames, mappings.properties]);
+    });
+  }, [columnNames]);
+
+  const items = useMemo(() => {
+    return (
+      filePreview.sampleDocs?.map((doc) => {
+        return doc.flattened;
+      }) || []
+    );
+  }, [filePreview.sampleDocs]);
 
   return (
     <>
@@ -323,34 +300,7 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({
           <EuiSpacer size={'s'} />
         </>
       ) : null}
-      {filePreview.sampleDocs?.length ? (
-        <UnifiedDataTable
-          sampleSizeState={10}
-          onSetColumns={noop}
-          columns={columnNames!}
-          rows={filePreview.sampleDocs}
-          columnsMeta={columnsMeta}
-          services={services}
-          enableInTableSearch={false}
-          isPlainRecord
-          isSortEnabled={false}
-          showMultiFields={false}
-          showColumnTokens
-          showTimeCol
-          enableComparisonMode={false}
-          isPaginationEnabled={false}
-          showKeyboardShortcuts={false}
-          canDragAndDropColumns={false}
-          loadingState={DataLoadingState.loaded}
-          dataView={dataView}
-          sort={[]}
-          ariaLabelledBy="lookupIndexDataGrid"
-          maxDocFieldsDisplayed={100}
-          showFullScreenButton={false}
-          disableCellActions
-          disableCellPopover
-        />
-      ) : null}
+      {filePreview.sampleDocs?.length ? <EuiBasicTable columns={columns} items={items} /> : null}
     </>
   );
 };
