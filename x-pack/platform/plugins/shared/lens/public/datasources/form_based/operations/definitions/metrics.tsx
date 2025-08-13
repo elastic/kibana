@@ -25,6 +25,7 @@ import {
   SUM_NAME,
 } from '@kbn/lens-formula-docs';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
+import { ValueFormatConfig } from '../../../../../common';
 import { LayerSettingsFeatures, OperationDefinition, ParamEditorProps } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -33,11 +34,7 @@ import {
   getFilter,
   isColumnOfType,
 } from './helpers';
-import {
-  FieldBasedIndexPatternColumn,
-  BaseIndexPatternColumn,
-  ValueFormatConfig,
-} from './column_types';
+import { FieldBasedIndexPatternColumn, BaseIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';

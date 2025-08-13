@@ -1,0 +1,239 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { schema } from '@kbn/config-schema';
+import { filterSchema } from './filter';
+import { formatSchema } from './format';
+import {
+  LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+  LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
+  LENS_PERCENTILE_DEFAULT_VALUE,
+  LENS_PERCENTILE_RANK_DEFAULT_VALUE,
+  LENS_STATIC_VALUE_DEFAULT,
+} from './constants';
+
+const genericOperationOptionsSchema = formatSchema.extends({
+  /**
+   * Label for the operation
+   */
+  label: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Label for the operation',
+      },
+    })
+  ),
+});
+
+export const staticOperationDefinitionSchema = genericOperationOptionsSchema.extends({
+  operation: schema.literal('static_value'),
+  /**
+   * Static value
+   */
+  value: schema.maybe(
+    schema.number({
+      meta: {
+        description: 'Static value',
+      },
+      defaultValue: LENS_STATIC_VALUE_DEFAULT,
+    })
+  ),
+});
+
+export const formulaOperationDefinitionSchema = genericOperationOptionsSchema.extends({
+  operation: schema.literal('formula'),
+  /**
+   * Formula
+   */
+  formula: schema.string({
+    meta: {
+      description: 'Formula',
+    },
+  }),
+});
+
+export const metricOperationSharedSchema = genericOperationOptionsSchema.extends({
+  /**
+   * Time scale
+   */
+  time_scale: schema.maybe(
+    schema.oneOf(
+      [schema.literal('s'), schema.literal('m'), schema.literal('h'), schema.literal('d')],
+      { meta: { description: 'Time scale' } }
+    )
+  ),
+  /**
+   * Reduced time range
+   */
+  reduced_time_range: schema.maybe(schema.string({ meta: { description: 'Reduced time range' } })),
+  /**
+   * Time shift
+   */
+  time_shift: schema.maybe(schema.string({ meta: { description: 'Time shift' } })),
+  /**
+   * Filter
+   */
+  filter: schema.maybe(filterSchema),
+});
+
+export const fieldBasedOperationSharedSchema = metricOperationSharedSchema.extends({
+  /**
+   * Field to be used for the metric
+   */
+  field: schema.string({ meta: { description: 'Field to be used for the metric' } }),
+});
+
+const emptyAsNullSchemaRawObject = {
+  /**
+   * Whether to consider null values as null
+   */
+  empty_as_null: schema.maybe(
+    schema.boolean({
+      meta: {
+        description: 'Whether to consider null values as null',
+      },
+    })
+  ),
+};
+
+export const countMetricOperationSchema = fieldBasedOperationSharedSchema.extends({
+  ...emptyAsNullSchemaRawObject,
+  /**
+   * Select the operation type
+   */
+  operation: schema.literal('count'),
+  /**
+   * Field to be used for the metric
+   */
+  field: schema.maybe(schema.string()),
+});
+
+export const uniqueCountMetricOperationSchema = fieldBasedOperationSharedSchema.extends({
+  ...emptyAsNullSchemaRawObject,
+  operation: schema.literal('unique_count'),
+});
+
+export const metricOperationSchema = fieldBasedOperationSharedSchema.extends({
+  operation: schema.oneOf([
+    schema.literal('min'),
+    schema.literal('max'),
+    schema.literal('average'),
+    schema.literal('median'),
+    schema.literal('standard_deviation'),
+  ]),
+});
+
+export const sumMetricOperationSchema = fieldBasedOperationSharedSchema.extends({
+  ...emptyAsNullSchemaRawObject,
+  operation: schema.literal('sum'),
+});
+
+export const lastValueOperationSchema = fieldBasedOperationSharedSchema.extends({
+  operation: schema.literal('last_value'),
+  sort_by: schema.string(),
+  show_array_values: schema.maybe(
+    schema.boolean({
+      defaultValue: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+    })
+  ),
+});
+
+export const percentileOperationSchema = fieldBasedOperationSharedSchema.extends({
+  operation: schema.literal('percentile'),
+  percentile: schema.maybe(
+    schema.number({
+      meta: { description: 'Percentile' },
+      defaultValue: LENS_PERCENTILE_DEFAULT_VALUE,
+    })
+  ),
+});
+
+export const percentileRanksOperationSchema = fieldBasedOperationSharedSchema.extends({
+  operation: schema.literal('percentile_rank'),
+  rank: schema.maybe(
+    schema.number({
+      meta: { description: 'Percentile Rank' },
+      defaultValue: LENS_PERCENTILE_RANK_DEFAULT_VALUE,
+    })
+  ),
+});
+
+export const fieldMetricOperationsSchema = schema.oneOf([
+  countMetricOperationSchema,
+  uniqueCountMetricOperationSchema,
+  metricOperationSchema,
+  sumMetricOperationSchema,
+  lastValueOperationSchema,
+  percentileOperationSchema,
+  percentileRanksOperationSchema,
+]);
+
+export const differencesOperationSchema = metricOperationSharedSchema.extends({
+  operation: schema.literal('differences'),
+  of: fieldMetricOperationsSchema,
+});
+
+export const movingAverageOperationSchema = metricOperationSharedSchema.extends({
+  operation: schema.literal('moving_average'),
+  of: fieldMetricOperationsSchema,
+  window: schema.maybe(
+    schema.number({
+      meta: { description: 'Window' },
+      defaultValue: LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
+    })
+  ),
+});
+
+export const cumulativeSumOperationSchema = fieldBasedOperationSharedSchema.extends({
+  operation: schema.literal('cumulative_sum'),
+});
+
+export const counterRateOperationSchema = fieldBasedOperationSharedSchema.extends({
+  operation: schema.literal('counter_rate'),
+});
+
+export const metricOperationDefinitionSchema = schema.oneOf([
+  formulaOperationDefinitionSchema,
+  staticOperationDefinitionSchema,
+  fieldMetricOperationsSchema,
+  differencesOperationSchema,
+  movingAverageOperationSchema,
+  cumulativeSumOperationSchema,
+  counterRateOperationSchema,
+  countMetricOperationSchema,
+  uniqueCountMetricOperationSchema,
+  lastValueOperationSchema,
+  percentileOperationSchema,
+  percentileRanksOperationSchema,
+]);
+
+export type LensApiAllMetricOperations = typeof metricOperationDefinitionSchema.type;
+export type LensApiReferableMetricOperations =
+  | LensApiCountMetricOperation
+  | LensApiUniqueCountMetricOperation
+  | LensApiMetricOperation
+  | LensApiSumMetricOperation
+  | LensApiLastValueOperation
+  | LensApiPercentileOperation
+  | LensApiPercentileRanksOperation;
+export type LensApiFieldMetricOperations = typeof fieldMetricOperationsSchema.type;
+
+export type LensApiCountMetricOperation = typeof countMetricOperationSchema.type;
+export type LensApiUniqueCountMetricOperation = typeof uniqueCountMetricOperationSchema.type;
+export type LensApiMetricOperation = typeof metricOperationSchema.type;
+export type LensApiSumMetricOperation = typeof sumMetricOperationSchema.type;
+export type LensApiLastValueOperation = typeof lastValueOperationSchema.type;
+export type LensApiPercentileOperation = typeof percentileOperationSchema.type;
+export type LensApiPercentileRanksOperation = typeof percentileRanksOperationSchema.type;
+export type LensApiDifferencesOperation = typeof differencesOperationSchema.type;
+export type LensApiMovingAverageOperation = typeof movingAverageOperationSchema.type;
+export type LensApiCumulativeSumOperation = typeof cumulativeSumOperationSchema.type;
+export type LensApiCounterRateOperation = typeof counterRateOperationSchema.type;
+export type LensApiFormulaOperation = typeof formulaOperationDefinitionSchema.type;
+export type LensApiStaticValueOperation = typeof staticOperationDefinitionSchema.type;

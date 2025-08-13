@@ -19,6 +19,7 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { memoize } from 'lodash';
+import { ValueFormatConfig } from '../../../../../common';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -38,12 +39,7 @@ export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColu
   operationType: typeof PERCENTILE_ID;
   params: {
     percentile: number;
-    format?: {
-      id: string;
-      params?: {
-        decimals: number;
-      };
-    };
+    format?: ValueFormatConfig;
   };
 }
 
