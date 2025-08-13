@@ -195,7 +195,7 @@ describe('Security Solution - Health Diagnostic Queries - Circuit Breakers', () 
         expectInvalidCircuitBreakerResult(
           result,
           'ElasticsearchCircuitBreaker',
-          'Node stats missing JVM or CPU metrics'
+          'Node node1 missing metrics. JVM: undefined, OS: undefined'
         );
       });
     });
