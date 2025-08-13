@@ -70,10 +70,6 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyoutProps> = ({
     },
   });
 
-  if (!isOpen) {
-    return null;
-  }
-
   const handleInputChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };

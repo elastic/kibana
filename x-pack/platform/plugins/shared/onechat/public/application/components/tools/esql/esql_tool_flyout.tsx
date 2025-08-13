@@ -212,21 +212,17 @@ export const OnechatEsqlToolFlyout: React.FC<OnechatEsqlToolFlyoutProps> = ({
         maxWidth
       >
         <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem>
-              <EuiTitle size="m">
-                <h2 id={esqlToolFlyoutTitleId}>
-                  {mode === OnechatEsqlToolFlyoutMode.Create
-                    ? i18n.translate('xpack.onechat.tools.newEsqlTool.title', {
-                        defaultMessage: 'New ES|QL tool',
-                      })
-                    : i18n.translate('xpack.onechat.tools.editEsqlTool.title', {
-                        defaultMessage: 'Edit ES|QL tool',
-                      })}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiTitle size="m">
+            <h2 id={esqlToolFlyoutTitleId}>
+              {mode === OnechatEsqlToolFlyoutMode.Create
+                ? i18n.translate('xpack.onechat.tools.newEsqlTool.title', {
+                    defaultMessage: 'New ES|QL tool',
+                  })
+                : i18n.translate('xpack.onechat.tools.editEsqlTool.title', {
+                    defaultMessage: 'Edit ES|QL tool',
+                  })}
+            </h2>
+          </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody css={flyoutBodyClass(euiTheme)}>
           {isLoading ? (
