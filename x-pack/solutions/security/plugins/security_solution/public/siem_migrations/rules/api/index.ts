@@ -29,6 +29,7 @@ import {
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH,
   SIEM_RULE_MIGRATION_PATH,
   SIEM_RULE_MIGRATION_STOP_PATH,
+  SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationResponse,
@@ -414,5 +415,27 @@ export const deleteMigration = async ({ migrationId, signal }: DeleteMigrationPa
   return KibanaServices.get().http.delete<unknown>(
     replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),
     { version: '1', signal }
+  );
+};
+
+export interface UpdateIndexPatternParams {
+  /** `id` of the migration to update the index pattern for */
+  migrationId: string;
+  /** The index pattern to update */
+  indexPattern: string;
+  /** The ids of the rules to update */
+  ids: string[];
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+export const updateIndexPattern = async ({
+  migrationId,
+  indexPattern,
+  ids,
+  signal,
+}: UpdateIndexPatternParams) => {
+  return KibanaServices.get().http.post<void>(
+    replaceParams(SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH, { migration_id: migrationId }),
+    { version: '1', body: JSON.stringify({ index_pattern: indexPattern, ids }), signal }
   );
 };

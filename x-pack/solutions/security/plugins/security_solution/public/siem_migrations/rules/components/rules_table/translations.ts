@@ -118,3 +118,10 @@ export const START_RULE_MIGRATION_MODAL_CANCEL = i18n.translate(
     defaultMessage: 'Cancel',
   }
 );
+
+export const MISSING_INDEX_PATTERN_FLYOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.missingIndexPatternFlyout.title',
+  {
+    defaultMessage: 'Set Missing Index Pattern',
+  }
+);

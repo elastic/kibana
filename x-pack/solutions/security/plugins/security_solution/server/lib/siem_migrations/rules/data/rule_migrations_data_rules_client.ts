@@ -492,10 +492,13 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataBaseClient 
         script: {
           source: `
                 def originalQuery = ctx._source.elastic_rule.query;
-                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', '${indexPattern}');
+                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
                 ctx._source.elastic_rule.query = newQuery;
               `,
           lang: 'painless',
+          params: {
+            indexPattern,
+          },
         },
         query,
       })
