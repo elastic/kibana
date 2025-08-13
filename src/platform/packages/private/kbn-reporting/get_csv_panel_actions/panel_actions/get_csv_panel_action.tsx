@@ -152,7 +152,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
     // NOTE: For historical reasons capability identifier is called `downloadCsv. It can not be renamed.
     const capabilityHasCsvReporting =
       capabilities.dashboard_v2?.downloadCsv === true ||
-      capabilities.reporting_user?.generateReport === true;
+      capabilities.reportingLegacy?.generateReport === true;
     if (!licenseHasCsvReporting || !capabilityHasCsvReporting) {
       return false;
     }

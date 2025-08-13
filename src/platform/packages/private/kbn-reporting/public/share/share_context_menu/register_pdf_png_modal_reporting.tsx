@@ -219,10 +219,10 @@ export const reportingPDFExportProvider = ({
 
       const capabilityHasDashboardScreenshotReporting =
         capabilities.dashboard_v2?.generateScreenshot === true ||
-        capabilities.reporting_user?.generateReport === true;
+        capabilities.reportingLegacy?.generateReport === true;
       const capabilityHasVisualizeScreenshotReporting =
         capabilities.visualize_v2?.generateScreenshot === true ||
-        capabilities.reporting_user?.generateReport === true;
+        capabilities.reportingLegacy?.generateReport === true;
 
       if (!licenseHasScreenshotReporting) {
         return false;

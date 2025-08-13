@@ -52,7 +52,7 @@ export const setKibanaServices = (
   presentationUtilService = deps.presentationUtil;
   reportingService = Boolean(
     capabilities.canvas?.generatePdf === true ||
-      capabilities.reporting_user?.generateReport === true
+      capabilities.reportingLegacy?.generateReport === true
   )
     ? deps.reporting
     : undefined;

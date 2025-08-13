@@ -185,7 +185,7 @@ export const reportingCsvExportProvider = ({
 
       const capabilityHasCsvReporting =
         capabilities.discover_v2?.generateCsv === true ||
-        capabilities.reporting_user?.generateReport === true;
+        capabilities.reportingLegacy?.generateReport === true;
 
       if (!(licenseHasCsvReporting && capabilityHasCsvReporting)) {
         return false;
