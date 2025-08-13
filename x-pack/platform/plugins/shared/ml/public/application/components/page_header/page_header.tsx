@@ -15,7 +15,7 @@ export const MlPageHeader: FC<
   PropsWithChildren<{
     leftSideItems?: ReactNode | ReactNode[];
     rightSideItems?: ReactNode | ReactNode[];
-    restrictWidth?: boolean | number;
+    restrictWidth?: number;
   }>
 > = ({ children, leftSideItems, rightSideItems, restrictWidth }) => {
   const {
