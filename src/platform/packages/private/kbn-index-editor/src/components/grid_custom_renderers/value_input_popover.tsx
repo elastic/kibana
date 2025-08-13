@@ -35,7 +35,7 @@ export const getValueInputPopover =
   }) =>
   ({ rowIndex, colIndex, columnId, cellContentsElement }: EuiDataGridCellPopoverElementProps) => {
     const row = rows[rowIndex];
-    const docId = row.raw._id;
+    const docId = row.raw._id as string;
     const cellValue = row.flattened[columnId]?.toString() ?? savingDocs?.get(docId)?.[columnId];
 
     const isPlaceholder = isPlaceholderColumn(columnId);

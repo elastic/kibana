@@ -657,20 +657,6 @@ export class IndexUpdateService {
     return this._indexName$.getValue();
   }
 
-  /** Index a new document */
-  public addDoc(doc: Record<string, any>) {
-    this.addAction('add-doc', { value: doc });
-  }
-
-  public async addNewRow(newRow: Record<string, any>) {
-    const response = await this.bulkUpdate([{ type: 'add-doc', payload: { value: newRow } }]);
-
-    if (!response.errors) {
-      this.addAction('new-row-added', newRow);
-    }
-    return response;
-  }
-
   public addEmptyRow() {
     const placeholder = this.buildPlaceholderRow();
     this._rows$.next([placeholder, ...this._rows$.getValue()]);

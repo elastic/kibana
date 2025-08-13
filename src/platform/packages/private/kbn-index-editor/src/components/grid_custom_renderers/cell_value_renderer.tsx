@@ -25,7 +25,7 @@ export const getCellValueRenderer =
   ): FunctionComponent<DataGridCellValueElementProps> =>
   ({ rowIndex, colIndex, columnId }) => {
     const row = rows[rowIndex];
-    const docId = row.raw._id;
+    const docId = row.raw._id as string;
 
     const pendingSaveValue = savingDocs?.get(docId)?.[columnId];
 
