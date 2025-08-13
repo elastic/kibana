@@ -26,10 +26,10 @@ export const useSetupTechnology = ({
   isEditPage?: boolean;
   selectedProvider?: CloudProviders;
 }) => {
-  const isCspmAws = selectedProvider === AWS_PROVIDER;
-  const isCspmGcp = selectedProvider === GCP_PROVIDER;
-  const isCspmAzure = selectedProvider === AZURE_PROVIDER;
-  const isAgentlessSupportedForCloudProvider = isCspmAws || isCspmGcp || isCspmAzure;
+  const isAws = selectedProvider === AWS_PROVIDER;
+  const isGcp = selectedProvider === GCP_PROVIDER;
+  const isAzure = selectedProvider === AZURE_PROVIDER;
+  const isAgentlessSupportedForCloudProvider = isAws || isGcp || isAzure;
   const isAgentlessAvailable = isAgentlessSupportedForCloudProvider && isAgentlessEnabled;
   const defaultEditSetupTechnology =
     isEditPage && isAgentlessAvailable ? SetupTechnology.AGENTLESS : SetupTechnology.AGENT_BASED;

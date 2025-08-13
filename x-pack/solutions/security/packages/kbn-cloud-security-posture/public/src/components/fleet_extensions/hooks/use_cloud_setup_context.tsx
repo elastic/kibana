@@ -16,6 +16,7 @@ import {
   GCP_PROVIDER_TEST_ID,
 } from '../constants';
 import { CloudSetupContext } from '../cloud_setup_context';
+
 interface ICloudSetupProviderOptions {
   type: CloudProviders;
   name: string;
@@ -61,21 +62,21 @@ export function useCloudSetup() {
     () => [
       {
         type: AWS_PROVIDER,
-        name: i18n.translate('securitySolutionPackages.cspmIntegration.awsOption.nameTitle', {
+        name: i18n.translate('securitySolutionPackages.integrations.awsOption.nameTitle', {
           defaultMessage: 'AWS',
         }),
         icon: 'logoAWS',
       },
       {
         type: GCP_PROVIDER,
-        name: i18n.translate('securitySolutionPackages.cspmIntegration.gcpOption.nameTitle', {
+        name: i18n.translate('securitySolutionPackages.integrations.gcpOption.nameTitle', {
           defaultMessage: 'GCP',
         }),
         icon: 'logoGCP',
       },
       {
         type: AZURE_PROVIDER,
-        name: i18n.translate('securitySolutionPackages.cspmIntegration.azureOption.nameTitle', {
+        name: i18n.translate('securitySolutionPackages.integrations.azureOption.nameTitle', {
           defaultMessage: 'Azure',
         }),
         icon: 'logoAzure',
@@ -126,25 +127,27 @@ export function useCloudSetup() {
 
   return React.useMemo(
     () => ({
-      getCloudSetupProviderByInputType,
-      templateInputOptions: getCloudSetupTemplateInputOptions(),
-      config,
-      showCloudConnectors: config.showCloudConnectors,
-      showCloudTemplates: config.showCloudTemplates,
-      defaultProvider: config.defaultProvider,
-      defaultProviderType: config.providers[config.defaultProvider].type,
-      awsPolicyType: getProviderDetails(AWS_PROVIDER).policyType,
       awsOrganizationEnabled: getProviderDetails(AWS_PROVIDER).organizationEnabled,
       awsOverviewPath: getProviderDetails(AWS_PROVIDER).overviewPath,
-      azurePolicyType: getProviderDetails(AZURE_PROVIDER).policyType,
+      awsPolicyType: getProviderDetails(AWS_PROVIDER).policyType,
       azureEnabled: getProviderDetails(AZURE_PROVIDER).enabled,
       azureManualFieldsEnabled: getProviderDetails(AZURE_PROVIDER).manualFieldsEnabled,
       azureOrganizationEnabled: getProviderDetails(AZURE_PROVIDER).organizationEnabled,
       azureOverviewPath: getProviderDetails(AZURE_PROVIDER).overviewPath,
+      azurePolicyType: getProviderDetails(AZURE_PROVIDER).policyType,
+      config,
+      defaultProvider: config.defaultProvider,
+      defaultProviderType: config.providers[config.defaultProvider].type,
       gcpEnabled: getProviderDetails(GCP_PROVIDER).enabled,
-      gcpPolicyType: getProviderDetails(GCP_PROVIDER).policyType,
       gcpOrganizationEnabled: getProviderDetails(GCP_PROVIDER).organizationEnabled,
       gcpOverviewPath: getProviderDetails(GCP_PROVIDER).overviewPath,
+      gcpPolicyType: getProviderDetails(GCP_PROVIDER).policyType,
+      getCloudSetupProviderByInputType,
+      name: config.name,
+      shortName: config.shortName,
+      showCloudConnectors: config.showCloudConnectors,
+      showCloudTemplates: config.showCloudTemplates,
+      templateInputOptions: getCloudSetupTemplateInputOptions(),
       templateName: config.policyTemplate,
     }),
     [

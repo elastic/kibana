@@ -73,7 +73,7 @@ export const GcpInputVarFields = ({
     hasInvalidRequiredVars
   );
   const credentialFilesError = i18n.translate(
-    'securitySolutionPackages.cspmIntegration.integration.fieldRequired',
+    'securitySolutionPackages.integration.fieldRequired',
     {
       defaultMessage: '{field} is required',
       values: {
@@ -90,15 +90,12 @@ export const GcpInputVarFields = ({
     credentialJSONFields?.value,
     hasInvalidRequiredVars
   );
-  const credentialJSONError = i18n.translate(
-    'securitySolutionPackages.cspmIntegration.integration.fieldRequired',
-    {
-      defaultMessage: '{field} is required',
-      values: {
-        field: credentialJSONFields?.label,
-      },
-    }
-  );
+  const credentialJSONError = i18n.translate('securitySolutionPackages.integration.fieldRequired', {
+    defaultMessage: '{field} is required',
+    values: {
+      field: credentialJSONFields?.label,
+    },
+  });
 
   const credentialFieldValue = credentialOptionsList[0].value;
   const credentialJSONValue = credentialOptionsList[1].value;
