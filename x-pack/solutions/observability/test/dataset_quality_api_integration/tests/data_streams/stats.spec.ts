@@ -136,7 +136,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await logsSynthtrace.clean();
-        await cleanLogIndexTemplate({ esClient: es });
       });
     });
 

@@ -8,7 +8,6 @@
 import sinon from 'sinon';
 import _ from 'lodash';
 import { FeatureCollection } from 'geojson';
-import { TableSourceDescriptor } from '../../../../../common/descriptor_types';
 import { FEATURE_VISIBLE_PROPERTY_NAME, SOURCE_TYPES } from '../../../../../common/constants';
 import { performInnerJoins } from './perform_inner_joins';
 import { InnerJoin } from '../../../joins/inner_join';
@@ -63,7 +62,7 @@ const joinDescriptor = {
     ],
     term: 'rightKey',
     type: SOURCE_TYPES.TABLE_SOURCE,
-  } as TableSourceDescriptor,
+  },
 };
 const mockVectorSource = {
   getInspectorAdapters: () => {
