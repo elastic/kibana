@@ -89,7 +89,7 @@ export const DataGrid = ({
   );
 
   const renderCellValue = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-    const fieldName = rows[rowIndex].name;
+    const fieldName = rows[rowIndex]?.name;
     const fieldConfig = fields[fieldName];
 
     if (!fieldConfig) return null;
