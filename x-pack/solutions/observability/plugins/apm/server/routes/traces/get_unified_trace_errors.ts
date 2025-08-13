@@ -54,7 +54,7 @@ export const requiredFields = asMutableArray([SPAN_ID] as const);
 export const optionalFields = asMutableArray([EXCEPTION_TYPE, EXCEPTION_MESSAGE] as const);
 
 interface OptionalException {
-  span?: {
+  span: {
     id: string;
   };
   exception?: {
@@ -110,7 +110,7 @@ async function getUnprocessedOtelErrors({
       (
         doc
       ): doc is {
-        id: string | undefined;
+        id: string;
         error: { exception: { type: string | undefined; message: string | undefined } };
       } => !!doc
     );
