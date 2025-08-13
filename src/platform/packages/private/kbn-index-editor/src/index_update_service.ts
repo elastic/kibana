@@ -679,11 +679,7 @@ export class IndexUpdateService {
     this._qstr$.complete();
     this._refreshSubject$.complete();
     this._exitAttemptWithUnsavedFields$.complete();
-
-    const indexName = this.getIndexName();
-    if (indexName) {
-      this.data.dataViews.clearInstanceCache(indexName);
-    }
+    this.data.dataViews.clearCache();
     this._indexName$.complete();
   }
 
