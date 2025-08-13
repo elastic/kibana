@@ -21,7 +21,7 @@ interface ControlsProps {
 
 export function Controls({ controls, onChange, onRefreshData }: ControlsProps) {
   return (
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem grow={false} data-test-subj="streamsAppSchemaEditorControls">
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiSearchBar

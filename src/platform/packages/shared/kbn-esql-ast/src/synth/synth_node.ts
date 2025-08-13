@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { serialize } from './helpers';
+import { Walker } from '../walker';
+import { Builder } from '../builder';
+import { BasicPrettyPrinter } from '../pretty_print';
 import type { ESQLProperNode } from '../types';
 
 /**
@@ -22,7 +24,20 @@ import type { ESQLProperNode } from '../types';
  * ```
  */
 export class SynthNode {
+  public static from<N extends ESQLProperNode>(node: N): N & SynthNode {
+    // Remove parser generated fields.
+    Walker.walk(node, {
+      visitAny: (n) => {
+        Object.assign(n, Builder.parserFields({}));
+      },
+    });
+
+    node = Object.assign(new SynthNode(), node);
+
+    return node;
+  }
+
   toString(this: ESQLProperNode) {
-    return serialize(this);
+    return BasicPrettyPrinter.print(this);
   }
 }

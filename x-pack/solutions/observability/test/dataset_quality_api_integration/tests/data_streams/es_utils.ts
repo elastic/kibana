@@ -20,9 +20,13 @@ export async function addIntegrationToLogIndexTemplate({
     name: 'logs',
   });
 
+  const template = indexTemplates[0].index_template;
+  // @ts-expect-error `created_date` is a system-managed property that cannot be set
+  delete template.created_date;
+
   await esClient.indices.putIndexTemplate({
     name: 'logs',
-    ...indexTemplates[0].index_template,
+    ...template,
     _meta: {
       ...indexTemplates[0].index_template._meta,
       package: {
@@ -43,9 +47,13 @@ export async function cleanLogIndexTemplate({ esClient }: { esClient: Client }) 
     name: 'logs',
   });
 
+  const template = indexTemplates[0].index_template;
+  // @ts-expect-error `created_date` is a system-managed property that cannot be set
+  delete template.created_date;
+
   await esClient.indices.putIndexTemplate({
     name: 'logs',
-    ...indexTemplates[0].index_template,
+    ...template,
     _meta: {
       ...indexTemplates[0].index_template._meta,
       package: undefined,

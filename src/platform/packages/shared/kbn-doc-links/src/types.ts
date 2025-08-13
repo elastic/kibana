@@ -308,6 +308,7 @@ export interface DocLinks {
     readonly bidirectionalIntegrations: string;
     readonly thirdPartyLlmProviders: string;
     readonly trustedApps: string;
+    readonly trustedDevices: string;
     readonly elasticAiFeatures: string;
     readonly eventFilters: string;
     readonly eventMerging: string;
