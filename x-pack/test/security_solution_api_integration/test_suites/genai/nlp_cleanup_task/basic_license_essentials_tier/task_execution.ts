@@ -10,7 +10,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { MlGetTrainedModelsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { waitFor } from '../../../../../common/utils/security_solution';
+import { waitFor } from '../../../../config/services/detections_response';
 
 export default ({ getService }: FtrProviderContext): void => {
   const esSupertest = getService('esSupertest');

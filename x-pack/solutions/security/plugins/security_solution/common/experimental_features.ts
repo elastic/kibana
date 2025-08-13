@@ -211,6 +211,11 @@ export const allowedExperimentalValues = Object.freeze({
   bulkEditAlertSuppressionEnabled: true,
 
   /**
+   * Enables the ability to use does not match condition for indicator match rules
+   */
+  doesNotMatchForIndicatorMatchRuleEnabled: false,
+
+  /**
    * Enables the new data ingestion hub
    */
   dataIngestionHubEnabled: false,
@@ -240,6 +245,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Defend Insights feature
    */
   defendInsights: true,
+
+  /**
+   * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
+   */
+  endpointExceptionsMovedUnderManagement: false,
 
   /**
    * Disables flyout history and new preview navigation
@@ -280,7 +290,14 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables advanced mode for Trusted Apps creation and update
    */
-  trustedAppsAdvancedMode: false,
+  trustedAppsAdvancedMode: true,
+
+  /**
+   * Enables Trusted Devices artifact management for device control protections.
+   * Allows users to manage trusted USB and external devices
+   */
+  trustedDevices: false,
+
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
    */

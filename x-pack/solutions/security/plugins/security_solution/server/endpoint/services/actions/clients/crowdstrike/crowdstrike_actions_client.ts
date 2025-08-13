@@ -314,7 +314,8 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   }
 
   protected async validateRequest(
-    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<any, any, any>
   ): Promise<ResponseActionsClientValidateRequestResponse> {
     // TODO:PT support multiple agents
     if (payload.endpoint_ids.length > 1) {
@@ -337,6 +338,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
       ...actionRequest,
       ...this.getMethodOptions(options),
+      parameters: undefined,
       command: 'isolate',
     };
     let actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse> | undefined;
@@ -396,6 +398,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
       ...actionRequest,
       ...this.getMethodOptions(options),
+      parameters: undefined,
       command: 'unisolate',
     };
 

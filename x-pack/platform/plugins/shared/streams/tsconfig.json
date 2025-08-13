@@ -11,9 +11,7 @@
     "public/**/*",
     "types/**/*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core-pricing-common",
@@ -55,5 +53,8 @@
     "@kbn/inference-plugin",
     "@kbn/security-plugin",
     "@kbn/task-manager-plugin",
+    "@kbn/sse-utils",
+    "@kbn/ai-tools",
+    "@kbn/licensing-types"
   ]
 }

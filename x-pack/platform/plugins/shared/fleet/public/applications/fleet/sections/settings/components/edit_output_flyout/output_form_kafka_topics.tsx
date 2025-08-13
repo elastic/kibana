@@ -142,6 +142,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
           data-test-subj={'editOutputFlyout.kafkaTopicsRadioInput'}
           options={kafkaTopicsOptions}
           compressed
+          name="kafkaTopics"
           {...inputs.kafkaTopicsInput.props}
         />
       </EuiFormRow>
