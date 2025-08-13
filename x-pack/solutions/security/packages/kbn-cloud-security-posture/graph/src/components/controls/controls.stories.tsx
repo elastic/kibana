@@ -42,7 +42,8 @@ export default {
     },
     nodeIdsToCenter: {
       control: { type: 'object' },
-      description: 'Array of starting node IDs (nodes with no predecessors) for centering',
+      description:
+        'Array of origin node IDs (nodes that have hasOriginEvents=true) the graph must center to',
     },
   },
   decorators: [GlobalStylesStorybookDecorator],
@@ -53,14 +54,6 @@ export const Controls: StoryObj<ControlsProps> = {
     showZoom: true,
     showFitView: true,
     nodeIdsToCenter: ['node1', 'node2'],
-    fitViewOptions: { duration: 200 },
-  },
-};
-
-export const ControlsWithoutStartingNodes: StoryObj<ControlsProps> = {
-  args: {
-    showZoom: true,
-    showFitView: true,
     fitViewOptions: { duration: 200 },
   },
 };
