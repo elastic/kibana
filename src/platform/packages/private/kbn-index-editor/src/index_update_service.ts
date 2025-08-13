@@ -51,7 +51,7 @@ const DOCS_PER_FETCH = 1000;
 const MAX_COLUMN_PLACEHOLDERS = 4;
 
 interface DocUpdate {
-  id?: string;
+  id: string;
   value: Record<string, any>;
 }
 
@@ -616,9 +616,16 @@ export class IndexUpdateService {
   }
 
   private buildPlaceholderRow(): DataTableRecord {
-    return buildDataTableRecord({
-      _id: `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`,
-    });
+    const docId = `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`;
+    return {
+      id: docId,
+      raw: {
+        _id: docId,
+      },
+      flattened: {
+        _id: docId,
+      },
+    };
   }
 
   public refresh() {
@@ -653,7 +660,8 @@ export class IndexUpdateService {
   }
 
   public addEmptyRow() {
-    this._rows$.next([this.buildPlaceholderRow(), ...this._rows$.getValue()]);
+    const placeholder = this.buildPlaceholderRow();
+    this._rows$.next([placeholder, ...this._rows$.getValue()]);
   }
 
   /* Partial doc update */
@@ -683,9 +691,18 @@ export class IndexUpdateService {
    * @param updates
    */
   public bulkUpdate(updates: BulkUpdateOperations): Promise<BulkResponse> {
-    // First split updates into index and delete operations
-    const indexActions = updates.filter(isDocUpdate);
+    const deletingDocIds: string[] = updates
+      .filter(isDocDelete)
+      .map((v) => v.payload.ids)
+      .flat();
+    const deletingDocIdsSet = new Set(deletingDocIds);
 
+    // Filter out deleted docs
+    const indexActions = updates
+      .filter(isDocUpdate)
+      .filter((action) => !deletingDocIdsSet.has(action.payload.id));
+
+    // First split updates into index and delete operations
     const groupedOperations = groupBy(
       indexActions.map((v) => v.payload),
       (update) =>
@@ -709,19 +726,20 @@ export class IndexUpdateService {
       return [{ index: {} }, doc];
     });
 
-    const deleteOperations = updates
-      .filter(isDocDelete)
-      .map((v) => v.payload.ids)
-      .flat()
-      .map((id) => {
-        return [{ delete: { _id: id } }];
-      });
-
     const operations: BulkRequest['operations'] = [
       ...updateOperations,
       ...newDocOperations,
-      ...deleteOperations,
+      ...deletingDocIds
+        .filter((v) => !v.startsWith(ROW_PLACEHOLDER_PREFIX))
+        .map((id) => {
+          return [{ delete: { _id: id } }];
+        }),
     ];
+
+    if (!operations.length) {
+      // northing to send
+      throw new Error('empty operations');
+    }
 
     const body = JSON.stringify({
       operations: operations.flat(),
