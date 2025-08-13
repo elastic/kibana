@@ -23,7 +23,7 @@ export function AddToCaseComment({ comment, onCommentChange }: AddToCaseCommentP
       onChange={(e) => {
         onCommentChange(e.target.value);
       }}
-      value={comment || ''}
+      value={comment}
       fullWidth
       rows={5}
     />
