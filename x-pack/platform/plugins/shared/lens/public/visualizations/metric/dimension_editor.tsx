@@ -597,12 +597,14 @@ function SecondaryMetricEditor({
               label: i18n.translate('xpack.lens.metric.secondaryMetric.colorMode.static', {
                 defaultMessage: 'Static',
               }),
+              'data-test-subj': 'lnsMetric_color_mode_static',
             },
             {
               id: `${idPrefix}dynamic`,
               label: i18n.translate('xpack.lens.metric.secondaryMetric.colorMode.dynamic', {
                 defaultMessage: 'Dynamic',
               }),
+              'data-test-subj': 'lnsMetric_color_mode_dynamic',
               isDisabled: !isNumericType,
               toolTipContent: isNumericType
                 ? undefined
@@ -736,6 +738,7 @@ function PrimaryMetricEditor(props: SubProps) {
                   defaultMessage: 'Static',
                 }),
                 value: 'static',
+                'data-test-subj': 'lnsMetric_color_mode_static',
               },
               {
                 id: `${idPrefix}dynamic`,
@@ -743,6 +746,7 @@ function PrimaryMetricEditor(props: SubProps) {
                   defaultMessage: 'Dynamic',
                 }),
                 value: 'dynamic',
+                'data-test-subj': 'lnsMetric_color_mode_dynamic',
               },
             ]}
             idSelected={`${idPrefix}${colorByValue}`}
@@ -988,6 +992,7 @@ export function DimensionEditorAdditionalSection({
                   defaultMessage: 'Panel',
                 }),
                 value: 'panel',
+                'data-test-subj': 'lnsMetric_supporting_visualization_panel',
               },
               {
                 id: `${buttonIdPrefix}trendline`,
@@ -996,6 +1001,7 @@ export function DimensionEditorAdditionalSection({
                 }),
                 isDisabled: !supportsTrendline,
                 value: 'trendline',
+                'data-test-subj': 'lnsMetric_supporting_visualization_trendline',
               },
               {
                 id: `${buttonIdPrefix}bar`,
@@ -1004,6 +1010,7 @@ export function DimensionEditorAdditionalSection({
                 }),
                 isDisabled: !state.maxAccessor,
                 value: 'bar',
+                'data-test-subj': 'lnsMetric_supporting_visualization_bar',
               },
             ]}
             idSelected={`${buttonIdPrefix}${selectedSupportingVisualization}`}
