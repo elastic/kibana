@@ -19,6 +19,7 @@ import {
   EnterConditionBranchNode,
   ExitConditionBranchNode,
   AtomicGraphNode,
+  WaitGraphNode,
   WorkflowYaml,
 } from '@kbn/workflows';
 import { omit } from 'lodash';
@@ -46,7 +47,7 @@ function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep
 }
 
 export function visitWaitStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
-  const waitNode = {
+  const waitNode: WaitGraphNode = {
     id: getNodeId(currentStep),
     type: 'wait',
     configuration: {
