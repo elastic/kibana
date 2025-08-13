@@ -16,14 +16,12 @@ import { SvlDataUsagePageProvider } from '@kbn/test-suites-xpack-platform/server
 import { SvlCustomRolesPageProvider } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects/svl_custom_roles_page';
 import { SvlRuleDetailsPageProvider } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects/svl_rule_details_ui_page';
 import { SvlTriggersActionsPageProvider } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects/svl_triggers_actions_ui_page';
-import { SvlObltOverviewPageProvider } from './svl_oblt_overview_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
 
   svlCommonPage: SvlCommonPageProvider,
   svlCommonNavigation: SvlCommonNavigationProvider,
-  svlObltOverviewPage: SvlObltOverviewPageProvider,
   svlTriggersActionsUI: SvlTriggersActionsPageProvider,
   svlRuleDetailsUI: SvlRuleDetailsPageProvider,
   svlManagementPage: SvlManagementPageProvider,
