@@ -52,8 +52,11 @@ export const ConversationListItem: FunctionComponent<Props> = ({
     [conversation.id, onConversationSelected]
   );
 
-  const iconColor = useMemo(
-    () => (conversation.isConversationOwner ? 'accent' : 'default'),
+  const { iconColor, iconTitle } = useMemo(
+    () =>
+      conversation.isConversationOwner
+        ? { iconColor: 'accent', iconTitle: i18n.SHARED_BY_YOU }
+        : { iconColor: 'default', iconTitle: i18n.SHARED_WITH_YOU },
     [conversation.isConversationOwner]
   );
 
@@ -71,12 +74,16 @@ export const ConversationListItem: FunctionComponent<Props> = ({
         onClick: () => handleDuplicateConversation(conversation),
         icon: 'copy',
       },
-      {
-        key: 'delete',
-        children: i18n.DELETE_CONVERSATION,
-        onClick: () => setDeleteConversationItem(conversation),
-        icon: 'trash',
-      },
+      ...(conversation.isConversationOwner
+        ? [
+            {
+              key: 'delete',
+              children: i18n.DELETE_CONVERSATION,
+              onClick: () => setDeleteConversationItem(conversation),
+              icon: 'trash',
+            },
+          ]
+        : []),
     ],
     [handleCopyUrl, handleDuplicateConversation, setDeleteConversationItem, conversation]
   );
@@ -98,6 +105,7 @@ export const ConversationListItem: FunctionComponent<Props> = ({
           iconType={conversation.users.length !== 1 ? 'users' : undefined}
           iconProps={{
             size: 's',
+            title: iconTitle,
             css: css`
               margin-inline-start: 12px;
               margin-inline-end: 0px;

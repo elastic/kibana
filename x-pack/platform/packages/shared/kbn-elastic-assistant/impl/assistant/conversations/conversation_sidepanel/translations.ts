@@ -21,6 +21,19 @@ export const DELETE_CONVERSATION = i18n.translate(
   }
 );
 
+export const SHARED_BY_YOU = i18n.translate(
+  'xpack.elasticAssistant.assistant.sidePanel.sharedByYou',
+  {
+    defaultMessage: 'Shared by you',
+  }
+);
+
+export const SHARED_WITH_YOU = i18n.translate(
+  'xpack.elasticAssistant.assistant.sidePanel.sharedWithYou',
+  {
+    defaultMessage: 'Shared with you',
+  }
+);
 export const NEW_CHAT = i18n.translate(
   'xpack.elasticAssistant.assistant.conversations.sidePanel.newChatButtonLabel',
   {
