@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { EsqlToolDefinition } from '@kbn/onechat-common';
+import { ToolDefinition } from '@kbn/onechat-common';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import { useExecuteTool } from '../../../hooks/tools/use_execute_tools';
@@ -29,15 +29,14 @@ import type { ExecuteToolResponse } from '../../../../../common/http_api/tools';
 interface OnechatTestToolFlyoutProps {
   isOpen: boolean;
   isLoading?: boolean;
-  tool?: EsqlToolDefinition;
+  tool?: ToolDefinition;
   onClose: () => void;
 }
 
-const getParameters = (tool: EsqlToolDefinition | undefined) => {
+const getParameters = (tool: ToolDefinition | undefined) => {
   if (!tool) return [];
 
   const fields: Array<{ name: string; label: string; value: string; type: string }> = [];
-
   if (tool.configuration && tool.configuration.params) {
     const params = tool.configuration.params as Record<string, any>;
     Object.entries(params).forEach(([paramName, paramConfig]) => {
@@ -67,7 +66,7 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyoutProps> = ({
       setResponse(JSON.stringify(data, null, 2));
     },
     onError: (error: Error) => {
-      setResponse(JSON.stringify({ error: 'Failed to execute tool' }, null, 2));
+      setResponse(JSON.stringify({ error: error.message }, null, 2));
     },
   });
 
@@ -83,7 +82,6 @@ export const OnechatTestFlyout: React.FC<OnechatTestToolFlyoutProps> = ({
     if (!tool?.id) return;
 
     const toolParams: Record<string, any> = {};
-    
     getParameters(tool).forEach((field) => {
       if (formData[field.name]) {
         let value = formData[field.name];

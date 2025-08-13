@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EsqlToolDefinition, EsqlToolDefinitionWithSchema, EsqlToolParam, ToolType } from '@kbn/onechat-common';
+import { EsqlToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { transformEsqlToolToFormData } from '../../../utils/transform_esql_form_data';
@@ -106,6 +106,7 @@ export const OnechatEsqlToolFlyout: React.FC<OnechatEsqlToolFlyoutProps> = ({
   const { errors, isSubmitSuccessful } = formState;
   const { euiTheme } = useEuiTheme();
   const [showTestFlyout, setShowTestFlyout] = useState(false);
+  const [testToolData, setTestToolData] = useState<OnechatEsqlToolFormData>(getDefaultValues());
 
   useEffect(() => {
     reset(tool ? transformEsqlToolToFormData(tool) : getDefaultValues());
@@ -135,10 +136,6 @@ export const OnechatEsqlToolFlyout: React.FC<OnechatEsqlToolFlyoutProps> = ({
     onClose();
   }, [reset, onClose, getValues]);
 
-  if (!isOpen) {
-    return null;
-  }
-
   const saveButton = (
     <EuiButton
       type="submit"
@@ -154,28 +151,60 @@ export const OnechatEsqlToolFlyout: React.FC<OnechatEsqlToolFlyoutProps> = ({
     </EuiButton>
   );
 
+  const saveAndTestButton = (
+    <EuiButton
+      fill
+      onClick={async () => {
+        await saveTool(getValues());
+        setTestToolData(form.getValues());
+        setShowTestFlyout(true);
+        onClose();
+      }}
+      disabled={Object.keys(errors).length > 0 || isSubmitting}
+      isLoading={isSubmitting}
+    >
+      {i18n.translate('xpack.onechat.tools.esqlToolFlyout.saveButtonLabel', {
+        defaultMessage: 'Save and Test',
+      })}
+    </EuiButton>
+  );
+
+  if (showTestFlyout) {
+    const testTool = testToolData
+      ? {
+          id: testToolData.name,
+          type: ToolType.esql,
+          description: testToolData.description,
+          tags: testToolData.tags,
+          configuration: {
+            query: testToolData.esql,
+            params: Object.fromEntries(
+              testToolData.params.map((param) => [
+                param.name,
+                { type: param.type, description: param.description },
+              ])
+            ),
+          },
+        }
+      : tool;
+    return (
+      <FormProvider {...form}>
+        <OnechatTestFlyout
+          isOpen={showTestFlyout}
+          isLoading={isLoading}
+          tool={testTool}
+          onClose={() => setShowTestFlyout(false)}
+        />
+      </FormProvider>
+    );
+  }
+
+  if (!isOpen) {
+    return null;
+  }
+
   return (
     <FormProvider {...form}>
-      <OnechatTestFlyout
-        isOpen={showTestFlyout}
-        isLoading={isLoading}
-        tool={{
-          id: form.getValues().name,
-          type: ToolType.esql,
-          description: form.getValues().description,
-          tags: form.getValues().tags,
-          configuration: {
-            query: form.getValues().esql,
-            params: Object.fromEntries(
-              form.getValues().params.map((param) => [
-                param.name,
-                {type: param.type, description: param.description}
-              ])
-            )
-          }
-        }}
-        onClose={() => setShowTestFlyout(false)}
-      />
       <EuiFlyout
         onClose={handleCloseFlyout}
         aria-labelledby={esqlToolFlyoutTitleId}
@@ -196,13 +225,6 @@ export const OnechatEsqlToolFlyout: React.FC<OnechatEsqlToolFlyoutProps> = ({
                       })}
                 </h2>
               </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ marginRight: '20px' }}>
-              <EuiButton size="s" onClick={() => setShowTestFlyout(true)}>
-                {i18n.translate('xpack.onechat.tools.esqlToolFlyout.testButtonLabel', {
-                  defaultMessage: 'Test',
-                })}
-              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
@@ -235,7 +257,10 @@ export const OnechatEsqlToolFlyout: React.FC<OnechatEsqlToolFlyoutProps> = ({
                   {saveButton}
                 </EuiToolTip>
               ) : (
-                saveButton
+                <EuiFlexGroup>
+                  <EuiFlexItem>{saveButton}</EuiFlexItem>
+                  <EuiFlexItem>{saveAndTestButton}</EuiFlexItem>
+                </EuiFlexGroup>
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
