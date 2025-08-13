@@ -123,9 +123,6 @@ export function isInputAllowedForDeploymentMode(
     return registryInput.deployment_modes.includes(deploymentMode);
   }
 
-  // For backward compatibility, if deployment_modes is not specified:
-  // - For agentless mode, check the blocklist
-  // - For default mode, allow all inputs
   if (deploymentMode === 'agentless') {
     const policyTemplate = packageInfo?.policy_templates?.find(
       ({ name }) => name === input.policy_template
