@@ -214,7 +214,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
       // login page to re-authenticate, or fail if redirect isn't possible.
       if (err instanceof InvalidGrantError) {
         if (canStartNewSession(request)) {
-          this.logger.warn('Clearing session since both access and refresh tokens are expired.');
+          this.logger.warn('Clearing session since refresh token is expired.');
 
           // Set state to `null` to let `Authenticator` know that we want to clear current session.
           return AuthenticationResult.redirectTo(this.getLoginPageURL(request), { state: null });
