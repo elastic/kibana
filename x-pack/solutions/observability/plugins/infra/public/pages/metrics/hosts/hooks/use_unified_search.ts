@@ -12,6 +12,8 @@ import { Subscription, map, tap } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
+import { useInfraMLCapabilitiesContext } from '../../../../containers/ml/infra_ml_capabilities';
+import type { HostsViewQuerySubmittedParams } from '../../../../services/telemetry';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useReloadRequestTimeContext } from '../../../../hooks/use_reload_request_time';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
@@ -28,15 +30,28 @@ import { retrieveFieldsFromFilter } from '../../../../utils/filters/build';
 const buildQuerySubmittedPayload = (
   hostState: HostsState & { parsedDateRange: StringDateRangeTimestamp }
 ) => {
-  const { panelFilters, filters, parsedDateRange, query: queryObj, limit } = hostState;
+  const {
+    panelFilters,
+    filters,
+    parsedDateRange,
+    query: queryObj,
+    limit,
+    preferredSchema,
+  } = hostState;
 
-  return {
+  const payload: HostsViewQuerySubmittedParams = {
     control_filter_fields: retrieveFieldsFromFilter(panelFilters),
     filter_fields: retrieveFieldsFromFilter(filters),
     interval: telemetryTimeRangeFormatter(parsedDateRange.to - parsedDateRange.from),
     with_query: !!queryObj.query,
     limit,
   };
+
+  if (preferredSchema) {
+    payload.preferred_schema = preferredSchema;
+  }
+
+  return payload;
 };
 
 export const useUnifiedSearch = () => {
@@ -44,6 +59,7 @@ export const useUnifiedSearch = () => {
   const [searchCriteria, setSearch] = useHostsUrlState();
   const { metricsView } = useMetricsDataViewContext();
   const { updateReloadRequestTime } = useReloadRequestTimeContext();
+  const { updateTopbarMenuVisibilityBySchema } = useInfraMLCapabilitiesContext();
   const { services } = useKibanaContextForPlugin();
   const kibanaQuerySettings = useKibanaQuerySettings();
 
@@ -94,6 +110,16 @@ export const useUnifiedSearch = () => {
     [setSearch, updateReloadRequestTime]
   );
 
+  const onPreferredSchemaChange = useCallback(
+    (preferredSchema: HostsState['preferredSchema']) => {
+      setSearch({ type: 'SET_PREFERRED_SCHEMA', preferredSchema });
+
+      updateTopbarMenuVisibilityBySchema(preferredSchema);
+      updateReloadRequestTime();
+    },
+    [setSearch, updateReloadRequestTime, updateTopbarMenuVisibilityBySchema]
+  );
+
   const onDateRangeChange = useCallback(
     (dateRange: StringDateRange) => {
       setSearch({ type: 'SET_DATE_RANGE', dateRange });
@@ -130,20 +156,30 @@ export const useUnifiedSearch = () => {
     return { from, to };
   }, [parsedDateRange]);
 
-  const buildQuery = useCallback(() => {
-    return buildEsQuery(
+  const buildQuery = useCallback(
+    (
+      options: { includeControls?: boolean } = {
+        includeControls: true,
+      }
+    ) => {
+      return buildEsQuery(
+        metricsView?.dataViewReference,
+        searchCriteria.query,
+        [
+          ...searchCriteria.filters,
+          ...(options?.includeControls ? searchCriteria.panelFilters : []),
+        ],
+        kibanaQuerySettings
+      );
+    },
+    [
       metricsView?.dataViewReference,
       searchCriteria.query,
-      [...searchCriteria.filters, ...searchCriteria.panelFilters],
-      kibanaQuerySettings
-    );
-  }, [
-    metricsView?.dataViewReference,
-    searchCriteria.query,
-    searchCriteria.filters,
-    searchCriteria.panelFilters,
-    kibanaQuerySettings,
-  ]);
+      searchCriteria.filters,
+      searchCriteria.panelFilters,
+      kibanaQuerySettings,
+    ]
+  );
 
   useEffectOnce(() => {
     // Sync filtersService from the URL state
@@ -154,6 +190,8 @@ export const useUnifiedSearch = () => {
     if (!deepEqual(queryStringService.getQuery(), searchCriteria.query)) {
       queryStringService.setQuery(searchCriteria.query);
     }
+
+    updateTopbarMenuVisibilityBySchema(searchCriteria.preferredSchema);
 
     try {
       // Validates the "query" object from the URL state
@@ -167,6 +205,9 @@ export const useUnifiedSearch = () => {
 
   useEffect(() => {
     const subscription = new Subscription();
+
+    queryStringService.clearQuery();
+
     subscription.add(
       filterManagerService
         .getUpdates$()
@@ -227,6 +268,7 @@ export const useUnifiedSearch = () => {
     onDateRangeChange,
     onLimitChange,
     onPanelFiltersChange,
+    onPreferredSchemaChange,
   };
 };
 

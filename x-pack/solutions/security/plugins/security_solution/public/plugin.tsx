@@ -192,12 +192,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }
       ),
       icon: 'sparkles',
-      path: '/app/management/kibana/securityAiAssistantManagement',
+      path: '/app/management/ai/securityAiAssistantManagement',
       showOnHomePage: false,
       category: 'admin',
     });
 
-    management?.sections.section.kibana.registerApp({
+    management?.sections.section.ai.registerApp({
       id: 'securityAiAssistantManagement',
       title: ASSISTANT_MANAGEMENT_TITLE,
       hideFromSidebar: true,
@@ -227,7 +227,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) &&
           !productFeatureKeys?.has(ProductFeatureSecurityKey.configurations) &&
           license?.hasAtLeast('enterprise');
-        const assistantManagementApp = management?.sections.section.kibana.getApp(
+        const assistantManagementApp = management?.sections.section.ai.getApp(
           'securityAiAssistantManagement'
         );
 
@@ -310,6 +310,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         entityAnalytics: new subPluginClasses.EntityAnalytics(),
         siemMigrations: new subPluginClasses.SiemMigrations(),
         configurations: new subPluginClasses.Configurations(),
+        reports: new subPluginClasses.Reports(),
       };
     }
     return this._subPlugins;
@@ -344,6 +345,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         !this.experimentalFeatures.siemMigrationsDisabled
       ),
       configurations: subPlugins.configurations.start(),
+      reports: subPlugins.reports.start(),
     };
   }
 

@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
     });
 
     it('should navigate back correctly from to surrounding and single views', async () => {
@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // navigate to context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const [, surrDocs] = await dataGrid.getRowActions({ rowIndex: 0 });
+      const [, surrDocs] = await dataGrid.getRowActions();
       await surrDocs.click();
       await context.waitUntilContextLoadingHasFinished();
 
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // navigate to single doc view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const [singleView] = await dataGrid.getRowActions({ rowIndex: 0 });
+      const [singleView] = await dataGrid.getRowActions();
       await singleView.click();
       await header.waitUntilLoadingHasFinished();
 
@@ -199,7 +199,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should open saved search by navigation to context from embeddable', async () => {
       // navigate to context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const [, surrDocs] = await dataGrid.getRowActions({ rowIndex: 0 });
+      const [, surrDocs] = await dataGrid.getRowActions();
       await surrDocs.click();
 
       // close popup

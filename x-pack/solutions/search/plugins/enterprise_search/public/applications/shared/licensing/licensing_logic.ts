@@ -8,7 +8,7 @@
 import { kea, MakeLogicType } from 'kea';
 import { Observable, Subscription } from 'rxjs';
 
-import { ILicense } from '@kbn/licensing-plugin/public';
+import { ILicense } from '@kbn/licensing-types';
 
 import {
   hasEnterpriseLicense,
@@ -41,14 +41,12 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
     license: [
       null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setLicense: (_, license) => license,
       },
     ],
     licenseSubscription: [
       null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setLicenseSubscription: (_, licenseSubscription) => licenseSubscription,
       },
     ],

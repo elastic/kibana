@@ -58,7 +58,7 @@ export function asTrees(streams: Streams.all.Definition[]) {
         name: stream.name,
         children: [],
         stream,
-        type: Streams.UnwiredStream.Definition.is(stream)
+        type: Streams.ClassicStream.Definition.is(stream)
           ? 'classic'
           : isRootStreamDefinition(stream)
           ? 'root'

@@ -14,9 +14,11 @@ import {
   EVENT_FILTERS_LABELS,
   HOST_ISOLATION_EXCEPTIONS_LABELS,
   TRUSTED_APPS_LABELS,
+  TRUSTED_DEVICES_LABELS,
 } from '../translations';
 import { useCanAccessSomeArtifacts } from '../../hooks/use_can_access_some_artifacts';
 import { BlocklistsApiClient } from '../../../../../blocklist/services';
+import { TrustedDevicesApiClient } from '../../../../../trusted_devices/service/api_client';
 import { HostIsolationExceptionsApiClient } from '../../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { EventFiltersApiClient } from '../../../../../event_filters/service/api_client';
 import { TrustedAppsApiClient } from '../../../../../trusted_apps/service';
@@ -28,7 +30,9 @@ import {
   getPolicyEventFiltersPath,
   getPolicyHostIsolationExceptionsPath,
   getPolicyTrustedAppsPath,
+  getPolicyTrustedDevicesPath,
   getTrustedAppsListPath,
+  getTrustedDevicesListPath,
 } from '../../../../../../common/routing';
 import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../../../trusted_apps/constants';
 import type { FleetIntegrationArtifactCardProps } from './fleet_integration_artifacts_card';
@@ -36,7 +40,10 @@ import { FleetIntegrationArtifactsCard } from './fleet_integration_artifacts_car
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../../../event_filters/constants';
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../../../blocklist/constants';
+import { SEARCHABLE_FIELDS as TRUSTED_DEVICES_SEARCHABLE_FIELDS } from '../../../../../trusted_devices/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
 import { useHttp } from '../../../../../../../common/lib/kibana';
+import { useLicense } from '../../../../../../../common/hooks/use_license';
 
 interface PolicyArtifactCardProps {
   policyId: string;
@@ -71,6 +78,36 @@ const TrustedAppsPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
   );
 });
 TrustedAppsPolicyCard.displayName = 'TrustedAppsPolicyCard';
+
+const TrustedDevicesPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
+  const http = useHttp();
+  const trustedDevicesApiClientInstance = useMemo(
+    () => TrustedDevicesApiClient.getInstance(http),
+    [http]
+  );
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
+
+  const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
+    useCallback(() => {
+      if (canReadPolicyManagement) {
+        return getPolicyTrustedDevicesPath(policyId);
+      }
+
+      return getTrustedDevicesListPath({ includedPolicies: `${policyId},global` });
+    }, [canReadPolicyManagement, policyId]);
+
+  return (
+    <FleetIntegrationArtifactsCard
+      policyId={policyId}
+      artifactApiClientInstance={trustedDevicesApiClientInstance}
+      getArtifactsPath={getArtifactPathHandler}
+      searchableFields={TRUSTED_DEVICES_SEARCHABLE_FIELDS}
+      labels={TRUSTED_DEVICES_LABELS}
+      data-test-subj="trustedDevices"
+    />
+  );
+});
+TrustedDevicesPolicyCard.displayName = 'TrustedDevicesPolicyCard';
 
 const EventFiltersPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
   const http = useHttp();
@@ -174,8 +211,13 @@ export const EndpointPolicyArtifactCards = memo<EndpointPolicyArtifactCardsProps
       canReadEventFilters,
       canReadTrustedApplications,
       canReadHostIsolationExceptions,
+      canReadTrustedDevices,
     } = useUserPrivileges().endpointPrivileges;
     const canAccessArtifactContent = useCanAccessSomeArtifacts();
+    const isEnterprise = useLicense().isEnterprise();
+
+    const trustedDevicesVisible =
+      useIsExperimentalFeatureEnabled('trustedDevices') && canReadTrustedDevices && isEnterprise;
 
     if (loading) {
       return <EuiSkeletonText lines={4} />;
@@ -201,6 +243,13 @@ export const EndpointPolicyArtifactCards = memo<EndpointPolicyArtifactCardsProps
           {canReadTrustedApplications && (
             <>
               <TrustedAppsPolicyCard policyId={policyId} />
+              <EuiSpacer size="s" />
+            </>
+          )}
+
+          {trustedDevicesVisible && (
+            <>
+              <TrustedDevicesPolicyCard policyId={policyId} />
               <EuiSpacer size="s" />
             </>
           )}

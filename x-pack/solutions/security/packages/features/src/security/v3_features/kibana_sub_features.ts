@@ -137,6 +137,65 @@ const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
     },
   ],
 });
+
+const trustedDevicesSubFeature = (): SubFeatureConfig => ({
+  requireAllSpaces: true,
+  privilegesTooltip: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.trustedDevices.privilegesTooltip',
+    {
+      defaultMessage: 'All Spaces is required for Trusted Devices access.',
+    }
+  ),
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.trustedDevices',
+    {
+      defaultMessage: 'Trusted Devices',
+    }
+  ),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.trustedDevices.description',
+    {
+      defaultMessage:
+        'Allows management of trusted USB and external devices that bypass device control protections.',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [
+            'lists-all',
+            'lists-read',
+            'lists-summary',
+            `${APP_ID}-writeTrustedDevices`,
+            `${APP_ID}-readTrustedDevices`,
+          ],
+          id: 'trusted_devices_all',
+          includeIn: 'none',
+          name: TRANSLATIONS.all,
+          savedObject: {
+            all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
+            read: [],
+          },
+          ui: ['writeTrustedDevices', 'readTrustedDevices'],
+        },
+        {
+          api: ['lists-read', 'lists-summary', `${APP_ID}-readTrustedDevices`],
+          id: 'trusted_devices_read',
+          includeIn: 'none',
+          name: TRANSLATIONS.read,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['readTrustedDevices'],
+        },
+      ],
+    },
+  ],
+});
+
 const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
@@ -814,6 +873,14 @@ export const getSecurityV3SubFeaturesMap = ({
       SecuritySubFeatureId.trustedApplications,
       enableSpaceAwarenessIfNeeded(trustedApplicationsSubFeature()),
     ],
+    ...((experimentalFeatures.trustedDevices
+      ? [
+          [
+            SecuritySubFeatureId.trustedDevices,
+            enableSpaceAwarenessIfNeeded(trustedDevicesSubFeature()),
+          ],
+        ]
+      : []) as Array<[SecuritySubFeatureId, SubFeatureConfig]>),
     [
       SecuritySubFeatureId.hostIsolationExceptionsBasic,
       enableSpaceAwarenessIfNeeded(hostIsolationExceptionsBasicSubFeature()),

@@ -11,8 +11,10 @@ import type {
   IndexAutocompleteItem,
   InferenceEndpointAutocompleteItem,
   ESQLControlVariable,
+  ESQLSourceResult,
 } from '@kbn/esql-types';
-import { ESQLLicenseType } from '@kbn/esql-types';
+import { LicenseType } from '@kbn/licensing-types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLLocation } from '../types';
 import type { FieldType, SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
@@ -125,7 +127,7 @@ export interface ICommandCallbacks {
   getByType?: GetColumnsByTypeFn;
   getSuggestedUserDefinedColumnName?: (extraFieldNames?: string[] | undefined) => string;
   getColumnsForQuery?: (query: string) => Promise<ESQLFieldWithMetadata[]>;
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
 }
 
 export interface ICommandContext {
@@ -140,6 +142,7 @@ export interface ICommandContext {
   variables?: ESQLControlVariable[];
   supportsControls?: boolean;
   histogramBarTarget?: number;
+  activeProduct?: PricingProduct | undefined;
 }
 
 /**
@@ -224,14 +227,6 @@ export enum Location {
    * In the COMPLETION command
    */
   COMPLETION = 'completion',
-}
-
-export interface ESQLSourceResult {
-  name: string;
-  hidden: boolean;
-  title?: string;
-  dataStreams?: Array<{ name: string; title?: string }>;
-  type?: string;
 }
 
 const commandOptionNameToLocation: Record<string, Location> = {

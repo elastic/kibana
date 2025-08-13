@@ -10,13 +10,15 @@ import { createTestConfig } from '../../../../../config/serverless/config.base';
 
 export default createTestConfig({
   kbnTestServerArgs: [
-    `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`,
     `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
       { product_line: 'security', product_tier: 'complete' },
       { product_line: 'endpoint', product_tier: 'complete' },
       { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
     `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_BEDROCK_ACTION)}`,
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+      'automaticDashboardsMigration',
+    ])}`,
   ],
   testFiles: [require.resolve('..')],
   junit: {

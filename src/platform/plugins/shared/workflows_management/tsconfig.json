@@ -30,8 +30,13 @@
     "@kbn/workflows-execution-engine",
     "@kbn/task-manager-plugin",
     "@kbn/kibana-utils-plugin",
+    "@kbn/core-application-common",
+    "@kbn/security-plugin-types-server",
+    "@kbn/react-kibana-context-render",
+    "@kbn/embeddable-plugin",
+    "@kbn/css-utils",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/alerting-plugin"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

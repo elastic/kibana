@@ -6,7 +6,7 @@
  */
 
 import { isDate } from 'lodash';
-import { LicenseType } from '../../common/types';
+import { LicenseType } from '@kbn/licensing-types';
 
 /** @public */
 export interface FeatureUsageServiceSetup {

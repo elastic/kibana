@@ -39,9 +39,7 @@ async function generateElasticsearchCommandDefinitions(): Promise<void> {
 
         return JSON.parse(fileContent);
       })
-      .filter((command) => {
-        Object.entries(command).filter(([key]) => key !== 'comment');
-      });
+      .map(({ comment, ...rest }) => rest);
   } catch (error) {
     const errorMessage =
       error.code === 'ENOENT'
@@ -64,7 +62,12 @@ async function generateElasticsearchCommandDefinitions(): Promise<void> {
 
   // Populate the metadata object without the comment field
   esCommandDefinitions.forEach((command) => {
-    commandsMetadata[command.name] = command;
+    // Normalize the license field to lowercase, to agree with the licensing types
+    const updatedComand = {
+      ...command,
+      license: command.license?.toLowerCase() as typeof command.license,
+    };
+    commandsMetadata[command.name] = updatedComand;
   });
 
   const outputTsPath = join(outputCommandsDir, 'commands.ts');

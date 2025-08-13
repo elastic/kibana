@@ -21,18 +21,34 @@
     "functions": [
       {
         "parentPluginId": "@kbn/onechat-browser",
-        "id": "def-common.onechat",
+        "id": "def-common.formatOnechatErrorMessage",
         "type": "Function",
         "tags": [],
-        "label": "onechat",
+        "label": "formatOnechatErrorMessage",
         "description": [],
         "signature": [
-          "() => string"
+          "(error: any) => string"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-browser/index.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-browser/base/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-browser",
+            "id": "def-common.formatOnechatErrorMessage.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-browser/base/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }

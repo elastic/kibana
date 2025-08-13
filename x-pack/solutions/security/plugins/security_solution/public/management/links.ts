@@ -26,6 +26,8 @@ import {
   SecurityPageName,
   SECURITY_FEATURE_ID,
   TRUSTED_APPS_PATH,
+  ENDPOINT_EXCEPTIONS_PATH,
+  TRUSTED_DEVICES_PATH,
 } from '../../common/constants';
 import {
   BLOCKLIST,
@@ -36,8 +38,10 @@ import {
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
+  TRUSTED_DEVICES,
   ENTITY_ANALYTICS_RISK_SCORE,
   ENTITY_STORE,
+  ENDPOINT_EXCEPTIONS,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -71,7 +75,9 @@ const categories = [
     linkIds: [
       SecurityPageName.endpoints,
       SecurityPageName.policies,
+      SecurityPageName.endpointExceptions,
       SecurityPageName.trustedApps,
+      SecurityPageName.trustedDevices,
       SecurityPageName.eventFilters,
       SecurityPageName.hostIsolationExceptions,
       SecurityPageName.blocklist,
@@ -125,6 +131,19 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     {
+      id: SecurityPageName.endpointExceptions,
+      title: ENDPOINT_EXCEPTIONS,
+      description: i18n.translate('xpack.securitySolution.appLinks.endpointExceptionsDescription', {
+        defaultMessage: 'Add exceptions to your hosts.',
+      }),
+      landingIcon: IconTool,
+      path: ENDPOINT_EXCEPTIONS_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+
+      experimentalKey: 'endpointExceptionsMovedUnderManagement',
+    },
+    {
       id: SecurityPageName.trustedApps,
       title: TRUSTED_APPLICATIONS,
       description: i18n.translate(
@@ -138,6 +157,21 @@ export const links: LinkItem = {
       path: TRUSTED_APPS_PATH,
       skipUrlState: true,
       hideTimeline: true,
+    },
+    {
+      id: SecurityPageName.trustedDevices,
+      title: TRUSTED_DEVICES,
+      description: i18n.translate('xpack.securitySolution.appLinks.trustedDevicesDescription', {
+        defaultMessage:
+          'Add a trusted device to improve performance or alleviate compatibility issues.',
+      }),
+      landingIcon: IconDashboards,
+      path: TRUSTED_DEVICES_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+      experimentalKey: 'trustedDevices',
+      capabilities: [`${SECURITY_FEATURE_ID}.readTrustedDevices`],
+      licenseType: 'enterprise',
     },
     {
       id: SecurityPageName.eventFilters,
@@ -229,7 +263,9 @@ export const getManagementFilteredLinks = async (
     canAccessHostIsolationExceptions,
     canReadHostIsolationExceptions,
     canReadEndpointList,
+    canReadEndpointExceptions,
     canReadTrustedApplications,
+    canReadTrustedDevices,
     canReadEventFilters,
     canReadBlocklist,
     canReadPolicyManagement,
@@ -255,6 +291,10 @@ export const getManagementFilteredLinks = async (
     linksToExclude.push(SecurityPageName.policies);
   }
 
+  if (!canReadEndpointExceptions) {
+    linksToExclude.push(SecurityPageName.endpointExceptions);
+  }
+
   if (!canReadActionsLogManagement) {
     linksToExclude.push(SecurityPageName.responseActionsHistory);
   }
@@ -265,6 +305,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadTrustedApplications) {
     linksToExclude.push(SecurityPageName.trustedApps);
+  }
+
+  if (!canReadTrustedDevices) {
+    linksToExclude.push(SecurityPageName.trustedDevices);
   }
 
   if (!canReadEventFilters) {

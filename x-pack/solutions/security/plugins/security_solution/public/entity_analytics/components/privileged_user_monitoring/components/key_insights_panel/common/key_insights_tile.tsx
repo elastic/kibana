@@ -6,23 +6,24 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiText, EuiIcon } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexItem, EuiFlexGroup, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
+import { isLeft } from 'fp-ts/Either';
 import { createKeyInsightsPanelLensAttributes } from './lens_attributes';
 import { VisualizationEmbeddable } from '../../../../../../common/components/visualization_actions/visualization_embeddable';
 import { useEsqlGlobalFilterQuery } from '../../../../../../common/hooks/esql/use_esql_global_filter';
 import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
 import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
 import { useVisualizationResponse } from '../../../../../../common/components/visualization_actions/use_visualization_response';
+import type { EsqlQueryOrInvalidFields } from '../../../queries/helpers';
 
-const LENS_VISUALIZATION_HEIGHT = 150;
-const LENS_VISUALIZATION_MIN_WIDTH = 220;
+const LENS_VISUALIZATION_HEIGHT = 140;
 
 interface KeyInsightsTileProps {
   title: string;
   label: string;
-  getEsqlQuery: (namespace: string) => string;
+  getEsqlQuery: (namespace: string) => EsqlQueryOrInvalidFields;
   id: string;
   inspectTitle: ReactElement;
   spaceId?: string;
@@ -43,14 +44,6 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   // Use prop spaceId if provided, otherwise use hook spaceId, fallback to 'default'
   const effectiveSpaceId = propSpaceId || hookSpaceId || 'default';
 
-  const lensAttributes = createKeyInsightsPanelLensAttributes({
-    title,
-    label,
-    esqlQuery: getEsqlQuery(effectiveSpaceId),
-    dataViewId: 'default-dataview',
-    filterQuery,
-  });
-
   const visualizationResponse = useVisualizationResponse({
     visualizationId: id,
   });
@@ -69,15 +62,18 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
     setHasStartedLoading(false);
   }, [timerange.from, timerange.to, filterQuery, effectiveSpaceId]);
 
+  const esqlQuery = getEsqlQuery(effectiveSpaceId);
+
   // Only show error state if:
   // 1. Loading has started at least once (hasStartedLoading)
   // 2. Loading is now complete (loading === false)
   // 3. We have no tables (indicating an error)
   if (
-    hasStartedLoading &&
-    visualizationResponse &&
-    visualizationResponse.loading === false &&
-    !visualizationResponse.tables
+    isLeft(esqlQuery) ||
+    (hasStartedLoading &&
+      visualizationResponse &&
+      visualizationResponse.loading === false &&
+      !visualizationResponse.tables)
   ) {
     return (
       <EuiFlexGroup
@@ -94,21 +90,30 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
         <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="alert" color="warning" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <FormattedMessage
-                  id="xpack.securitySolution.keyInsightsTile.dataNotAvailable"
-                  defaultMessage="Data not available"
-                />
-              </EuiText>
+              <EuiTitle>
+                <h3>
+                  {i18n.translate(
+                    'xpack.securitySolution.privilegedUserMonitoring.keyInsights.NA',
+                    {
+                      defaultMessage: 'N/A',
+                    }
+                  )}
+                </h3>
+              </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
+
+  const lensAttributes = createKeyInsightsPanelLensAttributes({
+    title,
+    label,
+    esqlQuery: esqlQuery.right,
+    dataViewId: 'default-dataview',
+    filterQuery,
+  });
 
   // If we reach here, either still loading or we have a valid response, so show the embeddable
   return (
@@ -118,7 +123,7 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
       lensAttributes={lensAttributes}
       id={id}
       timerange={timerange}
-      width={LENS_VISUALIZATION_MIN_WIDTH}
+      width={'100%'}
       height={LENS_VISUALIZATION_HEIGHT}
       disableOnClickFilter
       inspectTitle={inspectTitle}

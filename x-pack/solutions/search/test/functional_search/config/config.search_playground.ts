@@ -15,6 +15,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'Search Solution Functional Tests - Apps - Search Playground',
     },
+    kbnTestServer: {
+      ...searchFuncationalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...searchFuncationalConfig.get('kbnTestServer.serverArgs'),
+        '--xpack.spaces.defaultSolution=es', // Default to Search Solution
+      ],
+    },
     // load tests in the index file
     testFiles: [require.resolve('../apps/search_playground/index.ts')],
   };
