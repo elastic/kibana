@@ -10,9 +10,10 @@ import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { identity } from 'fp-ts/function';
 import { schema } from '@kbn/config-schema';
-import { throwErrors } from '@kbn/io-ts-utils';
+import { createRouteValidationFunction, throwErrors } from '@kbn/io-ts-utils';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 import { createSearchClient } from '../../lib/create_search_client';
+import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { getProcessList } from '../../lib/host_details/process_list';
 import { getProcessListChart } from '../../lib/host_details/process_list_chart';
 import {
@@ -31,24 +32,26 @@ export const initProcessListRoute = (libs: InfraBackendLibs) => {
       method: 'post',
       path: '/api/metrics/process_list',
       validate: {
-        body: escapeHatch,
+        body: createRouteValidationFunction(ProcessListAPIRequestRT),
       },
     },
-    async (requestContext, request, response) => {
+    async (context, request, response) => {
       const options = pipe(
         ProcessListAPIRequestRT.decode(request.body),
         fold(throwErrors(Boom.badRequest), identity)
       );
 
-      const client = createSearchClient(requestContext, framework);
-      const soClient = (await requestContext.core).savedObjects.client;
+      const infraMetricsClient = await getInfraMetricsClient({  request, libs, context });
+
+      const client = createSearchClient(context, framework);
+      const soClient = (await context.core).savedObjects.client;
 
       const { configuration } = await libs.sources.getSourceConfiguration(
         soClient,
         options.sourceId
       );
 
-      const processListResponse = await getProcessList(client, configuration, options);
+      const processListResponse = await getProcessList(infraMetricsClient,  options);
 
       return response.ok({
         body: ProcessListAPIResponseRT.encode(processListResponse),

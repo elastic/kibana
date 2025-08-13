@@ -16,7 +16,7 @@ import type {
   ProcessListAPIChartResponse,
 } from '../../../common/http_api';
 
-const getProcessListChartECS = async (
+const getEcsProcessListChart = async (
   search: ESSearchClient,
   { hostTerm, indexPattern, to, command }: Omit<ProcessListAPIChartRequest, 'schema'>
 ) => {
@@ -129,7 +129,7 @@ const getProcessListChartECS = async (
   return timeseries as ProcessListAPIChartResponse;
 };
 
-const getProcessListChartSEMCONV = async (
+const getSemConvProcessListChart = async (
   search: ESSearchClient,
   { hostTerm, indexPattern, to, command }: Omit<ProcessListAPIChartRequest, 'schema'>
 ) => {
@@ -255,14 +255,14 @@ export const getProcessListChart = async (
     const detectedSchema = schema || DataSchemaFormatEnum.ECS;
 
     if (detectedSchema === DataSchemaFormatEnum.SEMCONV) {
-      return await getProcessListChartSEMCONV(search, {
+      return await getSemConvProcessListChart(search, {
         hostTerm,
         indexPattern,
         to,
         command,
       });
     } else {
-      return await getProcessListChartECS(search, {
+      return await getEcsProcessListChart(search, {
         hostTerm,
         indexPattern,
         to,

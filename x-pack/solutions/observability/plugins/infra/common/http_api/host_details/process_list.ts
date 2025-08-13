@@ -31,107 +31,6 @@ export const ProcessListAPIRequestRT = rt.type({
   ]),
 });
 
-export const ProcessListAPIQueryAggregationRT = rt.type({
-  summaryEvent: rt.type({
-    summary: rt.type({
-      hits: rt.type({
-        hits: rt.array(
-          rt.type({
-            _source: rt.type({
-              system: rt.type({
-                process: rt.type({
-                  summary: rt.record(rt.string, rt.number),
-                }),
-              }),
-            }),
-          })
-        ),
-      }),
-    }),
-  }),
-  processes: rt.type({
-    filteredProcs: rt.type({
-      buckets: rt.array(
-        rt.type({
-          key: rt.string,
-          cpu: AggValueRT,
-          memory: AggValueRT,
-          startTime: rt.type({
-            value_as_string: rt.string,
-          }),
-          meta: rt.type({
-            hits: rt.type({
-              hits: rt.array(
-                rt.type({
-                  _source: rt.type({
-                    process: rt.type({
-                      pid: rt.number,
-                      command_line: rt.string,
-                    }),
-                    system: rt.type({
-                      process: rt.type({
-                        state: rt.string,
-                      }),
-                    }),
-                    user: rt.type({
-                      name: rt.string,
-                    }),
-                  }),
-                })
-              ),
-            }),
-          }),
-        })
-      ),
-    }),
-  }),
-});
-
-// SEMCONV-specific aggregation type
-export const ProcessListAPIQueryAggregationSEMCONVRT = rt.type({
-  summaryEvent: rt.type({
-    by_status: rt.type({
-      buckets: rt.array(
-        rt.type({
-          key: rt.string,
-          latest_count: rt.type({
-            hits: rt.type({
-              hits: rt.array(
-                rt.type({
-                  fields: rt.record(rt.string, rt.array(rt.union([rt.string, rt.number]))),
-                })
-              ),
-            }),
-          }),
-        })
-      ),
-    }),
-  }),
-  processes: rt.type({
-    filteredProcs: rt.type({
-      buckets: rt.array(
-        rt.type({
-          key: rt.string,
-          cpu: AggValueRT,
-          memory: AggValueRT,
-          startTime: rt.type({
-            value_as_string: rt.string,
-          }),
-          meta: rt.type({
-            hits: rt.type({
-              hits: rt.array(
-                rt.type({
-                  fields: rt.record(rt.string, rt.array(rt.union([rt.string, rt.number]))),
-                })
-              ),
-            }),
-          }),
-        })
-      ),
-    }),
-  }),
-});
-
 // string in case of 'N?A'
 const summaryPropertyRT = rt.union([rt.number, rt.string]);
 
@@ -140,7 +39,7 @@ export const ProcessListAPIResponseRT = rt.type({
     rt.type({
       cpu: rt.union([rt.null, rt.number]),
       memory: rt.union([rt.null, rt.number]),
-      startTime: rt.number,
+      startTime: rt.union([rt.null, rt.number]),
       pid: rt.number,
       state: rt.string,
       user: rt.string,
@@ -160,12 +59,6 @@ export const ProcessListAPIResponseRT = rt.type({
     })
   ),
 });
-
-export type ProcessListAPIQueryAggregation = rt.TypeOf<typeof ProcessListAPIQueryAggregationRT>;
-
-export type ProcessListAPIQueryAggregationSEMCONV = rt.TypeOf<
-  typeof ProcessListAPIQueryAggregationSEMCONVRT
->;
 
 export type ProcessListAPIRequest = rt.TypeOf<typeof ProcessListAPIRequestRT>;
 

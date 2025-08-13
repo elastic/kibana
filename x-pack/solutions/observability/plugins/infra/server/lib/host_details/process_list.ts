@@ -16,14 +16,11 @@ import {
 } from '../../../common/constants';
 import type {
   ProcessListAPIRequest,
-  ProcessListAPIQueryAggregation,
-  ProcessListAPIQueryAggregationSEMCONV,
 } from '../../../common/http_api';
-import type { InfraSourceConfiguration } from '../sources';
+import { InfraMetricsClient } from '../helpers/get_infra_metrics_client';
 
-const getProcessListECS = async (
-  search: ESSearchClient,
-  sourceConfiguration: InfraSourceConfiguration,
+const getEcsProcessList = async (
+  infraMetricsClient: InfraMetricsClient,
   { hostTerm, to, sortBy, searchFilter }: Omit<ProcessListAPIRequest, 'schema'>
 ) => {
   const mandatoryFieldsFilter = MANDATORY_PROCESS_FIELDS_ECS.map((field) => ({
@@ -33,12 +30,13 @@ const getProcessListECS = async (
   }));
 
   const filter = searchFilter ? searchFilter : [{ match_all: {} }];
-  const body = {
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          {
+ const response = await infraMetricsClient.search({
+   track_total_hits: true,
+   size: 0,
+   query: {
+     bool: {
+       filter: [
+         {
             range: {
               [TIMESTAMP_FIELD]: {
                 gte: to - 60 * 1000, // 1 minute
@@ -130,31 +128,25 @@ const getProcessListECS = async (
         },
       },
     },
-  };
-
-  const result = await search<{}, ProcessListAPIQueryAggregation>({
-    body,
-    index: sourceConfiguration.metricAlias,
   });
 
-  const { buckets: processListBuckets } = result.aggregations!.processes.filteredProcs;
+  const { buckets: processListBuckets } = response.aggregations!.processes.filteredProcs;
   const processList = processListBuckets.map((bucket) => {
     const meta = bucket.meta.hits.hits[0]._source;
 
     return {
       cpu: bucket.cpu.value ?? null,
       memory: bucket.memory.value ?? null,
-      startTime: Date.parse(bucket.startTime.value_as_string),
+      startTime: bucket.startTime.value,
       pid: meta.process.pid,
       state: meta.system.process.state,
       user: meta.user.name,
-      command: bucket.key,
+      command: bucket.key as string,
     };
   });
 
-  const summary: { [p: string]: number } = result.aggregations!.summaryEvent.summary.hits.hits
-    .length
-    ? result.aggregations!.summaryEvent.summary.hits.hits[0]._source.system.process.summary
+  const summary: { [p: string]: number } = response.aggregations!.summaryEvent.summary.hits.hits
+    ? response.aggregations!.summaryEvent.summary.hits.hits[0]._source.system.process.summary
     : {};
 
   return {
@@ -163,9 +155,8 @@ const getProcessListECS = async (
   };
 };
 
-const getProcessListSEMCONV = async (
-  search: ESSearchClient,
-  sourceConfiguration: InfraSourceConfiguration,
+const getSemConvProcessList = async (
+  infraMetricsClient: InfraMetricsClient,
   { hostTerm, to, sortBy, searchFilter }: Omit<ProcessListAPIRequest, 'schema'>
 ) => {
   const mandatoryFieldsFilter = MANDATORY_PROCESS_FIELDS_SEMCONV.map((field) => ({
@@ -175,8 +166,9 @@ const getProcessListSEMCONV = async (
   }));
 
   const filter = searchFilter ? searchFilter : [{ match_all: {} }];
-  const body = {
-    size: 0,
+ const response = await infraMetricsClient.search({
+   track_total_hits: true,
+   size: 0,
     query: {
       bool: {
         filter: [
@@ -196,47 +188,6 @@ const getProcessListSEMCONV = async (
       },
     },
     aggs: {
-      summaryEvent: {
-        filter: {
-          bool: {
-            must: [
-              {
-                term: {
-                  'event.dataset': HOST_METRICS_RECEIVER_OTEL,
-                },
-              },
-              {
-                exists: {
-                  field: 'system.processes.count',
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          by_status: {
-            terms: {
-              field: 'attributes.status',
-              size: 20,
-            },
-            aggs: {
-              latest_count: {
-                top_hits: {
-                  size: 1,
-                  sort: [
-                    {
-                      [TIMESTAMP_FIELD]: {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: ['system.processes.count'],
-                },
-              },
-            },
-          },
-        },
-      },
       processes: {
         filter: {
           bool: {
@@ -286,95 +237,39 @@ const getProcessListSEMCONV = async (
         },
       },
     },
-  };
-
-  const result = await search<{}, ProcessListAPIQueryAggregationSEMCONV>({
-    body,
-    index: sourceConfiguration.metricAlias,
   });
 
-  const { buckets: processListBuckets } = result.aggregations!.processes.filteredProcs;
+  const { buckets: processListBuckets } = response.aggregations!.processes.filteredProcs;
   const processList = processListBuckets.map((bucket) => {
     const hit = bucket.meta.hits.hits[0];
     const meta = hit.fields || {};
 
     return {
-      cpu: bucket.cpu.value, // already a ratio (0-1)
-      memory: bucket.memory.value / 100, // convert to ratio (0-1)
-      startTime: Date.parse(bucket.startTime.value_as_string),
+      cpu: bucket.cpu.value,
+      memory: bucket.memory.value !== null ? bucket.memory.value / 100 : null,
+      startTime: bucket.startTime.value,
       pid: meta['process.pid'][0] as number,
       state: '', // Not available in SEMCONV
       user: meta['process.owner'][0] as string,
-      command: bucket.key,
+      command: bucket.key as string,
     };
   });
 
-  const summary: { [p: string]: number } = {};
-
-  if (result.aggregations?.summaryEvent?.by_status?.buckets?.length) {
-    const statusBuckets = result.aggregations.summaryEvent.by_status.buckets;
-
-    const getValue = (fields: Record<string, unknown>, fieldName: string) => {
-      const value = fields[fieldName];
-      return Array.isArray(value) ? value[0] : value;
-    };
-
-    const { total, ...statusCounts } = statusBuckets.reduce(
-      (acc, bucket) => {
-        const status = bucket.key;
-        const latestHit = bucket.latest_count?.hits?.hits?.[0];
-
-        if (latestHit?.fields) {
-          const count = Number(getValue(latestHit.fields, 'system.processes.count')) || 0;
-          acc.total += count;
-
-          // Map SEMCONV status values to UI field names
-          switch (status) {
-            case 'running':
-              acc.running = count;
-              break;
-            case 'sleeping':
-              acc.sleeping = count;
-              break;
-            case 'stopped':
-              acc.stopped = count;
-              break;
-            case 'idle':
-              acc.idle = count;
-              break;
-            case 'zombies': // SEMCONV uses "zombies", UI expects "zombie"
-              acc.zombie = count;
-              break;
-            default: // blocked, daemon, detached, locked, orphan, paging, system, unknown
-              acc.unknown = (acc.unknown || 0) + count;
-              break;
-          }
-        }
-
-        return acc;
-      },
-      { total: 0 } as { total: number; [key: string]: number }
-    );
-
-    Object.assign(summary, { total, ...statusCounts });
-  }
-
   return {
     processList,
-    summary,
+    summary: {},
   };
 };
 
 export const getProcessList = async (
-  search: ESSearchClient,
-  sourceConfiguration: InfraSourceConfiguration,
+  infraMetricsClient: InfraMetricsClient,
   { hostTerm, to, sortBy, searchFilter, schema, sourceId }: ProcessListAPIRequest
 ) => {
   try {
     const detectedSchema = schema || DataSchemaFormatEnum.ECS;
 
     if (detectedSchema === DataSchemaFormatEnum.SEMCONV) {
-      return await getProcessListSEMCONV(search, sourceConfiguration, {
+      return await getSemConvProcessList(infraMetricsClient, {
         hostTerm,
         to,
         sortBy,
@@ -382,7 +277,7 @@ export const getProcessList = async (
         sourceId,
       });
     } else {
-      return await getProcessListECS(search, sourceConfiguration, {
+      return await getEcsProcessList(infraMetricsClient, {
         hostTerm,
         to,
         sortBy,
