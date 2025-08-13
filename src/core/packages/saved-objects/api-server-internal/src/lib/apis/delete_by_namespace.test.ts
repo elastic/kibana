@@ -144,7 +144,7 @@ describe('#deleteByNamespace', () => {
       });
     });
 
-    describe.only('search dsl', () => {
+    describe('search dsl', () => {
       it(`constructs a query using all multi-namespace types, and another using all single-namespace types`, async () => {
         await deleteByNamespaceSuccess(namespace);
         const allTypes = registry.getAllTypes().map((type) => type.name);
