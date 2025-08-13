@@ -31,6 +31,9 @@ export const registerLookupIndexRoutes = (
           reason: 'This route delegates authorization to the scoped ES client',
         },
       },
+      options: {
+        description: 'Updates an index with bulk operations',
+      },
     },
     async (requestHandlerContext, request, response) => {
       try {
@@ -67,6 +70,9 @@ export const registerLookupIndexRoutes = (
           enabled: false,
           reason: 'This route delegates authorization to the scoped ES client',
         },
+      },
+      options: {
+        description: 'Creates an index with lookup mode',
       },
     },
     async (requestHandlerContext, request, response) => {
