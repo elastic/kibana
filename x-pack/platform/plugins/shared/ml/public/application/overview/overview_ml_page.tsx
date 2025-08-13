@@ -146,6 +146,7 @@ export const OverviewPage: FC = () => {
   return (
     <>
       <MlPageHeader
+        restrictWidth={1200}
         rightSideItems={[
           <EuiImage
             alt={i18n.translate('xpack.ml.overview.welcomeBanner.header.imageAlt', {

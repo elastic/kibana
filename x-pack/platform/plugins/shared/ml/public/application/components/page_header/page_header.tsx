@@ -15,8 +15,9 @@ export const MlPageHeader: FC<
   PropsWithChildren<{
     leftSideItems?: ReactNode | ReactNode[];
     rightSideItems?: ReactNode | ReactNode[];
+    restrictWidth?: boolean | number;
   }>
-> = ({ children, leftSideItems, rightSideItems }) => {
+> = ({ children, leftSideItems, rightSideItems, restrictWidth }) => {
   const {
     headerPortal,
     leftHeaderPortal,
@@ -24,19 +25,22 @@ export const MlPageHeader: FC<
     setIsHeaderMounted,
     setIsLeftSectionMounted,
     setIsRightSectionMounted,
+    setHeaderRestrictWidth,
   } = useContext(MlPageControlsContext);
 
   useEffect(() => {
     setIsHeaderMounted(true);
     setIsLeftSectionMounted(!!leftSideItems);
     setIsRightSectionMounted(!!rightSideItems);
+    setHeaderRestrictWidth(restrictWidth);
     return () => {
       setIsHeaderMounted(false);
       setIsLeftSectionMounted(false);
       setIsRightSectionMounted(false);
+      setHeaderRestrictWidth(undefined);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [leftSideItems, rightSideItems]);
+  }, [leftSideItems, rightSideItems, restrictWidth]);
 
   return (
     <>
