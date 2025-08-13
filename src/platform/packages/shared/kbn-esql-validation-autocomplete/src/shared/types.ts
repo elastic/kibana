@@ -16,7 +16,6 @@ import type {
   InferenceEndpointsAutocompleteResult,
   ESQLLicenseResult,
   ESQLSourceResult,
-  CachedFunctionOptions,
 } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
@@ -50,9 +49,9 @@ export interface ESQLCallbacks {
   getFieldsMetadata?: Promise<PartialFieldsMetadataClient>;
   getVariables?: () => ESQLControlVariable[] | undefined;
   canSuggestVariables?: () => boolean;
-  getJoinIndices?: (
-    cacheOptions?: CachedFunctionOptions
-  ) => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getJoinIndices?: (cacheOptions?: {
+    forceRefresh?: boolean;
+  }) => Promise<{ indices: IndexAutocompleteItem[] }>;
   getTimeseriesIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   getEditorExtensions?: (queryString: string) => Promise<{
     recommendedQueries: RecommendedQuery[];

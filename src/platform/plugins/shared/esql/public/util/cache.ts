@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CachedFunctionOptions } from '@kbn/esql-types';
-
 /**
  * Given a non-parametrized async function, returns a function which caches the
  * result of that function. When a cached value is available, it returns
@@ -32,7 +30,7 @@ export const cacheNonParametrizedAsyncFunction = <T>(
   let lastCallTime = 0;
   let value: Promise<T> | undefined;
 
-  return ({ forceRefresh = false }: CachedFunctionOptions = {}) => {
+  return ({ forceRefresh = false }: { forceRefresh?: boolean } = {}) => {
     const time = now();
 
     if (forceRefresh || time - lastCallTime > maxCacheDuration) {
