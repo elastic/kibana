@@ -99,6 +99,55 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.enrichDocument",
+        "type": "Function",
+        "tags": [],
+        "label": "enrichDocument",
+        "description": [
+          "\nEnriches a DocumentEntry with a content reference."
+        ],
+        "signature": [
+          "(contentReferencesStore: ",
+          {
+            "pluginId": "@kbn/elastic-assistant-common",
+            "scope": "common",
+            "docId": "kibKbnElasticAssistantCommonPluginApi",
+            "section": "def-common.ContentReferencesStore",
+            "text": "ContentReferencesStore"
+          },
+          ") => (document: { source: string; id: string; type: \"document\"; namespace: string; text: string; name: string; global: boolean; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string; users: { id?: string | undefined; name?: string | undefined; }[]; kbResource: \"user\" | \"security_labs\"; required?: boolean | undefined; vector?: { modelId: string; tokens: {} & { [k: string]: number; }; } | undefined; }) => { source: string; id: string; type: \"document\"; namespace: string; text: string; name: string; global: boolean; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string; users: { id?: string | undefined; name?: string | undefined; }[]; kbResource: \"user\" | \"security_labs\"; required?: boolean | undefined; vector?: { modelId: string; tokens: {} & { [k: string]: number; }; } | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/content_references/references/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.enrichDocument.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "contentReferencesStore",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/elastic-assistant-common",
+                "scope": "common",
+                "docId": "kibKbnElasticAssistantCommonPluginApi",
+                "section": "def-common.ContentReferencesStore",
+                "text": "ContentReferencesStore"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/content_references/references/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.esqlQueryReference",
         "type": "Function",
         "tags": [],
@@ -1590,6 +1639,46 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.sanitizeMessages",
+        "type": "Function",
+        "tags": [],
+        "label": "sanitizeMessages",
+        "description": [
+          "\nRemoves content references from chat history"
+        ],
+        "signature": [
+          "(messages: ",
+          "BaseMessage",
+          "[]) => ",
+          "BaseMessage",
+          "[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/content_references/references/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.sanitizeMessages.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "messages",
+            "description": [],
+            "signature": [
+              "BaseMessage",
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/content_references/references/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],

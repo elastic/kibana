@@ -107,7 +107,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         showAssistantOverlay?.({ showOverlay: false });
       } else {
         navigateToApp('management', {
-          path: 'kibana/securityAiAssistantManagement',
+          path: 'ai/securityAiAssistantManagement',
         });
       }
     }, [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp, showAssistantOverlay]);
@@ -126,7 +126,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         showAssistantOverlay?.({ showOverlay: false });
       } else {
         navigateToApp('management', {
-          path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
+          path: `ai/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
         });
       }
     }, [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp, showAssistantOverlay]);

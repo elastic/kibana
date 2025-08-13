@@ -254,7 +254,7 @@ export function InterceptDisplayManager({
                     <EuiFlexItem>
                       <EuiButtonEmpty
                         size="s"
-                        data-test-subj="productInterceptDismiss"
+                        data-test-subj="productInterceptDismissButton"
                         onClick={dismissProductIntercept}
                         color="text"
                       >
