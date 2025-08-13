@@ -28,7 +28,7 @@ export type FieldConfigValue = string | number | undefined;
 
 export interface FieldConfiguration {
   title: string;
-  formattedValue: React.ReactNode;
+  formatter?: (value: FieldConfigValue) => React.ReactNode;
   description?: string;
 }
 
@@ -105,7 +105,11 @@ export function ContentFrameworkTable({
           name: fieldConfiguration?.title || fieldName,
           ...(fieldDescription && { description: fieldDescription }),
         }),
-        valueCellContent: fieldConfiguration ? <>{fieldConfiguration?.formattedValue}</> : value,
+        valueCellContent: fieldConfiguration?.formatter ? (
+          <>{fieldConfiguration?.formatter(value)}</>
+        ) : (
+          value
+        ),
       };
 
       return acc;

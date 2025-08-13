@@ -67,7 +67,7 @@ export const APMSpan: Story = {
       [SPAN_DURATION]: {
         title: 'Duration',
         description: 'Custom field description',
-        formattedValue: <div>Custom content for the formatted value</div>,
+        formatter: (value) => <div>Custom formatter for: {value}</div>,
       },
     },
   },
@@ -98,7 +98,7 @@ export const APMTransaction: Story = {
       [TRANSACTION_DURATION]: {
         title: 'Duration',
         description: 'Custom field description',
-        formattedValue: <div>Custom content for the formatted value</div>,
+        formatter: (value) => <div>Custom formatter for: {value}</div>,
       },
     },
   },
