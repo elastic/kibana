@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import { UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { produce } from 'immer';
+import { useCallback, useMemo, useState } from 'react';
 import { CreateToolPayload, CreateToolResponse } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
+import { duplicateName } from '../../utils/duplicate_name';
+import { labels } from '../../utils/i18n';
 import { useFlyoutState } from '../use_flyout_state';
 import { useOnechatServices } from '../use_onechat_service';
+import { useToasts } from '../use_toasts';
+import { useOnechatTool } from './use_tools';
 
 type CreateToolMutationOptions = UseMutationOptions<CreateToolResponse, Error, CreateToolPayload>;
 type CreateToolMutationSuccessCallback = NonNullable<CreateToolMutationOptions['onSuccess']>;
@@ -23,50 +28,98 @@ export const useCreateTool = ({
 }: {
   onSuccess?: CreateToolMutationSuccessCallback;
   onError?: CreateToolMutationErrorCallback;
-}) => {
+} = {}) => {
   const queryClient = useQueryClient();
   const { toolsService } = useOnechatServices();
 
-  const { mutateAsync, isLoading } = useMutation<CreateToolResponse, Error, CreateToolPayload>({
+  const { mutate, mutateAsync, isLoading } = useMutation<
+    CreateToolResponse,
+    Error,
+    CreateToolPayload
+  >({
     mutationFn: (tool) => toolsService.create(tool),
     onSuccess,
     onError,
     onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.tools.all }),
   });
 
-  return { createTool: mutateAsync, isLoading };
+  return { createToolSync: mutate, createTool: mutateAsync, isLoading };
 };
-
-export type CreateToolSuccessCallback = (tool: ToolDefinitionWithSchema) => void;
-export type CreateToolErrorCallback = (error: Error) => void;
 
 export const useCreateToolFlyout = ({
   onSuccess,
   onError,
 }: {
-  onSuccess?: CreateToolSuccessCallback;
-  onError?: CreateToolErrorCallback;
-}) => {
+  onSuccess?: CreateToolMutationSuccessCallback;
+  onError?: CreateToolMutationErrorCallback;
+} = {}) => {
+  const { addSuccessToast, addErrorToast } = useToasts();
   const { isOpen, openFlyout, closeFlyout } = useFlyoutState();
+  const [sourceToolId, setSourceToolId] = useState<string | undefined>();
+  const { tool: sourceTool, isLoading: isLoadingSourceTool } = useOnechatTool(sourceToolId);
+
+  const duplicateTool = useMemo(() => {
+    if (!sourceTool) {
+      return;
+    }
+    return produce(sourceTool, (draft) => {
+      draft.id = duplicateName(sourceTool.id);
+    });
+  }, [sourceTool]);
+
+  const handleOpenFlyout = useCallback(
+    (toolId?: string) => {
+      if (toolId) {
+        setSourceToolId(toolId);
+      }
+      openFlyout();
+    },
+    [openFlyout]
+  );
+
+  const handleCloseFlyout = useCallback(() => {
+    setSourceToolId(undefined);
+    closeFlyout();
+  }, [closeFlyout]);
 
   const handleSuccess = useCallback<CreateToolMutationSuccessCallback>(
     (tool) => {
       closeFlyout();
-      onSuccess?.(tool);
+      addSuccessToast({
+        title: labels.tools.createEsqlToolSuccessToast(tool.id),
+      });
     },
-    [closeFlyout, onSuccess]
+    [closeFlyout, addSuccessToast]
   );
 
-  const { createTool, isLoading: isSubmitting } = useCreateTool({
+  const handleError = useCallback<CreateToolMutationErrorCallback>(
+    (error) => {
+      addErrorToast({
+        title: labels.tools.createEsqlToolErrorToast,
+        text: formatOnechatErrorMessage(error),
+      });
+    },
+    [addErrorToast]
+  );
+  const { createTool: createToolMutation, isLoading: isSubmitting } = useCreateTool({
     onSuccess: handleSuccess,
-    onError,
+    onError: handleError,
   });
+
+  const createTool = useCallback(
+    async (tool: CreateToolPayload) => {
+      await createToolMutation(tool, { onSuccess, onError });
+    },
+    [createToolMutation, onSuccess, onError]
+  );
 
   return {
     isOpen,
     isSubmitting,
-    openFlyout,
+    isLoading: !!sourceToolId && isLoadingSourceTool,
+    sourceTool: duplicateTool,
     submit: createTool,
-    closeFlyout,
+    openFlyout: handleOpenFlyout,
+    closeFlyout: handleCloseFlyout,
   };
 };

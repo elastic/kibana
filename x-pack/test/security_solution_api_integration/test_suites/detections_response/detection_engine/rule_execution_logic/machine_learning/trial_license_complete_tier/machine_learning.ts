@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should create 1 alert from ML rule when record meets anomaly_threshold', async () => {
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getAlerts(supertest, log, es, createdRule);
-      expect(alerts.hits.hits.length).toBe(1);
+      expect(alerts.hits.hits).toHaveLength(1);
       const alert = alerts.hits.hits[0];
 
       expect(alert._source).toEqual(
@@ -244,7 +244,7 @@ export default ({ getService }: FtrProviderContext) => {
         rule: { ...rule, anomaly_threshold: 20 },
       });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts.length).toBe(7);
+      expect(previewAlerts).toHaveLength(7);
     });
 
     describe('with non-value list exception', () => {
@@ -268,7 +268,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).toBe(0);
+        expect(previewAlerts).toHaveLength(0);
       });
     });
 
@@ -304,7 +304,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).toBe(0);
+        expect(previewAlerts).toHaveLength(0);
       });
     });
 
@@ -320,7 +320,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('@skipInServerlessMKI should be enriched with host risk score', async () => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts).toHaveLength(1);
         const fullAlert = previewAlerts[0]._source;
 
         expect(fullAlert?.host?.risk?.calculated_level).toBe('Low');

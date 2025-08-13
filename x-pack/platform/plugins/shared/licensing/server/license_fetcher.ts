@@ -18,7 +18,7 @@ import type {
   PublicFeatures,
   LicenseType,
   LicenseStatus,
-} from '../common/types';
+} from '@kbn/licensing-types';
 import { License } from '../common/license';
 import type { ElasticsearchError, LicenseFetcher } from './types';
 

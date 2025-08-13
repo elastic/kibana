@@ -45,7 +45,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
   }
 
   public start(core: CoreStart, plugins: LogsSharedClientStartDeps) {
-    const { http, settings } = core;
+    const { http, settings, theme } = core;
     const {
       charts,
       data,
@@ -72,6 +72,8 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       share,
       dataViews,
       embeddable: plugins.embeddable,
+      mlApi: plugins.ml?.mlApi,
+      theme,
     });
 
     if (!observabilityAIAssistant) {

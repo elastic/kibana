@@ -12,7 +12,7 @@ import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ScopedHistory } from '@kbn/core/public';
-export type { LicenseType, ILicense } from '@kbn/licensing-plugin/public';
+export type { LicenseType, ILicense } from '@kbn/licensing-types';
 
 export interface SetupDependencies {
   management: ManagementSetup;

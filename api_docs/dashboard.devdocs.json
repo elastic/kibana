@@ -1994,11 +1994,11 @@
             "\nUse getContentClient().getForRequest to get a scoped client to perform CRUD and search operations for dashboards using the methods available in the {@link DashboardStorage} class.\n"
           ],
           "signature": [
-            "() => { getForRequest: <T = unknown>({ requestHandlerContext, version, }: { requestHandlerContext: ",
-            "RequestHandlerContext",
-            "; request: ",
+            "() => { getForRequest: <T = unknown>({ request, requestHandlerContext, version, }: { request: ",
             "KibanaRequest",
-            "<unknown, unknown, unknown, any>; version?: number | undefined; }) => ",
+            "<unknown, unknown, unknown, any>; requestHandlerContext: ",
+            "RequestHandlerContext",
+            "; version?: number | undefined; }) => ",
             "IContentClient",
             "<T>; } | undefined"
           ],
