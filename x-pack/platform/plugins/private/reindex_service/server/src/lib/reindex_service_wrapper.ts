@@ -58,15 +58,15 @@ export class ReindexServiceWrapper {
     logger,
     licensing,
     security,
-    version
-  }:{
-    soClient: SavedObjectsClientContract,
-    credentialStore: CredentialStore,
-    clusterClient: IClusterClient,
-    logger: Logger,
-    licensing: LicensingPluginSetup,
-    security: SecurityPluginStart,
-    version: Version
+    version,
+  }: {
+    soClient: SavedObjectsClientContract;
+    credentialStore: CredentialStore;
+    clusterClient: IClusterClient;
+    logger: Logger;
+    licensing: LicensingPluginSetup;
+    security: SecurityPluginStart;
+    version: Version;
   }) {
     this.reindexWorker = ReindexWorker.create(
       soClient,
