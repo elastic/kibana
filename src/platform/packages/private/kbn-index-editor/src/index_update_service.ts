@@ -44,6 +44,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { Builder, BasicPrettyPrinter } from '@kbn/esql-ast';
 import { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
+import { IndexEditorErrors } from './types';
 import { parsePrimitive, isPlaceholderColumn } from './utils';
 import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from './constants';
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
@@ -113,6 +114,9 @@ export class IndexUpdateService {
 
   private readonly _isFetching$ = new BehaviorSubject<boolean>(false);
   public readonly isFetching$: Observable<boolean> = this._isFetching$.asObservable();
+
+  private readonly _error$ = new BehaviorSubject<IndexEditorErrors | null>(null);
+  public readonly error$: Observable<IndexEditorErrors | null> = this._error$.asObservable();
 
   private readonly _exitAttemptWithUnsavedFields$ = new BehaviorSubject<boolean>(false);
   public readonly exitAttemptWithUnsavedFields$ =
@@ -412,9 +416,8 @@ export class IndexUpdateService {
 
             // TODO handle index docs
           },
-          error: (err) => {
-            // TODO handle API errors
-
+          error: () => {
+            this._error$.next(IndexEditorErrors.GENERIC_SAVING_ERROR);
             this._isSaving$.next(false);
           },
         })
