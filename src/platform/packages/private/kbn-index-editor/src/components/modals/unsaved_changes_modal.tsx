@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import { EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import React from 'react';
+import { EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import { useGeneratedHtmlId } from '@elastic/eui';
 import { KibanaContextExtra } from '../../types';
-import { isPlaceholderColumn } from '../../utils';
 
 export interface UnsavedChangesModal {
   onClose: () => void;
@@ -24,16 +24,11 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
     services: { indexUpdateService },
   } = useKibana<KibanaContextExtra>();
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const exitAttemptWithUnsavedFields = useObservable(
     indexUpdateService.exitAttemptWithUnsavedFields$,
     false
-  );
-
-  const pendingColumnsToBeSaved = useObservable(indexUpdateService.pendingColumnsToBeSaved$, []);
-
-  const columnsWithoutPlaceholders = useMemo(
-    () => pendingColumnsToBeSaved.filter((column) => !isPlaceholderColumn(column.name)),
-    [pendingColumnsToBeSaved]
   );
 
   const closeWithoutSaving = () => {
@@ -51,10 +46,12 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       title={
         <FormattedMessage
           id="indexEditor.warningModal.title"
-          defaultMessage="You have unsaved columns"
+          defaultMessage="You have unsaved changes"
         />
       }
       onCancel={continueEditing}
@@ -67,19 +64,8 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
       }
     >
       <FormattedMessage
-        id="indexEditor.warningModal.body_1"
-        defaultMessage="You need at least one value set on each new column for it to be saved:"
-      />
-      <EuiSpacer size="s" />
-      <ul>
-        {columnsWithoutPlaceholders.map((column) => (
-          <li key={column.name}>{column.name}</li>
-        ))}
-      </ul>
-      <EuiSpacer size="s" />
-      <FormattedMessage
         id="indexEditor.warningModal.body_2"
-        defaultMessage="Are you sure you want to leave?"
+        defaultMessage="Are you sure you want to leave without saving?"
       />
     </EuiConfirmModal>
   );

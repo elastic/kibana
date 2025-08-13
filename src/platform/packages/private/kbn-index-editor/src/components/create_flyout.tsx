@@ -12,9 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { FC } from 'react';
 import React, { Suspense, lazy } from 'react';
-import { distinctUntilChanged, firstValueFrom, from, skip, takeUntil } from 'rxjs';
+import { distinctUntilChanged, from, skip, takeUntil } from 'rxjs';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
-import { isPlaceholderColumn } from '../utils';
 
 export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentContext) {
   const {
@@ -40,19 +39,7 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
   });
 
   const onFlyoutClose = async () => {
-    if (indexUpdateService.isIndexCreated()) {
-      indexUpdateService.discardUnsavedChanges();
-    }
-
-    const pendingColumnsToBeSaved = await firstValueFrom(
-      indexUpdateService.pendingColumnsToBeSaved$
-    );
-
-    const unsavedColumnsWithoutPlaceholders = pendingColumnsToBeSaved.filter(
-      (column) => !isPlaceholderColumn(column.name)
-    );
-
-    if (unsavedColumnsWithoutPlaceholders.length) {
+    if (true) {
       deps.indexUpdateService.setExitAttemptWithUnsavedFields(true);
       return;
     }
