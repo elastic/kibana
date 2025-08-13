@@ -18,7 +18,7 @@ export function cli() {
 
           --port              Port on which Kibana is running. Falls back to 5603 & 5601.
           --pid               Process ID to hook into it. Takes precedence over \`port\`.
-          --timeout           Run commands until timeout (in milliseconds)
+          --t, --timeout      Run commands until timeout (in milliseconds)
           --c, --connections  Number of commands that can be run in parallel.
           --a, --amount       Amount of times the command should be run
           --heap              Collect a heap snapshot
