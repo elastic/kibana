@@ -31,13 +31,29 @@ export default {
 
 const mock = new NoDataViewsPromptStorybookMock();
 
-export const CreateDataView = {
+export const CanCreateDataView = {
   render: (params: NoDataViewsPromptStorybookParams) => {
     return (
       <NoDataViewsPromptProvider {...mock.getServices(params)}>
         <Component {...mock.getProps()} />
       </NoDataViewsPromptProvider>
     );
+  },
+
+  argTypes: mock.getArgumentTypes(),
+};
+
+export const CannotCreateDataView = {
+  render: (params: NoDataViewsPromptStorybookParams) => {
+    return (
+      <NoDataViewsPromptProvider {...mock.getServices(params)}>
+        <Component {...mock.getProps()} />
+      </NoDataViewsPromptProvider>
+    );
+  },
+
+  args: {
+    canCreateNewDataView: true, // Enable data view creation button
   },
 
   argTypes: mock.getArgumentTypes(),

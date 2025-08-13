@@ -18,7 +18,6 @@
     "@kbn/shared-ux-page-no-data",
     "@kbn/shared-ux-page-no-data-config-types",
     "@kbn/shared-ux-page-no-data-config-mocks",
-    "@kbn/test-jest-helpers",
   ],
   "exclude": [
     "target/**/*",
