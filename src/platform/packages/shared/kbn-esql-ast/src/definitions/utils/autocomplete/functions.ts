@@ -6,9 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { LicenseType } from '@kbn/licensing-types';
 
 import { uniq } from 'lodash';
-import { ESQLLicenseType } from '@kbn/esql-types';
 import { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import {
   isAssignment,
@@ -142,7 +142,7 @@ export async function getFunctionArgsSuggestions(
   fullText: string,
   offset: number,
   context?: ICommandContext,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean
 ): Promise<ISuggestionItem[]> {
   const astContext = findAstPosition(commands, offset);
   const node = astContext.node;
@@ -444,7 +444,7 @@ async function getListArgsSuggestions(
   getFieldsByType: GetColumnsByTypeFn,
   fieldsMap: Map<string, ESQLFieldWithMetadata>,
   offset: number,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean,
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
   activeProduct?: PricingProduct
 ) {
   const suggestions = [];

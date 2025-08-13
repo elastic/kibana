@@ -63,11 +63,7 @@ export function QualitiesSelector({
 
   const renderOption = (quality: QualityItem) => (
     <EuiText size="s">
-      <QualityIndicator
-        quality={quality.label}
-        description={capitalize(quality.label)}
-        isColoredDescription
-      />
+      <QualityIndicator quality={quality.label} description={capitalize(quality.label)} />
     </EuiText>
   );
 
