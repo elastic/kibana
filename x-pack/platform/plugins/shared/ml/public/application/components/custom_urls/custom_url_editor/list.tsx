@@ -6,7 +6,7 @@
  */
 
 import type { FC, ChangeEvent } from 'react';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import {
   EuiButtonIcon,
@@ -17,6 +17,9 @@ import {
   EuiToolTip,
   EuiTextArea,
   EuiSpacer,
+  useEuiTheme,
+  EuiPanel,
+  EuiFormLabel,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -30,6 +33,7 @@ import {
 import { parseUrlState } from '@kbn/ml-url-state';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
+import { css } from '@emotion/react';
 import { useMlApi, useMlKibana } from '../../../contexts/kibana';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
@@ -73,9 +77,31 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
       data: { dataViews },
     },
   } = useMlKibana();
+  const { euiTheme } = useEuiTheme();
   const mlApi = useMlApi();
   const { displayErrorToast } = useToastNotificationService();
   const [expandedUrlIndex, setExpandedUrlIndex] = useState<number | null>(null);
+
+  const labelFieldStyle = useMemo(
+    () => css`
+      min-width: calc(${euiTheme.size.xl} * 3);
+    `,
+    [euiTheme.size.xl]
+  );
+
+  const urlFieldStyle = useMemo(
+    () => css`
+      min-width: calc(${euiTheme.size.xxxxl} * 4);
+    `,
+    [euiTheme.size.xxxxl]
+  );
+
+  const actionButtonsStyle = useMemo(
+    () => css`
+      max-width: calc(${euiTheme.size.xl} * 3);
+    `,
+    [euiTheme.size.xl]
+  );
 
   const onLabelChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
     if (index < customUrls.length) {
@@ -212,134 +238,154 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
 
     return (
       <React.Fragment key={`url_${index}`}>
-        <EuiFlexGroup data-test-subj={`mlJobEditCustomUrlItem_${index}`}>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.ml.customUrlEditorList.labelLabel"
-                  defaultMessage="Label"
-                />
-              }
-              isInvalid={isInvalidLabel}
-              error={invalidLabelError}
-              data-test-subj="mlJobEditCustomUrlItemLabel"
-            >
-              <EuiFieldText
-                value={label}
-                isInvalid={isInvalidLabel}
-                onChange={(e) => onLabelChange(e, index)}
-                data-test-subj={`mlJobEditCustomUrlLabelInput_${index}`}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              fullWidth={true}
-              label={
-                <FormattedMessage id="xpack.ml.customUrlEditorList.urlLabel" defaultMessage="URL" />
-              }
-            >
-              {index === expandedUrlIndex ? (
-                <EuiTextArea
-                  inputRef={(input: HTMLTextAreaElement | null) => {
-                    if (input) {
-                      input.focus();
-                    }
-                  }}
-                  fullWidth={true}
-                  value={customUrl.url_value}
-                  onChange={(e) => onUrlValueChange(e, index)}
-                  onBlur={() => {
-                    setExpandedUrlIndex(null);
-                  }}
-                  data-test-subj={`mlJobEditCustomUrlTextarea_${index}`}
-                />
-              ) : (
-                <EuiFieldText
-                  fullWidth={true}
-                  value={customUrl.url_value}
-                  readOnly={true}
-                  onFocus={() => setExpandedUrlIndex(index)}
-                  data-test-subj={`mlJobEditCustomUrlInput_${index}`}
-                />
-              )}
-            </EuiFormRow>
-          </EuiFlexItem>
-          {isCustomTimeRange === false ? (
+        <EuiPanel data-test-subj={`mlJobEditCustomUrlItem_${index}`}>
+          <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
+              <EuiFormLabel>Custom URL {index + 1}</EuiFormLabel>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} gutterSize="m" css={actionButtonsStyle}>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
+                        defaultMessage="Test custom URL"
+                      />
+                    }
+                  >
+                    <EuiButtonIcon
+                      size="s"
+                      color="primary"
+                      onClick={() => onTestButtonClick(index)}
+                      iconType="popout"
+                      aria-label={i18n.translate(
+                        'xpack.ml.customUrlEditorList.testCustomUrlAriaLabel',
+                        {
+                          defaultMessage: 'Test custom URL',
+                        }
+                      )}
+                      data-test-subj="mlJobEditTestCustomUrlButton"
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow>
+                    <EuiToolTip
+                      content={
+                        <FormattedMessage
+                          id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
+                          defaultMessage="Delete custom URL"
+                        />
+                      }
+                    >
+                      <EuiButtonIcon
+                        size="s"
+                        color="danger"
+                        onClick={() => onDeleteButtonClick(index)}
+                        iconType="trash"
+                        aria-label={i18n.translate(
+                          'xpack.ml.customUrlEditorList.deleteCustomUrlAriaLabel',
+                          {
+                            defaultMessage: 'Delete custom URL',
+                          }
+                        )}
+                        data-test-subj={`mlJobEditDeleteCustomUrlButton_${index}`}
+                      />
+                    </EuiToolTip>
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup wrap gutterSize="s">
+            <EuiFlexItem css={labelFieldStyle} grow={2}>
               <EuiFormRow
+                fullWidth={true}
                 label={
                   <FormattedMessage
-                    id="xpack.ml.customUrlEditorList.timeRangeLabel"
-                    defaultMessage="Time range"
+                    id="xpack.ml.customUrlEditorList.labelLabel"
+                    defaultMessage="Label"
                   />
                 }
-                error={invalidIntervalError}
-                isInvalid={isInvalidTimeRange}
+                isInvalid={isInvalidLabel}
+                error={invalidLabelError}
+                data-test-subj="mlJobEditCustomUrlItemLabel"
               >
                 <EuiFieldText
-                  value={(customUrl as MlKibanaUrlConfig).time_range || ''}
-                  isInvalid={isInvalidTimeRange}
-                  placeholder={TIME_RANGE_TYPE.AUTO}
-                  onChange={(e) => onTimeRangeChange(e, index)}
+                  key={`label-field-${index}`}
+                  fullWidth={true}
+                  value={label}
+                  isInvalid={isInvalidLabel}
+                  onChange={(e) => onLabelChange(e, index)}
+                  data-test-subj={`mlJobEditCustomUrlLabelInput_${index}`}
                 />
               </EuiFormRow>
             </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem grow={false}>
-            <EuiFormRow hasEmptyLabelSpace>
-              <EuiToolTip
-                content={
+            {isCustomTimeRange === false ? (
+              <EuiFlexItem css={labelFieldStyle} grow={2}>
+                <EuiFormRow
+                  fullWidth={true}
+                  label={
+                    <FormattedMessage
+                      id="xpack.ml.customUrlEditorList.timeRangeLabel"
+                      defaultMessage="Time range"
+                    />
+                  }
+                  error={invalidIntervalError}
+                  isInvalid={isInvalidTimeRange}
+                >
+                  <EuiFieldText
+                    fullWidth={true}
+                    value={(customUrl as MlKibanaUrlConfig).time_range || ''}
+                    isInvalid={isInvalidTimeRange}
+                    placeholder={TIME_RANGE_TYPE.AUTO}
+                    onChange={(e) => onTimeRangeChange(e, index)}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem css={urlFieldStyle} grow={6}>
+              <EuiFormRow
+                fullWidth={true}
+                label={
                   <FormattedMessage
-                    id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
-                    defaultMessage="Test custom URL"
+                    id="xpack.ml.customUrlEditorList.urlLabel"
+                    defaultMessage="URL"
                   />
                 }
               >
-                <EuiButtonIcon
-                  size="s"
-                  color="primary"
-                  onClick={() => onTestButtonClick(index)}
-                  iconType="popout"
-                  aria-label={i18n.translate(
-                    'xpack.ml.customUrlEditorList.testCustomUrlAriaLabel',
-                    {
-                      defaultMessage: 'Test custom URL',
-                    }
-                  )}
-                  data-test-subj="mlJobEditTestCustomUrlButton"
-                />
-              </EuiToolTip>
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow hasEmptyLabelSpace>
-              <EuiToolTip
-                content={
-                  <FormattedMessage
-                    id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
-                    defaultMessage="Delete custom URL"
+                {index === expandedUrlIndex ? (
+                  <EuiTextArea
+                    key={`url-textarea-${index}`}
+                    inputRef={(input: HTMLTextAreaElement | null) => {
+                      if (input) {
+                        input.focus();
+                      }
+                    }}
+                    fullWidth={true}
+                    value={customUrl.url_value}
+                    onChange={(e) => onUrlValueChange(e, index)}
+                    onBlur={() => {
+                      setExpandedUrlIndex(null);
+                    }}
+                    data-test-subj={`mlJobEditCustomUrlTextarea_${index}`}
                   />
-                }
-              >
-                <EuiButtonIcon
-                  size="s"
-                  color="danger"
-                  onClick={() => onDeleteButtonClick(index)}
-                  iconType="trash"
-                  aria-label={i18n.translate(
-                    'xpack.ml.customUrlEditorList.deleteCustomUrlAriaLabel',
-                    {
-                      defaultMessage: 'Delete custom URL',
-                    }
-                  )}
-                  data-test-subj={`mlJobEditDeleteCustomUrlButton_${index}`}
-                />
-              </EuiToolTip>
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                ) : (
+                  <EuiFieldText
+                    key={`url-field-${index}`}
+                    fullWidth={true}
+                    value={customUrl.url_value}
+                    readOnly={true}
+                    onFocus={() => setExpandedUrlIndex(index)}
+                    data-test-subj={`mlJobEditCustomUrlInput_${index}`}
+                  />
+                )}
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
         <EuiSpacer size="m" />
       </React.Fragment>
     );
