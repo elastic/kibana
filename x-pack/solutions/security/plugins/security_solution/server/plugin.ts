@@ -117,6 +117,7 @@ import {
   ENDPOINT_SEARCH_STRATEGY,
 } from '../common/endpoint/constants';
 
+import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
 import { registerEntityStoreFieldRetentionEnrichTask } from './lib/entity_analytics/entity_store/tasks';
@@ -138,7 +139,6 @@ import {
   CASE_ATTACHMENT_TYPE_ID,
   THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
 } from '../common/threat_intelligence/constants';
-import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_diagnostic_service';
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 
@@ -291,7 +291,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       getStartServices: core.getStartServices,
       taskManager: plugins.taskManager,
       logger: this.logger,
-      auditLogger: plugins.security?.audit.withoutRequest,
       telemetry: core.analytics,
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,

@@ -39,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await ui.auth.login('editor');
       await PageObjects.common.navigateToUrlWithBrowserHistory(
         'management',
-        '/kibana/observabilityAiAssistantManagement'
+        '/ai/observabilityAiAssistantManagement'
       );
     });
 

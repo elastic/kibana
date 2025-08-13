@@ -27,7 +27,7 @@ export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   catalogue: [APP_ID],
   minimumLicense: 'enterprise',
   management: {
-    kibana: ['securityAiAssistantManagement'],
+    ai: ['securityAiAssistantManagement'],
   },
   privileges: {
     all: {
@@ -40,7 +40,7 @@ export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
       },
       ui: [],
       management: {
-        kibana: ['securityAiAssistantManagement'],
+        ai: ['securityAiAssistantManagement'],
       },
     },
     read: {

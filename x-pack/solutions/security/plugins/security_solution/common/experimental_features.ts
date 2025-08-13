@@ -285,7 +285,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables advanced mode for Trusted Apps creation and update
    */
-  trustedAppsAdvancedMode: false,
+  trustedAppsAdvancedMode: true,
 
   /**
    * Enables Trusted Devices artifact management for device control protections.
