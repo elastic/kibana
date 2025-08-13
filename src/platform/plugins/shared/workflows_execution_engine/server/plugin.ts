@@ -34,6 +34,7 @@ import { WorkflowExecutionRepository } from './repositories/workflow_execution_r
 import { StepFactory } from './step/step_factory';
 import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
 import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
+import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -91,53 +92,70 @@ export class WorkflowsExecutionEnginePlugin
         await plugins.actions.getUnsecuredActionsClient()
       );
 
+      const workflowLogger = new WorkflowEventLogger(
+        this.esClient,
+        this.logger,
+        WORKFLOWS_EXECUTION_LOGS_INDEX,
+        {
+          workflowId: workflow.id,
+          workflowName: workflow.name,
+          executionId: workflowRunId,
+        },
+        {
+          enableConsoleLogging: this.config.logging.console,
+        }
+      );
+
       // Create workflow runtime first (simpler, fewer dependencies)
       const workflowRuntime = new WorkflowExecutionRuntimeManager({
         workflowExecution: workflowExecution as EsWorkflowExecution,
         workflowExecutionRepository,
         stepExecutionRepository,
         workflowExecutionGraph,
+        workflowLogger,
       });
 
       const contextManager = new WorkflowContextManager({
         workflowRunId,
-        workflow: workflow as any,
+        workflow: workflow.definition,
         event: context.event,
         logger: this.logger,
         workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,
         esClient: this.esClient,
-        enableConsoleLogging: this.config.logging.console,
         workflowExecutionGraph,
         workflowExecutionRuntime: workflowRuntime,
       });
 
-      // Set the logger reference using a clean setter method
-      workflowRuntime.setLogger(contextManager);
-
       // Log workflow execution start
-      await contextManager.logWorkflowStart();
-
       await workflowRuntime.start();
 
-      try {
-        do {
-          const currentNode = workflowRuntime.getCurrentStep();
+      do {
+        const currentNode = workflowRuntime.getCurrentStep();
 
-          const step = new StepFactory().create(
-            currentNode as any,
-            contextManager,
-            connectorExecutor,
-            workflowRuntime
-          );
+        const step = new StepFactory().create(
+          currentNode as any,
+          contextManager,
+          connectorExecutor,
+          workflowRuntime,
+          workflowLogger
+        );
 
+        try {
           await step.run();
-        } while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING);
-
-        contextManager.logWorkflowComplete(true);
-      } catch (error) {
-        await workflowRuntime.fail(error);
-        contextManager.logWorkflowComplete(false);
-      }
+        } catch (error) {
+          // If an unhandled error occurs in a step, the workflow execution is terminated
+          workflowLogger.logError(
+            `Error executing step ${currentNode.id} (${currentNode.name}): ${error.message}`
+          );
+          await workflowRuntime.setStepResult(currentNode.id, {
+            output: null,
+            error: String(error),
+          });
+          await workflowRuntime.finishStep(currentNode.id);
+          await workflowRuntime.fail(error);
+          break;
+        }
+      } while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING);
     };
 
     return {

@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { isEqual, memoize } from 'lodash';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
+import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import useObservable from 'react-use/lib/useObservable';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { CoreStart } from '@kbn/core/public';
@@ -30,7 +31,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
 import React, { ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
@@ -127,17 +128,8 @@ const ESQLEditorInternal = function ESQLEditor({
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
-  const {
-    dataViews,
-    expressions,
-    indexManagementApiService,
-    application,
-    core,
-    fieldsMetadata,
-    uiSettings,
-    uiActions,
-    data,
-  } = kibana.services;
+  const { dataViews, expressions, application, core, fieldsMetadata, uiSettings, uiActions, data } =
+    kibana.services;
 
   const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
 
@@ -510,12 +502,15 @@ const ESQLEditorInternal = function ESQLEditor({
         return [];
       },
       getPolicies: async () => {
-        const { data: policies, error } =
-          (await indexManagementApiService?.getAllEnrichPolicies()) || {};
-        if (error || !policies) {
+        try {
+          const policies = (await core.http.get(
+            `/internal/index_management/enrich_policies`
+          )) as SerializedEnrichPolicy[];
+
+          return policies.map(({ type, query: policyQuery, ...rest }) => rest);
+        } catch (error) {
           return [];
         }
-        return policies.map(({ type, query: policyQuery, ...rest }) => rest);
       },
       getPreferences: async () => {
         return {
@@ -555,7 +550,8 @@ const ESQLEditorInternal = function ESQLEditor({
         }
 
         return {
-          hasAtLeast: ls.hasAtLeast.bind(ls), // keep the original context this
+          ...ls,
+          hasAtLeast: ls.hasAtLeast.bind(ls),
         };
       },
       getActiveProduct: () => core.pricing.getActiveProduct(),
@@ -576,7 +572,6 @@ const ESQLEditorInternal = function ESQLEditor({
     abortController,
     variablesService?.esqlVariables,
     variablesService?.areSuggestionsEnabled,
-    indexManagementApiService,
     histogramBarTarget,
     activeSolutionId,
   ]);

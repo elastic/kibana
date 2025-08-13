@@ -261,6 +261,7 @@ const AwsCredentialTypeSelector = ({
     options={[...AWS_CREDENTIALS_OPTIONS]}
     idSelected={type}
     onChange={(id) => onChange(id as AwsCredentialsType)}
+    name="awsCredentialType"
   />
 );
 
