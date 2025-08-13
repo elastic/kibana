@@ -64,7 +64,7 @@ describe('mergeQuery', () => {
         id: 'foo',
         type: 'query',
         value: {
-          resolution: 'system',
+          source: 'system',
           current: { id: 'foo', title: 'foo updated user', kql: { query: 'message: hello' } },
           incoming: {
             id: 'foo',
@@ -91,7 +91,7 @@ describe('mergeQuery', () => {
         id: 'foo',
         type: 'query',
         value: {
-          resolution: 'system',
+          source: 'system',
           current: undefined,
           incoming: {
             id: 'foo',
@@ -131,7 +131,7 @@ describe('mergeQuery', () => {
         id: 'foo',
         type: 'query',
         value: {
-          resolution: 'system',
+          source: 'system',
           current: { id: 'foo', title: 'foo', kql: { query: 'message: hello' } },
           incoming: { id: 'foo', title: 'foo updated', kql: { query: 'message: hello' } },
         },
@@ -140,7 +140,12 @@ describe('mergeQuery', () => {
   ];
 
   it.each(cases)('$name', ({ base, existing, incoming, expectedValue, expectedConflict }) => {
-    const result = mergeQuery(base, existing, incoming);
+    const result = mergeQuery({
+      base,
+      existing,
+      incoming,
+      resolver: (existing) => ({ source: 'system', value: existing }),
+    });
     expect(result).toEqual({ value: expectedValue, conflict: expectedConflict });
   });
 });
