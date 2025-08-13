@@ -621,7 +621,7 @@ export const QueryBarTopRow = React.memo(
               isDisabled={isDateRangeInvalid || props.isDisabled}
               isLoading={props.isLoading}
               onClick={onClickSubmitButton}
-              size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+              size={shouldShowDatePickerAsBadge() ? 's' : 's'}
               color={props.isDirty ? 'success' : 'primary'}
               fill={false}
               needsUpdate={props.isDirty}
@@ -863,6 +863,10 @@ const inputStringStyles = {
     css({
       '.euiDatePopoverButton-isInvalid': {
         backgroundImage: `linear-gradient(0deg,${euiTheme.colors.danger},${euiTheme.colors.danger} ${euiTheme.size.xxs},#0000 0,#0000)`,
+      },
+
+      '.euiFormControlLayout': {
+        blockSize: euiTheme.size.xl,
       },
     }),
 };
