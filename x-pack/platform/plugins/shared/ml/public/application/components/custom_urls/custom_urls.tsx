@@ -345,9 +345,22 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
     return (
       <>
         <EuiSpacer size="m" />
+        <CustomUrlList
+          job={this.props.job}
+          customUrls={customUrls}
+          onChange={this.props.setCustomUrls}
+          dataViewListItems={this.state.dataViewListItems}
+          isPartialDFAJob={this.props.isPartialDFAJob}
+        />
         {(!editorOpen || editMode === 'modal') && (
           <EuiButton
             size="s"
+            iconType="plusInCircle"
+            iconSide="left"
+            aria-label={i18n.translate(
+              'xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel',
+              { defaultMessage: 'Add custom URL' }
+            )}
             onClick={this.editNewCustomUrl}
             data-test-subj="mlJobOpenCustomUrlFormButton"
           >
@@ -358,14 +371,6 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
           </EuiButton>
         )}
         {editorOpen && this.renderEditor()}
-        <EuiSpacer size="l" />
-        <CustomUrlList
-          job={this.props.job}
-          customUrls={customUrls}
-          onChange={this.props.setCustomUrls}
-          dataViewListItems={this.state.dataViewListItems}
-          isPartialDFAJob={this.props.isPartialDFAJob}
-        />
       </>
     );
   }
