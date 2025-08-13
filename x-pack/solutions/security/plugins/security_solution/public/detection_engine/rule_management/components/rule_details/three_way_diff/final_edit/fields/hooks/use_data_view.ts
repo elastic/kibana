@@ -30,6 +30,7 @@ export function useDataView(indexPatternsOrDataViewId: UseDataViewParams): UseDa
 
     (async () => {
       if (dataView !== undefined) {
+        setIsLoading(false);
         return;
       }
 
