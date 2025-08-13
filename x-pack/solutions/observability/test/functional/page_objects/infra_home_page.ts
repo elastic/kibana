@@ -287,7 +287,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async noDataPromptExists() {
-      return testSubjects.existOrFail('kbnNoDataPage');
+      return testSubjects.existOrFail('NoDataPage');
     },
 
     async noDataPromptAddDataClick() {
