@@ -131,7 +131,7 @@ export const AwsCredentialsForm = ({
   hasInvalidRequiredVars,
   isValid,
 }: AwsFormProps) => {
-  const { awsPolicyType } = useCloudSetup();
+  const { awsPolicyType, shortName } = useCloudSetup();
   const {
     awsCredentialsType,
     setupFormat,
@@ -154,8 +154,9 @@ export const AwsCredentialsForm = ({
         info={
           <FormattedMessage
             id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContent"
-            defaultMessage="Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+            defaultMessage="Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up and deploy {shortName} for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
             values={{
+              shortName,
               gettingStartedLink: (
                 <EuiLink href={elasticDocLink} target="_blank">
                   <FormattedMessage

@@ -7,12 +7,14 @@
 import React from 'react';
 import { EuiHorizontalRule, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 interface AzureSetupInfoContentProps {
   documentationLink: string;
 }
 
 export const AzureSetupInfoContent = ({ documentationLink }: AzureSetupInfoContentProps) => {
+  const { shortName } = useCloudSetup();
   return (
     <>
       <EuiHorizontalRule margin="xl" />
@@ -28,8 +30,9 @@ export const AzureSetupInfoContent = ({ documentationLink }: AzureSetupInfoConte
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="securitySolutionPackages.azureIntegration.gettingStarted.setupInfoContent"
-          defaultMessage="Utilize an Azure Resource Manager (ARM) template (a built-in Azure IaC tool) or a series of manual steps to set up and deploy CSPM for assessing your Azure environment's security posture. Refer to our {gettingStartedLink} guide for details."
+          defaultMessage="Utilize an Azure Resource Manager (ARM) template (a built-in Azure IaC tool) or a series of manual steps to set up and deploy {shortName} for assessing your Azure environment's security posture. Refer to our {gettingStartedLink} guide for details."
           values={{
+            shortName,
             gettingStartedLink: (
               <EuiLink href={documentationLink} target="_blank">
                 <FormattedMessage
