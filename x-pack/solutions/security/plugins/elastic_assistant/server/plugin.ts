@@ -14,16 +14,13 @@ import type {
 } from '@kbn/core/server';
 
 import type { AssistantFeatures } from '@kbn/elastic-assistant-common';
-import {
-  ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
-  ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
-  ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
-} from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID } from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject, exhaustMap, takeWhile, takeUntil } from 'rxjs';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
-import type { IRuleDataClient, IndexOptions } from '@kbn/rule-registry-plugin/server';
+import type { IndexOptions } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+
 import { events } from './lib/telemetry/event_based_telemetry';
 import type {
   AssistantTool,
@@ -131,58 +128,17 @@ export class ElasticAssistantPlugin
 
     registerRoutes(router, this.logger, this.config);
 
+    this.initializeAttackDiscovery({
+      core,
+      plugins,
+      requestContextFactory,
+    });
+
     // The featureFlags service is not available in the core setup, so we need
     // to wait for the start services to be available to read the feature flags.
     // This can take a while, but the plugin setup phase cannot run for a long time.
     // As a workaround, this promise does not block the setup phase.
-    const featureFlagDefinitions: FeatureFlagDefinition[] = [
-      {
-        featureFlagName: ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
-        fallbackValue: true,
-        fn: (assistantAttackDiscoverySchedulingEnabled) => {
-          if (assistantAttackDiscoverySchedulingEnabled) {
-            // Register Attack Discovery Schedule type
-            plugins.alerting.registerType(
-              getAttackDiscoveryScheduleType({
-                logger: this.logger,
-                publicBaseUrl: core.http.basePath.publicBaseUrl,
-                telemetry: core.analytics,
-              })
-            );
-          }
-          return !assistantAttackDiscoverySchedulingEnabled; // keep subscription active while the feature flag is disabled
-        },
-      },
-      {
-        featureFlagName: ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
-        fallbackValue: true,
-        fn: (attackDiscoveryAlertsEnabled) => {
-          let adhocAttackDiscoveryDataClient: IRuleDataClient | undefined;
-          if (attackDiscoveryAlertsEnabled) {
-            // Initialize index for ad-hoc generated attack discoveries
-            const { ruleDataService } = plugins.ruleRegistry;
-
-            const ruleDataServiceOptions: IndexOptions = {
-              feature: ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
-              registrationContext: ATTACK_DISCOVERY_ALERTS_CONTEXT,
-              dataset: Dataset.alerts,
-              additionalPrefix: '.adhoc',
-              componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
-              componentTemplates: [
-                {
-                  name: 'mappings',
-                  mappings: mappingFromFieldMap(attackDiscoveryAlertFieldMap),
-                },
-              ],
-            };
-            adhocAttackDiscoveryDataClient =
-              ruleDataService.initializeIndex(ruleDataServiceOptions);
-          }
-          requestContextFactory.setup(adhocAttackDiscoveryDataClient);
-          return !attackDiscoveryAlertsEnabled; // keep subscription active while the feature flag is disabled.
-        },
-      },
-    ];
+    const featureFlagDefinitions: FeatureFlagDefinition[] = [];
 
     core
       .getStartServices()
@@ -267,5 +223,45 @@ export class ElasticAssistantPlugin
         )
         .subscribe();
     });
+  }
+
+  /** Initializes Attack Discovery related services and data clients */
+  private initializeAttackDiscovery({
+    core,
+    plugins,
+    requestContextFactory,
+  }: {
+    core: ElasticAssistantPluginCoreSetupDependencies;
+    plugins: ElasticAssistantPluginSetupDependencies;
+    requestContextFactory: RequestContextFactory;
+  }) {
+    // Register Attack Discovery Schedule type
+    plugins.alerting.registerType(
+      getAttackDiscoveryScheduleType({
+        logger: this.logger,
+        publicBaseUrl: core.http.basePath.publicBaseUrl,
+        telemetry: core.analytics,
+      })
+    );
+
+    // Initialize index for ad-hoc generated attack discoveries
+    const { ruleDataService } = plugins.ruleRegistry;
+
+    const ruleDataServiceOptions: IndexOptions = {
+      feature: ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
+      registrationContext: ATTACK_DISCOVERY_ALERTS_CONTEXT,
+      dataset: Dataset.alerts,
+      additionalPrefix: '.adhoc',
+      componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
+      componentTemplates: [
+        {
+          name: 'mappings',
+          mappings: mappingFromFieldMap(attackDiscoveryAlertFieldMap),
+        },
+      ],
+    };
+
+    const adhocAttackDiscoveryDataClient = ruleDataService.initializeIndex(ruleDataServiceOptions);
+    requestContextFactory.setup(adhocAttackDiscoveryDataClient);
   }
 }
