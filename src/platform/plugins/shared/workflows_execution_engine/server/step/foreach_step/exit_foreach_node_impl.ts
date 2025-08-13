@@ -10,24 +10,20 @@
 import { ExitForeachNode } from '@kbn/workflows';
 import { StepImplementation } from '../step_base';
 import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 
 export class ExitForeachNodeImpl implements StepImplementation {
   constructor(
     private step: ExitForeachNode,
-    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
+    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
+    private workflowLogger: IWorkflowEventLogger
   ) {}
 
   public async run(): Promise<void> {
     const foreachState = this.wfExecutionRuntimeManager.getStepState(this.step.startNodeId);
 
     if (!foreachState) {
-      const error = new Error(`Foreach state for step ${this.step.startNodeId} not found`);
-      await this.wfExecutionRuntimeManager.setStepResult(this.step.startNodeId, {
-        output: null,
-        error,
-      });
-      await this.wfExecutionRuntimeManager.finishStep(this.step.startNodeId);
-      return;
+      throw new Error(`Foreach state for step ${this.step.startNodeId} not found`);
     }
 
     if (foreachState.items[foreachState.index + 1]) {
@@ -37,6 +33,9 @@ export class ExitForeachNodeImpl implements StepImplementation {
 
     await this.wfExecutionRuntimeManager.setStepState(this.step.startNodeId, undefined);
     await this.wfExecutionRuntimeManager.finishStep(this.step.startNodeId);
+    this.workflowLogger.logDebug(
+      `Exiting foreach step ${this.step.startNodeId} after processing all items.`
+    );
     this.wfExecutionRuntimeManager.goToNextStep();
   }
 }
