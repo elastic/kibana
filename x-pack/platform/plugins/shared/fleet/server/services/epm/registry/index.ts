@@ -144,7 +144,7 @@ async function _fetchFindLatestPackage(
         }
         return latestPackageFromRegistry;
       } else if (bundledPackage) {
-        logger.debug('getPackage - use bundled package');
+        logger.debug('_fetchFindLatestPackage - use bundled package');
         // falling back on bundled package if exists
         return bundledPackage;
       } else {
@@ -609,6 +609,20 @@ export async function fetchArchiveBuffer({
     return { archiveBuffer, archivePath };
   } catch (error) {
     logger.warn(`fetchArchiveBuffer failed with error: ${error}`);
+    if (error instanceof RegistryConnectionError) {
+      const bundledPackage = await getBundledPackageByName(pkgName);
+      if (bundledPackage) {
+        logger.debug('fetchArchiveBuffer - falling back on bundled package');
+        const buffer = await bundledPackage?.getBuffer();
+        const bundledArchivePath = `${pkgName}-${pkgVersion}.zip`;
+        return {
+          archiveBuffer: buffer,
+          archivePath: bundledArchivePath,
+          verificationResult: undefined,
+        };
+      }
+      throw new PackageNotFoundError(`${pkgName}@${pkgVersion} not found`);
+    }
     throw error;
   }
 }
