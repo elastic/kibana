@@ -38,6 +38,7 @@
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

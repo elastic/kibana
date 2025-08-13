@@ -91,14 +91,9 @@ export default function Header() {
                 >
                   {createAlertText}
                 </EuiButton>
-                <AlertFlyout
-                  addFlyoutVisible={!!ruleType}
-                  setAddFlyoutVisibility={(visible) => {
-                    if (!visible) {
-                      setRuleType(null);
-                    }
-                  }}
-                />
+                {ruleType === DEGRADED_DOCS_RULE_TYPE_ID && (
+                  <AlertFlyout closeFlyout={() => setRuleType(null)} />
+                )}
               </>,
             ]
           : undefined

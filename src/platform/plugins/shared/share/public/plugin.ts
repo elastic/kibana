@@ -9,7 +9,8 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { Subscription } from 'rxjs';
-import type { ILicense, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
 import { ShareRegistry, ShareMenuRegistrySetup } from './services';
 import { UrlService } from '../common/url_service';
