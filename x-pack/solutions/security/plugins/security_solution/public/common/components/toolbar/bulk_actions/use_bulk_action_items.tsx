@@ -15,6 +15,13 @@ import type {
   SetEventsLoading,
 } from '../../../../../common/types';
 import * as i18n from './translations';
+import {
+  BULK_ACTION_CLOSE_SELECTED_AS_DUPLICATE,
+  BULK_ACTION_CLOSE_SELECTED_AS_FALSE_POSITIVE,
+  BULK_ACTION_CLOSE_SELECTED_AS_INVESTIGATION_REQUIRED,
+  BULK_ACTION_CLOSE_SELECTED_AS_NONE,
+  BULK_ACTION_CLOSING_PANEL_TITLE,
+} from '../../../../detections/hooks/translations';
 import { updateAlertStatus } from './update_alerts';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useStartTransaction } from '../../../lib/apm/use_start_transaction';
@@ -205,14 +212,14 @@ export const useBulkActionItems = ({
       [
         {
           id: ALERT_CLOSING_REASON_PANEL_ID,
-          title: i18n.BULK_ACTION_CLOSING_PANEL_TITLE,
+          title: BULK_ACTION_CLOSING_PANEL_TITLE,
           items: [
             {
-              name: i18n.BULK_ACTION_CLOSE_SELECTED_AS_NONE,
+              name: BULK_ACTION_CLOSE_SELECTED_AS_NONE,
               onClick: () => onClickUpdate(FILTER_CLOSED as AlertWorkflowStatus),
             },
             {
-              name: i18n.BULK_ACTION_CLOSE_SELECTED_AS_FALSE_POSITIVE,
+              name: BULK_ACTION_CLOSE_SELECTED_AS_FALSE_POSITIVE,
               onClick: () =>
                 onClickUpdate(
                   FILTER_CLOSED as AlertWorkflowStatus,
@@ -220,7 +227,7 @@ export const useBulkActionItems = ({
                 ),
             },
             {
-              name: i18n.BULK_ACTION_CLOSE_SELECTED_AS_DUPLICATE,
+              name: BULK_ACTION_CLOSE_SELECTED_AS_DUPLICATE,
               onClick: () =>
                 onClickUpdate(
                   FILTER_CLOSED as AlertWorkflowStatus,
@@ -228,7 +235,7 @@ export const useBulkActionItems = ({
                 ),
             },
             {
-              name: i18n.BULK_ACTION_CLOSE_SELECTED_AS_INVESTIGATION_REQUIRED,
+              name: BULK_ACTION_CLOSE_SELECTED_AS_INVESTIGATION_REQUIRED,
               onClick: () =>
                 onClickUpdate(
                   FILTER_CLOSED as AlertWorkflowStatus,
