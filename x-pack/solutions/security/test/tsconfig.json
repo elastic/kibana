@@ -65,5 +65,10 @@
     "@kbn/securitysolution-endpoint-exceptions-common",
     "@kbn/securitysolution-lists-common",
     "@kbn/osquery-plugin",
+    "@kbn/serverless-security-settings",
+    "@kbn/rison",
+    "@kbn/core-chrome-browser",
+    "@kbn/openapi-common",
+    "@kbn/spaces-plugin"
   ]
 }

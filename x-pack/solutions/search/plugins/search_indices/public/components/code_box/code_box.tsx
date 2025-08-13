@@ -27,6 +27,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { getDefaultCodingLanguage } from '../../utils/language';
 
@@ -49,6 +50,7 @@ export const CodeBox = (props: CodeBoxProps) => {
   const { consoleCode, options, showTopBar = true } = props;
   const dataTestSubj = props['data-test-subj'];
   const { euiTheme } = useEuiTheme();
+  const isDarkMode = useKibanaIsDarkMode();
   const {
     application,
     console: consolePlugin,
@@ -89,7 +91,7 @@ export const CodeBox = (props: CodeBoxProps) => {
   const codeSnippet = selectedOption?.code ?? '';
 
   const languageButton = selectedOption ? (
-    <EuiThemeProvider colorMode="dark">
+    <EuiThemeProvider colorMode={isDarkMode ? 'dark' : 'light'}>
       <EuiButtonEmpty
         data-test-subj={
           dataTestSubj ? `${dataTestSubj}-select-lang-button` : 'code-box-select-lang-button'
@@ -109,11 +111,13 @@ export const CodeBox = (props: CodeBoxProps) => {
   ) : null;
 
   return (
-    <EuiThemeProvider colorMode="dark">
+    <EuiThemeProvider colorMode={isDarkMode ? 'dark' : 'light'}>
       <EuiPanel
         paddingSize="xs"
         data-test-subj={dataTestSubj ?? 'codeBlockControlsPanel'}
         css={Styles.CodeBoxPanel(euiTheme)}
+        hasShadow={false}
+        hasBorder={true}
       >
         {showTopBar && (
           <>
@@ -125,7 +129,7 @@ export const CodeBox = (props: CodeBoxProps) => {
             >
               {options && languageButton && (
                 <EuiFlexItem>
-                  <EuiThemeProvider colorMode="light">
+                  <EuiThemeProvider colorMode={isDarkMode ? 'dark' : 'light'}>
                     <EuiPopover
                       button={languageButton}
                       isOpen={isPopoverOpen}
