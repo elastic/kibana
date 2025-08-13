@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // navigate to the context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+      const rowActions = await dataGrid.getRowActions();
       await rowActions[1].click();
       await context.waitUntilContextLoadingHasFinished();
 
@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+      const rowActions = await dataGrid.getRowActions();
       await rowActions[1].click();
 
       // close popup
