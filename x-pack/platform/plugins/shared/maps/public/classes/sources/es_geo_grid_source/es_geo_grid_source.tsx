@@ -52,6 +52,7 @@ import {
   getLayerFeaturesRequestName,
 } from '../vector_source';
 import {
+  AbstractESAggSourceDescriptor,
   DataFilters,
   ESGeoGridSourceDescriptor,
   MapExtent,
@@ -84,8 +85,10 @@ export const heatmapTitle = i18n.translate('xpack.maps.source.esGridHeatmapTitle
 export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSource {
   static createDescriptor(
     descriptor: Partial<ESGeoGridSourceDescriptor>
-  ): ESGeoGridSourceDescriptor {
-    const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
+  ): ESGeoGridSourceDescriptor & Required<Pick<ESGeoGridSourceDescriptor, 'metrics'>> {
+    const normalizedDescriptor = AbstractESAggSource.createDescriptor(
+      descriptor
+    ) as AbstractESAggSourceDescriptor & Partial<ESGeoGridSourceDescriptor>;
     if (!isValidStringConfig(normalizedDescriptor.geoField)) {
       throw new Error('Cannot create an ESGeoGridSourceDescriptor without a geoField');
     }
@@ -95,10 +98,11 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       geoField: normalizedDescriptor.geoField!,
       requestType: descriptor.requestType || RENDER_AS.POINT,
       resolution: descriptor.resolution ? descriptor.resolution : GRID_RESOLUTION.COARSE,
-    };
+    } as ESGeoGridSourceDescriptor & Required<Pick<ESGeoGridSourceDescriptor, 'metrics'>>;
   }
 
-  readonly _descriptor: ESGeoGridSourceDescriptor;
+  readonly _descriptor: ESGeoGridSourceDescriptor &
+    Required<Pick<ESGeoGridSourceDescriptor, 'metrics'>>;
 
   constructor(descriptor: Partial<ESGeoGridSourceDescriptor>) {
     const sourceDescriptor = ESGeoGridSource.createDescriptor(descriptor);
@@ -122,6 +126,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     return i18n.translate('xpack.maps.source.esGeoGrid.cluster.bucketsName', {
       defaultMessage: 'clusters',
     });
+  }
+
+  getGeoFieldName(): string {
+    return this._descriptor.geoField;
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> {

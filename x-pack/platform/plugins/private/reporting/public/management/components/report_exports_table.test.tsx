@@ -15,7 +15,7 @@ import { ReportExportsTable } from './report_exports_table';
 import { render, screen, waitFor } from '@testing-library/react';
 import { Job, ReportingAPIClient } from '@kbn/reporting-public';
 import { Observable } from 'rxjs';
-import { ILicense } from '@kbn/licensing-plugin/public';
+import { ILicense } from '@kbn/licensing-types';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { userEvent } from '@testing-library/user-event';
 import { mockConfig } from '../__test__/report_listing.test.helpers';
