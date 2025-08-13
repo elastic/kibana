@@ -143,8 +143,22 @@ export class DashboardPageObject extends FtrService {
 
   public async getDashboardIdFromCurrentUrl() {
     const currentUrl = await this.browser.getCurrentUrl();
-    const id = this.getDashboardIdFromUrl(currentUrl);
 
+    // If URL is a redirect URL, wait for it to resolve
+    if (currentUrl.includes('/app/r?l=DASHBOARD')) {
+      await this.retry.waitFor('dashboard redirect to complete', async () => {
+        const url = await this.browser.getCurrentUrl();
+        return !url.includes('/app/r?l=DASHBOARD');
+      });
+      const resolvedUrl = await this.browser.getCurrentUrl();
+      const id = this.getDashboardIdFromUrl(resolvedUrl);
+      this.log.debug(
+        `Dashboard id extracted from ${resolvedUrl} (after redirect from ${currentUrl}) is ${id}`
+      );
+      return id;
+    }
+
+    const id = this.getDashboardIdFromUrl(currentUrl);
     this.log.debug(`Dashboard id extracted from ${currentUrl} is ${id}`);
 
     return id;

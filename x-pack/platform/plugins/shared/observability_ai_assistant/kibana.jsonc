@@ -17,6 +17,7 @@
       "taskManager",
       "dataViews",
       "inference",
+      "llmTasks",
       "productDocBase"
     ],
     "optionalPlugins": ["cloud", "serverless"],

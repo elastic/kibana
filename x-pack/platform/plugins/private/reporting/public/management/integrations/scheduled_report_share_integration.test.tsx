@@ -8,7 +8,7 @@
 import React from 'react';
 import { SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
 import type { Capabilities } from '@kbn/core-capabilities-common';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import {
   shouldRegisterScheduledReportShareIntegration,
   createScheduledReportShareIntegration,
