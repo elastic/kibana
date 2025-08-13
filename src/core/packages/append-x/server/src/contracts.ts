@@ -59,6 +59,7 @@ const myDataStream: DataStreamDefinition<MyDocument> = {
     dynamic: false,
     properties: {
       '@timestamp': mappings.date(),
+      someField: mappings.text(),
       object: {
         type: 'object',
         properties: {
