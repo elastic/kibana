@@ -82,6 +82,10 @@ export const useOverviewSummaryPanel = () => {
     isSummaryPanelLoading,
     totalDegradedDocsCount,
     totalFailedDocsCount,
+    degradedPercentage,
+    failedPercentage,
+    degradedQuality: mapPercentageToQuality([degradedPercentage]),
+    failedQuality: mapPercentageToQuality([failedPercentage]),
     quality,
   };
 };
