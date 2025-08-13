@@ -58,6 +58,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       updateWorkflowExecution: jest.fn(),
       getStepExecution: jest.fn(),
       upsertStep: jest.fn(),
+      load: jest.fn(),
       flush: jest.fn(),
     } as unknown as WorkflowExecutionState;
 
@@ -95,11 +96,13 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
   describe('nodes navigation', () => {
     it('should return the current executing node', () => {
+      underTest.goToStep('node1');
       const currentStep = underTest.getCurrentStep();
       expect(currentStep).toEqual({ id: 'node1' });
     });
 
     it('should return next node after calling gotToNextNode', () => {
+      underTest.goToStep('node1'); // Start at node1
       underTest.goToNextStep();
       const currentStep = underTest.getCurrentStep();
       expect(currentStep).toEqual({ id: 'node2' });
@@ -172,6 +175,11 @@ describe('WorkflowExecutionRuntimeManager', () => {
       mockDateNow = new Date('2025-08-05T20:00:00.000Z');
     });
 
+    it('should set current step to the first node in the workflow', async () => {
+      await underTest.start();
+      expect(underTest.getCurrentStep()).toEqual({ id: 'node1' });
+    });
+
     it('should start the workflow execution and update workflow status in runtime', async () => {
       await underTest.start();
 
@@ -190,6 +198,38 @@ describe('WorkflowExecutionRuntimeManager', () => {
       expect(workflowLogger.logInfo).toHaveBeenCalledWith('Workflow execution started', {
         event: { action: 'workflow-start', category: ['workflow'] },
         tags: ['workflow', 'execution', 'start'],
+      });
+    });
+  });
+
+  describe('resume', () => {
+    beforeEach(() => {
+      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        currentNodeId: 'node2',
+      } as Partial<EsWorkflowExecution>);
+    });
+
+    it('should not have RUNNING status before resuming', () => {
+      expect(underTest.getWorkflowExecutionStatus()).not.toBe(ExecutionStatus.RUNNING);
+    });
+
+    it('should load workflow execution state', async () => {
+      await underTest.resume();
+      expect(workflowExecutionState.load).toHaveBeenCalled();
+    });
+
+    it('should set current step to the node from execution', async () => {
+      await underTest.resume();
+
+      expect(underTest.getCurrentStep()).toEqual({ id: 'node2' });
+    });
+
+    it('should update workflow status to RUNNING', async () => {
+      await underTest.resume();
+
+      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
+        status: ExecutionStatus.RUNNING,
       });
     });
   });
@@ -354,12 +394,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
       underTest.goToStep('node3');
     });
 
-    it('should complete workflow execution if its last step succeeded', async () => {
-      (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
-        stepId: 'node3',
-        output: { success: true, data: {} },
-        error: null,
-      } as Partial<EsWorkflowStepExecution>);
+    it('should complete workflow execution if no nodes to process', async () => {
+      underTest.goToStep('node3'); // set execution to the last node
+      underTest.goToNextStep(); // go to next node that will make current index to -1
       await underTest.saveState();
 
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
@@ -372,11 +409,8 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should log workflow completion', async () => {
-      (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
-        stepId: 'node3',
-        output: { success: true, data: {} },
-        error: null,
-      } as Partial<EsWorkflowStepExecution>);
+      underTest.goToStep('node3'); // set execution to the last node
+      underTest.goToNextStep(); // go to next node that will make current index to -1
       await underTest.saveState();
       expect(workflowLogger.logInfo).toHaveBeenCalledWith(
         `Workflow execution completed successfully`,
@@ -406,6 +440,16 @@ describe('WorkflowExecutionRuntimeManager', () => {
           error: 'Second step failed',
           finishedAt: '2025-08-06T00:00:04.000Z',
           duration: 14404000,
+        })
+      );
+    });
+
+    it('should save the current nodeId in workflow execution state', async () => {
+      underTest.goToStep('node2');
+      await underTest.saveState();
+      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({
+          currentNodeId: 'node2',
         })
       );
     });
