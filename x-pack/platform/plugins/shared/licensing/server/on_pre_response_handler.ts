@@ -7,7 +7,7 @@
 
 import { firstValueFrom, Observable } from 'rxjs';
 import { OnPreResponseHandler } from '@kbn/core/server';
-import { ILicense } from '../common/types';
+import { ILicense } from '@kbn/licensing-types';
 
 export function createOnPreResponseHandler(
   refresh: () => Promise<ILicense>,

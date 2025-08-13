@@ -7,7 +7,7 @@
 
 import { Subscription } from 'rxjs';
 import { ICustomClusterClient } from '@kbn/core/server';
-import { ILicense, LicenseFeature } from '@kbn/licensing-plugin/common/types';
+import { ILicense, LicenseFeature } from '@kbn/licensing-types';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { Logger } from '@kbn/core/server';
 import { MonitoringConfig } from './config';
