@@ -10,7 +10,6 @@ import { type InferenceClient } from '@kbn/inference-common';
 import { type GeneratedSignificantEventQuery, type Streams } from '@kbn/streams-schema';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
-import { isKqlQueryValid } from '../../routes/internal/esql/query_helpers';
 import { analyzeDataset } from './helpers/analyze_dataset';
 import { assignShortIds } from './helpers/assign_short_ids';
 import { getLogPatterns } from './helpers/get_log_patterns';
@@ -125,13 +124,8 @@ Quality over quantity - aim for queries that have high signal-to-noise ratio.
     } as const,
   });
 
-  const queries = output.queries.filter((query) => isKqlQueryValid(query.kql));
-  if (!queries.length) {
-    return [];
-  }
-
   const verifiedQueries = await verifyQueries(
-    { queries, definition, start, end },
+    { queries: output.queries, definition, start, end },
     { esClient, logger }
   );
 

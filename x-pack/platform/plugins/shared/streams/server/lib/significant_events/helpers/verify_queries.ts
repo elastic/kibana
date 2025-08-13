@@ -10,7 +10,7 @@ import { kqlQuery } from '@kbn/es-query';
 import { getIndexPatternsForStream, type Streams } from '@kbn/streams-schema';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import pLimit from 'p-limit';
-import { rangeQuery } from '../../../routes/internal/esql/query_helpers';
+import { isKqlQueryValid, rangeQuery } from '../../../routes/internal/esql/query_helpers';
 
 interface Query {
   title: string;
@@ -42,10 +42,19 @@ export async function verifyQueries(
 ): Promise<VerifiedQueries> {
   const { queries, definition, start, end } = params;
   const { esClient, logger } = dependencies;
+
+  const validQueries = queries.filter((query) => isKqlQueryValid(query.kql));
+  if (!queries.length) {
+    return {
+      totalCount: 0,
+      queries: [],
+    };
+  }
+
   const limiter = pLimit(10);
-  const [queriesWithCounts, totalCount] = await Promise.all([
+  const [validQueriesWithCounts, totalCount] = await Promise.all([
     Promise.all(
-      queries.map((query) =>
+      validQueries.map((query) =>
         limiter(async () => {
           return esClient
             .search('verify_query', {
@@ -74,15 +83,17 @@ export async function verifyQueries(
         return 0;
       }),
   ]);
-  if (queries.length) {
+
+  if (validQueriesWithCounts.length) {
     logger.debug(() => {
-      return `Ran queries: ${queriesWithCounts
+      return `Ran queries: ${validQueriesWithCounts
         .map((query) => `- ${query.kql}: ${query.count}`)
         .join('\n')}`;
     });
   }
+
   return {
     totalCount,
-    queries: queriesWithCounts,
+    queries: validQueriesWithCounts,
   };
 }

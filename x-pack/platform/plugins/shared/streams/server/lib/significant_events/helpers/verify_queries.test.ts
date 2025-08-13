@@ -38,6 +38,34 @@ describe('verifyQueries', () => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
   });
 
+  it('filters out the invalid queries', async () => {
+    esClientMock.search.mockResolvedValue({
+      took: 10,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: { value: 42, relation: 'eq' }, hits: [] },
+    });
+    const esClient = createTracedEsClient({ client: esClientMock, logger: loggerMock });
+
+    const result = await verifyQueries(
+      {
+        definition: logsStreamDefinition,
+        end: 1000,
+        start: 0,
+        queries: [
+          { kql: 'message:good', title: 'good query' },
+          { kql: 'message:*"invalid"* and something', title: 'bad query' },
+        ],
+      },
+      { esClient, logger: loggerMock }
+    );
+
+    expect(result).toEqual({
+      totalCount: 42,
+      queries: [{ kql: 'message:good', title: 'good query', count: 42 }],
+    });
+  });
+
   it('handles any search error gracefully', async () => {
     esClientMock.search.mockRejectedValue(new Error('timeout error'));
     const esClient = createTracedEsClient({ client: esClientMock, logger: loggerMock });
