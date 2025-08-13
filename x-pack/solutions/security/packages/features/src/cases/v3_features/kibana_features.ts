@@ -14,8 +14,8 @@ import { APP_ID, CASES_FEATURE_ID_V3, CASES_FEATURE_ID } from '../../constants';
 import type { CasesFeatureParams } from '../types';
 
 export const getCasesBaseKibanaFeatureV3 = ({
-  uiCapabilities,
   apiTags,
+  uiCapabilities,
   savedObjects,
 }: CasesFeatureParams): BaseKibanaFeatureConfig => {
   return {
@@ -34,7 +34,7 @@ export const getCasesBaseKibanaFeatureV3 = ({
     cases: [APP_ID],
     privileges: {
       all: {
-        api: apiTags.all,
+        api: apiTags.default.all,
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
@@ -47,10 +47,10 @@ export const getCasesBaseKibanaFeatureV3 = ({
           all: [...savedObjects.files],
           read: [...savedObjects.files],
         },
-        ui: uiCapabilities.all,
+        ui: uiCapabilities.default.all,
       },
       read: {
-        api: apiTags.read,
+        api: apiTags.default.read,
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
@@ -60,7 +60,7 @@ export const getCasesBaseKibanaFeatureV3 = ({
           all: [],
           read: [...savedObjects.files],
         },
-        ui: uiCapabilities.read,
+        ui: uiCapabilities.default.read,
       },
     },
   };

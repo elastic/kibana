@@ -227,7 +227,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
-    productFeaturesService.init(plugins.features);
+    productFeaturesService.setup(core, plugins);
 
     events.forEach((eventConfig) => {
       core.analytics.registerEventType(eventConfig);
@@ -304,7 +304,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       productFeaturesService,
     });
 
-    productFeaturesService.registerApiAccessControl(core.http);
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
       APP_ID,
