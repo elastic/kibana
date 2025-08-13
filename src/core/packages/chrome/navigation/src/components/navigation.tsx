@@ -90,7 +90,7 @@ export const Navigation = ({
   };
 
   return (
-    <>
+    <div data-test-subj="navigation-root">
       <SideNav isCollapsed={isCollapsed}>
         <SideNav.Logo
           isActive={activePageId === logo.id}
@@ -335,6 +335,6 @@ export const Navigation = ({
           </SecondaryMenu>
         </SideNav.Panel>
       )}
-    </>
+    </div>
   );
 };
