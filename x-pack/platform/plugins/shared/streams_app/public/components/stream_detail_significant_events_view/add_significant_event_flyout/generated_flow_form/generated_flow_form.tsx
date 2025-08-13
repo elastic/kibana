@@ -132,6 +132,10 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
                     }
                   },
                   error: (error) => {
+                    if (error.name === 'AbortError') {
+                      return;
+                    }
+
                     notifications.showErrorDialog({
                       title: i18n.translate(
                         'xpack.streams.addSignificantEventFlyout.aiFlow.generateErrorToastTitle',
