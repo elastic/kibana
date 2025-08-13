@@ -34,13 +34,13 @@ const textareaStyles = css`
 interface ConversationInputTextAreaProps {
   message: string;
   setMessage: (message: string) => void;
-  handleSubmit: () => void;
+  onSubmit: () => void;
 }
 
 export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps> = ({
   message,
   setMessage,
-  handleSubmit,
+  onSubmit,
 }) => {
   const conversationId = useConversationId();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -67,7 +67,7 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
         onKeyDown={(event) => {
           if (!event.shiftKey && event.key === keys.ENTER) {
             event.preventDefault();
-            handleSubmit();
+            onSubmit();
           }
         }}
         placeholder={i18n.translate('xpack.onechat.conversationInputForm.placeholder', {

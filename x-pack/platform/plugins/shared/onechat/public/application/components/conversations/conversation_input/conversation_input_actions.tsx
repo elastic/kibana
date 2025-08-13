@@ -13,11 +13,13 @@ import { useAgentId, useHasActiveConversation } from '../../../hooks/use_convers
 import { useConversationActions } from '../../../hooks/use_conversation_actions';
 import { AgentDisplay } from '../agent_display';
 import { AgentSelectDropdown } from '../agent_select_dropdown';
-import { useMessages } from '../../../context/messages_context';
+// No context used here; props are provided by the form
 
 interface ConversationInputActionsProps {
-  handleSubmit: () => void;
-  submitDisabled: boolean;
+  onSubmit: () => void;
+  isSubmitDisabled: boolean;
+  canCancel: boolean;
+  onCancel: () => void;
 }
 
 const labels = {
@@ -30,13 +32,14 @@ const labels = {
 };
 
 export const ConversationInputActions: React.FC<ConversationInputActionsProps> = ({
-  handleSubmit,
-  submitDisabled,
+  onSubmit,
+  isSubmitDisabled,
+  canCancel,
+  onCancel,
 }) => {
   const { setAgentId } = useConversationActions();
   const agentId = useAgentId();
   const hasActiveConversation = useHasActiveConversation();
-  const { canCancel, cancel } = useMessages();
   const { euiTheme } = useEuiTheme();
   const cancelButtonStyles = css`
     background-color: ${euiTheme.colors.backgroundLightText};
@@ -65,7 +68,7 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
               size="m"
               color="text"
               css={cancelButtonStyles}
-              onClick={cancel}
+              onClick={onCancel}
             />
           ) : (
             <EuiButtonIcon
@@ -74,8 +77,8 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
               iconType="sortUp"
               display="fill"
               size="m"
-              disabled={submitDisabled}
-              onClick={handleSubmit}
+              disabled={isSubmitDisabled}
+              onClick={onSubmit}
             />
           )}
         </EuiFlexItem>

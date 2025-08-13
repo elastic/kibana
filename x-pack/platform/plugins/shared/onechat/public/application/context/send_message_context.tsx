@@ -163,9 +163,7 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
   };
 };
 
-interface MessagesState {
-  input: string;
-  setInput: (input: string) => void;
+interface SendMessageState {
   sendMessage: ({ message }: { message: string }) => void;
   isResponseLoading: boolean;
   error: unknown;
@@ -175,43 +173,31 @@ interface MessagesState {
   cancel: () => void;
 }
 
-const MessagesContext = createContext<MessagesState | null>(null);
+const SendMessageContext = createContext<SendMessageState | null>(null);
 
-export const MessagesProvider = ({ children }: { children: React.ReactNode }) => {
-  const [input, setInput] = useState('');
+export const SendMessageProvider = ({ children }: { children: React.ReactNode }) => {
   const { sendMessage, isResponseLoading, error, pendingMessage, retry, canCancel, cancel } =
     useSendMessageMutation();
 
-  const handleCancel = () => {
-    if (pendingMessage) {
-      setInput(pendingMessage);
-    }
-    cancel();
+  const sendMessageValue = {
+    sendMessage,
+    isResponseLoading,
+    error,
+    pendingMessage,
+    retry,
+    canCancel,
+    cancel,
   };
 
   return (
-    <MessagesContext.Provider
-      value={{
-        input,
-        setInput,
-        sendMessage,
-        isResponseLoading,
-        error,
-        pendingMessage,
-        retry,
-        canCancel,
-        cancel: handleCancel,
-      }}
-    >
-      {children}
-    </MessagesContext.Provider>
+    <SendMessageContext.Provider value={sendMessageValue}>{children}</SendMessageContext.Provider>
   );
 };
 
-export const useMessages = () => {
-  const context = useContext(MessagesContext);
+export const useSendMessage = () => {
+  const context = useContext(SendMessageContext);
   if (!context) {
-    throw new Error('useMessages must be used within a MessagesProvider');
+    throw new Error('useSendMessage must be used within a SendMessageProvider');
   }
   return context;
 };
