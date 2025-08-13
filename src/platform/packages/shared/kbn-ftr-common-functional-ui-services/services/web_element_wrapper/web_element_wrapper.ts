@@ -199,9 +199,9 @@ export class WebElementWrapper {
    *
    * @return {Promise<void>}
    */
-  public async click(topOffset?: number) {
+  public async click(topOffsetOrOptions?: number | { topOffset?: number; bottomOffset?: number }) {
     await this.retryCall(async function click(wrapper) {
-      await wrapper.scrollIntoViewIfNecessary(topOffset);
+      await wrapper.scrollIntoViewIfNecessary(topOffsetOrOptions);
       await wrapper._webElement.click();
     });
   }
