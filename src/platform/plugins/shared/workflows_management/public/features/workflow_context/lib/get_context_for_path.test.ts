@@ -80,10 +80,16 @@ describe('getContextSchemaForPath', () => {
   it('should return the root context for the first step', () => {
     const context = getContextSchemaForPath(definition, workflowGraph, ['steps', 0]);
 
-    expect(Object.keys(context.shape)).toEqual(['consts']);
+    expect(Object.keys(context.shape).sort()).toEqual(
+      ['workflowRunId', 'now', 'event', 'steps', 'consts'].sort()
+    );
     expectZodSchemaEqual(
       context,
       z.object({
+        workflowRunId: z.string(),
+        now: z.date(),
+        event: z.any(),
+        steps: z.object({}),
         consts: z.object({
           test: z.string(),
         }),
@@ -102,15 +108,16 @@ describe('getContextSchemaForPath', () => {
     expectZodSchemaEqual(
       context,
       z.object({
-        consts: z.object({
-          test: z.string(),
-        }),
+        workflowRunId: z.string(),
+        now: z.date(),
+        event: z.any(),
         steps: z.object({
           'first-step': z.object({
-            output: z.object({
-              message: z.string(),
-            }),
+            output: z.string(),
           }),
+        }),
+        consts: z.object({
+          test: z.string(),
         }),
       })
     );
