@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { clickRuleUpdatesTab } from '../../../../tasks/prebuilt_rules';
+import { clickRuleUpdatesTab } from '../../../../../tasks/prebuilt_rules';
 import {
   clickUpdateScheduleMenuItem,
   openBulkEditAddIndexPatternsForm,
@@ -23,22 +23,22 @@ import {
   typeScheduleLookback,
   typeTags,
   waitForBulkEditActionToFinish,
-} from '../../../../tasks/rules_bulk_actions';
+} from '../../../../../tasks/rules_bulk_actions';
 import {
   ABOUT_EDIT_TAB,
   ACTIONS_EDIT_TAB,
   DEFINITION_EDIT_TAB,
   SCHEDULE_EDIT_TAB,
-} from '../../../../screens/create_new_rule';
+} from '../../../../../screens/create_new_rule';
 import {
   ABOUT_RULE_DESCRIPTION,
   MODIFIED_PREBUILT_RULE_BADGE,
   MODIFIED_PREBUILT_RULE_BADGE_NO_BASE_VERSION,
   MODIFIED_PREBUILT_RULE_PER_FIELD_BADGE,
   RULE_CUSTOMIZATIONS_DIFF_FLYOUT,
-} from '../../../../screens/rule_details';
-import { goToRuleEditSettings } from '../../../../tasks/rule_details';
-import { getIndexPatterns, getNewRule } from '../../../../objects/rule';
+} from '../../../../../screens/rule_details';
+import { goToRuleEditSettings } from '../../../../../tasks/rule_details';
+import { getIndexPatterns, getNewRule } from '../../../../../objects/rule';
 import {
   editFirstRule,
   expectModifiedRuleBadgeToBeDisplayed,
@@ -50,25 +50,25 @@ import {
   filterByCustomRules,
   filterByElasticRules,
   selectAllRules,
-} from '../../../../tasks/alerts_detection_rules';
-import { MODIFIED_RULE_BADGE, RULE_NAME } from '../../../../screens/alerts_detection_rules';
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
+} from '../../../../../tasks/alerts_detection_rules';
+import { MODIFIED_RULE_BADGE, RULE_NAME } from '../../../../../screens/alerts_detection_rules';
+import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
-} from '../../../../tasks/api_calls/common';
+} from '../../../../../tasks/api_calls/common';
 import {
   createAndInstallMockedPrebuiltRules,
   installPrebuiltRuleAssets,
   preventPrebuiltRulesPackageInstallation,
-} from '../../../../tasks/api_calls/prebuilt_rules';
-import { createRule, patchRule } from '../../../../tasks/api_calls/rules';
+} from '../../../../../tasks/api_calls/prebuilt_rules';
+import { createRule, patchRule } from '../../../../../tasks/api_calls/rules';
 
-import { login } from '../../../../tasks/login';
+import { login } from '../../../../../tasks/login';
 
-import { visitRulesManagementTable } from '../../../../tasks/rules_management';
-import { fillDescription, goToAboutStepTab } from '../../../../tasks/create_new_rule';
-import { saveEditedRule } from '../../../../tasks/edit_rule';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
+import { fillDescription, goToAboutStepTab } from '../../../../../tasks/create_new_rule';
+import { saveEditedRule } from '../../../../../tasks/edit_rule';
 describe(
   'Detection rules, Prebuilt Rules Customization workflow',
   {
