@@ -5,5 +5,5 @@
     "@elastic/kibana-management"
   ],
   "group": "platform",
-  "visibility": "shared"
+  "visibility": "private"
 }
