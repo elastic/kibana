@@ -20,7 +20,7 @@ describe('getLicenseInfo', () => {
       operator: '-',
       preview: false,
       signatures: [],
-      license: 'PLATINUM',
+      license: 'platinum',
     };
 
     const result = getLicenseInfoForFunctions(fn);
@@ -28,7 +28,7 @@ describe('getLicenseInfo', () => {
     expect(result).toEqual({
       licenses: [
         {
-          name: 'PLATINUM',
+          name: 'platinum',
           isSignatureSpecific: false,
           paramsWithLicense: [],
         },
