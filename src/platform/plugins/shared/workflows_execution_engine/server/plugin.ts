@@ -264,6 +264,8 @@ async function workflowExecutionLoop(
           `Error saving state after step ${currentNode.id} (${currentNode.name}): ${error.message}`
         );
       }
+
+      await workflowLogger.flushEvents();
     }
   }
 }
