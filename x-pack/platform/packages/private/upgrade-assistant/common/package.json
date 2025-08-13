@@ -1,11 +1,6 @@
 {
-<<<<<<<< HEAD:x-pack/platform/packages/private/upgrade-assistant/common/package.json
   "name": "@kbn/upgrade-assistant-pkg-common",
-========
-  "name": "@kbn/ai-tools",
->>>>>>>> main:x-pack/platform/packages/shared/kbn-ai-tools/package.json
   "private": true,
   "version": "1.0.0",
   "license": "Elastic License 2.0"
 }
-

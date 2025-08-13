@@ -22,11 +22,7 @@ import {
 import { reindexOperationSavedObjectType, Version } from '@kbn/upgrade-assistant-pkg-server';
 import { RouteDependencies, ReindexServiceServerPluginStart } from './types';
 
-<<<<<<< HEAD
 import { ReindexServiceWrapper } from './src/lib/reindex_service_wrapper';
-=======
-import { ReindexWorker } from './src/lib';
->>>>>>> main
 import { CredentialStore, credentialStoreFactory } from './src/lib/credential_store';
 import { registerBatchReindexIndicesRoutes, registerReindexIndicesRoutes } from './src/routes';
 
@@ -41,21 +37,13 @@ interface PluginsStart {
 export class ReindexServiceServerPlugin
   implements Plugin<void, ReindexServiceServerPluginStart, PluginsSetup, PluginsStart>
 {
-<<<<<<< HEAD
   private reindexService: ReturnType<ReindexServiceWrapper['getInternalApis']> | null = null;
-=======
-  private reindexWorker: ReindexWorker | null = null;
->>>>>>> main
 
   // Properties set at setup
   private licensing?: LicensingPluginSetup;
 
   private readonly logger: Logger;
   private readonly credentialStore: CredentialStore;
-<<<<<<< HEAD
-=======
-  private securityPluginStart?: SecurityPluginStart;
->>>>>>> main
   private version: Version;
 
   constructor({ logger, env }: PluginInitializerContext) {
@@ -66,7 +54,6 @@ export class ReindexServiceServerPlugin
     this.version.setup(env.packageInfo.version);
   }
 
-<<<<<<< HEAD
   public setup(
     {
       http,
@@ -75,9 +62,6 @@ export class ReindexServiceServerPlugin
     }: CoreSetup<PluginsStart, ReindexServiceServerPluginStart>,
     { licensing }: PluginsSetup
   ) {
-=======
-  public setup({ http, savedObjects }: CoreSetup, { licensing }: PluginsSetup) {
->>>>>>> main
     this.licensing = licensing;
     const router = http.createRouter();
 
@@ -86,37 +70,25 @@ export class ReindexServiceServerPlugin
       credentialStore: this.credentialStore,
       log: this.logger,
       licensing,
-<<<<<<< HEAD
       getSecurityPlugin: async () => {
         const [, { security }] = await getStartServices();
         return security;
       },
-=======
-      getSecurityPlugin: () => this.securityPluginStart,
->>>>>>> main
       lib: {
         handleEsError,
       },
       version: this.version,
-<<<<<<< HEAD
       getReindexService: async () => {
         const [, , reindexService] = await getStartServices();
         return reindexService;
       },
-=======
->>>>>>> main
     };
 
     savedObjects.registerType(reindexOperationSavedObjectType);
 
-<<<<<<< HEAD
     registerReindexIndicesRoutes(dependencies);
     // might be possible to avoid padding the worker here
     registerBatchReindexIndicesRoutes(dependencies, () => this.getReindexService().getWorker());
-=======
-    registerReindexIndicesRoutes(dependencies, () => this.getWorker());
-    registerBatchReindexIndicesRoutes(dependencies, () => this.getWorker());
->>>>>>> main
   }
 
   public start(
@@ -125,13 +97,7 @@ export class ReindexServiceServerPlugin
       elasticsearch,
     }: { savedObjects: SavedObjectsServiceStart; elasticsearch: ElasticsearchServiceStart },
     { security }: PluginsStart
-<<<<<<< HEAD
   ): ReindexServiceServerPluginStart {
-=======
-  ) {
-    this.securityPluginStart = security;
-
->>>>>>> main
     const soClient = new SavedObjectsClient(
       savedObjects.createInternalRepository([reindexOperationSavedObjectType.name])
     );
@@ -145,11 +111,7 @@ export class ReindexServiceServerPlugin
 
     // The ReindexWorker will use the credentials stored in the cache to reindex the data
 
-<<<<<<< HEAD
     const service = new ReindexServiceWrapper(
-=======
-    this.reindexWorker = ReindexWorker.create(
->>>>>>> main
       soClient,
       this.credentialStore,
       elasticsearch.client,
@@ -159,26 +121,16 @@ export class ReindexServiceServerPlugin
       this.version
     );
 
-<<<<<<< HEAD
     this.reindexService = service.getInternalApis();
 
     return {
       getScopedClient: service.getScopedClient,
       // todo move internally
       cleanupReindexOperations: service.cleanupReindexOperations.bind(service),
-=======
-    this.reindexWorker?.start();
-
-    return {
-      cleanupReindexOperations: this.reindexWorker?.cleanupReindexOperations.bind(
-        this.reindexWorker
-      ),
->>>>>>> main
     };
   }
 
   public stop() {
-<<<<<<< HEAD
     this.reindexService?.stop();
   }
 
@@ -187,17 +139,5 @@ export class ReindexServiceServerPlugin
       throw new Error('Worker unavailable');
     }
     return this.reindexService;
-=======
-    if (this.reindexWorker) {
-      this.reindexWorker.stop();
-    }
-  }
-
-  private getWorker() {
-    if (!this.reindexWorker) {
-      throw new Error('Worker unavailable');
-    }
-    return this.reindexWorker;
->>>>>>> main
   }
 }
