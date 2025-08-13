@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
+import expect from 'expect';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common/src/constants';
 import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
+import { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/list.gen';
 import { routeWithNamespace, waitFor } from '../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -23,6 +24,7 @@ export const PrivMonUtils = (
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
 
   log.info(`Monitoring: Privileged Users: Using namespace ${namespace}`);
 
@@ -35,7 +37,7 @@ export const PrivMonUtils = (
       log.error(JSON.stringify(res.body));
     }
 
-    expect(res.status).to.eql(200);
+    expect(res.status).toEqual(200);
   };
 
   const initPrivMonEngineWithoutAuth = async ({
@@ -99,11 +101,46 @@ export const PrivMonUtils = (
     );
   };
 
+  const assertIsPrivileged = (
+    user: ListPrivMonUsersResponse[number] | undefined,
+    isPrivileged: boolean
+  ) => {
+    if (isPrivileged) {
+      expect(user?.user?.is_privileged).toEqual(true);
+    } else {
+      expect(user?.user?.is_privileged).toEqual(false);
+      expect(user?.labels?.source_ids).toEqual([]);
+      expect(user?.labels?.sources).toEqual([]);
+    }
+  };
+
+  const findUser = (users: ListPrivMonUsersResponse, username: string) =>
+    users.find((user) => user.user?.name === username);
+
+  const createSourceIndex = async (indexName: string) =>
+    es.indices.create({
+      index: indexName,
+      mappings: {
+        properties: {
+          user: {
+            properties: {
+              name: {
+                type: 'keyword',
+              },
+            },
+          },
+        },
+      },
+    });
+
   return {
     initPrivMonEngine,
     initPrivMonEngineWithoutAuth,
     bulkUploadUsersCsv,
     retry,
     waitForSyncTaskRun,
+    findUser,
+    createSourceIndex,
+    assertIsPrivileged,
   };
 };

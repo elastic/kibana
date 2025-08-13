@@ -41,6 +41,12 @@ export const bulkUpsertOperationsFactory =
           {
             script: {
               source: `
+              if (ctx._source.labels == null) {
+                ctx._source.labels = new HashMap();
+              }
+              if (ctx._source.labels.source_ids == null) {
+                ctx._source.labels.source_ids = new ArrayList();
+              }
               if (!ctx._source.labels.source_ids.contains(params.source_id)) {
                 ctx._source.labels.source_ids.add(params.source_id);
               }

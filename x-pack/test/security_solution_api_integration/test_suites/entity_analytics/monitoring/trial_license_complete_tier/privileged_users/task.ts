@@ -101,8 +101,8 @@ export default ({ getService }: FtrProviderContext) => {
         const usersForIndex2 = (await api.listPrivMonUsers({ query: {} }))
           .body as ListPrivMonUsersResponse;
 
-        assertIsPrivileged(findUser(usersForIndex2, user2.name), true);
-        assertIsPrivileged(findUser(usersForIndex2, user1.name), false);
+        privMonUtils.assertIsPrivileged(privMonUtils.findUser(usersForIndex2, user2.name), true);
+        privMonUtils.assertIsPrivileged(privMonUtils.findUser(usersForIndex2, user1.name), false);
 
         await api.updateEntitySource({
           body: {
@@ -116,25 +116,15 @@ export default ({ getService }: FtrProviderContext) => {
         const usersForIndex1AndIndex2 = (await api.listPrivMonUsers({ query: {} }))
           .body as ListPrivMonUsersResponse;
 
-        assertIsPrivileged(findUser(usersForIndex1AndIndex2, user1.name), true);
-        assertIsPrivileged(findUser(usersForIndex1AndIndex2, user2.name), true);
+        privMonUtils.assertIsPrivileged(
+          privMonUtils.findUser(usersForIndex1AndIndex2, user1.name),
+          true
+        );
+        privMonUtils.assertIsPrivileged(
+          privMonUtils.findUser(usersForIndex1AndIndex2, user2.name),
+          true
+        );
       });
     });
   });
 };
-
-const assertIsPrivileged = (
-  user: ListPrivMonUsersResponse[number] | undefined,
-  isPrivileged: boolean
-) => {
-  if (isPrivileged) {
-    expect(user?.user?.is_privileged).toEqual(true);
-  } else {
-    expect(user?.user?.is_privileged).toEqual(false);
-    expect(user?.labels?.source_ids).toEqual([]);
-    expect(user?.labels?.sources).toEqual([]);
-  }
-};
-
-const findUser = (users: ListPrivMonUsersResponse, username: string) =>
-  users.find((user) => user.user?.name === username);
