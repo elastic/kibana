@@ -79,13 +79,7 @@ export class WorkflowsExecutionEnginePlugin
               const { workflowRunId } = taskInstance.params as ResumeWorkflowExecutionParams;
               const [, pluginsStart] = await core.getStartServices();
 
-              const {
-                workflowRuntime,
-                contextManager,
-                connectorExecutor,
-                workflowLogger,
-                workflowTaskManager,
-              } = await createContainer(
+              const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
                 workflowRunId,
                 (pluginsStart as any).actions,
                 (pluginsStart as any).taskManager,
@@ -96,13 +90,7 @@ export class WorkflowsExecutionEnginePlugin
               );
               await workflowRuntime.resume();
 
-              await run(
-                workflowRuntime,
-                contextManager,
-                connectorExecutor,
-                workflowLogger,
-                workflowTaskManager
-              );
+              await run(workflowRuntime, workflowLogger, nodesFactory);
             },
             async cancel() {},
           };
@@ -139,13 +127,7 @@ export class WorkflowsExecutionEnginePlugin
       } as Partial<EsWorkflowExecution>; // EsWorkflowExecution (add triggeredBy to type if needed)
       await this.workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
-      const {
-        workflowRuntime,
-        contextManager,
-        connectorExecutor,
-        workflowLogger,
-        workflowTaskManager,
-      } = await createContainer(
+      const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
         workflowRunId,
         plugins.actions,
         plugins.taskManager,
@@ -158,13 +140,7 @@ export class WorkflowsExecutionEnginePlugin
       // Log workflow execution start
       await workflowRuntime.start();
 
-      await run(
-        workflowRuntime,
-        contextManager,
-        connectorExecutor,
-        workflowLogger,
-        workflowTaskManager
-      );
+      await run(workflowRuntime, workflowLogger, nodesFactory);
     };
 
     return {
@@ -238,6 +214,14 @@ async function createContainer(
 
   const workflowTaskManager = new WorkflowTaskManager(taskManagerPlugin);
 
+  const nodesFactory = new StepFactory(
+    contextManager,
+    connectorExecutor,
+    workflowRuntime,
+    workflowLogger,
+    workflowTaskManager
+  );
+
   return {
     workflowRuntime,
     contextManager,
@@ -246,26 +230,18 @@ async function createContainer(
     taskManagerPlugin,
     workflowExecutionRepository,
     workflowTaskManager,
+    nodesFactory,
   };
 }
 
 async function run(
   workflowRuntime: WorkflowExecutionRuntimeManager,
-  contextManager: WorkflowContextManager,
-  connectorExecutor: ConnectorExecutor,
   workflowLogger: WorkflowEventLogger,
-  workflowTaskManager: WorkflowTaskManager
+  nodesFactory: StepFactory
 ) {
   do {
     const currentNode = workflowRuntime.getCurrentStep();
-    const step = new StepFactory().create(
-      currentNode as any,
-      contextManager,
-      connectorExecutor,
-      workflowRuntime,
-      workflowLogger,
-      workflowTaskManager
-    );
+    const step = nodesFactory.create(currentNode as any);
 
     try {
       await step.run();
