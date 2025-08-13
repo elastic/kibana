@@ -1946,7 +1946,10 @@ describe('migration actions', () => {
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
-          "right": "bulk_index_succeeded",
+          "right": Object {
+            "type": "bulk_index_succeeded",
+            "versionConflictErrors": Array [],
+          },
         }
       `);
     });
@@ -1966,7 +1969,10 @@ describe('migration actions', () => {
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
-          "right": "bulk_index_succeeded",
+          "right": Object {
+            "type": "bulk_index_succeeded",
+            "versionConflictErrors": Array [],
+          },
         }
       `);
     });
