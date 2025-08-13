@@ -113,6 +113,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await queryBar.setQuery('test');
       await queryBar.submitQuery();
+
+      await discover.waitUntilSearchingHasFinished();
       await retry.try(async () => expect(await discover.getHitCount()).to.be('22'));
 
       await queryBar.clearQuery();
