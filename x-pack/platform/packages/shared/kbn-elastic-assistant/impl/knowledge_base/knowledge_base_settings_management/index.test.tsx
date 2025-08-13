@@ -26,6 +26,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory, History } from 'history';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
@@ -33,6 +34,7 @@ const mockContext = {
   http: {
     get: jest.fn(),
   },
+  docLinks: docLinksServiceMock.createStartContract(),
   selectedSettingsTab: null,
   assistantAvailability: {
     isAssistantEnabled: true,
