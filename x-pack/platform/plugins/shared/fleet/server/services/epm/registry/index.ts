@@ -144,7 +144,7 @@ async function _fetchFindLatestPackage(
         }
         return latestPackageFromRegistry;
       } else if (bundledPackage) {
-        logger.debug('_fetchFindLatestPackage - use bundled package');
+        logger.debug(`_fetchFindLatestPackage - Fall back on bundled package of ${packageName}`);
         // falling back on bundled package if exists
         return bundledPackage;
       } else {
@@ -401,7 +401,7 @@ export async function getPackage(
     if (airGappedUtils().shouldSkipRegistryRequests) {
       const bundledPackage = await getBundledPackageByName(name);
       if (bundledPackage) {
-        logger.debug('getPackage - use bundled package');
+        logger.debug(`getPackage - Use bundled package of ${name}-${version}`);
         buffer = await bundledPackage?.getBuffer();
         archivePathToUse = `${name}-${version}.zip`;
       }
@@ -446,7 +446,7 @@ export async function getPackage(
       verificationResult,
     };
   } catch (error) {
-    logger.warn(`getPackage failed with error: ${error}`);
+    logger.warn(`getPackage - ${name}-${version} failed with error: ${error}`);
 
     if (error instanceof RegistryConnectionError) {
       let buffer;
@@ -454,7 +454,7 @@ export async function getPackage(
       // use bundled package as fallback
       const bundledPackage = await getBundledPackageByName(name);
       if (bundledPackage) {
-        logger.debug('getPackage - falling back on bundled package');
+        logger.debug(`getPackage - Fall back on bundled package of ${name}-${version}`);
         buffer = await bundledPackage?.getBuffer();
         bundledArchivePath = `${name}-${version}.zip`;
 
@@ -480,7 +480,7 @@ export async function getPackage(
           verificationResult,
         };
       }
-      logger.debug('getPackage - falling back on values from cache');
+      logger.debug(`getPackage - Fall back on value from cache of ${name}-${version}`);
       const assetsMap = getPackageAssetsMapCache(name, version);
 
       if (!packageInfo || !assetsMap) {
@@ -612,7 +612,9 @@ export async function fetchArchiveBuffer({
     if (error instanceof RegistryConnectionError) {
       const bundledPackage = await getBundledPackageByName(pkgName);
       if (bundledPackage) {
-        logger.debug('fetchArchiveBuffer - falling back on bundled package');
+        logger.debug(
+          `fetchArchiveBuffer - Fall back on bundled package of ${pkgName}-${pkgVersion}`
+        );
         const buffer = await bundledPackage?.getBuffer();
         const bundledArchivePath = `${pkgName}-${pkgVersion}.zip`;
         return {
