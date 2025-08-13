@@ -42,11 +42,9 @@ const meta: Meta<GraphCenteringStoryProps> = {
           )}
           <EuiFlexItem>
             <Graph
-              /* eslint-disable-next-line @elastic/eui/no-css-color */
               css={css`
                 height: 400px;
                 width: 100%;
-                border: 1px solid #aaa;
                 border-radius: 6px;
               `}
               nodes={nodes ?? []}

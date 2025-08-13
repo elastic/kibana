@@ -53,7 +53,7 @@ describe('Controls', () => {
       const { container } = renderWithProviders({
         showZoom: false,
         showFitView: false,
-        nodeIdsToCenter: [],
+        nodeIdsToCenterOn: [],
       });
 
       expect(container).toBeEmptyDOMElement();
@@ -145,54 +145,54 @@ describe('Controls', () => {
       expect(queryByLabelText('Center')).not.toBeInTheDocument();
     });
 
-    it('hides center button when nodeIdsToCenter is null', () => {
+    it('hides center button when nodeIdsToCenterOn is null', () => {
       const { queryByLabelText } = renderWithProviders({
         ...defaultProps,
-        nodeIdsToCenter: null as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+        nodeIdsToCenterOn: null as any, // eslint-disable-line @typescript-eslint/no-explicit-any
       });
 
       expect(queryByLabelText('Center')).not.toBeInTheDocument();
     });
 
-    it('hides center button when nodeIdsToCenter is undefined', () => {
+    it('hides center button when nodeIdsToCenterOn is undefined', () => {
       const { queryByLabelText } = renderWithProviders({
         ...defaultProps,
-        nodeIdsToCenter: undefined,
+        nodeIdsToCenterOn: undefined,
       });
 
       expect(queryByLabelText('Center')).not.toBeInTheDocument();
     });
 
-    it('hides center button when nodeIdsToCenter is empty array', () => {
+    it('hides center button when nodeIdsToCenterOn is empty array', () => {
       const { queryByLabelText } = renderWithProviders({
         ...defaultProps,
-        nodeIdsToCenter: [],
+        nodeIdsToCenterOn: [],
       });
 
       expect(queryByLabelText('Center')).not.toBeInTheDocument();
     });
 
-    it('hides center button when nodeIdsToCenter contains only empty or whitespace strings', () => {
+    it('hides center button when nodeIdsToCenterOn contains only empty or whitespace strings', () => {
       const { queryByLabelText } = renderWithProviders({
         ...defaultProps,
-        nodeIdsToCenter: ['', '   ', '\t', '\n', '  ', '\u00A0', '\u2000', '\u2028'],
+        nodeIdsToCenterOn: ['', '   ', '\t', '\n', '  ', '\u00A0', '\u2000', '\u2028'],
       });
 
       expect(queryByLabelText('Center')).not.toBeInTheDocument();
     });
 
-    it('renders center button when nodeIdsToCenter is populated', () => {
+    it('renders center button when nodeIdsToCenterOn is populated', () => {
       const { getByLabelText } = renderWithProviders({
         ...defaultProps,
-        nodeIdsToCenter: ['node1'], // Need at least one non-empty node ID for center button to render
+        nodeIdsToCenterOn: ['node1'], // Need at least one non-empty node ID for center button to render
       });
       expect(getByLabelText('Center')).toBeInTheDocument();
     });
 
-    it('renders center button when nodeIdsToCenter contains mix of empty and non-empty IDs', () => {
+    it('renders center button when nodeIdsToCenterOn contains mix of empty and non-empty IDs', () => {
       const { getByLabelText } = renderWithProviders({
         ...defaultProps,
-        nodeIdsToCenter: ['', 'node1', '  ', 'node2', ''],
+        nodeIdsToCenterOn: ['', 'node1', '  ', 'node2', ''],
       });
 
       expect(getByLabelText('Center')).toBeInTheDocument();
@@ -205,7 +205,7 @@ describe('Controls', () => {
         ...defaultProps,
         onCenter,
         fitViewOptions,
-        nodeIdsToCenter: ['node1', 'node2'],
+        nodeIdsToCenterOn: ['node1', 'node2'],
       });
 
       fireEvent.click(getByLabelText('Center'));
@@ -224,7 +224,7 @@ describe('Controls', () => {
         ...defaultProps,
         onCenter,
         fitViewOptions,
-        nodeIdsToCenter: ['', 'node1', '  ', 'node2', ''],
+        nodeIdsToCenterOn: ['', 'node1', '  ', 'node2', ''],
       });
 
       fireEvent.click(getByLabelText('Center'));
@@ -241,7 +241,7 @@ describe('Controls', () => {
 
       const { rerender, getByLabelText } = renderWithProviders({
         ...defaultProps,
-        nodeIdsToCenter: nodeIds,
+        nodeIdsToCenterOn: nodeIds,
       });
 
       const centerButton = getByLabelText('Center');
@@ -252,7 +252,7 @@ describe('Controls', () => {
       // Re-render with same nodeIds reference
       rerender(
         <EuiThemeProvider>
-          <Controls {...defaultProps} nodeIdsToCenter={nodeIds} />
+          <Controls {...defaultProps} nodeIdsToCenterOn={nodeIds} />
         </EuiThemeProvider>
       );
 
@@ -297,7 +297,7 @@ describe('Controls', () => {
 
       const { getByLabelText } = renderWithProviders({
         ...defaultProps,
-        nodeIdsToCenter: ['node1'],
+        nodeIdsToCenterOn: ['node1'],
       });
 
       const zoomInButton = getByLabelText('Zoom in');
@@ -334,7 +334,7 @@ describe('Controls', () => {
     it('should have proper accessible names', () => {
       const { getByLabelText } = renderWithProviders({
         ...defaultProps,
-        nodeIdsToCenter: ['node1'],
+        nodeIdsToCenterOn: ['node1'],
       });
 
       const zoomInButton = getByLabelText('Zoom in');

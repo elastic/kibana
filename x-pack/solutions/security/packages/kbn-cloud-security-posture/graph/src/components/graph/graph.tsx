@@ -174,7 +174,7 @@ export const Graph = memo<GraphProps>(
         >
           {interactive && (
             <Panel position="bottom-right">
-              <Controls fitViewOptions={fitViewOptions} nodeIdsToCenter={nodesWithOriginEvents} />
+              <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={nodesWithOriginEvents} />
             </Panel>
           )}
           {children}

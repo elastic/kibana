@@ -10,17 +10,6 @@ import React from 'react';
 import { Graph, type GraphProps } from './graph';
 import { TestProviders } from '../mock/test_providers';
 
-// // Mock the Controls component to capture props
-// jest.mock('../controls/controls', () => ({
-//   Controls: jest.fn(({ nodeIdsToCenter }) => {
-//     return (
-//       <div data-testid="mocked-controls" data-node-ids={JSON.stringify(nodeIdsToCenter || [])}>
-//         {'Mocked Controls'}
-//       </div>
-//     );
-//   }),
-// }));
-
 // Turn off the optimization that hides elements that are not visible in the viewport
 jest.mock('../constants', () => ({
   ...jest.requireActual('../constants'),
