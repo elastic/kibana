@@ -13,6 +13,7 @@
     "event.success_count": [1],
     "processor.event": ["transaction"],
     "agent.name": ["nodejs"],
+    "agent.version": ["1"],
     "host.name": ["docker-integrations-6cf69b8966-mnccd"],
     "http.response.status_code": [200],
     "processor.name.text": ["transaction"],

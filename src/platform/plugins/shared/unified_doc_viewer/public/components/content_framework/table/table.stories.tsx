@@ -8,12 +8,29 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
+import {
+  AGENT_NAME,
+  AGENT_VERSION,
+  AT_TIMESTAMP,
+  EVENT_OUTCOME,
+  HOST_NAME,
+  HTTP_RESPONSE_STATUS_CODE,
+  PARENT_ID,
+  SERVICE_NAME,
+  SERVICE_NODE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_DURATION,
+  SPAN_SUBTYPE,
+  SPAN_TYPE,
+  TRACE_ID,
+  TRANSACTION_DURATION,
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
+} from '@kbn/apm-types';
 import { UnifiedDocViewerStorybookArgs } from '../../../../.storybook/preview';
 import APMSpanFixture from '../../../__fixtures__/span_apm.json';
 import APMTransactionFixture from '../../../__fixtures__/transaction_apm.json';
 import { ContentFrameworkTable, ContentFrameworkTableProps } from '.';
-import { spanFields } from '../../observability/traces/doc_viewer_span_overview/resources/fields';
-import { transactionFields } from '../../observability/traces/doc_viewer_transaction_overview/resources/fields';
 
 type Args = UnifiedDocViewerStorybookArgs<ContentFrameworkTableProps>;
 const meta = {
@@ -28,7 +45,22 @@ export const APMSpan: Story = {
   name: 'APM Span',
   args: {
     hit: APMSpanFixture,
-    fieldNames: [...spanFields, 'span.name', 'span.id'],
+    fieldNames: [
+      AT_TIMESTAMP,
+      SERVICE_NAME,
+      SPAN_DESTINATION_SERVICE_RESOURCE,
+      HTTP_RESPONSE_STATUS_CODE,
+      SPAN_TYPE,
+      SPAN_SUBTYPE,
+      EVENT_OUTCOME,
+      TRANSACTION_ID,
+      SPAN_DURATION,
+      HOST_NAME,
+      SERVICE_NODE_NAME,
+      TRACE_ID,
+      PARENT_ID,
+      TRANSACTION_ID,
+    ],
     title: 'APM Span data',
   },
 };
@@ -37,7 +69,22 @@ export const APMTransaction: Story = {
   name: 'APM Transaction',
   args: {
     hit: APMTransactionFixture,
-    fieldNames: [...transactionFields, 'transaction.name', 'transaction.id'],
+    fieldNames: [
+      AT_TIMESTAMP,
+      SERVICE_NAME,
+      TRANSACTION_NAME,
+      HTTP_RESPONSE_STATUS_CODE,
+      EVENT_OUTCOME,
+      TRANSACTION_ID,
+      TRANSACTION_DURATION,
+      HOST_NAME,
+      SERVICE_NODE_NAME,
+      TRACE_ID,
+      PARENT_ID,
+      TRANSACTION_ID,
+      AGENT_NAME,
+      AGENT_VERSION,
+    ],
     title: 'APM Transaction data',
   },
 };
