@@ -424,30 +424,28 @@ export function UnifiedHistogramChart({
         </EuiFlexItem>
       )}
 
-      <>
-        {canSaveVisualization && isSaveModalVisible && visContext.attributes && (
-          <LensSaveModalComponent
-            initialInput={removeTablesFromLensAttributes(visContext.attributes)}
-            onSave={() => {}}
-            onClose={() => setIsSaveModalVisible(false)}
-            isSaveable={false}
-          />
-        )}
-        {isFlyoutVisible && !!visContext && !!lensVisServiceCurrentSuggestionContext && (
-          <ChartConfigPanel
-            services={services}
-            visContext={visContext}
-            lensAdapters={lensAdapters}
-            dataLoading$={dataLoading$}
-            isFlyoutVisible={isFlyoutVisible}
-            setIsFlyoutVisible={setIsFlyoutVisible}
-            isPlainRecord={isPlainRecord}
-            query={query}
-            currentSuggestionContext={lensVisServiceCurrentSuggestionContext}
-            onSuggestionContextEdit={onSuggestionContextEdit}
-          />
-        )}
-      </>
+      {canSaveVisualization && isSaveModalVisible && visContext.attributes && (
+        <LensSaveModalComponent
+          initialInput={removeTablesFromLensAttributes(visContext.attributes)}
+          onSave={() => {}}
+          onClose={() => setIsSaveModalVisible(false)}
+          isSaveable={false}
+        />
+      )}
+      {isFlyoutVisible && !!visContext && !!lensVisServiceCurrentSuggestionContext && (
+        <ChartConfigPanel
+          services={services}
+          visContext={visContext}
+          lensAdapters={lensAdapters}
+          dataLoading$={dataLoading$}
+          isFlyoutVisible={isFlyoutVisible}
+          setIsFlyoutVisible={setIsFlyoutVisible}
+          isPlainRecord={isPlainRecord}
+          query={query}
+          currentSuggestionContext={lensVisServiceCurrentSuggestionContext}
+          onSuggestionContextEdit={onSuggestionContextEdit}
+        />
+      )}
     </EuiFlexGroup>
   );
 }
