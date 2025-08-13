@@ -58,6 +58,60 @@ export const FIELD_TYPE_MAP = {
     }),
     readonly: true,
   },
+  constant_keyword: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableConstantKeywordType', {
+      defaultMessage: 'Constant keyword',
+    }),
+    readonly: false,
+  },
+  text: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableTextType', {
+      defaultMessage: 'Text',
+    }),
+    readonly: false,
+  },
+  flattened: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableFlattenedType', {
+      defaultMessage: 'Flattened',
+    }),
+    readonly: false,
+  },
+  float: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableFloatType', {
+      defaultMessage: 'Float',
+    }),
+    readonly: false,
+  },
+  short: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableShortType', {
+      defaultMessage: 'Short',
+    }),
+    readonly: false,
+  },
+  geo_point: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableGeoPointType', {
+      defaultMessage: 'Geo Point',
+    }),
+    readonly: false,
+  },
+  wildcard: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableWildcardType', {
+      defaultMessage: 'Wildcard',
+    }),
+    readonly: false,
+  },
+  nested: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableNestedType', {
+      defaultMessage: 'Nested',
+    }),
+    readonly: false,
+  },
+  version: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableVersionType', {
+      defaultMessage: 'Version',
+    }),
+    readonly: false,
+  },
 } as const;
 
 export type FieldTypeOption = keyof typeof FIELD_TYPE_MAP;

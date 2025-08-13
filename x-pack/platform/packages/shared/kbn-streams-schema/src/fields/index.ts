@@ -12,12 +12,21 @@ import { recursiveRecord } from '../shared/record_types';
 
 export const FIELD_DEFINITION_TYPES = [
   'keyword',
+  'constant_keyword',
   'match_only_text',
   'long',
   'double',
   'date',
   'boolean',
   'ip',
+  'text',
+  'flattened',
+  'float',
+  'short',
+  'geo_point',
+  'wildcard',
+  'nested',
+  'version',
 ] as const;
 
 export type FieldDefinitionType = (typeof FIELD_DEFINITION_TYPES)[number];
