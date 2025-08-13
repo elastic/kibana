@@ -128,7 +128,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(body.analysis.exitSpans.hasMatchingDestinationResources).toBe(true);
           expect(body.analysis.parentRelationships.found).toBe(true);
           expect(body.analysis.parentRelationships.documentCount).toBe(1);
-          expect(body.analysis.parentRelationships.sourceSpanIds.length).toBe(1);
+          expect(body.analysis.parentRelationships.sourceSpanIds.length).toBe(4);
           expect(body.elasticsearchResponses.exitSpansQuery).toBeDefined();
           expect(body.elasticsearchResponses.sourceSpansQuery).toBeDefined();
           expect(body.elasticsearchResponses.destinationParentIdsQuery).toBeDefined();
