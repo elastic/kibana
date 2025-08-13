@@ -17,16 +17,24 @@ import { useKibana } from '../../../../common/lib/kibana';
 type GenericEntityRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type GenericEntityResponse = IKibanaSearchResponse<estypes.SearchResponse<GenericEntityRecord>>;
 
-const fetchGenericEntity = async (
-  dataService: DataPublicPluginStart,
-  { docId, entityId }: { docId: string; entityId: string }
-): Promise<GenericEntityResponse> => {
-  let termQuery;
+// explicitly force to pass either parameter or both
+export type UseGetGenericEntityParams =
+  | { entityDocId: string; entityId?: never }
+  | { entityDocId?: never; entityId: string }
+  | { entityDocId: string; entityId: string };
 
-  if (docId) {
-    termQuery = { _id: docId };
-  } else if (entityId) {
-    termQuery = { 'entity.id': entityId };
+export const fetchGenericEntity = async (
+  dataService: DataPublicPluginStart,
+  { entityDocId, entityId }: UseGetGenericEntityParams
+): Promise<GenericEntityResponse> => {
+  const shouldClauses = [];
+
+  if (entityDocId) {
+    shouldClauses.push({ term: { _id: entityDocId } });
+  }
+
+  if (entityId) {
+    shouldClauses.push({ term: { 'entity.id': entityId } });
   }
 
   return lastValueFrom(
@@ -34,19 +42,24 @@ const fetchGenericEntity = async (
       params: {
         index: ASSET_INVENTORY_INDEX_PATTERN,
         query: {
-          term: termQuery,
+          bool: {
+            should: shouldClauses,
+            minimum_should_match: 1,
+          },
         },
       },
     })
   );
 };
 
-export const useGetGenericEntity = ({ docId, entityId }: { docId: string; entityId: string }) => {
+export const useGetGenericEntity = (params: UseGetGenericEntityParams) => {
   const { data: dataService } = useKibana().services;
 
+  const { entityDocId, entityId } = params;
+
   const getGenericEntity = useQuery({
-    queryKey: ['use-get-generic-entity-key', docId, entityId],
-    queryFn: () => fetchGenericEntity(dataService, { docId, entityId }),
+    queryKey: ['use-get-generic-entity-key', entityDocId, entityId],
+    queryFn: () => fetchGenericEntity(dataService, params),
     select: (response) => response.rawResponse.hits.hits[0], // extracting result out of ES
   });
 

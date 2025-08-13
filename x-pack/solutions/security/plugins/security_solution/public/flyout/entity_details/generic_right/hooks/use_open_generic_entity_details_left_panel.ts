@@ -14,19 +14,16 @@ import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { GenericEntityDetailsPanelKey } from '../../generic_details_left';
 
-export const useOpenGenericEntityDetailsLeftPanel = ({
-  insightsField,
-  insightsValue,
-  entityDocId,
-  entityId,
-  scopeId,
-}: {
-  insightsField: string;
-  insightsValue: string;
-  entityDocId: string;
-  entityId: string;
-  scopeId: string;
-}) => {
+import { type UseGetGenericEntityParams } from './use_get_generic_entity';
+
+export const useOpenGenericEntityDetailsLeftPanel = (
+  params: {
+    insightsField: string;
+    insightsValue: string;
+    scopeId: string;
+  } & UseGetGenericEntityParams
+) => {
+  const { insightsField, insightsValue, entityDocId, entityId, scopeId } = params;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { hasMisconfigurationFindings } = useHasMisconfigurations(insightsField, insightsValue);
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(insightsField, insightsValue);

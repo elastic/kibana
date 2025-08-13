@@ -14,6 +14,7 @@ import {
   type EntityDetailsLeftPanelTab,
   type LeftPanelTabsType,
 } from '../shared/components/left_panel/left_panel_header';
+import type { UseGetGenericEntityParams } from '../generic_right/hooks/use_get_generic_entity';
 import { useGetGenericEntity } from '../generic_right/hooks/use_get_generic_entity';
 import {
   getInsightsInputTab,
@@ -35,11 +36,7 @@ interface BaseGenericEntityDetailsPanelProps {
 }
 
 export type GenericEntityDetailsPanelProps = BaseGenericEntityDetailsPanelProps &
-  (
-    | { entityDocId: string; entityId?: never }
-    | { entityDocId?: never; entityId: string }
-    | { entityDocId: string; entityId: string }
-  ) &
+  UseGetGenericEntityParams &
   Record<string, unknown>;
 
 export interface GenericEntityDetailsExpandableFlyoutProps extends FlyoutPanelProps {
@@ -77,8 +74,6 @@ const useSelectedTab = (params: GenericEntityDetailsPanelProps, tabs: LeftPanelT
 
 export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps) => {
   const {
-    entityDocId,
-    entityId,
     field,
     value,
     hasMisconfigurationFindings,
@@ -86,11 +81,11 @@ export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps
     hasNonClosedAlerts,
     scopeId,
   } = params;
-  // Ensure we have both parameters for the hook
-  const docId = entityDocId || '';
-  const entityIdParam = entityId || '';
 
-  const { getGenericEntity } = useGetGenericEntity({ docId, entityId: entityIdParam });
+  // By passing the entire params object, we maintain the union type constraints that enforce
+  // either entityDocId or entityId to be present
+  // Destructuring of the params to extract the relevant fields happens internally in useGetGenericEntity
+  const { getGenericEntity } = useGetGenericEntity(params);
   const source = getGenericEntity.data?._source;
 
   const tabs: LeftPanelTabsType = useMemo(() => {
