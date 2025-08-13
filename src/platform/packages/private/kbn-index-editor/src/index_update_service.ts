@@ -209,6 +209,8 @@ export class IndexUpdateService {
   // Accumulate updates in buffer with undo
   private bufferState$: Observable<DocUpdate[]> = this._actions$.pipe(
     scan((acc: DocUpdate[], action: Action) => {
+      this._error$.next(null);
+
       switch (action.type) {
         case 'add':
           return [...acc, action.payload];
@@ -350,7 +352,6 @@ export class IndexUpdateService {
     }
 
     return await this.data.dataViews.create({
-      id: indexName,
       title: indexName,
       name: indexName,
       // The index might not exist yet
@@ -412,9 +413,11 @@ export class IndexUpdateService {
             // Clear the buffer after successful update
             this._actions$.next({ type: 'saved', payload: { response, updates } });
 
-            this._isSaving$.next(false);
+            if (response.errors) {
+              this._error$.next(IndexEditorErrors.PARTIAL_SAVING_ERROR);
+            }
 
-            // TODO handle index docs
+            this._isSaving$.next(false);
           },
           error: () => {
             this._error$.next(IndexEditorErrors.GENERIC_SAVING_ERROR);

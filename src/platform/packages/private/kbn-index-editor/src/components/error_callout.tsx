@@ -48,7 +48,7 @@ export const ErrorCallout = () => {
       iconType="error"
       color="danger"
     >
-      {errorMessages[error]}
+      <p>{errorMessages[error]}</p>
     </EuiCallOut>
   ) : null;
 };
