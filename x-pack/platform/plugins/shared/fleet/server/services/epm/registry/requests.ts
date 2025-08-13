@@ -124,7 +124,7 @@ export async function fetchUrl(url: string, retries?: number): Promise<string> {
   try {
     return getResponseStream(url, retries).then(streamToString);
   } catch (error) {
-    logger.warn(`getResponseStream failed with error: ${error}`);
+    logger.warn(`fetchUrl - failed with error: ${error}`);
     throw error;
   }
 }

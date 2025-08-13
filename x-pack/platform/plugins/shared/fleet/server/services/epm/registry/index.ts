@@ -75,12 +75,11 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
 export async function fetchList(
   params?: GetPackagesRequest['query']
 ): Promise<RegistrySearchResults> {
+  const logger = appContextService.getLogger();
   if (airGappedUtils().shouldSkipRegistryRequests) {
-    appContextService
-      .getLogger()
-      .debug(
-        'fetchList: isAirGapped enabled and no registryUrl or RegistryProxyUrl configured, skipping registry requests'
-      );
+    logger.debug(
+      'fetchList: isAirGapped enabled and no registryUrl or RegistryProxyUrl configured, skipping registry requests'
+    );
     return [];
   }
 
@@ -133,6 +132,7 @@ async function _fetchFindLatestPackage(
         const latestPackageFromRegistry = searchResults[0] ?? null;
 
         if (bundledPackage && !latestPackageFromRegistry) {
+          logger.debug(`_fetchFindLatestPackage - Use bundled package of ${packageName}`);
           return bundledPackage;
         }
 
@@ -157,6 +157,7 @@ async function _fetchFindLatestPackage(
 
       // Fall back to the bundled version of the package if it exists
       if (bundledPackage) {
+        logger.debug(`_fetchFindLatestPackage - Fall back on bundled package of ${packageName}`);
         return bundledPackage;
       }
 
@@ -257,15 +258,17 @@ export async function getFile(
 }
 
 export async function fetchFile(filePath: string): Promise<Response | null> {
+  const logger = appContextService.getLogger();
+
   if (airGappedUtils().shouldSkipRegistryRequests) {
-    appContextService
-      .getLogger()
-      .debug(
-        'fetchFile: isAirGapped enabled and no registryUrl or RegistryProxyUrl configured, skipping registry requests'
-      );
+    logger.debug(
+      'fetchFile: isAirGapped enabled and no registryUrl or RegistryProxyUrl configured, skipping registry requests'
+    );
     return null;
   }
   const registryUrl = getRegistryUrl();
+  logger.debug(`fetchFile getting url: ${registryUrl}`);
+
   return getResponse(`${registryUrl}${filePath}`);
 }
 
