@@ -17,9 +17,9 @@ import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import {
-  UiActionsEnhancedMemoryActionStorage,
-  UiActionsEnhancedDynamicActionManager,
-} from '@kbn/ui-actions-enhanced-plugin/public';
+  MemoryActionStorage as UiActionsEnhancedMemoryActionStorage,
+  DynamicActionManager as UiActionsEnhancedDynamicActionManager,
+} from '@kbn/ui-actions-enhanced-dynamic-actions-public';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';

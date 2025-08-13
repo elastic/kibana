@@ -10,10 +10,8 @@ import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
-import type {
-  UiActionsEnhancedDrilldownDefinition as Drilldown,
-  UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
-} from '@kbn/ui-actions-enhanced-plugin/public';
+import type { UiActionsEnhancedDrilldownDefinition as Drilldown } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { BaseActionFactoryContext } from '@kbn/ui-actions-enhanced-dynamic-actions-public';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';

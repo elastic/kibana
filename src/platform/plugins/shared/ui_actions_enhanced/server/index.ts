@@ -28,4 +28,4 @@ export type {
   BaseActionConfig as UiActionsEnhancedBaseActionConfig,
   SerializedAction as UiActionsEnhancedSerializedAction,
   SerializedEvent as UiActionsEnhancedSerializedEvent,
-} from '../common/types';
+} from '@kbn/ui-actions-enhanced-dynamic-actions-common';

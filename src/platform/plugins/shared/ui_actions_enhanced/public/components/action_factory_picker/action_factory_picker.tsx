@@ -8,7 +8,10 @@
  */
 
 import React from 'react';
-import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
+import {
+  ActionFactory,
+  BaseActionFactoryContext,
+} from '@kbn/ui-actions-enhanced-dynamic-actions-public';
 import { PresentablePicker, Item } from '../presentable_picker';
 
 export interface ActionFactoryPickerProps {

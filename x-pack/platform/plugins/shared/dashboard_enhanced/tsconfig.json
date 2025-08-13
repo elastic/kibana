@@ -22,7 +22,9 @@
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/deeplinks-analytics",
-    "@kbn/presentation-util"
+    "@kbn/presentation-util",
+    "@kbn/ui-actions-enhanced-dynamic-actions-common",
+    "@kbn/ui-actions-enhanced-dynamic-actions-public"
   ],
   "exclude": ["target/**/*"]
 }

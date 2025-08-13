@@ -23,7 +23,6 @@ import { ActionExecutionContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugi
 import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider, UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import {
-  UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
   UiActionsEnhancedDrilldownDefinition as Drilldown,
   UrlDrilldownCollectConfig,
   urlDrilldownCompileUrl,
@@ -31,7 +30,8 @@ import {
   UrlDrilldownGlobalScope,
   urlDrilldownValidateUrlTemplate,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import type { SerializedAction } from '@kbn/ui-actions-enhanced-plugin/common/types';
+import type { SerializedAction } from '@kbn/ui-actions-enhanced-dynamic-actions-common';
+import type { BaseActionFactoryContext } from '@kbn/ui-actions-enhanced-dynamic-actions-public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { EuiText, EuiTextBlockTruncate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

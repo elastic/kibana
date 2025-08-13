@@ -1,0 +1,67 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Configurable } from '@kbn/kibana-utils-plugin/public';
+import type { LicenseType } from '@kbn/licensing-plugin/public';
+import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { Presentable } from '@kbn/ui-actions-browser';
+import type { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import type {
+  BaseActionConfig,
+  SerializedAction,
+  SerializedEvent,
+} from '@kbn/ui-actions-enhanced-dynamic-actions-common';
+import type { BaseActionFactoryContext } from './types';
+
+/**
+ * This is a convenience interface for registering new action factories.
+ */
+export interface ActionFactoryDefinition<
+  Config extends BaseActionConfig = BaseActionConfig,
+  ExecutionContext extends object = object,
+  FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+> extends Partial<Omit<Presentable<FactoryContext>, 'getHref'>>,
+    Configurable<Config, FactoryContext>,
+    PersistableStateDefinition<SerializedEvent> {
+  /**
+   * Unique ID of the action factory. This ID is used to identify this action
+   * factory in the registry as well as to construct actions of this type and
+   * identify this action factory when presenting it to the user in UI.
+   */
+  id: string;
+
+  /**
+   * Minimal license level
+   * Empty means no license restrictions
+   */
+  readonly minimalLicense?: LicenseType;
+
+  /**
+   * Required when `minimalLicense` is used.
+   * Is a user-facing string. Has to be unique. Doesn't need i18n.
+   * The feature's name will be displayed to Cloud end-users when they're billed based on their feature usage.
+   */
+  licenseFeatureName?: string;
+
+  /**
+   * Is this action factory not GA?
+   * Adds a beta badge on a list item representing this ActionFactory
+   */
+  readonly isBeta?: boolean;
+
+  /**
+   * This method should return a definition of a new action, normally used to
+   * register it in `ui_actions` registry.
+   */
+  create(
+    serializedAction: Omit<SerializedAction<Config>, 'factoryId'>
+  ): ActionDefinition<ExecutionContext>;
+
+  supportedTriggers(): string[];
+}

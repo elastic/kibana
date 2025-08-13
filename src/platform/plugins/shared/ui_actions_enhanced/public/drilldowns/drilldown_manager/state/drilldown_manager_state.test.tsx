@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionFactory, MemoryActionStorage } from '../../../dynamic_actions';
+import {
+  ActionFactory,
+  MemoryActionStorage,
+} from '@kbn/ui-actions-enhanced-dynamic-actions-public';
 import { DrilldownManagerState, DrilldownManagerStateDeps } from './drilldown_manager_state';
-import { DynamicActionManager } from '../../../dynamic_actions/dynamic_action_manager';
+import { DynamicActionManager } from '@kbn/ui-actions-enhanced-dynamic-actions-public';
 import { uiActionsEnhancedPluginMock } from '../../../mocks';
 import { AdvancedUiActionsStart } from '../../..';
 import { Trigger } from '@kbn/ui-actions-plugin/public';

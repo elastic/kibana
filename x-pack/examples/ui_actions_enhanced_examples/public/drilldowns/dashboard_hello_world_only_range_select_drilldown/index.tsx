@@ -10,7 +10,7 @@ import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '@kbn/ui-actions-enhanced-plugin/public';
 import { RangeSelectContext, SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
-import { BaseActionFactoryContext } from '@kbn/ui-actions-enhanced-plugin/public/dynamic_actions';
+import { BaseActionFactoryContext } from '@kbn/ui-actions-enhanced-dynamic-actions-public';
 
 export type Config = {
   name: string;

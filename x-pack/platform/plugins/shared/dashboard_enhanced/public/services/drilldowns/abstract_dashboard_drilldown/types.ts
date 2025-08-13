@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { UiActionsEnhancedBaseActionFactoryContext } from '@kbn/ui-actions-enhanced-plugin/public';
+import { BaseActionFactoryContext } from '@kbn/ui-actions-enhanced-dynamic-actions-public';
 import { DashboardDrilldownConfig } from '../../../../common';
 
 export type Config = DashboardDrilldownConfig;
 
-export type FactoryContext = UiActionsEnhancedBaseActionFactoryContext;
+export type FactoryContext = BaseActionFactoryContext;

@@ -8,9 +8,9 @@
 import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   DynamicActionsState,
-  UiActionsEnhancedAbstractActionStorage as AbstractActionStorage,
-  UiActionsEnhancedSerializedEvent as SerializedEvent,
-} from '@kbn/ui-actions-enhanced-plugin/public';
+  SerializedEvent,
+} from '@kbn/ui-actions-enhanced-dynamic-actions-common';
+import { AbstractActionStorage } from '@kbn/ui-actions-enhanced-dynamic-actions-public';
 import { HasDynamicActions } from './interfaces/has_dynamic_actions';
 
 export type DynamicActionStorageApi = Pick<

@@ -12,10 +12,12 @@ import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs';
 import {
   ActionFactory,
-  BaseActionConfig,
   BaseActionFactoryContext,
+} from '@kbn/ui-actions-enhanced-dynamic-actions-public/src';
+import {
+  BaseActionConfig,
   SerializedAction,
-} from '../../../dynamic_actions';
+} from '@kbn/ui-actions-enhanced-dynamic-actions-common';
 import { useSyncObservable } from '../hooks/use_sync_observable';
 import { ActionFactoryPlaceContext } from '../types';
 

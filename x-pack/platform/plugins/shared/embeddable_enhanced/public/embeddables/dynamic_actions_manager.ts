@@ -11,10 +11,8 @@ import {
   SerializedPanelState,
   StateComparators,
 } from '@kbn/presentation-publishing';
-import {
-  UiActionsEnhancedDynamicActionManager as DynamicActionManager,
-  DynamicActionsState,
-} from '@kbn/ui-actions-enhanced-plugin/public';
+import { DynamicActionManager } from '@kbn/ui-actions-enhanced-dynamic-actions-public';
+import { DynamicActionsState } from '@kbn/ui-actions-enhanced-dynamic-actions-common';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, map } from 'rxjs';
 import { DynamicActionStorage, type DynamicActionStorageApi } from './dynamic_action_storage';

@@ -7,7 +7,7 @@
 
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { EmbeddableApiContext, ViewMode } from '@kbn/presentation-publishing';
-import { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
+import { SerializedEvent } from '@kbn/ui-actions-enhanced-dynamic-actions-common';
 import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   UiActionsEnhancedMemoryActionStorage as MemoryActionStorage,

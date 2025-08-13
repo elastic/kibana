@@ -14,7 +14,7 @@ import {
   ActionFactory,
   BaseActionFactoryContext,
   DynamicActionManager,
-} from '../../dynamic_actions';
+} from '@kbn/ui-actions-enhanced-dynamic-actions-public';
 
 /**
  * Interface used as piece of ActionFactoryContext that is passed in from

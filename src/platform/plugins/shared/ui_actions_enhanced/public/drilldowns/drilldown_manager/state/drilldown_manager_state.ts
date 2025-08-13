@@ -12,17 +12,17 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { useMemo } from 'react';
+
+import {
+  ActionFactory,
+  BaseActionFactoryContext,
+} from '@kbn/ui-actions-enhanced-dynamic-actions-public';
+import { SerializedAction, SerializedEvent } from '@kbn/ui-actions-enhanced-dynamic-actions-common';
 import {
   PublicDrilldownManagerProps,
   DrilldownManagerDependencies,
   DrilldownTemplate,
 } from '../types';
-import {
-  ActionFactory,
-  BaseActionFactoryContext,
-  SerializedAction,
-  SerializedEvent,
-} from '../../../dynamic_actions';
 import { DrilldownState } from './drilldown_state';
 import {
   toastDrilldownCreated,

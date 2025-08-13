@@ -8,9 +8,12 @@
  */
 
 import React from 'react';
-import { ActionFactory as ActionFactoryUi } from '../../components/action_factory';
-import { ActionFactory, BaseActionFactoryContext } from '../../../../dynamic_actions';
+import {
+  ActionFactory,
+  BaseActionFactoryContext,
+} from '@kbn/ui-actions-enhanced-dynamic-actions-public';
 import { useDrilldownManager } from '../context';
+import { ActionFactory as ActionFactoryUi } from '../../components/action_factory';
 
 export interface ActionFactoryViewProps {
   factory: ActionFactory;
