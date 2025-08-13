@@ -48,6 +48,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     workflowLogger = {
       logInfo: jest.fn(),
+      logWarn: jest.fn(),
+      logDebug: jest.fn(),
+      logError: jest.fn(),
     } as unknown as IWorkflowEventLogger;
 
     workflowExecutionState = {

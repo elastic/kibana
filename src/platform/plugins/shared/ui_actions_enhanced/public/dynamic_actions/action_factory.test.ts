@@ -10,7 +10,7 @@
 import { ActionFactory } from './action_factory';
 import { ActionFactoryDefinition } from './action_factory_definition';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { PublicLicense } from '@kbn/licensing-plugin/public';
+import { PublicLicense } from '@kbn/licensing-types';
 
 const def: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',
