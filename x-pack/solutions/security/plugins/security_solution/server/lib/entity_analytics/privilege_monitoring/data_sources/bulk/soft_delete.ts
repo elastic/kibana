@@ -29,7 +29,7 @@ export const bulkSoftDeleteOperationsFactory =
   (dataClient: PrivilegeMonitoringDataClient) =>
   (users: PrivMonBulkUser[], userIndexName: string): object[] => {
     const ops: object[] = [];
-    dataClient.log('info', `Building bulk operations for soft delete users`);
+    dataClient.log('debug', `Building bulk operations for soft delete users`);
     for (const user of users) {
       ops.push(
         { update: { _index: userIndexName, _id: user.existingUserId } },

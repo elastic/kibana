@@ -150,7 +150,7 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
       const existingUserMap = new Map<string, string | undefined>();
       for (const hit of existingUserRes.hits.hits) {
         const username = hit._source?.user?.name;
-        dataClient.log('info', `Found existing user: ${username} with ID: ${hit._id}`);
+        dataClient.log('debug', `Found existing user: ${username} with ID: ${hit._id}`);
         if (username) existingUserMap.set(username, hit._id);
       }
 

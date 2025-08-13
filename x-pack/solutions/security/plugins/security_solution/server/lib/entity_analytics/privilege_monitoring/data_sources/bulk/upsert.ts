@@ -33,7 +33,7 @@ export const bulkUpsertOperationsFactory =
       if (user.existingUserId) {
         // Update user with painless script
         dataClient.log(
-          'info',
+          'debug',
           `Updating existing user: ${user.username} with ID: ${user.existingUserId}`
         );
         ops.push(
@@ -56,7 +56,10 @@ export const bulkUpsertOperationsFactory =
         );
       } else {
         // New user — create
-        dataClient.log('info', `Creating new user: ${user.username} with index: ${user.indexName}`);
+        dataClient.log(
+          'debug',
+          `Creating new user: ${user.username} with index: ${user.indexName}`
+        );
         ops.push(
           { index: { _index: userIndexName } },
           {
@@ -69,6 +72,6 @@ export const bulkUpsertOperationsFactory =
         );
       }
     }
-    dataClient.log('info', `Built ${ops.length} bulk operations for users`);
+    dataClient.log('debug', `Built ${ops.length} bulk operations for users`);
     return ops;
   };
