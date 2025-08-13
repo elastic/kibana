@@ -16,7 +16,6 @@ import { SvlDataUsagePageProvider } from '@kbn/test-suites-xpack-platform/server
 import { SvlCustomRolesPageProvider } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects/svl_custom_roles_page';
 import { SvlRuleDetailsPageProvider } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects/svl_rule_details_ui_page';
 import { SvlTriggersActionsPageProvider } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects/svl_triggers_actions_ui_page';
-import { SvlObltOverviewPageProvider } from './svl_oblt_overview_page';
 import { SvlSecLandingPageProvider } from './svl_sec_landing_page';
 import { CspDashboardPageProvider } from './csp_dashboard_page';
 import { AddCisIntegrationFormPageProvider } from './add_cis_integration_form_page';
@@ -27,7 +26,6 @@ export const pageObjects = {
 
   svlCommonPage: SvlCommonPageProvider,
   svlCommonNavigation: SvlCommonNavigationProvider,
-  svlObltOverviewPage: SvlObltOverviewPageProvider,
   svlSecLandingPage: SvlSecLandingPageProvider,
   svlTriggersActionsUI: SvlTriggersActionsPageProvider,
   svlRuleDetailsUI: SvlRuleDetailsPageProvider,
