@@ -92,7 +92,6 @@ export function getSuggestion(
 ): monaco.languages.CompletionItem {
   let keyToInsert = key;
   const isAt = context.triggerCharacter === '@';
-  const isBracket = context.triggerCharacter === '{';
   const keyCouldAccessedByDot = PROPERTY_PATH_REGEX.test(key);
   const removeDot = isAt || !keyCouldAccessedByDot;
 
@@ -106,10 +105,6 @@ export function getSuggestion(
   let insertTextRules = monaco.languages.CompletionItemInsertTextRule.None;
   if (isAt) {
     insertText = `{{ ${key}$0 }}`;
-    insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
-  } else if (isBracket) {
-    // monaco-editor automatically adds a closing bracket, so we need to add only inner brackets
-    insertText = `{ ${key}$0 }`;
     insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
   }
   if (shouldBeQuoted) {
