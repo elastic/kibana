@@ -54,6 +54,7 @@
     "@kbn/security-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/sse-utils",
-    "@kbn/ai-tools"
+    "@kbn/ai-tools",
+    "@kbn/licensing-types"
   ]
 }

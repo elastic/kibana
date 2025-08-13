@@ -127,7 +127,7 @@ describe('Alerts', () => {
 
     const result = await chatClient.evaluate(conversation, [
       'Uses the get_alerts_dataset_info function',
-      'Correctly uses the alerts function without a filter',
+      'Correctly uses the alerts function',
       'Returns two alerts related to threshold',
       'After the second question, uses alerts function to filtering on service.name my-service to retrieve active alerts for that service. The filter should be `service.name:"my-service"` or `service.name:my-service`.',
       'Summarizes the active alerts for the `my-service` service',

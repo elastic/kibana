@@ -8,7 +8,7 @@
 import { AlertInstanceContext, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { LicenseType } from '@kbn/licensing-plugin/server';
+import { LicenseType } from '@kbn/licensing-types';
 import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { PersistenceAlertType } from '@kbn/rule-registry-plugin/server';
 import { STREAMS_PRODUCER, STREAMS_RULE_REGISTRATION_CONTEXT } from '../../../../common/constants';
