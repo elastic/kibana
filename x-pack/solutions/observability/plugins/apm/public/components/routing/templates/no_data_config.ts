@@ -46,7 +46,7 @@ function getNoDataConfigDetails({
     title: i18n.translate('xpack.apm.noDataConfig.addApmIntegrationButtonLabel', {
       defaultMessage: 'Add the APM integration',
     }),
-    href: `${basePath}/app/apm/tutorial`,
+    href: `${basePath}/app/integrations/detail/apm/overview`,
     description,
     button: i18n.translate('xpack.apm.noDataConfig.addApmIntegrationButtonLabel', {
       defaultMessage: 'Add the APM integration',

@@ -75,7 +75,11 @@ describe('KibanaPageTemplate', () => {
   test('renders noDataConfig with solutionNav', () => {
     renderWithI18n(
       <NoDataCardProvider {...getNoDataCardServicesMock()}>
-        <KibanaPageTemplate noDataConfig={noDataConfig} solutionNav={solutionNav} />
+        <KibanaPageTemplate
+          noDataConfig={noDataConfig}
+          solutionNav={solutionNav}
+          data-test-subj="noDataConfigPageWithSolutionNavBar"
+        />
       </NoDataCardProvider>
     );
 
@@ -85,7 +89,7 @@ describe('KibanaPageTemplate', () => {
   test('renders noDataConfig without solutionNav', () => {
     renderWithI18n(
       <NoDataCardProvider {...getNoDataCardServicesMock()}>
-        <KibanaPageTemplate noDataConfig={noDataConfig} />
+        <KibanaPageTemplate noDataConfig={noDataConfig} data-test-subj="noDataConfigPage" />
       </NoDataCardProvider>
     );
 
@@ -102,6 +106,7 @@ describe('KibanaPageTemplate', () => {
           rightSideItems: [<div key="test">test</div>],
         }}
         solutionNav={solutionNav}
+        data-test-subj="testPageTemplate"
       >
         <div>Child element</div>
       </KibanaPageTemplate>
@@ -110,5 +115,6 @@ describe('KibanaPageTemplate', () => {
     // Should render the solution nav
     expect(screen.getByText('Kibana')).toBeInTheDocument();
     expect(screen.getByText('Child element')).toBeInTheDocument();
+    expect(screen.getByTestId('testPageTemplate')).toBeInTheDocument();
   });
 });

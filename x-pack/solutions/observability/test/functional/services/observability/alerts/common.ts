@@ -158,7 +158,7 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const getNoDataPageOrFail = async () => {
-    return await testSubjects.existOrFail('kbnNoDataPage');
+    return await testSubjects.existOrFail('NoDataPage');
   };
 
   const getNoDataStateOrFail = async () => {
