@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { VectorLayerDescriptor } from '@kbn/maps-plugin/common';
+import type { EMSFileSourceDescriptor, VectorLayerDescriptor } from '@kbn/maps-plugin/common';
 import {
   FIELD_ORIGIN,
   LAYER_TYPE,
@@ -18,7 +18,7 @@ import {
   STYLE_TYPE,
   COLOR_MAP_TYPE,
 } from '@kbn/maps-plugin/common';
-import type { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
+import type { EMSTermJoinConfig, TableSourceDescriptor } from '@kbn/maps-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { useDataVisualizerKibana } from '../../../../../kibana_context';
 import type { FieldVisStats } from '../../../../../../../common/types';
@@ -55,13 +55,13 @@ export const getChoroplethTopValuesLayer = (
           ],
           // Right join/term is the field in the doc you’re trying to join it to (foreign key - e.g. US)
           term: 'key',
-        },
+        } as TableSourceDescriptor,
       },
     ],
     sourceDescriptor: {
       type: 'EMS_FILE',
       id: layerId,
-    },
+    } as EMSFileSourceDescriptor,
     style: {
       type: 'VECTOR',
       // @ts-ignore missing style properties. Remove once 'VectorLayerDescriptor' type is updated

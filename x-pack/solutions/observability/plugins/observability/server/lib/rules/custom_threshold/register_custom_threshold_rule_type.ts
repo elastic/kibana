@@ -12,7 +12,7 @@ import { IRuleTypeAlerts, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-pl
 import { IBasePath, Logger } from '@kbn/core/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { LicenseType } from '@kbn/licensing-plugin/server';
+import { LicenseType } from '@kbn/licensing-types';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
 import { customThresholdParamsSchema } from '@kbn/response-ops-rule-params/custom_threshold';
 import { observabilityFeatureId, observabilityPaths } from '../../../../common';
