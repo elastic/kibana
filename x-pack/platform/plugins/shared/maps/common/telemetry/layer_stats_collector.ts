@@ -63,8 +63,9 @@ export class LayerStatsCollector {
       if (layerDescriptor.type) {
         this._updateCounts(layerDescriptor.type, this._layerTypeCounts);
       }
-      if (layerDescriptor.sourceDescriptor?.id) {
-        this._sourceIds.add(layerDescriptor.sourceDescriptor.id);
+      const sourceId = (layerDescriptor.sourceDescriptor as { id?: string })?.id;
+      if (sourceId) {
+        this._sourceIds.add(sourceId);
       }
     });
   }
