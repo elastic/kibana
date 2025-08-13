@@ -13,13 +13,11 @@ import { useAgentId, useHasActiveConversation } from '../../../hooks/use_convers
 import { useConversationActions } from '../../../hooks/use_conversation_actions';
 import { AgentDisplay } from '../agent_display';
 import { AgentSelectDropdown } from '../agent_select_dropdown';
-// No context used here; props are provided by the form
-
+import { useSendMessage } from '../../../context/send_message_context';
 interface ConversationInputActionsProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
-  canCancel: boolean;
-  onCancel: () => void;
+  resetToPendingMessage: () => void;
 }
 
 const labels = {
@@ -34,12 +32,12 @@ const labels = {
 export const ConversationInputActions: React.FC<ConversationInputActionsProps> = ({
   onSubmit,
   isSubmitDisabled,
-  canCancel,
-  onCancel,
+  resetToPendingMessage,
 }) => {
   const { setAgentId } = useConversationActions();
   const agentId = useAgentId();
   const hasActiveConversation = useHasActiveConversation();
+  const { canCancel, cancel } = useSendMessage();
   const { euiTheme } = useEuiTheme();
   const cancelButtonStyles = css`
     background-color: ${euiTheme.colors.backgroundLightText};
@@ -68,7 +66,12 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
               size="m"
               color="text"
               css={cancelButtonStyles}
-              onClick={onCancel}
+              onClick={() => {
+                if (canCancel) {
+                  cancel();
+                  resetToPendingMessage();
+                }
+              }}
             />
           ) : (
             <EuiButtonIcon

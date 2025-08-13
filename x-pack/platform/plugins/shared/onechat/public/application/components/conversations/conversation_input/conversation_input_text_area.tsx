@@ -32,14 +32,14 @@ const textareaStyles = css`
 `;
 
 interface ConversationInputTextAreaProps {
-  message: string;
-  setMessage: (message: string) => void;
+  input: string;
+  setInput: (input: string) => void;
   onSubmit: () => void;
 }
 
 export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps> = ({
-  message,
-  setMessage,
+  input,
+  setInput,
   onSubmit,
 }) => {
   const conversationId = useConversationId();
@@ -60,9 +60,9 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
         })}
         css={textareaStyles}
         data-test-subj="onechatAppConversationInputFormTextArea"
-        value={message}
+        value={input}
         onChange={(event) => {
-          setMessage(event.currentTarget.value);
+          setInput(event.currentTarget.value);
         }}
         onKeyDown={(event) => {
           if (!event.shiftKey && event.key === keys.ENTER) {

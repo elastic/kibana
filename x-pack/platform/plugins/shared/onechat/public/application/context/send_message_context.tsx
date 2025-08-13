@@ -179,18 +179,20 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
   const { sendMessage, isResponseLoading, error, pendingMessage, retry, canCancel, cancel } =
     useSendMessageMutation();
 
-  const sendMessageValue = {
-    sendMessage,
-    isResponseLoading,
-    error,
-    pendingMessage,
-    retry,
-    canCancel,
-    cancel,
-  };
-
   return (
-    <SendMessageContext.Provider value={sendMessageValue}>{children}</SendMessageContext.Provider>
+    <SendMessageContext.Provider
+      value={{
+        sendMessage,
+        isResponseLoading,
+        error,
+        pendingMessage,
+        retry,
+        canCancel,
+        cancel,
+      }}
+    >
+      {children}
+    </SendMessageContext.Provider>
   );
 };
 

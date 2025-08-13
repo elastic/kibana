@@ -26,7 +26,7 @@ const fullHeightStyles = css`
 export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
   const isSendingMessage = useIsSendingMessage();
   const [input, setInput] = useState('');
-  const { sendMessage, canCancel, cancel, pendingMessage } = useSendMessage();
+  const { sendMessage, pendingMessage } = useSendMessage();
   const { euiTheme } = useEuiTheme();
   const isSubmitDisabled = !input.trim() || isSendingMessage;
 
@@ -68,16 +68,14 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
           defaultMessage: 'Message input form',
         })}
       >
-        <ConversationInputTextArea message={input} setMessage={setInput} onSubmit={handleSubmit} />
+        <ConversationInputTextArea input={input} setInput={setInput} onSubmit={handleSubmit} />
         <ConversationInputActions
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
-          canCancel={canCancel}
-          onCancel={() => {
+          resetToPendingMessage={() => {
             if (pendingMessage) {
               setInput(pendingMessage);
             }
-            cancel();
           }}
         />
       </EuiFlexGroup>
