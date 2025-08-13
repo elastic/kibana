@@ -39,6 +39,6 @@ export const IM_DOES_NOT_MATCH_TOUR_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.imDoesNotMatchTourDescription',
   {
     defaultMessage:
-      'Use new DOES NOT MATCH condition in Indicator Match rule to find events that are not matching values in indicator index.',
+      'Now, you can find events that don't match values in your indicator index.',
   }
 );
