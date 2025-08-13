@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { LicenseType } from '@kbn/licensing-types';
 import { RepositoryType } from './types';
 
 const basicLicense: LicenseType = 'basic';

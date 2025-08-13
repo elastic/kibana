@@ -6,9 +6,40 @@
  */
 
 export type * from './data_request_descriptor_types';
-export type * from './source_descriptor_types';
 export type * from './layer_descriptor_types';
 export type * from './map_descriptor';
 export type * from './style_property_descriptor_types';
 
-export type { HeatmapStyleDescriptor } from '../../server';
+export type {
+  //
+  // Source types
+  //
+  AggDescriptor,
+  CountAggDescriptor,
+  FieldedAggDescriptor,
+  PercentileAggDescriptor,
+  AbstractESAggSourceDescriptor,
+  AbstractESJoinSourceDescriptor,
+  AbstractESSourceDescriptor,
+  EMSFileSourceDescriptor,
+  EMSTMSSourceDescriptor,
+  ESGeoGridSourceDescriptor,
+  ESGeoLineSourceDescriptor,
+  ESPewPewSourceDescriptor,
+  ESSearchSourceDescriptor,
+  ESQLSourceDescriptor,
+  ESDistanceSourceDescriptor,
+  ESTermSourceDescriptor,
+  KibanaTilemapSourceDescriptor,
+  WMSSourceDescriptor,
+  XYZTMSSourceDescriptor,
+  MVTFieldDescriptor,
+  TiledSingleLayerVectorSourceDescriptor,
+  JoinSourceDescriptor,
+  SourceDescriptor,
+
+  //
+  // Style types
+  //
+  HeatmapStyleDescriptor,
+} from '../../server';

@@ -26,7 +26,7 @@ import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React, { useCallback, useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { transformEsqlToolToFormData } from '../../../utils/transform_esql_form_data';
-import { OnechatEsqlToolForm } from './form/esql_tool_form';
+import { OnechatEsqlToolForm, OnechatEsqlToolFormMode } from './form/esql_tool_form';
 import { OnechatEsqlToolFormData } from './form/types/esql_tool_form_types';
 import { useEsqlToolFormValidationResolver } from './form/validation/esql_tool_form_validation';
 
@@ -63,13 +63,8 @@ const flyoutBodyClass = (euiTheme: EuiThemeComputed) =>
     }
   `;
 
-export enum OnechatEsqlToolFlyoutMode {
-  Create = 'create',
-  Edit = 'edit',
-}
-
 export interface OnechatEsqlToolFlyoutProps {
-  mode: OnechatEsqlToolFlyoutMode;
+  mode: OnechatEsqlToolFormMode;
   isOpen: boolean;
   isSubmitting: boolean;
   isLoading?: boolean;
@@ -163,7 +158,7 @@ export const OnechatEsqlToolFlyout: React.FC<OnechatEsqlToolFlyoutProps> = ({
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 id={esqlToolFlyoutTitleId}>
-              {mode === OnechatEsqlToolFlyoutMode.Create
+              {mode === OnechatEsqlToolFormMode.Create
                 ? i18n.translate('xpack.onechat.tools.newEsqlTool.title', {
                     defaultMessage: 'New ES|QL tool',
                   })
@@ -179,7 +174,7 @@ export const OnechatEsqlToolFlyout: React.FC<OnechatEsqlToolFlyoutProps> = ({
               <EuiLoadingSpinner size="xxl" />
             </EuiFlexGroup>
           ) : (
-            <OnechatEsqlToolForm formId={esqlToolFormId} saveTool={saveTool} />
+            <OnechatEsqlToolForm mode={mode} formId={esqlToolFormId} saveTool={saveTool} />
           )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

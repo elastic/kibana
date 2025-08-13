@@ -33,34 +33,33 @@ export const MetricsAndGroupByToolbarItems = ({
 }: Props) => {
   const inventoryModel = findInventoryModel(props.nodeType);
   const { featureFlags } = usePluginConfig();
-  const { data: timeRangeMetadata, loading } = useTimeRangeMetadataContext();
+  const { data: timeRangeMetadata, loading = false } = useTimeRangeMetadataContext();
 
   const schemas: DataSchemaFormat[] = useMemo(
     () => timeRangeMetadata?.schemas || [],
-    [timeRangeMetadata]
+    [timeRangeMetadata?.schemas]
   );
 
   useEffect(() => {
     if (
+      !featureFlags.hostOtelEnabled ||
       !allowSchemaSelection ||
-      !timeRangeMetadata ||
-      schemas.length === 0 ||
-      !featureFlags.hostOtelEnabled
+      !timeRangeMetadata?.preferredSchema ||
+      schemas.length === 0
     ) {
       return;
     }
 
-    const current = preferredSchema;
-    if (current === null) {
+    if (preferredSchema === null) {
       changePreferredSchema(timeRangeMetadata.preferredSchema);
     }
   }, [
     allowSchemaSelection,
     changePreferredSchema,
-    featureFlags.hostOtelEnabled,
     preferredSchema,
+    featureFlags.hostOtelEnabled,
     schemas,
-    timeRangeMetadata,
+    timeRangeMetadata?.preferredSchema,
   ]);
 
   const { value: aggregations } = useAsync(
@@ -114,7 +113,7 @@ export const MetricsAndGroupByToolbarItems = ({
           <SchemaSelector
             value={preferredSchema ?? 'ecs'}
             schemas={schemas}
-            isLoading={loading ?? false}
+            isLoading={loading}
             onChange={changePreferredSchema}
           />
         </EuiFlexItem>
