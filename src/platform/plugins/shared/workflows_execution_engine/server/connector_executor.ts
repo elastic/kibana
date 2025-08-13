@@ -9,7 +9,7 @@
 
 import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import uuid from 'uuid';
+import { validate as validateUuid } from 'uuid';
 
 export class ConnectorExecutor {
   constructor(private actionsClient: IUnsecuredActionsClient) {}
@@ -32,7 +32,7 @@ export class ConnectorExecutor {
   ): Promise<ActionTypeExecutorResult<unknown>> {
     let connectorId: string;
 
-    if (uuid.validate(connectorName)) {
+    if (validateUuid(connectorName)) {
       connectorId = connectorName;
     } else {
       const allConnectors = await this.actionsClient.getAll('default');
