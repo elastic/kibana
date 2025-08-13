@@ -85,7 +85,6 @@ export function AddPageAttachmentToCaseModal({
 function AddToCaseButtonContent({
   pageAttachmentState,
   cases,
-  notifications,
   onCloseModal,
 }: AddPageAttachmentToCaseModalProps) {
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(true);
