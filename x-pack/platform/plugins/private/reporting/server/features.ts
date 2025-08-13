@@ -67,6 +67,7 @@ export function registerFeatures({ isServerless, features }: FeatureRegistration
               excludeFromBasePrivileges: true,
               app: [],
               catalogue: [],
+              management: { insightsAndAlerting: ['reporting'] },
               savedObject: { all: [], read: [] },
               api: ['generateReport', 'downloadCsv'], // NOTE: this was carried over from x-pack/platform/plugins/shared/features/server/oss_features.ts:850, but 'downloadCsv' is not used as an access control tag for any API endpoint. Remove it from here?
               ui: ['generateReport'],
