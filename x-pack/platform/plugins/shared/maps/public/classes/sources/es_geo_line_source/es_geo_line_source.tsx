@@ -66,10 +66,15 @@ export const REQUIRES_GOLD_LICENSE_MSG = i18n.translate(
   }
 );
 
+type NormalizedGeoLineDescriptor = ESGeoLineSourceDescriptor &
+  Required<
+    Pick<ESGeoLineSourceDescriptor, 'groupByTimeseries' | 'lineSimplificationSize' | 'metrics'>
+  >;
+
 export class ESGeoLineSource extends AbstractESAggSource {
   static createDescriptor(
     descriptor: Partial<ESGeoLineSourceDescriptor>
-  ): ESGeoLineSourceDescriptor {
+  ): NormalizedGeoLineDescriptor {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(
       descriptor
     ) as ESGeoLineSourceDescriptor;
@@ -94,10 +99,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
       geoField: normalizedDescriptor.geoField!,
       splitField: normalizedDescriptor.splitField,
       sortField: normalizedDescriptor.sortField,
-    };
+    } as NormalizedGeoLineDescriptor;
   }
 
-  readonly _descriptor: ESGeoLineSourceDescriptor;
+  readonly _descriptor: NormalizedGeoLineDescriptor;
 
   constructor(descriptor: Partial<ESGeoLineSourceDescriptor>) {
     const sourceDescriptor = ESGeoLineSource.createDescriptor(descriptor);
@@ -109,6 +114,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
     return i18n.translate('xpack.maps.source.esGeoLine.bucketsName', {
       defaultMessage: 'tracks',
     });
+  }
+
+  getGeoFieldName(): string {
+    return this._descriptor.geoField;
   }
 
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
