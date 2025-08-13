@@ -7,7 +7,7 @@
 
 import { Observable } from 'rxjs';
 import type { IClusterClient, IRouter, CustomRequestHandlerContext } from '@kbn/core/server';
-import { ILicense } from '../common/types';
+import { ILicense } from '@kbn/licensing-types';
 import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 
 export interface ElasticsearchError extends Error {

@@ -34,7 +34,7 @@ import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/v
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { updateSavedSearch } from '../../utils/update_saved_search';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
-import { TABS_ENABLED } from '../../../../../constants';
+import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../../constants';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
 import { disconnectTab, clearAllTabs } from './tabs';
@@ -69,10 +69,14 @@ export const initializeSession: InternalStateThunkActionCreator<
     getState,
     { services, customizationContext, runtimeStateManager, urlStateStorage, tabsStorageManager }
   ) => {
+    const tabsEnabled = services.core.featureFlags.getBooleanValue(
+      TABS_ENABLED_FEATURE_FLAG_KEY,
+      false
+    );
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
-    if (TABS_ENABLED && shouldClearAllTabs) {
+    if (tabsEnabled && shouldClearAllTabs) {
       dispatch(clearAllTabs());
     }
 
@@ -110,7 +114,7 @@ export const initializeSession: InternalStateThunkActionCreator<
       );
     }
 
-    if (TABS_ENABLED && !wasTabInitialized) {
+    if (tabsEnabled && !wasTabInitialized) {
       const tabInitialGlobalState = tabState.initialGlobalState;
 
       if (tabInitialGlobalState?.filters) {
