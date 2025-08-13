@@ -6,7 +6,7 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiNotificationBadge,
@@ -14,7 +14,6 @@ import {
   EuiSelectable,
   EuiText,
   EuiTourStep,
-  EuiLink,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -99,21 +98,22 @@ const InactiveAgentsTourStep: React.FC<{
     minWidth={300}
     step={1}
     stepsTotal={0}
-    title=""
-    onFinish={() => {}}
+    title={
+      <FormattedMessage
+        id="xpack.fleet.agentList.inactiveAgentsTourStepTitle"
+        defaultMessage="Inactive agents"
+      />
+    }
+    onFinish={onDismiss}
     anchorPosition="upCenter"
     maxWidth={280}
     footerAction={
-      <EuiLink
-        onClick={() => {
-          onDismiss();
-        }}
-      >
+      <EuiButtonEmpty onClick={onDismiss}>
         <FormattedMessage
-          id="xpack.fleet.addAgentHelpPopover.footActionButton"
+          id="xpack.fleet.genericTourPopover.dismissButton"
           defaultMessage="Got it"
         />
-      </EuiLink>
+      </EuiButtonEmpty>
     }
   >
     {children as React.ReactElement}

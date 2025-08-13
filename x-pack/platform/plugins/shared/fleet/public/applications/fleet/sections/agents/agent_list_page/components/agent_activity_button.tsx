@@ -41,7 +41,14 @@ export const AgentActivityButton: React.FC<{
           />
         }
         anchorPosition="upCenter"
-        footerAction={<EuiButtonEmpty onClick={dismiss}>OK</EuiButtonEmpty>}
+        footerAction={
+          <EuiButtonEmpty onClick={dismiss}>
+            <FormattedMessage
+              id="xpack.fleet.genericTourPopover.dismissButton"
+              defaultMessage="Got it"
+            />
+          </EuiButtonEmpty>
+        }
         anchor="#agentActivityButton"
       />
       <EuiButtonEmpty

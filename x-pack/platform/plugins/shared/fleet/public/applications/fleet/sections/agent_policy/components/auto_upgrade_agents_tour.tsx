@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiText, EuiTourStep } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -36,6 +36,14 @@ export const AutoUpgradeAgentsTour: React.FC<{ anchor: string }> = ({ anchor }) 
             id="xpack.fleet.autoUpgradeAgentsTour.tourTitle"
             defaultMessage="Auto-upgrade agents"
           />
+        }
+        footerAction={
+          <EuiButtonEmpty onClick={dismiss}>
+            <FormattedMessage
+              id="xpack.fleet.genericTourPopover.dismissButton"
+              defaultMessage="Got it"
+            />
+          </EuiButtonEmpty>
         }
         anchorPosition="downLeft"
         anchor={anchor}
