@@ -62,7 +62,14 @@ export function getConnectorType(): InferenceConnector {
           !Array.isArray(subActionParams.body.messages) ||
           !subActionParams.body.messages.length
         ) {
-          errors.body.push(translations.getRequiredMessage('Messages'));
+          try {
+            const parsedBody = JSON.parse(subActionParams.body);
+            if (!parsedBody.messages.length) {
+              errors.body.push(translations.getRequiredMessage('Messages'));
+            }
+          } catch {
+            errors.body.push(translations.BODY_INVALID);
+          }
         }
       }
 
