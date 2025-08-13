@@ -26,7 +26,10 @@ import {
   type EntityDetailsPath,
 } from '../shared/components/left_panel/left_panel_header';
 import { useOpenGenericEntityDetailsLeftPanel } from './hooks/use_open_generic_entity_details_left_panel';
-import { useGetGenericEntity } from './hooks/use_get_generic_entity';
+import {
+  type UseGetGenericEntityParams,
+  useGetGenericEntity,
+} from './hooks/use_get_generic_entity';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
 import { GenericEntityFlyoutHeader } from './header';
@@ -60,12 +63,7 @@ interface BaseGenericEntityPanelProps {
   [key: string]: unknown;
 }
 
-export type GenericEntityPanelProps = BaseGenericEntityPanelProps &
-  (
-    | { entityDocId: string; entityId?: never }
-    | { entityDocId?: never; entityId: string }
-    | { entityDocId: string; entityId: string }
-  );
+export type GenericEntityPanelProps = BaseGenericEntityPanelProps & UseGetGenericEntityParams;
 
 export interface GenericEntityPanelExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'generic-entity-panel';
@@ -74,19 +72,14 @@ export interface GenericEntityPanelExpandableFlyoutProps extends FlyoutPanelProp
 
 export const GENERIC_PANEL_RISK_SCORE_QUERY_ID = 'genericPanelRiskScoreQuery';
 
-export const GenericEntityPanel = ({
-  entityDocId,
-  entityId,
-  scopeId,
-  isPreviewMode,
-}: GenericEntityPanelProps) => {
+export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
+  const { isPreviewMode } = params;
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
-  // Ensure we have both parameters for the hook
-  const docId = entityDocId || '';
-  const entityIdParam = entityId || '';
 
-  const { getGenericEntity } = useGetGenericEntity({ docId, entityId: entityIdParam });
+  // When you destructuring params in the function signature TypeScript loses track
+  // of the union type constraints and infers them as potentially undefined
+  const { getGenericEntity } = useGetGenericEntity(params);
   const genericInsightsValue = getGenericEntity.data?._source?.entity.id;
   const { getAssetCriticality } = useGenericEntityCriticality({
     enabled: !!genericInsightsValue,
@@ -98,9 +91,7 @@ export const GenericEntityPanel = ({
   const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
     insightsField: 'related.entity',
     insightsValue: genericInsightsValue || '',
-    entityDocId: docId,
-    entityId: entityIdParam,
-    scopeId,
+    ...params,
   });
 
   const openGenericEntityDetailsPanelByPath = (path: EntityDetailsPath) => {
