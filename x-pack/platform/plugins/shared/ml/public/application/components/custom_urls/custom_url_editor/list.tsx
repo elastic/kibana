@@ -82,25 +82,19 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
   const { displayErrorToast } = useToastNotificationService();
   const [expandedUrlIndex, setExpandedUrlIndex] = useState<number | null>(null);
 
-  const labelFieldStyle = useMemo(
-    () => css`
-      min-width: calc(${euiTheme.size.xl} * 3);
-    `,
-    [euiTheme.size.xl]
-  );
-
-  const urlFieldStyle = useMemo(
-    () => css`
-      min-width: calc(${euiTheme.size.xxxxl} * 4);
-    `,
-    [euiTheme.size.xxxxl]
-  );
-
-  const actionButtonsStyle = useMemo(
-    () => css`
-      max-width: calc(${euiTheme.size.xl} * 3);
-    `,
-    [euiTheme.size.xl]
+  const styles = useMemo(
+    () => ({
+      labelField: css`
+        min-width: calc(${euiTheme.size.xl} * 3);
+      `,
+      urlField: css`
+        min-width: calc(${euiTheme.size.xxxxl} * 4);
+      `,
+      actionButtons: css`
+        max-width: calc(${euiTheme.size.xl} * 3);
+      `,
+    }),
+    [euiTheme.size.xl, euiTheme.size.xxxxl]
   );
 
   const onLabelChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
@@ -238,13 +232,17 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
 
     return (
       <React.Fragment key={`url_${index}`}>
-        <EuiPanel data-test-subj={`mlJobEditCustomUrlItem_${index}`}>
+        <EuiPanel
+          data-test-subj={`mlJobEditCustomUrlItem_${index}`}
+          role="listitem"
+          aria-labelledby={`custom-url-heading-${index}`}
+        >
           <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiFormLabel>Custom URL {index + 1}</EuiFormLabel>
+              <EuiFormLabel id={`custom-url-heading-${index}`}>Custom URL {index + 1}</EuiFormLabel>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false} gutterSize="m" css={actionButtonsStyle}>
+              <EuiFlexGroup responsive={false} gutterSize="xs" css={styles.actionButtons}>
                 <EuiFlexItem grow={false}>
                   <EuiToolTip
                     content={
@@ -300,7 +298,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
           </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiFlexGroup wrap gutterSize="s">
-            <EuiFlexItem css={labelFieldStyle} grow={2}>
+            <EuiFlexItem css={styles.labelField} grow={2}>
               <EuiFormRow
                 fullWidth={true}
                 label={
@@ -320,11 +318,14 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                   isInvalid={isInvalidLabel}
                   onChange={(e) => onLabelChange(e, index)}
                   data-test-subj={`mlJobEditCustomUrlLabelInput_${index}`}
+                  aria-required="true"
+                  aria-label={`Label for custom URL ${index + 1}`}
+                  aria-invalid={isInvalidLabel}
                 />
               </EuiFormRow>
             </EuiFlexItem>
             {isCustomTimeRange === false ? (
-              <EuiFlexItem css={labelFieldStyle} grow={2}>
+              <EuiFlexItem css={styles.labelField} grow={2}>
                 <EuiFormRow
                   fullWidth={true}
                   label={
@@ -342,11 +343,13 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                     isInvalid={isInvalidTimeRange}
                     placeholder={TIME_RANGE_TYPE.AUTO}
                     onChange={(e) => onTimeRangeChange(e, index)}
+                    aria-label={`Time range for custom URL ${index + 1}`}
+                    aria-invalid={isInvalidTimeRange}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
             ) : null}
-            <EuiFlexItem css={urlFieldStyle} grow={6}>
+            <EuiFlexItem css={styles.urlField} grow={6}>
               <EuiFormRow
                 fullWidth={true}
                 label={
@@ -370,6 +373,8 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                     onBlur={() => {
                       setExpandedUrlIndex(null);
                     }}
+                    aria-required="true"
+                    aria-label={`URL value for ${label || `custom URL ${index + 1}`}`}
                     data-test-subj={`mlJobEditCustomUrlTextarea_${index}`}
                   />
                 ) : (
@@ -379,6 +384,10 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                     value={customUrl.url_value}
                     readOnly={true}
                     onFocus={() => setExpandedUrlIndex(index)}
+                    aria-required="true"
+                    aria-label={`URL value for ${
+                      label || `custom URL ${index + 1}`
+                    }. Click to expand for editing.`}
                     data-test-subj={`mlJobEditCustomUrlInput_${index}`}
                   />
                 )}
@@ -391,5 +400,13 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
     );
   });
 
-  return <div data-test-subj="mlJobEditCustomUrlsList">{customUrlRows}</div>;
+  return (
+    <div
+      role="list"
+      data-test-subj="mlJobEditCustomUrlsList"
+      aria-label="Custom URL configurations"
+    >
+      {customUrlRows}
+    </div>
+  );
 };
