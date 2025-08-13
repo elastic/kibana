@@ -179,7 +179,6 @@ function mergeQueries({
       queries.push(value);
     }
     if (conflict) {
-      console.log('GOT CONFLICT', conflict);
       conflicts.push(conflict);
     }
 

@@ -120,18 +120,14 @@ function mergeProperty<K extends MergeablePropertiesKeys = MergeablePropertiesKe
   incoming?: MergeableProperties[K];
   resolver: Resolver<MergeableProperties[K]>;
 }): { value?: MergeableProperties[K]; conflict?: PropertyConflict<K>['value'] } {
-  console.log('MERGING', base, existing, incoming);
-  // Case 1: Existing equals incoming → no conflict
   if (isEqual(existing, incoming)) {
-    // Special-case: both deleted (existing & incoming undefined)
     if (!existing && !incoming) {
       return {}; // both deleted
     }
-    // Special-case: both changed to same defined value (≠ base)
     if (existing && !isEqual(base, existing) && !isEqual(base, incoming)) {
       return { value: existing }; // both changed same way
     }
-    // Otherwise: could be same as base, but still no conflict
+
     return { value: existing };
   }
 
