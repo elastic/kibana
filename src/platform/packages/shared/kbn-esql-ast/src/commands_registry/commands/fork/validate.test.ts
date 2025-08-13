@@ -48,20 +48,8 @@ describe('FORK Validation', () => {
   });
 
   test('supports a maximum of 8 branches', () => {
-    forkExpectErrors(
-      `FROM index
-| FORK
-    (WHERE keywordField != "")
-    (WHERE keywordField != "")
-    (WHERE keywordField != "")
-    (WHERE keywordField != "")
-    (WHERE keywordField != "")
-    (WHERE keywordField != "")
-    (WHERE keywordField != "")
-    (WHERE keywordField != "")
-    (WHERE keywordField != "")`,
-      [`[FORK] Supports a maximum of 8 branches.`]
-    );
+    const branches = Array(9).fill('(WHERE keywordField != "")').join(' ');
+    forkExpectErrors(`FROM index| FORK ${branches}`, [`[FORK] Supports a maximum of 8 branches.`]);
   });
 
   test('enforces only one fork command', () => {
