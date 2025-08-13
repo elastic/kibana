@@ -284,7 +284,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
             enabled: true,
             schedule: {
               interval: '3s',
-          }
+            },
           })
         )
         .expect(200);
