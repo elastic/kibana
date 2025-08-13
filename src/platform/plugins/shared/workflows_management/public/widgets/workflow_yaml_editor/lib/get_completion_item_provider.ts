@@ -86,6 +86,7 @@ export function getSuggestion(
   context: monaco.languages.CompletionContext,
   range: monaco.IRange,
   scalarType: Scalar.Type | null,
+  shouldBeQuoted: boolean,
   type: string,
   description?: string
 ): monaco.languages.CompletionItem {
@@ -111,8 +112,7 @@ export function getSuggestion(
     insertText = `{ ${key}$0 }`;
     insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
   }
-  if (scalarType === 'PLAIN') {
-    // if we are in a plain scalar, we need to add quotes otherwise template expression will break yaml
+  if (shouldBeQuoted) {
     insertText = `"${insertText}"`;
   }
   // $0 is the cursor position
@@ -173,6 +173,12 @@ export function getCompletionItemProvider(
         const path = getCurrentPath(yamlDocument, absolutePosition);
         const yamlNode = yamlDocument.getIn(path, true);
         const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
+        // if we are in a plain scalar which starts with { or @, we need to add quotes otherwise template expression will break yaml
+        const shouldBeQuoted =
+          isScalar(yamlNode) &&
+          scalarType === 'PLAIN' &&
+          ((yamlNode?.value as string)?.startsWith('{') ||
+            (yamlNode?.value as string)?.startsWith('@'));
 
         let context: z.ZodType = getContextSchemaForPath(result.data, workflowGraph, path);
 
@@ -209,6 +215,7 @@ export function getCompletionItemProvider(
               completionContext,
               range,
               scalarType,
+              shouldBeQuoted,
               propertyTypeName,
               current?.description
             )

@@ -149,6 +149,23 @@ steps:
       });
     });
 
+    it('should provide completions after @ and not quote insertText automatically if cursor is in plain scalar but not starting with { or @', () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: step1
+    type: console.log  
+    with:
+      message: hey, this is @|<-
+`.trim();
+      testCompletion(completionProvider, yamlContent, (suggestion) => {
+        return !suggestion.insertText.startsWith('"') && !suggestion.insertText.endsWith('"');
+      });
+    });
+
     it('should provide basic completions with @ and not quote insertText automatically if cursor is in string', () => {
       const yamlContent = `
 version: "1"
