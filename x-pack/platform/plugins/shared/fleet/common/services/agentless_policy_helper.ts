@@ -47,18 +47,21 @@ function extractRegistryInputsForDeploymentMode(
 }
 
 export const isAgentlessIntegration = (
-  packageInfo: Pick<PackageInfo, 'policy_templates'> | undefined
+  packageInfo: Pick<PackageInfo, 'policy_templates'> | undefined,
+  integrationToEnable?: string
 ) => {
-  if (
-    packageInfo?.policy_templates &&
-    packageInfo?.policy_templates.length > 0 &&
-    !!packageInfo?.policy_templates.find(
+  if (integrationToEnable) {
+    return Boolean(
+      packageInfo?.policy_templates?.find(({ name }) => name === integrationToEnable)
+        ?.deployment_modes?.agentless.enabled === true
+    );
+  }
+
+  return Boolean(
+    packageInfo?.policy_templates?.some(
       (policyTemplate) => policyTemplate?.deployment_modes?.agentless.enabled === true
     )
-  ) {
-    return true;
-  }
-  return false;
+  );
 };
 
 export const getAgentlessAgentPolicyNameFromPackagePolicyName = (packagePolicyName: string) => {
@@ -124,7 +127,11 @@ export function isInputAllowedForDeploymentMode(
   // - For agentless mode, check the blocklist
   // - For default mode, allow all inputs
   if (deploymentMode === 'agentless') {
-    return !AGENTLESS_DISABLED_INPUTS.includes(input.type);
+    const policyTemplate = packageInfo?.policy_templates?.find(
+      ({ name }) => name === input.policy_template
+    );
+    const isAgentlessEnabled = policyTemplate?.deployment_modes?.agentless.enabled;
+    return Boolean(isAgentlessEnabled) && !AGENTLESS_DISABLED_INPUTS.includes(input.type);
   }
 
   return true; // Allow all inputs for default mode when deployment_modes is not specified
