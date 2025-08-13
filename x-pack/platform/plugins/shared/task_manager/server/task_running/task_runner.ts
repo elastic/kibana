@@ -766,7 +766,7 @@ export class TaskManagerRunner implements TaskRunner {
           startedAt: null,
           retryAt: null,
           ownerId: null,
-          ...(setDisabled ? { enabled: false } : {}),
+          ...(setDisabled ? { enabled: false, status: TaskStatus.Idle } : {}),
         };
       }
 

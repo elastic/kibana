@@ -265,5 +265,50 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         id: createdRule.id,
       });
     });
+
+    it('should disable task if task is run but rule is disabled', async () => {
+      const { body: createdRule } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData({ enabled: true }))
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+      await waitTillRuleRun(createdRule.id);
+
+      await ruleUtils.disable(createdRule.id);
+      const sinceDate = new Date();
+
+      // manually enable scheduled task
+      await es.update({
+        id: `task:${createdRule.scheduled_task_id}`,
+        index: '.kibana_task_manager',
+        doc: {
+          enabled: true,
+        },
+      });
+      await waitTillRuleRun(createdRule.id, sinceDate);
+
+      const taskDoc = await es.get<any>({
+        id: `task:${createdRule.scheduled_task_id}`,
+        index: '.kibana_task_manager',
+      });
+
+      console.log(`taskDoc: ${JSON.stringify(taskDoc, null, 4)}`);
+      expect(taskDoc._source?.attributes?.enabled).to.be(false);
+    });
   });
+
+  async function waitTillRuleRun(id: string, since?: Date) {
+    await retry.try(async () => {
+      return await getEventLog({
+        getService,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id,
+        provider: 'alerting',
+        actions: new Map([['execute', { equal: 1 }]]),
+        filter: `@timestamp > ${since}`,
+      });
+    });
+  }
 }

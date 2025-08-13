@@ -2749,7 +2749,7 @@ describe('TaskManagerRunner', () => {
         expect.objectContaining({
           enabled: false,
           id: 'foo',
-          status: 'should_disable',
+          status: 'idle',
         }),
         expect.anything()
       );
