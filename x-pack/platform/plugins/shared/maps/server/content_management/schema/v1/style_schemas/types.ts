@@ -12,7 +12,7 @@ import {
   colorDynamicSchema,
   colorStaticSchema,
   colorStylePropertySchema,
-} from './color_style_schemas';
+} from './color_schemas';
 
 export type HeatmapStyleDescriptor = TypeOf<typeof heatmapStyleSchema>;
 

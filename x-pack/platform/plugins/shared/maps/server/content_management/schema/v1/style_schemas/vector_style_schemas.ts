@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { SYMBOLIZE_AS_TYPES, VECTOR_STYLES } from '../../../../../common';
 import { FIELD_ORIGIN } from '../../../../../common/constants';
-import { colorStylePropertySchema } from './color_style_schemas';
+import { colorStylePropertySchema } from './color_schemas';
 
 export const symbolizeAsOptionsSchema = schema.object({
   value: schema.maybe(
