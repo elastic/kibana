@@ -15,9 +15,9 @@ import {
 } from '@kbn/streams-schema';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
-import pLimit from 'p-limit';
 import { v4 } from 'uuid';
-import { isKqlQueryValid, kqlQuery, rangeQuery } from '../../routes/internal/esql/query_helpers';
+import { isKqlQueryValid } from '../../routes/internal/esql/query_helpers';
+import { verifyQueries } from './helpers/verify_queries';
 import INSTRUCTION from './prompts/generate_queries_instruction.text';
 import KQL_GUIDE from './prompts/kql_guide.text';
 
@@ -168,52 +168,13 @@ Quality over quantity - aim for queries that have high signal-to-noise ratio.
     return [];
   }
 
-  const limiter = pLimit(10);
-
-  const [queriesWithCounts, totalCount] = await Promise.all([
-    Promise.all(
-      queries.map((query) =>
-        limiter(async () => {
-          return esClient
-            .search('verify_query', {
-              track_total_hits: true,
-              index: getIndexPatternsForStream(definition),
-              size: 0,
-              timeout: '5s',
-              query: {
-                bool: {
-                  filter: [...kqlQuery(query.kql), ...rangeQuery(lookbackStart, end)],
-                },
-              },
-            })
-            .then((response) => ({ ...query, count: response.hits.total.value }))
-            .catch(() => {
-              return { ...query, count: 0 };
-            });
-        })
-      )
-    ),
-    esClient
-      .search('verify_query', {
-        track_total_hits: true,
-        index: getIndexPatternsForStream(definition),
-        size: 0,
-        timeout: '5s',
-      })
-      .then((response) => response.hits.total.value),
-  ]);
-
-  if (queriesWithCounts.length) {
-    logger.debug(() => {
-      return `Ran queries: ${queriesWithCounts
-        .map((query) => `- ${query.kql}: ${query.count}`)
-        .join('\n')}`;
-    });
-  }
+  const verifiedQueries = await verifyQueries(
+    { queries, definition, start, end },
+    { esClient, logger }
+  );
 
   const idLookupTable = new ShortIdTable();
-
-  const queriesWithShortIds = queriesWithCounts.map((query) => {
+  const queriesWithShortIds = verifiedQueries.queries.map((query) => {
     const id = v4();
     return {
       id,
@@ -232,7 +193,7 @@ I've executed those queries and obtained document counts for each.
 Now I need you to analyze these results and prioritize the most operationally relevant queries.
 
 ## Analysis Context
-- Total documents in time period: ${totalCount}
+- Total documents in time period: ${verifiedQueries.totalCount}
 - Lookback period: ${longLookback.asDays()} days
 - Goal: Identify queries that provide the best signal-to-noise ratio for operational monitoring
 
