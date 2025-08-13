@@ -11,7 +11,7 @@ import type { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/t
 import type { HttpStart } from '@kbn/core/public';
 import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
+import { DataTableRecord } from '@kbn/discover-utils';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, times, zipObject } from 'lodash';
 import {
