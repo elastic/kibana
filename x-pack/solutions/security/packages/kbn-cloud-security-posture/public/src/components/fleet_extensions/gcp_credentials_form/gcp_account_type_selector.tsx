@@ -67,7 +67,7 @@ export const GcpAccountTypeSelect = ({
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
-  const { gcpOrganizationEnabled, gcpPolicyType } = useCloudSetup();
+  const { gcpOrganizationEnabled, gcpPolicyType, shortName } = useCloudSetup();
 
   const gcpAccountTypeOptions = useMemo(
     () => getGcpAccountTypeOptions(!gcpOrganizationEnabled),
@@ -175,7 +175,8 @@ export const GcpAccountTypeSelect = ({
           <EuiText color="subdued" size="s">
             <FormattedMessage
               id="securitySolutionPackages.fleetIntegration.gcpAccountType.gcpSingleAccountDescription"
-              defaultMessage="Deploying to a single project is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all projects (both current and future)."
+              defaultMessage="Deploying to a single project is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy {shortName} at the organization-level, which automatically connects all projects (both current and future)."
+              values={{ shortName }}
             />
           </EuiText>
         </>

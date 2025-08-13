@@ -125,7 +125,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
         {isEditPage && <EditScreenStepTitle />}
         {/* Shows info on the active policy template */}
         <FormattedMessage
-          id="securitySolutionPackages.fleetIntegration.configureCspmIntegrationDescription"
+          id="securitySolutionPackages.fleetIntegration.configureIntegrationDescription"
           defaultMessage="Select the cloud service provider (CSP) you want to monitor and then fill in the name and description to help identify this integration"
         />
         <EuiSpacer size="l" />

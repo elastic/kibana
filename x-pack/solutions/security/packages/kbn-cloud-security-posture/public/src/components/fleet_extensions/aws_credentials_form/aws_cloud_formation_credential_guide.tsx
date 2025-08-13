@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AWS_CREDENTIALS_TYPE } from '../constants';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 const CLOUD_FORMATION_EXTERNAL_DOC_URL =
   'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html';
@@ -19,6 +20,7 @@ export const CloudFormationCloudCredentialsGuide = ({
   isOrganization?: boolean;
   credentialType: 'cloud_connectors' | 'direct_access_keys';
 }) => {
+  const { shortName } = useCloudSetup();
   const credentialsTypeSteps: Record<
     string,
     { intro: React.JSX.Element; lastStep: React.JSX.Element }
@@ -61,8 +63,9 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
       intro: (
         <FormattedMessage
           id="securitySolutionPackages.agentlessForms.cloudFormation.guide.description.cloudConnectors"
-          defaultMessage="To enable CSPM, you launch an AWS CloudFormation stack that automatically creates an IAM role in your account. This role includes the necessary permissions and embeds a unique External ID—generated during onboarding—into its trust policy. The resulting Role ARN and External ID are then used by CSPM to securely assume the role and access your AWS resources. Roles do not have standard long-term credentials such as passwords or access keys. {learnMore}."
+          defaultMessage="To enable {shortName}, you launch an AWS CloudFormation stack that automatically creates an IAM role in your account. This role includes the necessary permissions and embeds a unique External ID—generated during onboarding—into its trust policy. The resulting Role ARN and External ID are then used by {shortName} to securely assume the role and access your AWS resources. Roles do not have standard long-term credentials such as passwords or access keys. {learnMore}."
           values={{
+            shortName,
             learnMore: (
               <EuiLink
                 href={CLOUD_FORMATION_EXTERNAL_DOC_URL}

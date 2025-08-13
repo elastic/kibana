@@ -74,7 +74,7 @@ export const AzureAccountTypeSelect = ({
   packageInfo,
   setupTechnology,
 }: AzureAccountTypeSelectProps) => {
-  const { azurePolicyType, azureOrganizationEnabled } = useCloudSetup();
+  const { azurePolicyType, azureOrganizationEnabled, shortName } = useCloudSetup();
   const azureAccountTypeOptions = getAzureAccountTypeOptions(!azureOrganizationEnabled);
   const isAgentless = setupTechnology === SetupTechnology.AGENTLESS;
 
@@ -138,7 +138,8 @@ export const AzureAccountTypeSelect = ({
           <EuiText color="subdued" size="s">
             <FormattedMessage
               id="securitySolutionPackages.fleetIntegration.azureAccountType.singleAccountDescription"
-              defaultMessage="Deploying to a single subscription is suitable for an initial POC. To ensure compete coverage, it is strongly recommended to deploy CSPM at the organization (tenant root group) level, which automatically connects all subscriptions (both current and future)."
+              defaultMessage="Deploying to a single subscription is suitable for an initial POC. To ensure compete coverage, it is strongly recommended to deploy {shortName} at the organization (tenant root group) level, which automatically connects all subscriptions (both current and future)."
+              values={{ shortName }}
             />
           </EuiText>
         </>

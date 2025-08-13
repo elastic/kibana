@@ -73,7 +73,8 @@ export const AwsCredentialsFormAgentless = ({
   showCloudConnectors,
   cloud,
 }: AwsAgentlessFormProps) => {
-  const { awsOverviewPath, awsPolicyType, templateName, showCloudTemplates } = useCloudSetup();
+  const { awsOverviewPath, awsPolicyType, templateName, showCloudTemplates, shortName } =
+    useCloudSetup();
 
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
 
@@ -169,8 +170,9 @@ export const AwsCredentialsFormAgentless = ({
           showCloudConnectors ? (
             <FormattedMessage
               id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentAgentlessCloudConnector"
-              defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+              defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy {shortName} for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
               values={{
+                shortName,
                 gettingStartedLink: (
                   <EuiLink href={awsOverviewPath} target="_blank">
                     <FormattedMessage
@@ -184,8 +186,9 @@ export const AwsCredentialsFormAgentless = ({
           ) : (
             <FormattedMessage
               id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentAgentless"
-              defaultMessage="Utilize AWS Access Keys to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+              defaultMessage="Utilize AWS Access Keys to set up and deploy {shortName} for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
               values={{
+                shortName,
                 gettingStartedLink: (
                   <EuiLink href={awsOverviewPath} target="_blank">
                     <FormattedMessage

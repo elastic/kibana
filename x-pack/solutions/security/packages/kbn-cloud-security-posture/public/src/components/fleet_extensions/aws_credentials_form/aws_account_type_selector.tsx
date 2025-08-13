@@ -66,7 +66,7 @@ export const AwsAccountTypeSelect = ({
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
-  const { awsOrganizationEnabled, awsPolicyType } = useCloudSetup();
+  const { awsOrganizationEnabled, awsPolicyType, shortName } = useCloudSetup();
 
   const awsAccountTypeOptions = useMemo(
     () => getAwsAccountTypeOptions(!awsOrganizationEnabled),
@@ -147,7 +147,8 @@ export const AwsAccountTypeSelect = ({
           <EuiText color="subdued" size="s">
             <FormattedMessage
               id="securitySolutionPackages.fleetIntegration.awsAccountType.singleAccountDescription"
-              defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all accounts (both current and future)."
+              defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy {shortName} at the organization-level, which automatically connects all accounts (both current and future)."
+              values={{ shortName }}
             />
           </EuiText>
         </>
