@@ -43,6 +43,61 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
   describe('eventLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
+    const runRuleAndEnsureCompletion = async ({
+      spaceId,
+      ruleId,
+      runs,
+      totalAlertsGeneratedPerRun = [],
+    }: {
+      spaceId: string;
+      ruleId: string;
+      runs: number;
+      totalAlertsGeneratedPerRun?: number[];
+    }) => {
+      if (totalAlertsGeneratedPerRun.length && totalAlertsGeneratedPerRun.length !== runs) {
+        throw new Error('Alerts per run has to be the same length as the number of runs');
+      }
+      for (let run = 0; run < runs; run++) {
+        // Specifically check provider: actions if the expected alerts total has changed,
+        // otherwise just check provider: alerting execute.
+        const currentRunAlerts = totalAlertsGeneratedPerRun[run];
+        const prevRunAlerts = totalAlertsGeneratedPerRun[run - 1];
+        const shouldUseActionsProvider =
+          !!totalAlertsGeneratedPerRun[run] && currentRunAlerts !== prevRunAlerts;
+        // Skip the first run since creating the rule runs it already
+        if (run !== 0) {
+          await runSoon({
+            id: ruleId,
+            spaceId,
+            supertest,
+            retry,
+          });
+        }
+
+        const provider = shouldUseActionsProvider ? 'actions' : 'alerting';
+        const actions: Array<[string, { gte: number } | { equal: number }]> = [];
+        if (shouldUseActionsProvider) {
+          actions.push(['execute', { equal: totalAlertsGeneratedPerRun[run] }]);
+        } else {
+          actions.push(['execute', { equal: run + 1 }]);
+          if (totalAlertsGeneratedPerRun[run]) {
+            actions.push(['execute-action', { equal: totalAlertsGeneratedPerRun[run] }]);
+          }
+        }
+
+        await retry.try(async () => {
+          return await getEventLog({
+            getService,
+            spaceId,
+            type: 'alert',
+            id: ruleId,
+            provider,
+            actions: new Map(actions),
+          });
+        });
+      }
+    };
+
     beforeEach(async () => {
       await resetRulesSettings(supertest, Spaces.default.id);
       await resetRulesSettings(supertest, Spaces.space1.id);
@@ -103,37 +158,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           const alertId = response.body.id;
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
-          await retry.try(async () => {
-            return await getEventLog({
-              getService,
-              spaceId: space.id,
-              type: 'alert',
-              id: alertId,
-              provider: 'alerting',
-              actions: new Map([['execute', { gte: 1 }]]),
-            });
+          await runRuleAndEnsureCompletion({
+            runs: 4,
+            totalAlertsGeneratedPerRun: [0, 1, 2, 2],
+            ruleId: alertId,
+            spaceId: space.id,
           });
-
-          // Run 3 more times
-          for (let runs = 2; runs <= 4; runs++) {
-            await runSoon({
-              id: alertId,
-              supertest,
-              retry,
-              spaceId: space.id,
-            });
-
-            await retry.try(async () => {
-              return await getEventLog({
-                getService,
-                spaceId: space.id,
-                type: 'alert',
-                id: alertId,
-                provider: 'actions',
-                actions: new Map([['execute', { gte: Math.min(runs - 1, 2) }]]),
-              });
-            });
-          }
 
           const events = await retry.try(async () => {
             return await getEventLog({
@@ -144,11 +174,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 4 }],
-                ['execute', { gte: 4 }],
+                ['execute-start', { equal: 4 }],
+                ['execute', { equal: 4 }],
                 ['execute-action', { equal: 2 }],
                 ['new-instance', { equal: 1 }],
-                ['active-instance', { gte: 1 }],
+                ['active-instance', { equal: 2 }],
                 ['recovered-instance', { equal: 1 }],
               ]),
             });
@@ -327,7 +357,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               type: 'action',
               id: createdAction.id,
               provider: 'actions',
-              actions: new Map([['execute', { gte: 1 }]]),
+              actions: new Map([['execute', { equal: 2 }]]),
             });
           });
 
@@ -480,7 +510,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.multipleSearches',
-                schedule: { interval: '1s' },
+                schedule: { interval: '24h' },
                 throttle: null,
                 params: {
                   numSearches,
@@ -494,6 +524,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           const ruleId = response.body.id;
           objectRemover.add(space.id, ruleId, 'rule', 'alerting');
 
+          await runRuleAndEnsureCompletion({
+            runs: 4,
+            spaceId: space.id,
+            ruleId,
+          });
+
           // get the events we're expecting
           const events = await retry.try(async () => {
             return await getEventLog({
@@ -504,7 +540,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute', { gte: 4 }],
+                ['execute', { equal: 4 }],
               ]),
             });
           });
@@ -614,7 +650,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.throw',
-                schedule: { interval: '1s' },
+                schedule: { interval: '24h' },
                 throttle: null,
               })
             );
@@ -631,8 +667,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               id: alertId,
               provider: 'alerting',
               actions: new Map([
-                ['execute-start', { gte: 1 }],
-                ['execute', { gte: 1 }],
+                ['execute-start', { equal: 1 }],
+                ['execute', { equal: 1 }],
               ]),
             });
           });
@@ -728,7 +764,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '24h' },
                 throttle: null,
                 params: {
                   pattern,
@@ -753,6 +789,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           const alertId = response.body.id;
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
+          await runRuleAndEnsureCompletion({
+            runs: 18,
+            totalAlertsGeneratedPerRun: [1, 2, 2, 3, 4, 5, 5, 5, 5, ...new Array(8).fill(5), 6],
+            ruleId: alertId,
+            spaceId: space.id,
+          });
+
           // get the events we're expecting
           const events = await retry.try(async () => {
             return await getEventLog({
@@ -763,11 +806,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 6 }],
-                ['execute', { gte: 6 }],
+                ['execute-start', { equal: 18 }],
+                ['execute', { equal: 18 }],
                 ['execute-action', { equal: 6 }],
                 ['new-instance', { equal: 3 }],
-                ['active-instance', { gte: 6 }],
+                ['active-instance', { equal: 14 }],
                 ['recovered-instance', { equal: 3 }],
               ]),
             });
@@ -830,7 +873,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '24h' },
                 throttle: null,
                 notify_when: null,
                 params: {
@@ -865,6 +908,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           const alertId = response.body.id;
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
+          await runRuleAndEnsureCompletion({
+            runs: 18,
+            totalAlertsGeneratedPerRun: [1, 2, 2, 3, 4, 5, 5, 5, 5, ...new Array(8).fill(5), 6],
+            ruleId: alertId,
+            spaceId: space.id,
+          });
+
           // get the events we're expecting
           const events = await retry.try(async () => {
             return await getEventLog({
@@ -875,11 +925,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 6 }],
-                ['execute', { gte: 6 }],
+                ['execute-start', { equal: 18 }],
+                ['execute', { equal: 18 }],
                 ['execute-action', { equal: 6 }],
                 ['new-instance', { equal: 3 }],
-                ['active-instance', { gte: 6 }],
+                ['active-instance', { equal: 14 }],
                 ['recovered-instance', { equal: 3 }],
               ]),
             });
@@ -941,7 +991,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '24h' },
                 throttle: null,
                 params: {
                   pattern,
@@ -966,6 +1016,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           const alertId = response.body.id;
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
+          await runRuleAndEnsureCompletion({
+            runs: 14,
+            totalAlertsGeneratedPerRun: [1, 2, 2, 3, 4, 5, 5, 5, 5, 5, ...new Array(3).fill(5), 6],
+            ruleId: alertId,
+            spaceId: space.id,
+          });
+
           // get the events we're expecting
           const events = await retry.try(async () => {
             return await getEventLog({
@@ -976,11 +1033,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 6 }],
-                ['execute', { gte: 6 }],
+                ['execute-start', { equal: 14 }],
+                ['execute', { equal: 14 }],
                 ['execute-action', { equal: 6 }],
                 ['new-instance', { equal: 3 }],
-                ['active-instance', { gte: 3 }],
+                ['active-instance', { equal: 10 }],
                 ['recovered-instance', { equal: 3 }],
               ]),
             });
@@ -1038,7 +1095,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '24h' },
                 throttle: null,
                 notify_when: null,
                 params: {
@@ -1073,6 +1130,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           const alertId = response.body.id;
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
+          await runRuleAndEnsureCompletion({
+            runs: 14,
+            totalAlertsGeneratedPerRun: [1, 2, 2, 3, 4, 5, 5, 5, 5, 5, ...new Array(3).fill(5), 6],
+            ruleId: alertId,
+            spaceId: space.id,
+          });
+
           // get the events we're expecting
           const events = await retry.try(async () => {
             return await getEventLog({
@@ -1083,11 +1147,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 6 }],
-                ['execute', { gte: 6 }],
+                ['execute-start', { equal: 14 }],
+                ['execute', { equal: 14 }],
                 ['execute-action', { equal: 6 }],
                 ['new-instance', { equal: 3 }],
-                ['active-instance', { gte: 3 }],
+                ['active-instance', { equal: 10 }],
                 ['recovered-instance', { equal: 3 }],
               ]),
             });
@@ -1131,7 +1195,6 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             })
             .expect(200);
 
-          // pattern of when the alert should fire
           const instance = [true, false, false, true, false, true, false, true, false].concat(
             ...new Array(8).fill(true),
             false
@@ -1146,7 +1209,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '24h' },
                 throttle: null,
                 params: {
                   pattern,
@@ -1171,6 +1234,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           const alertId = response.body.id;
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
+          await runRuleAndEnsureCompletion({
+            runs: 18,
+            totalAlertsGeneratedPerRun: [1, 2, 2, 3, 4, 5, 6, 7, ...new Array(9).fill(7), 8],
+            ruleId: alertId,
+            spaceId: space.id,
+          });
+
           // get the events we're expecting
           const events = await retry.try(async () => {
             return await getEventLog({
@@ -1181,11 +1251,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 8 }],
-                ['execute', { gte: 8 }],
+                ['execute-start', { equal: 18 }],
+                ['execute', { equal: 18 }],
                 ['execute-action', { equal: 8 }],
                 ['new-instance', { equal: 4 }],
-                ['active-instance', { gte: 4 }],
+                ['active-instance', { equal: 13 }],
                 ['recovered-instance', { equal: 4 }],
               ]),
             });
@@ -1249,7 +1319,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '2s' },
+                schedule: { interval: '24h' },
                 notify_when: RuleNotifyWhen.THROTTLE,
                 throttle: '1s',
                 params: {
@@ -1274,6 +1344,15 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           const alertId = response.body.id;
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
+          await runRuleAndEnsureCompletion({
+            runs: 18,
+            totalAlertsGeneratedPerRun: [
+              1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+            ],
+            ruleId: alertId,
+            spaceId: space.id,
+          });
+
           // get the events we're expecting
           const events = await retry.try(async () => {
             return await getEventLog({
@@ -1284,11 +1363,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 15 }],
-                ['execute', { gte: 15 }],
+                ['execute-start', { equal: 18 }],
+                ['execute', { equal: 18 }],
                 ['execute-action', { equal: 15 }],
                 ['new-instance', { equal: 3 }],
-                ['active-instance', { gte: 6 }],
+                ['active-instance', { equal: 14 }],
                 ['recovered-instance', { equal: 3 }],
               ]),
             });
@@ -1351,7 +1430,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '2s' },
+                schedule: { interval: '24h' },
                 throttle: null,
                 notify_when: null,
                 params: {
@@ -1384,6 +1463,15 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           const alertId = response.body.id;
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
+          await runRuleAndEnsureCompletion({
+            runs: 18,
+            totalAlertsGeneratedPerRun: [
+              1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+            ],
+            ruleId: alertId,
+            spaceId: space.id,
+          });
+
           // get the events we're expecting
           const events = await retry.try(async () => {
             return await getEventLog({
@@ -1394,11 +1482,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 15 }],
-                ['execute', { gte: 15 }],
+                ['execute-start', { equal: 18 }],
+                ['execute', { equal: 18 }],
                 ['execute-action', { equal: 15 }],
                 ['new-instance', { equal: 3 }],
-                ['active-instance', { gte: 6 }],
+                ['active-instance', { equal: 14 }],
                 ['recovered-instance', { equal: 3 }],
               ]),
             });
@@ -1460,7 +1548,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '2s' },
+                schedule: { interval: '24h' },
                 throttle: '1s',
                 params: {
                   pattern,
@@ -1484,6 +1572,30 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           const alertId = response.body.id;
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
+          await runRuleAndEnsureCompletion({
+            runs: 18,
+            totalAlertsGeneratedPerRun: [
+              1,
+              2,
+              2,
+              3,
+              4,
+              5,
+              5,
+              6,
+              6,
+              7,
+              ...new Array(3).fill(7),
+              8,
+              8,
+              8,
+              8,
+              8,
+            ],
+            ruleId: alertId,
+            spaceId: space.id,
+          });
+
           // get the events we're expecting
           const events = await retry.try(async () => {
             return await getEventLog({
@@ -1494,11 +1606,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 8 }],
-                ['execute', { gte: 8 }],
+                ['execute-start', { equal: 18 }],
+                ['execute', { equal: 18 }],
                 ['execute-action', { equal: 8 }],
                 ['new-instance', { equal: 3 }],
-                ['active-instance', { gte: 3 }],
+                ['active-instance', { equal: 10 }],
                 ['recovered-instance', { equal: 3 }],
               ]),
             });
@@ -1556,7 +1668,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '2s' },
+                schedule: { interval: '24h' },
                 throttle: null,
                 notify_when: null,
                 params: {
@@ -1589,6 +1701,30 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           const alertId = response.body.id;
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
+          await runRuleAndEnsureCompletion({
+            runs: 18,
+            totalAlertsGeneratedPerRun: [
+              1,
+              2,
+              2,
+              3,
+              4,
+              5,
+              5,
+              6,
+              6,
+              7,
+              ...new Array(3).fill(7),
+              8,
+              8,
+              8,
+              8,
+              8,
+            ],
+            ruleId: alertId,
+            spaceId: space.id,
+          });
+
           // get the events we're expecting
           const events = await retry.try(async () => {
             return await getEventLog({
@@ -1599,11 +1735,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 8 }],
-                ['execute', { gte: 8 }],
+                ['execute-start', { equal: 18 }],
+                ['execute', { equal: 18 }],
                 ['execute-action', { equal: 8 }],
                 ['new-instance', { equal: 3 }],
-                ['active-instance', { gte: 3 }],
+                ['active-instance', { equal: 10 }],
                 ['recovered-instance', { equal: 3 }],
               ]),
             });
@@ -1649,7 +1785,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '24h' },
                 throttle: null,
                 params: { pattern },
                 actions: [],
@@ -1661,6 +1797,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           const alertId = response.body.id;
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
+          await runRuleAndEnsureCompletion({
+            runs: 10,
+            ruleId: alertId,
+            spaceId: space.id,
+          });
+
           // get the events we're expecting
           const events = await retry.try(async () => {
             return await getEventLog({
@@ -1670,10 +1812,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               id: alertId,
               provider: 'alerting',
               actions: new Map([
-                ['execute', { gte: 10 }],
-                ['new-instance', { gte: 4 }],
-                ['active-instance', { gte: 3 }],
-                ['recovered-instance', { gte: 3 }],
+                ['execute', { equal: 10 }],
+                ['new-instance', { equal: 3 }],
+                ['active-instance', { equal: 6 }],
+                ['recovered-instance', { equal: 3 }],
               ]),
             });
           });
@@ -1778,7 +1920,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '2s' },
+                schedule: { interval: '24h' },
                 throttle: '1s',
                 params: {
                   pattern,
@@ -1797,6 +1939,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           const alertId = response.body.id;
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
+          await runRuleAndEnsureCompletion({
+            runs: 4,
+            ruleId: alertId,
+            spaceId: space.id,
+          });
+
           // get the events we're expecting
           const events = await retry.try(async () => {
             return await getEventLog({
@@ -1807,10 +1955,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 4 }],
-                ['execute', { gte: 4 }],
+                ['execute-start', { equal: 4 }],
+                ['execute', { equal: 4 }],
                 ['new-instance', { equal: 1 }],
-                ['active-instance', { gte: 1 }],
+                ['active-instance', { equal: 2 }],
                 ['recovered-instance', { equal: 1 }],
               ]),
             });
@@ -1973,7 +2121,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '24h' },
                 throttle: null,
                 notify_when: null,
                 params: {
@@ -2001,6 +2149,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           const alertId = response.body.id;
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
+          await runRuleAndEnsureCompletion({
+            runs: 6,
+            totalAlertsGeneratedPerRun: [0, 0, 0, 0, 0, 1],
+            ruleId: alertId,
+            spaceId: space.id,
+          });
+
           // get the events we're expecting
           const events = await retry.try(async () => {
             return await getEventLog({
@@ -2011,8 +2166,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 6 }],
-                ['execute', { gte: 6 }],
+                ['execute-start', { equal: 6 }],
+                ['execute', { equal: 6 }],
+                ['execute-action', { equal: 1 }],
                 ['new-instance', { equal: 1 }],
                 ['active-instance', { equal: 2 }],
                 ['recovered-instance', { equal: 1 }],
@@ -2079,7 +2235,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '24h' },
                 throttle: null,
                 params: {
                   pattern: {
@@ -2108,7 +2264,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               type: 'alert',
               id: alertId,
               provider: 'alerting',
-              actions: new Map([['execute', { gte: 1 }]]),
+              actions: new Map([['execute', { equal: 1 }]]),
             });
           });
 
@@ -2143,7 +2299,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               type: 'alert',
               id: alertId,
               provider: 'alerting',
-              actions: new Map([['execute', { gte: 1 }]]),
+              actions: new Map([['execute', { equal: 1 }]]),
             });
 
             const updatedEvent = newResponse.find((event) => event?._id === eventToUpdate?._id);
