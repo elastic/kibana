@@ -95,10 +95,12 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   const { currentGroupByColumns } = useDataCascadeState<G, L>();
   const [isPendingRowGroupDataFetch, setRowGroupDataFetch] = useState<boolean>(false);
 
-  // rows that can be expanded are denoted to be group nodes
-  const isGroupNode = rowInstance.getCanExpand();
+  const isGroupNode = useMemo(() => {
+    return currentGroupByColumns.length - 1 > rowInstance.depth;
+  }, [currentGroupByColumns, rowInstance]);
   const isRowExpanded = rowInstance.getIsExpanded();
   const hasAllParentsExpanded = rowInstance.getIsAllParentsExpanded();
+  const rowToggleFn = rowInstance.getToggleExpandedHandler();
 
   const styles = useMemo(() => {
     return cascadeRowStyles(
@@ -139,12 +141,12 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   }, [fetchGroupNodeData]);
 
   const onCascadeRowClick = useCallback(() => {
-    rowInstance.toggleExpanded();
+    rowToggleFn();
     if (isGroupNode) {
       // can expand here denotes it still has some nesting, hence we need to fetch the data for the sub-rows
       fetchCascadeRowGroupNodeData();
     }
-  }, [fetchCascadeRowGroupNodeData, isGroupNode, rowInstance]);
+  }, [fetchCascadeRowGroupNodeData, isGroupNode, rowToggleFn]);
 
   /**
    * @description required ARIA props to ensure proper accessibility tree gets generated
@@ -192,6 +194,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 iconType={isRowExpanded ? 'arrowDown' : 'arrowRight'}
+                disabled={!rowInstance.getCanExpand()}
                 onClick={onCascadeRowClick}
                 aria-label={i18n.translate('sharedUXPackages.dataCascade.removeRowButtonLabel', {
                   defaultMessage: 'expand row',
