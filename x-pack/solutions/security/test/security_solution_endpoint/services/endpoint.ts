@@ -81,21 +81,12 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
   const log = getService('log');
 
   return new (class EndpointTestResources {
-    private readonly esClient: ReturnType<typeof getService>;
-    private readonly retry: ReturnType<typeof getService>;
-    private readonly kbnClient: ReturnType<typeof getService>;
-    private readonly config: ReturnType<typeof getService>;
-    private readonly supertest: ReturnType<typeof getService>;
-    private readonly log: ReturnType<typeof getService>;
-
-    constructor() {
-      this.esClient = esClient;
-      this.retry = retry;
-      this.kbnClient = kbnClient;
-      this.config = config;
-      this.supertest = supertest;
-      this.log = log;
-    }
+    private readonly esClient = esClient;
+    private readonly retry = retry;
+    private readonly kbnClient = kbnClient;
+    private readonly config = config;
+    private readonly supertest = supertest;
+    private readonly log = log;
 
     getScopedKbnClient(spaceId: string = DEFAULT_SPACE_ID): KbnClient {
       if (!spaceId || spaceId === DEFAULT_SPACE_ID) {

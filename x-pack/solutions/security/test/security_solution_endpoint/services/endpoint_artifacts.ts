@@ -50,17 +50,10 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
   const esClient = getService('es');
 
   return new (class EndpointTelemetryTestResources {
-    private readonly supertest: TestAgent;
-    private readonly log: ReturnType<typeof getService>;
-    private readonly esClient: ReturnType<typeof getService>;
-    private readonly exceptionsGenerator: ExceptionsListItemGenerator;
-
-    constructor() {
-      this.supertest = supertestSv;
-      this.log = log;
-      this.esClient = esClient;
-      this.exceptionsGenerator = new ExceptionsListItemGenerator();
-    }
+    private readonly supertest = supertestSv;
+    private readonly log = log;
+    private readonly esClient = esClient;
+    private readonly exceptionsGenerator = new ExceptionsListItemGenerator();
 
     getHttpResponseFailureHandler(
       ignoredStatusCodes: number[] = []
