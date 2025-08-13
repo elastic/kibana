@@ -53,6 +53,7 @@ import { EditCategory } from './edit_category';
 import { parseCaseUsers } from '../../utils';
 import { CustomFields } from './custom_fields';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
+import { CaseSummary } from './case_summary';
 
 const LOCALSTORAGE_SORT_ORDER_KEY = 'cases.userActivity.sortOrder';
 
@@ -212,6 +213,8 @@ export const CaseViewActivity = ({
         `}
       >
         <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY} />
+        <CaseSummary caseData={caseData} markdown={false} />
+        <EuiSpacer size="m" />
         <Description
           isLoadingDescription={isLoadingDescription}
           caseData={caseData}
