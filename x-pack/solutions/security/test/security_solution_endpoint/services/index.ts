@@ -11,8 +11,8 @@ import { IngestManagerProvider } from '@kbn/test-suites-xpack-platform/api_integ
 import { services as xPackFunctionalServices } from '../../functional/services';
 import { EndpointTelemetryTestResourcesProvider } from './endpoint_telemetry';
 import { EndpointTestResources } from './endpoint';
-import { TimelineTestService } from '../../security_solution_ftr/services/timeline';
-import { DetectionsTestService } from '../../security_solution_ftr/services/detections';
+import { TimelineTestService } from './timeline';
+import { DetectionsTestService } from './detections';
 import { EndpointPolicyTestResourcesProvider } from './endpoint_policy';
 import { EndpointArtifactsTestResources } from './endpoint_artifacts';
 import {

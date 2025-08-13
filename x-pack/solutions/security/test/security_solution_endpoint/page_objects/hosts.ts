@@ -6,7 +6,7 @@
  */
 
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrService } from '../../ftr_provider_context';
+import { FtrService } from '../configs/ftr_provider_context';
 
 export class HostsPageObject extends FtrService {
   private readonly pageObjects = this.ctx.getPageObjects(['common', 'header']);

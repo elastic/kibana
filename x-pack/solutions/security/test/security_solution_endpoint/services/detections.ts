@@ -19,7 +19,7 @@ import {
   indexEndpointRuleAlerts,
 } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
-import { FtrService } from '../../ftr_provider_context';
+import { FtrService } from '../../functional/ftr_provider_context';
 
 export class DetectionsTestService extends FtrService {
   private readonly supertest = this.ctx.getService('supertest');

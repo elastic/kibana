@@ -18,7 +18,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    { "path": "../security_solution_ftr/tsconfig.json" },
     "@kbn/expect",
     "@kbn/security-solution-plugin",
     "@kbn/repo-info",
