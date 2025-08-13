@@ -68,7 +68,7 @@ export class ContentManagementPlugin
     const { api: coreApi, contentRegistry } = this.core.setup();
 
     const rpc = new RpcService<RpcContext>();
-    registerProcedures(rpc);
+    registerProcedures(rpc, this.logger);
 
     const router = core.http.createRouter();
     initRpcRoutes(procedureNames, router, {
