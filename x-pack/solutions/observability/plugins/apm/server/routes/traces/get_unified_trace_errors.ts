@@ -53,7 +53,7 @@ export async function getUnifiedTraceErrors({
 export const requiredFields = asMutableArray([SPAN_ID] as const);
 export const optionalFields = asMutableArray([EXCEPTION_TYPE, EXCEPTION_MESSAGE] as const);
 
-interface OptionalException {
+interface OtelError {
   span: {
     id: string;
   };
@@ -92,7 +92,7 @@ async function getUnprocessedOtelErrors({
   return response.hits.hits
     .map((hit) => {
       const event = unflattenKnownApmEventFields(hit.fields, requiredFields) as
-        | OptionalException
+        | OtelError
         | undefined;
       if (!event) return null;
 
