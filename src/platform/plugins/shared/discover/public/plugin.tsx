@@ -19,6 +19,7 @@ import type {
   ScopedHistory,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { ControlPanelsState } from '@kbn/controls-plugin/public';
 import { type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
@@ -412,20 +413,31 @@ export class DiscoverPlugin
           const controlsState = JSON.parse(
             savedSessionAttributes.controlGroupJson
           ) as ControlPanelsState<ESQLControlState>;
-          if ('controlGroupApi$' in container) {
+
+          if (apiPublishesESQLVariables(container) && 'controlGroupApi$' in container) {
+            const esqlVariables$ = apiPublishesESQLVariables(container)
+              ? container.esqlVariables$
+              : undefined;
+            const esqlVariables = esqlVariables$?.getValue();
             const controlGroupApi$ =
               container.controlGroupApi$ as BehaviorSubject<ControlGroupRendererApi>;
             const controlGroupApi = controlGroupApi$.getValue();
+
+            // Only add controls whose variableName exists in current esqlVariables
             Object.values(controlsState).forEach((panel) => {
-              // add a new control
-              controlGroupApi.addNewPanel({
-                panelType: ESQL_CONTROL,
-                serializedState: {
-                  rawState: {
-                    ...panel,
+              const variableName = panel.variableName;
+              const variableExists = esqlVariables?.some((esqlVar) => esqlVar.key === variableName);
+              // Only add the control if its variable name exists in current esqlVariables
+              if (!variableExists) {
+                controlGroupApi.addNewPanel({
+                  panelType: ESQL_CONTROL,
+                  serializedState: {
+                    rawState: {
+                      ...panel,
+                    },
                   },
-                },
-              });
+                });
+              }
             });
           }
         }
