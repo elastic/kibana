@@ -45,7 +45,10 @@ export const registerSiemRuleMigrationsGetRulesRoute = (
           async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationRulesResponse>> => {
             const { migration_id: migrationId } = req.params;
 
-            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+              context.securitySolution,
+              'rules'
+            );
             try {
               const ctx = await context.resolve(['securitySolution']);
               const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();

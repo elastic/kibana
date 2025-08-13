@@ -14,7 +14,7 @@ import {
   getPrebuiltRulesAndTimelinesStatus,
   installPrebuiltRulesAndTimelines,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import { deleteAllPrebuiltRuleAssets } from '../../../../utils/rules/prebuilt_rules/delete_all_prebuilt_rule_assets';
 import { deleteAllTimelines } from '../../../../utils/rules/prebuilt_rules/delete_all_timelines';
 import {
@@ -30,8 +30,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const retryService = getService('retry');
   const securitySolutionApi = getService('securitySolutionApi');
 
-  // Failing: See https://github.com/elastic/kibana/issues/228944
-  describe.skip('@ess @serverless @skipInServerlessMKI Install prebuilt rules from EPR', () => {
+  describe('@ess @serverless @skipInServerlessMKI Install prebuilt rules from EPR', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllTimelines(es, log);

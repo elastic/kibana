@@ -7,8 +7,8 @@
 import dedent from 'dedent';
 import { ChatFunctionClient } from '.';
 import { Logger } from '@kbn/logging';
+import { GET_DATA_ON_SCREEN_FUNCTION_NAME } from '../../../common';
 import { RegisterInstructionCallback } from '../types';
-import { GET_DATA_ON_SCREEN_FUNCTION_NAME } from '../../functions/get_data_on_screen';
 
 describe('chatFunctionClient', () => {
   describe('when executing a function with invalid arguments', () => {

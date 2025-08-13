@@ -30,6 +30,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   cidrFunction,
   dateRangeFunction,
@@ -74,6 +75,7 @@ import { ISessionsClient, ISessionService, SessionsClient, SessionService } from
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
 import { createConnectedSearchSessionIndicator } from './session/session_indicator';
 import { ISearchSetup, ISearchStart } from './types';
+import { openSearchSessionsFlyout } from './session/sessions_mgmt';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -89,6 +91,7 @@ export interface SearchServiceStartDependencies {
   indexPatterns: DataViewsContract;
   inspector: InspectorStartContract;
   screenshotMode: ScreenshotModePluginStart;
+  share: SharePluginStart;
   scriptedFieldsEnabled: boolean;
 }
 
@@ -217,15 +220,18 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    { http, uiSettings, chrome, application, notifications, ...startServices }: CoreStart,
+    coreStart: CoreStart,
     {
       fieldFormats,
       indexPatterns,
       inspector,
       screenshotMode,
       scriptedFieldsEnabled,
+      share,
     }: SearchServiceStartDependencies
   ): ISearchStart {
+    const { http, uiSettings, chrome, application, notifications, ...startServices } = coreStart;
+
     const search = ((request, options = {}) => {
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
@@ -305,6 +311,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       showError: (e) => {
         this.searchInterceptor.showError(e);
       },
+      showSearchSessionsFlyout: openSearchSessionsFlyout({
+        coreStart,
+        kibanaVersion: this.initializerContext.env.packageInfo.version,
+        usageCollector: this.usageCollector!,
+        config: config.search.sessions,
+        sessionsClient: this.sessionsClient,
+        share,
+      }),
       showWarnings: (adapter, callback) => {
         adapter?.getRequests().forEach((request) => {
           const rawResponse = (

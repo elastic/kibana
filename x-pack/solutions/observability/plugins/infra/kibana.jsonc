@@ -28,6 +28,7 @@
       "observability",
       "observabilityShared",
       "ruleRegistry",
+      "savedSearch",
       "security",
       "share",
       "triggersActionsUi",
@@ -52,7 +53,6 @@
       "serverless"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "observability",
       "licenseManagement",
       "kibanaUtils",

@@ -75,6 +75,14 @@ describe('single line query', () => {
       });
     });
 
+    describe('WHERE', () => {
+      test('escapes field parts which match keywords (FIRST)', () => {
+        const { text } = reprint('FROM a | WHERE `first`.name == "Beatrice" AND `and` == "one"');
+
+        expect(text).toBe('FROM a | WHERE `first`.name == "Beatrice" AND `and` == "one"');
+      });
+    });
+
     describe('EXPLAIN', () => {
       /** @todo Enable once query expressions are supported.  */
       test.skip('a nested query', () => {
@@ -301,24 +309,24 @@ describe('single line query', () => {
     describe('COMPLETION', () => {
       test('from single line', () => {
         const { text } =
-          reprint(`FROM search-movies | COMPLETION result = "Shakespeare" WITH inferenceId
+          reprint(`FROM search-movies | COMPLETION result = "Shakespeare" WITH {"inference_id": "my-inference-id"}
         `);
 
         expect(text).toBe(
-          'FROM search-movies | COMPLETION result = "Shakespeare" WITH inferenceId'
+          'FROM search-movies | COMPLETION result = "Shakespeare" WITH {"inference_id": "my-inference-id"}'
         );
       });
 
       test('from multiline', () => {
         const { text } = reprint(
           `FROM kibana_sample_data_ecommerce
-                 | COMPLETION result = "prompt" WITH \`openai-completion\`
+                 | COMPLETION result = "prompt" WITH {"inference_id": "my-inference-id"}
                  | LIMIT 2
           `
         );
 
         expect(text).toBe(
-          'FROM kibana_sample_data_ecommerce | COMPLETION result = "prompt" WITH `openai-completion` | LIMIT 2'
+          'FROM kibana_sample_data_ecommerce | COMPLETION result = "prompt" WITH {"inference_id": "my-inference-id"} | LIMIT 2'
         );
       });
     });

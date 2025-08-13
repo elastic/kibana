@@ -374,12 +374,23 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }
     }
 
-    await this.assertNoHierarchicalConflicts(this._definition.name);
+    if (!existsInStartingState) {
+      await this.assertNoHierarchicalConflicts(this._definition.name);
+    }
 
-    const [ancestors, descendants] = await Promise.all([
-      this.dependencies.streamsClient.getAncestors(this._definition.name),
-      this.dependencies.streamsClient.getDescendants(this._definition.name),
-    ]);
+    const ancestors = desiredState
+      .all()
+      .filter((stream) => {
+        return isDescendantOf(stream.definition.name, this._definition.name);
+      })
+      .map((stream) => stream.definition as Streams.WiredStream.Definition);
+
+    const descendants = desiredState
+      .all()
+      .filter((stream) => {
+        return isDescendantOf(this._definition.name, stream.definition.name);
+      })
+      .map((stream) => stream.definition as Streams.WiredStream.Definition);
 
     validateAncestorFields({
       ancestors,
@@ -520,7 +531,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       },
       existsAsManagedDataStream
         ? {
-            type: 'upsert_write_index_or_rollover',
+            type: 'rollover',
             request: {
               name: this._definition.name,
             },
@@ -579,7 +590,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     });
     if (this.hasChangedFields() || hasAncestorsWithChangedFields) {
       actions.push({
-        type: 'upsert_write_index_or_rollover',
+        type: 'rollover',
         request: {
           name: this._definition.name,
         },
@@ -673,6 +684,12 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       },
       {
         type: 'delete_dot_streams_document',
+        request: {
+          name: this._definition.name,
+        },
+      },
+      {
+        type: 'delete_queries',
         request: {
           name: this._definition.name,
         },

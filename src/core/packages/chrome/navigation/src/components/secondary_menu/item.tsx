@@ -16,7 +16,7 @@ export interface SecondaryMenuItemProps extends SecondaryMenuItem {
   children: ReactNode;
   href: string;
   iconType?: IconType;
-  isCurrent: boolean;
+  isActive: boolean;
   key: string;
   onClick?: () => void;
   testSubjPrefix?: string;
@@ -30,7 +30,7 @@ export const SecondaryMenuItemComponent = ({
   children,
   iconType,
   id,
-  isCurrent,
+  isActive,
   testSubjPrefix = 'secondaryMenuItem',
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
@@ -55,7 +55,7 @@ export const SecondaryMenuItemComponent = ({
 
   return (
     <li>
-      {isCurrent ? (
+      {isActive ? (
         <EuiButton
           css={styles}
           data-test-subj={`${testSubjPrefix}-${id}`}

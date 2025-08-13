@@ -10,8 +10,10 @@
 import { MenuItem } from '../../types';
 
 export const LOGO = {
+  href: '/elasticsearch',
+  id: 'elasticsearch',
   label: 'Elasticsearch',
-  logoType: 'logoElasticsearch',
+  type: 'logoElasticsearch',
 };
 
 export const PRIMARY_MENU_ITEMS: MenuItem[] = [

@@ -12,10 +12,13 @@ import { StepImplementation } from '../step_base';
 import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 
 export class ExitIfNodeImpl implements StepImplementation {
-  constructor(private step: ExitIfNode, private workflowState: WorkflowExecutionRuntimeManager) {}
+  constructor(
+    private step: ExitIfNode,
+    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
+  ) {}
 
   public async run(): Promise<void> {
-    await this.workflowState.finishStep(this.step.startNodeId);
-    this.workflowState.goToNextStep();
+    await this.wfExecutionRuntimeManager.finishStep(this.step.startNodeId);
+    this.wfExecutionRuntimeManager.goToNextStep();
   }
 }

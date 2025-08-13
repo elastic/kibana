@@ -16,6 +16,7 @@ import { SIEM_DASHBOARD_MIGRATION_DASHBOARDS_PATH } from '../../../../../../comm
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../../../common/utils/authz';
 import { withLicense } from '../../../common/utils/with_license';
+import { SiemMigrationAuditLogger } from '../../../common/utils/audit';
 
 export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -46,10 +47,19 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
             body: `No dashboards provided for migration ID ${migrationId}. Please provide at least one dashboard.`,
           });
         }
+
+        const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+          context.securitySolution,
+          'dashboards'
+        );
         try {
           const ctx = await context.resolve(['securitySolution']);
           const dashboardMigrationsClient =
             ctx.securitySolution.siemMigrations.getDashboardsClient();
+          await siemMigrationAuditLogger.logAddDashboards({
+            migrationId,
+            count: originalDashboardsCount,
+          });
           await dashboardMigrationsClient.data.dashboards.create(
             migrationId,
             originalDashboardsExport
@@ -57,6 +67,9 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
           return res.ok();
         } catch (error) {
           logger.error(`Error creating dashboards for migration ID ${migrationId}: ${error}`);
+          await siemMigrationAuditLogger.logCreateMigration({
+            error,
+          });
           return res.badRequest({
             body: `Error creating dashboards for migration ID ${migrationId}: ${error.message}`,
           });

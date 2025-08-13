@@ -137,7 +137,6 @@ const ContextEditorComponent: React.FC<Props> = ({
     [
       anonymizationPageFields.data,
       anonymizationPageFields.total,
-      compressed,
       handlePageChecked,
       handlePageReset,
       handlePageUnchecked,
@@ -145,9 +144,10 @@ const ContextEditorComponent: React.FC<Props> = ({
       handleRowReset,
       handleRowUnChecked,
       hasUpdateAIAssistantAnonymization,
+      selectedFields,
+      compressed,
       onListUpdated,
       rawData,
-      selectedFields,
     ]
   );
   const toolbar = useMemo(

@@ -18,7 +18,6 @@ import {
   apmEnableTableSearchBar,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
-  apmEnableServiceMapApiV2,
   apmProgressiveLoading,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
@@ -48,7 +47,6 @@ const SETTINGS_KEYS = [
   apmAWSLambdaRequestCostPerMillion,
   apmEnableTableSearchBar,
   apmEnableServiceInventoryTableSearchBar,
-  apmEnableServiceMapApiV2,
 ];
 
 function getApmSettingsKeys(isProfilingPluginEnabled: boolean) {

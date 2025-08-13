@@ -351,9 +351,11 @@ const createScanOptionsMock = (
   return merge(options, overrides);
 };
 
-const createRunScriptOptionsMock = (
-  overrides: Partial<RunScriptActionRequestBody> = {}
-): RunScriptActionRequestBody => {
+const createRunScriptOptionsMock = <
+  TParams extends RunScriptActionRequestBody['parameters'] = RunScriptActionRequestBody['parameters']
+>(
+  overrides: Partial<RunScriptActionRequestBody<TParams>> = {}
+): RunScriptActionRequestBody<TParams> => {
   const options: RunScriptActionRequestBody = {
     ...createNoParamsResponseActionOptionsMock(),
     parameters: {

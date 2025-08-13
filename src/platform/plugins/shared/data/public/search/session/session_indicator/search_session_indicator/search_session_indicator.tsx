@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useImperativeHandle } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiButtonEmptyProps,
@@ -20,12 +21,13 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { CheckInEmptyCircle, PartialClock } from './custom_icons';
-import './search_session_indicator.scss';
 import { SearchSessionName } from './components';
 import { SearchSessionState } from '../../search_session_state';
 import { SearchSessionsDeprecatedWarning } from '../../search_sessions_deprecation_message';
@@ -349,6 +351,7 @@ export const SearchSessionIndicator = React.forwardRef<
   SearchSessionIndicatorRef,
   SearchSessionIndicatorProps
 >((props, ref) => {
+  const styles = useMemoCss(componentStyles);
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const onOpened = props.onOpened;
@@ -388,11 +391,13 @@ export const SearchSessionIndicator = React.forwardRef<
       closePopover={closePopover}
       anchorPosition={'downLeft'}
       panelPaddingSize={'m'}
-      className="searchSessionIndicator"
+      css={styles.popover}
       data-test-subj={'searchSessionIndicator'}
       data-state={props.state}
       data-save-disabled={props.saveDisabled ?? false}
-      panelClassName={'searchSessionIndicator__panel'}
+      panelProps={{
+        css: styles.panel,
+      }}
       repositionOnScroll={true}
       button={
         <EuiToolTip content={button.tooltipText} delay={'long'}>
@@ -460,3 +465,14 @@ export const SearchSessionIndicator = React.forwardRef<
 // React.lazy() needs default:
 // eslint-disable-next-line import/no-default-export
 export default SearchSessionIndicator;
+
+const componentStyles = {
+  popover: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: `0 ${euiTheme.size.xs}`,
+    }),
+  panel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: `calc(${euiTheme.size.base} * 18)`,
+    }),
+};
