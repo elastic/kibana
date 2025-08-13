@@ -9,40 +9,15 @@
 
 import React from 'react';
 import { MetricsGrid } from './metrics_grid';
+import { MetricField } from '../types';
 
 export const MetricsGridSection: React.FC<{
   indexPattern: string;
   timeRange: { from?: string; to?: string };
+  fields: MetricField[];
   // TODO add props
-}> = () => {
+}> = ({ fields, timeRange }) => {
   // Hardcoded demo data
-  const fields = [
-    {
-      name: 'cpu.usage',
-      index: 'metrics-*',
-      dimensions: [{ name: 'host.name', type: 'string' }],
-      type: 'float',
-      time_series_metric: 'avg',
-      unit: '%',
-    },
-    {
-      name: 'memory.usage',
-      index: 'metrics-*',
-      dimensions: [{ name: 'host.name', type: 'string' }],
-      type: 'float',
-      time_series_metric: 'avg',
-      unit: 'MB',
-    },
-    {
-      name: 'disk.io',
-      index: 'metrics-*',
-      dimensions: [{ name: 'host.name', type: 'string' }],
-      type: 'float',
-      time_series_metric: 'avg',
-      unit: 'IOPS',
-    },
-  ];
-  const timeRange = { from: 'now-1h', to: 'now' };
   const loading = false;
   const searchTerm = '';
   const dimensions: string[] = [];

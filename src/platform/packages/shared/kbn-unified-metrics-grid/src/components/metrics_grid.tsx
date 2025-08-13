@@ -50,17 +50,10 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
   filters = [],
   displayDensity = 'normal',
 }) => {
-  // Determine number of columns based on display density
-  const getColumns = () => {
-    switch (displayDensity) {
-      case 'compact':
-        return 4;
-      case 'row':
-        return 1;
-      case 'normal':
-      default:
-        return 3;
-    }
+  const getColumns = (): 1 | 2 | 3 | 4 => {
+    return Array.isArray(fields)
+      ? ((fields?.length >= 4 ? 4 : fields?.length) as 1 | 2 | 3 | 4)
+      : 1;
   };
 
   if (loading) {
@@ -82,11 +75,7 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
   }
 
   return (
-    <EuiFlexGrid
-      columns={fields?.length > 4 ? 4 : fields?.length}
-      gutterSize="l"
-      style={{ margin: '16px' }}
-    >
+    <EuiFlexGrid columns={getColumns()} gutterSize="l" style={{ margin: '16px' }}>
       {pivotOn === 'metric'
         ? fields.map((field, index) => (
             <EuiFlexItem key={`${field.name}-${displayDensity}`}>
