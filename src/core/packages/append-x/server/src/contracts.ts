@@ -130,7 +130,7 @@ const previousDeclaration: DataStreamDefinition<MyDocument> = {
   if (params._source["someFieldV2"] != null) {
     emit(params._source["someFieldV2"]);
   } else  { // return the original value
-    emit(doc['someFieldV2'].value);
+    emit(doc['someField'].value);
   }
 `,
       },
