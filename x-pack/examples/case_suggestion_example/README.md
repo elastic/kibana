@@ -40,7 +40,7 @@ This example showcases:
 
   - Implements the logic for fetching and formatting suggestion data, including the associated attachment. The handler uses mocked data to simulate fetching synthetics monitor information, as an example.
 
-- **Public Plugin** [`server/plugin.ts`](./server/plugin.ts)
+- **Public Plugin** [`public/plugin.ts`](./public/plugin.ts)
 
   - Demonstrates how to register client-side suggestion.
 
