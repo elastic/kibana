@@ -151,7 +151,6 @@ function AddToCaseButtonContent({
         <AddToCaseComment
           onCommentChange={(change) => setComment(change)}
           comment={comment}
-          notifications={notifications}
         />
       </EuiModalBody>
     </EuiConfirmModal>
