@@ -58,6 +58,7 @@ export const WorkflowYAMLEditor = ({
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor | null>(
     null
   );
+  const editorModel = useRef<monaco.editor.ITextModel>();
 
   const workflowJsonSchema = useWorkflowJsonSchema();
   const schemas = useMemo(() => {
@@ -99,25 +100,16 @@ export const WorkflowYAMLEditor = ({
 
   const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
+    const model = editor.getModel();
+    if (model) {
+      editorModel.current = model;
+    }
 
     editor.updateOptions({
       glyphMargin: true,
     });
 
     onMount?.(editor, monaco);
-
-    // Monkey patching to set the initial markers
-    // https://github.com/suren-atoyan/monaco-react/issues/70#issuecomment-760389748
-    const setModelMarkers = monaco.editor.setModelMarkers;
-    monaco.editor.setModelMarkers = function (model, owner, markers) {
-      setModelMarkers.call(monaco.editor, model, owner, markers);
-      handleMarkersChanged(editor, model.uri, markers, owner);
-    };
-
-    monaco.languages.registerCompletionItemProvider(
-      'yaml',
-      getCompletionItemProvider(WORKFLOW_ZOD_SCHEMA_LOOSE)
-    );
 
     setIsEditorMounted(true);
   };
@@ -128,6 +120,10 @@ export const WorkflowYAMLEditor = ({
       validateMustacheExpressionsEverywhere();
     }
   }, [validateMustacheExpressionsEverywhere, isEditorMounted]);
+
+  const completionProvider = useMemo(() => {
+    return getCompletionItemProvider(WORKFLOW_ZOD_SCHEMA_LOOSE);
+  }, []);
 
   const editorOptions = useMemo<monaco.editor.IStandaloneEditorConstructionOptions>(
     () => ({
@@ -158,6 +154,33 @@ export const WorkflowYAMLEditor = ({
 
   const styles = useMemoCss(editorStyles);
 
+  // Clean up the monaco model and editor on unmount
+  useEffect(() => {
+    const editor = editorRef.current;
+    const model = editorModel.current;
+    return () => {
+      model?.dispose();
+      editor?.dispose();
+    };
+  }, []);
+
+  useEffect(() => {
+    // Monkey patching to set the initial markers
+    // https://github.com/suren-atoyan/monaco-react/issues/70#issuecomment-760389748
+    const setModelMarkers = monaco.editor.setModelMarkers;
+    monaco.editor.setModelMarkers = function (model, owner, markers) {
+      setModelMarkers.call(monaco.editor, model, owner, markers);
+      if (editorRef.current && !('getOriginalEditor' in editorRef.current)) {
+        handleMarkersChanged(editorRef.current, model.uri, markers, owner);
+      }
+    };
+
+    return () => {
+      // Reset the monaco.editor.setModelMarkers to the original function
+      monaco.editor.setModelMarkers = setModelMarkers;
+    };
+  }, [handleMarkersChanged]);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none" css={styles.container}>
       <EuiFlexItem css={{ flex: 1, minHeight: 0 }}>
@@ -167,6 +190,7 @@ export const WorkflowYAMLEditor = ({
           options={editorOptions}
           // @ts-expect-error - TODO: fix this
           schemas={schemas}
+          suggestionProvider={completionProvider}
           {...props}
         />
       </EuiFlexItem>
