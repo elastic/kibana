@@ -389,4 +389,37 @@ describe('Color mapping - color generation', () => {
     // this is an edge case and ideally never happen
     expect(colorFactory('not_available')).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
   });
+
+  it('prevent 8.11 basic configuration to generate gray palettes', () => {
+    const colorFactory = getColorFactory(
+      {
+        ...DEFAULT_COLOR_MAPPING_CONFIG,
+        assignments: [],
+        specialAssignments: [
+          {
+            color: {
+              colorIndex: 1,
+              paletteId: 'neutral',
+              type: 'categorical',
+            },
+            rules: [
+              {
+                type: 'other',
+              },
+            ],
+            touched: false,
+          },
+        ],
+      },
+      palettes,
+      true, // testing in dark mode
+      {
+        type: 'categories',
+        categories: ['cat1', 'cat2', 'cat3'],
+      }
+    );
+    expect(toHex(colorFactory('cat1'))).toBe(toHex(elasticPaletteColors[0]));
+    expect(toHex(colorFactory('cat2'))).toBe(toHex(elasticPaletteColors[1]));
+    expect(toHex(colorFactory('cat3'))).toBe(toHex(elasticPaletteColors[2]));
+  });
 });
