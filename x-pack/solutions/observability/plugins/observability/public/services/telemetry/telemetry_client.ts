@@ -33,4 +33,10 @@ export class TelemetryClient implements ITelemetryClient {
       caseContext,
     });
   }
+
+  reportRelatedAlertAddedToCase(newCaseCreated: boolean): void {
+    this.analytics.reportEvent(TelemetryEventTypes.RELATED_ALERT_ADDED_TO_CASE, {
+      new_case_created: newCaseCreated,
+    });
+  }
 }

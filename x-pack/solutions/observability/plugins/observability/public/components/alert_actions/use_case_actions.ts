@@ -11,36 +11,33 @@ import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { Alert } from '@kbn/alerting-types';
 import { CasesService } from '@kbn/response-ops-alerts-table/types';
 import type { EventNonEcsData } from '../../../common/typings';
-import { useKibana } from '../../utils/kibana_react';
 export const useCaseActions = ({
   alerts,
-  refresh,
+  onAddToCase,
   services,
-  caseContext,
 }: {
   alerts: Alert[];
-  refresh?: () => void;
+  onAddToCase?: ({ isNewCase }: { isNewCase: boolean }) => void;
   services: {
     /**
      * The cases service is optional: cases features will be disabled if not provided
      */
     cases?: CasesService;
   };
-  caseContext?: string;
 }) => {
   const { cases } = services;
-  const { telemetryClient } = useKibana().services;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const onSuccess = useCallback(() => {
-    refresh?.();
-    if (caseContext) {
-      telemetryClient.reportCaseSelectedFromObservability(caseContext);
-    }
-  }, [caseContext, refresh, telemetryClient]);
+  const onAddToExistingCase = useCallback(() => {
+    onAddToCase?.({ isNewCase: false });
+  }, [onAddToCase]);
+
+  const onAddToNewCase = useCallback(() => {
+    onAddToCase?.({ isNewCase: true });
+  }, [onAddToCase]);
 
   const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({
-    onSuccess,
+    onSuccess: onAddToExistingCase,
   });
 
   function getCaseAttachments(): CaseAttachmentsWithoutOwner {
@@ -61,7 +58,7 @@ export const useCaseActions = ({
       }) ?? { id: '', name: '' },
     }));
   }
-  const createCaseFlyout = cases?.hooks.useCasesAddToNewCaseFlyout({ onSuccess });
+  const createCaseFlyout = cases?.hooks.useCasesAddToNewCaseFlyout({ onSuccess: onAddToNewCase });
   const closeActionsPopover = () => {
     setIsPopoverOpen(false);
   };
