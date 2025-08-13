@@ -98,7 +98,7 @@ export function SloPurgeConfirmationModal({
           onChange={(val: string) => {
             setPurgeType(val);
           }}
-          name="radio group"
+          name="purgeType"
         />
       </EuiFormRow>
       {purgeType === 'fixed_age' ? (
@@ -127,6 +127,7 @@ export function SloPurgeConfirmationModal({
             ]}
             idSelected={age}
             onChange={setAge}
+            name="purgeAge"
           />
         </EuiFormRow>
       ) : (
