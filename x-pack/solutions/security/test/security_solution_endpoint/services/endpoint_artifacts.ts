@@ -45,12 +45,23 @@ export interface ArtifactCreateOptions {
 }
 
 export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProviderContext) {
-  const exceptionsGenerator = new ExceptionsListItemGenerator();
   const supertestSv = getService('supertest');
   const log = getService('log');
   const esClient = getService('es');
 
   return new (class EndpointTelemetryTestResources {
+    private readonly supertest: TestAgent;
+    private readonly log: ReturnType<typeof getService>;
+    private readonly esClient: ReturnType<typeof getService>;
+    private readonly exceptionsGenerator: ExceptionsListItemGenerator;
+
+    constructor() {
+      this.supertest = supertestSv;
+      this.log = log;
+      this.esClient = esClient;
+      this.exceptionsGenerator = new ExceptionsListItemGenerator();
+    }
+
     getHttpResponseFailureHandler(
       ignoredStatusCodes: number[] = []
     ): (res: Response) => Promise<Response> {
@@ -65,7 +76,7 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
 
     async ensureListExists(
       listDefinition: CreateExceptionListSchema,
-      { supertest = supertestSv, spaceId = DEFAULT_SPACE_ID }: ArtifactCreateOptions = {}
+      { supertest = this.supertest, spaceId = DEFAULT_SPACE_ID }: ArtifactCreateOptions = {}
     ): Promise<void> {
       // attempt to create it and ignore 409 (already exists) errors
       await supertest
@@ -77,9 +88,9 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
 
     async createExceptionItem(
       createPayload: CreateExceptionListItemSchema,
-      { supertest = supertestSv, spaceId = DEFAULT_SPACE_ID }: ArtifactCreateOptions = {}
+      { supertest = this.supertest, spaceId = DEFAULT_SPACE_ID }: ArtifactCreateOptions = {}
     ): Promise<ArtifactTestData> {
-      log.verbose(`Creating exception item:\n${JSON.stringify(createPayload)}`);
+      this.log.verbose(`Creating exception item:\n${JSON.stringify(createPayload)}`);
 
       const artifact = await supertest
         .post(addSpaceIdToPath('/', spaceId, EXCEPTION_LIST_ITEM_URL))
@@ -91,7 +102,7 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
       const { item_id: itemId, list_id: listId } = artifact;
       const artifactAssignment = isArtifactGlobal(artifact) ? 'Global' : 'Per-Policy';
 
-      log.info(
+      this.log.info(
         `Created [${artifactAssignment}] exception list item in space [${spaceId}], List ID [${listId}], Item ID [${itemId}]`
       );
 
@@ -111,7 +122,7 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
         item_id: itemId,
         namespace_type: nameSpaceType,
       }: Pick<ExceptionListItemSchema, 'list_id' | 'item_id' | 'namespace_type'>,
-      { supertest = supertestSv, spaceId = DEFAULT_SPACE_ID }: ArtifactCreateOptions = {}
+      { supertest = this.supertest, spaceId = DEFAULT_SPACE_ID }: ArtifactCreateOptions = {}
     ): Promise<void> {
       const deleteResponse = await supertest
         .delete(
@@ -125,7 +136,9 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
         .send()
         .then(this.getHttpResponseFailureHandler([404]));
 
-      log.info(`Deleted exception list item [${listId}]: ${itemId} (${deleteResponse.status})`);
+      this.log.info(
+        `Deleted exception list item [${listId}]: ${itemId} (${deleteResponse.status})`
+      );
     }
 
     async createEndpointException(
@@ -142,7 +155,8 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
         },
         options
       );
-      const endpointException = exceptionsGenerator.generateEndpointExceptionForCreate(overrides);
+      const endpointException =
+        this.exceptionsGenerator.generateEndpointExceptionForCreate(overrides);
 
       return this.createExceptionItem(endpointException, options);
     }
@@ -152,7 +166,7 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
       options?: ArtifactCreateOptions
     ): Promise<ArtifactTestData> {
       await this.ensureListExists(TRUSTED_APPS_EXCEPTION_LIST_DEFINITION, options);
-      const trustedApp = exceptionsGenerator.generateTrustedAppForCreate(overrides);
+      const trustedApp = this.exceptionsGenerator.generateTrustedAppForCreate(overrides);
 
       return this.createExceptionItem(trustedApp, options);
     }
@@ -162,7 +176,7 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
       options?: ArtifactCreateOptions
     ): Promise<ArtifactTestData> {
       await this.ensureListExists(EVENT_FILTER_LIST_DEFINITION, options);
-      const eventFilter = exceptionsGenerator.generateEventFilterForCreate(overrides);
+      const eventFilter = this.exceptionsGenerator.generateEventFilterForCreate(overrides);
 
       return this.createExceptionItem(eventFilter, options);
     }
@@ -172,7 +186,7 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
       options?: ArtifactCreateOptions
     ): Promise<ArtifactTestData> {
       await this.ensureListExists(HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION, options);
-      const artifact = exceptionsGenerator.generateHostIsolationExceptionForCreate(overrides);
+      const artifact = this.exceptionsGenerator.generateHostIsolationExceptionForCreate(overrides);
 
       return this.createExceptionItem(artifact, options);
     }
@@ -182,7 +196,7 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
       options?: ArtifactCreateOptions
     ): Promise<ArtifactTestData> {
       await this.ensureListExists(BLOCKLISTS_LIST_DEFINITION, options);
-      const blocklist = exceptionsGenerator.generateBlocklistForCreate(overrides);
+      const blocklist = this.exceptionsGenerator.generateBlocklistForCreate(overrides);
 
       return this.createExceptionItem(blocklist, options);
     }
@@ -220,7 +234,7 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
     > {
       const {
         hits: { hits: manifestResults },
-      } = await esClient.search<InternalUnifiedManifestSchemaResponseType['_source']>({
+      } = await this.esClient.search<InternalUnifiedManifestSchemaResponseType['_source']>({
         index: '.kibana*',
         query: {
           bool: { filter: [{ term: { type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE } }] },

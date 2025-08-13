@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// some services might be missing ...
 import { services as serverlessServices } from '@kbn/test-suites-xpack-platform/serverless/api_integration/services';
 import { KibanaEBTServerProvider } from '@kbn/test-suites-src/analytics/services/kibana_ebt';
 import { SearchSecureService } from '../services/search_secure';

@@ -81,22 +81,38 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
   const log = getService('log');
 
   return new (class EndpointTestResources {
+    private readonly esClient: ReturnType<typeof getService>;
+    private readonly retry: ReturnType<typeof getService>;
+    private readonly kbnClient: ReturnType<typeof getService>;
+    private readonly config: ReturnType<typeof getService>;
+    private readonly supertest: ReturnType<typeof getService>;
+    private readonly log: ReturnType<typeof getService>;
+
+    constructor() {
+      this.esClient = esClient;
+      this.retry = retry;
+      this.kbnClient = kbnClient;
+      this.config = config;
+      this.supertest = supertest;
+      this.log = log;
+    }
+
     getScopedKbnClient(spaceId: string = DEFAULT_SPACE_ID): KbnClient {
       if (!spaceId || spaceId === DEFAULT_SPACE_ID) {
-        return kbnClient;
+        return this.kbnClient;
       }
 
       const kbnClientOptions: Parameters<typeof createKbnClient>[0] = {
-        url: kbnClient.resolveUrl('/'),
-        username: config.get('servers.elasticsearch.username'),
-        password: config.get('servers.elasticsearch.password'),
+        url: this.kbnClient.resolveUrl('/'),
+        username: this.config.get('servers.elasticsearch.username'),
+        password: this.config.get('servers.elasticsearch.password'),
         spaceId,
       };
 
-      log.info(`creating new KbnClient with:\n${JSON.stringify(kbnClientOptions, null, 2)}`);
+      this.log.info(`creating new KbnClient with:\n${JSON.stringify(kbnClientOptions, null, 2)}`);
 
       // Was not included above in order to keep the output of the log.info() above clean in the output
-      kbnClientOptions.log = log;
+      kbnClientOptions.log = this.log;
 
       return createKbnClient(kbnClientOptions);
     }
@@ -140,27 +156,24 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
         withResponseActions = true,
       } = options;
 
-      const _kbnClient = this.getScopedKbnClient(spaceId);
-      const endpointPackage = await getEndpointPackageInfo(_kbnClient);
+      const client = this.getScopedKbnClient(spaceId);
+      const endpointPackage = await getEndpointPackageInfo(client);
 
       if (waitUntilTransformed && customIndexFn) {
         // need this before indexing docs so that the united transform doesn't
         // create a checkpoint with a timestamp after the doc timestamps
-        await stopMetadataTransforms(esClient, endpointPackage.version);
+        await stopMetadataTransforms(this.esClient, endpointPackage.version);
       }
 
-      const isServerless = await isServerlessKibanaFlavor(_kbnClient);
-      const CurrentKibanaVersionDocGenerator = await createDocGeneratorClass(
-        _kbnClient,
-        isServerless
-      );
+      const isServerless = await isServerlessKibanaFlavor(client);
+      const CurrentKibanaVersionDocGenerator = await createDocGeneratorClass(client, isServerless);
 
       // load data into the system
       const indexedData = customIndexFn
         ? await customIndexFn()
         : await indexHostsAndAlerts(
-            esClient as Client,
-            kbnClient,
+            this.esClient as Client,
+            client,
             generatorSeed,
             numHosts,
             numHostDocs,
@@ -176,12 +189,12 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
             undefined,
             undefined,
             undefined,
-            log
+            this.log
           );
 
       if (waitUntilTransformed && customIndexFn) {
         await startMetadataTransforms(
-          esClient,
+          this.esClient,
           Array.from(new Set(indexedData.hosts.map((host) => host.agent.id))),
           endpointPackage.version
         );
@@ -211,31 +224,31 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
       { spaceId = DEFAULT_SPACE_ID }: { spaceId?: string } = {}
     ): Promise<DeleteIndexedHostsAndAlertsResponse> {
       return deleteIndexedHostsAndAlerts(
-        esClient as Client,
+        this.esClient as Client,
         this.getScopedKbnClient(spaceId),
         indexedData
       );
     }
 
-    async waitForIndex(
+    private async waitForIndex(
       ids: string[],
       index: string,
       body: any = {},
-      timeout: number = config.get('timeouts.waitFor')
+      timeout: number = this.config.get('timeouts.waitFor')
     ) {
       // If we have a specific number of endpoint hosts to check for, then use that number,
       // else we just want to make sure the index has data, thus just having one in the index will do
       const size = ids.length || 1;
 
-      await retry.waitForWithTimeout(`endpoint hosts in ${index}`, timeout, async () => {
+      await this.retry.waitForWithTimeout(`endpoint hosts in ${index}`, timeout, async () => {
         try {
           if (index === METADATA_UNITED_INDEX) {
             // United metadata transform occasionally can't find docs in .fleet-agents.
             // Running a search on the index first eliminates this issue.
             // Replacing the search with a refresh does not resolve flakiness.
-            await esClient.search({ index: AGENTS_INDEX });
+            await this.esClient.search({ index: AGENTS_INDEX });
           }
-          const searchResponse = await esClient.search({
+          const searchResponse = await this.esClient.search({
             index,
             size,
             body,
@@ -262,7 +275,10 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
      * @param [ids] optional list of ids to check for. If empty, it will just check if data exists in the index
      * @param [timeout] optional max timeout to waitFor in ms. default is 20000.
      */
-    async waitForUnitedEndpoints(ids: string[] = [], timeout = config.get('timeouts.waitFor')) {
+    async waitForUnitedEndpoints(
+      ids: string[] = [],
+      timeout = this.config.get('timeouts.waitFor')
+    ) {
       const body = ids.length
         ? {
             query: {
@@ -298,7 +314,7 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
     async installOrUpgradeEndpointFleetPackage(
       spaceId: string = DEFAULT_SPACE_ID
     ): ReturnType<typeof installOrUpgradeEndpointFleetPackage> {
-      return installOrUpgradeEndpointFleetPackage(this.getScopedKbnClient(spaceId), log);
+      return installOrUpgradeEndpointFleetPackage(this.getScopedKbnClient(spaceId), this.log);
     }
 
     /**
@@ -310,7 +326,7 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
       endpointAgentId: string,
       spaceId: string = DEFAULT_SPACE_ID
     ): Promise<HostInfo> {
-      return supertest
+      return this.supertest
         .get(
           addSpaceIdToPath('/', spaceId, HOST_METADATA_GET_ROUTE.replace('{id}', endpointAgentId))
         )
@@ -333,7 +349,7 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
       const currentMetadata = await this.fetchEndpointMetadata(endpointAgentId, spaceId);
       const endpointPackage = await getEndpointPackageInfo(this.getScopedKbnClient(spaceId));
 
-      await stopMetadataTransforms(esClient, endpointPackage.version);
+      await stopMetadataTransforms(this.esClient, endpointPackage.version);
       const generatedMetadataDoc = new EndpointDocGenerator().generateHostMetadata();
 
       const updatedMetadataDoc = merge(
@@ -346,7 +362,7 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
         updates
       );
 
-      await esClient
+      await this.esClient
         .index({
           index: METADATA_DATASTREAM,
           body: updatedMetadataDoc,
@@ -354,16 +370,16 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
         })
         .catch(catchAxiosErrorFormatAndThrow);
 
-      await startMetadataTransforms(esClient, [], endpointPackage.version);
+      await startMetadataTransforms(this.esClient, [], endpointPackage.version);
 
-      log.info(
+      this.log.info(
         `Endpoint metadata update was indexed for endpoint agent id [${endpointAgentId}] in space [${spaceId}]`
       );
 
       let response: HostInfo | undefined;
 
       // Wait for the update to show up on Metadata API (after transform runs)
-      await retry.waitFor(
+      await this.retry.waitFor(
         `update to endpoint id [${endpointAgentId}] to be processed by transform`,
         async () => {
           response = await this.fetchEndpointMetadata(endpointAgentId, spaceId);
@@ -376,8 +392,8 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
         throw new Error(`Response object not set. Issue fetching endpoint metadata`);
       }
 
-      log.info(`Endpoint metadata doc update done for agent ID [${endpointAgentId}]`);
-      log.verbose(JSON.stringify(response, null, 2));
+      this.log.info(`Endpoint metadata doc update done for agent ID [${endpointAgentId}]`);
+      this.log.verbose(JSON.stringify(response, null, 2));
 
       return response;
     }
