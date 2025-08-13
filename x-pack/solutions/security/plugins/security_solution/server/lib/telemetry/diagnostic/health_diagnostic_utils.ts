@@ -96,25 +96,37 @@ export async function applyFilterlist(
       dst[key] = rules[fullPath] === Action.MASK ? await maskValue(String(value), salt) : value;
     } else {
       const nextValue = srcObj[key];
-      
+
       if (Array.isArray(nextValue)) {
         if (!dst[key]) {
           dst[key] = [];
         }
         const dstArray = dst[key] as unknown[];
-        
+
         for (let i = 0; i < nextValue.length; i++) {
           const item = nextValue[i];
           if (item && typeof item === 'object') {
             if (!dstArray[i]) {
               dstArray[i] = {};
             }
-            await processPath(item, dstArray[i] as Record<string, unknown>, keys, fullPath, keyIndex + 1);
+            await processPath(
+              item,
+              dstArray[i] as Record<string, unknown>,
+              keys,
+              fullPath,
+              keyIndex + 1
+            );
           }
         }
       } else if (nextValue && typeof nextValue === 'object') {
         dst[key] ??= {};
-        await processPath(nextValue, dst[key] as Record<string, unknown>, keys, fullPath, keyIndex + 1);
+        await processPath(
+          nextValue,
+          dst[key] as Record<string, unknown>,
+          keys,
+          fullPath,
+          keyIndex + 1
+        );
       }
     }
   };
