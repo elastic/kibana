@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
+import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import {
   ADD_ELASTIC_RULES_BTN,
   ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN,
-} from '../../../../screens/alerts_detection_rules';
-import { deleteFirstRule } from '../../../../tasks/alerts_detection_rules';
+} from '../../../../../screens/alerts_detection_rules';
+import { deleteFirstRule } from '../../../../../tasks/alerts_detection_rules';
 import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
-} from '../../../../tasks/api_calls/common';
+} from '../../../../../tasks/api_calls/common';
 import {
   installAllPrebuiltRulesRequest,
   installPrebuiltRuleAssets,
   installMockEmptyPrebuiltRulesPackage,
   installSpecificPrebuiltRulesRequest,
-} from '../../../../tasks/api_calls/prebuilt_rules';
-import { resetRulesTableState } from '../../../../tasks/common';
-import { login } from '../../../../tasks/login';
-import { visitRulesManagementTable } from '../../../../tasks/rules_management';
+} from '../../../../../tasks/api_calls/prebuilt_rules';
+import { resetRulesTableState } from '../../../../../tasks/common';
+import { login } from '../../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update Notifications',
