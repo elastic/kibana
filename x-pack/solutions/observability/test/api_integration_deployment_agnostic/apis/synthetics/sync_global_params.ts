@@ -218,7 +218,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...newMonitor,
           [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
           [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-          locations: [pvtLoc],
         })
       );
       newHttpMonitorId = apiResponse.rawBody.id;
