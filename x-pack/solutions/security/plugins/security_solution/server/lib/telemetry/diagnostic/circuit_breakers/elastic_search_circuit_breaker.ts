@@ -66,7 +66,7 @@ export class ElasticsearchCircuitBreaker extends BaseCircuitBreaker {
         const currentTimestamp = node.timestamp;
         const lastReportedTimestamp = this.nodeTimestamps[nodeId];
 
-        if (!currentTimestamp || lastReportedTimestamp === currentTimestamp) {
+        if (currentTimestamp === undefined || lastReportedTimestamp === currentTimestamp) {
           return this.failure(
             `Node ${nodeId} is stale: no timestamp updates detected. Current timestamp=${currentTimestamp}, Last reported timestamp=${lastReportedTimestamp}`
           );
