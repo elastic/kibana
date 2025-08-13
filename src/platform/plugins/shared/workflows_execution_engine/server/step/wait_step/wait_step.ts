@@ -12,6 +12,7 @@ import { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event
 import { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
 
 export class WaitStepImpl implements StepImplementation {
+  private static readonly SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
   private durationCache: number | null = null;
 
   constructor(
@@ -22,12 +23,12 @@ export class WaitStepImpl implements StepImplementation {
   ) {}
 
   async run(): Promise<void> {
-    if (this.getDurationInMs() > 1000 * 2) {
+    if (this.getDurationInMs() > WaitStepImpl.SHORT_DURATION_THRESHOLD) {
       await this.handleLongDuration();
       return;
     }
 
-    this.handleShortDuration();
+    await this.handleShortDuration();
   }
 
   private getDurationInMs(): number {
@@ -45,7 +46,8 @@ export class WaitStepImpl implements StepImplementation {
   private async handleShortDuration(): Promise<void> {
     await this.workflowRuntime.startStep(this.node.id);
     this.logStartWait();
-    await new Promise((resolve) => setTimeout(resolve, this.getDurationInMs()));
+    const durationInMs = this.getDurationInMs();
+    await new Promise((resolve) => setTimeout(resolve, durationInMs));
     this.logFinishWait();
     await this.workflowRuntime.finishStep(this.node.id);
     this.workflowRuntime.goToNextStep();
