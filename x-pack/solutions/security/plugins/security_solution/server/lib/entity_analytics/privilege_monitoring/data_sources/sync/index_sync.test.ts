@@ -177,5 +177,36 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
       expect(mockGetMonitoredUsers).toHaveBeenCalledWith(['frodo', 'samwise']);
       expect(mockBulkUpsertOperations).toHaveBeenCalled();
     });
+
+    it('should log errors when the bulk upload response contains errors', async () => {
+      const errorMsg = 'Bulk operation failed';
+      const mockHits = [
+        {
+          _source: { user: { name: 'frodo' } },
+          _id: '1',
+          sort: [1],
+        },
+      ];
+
+      mockSearchUsernamesInIndex
+        .mockResolvedValueOnce({ hits: { hits: mockHits } }) // first batch
+        .mockResolvedValueOnce({ hits: { hits: [] } }); // second batch = end
+      mockGetMonitoredUsers.mockResolvedValue({
+        hits: {
+          hits: [],
+        },
+      });
+      mockBulkUpsertOperations.mockReturnValue([{ index: { _id: '1' } }]);
+      esClientMock.bulk.mockResolvedValue({
+        errors: true,
+        items: [{ index: { error: { errorMsg } } }],
+      });
+
+      await indexSyncService.syncUsernamesFromIndex({
+        indexName: 'test-index',
+      });
+
+      expect(deps.logger.error).toHaveBeenCalledWith(expect.stringContaining(errorMsg));
+    });
   });
 });
