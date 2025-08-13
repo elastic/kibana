@@ -104,23 +104,29 @@ export function AlertActions({
     }
   }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
-  
+  const onAddToCase = useCallback(
+    ({ isNewCase }: { isNewCase: boolean }) => {
+      if (tableId === RELATED_ALERTS_TABLE_ID) {
+        telemetryClient.reportRelatedAlertAddedToCase(isNewCase);
+      }
+      refresh?.();
+    },
+    [refresh, telemetryClient, tableId]
+  );
 
-
-
-  const {     isPopoverOpen,
+  const {
+    isPopoverOpen,
     setIsPopoverOpen,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
-    removeAlertsFromCase, } =
-    useCaseActions({
-      refresh
-      onAddToCase,
-      alerts: [alert],
-      services: {
-        cases,
-      },
-    });
+    removeAlertsFromCase,
+  } = useCaseActions({
+    onAddToCase,
+    alerts: [alert],
+    services: {
+      cases,
+    },
+  });
 
   const closeActionsPopover = useCallback(() => {
     setIsPopoverOpen(false);
