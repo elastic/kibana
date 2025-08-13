@@ -13,12 +13,27 @@ import type api from '@elastic/elasticsearch/lib/api/types';
 
 // Example usage...
 
+/**
+ * Outstanding points:
+ *
+ * 1. How should we handle updating mappings? Do we just apply to the index template or go and update the existing write index as well?
+ * 2. Lazy creation, but eager update of mappings to existing data streams
+ *    2.1. With option to eagerly create for when we know the data stream will be used, failing Kibana startup if data stream cannot be created.
+ *    2.2. Data stream deletion a future possibility
+ * 3. Data streams for CRUD-like use cases: specifically updates
+ *    3.1. Likely a future phase (requires updating underlying index)
+ *    3.2. Consider removing possibility to control IDs at doc creation
+ * 4. We need guidance for teams to mostly be able to self-service their management/creation of data streams.
+ *    4.1. We can largely rely on convention to start with: write a Jest integration test and take a snapshot of the serialized data stream declaration that you want to ship. Note: once merged these test snapshots should never change in a breaking way...
+ */
+
 const dataStream: DataStreamHelpers = {} as any; // static functions to help declare and manage data streams.
 const mappings: MappingsHelpers = {} as any; // static functions to help declare mappings for data streams.
-const esClient: Client = {} as any;
-const integrationTestHelpers: JestIntegrationTestHelpers = {} as any;
 const appendXSetup: AppendXServiceSetup = {} as any;
 const appendXStart: AppendXServiceStart = {} as any;
+
+const esClient: Client = {} as any;
+const integrationTestHelpers: JestIntegrationTestHelpers = {} as any;
 
 /**
  * A type checked schema and mappings declaration similar to SOs.
@@ -40,7 +55,6 @@ type MyDocument = TypeOf<typeof myDocumentSchema>;
 const myDataStream: DataStreamDefinition<MyDocument> = {
   name: 'my-data-stream',
   schema: myDocumentSchema,
-  autoRollover: true,
   mappings: {
     dynamic: false,
     properties: {
@@ -53,7 +67,13 @@ const myDataStream: DataStreamDefinition<MyDocument> = {
       },
     },
   },
-  runtimeMappings: {
+  searchRuntimeMappings: {
+    // full declaration, or you could write:
+    // someFieldV2: mappings.searchRuntimeMappings.remap({
+    //   previousFieldName: 'someField',
+    //   fieldName: 'someFieldV2',
+    //   type: 'keyword',
+    // }),
     someFieldV2: {
       type: 'keyword',
       script: {
@@ -62,7 +82,7 @@ const myDataStream: DataStreamDefinition<MyDocument> = {
   if (params._source["someFieldV2"] != null) {
     emit(params._source["someFieldV2"]);
   } else  { // return the original processed in some way
-    emit(doc['someFieldV2'].value + " the original, but processed");
+    emit(doc['someField'].value + " the original, but processed");
   }
 `,
       },
@@ -81,7 +101,7 @@ esClient.indices.createDataStream(dataStream.asCreateDataStreamRequestArgs(myDat
 appendXSetup.registerDataStream(myDataStream);
 
 // Searching
-// const client = appendXStart.getClient(myDataStream);
+// const client = appendXStart.client.scopeTo<TDoc>(myDataStream, myDataStream2, myDataStream3);
 // const result = await client.search({...}) // ES API
 
 // Authoring integ tests
@@ -89,7 +109,6 @@ appendXSetup.registerDataStream(myDataStream);
 const previousDeclaration: DataStreamDefinition<MyDocument> = {
   name: 'my-data-stream',
   schema: myDocumentSchema,
-  autoRollover: true,
   mappings: {
     dynamic: false,
     properties: {
@@ -102,7 +121,7 @@ const previousDeclaration: DataStreamDefinition<MyDocument> = {
       },
     },
   },
-  runtimeMappings: {
+  searchRuntimeMappings: {
     someFieldV2: {
       type: 'keyword',
       script: {
@@ -150,6 +169,14 @@ interface MappingsHelpers {
   date: () => KeywordMapping;
   keyword: () => KeywordMapping;
   text: () => TextMapping;
+  // Helpers for declaring runtime fields
+  searchRuntimeMappings: {
+    remap: (args: {
+      previousFieldName: string;
+      fieldName: string;
+      type: api.MappingRuntimeFieldType;
+    }) => api.MappingRuntimeField;
+  };
 }
 
 type DataStreamDeclarationMappings<Schema extends Record<string, unknown>> = Pick<
@@ -173,16 +200,9 @@ interface DataStreamDefinition<Schema extends Record<string, unknown> = {}> {
   mappings?: DataStreamDeclarationMappings<Schema>;
 
   // https://www.elastic.co/docs/manage-data/data-store/mapping/define-runtime-fields-in-search-request
-  runtimeMappings?: {
+  searchRuntimeMappings?: {
     [K in keyof Schema]?: api.MappingRuntimeField;
   };
-
-  /**
-   * TODO: discuss, this can control whether new mappings will trigger a rollover
-   *      or not. If set to true, the data stream will be rolled over when the "_meta"
-   *      field is updated. This ensures that _new_ documents will reflect the new mappings,
-   */
-  autoRollover?: boolean;
 }
 
 interface DataStreamHelpers {
