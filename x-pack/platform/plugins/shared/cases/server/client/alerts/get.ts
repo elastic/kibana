@@ -9,12 +9,11 @@ import type { MgetResponseItem, GetGetResult } from '@elastic/elasticsearch/lib/
 import { ALERT_GROUPING, TAGS } from '@kbn/rule-data-utils';
 import { flattenObject } from '@kbn/object-utils';
 import type { CaseMetadata } from '../../../common/types/domain';
-import { AttachmentType } from '../../../common/types/domain';
 import type { AttachmentAttributes } from '../../../common';
 import type { AlertInfo } from '../../common/types';
 import type { CasesClientArgs } from '..';
 import type { CasesClientGetAlertsResponse } from './types';
-import { getIDsAndIndicesAsArrays } from '../../common/utils';
+import { getAlertInfoFromComments } from '../../common/utils';
 
 function isAlert(
   doc?: MgetResponseItem<Record<string, unknown>>
@@ -47,34 +46,26 @@ export const getAlertMetadataFromComments = async (
   comments: AttachmentAttributes[],
   clientArgs: CasesClientArgs
 ): Promise<CaseMetadata> => {
-  const alertInfo: AlertInfo[] = comments.flatMap((c) => {
-    if (c.type === AttachmentType.alert) {
-      const { ids, indices } = getIDsAndIndicesAsArrays(c);
-      return ids.map((alertId, index) => ({ id: alertId, index: indices[index] }));
-    }
-    return [];
-  });
+  const alertInfo: AlertInfo[] = getAlertInfoFromComments(comments);
 
   const alertsDocs = await getAlerts(alertInfo, clientArgs);
 
-  const metadata = alertsDocs.reduce<Record<string, Set<string>>>(
-    (acc, alert) => {
-      const { [TAGS]: tags = [], [ALERT_GROUPING]: grouping } = alert;
+  const metadata: Record<string, Set<string>> = { tags: new Set() };
+  for (const alert of alertsDocs) {
+    const { [TAGS]: tags = [], [ALERT_GROUPING]: grouping } = alert;
 
-      tags.forEach((t) => {
-        acc.tags.add(t);
-      });
+    for (const tag of tags) {
+      metadata.tags.add(tag);
+    }
 
-      if (grouping) {
-        Object.entries(flattenObject(grouping)).forEach(([k, v]) => {
-          if (typeof v !== 'string') return;
-          (acc[k] ??= new Set()).add(v);
-        });
+    if (grouping) {
+      for (const [key, value] of Object.entries(flattenObject(grouping))) {
+        if (typeof value === 'string') {
+          (metadata[key] ??= new Set()).add(value);
+        }
       }
-      return acc;
-    },
-    { tags: new Set() }
-  );
+    }
+  }
 
   return Object.fromEntries(
     Object.entries(metadata).map(([key, value]) => [key, Array.from(value)])
