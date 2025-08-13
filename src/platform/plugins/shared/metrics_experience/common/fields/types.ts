@@ -11,7 +11,7 @@ import { Dimension } from '../dimensions/types';
 
 export interface MetricField {
   name: string;
-  index: string; // TODO: Change this to `datastream`
+  index: string;
   dimensions: Array<Dimension>;
   type: string;
   time_series_metric?: string;
