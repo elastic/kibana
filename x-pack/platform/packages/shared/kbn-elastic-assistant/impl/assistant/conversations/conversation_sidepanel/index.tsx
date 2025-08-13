@@ -10,7 +10,6 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiListGroup,
-  EuiListGroupItem,
   EuiPanel,
   EuiConfirmModal,
   EuiText,
@@ -24,14 +23,13 @@ import useEvent from 'react-use/lib/useEvent';
 
 import { css } from '@emotion/react';
 import { isEmpty, findIndex } from 'lodash';
+import { ConversationListItem } from './conversation_list_item';
 import { useConversation } from '../../use_conversation';
-import { ConversationSidePanelContextMenu } from './context_menu';
 import { ConversationWithOwner } from '../../api';
 import { useConversationsByDate } from './use_conversations_by_date';
 import { DataStreamApis } from '../../use_data_stream_apis';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
-import { COPY_URL, DUPLICATE } from '../../use_conversation/translations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -205,6 +203,57 @@ export const ConversationSidePanel = React.memo<Props>(
       [copyConversationUrl]
     );
 
+    const memoizedConversationList = useMemo(
+      () =>
+        Object.entries(conversationsCategorizedByDate).map(([category, convoList]) =>
+          convoList.length ? (
+            <EuiFlexItem grow={false} key={category}>
+              <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+                <EuiText css={titleClassName} size="s">
+                  {i18n.DATE_CATEGORY_LABELS[category]}
+                </EuiText>
+              </EuiPanel>
+              <EuiListGroup
+                size="xs"
+                css={css`
+                  padding: 0;
+                `}
+              >
+                {convoList.map((conversation) => (
+                  <ConversationListItem
+                    conversation={conversation}
+                    isActiveConversation={
+                      !isEmpty(conversation.id)
+                        ? conversation.id === currentConversation?.id
+                        : conversation.title === currentConversation?.title
+                    }
+                    key={conversation.id}
+                    handleDuplicateConversation={handleDuplicateConversation}
+                    handleCopyUrl={handleCopyUrl}
+                    lastConversationId={lastConversationId}
+                    onConversationSelected={onConversationSelected}
+                    setDeleteConversationItem={setDeleteConversationItem}
+                    setPaginationObserver={setPaginationObserver}
+                  />
+                ))}
+              </EuiListGroup>
+              <EuiSpacer size="s" />
+            </EuiFlexItem>
+          ) : null
+        ),
+      [
+        conversationsCategorizedByDate,
+        currentConversation?.id,
+        currentConversation?.title,
+        handleCopyUrl,
+        handleDuplicateConversation,
+        lastConversationId,
+        onConversationSelected,
+        setPaginationObserver,
+        titleClassName,
+      ]
+    );
+
     useEvent('keydown', onKeyDown);
     return (
       <>
@@ -226,100 +275,7 @@ export const ConversationSidePanel = React.memo<Props>(
               borderRadius="none"
               data-test-subj={'conversationSidePanel'}
             >
-              {Object.entries(conversationsCategorizedByDate).map(([category, convoList]) =>
-                convoList.length ? (
-                  <EuiFlexItem grow={false} key={category}>
-                    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
-                      <EuiText css={titleClassName} size="s">
-                        {i18n.DATE_CATEGORY_LABELS[category]}
-                      </EuiText>
-                    </EuiPanel>
-                    <EuiListGroup
-                      size="xs"
-                      css={css`
-                        padding: 0;
-                      `}
-                    >
-                      {convoList.map((conversation) => {
-                        const internalSetObserver = (ref: HTMLDivElement | null) => {
-                          if (conversation.id === lastConversationId && ref) {
-                            setPaginationObserver(ref);
-                          }
-                        };
-                        return (
-                          <span key={conversation.id + conversation.title}>
-                            <EuiFlexGroup gutterSize="xs">
-                              <EuiListGroupItem
-                                size="xs"
-                                onClick={() =>
-                                  onConversationSelected({
-                                    cId: conversation.id,
-                                  })
-                                }
-                                className="eui-textTruncate"
-                                css={css`
-                                  flex: 1;
-                                  .euiListGroupItem__button {
-                                    flex-direction: row-reverse;
-                                  }
-                                `}
-                                label={conversation.title}
-                                iconType={conversation.users.length !== 1 ? 'users' : undefined}
-                                iconProps={{
-                                  size: 's',
-                                  css: css`
-                                    margin-inline-start: 12px;
-                                    margin-inline-end: 0px;
-                                  `,
-                                }}
-                                data-test-subj={`peopeeee-conversation-select-${conversation.title}`}
-                                isActive={
-                                  !isEmpty(conversation.id)
-                                    ? conversation.id === currentConversation?.id
-                                    : conversation.title === currentConversation?.title
-                                }
-                              />
-                              <ConversationSidePanelContextMenu
-                                label={'context menu for converstion'}
-                                actions={[
-                                  {
-                                    key: 'copy',
-                                    children: COPY_URL,
-                                    onClick: () => handleCopyUrl(conversation),
-                                    icon: 'link',
-                                  },
-                                  {
-                                    key: 'duplicate',
-                                    children: DUPLICATE,
-                                    onClick: () => handleDuplicateConversation(conversation),
-                                    icon: 'copy',
-                                  },
-                                  {
-                                    key: 'delete',
-                                    children: i18n.DELETE_CONVERSATION,
-                                    onClick: () => setDeleteConversationItem(conversation),
-                                    icon: 'trash',
-                                  },
-                                ]}
-                              />
-                            </EuiFlexGroup>
-                            {/* Observer element for infinite scrolling pagination of conversations */}
-                            {conversation.id === lastConversationId && (
-                              <div
-                                ref={internalSetObserver}
-                                css={css`
-                                  height: 1px;
-                                `}
-                              />
-                            )}
-                          </span>
-                        );
-                      })}
-                    </EuiListGroup>
-                    <EuiSpacer size="s" />
-                  </EuiFlexItem>
-                ) : null
-              )}
+              {memoizedConversationList}
               {isFetchingCurrentUserConversations && (
                 <EuiLoadingSpinner
                   size="m"
