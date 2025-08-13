@@ -50,7 +50,7 @@ describe('Guardrails', function () {
     );
   });
 
-  it('maintains guardrails across conversation turns after XML tag injection', async function () {
+  it('maintains guardrails across conversation turns after unsafe override instruction attempt', async function () {
     logger.debug('Triggering a rule run');
     await Promise.all(
       ruleIds.map((ruleId) =>
