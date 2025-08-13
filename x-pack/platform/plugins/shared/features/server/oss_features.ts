@@ -136,7 +136,6 @@ export const buildOSSFeatures = ({
             read: [],
           },
           ui: ['save'],
-          api: ['manage_advanced_settings'],
         },
         read: {
           app: ['kibana'],
@@ -353,12 +352,10 @@ const getBaseDiscoverFeature = ({
   includeReporting: boolean;
   version: 'v1' | 'v2';
 }): Omit<KibanaFeatureConfig, 'id' | 'order'> => {
-  const apiAllPrivileges = ['fileUpload:analyzeFile'];
+  const apiAllPrivileges = ['fileUpload:analyzeFile', 'bulkGetUserProfiles', 'discoverUsageStats'];
   const savedObjectAllPrivileges = ['search'];
   const uiAllPrivileges = ['show', 'save'];
-  // Include user profiles & content insights stats collection (views) for Discover sessions
   const apiReadPrivileges = ['bulkGetUserProfiles', 'discoverUsageStats'];
-  apiAllPrivileges.push('bulkGetUserProfiles', 'discoverUsageStats');
   const savedObjectReadPrivileges = ['index-pattern', 'search'];
 
   if (version === 'v1') {

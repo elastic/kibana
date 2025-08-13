@@ -13,4 +13,6 @@ export const capabilitiesProvider = () => ({
     createShortUrl: true,
     save: true,
   },
+  // Capability used to guard Content Insights routes (analogous to dashboardUsageStats)
+  discoverUsageStats: { show: true },
 });

@@ -8,6 +8,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
@@ -43,6 +44,7 @@ export class DiscoverServerPlugin
       embeddable: EmbeddableSetup;
       home?: HomeServerPluginSetup;
       share?: SharePluginSetup;
+      usageCollection?: any; // loose type to avoid wider changes
     }
   ) {
     core.capabilities.registerProvider(capabilitiesProvider);
@@ -62,6 +64,25 @@ export class DiscoverServerPlugin
     }
 
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
+
+    // Register Content Insights domain for Discover (mirrors dashboard implementation)
+    if (plugins.usageCollection) {
+      registerContentInsights(
+        {
+          usageCollection: plugins.usageCollection,
+          http: core.http,
+          // Use start contract (mirrors dashboard implementation) to ensure proper reporter setup
+          getStartServices: () =>
+            core.getStartServices().then(([_, start]) => ({
+              usageCollection: (start as any).usageCollection!,
+            })),
+        },
+        {
+          domainId: 'discover',
+          routePrivileges: ['discoverUsageStats'],
+        }
+      );
+    }
     plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_TYPE, searchEmbeddableTransforms);
 
     core.pricing.registerProductFeatures([

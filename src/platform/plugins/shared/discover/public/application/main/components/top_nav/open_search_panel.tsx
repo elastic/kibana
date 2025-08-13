@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { UserProfilesProvider } from '@kbn/content-management-user-profiles';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -20,10 +23,23 @@ import {
   EuiFlyoutBody,
   EuiTitle,
   useGeneratedHtmlId,
+  EuiSplitPanel,
+  EuiSpacer,
+  EuiText,
+  EuiSkeletonRectangle,
+  EuiPanel,
+  EuiCodeBlock,
 } from '@elastic/eui';
 import { SavedSearchType, SavedSearchTypeDisplayName } from '@kbn/saved-search-plugin/common';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import {
+  ContentInsightsProvider,
+  ViewsStats,
+  ActivityView,
+  ContentInsightsClient,
+} from '@kbn/content-management-content-insights-public';
+import type { Logger } from '@kbn/logging';
 
 interface OpenSearchPanelProps {
   onClose: () => void;
@@ -31,18 +47,93 @@ interface OpenSearchPanelProps {
 }
 
 export function OpenSearchPanel(props: OpenSearchPanelProps) {
-  const modalTitleId = useGeneratedHtmlId();
-  const { addBasePath, capabilities, savedObjectsTagging, contentClient, uiSettings } =
+  const { onClose } = props;
+  const { savedObjectsTagging, http, addBasePath, contentClient, uiSettings, capabilities, core } =
     useDiscoverServices();
-  const hasSavedObjectPermission =
-    capabilities.savedObjectsManagement?.edit || capabilities.savedObjectsManagement?.delete;
+  const userProfileService = core.userProfile; // stable reference for profile lookups
+  const hasSavedObjectPermission = Boolean(capabilities?.savedObjectsManagement?.read);
+  const modalTitleId = useGeneratedHtmlId({ prefix: 'discoverSearchCreationModalTitle' });
+
+  const [selectedId, setSelectedId] = useState<string | undefined>();
+  const [selectedMeta, setSelectedMeta] = useState<any | undefined>();
+  const [loadingMeta, setLoadingMeta] = useState(false);
+
+  const insightsClient = useMemo(() => {
+    const loggerAdapter: Logger = {
+      get: () => loggerAdapter,
+      info: () => {},
+      warn: () => {},
+      error: () => {},
+      debug: () => {},
+      trace: () => {},
+      fatal: () => {},
+      log: () => {},
+      isLevelEnabled: () => false,
+    } as unknown as Logger;
+    return new ContentInsightsClient({ http, logger: loggerAdapter }, { domainId: 'discover' });
+  }, [http]);
+
+  const queryClient = useMemo(() => new QueryClient(), []);
+
+  const loadMeta = useCallback(
+    async (id: string) => {
+      setLoadingMeta(true);
+      try {
+        const res: any = await contentClient.get({ contentTypeId: SavedSearchType, id });
+        const so = res.result?.item ?? res.item ?? res; // defensive
+        let esqlQuery: string | undefined;
+        let rawSearchSource: string | undefined;
+        try {
+          const searchSourceJSON = so.attributes?.kibanaSavedObjectMeta?.searchSourceJSON;
+          if (searchSourceJSON) {
+            rawSearchSource = searchSourceJSON;
+            const parsed = JSON.parse(searchSourceJSON);
+            const q = parsed?.query;
+            if (q) {
+              if (q.language === 'esql' && typeof q.query === 'string') {
+                esqlQuery = q.query;
+              } else if (q.esql && typeof q.esql.query === 'string') {
+                esqlQuery = q.esql.query;
+              } else if (typeof q.esql === 'string') {
+                esqlQuery = q.esql;
+              }
+            }
+            if (!esqlQuery && typeof (parsed as any)?.esql === 'string') {
+              esqlQuery = (parsed as any).esql;
+            }
+          }
+        } catch (_e) {
+          // ignore parse errors
+        }
+        setSelectedMeta({
+          id,
+          title: so.attributes?.title,
+          createdAt: so.createdAt,
+          createdBy: so.createdBy,
+            updatedAt: so.updatedAt,
+          updatedBy: so.updatedBy,
+          managed: so.managed,
+          isTextBasedQuery: so.attributes?.isTextBasedQuery,
+          esqlQuery,
+          rawSearchSource,
+        });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to load saved search meta', e);
+      } finally {
+        setLoadingMeta(false);
+      }
+    },
+    [contentClient]
+  );
 
   return (
     <EuiFlyout
       aria-labelledby={modalTitleId}
       ownFocus
-      onClose={props.onClose}
+  onClose={onClose}
       data-test-subj="loadSearchForm"
+      size="l"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
@@ -55,43 +146,205 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <SavedObjectFinder
-          id="discoverOpenSearch"
-          services={{
-            savedObjectsTagging,
-            contentClient,
-            uiSettings,
-          }}
-          noItemsMessage={
-            <FormattedMessage
-              id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
-              defaultMessage="No matching Discover sessions found."
+        <EuiSplitPanel.Outer direction="row" responsive={false} grow={false} css={{ minHeight: 480 }}>
+          <EuiSplitPanel.Inner paddingSize="s" grow={true} css={{ width: '55%' }}>
+            <div
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              onMouseUp={(e) => e.stopPropagation()}
+              onFocus={(e) => e.stopPropagation()}
+            >
+            <SavedObjectFinder
+              id="discoverOpenSearch"
+              services={{
+                savedObjectsTagging,
+                contentClient,
+                uiSettings,
+              }}
+              onChoose={(id) => {
+                // Track the view and open the saved search (restore hyperlink behavior)
+                insightsClient.track(id, 'viewed');
+                props.onOpenSavedSearch(id);
+                onClose();
+              }}
+              extraColumns={[
+                {
+                  field: 'id',
+                  name: '',
+                  width: '40px',
+                  align: 'right',
+                  'data-test-subj': 'discoverSessionOpenDetailsCol',
+                  sortable: false,
+                  render: (_: string, item) => {
+                    return (
+                      <span style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <EuiButtonIcon
+                          iconType="arrowRight"
+                          size="s"
+                          color={selectedId === item.id ? 'primary' : 'text'}
+                          aria-label={i18n.translate('discover.openSession.showDetailsAria', {
+                            defaultMessage: 'Show details for {name}',
+                            values: { name: item.name || item.title },
+                          })}
+                          data-test-subj={`discoverSessionShowDetailsBtn-${item.id}`}
+                          onMouseDown={(e: React.MouseEvent<HTMLButtonElement>) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                           onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (selectedId !== item.id) {
+                              setSelectedId(item.id);
+                              loadMeta(item.id);
+                            }
+                          }}
+                        />
+                      </span>
+                    );
+                  },
+                },
+              ]}
+              noItemsMessage={
+                <FormattedMessage
+                  id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
+                  defaultMessage="No matching Discover sessions found."
+                />
+              }
+              savedObjectMetaData={[
+                {
+                  type: SavedSearchType,
+                  getIconForSavedObject: () => 'discoverApp',
+                  name: i18n.translate('discover.savedSearch.savedObjectName', {
+                    defaultMessage: 'Discover session',
+                  }),
+                },
+              ]}
+              showFilter={true}
             />
-          }
-          savedObjectMetaData={[
-            {
-              type: SavedSearchType,
-              getIconForSavedObject: () => 'discoverApp',
-              name: i18n.translate('discover.savedSearch.savedObjectName', {
-                defaultMessage: 'Discover session',
-              }),
-            },
-          ]}
-          onChoose={(id) => {
-            props.onOpenSavedSearch(id);
-            props.onClose();
-          }}
-          showFilter={true}
-        />
-      </EuiFlyoutBody>
-      {hasSavedObjectPermission && (
+            </div>
+          </EuiSplitPanel.Inner>
+          <EuiSplitPanel.Inner paddingSize="s" grow={true} css={{ width: '45%', overflow: 'auto' }}>
+            <EuiText size="s" color="subdued">
+              <strong>
+                <FormattedMessage id="discover.openSession.detailsHeader" defaultMessage="Details" />
+              </strong>
+            </EuiText>
+            <EuiSpacer size="s" />
+            {!selectedId && (
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="discover.openSession.noSelection"
+                  defaultMessage="Select a session to see activity & views"
+                />
+              </EuiText>
+            )}
+            {selectedId && (
+              <QueryClientProvider client={queryClient}>
+                <UserProfilesProvider
+                  // use pre-fetched service (avoid calling hooks inside callbacks causing invalid hook warnings)
+                  getUserProfile={async (uid: string) => {
+                    const res = await userProfileService.bulkGet({
+                      uids: new Set([uid]),
+                      dataPath: 'avatar',
+                    });
+                    return res[0]!;
+                  }}
+                  bulkGetUserProfiles={async (uids: string[]) => {
+                    if (!uids.length) return [] as any;
+                    return userProfileService.bulkGet({ uids: new Set(uids), dataPath: 'avatar' });
+                  }}
+                >
+                <ContentInsightsProvider contentInsightsClient={insightsClient}>
+                {loadingMeta && <EuiSkeletonRectangle height={120} width={'100%'} />}
+                {!loadingMeta && selectedMeta && (
+                  <>
+                    {(selectedMeta.isTextBasedQuery && (selectedMeta.esqlQuery || selectedMeta.rawSearchSource)) && (
+                      <>
+                        <EuiPanel hasBorder paddingSize="s">
+                          {selectedMeta.esqlQuery && (
+                            <>
+                              <EuiText size="xs">
+                                <strong>
+                                  {i18n.translate('discover.openSession.esqlQueryLabel', {
+                                    defaultMessage: 'ES|QL query',
+                                  })}
+                                </strong>
+                              </EuiText>
+                              <EuiSpacer size="xs" />
+                              <EuiCodeBlock
+                                language="esql"
+                                fontSize="s"
+                                paddingSize="s"
+                                isCopyable
+                                data-test-subj="discoverSessionEsqlQueryBlock"
+                                overflowHeight={160}
+                              >
+                                {selectedMeta.esqlQuery}
+                              </EuiCodeBlock>
+                            </>
+                          )}
+                          {!selectedMeta.esqlQuery && selectedMeta.rawSearchSource && (
+                            <>
+                              <EuiText size="xs">
+                                <strong>
+                                  {i18n.translate('discover.openSession.esqlQueryNotFoundLabel', {
+                                    defaultMessage: 'ES|QL query not extracted (showing raw search source snippet)',
+                                  })}
+                                </strong>
+                              </EuiText>
+                              <EuiSpacer size="xs" />
+                              <EuiCodeBlock
+                                language="json"
+                                fontSize="s"
+                                paddingSize="s"
+                                isCopyable
+                                data-test-subj="discoverSessionRawSearchSourceBlock"
+                                overflowHeight={160}
+                              >
+                                {selectedMeta.rawSearchSource.slice(0, 2000)}
+                              </EuiCodeBlock>
+                            </>
+                          )}
+                        </EuiPanel>
+                        <EuiSpacer size="s" />
+                      </>
+                    )}
+                    <ActivityView item={selectedMeta} />
+                    <EuiSpacer size="s" />
+                    <ViewsStats
+                      item={{
+                        id: selectedMeta.id,
+                        updatedAt:
+                          selectedMeta.updatedAt ||
+                          selectedMeta.createdAt ||
+                          new Date().toISOString(),
+                        createdAt: selectedMeta.createdAt,
+                        createdBy: selectedMeta.createdBy,
+                        updatedBy: selectedMeta.updatedBy,
+                        managed: selectedMeta.managed,
+                        references: [],
+                        type: SavedSearchType,
+                        attributes: { title: selectedMeta.title || '', description: '' },
+                      }}
+                    />
+                  </>
+                )}
+                </ContentInsightsProvider>
+                </UserProfilesProvider>
+              </QueryClientProvider>
+            )}
+          </EuiSplitPanel.Inner>
+        </EuiSplitPanel.Outer>
+  </EuiFlyoutBody>
+  {hasSavedObjectPermission && (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiButton
                 fill
-                onClick={props.onClose}
+                onClick={onClose}
                 data-test-subj="manageSearchesBtn"
                 href={addBasePath(
                   `/app/management/kibana/objects?initialQuery=type:("${SavedSearchTypeDisplayName}")`

@@ -12,11 +12,15 @@ import type { AppMenuActionPrimary } from '@kbn/discover-utils';
 import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { OpenSearchPanel } from '../open_search_panel';
+import { toMountPoint, createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import type { DiscoverServices } from '../../../../../build_services';
 
 export const getOpenSearchAppMenuItem = ({
   onOpenSavedSearch,
+  services,
 }: {
   onOpenSavedSearch: (savedSearchId: string) => void;
+  services: DiscoverServices;
 }): AppMenuActionPrimary => {
   return {
     id: AppMenuActionId.open,
@@ -28,7 +32,23 @@ export const getOpenSearchAppMenuItem = ({
       iconType: 'folderOpen',
       testId: 'discoverOpenButton',
       onClick: ({ onFinishAction }) => {
-        return <OpenSearchPanel onClose={onFinishAction} onOpenSavedSearch={onOpenSavedSearch} />;
+        // Close the menu popover immediately
+        onFinishAction();
+        // Open a standalone flyout detached from the app menu lifecycle
+        const { overlays } = services.core;
+        const { Provider: KibanaReactContextProvider } = createKibanaReactContext(services);
+        const flyoutRef = overlays.openFlyout(
+          toMountPoint(
+            <KibanaReactContextProvider>
+              <OpenSearchPanel
+                onClose={() => flyoutRef.close()}
+                onOpenSavedSearch={onOpenSavedSearch}
+              />
+            </KibanaReactContextProvider>,
+            services.core
+          ),
+          { size: 'l', ownFocus: true }
+        );
       },
     },
   };
