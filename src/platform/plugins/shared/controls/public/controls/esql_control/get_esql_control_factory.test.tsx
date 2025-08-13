@@ -15,19 +15,27 @@ import { getESQLControlFactory } from './get_esql_control_factory';
 import { BehaviorSubject } from 'rxjs';
 import { ControlFetchContext } from '../../control_group/control_fetch';
 
-const mockGetESQLSingleColumnValues = jest.fn(() => ({ options: ['option1', 'option2'] }));
-const mockIsSuccess = jest.fn(() => true);
+const MOCK_VALUES_FROM_QUERY = ['option1', 'option2', 'option3', 'option4', 'option5'];
+
+const mockGetESQLSingleColumnValues = jest.fn();
+const mockIsSuccess = jest.fn();
 
 jest.mock('./utils/get_esql_single_column_values', () => {
-  const getESQLSingleColumnValues = () => mockGetESQLSingleColumnValues();
-  getESQLSingleColumnValues.isSuccess = () => mockIsSuccess();
+  const getESQLSingleColumnValues = () => {
+    mockGetESQLSingleColumnValues();
+    return { values: MOCK_VALUES_FROM_QUERY };
+  };
+  getESQLSingleColumnValues.isSuccess = () => {
+    mockIsSuccess();
+    return true;
+  };
   return {
     getESQLSingleColumnValues,
   };
 });
 
 describe('ESQLControlApi', () => {
-  beforeEach(() => {
+  afterEach(() => {
     jest.resetAllMocks();
   });
 
@@ -95,7 +103,6 @@ describe('ESQLControlApi', () => {
     test('should update on load and fetch', async () => {
       const initialState = {
         selectedOptions: ['option1'],
-        availableOptions: ['option1', 'option2'],
         variableName: 'variable1',
         variableType: 'values',
         esqlQuery: 'FROM foo | STATS BY column',
@@ -119,6 +126,49 @@ describe('ESQLControlApi', () => {
         expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(2);
         expect(mockIsSuccess).toHaveBeenCalledTimes(2);
       });
+    });
+
+    test('should load availableOptions but not serialize them', async () => {
+      const initialState = {
+        selectedOptions: ['option1'],
+        variableName: 'variable1',
+        variableType: 'values',
+        esqlQuery: 'FROM foo | STATS BY column',
+        controlType: EsqlControlType.VALUES_FROM_QUERY,
+      } as ESQLControlState;
+      const { Component, api } = await factory.buildControl({
+        initialState,
+        finalizeApi,
+        uuid,
+        controlGroupApi,
+      });
+
+      await waitFor(() => {
+        expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(1);
+        expect(mockIsSuccess).toHaveBeenCalledTimes(1);
+      });
+
+      const { findByTestId, findAllByRole } = render(<Component className="" />);
+      fireEvent.click(await findByTestId('optionsListSelections'));
+      const availableOptions = await findAllByRole('option');
+      expect(availableOptions.length).toBe(5);
+
+      const serializedState = api.serializeState();
+      expect('availableOptions' in serializedState).toBeFalsy();
+      expect(serializedState.rawState).toMatchInlineSnapshot(`
+        Object {
+          "controlType": "VALUES_FROM_QUERY",
+          "esqlQuery": "FROM foo | STATS BY column",
+          "grow": false,
+          "selectedOptions": Array [
+            "option1",
+          ],
+          "title": "",
+          "variableName": "variable1",
+          "variableType": "values",
+          "width": "medium",
+        }
+      `);
     });
   });
 
