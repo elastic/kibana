@@ -17,7 +17,7 @@ import {
   LayersFieldFormats,
 } from '../../helpers';
 import { XYChartSeriesIdentifier } from '@elastic/charts';
-import { sampleArgs, sampleLayer } from '../../../common/__mocks__';
+import { sampleArgs, sampleLayer } from '../../../common/test_utils';
 import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import { RawValue } from '@kbn/data-plugin/common';
 

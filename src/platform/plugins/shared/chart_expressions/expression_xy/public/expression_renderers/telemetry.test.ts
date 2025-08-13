@@ -14,7 +14,7 @@ import {
   sampleAnnotationLayer,
   sampleLayer,
   sampleReferenceLineLayer,
-} from '../../common/__mocks__';
+} from '../../common/test_utils';
 import { getDataLayers } from '../helpers';
 import { extractCounterEvents } from './xy_chart_renderer';
 
@@ -40,7 +40,7 @@ function createLayer(type: PossibleLayerTypes) {
 function createLayers(
   layerConfigs: Partial<Record<CommonXYLayerConfig['layerType'], { count: number }>>
 ): CommonXYLayerConfig[] {
-  const layers = [];
+  const layers: CommonXYLayerConfig[] = [];
   for (const [type, { count }] of Object.entries(layerConfigs)) {
     layers.push(
       ...Array.from({ length: count }, () => createLayer(type as CommonXYLayerConfig['layerType']))

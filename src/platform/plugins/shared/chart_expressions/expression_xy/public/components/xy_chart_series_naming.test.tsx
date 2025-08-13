@@ -10,8 +10,8 @@ import { type Datatable } from '@kbn/expressions-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 
-import { chartsActiveCursorService, chartsThemeService, paletteService } from '../__test_utils__';
-import { createArgsWithLayers } from '../../common/__test_utils__';
+import { chartsActiveCursorService, chartsThemeService, paletteService } from '../test_utils';
+import { createArgsWithLayers } from '../../common/test_utils';
 import { XYChart, type XYChartRenderProps } from './xy_chart';
 import type { LayerCellValueActions } from '../types';
 import {
