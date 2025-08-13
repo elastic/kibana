@@ -10,7 +10,13 @@ import type { IClusterClient, LoggerFactory, Logger } from '@kbn/core/server';
 import type { Subject } from 'rxjs';
 import type { DashboardMigrationsDataClient } from './data/dashboard_migrations_data_client';
 import { DashboardMigrationsDataService } from './data/dashboard_migrations_data_service';
-import type { SiemMigrationsCreateClientParams } from '../common/types';
+import type { SiemMigrationsCommonCreateClientParams } from '../common/types';
+import type { DashboardMigrationsClientDependencies } from './types';
+
+export interface DashboardMigrationsCreateClientParams
+  extends SiemMigrationsCommonCreateClientParams {
+  dependencies: DashboardMigrationsClientDependencies;
+}
 
 export interface SiemDashboardsMigrationsSetupParams {
   esClusterClient: IClusterClient;
@@ -46,7 +52,7 @@ export class SiemDashboardMigrationsService {
     currentUser,
     spaceId,
     dependencies,
-  }: SiemMigrationsCreateClientParams): SiemDashboardMigrationsClient {
+  }: DashboardMigrationsCreateClientParams): SiemDashboardMigrationsClient {
     assert(currentUser, 'Current user must be authenticated');
     assert(this.esClusterClient, 'ES client not available, please call setup first');
 

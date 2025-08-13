@@ -1420,7 +1420,7 @@ for (let i = 0; i < 100; i++) {
       renderWithProviders(<RulesList />);
 
       expect(
-        await screen.findByText('A maintenance window is running for Observability rules')
+        await screen.findByText('One or more maintenance windows are running')
       ).toBeInTheDocument();
 
       expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);

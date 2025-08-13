@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { ESQLVariableType, ESQLControlVariable, ESQLLicenseType } from '@kbn/esql-types';
+import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
+import type { LicenseType } from '@kbn/licensing-types';
 import { uniqBy } from 'lodash';
+import { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type {
   ESQLSingleAstItem,
   ESQLFunction,
@@ -28,7 +30,6 @@ import {
   getCompatibleLiterals,
   buildConstantsDefinitions,
   isLiteralDateItem,
-  compareTypesWithLiterals,
 } from '../literals';
 import { EDITOR_MARKER } from '../../constants';
 import {
@@ -49,13 +50,7 @@ import {
   getOperatorsSuggestionsAfterNot,
   getSuggestionsToRightOfOperatorExpression,
 } from '../operators';
-import {
-  isColumn,
-  isFunctionExpression,
-  isIdentifier,
-  isLiteral,
-  isTimeInterval,
-} from '../../../ast/is';
+import { isColumn, isFunctionExpression, isIdentifier, isLiteral } from '../../../ast/is';
 import { Walker } from '../../../walker';
 
 export const within = (position: number, location: ESQLLocation | undefined) =>
@@ -196,7 +191,8 @@ export async function getFieldsOrFunctionsSuggestions(
     ignoreFn?: string[];
     ignoreColumns?: string[];
   } = {},
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
+  activeProduct?: PricingProduct
 ): Promise<ISuggestionItem[]> {
   const filteredFieldsByType = pushItUpInTheList(
     (await (fields
@@ -250,7 +246,8 @@ export async function getFieldsOrFunctionsSuggestions(
             returnTypes: types,
             ignored: ignoreFn,
           },
-          hasMinimumLicenseRequired
+          hasMinimumLicenseRequired,
+          activeProduct
         )
       : [],
     userDefinedColumns
@@ -333,7 +330,7 @@ export const getExpressionPosition = (
       return 'after_operator';
     }
 
-    if (isLiteral(expressionRoot) || isTimeInterval(expressionRoot)) {
+    if (isLiteral(expressionRoot)) {
       return 'after_literal';
     }
   }
@@ -359,6 +356,7 @@ export async function suggestForExpression({
   context,
   advanceCursorAfterInitialColumn = true,
   hasMinimumLicenseRequired,
+  activeProduct,
   ignoredColumnsForEmptyExpression = [],
 }: {
   expressionRoot: ESQLSingleAstItem | undefined;
@@ -367,9 +365,10 @@ export async function suggestForExpression({
   innerText: string;
   getColumnsByType?: GetColumnsByTypeFn | undefined;
   context?: ICommandContext;
+  activeProduct?: PricingProduct;
   advanceCursorAfterInitialColumn?: boolean;
   // @TODO should this be required?
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
   // a set of columns not to suggest when the expression is empty
   ignoredColumnsForEmptyExpression?: string[];
 }): Promise<ISuggestionItem[]> {
@@ -396,13 +395,17 @@ export async function suggestForExpression({
       }
 
       suggestions.push(
-        ...getOperatorSuggestions({
-          location,
-          // In case of a param literal, we don't know the type of the left operand
-          // so we can only suggest operators that accept any type as a left operand
-          leftParamType: isParamExpressionType(expressionType) ? undefined : expressionType,
-          ignored: ['='],
-        })
+        ...getOperatorSuggestions(
+          {
+            location,
+            // In case of a param literal, we don't know the type of the left operand
+            // so we can only suggest operators that accept any type as a left operand
+            leftParamType: isParamExpressionType(expressionType) ? undefined : expressionType,
+            ignored: ['='],
+          },
+          hasMinimumLicenseRequired,
+          activeProduct
+        )
       );
 
       break;
@@ -423,7 +426,8 @@ export async function suggestForExpression({
         suggestions.push(
           ...getFunctionSuggestions(
             { location, returnTypes: ['boolean'] },
-            hasMinimumLicenseRequired
+            hasMinimumLicenseRequired,
+            activeProduct
           ),
           ...(await getColumnsByType('boolean', [], {
             advanceCursor: true,
@@ -476,6 +480,7 @@ export async function suggestForExpression({
             getExpressionType(expression, context?.fields, context?.userDefinedColumns),
           getColumnsByType,
           hasMinimumLicenseRequired,
+          activeProduct,
         }))
       );
 
@@ -492,7 +497,7 @@ export async function suggestForExpression({
       );
       suggestions.push(
         ...pushItUpInTheList(columnSuggestions, true),
-        ...getFunctionSuggestions({ location }, hasMinimumLicenseRequired)
+        ...getFunctionSuggestions({ location }, hasMinimumLicenseRequired, activeProduct)
       );
 
       break;
@@ -592,7 +597,6 @@ export function extractTypeFromASTArg(
   | ESQLLiteral['literalType']
   | SupportedDataType
   | FunctionReturnType
-  | 'timeInterval'
   | string // @TODO remove this
   | undefined {
   if (Array.isArray(arg)) {
@@ -606,9 +610,6 @@ export function extractTypeFromASTArg(
     if (hit) {
       return hit.type;
     }
-  }
-  if (isTimeInterval(arg)) {
-    return arg.type;
   }
   if (isFunctionExpression(arg)) {
     const fnDef = getFunctionDefinition(arg.name);
@@ -636,10 +637,7 @@ function getValidFunctionSignaturesForPreviousArgs(
     (s) =>
       s.params?.length >= argIndex &&
       s.params.slice(0, argIndex).every(({ type: dataType }, idx) => {
-        return (
-          dataType === enrichedArgs[idx].dataType ||
-          compareTypesWithLiterals(dataType, enrichedArgs[idx].dataType)
-        );
+        return dataType === enrichedArgs[idx].dataType;
       })
   );
   return relevantFuncSignatures;

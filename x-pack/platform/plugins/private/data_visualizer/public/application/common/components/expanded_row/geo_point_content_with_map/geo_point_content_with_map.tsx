@@ -86,7 +86,7 @@ export const GeoPointContentWithMap: FC<{
             narrowByGlobalSearch: true,
             narrowByGlobalTime: true,
             narrowByMapBounds: true,
-            id: searchLayerDescriptor.sourceDescriptor!.id,
+            id: (searchLayerDescriptor.sourceDescriptor as { id: string }).id,
             type: 'ESQL',
             applyForceRefresh: true,
           };

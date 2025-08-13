@@ -32,13 +32,13 @@ import {
   LinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
-  LinkOptions,
 } from '../../../common/content_management';
 import { LinksStrings } from '../links_strings';
 import { LinkInfo } from './constants';
 import { LinkOptionsComponent } from './link_options';
 import { UnorderedLink } from '../../editor/open_link_editor_flyout';
 import { LinkDestination } from './link_destination';
+import type { LinkOptions } from '../../../server';
 
 export const LinkEditor = ({
   link,
@@ -122,6 +122,7 @@ export const LinkEditor = ({
                 }
                 setSelectedLinkType(id as LinkType);
               }}
+              name="linkType"
             />
           </EuiFormRow>
           <LinkDestination
