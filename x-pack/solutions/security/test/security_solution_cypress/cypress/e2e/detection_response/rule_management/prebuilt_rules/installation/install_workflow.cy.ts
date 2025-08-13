@@ -15,95 +15,108 @@ import {
   NO_RULES_AVAILABLE_FOR_INSTALL_MESSAGE,
   RULE_CHECKBOX,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
-  TOASTER,
+  SUCCESS_TOASTER_HEADER,
 } from '../../../../../screens/alerts_detection_rules';
 import { selectRulesByName } from '../../../../../tasks/alerts_detection_rules';
-import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../../../screens/breadcrumbs';
-import { installPrebuiltRuleAssets } from '../../../../../tasks/api_calls/prebuilt_rules';
+import {
+  installMockPrebuiltRulesPackage,
+  installPrebuiltRuleAssets,
+} from '../../../../../tasks/api_calls/prebuilt_rules';
 import { login } from '../../../../../tasks/login';
+
 import {
   assertInstallationRequestIsComplete,
   assertRuleInstallationSuccessToastShown,
   assertRulesPresentInInstalledRulesTable,
-  clickAddElasticRulesButton,
 } from '../../../../../tasks/prebuilt_rules';
-import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import {
+  deleteAlertsAndRules,
+  deletePrebuiltRulesAssets,
+} from '../../../../../tasks/api_calls/common';
+import { visitAddRulesPage } from '../../../../../tasks/rules_management';
+import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../../../screens/breadcrumbs';
 
-// Failing: See https://github.com/elastic/kibana/issues/182441
-describe.skip(
-  'Detection rules, Prebuilt Rules Installation and Update workflow',
+describe(
+  'Detection rules, Prebuilt Rules Installation Workflow',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
-    describe('Installation of prebuilt rules', () => {
-      const RULE_1 = createRuleAssetSavedObject({
-        name: 'Test rule 1',
-        rule_id: 'rule_1',
-      });
-      const RULE_2 = createRuleAssetSavedObject({
-        name: 'Test rule 2',
-        rule_id: 'rule_2',
-      });
-      beforeEach(() => {
-        login();
-        resetRulesTableState();
-        deleteAlertsAndRules();
-        visitRulesManagementTable();
-        installPrebuiltRuleAssets([RULE_1, RULE_2]);
-        cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/installation/_perform').as(
-          'installPrebuiltRules'
-        );
-        clickAddElasticRulesButton();
-      });
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
 
-      it('should install prebuilt rules one by one', () => {
-        // Attempt to install rules
-        cy.get(getInstallSingleRuleButtonByRuleId(RULE_1['security-rule'].rule_id)).click();
-        // Wait for request to complete
-        assertInstallationRequestIsComplete([RULE_1]);
-        // Assert installation succeeded
-        assertRuleInstallationSuccessToastShown([RULE_1]);
-        // Go back to rules table and assert that the rules are installed
-        cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
-        assertRulesPresentInInstalledRulesTable([RULE_1]);
-      });
+    const RULE_1 = createRuleAssetSavedObject({
+      name: 'Test rule 1',
+      rule_id: 'rule_1',
+    });
+    const RULE_2 = createRuleAssetSavedObject({
+      name: 'Test rule 2',
+      rule_id: 'rule_2',
+    });
 
-      it('should install multiple selected prebuilt rules by selecting them individually', () => {
-        selectRulesByName([RULE_1['security-rule'].name, RULE_2['security-rule'].name]);
-        cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
-        assertInstallationRequestIsComplete([RULE_1, RULE_2]);
-        assertRuleInstallationSuccessToastShown([RULE_1, RULE_2]);
-        // Go back to rules table and assert that the rules are installed
-        cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
-        assertRulesPresentInInstalledRulesTable([RULE_1, RULE_2]);
-      });
+    beforeEach(() => {
+      deleteAlertsAndRules();
+      deletePrebuiltRulesAssets();
+      /* Make sure persisted rules table state is cleared */
+      resetRulesTableState();
+      installPrebuiltRuleAssets([RULE_1, RULE_2]);
 
-      it('should install multiple selected prebuilt rules by selecting all in page', () => {
-        cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
-        cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
-        assertInstallationRequestIsComplete([RULE_1, RULE_2]);
-        assertRuleInstallationSuccessToastShown([RULE_1, RULE_2]);
-        // Go back to rules table and assert that the rules are installed
-        cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
-        assertRulesPresentInInstalledRulesTable([RULE_1, RULE_2]);
-      });
+      cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/installation/_perform').as(
+        'installPrebuiltRules'
+      );
 
-      it('should install all available rules at once', () => {
-        cy.get(INSTALL_ALL_RULES_BUTTON).click();
-        assertInstallationRequestIsComplete([RULE_1, RULE_2]);
-        assertRuleInstallationSuccessToastShown([RULE_1, RULE_2]);
-        // Go back to rules table and assert that the rules are installed
-        cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
-        assertRulesPresentInInstalledRulesTable([RULE_1, RULE_2]);
-      });
+      login();
+      visitAddRulesPage();
+    });
 
-      it('should display an empty screen when all available prebuilt rules have been installed', () => {
-        cy.get(INSTALL_ALL_RULES_BUTTON).click();
-        cy.get(TOASTER).should('be.visible').should('have.text', `2 rules installed successfully.`);
-        cy.get(RULE_CHECKBOX).should('not.exist');
-        cy.get(NO_RULES_AVAILABLE_FOR_INSTALL_MESSAGE).should('exist');
-        cy.get(GO_BACK_TO_RULES_TABLE_BUTTON).should('exist');
-      });
+    it('installs prebuilt rules one by one', () => {
+      // Attempt to install rules
+      cy.get(getInstallSingleRuleButtonByRuleId(RULE_1['security-rule'].rule_id)).click();
+      // Wait for request to complete
+      assertInstallationRequestIsComplete([RULE_1]);
+      // Assert installation succeeded
+      assertRuleInstallationSuccessToastShown([RULE_1]);
+      // Go back to rules table and assert that the rules are installed
+      cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
+      assertRulesPresentInInstalledRulesTable([RULE_1]);
+    });
+
+    it('installs multiple selected prebuilt rules by selecting them individually', () => {
+      selectRulesByName([RULE_1['security-rule'].name, RULE_2['security-rule'].name]);
+      cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
+      assertInstallationRequestIsComplete([RULE_1, RULE_2]);
+      assertRuleInstallationSuccessToastShown([RULE_1, RULE_2]);
+      // Go back to rules table and assert that the rules are installed
+      cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
+      assertRulesPresentInInstalledRulesTable([RULE_1, RULE_2]);
+    });
+
+    it('installs multiple selected prebuilt rules by selecting all in page', () => {
+      cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
+      cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
+      assertInstallationRequestIsComplete([RULE_1, RULE_2]);
+      assertRuleInstallationSuccessToastShown([RULE_1, RULE_2]);
+      // Go back to rules table and assert that the rules are installed
+      cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
+      assertRulesPresentInInstalledRulesTable([RULE_1, RULE_2]);
+    });
+
+    it('installs all available rules at once', () => {
+      cy.get(INSTALL_ALL_RULES_BUTTON).click();
+      assertInstallationRequestIsComplete([RULE_1, RULE_2]);
+      assertRuleInstallationSuccessToastShown([RULE_1, RULE_2]);
+      // Go back to rules table and assert that the rules are installed
+      cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
+      assertRulesPresentInInstalledRulesTable([RULE_1, RULE_2]);
+    });
+
+    it('displays an empty screen when all available prebuilt rules have been installed', () => {
+      cy.get(INSTALL_ALL_RULES_BUTTON).click();
+      cy.get(SUCCESS_TOASTER_HEADER)
+        .should('be.visible')
+        .should('have.text', `2 rules installed successfully`);
+      cy.get(RULE_CHECKBOX).should('not.exist');
+      cy.get(NO_RULES_AVAILABLE_FOR_INSTALL_MESSAGE).should('exist');
+      cy.get(GO_BACK_TO_RULES_TABLE_BUTTON).should('exist');
     });
   }
 );
