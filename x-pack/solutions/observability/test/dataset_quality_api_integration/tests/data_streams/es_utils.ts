@@ -22,12 +22,11 @@ export async function addIntegrationToLogIndexTemplate({
   });
 
   // Remove properties from the GET response that cannot be in the PUT request
-
   const {
-    created_date,
-    modification_date,
-    created_date_millis,
-    modified_date_millis,
+    created_date: createdDate,
+    modification_date: modificationDate,
+    created_date_millis: createdDateMillis,
+    modified_date_millis: modifiedDateMillis,
     ...safeTemplate
   } = indexTemplates[0].index_template as IndicesIndexTemplate & {
     created_date: number;
@@ -59,12 +58,11 @@ export async function cleanLogIndexTemplate({ esClient }: { esClient: Client }) 
   });
 
   // Remove properties from the GET response that cannot be in the PUT request
-
   const {
-    created_date,
-    modification_date,
-    created_date_millis,
-    modified_date_millis,
+    created_date: createdDate,
+    modification_date: modificationDate,
+    created_date_millis: createdDateMillis,
+    modified_date_millis: modifiedDateMillis,
     ...safeTemplate
   } = indexTemplates[0].index_template as IndicesIndexTemplate & {
     created_date: number;
