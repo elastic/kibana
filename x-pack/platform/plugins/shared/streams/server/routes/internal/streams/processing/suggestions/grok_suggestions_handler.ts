@@ -73,7 +73,9 @@ export const handleProcessingGrokSuggestions = async ({
   return {
     log_source: reviewResult.log_source,
     fields: reviewResult.fields.map((field) => {
-      const name = field.ecs_field === '@timestamp' ? 'custom_timestamp' : field.ecs_field;
+      const name = field.ecs_field.startsWith('@timestamp')
+        ? field.ecs_field.replace('@timestamp', 'custom_timestamp')
+        : field.ecs_field;
       return {
         name: isWiredStream ? getOtelFieldName(name) : name,
         columns: field.columns,

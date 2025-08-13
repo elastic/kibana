@@ -7,5 +7,4 @@
 
 export { cli } from './cli';
 export { SampleParserClient } from './client';
-export type { StreamLogGenerator } from './client/types';
 export { type LoghubQuery, createQueryMatcher, tokenize } from './src/validate_queries';

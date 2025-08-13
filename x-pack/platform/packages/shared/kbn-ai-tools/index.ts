@@ -6,9 +6,7 @@
  */
 
 export { describeDataset } from './src/tools/describe_dataset';
-export { getSampleDocuments } from './src/tools/describe_dataset/get_sample_documents';
 export { sortAndTruncateAnalyzedFields } from './src/tools/describe_dataset/sort_and_truncate_analyzed_fields';
-export { mergeSampleDocumentsWithFieldCaps } from './src/tools/describe_dataset/merge_sample_documents_with_field_caps';
 export type {
   DocumentAnalysis,
   TruncatedDocumentAnalysis,
