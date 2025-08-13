@@ -56,7 +56,6 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { CaseUI } from '@kbn/cases-plugin/common';
 import type { Case } from './apis/bulk_get_cases';
 
 export interface Consumer {
@@ -193,10 +192,6 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    * Any runtime mappings to be applied to the alerts search request
    */
   runtimeMappings?: MappingRuntimeFields;
-  /**
-   * Data relevant to a case the alerts belong to
-   */
-  caseData?: CaseUI;
   /**
    * Toggles the built-in alert status column visibility
    */
@@ -385,7 +380,6 @@ export type RenderContext<AC extends AdditionalContext> = {
 
   isLoadingCases: boolean;
   cases?: Map<string, Case>;
-  caseData?: CaseUI;
 
   isLoadingMaintenanceWindows: boolean;
   maintenanceWindows?: Map<string, MaintenanceWindow>;
