@@ -111,15 +111,15 @@ export class ReindexServiceServerPlugin
 
     // The ReindexWorker will use the credentials stored in the cache to reindex the data
 
-    const service = new ReindexServiceWrapper(
+    const service = new ReindexServiceWrapper({
       soClient,
-      this.credentialStore,
-      elasticsearch.client,
-      this.logger,
-      this.licensing!,
+      credentialStore: this.credentialStore,
+      clusterClient: elasticsearch.client,
+      logger: this.logger,
+      licensing: this.licensing!,
       security,
-      this.version
-    );
+      version: this.version
+  });
 
     this.reindexService = service.getInternalApis();
 

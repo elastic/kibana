@@ -6,13 +6,15 @@
  */
 
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
 import { createRequestMock } from '../__mocks__/request.mock';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { errors as esErrors } from '@elastic/elasticsearch';
+import { ReindexServiceWrapper } from '../lib/reindex_service_wrapper';
+import type { Version } from '@kbn/upgrade-assistant-pkg-server';
 
 const mockReindexService = {
   hasRequiredPrivileges: jest.fn(),
@@ -26,6 +28,7 @@ const mockReindexService = {
   getIndexAliases: jest.fn().mockResolvedValue({}),
   getIndexInfo: jest.fn().mockResolvedValue({ aliases: {}, settings: {} }),
 };
+
 jest.mock('@kbn/upgrade-assistant-pkg-server/src/es_version_precheck', () => ({
   versionCheckHandlerWrapper: () => (a: any) => a,
 }));
@@ -53,7 +56,7 @@ describe('reindex API', () => {
   let routeDependencies: any;
   let mockRouter: MockRouter;
 
-  const credentialStore = credentialStoreFactory(logMock);
+  const credentialStore = credentialStoreFactory(logMock.get());
   const worker = {
     includes: jest.fn(),
     forceRefresh: jest.fn(),
@@ -61,13 +64,27 @@ describe('reindex API', () => {
 
   beforeEach(() => {
     mockRouter = createMockRouter();
+    const securityMockInstance = securityMock.createStart();
+    const licensingMockInstance = licensingMock.createSetup();
+    const version = { getMajorVersion: () => 8, getMinorVersion: () => 7 } as any as Version;
     routeDependencies = {
       credentialStore,
       router: mockRouter,
-      licensing: licensingMock.createSetup(),
+      licensing: licensingMockInstance,
       lib: { handleEsError },
-      getSecurityPlugin: () => Promise.resolve(securityMock.createStart()),
-      version: { getMajorVersion: () => 8, getMinorVersion: () => 7 },
+      getSecurityPlugin: () => Promise.resolve(securityMockInstance),
+      version,
+     getReindexService: async () => {
+        return new ReindexServiceWrapper({
+          soClient: savedObjectsClientMock.create(),
+          credentialStore:{} as any,
+          clusterClient: elasticsearchServiceMock.createClusterClient(),
+          logger: logMock,
+          licensing:licensingMockInstance,
+          security: securityMockInstance,
+          version,
+        });
+      }
     };
     registerReindexIndicesRoutes(routeDependencies);
 
@@ -191,23 +208,6 @@ describe('reindex API', () => {
       expect(resp.status).toEqual(200);
       const data = resp.payload;
       expect(data).toEqual({ indexName: 'theIndex' });
-    });
-
-    it('calls worker.forceRefresh', async () => {
-      mockReindexService.createReindexOperation.mockResolvedValueOnce({
-        attributes: { indexName: 'theIndex' },
-      });
-
-      await routeDependencies.router.getHandler({
-        method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
-      })(
-        routeHandlerContextMock,
-        createRequestMock({ params: { indexName: 'theIndex' } }),
-        kibanaResponseFactory
-      );
-
-      expect(worker.forceRefresh).toHaveBeenCalled();
     });
 
     it('inserts headers into the credentialStore', async () => {

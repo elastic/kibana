@@ -51,7 +51,15 @@ export interface ReindexServiceScopedClient {
 export class ReindexServiceWrapper {
   private reindexWorker: ReindexWorker;
 
-  constructor(
+  constructor({
+    soClient,
+    credentialStore,
+    clusterClient,
+    logger,
+    licensing,
+    security,
+    version
+  }:{
     soClient: SavedObjectsClientContract,
     credentialStore: CredentialStore,
     clusterClient: IClusterClient,
@@ -59,7 +67,7 @@ export class ReindexServiceWrapper {
     licensing: LicensingPluginSetup,
     security: SecurityPluginStart,
     version: Version
-  ) {
+  }) {
     this.reindexWorker = ReindexWorker.create(
       soClient,
       credentialStore,
