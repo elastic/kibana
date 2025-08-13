@@ -6,9 +6,10 @@
  */
 
 import { sortBy } from 'lodash';
-import { prepareStreamsForImport } from './import';
-import { asTree } from './tree';
+import { flattenTree } from './import';
+import { asTree, mergeTrees } from './tree';
 import { testContentPackEntry } from './test.utils';
+import { buildResolvers } from './helpers';
 
 describe('content pack import', () => {
   it('merges imported streams in a target stream', () => {
@@ -40,7 +41,13 @@ describe('content pack import', () => {
       include: { objects: { all: {} } },
     });
 
-    const importedStreams = prepareStreamsForImport({ existing, incoming });
+    const { merged } = mergeTrees({
+      base: undefined,
+      existing,
+      incoming,
+      resolverFactories: buildResolvers([]),
+    });
+    const importedStreams = flattenTree(merged);
 
     expect(sortBy(importedStreams, 'name')).toEqual([
       testContentPackEntry({

@@ -37,36 +37,20 @@ describe('content stream diff', () => {
       include: { objects: { all: {} } },
     });
 
-    const diffs = diffTrees({ existing, merged });
-    expect(diffs).toEqual([
+    const changes = diffTrees({ existing, merged });
+    expect(changes).toEqual([
       {
         name: 'logs.foo',
-        diff: {
-          removed: {
-            fields: [],
-            queries: [],
-            routing: [{ destination: 'logs.foo.bar', if: { always: {} } }],
+        changes: [
+          {
+            operation: 'remove',
+            type: 'routing',
+            value: { destination: 'logs.foo.bar', if: { always: {} } },
           },
-          added: { fields: [], queries: [], routing: [] },
-          updated: { fields: [], queries: [], routing: [] },
-        },
+        ],
       },
-      {
-        name: 'logs.foo.bar',
-        diff: {
-          removed: { fields: [], queries: [], routing: [] },
-          added: { fields: [], queries: [], routing: [] },
-          updated: { fields: [], queries: [], routing: [] },
-        },
-      },
-      {
-        name: 'logs.foo.bar.baz',
-        diff: {
-          removed: { fields: [], queries: [], routing: [] },
-          added: { fields: [], queries: [], routing: [] },
-          updated: { fields: [], queries: [], routing: [] },
-        },
-      },
+      { name: 'logs.foo.bar', changes: [] },
+      { name: 'logs.foo.bar.baz', changes: [] },
     ]);
   });
 
@@ -98,36 +82,20 @@ describe('content stream diff', () => {
       include: { objects: { all: {} } },
     });
 
-    const diffs = diffTrees({ existing, merged });
-    expect(diffs).toEqual([
+    const changes = diffTrees({ existing, merged });
+    expect(changes).toEqual([
       {
         name: 'logs.foo',
-        diff: {
-          added: {
-            fields: [],
-            queries: [],
-            routing: [{ destination: 'logs.foo.bar', if: { always: {} } }],
+        changes: [
+          {
+            operation: 'add',
+            type: 'routing',
+            value: { destination: 'logs.foo.bar', if: { always: {} } },
           },
-          removed: { fields: [], queries: [], routing: [] },
-          updated: { fields: [], queries: [], routing: [] },
-        },
+        ],
       },
-      {
-        name: 'logs.foo.bar',
-        diff: {
-          added: { fields: [], queries: [], routing: [] },
-          removed: { fields: [], queries: [], routing: [] },
-          updated: { fields: [], queries: [], routing: [] },
-        },
-      },
-      {
-        name: 'logs.foo.bar.baz',
-        diff: {
-          added: { fields: [], queries: [], routing: [] },
-          removed: { fields: [], queries: [], routing: [] },
-          updated: { fields: [], queries: [], routing: [] },
-        },
-      },
+      { name: 'logs.foo.bar', changes: [] },
+      { name: 'logs.foo.bar.baz', changes: [] },
     ]);
   });
 
@@ -166,43 +134,34 @@ describe('content stream diff', () => {
       include: { objects: { all: {} } },
     });
 
-    const diffs = diffTrees({ existing, merged });
-    expect(diffs).toEqual([
+    const changes = diffTrees({ existing, merged });
+    expect(changes).toEqual([
       {
         name: 'logs.foo',
-        diff: {
-          added: { fields: [], queries: [], routing: [] },
-          removed: { fields: [], queries: [], routing: [] },
-          updated: { fields: [], queries: [], routing: [] },
-        },
+        changes: [],
       },
       {
         name: 'logs.foo.bar',
-        diff: {
-          added: { fields: [], queries: [], routing: [] },
-          removed: { fields: [], queries: [], routing: [] },
-          updated: {
-            queries: [],
-            fields: [
-              { from: { 'foo.bar': { type: 'keyword' } }, to: { 'foo.bar': { type: 'long' } } },
-            ],
-            routing: [
-              {
-                from: { destination: 'logs.foo.bar.baz', if: { always: {} } },
-                to: { destination: 'logs.foo.bar.baz', if: { never: {} } },
-              },
-            ],
+        changes: [
+          {
+            type: 'field',
+            operation: 'update',
+            value: {
+              from: { 'foo.bar': { type: 'keyword' } },
+              to: { 'foo.bar': { type: 'long' } },
+            },
           },
-        },
+          {
+            type: 'routing',
+            operation: 'update',
+            value: {
+              from: { destination: 'logs.foo.bar.baz', if: { always: {} } },
+              to: { destination: 'logs.foo.bar.baz', if: { never: {} } },
+            },
+          },
+        ],
       },
-      {
-        name: 'logs.foo.bar.baz',
-        diff: {
-          added: { fields: [], queries: [], routing: [] },
-          removed: { fields: [], queries: [], routing: [] },
-          updated: { fields: [], queries: [], routing: [] },
-        },
-      },
+      { name: 'logs.foo.bar.baz', changes: [] },
     ]);
   });
 
@@ -239,32 +198,11 @@ describe('content stream diff', () => {
       include: { objects: { all: {} } },
     });
 
-    const diffs = diffTrees({ existing, merged });
-    expect(diffs).toEqual([
-      {
-        name: 'logs.foo',
-        diff: {
-          added: { fields: [], queries: [], routing: [] },
-          removed: { fields: [], queries: [], routing: [] },
-          updated: { fields: [], queries: [], routing: [] },
-        },
-      },
-      {
-        name: 'logs.foo.bar',
-        diff: {
-          added: { fields: [], queries: [], routing: [] },
-          removed: { fields: [], queries: [], routing: [] },
-          updated: { fields: [], queries: [], routing: [] },
-        },
-      },
-      {
-        name: 'logs.foo.bar.baz',
-        diff: {
-          added: { fields: [], queries: [], routing: [] },
-          removed: { fields: [], queries: [], routing: [] },
-          updated: { fields: [], queries: [], routing: [] },
-        },
-      },
+    const changes = diffTrees({ existing, merged });
+    expect(changes).toEqual([
+      { name: 'logs.foo', changes: [] },
+      { name: 'logs.foo.bar', changes: [] },
+      { name: 'logs.foo.bar.baz', changes: [] },
     ]);
   });
 });
