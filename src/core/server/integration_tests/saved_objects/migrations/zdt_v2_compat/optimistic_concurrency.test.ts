@@ -28,7 +28,7 @@ interface TestSOType {
   keyword: string;
 }
 
-describe('ZDT upgrades - optimistic concurrency tests', () => {
+describe('ZDT & V2 upgrades - optimistic concurrency tests', () => {
   let esServer: TestElasticsearchUtils['es'];
 
   beforeAll(async () => {
