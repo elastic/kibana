@@ -52,7 +52,7 @@ export class AIAssistantManagementSelectionPlugin
     core.capabilities.registerProvider(() => {
       return {
         management: {
-          kibana: {
+          ai: {
             aiAssistantManagementSelection: true,
             observabilityAiAssistantManagement: true,
             securityAiAssistantManagement: true,
@@ -64,14 +64,14 @@ export class AIAssistantManagementSelectionPlugin
     plugins.features?.registerKibanaFeature({
       id: 'aiAssistantManagementSelection',
       name: i18n.translate('aiAssistantManagementSelection.featureRegistry.featureName', {
-        defaultMessage: 'AI Assistant',
+        defaultMessage: 'AI Assistant Settings',
       }),
       order: 8600,
       app: [],
       category: DEFAULT_APP_CATEGORIES.management,
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       management: {
-        kibana: [
+        ai: [
           'aiAssistantManagementSelection',
           'securityAiAssistantManagement',
           'observabilityAiAssistantManagement',
@@ -81,7 +81,7 @@ export class AIAssistantManagementSelectionPlugin
       privileges: {
         all: {
           management: {
-            kibana: [
+            ai: [
               'aiAssistantManagementSelection',
               'securityAiAssistantManagement',
               'observabilityAiAssistantManagement',
@@ -95,7 +95,7 @@ export class AIAssistantManagementSelectionPlugin
         },
         read: {
           management: {
-            kibana: [
+            ai: [
               'aiAssistantManagementSelection',
               'securityAiAssistantManagement',
               'observabilityAiAssistantManagement',
