@@ -2,18 +2,10 @@
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node",
-      "@kbn/ambient-common-types"
-    ]
+    "types": ["jest", "node", "@kbn/ambient-common-types"]
   },
-  "include": [
-    "**/*.ts"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/dev-cli-runner",
     "@kbn/inference-common",
@@ -28,7 +20,6 @@
     "@kbn/apm-config-loader",
     "@kbn/repo-info",
     "@kbn/std",
-    "@kbn/test",
-    "@kbn/kibana-api-cli",
+    "@kbn/test"
   ]
 }
