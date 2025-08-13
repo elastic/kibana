@@ -59,7 +59,6 @@
     "@kbn/dataset-quality-plugin",
     "@kbn/search-types",
     "@kbn/test-suites-src",
-    "@kbn/cloud-security-posture-common",
     "@kbn/scout-info",
     "@kbn/streams-schema",
     "@kbn/test-suites-xpack-platform",

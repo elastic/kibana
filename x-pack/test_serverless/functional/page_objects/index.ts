@@ -18,10 +18,6 @@ import { SvlTriggersActionsPageProvider } from '@kbn/test-suites-xpack-platform/
 import { SvlObltOnboardingPageProvider } from './svl_oblt_onboarding_page';
 import { SvlObltOnboardingStreamLogFilePageProvider } from './svl_oblt_onboarding_stream_log_file';
 import { SvlObltOverviewPageProvider } from './svl_oblt_overview_page';
-import { SvlSecLandingPageProvider } from './svl_sec_landing_page';
-import { CspDashboardPageProvider } from './csp_dashboard_page';
-import { AddCisIntegrationFormPageProvider } from './add_cis_integration_form_page';
-import { CspSecurityCommonProvider } from './security_common';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
@@ -31,15 +27,10 @@ export const pageObjects = {
   svlObltOnboardingPage: SvlObltOnboardingPageProvider,
   SvlObltOnboardingStreamLogFilePage: SvlObltOnboardingStreamLogFilePageProvider,
   svlObltOverviewPage: SvlObltOverviewPageProvider,
-  svlSecLandingPage: SvlSecLandingPageProvider,
   svlTriggersActionsUI: SvlTriggersActionsPageProvider,
   svlRuleDetailsUI: SvlRuleDetailsPageProvider,
   svlManagementPage: SvlManagementPageProvider,
   svlIngestPipelines: SvlIngestPipelines,
   svlApiKeys: SvlApiKeysProvider,
   svlDataUsagePage: SvlDataUsagePageProvider,
-  // Cloud Security Posture specific page objects
-  cloudPostureDashboard: CspDashboardPageProvider,
-  cisAddIntegration: AddCisIntegrationFormPageProvider,
-  cspSecurity: CspSecurityCommonProvider,
 };
