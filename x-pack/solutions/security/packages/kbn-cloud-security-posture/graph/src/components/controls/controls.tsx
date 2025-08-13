@@ -117,7 +117,7 @@ export const Controls = ({
 
   const showCenter = sanitizedNodeIds.length > 0;
 
-  if (!showZoom && !showFitView && !showCenter) {
+  if (!showZoom && !showCenter && !showFitView) {
     return null;
   }
 
@@ -167,9 +167,7 @@ export const Controls = ({
       )}
       {showFitView && (
         <EuiFlexItem grow={false}>
-          {showZoom || sanitizedNodeIds.length > 0 ? (
-            <EuiHorizontalRule size="full" margin="none" />
-          ) : null}
+          {showZoom || showCenter ? <EuiHorizontalRule size="full" margin="none" /> : null}
           <EuiButtonIcon
             iconType={fitToViewIconFn}
             aria-label={FitViewLabel}
