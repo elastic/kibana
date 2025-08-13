@@ -438,8 +438,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           dataStream: regularDataStreamName,
         });
 
-        await PageObjects.datasetQuality.openDatasetQualityDetailsActionsButton();
-
         const discoverButton = await PageObjects.datasetQuality.getOpenInDiscoverButton();
 
         await discoverButton.click();
