@@ -212,7 +212,7 @@ export const OnechatEsqlToolFlyout: React.FC<OnechatEsqlToolFlyoutProps> = ({
         maxWidth
       >
         <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+          <EuiTitle size="m">
             <h2 id={esqlToolFlyoutTitleId}>
               {mode === OnechatEsqlToolFlyoutMode.Create
                 ? i18n.translate('xpack.onechat.tools.newEsqlTool.title', {
