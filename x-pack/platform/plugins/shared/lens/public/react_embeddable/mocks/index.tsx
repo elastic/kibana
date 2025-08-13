@@ -20,8 +20,9 @@ import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
+import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
 import { ESQLControlVariable } from '@kbn/esql-types';
-import { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public';
+import { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced';
 import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import {
@@ -191,9 +192,7 @@ export function makeEmbeddableServices(
       ...services.uiActions,
       getTrigger: jest.fn().mockImplementation(() => ({ exec: jest.fn() })),
     },
-    embeddableEnhanced: {
-      initializeEmbeddableDynamicActions: jest.fn(mockDynamicActionsManager),
-    },
+    uiActionsEnhanced: uiActionsEnhancedPluginMock.createStartContract(),
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   };
 }

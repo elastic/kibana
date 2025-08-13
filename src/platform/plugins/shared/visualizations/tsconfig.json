@@ -71,14 +71,15 @@
     "@kbn/core-mount-utils-browser",
     "@kbn/presentation-containers",
     "@kbn/search-response-warnings",
-    "@kbn/embeddable-enhanced-plugin",
+    "@kbn/embeddable-enhanced",
     "@kbn/content-management-utils",
     "@kbn/react-hooks",
     "@kbn/presentation-panel-plugin",
     "@kbn/ui-actions-browser",
     "@kbn/deeplinks-analytics",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/css-utils"
+    "@kbn/css-utils",
+    "@kbn/ui-actions-enhanced-plugin"
   ],
   "exclude": ["target/**/*"]
 }

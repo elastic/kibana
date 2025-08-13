@@ -18,8 +18,7 @@ import type {
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { DynamicActionsSerializedState, HasDynamicActions } from '@kbn/embeddable-enhanced';
 import type { Observable } from 'rxjs';
 import type { MapAttributes } from '../../common/content_management';
 import type {

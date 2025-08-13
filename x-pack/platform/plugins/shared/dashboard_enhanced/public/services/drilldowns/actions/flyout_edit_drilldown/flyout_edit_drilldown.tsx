@@ -21,10 +21,7 @@ import {
   apiHasUniqueId,
 } from '@kbn/presentation-publishing';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import {
-  apiHasDynamicActions,
-  type HasDynamicActions,
-} from '@kbn/embeddable-enhanced-plugin/public';
+import { apiHasDynamicActions, type HasDynamicActions } from '@kbn/embeddable-enhanced';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { txtDisplayName } from './i18n';

@@ -11,7 +11,7 @@
     "@kbn/data-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/ui-actions-enhanced-plugin",
-    "@kbn/embeddable-enhanced-plugin",
+    "@kbn/embeddable-enhanced",
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/es-query",

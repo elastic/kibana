@@ -24,7 +24,6 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -44,6 +43,7 @@ import type {
 } from '@kbn/content-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
+import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import {
   createRegionMapFn,
   GEOHASH_GRID,
@@ -107,7 +107,7 @@ export interface MapsPluginStartDependencies {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   embeddable: EmbeddableStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+  uiActionsEnhanced?: AdvancedUiActionsStart;
   fieldFormats: FieldFormatsStart;
   fileUpload: FileUploadPluginStart;
   inspector: InspectorStartContract;

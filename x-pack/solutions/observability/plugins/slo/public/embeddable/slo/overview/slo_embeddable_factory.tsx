@@ -21,6 +21,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { Router } from '@kbn/shared-ux-router';
+import { initializeEmbeddableDynamicActions } from '@kbn/embeddable-enhanced';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createBrowserHistory } from 'history';
 import React, { useEffect } from 'react';
@@ -68,11 +69,14 @@ export const getOverviewEmbeddableFactory = ({
     const deps = { ...coreStart, ...pluginsStart };
     const state = initialState.rawState;
 
-    const dynamicActionsManager = deps.embeddableEnhanced?.initializeEmbeddableDynamicActions(
-      uuid,
-      () => titleManager.api.title$.getValue(),
-      initialState
-    );
+    const dynamicActionsManager = deps.uiActionsEnhanced
+      ? initializeEmbeddableDynamicActions(
+          uuid,
+          () => titleManager.api.title$.getValue(),
+          initialState,
+          { embeddable: deps.embeddable, uiActionsEnhanced: deps.uiActionsEnhanced }
+        )
+      : undefined;
 
     const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 

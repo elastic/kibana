@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { DynamicActionsState } from '@kbn/ui-actions-enhanced-plugin/public';
 import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
-  DynamicActionsState,
   UiActionsEnhancedAbstractActionStorage as AbstractActionStorage,
   UiActionsEnhancedSerializedEvent as SerializedEvent,
 } from '@kbn/ui-actions-enhanced-plugin/public';

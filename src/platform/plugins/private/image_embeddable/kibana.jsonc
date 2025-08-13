@@ -20,7 +20,7 @@
     "optionalPlugins": [
       "security",
       "screenshotMode",
-      "embeddableEnhanced"
+      "uiActionsEnhanced",
     ],
     "requiredBundles": []
   }
