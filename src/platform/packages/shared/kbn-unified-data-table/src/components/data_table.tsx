@@ -36,7 +36,6 @@ import {
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
   type UseEuiTheme,
-  EuiContextMenuItem,
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -72,6 +71,7 @@ import {
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
   DataGridPaginationMode,
+  CustomBulkActions,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -125,14 +125,6 @@ export enum DataLoadingState {
   loadingMore = 'loadingMore',
   loaded = 'loaded',
 }
-
-export type CustomBulkActions = Array<
-  Omit<React.ComponentProps<typeof EuiContextMenuItem>, 'onClick'> & {
-    onClick: (payload: { selectedDocIds: string[] }) => void;
-    label: React.ReactElement | string;
-    key: string;
-  }
->;
 
 /**
  * Unified Data Table props
@@ -469,7 +461,7 @@ interface InternalUnifiedDataTableProps {
   /**
    * Custom bulk action
    */
-  customBulkActions: CustomBulkActions;
+  customBulkActions?: CustomBulkActions;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);

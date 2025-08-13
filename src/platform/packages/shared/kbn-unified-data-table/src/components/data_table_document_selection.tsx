@@ -33,7 +33,7 @@ import { UnifiedDataTableContext } from '../table_context';
 import { DataTableCopyRowsAsText } from './data_table_copy_rows_as_text';
 import { DataTableCopyRowsAsJson } from './data_table_copy_rows_as_json';
 import { useControlColumn } from '../hooks/use_control_column';
-import { type CustomBulkActions } from './data_table';
+import type { CustomBulkActions } from '../types';
 
 export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
   const { record, rowIndex } = useControlColumn(props);
