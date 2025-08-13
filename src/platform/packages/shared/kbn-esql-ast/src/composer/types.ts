@@ -145,3 +145,12 @@ export type EsqlRequestParams = EsqlRequestParamEntry[];
 export type EsqlRequestParamEntry = EsqlRequestParamPositionalEntry | EsqlRequestParamNamedEntry;
 export type EsqlRequestParamPositionalEntry = string | number | boolean | null;
 export type EsqlRequestParamNamedEntry = Record<string, unknown>;
+
+export interface QueryCommandTag extends QueryCommandTagParametrized {
+  (initialParams: Record<string, unknown>): QueryCommandTagParametrized;
+}
+
+export interface QueryCommandTagParametrized {
+  (template: TemplateStringsArray, ...holes: ComposerQueryTagHole[]): ComposerQuery;
+  (query: string, paramsValues?: Record<string, unknown>): ComposerQuery;
+}

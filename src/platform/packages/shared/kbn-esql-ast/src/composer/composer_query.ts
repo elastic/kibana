@@ -12,13 +12,17 @@ import * as synth from '../synth';
 import { BasicPrettyPrinter, WrappingPrettyPrinter } from '../pretty_print';
 import { processTemplateHoles } from './util';
 import { Builder } from '../builder';
-import type { ESQLAstQueryExpression } from '../types';
+import type { ESQLAstQueryExpression, ESQLNamedParamLiteral } from '../types';
 import type {
   ComposerQueryTagHole,
   ComposerSortShorthand,
   EsqlRequest,
   ComposerQueryTag,
+  ComposerQueryGenerator,
+  QueryCommandTag,
+  QueryCommandTagParametrized,
 } from './types';
+import { Walker } from '../walker';
 
 export class ComposerQuery {
   constructor(
@@ -26,20 +30,82 @@ export class ComposerQuery {
     protected readonly params: Map<string, unknown> = new Map()
   ) {}
 
-  public readonly pipe: {
-    (template: TemplateStringsArray, ...holes: ComposerQueryTagHole[]): ComposerQuery;
-    (query: string): ComposerQuery;
-  } = (templateOrQuery, ...holes: ComposerQueryTagHole[]): this => {
-    if (Array.isArray(holes)) processTemplateHoles(holes, this.params);
+  public readonly pipe: QueryCommandTag = ((templateOrQueryOrParamValues, ...rest: unknown[]) => {
+    const tagOrGeneratorWithParams =
+      (initialParamValues: Record<string, unknown>): QueryCommandTagParametrized =>
+      (templateOrQuery: any, ...holes: unknown[]) => {
+        if (typeof templateOrQuery === 'string') {
+          const moreParamValues =
+            typeof holes[0] === 'object' && !Array.isArray(holes[0]) ? holes[0] : {};
+          const params = { ...initialParamValues, ...moreParamValues };
+          const command = synth.cmd(templateOrQuery);
 
-    const command = synth.cmd(
-      templateOrQuery as TemplateStringsArray,
-      ...(holes as synth.SynthTemplateHole[])
-    );
-    this.ast.commands.push(command);
+          for (const [name, value] of Object.entries(params)) {
+            const exists = this.params.has(name);
 
-    return this;
-  };
+            if (exists) {
+              // If a parameter with the same name already exists, we rename it
+              // as somebody might have already used it in the query in a
+              // different command.
+              let newName: string;
+              while (true) {
+                newName = `${name}_${this.params.size}`;
+                if (!this.params.has(newName)) break;
+              }
+
+              this.params.set(newName, value);
+
+              const nodes = Walker.matchAll(command, {
+                type: 'literal',
+                literalType: 'param',
+                value: name,
+              }) as ESQLNamedParamLiteral[];
+
+              for (const node of nodes) {
+                node.value = newName;
+              }
+            } else {
+              this.params.set(name, value);
+            }
+          }
+
+          this.ast.commands.push(command);
+        } else {
+          if (Array.isArray(holes))
+            processTemplateHoles(holes as ComposerQueryTagHole[], this.params);
+
+          const command = synth.cmd(
+            templateOrQuery as TemplateStringsArray,
+            ...(holes as synth.SynthTemplateHole[])
+          );
+
+          this.ast.commands.push(command);
+        }
+
+        return this;
+      };
+
+    if (
+      !!templateOrQueryOrParamValues &&
+      typeof templateOrQueryOrParamValues === 'object' &&
+      !Array.isArray(templateOrQueryOrParamValues)
+    ) {
+      return tagOrGeneratorWithParams(
+        templateOrQueryOrParamValues as Record<string, unknown>
+      ) as QueryCommandTagParametrized;
+    }
+
+    const parametrized = tagOrGeneratorWithParams({});
+
+    if (typeof templateOrQueryOrParamValues === 'string') {
+      return parametrized(templateOrQueryOrParamValues, rest[0] as Record<string, unknown>);
+    } else {
+      return parametrized(
+        templateOrQueryOrParamValues as TemplateStringsArray,
+        ...(rest as ComposerQueryTagHole[])
+      );
+    }
+  }) as QueryCommandTag;
 
   /**
    * Appends a new `LIMIT` command to the query. Equivalent to calling
@@ -169,7 +235,14 @@ export class ComposerQuery {
     return this.pipe`SORT ${nodes}`;
   };
 
-  public readonly where: ComposerQueryTag = (templateOrQuery, ...holes) => {
+  public readonly where: ComposerQueryTag & ComposerQueryGenerator<ComposerQuery> = (
+    templateOrQuery: string | TemplateStringsArray,
+    ...holes: unknown[]
+  ) => {
+    if (typeof templateOrQuery === 'string') {
+      const paramsValues: Record<string, unknown> | undefined = holes[0];
+    }
+
     if (Array.isArray(holes)) processTemplateHoles(holes, this.params);
 
     const expression = synth.exp(
