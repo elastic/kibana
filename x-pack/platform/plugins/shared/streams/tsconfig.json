@@ -54,6 +54,7 @@
     "@kbn/security-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/ai-tools",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/logging-mocks"
   ]
 }
