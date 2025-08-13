@@ -129,8 +129,8 @@ const previousDeclaration: DataStreamDefinition<MyDocument> = {
   // return what we have in source if there is something in source
   if (params._source["someFieldV2"] != null) {
     emit(params._source["someFieldV2"]);
-  } else  { // return the original processed in some way
-    emit(doc['someFieldV2'].value + " the original, but processed");
+  } else  { // return the original value
+    emit(doc['someFieldV2'].value);
   }
 `,
       },
