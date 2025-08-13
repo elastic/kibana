@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 import { KibanaFeatureConfig, SubFeaturePrivilegeConfig } from '@kbn/features-plugin/common';
 import { SupertestWithRoleScopeType } from '../../services';
 import { FtrProviderContext } from '../../ftr_provider_context';
