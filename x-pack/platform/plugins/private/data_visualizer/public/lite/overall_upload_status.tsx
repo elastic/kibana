@@ -60,6 +60,18 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
       status: generateStatus([uploadStatus.indexCreated, uploadStatus.pipelineCreated]),
     },
     {
+      title: i18n.translate(
+        'xpack.dataVisualizer.file.overallUploadStatus.creatingIndexAndIngestPipeline',
+        {
+          defaultMessage: 'Index searchable',
+        }
+      ),
+      children: <></>,
+      status: generateStatus([
+        uploadStatus.indexSearchable ? STATUS.COMPLETED : STATUS.NOT_STARTED,
+      ]),
+    },
+    {
       title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.uploadingFiles', {
         defaultMessage: 'Uploading files',
       }),
