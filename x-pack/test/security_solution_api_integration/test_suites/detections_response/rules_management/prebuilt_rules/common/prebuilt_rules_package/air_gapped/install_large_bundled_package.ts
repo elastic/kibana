@@ -12,7 +12,7 @@ import {
   getPrebuiltRulesAndTimelinesStatus,
   installPrebuiltRulesAndTimelines,
 } from '../../../../../utils';
-import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../../config/services/detections_response';
 import { NUM_OF_RULE_IN_MOCK_LARGE_PKG } from '../../configs/edge_cases/ess_air_gapped_with_bundled_large_package.config';
 
 export default ({ getService }: FtrProviderContext): void => {

@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './index.scss';
-
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
   Storage,
@@ -142,7 +140,7 @@ export class DataPublicPlugin
 
   public start(
     core: CoreStart,
-    { uiActions, fieldFormats, dataViews, inspector, screenshotMode }: DataStartDependencies
+    { uiActions, fieldFormats, dataViews, inspector, screenshotMode, share }: DataStartDependencies
   ): DataPublicPluginStart {
     const { uiSettings, overlays } = core;
     setOverlays(overlays);
@@ -160,6 +158,7 @@ export class DataPublicPlugin
       indexPatterns: dataViews,
       inspector,
       screenshotMode,
+      share,
       scriptedFieldsEnabled: dataViews.scriptedFieldsEnabled,
     });
     setSearchService(search);

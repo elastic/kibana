@@ -34,7 +34,7 @@ import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 import {
   AlertDetailsRuleFormFlyout,
   type AlertDetailsRuleFormFlyoutBaseProps,
-} from './AlertDetailsRuleFormFlyout';
+} from './alert_details_rule_form_flyout';
 
 export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
   alert: TopAlert | null;

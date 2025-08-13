@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 import { Document, isPair, isSeq, parseDocument, Scalar, visit } from 'yaml';
 
@@ -23,7 +22,7 @@ export function getYamlStringFromJSON(json: any) {
 
 export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
   yamlString: string,
-  schema: T = WorkflowSchema as unknown as T
+  schema: T
 ): z.SafeParseReturnType<z.input<T>, z.output<T>> {
   const doc = parseDocument(yamlString);
   const json = doc.toJSON();

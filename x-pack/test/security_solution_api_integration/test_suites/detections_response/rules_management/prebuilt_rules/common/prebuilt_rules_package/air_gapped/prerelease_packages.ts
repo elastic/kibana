@@ -17,7 +17,7 @@ import {
   installPrebuiltRules,
   installFleetPackage,
 } from '../../../../../utils';
-import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../../config/services/detections_response';
 import {
   MOCK_BETA_PKG_VERSION,
   MOCK_PKG_VERSION,

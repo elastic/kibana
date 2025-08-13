@@ -6,12 +6,14 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../hooks/use_kibana';
+import { useIngestionCtaFeatureFlag } from '../hooks/use_ingestion_cta_feature_flag';
 import { useSearchHomePageRedirect } from '../hooks/use_search_home_page_redirect';
 import { SearchHomepageBody } from './search_homepage_body';
 import { SearchHomepageHeader } from './search_homepage_header';
+import { SearchHomepageIngestionVariantBody } from './ingestion_body';
 
 export const SearchHomepagePage = () => {
   const {
@@ -22,7 +24,8 @@ export const SearchHomepagePage = () => {
       searchNavigation.breadcrumbs.setSearchBreadCrumbs([]);
     }
   }, [searchNavigation]);
-  useSearchHomePageRedirect();
+  const ingestionCTAVariantLoaded = useIngestionCtaFeatureFlag();
+  const { isLoading } = useSearchHomePageRedirect();
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -37,10 +40,20 @@ export const SearchHomepagePage = () => {
       grow={false}
       solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
-      <SearchHomepageHeader />
-      <EuiHorizontalRule margin="none" />
-      <SearchHomepageBody />
-      {embeddableConsole}
+      {isLoading ? (
+        <KibanaPageTemplate.EmptyPrompt icon={<EuiLoadingSpinner size="xl" />} />
+      ) : (
+        <>
+          <SearchHomepageHeader />
+          <EuiHorizontalRule margin="none" />
+          {ingestionCTAVariantLoaded ? (
+            <SearchHomepageIngestionVariantBody />
+          ) : (
+            <SearchHomepageBody />
+          )}
+          {embeddableConsole}
+        </>
+      )}
     </KibanaPageTemplate>
   );
 };

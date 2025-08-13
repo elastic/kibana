@@ -136,6 +136,7 @@ export const buildOSSFeatures = ({
             read: [],
           },
           ui: ['save'],
+          api: ['manage_advanced_settings'],
         },
         read: {
           app: ['kibana'],

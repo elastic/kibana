@@ -542,6 +542,12 @@ const baseGraph: EnhancedNodeViewModel[] = [
   },
 ];
 
+const entitiesData = [
+  { name: 'Suspicious ip' },
+  { name: 'Admin User' },
+  { name: 'Suspicious User' },
+];
+
 export const LargeGraph: Story = {
   args: {
     ...meta.args,
@@ -664,6 +670,72 @@ export const VariantStackSizes: Story = {
             }))
         )
         .flat(),
+    ]),
+  },
+};
+
+export const GraphWithAssetInventoryData: Story = {
+  args: {
+    ...meta.args,
+    ...extractEdges([
+      ...baseGraph.map((node, index) => {
+        // Add asset data to specific nodes
+        if (index === 1) {
+          return {
+            ...node,
+            label: entitiesData[0].name,
+            icon: 'globe',
+            documentsData: [
+              {
+                id: node.id,
+                type: 'event' as 'event' | 'alert',
+              },
+            ],
+          };
+        } else if (index === 2) {
+          return {
+            ...node,
+            label: entitiesData[1].name,
+            icon: 'user',
+            documentsData: [
+              {
+                id: node.id,
+                type: 'event' as 'event' | 'alert',
+              },
+            ],
+          };
+        } else if (index === 6) {
+          return {
+            ...node,
+            label: entitiesData[2].name,
+            icon: 'storage',
+            documentsData: [
+              {
+                id: node.id,
+                type: 'event' as 'event' | 'alert',
+              },
+            ],
+          };
+        }
+        return node;
+      }),
+      // Add the same additional nodes as GraphStackedEdgeCases
+      {
+        id: 'a(oktauser)-b(hackeruser)',
+        source: 'oktauser',
+        target: 'hackeruser',
+        label: 'CreateUser2',
+        color: 'primary',
+        shape: 'label',
+      },
+      {
+        id: 'a(siem-windows)-b(user)',
+        source: 'siem-windows',
+        target: 'user',
+        label: 'User login to OKTA2',
+        color: 'danger',
+        shape: 'label',
+      },
     ]),
   },
 };

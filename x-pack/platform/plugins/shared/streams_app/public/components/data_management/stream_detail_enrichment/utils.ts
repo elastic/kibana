@@ -29,6 +29,7 @@ import {
   DateFormState,
   ManualIngestPipelineFormState,
   EnrichmentDataSourceWithUIAttributes,
+  SetFormState,
 } from './types';
 import { ALWAYS_CONDITION } from '../../../util/condition';
 import { configDrivenProcessors } from './processors/config_driven';
@@ -42,7 +43,7 @@ import { ProcessorResources } from './state_management/processor_state_machine';
 /**
  * These are processor types with specialised UI. Other processor types are handled by a generic config-driven UI.
  */
-export const SPECIALISED_TYPES = ['date', 'dissect', 'grok'];
+export const SPECIALISED_TYPES = ['date', 'dissect', 'grok', 'set'];
 
 interface FormStateDependencies {
   grokCollection: StreamEnrichmentContextType['grokCollection'];
@@ -136,6 +137,17 @@ const defaultManualIngestPipelineProcessorFormState = (): ManualIngestPipelineFo
   if: ALWAYS_CONDITION,
 });
 
+const defaultSetProcessorFormState = (): SetFormState => ({
+  type: 'set' as const,
+  field: '',
+  value: '',
+  ignore_failure: false,
+  override: true,
+  ignore_empty_value: false,
+  media_type: '',
+  if: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -151,6 +163,7 @@ const defaultProcessorFormStateByType: Record<
   dissect: defaultDissectProcessorFormState,
   grok: defaultGrokProcessorFormState,
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
+  set: defaultSetProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -207,6 +220,15 @@ export const getFormStateFrom = (
     return structuredClone({
       ...date,
       type: 'date',
+    });
+  }
+
+  if (isSetProcessor(processor)) {
+    const { set } = processor;
+
+    return structuredClone({
+      ...set,
+      type: 'set',
     });
   }
 
@@ -298,6 +320,35 @@ export const convertFormStateToProcessor = (
     };
   }
 
+  if (formState.type === 'set') {
+    const { field, value, copy_from, ignore_failure, override, ignore_empty_value, media_type } =
+      formState;
+
+    const getValueOrCopyFrom = () => {
+      if (typeof copy_from === 'string' && !isEmpty(copy_from)) {
+        return { copy_from };
+      }
+      if (typeof value === 'string' && !isEmpty(value)) {
+        return { value };
+      }
+      return { value: '' };
+    };
+
+    return {
+      processorDefinition: {
+        set: {
+          if: formState.if,
+          field,
+          ...getValueOrCopyFrom(),
+          override,
+          ignore_empty_value,
+          media_type: isEmpty(media_type) ? undefined : media_type,
+          ignore_failure,
+        },
+      },
+    };
+  }
+
   if (configDrivenProcessors[formState.type]) {
     return {
       processorDefinition: configDrivenProcessors[formState.type].convertFormStateToConfig(
@@ -323,6 +374,7 @@ export const isDissectProcessor = createProcessorGuardByType('dissect');
 export const isManualIngestPipelineJsonProcessor =
   createProcessorGuardByType('manual_ingest_pipeline');
 export const isGrokProcessor = createProcessorGuardByType('grok');
+export const isSetProcessor = createProcessorGuardByType('set');
 
 const createId = htmlIdGenerator();
 

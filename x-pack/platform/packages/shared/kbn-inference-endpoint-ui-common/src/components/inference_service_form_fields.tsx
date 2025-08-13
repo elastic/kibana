@@ -54,6 +54,15 @@ import { ProviderSecretHiddenField } from './hidden_fields/provider_secret_hidde
 import { ProviderConfigHiddenField } from './hidden_fields/provider_config_hidden_field';
 import { useProviders } from '../hooks/use_providers';
 
+const providerConfigConfig = {
+  validations: [
+    {
+      validator: fieldValidators.emptyField(LABELS.PROVIDER_REQUIRED),
+      isBlocking: true,
+    },
+  ],
+};
+
 export function isProviderForSolutions(
   filterBySolution: SolutionView,
   provider: InferenceProvider
@@ -450,17 +459,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
   return !isLoading ? (
     <>
-      <UseField
-        path="config.provider"
-        config={{
-          validations: [
-            {
-              validator: fieldValidators.emptyField(LABELS.PROVIDER_REQUIRED),
-              isBlocking: true,
-            },
-          ],
-        }}
-      >
+      <UseField path="config.provider" config={providerConfigConfig}>
         {(field) => {
           const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
           const selectInput = providerSuperSelect(isInvalid);
@@ -527,12 +526,12 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           <EuiSpacer size="m" />
           <EuiHorizontalRule margin="xs" />
           <ProviderSecretHiddenField
-            providerSchema={providerSchema}
+            requiredProviderFormFields={requiredProviderFormFields}
             setRequiredProviderFormFields={setRequiredProviderFormFields}
             isSubmitting={isSubmitting}
           />
           <ProviderConfigHiddenField
-            providerSchema={providerSchema}
+            requiredProviderFormFields={requiredProviderFormFields}
             setRequiredProviderFormFields={setRequiredProviderFormFields}
             isSubmitting={isSubmitting}
           />

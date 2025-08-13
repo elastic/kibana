@@ -849,6 +849,14 @@
               },
               {
                 "plugin": "@kbn/langchain",
+                "path": "x-pack/platform/packages/shared/kbn-langchain/server/tracers/telemetry/telemetry_tracer.ts"
+              },
+              {
+                "plugin": "@kbn/langchain",
+                "path": "x-pack/platform/packages/shared/kbn-langchain/server/tracers/telemetry/telemetry_tracer.test.ts"
+              },
+              {
+                "plugin": "@kbn/langchain",
                 "path": "x-pack/platform/packages/shared/kbn-langchain/server/tracers/telemetry/telemetry_tracer.test.ts"
               },
               {
@@ -858,142 +866,6 @@
               {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/functions/context/utils/recall_and_score.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/lib/base_response_actions_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/lib/base_response_actions_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/lib/base_response_actions_client.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/ai_assistant_data_clients/knowledge_base/create_knowledge_base_entry.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/ai_assistant_data_clients/knowledge_base/create_knowledge_base_entry.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/nodes/generate_chat_title.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/nodes/execute_tools.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/helpers.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/telemetry.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/telemetry.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/entries/bulk_actions_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/field_retention_enrichment/field_retention_enrichment_task.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/field_retention_enrichment/field_retention_enrichment_task.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_store_data_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_store_data_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/workflow_insights/update_insight.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upload_csv.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upload_csv.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/async_sender.ts"
               },
               {
                 "plugin": "observability",
@@ -1118,6 +990,138 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/public/src/common/lib/telemetry/telemetry_service.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/ai_assistant_data_clients/knowledge_base/create_knowledge_base_entry.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/ai_assistant_data_clients/knowledge_base/create_knowledge_base_entry.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/nodes/generate_chat_title.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/helpers.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/telemetry.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/telemetry.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/entries/bulk_actions_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/lib/base_response_actions_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/lib/base_response_actions_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/lib/base_response_actions_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/field_retention_enrichment/field_retention_enrichment_task.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/field_retention_enrichment/field_retention_enrichment_task.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_store_data_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_store_data_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/workflow_insights/update_insight.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upload_csv.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upload_csv.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/engine/initialisation_service.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/engine/initialisation_service.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/async_sender.ts"
               },
               {
                 "plugin": "securitySolutionServerless",

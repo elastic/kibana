@@ -9,7 +9,7 @@
 
 import { dedent } from '../lib/indent.mjs';
 import { cleanPaths } from '../lib/clean.mjs';
-import { findPluginCleanPaths } from '../lib/find_clean_paths.mjs';
+import { collectBazelPaths, findPluginCleanPaths } from '../lib/find_clean_paths.mjs';
 import Path from 'path';
 import { REPO_ROOT } from '../lib/paths.mjs';
 
@@ -22,6 +22,7 @@ export const command = {
     id: 'total',
   },
   flagsHelp: `
+    --allow-root         Required supplementary flag if you're running this command as root.
     --quiet              Prevent logging more than basic success/error messages
   `,
   async run({ log }) {
@@ -36,6 +37,7 @@ export const command = {
 
     await cleanPaths(log, [
       ...(await findPluginCleanPaths(log)),
+      ...collectBazelPaths(),
       Path.resolve(REPO_ROOT, '.es', 'cache'),
     ]);
   },

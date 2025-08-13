@@ -18,7 +18,7 @@ import {
   DISK_THROUGHPUT_LABEL,
   DISK_USAGE_BY_MOUNT_POINT_LABEL,
 } from '../../../shared/charts/constants';
-import { DataSchemaFormat, type FormulasCatalog } from '../../../shared/metrics/types';
+import { type FormulasCatalog } from '../../../shared/metrics/types';
 
 export const init = (formulas: FormulasCatalog<HostFormulas>) => {
   const diskIOReadWrite: LensConfigWithId = {
@@ -69,9 +69,7 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
         breakdown: {
           type: 'topValues',
           field:
-            formulas.schema === DataSchemaFormat.ECS
-              ? 'system.filesystem.mount_point'
-              : 'attributes.mountpoint',
+            formulas.schema === 'ecs' ? 'system.filesystem.mount_point' : 'attributes.mountpoint',
           size: 5,
         },
         yAxis: [

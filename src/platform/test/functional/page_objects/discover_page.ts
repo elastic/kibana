@@ -227,7 +227,7 @@ export class DiscoverPageObject extends FtrService {
 
     await (
       await this.testSubjects.find('unifiedHistogramBreakdownSelectorSelectorSearch')
-    ).type(field);
+    ).type(field, { charByChar: true });
 
     const optionValue = value ?? field;
 

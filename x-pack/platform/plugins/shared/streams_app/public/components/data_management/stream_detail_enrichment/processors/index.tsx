@@ -56,6 +56,7 @@ import { ConfigDrivenProcessorType } from './config_driven/types';
 import { selectPreviewRecords } from '../state_management/simulation_state_machine/selectors';
 import { ManualIngestPipelineProcessorForm } from './manual_ingest_pipeline';
 import { isProcessorUnderEdit } from '../state_management/processor_state_machine';
+import { SetProcessorForm } from './set';
 
 export interface ProcessorConfigurationProps {
   dragHandleProps: DraggableProvidedDragHandleProps | null;
@@ -113,6 +114,7 @@ const ProcessorConfigurationListItem = ({
       <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
         {canDragAndDrop && (
           <EuiPanel
+            data-test-subj="streamsAppProcessorDragHandle"
             grow={false}
             hasShadow={false}
             color="transparent"
@@ -122,7 +124,7 @@ const ProcessorConfigurationListItem = ({
             <EuiIcon type="grab" size="m" />
           </EuiPanel>
         )}
-        <strong>{processor.type.toUpperCase()}</strong>
+        <strong data-test-subj="streamsAppProcessorLegend">{processor.type.toUpperCase()}</strong>
         <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
           {processorDescription}
         </EuiText>
@@ -299,6 +301,7 @@ const ProcessorConfigurationEditor = ({
             {type === 'grok' && <GrokProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
             {type === 'manual_ingest_pipeline' && <ManualIngestPipelineProcessorForm />}
+            {type === 'set' && <SetProcessorForm />}
             {!SPECIALISED_TYPES.includes(type) && (
               <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
             )}
@@ -333,6 +336,7 @@ const ProcessorPanel = (props: PropsWithChildren) => {
   return (
     <EuiPanel
       hasBorder
+      data-test-subj="streamsAppProcessorConfigurationListItem"
       css={css`
         border: ${euiTheme.border.thin};
         padding: ${euiTheme.size.m};

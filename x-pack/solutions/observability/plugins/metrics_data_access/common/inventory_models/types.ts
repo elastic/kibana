@@ -17,7 +17,7 @@ import type {
 } from './shared/metrics/types';
 import type { HOST_METRICS_RECEIVER_OTEL, SYSTEM_INTEGRATION } from '../constants';
 
-export { DataSchemaFormat } from './shared/metrics/types';
+export { DataSchemaFormatEnum, type DataSchemaFormat } from './shared/metrics/types';
 export const ItemTypeRT = rt.keyof({
   host: null,
   pod: null,

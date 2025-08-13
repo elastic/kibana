@@ -45,12 +45,16 @@ export const POLICIES = '[data-test-subj~="panelNavItem-id-policy"]';
 
 export const TRUSTED_APPS = '[data-test-subj~="panelNavItem-id-trusted_apps"]';
 
+export const TRUSTED_DEVICES = '[data-test-subj~="panelNavItem-id-trusted_devices"]';
+
 export const EVENT_FILTERS = '[data-test-subj~="panelNavItem-id-event_filters"]';
 
 export const BLOCKLIST = '[data-test-subj~="panelNavItem-id-blocklist"]';
 
 export const HOST_ISOLATION_EXCEPTIONS =
   '[data-test-subj~="panelNavItem-id-host_isolation_exceptions"]';
+
+export const ENDPOINT_EXCEPTIONS = '[data-test-subj~="panelNavItem-id-endpoint_exceptions"]';
 
 export const RESPONSE_ACTIONS_HISTORY =
   '[data-test-subj~="panelNavItem-id-response_actions_history"]';
@@ -102,6 +106,7 @@ export const openNavigationPanelFor = (pageName: string) => {
       break;
     }
     case FLEET:
+    case ENDPOINT_EXCEPTIONS:
     case ENDPOINTS: {
       panel = ASSETS_PANEL_BTN;
       break;

@@ -14,6 +14,7 @@ import type {
   UpdateToolPayload,
   CreateToolResponse,
   UpdateToolResponse,
+  BulkDeleteToolResponse,
 } from '../../../common/http_api/tools';
 
 export class ToolsService {
@@ -34,6 +35,12 @@ export class ToolsService {
 
   async delete({ toolId }: { toolId: string }) {
     return await this.http.delete<DeleteToolResponse>(`/api/chat/tools/${toolId}`, {});
+  }
+
+  async bulkDelete(toolsIds: string[]) {
+    return await this.http.post<BulkDeleteToolResponse>(`/internal/chat/tools/_bulk_delete`, {
+      body: JSON.stringify({ ids: toolsIds }),
+    });
   }
 
   async create(tool: CreateToolPayload) {

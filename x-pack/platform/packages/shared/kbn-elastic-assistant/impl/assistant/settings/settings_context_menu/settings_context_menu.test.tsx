@@ -142,7 +142,7 @@ describe('SettingsContextMenu', () => {
 
     await userEvent.click(screen.getByTestId('ai-assistant-settings'));
     expect(mockNavigateToApp).toHaveBeenCalledWith('management', {
-      path: 'kibana/securityAiAssistantManagement',
+      path: 'ai/securityAiAssistantManagement',
     });
   });
 
@@ -180,7 +180,7 @@ describe('SettingsContextMenu', () => {
 
     await userEvent.click(screen.getByTestId('knowledge-base'));
     expect(mockNavigateToApp).toHaveBeenCalledWith('management', {
-      path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
+      path: `ai/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
     });
   });
 

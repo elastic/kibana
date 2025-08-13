@@ -35,7 +35,7 @@ import {
   InferenceClient,
   ToolChoiceType,
 } from '@kbn/inference-common';
-import { isLockAcquisitionError } from '@kbn/lock-manager';
+import { CONTEXT_FUNCTION_NAME } from '../../../common';
 import { resourceNames } from '..';
 import {
   ChatCompletionChunkEvent,
@@ -59,7 +59,6 @@ import {
   KnowledgeBaseType,
   KnowledgeBaseEntryRole,
 } from '../../../common/types';
-import { CONTEXT_FUNCTION_NAME } from '../../functions/context/context';
 import type { ChatFunctionClient } from '../chat_function_client';
 import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
@@ -73,11 +72,8 @@ import { getGeneratedTitle } from './operators/get_generated_title';
 import { runStartupMigrations } from '../startup_migrations/run_startup_migrations';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
-import { deleteInferenceEndpoint, waitForKbModel, warmupModel } from '../inference_endpoint';
+import { warmupModel } from '../inference_endpoint';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
-import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
-import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
-import { LEGACY_CUSTOM_INFERENCE_ID } from '../../../common/preconfigured_inference_ids';
 import { addAnonymizationData } from './operators/add_anonymization_data';
 
 const MAX_FUNCTION_CALLS = 8;
@@ -674,81 +670,11 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.getModelStatus();
   };
 
-  setupKnowledgeBase = async (
-    nextInferenceId: string,
-    waitUntilComplete: boolean = false
-  ): Promise<{
-    reindex: boolean;
-    currentInferenceId: string | undefined;
-    nextInferenceId: string;
-  }> => {
-    const { esClient, core, logger } = this.dependencies;
-
-    logger.debug(`Setting up knowledge base with inference_id: ${nextInferenceId}`);
-
-    const currentInferenceId = await getInferenceIdFromWriteIndex(esClient, logger);
-    if (currentInferenceId === nextInferenceId) {
-      logger.debug('Inference ID is unchanged. No need to re-index knowledge base.');
-      const warmupModelPromise = warmupModel({ esClient, logger, inferenceId: nextInferenceId });
-      if (waitUntilComplete) {
-        logger.debug('Waiting for warmup to complete...');
-        await warmupModelPromise;
-        logger.debug('Warmup completed.');
-      }
-      return { reindex: false, currentInferenceId, nextInferenceId };
-    }
-
-    await createOrUpdateKnowledgeBaseIndexAssets({
-      core: this.dependencies.core,
-      logger: this.dependencies.logger,
-      inferenceId: nextInferenceId,
-    });
-
-    const kbSetupPromise = waitForKbModel({
-      core: this.dependencies.core,
-      esClient,
-      logger,
-      config: this.dependencies.config,
-      inferenceId: nextInferenceId,
-    })
-      .then(async () => {
-        logger.info(
-          `Inference ID has changed from "${currentInferenceId}" to "${nextInferenceId}". Re-indexing knowledge base.`
-        );
-
-        await reIndexKnowledgeBaseWithLock({
-          core,
-          logger,
-          esClient,
-        });
-
-        // If the inference ID switched to a preconfigured inference endpoint, delete the legacy custom inference endpoint if it exists.
-        if (currentInferenceId === LEGACY_CUSTOM_INFERENCE_ID) {
-          void deleteInferenceEndpoint({
-            esClient,
-            logger,
-            inferenceId: LEGACY_CUSTOM_INFERENCE_ID,
-          });
-        }
-      })
-      .catch((e) => {
-        if (isLockAcquisitionError(e)) {
-          logger.info(e.message);
-        } else {
-          logger.error(
-            `Failed to setup knowledge base with inference_id: ${nextInferenceId}. Error: ${e.message}`
-          );
-          logger.debug(e);
-        }
-      });
-
-    if (waitUntilComplete) {
-      logger.debug('Waiting for knowledge base setup to complete...');
-      await kbSetupPromise;
-      logger.debug('Knowledge base setup completed.');
-    }
-
-    return { reindex: true, currentInferenceId, nextInferenceId };
+  setupKnowledgeBase = async (nextInferenceId: string, waitUntilComplete: boolean = false) => {
+    return this.dependencies.knowledgeBaseService.setupKnowledgeBase(
+      nextInferenceId,
+      waitUntilComplete
+    );
   };
 
   warmupKbModel = (inferenceId: string) => {
