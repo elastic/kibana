@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { timeRangeSchema } from './src/time_range';
-export { querySchema } from './src/query';
-export { filterSchema } from './src/filter';
+import { schema } from '@kbn/config-schema';
 
-export type {
-  TimeRange,
-  AbsoluteTimeRange,
-  RelativeTimeRange,
-  Filter,
-  FilterMeta,
-  AggregateQuery,
-  Query,
-} from './src/types';
+export const querySchema = schema.object({
+  query: schema.oneOf([
+    schema.string({
+      meta: {
+        description:
+          'A text-based query such as Kibana Query Language (KQL) or Lucene query language.',
+      },
+    }),
+    schema.recordOf(schema.string(), schema.any()),
+  ]),
+  language: schema.string(),
+});
+
+export const aggregateQuerySchema = schema.object({
+  esql: schema.string(),
+});

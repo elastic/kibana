@@ -10,7 +10,15 @@
 import { TypeOf } from '@kbn/config-schema';
 import { Writable } from '@kbn/utility-types';
 import { timeRangeSchema, absoluteTimeRangeSchema, relativeTimeRangeSchema } from './time_range';
+import { aggregateQuerySchema, querySchema } from './query';
+import { filterSchema, filterMetaSchema } from './filter';
 
 export type TimeRange = Writable<TypeOf<typeof timeRangeSchema>>;
 export type AbsoluteTimeRange = TypeOf<typeof absoluteTimeRangeSchema>;
 export type RelativeTimeRange = TypeOf<typeof relativeTimeRangeSchema>;
+
+export type Query = Writable<TypeOf<typeof querySchema>>;
+export type AggregateQuery = Writable<TypeOf<typeof aggregateQuerySchema>>;
+
+export type Filter = Writable<TypeOf<typeof filterSchema>>;
+export type FilterMeta = Writable<TypeOf<typeof filterMetaSchema>>;

@@ -16,14 +16,13 @@ import {
   UpdateIn,
 } from '@kbn/content-management-plugin/common';
 import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { filterSchema, querySchema } from '@kbn/es-query-server';
 import { WithRequiredProperty } from '@kbn/utility-types';
 import {
   dashboardItemSchema,
   panelGridDataSchema,
   panelSchema,
   sectionSchema,
-  filterSchema,
-  querySchema,
   dashboardAttributesSchema,
   dashboardCreateOptionsSchema,
   dashboardCreateResultSchema,
