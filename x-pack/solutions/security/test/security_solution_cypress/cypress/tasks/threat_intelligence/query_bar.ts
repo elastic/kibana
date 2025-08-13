@@ -46,14 +46,14 @@ export const filterOutFromBarChartLegend = () => {
  * Filter in value by clicking on the menu item within an indicators table cell
  */
 export const filterInFromTableCell = () => {
-  clickAction(INDICATOR_TYPE_CELL, 0, INDICATORS_TABLE_CELL_FILTER_IN_BUTTON);
+  clickAction(INDICATOR_TYPE_CELL, 10, INDICATORS_TABLE_CELL_FILTER_IN_BUTTON);
 };
 
 /**
  * Filter out value by clicking on the menu item within an indicators table cell
  */
 export const filterOutFromTableCell = () => {
-  clickAction(INDICATOR_TYPE_CELL, 0, INDICATORS_TABLE_CELL_FILTER_OUT_BUTTON);
+  clickAction(INDICATOR_TYPE_CELL, 10, INDICATORS_TABLE_CELL_FILTER_OUT_BUTTON);
 };
 
 /**

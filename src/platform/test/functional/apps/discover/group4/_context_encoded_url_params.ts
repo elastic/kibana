@@ -55,10 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // navigate to the context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const [, surroundingActionEl] = await dataGrid.getRowActions({
-        isAnchorRow: false,
-        rowIndex: 0,
-      });
+      const [, surroundingActionEl] = await dataGrid.getRowActions();
       await surroundingActionEl.click();
       await header.waitUntilLoadingHasFinished();
 
