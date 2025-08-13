@@ -17,8 +17,8 @@ import {
   Asset,
   AssetLink,
   AssetLinkRequest,
-  AssetUnlinkRequest,
   AssetType,
+  AssetUnlinkRequest,
   AssetWithoutUuid,
   DashboardLink,
   QueryAsset,
@@ -26,6 +26,7 @@ import {
   RuleLink,
   SloLink,
 } from '../../../../common/assets';
+import { AssetNotFoundError } from '../errors/asset_not_found_error';
 import {
   ASSET_ID,
   ASSET_TYPE,
@@ -35,7 +36,6 @@ import {
   STREAM_NAME,
 } from './fields';
 import { AssetStorageSettings } from './storage_settings';
-import { AssetNotFoundError } from '../errors/asset_not_found_error';
 
 interface TermQueryOpts {
   queryEmptyString: boolean;
@@ -152,6 +152,7 @@ function fromStorage(link: StoredAssetLink): AssetLink {
       },
     } satisfies QueryLink;
   }
+
   return link;
 }
 

@@ -29,7 +29,14 @@ export const Create: StoryFn<{}> = () => {
         `
       )}
     >
-      <SignificantEventsViewEmptyState />
+      <SignificantEventsViewEmptyState
+        onAddClick={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+        onIdentifySystemClick={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
     </EuiPanel>
   );
 };
