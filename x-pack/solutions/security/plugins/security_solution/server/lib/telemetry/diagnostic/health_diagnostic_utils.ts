@@ -72,25 +72,51 @@ export async function applyFilterlist(
     const filteredDoc: Record<string, unknown> = {};
     for (const path of Object.keys(rules)) {
       const keys = path.split('.');
-      let src = doc as Record<string, unknown>;
-      let dst = filteredDoc;
-
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-
-        if (!Object.hasOwn(src, key)) break;
-
-        if (i === keys.length - 1) {
-          const value = src[key];
-          dst[key] = rules[path] === Action.MASK ? await maskValue(String(value), salt) : value;
-        } else {
-          dst[key] ??= {};
-          src = src[key] as Record<string, unknown>;
-          dst = dst[key] as Record<string, unknown>;
-        }
-      }
+      await processPath(doc, filteredDoc, keys, path, 0);
     }
     return filteredDoc;
+  };
+
+  const processPath = async (
+    src: unknown,
+    dst: Record<string, unknown>,
+    keys: string[],
+    fullPath: string,
+    keyIndex: number
+  ): Promise<void> => {
+    if (keyIndex >= keys.length || !src || typeof src !== 'object') return;
+
+    const key = keys[keyIndex];
+    const srcObj = src as Record<string, unknown>;
+
+    if (!Object.hasOwn(srcObj, key)) return;
+
+    if (keyIndex === keys.length - 1) {
+      const value = srcObj[key];
+      dst[key] = rules[fullPath] === Action.MASK ? await maskValue(String(value), salt) : value;
+    } else {
+      const nextValue = srcObj[key];
+      
+      if (Array.isArray(nextValue)) {
+        if (!dst[key]) {
+          dst[key] = [];
+        }
+        const dstArray = dst[key] as unknown[];
+        
+        for (let i = 0; i < nextValue.length; i++) {
+          const item = nextValue[i];
+          if (item && typeof item === 'object') {
+            if (!dstArray[i]) {
+              dstArray[i] = {};
+            }
+            await processPath(item, dstArray[i] as Record<string, unknown>, keys, fullPath, keyIndex + 1);
+          }
+        }
+      } else if (nextValue && typeof nextValue === 'object') {
+        dst[key] ??= {};
+        await processPath(nextValue, dst[key] as Record<string, unknown>, keys, fullPath, keyIndex + 1);
+      }
+    }
   };
 
   for (const doc of data) {

@@ -123,6 +123,133 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
       expect(docs[1].token).not.toBe('xyz789');
     });
 
+    test('should handle arrays of complex documents', async () => {
+      const data = [
+        {
+          per_minute: {
+            buckets: [
+              {
+                key_as_string: '2025-08-13T13:56:00.000Z',
+                key: 1755093360000,
+                doc_count: 2,
+                per_node: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    {
+                      key: 'RfUrmQqJSL67wlQKvO95gg',
+                      doc_count: 1,
+                      avg_cpu: {
+                        value: 0.830078125,
+                      },
+                      avg_jvm_heap: {
+                        value: 51,
+                      },
+                    },
+                    {
+                      key: '_ypuq9evRyqjr5aBJmsPrA',
+                      doc_count: 1,
+                      avg_cpu: {
+                        value: 0.58984375,
+                      },
+                      avg_jvm_heap: {
+                        value: 6,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                key_as_string: '2025-08-13T13:57:00.000Z',
+                key: 1755093420000,
+                doc_count: 18,
+                per_node: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    {
+                      key: 'RfUrmQqJSL67wlQKvO95gg',
+                      doc_count: 6,
+                      avg_cpu: {
+                        value: 0.6482747395833334,
+                      },
+                      avg_jvm_heap: {
+                        value: 42.833333333333336,
+                      },
+                    },
+                    {
+                      key: 'UHo_pnFMQFqkbewG85AYoA',
+                      doc_count: 6,
+                      avg_cpu: {
+                        value: 0.5349527994791666,
+                      },
+                      avg_jvm_heap: {
+                        value: 57,
+                      },
+                    },
+                    {
+                      key: '_ypuq9evRyqjr5aBJmsPrA',
+                      doc_count: 6,
+                      avg_cpu: {
+                        value: 0.506591796875,
+                      },
+                      avg_jvm_heap: {
+                        value: 12,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ];
+
+      const rules = {
+        'per_minute.buckets.key_as_string': Action.KEEP,
+        'per_minute.buckets.key': Action.KEEP,
+        'per_minute.buckets.doc_count': Action.KEEP,
+        'per_minute.buckets.per_node.doc_count_error_upper_bound': Action.KEEP,
+        'per_minute.buckets.per_node.sum_other_doc_count': Action.KEEP,
+        'per_minute.buckets.per_node.buckets.key': Action.KEEP,
+        'per_minute.buckets.per_node.buckets.doc_count': Action.KEEP,
+        'per_minute.buckets.per_node.buckets.avg_cpu.value': Action.KEEP,
+        'per_minute.buckets.per_node.buckets.avg_jvm_heap.value': Action.KEEP,
+      };
+
+      const result = await applyFilterlist(data, rules, mockSalt);
+
+      expect(result).toHaveLength(1);
+      const aggrs = result[0] as any;
+
+      expect(aggrs.per_minute).toBeDefined();
+      expect(typeof aggrs.per_minute).toBe('object');
+      expect(Array.isArray(aggrs.per_minute.buckets)).toBe(true);
+      expect(aggrs.per_minute.buckets).toHaveLength(2);
+
+      const firstBucket = aggrs.per_minute.buckets[0];
+      expect(firstBucket.key_as_string).toBe('2025-08-13T13:56:00.000Z');
+      expect(firstBucket.key).toBe(1755093360000);
+      expect(firstBucket.doc_count).toBe(2);
+      expect(firstBucket.per_node.doc_count_error_upper_bound).toBe(0);
+      expect(firstBucket.per_node.sum_other_doc_count).toBe(0);
+      expect(Array.isArray(firstBucket.per_node.buckets)).toBe(true);
+      expect(firstBucket.per_node.buckets).toHaveLength(2);
+
+      const firstNodeBucket = firstBucket.per_node.buckets[0];
+      expect(firstNodeBucket.key).toBe('RfUrmQqJSL67wlQKvO95gg');
+      expect(firstNodeBucket.doc_count).toBe(1);
+      expect(firstNodeBucket.avg_cpu.value).toBe(0.830078125);
+      expect(firstNodeBucket.avg_jvm_heap.value).toBe(51);
+
+      const secondBucket = aggrs.per_minute.buckets[1];
+      expect(secondBucket.key_as_string).toBe('2025-08-13T13:57:00.000Z');
+      expect(secondBucket.key).toBe(1755093420000);
+      expect(secondBucket.doc_count).toBe(18);
+      expect(Array.isArray(secondBucket.per_node.buckets)).toBe(true);
+      expect(secondBucket.per_node.buckets).toHaveLength(3);
+    });
+
     test('should skip non-existent fields', async () => {
       const data = [{ user: 'john', email: 'john@example.com' }];
       const rules = {
