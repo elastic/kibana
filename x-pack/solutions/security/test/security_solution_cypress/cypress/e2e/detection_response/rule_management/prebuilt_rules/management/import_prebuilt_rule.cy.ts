@@ -9,23 +9,23 @@ import {
   expectManagementTableRules,
   importRules,
   importRulesWithOverwriteAll,
-} from '../../../../tasks/alerts_detection_rules';
-import { TOASTER } from '../../../../screens/alerts_detection_rules';
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
-import { getCustomQueryRuleParams } from '../../../../objects/rule';
-import { combineToNdJson } from '../../../../helpers/ndjson';
+} from '../../../../../tasks/alerts_detection_rules';
+import { TOASTER } from '../../../../../screens/alerts_detection_rules';
+import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
+import { getCustomQueryRuleParams } from '../../../../../objects/rule';
+import { combineToNdJson } from '../../../../../helpers/ndjson';
 import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
-} from '../../../../tasks/api_calls/common';
-import { createRule } from '../../../../tasks/api_calls/rules';
+} from '../../../../../tasks/api_calls/common';
+import { createRule } from '../../../../../tasks/api_calls/rules';
 import {
   installMockPrebuiltRulesPackage,
   installPrebuiltRuleAssets,
   installSpecificPrebuiltRulesRequest,
-} from '../../../../tasks/api_calls/prebuilt_rules';
-import { login } from '../../../../tasks/login';
-import { visitRulesManagementTable } from '../../../../tasks/rules_management';
+} from '../../../../../tasks/api_calls/prebuilt_rules';
+import { login } from '../../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 describe(
   'Detection rules, Prebuilt Rules Import workflow - With Rule Customization',
