@@ -75,7 +75,7 @@ export async function cleanLogIndexTemplate({ esClient }: { esClient: Client }) 
 
   await esClient.indices.putIndexTemplate({
     name: 'logs',
-    ...template,
+    ...safeTemplate,
     _meta: {
       ...safeTemplate._meta,
       package: undefined,
