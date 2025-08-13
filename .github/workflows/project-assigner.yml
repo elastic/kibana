@@ -1,6 +1,8 @@
 on:
   issues:
     types: [labeled, unlabeled]
+  pull_request:
+    types: [labeled, unlabeled]
 
 jobs:
   assign_to_project:
@@ -16,6 +18,14 @@ jobs:
               {"label": "Feature:Canvas", "projectNumber": 38, "columnName": "Inbox"},
               {"label": "Feature:Dashboard", "projectNumber": 68, "columnName": "Inbox"},
               {"label": "Feature:Drilldowns", "projectNumber": 68, "columnName": "Inbox"},
-              {"label": "Feature:Input Controls", "projectNumber": 72, "columnName": "Inbox"}
+              {"label": "Feature:Input Controls", "projectNumber": 72, "columnName": "Inbox"},
+              {"label": "Feature:Embedding", "projectNumber": 68, "columnName": "Inbox"},
+              {"label": "Team:obs-ux-infra_services", "projectNumber": 85, "columnName": "Inbox"},
+              {"label": "Team:Fleet", "projectNumber": 90, "columnName": "Inbox"},
+              {"label": "Team:obs-ux-management", "projectNumber": 85, "columnName": "Inbox"},
+              {"label": "Team:Obs AI Assistant", "projectNumber": 95, "columnName": "Inbox"},
+              {"label": "ci:project-deploy-observability", "projectNumber": 85, "columnName": "Inbox"},
+              {"label": "manual", "projectNumber": 100, "columnName": "Manual Testing"},
+              {"label": "copilot", "projectNumber": 101, "columnName": "Copilot Issues"}
             ]
           ghToken: ${{ secrets.PROJECT_ASSIGNER_TOKEN }}
