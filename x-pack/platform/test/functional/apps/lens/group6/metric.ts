@@ -524,14 +524,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsMetric_secondary_trend_baseline_primary');
       // Check the label and the badge text
       expect(await lens.getSecondaryMetricLabel()).to.be('Difference');
-      expect(await lens.getSecondaryMetricBadgeText()).to.be('+8,277.678 ↑');
+      expect(await lens.getSecondaryMetricBadgeText()).to.be('+8,277.678\n↑');
 
       // Save the visualization
       await lens.save('Metric label badge test', false, true);
 
       // Open in edit mode and change primary metric to last value of ip
       await visualize.gotoVisualizationLandingPage();
-      await visualize.openSavedVisualization('Metric prefix badge test');
+      await visualize.openSavedVisualization('Metric label badge test');
 
       await lens.openDimensionEditor(
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
@@ -543,9 +543,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         isPreviousIncompatible: true,
       });
 
-      // The badge text should change and the prefix should be "Average of bytes"
+      // The badge text should change and the label should be "Average of bytes"
       expect(await lens.getSecondaryMetricLabel()).to.contain('Average of bytes');
-      expect(await lens.getSecondaryMetricBadgeText()).to.be('5,727.322 ↑');
+      expect(await lens.getSecondaryMetricBadgeText()).to.be('5,727.322\n↑');
 
       // Open secondary metric editor
       await lens.openDimensionEditor(

@@ -2126,24 +2126,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getSecondaryMetricLabel(tile?: WebElementWrapper) {
       const ECH_SECONDARY_METRIC_LABEL_SELECTOR = '.echSecondaryMetric__label';
-      if (tile) {
-        return this.getMetricElementIfExists(ECH_SECONDARY_METRIC_LABEL_SELECTOR, tile);
-      }
-      return find.byCssSelector('.echSecondaryMetric__label');
+      const label = tile 
+        ? await this.getMetricElementIfExists(ECH_SECONDARY_METRIC_LABEL_SELECTOR, tile)
+        : await find.byCssSelector(ECH_SECONDARY_METRIC_LABEL_SELECTOR);
+      return label ? label.getAttribute('innerText') : undefined;
     },
 
     async hasSecondaryMetricBadge(tile?: WebElementWrapper) {
-      if (tile) {
-        return Boolean(this.getMetricElementIfExists(ECH_BADGE_SELECTOR, tile));
-      }
-      return find.existsByCssSelector(ECH_BADGE_SELECTOR);
+      return tile ? Boolean(this.getMetricElementIfExists(ECH_BADGE_SELECTOR, tile)) : find.existsByCssSelector(ECH_BADGE_SELECTOR);
     },
 
     async getSecondaryMetricBadge(tile?: WebElementWrapper) {
-      if (tile) {
-        return this.getMetricElementIfExists(ECH_BADGE_SELECTOR, tile);
-      }
-      return find.byCssSelector('.echBadge__content');
+      return tile ? this.getMetricElementIfExists(ECH_BADGE_SELECTOR, tile) : find.byCssSelector(ECH_BADGE_SELECTOR);
     },
 
     async getSecondaryMetricBadgeText(tile?: WebElementWrapper) {
