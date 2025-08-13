@@ -63,4 +63,4 @@ export const colorDynamicSchema = schema.object({
   options: colorDynamicOptions,
 });
 
-export const colorStylePropertySchema = schema.oneOf([colorStaticSchema, colorDynamicSchema]);
+export const colorSchema = schema.oneOf([colorStaticSchema, colorDynamicSchema]);

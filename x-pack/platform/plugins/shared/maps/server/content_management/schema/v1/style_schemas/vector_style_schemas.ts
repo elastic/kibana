@@ -8,7 +8,13 @@
 import { schema } from '@kbn/config-schema';
 import { SYMBOLIZE_AS_TYPES, VECTOR_STYLES } from '../../../../../common';
 import { FIELD_ORIGIN } from '../../../../../common/constants';
-import { colorStylePropertySchema } from './color_schemas';
+import { colorSchema } from './color_schemas';
+import {
+  labelBorderSizeSchema,
+  labelPositionSchema,
+  labelSchema,
+  labelZoomRangeSchema,
+} from './label_schemas';
 
 export const symbolizeAsOptionsSchema = schema.object({
   value: schema.maybe(
@@ -36,19 +42,17 @@ export const styleField = schema.object({
 
 export const vectorStylePropertiesSchema = schema.object({
   [VECTOR_STYLES.SYMBOLIZE_AS]: schema.maybe(symbolizeAsStylePropertySchema),
-  [VECTOR_STYLES.FILL_COLOR]: colorStylePropertySchema,
-  [VECTOR_STYLES.LINE_COLOR]: colorStylePropertySchema,
+  [VECTOR_STYLES.FILL_COLOR]: colorSchema,
+  [VECTOR_STYLES.LINE_COLOR]: colorSchema,
+  // [VECTOR_STYLES.LINE_WIDTH]: SizeStylePropertyDescriptor,
+  // [VECTOR_STYLES.ICON]: IconStylePropertyDescriptor,
+  // [VECTOR_STYLES.ICON_SIZE]: SizeStylePropertyDescriptor,
+  // [VECTOR_STYLES.ICON_ORIENTATION]: OrientationStylePropertyDescriptor,
+  [VECTOR_STYLES.LABEL_TEXT]: labelSchema,
+  [VECTOR_STYLES.LABEL_ZOOM_RANGE]: labelZoomRangeSchema,
+  [VECTOR_STYLES.LABEL_COLOR]: colorSchema,
+  // [VECTOR_STYLES.LABEL_SIZE]: SizeStylePropertyDescriptor,
+  [VECTOR_STYLES.LABEL_BORDER_COLOR]: colorSchema,
+  [VECTOR_STYLES.LABEL_BORDER_SIZE]: labelBorderSizeSchema,
+  [VECTOR_STYLES.LABEL_POSITION]: labelPositionSchema,
 });
-/* export type VectorStylePropertiesDescriptor = {
-  [VECTOR_STYLES.LINE_WIDTH]: SizeStylePropertyDescriptor;
-  [VECTOR_STYLES.ICON]: IconStylePropertyDescriptor;
-  [VECTOR_STYLES.ICON_SIZE]: SizeStylePropertyDescriptor;
-  [VECTOR_STYLES.ICON_ORIENTATION]: OrientationStylePropertyDescriptor;
-  [VECTOR_STYLES.LABEL_TEXT]: LabelStylePropertyDescriptor;
-  [VECTOR_STYLES.LABEL_ZOOM_RANGE]: LabelZoomRangeStylePropertyDescriptor;
-  [VECTOR_STYLES.LABEL_COLOR]: ColorStylePropertyDescriptor;
-  [VECTOR_STYLES.LABEL_SIZE]: SizeStylePropertyDescriptor;
-  [VECTOR_STYLES.LABEL_BORDER_COLOR]: ColorStylePropertyDescriptor;
-  [VECTOR_STYLES.LABEL_BORDER_SIZE]: LabelBorderSizeStylePropertyDescriptor;
-  [VECTOR_STYLES.LABEL_POSITION]: LabelPositionStylePropertyDescriptor;
-};*/
