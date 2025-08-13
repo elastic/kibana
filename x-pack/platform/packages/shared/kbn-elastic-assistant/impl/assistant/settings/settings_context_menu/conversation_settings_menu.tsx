@@ -34,6 +34,7 @@ import {
   conversationContainsAnonymizedValues,
   conversationContainsContentReferences,
 } from '../../conversations/utils';
+import { DUPLICATE } from './translations';
 
 interface Params {
   isConversationOwner: boolean;
@@ -130,7 +131,7 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
           throw new Error('No conversation available to duplicate');
         }
         const newConversation = await createConversation({
-          title: `[Duplicate] ${selectedConversation.title}`,
+          title: `[${DUPLICATE}] ${selectedConversation.title}`,
           apiConfig: selectedConversation.apiConfig,
           messages: selectedConversation.messages,
           replacements: selectedConversation.replacements,
@@ -146,10 +147,16 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
         }
       } catch (error) {
         toasts?.addError(error, {
-          title: i18n.COPY_URL_ERROR,
+          title: i18n.DUPLICATE_ERROR,
         });
       }
-    }, [createConversation, refetchCurrentUserConversations, selectedConversation, toasts]);
+    }, [
+      createConversation,
+      refetchCurrentUserConversations,
+      selectedConversation,
+      setCurrentConversation,
+      toasts,
+    ]);
 
     const handleCopyUrl = useCallback(() => {
       try {

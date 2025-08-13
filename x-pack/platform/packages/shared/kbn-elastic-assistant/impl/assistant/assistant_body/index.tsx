@@ -25,6 +25,7 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import { css } from '@emotion/react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
+import { SharedConversationOwnerCallout } from '../shared_conversation_callout/owner';
 import { EmptyConvo } from './empty_convo';
 import { WelcomeSetup } from './welcome_setup';
 import { Conversation } from '../../..';
@@ -37,6 +38,8 @@ interface Props {
   currentSystemPromptId: string | undefined;
   handleOnConversationSelected: ({ cId }: { cId: string }) => Promise<void>;
   isAssistantEnabled: boolean;
+  isConversationOwner: boolean;
+  isConversationShared: boolean;
   isSettingsModalVisible: boolean;
   isWelcomeSetup: boolean;
   isLoading: boolean;
@@ -54,6 +57,8 @@ export const AssistantBody: FunctionComponent<Props> = ({
   handleOnConversationSelected,
   setCurrentSystemPromptId,
   http,
+  isConversationOwner,
+  isConversationShared,
   isAssistantEnabled,
   isLoading,
   isSettingsModalVisible,
@@ -141,6 +146,11 @@ export const AssistantBody: FunctionComponent<Props> = ({
           >
             {comments}
           </EuiPanel>
+        )}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {isConversationOwner && isConversationShared && (
+          <SharedConversationOwnerCallout id={currentConversation?.id ?? ''} />
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>

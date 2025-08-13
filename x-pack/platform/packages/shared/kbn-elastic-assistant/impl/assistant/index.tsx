@@ -24,12 +24,12 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   useEuiTheme,
-  EuiCallOut,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import useEvent from 'react-use/lib/useEvent';
+import { SharedConversationCallout } from './shared_conversation_callout';
 import { AssistantBody } from './assistant_body';
 import { useCurrentConversation } from './use_current_conversation';
 import { useDataStreamApis } from './use_data_stream_apis';
@@ -56,7 +56,6 @@ import {
   useAssistantLastConversation,
   useAssistantSpaceId,
 } from './use_space_aware_context';
-import * as i18n from './translations';
 import { AssistantConversationBanner } from './assistant_conversation_banner';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
@@ -550,6 +549,8 @@ const AssistantComponent: React.FC<Props> = ({
                     currentSystemPromptId={currentSystemPrompt?.id}
                     handleOnConversationSelected={handleOnConversationSelected}
                     http={http}
+                    isConversationOwner={isConversationOwner}
+                    isConversationShared={currentConversation?.users.length !== 1 ?? false}
                     isAssistantEnabled={isAssistantEnabled}
                     isLoading={isInitialLoad}
                     isSettingsModalVisible={isSettingsModalVisible}
@@ -562,7 +563,7 @@ const AssistantComponent: React.FC<Props> = ({
                 <EuiFlyoutFooter
                   css={css`
                     background: none;
-                    border-top: ${euiTheme.border.thin};
+                    border-top: ${isConversationOwner ? euiTheme.border.thin : 'none'};
                     overflow: hidden;
                     max-height: 60%;
                     display: flex;
@@ -642,13 +643,10 @@ const AssistantComponent: React.FC<Props> = ({
                       )}
                     </>
                   ) : (
-                    <EuiCallOut
-                      css={css`
-                        padding: ${euiTheme.size.m};
-                      `}
-                      size="s"
-                      title={i18n.DISABLED_OWNERSHIP}
-                      iconType="readOnly"
+                    <SharedConversationCallout
+                      selectedConversation={currentConversation}
+                      refetchCurrentUserConversations={refetchCurrentUserConversations}
+                      setCurrentConversation={setCurrentConversation}
                     />
                   )}
                 </EuiFlyoutFooter>

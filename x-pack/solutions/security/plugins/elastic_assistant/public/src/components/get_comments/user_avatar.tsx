@@ -8,51 +8,27 @@
 import React from 'react';
 import { EuiAvatar } from '@elastic/eui';
 import type { User } from '@kbn/elastic-assistant-common';
-import { useQuery } from '@tanstack/react-query';
-import type { UserProfileAvatarData } from '@kbn/user-profile-components';
-import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
+import { UserAvatar } from '@kbn/user-profile-components';
+import { useUserProfile } from './use_user_profile';
+import * as i18n from './translations';
 
 interface Props {
   // legacy message object does not include user
   user?: User;
 }
-const useUserProfile = ({ user }: Props) => {
-  const { userProfile } = useKibana().services;
 
-  return useQuery({
-    queryKey: ['userProfile', user?.id],
-    queryFn: async () => {
-      const data = await userProfile?.bulkGet<{ avatar: UserProfileAvatarData }>({
-        uids: new Set([user?.id ?? '']),
-        dataPath: 'avatar',
-      });
-
-      return data;
-    },
-    select: (profile) => {
-      return {
-        username: profile?.[0]?.user.username ?? user?.name ?? 'Unknown',
-        avatar: profile?.[0]?.data.avatar,
-      };
-    },
-    enabled: !!user?.id?.length,
-  });
+export const SecurityUserAvatar: React.FC<Props> = ({ user }) => {
+  const { data: userProfile } = useUserProfile({ user });
+  if (userProfile) {
+    return <UserAvatar user={userProfile.user} avatar={userProfile.avatar} size="l" />;
+  }
+  return <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />;
 };
 
-export const UserAvatar: React.FC<Props> = ({ user }) => {
-  const { data: currentUserAvatar } = useUserProfile({ user });
-  if (currentUserAvatar?.avatar) {
-    return (
-      <EuiAvatar
-        name="user"
-        size="l"
-        color={currentUserAvatar?.avatar?.color ?? 'subdued'}
-        {...(currentUserAvatar?.avatar?.imageUrl
-          ? { imageUrl: currentUserAvatar?.avatar.imageUrl as string }
-          : { initials: currentUserAvatar?.avatar?.initials })}
-      />
-    );
+export const SecurityUserName: React.FC<Props> = ({ user }) => {
+  const { data: userProfile } = useUserProfile({ user });
+  if (userProfile) {
+    return userProfile.user.full_name ?? userProfile.user.username;
   }
-
-  return <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />;
+  return i18n.YOU;
 };
