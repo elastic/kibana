@@ -55,6 +55,7 @@
     "@kbn/task-manager-plugin",
     "@kbn/sse-utils",
     "@kbn/ai-tools",
-    "@kbn/streamlang"
+    "@kbn/streamlang",
+    "@kbn/licensing-types"
   ]
 }

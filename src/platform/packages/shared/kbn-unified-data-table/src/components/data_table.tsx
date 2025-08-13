@@ -88,7 +88,7 @@ import {
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
-import { useRowHeight } from '../hooks/use_row_height';
+import { useRowHeight, RowHeightType } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
 import { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
@@ -873,6 +873,7 @@ const InternalUnifiedDataTable = ({
     onChangeRowHeight: onChangeHeaderRowHeight,
     onChangeRowHeightLines: onChangeHeaderRowHeightLines,
   } = useRowHeight({
+    type: RowHeightType.header,
     storage,
     consumer,
     key: 'dataGridHeaderRowHeight',
@@ -884,6 +885,7 @@ const InternalUnifiedDataTable = ({
 
   const { rowHeight, rowHeightLines, lineCountInput, onChangeRowHeight, onChangeRowHeightLines } =
     useRowHeight({
+      type: RowHeightType.row,
       storage,
       consumer,
       key: 'dataGridRowHeight',
