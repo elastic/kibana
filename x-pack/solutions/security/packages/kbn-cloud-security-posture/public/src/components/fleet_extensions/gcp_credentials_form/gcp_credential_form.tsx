@@ -359,6 +359,7 @@ export const GcpCredentialsForm = ({
         onChange={(idSelected: SetupFormatGCP) =>
           idSelected !== setupFormat && onSetupFormatChange(idSelected)
         }
+        name="setupFormat"
       />
       <EuiSpacer size="l" />
       {setupFormat === GCP_SETUP_ACCESS.CLOUD_SHELL ? (
