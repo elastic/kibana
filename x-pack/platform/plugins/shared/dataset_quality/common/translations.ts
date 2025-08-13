@@ -177,7 +177,7 @@ export const summaryPanelQualityPoorText = i18n.translate(
 export const summaryPanelQualityDegradedText = i18n.translate(
   'xpack.datasetQuality.summaryPanelQualityDegradedText',
   {
-    defaultMessage: 'Degraded',
+    defaultMessage: 'Warning',
   }
 );
 
@@ -258,7 +258,7 @@ Dataset Quality Details
 */
 
 export const overviewHeaderTitle = i18n.translate('xpack.datasetQuality.details.overviewTitle', {
-  defaultMessage: 'Overview',
+  defaultMessage: 'Summary',
 });
 
 export const overviewTitleTooltip = i18n.translate(
@@ -320,14 +320,14 @@ export const overviewPanelTitleDatasetQuality = i18n.translate(
 export const overviewPanelDatasetQualityIndicatorDegradedDocs = i18n.translate(
   'xpack.datasetQuality.details.overviewPanel.datasetQuality.degradedDocs',
   {
-    defaultMessage: 'Degraded docs',
+    defaultMessage: 'Degraded documents',
   }
 );
 
 export const overviewPanelDatasetQualityIndicatorFailedDocs = i18n.translate(
   'xpack.datasetQuality.details.overviewPanel.datasetQuality.failedDocs',
   {
-    defaultMessage: 'Failed docs',
+    defaultMessage: 'Failed documents',
   }
 );
 
