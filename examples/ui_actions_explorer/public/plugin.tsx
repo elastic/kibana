@@ -10,17 +10,7 @@
 import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import {
-  PHONE_TRIGGER,
-  USER_TRIGGER,
-  COUNTRY_TRIGGER,
-  lookUpWeatherAction,
-  viewInMapsAction,
-  createEditUserAction,
-  makePhoneCallAction,
-  showcasePluggability,
-  createTriggerPhoneTriggerAction,
-} from './actions/actions';
+import { PHONE_TRIGGER, USER_TRIGGER, COUNTRY_TRIGGER } from './actions/actions';
 import image from './ui_actions.png';
 
 interface StartDeps {
@@ -54,42 +44,50 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
 
     const startServices = core.getStartServices();
 
-    deps.uiActions.addTriggerActionAsync(USER_TRIGGER, TRIGGER_PHONE_TRIGGER_ACTION, async () =>
-      createTriggerPhoneTriggerAction(async () => (await startServices)[1].uiActions)
-    );
-    deps.uiActions.addTriggerActionAsync(USER_TRIGGER, EDIT_USER_ACTION, async () =>
-      createEditUserAction(async () => (await startServices)[0])
-    );
+    deps.uiActions.addTriggerActionAsync(USER_TRIGGER, TRIGGER_PHONE_TRIGGER_ACTION, async () => {
+      const { createTriggerPhoneTriggerAction } = await import('./actions/actions');
+      return createTriggerPhoneTriggerAction(async () => (await startServices)[1].uiActions);
+    });
+    deps.uiActions.addTriggerActionAsync(USER_TRIGGER, EDIT_USER_ACTION, async () => {
+      const { createEditUserAction } = await import('./actions/actions');
+      return createEditUserAction(async () => (await startServices)[0]);
+    });
 
-    deps.uiActions.addTriggerActionAsync(
-      COUNTRY_TRIGGER,
-      VIEW_IN_MAPS_ACTION,
-      async () => viewInMapsAction
-    );
-    deps.uiActions.addTriggerActionAsync(
-      COUNTRY_TRIGGER,
-      LOOK_UP_WEATHER_ACTION,
-      async () => lookUpWeatherAction
-    );
+    deps.uiActions.addTriggerActionAsync(COUNTRY_TRIGGER, VIEW_IN_MAPS_ACTION, async () => {
+      const { viewInMapsAction } = await import('./actions/actions');
+      return viewInMapsAction;
+    });
+    deps.uiActions.addTriggerActionAsync(COUNTRY_TRIGGER, LOOK_UP_WEATHER_ACTION, async () => {
+      const { lookUpWeatherAction } = await import('./actions/actions');
+      return lookUpWeatherAction;
+    });
     deps.uiActions.addTriggerActionAsync(
       COUNTRY_TRIGGER,
       SHOWCASE_PLUGGABILITY_ACTION_COUNTRY,
-      async () => showcasePluggability
+      async () => {
+        const { showcasePluggability } = await import('./actions/actions');
+        return showcasePluggability;
+      }
     );
-    deps.uiActions.addTriggerActionAsync(
-      PHONE_TRIGGER,
-      MAKE_PHONE_CALL_ACTION,
-      async () => makePhoneCallAction
-    );
+    deps.uiActions.addTriggerActionAsync(PHONE_TRIGGER, MAKE_PHONE_CALL_ACTION, async () => {
+      const { makePhoneCallAction } = await import('./actions/actions');
+      return makePhoneCallAction;
+    });
     deps.uiActions.addTriggerActionAsync(
       PHONE_TRIGGER,
       SHOWCASE_PLUGGABILITY_ACTION_PHONE,
-      async () => showcasePluggability
+      async () => {
+        const { showcasePluggability } = await import('./actions/actions');
+        return showcasePluggability;
+      }
     );
     deps.uiActions.addTriggerActionAsync(
       USER_TRIGGER,
       SHOWCASE_PLUGGABILITY_ACTION_USER,
-      async () => showcasePluggability
+      async () => {
+        const { showcasePluggability } = await import('./actions/actions');
+        return showcasePluggability;
+      }
     );
 
     core.application.register({

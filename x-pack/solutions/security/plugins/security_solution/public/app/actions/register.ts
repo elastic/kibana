@@ -18,14 +18,12 @@ import {
   createFilterOutDiscoverCellActionFactory,
 } from './filter';
 import {
-  createAddToTimelineLensAction,
   createAddToTimelineCellActionFactory,
   createInvestigateInNewTimelineCellActionFactory,
   createAddToTimelineDiscoverCellActionFactory,
 } from './add_to_timeline';
 import { createShowTopNCellActionFactory } from './show_top_n';
 import {
-  createCopyToClipboardLensAction,
   createCopyToClipboardCellActionFactory,
   createCopyToClipboardDiscoverCellActionFactory,
 } from './copy_to_clipboard';
@@ -38,10 +36,7 @@ import type {
   SecurityCellActionName,
   SecurityCellActions,
 } from './types';
-import { enhanceActionWithTelemetry } from './telemetry';
 import { registerDiscoverHistogramActions } from './register_discover_histogram_actions';
-import { createFilterInLensAction } from './filter/lens/filter_in';
-import { createFilterOutLensAction } from './filter/lens/filter_out';
 
 export const CELL_VALUE_LENS_LEGEND_FILTER_IN_ACTION = 'CELL_VALUE_LENS_LEGEND_FILTER_IN_ACTION';
 export const CELL_VALUE_LENS_LEGEND_FILTER_OUT_ACTION = 'CELL_VALUE_LENS_LEGEND_FILTER_OUT_ACTION';
@@ -66,32 +61,39 @@ export const registerUIActions = async (
 const registerLensEmbeddableActions = (store: SecurityAppStore, services: StartServices) => {
   const { uiActions } = services;
 
-  const filterInLegendActions = createFilterInLensAction({ store, order: 2, services });
   uiActions.addTriggerActionAsync(
     CELL_VALUE_TRIGGER,
     CELL_VALUE_LENS_LEGEND_FILTER_IN_ACTION,
-    async () => filterInLegendActions
+    async () => {
+      const { createFilterInLensAction } = await import('./filter/lens/filter_in');
+      return createFilterInLensAction({ store, order: 2, services });
+    }
   );
-
-  const filterOutLegendActions = createFilterOutLensAction({ store, order: 3, services });
   uiActions.addTriggerActionAsync(
     CELL_VALUE_TRIGGER,
     CELL_VALUE_LENS_LEGEND_FILTER_OUT_ACTION,
-    async () => filterOutLegendActions
+    async () => {
+      const { createFilterOutLensAction } = await import('./filter/lens/filter_out');
+      return createFilterOutLensAction({ store, order: 3, services });
+    }
   );
 
-  const addToTimelineAction = createAddToTimelineLensAction({ store, order: 4 });
   uiActions.addTriggerActionAsync(
     CELL_VALUE_TRIGGER,
     CELL_VALUE_LENS_LEGEND_ADD_TO_TIMELINE_ACTION,
-    async () => addToTimelineAction
+    async () => {
+      const { createAddToTimelineLensAction } = await import('./add_to_timeline');
+      return createAddToTimelineLensAction({ store, order: 4 });
+    }
   );
 
-  const copyToClipboardAction = createCopyToClipboardLensAction({ order: 5 });
   uiActions.addTriggerActionAsync(
     CELL_VALUE_TRIGGER,
     CELL_VALUE_LENS_LEGEND_COPY_TO_CLIPBOARD_ACTION,
-    async () => copyToClipboardAction
+    async () => {
+      const { createCopyToClipboardLensAction } = await import('./copy_to_clipboard');
+      return createCopyToClipboardLensAction({ order: 5 });
+    }
   );
 };
 
@@ -113,12 +115,11 @@ const registerDiscoverCellActions = (store: SecurityAppStore, services: StartSer
       const actionFactory = DiscoverCellActionsFactories[actionName];
       if (actionFactory) {
         const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
-        const actionWithTelemetry = enhanceActionWithTelemetry(action, services);
-        uiActions.addTriggerActionAsync(
-          triggerId,
-          `${triggerId}-${actionName}`,
-          async () => actionWithTelemetry
-        );
+
+        uiActions.addTriggerActionAsync(triggerId, `${triggerId}-${actionName}`, async () => {
+          const { enhanceActionWithTelemetry } = await import('./telemetry');
+          return enhanceActionWithTelemetry(action, services);
+        });
       }
     });
   };
@@ -160,6 +161,7 @@ const registerCellActions = (
       if (actionFactory) {
         uiActions.addTriggerActionAsync(triggerId, `${triggerId}-${actionName}`, async () => {
           const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
+          const { enhanceActionWithTelemetry } = await import('./telemetry');
           return enhanceActionWithTelemetry(action, services);
         });
       }
