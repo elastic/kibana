@@ -30,6 +30,15 @@ export class WorkflowExecutionState {
     this.workflowExecution = initialWorkflowExecution;
   }
 
+  public async load(): Promise<void> {
+    const foundSteps = await this.workflowStepExecutionRepository.searchStepExecutionsByExecutionId(
+      this.workflowExecution.id
+    );
+    foundSteps.forEach((stepExecution) => {
+      this.stepExecutions.set(stepExecution.stepId, stepExecution);
+    });
+  }
+
   public getWorkflowExecution(): EsWorkflowExecution {
     return this.workflowExecution;
   }

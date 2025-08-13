@@ -90,7 +90,7 @@ export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 export const WaitStepSchema = BaseStepSchema.extend({
   type: z.literal('wait'),
   with: z.object({
-    duration: z.string().min(1), // e.g., '5s', '1m', '2h'
+    duration: z.string().regex(/^\d+(ms|[smhdw])$/), // e.g., '5s', '1m', '2h'
   }),
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
@@ -243,6 +243,7 @@ const StepSchema = z.lazy(() =>
   z.discriminatedUnion('type', [
     ForEachStepSchema,
     IfStepSchema,
+    WaitStepSchema,
     ParallelStepSchema,
     MergeStepSchema,
     BaseConnectorStepSchema,

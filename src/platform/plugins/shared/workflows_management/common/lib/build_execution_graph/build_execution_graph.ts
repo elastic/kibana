@@ -51,10 +51,6 @@ export function visitWaitStep(graph: graphlib.Graph, previousStep: any, currentS
     type: 'wait',
     configuration: {
       ...currentStep,
-      type: 'wait',
-      with: {
-        duration: currentStep.with.duration || currentStep.with.delay,
-      },
     },
   };
   graph.setNode(waitNode.id, waitNode);

@@ -9,12 +9,10 @@
 
 import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import uuid from 'uuid';
 
 export class ConnectorExecutor {
-  constructor(
-    private connectorCredentials: Record<string, any>,
-    private actionsClient: IUnsecuredActionsClient
-  ) {}
+  constructor(private actionsClient: IUnsecuredActionsClient) {}
 
   public async execute(
     connectorType: string,
@@ -32,13 +30,20 @@ export class ConnectorExecutor {
     connectorName: string,
     connectorParams: Record<string, any>
   ): Promise<ActionTypeExecutorResult<unknown>> {
-    const connectorCredentials = this.connectorCredentials[connectorName];
+    let connectorId: string;
 
-    if (!connectorCredentials) {
-      throw new Error(`Connector credentials for "${connectorName}" not found`);
+    if (uuid.validate(connectorName)) {
+      connectorId = connectorName;
+    } else {
+      const allConnectors = await this.actionsClient.getAll('default');
+      const connector = allConnectors.find((c) => c.name === connectorName);
+
+      if (!connector) {
+        throw new Error(`Connector with name ${connectorName} not found`);
+      }
+
+      connectorId = connector?.id;
     }
-
-    const connectorId = connectorCredentials.id;
 
     return await this.actionsClient.execute({
       id: connectorId,

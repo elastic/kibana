@@ -23,6 +23,7 @@ import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import { WaitStepImpl } from './wait_step/wait_step';
+import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -36,7 +37,8 @@ export class StepFactory {
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
     workflowState: WorkflowExecutionRuntimeManager,
-    workflowLogger: IWorkflowEventLogger // Assuming you have a logger interface
+    workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
+    workflowTaskManager: WorkflowTaskManager
   ): StepImplementation {
     const stepType = (step as any).type; // Use a more type-safe way to determine step type if possible
 
@@ -58,13 +60,7 @@ export class StepFactory {
       case 'exit-if':
         return new ExitIfNodeImpl(step as any, workflowState);
       case 'wait':
-        return new WaitStepImpl(
-          step as any,
-          contextManager,
-          connectorExecutor,
-          workflowState,
-          workflowLogger
-        );
+        return new WaitStepImpl(step as any, workflowState, workflowLogger, workflowTaskManager);
       case 'atomic':
         return new AtomicStepImpl(
           step as any,

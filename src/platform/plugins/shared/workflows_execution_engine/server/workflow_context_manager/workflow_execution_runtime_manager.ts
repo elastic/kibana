@@ -39,7 +39,7 @@ interface WorkflowExecutionRuntimeManagerInit {
  * and uses topological sorting to determine execution order.
  */
 export class WorkflowExecutionRuntimeManager {
-  private currentStepIndex: number = 0;
+  private currentStepIndex: number = -1;
   private topologicalOrder: string[];
   private workflowLogger: IWorkflowEventLogger | null = null;
 
@@ -55,6 +55,10 @@ export class WorkflowExecutionRuntimeManager {
 
   public getWorkflowExecutionStatus(): ExecutionStatus {
     return this.workflowExecutionState.getWorkflowExecution().status;
+  }
+
+  public getWorkflowExecution(): EsWorkflowExecution {
+    return this.workflowExecutionState.getWorkflowExecution();
   }
 
   public getNodeSuccessors(nodeId: string): any[] {
@@ -205,9 +209,22 @@ export class WorkflowExecutionRuntimeManager {
     toSave.forEach((stepExecution) => this.workflowExecutionState.upsertStep(stepExecution));
   }
 
+  public async setWaitStep(stepId: string): Promise<void> {
+    this.workflowExecutionState.upsertStep({
+      stepId,
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+    });
+
+    this.workflowExecutionState.updateWorkflowExecution({
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+    });
+  }
+
   public async start(): Promise<void> {
+    this.currentStepIndex = 0;
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       status: ExecutionStatus.RUNNING,
+      currentNodeId: this.topologicalOrder[this.currentStepIndex],
       startedAt: new Date().toISOString(),
     };
     this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
@@ -215,8 +232,22 @@ export class WorkflowExecutionRuntimeManager {
     await this.workflowExecutionState.flush();
   }
 
+  public async resume(): Promise<void> {
+    const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
+    this.currentStepIndex = this.topologicalOrder.findIndex(
+      (nodeId) => nodeId === workflowExecution.currentNodeId
+    );
+    await this.workflowExecutionState.load();
+    const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
+      status: ExecutionStatus.RUNNING,
+    };
+    this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
+  }
+
   public async saveState(): Promise<void> {
-    const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {};
+    const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
+      currentNodeId: this.getCurrentStep()?.id,
+    };
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
 
     if (
