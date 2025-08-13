@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_TYPES } from '../../common/constants';
+import { LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
 
 jest.mock('../classes/layers/heatmap_layer', () => {});
 jest.mock('../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer', () => {});
@@ -239,7 +239,6 @@ describe('getQueryableUniqueIndexPatternIds', () => {
       },
       visible,
       sourceDescriptor: ESSearchSource.createDescriptor({
-        type: SOURCE_TYPES.ES_SEARCH,
         indexPatternId,
         geoField: 'field',
       }),
