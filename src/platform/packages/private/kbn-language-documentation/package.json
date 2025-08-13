@@ -10,5 +10,8 @@
     "make:docs": "./scripts/make_docs.sh",
     "postmake:docs": "yarn run lint:fix",
     "lint:fix": "cd ../../../../.. && node ./scripts/eslint --fix ./src/platform/packages/private/kbn-language-documentation/src/sections/generated"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2"
   }
 }
