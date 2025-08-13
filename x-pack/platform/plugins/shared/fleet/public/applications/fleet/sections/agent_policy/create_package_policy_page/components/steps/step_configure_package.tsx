@@ -20,7 +20,10 @@ import {
   isIntegrationPolicyTemplate,
   getRegistryStreamWithDataStreamForInputType,
 } from '../../../../../../../../common/services';
-import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
+import {
+  isInputAllowedForDeploymentMode,
+  isAgentlessIntegration,
+} from '../../../../../../../../common/services/agentless_policy_helper';
 
 import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../../../types';
 import { Loading } from '../../../../../components';
@@ -68,6 +71,16 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
         {!noTopRule && <EuiHorizontalRule margin="m" />}
         <EuiFlexGroup direction="column" gutterSize="none">
           {packagePolicyTemplates.map((policyTemplate) => {
+            const deploymentMode =
+              isAgentlessSelected && packagePolicy.supports_agentless ? 'agentless' : 'default';
+
+            if (
+              deploymentMode === 'agentless' &&
+              !isAgentlessIntegration(packageInfo, policyTemplate.name)
+            ) {
+              return null;
+            }
+
             const inputs = getNormalizedInputs(policyTemplate);
             const packagePolicyInputs = packagePolicy.inputs;
             return inputs.map((packageInput) => {
@@ -102,11 +115,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
 
               const isInputAvailable =
                 packagePolicyInput &&
-                isInputAllowedForDeploymentMode(
-                  packagePolicyInput,
-                  isAgentlessSelected && packagePolicy.supports_agentless ? 'agentless' : 'default',
-                  packageInfo
-                );
+                isInputAllowedForDeploymentMode(packagePolicyInput, deploymentMode, packageInfo);
 
               return isInputAvailable ? (
                 <EuiFlexItem key={packageInput.type}>

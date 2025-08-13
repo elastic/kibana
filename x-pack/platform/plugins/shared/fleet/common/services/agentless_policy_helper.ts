@@ -124,11 +124,7 @@ export function isInputAllowedForDeploymentMode(
   }
 
   if (deploymentMode === 'agentless') {
-    const policyTemplate = packageInfo?.policy_templates?.find(
-      ({ name }) => name === input.policy_template
-    );
-    const isAgentlessEnabled = policyTemplate?.deployment_modes?.agentless.enabled;
-    return Boolean(isAgentlessEnabled) && !AGENTLESS_DISABLED_INPUTS.includes(input.type);
+    return !AGENTLESS_DISABLED_INPUTS.includes(input.type);
   }
 
   return true; // Allow all inputs for default mode when deployment_modes is not specified
