@@ -74,11 +74,11 @@ export function registerFeatureFlags(
     [OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS]: {
       category: ['observability'],
       name: i18n.translate('xpack.streams.groupStreamsSettingsName', {
-        defaultMessage: 'Group Streams',
+        defaultMessage: 'Group streams',
       }) as string,
       value: false,
       description: i18n.translate('xpack.streams.groupStreamsSettingsDescription', {
-        defaultMessage: 'Enable Group Streams.',
+        defaultMessage: 'Enable Group streams.',
       }),
       type: 'boolean',
       schema: schema.boolean(),

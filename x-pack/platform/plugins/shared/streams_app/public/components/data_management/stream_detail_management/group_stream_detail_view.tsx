@@ -78,53 +78,53 @@ export const GroupStreamDetailView = ({
               {prev}, {curr}
             </>
           ))
-      : i18n.translate('xpack.streamsApp.groupStreamDetailView.noneLabel', {
+      : i18n.translate('xpack.streams.groupStreamDetailView.noneLabel', {
           defaultMessage: 'None',
         });
 
   const meta = [
     {
-      title: i18n.translate('xpack.streamsApp.groupStreamDetailView.descriptionLabel', {
+      title: i18n.translate('xpack.streams.groupStreamDetailView.descriptionLabel', {
         defaultMessage: 'Description',
       }),
       description: stream.description,
     },
     {
-      title: i18n.translate('xpack.streamsApp.groupStreamDetailView.ownerLabel', {
+      title: i18n.translate('xpack.streams.groupStreamDetailView.ownerLabel', {
         defaultMessage: 'Owner',
       }),
       description: stream.group.owner,
     },
     {
-      title: i18n.translate('xpack.streamsApp.groupStreamDetailView.tierLabel', {
+      title: i18n.translate('xpack.streams.groupStreamDetailView.tierLabel', {
         defaultMessage: 'Tier',
       }),
       description: stream.group.tier,
     },
     {
-      title: i18n.translate('xpack.streamsApp.groupStreamDetailView.tagsLabel', {
+      title: i18n.translate('xpack.streams.groupStreamDetailView.tagsLabel', {
         defaultMessage: 'Tags',
       }),
       description: stream.group.tags.length
         ? stream.group.tags.join(', ')
-        : i18n.translate('xpack.streamsApp.groupStreamDetailView.noneLabel', {
+        : i18n.translate('xpack.streams.groupStreamDetailView.noneLabel', {
             defaultMessage: 'None',
           }),
     },
     {
-      title: i18n.translate('xpack.streamsApp.groupStreamDetailView.runbookLinksLabel', {
+      title: i18n.translate('xpack.streams.groupStreamDetailView.runbookLinksLabel', {
         defaultMessage: 'Runbook links',
       }),
       description: renderLinks(stream.group.runbook_links),
     },
     {
-      title: i18n.translate('xpack.streamsApp.groupStreamDetailView.documentationLinksLabel', {
+      title: i18n.translate('xpack.streams.groupStreamDetailView.documentationLinksLabel', {
         defaultMessage: 'Documentation links',
       }),
       description: renderLinks(stream.group.documentation_links),
     },
     {
-      title: i18n.translate('xpack.streamsApp.groupStreamDetailView.repositoryLinksLabel', {
+      title: i18n.translate('xpack.streams.groupStreamDetailView.repositoryLinksLabel', {
         defaultMessage: 'Repository links',
       }),
       description: renderLinks(stream.group.repository_links),
@@ -140,7 +140,7 @@ export const GroupStreamDetailView = ({
           openGroupStreamModificationFlyout(stream);
         }}
       >
-        {i18n.translate('xpack.streamsApp.groupStreamDetailView.editButtonLabel', {
+        {i18n.translate('xpack.streams.groupStreamDetailView.editButtonLabel', {
           defaultMessage: 'Edit',
         })}
       </EuiButton>

@@ -72,7 +72,7 @@ export function StreamDetailContextProvider({
             return response;
           }
 
-          throw new Error('Stream detail only supports IngestStreams and group streams.');
+          throw new Error('Stream detail only supports Ingest streams and Group streams.');
         });
     },
     [streamsRepositoryClient, name, canManage]

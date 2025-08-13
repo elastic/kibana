@@ -69,13 +69,13 @@ function GroupStreamCard({
       <EuiText size="xs">
         <p>{stream.description}</p>
         <p>
-          {i18n.translate('streamsApp.streamList.groupStreamCard.ownerLabel', {
+          {i18n.translate('xpack.streams.groupStreamCard.ownerLabel', {
             defaultMessage: 'Owner: {owner}',
             values: { owner: stream.group.owner },
           })}
         </p>
         <p>
-          {i18n.translate('streamsApp.streamList.groupStreamCard.tierLabel', {
+          {i18n.translate('xpack.streams.groupStreamCard.tierLabel', {
             defaultMessage: 'Tier: {tier}',
             values: { tier: stream.group.tier },
           })}

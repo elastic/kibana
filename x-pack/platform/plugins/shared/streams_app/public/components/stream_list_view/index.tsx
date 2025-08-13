@@ -131,7 +131,7 @@ export function StreamListView() {
               <EuiFlexItem grow={false}>
                 <EuiButton onClick={() => openGroupStreamModificationFlyout()}>
                   {i18n.translate('xpack.streams.streamsListView.createGroupStreamButtonLabel', {
-                    defaultMessage: 'Create group stream',
+                    defaultMessage: 'Create Group stream',
                   })}
                 </EuiButton>
               </EuiFlexItem>

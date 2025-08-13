@@ -43,7 +43,7 @@ export function LinkedDashboardsView({ definition }: { definition: Streams.all.G
       )}
     </>
   ) : (
-    i18n.translate('streamsApp.linkedDashboardsView.noLinkedDashboardsLabel', {
+    i18n.translate('xpack.streams.linkedDashboardsView.noLinkedDashboardsLabel', {
       defaultMessage: 'No linked dashboards',
     })
   );
