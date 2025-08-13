@@ -40,7 +40,7 @@ export type {
   //
   // Style types
   //
-  HeatmapStyleDescriptor
+  HeatmapStyleDescriptor,
 } from './content_management';
 export { MapsStorage } from './content_management';
 

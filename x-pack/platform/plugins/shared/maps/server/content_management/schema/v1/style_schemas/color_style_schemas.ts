@@ -1,0 +1,66 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { schema } from '@kbn/config-schema';
+import { COLOR_MAP_TYPE, DATA_MAPPING_FUNCTION, STYLE_TYPE } from '../../../../../common/constants';
+import { fieldMetaSchema, styleField } from './vector_style_schemas';
+
+export const categoryColorStop = schema.object({
+  stop: schema.nullable(schema.string()),
+  color: schema.string(),
+});
+
+export const ordinalColorStop = schema.object({
+  stop: schema.number(),
+  color: schema.string(),
+});
+
+export const colorDynamicOptions = schema.object({
+  // ordinal color properties
+  color: schema.maybe(schema.string()),
+  customColorRamp: schema.maybe(schema.arrayOf(ordinalColorStop)),
+  useCustomColorRamp: schema.maybe(schema.boolean()),
+  dataMappingFunction: schema.maybe(
+    schema.oneOf([
+      schema.literal(DATA_MAPPING_FUNCTION.INTERPOLATE),
+      schema.literal(DATA_MAPPING_FUNCTION.PERCENTILES),
+    ])
+  ),
+  invert: schema.maybe(schema.boolean()),
+
+  // category color properties
+  colorCategory: schema.maybe(schema.string()),
+  customColorPalette: schema.maybe(schema.arrayOf(categoryColorStop)),
+  useCustomColorPalette: schema.maybe(schema.boolean()),
+  otherCategoryColor: schema.maybe(schema.string()),
+
+  field: schema.maybe(styleField),
+  fieldMetaOptions: fieldMetaSchema,
+
+  type: schema.maybe(
+    schema.oneOf([
+      schema.literal(COLOR_MAP_TYPE.CATEGORICAL),
+      schema.literal(COLOR_MAP_TYPE.ORDINAL),
+    ])
+  ),
+});
+
+export const colorStaticOptions = schema.object({
+  color: schema.string(),
+});
+
+export const colorStaticSchema = schema.object({
+  type: schema.literal(STYLE_TYPE.STATIC),
+  options: colorStaticOptions,
+});
+
+export const colorDynamicSchema = schema.object({
+  type: schema.literal(STYLE_TYPE.DYNAMIC),
+  options: colorDynamicOptions,
+});
+
+export const colorStylePropertySchema = schema.oneOf([colorStaticSchema, colorDynamicSchema]);
