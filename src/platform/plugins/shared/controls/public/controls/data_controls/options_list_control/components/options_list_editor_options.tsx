@@ -139,6 +139,7 @@ export const OptionsListEditorOptions = ({
             setSingleSelect(newSingleSelect);
             updateState({ singleSelect: newSingleSelect });
           }}
+          name="selectionType"
         />
       </EuiFormRow>
       {allowExpensiveQueries && compatibleSearchTechniques.length > 1 && (
@@ -155,6 +156,7 @@ export const OptionsListEditorOptions = ({
               setSearchTechnique(newSearchTechnique);
               updateState({ searchTechnique: newSearchTechnique });
             }}
+            name="searchTechnique"
           />
         </EuiFormRow>
       )}

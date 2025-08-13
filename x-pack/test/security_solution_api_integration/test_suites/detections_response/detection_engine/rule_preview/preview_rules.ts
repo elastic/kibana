@@ -78,7 +78,8 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).to.eql({ logs });
         });
 
-        it('should limit concurrent requests to 10', async () => {
+        // https://github.com/elastic/kibana/issues/208568
+        it('@skipInServerlessMKI should limit concurrent requests to 10', async () => {
           const responses = await Promise.all(
             Array.from({ length: 15 }).map(() =>
               supertest

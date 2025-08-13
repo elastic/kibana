@@ -12,20 +12,6 @@ export const plugin = async (context: PluginInitializerContext) => {
   return new LicensingPlugin(context);
 };
 
-export type {
-  LicenseCheckState,
-  LicenseType,
-  LicenseStatus,
-  LicenseFeature,
-  PublicLicense,
-  PublicFeatures,
-  PublicLicenseJSON,
-  LicenseCheck,
-  ILicense,
-} from '../common/types';
-
-export { LICENSE_TYPE } from '../common/types';
-
 export type { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 
 export type {
