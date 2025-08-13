@@ -220,6 +220,7 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
       const result = await applyFilterlist(data, rules, mockSalt);
 
       expect(result).toHaveLength(1);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const aggrs = result[0] as any;
 
       expect(aggrs.per_minute).toBeDefined();
