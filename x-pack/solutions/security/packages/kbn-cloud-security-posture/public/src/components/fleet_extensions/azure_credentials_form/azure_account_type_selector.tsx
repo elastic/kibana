@@ -123,6 +123,7 @@ export const AzureAccountTypeSelect = ({
           });
         }}
         size="m"
+        name="azureAccountType"
       />
       {getAzureAccountType(input) === AZURE_ORGANIZATION_ACCOUNT && (
         <>
