@@ -28,7 +28,7 @@ type FieldCategory =
   | 'resource.attributes.agent'
   | 'resource.attributes.cloud';
 
-export const getAllFields = (metadata: InfraMetadata, schema: DataSchemaFormat) => {
+export const getAllFields = (metadata: InfraMetadata, schema: DataSchemaFormat | null) => {
   if (!metadata?.info) return [];
 
   const mapNestedProperties = (category: FieldCategory, property: string) => {

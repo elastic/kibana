@@ -25,7 +25,7 @@ import { MetricsContent } from './metrics/metrics';
 
 export const Overview = () => {
   const { dateRange } = useDatePickerContext();
-  const { entity, renderMode } = useAssetDetailsRenderPropsContext();
+  const { entity, renderMode, schema } = useAssetDetailsRenderPropsContext();
   const {
     metadata,
     loading: metadataLoading,
@@ -35,12 +35,18 @@ export const Overview = () => {
   const isFullPageView = renderMode.mode === 'page';
 
   const metadataSummarySection = isFullPageView ? (
-    <MetadataSummaryList metadata={metadata} loading={metadataLoading} entityType={entity.type} />
+    <MetadataSummaryList
+      metadata={metadata}
+      loading={metadataLoading}
+      entityType={entity.type}
+      schema={schema}
+    />
   ) : (
     <MetadataSummaryListCompact
       metadata={metadata}
       loading={metadataLoading}
       entityType={entity.type}
+      schema={schema}
     />
   );
 
