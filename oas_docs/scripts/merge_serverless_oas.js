@@ -15,6 +15,7 @@ const { REPO_ROOT } = require('@kbn/repo-info');
   await merge({
     sourceGlobs: [
       `${REPO_ROOT}/oas_docs/bundle.serverless.json`,
+      `${REPO_ROOT}/src/platform/plugins/shared/dashboard/docs/openapi/bundled.yaml`,
       `${REPO_ROOT}/src/platform/plugins/shared/data_views/docs/openapi/bundled.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/shared/ml/common/openapi/ml_apis_serverless.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/shared/task_manager/docs/openapi/bundled_serverless.yaml`,
