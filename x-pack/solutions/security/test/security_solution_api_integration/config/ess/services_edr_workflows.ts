@@ -7,8 +7,8 @@
 
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { services as xPackAPIServices } from '@kbn/test-suites-xpack-platform/api_integration/services';
-import { EndpointTestResources } from '../../../security_solution_endpoint/services/endpoint';
-import { EndpointArtifactsTestResources } from '../../../security_solution_endpoint/services/endpoint_artifacts';
+import { EndpointTestResourcesProvider } from '../../../security_solution_endpoint/services/endpoint';
+import { EndpointArtifactsTestResourcesProvider } from '../../../security_solution_endpoint/services/endpoint_artifacts';
 import { EndpointPolicyTestResourcesProvider } from '../../../security_solution_endpoint/services/endpoint_policy';
 
 import { ResolverGeneratorProvider } from '../services/security_solution_edr_workflows_resolver';
@@ -22,9 +22,9 @@ import { SecuritySolutionESSUtils } from '../services/security_solution_ess_util
 export const services = {
   ...xPackAPIServices,
   resolverGenerator: ResolverGeneratorProvider,
-  endpointTestResources: EndpointTestResources,
+  endpointTestResources: EndpointTestResourcesProvider,
   endpointPolicyTestResources: EndpointPolicyTestResourcesProvider,
-  endpointArtifactTestResources: EndpointArtifactsTestResources,
+  endpointArtifactTestResources: EndpointArtifactsTestResourcesProvider,
   rolesUsersProvider: RolesUsersProvider,
   endpointDataStreamHelpers: SecuritySolutionEndpointDataStreamHelpers,
   endpointRegistryHelpers: SecuritySolutionEndpointRegistryHelpers,

@@ -10,11 +10,11 @@ import { SvlCommonApiServiceProvider } from '@kbn/test-suites-xpack-platform/ser
 import { IngestManagerProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ingest_manager';
 import { services as platformServices } from '@kbn/test-suites-xpack-platform/functional/services';
 import { EndpointTelemetryTestResourcesProvider } from './endpoint_telemetry';
-import { EndpointTestResources } from './endpoint';
+import { EndpointTestResourcesProvider } from './endpoint';
 import { TimelineTestService } from './timeline';
 import { DetectionsTestService } from './detections';
 import { EndpointPolicyTestResourcesProvider } from './endpoint_policy';
-import { EndpointArtifactsTestResources } from './endpoint_artifacts';
+import { EndpointArtifactsTestResourcesProvider } from './endpoint_artifacts';
 import {
   KibanaSupertestWithCertProvider,
   KibanaSupertestWithCertWithoutAuthProvider,
@@ -25,12 +25,12 @@ import { SecuritySolutionEndpointRegistryHelpers } from './endpoint_registry_hel
 export const services = {
   ...platformServices,
 
-  endpointTestResources: EndpointTestResources,
+  endpointTestResources: EndpointTestResourcesProvider,
   telemetryTestResources: EndpointTelemetryTestResourcesProvider,
   ingestManager: IngestManagerProvider,
   timeline: TimelineTestService,
   detections: DetectionsTestService,
-  endpointArtifactTestResources: EndpointArtifactsTestResources,
+  endpointArtifactTestResources: EndpointArtifactsTestResourcesProvider,
   policyTestResources: EndpointPolicyTestResourcesProvider,
   endpointDataStreamHelpers: SecuritySolutionEndpointDataStreamHelpers,
   endpointRegistryHelpers: SecuritySolutionEndpointRegistryHelpers,
