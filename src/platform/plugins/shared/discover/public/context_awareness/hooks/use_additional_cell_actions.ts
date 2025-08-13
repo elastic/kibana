@@ -50,7 +50,7 @@ export const useAdditionalCellActions = ({
     );
 
     actions.forEach((action) => {
-      uiActions.registerActionAsync(action.id, async () => action);
+      uiActions.registerAction(action);
       uiActions.attachAction(DISCOVER_CELL_ACTIONS_TRIGGER.id, action.id);
     });
 
