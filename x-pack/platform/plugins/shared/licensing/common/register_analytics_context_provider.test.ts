@@ -6,7 +6,7 @@
  */
 
 import { firstValueFrom, ReplaySubject, Subject } from 'rxjs';
-import type { ILicense } from './types';
+import type { ILicense } from '@kbn/licensing-types';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 
 describe('registerAnalyticsContextProvider', () => {

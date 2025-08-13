@@ -35,7 +35,7 @@ export class WorkflowContextManager {
     this.context = {
       workflowRunId: init.workflowRunId,
       event: init.event,
-      consts: init.workflow.consts,
+      consts: init.workflow.consts || {},
       steps: {},
     };
 
@@ -78,5 +78,20 @@ export class WorkflowContextManager {
 
   public getContextKey(key: string): any {
     return this.context[key as keyof typeof this.context];
+  }
+
+  public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {
+    const propertyPathSegments = propertyPath.split('.');
+    let result: any = this.getContext();
+
+    for (const segment of propertyPathSegments) {
+      if (!(segment in result)) {
+        return { pathExists: false, value: undefined }; // Path not found in context
+      }
+
+      result = result[segment];
+    }
+
+    return { pathExists: true, value: result };
   }
 }
