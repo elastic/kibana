@@ -95,6 +95,62 @@ describe('#getAllFields', () => {
     expect(getAllFields(result, 'ecs')).toHaveLength(0);
   });
 
+  it('should map semconv metadata properly', () => {
+    const result: InfraMetadata = {
+      id: 'host1',
+      name: 'host1',
+      hasSystemIntegration: true,
+      features: [
+        {
+          name: 'system.core',
+          source: 'metrics',
+        },
+      ],
+      info: {
+        host: {
+          name: 'test-host',
+        },
+        resource: {
+          attributes: {
+            host: {
+              name: 'test-host',
+              ip: '10.10.10.10',
+            },
+            os: {
+              name: 'Ubuntu',
+              version: '18.04',
+            },
+            cloud: {
+              provider: 'gcp',
+            },
+            container: {
+              id: 'load-generator',
+              image: {
+                name: 'ghcr.io/open-telemetry/demo:latest-loadgenerator',
+              },
+              runtime: 'docker',
+            },
+          },
+        },
+      },
+    };
+
+    expect(getAllFields(result, 'semconv')).toStrictEqual([
+      { name: 'host.name', value: 'test-host' },
+      { name: 'resource.attributes.os.name', value: 'Ubuntu' },
+      { name: 'resource.attributes.os.version', value: '18.04' },
+      { name: 'resource.attributes.host.name', value: 'test-host' },
+      { name: 'resource.attributes.host.ip', value: '10.10.10.10' },
+      { name: 'resource.attributes.container.id', value: 'load-generator' },
+      {
+        name: 'resource.attributes.container.image.name',
+        value: 'ghcr.io/open-telemetry/demo:latest-loadgenerator',
+      },
+      { name: 'resource.attributes.container.runtime', value: 'docker' },
+      { name: 'resource.attributes.cloud.provider', value: 'gcp' },
+    ]);
+  });
+
   it('should map metadata with nested properties', async () => {
     const result: InfraMetadata = {
       id: 'host1',
