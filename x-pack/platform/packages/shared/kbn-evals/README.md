@@ -122,23 +122,27 @@ node scripts/playwright test --config x-pack/solutions/observability/packages/kb
 
 ### Running evaluations against your local/development Kibana instance
 
-To run evaluations against your local Kibana instance instead of the Scout server, set the `DEV_MODE` environment variable. Ensure that Kibana is running and properly configured using your standard development setup (e.g., `kibana.dev.yml`).
+To run evaluations against your local Kibana instance instead of the Scout server, manually create a Scout configuration file. This approach provides more control over the testing environment (running Kibana in Debug mode, connecting to local/remote test cluster, etc.). Running the Scout server is also not required for this approach.
 
-1. **Run with default credentials (auto-discovery)**
-   If your local Kibana instance uses default development credentials, simply run:
+To do this, you need to create (or override) a configuration file at `.scout/servers/local.json` and add host and auth details for your target Kibana instance:
 
-   ```bash
-   DEV_MODE=1 node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
-   ```
+```json
+{
+  "serverless": false,
+  "isCloud": false,
+  "hosts": {
+    "kibana": "http://localhost:5601/<basePath>"
+  },
+  "auth": {
+    "username": "elastic",
+    "password": "changeme"
+  }
+}
+```
 
-2. **Run with custom credentials**
-   If connecting to a remote cluster or using non-default credentials, provide the credentials in the `KIBANA_BASE_URL` environment variable:
+Then you can run the evaluations as normal. The Playwright tests will use the provided configuration details to target your Kibana instance.
 
-   ```bash
-   KIBANA_BASE_URL=http://<username>:<password>@localhost:5601 \
-   DEV_MODE=1 \
-   node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
-   ```
+> **Note:** Running the Scout server with `node scripts/scout.js start-server --stateful` will override any manual configuration in `.scout/servers/local.json` so you may need to update this file every time you want to switch between the two.
 
 ## Regenerating Phoenix GraphQL types
 

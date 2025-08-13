@@ -9,6 +9,7 @@ import { ScoutTestOptions, createPlaywrightConfig } from '@kbn/scout';
 import { PlaywrightTestConfig, defineConfig } from '@playwright/test';
 import { AvailableConnectorWithId, getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
 import { ToolingLog, LOG_LEVEL_FLAGS, DEFAULT_LOG_LEVEL } from '@kbn/tooling-log';
+
 export interface EvaluationTestOptions extends ScoutTestOptions {
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
