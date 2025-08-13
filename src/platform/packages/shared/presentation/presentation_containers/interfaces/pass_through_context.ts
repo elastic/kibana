@@ -10,9 +10,7 @@
 import { SerializableRecord } from '@kbn/utility-types';
 
 /**
- * This API provides pass through context.
- * Pass through context is a generic mechanism to pass context
- * from solutions to embeddables.
+ * Allows the Presentation Container to provide generic untyped context to its children.
  *
  * For example, alerting page links to dashboards.
  * Linked dashboard panels should show the alert from alerting page.
