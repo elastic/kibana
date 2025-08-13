@@ -16,7 +16,9 @@ import type api from '@elastic/elasticsearch/lib/api/types';
 const dataStream: DataStreamHelpers = {} as any; // static functions to help declare and manage data streams.
 const mappings: MappingsHelpers = {} as any; // static functions to help declare mappings for data streams.
 const esClient: Client = {} as any;
+const integrationTestHelpers: JestIntegrationTestHelpers = {} as any;
 const appendXSetup: AppendXServiceSetup = {} as any;
+const appendXStart: AppendXServiceStart = {} as any;
 
 /**
  * A type checked schema and mappings declaration similar to SOs.
@@ -30,6 +32,7 @@ const myDocumentSchema = schema.object({
     test: schema.string(),
   }),
   someField: schema.string(),
+  someFieldV2: schema.maybe(schema.string()), // This is a new field that will be runtime mapped, so searchable/aggable...
 });
 
 type MyDocument = TypeOf<typeof myDocumentSchema>;
@@ -50,6 +53,21 @@ const myDataStream: DataStreamDefinition<MyDocument> = {
       },
     },
   },
+  runtimeMappings: {
+    someFieldV2: {
+      type: 'keyword',
+      script: {
+        source: `
+  // return what we have in source if there is something in source
+  if (params._source["someFieldV2"] != null) {
+    emit(params._source["someFieldV2"]);
+  } else  { // return the original processed in some way
+    emit(doc['someFieldV2'].value + " the original, but processed");
+  }
+`,
+      },
+    },
+  },
 };
 
 // This could be a nice way to expose the "low-level" requests we are making so that
@@ -61,6 +79,49 @@ esClient.indices.createDataStream(dataStream.asCreateDataStreamRequestArgs(myDat
 
 // Register your data stream with the AppendX service
 appendXSetup.registerDataStream(myDataStream);
+
+// Searching
+// const client = appendXStart.getClient(myDataStream);
+// const result = await client.search({...}) // ES API
+
+// Authoring integ tests
+
+const previousDeclaration: DataStreamDefinition<MyDocument> = {
+  name: 'my-data-stream',
+  schema: myDocumentSchema,
+  autoRollover: true,
+  mappings: {
+    dynamic: false,
+    properties: {
+      '@timestamp': mappings.date(),
+      object: {
+        type: 'object',
+        properties: {
+          test: mappings.text(),
+        },
+      },
+    },
+  },
+  runtimeMappings: {
+    someFieldV2: {
+      type: 'keyword',
+      script: {
+        source: `
+  // return what we have in source if there is something in source
+  if (params._source["someFieldV2"] != null) {
+    emit(params._source["someFieldV2"]);
+  } else  { // return the original processed in some way
+    emit(doc['someFieldV2'].value + " the original, but processed");
+  }
+`,
+      },
+    },
+  },
+};
+
+test('myDataStream should be backwards compatible', async () => {
+  await integrationTestHelpers.assertBackwardsCompatible(previousDeclaration, myDataStream);
+});
 
 // Type shenanigans
 
@@ -81,18 +142,22 @@ type DateNanosMapping = Strict<api.MappingDateNanosProperty>;
 
 type StringMapping = KeywordMapping | TextMapping | DateMapping | DateNanosMapping;
 
+interface JestIntegrationTestHelpers {
+  assertBackwardsCompatible: (...dataStream: DataStreamDefinition[]) => void;
+}
+
 interface MappingsHelpers {
   date: () => KeywordMapping;
   keyword: () => KeywordMapping;
   text: () => TextMapping;
 }
 
-type DataStreamDeclarationMappings<Schema extends Record<string, unknown>> = Omit<
-  StrictMappingTypeMapping,
-  'properties'
-> & {
-  properties: ObjectToPropertiesDefinition<Schema>;
-};
+type DataStreamDeclarationMappings<Schema extends Record<string, unknown>> = Pick<
+  Omit<StrictMappingTypeMapping, 'properties'> & {
+    properties: ObjectToPropertiesDefinition<Schema>;
+  },
+  'dynamic' | 'properties'
+>;
 
 interface DataStreamDefinition<Schema extends Record<string, unknown> = {}> {
   /**
@@ -104,7 +169,14 @@ interface DataStreamDefinition<Schema extends Record<string, unknown> = {}> {
    *         fields are stripped when read into Kibana memory from the client.
    */
   schema: Type<Schema>;
+
   mappings?: DataStreamDeclarationMappings<Schema>;
+
+  // https://www.elastic.co/docs/manage-data/data-store/mapping/define-runtime-fields-in-search-request
+  runtimeMappings?: {
+    [K in keyof Schema]?: api.MappingRuntimeField;
+  };
+
   /**
    * TODO: discuss, this can control whether new mappings will trigger a rollover
    *      or not. If set to true, the data stream will be rolled over when the "_meta"
@@ -120,6 +192,19 @@ interface DataStreamHelpers {
 
 export interface AppendXServiceSetup {
   registerDataStream: (dataStream: DataStreamDefinition) => void;
+}
+
+export interface AppendXServiceStart {
+  getClient<Schema extends Record<string, unknown>>(
+    dataStream: DataStreamDefinition<Schema>
+  ): {
+    search: (req: Omit<api.SearchRequest, 'index'>) => Promise<api.SearchResponse<unknown>>; // For TS schema to hold true we must merge `fields` into `_source`...
+    searchMergeFields: (
+      req: Omit<api.SearchRequest, 'index'>
+    ) => Promise<api.SearchResponse<Schema>>; // For TS schema to hold true we must merge `fields` into `_source`...
+    index: (req: Omit<api.IndexRequest, 'index'>) => Promise<api.IndexResponse>;
+    delete: (req: Omit<api.DeleteRequest, 'index'>) => Promise<api.DeleteResponse>;
+  };
 }
 
 // An attempt at getting TS to check mapping properties match the schema
