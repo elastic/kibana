@@ -19,6 +19,7 @@ import {
   EuiSkeletonRectangle,
   EuiSkeletonTitle,
   type UseEuiTheme,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
@@ -93,6 +94,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   dataViewEditorService,
 }: Props) => {
   const styles = useMemoCss(componentStyles);
+  const isMobile = useIsWithinBreakpoints(['xs']);
 
   const {
     services: { application, dataViews, uiSettings, overlays, docLinks },
@@ -110,18 +112,18 @@ const IndexPatternEditorFlyoutContentComponent = ({
       isAdHoc: false,
       ...(editData
         ? {
-            title: editData.getIndexPattern(),
-            id: editData.id,
-            name: editData.name,
-            allowHidden: editData.getAllowHidden(),
-            ...(editData.timeFieldName === noTimeFieldValue
-              ? { timestampField: { label: noTimeFieldLabel, value: noTimeFieldValue } }
-              : editData.timeFieldName
+          title: editData.getIndexPattern(),
+          id: editData.id,
+          name: editData.name,
+          allowHidden: editData.getAllowHidden(),
+          ...(editData.timeFieldName === noTimeFieldValue
+            ? { timestampField: { label: noTimeFieldLabel, value: noTimeFieldValue } }
+            : editData.timeFieldName
               ? {
-                  timestampField: { label: editData.timeFieldName, value: editData.timeFieldName },
-                }
+                timestampField: { label: editData.timeFieldName, value: editData.timeFieldName },
+              }
               : {}),
-          }
+        }
         : {}),
     },
     schema,
@@ -261,9 +263,37 @@ const IndexPatternEditorFlyoutContentComponent = ({
     <></>
   );
 
+  const EditorFlyoutFooter = () =>
+    <Footer
+      onCancel={onCancel}
+      onSubmit={async (adhoc?: boolean) => {
+        const formData = form.getFormData();
+        if (!formData.name) {
+          form.updateFieldValues({ name: formData.title });
+          await form.getFields().name.validate();
+        }
+        // Ensures timestamp field is validated against current set of options
+        form.validateFields(['timestampField']);
+        form.setFieldValue('isAdHoc', adhoc || false);
+        form.submit();
+      }}
+      submitDisabled={(form.isSubmitted && !form.isValid) || form.isSubmitting}
+      submittingType={
+        form.isSubmitting
+          ? form.getFormData().isAdHoc
+            ? SubmittingType.savingAsAdHoc
+            : SubmittingType.persisting
+          : undefined
+      }
+      isEdit={!!editData}
+      isPersisted={Boolean(editData && editData.isPersisted())}
+      allowAdHoc={allowAdHoc}
+      canSave={canSave}
+    />
+
   return (
     <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
-      <FlyoutPanels.Item data-test-subj="indexPatternEditorFlyout" border="right">
+      <FlyoutPanels.Item data-test-subj="indexPatternEditorFlyout" css={styles.flexItem}>
         <FlyoutPanels.Content>
           <EuiTitle data-test-subj="flyoutTitle">
             <h2 id="dataViewEditorFlyoutTitle">{editData ? editorTitleEditMode : editorTitle}</h2>
@@ -329,34 +359,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
             />
           </Form>
         </FlyoutPanels.Content>
-        <Footer
-          onCancel={onCancel}
-          onSubmit={async (adhoc?: boolean) => {
-            const formData = form.getFormData();
-            if (!formData.name) {
-              form.updateFieldValues({ name: formData.title });
-              await form.getFields().name.validate();
-            }
-            // Ensures timestamp field is validated against current set of options
-            form.validateFields(['timestampField']);
-            form.setFieldValue('isAdHoc', adhoc || false);
-            form.submit();
-          }}
-          submitDisabled={(form.isSubmitted && !form.isValid) || form.isSubmitting}
-          submittingType={
-            form.isSubmitting
-              ? form.getFormData().isAdHoc
-                ? SubmittingType.savingAsAdHoc
-                : SubmittingType.persisting
-              : undefined
-          }
-          isEdit={!!editData}
-          isPersisted={Boolean(editData && editData.isPersisted())}
-          allowAdHoc={allowAdHoc}
-          canSave={canSave}
-        />
+        {!isMobile && <EditorFlyoutFooter />}
       </FlyoutPanels.Item>
-      <FlyoutPanels.Item>
+      <FlyoutPanels.Item css={PanelItemStyles}>
         {isLoadingSources ? (
           <></>
         ) : (
@@ -368,6 +373,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           />
         )}
       </FlyoutPanels.Item>
+      {isMobile && <EditorFlyoutFooter />}
     </FlyoutPanels.Group>
   );
 };
@@ -383,6 +389,16 @@ const componentStyles = {
   skeletonTitle: css({
     width: '25vw',
   }),
+  flexItem: css({
+    border: '1px solid red'
+  })
 };
+
+const PanelItemStyles = css`
+  border: 1px solid red !important;
+  @media only screen and (max-width: 767px) {
+    height: auto;
+  }
+`
 
 export const IndexPatternEditorFlyoutContent = React.memo(IndexPatternEditorFlyoutContentComponent);
