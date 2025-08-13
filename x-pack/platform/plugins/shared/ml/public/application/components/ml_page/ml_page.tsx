@@ -202,7 +202,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
 
     const headerChildren = useMemo(() => {
       // This is a workaround for EUI issue, where passing restrictWidth along with children prop,
-      // doesn't apply the max width
+      // doesn't apply the max width - https://github.com/elastic/eui/pull/8965
       const styles = css`
         inline-size: 100%;
         max-inline-size: ${headerRestrictWidth}px;
