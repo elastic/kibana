@@ -53,6 +53,8 @@
     "@kbn/inference-plugin",
     "@kbn/security-plugin",
     "@kbn/task-manager-plugin",
-    "@kbn/ai-tools"
+    "@kbn/ai-tools",
+    "@kbn/sse-utils",
+    "@kbn/licensing-types"
   ]
 }

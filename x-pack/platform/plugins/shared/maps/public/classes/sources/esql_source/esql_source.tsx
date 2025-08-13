@@ -50,13 +50,23 @@ export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
 });
 
+export type NormalizedESQLSourceDescriptor = ESQLSourceDescriptor &
+  Required<
+    Pick<
+      ESQLSourceDescriptor,
+      'narrowByGlobalSearch' | 'narrowByGlobalTime' | 'narrowByMapBounds' | 'applyForceRefresh'
+    >
+  >;
+
 export class ESQLSource
   extends AbstractVectorSource
   implements IVectorSource, Pick<IESSource, 'getIndexPatternId' | 'getGeoFieldName'>
 {
-  readonly _descriptor: ESQLSourceDescriptor;
+  readonly _descriptor: NormalizedESQLSourceDescriptor;
 
-  static createDescriptor(descriptor: Partial<ESQLSourceDescriptor>): ESQLSourceDescriptor {
+  static createDescriptor(
+    descriptor: Partial<ESQLSourceDescriptor>
+  ): NormalizedESQLSourceDescriptor {
     if (!isValidStringConfig(descriptor.esql)) {
       throw new Error('Cannot create ESQLSourceDescriptor when esql is not provided');
     }
