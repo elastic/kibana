@@ -16,3 +16,10 @@ export const ExecutionGraphNodeSchema = z.object({
 });
 
 export type ExecutionGraphNode = z.infer<typeof ExecutionGraphNodeSchema>;
+
+export const AtomicGraphNodeSchema = z.object({
+  id: z.string(),
+  type: z.literal('atomic'),
+  configuration: z.any(),
+});
+export type AtomicGraphNode = z.infer<typeof AtomicGraphNodeSchema>;

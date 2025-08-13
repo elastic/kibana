@@ -1,14 +1,45 @@
 steps:
-  - group: 'Cypress MKI - Explore'
+  - group: "Cypress MKI - CSP"
+    key: cypress_test_CSP
+    steps:
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:cloud_security_posture
+        label: "Cypress MKI - CSP"
+        key: test_CSP
+        env:
+          BK_TEST_SUITE_KEY: "serverless-cypress-explore"
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+
+  - group: "Cypress MKI - Explore"
     key: cypress_test_explore
     steps:
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:explore
+        label: "Cypress MKI - Explore"
+        key: test_explore
+        env:
+          BK_TEST_SUITE_KEY: "serverless-cypress-explore"
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:explore:cases
-        label: 'Cypress MKI - Cases'
+        label: "Cypress MKI - Cases"
         key: test_explore_cases
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
