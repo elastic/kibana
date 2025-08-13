@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 
 export const checkLicense = (license: ILicense): boolean => {
   const result = license.check('elastic documentation', 'enterprise');

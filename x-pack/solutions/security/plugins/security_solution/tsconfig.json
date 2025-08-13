@@ -254,6 +254,6 @@
     "@kbn/elastic-assistant-shared-state",
     "@kbn/elastic-assistant-shared-state-plugin",
     "@kbn/spaces-utils",
-    "@kbn/core-metrics-server",
+    "@kbn/licensing-types",
   ]
 }
