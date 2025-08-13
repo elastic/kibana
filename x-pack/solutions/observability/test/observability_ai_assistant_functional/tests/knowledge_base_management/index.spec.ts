@@ -200,7 +200,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       });
     });
 
-    describe('Bulk import knowledge base entries', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/231420
+    describe.skip('Bulk import knowledge base entries', () => {
       const tempDir = os.tmpdir();
       const tempFilePath = path.join(tempDir, 'bulk_import.ndjson');
 
