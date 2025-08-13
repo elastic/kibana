@@ -22,7 +22,7 @@ export async function addIntegrationToLogIndexTemplate({
   });
 
   // Remove properties from the GET response that cannot be in the PUT request
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   const {
     created_date,
     modification_date,
@@ -59,7 +59,7 @@ export async function cleanLogIndexTemplate({ esClient }: { esClient: Client }) 
   });
 
   // Remove properties from the GET response that cannot be in the PUT request
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   const {
     created_date,
     modification_date,
