@@ -53,10 +53,12 @@ const PageWrapper: FC = () => {
       <MlPageHeader>
         <PageTitle
           title={
-            <FormattedMessage
-              id="xpack.ml.suppliedConfigurations.preconfigurecJobsHeader"
-              defaultMessage="Supplied configurations"
-            />
+            <span data-test-subj="mlPageSuppliedConfigurations">
+              <FormattedMessage
+                id="xpack.ml.suppliedConfigurations.preconfigurecJobsHeader"
+                defaultMessage="Supplied configurations"
+              />
+            </span>
           }
         />
         <EuiSpacer size="s" />
