@@ -20,6 +20,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalFooter,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -343,7 +344,17 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
     const { editMode = 'inline' } = this.props;
 
     return (
-      <>
+      <section aria-labelledby="custom-urls-heading" role="list">
+        <EuiScreenReaderOnly>
+          <h2 id="custom-urls-heading">Custom URL Configuration</h2>
+        </EuiScreenReaderOnly>
+        <EuiScreenReaderOnly>
+          <div aria-live="polite" aria-atomic="true">
+            {customUrls.length === 0
+              ? 'No custom URLs configured'
+              : `${customUrls.length} custom URL${customUrls.length === 1 ? '' : 's'} configured`}
+          </div>
+        </EuiScreenReaderOnly>
         <EuiSpacer size="m" />
         <CustomUrlList
           job={this.props.job}
@@ -353,25 +364,28 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
           isPartialDFAJob={this.props.isPartialDFAJob}
         />
         {(!editorOpen || editMode === 'modal') && (
-          <EuiButton
-            size="s"
-            iconType="plusInCircle"
-            iconSide="left"
-            aria-label={i18n.translate(
-              'xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel',
-              { defaultMessage: 'Add custom URL' }
-            )}
-            onClick={this.editNewCustomUrl}
-            data-test-subj="mlJobOpenCustomUrlFormButton"
-          >
-            <FormattedMessage
-              id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
-              defaultMessage="Add custom URL"
-            />
-          </EuiButton>
+          <>
+            <EuiSpacer size="m" />
+            <EuiButton
+              size="s"
+              iconType="plusInCircle"
+              iconSide="left"
+              aria-label={i18n.translate(
+                'xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel',
+                { defaultMessage: 'Add custom URL' }
+              )}
+              onClick={this.editNewCustomUrl}
+              data-test-subj="mlJobOpenCustomUrlFormButton"
+            >
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
+                defaultMessage="Add custom URL"
+              />
+            </EuiButton>
+          </>
         )}
         {editorOpen && this.renderEditor()}
-      </>
+      </section>
     );
   }
 }

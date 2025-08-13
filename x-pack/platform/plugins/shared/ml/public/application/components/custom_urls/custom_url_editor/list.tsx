@@ -238,13 +238,18 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
 
     return (
       <>
-        <EuiPanel key={`url_${index}`} data-test-subj={`mlJobEditCustomUrlItem_${index}`}>
+        <EuiPanel
+          key={`url_${index}`}
+          data-test-subj={`mlJobEditCustomUrlItem_${index}`}
+          role="listitem"
+          aria-labelledby={`custom-url-heading-${index}`}
+        >
           <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiFormLabel>Custom URL {index + 1}</EuiFormLabel>
+              <EuiFormLabel id={`custom-url-heading-${index}`}>Custom URL {index + 1}</EuiFormLabel>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false} gutterSize="m" css={actionButtonsStyle}>
+              <EuiFlexGroup responsive={false} gutterSize="xs" css={actionButtonsStyle}>
                 <EuiFlexItem grow={false}>
                   <EuiToolTip
                     content={
@@ -320,6 +325,9 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                   isInvalid={isInvalidLabel}
                   onChange={(e) => onLabelChange(e, index)}
                   data-test-subj={`mlJobEditCustomUrlLabelInput_${index}`}
+                  aria-required="true"
+                  aria-label={`Label for custom URL ${index + 1}`}
+                  aria-invalid={isInvalidLabel}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -342,6 +350,8 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                     isInvalid={isInvalidTimeRange}
                     placeholder={TIME_RANGE_TYPE.AUTO}
                     onChange={(e) => onTimeRangeChange(e, index)}
+                    aria-label={`Time range for custom URL ${index + 1}`}
+                    aria-invalid={isInvalidTimeRange}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -370,6 +380,8 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                     onBlur={() => {
                       setExpandedUrlIndex(null);
                     }}
+                    aria-required="true"
+                    aria-label={`URL value for ${label || `custom URL ${index + 1}`}`}
                     data-test-subj={`mlJobEditCustomUrlTextarea_${index}`}
                   />
                 ) : (
@@ -379,6 +391,10 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                     value={customUrl.url_value}
                     readOnly={true}
                     onFocus={() => setExpandedUrlIndex(index)}
+                    aria-required="true"
+                    aria-label={`URL value for ${
+                      label || `custom URL ${index + 1}`
+                    }. Click to expand for editing.`}
                     data-test-subj={`mlJobEditCustomUrlInput_${index}`}
                   />
                 )}
