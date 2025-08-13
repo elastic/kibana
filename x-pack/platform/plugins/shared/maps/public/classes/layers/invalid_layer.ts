@@ -14,9 +14,8 @@ import { AbstractSource } from '../sources/source';
 import { IStyle } from '../styles/style';
 
 class InvalidSource extends AbstractSource {
-  constructor(id?: string) {
+  constructor() {
     super({
-      id,
       type: 'INVALID',
     });
   }
@@ -29,7 +28,7 @@ export class InvalidLayer extends AbstractLayer {
   constructor(layerDescriptor: LayerDescriptor, error: Error) {
     super({
       layerDescriptor,
-      source: new InvalidSource(layerDescriptor.sourceDescriptor?.id),
+      source: new InvalidSource(),
     });
     this._error = error;
     this._style = {

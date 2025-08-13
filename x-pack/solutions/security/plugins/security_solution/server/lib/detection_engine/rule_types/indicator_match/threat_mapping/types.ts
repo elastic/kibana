@@ -195,6 +195,7 @@ export interface BuildThreatEnrichmentOptions {
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   threatIndexFields: DataViewFieldBase[];
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
+  threatMapping: ThreatMapping;
 }
 
 export interface EventsOptions {

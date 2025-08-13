@@ -526,6 +526,8 @@
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
+        "effort:high",
+        "risk:high",
         "backport:all-open"
       ],
       "enabled": true
@@ -590,7 +592,9 @@
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
-        "backport:all-open"
+        "backport:all-open",
+        "effort:high",
+        "risk:high"
       ],
       "enabled": true
     },
@@ -753,7 +757,6 @@
       "groupName": "@elastic/fleet dependencies",
       "matchDepNames": [
         "exponential-backoff",
-        "@paralleldrive/cuid2",
         "isbinaryfile",
         "js-search",
         "openpgp",
@@ -2325,7 +2328,8 @@
         "release_note:skip",
         "Team:Search",
         "Team:Enterprise Search",
-        "backport:all-open"
+        "backport:all-open",
+        "effort:high"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -3932,7 +3936,9 @@
       "labels": [
         "release_note:skip",
         "backport:all-open",
-        "ci:all-cypress-suites"
+        "ci:all-cypress-suites",
+        "effort:high",
+        "risk:high"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
