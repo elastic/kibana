@@ -346,7 +346,9 @@ export function AddCisIntegrationFormPageProvider({
     if (credentialType === 'cloud_connectors') {
       credentialTypeValue = 'cloud_connector';
     }
-    await testSubjects.click(AWS_CREDENTIAL_SELECTOR);
+    await testSubjects.click(AWS_CREDENTIAL_SELECTOR, undefined, {
+      bottomOffset: 100 /* account for fixed footer to decide if need to scroll down */,
+    });
     await selectValue(AWS_CREDENTIAL_SELECTOR, credentialTypeValue);
   };
 
