@@ -118,8 +118,8 @@ export class ReindexServiceServerPlugin
       logger: this.logger,
       licensing: this.licensing!,
       security,
-      version: this.version
-  });
+      version: this.version,
+    });
 
     this.reindexService = service.getInternalApis();
 
