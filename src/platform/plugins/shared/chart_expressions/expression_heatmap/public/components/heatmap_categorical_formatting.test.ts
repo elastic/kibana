@@ -12,6 +12,8 @@ import {
   setupResizeObserverMock,
   cleanResizeObserverMock,
   renderChart,
+  setupCanvasMock,
+  cleanCanvasMock,
 } from '@kbn/chart-test-jest-helpers';
 import { getFieldFormatsRegistry } from '@kbn/data-plugin/public/test_utils';
 import { type CoreSetup } from '@kbn/core/public';
@@ -154,11 +156,13 @@ describe('XY categorical formatting', () => {
   };
 
   beforeAll(() => {
+    setupCanvasMock();
     setupResizeObserverMock();
     jest.useFakeTimers();
   });
 
   afterAll(() => {
+    cleanCanvasMock();
     cleanResizeObserverMock();
     jest.useRealTimers();
   });

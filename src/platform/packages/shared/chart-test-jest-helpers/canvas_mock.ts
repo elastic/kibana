@@ -7,6 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { renderChart, waitForRenderComplete } from './render_chart';
-export { setupResizeObserverMock, cleanResizeObserverMock } from './resize_observer_mock';
-export { setupCanvasMock, cleanCanvasMock } from './canvas_mock';
+let originalGetContext: typeof HTMLCanvasElement.prototype.getContext | undefined;
+
+export function setupCanvasMock() {
+  originalGetContext = HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext = jest.fn();
+}
+
+export function cleanCanvasMock() {
+  if (originalGetContext) {
+    HTMLCanvasElement.prototype.getContext = originalGetContext;
+  }
+}

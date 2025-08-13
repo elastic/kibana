@@ -10,13 +10,15 @@ import { type Datatable } from '@kbn/expressions-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 
-import { chartsActiveCursorService, chartsThemeService, paletteService } from '../__mocks__';
-import { createArgsWithLayers } from '../../common/__mocks__';
+import { chartsActiveCursorService, chartsThemeService, paletteService } from '../__test_utils__';
+import { createArgsWithLayers } from '../../common/__test_utils__';
 import { XYChart, type XYChartRenderProps } from './xy_chart';
 import {
   setupResizeObserverMock,
   cleanResizeObserverMock,
   renderChart,
+  setupCanvasMock,
+  cleanCanvasMock,
 } from '@kbn/chart-test-jest-helpers';
 import { EXTENDED_DATA_LAYER, LayerTypes, SeriesTypes, XScaleTypes } from '../../common/constants';
 import { getFieldFormatsRegistry } from '@kbn/data-plugin/public/test_utils';
@@ -145,11 +147,13 @@ describe('XY categorical formatting', () => {
   };
 
   beforeAll(() => {
+    setupCanvasMock();
     setupResizeObserverMock();
     jest.useFakeTimers();
   });
 
   afterAll(() => {
+    cleanCanvasMock();
     cleanResizeObserverMock();
     jest.useRealTimers();
   });

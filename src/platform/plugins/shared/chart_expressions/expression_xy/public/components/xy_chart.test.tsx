@@ -52,14 +52,14 @@ import {
   dateHistogramLayer,
   paletteService,
   sampleArgsWithReferenceLine,
-} from '../__mocks__';
+} from '../__test_utils__';
 import {
   mockPaletteOutput,
   sampleArgs,
   createArgsWithLayers,
   createSampleDatatableWithRows,
   sampleLayer,
-} from '../../common/__mocks__';
+} from '../../common/__test_utils__';
 import { XYChart, XYChartRenderProps } from './xy_chart';
 import {
   ExtendedDataLayerConfig,
