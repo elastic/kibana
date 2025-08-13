@@ -1188,7 +1188,7 @@ export function registerConnectorRoutes({
       try {
         const index = await fetchIndex(client.asCurrentUser, indexName);
         return response.ok({
-          body: index,
+          body: index?.index,
           headers: { 'content-type': 'application/json' },
         });
       } catch (error) {
