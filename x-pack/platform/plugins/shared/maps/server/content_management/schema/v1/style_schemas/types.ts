@@ -7,8 +7,8 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { heatmapStyleSchema } from './heatmap_style_schemas';
-import { symbolizeAsOptionsSchema } from './vector_style_schemas';
 import { colorDynamicSchema, colorStaticSchema, colorSchema } from './color_schemas';
+import { symbolizeAsOptionsSchema } from './marker_schemas';
 
 export type HeatmapStyleDescriptor = TypeOf<typeof heatmapStyleSchema>;
 
