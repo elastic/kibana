@@ -55,6 +55,16 @@ export class SavedSearchServerPlugin
       },
     });
 
+    // Register saved search as a favorites-enabled content type (mirrors dashboard + esql implementations)
+    // This enables the /internal/content_management/favorites/saved_search API routes to accept this type
+    // and resolves 400 "Unknown favorite type" errors observed in the Open Discover Session flyout.
+    try {
+      contentManagement.favorites.registerFavoriteType(SavedSearchType);
+    } catch (e) {
+      // If already registered (e.g. due to plugin re-initialization in tests) swallow the error
+      // eslint-disable-next-line no-empty
+    }
+
     const searchSource = data.search.searchSource;
 
     const getSearchSourceMigrations = searchSource.getAllMigrations.bind(searchSource);

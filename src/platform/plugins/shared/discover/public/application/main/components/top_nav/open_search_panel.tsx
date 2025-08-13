@@ -29,8 +29,20 @@ import {
   EuiSkeletonRectangle,
   EuiPanel,
   EuiCodeBlock,
+  EuiTabs,
+  EuiTab,
+  EuiBadge,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { SavedSearchType, SavedSearchTypeDisplayName } from '@kbn/saved-search-plugin/common';
+import {
+  FavoriteButton,
+  FavoritesClient,
+  FavoritesContextProvider,
+  useFavorites,
+} from '@kbn/content-management-favorites-public';
+import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public/src/components/favorite_button';
+import { QueryClient as FavoritesQueryClient } from '@tanstack/react-query';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import {
@@ -46,6 +58,158 @@ interface OpenSearchPanelProps {
   onOpenSavedSearch: (id: string) => void;
 }
 
+interface FavoritesListProps {
+  savedObjectsTagging: any;
+  contentClient: any;
+  uiSettings: any;
+  activeTab: 'all' | 'starred';
+  setActiveTab: (t: 'all' | 'starred') => void;
+  onSelect: (id: string) => void;
+  onOpen: (id: string) => void;
+  selectedId?: string;
+}
+
+const FavoritesList = ({
+  savedObjectsTagging,
+  contentClient,
+  uiSettings,
+  activeTab,
+  setActiveTab,
+  onSelect,
+  onOpen,
+  selectedId,
+}: FavoritesListProps) => {
+  const favorites = useFavorites();
+  // Build a stable key to remount the finder when either the active tab changes
+  // or the set of favorite ids changes (ensures filtering is applied because the
+  // underlying SavedObjectFinder only filters during its fetch cycle).
+  const favoritesVersion = useMemo(
+    () => (favorites.data?.favoriteIds ? favorites.data.favoriteIds.slice().sort().join('|') : 'none'),
+    [favorites.data?.favoriteIds]
+  );
+  const finderKey = `${activeTab}-${favoritesVersion}`;
+  const favoriteIds = favorites.data?.favoriteIds || [];
+  const favoriteCount = favoriteIds.length;
+
+  return (
+    <div
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+      onMouseUp={(e) => e.stopPropagation()}
+      onFocus={(e) => e.stopPropagation()}
+      css={(theme: any) => cssFavoriteHoverWithinEuiTableRow(theme.euiTheme)}
+    >
+      <EuiTabs size="s">
+        <EuiTab
+          onClick={() => setActiveTab('all')}
+          isSelected={activeTab === 'all'}
+          data-test-subj="discoverSessionsTabAll"
+        >
+          {i18n.translate('discover.openSession.tabAll', { defaultMessage: 'All' })}
+        </EuiTab>
+    {/* Spacer to separate tabs from the search bar */}
+    <EuiSpacer size="s" />
+        <EuiTab
+          onClick={() => setActiveTab('starred')}
+          isSelected={activeTab === 'starred'}
+          data-test-subj="discoverSessionsTabStarred"
+        >
+          {i18n.translate('discover.openSession.tabStarred', { defaultMessage: 'Starred' })}{' '}
+          {!favorites.isLoading && (
+            <EuiBadge color={favoriteCount ? 'hollow' : 'default'} data-test-subj="discoverSessionsStarredCount">
+              {favoriteCount}
+            </EuiBadge>
+          )}
+        </EuiTab>
+      </EuiTabs>
+      <SavedObjectFinder
+        key={finderKey}
+        id="discoverOpenSearch"
+        services={{ savedObjectsTagging, contentClient, uiSettings }}
+        onChoose={(id: string) => onOpen(id)}
+        extraColumns={[
+          {
+            field: 'star',
+            name: '',
+            width: '32px',
+            align: 'left',
+            sortable: false,
+            render: (_: string, item: any) => <FavoriteButton id={item.id} />,
+          },
+          {
+            field: 'details',
+            name: '',
+            width: '32px',
+            align: 'right',
+            sortable: false,
+            'data-test-subj': 'discoverSessionOpenDetailsCol',
+            render: (_: string, item: any) => (
+              <EuiButtonIcon
+                iconType="controlsVertical"
+                size="s"
+                color={selectedId === item.id ? 'primary' : 'text'}
+                aria-label={i18n.translate('discover.openSession.showDetailsAria', {
+                  defaultMessage: 'Show details for {name}',
+                  values: { name: item.name || item.title },
+                })}
+                data-test-subj={`discoverSessionShowDetailsBtn-${item.id}`}
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (selectedId !== item.id) onSelect(item.id);
+                }}
+              />
+            ),
+          },
+        ]}
+        noItemsMessage={
+          activeTab === 'starred' ? (
+            <EuiEmptyPrompt
+              title={<h4>{i18n.translate('discover.openSession.noStarredTitle', { defaultMessage: 'No starred sessions yet' })}</h4>}
+              body={
+                <p>
+                  {i18n.translate('discover.openSession.noStarredBody', {
+                    defaultMessage: 'Star sessions you frequently open to quickly find them here.',
+                  })}
+                </p>
+              }
+              data-test-subj="discoverSessionsStarredEmpty"
+            />
+          ) : (
+            <FormattedMessage
+              id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
+              defaultMessage="No matching Discover sessions found."
+            />
+          )
+        }
+        savedObjectMetaData={[
+          {
+            type: SavedSearchType,
+            getIconForSavedObject: () => 'discoverApp',
+            name: i18n.translate('discover.savedSearch.savedObjectName', {
+              defaultMessage: 'Discover session',
+            }),
+            getTooltipForSavedObject: (_so: any) =>
+              activeTab === 'starred'
+                ? i18n.translate('discover.openSession.starredTooltip', {
+                    defaultMessage: 'Starred Discover session',
+                  })
+                : '',
+            showSavedObject: (so: any) => {
+              if (activeTab === 'all') return true;
+              // While loading, show nothing in Starred tab to avoid flashing all items
+              if (favorites.isLoading) return false;
+              if (favorites.error) return false;
+              return favoriteIds.includes(so.id);
+            },
+          },
+        ]}
+        showFilter={true}
+      />
+    </div>
+  );
+};
+
 export function OpenSearchPanel(props: OpenSearchPanelProps) {
   const { onClose } = props;
   const { savedObjectsTagging, http, addBasePath, contentClient, uiSettings, capabilities, core } =
@@ -57,6 +221,17 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
   const [selectedId, setSelectedId] = useState<string | undefined>();
   const [selectedMeta, setSelectedMeta] = useState<any | undefined>();
   const [loadingMeta, setLoadingMeta] = useState(false);
+  const [activeTab, setActiveTab] = useState<'all' | 'starred'>('all');
+
+  const favoritesQueryClient = useMemo(() => new FavoritesQueryClient(), []);
+  const favoritesClient = useMemo(
+    () =>
+      new FavoritesClient('discover', SavedSearchType, {
+        http: core.http,
+        userProfile: core.userProfile,
+      }),
+    [core.http, core.userProfile]
+  );
 
   const insightsClient = useMemo(() => {
     const loggerAdapter: Logger = {
@@ -148,81 +323,27 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
       <EuiFlyoutBody>
         <EuiSplitPanel.Outer direction="row" responsive={false} grow={false} css={{ minHeight: 480 }}>
           <EuiSplitPanel.Inner paddingSize="s" grow={true} css={{ width: '55%' }}>
-            <div
-              onClick={(e) => e.stopPropagation()}
-              onMouseDown={(e) => e.stopPropagation()}
-              onMouseUp={(e) => e.stopPropagation()}
-              onFocus={(e) => e.stopPropagation()}
-            >
-            <SavedObjectFinder
-              id="discoverOpenSearch"
-              services={{
-                savedObjectsTagging,
-                contentClient,
-                uiSettings,
-              }}
-              onChoose={(id) => {
-                // Track the view and open the saved search (restore hyperlink behavior)
-                insightsClient.track(id, 'viewed');
-                props.onOpenSavedSearch(id);
-                onClose();
-              }}
-              extraColumns={[
-                {
-                  field: 'id',
-                  name: '',
-                  width: '40px',
-                  align: 'right',
-                  'data-test-subj': 'discoverSessionOpenDetailsCol',
-                  sortable: false,
-                  render: (_: string, item) => {
-                    return (
-                      <span style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        <EuiButtonIcon
-                          iconType="arrowRight"
-                          size="s"
-                          color={selectedId === item.id ? 'primary' : 'text'}
-                          aria-label={i18n.translate('discover.openSession.showDetailsAria', {
-                            defaultMessage: 'Show details for {name}',
-                            values: { name: item.name || item.title },
-                          })}
-                          data-test-subj={`discoverSessionShowDetailsBtn-${item.id}`}
-                          onMouseDown={(e: React.MouseEvent<HTMLButtonElement>) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
-                           onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            if (selectedId !== item.id) {
-                              setSelectedId(item.id);
-                              loadMeta(item.id);
-                            }
-                          }}
-                        />
-                      </span>
-                    );
-                  },
-                },
-              ]}
-              noItemsMessage={
-                <FormattedMessage
-                  id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
-                  defaultMessage="No matching Discover sessions found."
-                />
-              }
-              savedObjectMetaData={[
-                {
-                  type: SavedSearchType,
-                  getIconForSavedObject: () => 'discoverApp',
-                  name: i18n.translate('discover.savedSearch.savedObjectName', {
-                    defaultMessage: 'Discover session',
-                  }),
-                },
-              ]}
-              showFilter={true}
-            />
-            </div>
+              <QueryClientProvider client={favoritesQueryClient}>
+                <FavoritesContextProvider favoritesClient={favoritesClient}>
+                  <FavoritesList
+                    savedObjectsTagging={savedObjectsTagging}
+                    contentClient={contentClient}
+                    uiSettings={uiSettings}
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    onSelect={(id) => {
+                      setSelectedId(id);
+                      loadMeta(id);
+                    }}
+                    onOpen={(id) => {
+                      insightsClient.track(id, 'viewed');
+                      props.onOpenSavedSearch(id);
+                      onClose();
+                    }}
+                    selectedId={selectedId}
+                  />
+                </FavoritesContextProvider>
+              </QueryClientProvider>
           </EuiSplitPanel.Inner>
           <EuiSplitPanel.Inner paddingSize="s" grow={true} css={{ width: '45%', overflow: 'auto' }}>
             <EuiText size="s" color="subdued">
