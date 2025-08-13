@@ -20,6 +20,7 @@ import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
 import { SimulationContext } from '../stream_detail_enrichment/state_management/simulation_state_machine';
 
 export function PreviewTable({
+  isLoading,
   documents,
   displayColumns,
   height,
@@ -34,6 +35,7 @@ export function PreviewTable({
   leadingControlColumns,
 }: {
   documents: SampleDocument[];
+  isLoading?: boolean;
   displayColumns?: string[];
   height?: EuiDataGridProps['height'];
   renderCellValue?: (doc: SampleDocument, columnId: string) => React.ReactNode | undefined;
@@ -162,6 +164,9 @@ export function PreviewTable({
       aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
         defaultMessage: 'Preview',
       })}
+      data-test-subj={
+        isLoading === true ? 'streamsAppPreviewTableLoading' : 'streamsAppPreviewTableLoaded'
+      }
       leadingControlColumns={visibleColumns.length > 0 ? leadingControlColumns : undefined}
       columns={gridColumns}
       columnVisibility={{

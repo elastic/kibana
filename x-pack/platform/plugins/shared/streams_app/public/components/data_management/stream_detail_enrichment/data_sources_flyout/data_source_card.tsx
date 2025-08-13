@@ -117,6 +117,7 @@ export const DataSourceCard = ({
           />
         ) : (
           <PreviewTable
+            isLoading={isLoading}
             documents={previewDocs.map(flattenObjectNestedLast) as FlattenRecord[]}
             height={150}
           />

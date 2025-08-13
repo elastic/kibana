@@ -40,9 +40,6 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
   });
 
   test('should display a list of stream mappings', async ({ page, pageObjects }) => {
-    // Wait for the schema editor table to load
-    await pageObjects.streams.expectSchemaEditorTableVisible();
-
     // Verify the table has the expected columns
     await expect(page.getByRole('columnheader').getByText('Field', { exact: true })).toBeVisible();
     await expect(page.getByRole('columnheader').getByText('Type', { exact: true })).toBeVisible();
@@ -56,9 +53,6 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
   });
 
   test('should allow searching by field name', async ({ pageObjects }) => {
-    // Wait for the schema editor table to load
-    await pageObjects.streams.expectSchemaEditorTableVisible();
-
     // Search for a common field like '@timestamp'
     await pageObjects.streams.searchFields('@timestamp');
 
@@ -93,9 +87,6 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
   });
 
   test('should allow filtering by field type and status', async ({ page, pageObjects }) => {
-    // Wait for the schema editor table to load
-    await pageObjects.streams.expectSchemaEditorTableVisible();
-
     // Test filtering by type
     await pageObjects.streams.clickFieldTypeFilter();
     await pageObjects.streams.selectFilterValue('Number');
@@ -128,8 +119,6 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
   });
 
   test('should allow mapping a field', async ({ page, pageObjects }) => {
-    // Wait for the schema editor table to load
-    await pageObjects.streams.expectSchemaEditorTableVisible();
     // Search specific unmapped field
     await pageObjects.streams.searchFields('resource.attributes.host.ip');
     // Verify the field is unmapped
@@ -166,9 +155,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     });
   });
 
-  test('should allow unmapping a field', async ({ page, pageObjects }) => {
-    // Wait for the schema editor table to load
-    await pageObjects.streams.expectSchemaEditorTableVisible();
+  test('should allow unmapping a field', async ({ pageObjects }) => {
     // Search specific unmapped field
     await pageObjects.streams.searchFields('resource.attributes.host.ip');
     // Verify the field is unmapped

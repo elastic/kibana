@@ -116,6 +116,7 @@ const SamplePreviewTableContent = ({
         `}
       >
         <PreviewTable
+          isLoading={loading}
           documents={value.documentsWithRuntimeFieldsApplied.slice(0, SAMPLE_DOCUMENTS_TO_SHOW)}
           displayColumns={columns}
         />

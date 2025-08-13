@@ -15,12 +15,10 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
   });
 
-  test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+  test.beforeEach(async ({ apiServices, browserAuth }) => {
     await browserAuth.loginAsAdmin();
     // Clear existing processors before each test
     await apiServices.streams.clearStreamProcessors('logs-generic-default');
-
-    await pageObjects.streams.gotoProcessingTab('logs-generic-default');
   });
 
   test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
@@ -29,6 +27,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
   });
 
   test('should create a new processor successfully', async ({ pageObjects }) => {
+    await pageObjects.streams.gotoProcessingTab('logs-generic-default');
     await pageObjects.streams.clickAddProcessor();
 
     await pageObjects.streams.fillFieldInput('message');
@@ -42,6 +41,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     page,
     pageObjects,
   }) => {
+    await pageObjects.streams.gotoProcessingTab('logs-generic-default');
     await pageObjects.streams.clickAddProcessor();
 
     await expect(
@@ -61,6 +61,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     page,
     pageObjects,
   }) => {
+    await pageObjects.streams.gotoProcessingTab('logs-generic-default');
     // Create a new processor ready to be saved
     await pageObjects.streams.clickAddProcessor();
     await pageObjects.streams.fillFieldInput('message');
@@ -80,6 +81,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
   });
 
   test('should cancel creating a new processor', async ({ page, pageObjects }) => {
+    await pageObjects.streams.gotoProcessingTab('logs-generic-default');
     await pageObjects.streams.clickAddProcessor();
 
     // Fill in some data
@@ -98,6 +100,9 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     page,
     pageObjects,
   }) => {
+    await pageObjects.streams.gotoProcessingTab('logs-generic-default', {
+      waitForTableLoaded: false,
+    });
     await pageObjects.streams.clickAddProcessor();
 
     // Try to create without filling required fields
@@ -122,7 +127,9 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
   }) => {
     // Login as user with limited privileges
     await browserAuth.loginAsViewer();
-    await pageObjects.streams.gotoProcessingTab('logs-generic-default');
+    await pageObjects.streams.gotoProcessingTab('logs-generic-default', {
+      waitForTableLoaded: false,
+    });
 
     // Create button should be disabled or show tooltip
     const createButton = page.getByTestId('streamsAppStreamDetailEnrichmentAddProcessorButton');
