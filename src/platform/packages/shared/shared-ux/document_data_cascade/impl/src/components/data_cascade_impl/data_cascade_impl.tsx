@@ -126,6 +126,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   const { euiTheme } = useEuiTheme();
   const actions = useDataCascadeActions<G, L>();
   const state = useDataCascadeState<G, L>();
+  const tableRef = useRef<ReturnType<typeof useTableHelper<G>>>();
 
   // The scrollable element for your list
   const scrollElementRef = useRef(null);
@@ -137,7 +138,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     actions.setInitialState(data);
   }, [data, actions]);
 
-  const table = useTableHelper<G>({
+  tableRef.current = useTableHelper<G>({
     data: state.groupNodes,
     state: state.table,
     columns: (columnsHelper) => [
@@ -173,24 +174,25 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     ],
     getRowId: (rowData) => rowData.id,
     getRowCanExpand: (row) => {
-      if (!allowExpandMultiple) {
-        // if allowExpandMultiple is false, only allow expanding the root group
-        return row.depth === 0;
+      if (allowExpandMultiple) {
+        return true;
       }
 
-      // only allow expanding rows up until the depth of the current group by columns
-      return state.currentGroupByColumns.length - 1 > row.depth;
+      const expandedRowIds = Object.keys(state.table.expanded ?? {});
+
+      return expandedRowIds.length === 0 || expandedRowIds.includes(row.id)
+        ? true
+        : // when not supporting expansions on multiple row, expansion is not allowed if there's an existing expanded item with the same parent
+          !expandedRowIds
+            .map((id) => tableRef.current?.getRow?.(id)?.parentId)
+            .includes(row.parentId);
     },
     getSubRows: (row) => row.children as G[],
-    onExpandedChange: (updater) => {
-      const updatedValue = typeof updater === 'function' ? updater(state.table.expanded) : updater;
-
-      actions.setExpandedRows(updatedValue);
-    },
+    onExpandedChange: actions.setExpandedRows,
   });
 
-  const headerColumns = table.getHeaderGroups()[0].headers;
-  const { rows } = table.getRowModel();
+  const headerColumns = tableRef.current.getHeaderGroups()[0].headers;
+  const { rows } = tableRef.current.getRowModel();
 
   const {
     activeStickyIndex,
