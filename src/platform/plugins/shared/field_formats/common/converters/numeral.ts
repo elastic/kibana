@@ -48,14 +48,14 @@ export abstract class NumeralFormat extends FieldFormat {
     }
 
     if (isNaN(val) && typeof originalVal === 'string') {
-      // If the value is a string that cannot be parsed as a number, try to parse it as a JSON object
+      // if the value is a string that cannot be parsed as a number, try to parse it as a JSON object
       try {
         const parsedVal = JSON.parse(originalVal);
         if (typeof parsedVal === 'object' && parsedVal !== null) {
-          return originalVal; // Return the original string if it's a JSON object
+          return originalVal; // return the original string if it's a JSON object
         }
       } catch {
-        // If parsing fails, we return continue
+        // if parsing fails, continue to a next step
       }
     }
 
