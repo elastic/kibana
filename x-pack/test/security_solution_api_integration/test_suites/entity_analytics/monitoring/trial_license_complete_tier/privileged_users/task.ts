@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
       },
     });
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
+  describe('@ess @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
     const kibanaServer = getService('kibanaServer');
 
     before(async () => {
