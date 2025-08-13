@@ -12,7 +12,6 @@ import { XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
 const descriptor: XYZTMSSourceDescriptor = {
   type: SOURCE_TYPES.EMS_XYZ,
   urlTemplate: 'https://example.com/{x}/{y}/{z}.png',
-  id: 'foobar',
 };
 describe('xyz Tilemap Source', () => {
   it('should echo url template for url template', async () => {

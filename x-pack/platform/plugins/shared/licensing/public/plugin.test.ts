@@ -7,9 +7,9 @@
 
 import { firstValueFrom } from 'rxjs';
 import { take, toArray } from 'rxjs';
+import type { LicenseType } from '@kbn/licensing-types';
 import { mountExpiredBannerMock } from './plugin.test.mocks';
 
-import { LicenseType } from '../common/types';
 import { LicensingPlugin, licensingSessionStorageKey } from './plugin';
 
 import { License } from '../common/license';

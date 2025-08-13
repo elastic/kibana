@@ -110,13 +110,13 @@ export const useQualityIssuesDocsChart = () => {
     const lensAttributes =
       docsTrendChart === 'degraded'
         ? getDegradedLensAttributes({
-            color: euiTheme.colors.danger,
+            color: euiTheme.colors.vis.euiColorVis6,
             dataStream: dataStreamName,
             datasetTitle,
             breakdownFieldName: breakdownDataViewField?.name,
           })
         : getFailedLensAttributes({
-            color: euiTheme.colors.danger,
+            color: euiTheme.colors.vis.euiColorVis6,
             dataStream: dataStreamName,
             datasetTitle,
             breakdownFieldName: breakdownDataViewField?.name,
@@ -130,6 +130,7 @@ export const useQualityIssuesDocsChart = () => {
     docsTrendChart,
     integrationDetails?.integration?.integration?.datasets,
     datasetDetails.name,
+    euiTheme.colors.vis.euiColorVis6,
   ]);
 
   const openInLensCallback = useCallback(() => {
