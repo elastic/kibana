@@ -37,7 +37,7 @@ import type {
 } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { LICENSE_TYPE } from '@kbn/licensing-plugin/server';
+import { LICENSE_TYPE } from '@kbn/licensing-types';
 import type {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,

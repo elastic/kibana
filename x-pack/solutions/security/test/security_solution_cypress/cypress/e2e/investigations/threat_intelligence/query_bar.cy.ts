@@ -32,8 +32,7 @@ import { login } from '../../../tasks/login';
 
 const URL = '/app/security/threat_intelligence/indicators';
 
-// Failing: See https://github.com/elastic/kibana/issues/193804
-describe.skip('Indicators query bar interaction', { tags: ['@ess'] }, () => {
+describe('Indicators query bar interaction', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_multiple' }));
 
   after(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_multiple' }));

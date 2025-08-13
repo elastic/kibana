@@ -20,13 +20,13 @@ import type { EventNonEcsData } from '../../../common/typings';
 
 export const useCaseActions = ({
   alerts,
-  refresh,
+  onAddToCase,
   services,
   caseData,
   alertAttachment,
 }: {
   alerts: Alert[];
-  refresh?: () => void;
+  onAddToCase?: ({ isNewCase }: { isNewCase: boolean }) => void;
   services: {
     /**
      * The cases service is optional: cases features will be disabled if not provided
@@ -39,9 +39,9 @@ export const useCaseActions = ({
   const { cases } = services;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const onSuccess = useCallback(() => {
-    refresh?.();
-  }, [refresh]);
+  const onAddToExistingCase = useCallback(() => {
+    onAddToCase?.({ isNewCase: false });
+  }, [onAddToCase]);
 
   const { mutateAsync: deleteComment } = useDeleteComment();
   const { mutateAsync: updateComment } = useUpdateAlertComment();
@@ -75,8 +75,13 @@ export const useCaseActions = ({
       }
     });
   };
+  const onAddToNewCase = useCallback(() => {
+    onAddToCase?.({ isNewCase: true });
+  }, [onAddToCase]);
 
-  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({ onSuccess });
+  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({
+    onSuccess: onAddToExistingCase,
+  });
 
   function getCaseAttachments(): CaseAttachmentsWithoutOwner {
     return alerts.map((alert) => ({
@@ -96,8 +101,7 @@ export const useCaseActions = ({
       }) ?? { id: '', name: '' },
     }));
   }
-
-  const createCaseFlyout = cases?.hooks.useCasesAddToNewCaseFlyout({ onSuccess });
+  const createCaseFlyout = cases?.hooks.useCasesAddToNewCaseFlyout({ onSuccess: onAddToNewCase });
   const closeActionsPopover = () => {
     setIsPopoverOpen(false);
   };

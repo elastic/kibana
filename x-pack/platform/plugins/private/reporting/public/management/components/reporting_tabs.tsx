@@ -10,7 +10,7 @@ import { EuiBetaBadge, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useHistory, useParams } from 'react-router-dom';
-import { ILicense } from '@kbn/licensing-plugin/public';
+import { ILicense } from '@kbn/licensing-types';
 import { ClientConfigType, useInternalApiClient, useKibana } from '@kbn/reporting-public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';

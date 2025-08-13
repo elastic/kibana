@@ -14,9 +14,9 @@ import type {
   RecommendedQuery,
   RecommendedField,
   InferenceEndpointsAutocompleteResult,
-  ESQLLicenseResult,
   ESQLSourceResult,
 } from '@kbn/esql-types';
+import { ILicense } from '@kbn/licensing-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
@@ -57,7 +57,7 @@ export interface ESQLCallbacks {
   getInferenceEndpoints?: (
     taskType: InferenceTaskType
   ) => Promise<InferenceEndpointsAutocompleteResult>;
-  getLicense?: () => Promise<ESQLLicenseResult | undefined>;
+  getLicense?: () => Promise<Pick<ILicense, 'hasAtLeast'> | undefined>;
   getActiveProduct?: () => PricingProduct | undefined;
 }
 
