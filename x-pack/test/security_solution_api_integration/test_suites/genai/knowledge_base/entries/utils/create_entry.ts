@@ -16,7 +16,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import type { User } from '../../../utils/auth/types';
 
-import { routeWithNamespace } from '../../../../../../common/utils/security_solution';
+import { routeWithNamespace } from '../../../../../config/services/detections_response';
 
 /**
  * Creates a Knowledge Base Entry
