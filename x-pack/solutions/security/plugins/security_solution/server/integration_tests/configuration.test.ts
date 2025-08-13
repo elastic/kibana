@@ -317,42 +317,42 @@ describe('configuration', () => {
       telemetryConfiguration.resetAllToDefault();
 
       // Verify default values are restored
-      expect(telemetryConfiguration.health_diagnostic_config.query.maxDocuments).toBe(100_000_000);
-      expect(telemetryConfiguration.health_diagnostic_config.query.bufferSize).toBe(10_000);
+      expect(telemetryConfiguration.health_diagnostic_config.query.maxDocuments).toBe(10_000);
+      expect(telemetryConfiguration.health_diagnostic_config.query.bufferSize).toBe(1_000);
       expect(
         telemetryConfiguration.health_diagnostic_config.rssGrowthCircuitBreaker.maxRssGrowthPercent
       ).toBe(40);
       expect(
         telemetryConfiguration.health_diagnostic_config.rssGrowthCircuitBreaker.validationIntervalMs
-      ).toBe(200);
+      ).toBe(500);
       expect(
         telemetryConfiguration.health_diagnostic_config.timeoutCircuitBreaker.timeoutMillis
-      ).toBe(1000);
+      ).toBe(5000);
       expect(
         telemetryConfiguration.health_diagnostic_config.timeoutCircuitBreaker.validationIntervalMs
-      ).toBe(50);
+      ).toBe(500);
       expect(
         telemetryConfiguration.health_diagnostic_config.eventLoopUtilizationCircuitBreaker
           .thresholdMillis
-      ).toBe(1000);
+      ).toBe(5000);
       expect(
         telemetryConfiguration.health_diagnostic_config.eventLoopUtilizationCircuitBreaker
           .validationIntervalMs
-      ).toBe(50);
+      ).toBe(500);
       expect(
         telemetryConfiguration.health_diagnostic_config.eventLoopDelayCircuitBreaker.thresholdMillis
-      ).toBe(100);
+      ).toBe(500);
       expect(
         telemetryConfiguration.health_diagnostic_config.eventLoopDelayCircuitBreaker
           .validationIntervalMs
-      ).toBe(10);
+      ).toBe(250);
       expect(
         telemetryConfiguration.health_diagnostic_config.elasticsearchCircuitBreaker
           .maxJvmHeapUsedPercent
-      ).toBe(80);
+      ).toBe(90);
       expect(
         telemetryConfiguration.health_diagnostic_config.elasticsearchCircuitBreaker.maxCpuPercent
-      ).toBe(80);
+      ).toBe(90);
       expect(
         telemetryConfiguration.health_diagnostic_config.elasticsearchCircuitBreaker
           .expectedClusterHealth
