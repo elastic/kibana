@@ -78,9 +78,9 @@ export const Controls = ({
   const { zoomIn, zoomOut, fitView } = useReactFlow();
   const { maxZoomReached, minZoomReached } = useStore(selector);
 
-  // Sanitize nodeIdsToCenter to filter out empty strings and undefined/null values
+  // Memoize a sanitized list of node ids filtering out undefined/null, empty and whitespace strings
   // Converts ['node1', 'node2'] into [{ id: 'node1' }, { id: 'node2' }]
-  const nonEmptyNodeIds = useMemo(
+  const sanitizedNodeIds = useMemo(
     () => (nodeIdsToCenter ?? []).filter((id) => id && id.trim().length > 0).map((id) => ({ id })),
     [nodeIdsToCenter]
   );
@@ -101,7 +101,7 @@ export const Controls = ({
   };
 
   const onCenterHandler = () => {
-    fitView({ ...fitViewOptions, nodes: nonEmptyNodeIds });
+    fitView({ ...fitViewOptions, nodes: sanitizedNodeIds });
     onCenter?.();
   };
 
@@ -115,8 +115,8 @@ export const Controls = ({
     background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
 
-  if (!showZoom && !showFitView && nonEmptyNodeIds.length === 0) {
-    return <></>;
+  if (!showZoom && !showFitView && sanitizedNodeIds.length === 0) {
+    return null;
   }
 
   return (
@@ -149,7 +149,7 @@ export const Controls = ({
           </EuiFlexItem>
         </>
       )}
-      {nonEmptyNodeIds.length > 0 && (
+      {sanitizedNodeIds.length > 0 && (
         <EuiFlexItem grow={false}>
           {showZoom ? <EuiHorizontalRule size="full" margin="none" /> : null}
           <EuiButtonIcon
@@ -165,7 +165,7 @@ export const Controls = ({
       )}
       {showFitView && (
         <EuiFlexItem grow={false}>
-          {showZoom || nonEmptyNodeIds.length > 0 ? (
+          {showZoom || sanitizedNodeIds.length > 0 ? (
             <EuiHorizontalRule size="full" margin="none" />
           ) : null}
           <EuiButtonIcon
