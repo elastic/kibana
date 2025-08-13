@@ -24,7 +24,7 @@ import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { UnifiedHistogramMode } from '@kbn/unified-histogram/types';
+import type { ChartSectionConfiguration } from '@kbn/unified-histogram/types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
@@ -322,13 +322,6 @@ export interface AdditionalCellAction {
   execute: (context: AdditionalCellActionContext) => void | Promise<void>;
 }
 
-export interface ChartConfigExtension {
-  /**
-   * Supports customizing the chart (UnifiedHistogram) section in Discover
-   */
-  mode: UnifiedHistogramMode;
-}
-
 /**
  * The core profile interface for Discover context awareness.
  * Each of the available methods map to a specific extension point in the Discover application.
@@ -455,5 +448,5 @@ export interface Profile {
    * Gets configuration for the Discover chart (UnifiedHistogram) section
    * @returns The custom configuration for the chart
    */
-  getChartConfig: () => ChartConfigExtension;
+  getChartSectionConfiguration: () => ChartSectionConfiguration;
 }

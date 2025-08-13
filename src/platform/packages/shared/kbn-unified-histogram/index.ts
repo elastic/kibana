@@ -12,12 +12,9 @@ export type {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramAdapters,
   UnifiedHistogramVisContext,
+  ChartSectionConfiguration,
 } from './types';
-export {
-  UnifiedHistogramFetchStatus,
-  UnifiedHistogramExternalVisContextStatus,
-  UnifiedHistogramMode,
-} from './types';
+export { UnifiedHistogramFetchStatus, UnifiedHistogramExternalVisContextStatus } from './types';
 
 export {
   UnifiedBreakdownFieldSelector,
