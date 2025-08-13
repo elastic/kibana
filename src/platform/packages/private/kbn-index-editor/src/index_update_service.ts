@@ -214,7 +214,12 @@ export class IndexUpdateService {
       fromCmd.args.push(
         Builder.option({
           name: 'metadata',
-          args: [Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] })],
+          args: [
+            Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] }),
+            Builder.expression.column({
+              args: [Builder.identifier({ name: '_source' })],
+            }),
+          ],
         })
       );
     }
@@ -341,19 +346,6 @@ export class IndexUpdateService {
   public readonly dataView$: Observable<DataView> = combineLatest([
     this._indexName$,
     this._indexCrated$,
-    this.pendingColumnsToBeSaved$.pipe(
-      // Refetch the dataView to look for new field types when there are new columns saved
-      // (when pendingColumnsToBeSaved$ length decreases)
-      scan(
-        (acc, curr) => ({
-          prevLength: acc.currLength,
-          currLength: curr.length,
-        }),
-        { prevLength: 0, currLength: 0 }
-      ),
-      filter(({ prevLength, currLength }) => currLength < prevLength),
-      startWith({ prevLength: 0, currLength: 0 })
-    ),
   ]).pipe(
     skipWhile(([indexName, indexCreated]) => {
       return !indexName;
@@ -444,17 +436,24 @@ export class IndexUpdateService {
           tap(() => {
             this._isSaving$.next(true);
           }),
+          // Save updates
           exhaustMap(([updates]) => {
             return from(this.bulkUpdate(updates)).pipe(
               catchError((errors) => {
-                return of({ errors } as BulkResponse);
+                return of({ errors: true } as BulkResponse);
               }),
-              withLatestFrom(this._rows$, this.dataView$, this.savingDocs$),
-              map(([response, rows, dataView, savingDocs]) => {
-                return { updates, response, rows, dataView, savingDocs };
+              map((response) => {
+                return { updates, response };
               })
             );
-          })
+          }),
+          withLatestFrom(this._rows$, this.dataView$, this.savingDocs$),
+          switchMap(([{ updates, response }, rows, dataView, savingDocs]) =>
+            // Refresh the data view fields to get new columns types if any
+            from(this.data.dataViews.refreshFields(dataView, false, true)).pipe(
+              map(() => ({ updates, response, rows, savingDocs }))
+            )
+          )
         )
         .subscribe({
           next: ({ updates: bulkUpdateOperations, response, rows, savingDocs }) => {
