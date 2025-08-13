@@ -10,7 +10,6 @@ import React, { ReactElement } from 'react';
 import { calculateBounds } from '@kbn/data-plugin/common';
 import { FieldFormatter, MIN_ZOOM, MAX_ZOOM } from '@kbn/maps-plugin/common';
 import type {
-  AbstractSourceDescriptor,
   Attribution,
   DataRequestMeta,
   SourceRequestMeta,
@@ -26,7 +25,9 @@ import type {
 import { RasterTileSourceData } from '@kbn/maps-plugin/public/classes/sources/raster_source';
 import { RasterTileSource } from 'maplibre-gl';
 
-type CustomRasterSourceDescriptor = AbstractSourceDescriptor;
+interface CustomRasterSourceDescriptor {
+  type: 'CUSTOM_RASTER';
+}
 
 export class CustomRasterSource implements IRasterSource {
   static type = 'CUSTOM_RASTER';
@@ -35,7 +36,7 @@ export class CustomRasterSource implements IRasterSource {
 
   static createDescriptor(): CustomRasterSourceDescriptor {
     return {
-      type: CustomRasterSource.type,
+      type: 'CUSTOM_RASTER',
     };
   }
 

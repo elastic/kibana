@@ -225,7 +225,7 @@ describe('functions arg suggestions', () => {
                   optional: false,
                 },
               ],
-              license: 'PLATINUM',
+              license: 'platinum',
               returnType: 'keyword',
             },
             {
@@ -236,12 +236,12 @@ describe('functions arg suggestions', () => {
                   optional: false,
                 },
               ],
-              license: 'PLATINUM',
+              license: 'platinum',
               returnType: 'keyword',
             },
           ],
           locationsAvailable: [Location.STATS],
-          license: 'PLATINUM',
+          license: 'platinum',
           observabilityTier: 'COMPLETE',
         },
         {
@@ -267,7 +267,7 @@ describe('functions arg suggestions', () => {
                   optional: false,
                 },
               ],
-              license: 'PLATINUM',
+              license: 'platinum',
               returnType: 'cartesian_shape',
             },
           ],
@@ -328,7 +328,7 @@ describe('functions arg suggestions', () => {
             },
           ],
           locationsAvailable: [Location.STATS],
-          license: 'PLATINUM',
+          license: 'platinum',
         },
       ]);
     });

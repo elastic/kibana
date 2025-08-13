@@ -12,7 +12,7 @@ import {
   KibanaResponseFactory,
 } from '@kbn/core/server';
 
-import { ILicense } from '../common/types';
+import { ILicense } from '@kbn/licensing-types';
 import type { LicensingRequestHandlerContext } from './types';
 
 export type CheckLicense = (

@@ -11,7 +11,9 @@
     "public/**/*",
     "types/**/*"
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core-pricing-common",
@@ -55,6 +57,7 @@
     "@kbn/task-manager-plugin",
     "@kbn/sse-utils",
     "@kbn/ai-tools",
-    "@kbn/grok-heuristics"
+    "@kbn/grok-heuristics",
+    "@kbn/licensing-types"
   ]
 }

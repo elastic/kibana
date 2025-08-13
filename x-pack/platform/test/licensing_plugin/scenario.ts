@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { PublicLicenseJSON } from '@kbn/licensing-plugin/server';
+import { PublicLicenseJSON } from '@kbn/licensing-types';
 import { FtrProviderContext } from './services';
 import '@kbn/core-provider-plugin/types';
 
