@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UnifiedHistogramMode } from '@kbn/unified-histogram';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { dynamic } from '@kbn/shared-ux-utility';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 
 export type MetricsDataSourceProfileProvider = DataSourceProfileProvider<{}>;
+
+const LazyMetricsGridSection = dynamic(() => import('./dummy_metrics_grid'));
 
 export const createMetricsDataSourceProfileProvider = (
   services: ProfileProviderServices
@@ -24,17 +26,13 @@ export const createMetricsDataSourceProfileProvider = (
       ...(prev ? prev(params) : {}),
       hideSidebar: true,
     }),
-    getChartConfig: (prev) => () => ({
+    getChartSectionConfiguration: (prev) => () => ({
       ...(prev ? prev() : {}),
-      mode: UnifiedHistogramMode.metrics,
+      Component: LazyMetricsGridSection,
+      replaceDefaultHistogram: true,
     }),
   },
   resolve: (params) => {
-    // if (params.rootContext.solutionType !== SolutionType.Observability) {
-    //   return { isMatch: false };
-    // }
-
-    // TODO: implement a more robust matching logic
     if (
       !isOfAggregateQueryType(params.query) ||
       !params.query.esql.toLowerCase().includes('metrics')
