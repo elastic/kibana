@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DELETE_CONVERSATION_ARIA_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.sidePanel.deleteConversationAriaLabel',
+export const CONVERSATION_CONTEXT_MENU = i18n.translate(
+  'xpack.elasticAssistant.assistant.sidePanel.contextMenuLabel',
   {
-    defaultMessage: 'Delete conversation',
+    defaultMessage: 'Conversation options',
   }
 );
 

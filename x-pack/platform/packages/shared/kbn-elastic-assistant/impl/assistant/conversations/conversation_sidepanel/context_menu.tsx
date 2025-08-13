@@ -11,22 +11,18 @@ import {
   EuiContextMenuItem,
   EuiContextMenuItemProps,
   EuiContextMenuPanel,
-  EuiListGroupItemProps,
   EuiPopover,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import * as i18n from './translations';
 
 type ListGroupAction = EuiContextMenuItemProps & { key: string };
 
-interface ConversationSidePanelContextMenuProps extends EuiListGroupItemProps {
+interface ConversationSidePanelContextMenuProps  {
   actions: ListGroupAction[];
 }
 
-export const ConversationSidePanelContextMenu = ({
-  actions = [],
-  label,
-  ...props
-}: ConversationSidePanelContextMenuProps) => {
+export const ConversationSidePanelContextMenu = ({ actions }: ConversationSidePanelContextMenuProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
   const buttonId = useGeneratedHtmlId({ prefix: 'listGroupItemActionsButton' });
@@ -47,7 +43,7 @@ export const ConversationSidePanelContextMenu = ({
       {children}
     </EuiContextMenuItem>
   ));
-  console.log('actionItems', actionItems);
+
   return (
     <EuiPopover
       panelPaddingSize="none"
@@ -56,7 +52,7 @@ export const ConversationSidePanelContextMenu = ({
           size="xs"
           iconType="boxesVertical"
           iconSize="s"
-          aria-label={`Show actions for ${label}`}
+          aria-label{i18n.CONVERSATION_CONTEXT_MENU}
           aria-haspopup="true"
           aria-controls={menuId}
           aria-expanded={isPopoverOpen}

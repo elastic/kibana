@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback } from 'react';
+import React, { FunctionComponent, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiListGroupItem } from '@elastic/eui';
 import { ConversationWithOwner } from '../../api';
@@ -35,11 +35,14 @@ export const ConversationListItem: FunctionComponent<Props> = ({
   setDeleteConversationItem,
   setPaginationObserver,
 }) => {
-  const internalSetObserver = (ref: HTMLDivElement | null) => {
-    if (conversation.id === lastConversationId && ref) {
-      setPaginationObserver(ref);
-    }
-  };
+  const internalSetObserver = useCallback(
+    (ref: HTMLDivElement | null) => {
+      if (conversation.id === lastConversationId && ref) {
+        setPaginationObserver(ref);
+      }
+    },
+    [conversation.id, lastConversationId, setPaginationObserver]
+  );
 
   const handleConversationClick = useCallback(
     () =>
@@ -48,6 +51,36 @@ export const ConversationListItem: FunctionComponent<Props> = ({
       }),
     [conversation.id, onConversationSelected]
   );
+
+  const iconColor = useMemo(
+    () => (conversation.isConversationOwner ? 'accent' : 'default'),
+    [conversation.isConversationOwner]
+  );
+
+  const actions = useMemo(
+    () => [
+      {
+        key: 'copy',
+        children: COPY_URL,
+        onClick: () => handleCopyUrl(conversation),
+        icon: 'link',
+      },
+      {
+        key: 'duplicate',
+        children: DUPLICATE,
+        onClick: () => handleDuplicateConversation(conversation),
+        icon: 'copy',
+      },
+      {
+        key: 'delete',
+        children: i18n.DELETE_CONVERSATION,
+        onClick: () => setDeleteConversationItem(conversation),
+        icon: 'trash',
+      },
+    ],
+    [handleCopyUrl, handleDuplicateConversation, setDeleteConversationItem, conversation]
+  );
+
   return (
     <span key={conversation.id + conversation.title}>
       <EuiFlexGroup gutterSize="xs">
@@ -69,34 +102,12 @@ export const ConversationListItem: FunctionComponent<Props> = ({
               margin-inline-start: 12px;
               margin-inline-end: 0px;
             `,
-            color: conversation.isConversationOwner ? 'accent' : 'default',
+            color: iconColor,
           }}
           data-test-subj={`conversation-select-${conversation.title}`}
           isActive={isActiveConversation}
         />
-        <ConversationSidePanelContextMenu
-          label={'context menu for converstion'}
-          actions={[
-            {
-              key: 'copy',
-              children: COPY_URL,
-              onClick: () => handleCopyUrl(conversation),
-              icon: 'link',
-            },
-            {
-              key: 'duplicate',
-              children: DUPLICATE,
-              onClick: () => handleDuplicateConversation(conversation),
-              icon: 'copy',
-            },
-            {
-              key: 'delete',
-              children: i18n.DELETE_CONVERSATION,
-              onClick: () => setDeleteConversationItem(conversation),
-              icon: 'trash',
-            },
-          ]}
-        />
+        <ConversationSidePanelContextMenu actions={actions} />
       </EuiFlexGroup>
       {/* Observer element for infinite scrolling pagination of conversations */}
       {conversation.id === lastConversationId && (
