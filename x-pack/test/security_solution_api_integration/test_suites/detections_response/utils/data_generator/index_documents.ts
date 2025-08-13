@@ -23,8 +23,8 @@ type IndexDocuments = (params: IndexDocumentsParams) => Promise<BulkResponse>;
  * Indexes documents into provided index
  */
 export const indexDocuments: IndexDocuments = async ({ es, documents, index, log }) => {
-  const operations = documents.flatMap((doc: object) => [
-    { index: { _index: index, _id: v4() } },
+  const operations = documents.flatMap(({ _id, ...doc }: Record<string, unknown>) => [
+    { index: { _index: index, _id: _id ?? v4() } },
     doc,
   ]);
 
