@@ -19,8 +19,15 @@ import {
 } from '../utils/row_heights';
 import { ROWS_HEIGHT_OPTIONS } from '../constants';
 import { RowHeightMode, RowHeightSettingsProps } from '../components/row_height_settings';
+import { useRestorableRef } from '../restorable_state';
+
+export enum RowHeightType {
+  header = 'header',
+  row = 'row',
+}
 
 export interface UseRowHeightProps {
+  type: RowHeightType;
   storage: Storage;
   consumer: string;
   key: string;
@@ -84,6 +91,7 @@ export const getRowHeight = ({
 };
 
 export const useRowHeight = ({
+  type,
   storage,
   consumer,
   key,
@@ -92,15 +100,32 @@ export const useRowHeight = ({
   rowHeightState,
   onUpdateRowHeight,
 }: UseRowHeightProps) => {
+  const [initialValue] = useState(() =>
+    resolveRowHeight({
+      storage,
+      consumer,
+      key,
+      configRowHeight,
+      rowHeightState,
+    })
+  );
+
+  const restorableRowHeightRef = useRestorableRef(
+    type === RowHeightType.header ? 'headerRowHeight' : 'rowHeight',
+    initialValue
+  );
+
   const rowHeightLines = useMemo(() => {
     return resolveRowHeight({
       storage,
       consumer,
       key,
       configRowHeight,
-      rowHeightState,
+      rowHeightState: rowHeightState ?? restorableRowHeightRef.current,
     });
-  }, [configRowHeight, consumer, key, rowHeightState, storage]);
+  }, [configRowHeight, consumer, key, rowHeightState, storage, restorableRowHeightRef]);
+
+  restorableRowHeightRef.current = rowHeightLines; // Update the ref with the latest row height lines
 
   const getAdjustedLineCount = useCallback(
     (lineCount: number | undefined) => {
