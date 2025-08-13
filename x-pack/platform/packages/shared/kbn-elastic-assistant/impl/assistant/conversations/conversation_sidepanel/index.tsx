@@ -24,6 +24,7 @@ import useEvent from 'react-use/lib/useEvent';
 
 import { css } from '@emotion/react';
 import { isEmpty, findIndex } from 'lodash';
+import { ConversationSidePanelContextMenu } from './context_menu';
 import { ConversationWithOwner } from '../../api';
 import { useConversationsByDate } from './use_conversations_by_date';
 import { DataStreamApis } from '../../use_data_stream_apis';
@@ -226,46 +227,68 @@ export const ConversationSidePanel = React.memo<Props>(
                         };
                         return (
                           <span key={conversation.id + conversation.title}>
-                            <EuiListGroupItem
-                              size="xs"
-                              onClick={() =>
-                                onConversationSelected({
-                                  cId: conversation.id,
-                                })
-                              }
-                              css={css`
-                                .euiListGroupItem__button {
-                                  flex-direction: row-reverse;
+                            <EuiFlexGroup gutterSize="xs">
+                              <EuiListGroupItem
+                                size="xs"
+                                onClick={() =>
+                                  onConversationSelected({
+                                    cId: conversation.id,
+                                  })
                                 }
-                              `}
-                              label={conversation.title}
-                              iconType={conversation.users.length !== 1 ? 'users' : undefined}
-                              iconProps={{
-                                size: 's',
-                                css: css`
-                                  margin-inline-start: 12px;
-                                  margin-inline-end: 0px;
-                                `,
-                              }}
-                              data-test-subj={`conversation-select-${conversation.title}`}
-                              isActive={
-                                !isEmpty(conversation.id)
-                                  ? conversation.id === currentConversation?.id
-                                  : conversation.title === currentConversation?.title
-                              }
-                              extraAction={
-                                conversation.isConversationOwner
-                                  ? {
-                                      color: 'danger',
-                                      onClick: () => setDeleteConversationItem(conversation),
-                                      iconType: 'trash',
-                                      iconSize: 's',
-                                      'aria-label': i18n.DELETE_CONVERSATION_ARIA_LABEL,
-                                      'data-test-subj': 'delete-option',
-                                    }
-                                  : undefined
-                              }
-                            />
+                                className="eui-textTruncate"
+                                css={css`
+                                  flex: 1;
+                                  .euiListGroupItem__button {
+                                    flex-direction: row-reverse;
+                                  }
+                                `}
+                                label={conversation.title}
+                                iconType={conversation.users.length !== 1 ? 'users' : undefined}
+                                iconProps={{
+                                  size: 's',
+                                  css: css`
+                                    margin-inline-start: 12px;
+                                    margin-inline-end: 0px;
+                                  `,
+                                }}
+                                data-test-subj={`peopeeee-conversation-select-${conversation.title}`}
+                                isActive={
+                                  !isEmpty(conversation.id)
+                                    ? conversation.id === currentConversation?.id
+                                    : conversation.title === currentConversation?.title
+                                }
+                                // extraAction={
+                                //   conversation.isConversationOwner
+                                //     ? {
+                                //         color: 'danger',
+                                //         onClick: () => setDeleteConversationItem(conversation),
+                                //         iconType: 'trash',
+                                //         iconSize: 's',
+                                //         'aria-label': i18n.DELETE_CONVERSATION_ARIA_LABEL,
+                                //         'data-test-subj': 'delete-option',
+                                //       }
+                                //     : undefined
+                                // }
+                              />
+                              <ConversationSidePanelContextMenu
+                                label={'context menu for converstion'}
+                                actions={[
+                                  {
+                                    key: 'delete',
+                                    children: i18n.DELETE_CONVERSATION_ARIA_LABEL,
+                                    onClick: () => setDeleteConversationItem(conversation),
+                                    icon: 'trash',
+                                  },
+                                  {
+                                    key: 'delet2e',
+                                    children: i18n.DELETE_CONVERSATION_ARIA_LABEL,
+                                    onClick: () => setDeleteConversationItem(conversation),
+                                    icon: 'trash',
+                                  },
+                                ]}
+                              />
+                            </EuiFlexGroup>
+                            {/* Observer element for infinite scrolling pagination of conversations */}
                             {conversation.id === lastConversationId && (
                               <div
                                 ref={internalSetObserver}
