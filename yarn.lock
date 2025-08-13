@@ -2325,10 +2325,10 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
-"@elastic/monaco-esql@^3.1.6":
-  version "3.1.6"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.6.tgz#c89a1eb142b9a8bd713bc697d651373a9c4144df"
-  integrity sha512-roRLyZelCI0Vb9Z2/Ugu/w+aUghoLIqrnF/oVQqYH1VHXSBpzKDtItGEp5SXcXWdz7gcta3mlygfNxvr5DTEvw==
+"@elastic/monaco-esql@^3.1.7":
+  version "3.1.7"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.7.tgz#f35caee0a68c07e90d07390e31f760c78ba6d921"
+  integrity sha512-F4MzAQLrQjNwudrGAnPgMCIce5bzXkMOsav2nY08NneG09jOxyyC2l4AktmVI0WG1HAhmjdVnNeJemo2KAhwcA==
 
 "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -5448,6 +5448,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dashboard-markdown@link:src/platform/plugins/shared/dashboard_markdown":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dashboard-plugin@link:src/platform/plugins/shared/dashboard":
   version "0.0.0"
   uid ""
@@ -6088,6 +6092,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/gen-ai-settings-plugin@link:x-pack/platform/plugins/private/gen_ai_settings":
+  version "0.0.0"
+  uid ""
+
 "@kbn/gen-ai-streaming-response-example-plugin@link:x-pack/examples/gen_ai_streaming_response_example":
   version "0.0.0"
   uid ""
@@ -6441,6 +6449,10 @@
   uid ""
 
 "@kbn/licensing-plugin@link:x-pack/platform/plugins/shared/licensing":
+  version "0.0.0"
+  uid ""
+
+"@kbn/licensing-types@link:src/platform/packages/shared/kbn-licensing-types":
   version "0.0.0"
   uid ""
 

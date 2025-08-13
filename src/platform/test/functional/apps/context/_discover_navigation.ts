@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // navigate to the context view
         await dataGrid.clickRowToggle({ rowIndex: 0 });
 
-        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+        const rowActions = await dataGrid.getRowActions();
         await rowActions[1].click();
         await context.waitUntilContextLoadingHasFinished();
         const anchorTimestamp = await getTimestamp(true);
@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const firstContextTimestamp = await getTimestamp(false);
         await dataGrid.clickRowToggle({ rowIndex: 0 });
 
-        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+        const rowActions = await dataGrid.getRowActions();
         await rowActions[1].click();
         await context.waitUntilContextLoadingHasFinished();
         const anchorTimestamp = await getTimestamp(true);
@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // click the open action
       await retry.try(async () => {
-        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+        const rowActions = await dataGrid.getRowActions();
         if (!rowActions.length) {
           throw new Error('row actions empty, trying again');
         }
@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+      const rowActions = await dataGrid.getRowActions();
       await rowActions[0].click();
       await common.sleep(250);
 

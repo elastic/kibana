@@ -11,7 +11,7 @@ import { first, map, skip } from 'rxjs';
 import { Subject, combineLatest } from 'rxjs';
 
 import type { FeatureCatalogueEntry } from '@kbn/home-plugin/public';
-import { ILicense } from '@kbn/licensing-plugin/public';
+import { ILicense } from '@kbn/licensing-types';
 import { LicenseStatus } from '../common/types/license_status';
 import { PLUGIN } from '../common/constants';
 import { Dependencies } from './types';
