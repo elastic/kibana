@@ -13,6 +13,8 @@ import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-
 import { useEffect, useState } from 'react';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
+import type { AppMountParameters } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
@@ -31,7 +33,7 @@ import {
 } from './components/session_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
-import { TABS_ENABLED } from '../../constants';
+import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../constants';
 import { ChartPortalsRenderer } from './components/chart';
 import { useStateManagers } from './state_management/hooks/use_state_managers';
 import { getUserAndSpaceIds } from './utils/get_user_and_space_ids';
@@ -40,6 +42,7 @@ export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
   customizationCallbacks?: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
+  onAppLeave?: AppMountParameters['onAppLeave'];
 }
 
 type InitializeMainRoute = (
@@ -52,8 +55,13 @@ export const DiscoverMainRoute = ({
   customizationContext,
   customizationCallbacks = defaultCustomizationCallbacks,
   stateStorageContainer,
+  onAppLeave,
 }: MainRouteProps) => {
   const services = useDiscoverServices();
+  const tabsEnabled = services.core.featureFlags.getBooleanValue(
+    TABS_ENABLED_FEATURE_FLAG_KEY,
+    false
+  );
   const rootProfileState = useRootProfile();
   const history = useHistory();
   const [urlStateStorage] = useState(
@@ -105,6 +113,40 @@ export const DiscoverMainRoute = ({
     }
   }, [initializeMainRoute, rootProfileState]);
 
+  useEffect(() => {
+    onAppLeave?.((actions) => {
+      const tabs = runtimeStateManager.tabs.byId;
+      const hasAnyUnsavedTab = Object.values(tabs).some((tab) => {
+        const stateContainer = tab.stateContainer$.getValue();
+        if (!stateContainer) {
+          return false;
+        }
+
+        const isSaved = !!stateContainer.savedSearchState.getId();
+        const hasChanged = stateContainer.savedSearchState.getHasChanged$().getValue();
+
+        return isSaved && hasChanged;
+      });
+
+      if (!hasAnyUnsavedTab) return actions.default();
+
+      return actions.confirm(
+        i18n.translate('discover.confirmModal.confirmTextDescription', {
+          defaultMessage:
+            "You'll lose unsaved changes if you open another Discover session before returning to this one.",
+        }),
+        i18n.translate('discover.confirmModal.title', {
+          defaultMessage: 'Unsaved changes',
+        }),
+        () => {},
+        i18n.translate('discover.confirmModal.confirmText', {
+          defaultMessage: 'Leave without saving',
+        }),
+        'danger'
+      );
+    });
+  }, [onAppLeave, runtimeStateManager]);
+
   useUnmount(() => {
     for (const tabId of Object.keys(runtimeStateManager.tabs.byId)) {
       internalState.dispatch(internalStateActions.disconnectTab({ tabId }));
@@ -145,7 +187,7 @@ export const DiscoverMainRoute = ({
     <InternalStateProvider store={internalState}>
       <rootProfileState.AppWrapper>
         <ChartPortalsRenderer runtimeStateManager={sessionViewProps.runtimeStateManager}>
-          {TABS_ENABLED ? (
+          {tabsEnabled ? (
             <TabsView {...sessionViewProps} />
           ) : (
             <DiscoverSessionView {...sessionViewProps} />
