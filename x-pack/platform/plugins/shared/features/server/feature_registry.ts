@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep, uniq } from 'lodash';
-import { ILicense } from '@kbn/licensing-plugin/server';
+import { ILicense } from '@kbn/licensing-types';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
   KibanaFeatureConfig,
