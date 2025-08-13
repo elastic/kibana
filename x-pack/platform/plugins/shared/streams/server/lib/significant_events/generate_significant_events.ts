@@ -16,7 +16,6 @@ import {
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
 import pLimit from 'p-limit';
-import { Observable } from 'rxjs';
 import { v4 } from 'uuid';
 import { isKqlQueryValid, kqlQuery, rangeQuery } from '../../routes/internal/esql/query_helpers';
 import INSTRUCTION from './prompts/generate_queries_instruction.text';
@@ -39,80 +38,77 @@ interface Dependencies {
   logger: Logger;
 }
 
-export function generateSignificantEventDefinitions(
+export async function generateSignificantEventDefinitions(
   params: Params,
   dependencies: Dependencies
-): Observable<GeneratedSignificantEventQuery[]> {
-  return new Observable<GeneratedSignificantEventQuery[]>((subscriber) => {
-    (async () => {
-      try {
-        const {
-          definition,
-          connectorId,
-          currentDate = new Date(),
-          shortLookback = DEFAULT_SHORT_LOOKBACK,
-          longLookback = DEFAULT_LONG_LOOKBACK,
-        } = params;
-        const { inferenceClient, esClient, logger } = dependencies;
+): Promise<GeneratedSignificantEventQuery[]> {
+  const {
+    definition,
+    connectorId,
+    currentDate = new Date(),
+    shortLookback = DEFAULT_SHORT_LOOKBACK,
+    longLookback = DEFAULT_LONG_LOOKBACK,
+  } = params;
+  const { inferenceClient, esClient, logger } = dependencies;
 
-        const mend = moment(currentDate);
-        const mstart = mend.clone().subtract(shortLookback);
+  const mend = moment(currentDate);
+  const mstart = mend.clone().subtract(shortLookback);
 
-        const start = mstart.valueOf();
-        const end = mend.valueOf();
+  const start = mstart.valueOf();
+  const end = mend.valueOf();
 
-        const analysis = await describeDataset({
-          esClient: esClient.client,
-          start,
-          end,
-          index: getIndexPatternsForStream(definition),
+  const analysis = await describeDataset({
+    esClient: esClient.client,
+    start,
+    end,
+    index: getIndexPatternsForStream(definition),
+  });
+
+  const short = sortAndTruncateAnalyzedFields(analysis);
+
+  const textFields = analysis.fields
+    .filter((field) => field.types.includes('text'))
+    .map((field) => field.name);
+
+  const categorizationField = textFields.includes('message')
+    ? 'message'
+    : textFields.includes('body.text')
+    ? 'body.text'
+    : undefined;
+
+  const lookbackStart = mend.clone().subtract(longLookback).valueOf();
+
+  const logPatterns = categorizationField
+    ? await getLogPatterns({
+        start: lookbackStart,
+        end,
+        esClient,
+        fields: [categorizationField],
+        index: getIndexPatternsForStream(definition),
+        includeChanges: true,
+        metadata: [],
+      }).then((results) => {
+        return results.map((result) => {
+          const { sample, count, regex } = result;
+          return { count, sample, regex };
         });
+      })
+    : undefined;
 
-        const short = sortAndTruncateAnalyzedFields(analysis);
-
-        const textFields = analysis.fields
-          .filter((field) => field.types.includes('text'))
-          .map((field) => field.name);
-
-        const categorizationField = textFields.includes('message')
-          ? 'message'
-          : textFields.includes('body.text')
-          ? 'body.text'
-          : undefined;
-
-        const lookbackStart = mend.clone().subtract(longLookback).valueOf();
-
-        const logPatterns = categorizationField
-          ? await getLogPatterns({
-              start: lookbackStart,
-              end,
-              esClient,
-              fields: [categorizationField],
-              index: getIndexPatternsForStream(definition),
-              includeChanges: true,
-              metadata: [],
-            }).then((results) => {
-              return results.map((result) => {
-                const { sample, count, regex } = result;
-                return { count, sample, regex };
-              });
-            })
-          : undefined;
-
-        if (logPatterns?.length) {
-          logger.debug(() => {
-            return `Found ${logPatterns?.length} log patterns:
+  if (logPatterns?.length) {
+    logger.debug(() => {
+      return `Found ${logPatterns?.length} log patterns:
       
       ${logPatterns.map((pattern) => `- ${pattern.sample} (${pattern.count})`).join('\n')}
       `;
-          });
-        }
+    });
+  }
 
-        const chunks = [
-          INSTRUCTION,
-          KQL_GUIDE,
-          logPatterns
-            ? `## Log patterns
+  const chunks = [
+    INSTRUCTION,
+    KQL_GUIDE,
+    logPatterns
+      ? `## Log patterns
 The following log patterns were found over the last ${longLookback.asDays()} days.
 The field used is \`${categorizationField}\`:
     
@@ -126,112 +122,112 @@ ${JSON.stringify(
   })
 )}
     `
-            : '',
-          `## Dataset analysis
+      : '',
+    `## Dataset analysis
 Following is the list of fields found in the dataset with their types, count and values:
 
 ${JSON.stringify(short)}
     `,
-          `Remember: The goal is to create a focused set of queries that help operators 
+    `Remember: The goal is to create a focused set of queries that help operators 
 quickly identify when something unusual or problematic is happening in the system.
 Quality over quantity - aim for queries that have high signal-to-noise ratio.
     `,
-        ];
+  ];
 
-        const { output } = await inferenceClient.output({
-          id: 'generate_kql_queries',
-          connectorId,
-          input: chunks.filter(Boolean).join('\n\n'),
-          schema: {
+  const { output } = await inferenceClient.output({
+    id: 'generate_kql_queries',
+    connectorId,
+    input: chunks.filter(Boolean).join('\n\n'),
+    schema: {
+      type: 'object',
+      properties: {
+        queries: {
+          type: 'array',
+          items: {
             type: 'object',
             properties: {
-              queries: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    title: {
-                      type: 'string',
-                      description: 'A title for the log pattern',
-                    },
-                    kql: {
-                      type: 'string',
-                      description: 'The KQL of the specific log pattern',
-                    },
-                  },
-                  required: ['kql', 'title'],
-                },
+              title: {
+                type: 'string',
+                description: 'A title for the log pattern',
+              },
+              kql: {
+                type: 'string',
+                description: 'The KQL of the specific log pattern',
               },
             },
-            required: ['queries'],
-          } as const,
-        });
+            required: ['kql', 'title'],
+          },
+        },
+      },
+      required: ['queries'],
+    } as const,
+  });
 
-        const queries = output.queries.filter((query) => isKqlQueryValid(query.kql));
-        if (!queries.length) {
-          return [];
-        }
+  const queries = output.queries.filter((query) => isKqlQueryValid(query.kql));
+  if (!queries.length) {
+    return [];
+  }
 
-        const limiter = pLimit(10);
+  const limiter = pLimit(10);
 
-        const [queriesWithCounts, totalCount] = await Promise.all([
-          Promise.all(
-            queries.map((query) =>
-              limiter(async () => {
-                return esClient
-                  .search('verify_query', {
-                    track_total_hits: true,
-                    index: getIndexPatternsForStream(definition),
-                    size: 0,
-                    timeout: '5s',
-                    query: {
-                      bool: {
-                        filter: [...kqlQuery(query.kql), ...rangeQuery(lookbackStart, end)],
-                      },
-                    },
-                  })
-                  .then((response) => ({ ...query, count: response.hits.total.value }))
-                  .catch(() => {
-                    return { ...query, count: 0 };
-                  });
-              })
-            )
-          ),
-          esClient
+  const [queriesWithCounts, totalCount] = await Promise.all([
+    Promise.all(
+      queries.map((query) =>
+        limiter(async () => {
+          return esClient
             .search('verify_query', {
               track_total_hits: true,
               index: getIndexPatternsForStream(definition),
               size: 0,
               timeout: '5s',
+              query: {
+                bool: {
+                  filter: [...kqlQuery(query.kql), ...rangeQuery(lookbackStart, end)],
+                },
+              },
             })
-            .then((response) => response.hits.total.value),
-        ]);
+            .then((response) => ({ ...query, count: response.hits.total.value }))
+            .catch(() => {
+              return { ...query, count: 0 };
+            });
+        })
+      )
+    ),
+    esClient
+      .search('verify_query', {
+        track_total_hits: true,
+        index: getIndexPatternsForStream(definition),
+        size: 0,
+        timeout: '5s',
+      })
+      .then((response) => response.hits.total.value),
+  ]);
 
-        if (queriesWithCounts.length) {
-          logger.debug(() => {
-            return `Ran queries: ${queriesWithCounts
-              .map((query) => `- ${query.kql}: ${query.count}`)
-              .join('\n')}`;
-          });
-        }
+  if (queriesWithCounts.length) {
+    logger.debug(() => {
+      return `Ran queries: ${queriesWithCounts
+        .map((query) => `- ${query.kql}: ${query.count}`)
+        .join('\n')}`;
+    });
+  }
 
-        const idLookupTable = new ShortIdTable();
+  const idLookupTable = new ShortIdTable();
 
-        const queriesWithShortIds = queriesWithCounts.map((query) => {
-          const id = v4();
-          return {
-            id,
-            shortId: idLookupTable.take(id),
-            ...query,
-          };
-        });
+  const queriesWithShortIds = queriesWithCounts.map((query) => {
+    const id = v4();
+    return {
+      id,
+      shortId: idLookupTable.take(id),
+      ...query,
+    };
+  });
 
-        const { output: selectedQueries } = await inferenceClient.output({
-          id: 'verify_kql_queries',
-          connectorId,
-          input: [
-            INSTRUCTION,
-            `You've previously generated KQL queries to identify significant operational patterns. 
+  const { output: selectedQueries } = await inferenceClient.output({
+    id: 'verify_kql_queries',
+    connectorId,
+    input: [
+      INSTRUCTION,
+      `You've previously generated KQL queries to identify significant operational patterns. 
 I've executed those queries and obtained document counts for each. 
 Now I need you to analyze these results and prioritize the most operationally relevant queries.
 
@@ -251,52 +247,43 @@ ${JSON.stringify(
     };
   })
 )}`,
-          ].join('\n\n'),
-          schema: {
+    ].join('\n\n'),
+    schema: {
+      type: 'object',
+      properties: {
+        queries: {
+          type: 'array',
+          items: {
             type: 'object',
             properties: {
-              queries: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    id: {
-                      type: 'string',
-                    },
-                  },
-                  required: ['id'],
-                },
+              id: {
+                type: 'string',
               },
             },
-            required: ['queries'],
-          } as const,
-        });
-
-        const queriesByShortId = new Map(
-          queriesWithShortIds.map(({ shortId, ...query }) => [shortId, query])
-        );
-
-        const selected = selectedQueries.queries.flatMap(({ id }) => {
-          const query = queriesByShortId.get(id);
-          if (!query) {
-            return [];
-          }
-
-          return { title: query.title, kql: query.kql, count: query.count };
-        });
-
-        logger.debug(() => {
-          return `Selected queries: ${selected.map((query) => `- ${query.kql}`).join('\n')}`;
-        });
-
-        subscriber.next(selected);
-      } catch (error) {
-        subscriber.error(error);
-      } finally {
-        subscriber.complete();
-      }
-    })().catch((error) => {
-      subscriber.error(error);
-    });
+            required: ['id'],
+          },
+        },
+      },
+      required: ['queries'],
+    } as const,
   });
+
+  const queriesByShortId = new Map(
+    queriesWithShortIds.map(({ shortId, ...query }) => [shortId, query])
+  );
+
+  const selected = selectedQueries.queries.flatMap(({ id }) => {
+    const query = queriesByShortId.get(id);
+    if (!query) {
+      return [];
+    }
+
+    return { title: query.title, kql: query.kql, count: query.count };
+  });
+
+  logger.debug(() => {
+    return `Selected queries: ${selected.map((query) => `- ${query.kql}`).join('\n')}`;
+  });
+
+  return selected;
 }
