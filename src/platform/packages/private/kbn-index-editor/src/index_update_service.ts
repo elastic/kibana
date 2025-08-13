@@ -170,7 +170,12 @@ export class IndexUpdateService {
       fromCmd.args.push(
         Builder.option({
           name: 'metadata',
-          args: [Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] })],
+          args: [
+            Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] }),
+            Builder.expression.column({
+              args: [Builder.identifier({ name: '_source' })],
+            }),
+          ],
         })
       );
     }
@@ -269,19 +274,6 @@ export class IndexUpdateService {
   public readonly dataView$: Observable<DataView> = combineLatest([
     this._indexName$,
     this._indexCrated$,
-    this.pendingColumnsToBeSaved$.pipe(
-      // Refetch the dataView to look for new field types when there are new columns saved
-      // (when pendingColumnsToBeSaved$ length decreases)
-      scan(
-        (acc, curr) => ({
-          prevLength: acc.currLength,
-          currLength: curr.length,
-        }),
-        { prevLength: 0, currLength: 0 }
-      ),
-      filter(({ prevLength, currLength }) => currLength < prevLength),
-      startWith({ prevLength: 0, currLength: 0 })
-    ),
   ]).pipe(
     skipWhile(([indexName, indexCreated]) => {
       return !indexName;
@@ -373,19 +365,19 @@ export class IndexUpdateService {
           }),
           debounceTime(BUFFER_TIMEOUT_MS),
           filter((updates) => updates.length > 0),
-          switchMap((updates) => {
-            return from(this.bulkUpdate(updates)).pipe(
-              withLatestFrom(this._rows$, this.dataView$),
-              map(([response, rows, dataView]) => {
-                return { updates, response, rows, dataView };
-              })
-            );
-          })
+          switchMap((updates) =>
+            from(this.bulkUpdate(updates)).pipe(map((response) => ({ updates, response })))
+          ),
+          withLatestFrom(this._rows$, this.dataView$),
+          switchMap(([{ updates, response }, rows, dataView]) =>
+            // Refresh the data view fields to get new columns types if any
+            from(this.data.dataViews.refreshFields(dataView, false, true)).pipe(
+              map(() => ({ updates, response, rows, dataView }))
+            )
+          )
         )
         .subscribe({
-          next: ({ updates, response, rows, dataView }) => {
-            // TODO do we need to re-fetch docs using _mget, in order to retrieve a full doc update?
-
+          next: async ({ updates, response, rows, dataView }) => {
             const mappedResponse = response.items.reduce((acc, item, index) => {
               // Updates that were successful
               const updateItem = Object.values(item)[0] as BulkResponseItem;

@@ -23,7 +23,7 @@ import {
 import type { RestorableStateProviderApi } from '@kbn/restorable-state';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { difference, intersection } from 'lodash';
+import { difference, intersection, isEqual } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { RowColumnCreator } from './row_column_creator';
 import { getColumnInputRenderer } from './grid_custom_renderers/column_input_renderer';
@@ -96,20 +96,19 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     [props.columns]
   );
 
-  // Visible columns are calculated based on 3 sources:
-  // - The columns provided by the props, they provide the initial columns set, and any new column added by the user plus the placeholders.
-  // - The activeColumns state, which is the list of columns that are currently visible in the grid. But most importantly,
-  // it preserves the order of the columns given by the user.
-  // The visible columns are determined by:
-  // - Filter out hidden columns from the props.columns
-  // - Ensure the order is preserved based on activeColumns and the new columns that might have been added.
+  // These are the columns that are currently rendered in the grid.
+  // The columns data is taken from the props.columns. It has all the available columns, including placeholders.
+  // The order of the columns is determined by the activeColumns state.
   const renderedColumns = useMemo(() => {
+    // Filter the columns that are currently hidden
     const currentColumnNames = props.columns
       .map((c) => c.name)
       .filter((name) => !hiddenColumns.current.includes(name));
 
-    // It's important to only keep the columns that are still present in the props.columns
+    // Order the columns based on the activeColumns
     const preservedOrder = intersection(activeColumns, currentColumnNames);
+
+    // Identify the new columns
     const newColumns = difference(currentColumnNames, preservedOrder);
 
     // We need to place the new columns, (the ones not present in activeColumns) at their original index.
@@ -123,6 +122,11 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
     return preservedOrder;
   }, [props.columns, activeColumns]);
+
+  // We need to keep active columns in sync with rendered columns to not lose the user defined order.
+  if (!isEqual(activeColumns, renderedColumns)) {
+    setActiveColumns(renderedColumns);
+  }
 
   const columnsMeta = useMemo(() => {
     return props.columns.reduce((acc, column) => {
