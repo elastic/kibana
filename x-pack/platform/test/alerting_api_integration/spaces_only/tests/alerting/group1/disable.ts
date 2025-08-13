@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../scenarios';
@@ -53,6 +54,14 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         index: '.kibana_task_manager',
       });
       return scheduledTask._source!;
+    }
+
+    async function getRule(id: string): Promise<RawRule> {
+      const ruleDoc = await es.get<{ alert: RawRule }>({
+        id: `alert:${id}`,
+        index: '.kibana_alerting_cases',
+      });
+      return ruleDoc._source!.alert;
     }
 
     it('should handle disable rule request appropriately', async () => {
@@ -270,45 +279,48 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const { body: createdRule } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData({ enabled: true }))
+        .send(
+          getTestRuleData({
+            enabled: true,
+            schedule: {
+              interval: '3s',
+          }
+          })
+        )
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
-      await waitTillRuleRun(createdRule.id);
 
+      // wait for rule to run once
+      await retry.try(async () => {
+        const rule = await getRule(createdRule.id);
+        expect(rule?.monitoring?.run?.last_run?.timestamp).to.be.ok();
+      });
+
+      // disable rule, and implicitly task
       await ruleUtils.disable(createdRule.id);
-      const sinceDate = new Date();
 
-      // manually enable scheduled task
+      // wait for the task to be disabled
+      await retry.try(async () => {
+        const taskDoc = await getScheduledTask(createdRule.scheduled_task_id);
+        expect(taskDoc.task.enabled).to.be(false);
+      });
+
+      // manually enable task
       await es.update({
         id: `task:${createdRule.scheduled_task_id}`,
         index: '.kibana_task_manager',
         doc: {
-          enabled: true,
+          task: {
+            enabled: true,
+          },
         },
       });
-      await waitTillRuleRun(createdRule.id, sinceDate);
 
-      const taskDoc = await es.get<any>({
-        id: `task:${createdRule.scheduled_task_id}`,
-        index: '.kibana_task_manager',
+      // on it's next run, the task will disable itself
+      await retry.try(async () => {
+        const taskDoc = await getScheduledTask(createdRule.scheduled_task_id);
+        expect(taskDoc.task.enabled).to.be(false);
       });
-
-      console.log(`taskDoc: ${JSON.stringify(taskDoc, null, 4)}`);
-      expect(taskDoc._source?.attributes?.enabled).to.be(false);
     });
   });
-
-  async function waitTillRuleRun(id: string, since?: Date) {
-    await retry.try(async () => {
-      return await getEventLog({
-        getService,
-        spaceId: Spaces.space1.id,
-        type: 'alert',
-        id,
-        provider: 'alerting',
-        actions: new Map([['execute', { equal: 1 }]]),
-        filter: `@timestamp > ${since}`,
-      });
-    });
-  }
 }
