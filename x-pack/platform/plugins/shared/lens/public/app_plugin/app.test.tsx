@@ -234,7 +234,7 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         {
-          text: 'Visualize Library',
+          text: 'Visualize library',
           href: '/testbasepath/app/visualize#/',
           onClick: expect.anything(),
         },
@@ -251,7 +251,7 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         {
-          text: 'Visualize Library',
+          text: 'Visualize library',
           href: '/testbasepath/app/visualize#/',
           onClick: expect.anything(),
         },
@@ -268,7 +268,7 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         {
-          text: 'Visualize Library',
+          text: 'Visualize library',
           href: '/testbasepath/app/visualize#/',
           onClick: expect.anything(),
         },
@@ -287,7 +287,7 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         {
-          text: 'Visualize Library',
+          text: 'Visualize library',
           href: '/testbasepath/app/visualize#/',
           onClick: expect.anything(),
         },

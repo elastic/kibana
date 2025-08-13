@@ -193,6 +193,7 @@ export function ESQLControlsFlyout({
     ) : (
       <IdentifierControlForm
         variableType={variableType}
+        esqlVariables={esqlVariables}
         variableName={variableName}
         queryString={queryString}
         setControlState={setControlState}

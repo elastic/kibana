@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { IconColor } from '@elastic/eui';
 import {
   EuiLink,
   type EuiBasicTableColumn,
+  type IconColor,
   EuiHealth,
   EuiScreenReaderOnly,
   EuiButtonIcon,
@@ -19,8 +19,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EngineComponentResourceEnum,
   type EngineComponentResource,
+  type EngineComponentStatus,
 } from '../../../../../../../common/api/entity_analytics';
-import type { EngineComponentStatus } from '../../../../../../../common/api/entity_analytics';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
 type TableColumn = EuiBasicTableColumn<EngineComponentStatus>;

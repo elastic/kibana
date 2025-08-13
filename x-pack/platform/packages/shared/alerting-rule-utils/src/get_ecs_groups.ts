@@ -49,6 +49,5 @@ export const getEcsGroupsFromFlattenGrouping = (
       ecsGroup[flattenGroup] = ecsValue;
     }
   });
-
   return ecsGroup;
 };

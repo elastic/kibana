@@ -74,7 +74,10 @@ const getApiKey = async (deps: ApiKeyManagerDependencies) => {
     return (
       await encryptedSavedObjectsClient.getDecryptedAsInternalUser<PrivilegeMonitoringAPIKey>(
         PrivilegeMonitoringApiKeyType.name,
-        getPrivmonEncryptedSavedObjectId(deps.namespace)
+        getPrivmonEncryptedSavedObjectId(deps.namespace),
+        {
+          namespace: deps.namespace,
+        }
       )
     ).attributes;
   } catch (err) {

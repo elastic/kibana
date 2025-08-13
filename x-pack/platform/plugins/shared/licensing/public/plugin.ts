@@ -8,13 +8,12 @@
 import { firstValueFrom, Observable, Subject, Subscription } from 'rxjs';
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { ILicense } from '../common/types';
+import { ILicense, PublicLicenseJSON } from '@kbn/licensing-types';
 import { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { createLicenseUpdate } from '../common/license_update';
 import { License } from '../common/license';
 import { mountExpiredBanner } from './expired_banner';
 import { FeatureUsageService } from './services';
-import type { PublicLicenseJSON } from '../common/types';
 import { registerAnalyticsContextProvider } from '../common/register_analytics_context_provider';
 
 export const licensingSessionStorageKey = 'xpack.licensing';

@@ -12,7 +12,10 @@ import {
 import { Logger } from '@kbn/core/server';
 import { intersection, isEmpty } from 'lodash';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
-import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import {
+  type StatusRuleCondition,
+  SyntheticsMonitorStatusRuleParams as StatusRuleParams,
+} from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { syntheticsMonitorAttributes } from '../../../common/types/saved_objects';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 import {
@@ -48,6 +51,9 @@ import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_mon
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { ALERT_DETAILS_URL, VIEW_IN_APP_URL } from '../action_variables';
 import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
+
+const DEFAULT_RECOVERY_STRATEGY: NonNullable<StatusRuleCondition['recoveryStrategy']> =
+  'conditionNotMet';
 
 export class StatusRuleExecutor {
   previousStartedAt: Date | null;
@@ -333,7 +339,9 @@ export class StatusRuleExecutor {
         alertId,
         monitorSummary,
         statusConfig: configs[0],
-        locationNames: configs.map(({ locationId, ping }) => ping?.observer.geo.name || locationId),
+        locationNames: configs.map(
+          ({ locationId, latestPing }) => latestPing?.observer.geo.name || locationId
+        ),
         locationIds: configs.map(({ locationId }) => locationId),
       });
     }
@@ -361,10 +369,16 @@ export class StatusRuleExecutor {
     const { useTimeWindow, useLatestChecks, downThreshold, locationsThreshold } = getConditionType(
       this.params?.condition
     );
+    const recoveryStrategy = this.params?.condition?.recoveryStrategy ?? DEFAULT_RECOVERY_STRATEGY;
     const groupBy = this.params?.condition?.groupBy ?? 'locationId';
 
     if (groupBy === 'locationId' && locationsThreshold === 1) {
       Object.entries(downConfigs).forEach(([idWithLocation, statusConfig]) => {
+        // Skip scheduling if recoveryStrategy is 'firstUp' and latest ping is up
+        if (recoveryStrategy === 'firstUp' && (statusConfig.latestPing.summary?.up ?? 0) > 0) {
+          return;
+        }
+
         const doesMonitorMeetLocationThreshold = getDoesMonitorMeetLocationThreshold({
           matchesByLocation: [statusConfig],
           locationsThreshold,
@@ -384,15 +398,25 @@ export class StatusRuleExecutor {
             statusConfig,
             downThreshold,
             useLatestChecks,
-            locationNames: [statusConfig.ping.observer.geo?.name!],
-            locationIds: [statusConfig.ping.observer.name!],
+            locationNames: [statusConfig.latestPing.observer.geo?.name!],
+            locationIds: [statusConfig.latestPing.observer.name!],
           });
         }
       });
     } else {
       const downConfigsById = getConfigsByIds(downConfigs);
 
-      for (const [configId, configs] of downConfigsById) {
+      for (const [configId, locationConfigs] of downConfigsById) {
+        // If recoveryStrategy is 'firstUp', we only consider configs that are not up
+        const configs =
+          recoveryStrategy === 'firstUp'
+            ? locationConfigs.filter((c) => (c.latestPing.summary?.up ?? 0) === 0)
+            : locationConfigs;
+
+        if (!configs.length) {
+          continue;
+        }
+
         const doesMonitorMeetLocationThreshold = getDoesMonitorMeetLocationThreshold({
           matchesByLocation: configs,
           locationsThreshold,
@@ -412,8 +436,8 @@ export class StatusRuleExecutor {
             statusConfig: configs[0],
             downThreshold,
             useLatestChecks,
-            locationNames: configs.map((c) => c.ping.observer.geo?.name!),
-            locationIds: configs.map((c) => c.ping.observer.name!),
+            locationNames: configs.map((c) => c.latestPing.observer.geo?.name!),
+            locationIds: configs.map((c) => c.latestPing.observer.name!),
           });
         }
       }
@@ -421,7 +445,7 @@ export class StatusRuleExecutor {
   };
 
   getMonitorDownSummary({ statusConfig }: { statusConfig: AlertStatusMetaData }) {
-    const { ping, configId, locationId, checks } = statusConfig;
+    const { latestPing: ping, configId, locationId, checks } = statusConfig;
 
     return getMonitorSummary({
       monitorInfo: ping,
@@ -451,11 +475,11 @@ export class StatusRuleExecutor {
 
   getUngroupedDownSummary({ statusConfigs }: { statusConfigs: AlertStatusMetaData[] }) {
     const sampleConfig = statusConfigs[0];
-    const { ping, configId, checks } = sampleConfig;
+    const { latestPing: ping, configId, checks } = sampleConfig;
     const baseSummary = getMonitorSummary({
       monitorInfo: ping,
       reason: 'down',
-      locationId: statusConfigs.map((c) => c.ping.observer.name!),
+      locationId: statusConfigs.map((c) => c.latestPing.observer.name!),
       configId,
       dateFormat: this.dateFormat!,
       tz: this.tz!,
@@ -470,7 +494,7 @@ export class StatusRuleExecutor {
     });
     if (statusConfigs.length > 1) {
       baseSummary.locationNames = statusConfigs
-        .map((c) => c.ping.observer.geo?.name!)
+        .map((c) => c.latestPing.observer.geo?.name!)
         .join(` ${AND_LABEL} `);
     }
 

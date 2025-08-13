@@ -15,6 +15,7 @@ import type {
   SpacesUsage,
   FeatureTypeUsage,
   ResponseActionsUsage,
+  UpgradeableRulesSummary,
 } from './types';
 
 export const initialAlertSuppression: AlertSuppressionUsage = {
@@ -146,4 +147,23 @@ export const getInitialMaxAvgMin = (): MaxAvgMin => ({
   max: 0.0,
   avg: 0.0,
   min: 0.0,
+});
+
+/**
+ * Returns the initial usage statistics for rule upgrade status.
+ *
+ * The returned object contains default values for the total number of upgradeable rules,
+ * the number of customized rules, and the counts of enabled and disabled rules.
+ *
+ * @returns {UpgradeableRulesSummary} An object with initial values for rule upgrade status:
+ * - `total`: The total number of upgradeable rules (default is 0).
+ * - `customized`: The number of customized upgradeable rules (default is 0).
+ * - `enabled`: The number of enabled upgradeable rules (default is 0).
+ * - `disabled`: The number of disabled upgradeable rules (default is 0).
+ */
+export const getInitialRuleUpgradeStatus = (): UpgradeableRulesSummary => ({
+  total: 0,
+  customized: 0,
+  enabled: 0,
+  disabled: 0,
 });

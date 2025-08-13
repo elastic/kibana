@@ -216,7 +216,10 @@ export function ActionsPopover({
           <span>{runTestManually}</span>
         </EuiToolTip>
       ) : (
-        <NoPermissionsTooltip canUsePublicLocations={canUsePublicLocations}>
+        <NoPermissionsTooltip
+          canUsePublicLocations={canUsePublicLocations}
+          canEditSynthetics={canEditSynthetics}
+        >
           {runTestManually}
         </NoPermissionsTooltip>
       ),

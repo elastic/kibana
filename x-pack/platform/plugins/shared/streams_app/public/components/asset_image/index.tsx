@@ -70,6 +70,13 @@ const imageSets = {
       }
     ),
   },
+  extractFields: {
+    light: () => import('./extract_fields_light.png'),
+    dark: () => import('./extract_fields_dark.png'),
+    alt: i18n.translate('xpack.streams.streamDetailView.extractFieldsImage', {
+      defaultMessage: 'Extract fields image for the streams app',
+    }),
+  },
 };
 
 interface AssetImageProps extends Omit<EuiImageProps, 'src' | 'url' | 'alt'> {

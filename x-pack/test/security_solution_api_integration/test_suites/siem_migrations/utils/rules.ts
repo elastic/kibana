@@ -45,6 +45,7 @@ import {
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
 import { assertStatusCode } from './asserts';
+import { MigrationRequestParams, RequestParams } from './types';
 
 export interface SiemMigrationsAPIErrorResponse {
   status_code: number;
@@ -52,18 +53,8 @@ export interface SiemMigrationsAPIErrorResponse {
   message: string;
 }
 
-export interface RequestParams {
-  /** Optional expected status code parameter */
-  expectStatusCode?: number;
-}
-
 export interface CreateRuleMigrationRequestParams extends RequestParams {
   body?: CreateRuleMigrationRequestBody;
-}
-
-export interface MigrationRequestParams extends RequestParams {
-  /** `id` of the migration to get rules documents for */
-  migrationId: string;
 }
 
 export interface UpdateRuleMigrationRequestParams extends MigrationRequestParams {

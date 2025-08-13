@@ -98,12 +98,13 @@ export class ObservabilityPlugin
 
     const alertDetailsContextualInsightsService = new AlertDetailsContextualInsightsService();
 
-    plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
-    plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
-    plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
-
+    if (plugins.cases?.config.enabled) {
+      plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
+      plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
+      plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
+    }
     if (
-      plugins.cases &&
+      plugins.cases?.config.enabled &&
       plugins.observabilityShared.config.unsafe?.investigativeExperienceEnabled
     ) {
       plugins.cases.attachmentFramework.registerPersistableState({

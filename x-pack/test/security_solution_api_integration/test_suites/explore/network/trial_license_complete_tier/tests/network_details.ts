@@ -26,10 +26,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       before(async () => {
         supertest = await utils.createSuperTest();
         search = await utils.createSearch();
-        await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/filebeat/default');
       });
       after(
-        async () => await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default')
+        async () =>
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/filebeat/default')
       );
 
       it('Make sure that we get Network details data', async () => {
@@ -54,10 +55,15 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       before(async () => {
         supertest = await utils.createSuperTest();
         search = await utils.createSearch();
-        await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/default');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/packetbeat/default'
+        );
       });
       after(
-        async () => await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/default')
+        async () =>
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/packetbeat/default'
+          )
       );
 
       it('Make sure that we get Network details data', async () => {

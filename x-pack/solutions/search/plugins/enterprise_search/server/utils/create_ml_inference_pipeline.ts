@@ -33,6 +33,7 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
       id: parentPipelineId,
     });
     parentPipeline = pipelineResponse[parentPipelineId];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // Swallow error; in this case the next step will return
   }

@@ -11,7 +11,7 @@ import { BehaviorSubject, of } from 'rxjs';
 
 import { SerializedPanelState } from '@kbn/presentation-publishing';
 
-import { CONTROL_GROUP_TYPE } from '../../../common';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import type { ControlFetchContext } from '../../control_group/control_fetch/control_fetch';
 import type { ControlGroupApi } from '../../control_group/types';
 import { ControlApiRegistration, ControlFactory, DefaultControlApi } from '../types';
@@ -27,7 +27,7 @@ export const getMockedControlGroupApi = (
   const controlStateMap: Record<string, BehaviorSubject<SerializedPanelState<object>>> = {};
   const controlFetchMap = new Map<string, BehaviorSubject<ControlFetchContext>>();
   return {
-    type: CONTROL_GROUP_TYPE,
+    type: CONTROLS_GROUP_TYPE,
     parentApi: dashboardApi,
     autoApplySelections$: new BehaviorSubject(true),
     ignoreParentSettings$: new BehaviorSubject(undefined),

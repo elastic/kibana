@@ -92,6 +92,8 @@ export const CASES_PATH = '/cases' as const;
 export const OVERVIEW_PATH = '/overview' as const;
 export const ONBOARDING_PATH = '/get_started' as const;
 export const DATA_QUALITY_PATH = '/data_quality' as const;
+export const REPORTS_PATH = '/reports' as const;
+export const AI_VALUE_PATH = `${REPORTS_PATH}/ai_value` as const;
 export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
@@ -115,7 +117,9 @@ export const COVERAGE_OVERVIEW_PATH = '/rules_coverage_overview' as const;
 export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;
+export const ENDPOINT_EXCEPTIONS_PATH = `${MANAGEMENT_PATH}/endpoint_exceptions` as const;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
+export const TRUSTED_DEVICES_PATH = `${MANAGEMENT_PATH}/trusted_devices` as const;
 export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
@@ -173,6 +177,12 @@ export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as con
 
 /** This Kibana Advanced Setting sets a default AI connector for serverless AI features (AI for SOC) */
 export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as const;
+
+/** This Kibana Advanced Setting sets a default AI value report minutes per alert */
+export const DEFAULT_VALUE_REPORT_MINUTES = 'securitySolution:defaultValueReportMinutes' as const;
+
+/** This Kibana Advanced Setting sets a default AI value report hourly analyst rate */
+export const DEFAULT_VALUE_REPORT_RATE = 'securitySolution:defaultValueReportRate' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =

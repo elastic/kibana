@@ -335,7 +335,7 @@ const styles = {
       opacity: 0;
       transform: translateX(100%);
     }
-  
+
     100% {
       opacity: 1;
       transform: translateX(0%);
@@ -347,7 +347,7 @@ const styles = {
       opacity: 1;
       transform: translateX(0%);
     }
-  
+
     100% {
       opacity: 0;
       transform: translateX(100%);

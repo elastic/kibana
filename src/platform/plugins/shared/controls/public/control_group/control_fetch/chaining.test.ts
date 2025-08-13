@@ -11,7 +11,7 @@ import { BehaviorSubject, skip } from 'rxjs';
 
 import { Filter } from '@kbn/es-query';
 
-import { ControlGroupChainingSystem } from '../../../common';
+import { ControlsChainingSystem } from '@kbn/controls-schemas';
 import { chaining$ } from './chaining';
 
 const FILTER_ALPHA = {
@@ -37,7 +37,7 @@ const FILTER_DELTA = {
 
 describe('chaining$', () => {
   const onFireMock = jest.fn();
-  const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>('HIERARCHICAL');
+  const chainingSystem$ = new BehaviorSubject<ControlsChainingSystem>('HIERARCHICAL');
   const controlsInOrder$ = new BehaviorSubject<Array<{ id: string; type: string }>>([]);
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
   const alphaControlApi = {

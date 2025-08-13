@@ -202,7 +202,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.streams.some((stream) => stream.name === 'test-group')).to.eql(true);
       });
 
-      it('unsuccessfully creates a group stream with the same name as a unwired stream', async () => {
+      it('unsuccessfully creates a group stream with the same name as a classic stream', async () => {
         await esClient.index({ index: 'metrics-test-test', document: { '@timestamp': '2025' } });
         await apiClient
           .fetch('PUT /api/streams/{name} 2023-10-31', {

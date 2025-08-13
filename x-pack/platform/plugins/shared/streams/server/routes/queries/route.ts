@@ -60,7 +60,7 @@ const listQueriesRoute = createServerRoute({
       path: { name: streamName },
     } = params;
 
-    const queryAssets = await assetClient.getAssetLinks(streamName, ['query']);
+    const { [streamName]: queryAssets } = await assetClient.getAssetLinks([streamName], ['query']);
 
     return {
       queries: queryAssets.map((queryAsset) => queryAsset.query),

@@ -5,58 +5,51 @@
  * 2.0.
  */
 
-import { ToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ToolType } from '@kbn/onechat-common';
+import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common/tools/esql';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { CreateToolPayload } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
 import { useOnechatServices } from '../use_onechat_service';
 
-export const useOnechatTools = () => {
+export interface UseOnechatToolsProps {
+  includeSystemTools?: boolean;
+}
+
+export const useOnechatTools = ({ includeSystemTools }: UseOnechatToolsProps = {}) => {
   const { toolsService } = useOnechatServices();
 
-  const {
-    data: tools,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: queryKeys.tools.all,
     queryFn: () => toolsService.list(),
   });
 
-  return { tools: tools ?? [], isLoading, error };
+  const tools = useMemo(() => {
+    if (!data) {
+      return [];
+    }
+    if (includeSystemTools) {
+      return data;
+    }
+    return data.filter((tool) => tool.type !== ToolType.builtin);
+  }, [data, includeSystemTools]);
+
+  return { tools, isLoading, error };
 };
 
-export const useBaseTools = () => {
-  const { tools, ...rest } = useOnechatTools();
-
-  const baseTools = useMemo(() => tools.filter((tool) => tool.type === ToolType.builtin), [tools]);
-  return { tools: baseTools, ...rest };
-};
-
-export const useEsqlTools = () => {
-  const { tools, ...rest } = useOnechatTools();
-
-  const esqlTools = useMemo(() => tools.filter((tool) => tool.type === ToolType.esql), [tools]);
-  return { tools: esqlTools, ...rest };
-};
-
-export const useCreateTool = ({
-  onSuccess,
-  onError,
-}: {
-  onSuccess?: (tool: ToolDefinitionWithSchema) => void;
-  onError?: (error: Error) => void;
-}) => {
-  const queryClient = useQueryClient();
+export const useOnechatTool = (toolId?: string) => {
   const { toolsService } = useOnechatServices();
 
-  const { mutateAsync, isLoading } = useMutation({
-    mutationFn: (tool: CreateToolPayload) => toolsService.create(tool),
-    onSuccess,
-    onError,
-    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.tools.all }),
+  const {
+    data: tool,
+    isLoading,
+    error,
+  } = useQuery({
+    enabled: !!toolId,
+    queryKey: queryKeys.tools.byId(toolId),
+    // toolId! is safe because of the enabled check above
+    queryFn: () => toolsService.get({ toolId: toolId! }),
   });
 
-  return { createTool: mutateAsync, isLoading };
+  return { tool: tool as EsqlToolDefinitionWithSchema | undefined, isLoading, error };
 };

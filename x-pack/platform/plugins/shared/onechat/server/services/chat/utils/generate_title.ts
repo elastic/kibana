@@ -9,7 +9,7 @@ import { defer, shareReplay, switchMap, Observable } from 'rxjs';
 import { z } from '@kbn/zod';
 import { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { ElasticGenAIAttributes, withInferenceSpan } from '@kbn/inference-tracing';
+import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { Conversation, ConversationRound, RoundInput } from '@kbn/onechat-common';
 import { conversationToLangchainMessages } from '../../agents/modes/utils';
 
@@ -44,8 +44,9 @@ export const generateConversationTitle = async ({
   nextInput: RoundInput;
   chatModel: InferenceChatModel;
 }) => {
-  return withInferenceSpan(
-    { name: 'generate_title', [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' },
+  return withActiveInferenceSpan(
+    'GenerateTitle',
+    { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
     async (span) => {
       const structuredModel = chatModel.withStructuredOutput(
         z.object({

@@ -91,7 +91,7 @@ export function StreamDetailView() {
           <EuiFlexGroup gutterSize="s" alignItems="center">
             {key}
             <EuiBadgeGroup gutterSize="s">
-              {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+              {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
               <LifecycleBadge lifecycle={definition.effective_lifecycle} />
             </EuiBadgeGroup>
           </EuiFlexGroup>

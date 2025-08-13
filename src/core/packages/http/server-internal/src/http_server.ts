@@ -565,6 +565,14 @@ export class HttpServer {
       // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
       // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
       app.traceId = apm.currentTraceIds['trace.id'];
+      app.span = apm.startSpan('pre-route handler middlewares');
+
+      return responseToolkit.continue;
+    });
+
+    this.server!.ext('onPreHandler', (request, responseToolkit) => {
+      (request.app as KibanaRequestState).span?.end();
+      (request.app as KibanaRequestState).span = null;
 
       return responseToolkit.continue;
     });
@@ -744,6 +752,7 @@ export class HttpServer {
               reason: 'Route serves static assets',
             },
           },
+          excludeFromRateLimiter: true,
         },
         auth: false,
         cache: {

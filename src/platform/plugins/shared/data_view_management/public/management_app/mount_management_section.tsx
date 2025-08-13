@@ -19,9 +19,9 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { NoDataViewsPromptKibanaProvider } from '@kbn/shared-ux-prompt-no-data-views';
 import {
-  IndexPatternTableWithRouter,
   EditIndexPatternContainer,
   CreateEditFieldContainer,
+  IndexPatternTableContainerRouter,
 } from '../components';
 import {
   IndexPatternManagementStartDependencies,
@@ -127,7 +127,7 @@ export async function mountManagementSection(
           <Router history={params.history}>
             <Routes>
               <Route path={['/create']}>
-                <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
+                <IndexPatternTableContainerRouter canSave={canSave} showCreateDialog={true} />
               </Route>
               <Route path={createEditPath}>
                 <CreateEditFieldContainer />
@@ -137,7 +137,7 @@ export async function mountManagementSection(
               </Route>
               <Redirect path={'/patterns*'} to={'dataView*'} />
               <Route path={['/']}>
-                <IndexPatternTableWithRouter canSave={canSave} />
+                <IndexPatternTableContainerRouter canSave={canSave} />
               </Route>
             </Routes>
           </Router>

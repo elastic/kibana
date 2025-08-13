@@ -19,9 +19,10 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const superTestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('fleet_agents_status', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/230292
+  describe.skip('fleet_agents_status', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       await es.create({
         id: 'fleet-agent-policies:policy-inactivity-timeout',
         index: INGEST_SAVED_OBJECT_INDEX,
@@ -234,7 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
     });
 
     it('should return the status of agents', async () => {

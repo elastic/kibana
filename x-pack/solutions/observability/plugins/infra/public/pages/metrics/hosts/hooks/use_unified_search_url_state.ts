@@ -21,7 +21,7 @@ import {
   useSyncKibanaTimeFilterTime,
 } from '../../../../hooks/use_kibana_timefilter_time';
 import { DEFAULT_HOST_LIMIT, LOCAL_STORAGE_HOST_LIMIT_KEY } from '../constants';
-import { METRIC_SCHEMA_SEMCONV, METRIC_SCHEMA_ECS } from '../../../../../common/constants';
+import { DataSchemaFormatRT } from '../../../../../common/http_api/shared';
 
 const DEFAULT_QUERY = {
   language: 'kuery',
@@ -147,11 +147,7 @@ const HostsStateRT = rt.type({
   query: HostsQueryStateRT,
   dateRange: StringDateRangeRT,
   limit: rt.number,
-  preferredSchema: rt.union([
-    rt.literal(METRIC_SCHEMA_ECS),
-    rt.literal(METRIC_SCHEMA_SEMCONV),
-    rt.null,
-  ]),
+  preferredSchema: rt.union([DataSchemaFormatRT, rt.null]),
 });
 
 export type HostsState = rt.TypeOf<typeof HostsStateRT>;

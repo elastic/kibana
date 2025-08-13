@@ -19,7 +19,7 @@ export const container = createInventoryModel('container', {
       defaultMessage: 'Docker Container',
     }
   ),
-  requiredModule: 'docker',
+  requiredIntegration: 'docker',
   crosslinkSupport: {
     details: true,
     logs: true,
@@ -32,16 +32,4 @@ export const container = createInventoryModel('container', {
     ip: 'container.ip_address',
   },
   metrics,
-  requiredMetrics: [
-    'containerOverview',
-    'containerCpuUsage',
-    'containerMemory',
-    'containerNetworkTraffic',
-    'containerDiskIOBytes',
-    'containerDiskIOOps',
-    'containerK8sOverview',
-    'containerK8sCpuUsage',
-    'containerK8sMemoryUsage',
-  ],
-  tooltipMetrics: ['cpu', 'memory', 'rx', 'tx'],
 });

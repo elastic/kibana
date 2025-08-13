@@ -438,14 +438,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    describe('Unwired streams update', () => {
-      const unwiredPutBody: Streams.UnwiredStream.UpsertRequest = {
+    describe('Classic streams update', () => {
+      const classicPutBody: Streams.ClassicStream.UpsertRequest = {
         stream: {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
             processing: [],
-            unwired: {},
+            classic: {},
           },
         },
         dashboards: [],
@@ -490,11 +490,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
 
       it('inherit falls back to template dsl configuration', async () => {
-        const indexName = 'unwired-stream-inherit-dsl';
+        const indexName = 'classic-stream-inherit-dsl';
         await createDataStream(indexName, { dsl: { data_retention: '77d' } });
 
         // initially set to inherit which is a noop
-        await putStream(apiClient, indexName, unwiredPutBody);
+        await putStream(apiClient, indexName, classicPutBody);
         await esClient.indices.rollover({ alias: indexName });
         await expectLifecycle([indexName], { dsl: { data_retention: '77d' } });
 
@@ -505,7 +505,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             description: '',
             ingest: {
-              ...unwiredPutBody.stream.ingest,
+              ...classicPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '2d' } },
             },
           },
@@ -513,12 +513,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await expectLifecycle([indexName], { dsl: { data_retention: '2d' } });
 
         // inherit sets the lifecycle back to the template configuration
-        await putStream(apiClient, indexName, unwiredPutBody, 200);
+        await putStream(apiClient, indexName, classicPutBody, 200);
         await expectLifecycle([indexName], { dsl: { data_retention: '77d' } });
       });
 
       it('overrides dsl retention', async () => {
-        const indexName = 'unwired-stream-override-dsl';
+        const indexName = 'classic-stream-override-dsl';
         await createDataStream(indexName, { dsl: { data_retention: '77d' } });
 
         await putStream(apiClient, indexName, {
@@ -527,7 +527,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             description: '',
             ingest: {
-              ...unwiredPutBody.stream.ingest,
+              ...classicPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '11d' } },
             },
           },
@@ -538,7 +538,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       if (isServerless) {
         it('does not support ilm', async () => {
-          const indexName = 'unwired-stream-no-ilm';
+          const indexName = 'classic-stream-no-ilm';
           await createDataStream(indexName, { dsl: { data_retention: '2d' } });
 
           await putStream(
@@ -560,7 +560,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       } else {
         it('updates from ilm to dsl', async () => {
-          const indexName = 'unwired-stream-ilm-to-dsl';
+          const indexName = 'classic-stream-ilm-to-dsl';
           await createDataStream(indexName, { ilm: { policy: 'my-policy' } });
 
           await putStream(apiClient, indexName, {
@@ -569,7 +569,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               description: '',
               ingest: {
-                ...unwiredPutBody.stream.ingest,
+                ...classicPutBody.stream.ingest,
                 lifecycle: { dsl: { data_retention: '1d' } },
               },
             },
@@ -579,7 +579,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('updates from dsl to ilm', async () => {
-          const indexName = 'unwired-stream-dsl-to-ilm';
+          const indexName = 'classic-stream-dsl-to-ilm';
           await createDataStream(indexName, { dsl: { data_retention: '10d' } });
 
           await putStream(apiClient, indexName, {
@@ -588,7 +588,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               description: '',
               ingest: {
-                ...unwiredPutBody.stream.ingest,
+                ...classicPutBody.stream.ingest,
                 lifecycle: { ilm: { policy: 'my-policy' } },
               },
             },
@@ -598,12 +598,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('inherit falls back to template dsl or ilm configuration', async () => {
-          const indexName = 'unwired-stream-inherit-dsl-ilm';
+          const indexName = 'classic-stream-inherit-dsl-ilm';
           const templateLifecycle = { ilm: { policy: 'my-policy' } };
           await createDataStream(indexName, templateLifecycle);
 
           // initially set to inherit which is a noop
-          await putStream(apiClient, indexName, unwiredPutBody);
+          await putStream(apiClient, indexName, classicPutBody);
           await esClient.indices.rollover({ alias: indexName });
           await expectLifecycle([indexName], templateLifecycle);
 
@@ -614,7 +614,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               description: '',
               ingest: {
-                ...unwiredPutBody.stream.ingest,
+                ...classicPutBody.stream.ingest,
                 lifecycle: { dsl: { data_retention: '2d' } },
               },
             },
@@ -622,7 +622,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await expectLifecycle([indexName], { dsl: { data_retention: '2d' } });
 
           // inherit sets the lifecycle back to the template configuration
-          await putStream(apiClient, indexName, unwiredPutBody);
+          await putStream(apiClient, indexName, classicPutBody);
           await expectLifecycle([indexName], templateLifecycle);
 
           // update the template to use a new ilm policy
@@ -642,12 +642,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('inherit falls back to template disabled configuration', async () => {
-          const indexName = 'unwired-stream-inherit-disabled';
+          const indexName = 'classic-stream-inherit-disabled';
           const templateLifecycle = { disabled: {} };
           await createDataStream(indexName, templateLifecycle);
 
           // initially set to inherit which is a noop
-          await putStream(apiClient, indexName, unwiredPutBody);
+          await putStream(apiClient, indexName, classicPutBody);
           await esClient.indices.rollover({ alias: indexName });
           await expectLifecycle([indexName], templateLifecycle);
 
@@ -658,7 +658,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               description: '',
               ingest: {
-                ...unwiredPutBody.stream.ingest,
+                ...classicPutBody.stream.ingest,
                 lifecycle: { dsl: { data_retention: '2d' } },
               },
             },
@@ -672,7 +672,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               description: '',
               ingest: {
-                ...unwiredPutBody.stream.ingest,
+                ...classicPutBody.stream.ingest,
                 lifecycle: { ilm: { policy: 'my-policy' } },
               },
             },
@@ -680,7 +680,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await expectLifecycle([indexName], { ilm: { policy: 'my-policy' } });
 
           // inherit sets the lifecycle back to the template configuration
-          await putStream(apiClient, indexName, unwiredPutBody);
+          await putStream(apiClient, indexName, classicPutBody);
           await expectLifecycle([indexName], templateLifecycle);
         });
       }

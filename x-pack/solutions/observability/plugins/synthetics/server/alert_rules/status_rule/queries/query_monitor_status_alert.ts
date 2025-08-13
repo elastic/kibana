@@ -120,7 +120,7 @@ export async function queryMonitorStatusAlert({
             });
 
             const meta: AlertStatusMetaData = {
-              ping: latestPing,
+              latestPing,
               configId,
               monitorQueryId,
               locationId: monLocationId,

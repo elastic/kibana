@@ -99,12 +99,9 @@ describe('Form', () => {
     });
 
     await waitFor(() => {
-      expect(services.saveChanges).toHaveBeenCalledWith(
-        {
-          string: { type: 'string', unsavedValue: 'test' },
-        },
-        'namespace'
-      );
+      expect(services.saveChanges).toHaveBeenCalledWith({
+        string: { type: 'string', unsavedValue: 'test', needsReload: false, scope: 'namespace' },
+      });
     });
   });
 

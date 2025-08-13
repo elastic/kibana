@@ -86,7 +86,7 @@ export const createToolCallMessages = (toolCall: ToolCallWithResult): [AIMessage
 
   const toolResultMessage = new ToolMessage({
     tool_call_id: toolCall.tool_call_id,
-    content: toolCall.result,
+    content: toolCall.results,
   });
 
   return [toolCallMessage, toolResultMessage];

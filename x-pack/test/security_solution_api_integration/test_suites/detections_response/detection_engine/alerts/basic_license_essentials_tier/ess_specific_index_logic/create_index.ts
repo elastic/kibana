@@ -13,7 +13,7 @@ import {
 
 import { SIGNALS_FIELD_ALIASES_VERSION } from '@kbn/security-solution-plugin/server/lib/detection_engine/routes/index/get_signals_template';
 
-import { deleteAllAlerts } from '../../../../../../../common/utils/security_solution';
+import { deleteAllAlerts } from '../../../../../../config/services/detections_response';
 
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
@@ -31,11 +31,15 @@ export default ({ getService }: FtrProviderContext) => {
     describe('elastic admin', () => {
       describe('with another index that shares index alias', () => {
         before(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/signals/index_alias_clash');
+          await esArchiver.load(
+            'x-pack/solutions/security/test/fixtures/es_archives/signals/index_alias_clash'
+          );
         });
 
         after(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/signals/index_alias_clash');
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/signals/index_alias_clash'
+          );
         });
 
         it('should return 200 for create_index', async () => {
@@ -50,11 +54,15 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('with an outdated alerts index', () => {
         beforeEach(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
+          await esArchiver.load(
+            'x-pack/solutions/security/test/fixtures/es_archives/endpoint/resolver/signals'
+          );
         });
 
         afterEach(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/endpoint/resolver/signals'
+          );
         });
 
         it('should report that alerts index is outdated', async () => {
@@ -86,13 +94,13 @@ export default ({ getService }: FtrProviderContext) => {
       describe('with reIndexed from 7.xto 8.x .siem-signals index', () => {
         beforeEach(async () => {
           await esArchiver.load(
-            'x-pack/test/functional/es_archives/signals/reindexed_v8_siem_signals'
+            'x-pack/solutions/security/test/fixtures/es_archives/signals/reindexed_v8_siem_signals'
           );
         });
 
         afterEach(async () => {
           await esArchiver.unload(
-            'x-pack/test/functional/es_archives/signals/reindexed_v8_siem_signals'
+            'x-pack/solutions/security/test/fixtures/es_archives/signals/reindexed_v8_siem_signals'
           );
           await es.indices.delete({
             index: '.reindexed-v8-siem-signals-default-000002',

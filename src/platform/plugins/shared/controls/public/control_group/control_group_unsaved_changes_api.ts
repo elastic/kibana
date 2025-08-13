@@ -23,7 +23,8 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
-import type { ControlGroupSerializedState, ControlPanelsState } from '../../common';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
+import type { ControlPanelsState } from '../../common';
 import { apiPublishesAsyncFilters } from '../controls/data_controls/publishes_async_filters';
 import { getControlsInOrder, type ControlsInOrder } from './init_controls_manager';
 import { deserializeControlGroup } from './utils/serialization_utils';
@@ -47,10 +48,10 @@ export function initializeControlGroupUnsavedChanges({
   layout$: PublishingSubject<ControlsInOrder>;
   parentApi: unknown;
   resetControlsUnsavedChanges: (lastSavedControlsState: ControlPanelsState) => void;
-  serializeControlGroupState: () => SerializedPanelState<ControlGroupSerializedState>;
+  serializeControlGroupState: () => SerializedPanelState<ControlsGroupState>;
 }) {
   function getLastSavedControlsState() {
-    if (!apiHasLastSavedChildState<ControlGroupSerializedState>(parentApi)) {
+    if (!apiHasLastSavedChildState<ControlsGroupState>(parentApi)) {
       return {};
     }
     const lastSavedControlGroupState = parentApi.getLastSavedStateForChild(controlGroupId);
@@ -64,7 +65,7 @@ export function initializeControlGroupUnsavedChanges({
     return controlState ? { rawState: controlState } : undefined;
   }
 
-  const lastSavedControlsState$ = apiHasLastSavedChildState<ControlGroupSerializedState>(parentApi)
+  const lastSavedControlsState$ = apiHasLastSavedChildState<ControlsGroupState>(parentApi)
     ? parentApi.lastSavedStateForChild$(controlGroupId).pipe(map(() => getLastSavedControlsState()))
     : of({});
 

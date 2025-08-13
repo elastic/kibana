@@ -37,14 +37,14 @@ const createActions = (testBed: TestBed) => {
   };
 
   const clickPipelineAt = async (index: number) => {
-    const { component, table, router } = testBed;
+    const { component, table } = testBed;
     const { rows } = table.getMetaData('pipelinesTable');
     const pipelineLink = findTestSubject(rows[index].reactWrapper, 'pipelineDetailsLink');
 
-    await act(async () => {
-      const { href } = pipelineLink.props();
-      router.navigateTo(href!);
+    act(() => {
+      pipelineLink.simulate('click');
     });
+
     component.update();
   };
 
@@ -107,7 +107,7 @@ export type PipelineListTestSubjects =
   | 'createPipelineDropdown'
   | 'pipelinesTable'
   | 'pipelineDetails'
-  | 'pipelineDetails.title'
+  | 'detailsPanelTitle'
   | 'deletePipelinesConfirmation'
   | 'emptyList'
   | 'emptyList.title'
@@ -121,4 +121,5 @@ export type PipelineListTestSubjects =
   | 'pipelineError.cause'
   | 'missingCustomPipeline'
   | 'missingCustomPipeline.cause'
-  | 'createCustomPipeline';
+  | 'createCustomPipeline'
+  | 'pipelineTreePanel';

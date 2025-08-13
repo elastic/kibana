@@ -18,7 +18,7 @@ import { i18nTexts } from './i18n_texts';
 
 import { createStateSubject, type SimpleStateSubject, parseFileName } from './util';
 
-interface FileState {
+export interface FileState {
   file: File;
   status: 'idle' | 'uploading' | 'uploaded' | 'upload_failed';
   id?: string;

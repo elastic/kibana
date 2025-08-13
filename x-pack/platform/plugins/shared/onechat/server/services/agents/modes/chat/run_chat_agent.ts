@@ -45,6 +45,7 @@ export const runChatAgent: RunChatAgentFn = async (
   { logger, request, modelProvider, toolProvider, events }
 ) => {
   const model = await modelProvider.getDefaultModel();
+  logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
 
   const selectedTools = await selectProviderTools({
     provider: toolProvider,
@@ -62,12 +63,15 @@ export const runChatAgent: RunChatAgentFn = async (
     nextInput,
     previousRounds: conversation,
   });
+
   const agentGraph = createAgentGraph({
     logger,
     chatModel: model.chatModel,
     tools: langchainTools,
     customInstructions,
   });
+
+  logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
 
   const eventStream = agentGraph.streamEvents(
     { initialMessages },
@@ -90,6 +94,7 @@ export const runChatAgent: RunChatAgentFn = async (
     convertGraphEvents({
       graphName: chatAgentGraphName,
       toolIdMapping,
+      logger,
     }),
     addRoundCompleteEvent({ userInput: nextInput }),
     shareReplay()

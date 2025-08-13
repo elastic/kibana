@@ -18,7 +18,7 @@ export const awsRDS = createInventoryModel('awsRDS', {
       defaultMessage: 'RDS Database',
     }
   ),
-  requiredModule: 'aws',
+  requiredIntegration: 'aws',
   crosslinkSupport: {
     details: true,
     logs: true,
@@ -30,18 +30,4 @@ export const awsRDS = createInventoryModel('awsRDS', {
     id: 'aws.rds.db_instance.arn',
     name: 'aws.rds.db_instance.identifier',
   },
-  requiredMetrics: [
-    'awsRDSCpuTotal',
-    'awsRDSConnections',
-    'awsRDSQueriesExecuted',
-    'awsRDSActiveTransactions',
-    'awsRDSLatency',
-  ],
-  tooltipMetrics: [
-    'cpu',
-    'rdsLatency',
-    'rdsConnections',
-    'rdsQueriesExecuted',
-    'rdsActiveTransactions',
-  ],
 });

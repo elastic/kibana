@@ -40,12 +40,9 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 
 import { asyncMap } from '@kbn/std';
-import {
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_WIDTH,
-  type ControlWidth,
-  type DefaultDataControlState,
-} from '../../../common';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
+import type { ControlWidth } from '@kbn/controls-schemas';
+import type { DefaultDataControlState } from '../../../common';
 import { dataViewsService } from '../../services/kibana_services';
 import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
 import type { ControlGroupApi } from '../../control_group/types';

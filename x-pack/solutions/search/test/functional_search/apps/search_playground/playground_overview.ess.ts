@@ -62,14 +62,14 @@ export default function (ftrContext: FtrProviderContext) {
     });
   };
 
-  describe('Playground', () => {
+  describe('Unsaved Playground', () => {
     before(async () => {
       proxy = await createLlmProxy(log);
-      await pageObjects.common.navigateToApp('searchPlayground');
+      await pageObjects.common.navigateToApp('searchPlayground', { path: 'chat' });
     });
 
     beforeEach(async () => {
-      await pageObjects.common.navigateToApp('searchPlayground');
+      await pageObjects.common.navigateToApp('searchPlayground', { path: 'chat' });
     });
 
     after(async () => {

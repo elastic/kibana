@@ -31,6 +31,7 @@ import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-mocks';
 
 export function createInternalCoreSetupMock() {
   const setupDeps = {
@@ -58,6 +59,7 @@ export function createInternalCoreSetupMock() {
     security: securityServiceMock.createInternalSetup(),
     userProfile: userProfileServiceMock.createInternalSetup(),
     pricing: pricingServiceMock.createSetupContract(),
+    injection: injectionServiceMock.createInternalSetupContract(),
   };
   return setupDeps;
 }

@@ -10,20 +10,19 @@
 import {
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
 
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { i18n } from '@kbn/i18n';
 import {
   WORKFLOWS_EXECUTION_LOGS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../common';
+import type { WorkflowsManagementConfig } from './config';
 import { workflowSavedObjectType } from './saved_objects/workflow';
 import { SchedulerService } from './scheduler/scheduler_service';
 import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
@@ -37,15 +36,16 @@ import type {
 import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 import { defineRoutes } from './workflows_management/workflows_management_routes';
 import { WorkflowsService } from './workflows_management/workflows_management_service';
-
-/**
- * The order of appearance in the feature privilege page
- * under the management section.
- */
-const FEATURE_ORDER = 3000;
+// Import the workflows connector
+import {
+  getWorkflowsConnectorAdapter,
+  getConnectorType as getWorkflowsConnectorType,
+} from './connectors/workflows';
+import { registerFeatures } from './features';
 
 export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
   private readonly logger: Logger;
+  private readonly config: WorkflowsManagementConfig;
   private workflowsService: WorkflowsService | null = null;
   private schedulerService: SchedulerService | null = null;
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
@@ -55,10 +55,41 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get<WorkflowsManagementConfig>();
   }
 
   public setup(core: CoreSetup, plugins: WorkflowsManagementPluginServerDependenciesSetup) {
     this.logger.debug('Workflows Management: Setup');
+
+    // Register workflows connector if actions plugin is available
+    if (plugins.actions) {
+      // Create workflows service function for the connector
+      const getWorkflowsService = async (request: KibanaRequest) => {
+        // Return a function that will be called by the connector
+        return async (workflowId: string, inputs: Record<string, unknown>) => {
+          if (!this.api) {
+            throw new Error('Workflows management API not initialized');
+          }
+
+          // Get the workflow first
+          const workflow = await this.api.getWorkflow(workflowId);
+          if (!workflow) {
+            throw new Error(`Workflow not found: ${workflowId}`);
+          }
+
+          // Run the workflow, @tb: maybe switch to scheduler?
+          return await this.api.runWorkflow(workflow, inputs);
+        };
+      };
+
+      // Register the workflows connector
+      plugins.actions.registerType(getWorkflowsConnectorType({ getWorkflowsService }));
+
+      // Register connector adapter for alerting if available
+      if (plugins.alerting) {
+        plugins.alerting.registerConnectorAdapter(getWorkflowsConnectorAdapter());
+      }
+    }
 
     // Register workflow task definition
     if (plugins.taskManager) {
@@ -126,161 +157,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     // Register saved object types
     core.savedObjects.registerType(workflowSavedObjectType);
 
-    plugins.features?.registerKibanaFeature({
-      id: 'workflowsManagement',
-      name: i18n.translate(
-        'platform.plugins.shared.workflows_management.featureRegistry.workflowsManagementFeatureName',
-        {
-          defaultMessage: 'Workflows Management',
-        }
-      ),
-      category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-      app: [],
-      order: FEATURE_ORDER,
-      management: {
-        kibana: ['workflowsManagement'],
-      },
-      privileges: {
-        all: {
-          app: [],
-          api: [],
-          management: {
-            kibana: ['workflowsManagement'],
-          },
-          savedObject: {
-            all: ['workflows', 'workflow_executions'],
-            read: [],
-          },
-          ui: ['create', 'update', 'delete', 'read', 'execute'],
-        },
-        read: {
-          app: [],
-          api: [],
-          management: {
-            kibana: ['workflowsManagement'],
-          },
-          savedObject: {
-            all: [],
-            read: ['workflows', 'workflow_executions'],
-          },
-          ui: ['read'],
-        },
-      },
-      subFeatures: [
-        {
-          name: i18n.translate(
-            'platform.plugins.shared.workflows_management.featureRegistry.workflowsManagementSubFeatureName',
-            {
-              defaultMessage: 'Workflows Actions',
-            }
-          ),
-          privilegeGroups: [
-            {
-              groupType: 'independent',
-              privileges: [
-                {
-                  api: ['workflow:create'],
-                  id: 'workflow_create',
-                  name: i18n.translate(
-                    'platform.plugins.shared.workflows_management.featureRegistry.createWorkflowSubFeaturePrivilege',
-                    {
-                      defaultMessage: 'Create',
-                    }
-                  ),
-                  includeIn: 'all',
-                  savedObject: {
-                    all: ['workflow'],
-                    read: [],
-                  },
-                  ui: ['createWorkflow'],
-                },
-                {
-                  api: ['workflow:update'],
-                  id: 'workflow_update',
-                  name: i18n.translate(
-                    'platform.plugins.shared.workflows_management.featureRegistry.updateWorkflowSubFeaturePrivilege',
-                    {
-                      defaultMessage: 'Update',
-                    }
-                  ),
-                  includeIn: 'all',
-                  savedObject: {
-                    all: ['workflow'],
-                    read: [],
-                  },
-                  ui: ['updateWorkflow'],
-                },
-                {
-                  api: ['workflow:delete'],
-                  id: 'workflow_delete',
-                  name: i18n.translate(
-                    'platform.plugins.shared.workflows_management.featureRegistry.deleteWorkflowSubFeaturePrivilege',
-                    {
-                      defaultMessage: 'Delete',
-                    }
-                  ),
-                  includeIn: 'all',
-                  savedObject: {
-                    all: ['workflow'],
-                    read: [],
-                  },
-                  ui: ['deleteWorkflow'],
-                },
-                {
-                  api: ['workflow:execute'],
-                  id: 'workflow_execute',
-                  name: i18n.translate(
-                    'platform.plugins.shared.workflows_management.featureRegistry.executeWorkflowSubFeaturePrivilege',
-                    {
-                      defaultMessage: 'Execute',
-                    }
-                  ),
-                  includeIn: 'all',
-                  savedObject: {
-                    all: ['workflow_execution'],
-                    read: ['workflow'],
-                  },
-                  ui: ['executeWorkflow'],
-                },
-                {
-                  api: ['workflow:read'],
-                  id: 'workflow_read',
-                  name: i18n.translate(
-                    'platform.plugins.shared.workflows_management.featureRegistry.readWorkflowSubFeaturePrivilege',
-                    {
-                      defaultMessage: 'Read',
-                    }
-                  ),
-                  includeIn: 'all',
-                  savedObject: {
-                    read: ['workflow'],
-                    all: [],
-                  },
-                  ui: ['readWorkflow'],
-                },
-                {
-                  api: ['workflow_execution:read'],
-                  id: 'workflow_execution_read',
-                  name: i18n.translate(
-                    'platform.plugins.shared.workflows_management.featureRegistry.readWorkflowExecutionSubFeaturePrivilege',
-                    {
-                      defaultMessage: 'Read Workflow Execution',
-                    }
-                  ),
-                  includeIn: 'all',
-                  savedObject: {
-                    read: ['workflow_execution'],
-                    all: [],
-                  },
-                  ui: ['readWorkflowExecution'],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    });
+    registerFeatures(plugins);
 
     this.logger.debug('Workflows Management: Creating router');
     const router = core.http.createRouter();
@@ -304,12 +181,13 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       getSavedObjectsClient,
       WORKFLOWS_EXECUTIONS_INDEX,
       WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      WORKFLOWS_EXECUTION_LOGS_INDEX
+      WORKFLOWS_EXECUTION_LOGS_INDEX,
+      this.config.logging.console
     );
     this.api = new WorkflowsManagementApi(this.workflowsService);
 
     // Register server side APIs
-    defineRoutes(router, this.api);
+    defineRoutes(router, this.api, this.logger);
 
     return {
       management: this.api,
