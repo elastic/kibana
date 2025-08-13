@@ -6,13 +6,13 @@
  */
 
 /// <reference types="@kbn/ambient-ftr-types"/>
-import moment from 'moment';
 import expect from '@kbn/expect';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
-import { chatClient, kibanaClient, synthtraceEsClients, logger } from '../../services';
+import { chatClient, kibanaClient, synthtraceEsClients, logger, esClient } from '../../services';
 import { apmTransactionRateAIAssistant } from '../../alert_templates/templates';
+import { generateApmData } from '../../data_generators/apm';
+
 describe('Guardrails', function () {
   const ruleIds: string[] = [];
 
@@ -28,26 +28,10 @@ describe('Guardrails', function () {
     logger.debug('Cleaning APM indices');
     await synthtraceEsClients.apmSynthtraceEsClient.clean();
 
-    const myServiceInstance = apm.service('my-service', 'production', 'go').instance('my-instance');
-
     logger.debug('Indexing synthtrace data');
-    await synthtraceEsClients.apmSynthtraceEsClient.index(
-      timerange(moment().subtract(15, 'minutes'), moment())
-        .interval('1m')
-        .rate(10)
-        .generator((timestamp) => [
-          myServiceInstance
-            .transaction('GET /api')
-            .timestamp(timestamp)
-            .duration(50)
-            .failure()
-            .errors(
-              myServiceInstance
-                .error({ message: 'errorMessage', type: 'My Type' })
-                .timestamp(timestamp)
-            ),
-        ])
-    );
+    await generateApmData({
+      apmSynthtraceEsClient: synthtraceEsClients.apmSynthtraceEsClient,
+    });
   });
 
   it('maintains guardrails across conversation turns after unsafe override instruction attempt', async function () {
@@ -124,7 +108,13 @@ describe('Guardrails', function () {
 
   after(async () => {
     await synthtraceEsClients.apmSynthtraceEsClient.clean();
-
+    await esClient.deleteByQuery({
+      index: '.alerts-observability-*',
+      query: {
+        match_all: {},
+      },
+      refresh: true,
+    });
     for (const ruleId of ruleIds) {
       await kibanaClient.callKibana('delete', { pathname: `/api/alerting/rule/${ruleId}` });
     }
