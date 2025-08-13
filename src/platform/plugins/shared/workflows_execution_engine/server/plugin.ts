@@ -90,7 +90,7 @@ export class WorkflowsExecutionEnginePlugin
               );
               await workflowRuntime.resume();
 
-              await run(workflowRuntime, workflowLogger, nodesFactory);
+              await workflowExecutionLoop(workflowRuntime, workflowLogger, nodesFactory);
             },
             async cancel() {},
           };
@@ -140,7 +140,7 @@ export class WorkflowsExecutionEnginePlugin
       // Log workflow execution start
       await workflowRuntime.start();
 
-      await run(workflowRuntime, workflowLogger, nodesFactory);
+      await workflowExecutionLoop(workflowRuntime, workflowLogger, nodesFactory);
     };
 
     return {
@@ -234,12 +234,12 @@ async function createContainer(
   };
 }
 
-async function run(
+async function workflowExecutionLoop(
   workflowRuntime: WorkflowExecutionRuntimeManager,
   workflowLogger: WorkflowEventLogger,
   nodesFactory: StepFactory
 ) {
-  do {
+  while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
     const currentNode = workflowRuntime.getCurrentStep();
     const step = nodesFactory.create(currentNode as any);
 
@@ -265,11 +265,5 @@ async function run(
         );
       }
     }
-
-    // If the currentStepIndex has not explicitly changed (by a node), go to the next step
-    if (currentNode.id === workflowRuntime.getCurrentStep()?.id) {
-      // If the step is still the current step, finish it
-      workflowRuntime.goToNextStep();
-    }
-  } while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING);
+  }
 }

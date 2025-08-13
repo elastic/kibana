@@ -48,6 +48,7 @@ export class WaitStepImpl implements StepImplementation {
     await new Promise((resolve) => setTimeout(resolve, this.getDurationInMs()));
     this.logFinishWait();
     await this.workflowRuntime.finishStep(this.node.id);
+    this.workflowRuntime.goToNextStep();
   }
 
   private handleLongDuration(): Promise<void> {
@@ -80,6 +81,7 @@ export class WaitStepImpl implements StepImplementation {
     await this.workflowRuntime.setStepState(this.node.id, undefined);
     this.logFinishWait();
     await this.workflowRuntime.finishStep(this.node.id);
+    this.workflowRuntime.goToNextStep();
   }
 
   private logStartWait(): void {

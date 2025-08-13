@@ -461,12 +461,9 @@ export class WorkflowExecutionRuntimeManager {
       currentNodeId: this.getCurrentStep()?.id,
     };
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
+    const currentStep = this.getCurrentStep();
 
-    if (
-      this.workflowExecutionState.getStepExecution(
-        this.topologicalOrder[this.topologicalOrder.length - 1]
-      )
-    ) {
+    if (!currentStep) {
       workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
     }
 
