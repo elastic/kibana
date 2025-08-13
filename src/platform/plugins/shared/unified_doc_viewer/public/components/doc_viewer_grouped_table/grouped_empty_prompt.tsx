@@ -11,23 +11,23 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const AttributesEmptyPrompt = () => (
+export const GroupedTableEmptyPrompt = () => (
   <EuiEmptyPrompt
     layout="horizontal"
     body={
       <EuiText size="s" color="subdued">
         <p>
           {i18n.translate(
-            'unifiedDocViewer.docView.attributes.accordion.noFieldsMessage.noFieldsLabel',
+            'unifiedDocViewer.docView.docViewerGroupedTable.noFieldsMessage.noFieldsLabel',
             {
-              defaultMessage: 'No attributes fields found.',
+              defaultMessage: 'No fields found.',
             }
           )}
         </p>
         <>
           <strong>
             {i18n.translate(
-              'unifiedDocViewer.docView.attributes.accordion.noFieldsMessage.tryText',
+              'unifiedDocViewer.docView.docViewerGroupedTable.noFieldsMessage.tryText',
               {
                 defaultMessage: 'Try:',
               }
@@ -36,7 +36,7 @@ export const AttributesEmptyPrompt = () => (
           <ul>
             <li>
               {i18n.translate(
-                'unifiedDocViewer.docView.attributes.accordion.noFieldsMessage.fieldTypeFilterBullet',
+                'unifiedDocViewer.docView.docViewerGroupedTable.noFieldsMessage.fieldTypeFilterBullet',
                 {
                   defaultMessage: 'Using different field filters if applicable.',
                 }
@@ -46,6 +46,6 @@ export const AttributesEmptyPrompt = () => (
         </>
       </EuiText>
     }
-    data-test-subj="attributesAccordionEmptyPrompt"
+    data-test-subj="groupedTableEmptyPrompt"
   />
 );

@@ -136,6 +136,9 @@ export const DocViewerTable = ({
   decreaseAvailableHeightBy,
   onAddColumn,
   onRemoveColumn,
+  hideTableFilters = false,
+  hidePinLeadingControl = false,
+  hidePagination = false,
 }: DocViewRenderProps) => {
   const styles = useMemoCss(componentStyles);
 
@@ -307,8 +310,8 @@ export const DocViewerTable = ({
   const rows = useMemo(() => [...pinnedRows, ...restRows], [pinnedRows, restRows]);
 
   const leadingControlColumns = useMemo(() => {
-    return [getPinColumnControl({ rows, onTogglePinned })];
-  }, [rows, onTogglePinned]);
+    return hidePinLeadingControl ? undefined : [getPinColumnControl({ rows, onTogglePinned })];
+  }, [rows, onTogglePinned, hidePinLeadingControl]);
 
   const { curPageIndex, pageSize, totalPages, changePageIndex, changePageSize } = usePager({
     initialPageSize: getPageSize(storage),
@@ -458,58 +461,62 @@ export const DocViewerTable = ({
         <EuiSpacer size="s" />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <TableFilters {...tableFiltersProps} allFields={allFields} />
-      </EuiFlexItem>
+      {hideTableFilters ? null : (
+        <>
+          <EuiFlexItem grow={false}>
+            <TableFilters {...tableFiltersProps} allFields={allFields} />
+          </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiSpacer size="s" />
-      </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="s" />
+          </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          responsive={false}
-          wrap={true}
-          direction="row"
-          justifyContent="flexEnd"
-          alignItems="center"
-          gutterSize="m"
-        >
-          {filter && (
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                label={i18n.translate('unifiedDocViewer.showOnlySelectedFields.switchLabel', {
-                  defaultMessage: 'Selected only',
-                  description: 'Switch label to show only selected fields in the table',
-                })}
-                checked={showOnlySelectedFields ?? false}
-                disabled={isShowOnlySelectedFieldsDisabled}
-                onChange={onShowOnlySelectedFieldsChange}
-                compressed
-                data-test-subj="unifiedDocViewerShowOnlySelectedFieldsSwitch"
-              />
-            </EuiFlexItem>
-          )}
-          {isEsqlMode && (
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
-                  defaultMessage: 'Hide null fields',
-                  description: 'Switch label to hide fields with null values in the table',
-                })}
-                checked={areNullValuesHidden ?? false}
-                onChange={onHideNullValuesChange}
-                compressed
-                data-test-subj="unifiedDocViewerHideNullValuesSwitch"
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              responsive={false}
+              wrap={true}
+              direction="row"
+              justifyContent="flexEnd"
+              alignItems="center"
+              gutterSize="m"
+            >
+              {filter && (
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    label={i18n.translate('unifiedDocViewer.showOnlySelectedFields.switchLabel', {
+                      defaultMessage: 'Selected only',
+                      description: 'Switch label to show only selected fields in the table',
+                    })}
+                    checked={showOnlySelectedFields ?? false}
+                    disabled={isShowOnlySelectedFieldsDisabled}
+                    onChange={onShowOnlySelectedFieldsChange}
+                    compressed
+                    data-test-subj="unifiedDocViewerShowOnlySelectedFieldsSwitch"
+                  />
+                </EuiFlexItem>
+              )}
+              {isEsqlMode && (
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
+                      defaultMessage: 'Hide null fields',
+                      description: 'Switch label to hide fields with null values in the table',
+                    })}
+                    checked={areNullValuesHidden ?? false}
+                    onChange={onHideNullValuesChange}
+                    compressed
+                    data-test-subj="unifiedDocViewerHideNullValuesSwitch"
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiSpacer size="s" />
-      </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="s" />
+          </EuiFlexItem>
+        </>
+      )}
 
       {rows.length === 0 ? (
         <EuiSelectableMessage css={styles.noFieldsFound}>
@@ -535,7 +542,7 @@ export const DocViewerTable = ({
             rowCount={rows.length}
             renderCellValue={renderCellValue}
             renderCellPopover={renderCellPopover}
-            pagination={pagination}
+            pagination={hidePagination ? undefined : pagination}
             leadingControlColumns={leadingControlColumns}
           />
         </EuiFlexItem>
