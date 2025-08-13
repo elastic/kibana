@@ -58,7 +58,6 @@ export const WorkflowYAMLEditor = ({
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor | null>(
     null
   );
-  const editorModel = useRef<monaco.editor.ITextModel>();
 
   const workflowJsonSchema = useWorkflowJsonSchema();
   const schemas = useMemo(() => {
@@ -100,10 +99,6 @@ export const WorkflowYAMLEditor = ({
 
   const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
-    const model = editor.getModel();
-    if (model) {
-      editorModel.current = model;
-    }
 
     editor.updateOptions({
       glyphMargin: true,
@@ -157,9 +152,7 @@ export const WorkflowYAMLEditor = ({
   // Clean up the monaco model and editor on unmount
   useEffect(() => {
     const editor = editorRef.current;
-    const model = editorModel.current;
     return () => {
-      model?.dispose();
       editor?.dispose();
     };
   }, []);
