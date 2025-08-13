@@ -293,10 +293,15 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   ): Promise<HealthDiagnosticQuery[]> {
     const healthQueries = await this.healthQueries();
     return healthQueries.filter((query) => {
-      const { name, scheduleCron, enabled = false } = query;
-      const lastExecutedAt = new Date(lastExecutionByQuery[name] ?? 0);
+      try {
+        const { name, scheduleCron, enabled = false } = query;
+        const lastExecutedAt = new Date(lastExecutionByQuery[name] ?? 0);
 
-      return enabled && isDueForExecution(lastExecutedAt, now, scheduleCron);
+        return enabled && isDueForExecution(lastExecutedAt, now, scheduleCron);
+      } catch (error) {
+        this.logger.warn('Error processing health query', { error, name: query.name });
+        return false;
+      }
     });
   }
 

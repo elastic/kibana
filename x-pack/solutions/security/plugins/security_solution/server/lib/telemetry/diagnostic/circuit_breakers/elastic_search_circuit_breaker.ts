@@ -94,7 +94,7 @@ export class ElasticsearchCircuitBreaker extends BaseCircuitBreaker {
             return this.failure(`Node ${nodeId} CPU usage ${cpuPercent}% exceeds threshold`);
           }
         } else {
-          return this.failure('Node stats missing JVM or CPU metrics');
+          return this.failure(`Node ${nodeId} missing metrics. JVM: ${jvm?.mem}, OS: ${os?.cpu}`);
         }
       }
 
