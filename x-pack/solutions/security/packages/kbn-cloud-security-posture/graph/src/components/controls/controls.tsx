@@ -81,7 +81,8 @@ export const Controls = ({
   // Memoize a sanitized list of node ids filtering out undefined/null, empty and whitespace strings
   // Converts ['node1', 'node2'] into [{ id: 'node1' }, { id: 'node2' }]
   const sanitizedNodeIds = useMemo(
-    () => nodeIdsToCenterOn.filter((id) => id && id.trim().length > 0).map((id) => ({ id })),
+    () =>
+      (nodeIdsToCenterOn ?? []).filter((id) => id && id.trim().length > 0).map((id) => ({ id })),
     [nodeIdsToCenterOn]
   );
 
