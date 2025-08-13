@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { createFilterAction } from '@kbn/unified-search-plugin/public';
 import type { History } from 'history';
 import type { CoreSetup } from '@kbn/core/public';
 import type { SecurityAppStore } from '../../common/store';
@@ -24,7 +26,6 @@ const createDiscoverHistogramCustomFilterAction = async (
     EsqlInTimelineAction.VIS_FILTER_ACTION,
     EsqlInTimelineAction.VIS_FILTER_ACTION
   );
-
   services.uiActions.registerActionAsync(histogramApplyFilter.id, async () => histogramApplyFilter);
 
   return histogramApplyFilter;
@@ -48,18 +49,10 @@ export const registerDiscoverHistogramActions = async (
 ) => {
   createDiscoverHistogramCustomTrigger(store, history, services);
 
-  // Register the action factory, not the action itself
   services.uiActions.registerActionAsync(EsqlInTimelineAction.VIS_FILTER_ACTION, async () => {
     const [coreStart] = await coreSetup.getStartServices();
-    const { createFilterAction } = await import('@kbn/unified-search-plugin/public');
-
-    return createFilterAction(
-      services.customDataService.query.filterManager,
-      services.customDataService.query.timefilter.timefilter,
-      coreStart,
-      EsqlInTimelineAction.VIS_FILTER_ACTION,
-      EsqlInTimelineAction.VIS_FILTER_ACTION
-    );
+    const { createHistogramFilterAction } = await import('./histogram_filter_action');
+    return createHistogramFilterAction(coreStart, services);
   });
 
   services.uiActions.attachAction(
