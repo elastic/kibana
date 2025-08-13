@@ -377,15 +377,15 @@ export class IndexUpdateService {
           )
         )
         .subscribe({
-          next: ({ updates, response, rows, dataView }) => {
+          next: async ({ updates, response, rows, dataView }) => {
             const mappedResponse = response.items.reduce((acc, item, index) => {
               // Updates that were successful
               const updateItem = Object.values(item)[0] as BulkResponseItem;
               const updateValue = updates[index].value;
-              const updatedDocId = updates[index].id || updateItem._id;
-              if ([200, 201].includes(updateItem.status) && updatedDocId) {
-                const e = acc.get(updatedDocId) ?? {};
-                acc.set(updatedDocId, { ...e, ...updateValue });
+              if (updateItem.status === 200 && updateItem._id) {
+                const docId = updateItem._id;
+                const e = acc.get(docId) ?? {};
+                acc.set(docId, { ...e, ...updateValue });
               }
               return acc;
             }, new Map<string, any>());
