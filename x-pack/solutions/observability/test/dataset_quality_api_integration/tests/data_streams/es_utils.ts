@@ -6,6 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import type { IndicesIndexTemplate } from '@elastic/elasticsearch/lib/api/types';
 
 export async function addIntegrationToLogIndexTemplate({
   esClient,
@@ -20,24 +21,32 @@ export async function addIntegrationToLogIndexTemplate({
     name: 'logs',
   });
 
-  const template = indexTemplates[0].index_template;
-  // @ts-expect-error `created_date` is a system-managed property that cannot be set
-  delete template.created_date;
+  const {
+    created_date,
+    modification_date,
+    created_date_millis,
+    modified_date_millis,
+    ...safeTemplate
+  } = indexTemplates[0].index_template as IndicesIndexTemplate & {
+    created_date: number;
+    created_date_millis: number;
+    modification_date: number;
+    modified_date_millis: number;
+  };
 
   await esClient.indices.putIndexTemplate({
     name: 'logs',
-    ...template,
+    ...safeTemplate,
     _meta: {
-      ...indexTemplates[0].index_template._meta,
+      ...safeTemplate._meta,
       package: {
         name,
       },
       managed_by: managedBy,
     },
     // PUT expects string[] while GET might return string | string[]
-    ignore_missing_component_templates: indexTemplates[0].index_template
-      .ignore_missing_component_templates
-      ? [indexTemplates[0].index_template.ignore_missing_component_templates].flat()
+    ignore_missing_component_templates: safeTemplate.ignore_missing_component_templates
+      ? [safeTemplate.ignore_missing_component_templates].flat()
       : undefined,
   });
 }
@@ -47,22 +56,30 @@ export async function cleanLogIndexTemplate({ esClient }: { esClient: Client }) 
     name: 'logs',
   });
 
-  const template = indexTemplates[0].index_template;
-  // @ts-expect-error `created_date` is a system-managed property that cannot be set
-  delete template.created_date;
+  const {
+    created_date,
+    modification_date,
+    created_date_millis,
+    modified_date_millis,
+    ...safeTemplate
+  } = indexTemplates[0].index_template as IndicesIndexTemplate & {
+    created_date: number;
+    created_date_millis: number;
+    modification_date: number;
+    modified_date_millis: number;
+  };
 
   await esClient.indices.putIndexTemplate({
     name: 'logs',
     ...template,
     _meta: {
-      ...indexTemplates[0].index_template._meta,
+      ...safeTemplate._meta,
       package: undefined,
       managed_by: undefined,
     },
     // PUT expects string[] while GET might return string | string[]
-    ignore_missing_component_templates: indexTemplates[0].index_template
-      .ignore_missing_component_templates
-      ? [indexTemplates[0].index_template.ignore_missing_component_templates].flat()
+    ignore_missing_component_templates: safeTemplate.ignore_missing_component_templates
+      ? [safeTemplate.ignore_missing_component_templates].flat()
       : undefined,
   });
 }
