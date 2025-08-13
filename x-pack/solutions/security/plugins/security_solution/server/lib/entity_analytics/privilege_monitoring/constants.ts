@@ -36,6 +36,3 @@ export const PRE_EXCLUDE_INDICES: string[] = [
 
 // Indices that are excludes from the search result (This patterns can't be excluded from the search)
 export const POST_EXCLUDE_INDICES = ['.']; // internal indices
-
-// This is the maximum number of privileged users allowed to be added
-export const PRIVMON_MAX_USERS_ALLOWED = 10000;
