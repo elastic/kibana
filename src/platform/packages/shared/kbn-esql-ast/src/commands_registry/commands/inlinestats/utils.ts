@@ -26,6 +26,10 @@ import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../../definitions/types';
 import { mapToNonMarkerNode, isNotMarkerNodeOrArray } from '../../../definitions/utils/ast';
+import {
+  getCommaAndPipe as getCommaAndPipeStats,
+  rightAfterColumn as rightAfterColumnStats,
+} from '../stats/utils';
 
 function isAssignmentComplete(node: ESQLFunction | undefined) {
   const assignExpression = removeMarkerArgFromArgsList(node)?.args?.[1];
@@ -84,7 +88,14 @@ export const getPosition = (innerText: string, command: ESQLCommand): CaretPosit
     // check if the cursor follows a comma or the BY keyword
     // optionally followed by a fragment of a word
     // e.g. ", field/"
-    if (/\,\s+\S*$/.test(innerText) || noCaseCompare(findPreviousWord(innerText), 'by')) {
+    // Also treat caret right after a NOT token as "inside expression" to align with STATS
+    const afterNot =
+      /\bnot\s*$/i.test(innerText) || noCaseCompare(findPreviousWord(innerText), 'not');
+    if (
+      /\,\s+\S*$/.test(innerText) ||
+      noCaseCompare(findPreviousWord(innerText), 'by') ||
+      afterNot
+    ) {
       return 'grouping_expression_without_assignment';
     } else {
       return 'grouping_expression_complete';
@@ -95,7 +106,7 @@ export const getPosition = (innerText: string, command: ESQLCommand): CaretPosit
     return 'expression_after_assignment';
   }
 
-  if (getLastNonWhitespaceChar(innerText) === ',' || /stats\s+\S*$/i.test(innerText)) {
+  if (getLastNonWhitespaceChar(innerText) === ',' || /inlinestats\s+\S*$/i.test(innerText)) {
     return 'expression_without_assignment';
   }
 
@@ -188,3 +199,6 @@ export function checkFunctionContent(arg: ESQLFunction) {
       (isNotAnAggregation(subArg) ? checkFunctionContent(subArg) : false)
   );
 }
+
+export const getCommaAndPipe = getCommaAndPipeStats;
+export const rightAfterColumn = rightAfterColumnStats;
