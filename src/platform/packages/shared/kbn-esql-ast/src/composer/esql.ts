@@ -10,7 +10,7 @@
 import * as synth from '../synth';
 import { ComposerQuery } from './composer_query';
 import { ParameterHole } from './parameter_hole';
-import { processTemplateHoles } from './util';
+import { processTemplateHoles, validateParamName } from './util';
 import type {
   ComposerQueryGenerator,
   ComposerQueryTag,
@@ -43,6 +43,7 @@ const esqlTag = ((templateOrQueryOrParamValues: any, ...maybeHoles: ComposerQuer
           typeof holes[0] === 'object' && !Array.isArray(holes[0]) ? holes[0] : {};
 
         for (const [name, value] of Object.entries(moreParamValues)) {
+          validateParamName(name);
           params.set(name, value);
         }
 

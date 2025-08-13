@@ -10,9 +10,9 @@
 import { printTree } from 'tree-dump';
 import * as synth from '../synth';
 import { BasicPrettyPrinter, WrappingPrettyPrinter } from '../pretty_print';
-import { processTemplateHoles } from './util';
+import { processTemplateHoles, validateParamName } from './util';
 import { Builder } from '../builder';
-import type { ESQLAstQueryExpression, ESQLNamedParamLiteral } from '../types';
+import type { ESQLAstQueryExpression, ESQLCommand, ESQLNamedParamLiteral } from '../types';
 import type {
   ComposerQueryTagHole,
   ComposerSortShorthand,
@@ -34,53 +34,57 @@ export class ComposerQuery {
     const tagOrGeneratorWithParams =
       (initialParamValues: Record<string, unknown>): QueryCommandTagParametrized =>
       (templateOrQuery: any, ...holes: unknown[]) => {
+        const params: Record<string, unknown> = { ...initialParamValues };
+        let command: ESQLCommand;
+
         if (typeof templateOrQuery === 'string') {
           const moreParamValues =
             typeof holes[0] === 'object' && !Array.isArray(holes[0]) ? holes[0] : {};
-          const params = { ...initialParamValues, ...moreParamValues };
-          const command = synth.cmd(templateOrQuery);
 
-          for (const [name, value] of Object.entries(params)) {
-            const exists = this.params.has(name);
+          Object.assign(params, moreParamValues);
 
-            if (exists) {
-              // If a parameter with the same name already exists, we rename it
-              // as somebody might have already used it in the query in a
-              // different command.
-              let newName: string;
-              while (true) {
-                newName = `${name}_${this.params.size}`;
-                if (!this.params.has(newName)) break;
-              }
-
-              this.params.set(newName, value);
-
-              const nodes = Walker.matchAll(command, {
-                type: 'literal',
-                literalType: 'param',
-                value: name,
-              }) as ESQLNamedParamLiteral[];
-
-              for (const node of nodes) {
-                node.value = newName;
-              }
-            } else {
-              this.params.set(name, value);
-            }
-          }
-
-          this.ast.commands.push(command);
+          command = synth.cmd(templateOrQuery);
         } else {
           if (Array.isArray(holes))
             processTemplateHoles(holes as ComposerQueryTagHole[], this.params);
 
-          const command = synth.cmd(
+          command = synth.cmd(
             templateOrQuery as TemplateStringsArray,
             ...(holes as synth.SynthTemplateHole[])
           );
-
-          this.ast.commands.push(command);
         }
+
+        for (const [name, value] of Object.entries(params)) {
+          validateParamName(name);
+          const exists = this.params.has(name);
+
+          if (exists) {
+            // If a parameter with the same name already exists, we rename it
+            // as somebody might have already used it in the query in a
+            // different command.
+            let newName: string;
+            while (true) {
+              newName = `${name}_${this.params.size}`;
+              if (!this.params.has(newName)) break;
+            }
+
+            this.params.set(newName, value);
+
+            const nodes = Walker.matchAll(command, {
+              type: 'literal',
+              literalType: 'param',
+              value: name,
+            }) as ESQLNamedParamLiteral[];
+
+            for (const node of nodes) {
+              node.value = newName;
+            }
+          } else {
+            this.params.set(name, value);
+          }
+        }
+
+        this.ast.commands.push(command);
 
         return this;
       };

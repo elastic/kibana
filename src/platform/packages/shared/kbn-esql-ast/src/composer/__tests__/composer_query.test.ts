@@ -76,16 +76,51 @@ describe('.pipe``', () => {
     );
   });
 
-  test('can generate commands using a string `.pipe(str)`', () => {
-    const query = esql`FROM kibana_ecommerce_index`;
+  test('can parametrize a tagged template', () => {
+    const query = esql`FROM index`;
 
-    expect(query.print('basic')).toBe('FROM kibana_ecommerce_index');
+    query.pipe({ foo: 'bar' })`STATS foo = LOL(?foo)`;
 
-    query.pipe('WHERE foo > 42').pipe('EVAL a = 123');
+    expect(query.toRequest()).toEqual({
+      query: 'FROM index | STATS foo = LOL(?foo)',
+      params: [{ foo: 'bar' }],
+    });
+  });
 
-    expect(query.print('basic')).toBe(
-      'FROM kibana_ecommerce_index | WHERE foo > 42 | EVAL a = 123'
-    );
+  describe('string query syntax', () => {
+    test('can generate commands using a string `.pipe(str)`', () => {
+      const query = esql`FROM kibana_ecommerce_index`;
+
+      expect(query.print('basic')).toBe('FROM kibana_ecommerce_index');
+
+      query.pipe('WHERE foo > 42').pipe('EVAL a = 123');
+
+      expect(query.print('basic')).toBe(
+        'FROM kibana_ecommerce_index | WHERE foo > 42 | EVAL a = 123'
+      );
+    });
+
+    test('throws on invalid param name', () => {
+      const query = esql.from('index');
+
+      expect(() => query.pipe('WHERE foo > ?1', { '1': 42 })).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid parameter name \\"1\\". Parameter names cannot start with a digit or space."`
+      );
+    });
+
+    test('can add parameters using string syntax, renames colliding params', () => {
+      const query = esql`FROM kibana_ecommerce_index`;
+
+      query
+        .pipe('WHERE foo > ?param AND bar < ?param2', { param: 5.5, param2: 'asdf' })
+        .pipe('EVAL a = ?param', { param: 123 });
+
+      expect(query.toRequest()).toEqual({
+        query:
+          'FROM kibana_ecommerce_index | WHERE foo > ?param AND bar < ?param2 | EVAL a = ?param_2',
+        params: [{ param: 5.5 }, { param2: 'asdf' }, { param_2: 123 }],
+      });
+    });
   });
 });
 
@@ -257,6 +292,18 @@ describe('high-level helpers', () => {
       const param = 123;
 
       query.where`abc > fn(${{ param }})`;
+
+      expect(query.print('basic')).toBe('FROM a | WHERE abc > FN(?param)');
+    });
+
+    test('can parametrize a string query', () => {
+      const query = esql`FROM a`;
+
+      expect(query.print('basic')).toBe('FROM a');
+
+      const param = 123;
+
+      query.where('abc > fn(?param)', { param });
 
       expect(query.print('basic')).toBe('FROM a | WHERE abc > FN(?param)');
     });
