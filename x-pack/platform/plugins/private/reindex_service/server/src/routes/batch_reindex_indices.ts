@@ -115,7 +115,7 @@ export function registerBatchReindexIndicesRoutes(
             reindexOptions: {
               enqueue: true,
             },
-            security: getSecurityPlugin(),
+            security: await getSecurityPlugin(),
             version,
           });
           results.enqueued.push(result);
