@@ -14,7 +14,8 @@ import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public'
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 
 import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { LicensingPluginStart, ILicense } from '@kbn/licensing-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 
 import { BreadcrumbService } from './application/services/breadcrumbs';
 
