@@ -9,6 +9,7 @@
 
 import React, { KeyboardEvent } from 'react';
 import { useIsWithinBreakpoints } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { MenuItem, NavigationStructure, SecondaryMenuItem, SideNavLogo } from '../../types';
 import { NestedSecondaryMenu } from './nested_secondary_menu';
@@ -90,7 +91,12 @@ export const Navigation = ({
   };
 
   return (
-    <div data-test-subj="navigation-root">
+    <div
+      css={css`
+        display: flex;
+      `}
+      data-test-subj="navigation-root"
+    >
       <SideNav isCollapsed={isCollapsed}>
         <SideNav.Logo
           isActive={activePageId === logo.id}
