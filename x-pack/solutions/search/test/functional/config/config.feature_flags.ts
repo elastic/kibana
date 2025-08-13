@@ -6,14 +6,18 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { services } from '../../functional_search/services';
+import { pageObjects } from '../../functional_search/page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-xpack/functional/config.base')
+    require.resolve('@kbn/test-suites-xpack-platform/functional/config.base')
   );
 
   return {
     ...xpackFunctionalConfig.getAll(),
+    services,
+    pageObjects,
     junit: {
       reportName: 'Search Solution UI Functional Tests w/ Feature Flagged Features',
     },
