@@ -69,7 +69,10 @@ export async function verifyQueries(
         size: 0,
         timeout: '5s',
       })
-      .then((response) => response.hits.total.value),
+      .then((response) => response.hits.total.value)
+      .catch(() => {
+        return 0;
+      }),
   ]);
   if (queries.length) {
     logger.debug(() => {
