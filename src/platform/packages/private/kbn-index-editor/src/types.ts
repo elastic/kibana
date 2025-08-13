@@ -23,7 +23,7 @@ export interface EditLookupIndexContentContext {
   indexName?: string;
   doesIndexExist: boolean;
   onClose?: (result: {
-    indexName: string;
+    indexName: string | null;
     /** Indicates if the index was created */
     indexCreatedDuringFlyout: boolean;
   }) => void;
