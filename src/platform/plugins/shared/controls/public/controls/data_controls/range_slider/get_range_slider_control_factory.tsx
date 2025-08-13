@@ -192,8 +192,6 @@ export const getRangesliderControlFactory = (): DataControlFactory<
         dataControlManager.api.dataViews$,
         dataControlManager.api.fieldName$,
         selections.value$,
-        min$,
-        max$,
       ])
         .pipe(debounceTime(0))
         .subscribe(([dataViews, fieldName, value]) => {
