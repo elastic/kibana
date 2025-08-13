@@ -47,7 +47,6 @@ export class WorkflowExecutionRuntimeManager {
   private workflowLogger: IWorkflowEventLogger | null = null;
 
   private workflowExecutionState: WorkflowExecutionState;
-  private readonly traceId: string;
   private entryTransactionId?: string;
   private workflowTransaction?: any; // APM transaction instance
   private workflowExecutionGraph: graphlib.Graph;
@@ -57,7 +56,6 @@ export class WorkflowExecutionRuntimeManager {
     this.topologicalOrder = graphlib.alg.topsort(this.workflowExecutionGraph);
 
     // Use workflow execution ID as traceId for APM compatibility
-    this.traceId = this.workflowExecution.id;
     this.workflowLogger = workflowExecutionRuntimeManagerInit.workflowLogger;
     this.workflowExecutionState = workflowExecutionRuntimeManagerInit.workflowExecutionState;
   }
@@ -66,7 +64,7 @@ export class WorkflowExecutionRuntimeManager {
    * Get the APM trace ID for this workflow execution
    */
   public getTraceId(): string {
-    return this.traceId;
+    return this.getWorkflowExecution().id;
   }
 
   /**
@@ -187,7 +185,7 @@ export class WorkflowExecutionRuntimeManager {
           workflow_step_id: stepId,
           workflow_execution_id: workflowExecution.id,
           workflow_id: workflowExecution.workflowId,
-          trace_id: this.traceId, // Ensure consistent traceId
+          trace_id: this.getTraceId(), // Ensure consistent traceId
           service_name: 'workflow-engine',
         },
       },
@@ -222,7 +220,7 @@ export class WorkflowExecutionRuntimeManager {
           workflow_step_id: stepId,
           workflow_execution_id: workflowExecution.id,
           workflow_id: workflowExecution.workflowId,
-          trace_id: this.traceId,
+          trace_id: this.getTraceId(),
           service_name: 'workflow-engine',
         },
       },
@@ -278,7 +276,7 @@ export class WorkflowExecutionRuntimeManager {
           workflow_step_id: stepId,
           workflow_execution_id: workflowExecution.id,
           workflow_id: workflowExecution.workflowId,
-          trace_id: this.traceId,
+          trace_id: this.getTraceId(),
           service_name: 'workflow-engine',
         },
       },
