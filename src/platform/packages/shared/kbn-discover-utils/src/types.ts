@@ -58,7 +58,6 @@ export type DataTableColumnsMeta = Record<
   {
     type: DatatableColumnMeta['type'];
     esType?: DatatableColumnMeta['esType'];
-    variable?: string;
   }
 >;
 

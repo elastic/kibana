@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
@@ -25,6 +25,7 @@ import { DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
@@ -58,6 +59,9 @@ export function SearchEmbeddableGridComponent({
   stateManager,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
+  const esqlVariables$ = apiPublishesESQLVariables(api.parentApi)
+    ? api.parentApi.esqlVariables$
+    : undefined;
   const [
     loading,
     savedSearch,
@@ -74,6 +78,7 @@ export function SearchEmbeddableGridComponent({
     panelDescription,
     savedSearchTitle,
     savedSearchDescription,
+    esqlVariables,
   ] = useBatchedPublishingSubjects(
     api.dataLoading$,
     api.savedSearch$,
@@ -89,7 +94,8 @@ export function SearchEmbeddableGridComponent({
     api.title$,
     api.description$,
     api.defaultTitle$,
-    api.defaultDescription$
+    api.defaultDescription$,
+    esqlVariables$ ?? new BehaviorSubject(undefined)
   );
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
@@ -107,11 +113,14 @@ export function SearchEmbeddableGridComponent({
   const originalColumns = useMemo(() => {
     if (isEsql && columnsMeta) {
       const columnsFromRequest = Object.keys(columnsMeta);
-      const isDrivenByVariable = Object.entries(columnsMeta).find(([, meta]) => meta.variable);
+      const columnDrivenByVariable = Object.entries(columnsMeta).find(([id, meta]) => {
+        // check if the id exists in the esqlVariables value property
+        return esqlVariables?.some((esqlVar) => esqlVar.value === id);
+      });
 
-      if (isDrivenByVariable) {
-        // find the savedSearch.columns which doesn't exist in columnsFromRequest and replace it with the isDrivenByVariable
-        const variableDrivenColumnName = isDrivenByVariable[0];
+      if (columnDrivenByVariable) {
+        // find the savedSearch.columns which doesn't exist in columnsFromRequest and replace it with the columnDrivenByVariable
+        const variableDrivenColumnName = columnDrivenByVariable[0];
         const updatedColumns = (savedSearch.columns ?? []).map((columnName) => {
           // If this column from savedSearch doesn't exist in the current request columns,
           // replace it with the variable-driven column
@@ -127,7 +136,7 @@ export function SearchEmbeddableGridComponent({
     }
 
     return savedSearch.columns ?? [];
-  }, [columnsMeta, isEsql, savedSearch.columns]);
+  }, [columnsMeta, isEsql, esqlVariables, savedSearch.columns]);
 
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({
     capabilities: discoverServices.capabilities,
