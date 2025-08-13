@@ -27,6 +27,7 @@ import {
   TRANSACTION_ID,
   TRANSACTION_NAME,
 } from '@kbn/apm-types';
+import React from 'react';
 import { UnifiedDocViewerStorybookArgs } from '../../../../.storybook/preview';
 import APMSpanFixture from '../../../__fixtures__/span_apm.json';
 import APMTransactionFixture from '../../../__fixtures__/transaction_apm.json';
@@ -62,6 +63,13 @@ export const APMSpan: Story = {
       TRANSACTION_ID,
     ],
     title: 'APM Span data',
+    fieldConfigurations: {
+      [SPAN_DURATION]: {
+        title: 'Duration',
+        description: 'Custom field description',
+        formattedValue: <div>Custom content for the formatted value</div>,
+      },
+    },
   },
 };
 
@@ -86,5 +94,12 @@ export const APMTransaction: Story = {
       AGENT_VERSION,
     ],
     title: 'APM Transaction data',
+    fieldConfigurations: {
+      [TRANSACTION_DURATION]: {
+        title: 'Duration',
+        description: 'Custom field description',
+        formattedValue: <div>Custom content for the formatted value</div>,
+      },
+    },
   },
 };
