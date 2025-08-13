@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiDataGrid,
-  EuiDataGridProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiDataGrid } from '@elastic/eui';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
@@ -28,12 +21,8 @@ import { getUnifiedDocViewerServices } from '../../../../../plugin';
 export interface DataGridField {
   name: string;
   value: unknown;
-  formattedValue: unknown;
-  content?: React.ReactNode;
-  metadata?: {
-    description: string;
-    fieldName: string;
-  };
+  nameCellContent?: React.ReactNode;
+  valueCellContent?: React.ReactNode;
 }
 
 interface DataGridProps
@@ -59,7 +48,6 @@ export const DataGrid = ({
   title,
 }: DataGridProps) => {
   const { fieldFormats, toasts } = getUnifiedDocViewerServices();
-  const { euiTheme } = useEuiTheme();
 
   const onToggleColumn = useMemo(() => {
     if (!onRemoveColumn || !onAddColumn || !columns) {
@@ -100,52 +88,13 @@ export const DataGrid = ({
     [rows, toasts, filter, isEsqlMode]
   );
 
-  const gridColumns: EuiDataGridProps['columns'] = [
-    {
-      id: 'name',
-      actions: false,
-      cellActions: fieldCellActions,
-    },
-    {
-      id: 'value',
-      actions: false,
-      cellActions: fieldValueCellActions,
-    },
-  ];
-
   const renderCellValue = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-    const row = rows[rowIndex];
-    const fieldConfig = fields[row.name];
-    const fieldMetadata = fieldConfig.metadata;
+    const fieldName = rows[rowIndex].name;
+    const fieldConfig = fields[fieldName];
 
-    if (!row) return null;
-    if (columnId === 'name') {
-      return (
-        <EuiFlexGroup gutterSize="xs" responsive={false}>
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              font-weight: ${euiTheme.font.weight.semiBold};
-            `}
-          >
-            {fieldConfig.name}
-          </EuiFlexItem>
-
-          {fieldMetadata && (
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                title={fieldMetadata.fieldName}
-                content={fieldMetadata.description}
-                size="s"
-                color="subdued"
-                aria-label={`${fieldMetadata.fieldName}: ${fieldMetadata.description}`}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      );
-    }
-    if (columnId === 'value') return fieldConfig.content;
+    if (!fieldConfig) return null;
+    if (columnId === 'name') return fieldConfig.nameCellContent;
+    if (columnId === 'value') return fieldConfig.valueCellContent;
     return null;
   };
 
@@ -160,7 +109,16 @@ export const DataGrid = ({
         }
       `}
       aria-label={title}
-      columns={gridColumns}
+      columns={[
+        {
+          id: 'name',
+          cellActions: fieldCellActions,
+        },
+        {
+          id: 'value',
+          cellActions: fieldValueCellActions,
+        },
+      ]}
       rowCount={rows.length}
       renderCellValue={renderCellValue}
       columnVisibility={{

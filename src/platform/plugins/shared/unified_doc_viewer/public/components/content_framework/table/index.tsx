@@ -11,6 +11,8 @@ import React, { useMemo } from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
 import { getSpanDocumentOverview } from '@kbn/discover-utils';
 import { getFlattenedSpanDocumentOverview } from '@kbn/discover-utils/src';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 import { DataGrid, DataGridField } from './components/data_grid';
 import { getSpanFieldConfiguration } from '../../observability/traces/doc_viewer_span_overview/resources/get_span_field_configuration';
@@ -35,6 +37,7 @@ export function ContentFrameworkTable({
   onAddColumn,
   onRemoveColumn,
 }: ContentFrameworkTableProps) {
+  const { euiTheme } = useEuiTheme();
   const {
     fieldsMetadata: { useFieldsMetadata },
     fieldFormats,
@@ -57,6 +60,41 @@ export function ContentFrameworkTable({
     [formattedDoc, flattenedDoc]
   );
 
+  const nameCellValue = ({
+    id,
+    name,
+    description,
+  }: {
+    id: string;
+    name: string;
+    description?: string;
+  }) => {
+    return (
+      <EuiFlexGroup gutterSize="xs" responsive={false}>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            font-weight: ${euiTheme.font.weight.semiBold};
+          `}
+        >
+          {name}
+        </EuiFlexItem>
+
+        {description && (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              title={id}
+              content={description}
+              size="s"
+              color="subdued"
+              aria-label={`${id}: ${description}`}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  };
+
   if (!hit.flattened) {
     return null;
   }
@@ -66,23 +104,22 @@ export function ContentFrameworkTable({
       const fieldConfiguration = fieldConfigurations[fieldName];
       const fieldDescription =
         fieldConfiguration?.fieldMetadata?.short || fieldsMetadata[fieldName]?.short;
+
       if (!value) return acc;
 
       acc[fieldName] = {
         name: fieldConfiguration?.title || fieldName,
         value,
-        formattedValue: fieldConfiguration?.formattedValue || value,
-        content: fieldConfiguration ? (
+        nameCellContent: nameCellValue({
+          id: fieldName,
+          name: fieldConfiguration?.title || fieldName,
+          ...(fieldDescription && { description: fieldDescription }),
+        }),
+        valueCellContent: fieldConfiguration ? (
           <>{fieldConfiguration?.content(value, fieldConfiguration?.formattedValue)}</>
         ) : (
           value
         ),
-        ...(fieldDescription && {
-          metadata: {
-            fieldName,
-            description: fieldDescription,
-          },
-        }),
       };
 
       return acc;
