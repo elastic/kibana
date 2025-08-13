@@ -112,6 +112,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
           }
         >
           <EuiRadioGroup
+            name="entitySortBy"
             options={sortOptions}
             idSelected={forceSortByName ? 'name' : config?.sort?.by}
             onChange={(id) => {
@@ -132,6 +133,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
           }
         >
           <EuiRadioGroup
+            name="entitySortOrder"
             options={orderOptions}
             idSelected={config?.sort?.order}
             onChange={(id) => {

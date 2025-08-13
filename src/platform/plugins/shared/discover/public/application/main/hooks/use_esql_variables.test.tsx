@@ -13,7 +13,12 @@ import { DiscoverTestProvider } from '../../../__mocks__/test_provider';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { mockControlState } from '../../../__mocks__/esql_controls';
 import { useESQLVariables } from './use_esql_variables';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type {
+  ESQLControlState,
+  ESQLControlVariable,
+  ESQLVariableType,
+  EsqlControlType,
+} from '@kbn/esql-types';
 import type { DiscoverStateContainer } from '../state_management/discover_state';
 import React from 'react';
 
@@ -317,6 +322,96 @@ describe('useESQLVariables', () => {
 
       expect(mockControlGroupAPI.addNewPanel).toHaveBeenCalledTimes(1);
       expect(mockOnTextLangQueryChange).not.toHaveBeenCalled();
+    });
+
+    it('should handle numeric type coercion for ESQL variable values', async () => {
+      const stateContainer = getStateContainer();
+      const mockedStateContainer = {
+        ...stateContainer,
+        internalState: {
+          ...stateContainer.internalState,
+          dispatch: jest.fn(),
+        },
+      };
+
+      await renderUseESQLVariables({
+        isEsqlMode: true,
+        stateContainer: mockedStateContainer,
+      });
+
+      // Test case 1: String that can be converted to a number
+      const mockControlWithNumericString = {
+        panel1: {
+          type: 'esqlControl',
+          variableType: 'values' as ESQLVariableType,
+          variableName: 'numericVar',
+          selectedOptions: ['123'], // String that can be converted to number
+          title: 'Numeric Panel',
+          availableOptions: ['123', '456'],
+          esqlQuery: '',
+          controlType: 'STATIC_VALUES' as EsqlControlType,
+          order: 0,
+        },
+      };
+
+      act(() => {
+        mockControlGroupAPI.simulateInput({
+          initialChildControlState: mockControlWithNumericString,
+        });
+      });
+
+      await waitFor(() => {
+        const setEsqlVariablesCall = mockedStateContainer.internalState.dispatch.mock.calls.find(
+          (call) => call[0].type === 'internalState/setEsqlVariables'
+        );
+        expect(setEsqlVariablesCall).toBeTruthy();
+        expect(setEsqlVariablesCall[0].payload).toEqual([
+          {
+            key: 'numericVar',
+            type: 'values',
+            value: 123, // Should be converted to number
+          },
+        ]);
+      });
+
+      jest.clearAllMocks();
+
+      // Test case 2: String that cannot be converted to a number
+      const mockControlWithTextString = {
+        panel2: {
+          type: 'esqlControl',
+          variableType: 'values' as ESQLVariableType,
+          variableName: 'textVar',
+          selectedOptions: ['hello'], // String that cannot be converted to number
+          title: 'Text Panel',
+          availableOptions: ['hello', 'world'],
+          esqlQuery: '',
+          controlType: 'STATIC_VALUES' as EsqlControlType,
+          order: 0,
+        },
+      };
+
+      act(() => {
+        mockControlGroupAPI.simulateInput({
+          initialChildControlState: mockControlWithTextString,
+        });
+      });
+
+      await waitFor(() => {
+        const setEsqlVariablesCall = mockedStateContainer.internalState.dispatch.mock.calls.find(
+          (call) => call[0].type === 'internalState/setEsqlVariables'
+        );
+        expect(setEsqlVariablesCall).toBeTruthy();
+        expect(setEsqlVariablesCall[0].payload).toEqual([
+          {
+            key: 'textVar',
+            type: 'values',
+            value: 'hello', // Should remain as string
+          },
+        ]);
+      });
+
+      jest.clearAllMocks();
     });
   });
 
