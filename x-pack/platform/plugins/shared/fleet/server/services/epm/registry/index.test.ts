@@ -602,7 +602,7 @@ describe('getPackage', () => {
 
     mockGetBundledPackageByName.mockResolvedValue(undefined);
     await expect(getPackage('testpkg', '1.0.1')).rejects.toThrowError(
-      new PackageNotFoundError('Error while retrieving package from cache: testpkg-1.0.1 not found')
+      new PackageNotFoundError('testpkg@1.0.1 not found')
     );
   });
 });
