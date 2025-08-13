@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
-import { getSpanDocumentOverview } from '@kbn/discover-utils';
-import { getFlattenedSpanDocumentOverview } from '@kbn/discover-utils/src';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 import { DataGrid, DataGridField } from './components/data_grid';
-import { getSpanFieldConfiguration } from '../../observability/traces/doc_viewer_span_overview/resources/get_span_field_configuration';
 
 export interface ContentFrameworkTableProps
   extends Pick<
@@ -23,12 +20,24 @@ export interface ContentFrameworkTableProps
     'hit' | 'dataView' | 'columnsMeta' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
   > {
   fieldNames: string[];
+  fieldConfigurations?: Record<string, FieldConfiguration>;
   title: string;
+}
+
+export type FieldConfigValue = string | number | undefined;
+
+export interface FieldConfiguration {
+  title: string;
+  value: FieldConfigValue;
+  content: (value: FieldConfigValue, formattedValue?: string) => React.ReactNode;
+  description?: string;
+  formattedValue?: string;
 }
 
 export function ContentFrameworkTable({
   hit,
   fieldNames,
+  fieldConfigurations,
   dataView,
   columnsMeta,
   columns,
@@ -40,25 +49,11 @@ export function ContentFrameworkTable({
   const { euiTheme } = useEuiTheme();
   const {
     fieldsMetadata: { useFieldsMetadata },
-    fieldFormats,
   } = getUnifiedDocViewerServices();
   const { fieldsMetadata = {} } = useFieldsMetadata({
     attributes: ['short', 'flat_name', 'name'],
     fieldNames,
   });
-
-  const { formattedDoc, flattenedDoc } = useMemo(
-    // TODO unify this so it works for any doc, not just spans or transactions
-    () => ({
-      formattedDoc: getSpanDocumentOverview(hit, { dataView, fieldFormats }),
-      flattenedDoc: getFlattenedSpanDocumentOverview(hit),
-    }),
-    [dataView, fieldFormats, hit]
-  );
-  const fieldConfigurations = useMemo(
-    () => getSpanFieldConfiguration({ attributes: formattedDoc, flattenedDoc }),
-    [formattedDoc, flattenedDoc]
-  );
 
   const nameCellValue = ({
     id,
@@ -99,9 +94,8 @@ export function ContentFrameworkTable({
   const fields: Record<string, DataGridField> = fieldNames.reduce<Record<string, DataGridField>>(
     (acc, fieldName) => {
       const value = hit.flattened[fieldName] as string; // make sure it's a string
-      const fieldConfiguration = fieldConfigurations[fieldName];
-      const fieldDescription =
-        fieldConfiguration?.fieldMetadata?.short || fieldsMetadata[fieldName]?.short;
+      const fieldConfiguration = fieldConfigurations?.[fieldName];
+      const fieldDescription = fieldConfiguration?.description || fieldsMetadata[fieldName]?.short;
 
       if (!value) return acc;
 
