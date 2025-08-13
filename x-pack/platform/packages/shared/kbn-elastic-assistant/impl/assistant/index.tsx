@@ -464,6 +464,7 @@ const AssistantComponent: React.FC<Props> = ({
               isFetchingCurrentUserConversations={isFetchingCurrentUserConversations}
               refetchCurrentUserConversations={refetchCurrentUserConversations}
               setPaginationObserver={setPaginationObserver}
+              setCurrentConversation={setCurrentConversation}
             />
           </EuiFlexItem>
         )}

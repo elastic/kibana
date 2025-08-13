@@ -24,12 +24,14 @@ import useEvent from 'react-use/lib/useEvent';
 
 import { css } from '@emotion/react';
 import { isEmpty, findIndex } from 'lodash';
+import { useConversation } from '../../use_conversation';
 import { ConversationSidePanelContextMenu } from './context_menu';
 import { ConversationWithOwner } from '../../api';
 import { useConversationsByDate } from './use_conversations_by_date';
 import { DataStreamApis } from '../../use_data_stream_apis';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
+import { COPY_URL, DUPLICATE } from '../../use_conversation/translations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -43,6 +45,7 @@ interface Props {
   onConversationDeleted: (conversationId: string) => void;
   onConversationCreate: () => void;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
+  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation | undefined>>;
   setPaginationObserver: (ref: HTMLDivElement) => void;
 }
 
@@ -89,6 +92,8 @@ export const ConversationSidePanel = React.memo<Props>(
     conversations,
     onConversationDeleted,
     onConversationCreate,
+    refetchCurrentUserConversations,
+    setCurrentConversation,
     setPaginationObserver,
   }) => {
     const euiTheme = useEuiTheme();
@@ -101,6 +106,7 @@ export const ConversationSidePanel = React.memo<Props>(
     `;
     const [deleteConversationItem, setDeleteConversationItem] = useState<Conversation | null>(null);
 
+    const { copyConversationUrl, duplicateConversation } = useConversation();
     const conversationsCategorizedByDate = useConversationsByDate(Object.values(conversations));
 
     const conversationList = useMemo(
@@ -184,6 +190,21 @@ export const ConversationSidePanel = React.memo<Props>(
       }
     }, [deleteConversationItem, onDelete]);
 
+    const handleDuplicateConversation = useCallback(
+      (conversation?: Conversation) =>
+        duplicateConversation({
+          refetchCurrentUserConversations,
+          selectedConversation: conversation,
+          setCurrentConversation,
+        }),
+      [duplicateConversation, refetchCurrentUserConversations, setCurrentConversation]
+    );
+
+    const handleCopyUrl = useCallback(
+      (conversation?: Conversation) => copyConversationUrl(conversation),
+      [copyConversationUrl]
+    );
+
     useEvent('keydown', onKeyDown);
     return (
       <>
@@ -257,31 +278,25 @@ export const ConversationSidePanel = React.memo<Props>(
                                     ? conversation.id === currentConversation?.id
                                     : conversation.title === currentConversation?.title
                                 }
-                                // extraAction={
-                                //   conversation.isConversationOwner
-                                //     ? {
-                                //         color: 'danger',
-                                //         onClick: () => setDeleteConversationItem(conversation),
-                                //         iconType: 'trash',
-                                //         iconSize: 's',
-                                //         'aria-label': i18n.DELETE_CONVERSATION_ARIA_LABEL,
-                                //         'data-test-subj': 'delete-option',
-                                //       }
-                                //     : undefined
-                                // }
                               />
                               <ConversationSidePanelContextMenu
                                 label={'context menu for converstion'}
                                 actions={[
                                   {
-                                    key: 'delete',
-                                    children: i18n.DELETE_CONVERSATION_ARIA_LABEL,
-                                    onClick: () => setDeleteConversationItem(conversation),
-                                    icon: 'trash',
+                                    key: 'copy',
+                                    children: COPY_URL,
+                                    onClick: () => handleCopyUrl(conversation),
+                                    icon: 'link',
                                   },
                                   {
-                                    key: 'delet2e',
-                                    children: i18n.DELETE_CONVERSATION_ARIA_LABEL,
+                                    key: 'duplicate',
+                                    children: DUPLICATE,
+                                    onClick: () => handleDuplicateConversation(conversation),
+                                    icon: 'copy',
+                                  },
+                                  {
+                                    key: 'delete',
+                                    children: i18n.DELETE_CONVERSATION,
                                     onClick: () => setDeleteConversationItem(conversation),
                                     icon: 'trash',
                                   },

@@ -14,6 +14,13 @@ export const DELETE_CONVERSATION_ARIA_LABEL = i18n.translate(
   }
 );
 
+export const DELETE_CONVERSATION = i18n.translate(
+  'xpack.elasticAssistant.assistant.sidePanel.deleteConversation',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
 export const NEW_CHAT = i18n.translate(
   'xpack.elasticAssistant.assistant.conversations.sidePanel.newChatButtonLabel',
   {

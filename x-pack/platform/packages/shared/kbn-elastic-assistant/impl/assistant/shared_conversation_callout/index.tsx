@@ -10,13 +10,9 @@ import { EuiButton, EuiCallOut, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { DUPLICATE } from '../use_conversation/translations';
 import { DataStreamApis } from '../use_data_stream_apis';
-import {
-  DUPLICATE,
-  DUPLICATE_ERROR,
-  DUPLICATE_SUCCESS,
-} from '../settings/settings_context_menu/translations';
-import { Conversation, useAssistantContext } from '../../..';
+import { Conversation } from '../../..';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
   SHARED_CONVERSATION_CALLOUT,
@@ -45,41 +41,21 @@ const SharedConversationCalloutComponent: React.FC<Props> = ({
     setLocalStorageShowConversation(false);
   }, [setLocalStorageShowConversation]);
 
-  const { toasts } = useAssistantContext();
-  const { createConversation } = useConversation();
-  const handleDuplicateConversation = useCallback(async () => {
-    try {
-      if (!selectedConversation || selectedConversation.id === '') {
-        throw new Error('No conversation available to duplicate');
-      }
-      const newConversation = await createConversation({
-        title: `[${DUPLICATE}] ${selectedConversation.title}`,
-        apiConfig: selectedConversation.apiConfig,
-        messages: selectedConversation.messages,
-        replacements: selectedConversation.replacements,
-      });
-      if (newConversation) {
-        await refetchCurrentUserConversations();
-        setCurrentConversation(newConversation);
-        toasts?.addSuccess({
-          title: DUPLICATE_SUCCESS(newConversation.title),
-        });
-      } else {
-        throw new Error('Failed to duplicate conversation');
-      }
-    } catch (error) {
-      toasts?.addError(error, {
-        title: DUPLICATE_ERROR,
-      });
-    }
-  }, [
-    createConversation,
-    refetchCurrentUserConversations,
-    selectedConversation,
-    setCurrentConversation,
-    toasts,
-  ]);
-
+  const { duplicateConversation } = useConversation();
+  const handleDuplicateConversation = useCallback(
+    () =>
+      duplicateConversation({
+        refetchCurrentUserConversations,
+        selectedConversation,
+        setCurrentConversation,
+      }),
+    [
+      duplicateConversation,
+      refetchCurrentUserConversations,
+      selectedConversation,
+      setCurrentConversation,
+    ]
+  );
   return localStorageShowConversation ? (
     <EuiCallOut
       css={css`

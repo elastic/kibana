@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { COPY_URL, DUPLICATE } from '../../use_conversation/translations';
 import { DataStreamApis } from '../../use_data_stream_apis';
 import { useConversation } from '../../use_conversation';
 import { Conversation, useAssistantContext } from '../../../..';
@@ -34,7 +35,6 @@ import {
   conversationContainsAnonymizedValues,
   conversationContainsContentReferences,
 } from '../../conversations/utils';
-import { DUPLICATE } from './translations';
 
 interface Params {
   isConversationOwner: boolean;
@@ -67,8 +67,7 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
     setCurrentConversation,
   }: Params) => {
     const confirmModalTitleId = useGeneratedHtmlId();
-    const { http, toasts } = useAssistantContext();
-    const { createConversation } = useConversation();
+    const { copyConversationUrl, duplicateConversation } = useConversation();
     const { euiTheme } = useEuiTheme();
     const {
       setContentReferencesVisible,
@@ -125,64 +124,25 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
       [selectedConversation]
     );
 
-    const handleDuplicateConversation = useCallback(async () => {
-      try {
-        if (!selectedConversation || selectedConversation.id === '') {
-          throw new Error('No conversation available to duplicate');
-        }
-        const newConversation = await createConversation({
-          title: `[${DUPLICATE}] ${selectedConversation.title}`,
-          apiConfig: selectedConversation.apiConfig,
-          messages: selectedConversation.messages,
-          replacements: selectedConversation.replacements,
-        });
-        if (newConversation) {
-          await refetchCurrentUserConversations();
-          setCurrentConversation(newConversation);
-          toasts?.addSuccess({
-            title: i18n.DUPLICATE_SUCCESS(newConversation.title),
-          });
-        } else {
-          throw new Error('Failed to duplicate conversation');
-        }
-      } catch (error) {
-        toasts?.addError(error, {
-          title: i18n.DUPLICATE_ERROR,
-        });
-      }
-    }, [
-      createConversation,
-      refetchCurrentUserConversations,
-      selectedConversation,
-      setCurrentConversation,
-      toasts,
-    ]);
+    const handleCopyUrl = useCallback(
+      () => copyConversationUrl(selectedConversation),
+      [copyConversationUrl, selectedConversation]
+    );
 
-    const handleCopyUrl = useCallback(() => {
-      try {
-        if (!selectedConversation) {
-          throw new Error('No conversation id available to copy');
-        }
-        const conversationUrl = http?.basePath.prepend(
-          `/app/security/get_started?assistant=${selectedConversation.id}`
-        );
-
-        if (!conversationUrl) {
-          throw new Error('Conversation URL does not exist');
-        }
-
-        const urlToCopy = new URL(conversationUrl, window.location.origin).toString();
-        navigator.clipboard?.writeText(urlToCopy);
-
-        toasts?.addSuccess({
-          title: i18n.COPY_URL_SUCCESS,
-        });
-      } catch (error) {
-        toasts?.addError(error, {
-          title: i18n.COPY_URL_ERROR,
-        });
-      }
-    }, [http?.basePath, selectedConversation, toasts]);
+    const handleDuplicateConversation = useCallback(
+      () =>
+        duplicateConversation({
+          refetchCurrentUserConversations,
+          selectedConversation,
+          setCurrentConversation,
+        }),
+      [
+        duplicateConversation,
+        refetchCurrentUserConversations,
+        selectedConversation,
+        setCurrentConversation,
+      ]
+    );
 
     const items = useMemo(
       () => [
@@ -193,7 +153,7 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
           icon={'gear'}
           data-test-subj={'duplicate'}
         >
-          {i18n.DUPLICATE}
+          {DUPLICATE}
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'copy-url'}
@@ -202,7 +162,7 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
           data-test-subj={'copy-url'}
           onClick={handleCopyUrl}
         >
-          {i18n.COPY_URL}
+          {COPY_URL}
         </EuiContextMenuItem>,
         <EuiPanel color="transparent" paddingSize="none" key={'chat-options-panel'}>
           <EuiTitle
