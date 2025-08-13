@@ -15,6 +15,7 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import {
   createAndInstallMockedPrebuiltRules,
+  installMockPrebuiltRulesPackage,
   installPrebuiltRuleAssets,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
@@ -73,6 +74,10 @@ describe.skip(
   'Detection rules, Prebuilt Rules Installation and Update - Authorization/RBAC',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     beforeEach(() => {
       preventPrebuiltRulesPackageInstallation();
     });
