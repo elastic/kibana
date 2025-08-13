@@ -247,6 +247,7 @@ const StepSchema = z.lazy(() =>
     ParallelStepSchema,
     MergeStepSchema,
     BaseConnectorStepSchema,
+    WaitStepSchema,
   ])
 );
 
