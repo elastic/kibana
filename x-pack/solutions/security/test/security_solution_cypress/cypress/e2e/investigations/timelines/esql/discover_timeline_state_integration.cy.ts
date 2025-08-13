@@ -15,22 +15,10 @@ import {
   navigateFromKibanaCollapsibleTo,
   openKibanaNavigation,
 } from '../../../../tasks/kibana_navigation';
-import {
-  addDiscoverEsqlQuery,
-  addFieldToTable,
-  assertFieldsAreLoaded,
-  verifyDiscoverEsqlQuery,
-} from '../../../../tasks/discover';
-import {
-  GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
-  GET_LOCAL_SHOW_DATES_BUTTON,
-} from '../../../../screens/date_picker';
+import { addDiscoverEsqlQuery } from '../../../../tasks/discover';
+import { GET_LOCAL_SHOW_DATES_BUTTON } from '../../../../screens/date_picker';
 import { ALERTS_URL } from '../../../../urls/navigation';
-import {
-  DISCOVER_CONTAINER,
-  DISCOVER_DATA_VIEW_SWITCHER,
-  GET_DISCOVER_DATA_GRID_CELL_HEADER,
-} from '../../../../screens/discover';
+import { DISCOVER_CONTAINER, DISCOVER_DATA_VIEW_SWITCHER } from '../../../../screens/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
 import { login } from '../../../../tasks/login';
 import {
