@@ -58,7 +58,7 @@ export type ConflictResolution<K extends MergeablePropertiesKeys = MergeableProp
   type: K;
   stream: string;
   id: string;
-  value: MergeableProperties[K];
+  value?: MergeableProperties[K];
 };
 
 export const conflictResolutionSchema: z.Schema<ConflictResolution> = z.union([
@@ -117,9 +117,9 @@ export type PropertyConflict<K extends MergeablePropertiesKeys = MergeableProper
   type: K;
   id: string;
   value: {
-    resolution: 'system' | 'user';
-    current: MergeableProperties[K];
-    incoming: MergeableProperties[K];
+    source: 'system' | 'user';
+    current?: MergeableProperties[K];
+    incoming?: MergeableProperties[K];
   };
 };
 

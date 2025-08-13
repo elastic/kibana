@@ -168,7 +168,7 @@ const importContentRoute = createServerRoute({
     });
 
     const hasSystemResolvedConflicts = conflicts.some((streamConflicts) =>
-      streamConflicts.conflicts.some(({ value: { resolution } }) => resolution === 'system')
+      streamConflicts.conflicts.some(({ value: { source } }) => source === 'system')
     );
     if (hasSystemResolvedConflicts) {
       throw new StatusError('All conflicts must be resolved by user', 400);

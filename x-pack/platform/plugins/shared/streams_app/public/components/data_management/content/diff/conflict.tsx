@@ -100,18 +100,7 @@ export function ConflictsTable({
             },
           },
           { field: 'type', name: 'Property type', render: capitalize },
-          {
-            name: 'Identifier',
-            render: (conflict: PropertyConflict) => {
-              if (conflict.type === 'field') {
-                return Object.keys(conflict.value.current)[0];
-              } else if (conflict.type === 'query') {
-                return (conflict.value.current as StreamQuery).title;
-              } else if (conflict.type === 'routing') {
-                return (conflict.value.current as RoutingDefinition).destination;
-              }
-            },
-          },
+          { field: 'id', name: 'Identifier' },
           {
             render: (conflict: PropertyConflict) => {
               return (

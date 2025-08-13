@@ -146,51 +146,62 @@ export function asContentPackEntry({
   };
 }
 
-type resolverFn<T> = (existing: T, incoming: T) => { source: 'user' | 'system'; value: T };
+export type StreamResolverFactory<T> = (stream: string) => IdResolverFactory<T>;
+export type IdResolverFactory<T> = (id: string) => Resolver<T>;
+export type Resolver<T> = (existing?: T, incoming?: T) => { source: 'user' | 'system'; value?: T };
 
 function buildResolver<K extends MergeablePropertiesKeys>(
   resolutions: ConflictResolution[],
   predicate: (
-    value: MergeableProperties[K]
+    stream: string,
+    id: string
   ) => (resolution: ConflictResolution) => resolution is ConflictResolution<K>
-): resolverFn<MergeableProperties[K]> {
-  return (existing: MergeableProperties[K], incoming: MergeableProperties[K]) => {
-    const resolution = resolutions.find(predicate(existing));
-    if (resolution) {
-      return { source: 'user', value: resolution.value };
-    }
+): StreamResolverFactory<MergeableProperties[K]> {
+  return (stream: string) =>
+    (id: string) =>
+    (existing?: MergeableProperties[K], incoming?: MergeableProperties[K]) => {
+      const resolution = resolutions.find(predicate(stream, id));
+      if (resolution) {
+        return { source: 'user', value: resolution.value };
+      }
 
-    return { source: 'system', value: existing };
-  };
+      return { source: 'system', value: existing };
+    };
 }
 
-export type ConflictResolvers = {
-  query: resolverFn<StreamQuery>;
-  field: resolverFn<FieldDefinition>;
-  routing: resolverFn<RoutingDefinition>;
+export type ConflictResolverFactories = {
+  query: StreamResolverFactory<StreamQuery>;
+  field: StreamResolverFactory<FieldDefinition>;
+  routing: StreamResolverFactory<RoutingDefinition>;
 };
 
-export function buildResolvers(resolutions: ConflictResolution[]): ConflictResolvers {
+export function buildResolvers(resolutions: ConflictResolution[]): ConflictResolverFactories {
   return {
     query: buildResolver<'query'>(
       resolutions,
-      (query) =>
+      (stream, id) =>
         (resolution): resolution is ConflictResolution<'query'> => {
-          return resolution.type === 'query' && query.id === resolution.id;
+          return (
+            resolution.stream === stream && resolution.id === id && resolution.type === 'query'
+          );
         }
     ),
     field: buildResolver<'field'>(
       resolutions,
-      (field) =>
+      (stream, id) =>
         (resolution): resolution is ConflictResolution<'field'> => {
-          return resolution.type === 'field' && Object.keys(field)[0] === resolution.id;
+          return (
+            resolution.stream === stream && resolution.id === id && resolution.type === 'field'
+          );
         }
     ),
     routing: buildResolver<'routing'>(
       resolutions,
-      (routing) =>
+      (stream, id) =>
         (resolution): resolution is ConflictResolution<'routing'> => {
-          return resolution.type === 'field' && routing.destination === resolution.id;
+          return (
+            resolution.stream === stream && resolution.id === id && resolution.type === 'routing'
+          );
         }
     ),
   };

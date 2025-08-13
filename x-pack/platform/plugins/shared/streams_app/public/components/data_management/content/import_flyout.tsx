@@ -62,48 +62,7 @@ export function ImportContentPackFlyout({
         conflicts: StreamConflict[];
       }
     | undefined
-  >(
-    undefined /*{
-    changes: [
-      {
-        name: 'logs',
-        changes: [
-          {
-            operation: 'remove',
-            type: 'routing',
-            value: { if: { never: {} }, destination: 'logs.hello' },
-          },
-        ],
-      },
-      { name: 'logs.hello', changes: [] },
-      { name: 'logs.hello.world', changes: [] },
-    ],
-    conflicts: [
-      {
-        name: 'logs',
-        conflicts: [
-          {
-            type: 'query',
-            id: 'ade9fb02-d5f7-475c-befa-20afadb575cb',
-            value: {
-              resolution: 'system',
-              current: {
-                id: 'ade9fb02-d5f7-475c-befa-20afadb575cb',
-                title: 'root event updated',
-                kql: { query: 'message: "hello"' },
-              },
-              incoming: {
-                id: 'ade9fb02-d5f7-475c-befa-20afadb575cb',
-                title: 'root event',
-                kql: { query: 'message: "hello"' },
-              },
-            },
-          },
-        ],
-      },
-    ],
-  }*/
-  );
+  >();
   const [resolutions, setResolutions] = useState<ConflictResolution[]>([]);
 
   return (

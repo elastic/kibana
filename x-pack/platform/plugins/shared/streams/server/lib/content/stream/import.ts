@@ -109,7 +109,7 @@ export async function mergeContentPack({
     base: baseTree,
     existing: existingTree,
     incoming: incomingTree,
-    resolvers: buildResolvers(resolutions),
+    resolverFactories: buildResolvers(resolutions),
   });
 }
 

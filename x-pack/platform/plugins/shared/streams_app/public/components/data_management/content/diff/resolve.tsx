@@ -22,7 +22,7 @@ export function Resolve({
 }: {
   conflict: PropertyConflict;
   resolution?: ConflictResolution;
-  onResolution: (value: MergeableProperties[MergeablePropertiesKeys]) => void;
+  onResolution: (value?: MergeableProperties[MergeablePropertiesKeys]) => void;
 }) {
   const [selectedVersion, setSelectedVersion] = useState<'current' | 'incoming' | undefined>(
     resolution

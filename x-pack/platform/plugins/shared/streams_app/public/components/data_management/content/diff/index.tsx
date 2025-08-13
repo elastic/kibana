@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   ConflictResolution,
   PropertyAdded,
@@ -88,16 +88,20 @@ export function Diff({
         return (
           <EuiFlexGroup key={row.name} style={{ marginLeft: `${row.level * 16}px` }}>
             {!hasChanges ? (
-              <EuiText color={color}>{row.name}</EuiText>
+              <EuiText size="xs" color={color}>
+                {row.name}
+              </EuiText>
             ) : (
               <EuiAccordion
                 id={row.name}
                 buttonContent={
                   <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-                    <EuiFlexItem>
-                      <EuiText color={color}>{row.name}</EuiText>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color={color}>
+                        {row.name}
+                      </EuiText>
                     </EuiFlexItem>
-                    <EuiFlexItem>
+                    <EuiFlexItem grow={false}>
                       <EuiText color="subdued" size="xs">
                         {i18n.translate('xpack.streams.contentDiff.details', {
                           defaultMessage: 'details',
