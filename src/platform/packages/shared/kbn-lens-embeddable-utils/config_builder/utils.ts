@@ -29,10 +29,12 @@ import {
   LensBaseConfig,
   LensBaseLayer,
   LensBaseXYLayer,
+  LensConfig,
   LensDataset,
   LensDatatableDataset,
   LensESQLDataset,
 } from './types';
+import { LensApiState } from './schema';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -312,3 +314,17 @@ export const addLayerFormulaColumns = (
   };
   layer.columnOrder.push(...columns.columnOrder.map((c) => `${c}${postfix}`));
 };
+
+export function isLensAPIFormat(config: unknown): config is LensApiState {
+  return typeof config === 'object' && config !== null && 'type' in config;
+}
+
+export function isLensLegacyFormat(config: unknown): config is LensConfig {
+  return typeof config === 'object' && config !== null && 'chartType' in config;
+}
+
+export function isLensLegacyAttributes(config: unknown): config is LensAttributes {
+  return (
+    typeof config === 'object' && config !== null && 'state' in config && 'references' in config
+  );
+}
