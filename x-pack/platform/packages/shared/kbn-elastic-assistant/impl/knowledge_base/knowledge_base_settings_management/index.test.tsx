@@ -45,7 +45,6 @@ jest.mock('../../assistant/api/knowledge_base/entries/use_update_knowledge_base_
 jest.mock('../../assistant/api/knowledge_base/entries/use_delete_knowledge_base_entries');
 
 jest.mock('../../assistant/settings/use_settings_updater/use_knowledge_base_updater');
-jest.mock('../../assistant/api/knowledge_base/use_knowledge_base_indices');
 jest.mock('../../assistant/api/knowledge_base/use_knowledge_base_status');
 jest.mock('../../assistant/api/knowledge_base/entries/use_knowledge_base_entries');
 jest.mock(
