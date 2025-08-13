@@ -67,6 +67,7 @@ export function registerFeatures({ isServerless, features }: FeatureRegistration
               excludeFromBasePrivileges: true,
               app: [],
               catalogue: [],
+              management: { insightsAndAlerting: ['reporting'] },
               savedObject: { all: [], read: [] },
               api: ['generateReport'],
               ui: ['generateReport'],
