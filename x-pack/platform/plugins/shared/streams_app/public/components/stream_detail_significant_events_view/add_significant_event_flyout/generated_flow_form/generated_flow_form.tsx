@@ -132,6 +132,7 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
                     }
                   },
                   error: (error) => {
+                    setIsGenerating(false);
                     if (error.name === 'AbortError') {
                       return;
                     }
@@ -143,7 +144,6 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
                       ),
                       error,
                     });
-                    setIsGenerating(false);
                   },
                   complete: () => {
                     notifications.toasts.addSuccess({
