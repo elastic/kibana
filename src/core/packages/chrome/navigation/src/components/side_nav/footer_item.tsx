@@ -9,10 +9,11 @@
 
 import React, { KeyboardEvent, forwardRef, ForwardedRef } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiButtonIconProps, EuiToolTip, IconType } from '@elastic/eui';
+import { EuiButtonIcon, EuiButtonIconProps, EuiToolTip, IconType, useEuiTheme } from '@elastic/eui';
 
 import { MenuItem } from '../../../types';
 import { useTooltip } from '../../hooks/use_tooltip';
+import { BetaBadge } from '../beta_badge';
 
 export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, MenuItem {
   hasContent?: boolean;
@@ -28,9 +29,10 @@ export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconTy
  */
 export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemProps>(
   (
-    { hasContent, iconType, id, isActive, label, isBeta, ...props },
+    { badgeType, hasContent, iconType, id, isActive, label, ...props },
     ref: ForwardedRef<HTMLDivElement>
   ) => {
+    const { euiTheme } = useEuiTheme();
     const { tooltipRef, handleMouseOut } = useTooltip();
 
     const wrapperStyles = css`
@@ -51,14 +53,28 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
       />
     );
 
-    if (!hasContent)
+    if (!hasContent) {
+      const tooltipStyles = css`
+        display: flex;
+        align-items: center;
+        gap: ${euiTheme.size.s};
+      `;
+      const tooltipContent = badgeType ? (
+        <span css={tooltipStyles}>
+          {label}
+          <BetaBadge type={badgeType} isInverted />
+        </span>
+      ) : (
+        label
+      );
+
       return (
         <EuiToolTip
           ref={tooltipRef}
           anchorProps={{
             css: wrapperStyles,
           }}
-          content={label}
+          content={tooltipContent}
           disableScreenReaderOutput
           onMouseOut={handleMouseOut}
           position="right"
@@ -66,6 +82,7 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
           {menuItem}
         </EuiToolTip>
       );
+    }
 
     return (
       <div ref={ref} css={wrapperStyles}>

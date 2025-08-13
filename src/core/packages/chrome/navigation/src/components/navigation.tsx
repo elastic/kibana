@@ -126,7 +126,7 @@ export const Navigation = ({
               }
             >
               {(closePopover) => (
-                <SecondaryMenu title={item.label} isBeta={item.isBeta}>
+                <SecondaryMenu title={item.label} badgeType={item.badgeType}>
                   {item.sections?.map((section) => (
                     <SecondaryMenu.Section key={section.id} label={section.label}>
                       {section.items.map((subItem) => (
@@ -285,7 +285,7 @@ export const Navigation = ({
               }
             >
               {(closePopover) => (
-                <SecondaryMenu title={item.label} isBeta={item.isBeta}>
+                <SecondaryMenu title={item.label} badgeType={item.badgeType}>
                   {item.sections?.map((section) => (
                     <SecondaryMenu.Section key={section.id} label={section.label}>
                       {section.items.map((subItem) => (
@@ -318,7 +318,11 @@ export const Navigation = ({
 
       {isSidePanelOpen && sidePanelContent && (
         <SideNav.Panel>
-          <SecondaryMenu title={sidePanelContent.label} isPanel isBeta={sidePanelContent.isBeta}>
+          <SecondaryMenu
+            badgeType={sidePanelContent.badgeType}
+            isPanel
+            title={sidePanelContent.label}
+          >
             {sidePanelContent.sections?.map((section) => (
               <SecondaryMenu.Section key={section.id} label={section.label}>
                 {section.items.map((subItem) => (

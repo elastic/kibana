@@ -28,7 +28,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     label: 'Dashboards',
     iconType: 'dashboardApp',
     href: '/dashboards',
-    isBeta: true,
+    badgeType: 'beta',
   },
   {
     id: 'overview',
@@ -37,7 +37,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     href: '/overview',
   },
   { id: 'alerts', label: 'Alerts', iconType: 'bell', href: '/alerts' },
-  { id: 'cases', label: 'Cases', iconType: 'casesApp', href: '/cases' },
+  { id: 'cases', label: 'Cases', iconType: 'casesApp', href: '/cases', badgeType: 'techPreview' },
   {
     id: 'slos',
     label: 'SLOs',
@@ -124,7 +124,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     label: 'Machine learning',
     iconType: 'machineLearningApp',
     href: '/ml/overview',
-    isBeta: true,
+    badgeType: 'beta',
     sections: [
       {
         id: 'ml-section-1',
@@ -201,20 +201,21 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
     label: 'Getting started',
     iconType: 'launch',
     href: '/getting-started',
+    badgeType: 'beta',
   },
   {
     id: 'developer_tools',
     label: 'Developer tools',
     iconType: 'code',
     href: '/developer-tools',
-    isBeta: true,
+    badgeType: 'techPreview',
   },
   {
     id: 'settings',
     label: 'Settings',
     iconType: 'gear',
     href: '/settings/project/performance',
-    isBeta: true,
+    badgeType: 'techPreview',
     sections: [
       {
         id: 'project',
@@ -234,7 +235,7 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
             id: 'project-fleet',
             label: 'Fleet',
             href: '/settings/project/fleet',
-            isBeta: true,
+            badgeType: 'beta',
             isExternal: true,
           },
         ],

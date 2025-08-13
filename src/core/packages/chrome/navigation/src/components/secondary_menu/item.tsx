@@ -29,11 +29,11 @@ export interface SecondaryMenuItemProps extends SecondaryMenuItem {
  * The only style overrides are making the button labels left-aligned.
  */
 export const SecondaryMenuItemComponent = ({
+  badgeType,
   children,
   iconType,
   id,
   isActive,
-  isBeta,
   isExternal,
   testSubjPrefix = 'secondaryMenuItem',
   ...props
@@ -41,7 +41,6 @@ export const SecondaryMenuItemComponent = ({
   const { euiTheme } = useEuiTheme();
 
   const iconSide = iconType ? 'left' : 'right';
-
   const iconProps = {
     iconSide: iconSide as 'left' | 'right',
     iconType: isExternal ? 'popout' : iconType,
@@ -72,7 +71,7 @@ export const SecondaryMenuItemComponent = ({
   const content = (
     <div css={labelAndBadgeStyles}>
       {children}
-      {isBeta && <BetaBadge />}
+      {badgeType && <BetaBadge type={badgeType} />}
     </div>
   );
 

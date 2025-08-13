@@ -38,7 +38,7 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
       isActive,
       isCollapsed,
       isHorizontal,
-      isBeta,
+      badgeType,
       ...props
     },
     ref: ForwardedRef<HTMLAnchorElement>
@@ -58,22 +58,26 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
       gap: ${euiTheme.size.xs};
     `;
 
-    const getLabelWithBeta = () => (
+    const getLabelWithBeta = (label: ReactNode) => (
       <div css={betaContentStyles}>
-        <span>{children}</span>
-        <BetaBadge isInverted={!isHorizontal} />
+        <span>{label}</span>
+        {badgeType && <BetaBadge type={badgeType} isInverted={!isHorizontal} />}
       </div>
     );
 
     const getTooltipContent = () => {
       if (isHorizontal || (isCollapsed && hasContent)) return null;
-      if (isCollapsed) return isBeta ? getLabelWithBeta() : children;
-      if (!isCollapsed && isBeta) return <BetaBadge isInverted />;
+      if (isCollapsed) return badgeType ? getLabelWithBeta(children) : children;
+      // TODO: translate
+      if (!isCollapsed && badgeType)
+        return getLabelWithBeta(
+          badgeType === 'beta' ? 'Beta' : badgeType === 'techPreview' ? 'Tech preview' : children
+        );
 
       return null;
     };
 
-    const menuItemContent = isHorizontal && isBeta ? getLabelWithBeta() : children;
+    const menuItemContent = isHorizontal && badgeType ? getLabelWithBeta(children) : children;
 
     const menuItem = (
       <MenuItemComponent

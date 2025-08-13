@@ -9,12 +9,14 @@
 
 import { IconType } from '@elastic/eui';
 
+export type BadgeType = 'beta' | 'techPreview';
+
 export interface SecondaryMenuItem {
   'data-test-subj'?: string;
-  isExternal?: boolean;
-  isBeta?: boolean;
+  badgeType?: BadgeType;
   href: string;
   id: string;
+  isExternal?: boolean;
   label: string;
 }
 
@@ -26,13 +28,14 @@ export interface SecondaryMenuSection {
 
 export interface MenuItem {
   'data-test-subj'?: string;
+  badgeType?: BadgeType;
   href: string;
   iconType: IconType;
   id: string;
-  isBeta?: boolean;
   label: string;
   sections?: SecondaryMenuSection[];
 }
+
 export interface NavigationStructure {
   footerItems: MenuItem[];
   primaryItems: MenuItem[];

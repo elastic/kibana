@@ -15,12 +15,13 @@ import { SecondaryMenuItemComponent } from './item';
 import { SecondaryMenuSectionComponent } from './section';
 import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
 import { BetaBadge } from '../beta_badge';
+import { BadgeType } from '../../../types';
 
 export interface SecondaryMenuProps {
+  badgeType?: BadgeType;
   children: ReactNode;
   isPanel?: boolean;
   title: string;
-  isBeta?: boolean;
 }
 
 interface SecondaryMenuComponent extends FC<SecondaryMenuProps> {
@@ -32,10 +33,10 @@ interface SecondaryMenuComponent extends FC<SecondaryMenuProps> {
  * This menu is reused between the side nav panel and the side nav popover.
  */
 export const SecondaryMenu: SecondaryMenuComponent = ({
+  badgeType,
   children,
   isPanel = false,
   title,
-  isBeta,
 }) => {
   const { euiTheme } = useEuiTheme();
   const headerStyle = useMenuHeaderStyle();
@@ -60,7 +61,7 @@ export const SecondaryMenu: SecondaryMenuComponent = ({
       >
         <div css={titleWithBadgeStyles}>
           <h4>{title}</h4>
-          {isBeta && <BetaBadge alignment="text-bottom" />}
+          {badgeType && <BetaBadge type={badgeType} alignment="text-bottom" />}
         </div>
       </EuiTitle>
       {children}
