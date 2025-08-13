@@ -356,7 +356,9 @@ const getBaseDiscoverFeature = ({
   const apiAllPrivileges = ['fileUpload:analyzeFile'];
   const savedObjectAllPrivileges = ['search'];
   const uiAllPrivileges = ['show', 'save'];
-  const apiReadPrivileges = [];
+  // Include user profiles & content insights stats collection (views) for Discover sessions
+  const apiReadPrivileges = ['bulkGetUserProfiles', 'discoverUsageStats'];
+  apiAllPrivileges.push('bulkGetUserProfiles', 'discoverUsageStats');
   const savedObjectReadPrivileges = ['index-pattern', 'search'];
 
   if (version === 'v1') {
