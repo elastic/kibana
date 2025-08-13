@@ -292,8 +292,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
     />
 
   return (
-    <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
-      <FlyoutPanels.Item data-test-subj="indexPatternEditorFlyout" css={styles.flexItem}>
+    <FlyoutPanels.Group flyoutClassName="indexPatternEditorFlyout" maxWidth={1180}>
+      <FlyoutPanels.Item data-test-subj="indexPatternEditorFlyout" border="right">
         <FlyoutPanels.Content>
           <EuiTitle data-test-subj="flyoutTitle">
             <h2 id="dataViewEditorFlyoutTitle">{editData ? editorTitleEditMode : editorTitle}</h2>
@@ -360,7 +360,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         </FlyoutPanels.Content>
         {!isMobile && <EditorFlyoutFooter />}
       </FlyoutPanels.Item>
-      <FlyoutPanels.Item css={PanelItemStyles}>
+      <FlyoutPanels.Item>
         {isLoadingSources ? (
           <></>
         ) : (
@@ -388,16 +388,6 @@ const componentStyles = {
   skeletonTitle: css({
     width: '25vw',
   }),
-  flexItem: css({
-    border: '1px solid red'
-  })
 };
-
-const PanelItemStyles = css`
-  border: 1px solid red !important;
-  @media only screen and (max-width: 767px) {
-    height: auto;
-  }
-`
 
 export const IndexPatternEditorFlyoutContent = React.memo(IndexPatternEditorFlyoutContentComponent);
