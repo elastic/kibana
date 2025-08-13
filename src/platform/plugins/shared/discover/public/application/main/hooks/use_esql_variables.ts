@@ -40,7 +40,10 @@ const extractEsqlVariables = (
       acc.push({
         key: panel.variableName,
         type: panel.variableType,
-        value: panel.selectedOptions?.[0],
+        // If the selected option is not a number, keep it as a string
+        value: isNaN(Number(panel.selectedOptions?.[0]))
+          ? panel.selectedOptions?.[0]
+          : Number(panel.selectedOptions?.[0]),
       });
     }
     return acc;
