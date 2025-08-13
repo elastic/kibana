@@ -36,6 +36,22 @@ describe('isValidSchemaPath', () => {
     expect(isValidSchemaPath(z.object({ a: z.array(z.string()).length(5) }), 'a[10]')).toBe(false);
   });
 
+  it('should return true for unconstrained arrays with any valid index', () => {
+    expect(isValidSchemaPath(z.object({ a: z.array(z.string()) }), 'a[0]')).toBe(true);
+    expect(isValidSchemaPath(z.object({ a: z.array(z.string()) }), 'a[100]')).toBe(true);
+    expect(isValidSchemaPath(z.object({ a: z.array(z.string()) }), 'a[999]')).toBe(true);
+  });
+
+  it('should return false for negative array indices', () => {
+    expect(isValidSchemaPath(z.object({ a: z.array(z.string()) }), 'a[-1]')).toBe(false);
+    expect(isValidSchemaPath(z.object({ a: z.array(z.string()).length(5) }), 'a[-1]')).toBe(false);
+  });
+
+  it('should respect max length constraints', () => {
+    expect(isValidSchemaPath(z.object({ a: z.array(z.string()).max(3) }), 'a[2]')).toBe(true);
+    expect(isValidSchemaPath(z.object({ a: z.array(z.string()).max(3) }), 'a[3]')).toBe(false);
+  });
+
   it('should return true for nested array/object paths', () => {
     expect(isValidSchemaPath(z.object({ a: z.array(z.object({ b: z.string() })) }), 'a[0].b')).toBe(
       true
@@ -60,6 +76,21 @@ describe('getSchemaAtPath', () => {
 
   it('should return null for array paths with invalid index', () => {
     expect(getSchemaAtPath(z.object({ a: z.array(z.string()).length(5) }), 'a[10]')).toBeNull();
+  });
+
+  it('should return element schema for unconstrained arrays', () => {
+    expectZodSchemaEqual(
+      getSchemaAtPath(z.object({ a: z.array(z.string()) }), 'a[0]') as z.ZodType,
+      z.string()
+    );
+    expectZodSchemaEqual(
+      getSchemaAtPath(z.object({ a: z.array(z.string()) }), 'a[999]') as z.ZodType,
+      z.string()
+    );
+  });
+
+  it('should return null for negative indices', () => {
+    expect(getSchemaAtPath(z.object({ a: z.array(z.string()) }), 'a[-1]')).toBeNull();
   });
 
   it('should return null for invalid paths', () => {

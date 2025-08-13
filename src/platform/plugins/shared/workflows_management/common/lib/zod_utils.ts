@@ -50,11 +50,20 @@ export function getSchemaAtPath(
           return partial ? current : null;
         }
         const index = parseInt(segment, 10);
-        const maxLength =
-          current._def.maxLength?.value ?? current._def.exactLength?.value ?? Infinity;
-        if (index < 0 || index >= maxLength) {
+
+        // Reject negative indices
+        if (index < 0) {
           return partial ? current : null;
         }
+
+        // Only enforce bounds checking for arrays with explicit length constraints
+        const maxLength = current._def.maxLength?.value ?? current._def.exactLength?.value;
+        if (maxLength !== undefined && index >= maxLength) {
+          return partial ? current : null;
+        }
+
+        // For unconstrained arrays, we allow any non-negative index for schema introspection
+        // This is because we're validating schema paths, not runtime data
         current = current.element;
       } else {
         return null;
