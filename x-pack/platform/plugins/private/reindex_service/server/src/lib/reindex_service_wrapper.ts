@@ -35,12 +35,7 @@ import { reindexHandler } from './reindex_handler';
 export interface ReindexServiceScopedClientArgs {
   savedObjects: SavedObjectsClientContract;
   dataClient: IScopedClusterClient;
-  log: Logger;
-  licensing: LicensingPluginSetup;
   request: KibanaRequest;
-  credentialStore: CredentialStore;
-  security?: SecurityPluginStart;
-  version: Version;
 }
 
 export interface ReindexServiceScopedClient {
@@ -59,6 +54,13 @@ export interface ReindexServiceInternalApi {
 
 export class ReindexServiceWrapper {
   private reindexWorker: ReindexWorker;
+  private deps: {
+    credentialStore: CredentialStore;
+    logger: Logger;
+    licensing: LicensingPluginSetup;
+    security: SecurityPluginStart;
+    version: Version;
+  };
 
   constructor({
     soClient,
@@ -77,14 +79,22 @@ export class ReindexServiceWrapper {
     security: SecurityPluginStart;
     version: Version;
   }) {
-    this.reindexWorker = ReindexWorker.create(
-      soClient,
+    this.deps = {
       credentialStore,
-      clusterClient,
       logger,
       licensing,
       security,
-      version
+      version,
+    };
+
+    this.reindexWorker = ReindexWorker.create(
+      soClient,
+      credentialStore, //
+      clusterClient,
+      logger, //
+      licensing, //
+      security, //
+      version //
     );
 
     this.reindexWorker.start();
@@ -97,23 +107,23 @@ export class ReindexServiceWrapper {
   }
 
   public getScopedClient({
-    credentialStore,
     dataClient,
     request,
-    licensing,
-    log,
     savedObjects,
-    security,
-    version,
   }: ReindexServiceScopedClientArgs): ReindexServiceScopedClient {
     const callAsCurrentUser = dataClient.asCurrentUser;
-    const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser, log, version);
+    const reindexActions = reindexActionsFactory(
+      savedObjects,
+      callAsCurrentUser,
+      this.deps.logger,
+      this.deps.version
+    );
     const reindexService = reindexServiceFactory(
       callAsCurrentUser,
       reindexActions,
-      log,
-      licensing,
-      version
+      this.deps.logger,
+      this.deps.licensing,
+      this.deps.version
     );
 
     const throwIfNoPrivileges = async (indexName: string): Promise<void> => {
@@ -148,15 +158,15 @@ export class ReindexServiceWrapper {
               savedObjects,
               dataClient,
               indexName,
-              log,
-              licensing,
+              log: this.deps.logger,
+              licensing: this.deps.licensing,
               request,
-              credentialStore,
+              credentialStore: this.deps.credentialStore,
               reindexOptions: {
                 enqueue: true,
               },
-              security,
-              version,
+              security: this.deps.security,
+              version: this.deps.version,
             });
             results.enqueued.push(result);
           } catch (e) {
@@ -194,11 +204,11 @@ export class ReindexServiceWrapper {
             : await reindexService.createReindexOperation(indexName, reindexOptions);
 
         // Add users credentials for the worker to use
-        await credentialStore.set({ reindexOp, request, security });
+        await this.deps.credentialStore.set({ reindexOp, request, security: this.deps.security });
 
         return reindexOp.attributes;
       },
-
+      // ABOVE AND BELOW add options and mappings, figure out where to move reindexOptions
       reindex: async (
         indexName: string,
         reindexOptions?: {
@@ -221,7 +231,7 @@ export class ReindexServiceWrapper {
         const reindexOp = await reindexService.createReindexOperation(indexName, reindexOptions);
 
         // Add users credentials for the worker to use
-        await credentialStore.set({ reindexOp, request, security });
+        await this.deps.credentialStore.set({ reindexOp, request, security: this.deps.security });
 
         // Kick the worker on this node to immediately pickup the new reindex operation.
         this.getWorker().forceRefresh();
@@ -247,7 +257,7 @@ export class ReindexServiceWrapper {
           hasRequiredPrivileges,
           meta: {
             indexName,
-            reindexName: generateNewIndexName(indexName, version),
+            reindexName: generateNewIndexName(indexName, this.deps.version),
             aliases: Object.keys(aliases),
             isFrozen: isTruthy(settings?.frozen),
             isReadonly: isTruthy(settings?.verified_read_only),

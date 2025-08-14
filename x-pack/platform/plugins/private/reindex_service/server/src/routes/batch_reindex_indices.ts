@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
+import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 
 import { versionCheckHandlerWrapper, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH_UPRGRADE_ASSISTANT } from '../constants';
@@ -14,12 +15,7 @@ import { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 
 export function registerBatchReindexIndicesRoutes({
-  credentialStore,
   router,
-  licensing,
-  log,
-  getSecurityPlugin,
-  lib: { handleEsError },
   version,
   getReindexService,
 }: RouteDependencies) {
@@ -48,12 +44,7 @@ export function registerBatchReindexIndicesRoutes({
         const reindexService = (await getReindexService()).getScopedClient({
           savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
           dataClient: esClient,
-          log,
-          licensing,
           request,
-          credentialStore,
-          security: await getSecurityPlugin(),
-          version,
         });
         const result = await reindexService.getBatchQueueResponse();
         return response.ok({
@@ -94,12 +85,7 @@ export function registerBatchReindexIndicesRoutes({
       const reindexService = (await getReindexService()).getScopedClient({
         savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
         dataClient: esClient,
-        log,
-        licensing,
         request,
-        credentialStore,
-        security: await getSecurityPlugin(),
-        version,
       });
       const results = await reindexService.addToBatch(indexNames);
 

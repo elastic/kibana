@@ -6,7 +6,6 @@
  */
 
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import {
@@ -66,20 +65,9 @@ export class ReindexServiceServerPlugin
     { licensing }: PluginsSetup
   ) {
     this.licensing = licensing;
-    const router = http.createRouter();
 
     const dependencies: RouteDependencies = {
-      router,
-      credentialStore: this.credentialStore,
-      log: this.logger,
-      licensing,
-      getSecurityPlugin: async () => {
-        const [, { security }] = await getStartServices();
-        return security;
-      },
-      lib: {
-        handleEsError,
-      },
+      router: http.createRouter(),
       version: this.version,
       getReindexService: async () => {
         const [, , reindexService] = await getStartServices();
@@ -90,7 +78,6 @@ export class ReindexServiceServerPlugin
     savedObjects.registerType(reindexOperationSavedObjectType);
 
     registerReindexIndicesRoutes(dependencies);
-    // might be possible to avoid padding the worker here
     registerBatchReindexIndicesRoutes(dependencies);
   }
 
