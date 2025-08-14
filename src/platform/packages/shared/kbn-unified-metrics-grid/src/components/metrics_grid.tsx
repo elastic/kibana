@@ -29,6 +29,10 @@ type MetricsGridProps = {
   filters?: Array<{ field: string; value: string }>;
   dimensions: string[];
   displayDensity?: 'normal' | 'compact' | 'row';
+  headerActions?: {
+    hasExploreAction?: boolean;
+    hasMetricsInsightsAction?: boolean;
+  };
 } & (
   | {
       pivotOn: 'metric';
@@ -49,6 +53,7 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
   pivotOn,
   filters = [],
   displayDensity = 'normal',
+  headerActions,
 }) => {
   const getColumns = (): 1 | 2 | 3 | 4 => {
     return Array.isArray(fields)
@@ -100,6 +105,7 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
                 colorIndex={index}
                 displayDensity={displayDensity}
                 data-test-subj={`metric-chart-${field.name}`}
+                headerActions={headerActions}
               />
             </EuiFlexItem>
           ))

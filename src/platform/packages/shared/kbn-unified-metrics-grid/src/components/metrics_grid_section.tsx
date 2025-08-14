@@ -15,14 +15,25 @@ export const MetricsGridSection: React.FC<{
   indexPattern: string;
   timeRange: { from?: string; to?: string };
   fields: MetricField[];
+  headerActions?: {
+    hasExploreAction?: boolean;
+    hasMetricsInsightsAction?: boolean;
+  };
   // TODO add props
-}> = ({ fields, timeRange }) => {
+}> = ({ fields, timeRange, headerActions }) => {
   // Hardcoded demo data
   const loading = false;
   const searchTerm = '';
   const dimensions: string[] = [];
   const filters: Array<{ field: string; value: string }> = [];
   const displayDensity = 'normal';
+  // This can be used to enable/disable header actions
+  // and in the metrics context we use both (default)
+  // const headerActions = {
+  //   hasExploreAction: true,
+  //   hasMetricsInsightsAction: true,
+  // };
+  // for now this will be in the props
 
   return (
     <MetricsGrid
@@ -34,6 +45,7 @@ export const MetricsGridSection: React.FC<{
       dimensions={dimensions}
       pivotOn="metric"
       displayDensity={displayDensity}
+      headerActions={headerActions ?? undefined}
     />
   );
 };

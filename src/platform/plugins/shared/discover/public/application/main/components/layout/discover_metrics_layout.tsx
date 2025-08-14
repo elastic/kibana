@@ -15,12 +15,24 @@ interface DiscoverMetricsLayoutProps {
   indexPattern: string;
   fields: MetricField[];
   timeRange: { from: string; to: string };
+  headerActions?: {
+    hasExploreAction?: boolean;
+    hasMetricsInsightsAction?: boolean;
+  };
 }
 
 export const DiscoverMetricsLayout = ({
   fields,
   timeRange,
   indexPattern = 'metrics-*',
+  headerActions,
 }: DiscoverMetricsLayoutProps) => {
-  return <MetricsGridSection indexPattern={indexPattern} timeRange={timeRange} fields={fields} />;
+  return (
+    <MetricsGridSection
+      indexPattern={indexPattern}
+      timeRange={timeRange}
+      fields={fields}
+      headerActions={headerActions}
+    />
+  );
 };

@@ -11,8 +11,23 @@ import React from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { ChartContent } from './chart_content';
 import { ChartHeader } from './chart_header';
+import { MetricField } from '../../types';
 
-export const MetricChart: React.FC<any> = ({
+interface MetricChartProps {
+  metric: MetricField;
+  timeRange: { from?: string; to?: string };
+  byDimension?: string;
+  dimensions?: Array<string>;
+  colorIndex?: number;
+  displayDensity?: 'normal' | 'compact' | 'row';
+  filters?: Array<{ field: string; value: string }>;
+  headerActions?: {
+    hasExploreAction?: boolean;
+    hasMetricsInsightsAction?: boolean;
+  };
+}
+
+export const MetricChart: React.FC<MetricChartProps> = ({
   metric,
   timeRange,
   byDimension,
@@ -20,6 +35,7 @@ export const MetricChart: React.FC<any> = ({
   colorIndex,
   displayDensity = 'normal',
   filters = [],
+  headerActions,
 }) => {
   // Hardcoded data for demo
   const data = [
@@ -40,6 +56,8 @@ export const MetricChart: React.FC<any> = ({
         esqlQuery="SELECT * FROM metrics"
         metric={metric}
         displayDensity={displayDensity}
+        hasExploreAction={headerActions?.hasExploreAction ?? true}
+        hasMetricsInsightsAction={headerActions?.hasMetricsInsightsAction ?? true}
       />
       <EuiSpacer size="m" />
       <ChartContent

@@ -10,6 +10,7 @@
 import React from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { DiscoverMetricsLayout } from './discover_metrics_layout';
+import { queryByTestId } from '@testing-library/dom';
 
 const fields = [
   {
@@ -63,5 +64,66 @@ describe('Discover metrics layout component', () => {
     for (const field of fields) {
       expect(await component.findByTestId(`metric-chart-${field.name}`)).toBeInTheDocument();
     }
+  });
+
+  it('should render header actions (explore and insights) for each metric chart by default', async () => {
+    const component = renderWithKibanaRenderContext(
+      <DiscoverMetricsLayout fields={fields} timeRange={timeRange} indexPattern="metrics-*" />
+    );
+    // The length is 4 because there are 4 metric charts rendered
+    expect(await component.findAllByTestId('metricsChartExploreAction')).toHaveLength(4);
+    expect(await component.findAllByTestId('metricsChartInsightsAction')).toHaveLength(4);
+  });
+
+  it('should render both actions when both are true', async () => {
+    const component = renderWithKibanaRenderContext(
+      <DiscoverMetricsLayout
+        fields={fields}
+        timeRange={timeRange}
+        indexPattern="metrics-*"
+        headerActions={{ hasExploreAction: true, hasMetricsInsightsAction: true }}
+      />
+    );
+    expect(await component.findAllByTestId('metricsChartExploreAction')).toHaveLength(4);
+    expect(await component.findAllByTestId('metricsChartInsightsAction')).toHaveLength(4);
+  });
+
+  it('should render only Explore action when only hasExploreAction is true', async () => {
+    const component = renderWithKibanaRenderContext(
+      <DiscoverMetricsLayout
+        fields={fields}
+        timeRange={timeRange}
+        indexPattern="metrics-*"
+        headerActions={{ hasExploreAction: true, hasMetricsInsightsAction: false }}
+      />
+    );
+    expect(await component.findAllByTestId('metricsChartExploreAction')).toHaveLength(4);
+    expect(queryByTestId(component.container, 'metricsChartInsightsAction')).toBeNull();
+  });
+
+  it('should render only Insights action when only hasMetricsInsightsAction is true', async () => {
+    const component = renderWithKibanaRenderContext(
+      <DiscoverMetricsLayout
+        fields={fields}
+        timeRange={timeRange}
+        indexPattern="metrics-*"
+        headerActions={{ hasExploreAction: false, hasMetricsInsightsAction: true }}
+      />
+    );
+    expect(queryByTestId(component.container, 'metricsChartExploreAction')).toBeNull();
+    expect(await component.findAllByTestId('metricsChartInsightsAction')).toHaveLength(4);
+  });
+
+  it('should render neither action when both are false', async () => {
+    const component = renderWithKibanaRenderContext(
+      <DiscoverMetricsLayout
+        fields={fields}
+        timeRange={timeRange}
+        indexPattern="metrics-*"
+        headerActions={{ hasExploreAction: false, hasMetricsInsightsAction: false }}
+      />
+    );
+    expect(queryByTestId(component.container, 'metricsChartExploreAction')).toBeNull();
+    expect(queryByTestId(component.container, 'metricsChartInsightsAction')).toBeNull();
   });
 });

@@ -28,6 +28,8 @@ interface ChartHeaderProps {
   esqlQuery: string;
   metric: MetricField;
   displayDensity?: 'normal' | 'compact' | 'row';
+  hasExploreAction?: boolean;
+  hasMetricsInsightsAction?: boolean;
 }
 
 export const ChartHeader: React.FC<ChartHeaderProps> = ({
@@ -36,6 +38,8 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
   esqlQuery,
   metric,
   displayDensity = 'normal',
+  hasExploreAction = true,
+  hasMetricsInsightsAction = true,
 }) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
@@ -73,28 +77,32 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
 
   const actionIcons = (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content="Explore">
-          <EuiButtonIcon
-            iconType="inspect"
-            size="s"
-            color="text"
-            aria-label="Explore this metric"
-            onClick={handleExplore}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content="Metric insights" disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="sparkles"
-            size="s"
-            color="text"
-            aria-label="Metric insights"
-            onClick={handleInsights}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
+      {hasExploreAction && (
+        <EuiFlexItem data-test-subj="metricsChartExploreAction" grow={false}>
+          <EuiToolTip content="Explore">
+            <EuiButtonIcon
+              iconType="inspect"
+              size="s"
+              color="text"
+              aria-label="Explore this metric"
+              onClick={handleExplore}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      {hasMetricsInsightsAction && (
+        <EuiFlexItem data-test-subj="metricsChartInsightsAction" grow={false}>
+          <EuiToolTip content="Metric insights" disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="sparkles"
+              size="s"
+              color="text"
+              aria-label="Metric insights"
+              onClick={handleInsights}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 
