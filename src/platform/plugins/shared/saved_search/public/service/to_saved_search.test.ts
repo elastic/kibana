@@ -12,7 +12,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import type { SavedSearchByValueAttributes } from './types';
 import { byValueToSavedSearch } from './to_saved_search';
-import type { DiscoverSessionTab } from '../../../server';
+import type { DiscoverSessionTab } from '../../server';
 
 const mockServices = {
   contentManagement: contentManagementMock.createStartContract().client,
