@@ -9,8 +9,8 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import {
   RuleTranslationResult,
   SiemMigrationStatus,
+  SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
 } from '../../../../../common/siem_migrations/constants';
-import { SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../constants';
 
 export const conditions = {
   isFullyTranslated(): QueryDslQueryContainer {

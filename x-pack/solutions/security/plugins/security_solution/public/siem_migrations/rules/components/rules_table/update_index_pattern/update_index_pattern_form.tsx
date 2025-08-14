@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { EuiCallOut, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { DEFAULT_INDEX_KEY } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useUpdateIndexPattern } from '../../../logic/use_update_index_pattern';
@@ -30,8 +28,6 @@ const CommonUseField = getUseField({ component: Field });
 
 interface IndexPatternsFormData {
   index: string[];
-  overwrite: boolean;
-  overwriteDataViews: boolean;
 }
 
 const schema: FormSchema<IndexPatternsFormData> = {
@@ -71,8 +67,7 @@ export const UpdateIndexPatternForm = memo(
       defaultValue: initialFormData,
       schema,
     });
-    console.log('selectedRuleIds', selectedRuleIds, migrationId);
-    const { mutate: updateIndexPattern } = useUpdateIndexPattern(migrationId, {
+    const { mutate: updateIndexPattern } = useUpdateIndexPattern({
       onError: (error) => {
         addError(error, { title: i18n.UPDATE_INDEX_PATTERN_FAILURE });
       },
@@ -86,7 +81,6 @@ export const UpdateIndexPatternForm = memo(
 
     const { uiSettings } = useKibana().services;
     const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
-    console.log('dataViews', dataViews);
 
     const dataViewOptions = useMemo(() => {
       return [
@@ -95,18 +89,28 @@ export const UpdateIndexPatternForm = memo(
       ];
     }, [dataViews, defaultPatterns]);
 
+    const handleSubmit = useCallback(() => {
+      const indexPattern = formData.index.join(',');
+      if (selectedRuleIds.length > 0) {
+        updateIndexPattern({
+          migrationId,
+          indexPattern,
+          ids: selectedRuleIds,
+        });
+      } else {
+        updateIndexPattern({
+          migrationId,
+          indexPattern,
+        });
+      }
+    }, [formData.index, migrationId, selectedRuleIds, updateIndexPattern]);
+
     return (
       <IndexPatternPlaceholderFormWrapper
         form={form}
         title={i18n.INDEX_PATTERN_PLACEHOLDER_FORM_TITLE}
         onClose={onClose}
-        onSubmit={() => {
-          updateIndexPattern({
-            migrationId,
-            indexPattern: formData.index.join(','),
-            ids: selectedRuleIds.length > 0 ? selectedRuleIds : undefined,
-          });
-        }}
+        onSubmit={handleSubmit}
       >
         <CommonUseField
           path="index"

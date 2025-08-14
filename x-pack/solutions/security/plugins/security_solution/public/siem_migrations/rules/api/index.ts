@@ -424,7 +424,7 @@ export interface UpdateIndexPatternParams {
   /** The index pattern to update */
   indexPattern: string;
   /** The ids of the rules to update */
-  ids: string[];
+  ids?: string[];
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
 }
@@ -434,8 +434,11 @@ export const updateIndexPattern = async ({
   ids,
   signal,
 }: UpdateIndexPatternParams) => {
+  const payload = ids?.length
+    ? { index_pattern: indexPattern, ids }
+    : { index_pattern: indexPattern };
   return KibanaServices.get().http.post<void>(
     replaceParams(SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH, { migration_id: migrationId }),
-    { version: '1', body: JSON.stringify({ index_pattern: indexPattern, ids }), signal }
+    { version: '1', body: JSON.stringify(payload), signal }
   );
 };

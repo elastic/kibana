@@ -40,6 +40,7 @@ import {
   RuleTranslationResult,
   SiemMigrationRetryFilter,
   SiemMigrationStatus,
+  SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
@@ -144,7 +145,9 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       setSelectedMigrationRules(selectedRules);
       setIsSelectAllSelected(false);
       setMissingIndexPatternSelected(
-        selectedRules.filter((rule) => rule.elastic_rule?.query?.includes('[indexPattern]')).length
+        selectedRules.filter((rule) =>
+          rule.elastic_rule?.query?.includes(SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER)
+        ).length
       );
       setInstallTranslatedRulesSelected(
         selectedRules.filter((rule) => rule.translation_result === RuleTranslationResult.FULL)

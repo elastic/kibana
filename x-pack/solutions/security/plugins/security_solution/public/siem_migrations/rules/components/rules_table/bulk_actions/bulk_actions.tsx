@@ -71,8 +71,6 @@ export const BulkActions: React.FC<BulkActionsProps> = React.memo(
     const bulkActionItems: (closePopover: () => void) => EuiContextMenuPanelDescriptor[] =
       useCallback(
         (closePopover: () => void) => {
-          const items: EuiContextMenuPanelDescriptor['items'] = [];
-
           const missingIndexPatternItems = [
             {
               id: 'updateIndexPatternOfSelectedRules',
@@ -173,7 +171,7 @@ export const BulkActions: React.FC<BulkActionsProps> = React.memo(
               items: reprocessFailedRulesItems,
               disabled: !showRetryFailedRulesButton,
             },
-          ];
+          ] as unknown as EuiContextMenuPanelDescriptor[];
         },
         [
           numberOfRulesWithMissingIndex,
@@ -209,8 +207,8 @@ export const BulkActions: React.FC<BulkActionsProps> = React.memo(
                   id="xpack.securitySolution.siemMigrations.rules.table.showingPageOfTotalLabel"
                   defaultMessage="Showing {pageIndex} - {pageSize} of {total, plural, one {# rule} other {# rules}} {pipe} Selected {selectedRulesAmount, plural, one {# rule} other {# rules}}"
                   values={{
-                    pageIndex: pagination.pageIndex * pagination.pageSize + 1,
-                    pageSize: (pagination.pageIndex + 1) * pagination.pageSize,
+                    pageIndex: pagination.pageIndex * (pagination.pageSize ?? 0) + 1,
+                    pageSize: (pagination.pageIndex + 1) * (pagination.pageSize ?? 0),
                     total: numberOfTotalRules,
                     selectedRulesAmount: numberOfSelectedRules || 0,
                     pipe: '\u2000|\u2000',

@@ -62,3 +62,17 @@ export const UPDATE_INDEX_PATTERN_REQUIRED_ERROR = i18n.translate(
     defaultMessage: 'Index pattern is required',
   }
 );
+
+export const UPDATE_INDEX_PATTERN_FAILURE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.updateIndexPatternForm.failure',
+  {
+    defaultMessage: 'Update index pattern failure',
+  }
+);
+
+export const UPDATE_INDEX_PATTERN_SUCCESS = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.updateIndexPatternForm.success',
+  {
+    defaultMessage: 'Update index pattern success',
+  }
+);
