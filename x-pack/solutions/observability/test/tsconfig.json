@@ -102,6 +102,5 @@
     "@kbn/cypress-test-helper",
     "@kbn/streams-schema",
     "@kbn/security-plugin-types-common",
-    "@kbn/test-suites-xpack-observability",
   ]
 }
