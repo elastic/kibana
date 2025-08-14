@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { SafeParseReturnType, z } from '@kbn/zod';
 import { parseWorkflowYamlToJSON } from './yaml_utils';
 import { ConnectorContract, generateYamlSchemaFromConnectors } from '@kbn/workflows';
 
@@ -34,7 +34,14 @@ describe('parseWorkflowYamlToJSON', () => {
     `;
     const result = parseWorkflowYamlToJSON(yaml, yamlSchemaLoose);
     expect(result.success).toBe(true);
-    expect(result.data).toEqual({
+    expect(
+      (
+        result as SafeParseReturnType<
+          z.input<typeof yamlSchemaLoose>,
+          z.output<typeof yamlSchemaLoose>
+        >
+      ).data
+    ).toEqual({
       steps: [{ name: 'step1', type: 'noop', with: { message: 'Hello, world!' } }],
     });
   });
@@ -67,7 +74,14 @@ describe('parseWorkflowYamlToJSON', () => {
     `;
     const result = parseWorkflowYamlToJSON(yaml, yamlSchemaLoose);
     expect(result.success).toBe(true);
-    expect(result.data).toEqual({
+    expect(
+      (
+        result as SafeParseReturnType<
+          z.input<typeof yamlSchemaLoose>,
+          z.output<typeof yamlSchemaLoose>
+        >
+      ).data
+    ).toEqual({
       steps: [{ name: 'step1', type: 'noop', with: { message: 'Hello, {{event.message}}' } }],
     });
   });
