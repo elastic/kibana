@@ -34,8 +34,8 @@ export const Sample = ({
   );
 
   const colourPaletteStyles = useMemo(() => {
-    return grokCollection.getColourPaletteStyles();
-  }, [grokCollection]);
+    return grokCollection.getColourPaletteStyles(eui.euiTheme);
+  }, [eui.euiTheme, grokCollection]);
 
   useEffect(() => {
     const subscription = combineLatest(draftGrokExpressions.map((draft) => draft.getExpression$()))

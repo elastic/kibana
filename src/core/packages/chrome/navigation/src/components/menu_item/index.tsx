@@ -9,7 +9,14 @@
 
 import React, { forwardRef, ReactNode, HTMLAttributes, ForwardedRef } from 'react';
 import { css } from '@emotion/react';
-import { EuiIcon, EuiScreenReaderOnly, EuiText, IconType, useEuiTheme } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiScreenReaderOnly,
+  EuiText,
+  IconType,
+  euiFontSize,
+  useEuiTheme,
+} from '@elastic/eui';
 
 export interface MenuItemProps extends HTMLAttributes<HTMLAnchorElement | HTMLButtonElement> {
   as?: 'a' | 'button';
@@ -40,7 +47,8 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     },
     ref
   ): JSX.Element => {
-    const { euiTheme } = useEuiTheme();
+    const euiThemeContext = useEuiTheme();
+    const { euiTheme } = euiThemeContext;
 
     const isSingleWord = typeof children === 'string' && !children.includes(' ');
 
@@ -84,9 +92,11 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         z-index: 0;
       }
 
+      // TODO: consider using euiFocusRing
       // source: https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible
       &:focus-visible .iconWrapper {
-        border: 2px solid ${isActive ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
+        border: ${euiTheme.border.width.thick} solid
+          ${isActive ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
       }
 
       &:hover .iconWrapper::before {
@@ -128,7 +138,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     const horizontalStyles =
       !isHorizontal &&
       css`
-        font-size: 11px;
+        ${euiFontSize(euiThemeContext, 'xxs', { unit: 'px' }).fontSize};
         font-weight: ${euiTheme.font.weight.semiBold};
       `;
 
@@ -146,7 +156,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
               ${horizontalStyles}
               overflow: hidden;
               max-width: 100%;
-              padding: 0 4px;
+              padding: 0 ${euiTheme.size.xs};
             `}
           >
             {children}

@@ -39,6 +39,7 @@ export const SideNavPrimaryMenu = forwardRef<HTMLElement, SideNavPrimaryMenuProp
           flex-direction: column;
           flex: 1;
           gap: ${isCollapsed ? euiTheme.size.xs : euiTheme.size.base};
+          min-height: 0;
         `}
       >
         {children}

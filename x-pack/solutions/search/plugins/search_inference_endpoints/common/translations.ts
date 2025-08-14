@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const INFERENCE_ENDPOINT_LABEL = i18n.translate(
-  'xpack.searchInferenceEndpoints.inferenceEndpointsLabel',
-  {
-    defaultMessage: 'Inference endpoints',
-  }
-);
-
 export const CANCEL = i18n.translate('xpack.searchInferenceEndpoints.cancel', {
   defaultMessage: 'Cancel',
 });
@@ -61,7 +54,7 @@ export const UNABLE_TO_CREATE_INFERENCE_ENDPOINT = i18n.translate(
 export const INFERENCE_ENDPOINT_ALREADY_EXISTS = i18n.translate(
   'xpack.searchInferenceEndpoints.inferenceFlyoutWrapperComponent.inferenceEndpointAlreadyExistsError',
   {
-    defaultMessage: 'Inference Endpoint id already exists',
+    defaultMessage: 'Inference endpoint id already exists',
   }
 );
 
@@ -121,7 +114,7 @@ export const BREADCRUMB_RELEVANCE = i18n.translate(
 export const BREADCRUMB_INFERENCE_ENDPOINTS = i18n.translate(
   'xpack.searchInferenceEndpoints.breadcrumbs.inferenceEndpoints',
   {
-    defaultMessage: 'Inference Endpoints',
+    defaultMessage: 'Inference endpoints',
   }
 );
 

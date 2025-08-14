@@ -198,7 +198,7 @@ export const IndexSelectorModal = ({
               <EuiButton onClick={addPrivilegedUsers} fill disabled={selectedOptions.length === 0}>
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.addUserButtonLabel"
-                  defaultMessage="Add privileged users"
+                  defaultMessage="Update privileged users"
                 />
               </EuiButton>
             </EuiFlexGroup>

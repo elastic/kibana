@@ -14,8 +14,11 @@ import { css } from '@emotion/react';
 import { SecondaryMenuItemComponent } from './item';
 import { SecondaryMenuSectionComponent } from './section';
 import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
+import { BetaBadge } from '../beta_badge';
+import { BadgeType } from '../../../types';
 
 export interface SecondaryMenuProps {
+  badgeType?: BadgeType;
   children: ReactNode;
   isPanel?: boolean;
   title: string;
@@ -29,9 +32,20 @@ interface SecondaryMenuComponent extends FC<SecondaryMenuProps> {
 /**
  * This menu is reused between the side nav panel and the side nav popover.
  */
-export const SecondaryMenu: SecondaryMenuComponent = ({ children, isPanel = false, title }) => {
+export const SecondaryMenu: SecondaryMenuComponent = ({
+  badgeType,
+  children,
+  isPanel = false,
+  title,
+}) => {
   const { euiTheme } = useEuiTheme();
   const headerStyle = useMenuHeaderStyle();
+
+  const titleWithBadgeStyles = css`
+    display: flex;
+    align-items: center;
+    gap: ${euiTheme.size.xs};
+  `;
 
   return (
     <>
@@ -45,7 +59,10 @@ export const SecondaryMenu: SecondaryMenuComponent = ({ children, isPanel = fals
         `}
         size="xs"
       >
-        <h4>{title}</h4>
+        <div css={titleWithBadgeStyles}>
+          <h4>{title}</h4>
+          {badgeType && <BetaBadge type={badgeType} alignment="text-bottom" />}
+        </div>
       </EuiTitle>
       {children}
     </>

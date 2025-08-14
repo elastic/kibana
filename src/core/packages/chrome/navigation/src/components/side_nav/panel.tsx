@@ -37,7 +37,7 @@ export const SideNavPanel = ({ children }: SideNavPanelProps): JSX.Element => {
         className="side_panel"
         css={css`
           ${useEuiOverflowScroll('y')}
-          border-right: 1px ${euiTheme.colors.borderBaseSubdued} solid;
+          border-right: ${euiTheme.border.width.thin} ${euiTheme.colors.borderBaseSubdued} solid;
           height: 100%;
         `}
         color="subdued"

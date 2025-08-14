@@ -12,7 +12,7 @@ import type { PrivMonBulkUser } from '../../types';
  * Builds bulk operations to soft-delete users by updating their privilege status.
  *
  * For each user:
- * - Removes the specified `index` from `labels.source_indices`.
+ * - Removes the specified `id` from `labels.source_ids`.
  * - If no source indices remain, removes `'index'` from `labels.sources`.
  * - If no sources remain, sets `user.is_privileged` to `false`, effectively marking the user as no longer privileged.
  *
@@ -36,11 +36,11 @@ export const bulkSoftDeleteOperationsFactory =
         {
           script: {
             source: `
-            if (ctx._source.labels?.source_indices != null) {
-              ctx._source.labels.source_indices.removeIf(idx -> idx == params.index);
+            if (ctx._source.labels?.source_ids != null && !ctx._source.labels?.source_ids.isEmpty()) {
+              ctx._source.labels.source_ids.removeIf(idx -> idx == params.source_id);
             }
 
-            if (ctx._source.labels?.source_indices == null || ctx._source.labels.source_indices.isEmpty()) {
+            if (ctx._source.labels?.source_ids == null || ctx._source.labels.source_ids.isEmpty()) {
               if (ctx._source.labels?.sources != null) {
                 ctx._source.labels.sources.removeIf(src -> src == 'index');
               }
@@ -51,7 +51,7 @@ export const bulkSoftDeleteOperationsFactory =
             }
           `,
             params: {
-              index: user.indexName,
+              source_id: user.sourceId,
             },
           },
         }

@@ -11,13 +11,12 @@ import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 interface Props {
-  addFlyoutVisible: boolean;
-  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  closeFlyout: () => void;
   dataStream?: string;
 }
 
 export function AlertFlyout(props: Props) {
-  const { addFlyoutVisible, setAddFlyoutVisibility, dataStream } = props;
+  const { closeFlyout, dataStream } = props;
 
   const {
     services: {
@@ -36,28 +35,21 @@ export function AlertFlyout(props: Props) {
     }
   }, [dataStream]);
 
-  const onCloseAddFlyout = useCallback(
-    () => setAddFlyoutVisibility(false),
-    [setAddFlyoutVisibility]
-  );
+  const onCloseAddFlyout = useCallback(() => closeFlyout(), [closeFlyout]);
 
   return (
-    <>
-      {addFlyoutVisible && (
-        <RuleFormFlyout
-          plugins={{
-            ...services,
-            ruleTypeRegistry,
-            actionTypeRegistry,
-          }}
-          onCancel={onCloseAddFlyout}
-          onSubmit={onCloseAddFlyout}
-          ruleTypeId={DEGRADED_DOCS_RULE_TYPE_ID}
-          initialValues={{
-            params: initialValues,
-          }}
-        />
-      )}
-    </>
+    <RuleFormFlyout
+      plugins={{
+        ...services,
+        ruleTypeRegistry,
+        actionTypeRegistry,
+      }}
+      onCancel={onCloseAddFlyout}
+      onSubmit={onCloseAddFlyout}
+      ruleTypeId={DEGRADED_DOCS_RULE_TYPE_ID}
+      initialValues={{
+        params: initialValues,
+      }}
+    />
   );
 }

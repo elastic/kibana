@@ -15,15 +15,21 @@ export const useNavigation = () => {
   } = useKibana();
 
   const navigateToOnechatUrl = useCallback(
-    (path: string) => {
-      application.navigateToApp(ONECHAT_APP_ID, { path });
+    (path: string, params?: Record<string, string>) => {
+      const queryParams = new URLSearchParams(params);
+      application.navigateToApp(ONECHAT_APP_ID, {
+        path: queryParams.size ? `${path}?${queryParams}` : path,
+      });
     },
     [application]
   );
 
   const createOnechatUrl = useCallback(
-    (path: string) => {
-      return application.getUrlForApp(ONECHAT_APP_ID, { path });
+    (path: string, params?: Record<string, string>) => {
+      const queryParams = new URLSearchParams(params);
+      return application.getUrlForApp(ONECHAT_APP_ID, {
+        path: queryParams.size ? `${path}?${queryParams}` : path,
+      });
     },
     [application]
   );

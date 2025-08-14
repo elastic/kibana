@@ -8,32 +8,23 @@
 import expect from '@kbn/expect';
 import { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/list.gen';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { dataViewRouteHelpersFactory } from '../../../utils/data_view';
 import { PrivMonUtils } from './utils';
 import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
-  const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
+
   const privMonUtils = PrivMonUtils(getService);
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users CRUD APIs', () => {
-    const dataView = dataViewRouteHelpersFactory(supertest);
+  describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
     const kibanaServer = getService('kibanaServer');
-    before(async () => {
-      await dataView.create('security-solution');
-    });
 
     beforeEach(async () => {
       await enablePrivmonSetting(kibanaServer);
       await api.deleteMonitoringEngine({ query: { data: true } });
       await privMonUtils.initPrivMonEngine();
-    });
-
-    after(async () => {
-      await dataView.delete('security-solution');
     });
 
     describe('CRUD API', () => {

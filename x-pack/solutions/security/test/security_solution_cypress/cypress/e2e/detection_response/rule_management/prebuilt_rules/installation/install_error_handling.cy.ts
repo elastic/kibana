@@ -25,6 +25,7 @@ import {
   installPrebuiltRuleAssets,
   createAndInstallMockedPrebuiltRules,
   preventPrebuiltRulesPackageInstallation,
+  installMockPrebuiltRulesPackage,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { login } from '../../../../../tasks/login';
 import {
@@ -49,6 +50,10 @@ describe(
   'Detection rules, Prebuilt Rules Installation - Error handling',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     beforeEach(() => {
       deletePrebuiltRulesAssets();
       deleteAlertsAndRules();

@@ -56,7 +56,7 @@ export const SearchApplicationsListTable: React.FC<SearchApplicationsListTablePr
     {
       field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.searchApplications.list.table.column.name', {
-        defaultMessage: 'Search Application Name',
+        defaultMessage: 'Search application name',
       }),
       mobileOptions: {
         header: true,

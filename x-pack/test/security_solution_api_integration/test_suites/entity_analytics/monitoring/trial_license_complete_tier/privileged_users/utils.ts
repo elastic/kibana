@@ -4,23 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
+import expect from 'expect';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common/src/constants';
 import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
-import { routeWithNamespace } from '../../../../../config/services/detections_response';
+import { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/list.gen';
+import { routeWithNamespace, waitFor } from '../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export const PrivMonUtils = (
   getService: FtrProviderContext['getService'],
   namespace: string = 'default'
 ) => {
+  const TASK_ID = 'entity_analytics:monitoring:privileges:engine:default:1.0.0';
   const api = getService('securitySolutionApi');
   const log = getService('log');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
 
   log.info(`Monitoring: Privileged Users: Using namespace ${namespace}`);
 
@@ -33,7 +37,7 @@ export const PrivMonUtils = (
       log.error(JSON.stringify(res.body));
     }
 
-    expect(res.status).to.eql(200);
+    expect(res.status).toEqual(200);
   };
 
   const initPrivMonEngineWithoutAuth = async ({
@@ -79,5 +83,64 @@ export const PrivMonUtils = (
     }
   };
 
-  return { initPrivMonEngine, initPrivMonEngineWithoutAuth, bulkUploadUsersCsv, retry };
+  const waitForSyncTaskRun = async (): Promise<void> => {
+    const initialTime = new Date();
+
+    await waitFor(
+      async () => {
+        const task = await kibanaServer.savedObjects.get({
+          type: 'task',
+          id: TASK_ID,
+        });
+        const runAtTime = task.attributes.runAt;
+
+        return !!runAtTime && new Date(runAtTime) > initialTime;
+      },
+      'waitForSyncTaskRun',
+      log
+    );
+  };
+
+  const assertIsPrivileged = (
+    user: ListPrivMonUsersResponse[number] | undefined,
+    isPrivileged: boolean
+  ) => {
+    if (isPrivileged) {
+      expect(user?.user?.is_privileged).toEqual(true);
+    } else {
+      expect(user?.user?.is_privileged).toEqual(false);
+      expect(user?.labels?.source_ids).toEqual([]);
+      expect(user?.labels?.sources).toEqual([]);
+    }
+  };
+
+  const findUser = (users: ListPrivMonUsersResponse, username: string) =>
+    users.find((user) => user.user?.name === username);
+
+  const createSourceIndex = async (indexName: string) =>
+    es.indices.create({
+      index: indexName,
+      mappings: {
+        properties: {
+          user: {
+            properties: {
+              name: {
+                type: 'keyword',
+              },
+            },
+          },
+        },
+      },
+    });
+
+  return {
+    initPrivMonEngine,
+    initPrivMonEngineWithoutAuth,
+    bulkUploadUsersCsv,
+    retry,
+    waitForSyncTaskRun,
+    findUser,
+    createSourceIndex,
+    assertIsPrivileged,
+  };
 };
