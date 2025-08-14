@@ -29,7 +29,6 @@ yarn kbn bootstrap
 - If bootstrap fails with integrity errors, run: `yarn cache clean && yarn kbn clean`
 - If running as root: add `--allow-root` flag
 - Force dependency reinstall with: `yarn kbn bootstrap --force-install`
-- Bootstrap timeout is normal for first run (10+ minutes)
 
 ## Build & Development Commands
 
