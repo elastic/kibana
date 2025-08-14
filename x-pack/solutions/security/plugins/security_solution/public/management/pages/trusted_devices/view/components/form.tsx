@@ -48,7 +48,6 @@ import {
   VALIDATION_WARNINGS,
 } from '../translations';
 
-
 interface ValidationResult {
   isValid: boolean;
   errors: Record<string, string[]>;
@@ -301,18 +300,8 @@ const OPERATOR_OPTIONS = [
 
 export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
   ({ item, onChange, mode = 'create', disabled = false, error: submitError }) => {
-    // For new TD items, ensure we start with the correct OS types
-    const currentItem = useMemo(() => {
-      if (
-        mode === 'create' &&
-        item.os_types?.length === 1 &&
-        item.os_types[0] === 'windows' &&
-        !item.name?.trim()
-      ) {
-        return { ...item, os_types: [OperatingSystem.WINDOWS, OperatingSystem.MAC] };
-      }
-      return item;
-    }, [item, mode]);
+    const [hasUserSelectedOs, setHasUserSelectedOs] = useState<boolean>(false);
+
     const getTestId = useTestIdGenerator('trustedDevices-form');
 
     const [visitedFields, setVisitedFields] = useState<Record<string, boolean>>({});
@@ -322,6 +311,20 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
       errors: {},
       warnings: {},
     });
+
+    // For new TD items, ensure we start with the correct OS types
+    const currentItem = useMemo(() => {
+      if (
+        mode === 'create' &&
+        item.os_types?.length === 1 &&
+        item.os_types[0] === 'windows' &&
+        !item.name?.trim() &&
+        !hasUserSelectedOs // Don't override if user has explicitly selected an OS
+      ) {
+        return { ...item, os_types: [OperatingSystem.WINDOWS, OperatingSystem.MAC] };
+      }
+      return item;
+    }, [item, mode, hasUserSelectedOs]);
 
     const updateVisitedFields = useCallback((updates: Record<string, boolean>) => {
       setVisitedFields((prev) => ({ ...prev, ...updates }));
@@ -422,6 +425,9 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
     const handleOsChange = useCallback(
       (selectedOptions: Array<EuiComboBoxOptionOption<OsTypeArray>>) => {
         const osTypes = selectedOptions[0]?.value || [];
+
+        // Mark that user has explicitly selected an OS
+        setHasUserSelectedOs(true);
 
         const updatedItem = {
           ...currentItem,
