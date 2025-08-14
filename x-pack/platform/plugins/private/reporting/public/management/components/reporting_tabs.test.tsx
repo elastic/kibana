@@ -22,7 +22,7 @@ import {
 } from '@kbn/core/public/mocks';
 import { InternalApiClientProvider, ReportingAPIClient } from '@kbn/reporting-public';
 import { Observable } from 'rxjs';
-import { ILicense } from '@kbn/licensing-plugin/public';
+import { ILicense } from '@kbn/licensing-types';
 import { LocatorPublic, SharePluginSetup } from '@kbn/share-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
