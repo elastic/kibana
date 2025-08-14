@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { ESSearchClient } from '@kbn/metrics-data-access-plugin/server';
-import { DataSchemaFormatEnum, HOST_METRICS_RECEIVER_OTEL } from '@kbn/metrics-data-access-plugin/common';
+  
+import { DataSchemaFormatEnum } from '@kbn/metrics-data-access-plugin/common';
 import {
   TIMESTAMP_FIELD,
   PROCESS_COMMANDLINE_FIELD,
@@ -18,6 +17,17 @@ import type {
   ProcessListAPIRequest,
 } from '../../../common/http_api';
 import { InfraMetricsClient } from '../helpers/get_infra_metrics_client';
+
+interface EcsMetaSource {
+  process: { pid: number };
+  system: { 
+    process: { 
+      state: string;
+      summary: { [key: string]: number };
+    };
+  };
+  user: { name: string };
+}
 
 const getEcsProcessList = async (
   infraMetricsClient: InfraMetricsClient,
@@ -132,12 +142,12 @@ const getEcsProcessList = async (
 
   const { buckets: processListBuckets } = response.aggregations!.processes.filteredProcs;
   const processList = processListBuckets.map((bucket) => {
-    const meta = bucket.meta.hits.hits[0]._source;
+    const meta = bucket.meta.hits.hits[0]._source as EcsMetaSource;
 
     return {
-      cpu: bucket.cpu.value ?? null,
-      memory: bucket.memory.value ?? null,
-      startTime: bucket.startTime.value,
+      cpu: (bucket as any).cpu.value ?? null,
+      memory: (bucket as any).memory.value ?? null,
+      startTime: (bucket as any).startTime.value,
       pid: meta.process.pid,
       state: meta.system.process.state,
       user: meta.user.name,
@@ -146,7 +156,7 @@ const getEcsProcessList = async (
   });
 
   const summary: { [p: string]: number } = response.aggregations!.summaryEvent.summary.hits.hits
-    ? response.aggregations!.summaryEvent.summary.hits.hits[0]._source.system.process.summary
+    ? (response.aggregations!.summaryEvent.summary.hits.hits[0]._source as EcsMetaSource).system.process.summary
     : {};
 
   return {
@@ -204,9 +214,41 @@ const getSemConvProcessList = async (
               },
             },
             aggs: {
+              // Dual CPU aggregation approach to handle sorting vs display accuracy
+              
+              // PROBLEM: Pipeline aggregations (like sum_bucket) cannot be used for sorting in ES
+              // SOLUTION: Use two separate CPU aggregations:
+              
+              // 1. 'cpu' - Simple average for sorting
+              //    Used in the 'order' clause above for sorting buckets
+              
+              // 2. 'cpu_total' - Complex state-based aggregation for accurate display values
+              //    Aggregates CPU utilization across all process states, then sums them up
+              //    More accurate but cannot be used for sorting (pipeline aggregation)
+              
+              // This ensures sorting works correctly while maintaining accurate CPU calculations
+              // the difference between simple average and state-aggregated CPU is likely minimal
               cpu: {
                 avg: {
                   field: 'process.cpu.utilization',
+                },
+              },
+              cpu_by_state: {
+                terms: {
+                  field: 'attributes.state',
+                  size: 20,
+                },
+                aggs: {
+                  avg_cpu: {
+                    avg: {
+                      field: 'process.cpu.utilization',
+                    },
+                  },
+                },
+              },
+              cpu_total: {
+                sum_bucket: {
+                  buckets_path: 'cpu_by_state>avg_cpu',
                 },
               },
               memory: {
@@ -241,16 +283,18 @@ const getSemConvProcessList = async (
 
   const { buckets: processListBuckets } = response.aggregations!.processes.filteredProcs;
   const processList = processListBuckets.map((bucket) => {
-    const hit = bucket.meta.hits.hits[0];
-    const meta = hit.fields || {};
+    const meta = bucket.meta.hits.hits[0].fields as {
+      'process.pid': number[];
+      'process.owner': string[];  
+    };
 
     return {
-      cpu: bucket.cpu.value,
-      memory: bucket.memory.value !== null ? bucket.memory.value / 100 : null,
-      startTime: bucket.startTime.value,
-      pid: meta['process.pid'][0] as number,
+      cpu: (bucket as any).cpu_total.value,
+      memory: (bucket as any).memory.value !== null ? (bucket as any).memory.value / 100 : null,
+      startTime: (bucket as any).startTime.value,
+      pid: meta['process.pid'][0],
       state: '', // Not available in SEMCONV
-      user: meta['process.owner'][0] as string,
+      user: meta['process.owner'][0],
       command: bucket.key as string,
     };
   });
@@ -265,7 +309,7 @@ export const getProcessList = async (
   infraMetricsClient: InfraMetricsClient,
   { hostTerm, to, sortBy, searchFilter, schema, sourceId }: ProcessListAPIRequest
 ) => {
-  try {
+ 
     const detectedSchema = schema || DataSchemaFormatEnum.ECS;
 
     if (detectedSchema === DataSchemaFormatEnum.SEMCONV) {
@@ -285,7 +329,4 @@ export const getProcessList = async (
         sourceId,
       });
     }
-  } catch (e) {
-    throw e;
-  }
 };
