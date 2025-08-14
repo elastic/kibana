@@ -71,6 +71,7 @@ import {
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
   DataGridPaginationMode,
+  CustomBulkActions,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -457,6 +458,10 @@ interface InternalUnifiedDataTableProps {
    * @param row
    */
   getRowIndicator?: ColorIndicatorControlColumnParams['getRowIndicator'];
+  /**
+   * Custom bulk action
+   */
+  customBulkActions?: CustomBulkActions;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -539,6 +544,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdatePageIndex,
       disableCellActions = false,
       disableCellPopover = false,
+      customBulkActions,
     },
     ref
   ) => {
@@ -1059,6 +1065,7 @@ const InternalUnifiedDataTable = React.forwardRef<
               pageSize={unifiedDataTableContextValue.pageSize}
               toastNotifications={toastNotifications}
               columns={visibleColumns}
+              customBulkActions={customBulkActions}
             />
           )}
           {externalAdditionalControls}
@@ -1090,6 +1097,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       toastNotifications,
       visibleColumns,
       renderCustomToolbar,
+      customBulkActions,
     ]);
 
     const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
