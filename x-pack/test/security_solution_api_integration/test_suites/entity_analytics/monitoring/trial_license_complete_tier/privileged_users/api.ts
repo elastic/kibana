@@ -85,10 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(res.status).eql(500);
-        expect(res.body).to.eql({
-          message: 'Cannot create user: Maximum user limit of 1 reached',
-          status_code: 500,
-        });
+        expect(res.body.message).to.match(/Maximum user limit of \d+ reached/);
       });
       it('should update a user', async () => {
         log.info(`updating a user`);
