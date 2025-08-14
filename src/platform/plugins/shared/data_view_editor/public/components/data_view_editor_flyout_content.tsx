@@ -263,7 +263,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     <></>
   );
 
-  const EditorFlyoutFooter = () =>
+  const EditorFlyoutFooter = () => (
     <Footer
       onCancel={onCancel}
       onSubmit={async (adhoc?: boolean) => {
@@ -290,6 +290,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       allowAdHoc={allowAdHoc}
       canSave={canSave}
     />
+  );
 
   return (
     <FlyoutPanels.Group flyoutClassName="indexPatternEditorFlyout" maxWidth={1180}>

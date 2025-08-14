@@ -125,8 +125,8 @@ const styles = {
     height: '100%',
     ['@media only screen and (max-width: 767px)']: {
       '.euiFlyoutFooter': {
-        flexGrow: 1
-      }
-    }
+        flexGrow: 1,
+      },
+    },
   }),
 };
