@@ -81,7 +81,7 @@ export const DashboardGrid = ({
         height: gridData.h,
         resizeOptions: {
           minWidth: 6,
-          maxWidth: 24,
+          maxWidth: 12,
           minHeight: 2,
           maxHeight: 10,
         },
@@ -220,12 +220,7 @@ export const DashboardGrid = ({
         }}
         useCustomDragHandle={true}
         renderPanelContents={renderPanelContents}
-        callbacks={{
-          onLayoutChange,
-          onResize: (panel) => {
-            console.log('RESIZE FROM DASHBOARD', panel);
-          },
-        }}
+        onLayoutChange={onLayoutChange}
         expandedPanelId={expandedPanelId}
         accessMode={viewMode === 'edit' ? 'EDIT' : 'VIEW'}
       />

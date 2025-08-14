@@ -16,6 +16,13 @@ import { getSensorPosition, isKeyboardEvent, isMouseEvent, isTouchEvent } from '
 import { KeyboardCode, type UserKeyboardEvent } from '../sensors/keyboard/types';
 import type { PointerPosition, UserInteractionEvent } from '../types';
 
+export const getDefaultResizeOptions = (runtimeSettings: RuntimeGridSettings) => ({
+  minWidth: 1,
+  maxWidth: runtimeSettings.columnCount,
+  minHeight: 1,
+  maxHeight: Infinity,
+});
+
 const getColumnCountInPixels = ({
   columnCount,
   runtimeSettings,
@@ -49,13 +56,9 @@ export const getResizePreviewRect = ({
 }) => {
   const panelRect = activePanel.panelDiv.getBoundingClientRect();
   const { minWidth, maxWidth, minHeight, maxHeight } = {
-    minWidth: 1,
-    maxWidth: runtimeSettings.columnCount,
-    minHeight: 1,
-    maxHeight: Infinity,
+    ...getDefaultResizeOptions(runtimeSettings),
     ...resizeOptions,
   };
-  console.log('min height', getRowCountInPixels({ rowCount: minHeight, runtimeSettings }));
   return {
     left: panelRect.left,
     top: panelRect.top,

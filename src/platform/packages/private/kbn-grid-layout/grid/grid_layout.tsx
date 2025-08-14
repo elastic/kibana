@@ -8,14 +8,14 @@
  */
 
 import classNames from 'classnames';
+import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest } from 'rxjs';
-import { cloneDeep } from 'lodash';
 
 import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
-import { GridPanel, GridPanelData, GridPanelDragPreview } from './grid_panel';
+import { GridPanel, GridPanelDragPreview } from './grid_panel';
 import {
   GridSectionDragPreview,
   GridSectionFooter,
@@ -26,13 +26,13 @@ import type { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle 
 import type { GridLayoutContextType } from './use_grid_layout_context';
 import { GridLayoutContext } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
+import { getOrderedLayout } from './utils/conversions';
+import { isOrderedLayoutEqual } from './utils/equality_checks';
 import {
   getPanelKeysInOrder,
   getSectionsInOrder,
   resolveGridSection,
 } from './utils/resolve_grid_section';
-import { getOrderedLayout } from './utils/conversions';
-import { isOrderedLayoutEqual } from './utils/equality_checks';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -40,10 +40,7 @@ export type GridLayoutProps = {
   expandedPanelId?: string;
   accessMode?: GridAccessMode;
   className?: string; // this makes it so that custom CSS can be passed via Emotion
-  callbacks: {
-    onLayoutChange: (newLayout: GridLayoutData) => void;
-    onResize?: (newPanel: GridPanelData) => void;
-  };
+  onLayoutChange: (newLayout: GridLayoutData) => void;
 } & UseCustomDragHandle;
 
 type GridLayoutElementsInOrder = Array<{
@@ -55,7 +52,7 @@ export const GridLayout = ({
   layout,
   gridSettings,
   renderPanelContents,
-  callbacks: { onLayoutChange, onResize },
+  onLayoutChange,
   expandedPanelId,
   accessMode = 'EDIT',
   className,
@@ -194,9 +191,8 @@ export const GridLayout = ({
         renderPanelContents,
         useCustomDragHandle,
         gridLayoutStateManager,
-        onResize,
       } as GridLayoutContextType),
-    [renderPanelContents, useCustomDragHandle, gridLayoutStateManager, onResize]
+    [renderPanelContents, useCustomDragHandle, gridLayoutStateManager]
   );
 
   return (

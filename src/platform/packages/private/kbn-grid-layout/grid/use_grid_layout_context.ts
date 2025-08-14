@@ -19,7 +19,6 @@ export interface GridLayoutContextType<UseCustomDragHandle extends boolean = boo
       ? (refs: Array<HTMLElement | null>) => void
       : undefined
   ) => React.ReactNode;
-  onResize?: () => void;
 }
 
 export const GridLayoutContext = createContext<GridLayoutContextType | undefined>(undefined);

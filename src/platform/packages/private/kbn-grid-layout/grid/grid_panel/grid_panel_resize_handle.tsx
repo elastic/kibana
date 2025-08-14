@@ -7,24 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import { useGridLayoutPanelEvents } from '../use_grid_layout_events';
+import { useGridLayoutContext } from '../use_grid_layout_context';
+import { useGridLayoutPanelEvents, getDefaultResizeOptions } from '../use_grid_layout_events';
 
 export const ResizeHandle = React.memo(
   ({ sectionId, panelId }: { sectionId?: string; panelId: string }) => {
+    const buttonRef = useRef<HTMLButtonElement | null>(null);
     const startDrag = useGridLayoutPanelEvents({
       interactionType: 'resize',
       panelId,
       sectionId,
     });
+    const { gridLayoutStateManager } = useGridLayoutContext();
+
+    useEffect(() => {
+      const resizeCursorSubscription = gridLayoutStateManager.layoutUpdated$.subscribe((layout) => {
+        const panel = layout[panelId];
+        if (panel.type !== 'panel' || !buttonRef.current) return;
+
+        const { minWidth, maxWidth, minHeight, maxHeight } = {
+          ...getDefaultResizeOptions(gridLayoutStateManager.runtimeSettings$.getValue()),
+          ...panel.resizeOptions,
+        };
+        let direction = 'nwse';
+        if (panel.width === maxWidth && panel.height === maxHeight) {
+          direction = 'nw';
+        } else if (panel.width === minWidth && panel.height === minHeight) {
+          direction = 'se';
+        }
+        buttonRef.current.style.setProperty('--kbnDragHandleCursor', `${direction}-resize`);
+      });
+      return () => {
+        resizeCursorSubscription.unsubscribe();
+      };
+    }, [gridLayoutStateManager, panelId]);
 
     return (
       <button
+        ref={buttonRef}
         css={styles}
         onMouseDown={startDrag}
         onTouchStart={startDrag}
@@ -40,6 +66,7 @@ export const ResizeHandle = React.memo(
 
 const styles = ({ euiTheme }: UseEuiTheme) =>
   css({
+    // '--dragHandleCursorStyle': 'se-resize',
     right: '0',
     bottom: '0',
     margin: '-2px',
@@ -51,7 +78,7 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     zIndex: euiTheme.levels.toast,
     scrollMarginBottom: euiTheme.size.s,
     '&:hover, &:focus': {
-      cursor: 'se-resize',
+      cursor: 'var(--kbnDragHandleCursor)',
     },
     '.kbnGrid--static &, .kbnGridPanel--expanded &': {
       display: 'none',
