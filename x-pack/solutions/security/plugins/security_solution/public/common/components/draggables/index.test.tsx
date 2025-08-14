@@ -27,12 +27,7 @@ describe('draggables', () => {
   describe('rendering', () => {
     test('it renders the default DefaultDraggable', () => {
       const wrapper = shallow(
-        <DefaultDraggable
-          id="draggable-id"
-          field="some-field"
-          value="some-value"
-          queryValue="some-query-value"
-        >
+        <DefaultDraggable field="some-field" value="some-value" queryValue="some-query-value">
           <span>{'A child of this'}</span>
         </DefaultDraggable>
       );
@@ -107,30 +102,26 @@ describe('draggables', () => {
       const value = 'some value';
       const wrapper = mount(
         <TestProviders>
-          <DefaultDraggable id="draggable-id" field={field} value={value} />
+          <DefaultDraggable field={field} value={value} />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(value);
     });
 
     test('it returns null if value is undefined', () => {
-      const wrapper = shallow(
-        <DefaultDraggable id="draggable-id" field="some-field" value={undefined} />
-      );
+      const wrapper = shallow(<DefaultDraggable field="some-field" value={undefined} />);
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns null if value is null', () => {
-      const wrapper = shallow(
-        <DefaultDraggable id="draggable-id" field="some-field" value={null} />
-      );
+      const wrapper = shallow(<DefaultDraggable field="some-field" value={null} />);
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it renders a tooltip with the field name if a tooltip is not explicitly provided', () => {
       const wrapper = mount(
         <TestProviders>
-          <DefaultDraggable id="draggable-id" field="source.bytes" value="a default draggable" />
+          <DefaultDraggable field="source.bytes" value="a default draggable" />
         </TestProviders>
       );
 
@@ -143,7 +134,6 @@ describe('draggables', () => {
       const wrapper = mount(
         <TestProviders>
           <DefaultDraggable
-            id="draggable-id"
             field="source.bytes"
             tooltipContent="default draggable string tooltip"
             value="a default draggable"
@@ -160,7 +150,6 @@ describe('draggables', () => {
       const wrapper = mount(
         <TestProviders>
           <DefaultDraggable
-            id="draggable-id"
             field="source.bytes"
             tooltipContent={<span>{'default draggable tooltip'}</span>}
             value="a default draggable"
@@ -177,7 +166,6 @@ describe('draggables', () => {
       const wrapper = mount(
         <TestProviders>
           <DefaultDraggable
-            id="draggable-id"
             field="source.bytes"
             tooltipContent={null}
             value="a default draggable"

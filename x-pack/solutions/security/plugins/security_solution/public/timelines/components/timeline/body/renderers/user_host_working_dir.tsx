@@ -39,7 +39,11 @@ export const UserHostWorkingDir = React.memo<Props>(
   }) =>
     userName != null || userDomain != null || hostName != null || workingDirectory != null ? (
       <>
-        <TokensFlexItem grow={false} component="span">
+        <TokensFlexItem
+          grow={false}
+          component="span"
+          data-test-subj={`render-content-${userNameField}`}
+        >
           <DraggableBadge
             contextId={contextId}
             eventId={eventId}

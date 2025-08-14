@@ -259,7 +259,7 @@ describe('UserHostWorkingDir', () => {
       expect(wrapper.text()).toEqual('[user-name-123]custom separator[host-name-123]');
     });
 
-    test('it renders a draggable `user.domain` field (by default) when userDomain is provided, and userDomainField is NOT specified as a prop', () => {
+    test('it renders `user.domain` field (by default) when userDomain is provided, and userDomainField is NOT specified as a prop', () => {
       const wrapper = mount(
         <TestProviders>
           <div>
@@ -279,7 +279,7 @@ describe('UserHostWorkingDir', () => {
       expect(wrapper.find('[data-test-subj="render-content-user.domain"]').exists()).toBe(true);
     });
 
-    test('it renders a draggable with an overridden field name when userDomain is provided, and userDomainField is also specified as a prop', () => {
+    test('it renders with an overridden field name when userDomain is provided, and userDomainField is also specified as a prop', () => {
       const wrapper = mount(
         <TestProviders>
           <div>
@@ -302,7 +302,7 @@ describe('UserHostWorkingDir', () => {
       );
     });
 
-    test('it renders a draggable `user.name` field (by default) when userName is provided, and userNameField is NOT specified as a prop', () => {
+    test('it renders a `user.name` field (by default) when userName is provided, and userNameField is NOT specified as a prop', () => {
       const wrapper = mount(
         <TestProviders>
           <div>
@@ -319,10 +319,10 @@ describe('UserHostWorkingDir', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="render-content-user.name"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="token-user-name"]').exists()).toBe(true);
     });
 
-    test('it renders a draggable with an overridden field name when userName is provided, and userNameField is also specified as a prop', () => {
+    test('it renders with an overridden field name when userName is provided, and userNameField is also specified as a prop', () => {
       const wrapper = mount(
         <TestProviders>
           <div>

@@ -50,14 +50,7 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
             </>
           )}
           {typeof rowItem === 'string' && (
-            <DefaultDraggable
-              id={id}
-              field={attrName}
-              value={rowItem}
-              isAggregatable={true}
-              scopeId={scopeId}
-              fieldType={'keyword'}
-            >
+            <DefaultDraggable field={attrName} value={rowItem} scopeId={scopeId}>
               {render ? render(rowItem) : rowItem}
             </DefaultDraggable>
           )}

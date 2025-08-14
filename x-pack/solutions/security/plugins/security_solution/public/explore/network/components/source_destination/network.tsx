@@ -95,12 +95,7 @@ export const Network = React.memo<{
         ? uniq(bytes).map((b) =>
             !isNaN(Number(b)) ? (
               <EuiFlexItemMarginRight grow={false} key={b}>
-                <DefaultDraggable
-                  scopeId={scopeId}
-                  field={NETWORK_BYTES_FIELD_NAME}
-                  id={`network-default-draggable-${contextId}-${eventId}-${NETWORK_BYTES_FIELD_NAME}-${b}`}
-                  value={b}
-                >
+                <DefaultDraggable scopeId={scopeId} field={NETWORK_BYTES_FIELD_NAME} value={b}>
                   <Stats size="xs">
                     <span>
                       <PreferenceFormattedBytes value={b} />
@@ -115,12 +110,7 @@ export const Network = React.memo<{
       {packets != null
         ? uniq(packets).map((p) => (
             <EuiFlexItemMarginRight grow={false} key={p}>
-              <DefaultDraggable
-                scopeId={scopeId}
-                field={NETWORK_PACKETS_FIELD_NAME}
-                id={`network-default-draggable-${contextId}-${eventId}-${NETWORK_PACKETS_FIELD_NAME}-${p}`}
-                value={p}
-              >
+              <DefaultDraggable scopeId={scopeId} field={NETWORK_PACKETS_FIELD_NAME} value={p}>
                 <Stats size="xs">
                   <span>{`${p} ${i18n.PACKETS}`}</span>
                 </Stats>
