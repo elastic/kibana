@@ -69,7 +69,7 @@ describe('reindex API', () => {
   beforeEach(() => {
     mockRouter = createMockRouter();
     const securityMockInstance = securityMock.createStart();
-    const licensingMockInstance = licensingMock.createSetup();
+    const licensingMockInstance = licensingMock.createStart();
     const version = { getMajorVersion: () => 8, getMinorVersion: () => 7 } as any as Version;
     routeDependencies = {
       credentialStore,
