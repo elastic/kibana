@@ -65,3 +65,8 @@ export interface KibanaContextExtra {
   messageImporter: MessageImporter;
   storage: Storage;
 }
+
+export enum IndexEditorErrors {
+  GENERIC_SAVING_ERROR = 'genericSavingError',
+  PARTIAL_SAVING_ERROR = 'partialSavingError',
+}

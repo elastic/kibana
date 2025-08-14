@@ -24,6 +24,7 @@ import React, { lazy } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { ErrorCallout } from './error_callout';
 import { isPlaceholderColumn } from '../utils';
 import { UnsavedChangesModal } from './modals/unsaved_changes_modal';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
@@ -99,6 +100,8 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
               />
             </EuiText>
           </EuiFlyoutHeader>
+
+          <ErrorCallout />
 
           <EuiFlyoutBody
             css={css`
