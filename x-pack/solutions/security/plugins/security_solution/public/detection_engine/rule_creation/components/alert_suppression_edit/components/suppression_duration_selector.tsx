@@ -94,6 +94,7 @@ const SuppressionDurationSelectorFields = memo(function SuppressionDurationSelec
   return (
     <>
       <EuiRadioGroup
+        name="alertSuppressionDurationType"
         disabled={disabled}
         idSelected={suppressionDurationSelectorField.value}
         options={[

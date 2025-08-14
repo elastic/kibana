@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { installMockPrebuiltRulesPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { DEFINITION_DETAILS, SUPPRESS_BY_DETAILS } from '../../../../../screens/rule_details';
 
@@ -43,6 +44,10 @@ describe(
     },
   },
   () => {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
