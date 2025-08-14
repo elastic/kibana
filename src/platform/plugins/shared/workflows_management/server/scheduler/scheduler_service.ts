@@ -17,7 +17,6 @@ import {
   convertToWorkflowGraph,
 } from '../../common/lib/build_execution_graph/build_execution_graph';
 import { WorkflowsService } from '../workflows_management/workflows_management_service';
-import { extractConnectorIds } from './lib/extract_connector_ids';
 
 const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineModel[] => {
   return [];
@@ -62,14 +61,12 @@ export class SchedulerService {
   ): Promise<string> {
     const executionGraph = convertToWorkflowGraph(workflow.definition);
     workflow.executionGraph = convertToSerializableGraph(executionGraph); // TODO: It's not good approach, it's temporary
-    const connectorCredentials = await extractConnectorIds(this.actionsClient);
 
     const workflowRunId = generateUuid();
     const context = {
       workflowRunId,
       inputs,
       event: 'event' in inputs ? inputs.event : undefined,
-      connectorCredentials,
       triggeredBy: 'manual', // <-- mark as manual
     };
 

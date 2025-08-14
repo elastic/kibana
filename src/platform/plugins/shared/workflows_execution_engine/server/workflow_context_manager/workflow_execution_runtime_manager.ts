@@ -176,7 +176,7 @@ export class WorkflowExecutionRuntimeManager {
 
   public async startStep(stepId: string): Promise<void> {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    withSpan(
+    return withSpan(
       {
         name: `workflow.step.${stepId}`,
         type: 'workflow',
