@@ -46,10 +46,6 @@ export function updateFlyout(display: FLYOUT_STATE) {
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    dispatch({
-      type: UPDATE_FLYOUT,
-      display,
-    });
     switch (display) {
       case FLYOUT_STATE.NONE:
         const triggerElement = getFlyoutOpenTriggerElement(getState());
@@ -59,27 +55,30 @@ export function updateFlyout(display: FLYOUT_STATE) {
         });
         // Return focus to the button used to open this flyout
         if (triggerElement) {
-          // If previous flyout state was the edit panel, flyout was triggered by a hover action that's now hidden,
-          // so locate its enclosing layerName and focus the popover button
-          const nextTarget =
-            getFlyoutDisplay(getState()) !== FLYOUT_STATE.LAYER_PANEL
-              ? triggerElement
-              : (triggerElement
-                  .closest('[data-layerid]')
-                  ?.querySelector('button.mapTocEntry__layerName') as HTMLButtonElement) ?? null;
+          const prevFlyoutState = getFlyoutDisplay(getState());
+          if (prevFlyoutState === FLYOUT_STATE.LAYER_PANEL) {
+            // If previous flyout state was the edit panel, flyout was triggered by a hover action that's now hidden,
+            // so locate its enclosing layerName and focus the popover button
+            const layerTocEntry =
+              (triggerElement
+                .closest('[data-layerid]')
+                ?.querySelector('button.mapTocEntry__layerName') as HTMLButtonElement) ?? null;
 
-          // Wait for rendering to finish to ensure focusable elements are all re-enabled
-          requestAnimationFrame(() => {
-            if (nextTarget === triggerElement) {
-              triggerElement?.focus();
-            } else {
+            requestAnimationFrame(() => {
               // First focus the enclosing layerName
-              nextTarget?.focus();
+              layerTocEntry?.focus();
               // Wait for the original edit button to reappear, then shift focus to it
-              requestAnimationFrame(() => triggerElement?.focus());
-            }
-          });
+              requestAnimationFrame(() => triggerElement.focus());
+            });
+          } else {
+            // Wait for rendering to finish to ensure focusable elements are all re-enabled
+            requestAnimationFrame(() => triggerElement.focus());
+          }
         }
+        dispatch({
+          type: UPDATE_FLYOUT,
+          display,
+        });
         break;
       case FLYOUT_STATE.LAYER_PANEL:
         const selectedLayerId = getSelectedLayerId(getState());
