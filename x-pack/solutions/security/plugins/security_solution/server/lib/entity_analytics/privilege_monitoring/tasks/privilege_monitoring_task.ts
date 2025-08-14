@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { CoreStart, Logger, AnalyticsServiceSetup } from '@kbn/core/server';
+import {
+  type CoreStart,
+  type Logger,
+  type AnalyticsServiceSetup,
+  SECURITY_EXTENSION_ID,
+} from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -15,7 +20,6 @@ import type {
 
 import moment from 'moment';
 import type { RunSoonResult } from '@kbn/task-manager-plugin/server/task_scheduling';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
