@@ -204,7 +204,7 @@ describe('GraphInvestigation Component', () => {
       expect(showDetailsItem).not.toBeInTheDocument();
     });
 
-    it('shows `Show entity details` as disabled when entity node has documentsData', () => {
+    it('shows the option `Show entity details` as enabled when entity node has documentsData', () => {
       const { container, getByTestId } = renderStory();
 
       expandNode(container, 'projects/your-project-id/roles/customRole');
@@ -214,7 +214,7 @@ describe('GraphInvestigation Component', () => {
       expect(showDetailsItem).not.toHaveAttribute('disabled');
     });
 
-    it('should show the option `Show entity details` as enabled when entity node has no documentsData', () => {
+    it('show the option `Show entity details` as disabled when entity node has no documentsData', () => {
       const { container, queryByTestId } = renderStory();
 
       expandNode(container, 'admin@example.com');
