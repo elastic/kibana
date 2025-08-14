@@ -47,7 +47,7 @@ import {
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { LicenseService } from '../../common/license';
 import { Subject } from 'rxjs';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import type { PolicyConfig, PolicyData } from '../../common/endpoint/types';
 import { AntivirusRegistrationModes, ProtectionModes } from '../../common/endpoint/types';
