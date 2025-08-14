@@ -98,7 +98,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
       ];
       mockFindByIndex.mockResolvedValue(mockMonitoringSOSources);
 
-      indexSyncService.syncUsernamesFromIndex = jest.fn().mockResolvedValue(['user1', 'user2']);
+      indexSyncService._syncUsernamesFromIndex = jest.fn().mockResolvedValue(['user1', 'user2']);
       await indexSyncService.plainIndexSync(mockSavedObjectClient);
       expect(mockFindByIndex).toHaveBeenCalled();
       expect(mockSearchUsernamesInIndex).toHaveBeenCalledTimes(2);
@@ -168,8 +168,9 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
       mockBulkUpsertOperations.mockReturnValue([{ index: { _id: '1' } }]);
       dataClient.index = 'test-index';
 
-      const usernames = await indexSyncService.syncUsernamesFromIndex({
+      const usernames = await indexSyncService._syncUsernamesFromIndex({
         indexName: 'test-index',
+        sourceId: 'source-id',
       });
 
       expect(usernames).toEqual(['frodo', 'samwise']);
