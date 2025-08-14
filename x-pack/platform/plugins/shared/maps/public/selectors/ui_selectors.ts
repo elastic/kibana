@@ -19,3 +19,5 @@ export const getIsFullScreen = ({ ui }: MapStoreState): boolean => ui.isFullScre
 export const getIsReadOnly = ({ ui }: MapStoreState): boolean => ui.isReadOnly;
 export const getAutoOpenLayerWizardId = ({ ui }: MapStoreState): string => ui.autoOpenLayerWizardId;
 export const getDeletedFeatureIds = ({ ui }: MapStoreState): string[] => ui.deletedFeatureIds;
+export const getFlyoutOpenTriggerElement = ({ ui }: MapStoreState): HTMLElement | null =>
+  ui.flyoutOpenTriggerElement;

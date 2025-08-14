@@ -75,7 +75,6 @@ export class MapContainer extends Component<Props, State> {
   private _isInitalLoadRenderTimerStarted: boolean = false;
 
   private _flyoutRef: React.RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
-  private _flyoutOpenTrigger: HTMLButtonElement | null = null;
 
   state: State = {
     isInitialLoadRenderTimeoutComplete: false,
@@ -155,37 +154,8 @@ export class MapContainer extends Component<Props, State> {
     }
   }
 
-  _updateFlyout = async (flyoutDisplay: FLYOUT_STATE) => {
-    // If the flyout has just closed
-    if (flyoutDisplay === FLYOUT_STATE.NONE) {
-      const triggerElement = this._flyoutOpenTrigger;
-      this._flyoutOpenTrigger = null;
-      // Return focus to the button used to open this flyout
-      if (triggerElement) {
-        // If offsetParent is null, flyout was triggered by a hover action that's now hidden, so locate
-        // its enclosing layerName and focus the popover button
-        const nextTarget = triggerElement.offsetParent
-          ? triggerElement
-          : (triggerElement
-              .closest('[data-layerid]')
-              ?.querySelector('button.mapTocEntry__layerName') as HTMLButtonElement) ?? null;
-
-        // Wait for rendering to finish to ensure focusable elements are all re-enabled
-        requestAnimationFrame(() => {
-          if (nextTarget === triggerElement) {
-            triggerElement?.focus();
-          } else {
-            // First focus the enclosing layerName
-            nextTarget?.focus();
-            // Wait for the original edit button to reappear, then shift focus to it
-            requestAnimationFrame(() => triggerElement?.focus());
-          }
-        });
-      }
-    } else {
-      // If flyout is opening for the first time, remember the button used to open it
-      if (!this._flyoutOpenTrigger)
-        this._flyoutOpenTrigger = (document.activeElement as HTMLButtonElement) ?? null;
+  _updateFlyout = (flyoutDisplay: FLYOUT_STATE) => {
+    if (flyoutDisplay !== FLYOUT_STATE.NONE) {
       if (this._flyoutRef.current) {
         // Shift focus to the first focusable item inside the flyout
         focusFirstFocusable(this._flyoutRef.current);

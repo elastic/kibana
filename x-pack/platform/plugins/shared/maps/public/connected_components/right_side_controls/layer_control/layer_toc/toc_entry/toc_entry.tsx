@@ -219,6 +219,7 @@ export class TOCEntry extends Component<Props, State> {
           key="settings"
           isDisabled={this.props.isEditButtonDisabled}
           iconType="pencil"
+          data-edit-button
           aria-label={EDIT_LAYER_SETTINGS_LABEL}
           title={EDIT_LAYER_SETTINGS_LABEL}
           onClick={this._openLayerPanelWithCheck}

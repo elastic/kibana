@@ -8,12 +8,17 @@
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { MapStoreState } from '../reducers/store';
-import { getFlyoutDisplay, getOpenTOCDetails } from '../selectors/ui_selectors';
+import {
+  getFlyoutDisplay,
+  getFlyoutOpenTriggerElement,
+  getOpenTOCDetails,
+} from '../selectors/ui_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import { setQuery, trackMapSettings } from './map_actions';
 import { setSelectedLayer } from './layer_actions';
 import { DRAW_MODE } from '../../common/constants';
 import { UPDATE_EDIT_STATE } from './map_action_constants';
+import { getSelectedLayerId } from '../selectors/map_selectors';
 
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
 export const SET_IS_LAYER_TOC_OPEN = 'SET_IS_LAYER_TOC_OPEN';
@@ -27,6 +32,7 @@ export const SET_DRAW_MODE = 'SET_DRAW_MODE';
 export const SET_AUTO_OPEN_WIZARD_ID = 'SET_AUTO_OPEN_WIZARD_ID';
 export const PUSH_DELETED_FEATURE_ID = 'PUSH_DELETED_FEATURE_ID';
 export const CLEAR_DELETED_FEATURE_IDS = 'CLEAR_DELETED_FEATURE_IDS';
+export const SET_FLYOUT_OPEN_TRIGGER_ELEMENT = 'SET_FLYOUT_OPEN_TRIGGER_ELEMENT';
 
 export function exitFullScreen() {
   return {
@@ -36,9 +42,60 @@ export function exitFullScreen() {
 }
 
 export function updateFlyout(display: FLYOUT_STATE) {
-  return {
-    type: UPDATE_FLYOUT,
-    display,
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    dispatch({
+      type: UPDATE_FLYOUT,
+      display,
+    });
+    switch (display) {
+      case FLYOUT_STATE.NONE:
+        const triggerElement = getFlyoutOpenTriggerElement(getState());
+        dispatch({
+          type: SET_FLYOUT_OPEN_TRIGGER_ELEMENT,
+          flyoutOpenTriggerElement: null,
+        });
+        // Return focus to the button used to open this flyout
+        if (triggerElement) {
+          // If offsetParent is null, flyout was triggered by a hover action that's now hidden, so locate
+          // its enclosing layerName and focus the popover button
+          const nextTarget = triggerElement.offsetParent
+            ? triggerElement
+            : (triggerElement
+                .closest('[data-layerid]')
+                ?.querySelector('button.mapTocEntry__layerName') as HTMLButtonElement) ?? null;
+
+          // Wait for rendering to finish to ensure focusable elements are all re-enabled
+          requestAnimationFrame(() => {
+            if (nextTarget === triggerElement) {
+              triggerElement?.focus();
+            } else {
+              // First focus the enclosing layerName
+              nextTarget?.focus();
+              // Wait for the original edit button to reappear, then shift focus to it
+              requestAnimationFrame(() => triggerElement?.focus());
+            }
+          });
+        }
+        break;
+      case FLYOUT_STATE.LAYER_PANEL:
+        const selectedLayerId = getSelectedLayerId(getState());
+        dispatch({
+          type: SET_FLYOUT_OPEN_TRIGGER_ELEMENT,
+          flyoutOpenTriggerElement: document.querySelector(
+            `[data-layerid="${selectedLayerId}"] button[data-edit-button]`
+          ),
+        });
+        break;
+      default:
+        dispatch({
+          type: SET_FLYOUT_OPEN_TRIGGER_ELEMENT,
+          flyoutOpenTriggerElement: document.activeElement,
+        });
+        break;
+    }
   };
 }
 export function openMapSettings() {

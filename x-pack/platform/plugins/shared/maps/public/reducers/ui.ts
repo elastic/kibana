@@ -22,6 +22,7 @@ import {
   SET_AUTO_OPEN_WIZARD_ID,
   PUSH_DELETED_FEATURE_ID,
   CLEAR_DELETED_FEATURE_IDS,
+  SET_FLYOUT_OPEN_TRIGGER_ELEMENT,
 } from '../actions';
 import { DRAW_MODE } from '../../common/constants';
 
@@ -42,6 +43,7 @@ export type MapUiState = {
   openTOCDetails: string[];
   autoOpenLayerWizardId: string;
   deletedFeatureIds: string[];
+  flyoutOpenTriggerElement: HTMLElement | null;
 };
 
 export const DEFAULT_IS_LAYER_TOC_OPEN = true;
@@ -58,6 +60,7 @@ export const DEFAULT_MAP_UI_STATE = {
   openTOCDetails: [],
   autoOpenLayerWizardId: '',
   deletedFeatureIds: [],
+  flyoutOpenTriggerElement: null,
 };
 
 // Reducer
@@ -100,6 +103,11 @@ export function ui(state: MapUiState = DEFAULT_MAP_UI_STATE, action: any) {
       return {
         ...state,
         deletedFeatureIds: [],
+      };
+    case SET_FLYOUT_OPEN_TRIGGER_ELEMENT:
+      return {
+        ...state,
+        flyoutOpenTriggerElement: action.flyoutOpenTriggerElement,
       };
     default:
       return state;
