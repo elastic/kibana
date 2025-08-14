@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { IScopedClusterClient, Logger, CoreStart } from '@kbn/core/server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 
@@ -22,11 +23,21 @@ import {
   ASSET_INVENTORY_GENERIC_LOOKBACK_PERIOD,
   ASSET_INVENTORY_INDEX_PATTERN,
 } from './constants';
+import type {
+  SecuritySolutionPluginStart,
+  SecuritySolutionPluginStartDependencies,
+} from '../../plugin_contract';
+import { registerAssetInventoryUsageCollector } from './telemetry/collectors.ts/register';
 
 interface AssetInventoryClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;
   uiSettingsClient: IUiSettingsClient;
+
+  usageCollection?: UsageCollectionSetup;
+  coreStartPromise: Promise<
+    [CoreStart, SecuritySolutionPluginStartDependencies, SecuritySolutionPluginStart]
+  >;
 }
 
 type EntityStoreEngineStatus = GetEntityStoreStatusResponse['engines'][number];
@@ -131,9 +142,13 @@ export class AssetInventoryDataClient {
     secSolutionContext: SecuritySolutionApiRequestHandlerContext,
     requestBodyOverrides: InitEntityStoreRequestBody
   ) {
-    const { logger } = this.options;
+    const { logger, usageCollection, coreStartPromise } = this.options;
 
     logger.debug(`Enabling asset inventory`);
+
+    logger.debug('Registering Asset Inventory Telemetry');
+    registerAssetInventoryUsageCollector(logger, coreStartPromise, usageCollection);
+    logger.debug('Asset Inventory Telemetry Registered');
 
     try {
       if (!(await this.checkUISettingEnabled())) {
