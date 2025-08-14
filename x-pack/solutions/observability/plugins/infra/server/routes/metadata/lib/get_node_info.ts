@@ -70,7 +70,6 @@ export const getNodeInfo = async (
         'container.*',
         'resource.attributes.os.*',
         'resource.attributes.host.*',
-        'resource.attributes.container.*',
         'resource.attributes.agent.*',
         'resource.attributes.cloud.*',
         TIMESTAMP_FIELD,

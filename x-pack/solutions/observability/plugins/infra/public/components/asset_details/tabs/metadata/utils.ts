@@ -24,7 +24,6 @@ type FieldCategory =
   | 'container'
   | 'resource.attributes.os'
   | 'resource.attributes.host'
-  | 'resource.attributes.container'
   | 'resource.attributes.agent'
   | 'resource.attributes.cloud';
 
@@ -78,10 +77,6 @@ export const getAllFields = (
       metadata?.info?.resource?.attributes?.host ?? {}
     ).flatMap((prop) => mapNestedProperties('resource.attributes.host', prop));
 
-    const containerResourceAttributes = Object.keys(
-      metadata?.info?.resource?.attributes?.container ?? {}
-    ).flatMap((prop) => mapNestedProperties('resource.attributes.container', prop));
-
     const agentResourceAttributes = Object.keys(
       metadata?.info?.resource?.attributes?.agent ?? {}
     ).flatMap((prop) => mapNestedProperties('resource.attributes.agent', prop));
@@ -93,7 +88,6 @@ export const getAllFields = (
     additionalCategories.push(
       ...osResourceAttributes,
       ...hostResourceAttributes,
-      ...containerResourceAttributes,
       ...agentResourceAttributes,
       ...cloudResourceAttributes
     );

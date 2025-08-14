@@ -109,53 +109,6 @@ const semConvHostMetadataData = (metadataInfo: InfraMetadata['info']): MetadataD
   },
 ];
 
-const semConvContainerExtendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
-  {
-    field: 'runtime',
-    value: metadataInfo?.resource?.attributes?.container?.runtime,
-    tooltipFieldLabel: 'container.runtime',
-    tooltipLink:
-      'https://opentelemetry.io/docs/specs/semconv/registry/attributes/container/#container-runtime',
-  },
-  {
-    field: 'cloudInstanceId',
-    value: metadataInfo?.resource?.attributes?.cloud?.resource?.id,
-    tooltipFieldLabel: 'cloud.resource.id',
-    tooltipLink:
-      'https://opentelemetry.io/docs/specs/semconv/registry/attributes/cloud/#cloud-resource-id',
-  },
-  {
-    field: 'cloudProvider',
-    value: metadataInfo?.resource?.attributes?.cloud?.provider,
-    tooltipFieldLabel: 'cloud.provider',
-    tooltipLink:
-      'https://opentelemetry.io/docs/specs/semconv/registry/attributes/cloud/#cloud-provider',
-  },
-];
-
-const semConvContainerMetadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
-  {
-    field: 'containerId',
-    value: metadataInfo?.resource?.attributes?.container?.id,
-    tooltipFieldLabel: 'container.id',
-    tooltipLink:
-      'https://opentelemetry.io/docs/specs/semconv/registry/attributes/container/#container-id',
-  },
-  {
-    field: 'containerImageName',
-    value: metadataInfo?.resource?.attributes?.container?.image?.name,
-    tooltipFieldLabel: 'container.image.name',
-    tooltipLink:
-      'https://opentelemetry.io/docs/specs/semconv/registry/attributes/container/#container-image-name',
-  },
-  {
-    field: 'hostName',
-    value: metadataInfo?.resource?.attributes?.host?.name,
-    tooltipFieldLabel: 'host.name',
-    tooltipLink: 'https://opentelemetry.io/docs/specs/semconv/registry/attributes/host/#host-name',
-  },
-];
-
 export const getMetadataBySchema = (
   metadata: InfraMetadata['info'],
   schema: DataSchemaFormat | null
@@ -179,8 +132,8 @@ export const getMetadataBySchema = (
           extended: semConvHostExtendedMetadata(metadata),
         },
         container: {
-          metadata: semConvContainerMetadataData(metadata),
-          extended: semConvContainerExtendedMetadata(metadata),
+          metadata: [],
+          extended: [],
         },
       };
     default:

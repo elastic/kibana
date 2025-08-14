@@ -123,13 +123,6 @@ describe('#getAllFields', () => {
             cloud: {
               provider: 'gcp',
             },
-            container: {
-              id: 'load-generator',
-              image: {
-                name: 'ghcr.io/open-telemetry/demo:latest-loadgenerator',
-              },
-              runtime: 'docker',
-            },
           },
         },
       },
@@ -141,12 +134,6 @@ describe('#getAllFields', () => {
       { name: 'resource.attributes.os.version', value: '18.04' },
       { name: 'resource.attributes.host.name', value: 'test-host' },
       { name: 'resource.attributes.host.ip', value: '10.10.10.10' },
-      { name: 'resource.attributes.container.id', value: 'load-generator' },
-      {
-        name: 'resource.attributes.container.image.name',
-        value: 'ghcr.io/open-telemetry/demo:latest-loadgenerator',
-      },
-      { name: 'resource.attributes.container.runtime', value: 'docker' },
       { name: 'resource.attributes.cloud.provider', value: 'gcp' },
     ]);
   });

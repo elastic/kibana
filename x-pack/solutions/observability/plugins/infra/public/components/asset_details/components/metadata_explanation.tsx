@@ -22,8 +22,6 @@ const DOCS_LINKS = {
   ecs_container:
     'https://www.elastic.co/guide/en/ecs/current/ecs-container.html#field-container-id',
   semconv_host: 'https://opentelemetry.io/docs/specs/semconv/registry/attributes/host/#host-name',
-  semconv_container:
-    'https://opentelemetry.io/docs/specs/semconv/registry/attributes/container/#container-id',
 };
 
 const MetadataExplanationTooltipContent = React.memo(
@@ -74,8 +72,12 @@ export const MetadataExplanationMessage = ({
   schema: DataSchemaFormat | null;
 }) => {
   const { metadata, loading } = useMetadataStateContext();
-  const hostLink = entityType === 'host' ? 'host' : 'container';
-  const docsLink = DOCS_LINKS[`${schema ?? 'ecs'}_${hostLink}`];
+  const docsLink =
+    entityType === 'host'
+      ? schema === 'semconv'
+        ? DOCS_LINKS.semconv_host
+        : DOCS_LINKS.ecs_host
+      : DOCS_LINKS.ecs_container;
   const metadataField = findInventoryFields(entityType).id;
 
   return loading && !metadata ? (

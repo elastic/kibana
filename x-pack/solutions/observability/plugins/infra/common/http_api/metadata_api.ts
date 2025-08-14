@@ -93,13 +93,6 @@ export const InfraMetadataResourceRT = rt.partial({
       ip: rt.string,
       name: rt.string,
     }),
-    container: rt.partial({
-      runtime: rt.string,
-      id: rt.string,
-      image: rt.partial({
-        name: rt.string,
-      }),
-    }),
     agent: rt.partial({}),
     cloud: rt.partial({
       provider: rt.string,
