@@ -14,8 +14,8 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
-import type { KibanaRequest } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import type { KibanaRequest } from '@kbn/core/server';
 import { api } from './api';
 import { ExecutorParamsSchema, WorkflowsRuleActionParamsSchema } from './schema';
 import { createExternalService, type WorkflowsServiceFunction } from './service';
@@ -102,10 +102,6 @@ export async function executor(
 
   const externalService = createExternalService(
     actionId,
-    {
-      config: execOptions.config,
-      secrets: execOptions.secrets,
-    },
     logger,
     configurationUtilities,
     connectorUsageCollector,
