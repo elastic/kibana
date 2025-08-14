@@ -20,7 +20,7 @@ import { AZURE_SETUP_FORMAT, ARM_TEMPLATE_EXTERNAL_DOC_URL } from '../constants'
 import {
   AZURE_SETUP_FORMAT_TEST_SUBJECTS,
   AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
-} from './azure_test_subjects';
+} from '../test_subjects';
 import { AzureSetupInfoContent } from './azure_setup_info';
 import { AzureInputVarFields } from './azure_input_var_fields';
 import type { AzureCredentialsType, AzureSetupFormat, UpdatePolicy } from '../types';

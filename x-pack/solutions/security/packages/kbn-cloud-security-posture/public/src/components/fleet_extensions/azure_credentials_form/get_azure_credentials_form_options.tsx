@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 import { AZURE_CREDENTIALS_TYPE } from '../constants';
 import type { AzureCredentialsType } from '../types';
-import { AZURE_INPUT_FIELDS_TEST_SUBJECTS } from './azure_test_subjects';
+import { AZURE_INPUT_FIELDS_TEST_SUBJECTS } from '../test_subjects';
 
 export type AzureCredentialsFields = Record<
   string,

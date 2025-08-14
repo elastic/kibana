@@ -17,6 +17,7 @@ import { RadioGroup } from '../../csp_boxed_radio_group';
 import type { AwsAccountType, UpdatePolicy } from '../types';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '../constants';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
+import { AWS_ORGANIZATION_ACCOUNT_TEST_SUBJ, AWS_SINGLE_ACCOUNT_TEST_ID } from '../test_subjects';
 
 const getAwsAccountType = (input: NewPackagePolicyInput): AwsAccountType | undefined =>
   input.streams[0].vars?.['aws.account_type']?.value;
@@ -39,7 +40,7 @@ const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps
           }
         )
       : undefined,
-    testId: 'awsOrganizationTestId',
+    testId: AWS_ORGANIZATION_ACCOUNT_TEST_SUBJ,
   },
   {
     id: AWS_SINGLE_ACCOUNT,
@@ -49,7 +50,7 @@ const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps
         defaultMessage: 'Single Account',
       }
     ),
-    testId: 'awsSingleTestId',
+    testId: AWS_SINGLE_ACCOUNT_TEST_ID,
   },
 ];
 

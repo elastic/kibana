@@ -13,6 +13,7 @@ import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import type { AwsCredentialsType } from '../types';
 import { AWS_CREDENTIALS_TYPE } from '../constants';
 import { getAwsCredentialsType } from '../utils';
+import { AWS_INPUT_TEST_SUBJECTS } from '../test_subjects';
 
 const AssumeRoleDescription = (
   <div>
@@ -169,7 +170,7 @@ export const getAwsCredentialsFormOptions = (): Omit<AwsOptions, 'cloud_connecto
         label: i18n.translate('securitySolutionPackages.awsIntegration.roleArnLabel', {
           defaultMessage: 'Role ARN',
         }),
-        dataTestSubj: 'awsRoleArnInput',
+        dataTestSubj: AWS_INPUT_TEST_SUBJECTS.ROLE_ARN,
       },
     },
   },
@@ -181,12 +182,12 @@ export const getAwsCredentialsFormOptions = (): Omit<AwsOptions, 'cloud_connecto
     fields: {
       'aws.access_key_id': {
         label: AWS_FIELD_LABEL.access_key_id,
-        dataTestSubj: 'awsDirectAccessKeyId',
+        dataTestSubj: AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_KEY_ID,
       },
       'aws.secret_access_key': {
         label: AWS_FIELD_LABEL.secret_access_key,
         type: 'password',
-        dataTestSubj: 'awsDirectAccessSecretKey',
+        dataTestSubj: AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_SECRET_KEY,
         isSecret: true,
       },
     },
@@ -199,19 +200,19 @@ export const getAwsCredentialsFormOptions = (): Omit<AwsOptions, 'cloud_connecto
     fields: {
       'aws.access_key_id': {
         label: AWS_FIELD_LABEL.access_key_id,
-        dataTestSubj: 'awsTemporaryKeysAccessKeyId',
+        dataTestSubj: AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_KEY_ID,
       },
       'aws.secret_access_key': {
         label: AWS_FIELD_LABEL.secret_access_key,
         type: 'password',
-        dataTestSubj: 'awsTemporaryKeysSecretAccessKey',
+        dataTestSubj: AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_SECRET_KEY,
         isSecret: true,
       },
       'aws.session_token': {
         label: i18n.translate('securitySolutionPackages.awsIntegration.sessionTokenLabel', {
           defaultMessage: 'Session Token',
         }),
-        dataTestSubj: 'awsTemporaryKeysSessionToken',
+        dataTestSubj: AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_SESSION_TOKEN,
       },
     },
   },
@@ -225,7 +226,7 @@ export const getAwsCredentialsFormOptions = (): Omit<AwsOptions, 'cloud_connecto
         label: i18n.translate('securitySolutionPackages.awsIntegration.sharedCredentialFileLabel', {
           defaultMessage: 'Shared Credential File',
         }),
-        dataTestSubj: 'awsSharedCredentialFile',
+        dataTestSubj: AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_FILE,
       },
       'aws.credential_profile_name': {
         label: i18n.translate(
@@ -234,7 +235,7 @@ export const getAwsCredentialsFormOptions = (): Omit<AwsOptions, 'cloud_connecto
             defaultMessage: 'Credential Profile Name',
           }
         ),
-        dataTestSubj: 'awsCredentialProfileName',
+        dataTestSubj: AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_PROFILE_NAME,
       },
     },
   },

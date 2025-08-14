@@ -7,14 +7,12 @@
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CloudProviderConfig, CloudProviders } from '../types';
+import { AWS_PROVIDER, GCP_PROVIDER, AZURE_PROVIDER } from '../constants';
 import {
-  AWS_PROVIDER,
-  GCP_PROVIDER,
-  AZURE_PROVIDER,
-  AWS_PROVIDER_TEST_ID,
-  AZURE_PROVIDER_TEST_ID,
-  GCP_PROVIDER_TEST_ID,
-} from '../constants';
+  AWS_PROVIDER_TEST_SUBJ,
+  GCP_PROVIDER_TEST_SUBJ,
+  AZURE_PROVIDER_TEST_SUBJ,
+} from '../test_subjects';
 import { CloudSetupContext } from '../cloud_setup_context';
 
 interface ICloudSetupProviderOptions {
@@ -94,11 +92,11 @@ export function useCloudSetup() {
         icon: CloudSetupProviderOptions.find((o) => o.type === provider)?.icon ?? '',
         testId:
           provider === AWS_PROVIDER
-            ? AWS_PROVIDER_TEST_ID
+            ? AWS_PROVIDER_TEST_SUBJ
             : provider === GCP_PROVIDER
-            ? GCP_PROVIDER_TEST_ID
+            ? GCP_PROVIDER_TEST_SUBJ
             : provider === AZURE_PROVIDER
-            ? AZURE_PROVIDER_TEST_ID
+            ? AZURE_PROVIDER_TEST_SUBJ
             : '',
       })),
     [getCloudSetupProviders, CloudSetupProviderOptions]

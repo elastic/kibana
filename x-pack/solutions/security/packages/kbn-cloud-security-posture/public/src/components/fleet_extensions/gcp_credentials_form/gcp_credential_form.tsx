@@ -26,8 +26,8 @@ import { GCP_CREDENTIALS_TYPE, GCP_ORGANIZATION_ACCOUNT, GCP_SETUP_ACCESS } from
 import { ReadDocumentation } from '../common';
 import {
   GCP_INPUT_FIELDS_TEST_SUBJECTS,
-  GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
-} from './gcp_test_subjects';
+  GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
+} from '../test_subjects';
 import type { GcpFields, GcpInputFields, UpdatePolicy } from '../types';
 import { GcpInputVarFields } from './gcp_input_var_fields';
 import { GCPSetupInfoContent } from './gcp_setup_info';
@@ -164,7 +164,7 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
       }
     ),
     disabled: false,
-    testId: GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUD_SHELL,
+    testId: GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.CLOUD_SHELL,
   },
   {
     id: GCP_SETUP_ACCESS.MANUAL,
@@ -172,7 +172,7 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
       defaultMessage: 'Manual',
     }),
     disabled: false,
-    testId: GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL,
+    testId: GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL,
   },
 ];
 

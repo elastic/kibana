@@ -6,9 +6,6 @@
  */
 
 export const testSubjectIds = {
-  CIS_AWS_OPTION_TEST_ID: 'cloudSetupAwsTestId',
-  AWS_SINGLE_ACCOUNT_TEST_ID: 'awsSingleTestId',
-  AWS_MANUAL_TEST_ID: 'aws-manual-setup-option',
   AWS_CREDENTIAL_SELECTOR: 'aws-credentials-type-selector',
   ROLE_ARN_TEST_ID: 'awsRoleArnInput',
   DIRECT_ACCESS_KEY_ID_TEST_ID: 'awsDirectAccessKeyId',
