@@ -21,7 +21,7 @@ export function DetectionsPageObjectProvider({ getService, getPageObjects }: Ftr
     readonly pageObjects = pageObjects;
     readonly testSubjects = testSubjects;
     readonly retry = retry;
-    readonly defaultTimeout = defaultTimeoutMs;
+    readonly defaultTimeoutMs = defaultTimeoutMs;
 
     async navigateHome(): Promise<void> {
       await this.navigateToDetectionsPage();
