@@ -26,6 +26,7 @@ import { AnomalyDetails } from './anomaly_details';
 import { mlTableService } from '../../services/table_service';
 import { getColumns } from './anomalies_table_columns';
 import { RuleEditorFlyout } from '../rule_editor';
+import type { FocusTrapProps } from '../../util/create_focus_trap_props';
 
 interface AnomaliesTableProps {
   bounds?: TimeRangeBounds;
@@ -75,7 +76,7 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
     }, [tableData]);
 
     const [showRuleEditorFlyout, setShowRuleEditorFlyout] = useState<
-      ((anomaly: MlAnomaliesTableRecordExtended) => void) | null
+      ((anomaly: MlAnomaliesTableRecordExtended, focusTrapProps: FocusTrapProps) => void) | null
     >(null);
 
     const {

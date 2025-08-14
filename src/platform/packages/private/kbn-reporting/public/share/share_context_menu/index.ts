@@ -10,7 +10,7 @@
 import * as Rx from 'rxjs';
 
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
-import { ILicense } from '@kbn/licensing-plugin/public';
+import { ILicense } from '@kbn/licensing-types';
 
 import type { ReportingAPIClient } from '../../reporting_api_client';
 

@@ -167,6 +167,48 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.apiCanFocusPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "apiCanFocusPanel",
+        "description": [
+          "\nA type guard which can be used to determine if a given API can focus a child panel"
+        ],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.CanFocusPanel",
+            "text": "CanFocusPanel"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.apiCanFocusPanel.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
         "id": "def-public.apiHasLastSavedChildState",
         "type": "Function",
         "tags": [],
@@ -1224,6 +1266,54 @@
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.CanFocusPanel",
+        "type": "Interface",
+        "tags": [],
+        "label": "CanFocusPanel",
+        "description": [
+          "\nThis API can focus a child panel"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.CanFocusPanel.setFocusedPanelId",
+            "type": "Function",
+            "tags": [],
+            "label": "setFocusedPanelId",
+            "description": [],
+            "signature": [
+              "(panelId?: string | undefined) => void"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-containers",
+                "id": "def-public.CanFocusPanel.setFocusedPanelId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "panelId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

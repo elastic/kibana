@@ -65,7 +65,7 @@ export const functions = {
       }),
       preview: false,
       license: {
-        licenses: [{ name: 'PLATINUM', isSignatureSpecific: false, paramsWithLicense: [] }],
+        licenses: [{ name: 'platinum', isSignatureSpecific: false, paramsWithLicense: [] }],
         hasMultipleLicenses: false,
       },
       description: (

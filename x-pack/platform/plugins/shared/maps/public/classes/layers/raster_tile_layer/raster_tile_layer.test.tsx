@@ -18,7 +18,6 @@ import { IRasterSource, RasterTileSourceData } from '../../sources/raster_source
 const sourceDescriptor: XYZTMSSourceDescriptor = {
   type: SOURCE_TYPES.EMS_XYZ,
   urlTemplate: 'https://example.com/{x}/{y}/{z}.png',
-  id: 'foobar',
 };
 
 class MockTileSource extends AbstractSource implements IRasterSource {

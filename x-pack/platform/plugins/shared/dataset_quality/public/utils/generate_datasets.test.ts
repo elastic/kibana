@@ -116,7 +116,7 @@ describe('generateDatasets', () => {
           canReadFailureStore: true,
         },
         docsInTimeRange: 102,
-        quality: 'degraded',
+        quality: 'warning',
         degradedDocs: {
           percentage: 0,
           count: 0,

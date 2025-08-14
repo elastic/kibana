@@ -12,6 +12,7 @@
     "@kbn/i18n",
     "@kbn/shared-ux-markdown",
     "@kbn/react-kibana-mount",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

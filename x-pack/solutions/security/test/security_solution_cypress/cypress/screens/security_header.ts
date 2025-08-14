@@ -57,6 +57,9 @@ export const BLOCKLIST = '[data-test-subj="solutionSideNavPanelLink-blocklist"]'
 export const HOST_ISOLATION_EXCEPTIONS =
   '[data-test-subj="solutionSideNavPanelLink-host_isolation_exceptions"]';
 
+export const ENDPOINT_EXCEPTIONS =
+  '[data-test-subj="solutionSideNavPanelLink-endpoint_exceptions"]';
+
 export const RESPONSE_ACTIONS_HISTORY =
   '[data-test-subj="solutionSideNavPanelLink-response_actions_history"]';
 
@@ -118,6 +121,7 @@ export const openNavigationPanelFor = (page: string) => {
     case TRUSTED_APPS:
     case EVENT_FILTERS:
     case POLICIES:
+    case ENDPOINT_EXCEPTIONS:
     case BLOCKLIST: {
       panel = SETTINGS_PANEL_BTN;
       break;

@@ -17,6 +17,8 @@ import type {
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AiAssistantManagementObservabilityPluginSetup {}
@@ -29,6 +31,7 @@ export interface SetupDependencies {
   home?: HomePublicPluginSetup;
   observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
   ml: MlPluginStart;
+  spaces?: SpacesPluginSetup;
 }
 
 export interface StartDependencies {
@@ -36,6 +39,8 @@ export interface StartDependencies {
   serverless?: ServerlessPluginStart;
   productDocBase?: ProductDocBasePluginStart;
   ml: MlPluginSetup;
+  spaces?: SpacesPluginStart;
+  cloud?: CloudStart;
 }
 
 export interface ConfigSchema {
@@ -64,7 +69,7 @@ export class AiAssistantManagementObservabilityPlugin
     { home, management, observabilityAIAssistant }: SetupDependencies
   ): AiAssistantManagementObservabilityPluginSetup {
     const title = i18n.translate('xpack.observabilityAiAssistantManagement.app.title', {
-      defaultMessage: 'AI Assistant for Observability and Search',
+      defaultMessage: 'AI Assistant',
     });
 
     if (home) {
@@ -75,18 +80,18 @@ export class AiAssistantManagementObservabilityPlugin
           defaultMessage: 'Manage your AI Assistant for Observability and Search.',
         }),
         icon: 'sparkles',
-        path: '/app/management/kibana/ai-assistant/observability',
+        path: '/app/management/ai/ai-assistant/observability',
         showOnHomePage: false,
         category: 'admin',
       });
     }
 
     if (observabilityAIAssistant) {
-      management.sections.section.kibana.registerApp({
+      management.sections.section.ai.registerApp({
         id: 'observabilityAiAssistantManagement',
         title,
         hideFromSidebar: true,
-        order: 1,
+        order: 2,
         mount: async (mountParams) => {
           const { mountManagementSection } = await import('./app');
 

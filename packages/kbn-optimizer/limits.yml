@@ -26,6 +26,7 @@ pageLoadAssetSize:
   customIntegrations: 11715
   dashboard: 19000
   dashboardEnhanced: 12500
+  dashboardMarkdown: 5134
   data: 453742
   dataQuality: 10387
   datasetQuality: 27203
@@ -66,6 +67,7 @@ pageLoadAssetSize:
   filesManagement: 5270
   fileUpload: 16910
   fleet: 187942
+  genAiSettings: 4981
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
@@ -181,7 +183,7 @@ pageLoadAssetSize:
   visDefaultEditor: 35092
   visTypeGauge: 13006
   visTypeHeatmap: 12457
-  visTypeMarkdown: 9000
+  visTypeMarkdown: 8817
   visTypeMetric: 11966
   visTypePie: 9939
   visTypeTable: 18999

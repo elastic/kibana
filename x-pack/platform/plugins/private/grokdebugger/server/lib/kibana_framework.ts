@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreSetup, IRouter, RouteMethod, RouteConfig, RequestHandler } from '@kbn/core/server';
 
-import { ILicense } from '@kbn/licensing-plugin/server';
+import { ILicense } from '@kbn/licensing-types';
 
 type GrokDebuggerRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
   method: RouteMethod;
