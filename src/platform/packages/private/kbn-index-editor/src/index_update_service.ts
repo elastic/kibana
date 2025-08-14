@@ -21,6 +21,7 @@ import {
   Subscription,
   combineLatest,
   filter,
+  firstValueFrom,
   from,
   map,
   of,
@@ -33,7 +34,6 @@ import {
   tap,
   timer,
   withLatestFrom,
-  firstValueFrom,
   catchError,
   exhaustMap,
 } from 'rxjs';
@@ -95,8 +95,7 @@ type Action =
   | { type: 'add-column' }
   | { type: 'edit-column'; payload: ColumnUpdate }
   | { type: 'delete-column'; payload: ColumnUpdate }
-  | { type: 'discard-unsaved-columns' }
-  | { type: 'discard-unsaved-values' }
+  | { type: 'discard-unsaved-changes' }
   | { type: 'new-row-added'; payload: Record<string, any> };
 
 type ActionMap = {
@@ -162,9 +161,9 @@ export class IndexUpdateService {
   private readonly _error$ = new BehaviorSubject<IndexEditorErrors | null>(null);
   public readonly error$: Observable<IndexEditorErrors | null> = this._error$.asObservable();
 
-  private readonly _exitAttemptWithUnsavedFields$ = new BehaviorSubject<boolean>(false);
-  public readonly exitAttemptWithUnsavedFields$ =
-    this._exitAttemptWithUnsavedFields$.asObservable();
+  private readonly _exitAttemptWithUnsavedChanges$ = new BehaviorSubject<boolean>(false);
+  public readonly exitAttemptWithUnsavedChanges$ =
+    this._exitAttemptWithUnsavedChanges$.asObservable();
 
   /** ES Documents */
   private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([this.buildPlaceholderRow()]);
@@ -265,7 +264,7 @@ export class IndexUpdateService {
         case 'saved':
           // Clear the buffer after save
           return [];
-        case 'discard-unsaved-values':
+        case 'discard-unsaved-changes':
           return [];
         case 'edit-column':
           // if a column name has changed, we need to update the values added with the previous name.
@@ -301,15 +300,8 @@ export class IndexUpdateService {
     shareReplay(1) // keep latest buffer for retries
   );
 
-  public readonly hasUnsavedChanges$: Observable<boolean> = this.bufferState$.pipe(
-    map((actions) =>
-      actions.some((action) =>
-        (
-          ['add-column', 'add-doc', 'delete-column', 'delete-doc'] as Array<keyof ActionMap>
-        ).includes(action.type)
-      )
-    )
-  );
+  private readonly _hasUnsavedChanges$ = new BehaviorSubject<boolean>(false);
+  public readonly hasUnsavedChanges$: Observable<boolean> = this._hasUnsavedChanges$.asObservable();
 
   public flush() {
     this._flush$.next(Date.now());
@@ -432,6 +424,20 @@ export class IndexUpdateService {
   }
 
   private listenForUpdates() {
+    this._subscription.add(
+      this.bufferState$
+        .pipe(
+          map((actions) =>
+            actions.some((action) =>
+              (
+                ['add-column', 'add-doc', 'delete-column', 'delete-doc'] as Array<keyof ActionMap>
+              ).includes(action.type)
+            )
+          )
+        )
+        .subscribe(this._hasUnsavedChanges$)
+    );
+
     // Queue for bulk updates
     this._subscription.add(
       combineLatest([this.bufferState$, this._flush$])
@@ -623,7 +629,7 @@ export class IndexUpdateService {
                   // Filter out columns that were populated when adding a new row
                   return acc.filter((column) => action.payload[column.name] === undefined);
                 }
-                if (action.type === 'discard-unsaved-columns') {
+                if (action.type === 'discard-unsaved-changes') {
                   return acc.filter((column) => isPlaceholderColumn(column.name));
                 }
                 return acc;
@@ -783,16 +789,12 @@ export class IndexUpdateService {
     this.addAction('delete-column', { name });
   }
 
-  public setExitAttemptWithUnsavedFields(value: boolean) {
-    this._exitAttemptWithUnsavedFields$.next(value);
-  }
-
-  public discardUnsavedColumns() {
-    this.addAction('discard-unsaved-columns');
+  public setExitAttemptWithUnsavedChanges(value: boolean) {
+    this._exitAttemptWithUnsavedChanges$.next(value);
   }
 
   public discardUnsavedChanges() {
-    this.addAction('discard-unsaved-values');
+    this.addAction('discard-unsaved-changes');
   }
 
   public destroy() {
@@ -813,7 +815,7 @@ export class IndexUpdateService {
     this._indexCrated$.complete();
     this._qstr$.complete();
     this._refreshSubject$.complete();
-    this._exitAttemptWithUnsavedFields$.complete();
+    this._exitAttemptWithUnsavedChanges$.complete();
     this.data.dataViews.clearCache();
     this._indexName$.complete();
   }
@@ -828,11 +830,20 @@ export class IndexUpdateService {
       await this.bulkUpdate(updates);
 
       this.setIndexCreated(true);
-      this.addAction('discard-unsaved-columns');
+      this.addAction('discard-unsaved-changes');
     } catch (error) {
       throw error;
     } finally {
       this._isSaving$.next(false);
+    }
+  }
+
+  public exit() {
+    const hasUnsavedChanges = this._hasUnsavedChanges$.getValue();
+    if (hasUnsavedChanges) {
+      this.setExitAttemptWithUnsavedChanges(true);
+    } else {
+      this.destroy();
     }
   }
 }

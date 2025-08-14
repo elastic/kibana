@@ -21,6 +21,7 @@ import {
   EuiText,
   EuiModal,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -45,6 +46,8 @@ export const OverrideWarningModal: React.FC<OverrideWarningModalProps> = ({
 }) => {
   const [dontAskMeAgainCheck, setDontAskMeAgainCheck] = useState(false);
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const continueHandler = () => {
     if (dontAskMeAgainCheck) {
       storage.set(OVERRIDE_WARNING_MODAL_DISMISSED, true);
@@ -53,7 +56,7 @@ export const OverrideWarningModal: React.FC<OverrideWarningModalProps> = ({
   };
 
   return (
-    <EuiModal css={{ width: 700 }} onClose={onCancel}>
+    <EuiModal aria-labelledby={modalTitleId} css={{ width: 700 }} onClose={onCancel}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
