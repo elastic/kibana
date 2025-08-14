@@ -121,8 +121,8 @@ const componentStyles = {
     height: '100%',
     overflow: 'hidden',
     ['@media only screen and (max-width: 767px)']: {
-      height: 'auto'
-    }
+      height: 'auto',
+    },
   }),
   flyoutPanel: ({ euiTheme }: UseEuiTheme) =>
     css({
