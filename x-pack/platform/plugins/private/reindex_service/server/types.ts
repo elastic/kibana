@@ -20,6 +20,7 @@ export interface RouteDependencies {
 }
 
 export interface ReindexServiceServerPluginStart {
+  cleanupReindexOperations: (indexNames: string[]) => Promise<void>;
   getScopedClient: (scopedClientArgs: ReindexServiceScopedClientArgs) => ReindexServiceScopedClient;
 }
 

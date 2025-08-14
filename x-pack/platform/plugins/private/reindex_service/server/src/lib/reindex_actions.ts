@@ -38,7 +38,13 @@ export interface ReindexActions {
    * @param indexName
    * @param opts Additional options when creating the reindex operation
    */
-  createReindexOp(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
+  createReindexOp({
+    indexName,
+    opts,
+  }: {
+    indexName: string;
+    opts?: ReindexOptions;
+  }): Promise<ReindexSavedObject>;
 
   /**
    * Deletes a reindexOp.

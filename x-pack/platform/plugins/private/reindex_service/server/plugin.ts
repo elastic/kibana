@@ -101,7 +101,10 @@ export class ReindexServiceServerPlugin
 
     this.reindexService = service.getInternalApis();
 
+    const worker = service.getWorker();
+
     return {
+      cleanupReindexOperations: worker.cleanupReindexOperations.bind(worker),
       getScopedClient: service.getScopedClient,
     };
   }
