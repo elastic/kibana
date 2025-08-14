@@ -58,6 +58,7 @@ const SharedConversationCalloutComponent: React.FC<Props> = ({
   );
   return localStorageShowConversation ? (
     <EuiCallOut
+      data-test-subj="sharedConversationCallout"
       css={css`
         margin: ${euiTheme.size.m};
         padding: ${euiTheme.size.m};
@@ -71,6 +72,7 @@ const SharedConversationCalloutComponent: React.FC<Props> = ({
       <br />
       <br />
       <EuiButton
+        data-test-subj="duplicateConversation"
         onClick={handleDuplicateConversation}
         iconType="copy"
         color="primary"

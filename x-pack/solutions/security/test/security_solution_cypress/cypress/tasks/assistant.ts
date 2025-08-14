@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { visitGetStartedPage } from './navigation';
 import { CONNECTOR_NAME_INPUT, SAVE_ACTION_CONNECTOR_BTN } from '../screens/common/rule_actions';
 import { azureConnectorAPIPayload } from './api_calls/connectors';
 import { TIMELINE_CHECKBOX } from '../screens/timelines';
@@ -46,6 +47,21 @@ import {
   SEND_TO_TIMELINE_BUTTON,
   OPENAI_CONNECTOR_OPTION,
   SECRETS_APIKEY_INPUT,
+  SHARE_BADGE_BUTTON,
+  SHARE_SELECT,
+  NOT_SHARED_SELECT_OPTION,
+  SHARED_SELECT_OPTION,
+  OPTION_DESCRIPTION,
+  OWNER_SHARED_CALLOUT,
+  SHARED_CALLOUT,
+  SHARE_MODAL,
+  SHARE_BUTTON,
+  USER_PROFILES_SEARCH,
+  CONVERSATION_LIST_ICON,
+  USER_PROFILES_SELECT_OPTION,
+  DISMISS_CALLOUT_BUTTON,
+  USER_PROFILES_LIST,
+  DUPLICATE_CONVERSATION,
 } from '../screens/ai_assistant';
 
 export const openAssistant = (context?: 'rule' | 'alert') => {
@@ -243,4 +259,150 @@ export const assertConversationReadOnly = () => {
   cy.get(CHAT_CONTEXT_MENU).should('be.disabled');
   cy.get(FLYOUT_NAV_TOGGLE).should('be.disabled');
   cy.get(NEW_CHAT).should('be.disabled');
+};
+
+export const openShareMenu = () => {
+  cy.get(SHARE_BADGE_BUTTON).click();
+  cy.get(SHARE_SELECT).should('be.visible');
+};
+
+export const assertNotSharedMenu = () => {
+  cy.get(SHARE_BADGE_BUTTON).should('have.attr', 'title').and('include', 'Not shared');
+  cy.get(NOT_SHARED_SELECT_OPTION).should('have.attr', 'aria-checked', 'true');
+  cy.get(SHARED_SELECT_OPTION).should('have.attr', 'aria-checked', 'false');
+  cy.get(SHARED_SELECT_OPTION)
+    .find(OPTION_DESCRIPTION)
+    .should('have.text', 'All team members can view this conversation.');
+};
+
+export const assertSharedMenu = (isGlobal = true) => {
+  cy.get(SHARE_BADGE_BUTTON).should('have.attr', 'title').and('include', 'Shared');
+  cy.get(NOT_SHARED_SELECT_OPTION).should('have.attr', 'aria-checked', 'false');
+  cy.get(SHARED_SELECT_OPTION).should('have.attr', 'aria-checked', 'true');
+  cy.get(SHARED_SELECT_OPTION)
+    .find(OPTION_DESCRIPTION)
+    .should(
+      'have.text',
+      isGlobal
+        ? 'All team members can view this conversation.'
+        : 'Selected team members can view this conversation.'
+    );
+};
+
+export const shareConversationWithUser = (user: string) => {
+  cy.get(SHARE_MODAL).find('input').type(user);
+  cy.get(USER_PROFILES_SEARCH)
+    .find(USER_PROFILES_SELECT_OPTION(user))
+    .should('have.attr', 'aria-checked', 'false');
+  cy.get(USER_PROFILES_SEARCH).find(USER_PROFILES_SELECT_OPTION(user)).click();
+  cy.get(USER_PROFILES_SEARCH)
+    .find(USER_PROFILES_SELECT_OPTION(user))
+    .should('have.attr', 'aria-checked', 'true');
+};
+
+export const selectNotShared = () => {
+  cy.get(NOT_SHARED_SELECT_OPTION).click();
+};
+
+export const selectShareModal = () => {
+  cy.get(SHARED_SELECT_OPTION).click();
+  cy.get(SHARE_MODAL).should('exist');
+};
+
+export const selectShareType = (shareType: 'global' | 'selected') => {
+  cy.get(SHARE_MODAL).find(`button[data-test-subj="${shareType}"]`).click();
+  assertShareModalType(shareType);
+};
+
+export const assertShareModalType = (shareType: 'global' | 'selected') => {
+  cy.get(SHARE_MODAL)
+    .find(`button[data-test-subj="${shareType}"]`)
+    .should('have.attr', 'aria-pressed', 'true');
+};
+
+export const assertShareUser = (user: string) => {
+  cy.get(USER_PROFILES_LIST)
+    .find(USER_PROFILES_SELECT_OPTION(user))
+    .should('have.attr', 'aria-checked', 'true');
+};
+
+export const submitShareModal = () => {
+  cy.get(SHARE_MODAL).find(SHARE_BUTTON).click();
+};
+
+export const closeShareModal = () => {
+  cy.get(SHARE_MODAL).find(`button.euiModal__closeIcon`).click();
+};
+
+export const assertNotSharedCallout = () => {
+  cy.get(OWNER_SHARED_CALLOUT).should('not.exist');
+  cy.get(SHARED_CALLOUT).should('not.exist');
+  cy.get(USER_PROMPT).should('exist');
+  cy.get(SUBMIT_CHAT).should('exist');
+};
+
+export const assertOwnerSharedCallout = () => {
+  cy.get(OWNER_SHARED_CALLOUT).should('exist');
+  cy.get(SHARED_CALLOUT).should('not.exist');
+  cy.get(USER_PROMPT).should('exist');
+  cy.get(SUBMIT_CHAT).should('exist');
+};
+
+export const assertSharedCallout = () => {
+  cy.get(SHARED_CALLOUT).should('exist');
+  cy.get(OWNER_SHARED_CALLOUT).should('not.exist');
+  cy.get(USER_PROMPT).should('not.exist');
+  cy.get(SUBMIT_CHAT).should('not.exist');
+};
+
+export const dismissSharedCallout = () => {
+  cy.get(SHARED_CALLOUT).find(DISMISS_CALLOUT_BUTTON).click();
+  assertNoSharedCallout();
+};
+
+export const assertNoSharedCallout = () => {
+  cy.get(SHARED_CALLOUT).should('not.exist');
+};
+
+export const toggleConversationSideMenu = () => {
+  cy.get(FLYOUT_NAV_TOGGLE).click();
+};
+
+export const assertSharedConversationIcon = (title: string) => {
+  cy.get(CONVERSATION_LIST_ICON(title)).should('exist');
+};
+
+export const assertNotSharedConversationIcon = (title: string) => {
+  cy.get(CONVERSATION_LIST_ICON(title)).should('not.exist');
+};
+
+export const shareConversations = (convos: Array<{ title: string; share: string }>) => {
+  visitGetStartedPage();
+  openAssistant();
+  convos.forEach(({ title, share }) => {
+    selectConversation(title);
+    selectConnector(azureConnectorAPIPayload.name);
+    typeAndSendMessage('hello');
+    assertMessageSent('hello');
+    openShareMenu();
+    selectShareModal();
+    if (share === 'global') {
+      submitShareModal();
+      assertOwnerSharedCallout();
+    } else {
+      selectShareType('selected');
+      shareConversationWithUser(share);
+      submitShareModal();
+      assertOwnerSharedCallout();
+    }
+  });
+};
+
+export const duplicateConversation = (conversationName: string) => {
+  cy.get(SHARED_CALLOUT).find(DUPLICATE_CONVERSATION).click();
+  assertConversationTitle(`[Duplicate] ${conversationName}`);
+};
+
+export const assertMessageUser = (user: string, messageIndex: number) => {
+  cy.get(`.euiCommentEvent__headerUsername`).eq(messageIndex).should('have.text', user);
 };

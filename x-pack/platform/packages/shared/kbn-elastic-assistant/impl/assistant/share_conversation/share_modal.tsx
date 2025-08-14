@@ -18,6 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { UserProfile } from '@kbn/core-user-profile-common';
+import { DataStreamApis } from '../use_data_stream_apis';
 import { COPY_URL } from '../use_conversation/translations';
 import { UserProfilesList } from './user_profiles_list';
 import { useConversation } from '../use_conversation';
@@ -30,11 +31,12 @@ interface Props {
   selectedConversation: Conversation | undefined;
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
   refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
 }
 const shareOptions = [
   {
-    id: 'everyone',
+    id: 'global',
     label: i18n.WITH_EVERYONE,
     iconType: 'globe',
   },
@@ -48,12 +50,13 @@ const ShareModalComponent: React.FC<Props> = ({
   isSharedGlobal,
   isModalOpen,
   refetchCurrentConversation,
+  refetchCurrentUserConversations,
   setIsModalOpen,
   selectedConversation,
 }) => {
   const { copyConversationUrl, updateConversationUsers } = useConversation();
-  const [sharingOption, setSharingOption] = useState<'everyone' | 'selected'>(
-    isSharedGlobal ? 'everyone' : 'selected'
+  const [sharingOption, setSharingOption] = useState<'global' | 'selected'>(
+    isSharedGlobal ? 'global' : 'selected'
   );
   const { currentUser } = useAssistantContext();
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
@@ -79,7 +82,7 @@ const ShareModalComponent: React.FC<Props> = ({
     [copyConversationUrl, selectedConversation]
   );
   const accessText = useMemo(
-    () => (sharingOption === 'everyone' ? i18n.EVERYONE : i18n.ONLY_SELECTED),
+    () => (sharingOption === 'global' ? i18n.EVERYONE : i18n.ONLY_SELECTED),
     [sharingOption]
   );
 
@@ -101,7 +104,7 @@ const ShareModalComponent: React.FC<Props> = ({
       await updateConversationUsers({
         conversationId: selectedConversation.id,
         updatedUsers:
-          sharingOption === 'everyone'
+          sharingOption === 'global'
             ? []
             : [
                 ...nextUsers.map((user) => ({
@@ -116,6 +119,7 @@ const ShareModalComponent: React.FC<Props> = ({
                 ...(currentUser ? [{ id: currentUser.id, name: currentUser.name }] : []),
               ],
       });
+      await refetchCurrentUserConversations();
       refetchCurrentConversation({});
     }
   }, [
@@ -123,6 +127,7 @@ const ShareModalComponent: React.FC<Props> = ({
     nextSelectedUsers,
     nextUsers,
     refetchCurrentConversation,
+    refetchCurrentUserConversations,
     selectedConversation,
     setIsModalOpen,
     sharingOption,
@@ -130,7 +135,7 @@ const ShareModalComponent: React.FC<Props> = ({
   ]);
 
   return isModalOpen ? (
-    <EuiModal onClose={onCancelShare} maxWidth={600}>
+    <EuiModal onClose={onCancelShare} maxWidth={600} data-test-subj="shareConversationModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle className="eui-textTruncate">
           {`${i18n.SHARE} `} <strong>{selectedConversation?.title}</strong>
@@ -142,7 +147,7 @@ const ShareModalComponent: React.FC<Props> = ({
           options={shareOptions}
           isFullWidth
           idSelected={sharingOption}
-          onChange={(id) => setSharingOption(id as 'everyone' | 'selected')}
+          onChange={(id) => setSharingOption(id as 'global' | 'selected')}
           legend="shareOptions"
           buttonSize="compressed"
         />
@@ -174,13 +179,17 @@ const ShareModalComponent: React.FC<Props> = ({
 
         <EuiSpacer size="m" />
 
-        <EuiButton iconType="copyClipboard" onClick={handleCopyUrl}>
+        <EuiButton
+          data-test-subj="copyConversationUrl"
+          iconType="copyClipboard"
+          onClick={handleCopyUrl}
+        >
           {COPY_URL}
         </EuiButton>
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButton onClick={onSaveShare} fill>
+        <EuiButton data-test-subj="shareConversation" onClick={onSaveShare} fill>
           {i18n.DONE}
         </EuiButton>
       </EuiModalFooter>

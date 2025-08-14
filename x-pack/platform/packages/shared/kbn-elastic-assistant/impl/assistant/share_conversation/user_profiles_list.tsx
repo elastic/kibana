@@ -32,6 +32,7 @@ const UserProfilesListComponent: React.FC<Props> = ({ allUsers, onUsersSelect, s
   return (
     <UserProfilesSelectable
       {...{
+        'data-test-subj': 'userProfilesList',
         onChange,
         searchable: false,
         options: userProfiles,

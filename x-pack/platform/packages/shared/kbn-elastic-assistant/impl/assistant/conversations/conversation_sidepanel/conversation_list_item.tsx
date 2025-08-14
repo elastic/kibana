@@ -102,11 +102,13 @@ export const ConversationListItem: FunctionComponent<Props> = ({
             .euiListGroupItem__button {
               // forces the icon to be on the right side of the text
               flex-direction: ${shouldShowIcon ? 'row-reverse' : 'row'};
+              justify-content: space-between;
             }
           `}
           label={conversation.title}
           iconType={shouldShowIcon ? 'users' : undefined}
           iconProps={{
+            'data-test-subj': `conversation-icon-${conversation.title}`,
             size: 's',
             title: iconTitle,
             css: css`

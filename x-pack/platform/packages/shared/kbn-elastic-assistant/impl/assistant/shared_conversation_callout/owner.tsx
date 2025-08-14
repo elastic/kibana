@@ -48,6 +48,7 @@ const SharedConversationOwnerCalloutComponent: React.FC<{
   );
   return localStorageShowConversation ? (
     <EuiCallOut
+      data-test-subj="ownerSharedConversationCallout"
       css={css`
         margin: ${euiTheme.size.m};
         padding: ${euiTheme.size.m};

@@ -36,6 +36,7 @@ export const ConversationSidePanelContextMenu = ({
   const actionItems = actions.map(({ key, children, icon, onClick }) => (
     <EuiContextMenuItem
       key={key}
+      data-test-subj={`convo-context-menu-item-${key}`}
       icon={icon}
       onClick={(e) => {
         onClick?.(e);
@@ -51,6 +52,7 @@ export const ConversationSidePanelContextMenu = ({
       panelPaddingSize="none"
       button={
         <EuiButtonIcon
+          data-test-subj={`convo-context-menu-button`}
           size="xs"
           iconType="boxesVertical"
           iconSize="s"

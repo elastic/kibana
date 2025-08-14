@@ -444,6 +444,10 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const conversationShared = useMemo(() => {
+    if (!currentConversation || currentConversation?.id === '') {
+      // while loading or initializing, conversation is not shared
+      return 'not_shared';
+    }
     const conversationUsers = currentConversation?.users.length ?? 0;
     if (conversationUsers === 0) {
       return 'globally_shared';
@@ -453,7 +457,7 @@ const AssistantComponent: React.FC<Props> = ({
     }
     // length is 1
     return 'not_shared';
-  }, [currentConversation?.users.length]);
+  }, [currentConversation]);
 
   return (
     <>

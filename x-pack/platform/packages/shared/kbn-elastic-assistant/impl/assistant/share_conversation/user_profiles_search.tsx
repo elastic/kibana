@@ -40,6 +40,7 @@ const UserProfilesSearchComponent: React.FC<Props> = ({
   return (
     <UserProfilesSelectable
       {...{
+        'data-test-subj': 'userProfilesSearch',
         isLoading,
         onChange,
         onSearchChange: setSearchTerm,

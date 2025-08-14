@@ -202,6 +202,7 @@ export const AssistantHeader: React.FC<Props> = ({
                   <ShareBadge
                     isConversationOwner={isConversationOwner}
                     selectedConversation={selectedConversation}
+                    refetchCurrentUserConversations={refetchCurrentUserConversations}
                     refetchCurrentConversation={refetchCurrentConversation}
                   />
                 </EuiFlexItem>
