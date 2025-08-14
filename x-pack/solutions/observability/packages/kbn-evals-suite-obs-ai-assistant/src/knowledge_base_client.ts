@@ -23,9 +23,7 @@ export class KnowledgeBaseClient {
       return;
     }
 
-    if (!ready) {
-      this.log.info('Installing knowledge base');
-    }
+    this.log.info('Installing knowledge base');
 
     await pRetry(
       async () => {

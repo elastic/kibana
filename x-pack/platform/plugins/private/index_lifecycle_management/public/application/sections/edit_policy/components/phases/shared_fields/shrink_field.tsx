@@ -60,6 +60,7 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
       {isUsingShardSize === undefined ? null : (
         <>
           <EuiRadioGroup
+            name={`${phase}ShrinkMethod`}
             options={[
               {
                 id: `${phase}-configureShardCount`,
