@@ -15,7 +15,6 @@ export const services = {
   ...commonServices,
 
   supertest: kibanaApiIntegrationServices.supertest,
-  esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
   usageAPI: UsageAPIProvider,
   ml: MachineLearningProvider,
   ingestManager: IngestManagerProvider,

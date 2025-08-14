@@ -22,8 +22,8 @@ export function TimelineTestServiceProvider({ getService }: FtrProviderContext) 
   const log = getService('log');
 
   return new (class TimelineTestService {
-    private readonly supertest = supertest;
-    private readonly log = log;
+    readonly supertest = supertest;
+    readonly log = log;
 
     /**
      * Returns an error handler for `supertest` request that will dump out more useful information

@@ -29,11 +29,11 @@ export function DetectionsTestServiceProvider({ getService }: FtrProviderContext
   const esClient = getService('es');
 
   return new (class DetectionsTestService {
-    private readonly supertest = supertest;
-    private readonly log = log;
-    private readonly retry = retry;
-    private readonly esClient = esClient;
-    private readonly defaultTimeout = config.get('timeouts.waitFor');
+    readonly supertest = supertest;
+    readonly log = log;
+    readonly retry = retry;
+    readonly esClient = esClient;
+    readonly defaultTimeout = config.get('timeouts.waitFor');
 
     /**
      * Returns an error handler for `supertest` request that will dump out more useful information
