@@ -56,7 +56,7 @@ describe('useAssistantAvailability', () => {
               delete: true,
             },
             management: {
-              kibana: {
+              ai: {
                 aiAssistantManagementSelection: true,
               },
             },
@@ -114,7 +114,7 @@ describe('useAssistantAvailability', () => {
               delete: true,
             },
             management: {
-              kibana: {
+              ai: {
                 aiAssistantManagementSelection: true,
               },
             },
@@ -168,7 +168,7 @@ describe('useAssistantAvailability', () => {
               delete: false,
             },
             management: {
-              kibana: {
+              ai: {
                 aiAssistantManagementSelection: false,
               },
             },
@@ -219,7 +219,7 @@ describe('useAssistantAvailability', () => {
               delete: false,
             },
             management: {
-              kibana: {
+              ai: {
                 aiAssistantManagementSelection: false,
               },
             },

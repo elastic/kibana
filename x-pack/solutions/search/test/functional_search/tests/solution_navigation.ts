@@ -54,8 +54,8 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Search applications' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Query Rules' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Query rules' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference endpoints' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dev Tools' });
     });
 
@@ -113,7 +113,7 @@ export default function searchSolutionNavigation({
         },
         {
           deepLinkId: 'searchInferenceEndpoints:inferenceEndpoints',
-          breadcrumbs: ['Relevance', 'Inference Endpoints'],
+          breadcrumbs: ['Relevance', 'Inference endpoints'],
           pageTestSubject: 'inferenceEndpointsPage',
         },
         {

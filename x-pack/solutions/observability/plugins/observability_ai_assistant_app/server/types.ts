@@ -34,7 +34,7 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import type { InferenceServerStart, InferenceServerSetup } from '@kbn/inference-plugin/server';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
-import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
+import type { LlmTasksPluginStart, LlmTasksPluginSetup } from '@kbn/llm-tasks-plugin/server';
 import type { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 
@@ -77,5 +77,6 @@ export interface ObservabilityAIAssistantAppPluginSetupDependencies {
   serverless?: ServerlessPluginSetup;
   inference: InferenceServerSetup;
   spaces: SpacesPluginSetup;
+  llmTasks: LlmTasksPluginSetup;
   productDocBase: ProductDocBaseStartContract;
 }

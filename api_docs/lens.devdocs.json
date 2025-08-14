@@ -83,7 +83,15 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean> | undefined; lockHoverActions?: ((lock: boolean) => void) | undefined; type: string; phase$: ",
+          "<boolean> | undefined; lockHoverActions?: ((lock: boolean) => void) | undefined; overrideHoverActions$?: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean> | undefined; OverriddenHoverActionsComponent?: React.ComponentType<{}> | undefined; type: string; phase$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -339,7 +347,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; isNewPanel?: boolean | undefined; }>; onEdit: () => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
+          "; } | undefined; isNewPanel?: boolean | undefined; }>; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18109,7 +18117,15 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean> | undefined; lockHoverActions?: ((lock: boolean) => void) | undefined; type: string; phase$: ",
+          "<boolean> | undefined; lockHoverActions?: ((lock: boolean) => void) | undefined; overrideHoverActions$?: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean> | undefined; OverriddenHoverActionsComponent?: React.ComponentType<{}> | undefined; type: string; phase$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18365,7 +18381,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; isNewPanel?: boolean | undefined; }>; onEdit: () => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
+          "; } | undefined; isNewPanel?: boolean | undefined; }>; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -20431,7 +20447,15 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean> | undefined; lockHoverActions?: ((lock: boolean) => void) | undefined; type: string; phase$: ",
+          "<boolean> | undefined; lockHoverActions?: ((lock: boolean) => void) | undefined; overrideHoverActions$?: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean> | undefined; OverriddenHoverActionsComponent?: React.ComponentType<{}> | undefined; type: string; phase$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -20687,7 +20711,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; isNewPanel?: boolean | undefined; }>; onEdit: () => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
+          "; } | undefined; isNewPanel?: boolean | undefined; }>; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
