@@ -38,19 +38,14 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
     };
   });
 
+  /** Callback to invoke when the user attempts to close the flyout */
   const onFlyoutClose = async () => {
     if (true) {
       deps.indexUpdateService.setExitAttemptWithUnsavedFields(true);
       return;
     }
 
-    props.onClose?.({
-      indexName: indexUpdateService.getIndexName()!,
-      indexCreatedDuringFlyout: props.doesIndexExist ? false : indexUpdateService.isIndexCreated(),
-    });
-
     indexUpdateService.destroy();
-    flyoutSession.close();
   };
 
   const flyoutSession = overlays.openFlyout(
@@ -67,6 +62,14 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
       size: 'l',
     }
   );
+
+  indexUpdateService.completed$.subscribe(({ indexName, isIndexCreated }) => {
+    props.onClose?.({
+      indexName,
+      indexCreatedDuringFlyout: props.doesIndexExist ? false : isIndexCreated,
+    });
+    flyoutSession.close();
+  });
 
   // Close the flyout when user navigates out of the current plugin
   currentAppId$
