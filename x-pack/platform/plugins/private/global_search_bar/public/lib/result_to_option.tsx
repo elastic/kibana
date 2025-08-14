@@ -29,7 +29,8 @@ export const resultToOption = (
     type.toLowerCase() === 'elasticsearch' ||
     type.toLowerCase() === 'search' ||
     type.toLowerCase() === 'index' ||
-    type.toLowerCase() === 'connector';
+    type.toLowerCase() === 'connector' ||
+    type.toLowerCase().includes('stream');
   const option: EuiSelectableTemplateSitewideOption = {
     key: id,
     label: title,
