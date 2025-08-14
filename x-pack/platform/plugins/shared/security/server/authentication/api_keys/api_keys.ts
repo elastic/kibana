@@ -117,10 +117,7 @@ export class APIKeys implements APIKeysType {
    * Determines if cross-cluster API Keys are enabled in Elasticsearch.
    */
   async areCrossClusterAPIKeysEnabled(): Promise<boolean> {
-    if (!this.license.isEnabled()) {
-      return false;
-    }
-    if (this.buildFlavor === 'serverless') {
+    if (!this.license.isEnabled() || this.buildFlavor === 'serverless') {
       return false;
     }
 
