@@ -9,17 +9,12 @@ import { END, START, StateGraph } from '@langchain/langgraph';
 import { getParseOriginalDashboardNode } from './nodes/parse_original_dashboard';
 import { migrateDashboardConfigSchema, migrateDashboardState } from './state';
 import type { MigrateDashboardGraphParams } from './types';
-import {
-  fanOutPanelTranslations,
-  getTranslatePanelNode,
-} from './nodes/translate_panel/translate_panel';
+import { getTranslatePanelNode } from './nodes/translate_panel/translate_panel';
 import { getAggregateDashboardNode } from './nodes/aggregate_dashboard';
-import { getTranslatePanelGraph } from './sub_graphs/translate_panel';
 
 export function getDashboardMigrationAgent(params: MigrateDashboardGraphParams) {
   const parseOriginalDashboardNode = getParseOriginalDashboardNode();
-  const translatePanelNode = getTranslatePanelNode(params);
-  const translatePanelSubGraph = getTranslatePanelGraph(params); // only for graph drawing
+  const translatePanel = getTranslatePanelNode(params);
   const aggregateDashboardNode = getAggregateDashboardNode();
 
   const siemMigrationAgentGraph = new StateGraph(
@@ -28,11 +23,13 @@ export function getDashboardMigrationAgent(params: MigrateDashboardGraphParams) 
   )
     // Nodes
     .addNode('parseOriginalDashboard', parseOriginalDashboardNode)
-    .addNode('translatePanel', translatePanelNode, { subgraphs: [translatePanelSubGraph] })
+    .addNode('translatePanel', translatePanel.node, { subgraphs: [translatePanel.subgraph] })
     .addNode('aggregateDashboard', aggregateDashboardNode)
     // Edges
     .addEdge(START, 'parseOriginalDashboard')
-    .addConditionalEdges('parseOriginalDashboard', fanOutPanelTranslations, ['translatePanel'])
+    .addConditionalEdges('parseOriginalDashboard', translatePanel.conditionalEdge, [
+      'translatePanel',
+    ])
     .addEdge('translatePanel', 'aggregateDashboard')
     .addEdge('aggregateDashboard', END);
 

@@ -14,16 +14,16 @@ import type { ParsedPanel } from '../../../../lib/parsers/types';
 
 export const translateDashboardPanelState = Annotation.Root({
   parsed_panel: Annotation<ParsedPanel>(),
-  elastic_panel: Annotation<object>(), // The visualization panel object
-  index_pattern: Annotation<string>(),
+  elastic_panel: Annotation<object | undefined>(), // The visualization panel object
+  index_pattern: Annotation<string | undefined>(),
   resources: Annotation<MigrationResources>(),
   includes_ecs_mapping: Annotation<boolean>({
     reducer: (current, value) => value ?? current,
     default: () => false,
   }),
-  inline_query: Annotation<string>(),
-  description: Annotation<string>(),
-  esql_query: Annotation<string>(),
+  inline_query: Annotation<string | undefined>(),
+  description: Annotation<string | undefined>(),
+  esql_query: Annotation<string | undefined>(),
   validation_errors: Annotation<ValidationErrors>({
     reducer: (current, value) => value ?? current,
     default: () => ({ iterations: 0 }),

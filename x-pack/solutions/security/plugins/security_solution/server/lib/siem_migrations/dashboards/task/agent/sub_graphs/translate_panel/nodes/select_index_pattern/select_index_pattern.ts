@@ -29,7 +29,7 @@ export const getSelectIndexPatternNode = (params: GetSelectIndexPatternParams): 
   return async (state, config) => {
     const selectIndexPatternGraph = await selectIndexPatternGraphPromise; // This will only be awaited the first time the node is executed
 
-    if (!state.esql_query) {
+    if (!state.inline_query) {
       return { index_pattern: '[indexPattern]' };
     }
     const question = await SELECT_INDEX_PATTERN_PROMPT.format({

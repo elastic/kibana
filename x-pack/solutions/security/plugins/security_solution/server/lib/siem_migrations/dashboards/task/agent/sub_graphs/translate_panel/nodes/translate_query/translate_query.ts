@@ -15,9 +15,12 @@ import type { GraphNode } from '../../types';
 export const getTranslateQueryNode = (params: GetTranslateSplToEsqlParams): GraphNode => {
   const translateSplToEsql = getTranslateSplToEsql(params);
   return async (state) => {
+    if (!state.inline_query) {
+      return {};
+    }
     const { esqlQuery, comments } = await translateSplToEsql({
       title: state.parsed_panel.title,
-      description: state.description,
+      description: state.description ?? '',
       taskDescription: TASK_DESCRIPTION.migrate_dashboard,
       inlineQuery: state.inline_query,
       indexPattern: state.index_pattern || '[indexPattern]',
