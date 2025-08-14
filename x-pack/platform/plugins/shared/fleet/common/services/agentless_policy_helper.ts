@@ -46,6 +46,8 @@ function extractRegistryInputsForDeploymentMode(
   return inputs;
 }
 
+// Checks if a package has a policy template that supports agentless
+// Provide a specific integration policy template name to check if it alone supports agentless
 export const isAgentlessIntegration = (
   packageInfo: Pick<PackageInfo, 'policy_templates'> | undefined,
   integrationToEnable?: string

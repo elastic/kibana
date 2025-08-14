@@ -106,6 +106,58 @@ describe('agentless_policy_helper', () => {
 
       expect(result).toBe(false);
     });
+
+    it('should return true if the specified integration supports agentless', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+            deployment_modes: {
+              agentless: { enabled: true },
+              default: { enabled: false },
+            },
+          },
+          {
+            name: 'template2',
+            deployment_modes: {
+              agentless: { enabled: false },
+              default: { enabled: true },
+            },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+
+      expect(isAgentlessIntegration(packageInfo, 'template1')).toBe(true);
+      expect(isAgentlessIntegration(packageInfo, 'template2')).toBe(false);
+    });
+
+    it('should return false if the specified integration does not exist', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+            deployment_modes: {
+              agentless: { enabled: true },
+              default: { enabled: false },
+            },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+
+      expect(isAgentlessIntegration(packageInfo, 'nonexistent')).toBe(false);
+    });
+
+    it('should return false if the specified integration exists but has no deployment_modes', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+
+      expect(isAgentlessIntegration(packageInfo, 'template1')).toBe(false);
+    });
   });
 
   describe('getAgentlessAgentPolicyNameFromPackagePolicyName', () => {

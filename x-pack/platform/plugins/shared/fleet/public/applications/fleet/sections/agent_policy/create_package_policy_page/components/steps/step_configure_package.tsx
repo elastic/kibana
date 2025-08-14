@@ -55,6 +55,8 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   isAgentlessSelected = false,
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
+  const deploymentMode =
+    isAgentlessSelected && packagePolicy.supports_agentless ? 'agentless' : 'default';
   const packagePolicyTemplates = useMemo(
     () =>
       showOnlyIntegration
@@ -71,12 +73,8 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
         {!noTopRule && <EuiHorizontalRule margin="m" />}
         <EuiFlexGroup direction="column" gutterSize="none">
           {packagePolicyTemplates.map((policyTemplate) => {
-            const deploymentMode =
-              isAgentlessSelected && packagePolicy.supports_agentless ? 'agentless' : 'default';
-
             if (
-              deploymentMode === 'agentless' &&
-              !isAgentlessIntegration(packageInfo, policyTemplate.name)
+              !integrationSupportsDeploymentMode(deploymentMode, packageInfo, policyTemplate.name)
             ) {
               return null;
             }
@@ -160,4 +158,26 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
     );
 
   return validationResults ? renderConfigureInputs() : <Loading />;
+};
+
+const integrationSupportsDeploymentMode = (
+  deploymentMode: string,
+  packageInfo: PackageInfo,
+  integrationName: string
+) => {
+  if (deploymentMode === 'agentless') {
+    return isAgentlessIntegration(packageInfo, integrationName);
+  }
+
+  const integration = packageInfo.policy_templates?.find(({ name }) => name === integrationName);
+
+  if (!integration) {
+    return false;
+  }
+
+  if (integration.deployment_modes?.default) {
+    return integration.deployment_modes?.default.enabled;
+  }
+
+  return true;
 };
