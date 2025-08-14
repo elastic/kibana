@@ -12,11 +12,11 @@ export interface MetricField {
   index: string;
   dimensions: Array<{ name: string; type: string; description?: string }>;
   type: string;
-  time_series_metric?: string;
+  timeSeriesMetric?: string;
   unit?: string;
   description?: string;
   source?: string;
   stability?: string;
   display?: string;
-  no_data?: boolean;
+  noData?: boolean;
 }
