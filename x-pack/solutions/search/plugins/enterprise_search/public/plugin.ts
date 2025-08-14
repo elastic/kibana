@@ -47,6 +47,7 @@ import {
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
   SEARCH_HOMEPAGE,
+  SEARCH_APPS_TITLE,
 } from '../common/constants';
 import { registerLocators } from '../common/locators';
 import { ClientConfigType, InitialAppData } from '../common/types';
@@ -120,12 +121,7 @@ const applicationsLinks: AppDeepLink[] = [
   {
     id: 'searchApplications',
     path: `/${SEARCH_APPLICATIONS_PATH}`,
-    title: i18n.translate(
-      'xpack.enterpriseSearch.navigation.applicationsSearchApplicationsLinkLabel',
-      {
-        defaultMessage: 'Search Applications',
-      }
-    ),
+    title: SEARCH_APPS_TITLE,
     visibleIn: [],
   },
 ];
