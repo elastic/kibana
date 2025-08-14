@@ -385,9 +385,11 @@ export const reportingPNGExportProvider = ({
       const licenseHasScreenshotReporting = showLinks;
 
       const capabilityHasDashboardScreenshotReporting =
-        capabilities.dashboard_v2?.generateScreenshot === true;
+        capabilities.dashboard_v2?.generateScreenshot === true ||
+        capabilities.reportingLegacy?.generateReport === true;
       const capabilityHasVisualizeScreenshotReporting =
-        capabilities.visualize_v2?.generateScreenshot === true;
+        capabilities.visualize_v2?.generateScreenshot === true ||
+        capabilities.reportingLegacy?.generateReport === true;
 
       if (!licenseHasScreenshotReporting) {
         return false;
