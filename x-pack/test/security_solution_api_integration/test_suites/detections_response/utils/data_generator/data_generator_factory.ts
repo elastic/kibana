@@ -8,7 +8,6 @@
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
-import { v4 as uuidv4 } from 'uuid';
 import { indexDocuments } from './index_documents';
 import { generateDocuments } from './generate_documents';
 import { enhanceDocuments, EnhanceDocumentsOptions } from './enhance_documents';
@@ -47,18 +46,10 @@ export const dataGeneratorFactory = ({
 }: Omit<DataGeneratorParams, 'documents'>): DataGenerator => {
   return {
     indexListOfDocuments: async (documents: DataGeneratorParams['documents']) => {
-      // Process documents to ensure they have IDs
-      const processedDocuments = documents.map((doc) => {
-        if (!doc.id) {
-          return { ...doc, id: uuidv4() };
-        }
-        return doc;
-      });
-
-      const response = await indexDocuments({ es, index, documents: processedDocuments, log });
+      const response = await indexDocuments({ es, index, documents, log });
 
       return {
-        documents: processedDocuments,
+        documents,
         response,
       };
     },
