@@ -230,9 +230,18 @@ export const createSAMLResponse = async (params: SAMLResponseValueParams) => {
   } catch (err) {
     if (err.isAxiosError) {
       const requestId = err?.response?.headers?.['x-request-id'] || 'not found';
-      log.error(
-        `Create SAML Response failed with status code ${err?.response?.status}: ${err?.response?.data}.\nLocation: ${location}.\nX-Request-ID: ${requestId}`
-      );
+      const responseStatus = err?.response?.status;
+      let logMessage = `Create SAML Response (${location}) failed with status code ${responseStatus}: ${err?.response?.data}`;
+
+      // If response is 3XX, also log the Location header from response
+      if (responseStatus >= 300 && responseStatus < 400) {
+        const locationHeader = err?.response?.headers?.location || 'not found';
+        logMessage += `.\nLocation: ${locationHeader}.\nX-Request-ID: ${requestId}`;
+      } else {
+        logMessage += `.\nX-Request-ID: ${requestId}`;
+      }
+
+      log.error(logMessage);
     }
   }
 
