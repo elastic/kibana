@@ -2211,9 +2211,9 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.3.0.tgz#3d65189b84f55440145eeb01dff9a77fb8036830"
   integrity sha512-rimxG9D/jCT/UvrZvet69kTHYMIpBqPwl+iR+aA9Ay5QaP7LFEPnEj6TMb1wk64vfzrTeV95eOLMAElJmXo4wA==
 
-"@elastic/eui-amsterdam@file:./eui_106.1.0_scss_01.tgz", "@elastic/eui@file:./eui_106.1.0_scss_01.tgz":
-  version "106.1.0"
-  resolved "file:./eui_106.1.0_scss_01.tgz#4cfd20acc6d32db474dc1b5e6c978cf37367b3d2"
+"@elastic/eui-amsterdam@file:./eui_106.3.0_dual_range_input_popover_01.tgz", "@elastic/eui@file:./eui_106.3.0_dual_range_input_popover_01.tgz":
+  version "106.3.0"
+  resolved "file:./eui_106.3.0_dual_range_input_popover_01.tgz#e57e500314d08d94acfbb7542340bf00a27649aa"
   dependencies:
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
@@ -2250,13 +2250,13 @@
     uuid "^8.3.0"
     vfile "^4.2.1"
 
-"@elastic/eui-theme-borealis@file:./eui_theme_borealis_3.3.0_scss_order_01.tgz":
-  version "3.3.0"
-  resolved "file:./eui_theme_borealis_3.3.0_scss_order_01.tgz#96a1a0132e8e682b98d0902c29719405eab0c289"
+"@elastic/eui-theme-borealis@file:./eui_theme_borealis_3.3.1_dual_range_input_popover_01.tgz":
+  version "3.3.1"
+  resolved "file:./eui_theme_borealis_3.3.1_dual_range_input_popover_01.tgz#9b6fd7ec1cd971c9d76c86127a61e1a5b1411e1c"
 
-"@elastic/eui-theme-common@file:./eui_theme_common_3.1.0_scss_order_01.tgz":
-  version "3.1.0"
-  resolved "file:./eui_theme_common_3.1.0_scss_order_01.tgz#c32c2f0156cf2c95497dc2d8f00fd8bf8a1cfe4a"
+"@elastic/eui-theme-common@file:./eui_theme_common_4.0.0_dual_range_input_popover_01.tgz":
+  version "4.0.0"
+  resolved "file:./eui_theme_common_4.0.0_dual_range_input_popover_01.tgz#b979d193738fdee265b215b930feb8c70e7ca859"
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
