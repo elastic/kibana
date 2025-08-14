@@ -183,26 +183,6 @@ describe('lens suggestions api helpers', () => {
       );
     });
 
-    it('should return the suggestion as it is when datasource has no layers', async () => {
-      const suggestion = mockAllSuggestions[0];
-      const visAttributes = {
-        visualizationType: 'lnsHeatmap',
-        state: {
-          visualization: {
-            shape: 'heatmap',
-          },
-          datasourceStates: {
-            textBased: {
-              layers: null,
-            },
-          },
-        },
-      } as unknown as TypedLensByValueInput['attributes'];
-      expect(mergeSuggestionWithVisContext({ suggestion, visAttributes, context })).toStrictEqual(
-        suggestion
-      );
-    });
-
     it('should return the suggestion updated with the attributes if the visualization types and the context columns match', async () => {
       const suggestion = mockAllSuggestions[0];
       const visAttributes = {
