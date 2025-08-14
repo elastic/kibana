@@ -737,6 +737,29 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedSearch",
+        "id": "def-server.DiscoverSessionTabAttributes",
+        "type": "Type",
+        "tags": [],
+        "label": "DiscoverSessionTabAttributes",
+        "description": [],
+        "signature": [
+          "{ readonly version?: number | undefined; readonly usesAdHocDataView?: boolean | undefined; readonly viewMode?: ",
+          {
+            "pluginId": "savedSearch",
+            "scope": "common",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-common.VIEW_MODE",
+            "text": "VIEW_MODE"
+          },
+          " | undefined; readonly hideAggregatedPreview?: boolean | undefined; readonly rowHeight?: number | undefined; readonly headerRowHeight?: number | undefined; readonly timeRestore?: boolean | undefined; readonly timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; readonly refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; readonly rowsPerPage?: number | undefined; readonly sampleSize?: number | undefined; readonly breakdownField?: string | undefined; readonly density?: \"compact\" | \"normal\" | \"expanded\" | undefined; readonly visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; timeField?: string | undefined; dataViewId?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; readonly hits?: number | undefined; readonly sort: string[] | string[][]; readonly columns: string[]; readonly grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; readonly hideChart: boolean; readonly isTextBasedQuery: boolean; readonly kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }"
+        ],
+        "path": "src/platform/plugins/shared/saved_search/server/saved_objects/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": []
@@ -899,7 +922,7 @@
             "section": "def-common.SavedSearch",
             "text": "SavedSearch"
           },
-          ">(id: string | undefined, attributes: ",
+          ">(id: string | undefined, { title, description, tabs }: ",
           "SavedSearchAttributes",
           ", tags: string[] | undefined, searchSource: ",
           {
@@ -943,7 +966,7 @@
             "id": "def-common.fromSavedSearchAttributes.$2",
             "type": "Object",
             "tags": [],
-            "label": "attributes",
+            "label": "{ title, description, tabs }",
             "description": [],
             "signature": [
               "SavedSearchAttributes"
