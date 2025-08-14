@@ -65,6 +65,7 @@ const addMatchedQueryToMaps = ({
     field: decodedQuery.field,
     value: decodedQuery.value,
     queryType: decodedQuery.queryType,
+    negate: decodedQuery.negate,
   };
 
   if (!signalMatch) {

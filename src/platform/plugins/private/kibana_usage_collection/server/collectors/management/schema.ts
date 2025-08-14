@@ -476,10 +476,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmEnableServiceMapApiV2': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:aiAssistantSimulatedFunctionCalling': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -500,6 +496,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     },
   },
   'onechat:mcp:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'onechat:a2a:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -674,6 +674,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable significant events in streams.',
+    },
+  },
+  'observability:enableDiagnosticMode': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable diagnostic mode',
     },
   },
 };

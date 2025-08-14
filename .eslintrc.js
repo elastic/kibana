@@ -783,6 +783,7 @@ module.exports = {
         'x-pack/solutions/*/test/**/tests/**/*',
         'x-pack/solutions/*/test/api_integration_deployment_agnostic/*configs/**/*',
         'x-pack/solutions/*/test/alerting_api_integration/**/*',
+        'x-pack/solutions/*/test/serverless/*/configs/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
@@ -797,8 +798,8 @@ module.exports = {
         'x-pack/platform/test/serverless/*/configs/**/*',
         'x-pack/test_serverless/*/test_suites/**/*',
         'x-pack/test/profiling_api_integration/**/*.ts',
-        'x-pack/test/security_solution_api_integration/*/test_suites/**/*',
-        'x-pack/test/security_solution_api_integration/**/config*.ts',
+        'x-pack/solutions/security/test/security_solution_api_integration/*/test_suites/**/*',
+        'x-pack/solutions/security/test/security_solution_api_integration/**/config*.ts',
         '**/playwright.config.ts',
       ],
       rules: {

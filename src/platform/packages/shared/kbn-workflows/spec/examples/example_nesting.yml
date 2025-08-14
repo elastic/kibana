@@ -23,7 +23,7 @@ workflow:
           foreach: "{{alert.teams}}"
           steps:
             - name: Send message
-              type: slack.sendMessage
+              type: slack
               with:
                 message: "Alert for {{foreach.value}}"
                 channel: "{{foreach.value}}"

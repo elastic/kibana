@@ -22,6 +22,8 @@ export const roleDescriptorsFixture = base.extend<
 >({
   roleDescriptors: [
     ({ log }, use) => {
+      // TODO: Add support for serverless projects with different tiers
+      // ref https://github.com/elastic/kibana/pull/229919
       const resourcePath = `${SERVERLESS_ROLES_ROOT_PATH}/security/roles.yml`;
       const serverless = new Map<string, ElasticsearchRoleDescriptor>(
         Object.entries(
