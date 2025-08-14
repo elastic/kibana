@@ -20,6 +20,10 @@ export const TEST_SUBJ_TOOLTIP_IP = 'ips-tooltip-ip';
 export const VISIBLE_IPS_LIMIT = 1;
 export const MAX_IPS_IN_TOOLTIP = 10;
 
+const toolTipAriaLabel = i18n.translate('securitySolutionPackages.csp.graph.ips.toolTipAriaLabel', {
+  defaultMessage: 'Show IP address details',
+});
+
 const toolTipTitle = i18n.translate('securitySolutionPackages.csp.graph.ips.toolTipTitle', {
   defaultMessage: 'IP Addresses',
 });
@@ -38,66 +42,73 @@ export const Ips = ({ ips }: IpsProps) => {
 
   if (ips.length === 0) return null;
 
+  const toolTipContent = (
+    <ul data-test-subj={TEST_SUBJ_TOOLTIP_CONTENT}>
+      {ips.slice(0, MAX_IPS_IN_TOOLTIP).map((ip, index) => (
+        <li key={`${index}-${ip}`}>
+          <EuiText data-test-subj={TEST_SUBJ_TOOLTIP_IP} size="m">
+            {ip}
+          </EuiText>
+        </li>
+      ))}
+      {ips.length > MAX_IPS_IN_TOOLTIP ? (
+        <>
+          <li>
+            <br />
+          </li>
+          <li>{openFlyoutText}</li>
+        </>
+      ) : null}
+    </ul>
+  );
+
+  const visibleIps = (
+    <EuiText
+      data-test-subj={TEST_SUBJ_TEXT}
+      size="s"
+      color="subdued"
+      css={css`
+        font-weight: medium;
+        ${sFontSize};
+      `}
+    >
+      {'IP: '}
+      {ips.slice(0, VISIBLE_IPS_LIMIT).join(', ')}
+    </EuiText>
+  );
+
+  const counter =
+    ips.length > VISIBLE_IPS_LIMIT ? (
+      <EuiText
+        size="xs"
+        color="default"
+        data-test-subj={TEST_SUBJ_PLUS_COUNT}
+        css={css`
+          font-weight: medium;
+          ${xsFontSize};
+        `}
+      >
+        {`+${ips.length - VISIBLE_IPS_LIMIT}`}
+      </EuiText>
+    ) : null;
+
   return (
     <EuiToolTip
       data-test-subj={TEST_SUBJ_TOOLTIP}
       position="right"
-      title={toolTipTitle}
-      content={
-        ips.length > VISIBLE_IPS_LIMIT ? (
-          <ul data-test-subj={TEST_SUBJ_TOOLTIP_CONTENT}>
-            {ips.slice(0, MAX_IPS_IN_TOOLTIP).map((ip) => (
-              <li key={ip}>
-                <EuiText data-test-subj={TEST_SUBJ_TOOLTIP_IP} size="m">
-                  {ip}
-                </EuiText>
-              </li>
-            ))}
-            {ips.length > MAX_IPS_IN_TOOLTIP ? (
-              <>
-                <li>
-                  <br />
-                </li>
-                <li>{openFlyoutText}</li>
-              </>
-            ) : null}
-          </ul>
-        ) : null
-      }
+      title={ips.length > VISIBLE_IPS_LIMIT ? toolTipTitle : null}
+      content={ips.length > VISIBLE_IPS_LIMIT ? toolTipContent : null}
     >
       {/* Wrap badge with button to make it focusable and open ToolTip with keyboard */}
-      <ToolTipButton>
+      <ToolTipButton aria-label={toolTipAriaLabel}>
         <EuiFlexGroup
           responsive={false}
           gutterSize="xs"
           alignItems="center"
           justifyContent="center"
         >
-          <EuiText
-            data-test-subj={TEST_SUBJ_TEXT}
-            size="s"
-            color="subdued"
-            css={css`
-              font-weight: medium;
-              ${sFontSize};
-            `}
-          >
-            {'IP: '}
-            {ips.slice(0, VISIBLE_IPS_LIMIT).join(', ')}
-          </EuiText>
-          {ips.length > VISIBLE_IPS_LIMIT ? (
-            <EuiText
-              size="xs"
-              color="default"
-              data-test-subj={TEST_SUBJ_PLUS_COUNT}
-              css={css`
-                font-weight: medium;
-                ${xsFontSize};
-              `}
-            >
-              {`+${ips.length - VISIBLE_IPS_LIMIT}`}
-            </EuiText>
-          ) : null}
+          {visibleIps}
+          {counter}
         </EuiFlexGroup>
       </ToolTipButton>
     </EuiToolTip>

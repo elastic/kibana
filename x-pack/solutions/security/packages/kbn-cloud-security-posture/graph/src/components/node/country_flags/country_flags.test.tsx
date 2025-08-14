@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   CountryFlags,
   MAX_COUNTRY_FLAGS_IN_TOOLTIP,
@@ -29,7 +30,7 @@ describe('CountryFlags', () => {
     expect(screen.queryByTestId(TEST_SUBJ_BADGE)?.textContent).toStrictEqual('🇺🇸');
     expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
 
-    fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_BADGE));
+    await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
 
     await waitFor(() => {
       expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
@@ -41,7 +42,7 @@ describe('CountryFlags', () => {
     expect(screen.queryByTestId(TEST_SUBJ_BADGE)?.textContent).toStrictEqual('🇺🇸🇫🇷');
     expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
 
-    fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_BADGE));
+    await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
 
     await waitFor(() => {
       expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
@@ -54,7 +55,7 @@ describe('CountryFlags', () => {
     expect(screen.queryByTestId(TEST_SUBJ_BADGE)?.textContent).toStrictEqual('🇺🇸🇫🇷+2');
     expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
 
-    fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_BADGE));
+    await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
 
     await waitFor(() => {
       expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
@@ -73,7 +74,7 @@ describe('CountryFlags', () => {
     const countryCodes = ['US', 'FR', 'DE', 'JP', 'IL', 'GB', 'CA', 'BR', 'GR', 'IT', 'RU'];
     render(<CountryFlags countryCodes={countryCodes} />);
 
-    fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_BADGE));
+    await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
 
     await waitFor(() => {
       expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
@@ -104,7 +105,7 @@ describe('CountryFlags', () => {
   test('renders tooltip with correct title', async () => {
     render(<CountryFlags countryCodes={['us', 'fr', 'es']} />);
 
-    fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_BADGE));
+    await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
 
     await waitFor(() => {
       expect(screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
@@ -112,6 +113,13 @@ describe('CountryFlags', () => {
 
     const tooltipContent = screen.getByTestId(TEST_SUBJ_TOOLTIP);
     expect(tooltipContent).toHaveTextContent('Geolocation');
+  });
+
+  test('renders aria-label in focusable button', () => {
+    render(<CountryFlags countryCodes={['us', 'fr', 'es']} />);
+
+    const tooltipButton = screen.getByRole('button');
+    expect(tooltipButton).toHaveAccessibleName('Show geolocation details');
   });
 
   describe('ignores invalid country codes', () => {
@@ -153,7 +161,7 @@ describe('CountryFlags', () => {
       expect(screen.queryByTestId(TEST_SUBJ_BADGE)?.textContent).toStrictEqual('🇺🇸');
       expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
 
-      fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_BADGE));
+      await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
 
       await waitFor(() => {
         expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
@@ -165,7 +173,7 @@ describe('CountryFlags', () => {
       const countryCodes = ['US', 'INVALID', 'FR', 'JP', 'UK']; // United Kingdom's country code is 'GB', not 'UK'
       render(<CountryFlags countryCodes={countryCodes} />);
 
-      fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_BADGE));
+      await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
 
       await waitFor(() => {
         expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
@@ -185,7 +193,7 @@ describe('CountryFlags', () => {
     expect(screen.queryByTestId(TEST_SUBJ_BADGE)?.textContent).toStrictEqual('🇺🇸🇫🇷+1');
     expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
 
-    fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_BADGE));
+    await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
 
     await waitFor(() => {
       expect(screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
@@ -204,7 +212,7 @@ describe('CountryFlags', () => {
 
     render(<CountryFlags countryCodes={['us', 'fr', 'es']} />);
 
-    fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_BADGE));
+    await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
 
     await waitFor(() => {
       expect(screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
