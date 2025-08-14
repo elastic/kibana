@@ -10,9 +10,14 @@ import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
 import { Evaluator } from '../../types';
 import { LlmCorrectnessEvaluationPrompt } from './prompt';
+import {
+  calculateFactualScore,
+  calculateRelevanceScore,
+  calculateProceduralFidelityScore,
+} from './scoring';
 import { CorrectnessAnalysis } from './types';
 
-export function createCorrectnessEvaluator({
+export function createCorrectnessAnalysisEvaluator({
   inferenceClient,
   log,
 }: {
@@ -60,4 +65,53 @@ export function createCorrectnessEvaluator({
     kind: 'LLM',
     name: 'correctness',
   };
+}
+
+export function createQuantitativeCorrectnessEvaluators(): Evaluator[] {
+  // Extract and validate correctness analysis from output
+  const extractCorrectnessAnalysis = (output: any): CorrectnessAnalysis | null => {
+    return ((output as any)?.correctnessAnalysis as CorrectnessAnalysis) || null;
+  };
+
+  // Helper function to create evaluator with common validation logic
+  const quantitativeEvaluator = (
+    name: string,
+    scoreCalculator: (analysis: CorrectnessAnalysis) => number,
+    summaryKey: keyof CorrectnessAnalysis['summary']
+  ): Evaluator => ({
+    evaluate: async ({ output, metadata }) => {
+      const correctnessAnalysis = extractCorrectnessAnalysis(output);
+
+      if (!correctnessAnalysis) {
+        return {
+          score: null,
+          label: 'unavailable',
+          explanation: 'No correctness analysis available',
+          metadata,
+        };
+      }
+
+      const score = scoreCalculator(correctnessAnalysis);
+      const summaryText = correctnessAnalysis.summary[summaryKey];
+
+      return {
+        score,
+        label: summaryText,
+        explanation: summaryText,
+        metadata,
+      };
+    },
+    kind: 'LLM',
+    name,
+  });
+
+  return [
+    quantitativeEvaluator('factuality', calculateFactualScore, 'factual_accuracy_summary'),
+    quantitativeEvaluator('relevance', calculateRelevanceScore, 'relevance_summary'),
+    quantitativeEvaluator(
+      'sequence-accuracy',
+      calculateProceduralFidelityScore,
+      'sequence_accuracy_summary'
+    ),
+  ];
 }
