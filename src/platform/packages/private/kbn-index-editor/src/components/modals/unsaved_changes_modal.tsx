@@ -62,6 +62,7 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
       confirmButtonText={
         <FormattedMessage id="indexEditor.warningModal.confirm" defaultMessage="Yes" />
       }
+      buttonColor="danger"
     >
       <FormattedMessage
         id="indexEditor.warningModal.body_2"
