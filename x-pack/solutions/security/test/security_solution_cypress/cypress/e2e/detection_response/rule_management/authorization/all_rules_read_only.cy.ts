@@ -7,7 +7,8 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { getNewRule } from '../../../../objects/rule';
+import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
+import { getCustomQueryRuleParams, getNewRule } from '../../../../objects/rule';
 import {
   COLLAPSED_ACTION_BTN,
   RULE_CHECKBOX,
@@ -28,12 +29,16 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 // TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless
 // TODO: https://github.com/elastic/kibana/issues/161540
 describe('All rules - read only', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+  before(() => {
+    installMockPrebuiltRulesPackage();
+  });
+
   beforeEach(() => {
     deleteAlertsAndRules();
-    createRule(getNewRule({ rule_id: '1', enabled: false }));
+    createRule(getCustomQueryRuleParams({ rule_id: '1', enabled: false }));
     login(ROLES.t1_analyst);
     visitRulesManagementTable();
-    cy.get(RULE_NAME).should('have.text', getNewRule().name);
+    cy.get(RULE_NAME).should('have.text', getCustomQueryRuleParams().name);
   });
 
   it('Does not display select boxes for rules', () => {

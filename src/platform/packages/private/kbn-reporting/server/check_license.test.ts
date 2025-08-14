@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ILicense } from '@kbn/licensing-plugin/server';
+import { ILicense } from '@kbn/licensing-types';
 import { checkLicense } from './check_license';
 import { ExportTypesRegistry } from './export_types_registry';
 
