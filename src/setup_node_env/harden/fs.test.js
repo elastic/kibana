@@ -12,6 +12,7 @@
 const { createFsProxy, createFsPromisesProxy } = require('./fs');
 // eslint-disable-next-line @kbn/imports/uniform_imports
 const { REPO_ROOT } = require('../../platform/packages/shared/kbn-repo-info');
+const { fsEventBus, FS_CONFIG_EVENT } = require('@kbn/security-hardening/fs-event-bus');
 
 const join = require('path').join;
 
@@ -25,6 +26,19 @@ const safeFs = createFsProxy(fs);
 const safeFsPromises = createFsPromisesProxy(fsPromises);
 
 describe('Hardened FS', () => {
+  beforeAll(() => {
+    process.env.KBN_ENABLE_HARDENED_FS = true;
+    // Emit the configuration event to set up safe paths
+    fsEventBus.emit(FS_CONFIG_EVENT, {
+      safe_paths: [DATA_PATH],
+      enabled: true,
+    });
+  });
+
+  afterAll(() => {
+    process.env.KBN_ENABLE_HARDENED_FS = false;
+  });
+
   describe('callback', () => {
     it('should allow writing to safe paths', (done) => {
       safeFs.writeFile(join(DATA_PATH, 'good.json'), 'hello', (err) => {
