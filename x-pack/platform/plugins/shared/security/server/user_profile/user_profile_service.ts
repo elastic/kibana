@@ -132,7 +132,13 @@ export class UserProfileService {
     const activateRequest: SecurityActivateUserProfileRequest =
       grant.type === 'password'
         ? { grant_type: 'password', username: grant.username, password: grant.password }
-        : { grant_type: 'access_token', access_token: grant.accessToken };
+        : {
+            grant_type: 'access_token',
+            access_token: grant.accessToken,
+            ...(grant.type === 'uiamAccessToken'
+              ? { client_authentication: { scheme: 'SharedSecret', value: grant.sharedSecret } }
+              : {}),
+          };
 
     // Profile activation is a multistep process that might or might not cause profile document to be created or
     // updated. If Elasticsearch needs to handle multiple profile activation requests for the same user in parallel
