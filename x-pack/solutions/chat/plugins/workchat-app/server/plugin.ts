@@ -20,6 +20,7 @@ import { IntegrationRegistry } from './services/integrations';
 import { createServices } from './services/create_services';
 import type { WorkChatAppConfig } from './config';
 import { AppLogger } from './utils';
+import { workChatDataTypes } from './data_types';
 import type {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
@@ -68,6 +69,11 @@ export class WorkChatAppPlugin
 
     registerFeatures({ features: setupDeps.features });
 
+    // Register custom data types with onechat
+    workChatDataTypes.slice(0, -1).forEach((dataType) => {
+      setupDeps.onechat.data.register(dataType);
+    });
+
     return {
       integrations: {
         register: (tool) => {
@@ -88,6 +94,22 @@ export class WorkChatAppPlugin
       pluginsDependencies,
       integrationRegistry: this.integrationRegistry,
     });
+
+    // Log the contents of the DataTypeRegistry
+    const logger = this.loggerFactory.get('workchat.app.dataTypes');
+
+    // Create a mock request to access the registry (since we need a request object)
+    const mockRequest = {} as any; // In a real scenario, you'd use a proper request
+
+    pluginsDependencies.onechat.data
+      .getRegistry({ request: mockRequest })
+      .then((registry) => {
+        const registeredTypes = registry.list();
+        logger.info(`DataTypeRegistry contents: ${JSON.stringify(registeredTypes, null, 2)}`);
+      })
+      .catch((error) => {
+        logger.error(`Failed to get DataTypeRegistry: ${error.message}`);
+      });
 
     return {};
   }
