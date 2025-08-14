@@ -45,11 +45,11 @@ export const checkIntegrationKnowledgeIndexEntryExists = async ({
 /**
  * Ensures the integration knowledge index entry exists during Knowledge Base setup.
  * Similar to loadSecurityLabs() but for Index Entries rather than Document Entries.
- * This version works without telemetry, similar to how addKnowledgeBaseDocuments works.
  */
 export const ensureIntegrationKnowledgeIndexEntry = async (
   kbDataClient: AIAssistantKnowledgeBaseDataClient,
-  logger: Logger
+  logger: Logger,
+  telemetry: AnalyticsServiceSetup
 ): Promise<boolean> => {
   try {
     logger.debug('Checking if integration knowledge index entry exists...');
@@ -61,12 +61,6 @@ export const ensureIntegrationKnowledgeIndexEntry = async (
 
     if (!entryExists) {
       logger.debug('Creating integration knowledge index entry...');
-
-      // Create entry using the high-level createKnowledgeBaseEntry method
-      // We create a minimal telemetry mock since telemetry is required but not available during setup
-      const mockTelemetry = {
-        reportEvent: () => {}, // No-op during setup
-      } as unknown as AnalyticsServiceSetup;
 
       const entry = await kbDataClient.createKnowledgeBaseEntry({
         knowledgeBaseEntry: {
@@ -81,7 +75,7 @@ export const ensureIntegrationKnowledgeIndexEntry = async (
           global: true,
           users: [],
         },
-        telemetry: mockTelemetry,
+        telemetry,
       });
 
       if (entry) {

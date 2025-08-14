@@ -94,6 +94,7 @@ export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientPara
   manageGlobalKnowledgeBaseAIAssistant: boolean;
   getTrainedModelsProvider: () => ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
   elserInferenceId?: string;
+  telemetry: AnalyticsServiceSetup;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
@@ -300,7 +301,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         try {
           await ensureIntegrationKnowledgeIndexEntry(
             this,
-            this.options.logger.get('integrationKnowledge')
+            this.options.logger.get('integrationKnowledge'),
+            this.options.telemetry
           );
         } catch (error) {
           this.options.logger.error(
