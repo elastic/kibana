@@ -32,6 +32,13 @@ export const Description: FC<PropsWithChildren<unknown>> = memo(({ children }) =
       flex-direction: column !important;
     }
 
+    /* Widen the Custom URL fields */
+    .euiDescribedFormGroup__fieldWrapper,
+    .euiDescribedFormGroup__fields {
+      max-width: none !important;
+      width: 100% !important;
+    }
+
     > .euiFlexGroup {
       > .euiFlexItem {
         &:last-child {
@@ -43,6 +50,7 @@ export const Description: FC<PropsWithChildren<unknown>> = memo(({ children }) =
 
   return (
     <EuiDescribedFormGroup
+      gutterSize="xs"
       fullWidth
       css={cssOverride}
       title={<h3>{title}</h3>}

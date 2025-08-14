@@ -363,7 +363,6 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
         />
         {(!editorOpen || editMode === 'modal') && (
           <>
-            <EuiSpacer size="m" />
             <EuiButton
               size="s"
               iconType="plusInCircle"

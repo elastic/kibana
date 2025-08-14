@@ -84,7 +84,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
 
   const styles = useMemo(
     () => ({
-      labelField: css`
+      narrowField: css`
         min-width: calc(${euiTheme.size.xl} * 3);
       `,
       urlField: css`
@@ -298,7 +298,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
           </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiFlexGroup wrap gutterSize="s">
-            <EuiFlexItem css={styles.labelField} grow={2}>
+            <EuiFlexItem css={styles.narrowField} grow={2}>
               <EuiFormRow
                 fullWidth={true}
                 label={
@@ -325,7 +325,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
               </EuiFormRow>
             </EuiFlexItem>
             {isCustomTimeRange === false ? (
-              <EuiFlexItem css={styles.labelField} grow={2}>
+              <EuiFlexItem css={styles.narrowField} grow={2}>
                 <EuiFormRow
                   fullWidth={true}
                   label={
