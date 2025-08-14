@@ -19,6 +19,7 @@ import {
 } from '../common/utils';
 
 const SNAPSHOT_CUSTOM_AGGREGATIONS = ['avg', 'max', 'min', 'rate'] as const;
+const dataSchemaFormats = ['ecs', 'semconv'] as const;
 type SnapshotCustomAggregation = (typeof SNAPSHOT_CUSTOM_AGGREGATIONS)[number];
 
 const SnapshotMetricTypeKeysArray = [
