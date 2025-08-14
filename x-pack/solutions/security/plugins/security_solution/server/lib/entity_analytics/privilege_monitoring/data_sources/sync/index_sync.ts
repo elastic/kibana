@@ -63,13 +63,14 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
       const index: string = source.indexPattern;
 
       try {
-        const batchUserNames = await syncUsernamesFromIndex({
+        const allUserNames = await syncUsernamesFromIndex({
           indexName: index,
+          sourceId: source.id,
           kuery: source.filter?.kuery,
         });
 
         // collect stale users
-        const staleUsers = await findStaleUsers(index, batchUserNames);
+        const staleUsers = await findStaleUsers(source.id, allUserNames);
         allStaleUsers.push(...staleUsers);
       } catch (error) {
         if (
@@ -90,7 +91,7 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
     dataClient.log('debug', `Found ${allStaleUsers.length} stale users across all index sources.`);
     if (allStaleUsers.length > 0) {
       const ops = bulkUtilsService.bulkSoftDeleteOperations(allStaleUsers, dataClient.index);
-      await esClient.bulk({ body: ops });
+      await esClient.bulk({ body: ops, refresh: true });
     }
   };
 
@@ -113,9 +114,11 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
    */
   const syncUsernamesFromIndex = async ({
     indexName,
+    sourceId,
     kuery,
   }: {
     indexName: string;
+    sourceId: string;
     kuery?: string | unknown;
   }): Promise<string[]> => {
     const allUsernames: string[] = []; // Collect all usernames across batches
@@ -156,7 +159,7 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
 
       const usersToWrite: PrivMonBulkUser[] = batchUniqueUsernames.map((username) => ({
         username,
-        indexName,
+        sourceId,
         existingUserId: existingUserMap.get(username),
       }));
 
@@ -175,5 +178,5 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
     return uniq(allUsernames); // Return all unique usernames collected across batches;
   };
 
-  return { plainIndexSync, syncUsernamesFromIndex };
+  return { plainIndexSync, _syncUsernamesFromIndex: syncUsernamesFromIndex };
 };

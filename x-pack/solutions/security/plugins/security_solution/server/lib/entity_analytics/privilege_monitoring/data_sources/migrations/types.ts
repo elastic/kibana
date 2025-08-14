@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-export type PrivMonUserSource = 'csv' | 'api' | 'index_sync';
-
-export interface PrivMonBulkUser {
-  username: string;
-  existingUserId?: string;
-  sourceId: string;
+export interface MigratePrivMonDependencies {
+  logger: Logger;
+  esClient: ElasticsearchClient;
 }
