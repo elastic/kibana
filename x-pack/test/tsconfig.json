@@ -43,6 +43,7 @@
     "@kbn/securitysolution-exceptions-common",
     "@kbn/securitysolution-endpoint-exceptions-common",
     "@kbn/securitysolution-lists-common",
-    "@kbn/security-solution-plugin"
+    "@kbn/security-solution-plugin",
+    "@kbn/osquery-plugin"
   ]
 }
