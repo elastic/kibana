@@ -424,11 +424,11 @@ export class WorkflowExecutionRuntimeManager {
 
       const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
         spaceId: this.workflowExecution.spaceId,
-      id: this.workflowExecution.id,
-      status: ExecutionStatus.RUNNING,
-      startedAt: new Date().toISOString(),
-      workflowId: this.workflowExecution.workflowId,
-    triggeredBy: this.workflowExecution.triggeredBy,
+        id: this.workflowExecution.id,
+        status: ExecutionStatus.RUNNING,
+        startedAt: new Date().toISOString(),
+        workflowId: this.workflowExecution.workflowId,
+        triggeredBy: this.workflowExecution.triggeredBy,
       };
       await this.workflowExecutionRepository.updateWorkflowExecution(updatedWorkflowExecution);
       this.workflowExecution = {
@@ -521,20 +521,6 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   private async updateWorkflowState(error?: any): Promise<void> {
-    const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
-      spaceId: this.workflowExecution.spaceId,
-      id: this.workflowExecution.id,
-      status: ExecutionStatus.FAILED,
-      error: String(error),
-    };
-    await this.workflowExecutionRepository.updateWorkflowExecution(workflowExecutionUpdate);
-    this.workflowExecution = {
-      ...this.workflowExecution,
-      ...workflowExecutionUpdate,
-    };
-  }
-
-  private async updateWorkflowState(): Promise<void> {
     const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
       spaceId: this.workflowExecution.spaceId,
       id: this.workflowExecution.id,
