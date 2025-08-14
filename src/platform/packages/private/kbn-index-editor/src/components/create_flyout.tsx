@@ -39,13 +39,8 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
   });
 
   /** Callback to invoke when the user attempts to close the flyout */
-  const onFlyoutClose = async () => {
-    if (true) {
-      deps.indexUpdateService.setExitAttemptWithUnsavedFields(true);
-      return;
-    }
-
-    indexUpdateService.destroy();
+  const onFlyoutClose = () => {
+    indexUpdateService.exit();
   };
 
   const flyoutSession = overlays.openFlyout(

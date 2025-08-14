@@ -32,7 +32,7 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
   );
 
   const closeWithoutSaving = () => {
-    indexUpdateService.discardUnsavedColumns();
+    indexUpdateService.discardUnsavedChanges();
     onClose();
   };
 
