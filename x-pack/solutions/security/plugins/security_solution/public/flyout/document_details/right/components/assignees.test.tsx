@@ -132,11 +132,6 @@ describe('<Assignees />', () => {
 
   it('should call assignees update functionality with the right arguments', () => {
     const assignedProfiles = [mockUserProfiles[0], mockUserProfiles[1]];
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
-      isLoading: false,
-      data: assignedProfiles,
-    });
-
     const assignees = assignedProfiles.map((assignee) => assignee.uid);
     const { getByTestId, getByText } = renderAssignees('test-event', assignees);
 
