@@ -38,14 +38,16 @@ export abstract class NumeralFormat extends FieldFormat {
   protected getConvertedValue(val: number | string | object): string {
     if (val === -Infinity) return '-∞';
     if (val === +Infinity) return '+∞';
+    if (val == null || val === '__missing__') {
+      return 'N/A';
+    }
     if (typeof val === 'object') {
-      if (val === null) return '-';
       return JSON.stringify(val);
     } else if (typeof val !== 'number') {
       val = parseFloat(val);
     }
 
-    if (isNaN(val)) return '';
+    if (isNaN(val)) return 'NaN';
 
     const previousLocale = numeral.language();
     const defaultLocale =
@@ -65,6 +67,10 @@ export abstract class NumeralFormat extends FieldFormat {
   }
 
   htmlConvert: HtmlContextTypeConvert = (val) => {
+    if (val === '__missing__' || val == null) {
+      return `<span class="ffString__emptyValue">${this.getConvertedValue(val)}</span>`;
+    }
+
     if (typeof val === 'object' && !Array.isArray(val)) {
       return asPrettyString(val);
     }
