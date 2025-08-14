@@ -46341,7 +46341,7 @@ paths:
                                                       destination:
                                                         minLength: 1
                                                         type: string
-                                                      if:
+                                                      where:
                                                         anyOf:
                                                           - anyOf:
                                                               - additionalProperties: false
@@ -46473,7 +46473,7 @@ paths:
                                                               - always
                                                     required:
                                                       - destination
-                                                      - if
+                                                      - where
                                                   type: array
                                               required:
                                                 - fields
@@ -51066,7 +51066,15 @@ paths:
               additionalProperties: false
               type: object
               properties:
-                if:
+                stream:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                  required:
+                    - name
+                where:
                   anyOf:
                     - anyOf:
                         - additionalProperties: false
@@ -51196,17 +51204,9 @@ paths:
                           properties: {}
                       required:
                         - always
-                stream:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    name:
-                      type: string
-                  required:
-                    - name
               required:
                 - stream
-                - if
+                - where
       responses: {}
       summary: Fork a stream
       tags:
@@ -52800,7 +52800,7 @@ paths:
                                       destination:
                                         minLength: 1
                                         type: string
-                                      if:
+                                      where:
                                         anyOf:
                                           - anyOf:
                                               - additionalProperties: false
@@ -52932,7 +52932,7 @@ paths:
                                               - always
                                     required:
                                       - destination
-                                      - if
+                                      - where
                                   type: array
                               required:
                                 - fields
