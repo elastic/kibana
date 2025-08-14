@@ -69,7 +69,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
             },
             color: NUMERICAL_COLOR_PALETTES[0].value,
             type: COLOR_MAP_TYPE.ORDINAL,
-          } as ColorDynamicOptions,
+          },
         },
         [VECTOR_STYLES.LINE_COLOR]: {
           type: STYLE_TYPE.STATIC,

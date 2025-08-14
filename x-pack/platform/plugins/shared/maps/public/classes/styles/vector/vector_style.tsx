@@ -189,7 +189,7 @@ export class VectorStyle implements IVectorStyle {
   static createDescriptor(
     properties: Partial<VectorStylePropertiesDescriptor> = {},
     isTimeAware = true
-  ) {
+  ): VectorStyleDescriptor {
     return {
       type: LAYER_STYLE_TYPE.VECTOR,
       properties: { ...getDefaultStaticProperties(), ...properties },
