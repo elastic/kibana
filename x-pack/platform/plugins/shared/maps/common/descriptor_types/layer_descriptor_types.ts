@@ -10,9 +10,7 @@
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { Query } from '@kbn/es-query';
 import { Feature } from 'geojson';
-import {
-  EMSVectorTileStyleDescriptor,
-} from './style_property_descriptor_types';
+import { EMSVectorTileStyleDescriptor } from './style_property_descriptor_types';
 import { HeatmapStyleDescriptor } from '.';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
 import type { JoinSourceDescriptor, SourceDescriptor, VectorStyleDescriptor } from '.';
@@ -73,7 +71,12 @@ export type LayerDescriptor = {
   sourceDescriptor: SourceDescriptor | null;
   type?: string;
   visible?: boolean;
-  style?: { type: LAYER_STYLE_TYPE } | VectorStyleDescriptor | HeatmapStyleDescriptor | EMSVectorTileStyleDescriptor | null;
+  style?:
+    | { type: LAYER_STYLE_TYPE }
+    | VectorStyleDescriptor
+    | HeatmapStyleDescriptor
+    | EMSVectorTileStyleDescriptor
+    | null;
   query?: Query;
   includeInFitToBounds?: boolean;
   parent?: string;

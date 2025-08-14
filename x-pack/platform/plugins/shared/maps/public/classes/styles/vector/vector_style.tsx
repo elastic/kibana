@@ -8,6 +8,7 @@
 import React, { CSSProperties, ReactElement } from 'react';
 import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
+import { Writable } from '@kbn/utility-types';
 import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
 import {
   getDefaultStaticProperties,
@@ -55,6 +56,7 @@ import {
   DynamicStylePropertyOptions,
   IconDynamicOptions,
   IconStaticOptions,
+  IconStop,
   IconStylePropertyDescriptor,
   LabelDynamicOptions,
   LabelStaticOptions,
@@ -164,8 +166,12 @@ export interface IVectorStyle extends IStyle {
   }) => void;
 }
 
+type NormalizedVectorStyleDescriptor = VectorStyleDescriptor & {
+  properties: Writable<Required<VectorStyleDescriptor['properties']>>;
+};
+
 export class VectorStyle implements IVectorStyle {
-  private readonly _descriptor: VectorStyleDescriptor;
+  private readonly _descriptor: NormalizedVectorStyleDescriptor;
   private readonly _layer: IVectorLayer;
   private readonly _customIcons: CustomIcon[];
   private readonly _source: IVectorSource;
@@ -189,12 +195,12 @@ export class VectorStyle implements IVectorStyle {
   static createDescriptor(
     properties: Partial<VectorStylePropertiesDescriptor> = {},
     isTimeAware = true
-  ): VectorStyleDescriptor {
+  ): NormalizedVectorStyleDescriptor {
     return {
       type: LAYER_STYLE_TYPE.VECTOR,
       properties: { ...getDefaultStaticProperties(), ...properties },
       isTimeAware,
-    };
+    } as NormalizedVectorStyleDescriptor;
   }
 
   static createDefaultStyleProperties(mapColors: string[]) {
@@ -406,8 +412,8 @@ export class VectorStyle implements IVectorStyle {
         },
       } as any;
 
-      if ('field' in updatedProperties[key].options) {
-        delete (updatedProperties[key].options as DynamicStylePropertyOptions).field;
+      if ('field' in updatedProperties[key]!.options) {
+        delete (updatedProperties[key]!.options as Writable<DynamicStylePropertyOptions>).field;
       }
     });
 
@@ -544,8 +550,8 @@ export class VectorStyle implements IVectorStyle {
     return this._descriptor.isTimeAware;
   }
 
-  getPropertiesDescriptor(): VectorStylePropertiesDescriptor {
-    return this._descriptor.properties || {};
+  getPropertiesDescriptor(): NormalizedVectorStyleDescriptor['properties'] {
+    return this._descriptor.properties;
   }
 
   getDynamicPropertiesArray(): Array<IDynamicStyleProperty<DynamicStylePropertyOptions>> {
@@ -726,7 +732,7 @@ export class VectorStyle implements IVectorStyle {
       : this._getLegendDetailStyleProperties().length > 0;
   }
 
-  renderLegendDetails() {
+  renderLegendDetails(): ReactElement | null {
     const symbolId = this._getSymbolId();
     const svg = symbolId ? this.getIconSvg(symbolId) : undefined;
 
@@ -1014,7 +1020,7 @@ export class VectorStyle implements IVectorStyle {
         options.customIconStops.forEach((iconStop) => {
           const meta = this._getIconMeta(iconStop.icon);
           if (meta) {
-            iconStop.iconSource = meta.iconSource;
+            (iconStop.iconSource as Writable<IconStop['iconSource']>) = meta.iconSource;
           }
         });
       }

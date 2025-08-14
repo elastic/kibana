@@ -39,7 +39,7 @@ export const colorDynamicOptions = schema.object({
   otherCategoryColor: schema.maybe(schema.string()),
 
   field: schema.maybe(styleField),
-  fieldMetaOptions: fieldMetaOptions,
+  fieldMetaOptions,
 
   type: schema.maybe(
     schema.oneOf([

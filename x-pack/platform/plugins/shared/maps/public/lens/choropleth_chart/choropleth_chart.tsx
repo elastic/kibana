@@ -18,6 +18,7 @@ import {
   STYLE_TYPE,
   COLOR_MAP_TYPE,
   VECTOR_STYLES,
+  LayerDescriptor,
 } from '../../../common';
 import { emsWorldLayerId } from '../../../common/constants';
 import { ChoroplethChartProps } from './types';
@@ -124,7 +125,7 @@ export function ChoroplethChart({
       isTimeAware: false,
     },
     type: LAYER_TYPE.GEOJSON_VECTOR,
-  };
+  } as LayerDescriptor;
 
   return <PassiveMap passiveLayer={choroplethLayer} onRenderComplete={onRenderComplete} />;
 }

@@ -6,6 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
+import { Writable } from '@kbn/utility-types';
 import { heatmapStyleSchema } from './heatmap_style_schemas';
 import {
   colorDynamicSchema,
@@ -29,7 +30,12 @@ import {
   sizeStaticOptions,
   symbolizeAsOptionsSchema,
 } from './marker_schemas';
-import { fieldMetaOptions, styleField, vectorStylePropertiesSchema, vectorStyleSchema } from './vector_style_schemas';
+import {
+  fieldMetaOptions,
+  styleField,
+  vectorStylePropertiesSchema,
+  vectorStyleSchema,
+} from './vector_style_schemas';
 import {
   labelBorderSizeOptions,
   labelDynamicOptions,
@@ -39,7 +45,6 @@ import {
   labelZoomRangeSchema,
 } from './label_schemas';
 import { STYLE_TYPE } from '../../../../../common/constants';
-import { Writable } from '@kbn/utility-types';
 
 export type HeatmapStyleDescriptor = TypeOf<typeof heatmapStyleSchema>;
 
