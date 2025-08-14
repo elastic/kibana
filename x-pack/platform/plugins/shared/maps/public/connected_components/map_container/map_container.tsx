@@ -15,7 +15,6 @@ import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { Observable } from 'rxjs';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { css } from '@emotion/react';
-import { ReactReduxContext, ReactReduxContextValue } from 'react-redux';
 import { focusFirstFocusable } from '@kbn/presentation-util/src/focus_helpers';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
@@ -27,8 +26,6 @@ import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettings } from '../../../common/descriptor_types';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { ILayer } from '../../classes/layers/layer';
-import { setSelectedLayer, updateFlyout } from '../../actions';
-import { MapStoreState } from '../../reducers/store';
 import { AddLayerPanel } from '../add_layer_panel';
 import { EditLayerPanel } from '../edit_layer_panel';
 import { MapSettingsPanel } from '../map_settings_panel';
@@ -43,6 +40,7 @@ export interface Props {
   isMapLoading: boolean;
   cancelAllInFlightRequests: () => void;
   exitFullScreen: () => void;
+  closeFlyout: () => void;
   flyoutDisplay: FLYOUT_STATE;
   isFullScreen: boolean;
   isTimesliderOpen: boolean;
@@ -73,9 +71,6 @@ interface State {
 const mapWrapperStyles = css({ position: 'relative' });
 
 export class MapContainer extends Component<Props, State> {
-  static contextType = ReactReduxContext;
-  declare context: React.ContextType<React.Context<ReactReduxContextValue<MapStoreState, any>>>;
-
   private _isMounted: boolean = false;
   private _isInitalLoadRenderTimerStarted: boolean = false;
 
@@ -198,12 +193,6 @@ export class MapContainer extends Component<Props, State> {
     }
   };
 
-  _onClickCloseFlyout = () => {
-    const { dispatch } = this.context.store;
-    dispatch(updateFlyout(FLYOUT_STATE.NONE));
-    dispatch(setSelectedLayer(null));
-  };
-
   _startInitialLoadRenderTimer = () => {
     window.setTimeout(() => {
       if (this._isMounted) {
@@ -223,6 +212,7 @@ export class MapContainer extends Component<Props, State> {
       exitFullScreen,
       mapInitError,
       renderTooltipContent,
+      closeFlyout,
     } = this.props;
 
     if (mapInitError) {
@@ -290,7 +280,7 @@ export class MapContainer extends Component<Props, State> {
         <FlyoutPanelWrapper
           panelRef={this._flyoutRef}
           flyoutDisplay={this.props.flyoutDisplay}
-          onClose={this._onClickCloseFlyout}
+          onClose={closeFlyout}
         />
         {exitFullScreenButton}
       </EuiFlexGroup>
