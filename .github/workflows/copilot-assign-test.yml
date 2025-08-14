@@ -1,0 +1,32 @@
+name: Copilot Assignment Test
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - '.github/**'
+  workflow_dispatch:
+
+jobs:
+  copilot-assign-test:
+    name: Test Copilot Assignment Functionality
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Run Copilot Assignment Test
+        run: |
+          echo "Testing Copilot assignment functionality..."
+          node .github/copilot_assign_test.js
+
+      - name: Validate Test Results
+        run: |
+          echo "✅ Copilot assignment tests completed successfully"
+          echo "This validates the functionality tested in issue #10241"

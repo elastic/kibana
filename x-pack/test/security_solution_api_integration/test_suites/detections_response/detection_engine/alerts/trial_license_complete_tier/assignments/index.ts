@@ -8,6 +8,8 @@ import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Alert assignments API', function () {
+    // Alert assignment tests for security solution
+    // Note: For GitHub Copilot assignment testing, see .github/copilot_assign_test.js
     loadTestFile(require.resolve('./assignments'));
     loadTestFile(require.resolve('./assignments_ess'));
     loadTestFile(require.resolve('./assignments_serverless'));
