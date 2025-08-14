@@ -17,6 +17,7 @@ import {
 import { registerDeleteUnusedUrlsRoute } from './unused_urls_task/register_delete_unused_urls_route';
 import {
   TASK_ID,
+  durationToSeconds,
   runDeleteUnusedUrlsTask,
   scheduleUnusedUrlsCleanupTask,
 } from './unused_urls_task';
@@ -158,6 +159,10 @@ export class SharePlugin
         taskManager,
         checkInterval: this.config.url_expiration.check_interval,
         isEnabled: this.config.url_expiration.enabled,
+      });
+      // TODO: Workaround for interval not updating on change until https://github.com/elastic/kibana/issues/222089 is resolved.
+      taskManager.bulkUpdateSchedules([TASK_ID], {
+        interval: durationToSeconds(this.config.url_expiration.check_interval),
       });
     }
 
