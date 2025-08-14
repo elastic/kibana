@@ -21,6 +21,7 @@ import { getAssetCriticalityStats } from './asset_criticality_stats_collector';
 import { getEntitySourceStats } from './entity_source_stats_collector';
 import { getEntityStoreStats } from './entity_store_stats_collector';
 import type { AssetInventoryUsage, AssetInventoryUsageCollectorType } from '../type';
+import { ENTITY_INDEX } from '../helper';
 
 export function registerAssetInventoryUsageCollector(
   logger: Logger,
@@ -66,7 +67,7 @@ export function registerAssetInventoryUsageCollector(
         entitySourceStats,
         assetCriticalityStats,
       ] = await Promise.all([
-        awaitPromiseSafe('Entities', getEntityStats(esClient, '.entities*', logger)),
+        awaitPromiseSafe('Entities', getEntityStats(esClient, ENTITY_INDEX, logger)),
         awaitPromiseSafe('Entities Type', getEntitiesTypeStats(esClient, logger)),
         awaitPromiseSafe('Entity Store', getEntityStoreStats(esClient, logger)),
         awaitPromiseSafe('Entity Source', getEntitySourceStats(esClient, logger)),

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+export const ENTITY_INDEX = '.entities*';
+
 export const getAggsQuery = (
   termsField: string,
   size: number = 10,
-  index: string = '.entities*'
+  index: string = ENTITY_INDEX
 ) => ({
   size: 0,
   index,

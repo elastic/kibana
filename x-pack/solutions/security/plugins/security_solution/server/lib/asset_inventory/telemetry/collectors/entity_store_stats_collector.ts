@@ -7,7 +7,7 @@
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { AggregationBucket, AggregationOnlyResponse, EntityStoreStats } from '../type';
-import { getAggsQuery } from '../helper';
+import { ENTITY_INDEX, getAggsQuery } from '../helper';
 
 /**
  * Parses aggregation buckets into a simplified list of entity stats.
@@ -29,11 +29,11 @@ export const getEntityStoreStats = async (
 ): Promise<EntityStoreStats[]> => {
   try {
     const isIndexExists = await esClient.indices.exists({
-      index: '.entities*',
+      index: ENTITY_INDEX,
     });
 
     if (!isIndexExists) {
-      logger.debug('Index ".entities*" does not exist.');
+      logger.debug(`Index ${ENTITY_INDEX} does not exist.`);
       return [];
     }
 

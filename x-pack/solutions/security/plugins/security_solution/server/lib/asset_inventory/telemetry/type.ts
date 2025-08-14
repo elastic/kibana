@@ -12,32 +12,27 @@ export type AssetInventoryUsageCollectorType =
   | 'Entity Source'
   | 'Asset Criticality';
 
-export interface EntitiesStats {
+interface BaseStats {
   doc_count: number;
   last_doc_timestamp: string;
 }
-export interface EntitiesTypeStats {
+
+export type EntitiesStats = BaseStats;
+
+export interface EntitiesTypeStats extends BaseStats {
   entity_type: string;
-  doc_count: number;
-  last_doc_timestamp: string;
 }
 
-export interface EntityStoreStats {
+export interface EntityStoreStats extends BaseStats {
   entity_store: string;
-  doc_count: number;
-  last_doc_timestamp: string;
 }
 
-export interface EntitySourceStats {
+export interface EntitySourceStats extends BaseStats {
   entity_source: string;
-  doc_count: number;
-  last_doc_timestamp: string;
 }
 
-export interface AssetCriticalityStats {
+export interface AssetCriticalityStats extends BaseStats {
   criticality: string;
-  doc_count: number;
-  last_doc_timestamp: string;
 }
 
 export interface AssetInventoryUsage {
