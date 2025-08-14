@@ -93,7 +93,7 @@ import { getGroupingSettingsSelectorHook } from '../../../context/components/gro
 import {
   ESQLDataCascade,
   getESQLStatsQueryMeta,
-} from '../../../context/components/grouping/esql_data_cascade';
+} from '../../../context/components/grouping/data_cascade/esql_data_cascade';
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
@@ -316,7 +316,7 @@ function DiscoverDocumentsComponent({
         dataView={dataView}
         hit={hit}
         hits={displayedRows}
-        // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+        // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
         columnsMeta={customColumnsMeta}
         savedSearchId={savedSearch.id}
@@ -478,11 +478,6 @@ function DiscoverDocumentsComponent({
                   services.filterManager.setAppFilters([]);
                 }}
                 stateContainer={stateContainer}
-                services={{
-                  notifications: services.notifications,
-                  http: services.http,
-                  data: services.data,
-                }}
               />
             ) : (
               <DataGrouping<DataByGroupingAgg>
