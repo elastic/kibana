@@ -101,6 +101,8 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
           `${errors.length} errors deleting stale users with bulk operation.
         The first error is: ${JSON.stringify(errors[0])}`
         );
+        // Log all errors for debugging
+        dataClient.log('debug', `Errors deleting stale users: ${JSON.stringify(errors)}`);
       }
     }
   };
@@ -193,6 +195,9 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
         `${failures.length} errors upserting users with bulk operations.
         The first error is: ${JSON.stringify(failures[0])}`
       );
+
+      // Log all errors for debugging
+      dataClient.log('debug', `Errors upserting users: ${JSON.stringify(failures)}`);
     }
 
     return uniq(allUsernames); // Return all unique usernames collected across batches;
