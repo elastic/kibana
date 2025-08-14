@@ -13,7 +13,7 @@ Array [
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav_footer.dev_tools nav-item-deepLinkId-undefined nav-item-id-dev_tools",
     "href": "/tzo/s/sec/app/dev_tools",
-    "iconType": "editorCodeBlock",
+    "iconType": "devToolsApp",
     "id": "dev_tools",
     "label": "Developer tools",
     "sections": undefined,
@@ -21,7 +21,7 @@ Array [
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management nav-item-id-stack_management",
     "href": "/tzo/s/sec/app/management/ingest/ingest_pipelines",
-    "iconType": "gear",
+    "iconType": "broom",
     "id": "stack_management",
     "label": "Stack Management",
     "sections": Array [
@@ -299,7 +299,7 @@ Array [
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-2.securityGroup:rules nav-item-id-securityGroup:rules",
     "href": "/tzo/s/sec/app/security/rules",
-    "iconType": "securitySignal",
+    "iconType": "broom",
     "id": "securityGroup:rules",
     "label": "Rules",
     "sections": Array [
@@ -355,7 +355,7 @@ Array [
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-2.alerts nav-item-deepLinkId-undefined nav-item-id-alerts",
     "href": "/tzo/s/sec/app/security/alerts",
-    "iconType": "bell",
+    "iconType": "broom",
     "id": "alerts",
     "label": "Alerts",
     "sections": undefined,
@@ -363,7 +363,7 @@ Array [
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-2.attack_discovery nav-item-deepLinkId-undefined nav-item-id-attack_discovery",
     "href": "/tzo/s/sec/app/security/attack_discovery",
-    "iconType": "lensApp",
+    "iconType": "broom",
     "id": "attack_discovery",
     "label": "Attack discovery",
     "sections": undefined,
@@ -371,7 +371,7 @@ Array [
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-2.cloud_security_posture-findings nav-item-deepLinkId-undefined nav-item-id-cloud_security_posture-findings",
     "href": "/tzo/s/sec/app/security/cloud_security_posture/findings",
-    "iconType": "logoSecurity",
+    "iconType": "broom",
     "id": "cloud_security_posture-findings",
     "label": "Findings",
     "sections": undefined,
@@ -379,7 +379,7 @@ Array [
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-2.cases nav-item-deepLinkId-undefined nav-item-id-cases",
     "href": "/tzo/s/sec/app/security/cases",
-    "iconType": "casesApp",
+    "iconType": "broom",
     "id": "cases",
     "label": "Cases",
     "sections": undefined,
@@ -387,7 +387,7 @@ Array [
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-3.securityGroup:explore nav-item-id-securityGroup:explore",
     "href": "/tzo/s/sec/app/security/hosts",
-    "iconType": "search",
+    "iconType": "broom",
     "id": "securityGroup:explore",
     "label": "Explore",
     "sections": Array [
@@ -423,7 +423,7 @@ Array [
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-3.securityGroup:investigations nav-item-id-securityGroup:investigations",
     "href": "/tzo/s/sec/app/security/timelines",
-    "iconType": "casesApp",
+    "iconType": "broom",
     "id": "securityGroup:investigations",
     "label": "Investigations",
     "sections": Array [
@@ -459,7 +459,7 @@ Array [
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-3.threat_intelligence nav-item-deepLinkId-undefined nav-item-id-threat_intelligence",
     "href": "/tzo/s/sec/app/security/threat_intelligence/indicators",
-    "iconType": "bug",
+    "iconType": "broom",
     "id": "threat_intelligence",
     "label": "Intelligence",
     "sections": undefined,
@@ -467,7 +467,7 @@ Array [
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-4.securityGroup:assets nav-item-id-securityGroup:assets",
     "href": "/tzo/s/sec/app/fleet/agents",
-    "iconType": "indexManagementApp",
+    "iconType": "broom",
     "id": "securityGroup:assets",
     "label": "Assets",
     "sections": Array [
@@ -578,7 +578,7 @@ Array [
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav.securityGroup:machineLearning nav-item-id-securityGroup:machineLearning",
     "href": "/tzo/s/sec/app/ml/datavisualizer",
-    "iconType": "machineLearningApp",
+    "iconType": "broom",
     "id": "securityGroup:machineLearning",
     "label": "Machine Learning",
     "sections": Array [

@@ -24,7 +24,7 @@ import type {
 } from '@kbn/core-chrome-navigation/types';
 
 import { isActiveFromUrl } from '@kbn/shared-ux-chrome-navigation/src/utils';
-import { AppDeepLinkIdToIcon } from './hack_icons_mappings';
+import { AppDeepLinkIdToIcon } from './known_icons_mappings';
 
 export interface NavigationItems {
   logoItem: SideNavLogo;
@@ -277,9 +277,12 @@ export const toNavigationItems = (
       id: navNode.id,
       label: warnIfMissing(navNode, 'title', 'Missing Title 😭'),
       iconType: warnIfMissing(
-        navNode,
+        {
+          iconV2: AppDeepLinkIdToIcon[navNode.id],
+          ...navNode,
+        },
         ['iconV2', 'icon'],
-        AppDeepLinkIdToIcon[navNode.id] || 'broom'
+        'broom'
       ),
       href: itemHref,
       sections: secondarySections,

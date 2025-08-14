@@ -105,14 +105,12 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   link: 'discover',
-                  iconV2: 'discoverApp',
                 },
                 {
                   getIsActive: ({ pathNameSerialized, prepend }) => {
                     return pathNameSerialized.startsWith(prepend('/app/dashboards'));
                   },
                   link: 'dashboards',
-                  iconV2: 'dashboardApp',
                 },
                 {
                   children: [
@@ -137,12 +135,16 @@ export const getNavigationTreeDefinition = ({
                         );
                       },
                       link: 'elasticsearchIndexManagement',
+                      iconV2: 'indexManagementApp',
                     },
                     {
                       breadcrumbStatus: 'hidden',
                       link: 'searchPlayground',
                     },
-                    { link: 'enterpriseSearchContent:connectors' },
+                    {
+                      link: 'enterpriseSearchContent:connectors',
+                      iconV2: 'link' /* TODO: review icon */,
+                    },
                     {
                       getIsActive: ({ pathNameSerialized, prepend }) => {
                         const someSubItemSelected = searchApps?.some((app) =>
@@ -157,6 +159,7 @@ export const getNavigationTreeDefinition = ({
                         );
                       },
                       link: 'enterpriseSearchApplications:searchApplications',
+                      iconV2: 'searchProfilerApp' /* TODO: review icon */,
                       renderAs: 'item',
                       title: i18n.translate(
                         'xpack.enterpriseSearch.searchNav.build.searchApplications',
@@ -250,6 +253,7 @@ export const getNavigationTreeDefinition = ({
                       ),
                     },
                     {
+                      iconV2: 'managementApp',
                       children: [
                         {
                           children: [
