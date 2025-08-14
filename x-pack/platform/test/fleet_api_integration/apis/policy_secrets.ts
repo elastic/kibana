@@ -15,6 +15,7 @@ import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common/constants';
 import moment from 'moment';
+import pRetry from 'p-retry';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../helpers';
@@ -128,19 +129,22 @@ export default function (providerContext: FtrProviderContext) {
       });
     };
 
-    const cleanupAgents = async () => {
-      try {
-        await es.deleteByQuery({
-          index: AGENTS_INDEX,
-          refresh: true,
-          query: {
-            match_all: {},
-          },
-        });
-      } catch (err) {
-        // index doesn't exist
-      }
-    };
+    const cleanupAgents = async () =>
+      await pRetry(async () => {
+        try {
+          await es.deleteByQuery({
+            index: AGENTS_INDEX,
+            refresh: true,
+            query: {
+              match_all: {},
+            },
+          });
+        } catch (err) {
+          if (err?.meta?.statusCode === 409) {
+            throw err;
+          }
+        }
+      });
 
     const cleanupSecrets = async () => {
       try {

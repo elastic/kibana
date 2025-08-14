@@ -7,7 +7,7 @@
 
 import { parse, stringify } from 'query-string';
 import { Location } from 'history';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { decode, encode, RisonValue } from '@kbn/rison';
 import { useHistory } from 'react-router-dom';
 import { url } from '@kbn/kibana-utils-plugin/common';
@@ -54,16 +54,13 @@ export const useUrlState = <State>({
 
       const currentLocation = history.location;
 
-      const newState =
-        patch instanceof Function
-          ? patch(
-              decodeUrlState(
-                decodeRisonUrlState(
-                  getParamFromQueryString(getQueryStringFromLocation(currentLocation), urlStateKey)
-                )
-              ) ?? defaultState
-            )
-          : patch;
+      const decodedUrlState = decodeUrlState(
+        decodeRisonUrlState(
+          getParamFromQueryString(getQueryStringFromLocation(currentLocation), urlStateKey)
+        )
+      );
+
+      const newState = patch instanceof Function ? patch(decodedUrlState ?? ({} as State)) : patch;
 
       const newLocation = replaceQueryStringInLocation(
         currentLocation,
@@ -77,19 +74,14 @@ export const useUrlState = <State>({
         history.replace(newLocation);
       }
     },
-    [decodeUrlState, defaultState, encodeUrlState, history, urlStateKey]
-  );
-
-  const [shouldInitialize, setShouldInitialize] = useState(
-    writeDefaultState && typeof decodedState === 'undefined'
+    [decodeUrlState, encodeUrlState, history, urlStateKey]
   );
 
   useEffect(() => {
-    if (shouldInitialize) {
-      setShouldInitialize(false);
+    if (writeDefaultState && decodedState === undefined) {
       setState(defaultState);
     }
-  }, [shouldInitialize, setState, defaultState]);
+  }, [writeDefaultState, decodedState, defaultState, setState]);
 
   return [state, setState] as [typeof state, typeof setState];
 };

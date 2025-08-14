@@ -25,13 +25,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       before(async () => {
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.7.1/data.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.7.1/data.json'
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.7.1/data.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.7.1/data.json'
         );
         await deleteAllCaseItems(es);
       });
@@ -253,13 +253,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       before(async () => {
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.10.0/data.json'
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.10.0/data.json'
         );
         await deleteAllCaseItems(es);
       });
@@ -896,13 +896,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     describe('8.0.0', () => {
       before(async () => {
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/alerts.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.13.2/alerts.json'
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/alerts.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.13.2/alerts.json'
         );
         await deleteAllCaseItems(es);
       });
@@ -945,13 +945,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       before(async () => {
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.0.0/cases.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.0.0/cases.json'
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.0.0/cases.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.0.0/cases.json'
         );
         await deleteAllCaseItems(es);
       });
@@ -1297,13 +1297,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       before(async () => {
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.0.0/cases.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.0.0/cases.json'
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.0.0/cases.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.0.0/cases.json'
         );
         await deleteAllCaseItems(es);
       });
@@ -1374,13 +1374,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       before(async () => {
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.0.0/cases.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.0.0/cases.json'
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.0.0/cases.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.0.0/cases.json'
         );
         await deleteAllCaseItems(es);
       });

@@ -7,27 +7,18 @@
 
 import { EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ConversationRound } from '@kbn/onechat-common';
 import React from 'react';
+import { useSendMessage } from '../../../context/send_message_context';
+import { useConversationRounds } from '../../../hooks/use_conversation';
 import { ConversationContent } from '../conversation_grid';
 import { RoundError } from './round_error';
 import { RoundIcon } from './round_icon';
 import { RoundLayout } from './round_layout';
 import { RoundResponse } from './round_response';
 
-interface ConversationRoundsProps {
-  rounds: ConversationRound[];
-  isResponseLoading: boolean;
-  error: unknown;
-  onRetry: () => void;
-}
-
-export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
-  rounds,
-  isResponseLoading,
-  error,
-  onRetry,
-}) => {
+export const ConversationRounds: React.FC<{}> = () => {
+  const conversationRounds = useConversationRounds();
+  const { isResponseLoading, retry, error } = useSendMessage();
   return (
     <ConversationContent>
       <EuiFlexGroup
@@ -37,8 +28,8 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
           defaultMessage: 'Conversation messages',
         })}
       >
-        {rounds.map(({ input, response, steps }, index) => {
-          const isCurrentRound = index === rounds.length - 1;
+        {conversationRounds.map(({ input, response, steps }, index) => {
+          const isCurrentRound = index === conversationRounds.length - 1;
           const isLoading = isResponseLoading && isCurrentRound;
           const isError = Boolean(error) && isCurrentRound;
           return (
@@ -49,7 +40,7 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
               outputIcon={<RoundIcon isLoading={isLoading} isError={isError} />}
               output={
                 isError ? (
-                  <RoundError error={error} onRetry={onRetry} />
+                  <RoundError error={error} onRetry={retry} />
                 ) : (
                   <RoundResponse response={response} steps={steps} isLoading={isLoading} />
                 )

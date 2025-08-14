@@ -28,7 +28,7 @@ export async function readSignificantEventsFromAlertsIndices(
   const { assetClient, scopedClusterClient } = dependencies;
   const { name, from, to, bucketSize } = params;
 
-  const queryLinks = await assetClient.getAssetLinks(name, ['query']);
+  const { [name]: queryLinks } = await assetClient.getAssetLinks([name], ['query']);
   if (isEmpty(queryLinks)) {
     return [];
   }

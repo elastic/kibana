@@ -8,15 +8,14 @@
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
+import { useSendMessage } from '../../../context/send_message_context';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { ConversationContent } from '../conversation_grid';
 import { ConversationInputActions } from './conversation_input_actions';
 import { ConversationInputTextArea } from './conversation_input_text_area';
 
 interface ConversationInputFormProps {
-  message: string;
-  setMessage: (message: string) => void;
   onSubmit: () => void;
 }
 
@@ -24,19 +23,19 @@ const fullHeightStyles = css`
   height: 100%;
 `;
 
-export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
-  message,
-  setMessage,
-  onSubmit,
-}) => {
+export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
   const isSendingMessage = useIsSendingMessage();
+  const [input, setInput] = useState('');
+  const { sendMessage, pendingMessage } = useSendMessage();
   const { euiTheme } = useEuiTheme();
-  const disabled = !message.trim() || isSendingMessage;
+  const isSubmitDisabled = !input.trim() || isSendingMessage;
 
   const handleSubmit = () => {
-    if (disabled) {
+    if (isSubmitDisabled) {
       return;
     }
+    sendMessage({ message: input });
+    setInput('');
     onSubmit();
   };
 
@@ -69,12 +68,16 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
           defaultMessage: 'Message input form',
         })}
       >
-        <ConversationInputTextArea
-          message={message}
-          setMessage={setMessage}
-          handleSubmit={handleSubmit}
+        <ConversationInputTextArea input={input} setInput={setInput} onSubmit={handleSubmit} />
+        <ConversationInputActions
+          onSubmit={handleSubmit}
+          isSubmitDisabled={isSubmitDisabled}
+          resetToPendingMessage={() => {
+            if (pendingMessage) {
+              setInput(pendingMessage);
+            }
+          }}
         />
-        <ConversationInputActions handleSubmit={handleSubmit} submitDisabled={disabled} />
       </EuiFlexGroup>
     </ConversationContent>
   );
