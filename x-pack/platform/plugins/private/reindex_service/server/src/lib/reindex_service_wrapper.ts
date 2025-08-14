@@ -13,7 +13,7 @@ import {
   KibanaRequest,
 } from '@kbn/core/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { Version } from '@kbn/upgrade-assistant-pkg-server';
 import {
   ReindexOperation,
@@ -52,12 +52,22 @@ export interface ReindexServiceInternalApi {
   stop: () => void;
 }
 
+export interface ReindexServiceWrapperConstructorArgs {
+  soClient: SavedObjectsClientContract;
+  credentialStore: CredentialStore;
+  clusterClient: IClusterClient;
+  logger: Logger;
+  licensing: LicensingPluginStart;
+  security: SecurityPluginStart;
+  version: Version;
+}
+
 export class ReindexServiceWrapper {
   private reindexWorker: ReindexWorker;
   private deps: {
     credentialStore: CredentialStore;
     logger: Logger;
-    licensing: LicensingPluginSetup;
+    licensing: LicensingPluginStart;
     security: SecurityPluginStart;
     version: Version;
   };
@@ -70,15 +80,7 @@ export class ReindexServiceWrapper {
     licensing,
     security,
     version,
-  }: {
-    soClient: SavedObjectsClientContract;
-    credentialStore: CredentialStore;
-    clusterClient: IClusterClient;
-    logger: Logger;
-    licensing: LicensingPluginSetup;
-    security: SecurityPluginStart;
-    version: Version;
-  }) {
+  }: ReindexServiceWrapperConstructorArgs) {
     this.deps = {
       credentialStore,
       logger,

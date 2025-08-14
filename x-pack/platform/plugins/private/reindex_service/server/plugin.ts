@@ -7,7 +7,7 @@
 
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import {
   CoreSetup,
   Logger,
@@ -25,47 +25,35 @@ import {
   ReindexServiceWrapper,
   ReindexServiceInternalApi,
 } from './src/lib/reindex_service_wrapper';
-import { CredentialStore, credentialStoreFactory } from './src/lib/credential_store';
+import { credentialStoreFactory } from './src/lib/credential_store';
 import { registerBatchReindexIndicesRoutes, registerReindexIndicesRoutes } from './src/routes';
 
-interface PluginsSetup {
-  licensing: LicensingPluginSetup;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface PluginsSetup {}
 
 interface PluginsStart {
   security: SecurityPluginStart;
+  licensing: LicensingPluginStart;
 }
 
 export class ReindexServiceServerPlugin
   implements Plugin<void, ReindexServiceServerPluginStart, PluginsSetup, PluginsStart>
 {
   private reindexService: ReindexServiceInternalApi | null = null;
-
-  // Properties set at setup
-  private licensing?: LicensingPluginSetup;
-
   private readonly logger: Logger;
-  private readonly credentialStore: CredentialStore;
   private version: Version;
 
   constructor({ logger, env }: PluginInitializerContext) {
     this.logger = logger.get();
-    // used by worker and passed to routes
-    this.credentialStore = credentialStoreFactory(this.logger);
     this.version = new Version();
     this.version.setup(env.packageInfo.version);
   }
 
-  public setup(
-    {
-      http,
-      savedObjects,
-      getStartServices,
-    }: CoreSetup<PluginsStart, ReindexServiceServerPluginStart>,
-    { licensing }: PluginsSetup
-  ) {
-    this.licensing = licensing;
-
+  public setup({
+    http,
+    savedObjects,
+    getStartServices,
+  }: CoreSetup<PluginsStart, ReindexServiceServerPluginStart>) {
     const dependencies: RouteDependencies = {
       router: http.createRouter(),
       version: this.version,
@@ -86,7 +74,7 @@ export class ReindexServiceServerPlugin
       savedObjects,
       elasticsearch,
     }: { savedObjects: SavedObjectsServiceStart; elasticsearch: ElasticsearchServiceStart },
-    { security }: PluginsStart
+    { security, licensing }: PluginsStart
   ): ReindexServiceServerPluginStart {
     const soClient = new SavedObjectsClient(
       savedObjects.createInternalRepository([reindexOperationSavedObjectType.name])
@@ -103,10 +91,10 @@ export class ReindexServiceServerPlugin
 
     const service = new ReindexServiceWrapper({
       soClient,
-      credentialStore: this.credentialStore,
+      credentialStore: credentialStoreFactory(this.logger),
       clusterClient: elasticsearch.client,
       logger: this.logger,
-      licensing: this.licensing!,
+      licensing,
       security,
       version: this.version,
     });

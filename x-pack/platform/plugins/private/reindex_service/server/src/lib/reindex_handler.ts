@@ -13,7 +13,7 @@ import {
   KibanaRequest,
 } from '@kbn/core/server';
 
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { Version } from '@kbn/upgrade-assistant-pkg-server';
 
@@ -29,7 +29,7 @@ interface ReindexHandlerArgs {
   dataClient: IScopedClusterClient;
   indexName: string;
   log: Logger;
-  licensing: LicensingPluginSetup;
+  licensing: LicensingPluginStart;
   request: KibanaRequest;
   credentialStore: CredentialStore;
   reindexOptions?: {
