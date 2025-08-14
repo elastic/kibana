@@ -58,18 +58,22 @@ export function getConnectorType(): InferenceConnector {
         subAction === SUB_ACTION.UNIFIED_COMPLETION_STREAM ||
         subAction === SUB_ACTION.UNIFIED_COMPLETION_ASYNC_ITERATOR
       ) {
+        let parsedBody;
+        try {
+          // Attempt to parse the body only if it is a string, otherwise it is already an object
+          parsedBody =
+            typeof subActionParams.body === 'string'
+              ? JSON.parse(subActionParams.body)
+              : subActionParams.body;
+        } catch {
+          errors.body.push(translations.BODY_INVALID);
+        }
+
         if (
-          !Array.isArray(subActionParams.body.messages) ||
-          !subActionParams.body.messages.length
+          parsedBody &&
+          (!parsedBody.messages?.length || !Array.isArray(subActionParams.body.messages))
         ) {
-          try {
-            const parsedBody = JSON.parse(subActionParams.body);
-            if (!parsedBody.messages.length) {
-              errors.body.push(translations.getRequiredMessage('Messages'));
-            }
-          } catch {
-            errors.body.push(translations.BODY_INVALID);
-          }
+          errors.body.push(translations.getRequiredMessage('Messages'));
         }
       }
 
