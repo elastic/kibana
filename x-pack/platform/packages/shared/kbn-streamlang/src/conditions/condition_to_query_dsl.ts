@@ -49,7 +49,7 @@ function conditionToClause(condition: FilterCondition) {
         },
       };
     case 'startsWith':
-      return { prefix: { [condition.field]: value } };
+      return { prefix: { [condition.field]: `${value}*` } };
     case 'endsWith':
       return { wildcard: { [condition.field]: `*${value}` } };
     default:
