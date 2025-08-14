@@ -4,10 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
-import { PackageNotFoundError, RegistryResponseError } from '../../../errors';
+import {
+  FleetError,
+  PackageNotFoundError,
+  RegistryConnectionError,
+  RegistryResponseError,
+} from '../../../errors';
 import * as Archive from '../archive';
 
 import {
@@ -18,18 +22,26 @@ import {
   getLicensePath,
   fetchCategories,
   fetchList,
+  getPackage,
 } from '.';
 
-const mockLoggerFactory = loggingSystemMock.create();
-const mockLogger = mockLoggerFactory.get('mock logger');
+const mockLogger = loggingSystemMock.create().get();
+
 const mockGetConfig = jest.fn();
 
 const mockGetBundledPackageByName = jest.fn();
 const mockFetchUrl = jest.fn();
+const mockGetResponseStreamWithSize = jest.fn();
+const mockStreamToBuffer = jest.fn();
+const mockVerifyPackageArchiveSignature = jest.fn();
+const mockGetPackageAssetsMapCache = jest.fn();
 
 const MockArchive = Archive as jest.Mocked<typeof Archive>;
 
 jest.mock('../archive');
+jest.mock('./requests');
+jest.mock('../streams');
+jest.mock('../packages/cache');
 
 jest.mock('../..', () => ({
   appContextService: {
@@ -43,10 +55,29 @@ jest.mock('../..', () => ({
 
 jest.mock('./requests', () => ({
   fetchUrl: (url: string) => mockFetchUrl(url),
+  getResponseStreamWithSize: (url: string) => mockGetResponseStreamWithSize(url),
+}));
+
+jest.mock('../streams', () => ({
+  streamToBuffer: (stream: NodeJS.ReadableStream, size?: number) =>
+    mockStreamToBuffer(stream, size),
 }));
 
 jest.mock('../packages/bundled_packages', () => ({
   getBundledPackageByName: (name: string) => mockGetBundledPackageByName(name),
+}));
+
+jest.mock('../packages/package_verification', () => ({
+  verifyPackageArchiveSignature: (
+    pkgName: string,
+    pkgVersion: string,
+    pkgArchiveBuffer: Buffer | undefined,
+    logger: Logger
+  ) => mockVerifyPackageArchiveSignature(pkgName, pkgVersion, pkgArchiveBuffer, logger),
+}));
+
+jest.mock('../packages/cache', () => ({
+  getPackageAssetsMapCache: () => mockGetPackageAssetsMapCache(),
 }));
 
 describe('splitPkgKey', () => {
@@ -225,6 +256,15 @@ describe('fetchInfo', () => {
     });
   });
 
+  it('falls back to bundled package when isAirGapped config == true', async () => {
+    mockGetConfig.mockReturnValue({
+      isAirGapped: true,
+    });
+
+    const fetchedInfo = await fetchInfo('test-package', '1.0.0');
+    expect(fetchedInfo).toBeTruthy();
+  });
+
   it('falls back to bundled package when one exists', async () => {
     const fetchedInfo = await fetchInfo('test-package', '1.0.0');
     expect(fetchedInfo).toBeTruthy();
@@ -236,15 +276,6 @@ describe('fetchInfo', () => {
     } catch (e) {
       expect(e).toBeInstanceOf(PackageNotFoundError);
     }
-  });
-
-  it('falls back to bundled package when isAirGapped config == true', async () => {
-    mockGetConfig.mockReturnValue({
-      isAirGapped: true,
-    });
-
-    const fetchedInfo = await fetchInfo('test-package', '1.0.0');
-    expect(fetchedInfo).toBeTruthy();
   });
 });
 
@@ -376,5 +407,202 @@ describe('fetchList', () => {
     expect(mockFetchUrl).toBeCalledTimes(1);
     const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
     expect(callUrl.searchParams.get('kibana.version')).toBeNull();
+  });
+});
+
+describe('getPackage', () => {
+  const bundledPackage = {
+    name: 'testpkg',
+    version: '1.0.0',
+    getBuffer: () => Promise.resolve(Buffer.from('testpkg')),
+  };
+  const registryPackage = {
+    name: 'testpkg',
+    version: '1.0.1',
+    getBuffer: () => Promise.resolve(Buffer.from('testpkg')),
+  };
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('should return bundled package if isAirGapped = true', async () => {
+    mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
+    mockGetResponseStreamWithSize.mockResolvedValue({ stream: {}, size: 1000 });
+    mockStreamToBuffer.mockResolvedValue(Buffer.from('testpkg'));
+    mockVerifyPackageArchiveSignature.mockResolvedValue('verified');
+    mockGetConfig.mockReturnValue({
+      isAirGapped: true,
+      enabled: true,
+      agents: { enabled: true, elasticsearch: {} },
+    });
+    MockArchive.unpackBufferToAssetsMap.mockReturnValue({
+      assetsMap: new Map(),
+      paths: [],
+      archiveIterator: {},
+    } as any);
+    MockArchive.generatePackageInfoFromArchiveBuffer.mockReturnValue({
+      packageInfo: { name: 'testpkg', version: '1.0.0' },
+    } as any);
+
+    mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+    const result = await getPackage('testpkg', '1.0.1');
+    expect(result).toEqual({
+      archiveIterator: {},
+      assetsMap: new Map(),
+      packageInfo: {
+        name: 'testpkg',
+        version: '1.0.0',
+      },
+      paths: [],
+      verificationResult: 'verified',
+    });
+  });
+
+  it('should return registry package', async () => {
+    mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
+    mockGetResponseStreamWithSize.mockResolvedValue({ stream: {}, size: 1000 });
+    mockStreamToBuffer.mockResolvedValue(Buffer.from('testpkg'));
+    mockVerifyPackageArchiveSignature.mockResolvedValue('verified');
+    MockArchive.unpackBufferToAssetsMap.mockReturnValue({
+      assetsMap: new Map(),
+      paths: [],
+      archiveIterator: {},
+    } as any);
+    MockArchive.generatePackageInfoFromArchiveBuffer.mockReturnValue({
+      packageInfo: { name: 'testpkg', version: '1.0.1' },
+    } as any);
+
+    mockGetBundledPackageByName.mockResolvedValue(undefined);
+    const result = await getPackage('testpkg', '1.0.1');
+    expect(result).toEqual({
+      archiveIterator: {},
+      assetsMap: new Map(),
+      packageInfo: {
+        name: 'testpkg',
+        version: '1.0.1',
+      },
+      paths: [],
+      verificationResult: 'verified',
+    });
+  });
+
+  it('should throw if there is an error in fetchArchiveBuffer', async () => {
+    mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
+    mockGetResponseStreamWithSize.mockRejectedValueOnce(new FleetError('Error fetching package'));
+    mockStreamToBuffer.mockResolvedValue(Buffer.from('testpkg'));
+    mockVerifyPackageArchiveSignature.mockResolvedValue('verified');
+    MockArchive.unpackBufferToAssetsMap.mockReturnValue({
+      assetsMap: new Map(),
+      paths: [],
+      archiveIterator: {},
+    } as any);
+    MockArchive.generatePackageInfoFromArchiveBuffer.mockReturnValue({
+      packageInfo: { name: 'testpkg', version: '1.0.1' },
+    } as any);
+
+    mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+    await expect(getPackage('testpkg', '1.0.1')).rejects.toThrowError(
+      new FleetError('Error fetching package')
+    );
+  });
+
+  it('should try to retrieve from cache if there is a RegistryConnectionError and no bundled package', async () => {
+    mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
+    mockGetResponseStreamWithSize.mockRejectedValueOnce(
+      new RegistryConnectionError('Error connecting to EPR')
+    );
+    mockStreamToBuffer.mockResolvedValue(Buffer.from('testpkg'));
+    mockVerifyPackageArchiveSignature.mockResolvedValue('verified');
+    MockArchive.unpackBufferToAssetsMap.mockReturnValue({
+      assetsMap: new Map([
+        ['test-1.0.0/LICENSE.txt', Buffer.from('')],
+        ['test-1.0.0/changelog.yml', Buffer.from('')],
+        ['test-1.0.0/manifest.yml', Buffer.from('')],
+        ['test-1.0.0/docs/README.md', Buffer.from('')],
+      ]),
+      paths: [],
+      archiveIterator: {},
+    } as any);
+    MockArchive.getPackageInfo.mockReturnValue({ name: 'testpkg', version: '1.0.1' } as any);
+    mockGetPackageAssetsMapCache.mockReturnValue({
+      name: 'test',
+    } as any);
+    mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+    const result = await getPackage('testpkg', '1.0.1');
+    expect(result).toEqual({
+      archiveIterator: expect.any(Object),
+      assetsMap: new Map([
+        ['test-1.0.0/LICENSE.txt', Buffer.from('')],
+        ['test-1.0.0/changelog.yml', Buffer.from('')],
+        ['test-1.0.0/manifest.yml', Buffer.from('')],
+        ['test-1.0.0/docs/README.md', Buffer.from('')],
+      ]),
+      packageInfo: {
+        name: 'testpkg',
+        version: '1.0.1',
+      },
+      paths: [],
+      verificationResult: undefined,
+    });
+  });
+
+  it('should falls back to bundled package if there is a RegistryConnectionError', async () => {
+    mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
+    mockGetResponseStreamWithSize.mockRejectedValueOnce(
+      new RegistryConnectionError('Error connecting to EPR')
+    );
+    mockStreamToBuffer.mockResolvedValue(Buffer.from('testpkg'));
+    mockVerifyPackageArchiveSignature.mockResolvedValue('verified');
+    MockArchive.unpackBufferToAssetsMap.mockReturnValue({
+      assetsMap: new Map([
+        ['test-1.0.0/LICENSE.txt', Buffer.from('')],
+        ['test-1.0.0/changelog.yml', Buffer.from('')],
+        ['test-1.0.0/manifest.yml', Buffer.from('')],
+        ['test-1.0.0/docs/README.md', Buffer.from('')],
+      ]),
+      paths: [],
+      archiveIterator: {},
+    } as any);
+    MockArchive.getPackageInfo.mockReturnValue({ name: 'testpkg', version: '1.0.1' } as any);
+    mockGetPackageAssetsMapCache.mockReturnValue(new Map());
+    mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+    const result = await getPackage('testpkg', '1.0.1');
+    expect(result).toEqual({
+      archiveIterator: expect.any(Object),
+      assetsMap: new Map([
+        ['test-1.0.0/LICENSE.txt', Buffer.from('')],
+        ['test-1.0.0/changelog.yml', Buffer.from('')],
+        ['test-1.0.0/manifest.yml', Buffer.from('')],
+        ['test-1.0.0/docs/README.md', Buffer.from('')],
+      ]),
+      packageInfo: {
+        name: 'testpkg',
+        version: '1.0.1',
+      },
+      paths: [],
+      verificationResult: undefined,
+    });
+  });
+
+  it('should throw if there is a RegistryConnectionError and could not find bundled package nor retrieve from cache ', async () => {
+    mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
+    mockGetResponseStreamWithSize.mockRejectedValueOnce(
+      new RegistryConnectionError('Error connecting to EPR')
+    );
+    mockStreamToBuffer.mockResolvedValue(Buffer.from('testpkg'));
+    mockVerifyPackageArchiveSignature.mockResolvedValue('verified');
+    MockArchive.unpackBufferToAssetsMap.mockReturnValue({
+      assetsMap: new Map(),
+      paths: [],
+      archiveIterator: {},
+    } as any);
+    MockArchive.generatePackageInfoFromArchiveBuffer.mockReturnValue({
+      packageInfo: undefined,
+    } as any);
+
+    mockGetBundledPackageByName.mockResolvedValue(undefined);
+    await expect(getPackage('testpkg', '1.0.1')).rejects.toThrowError(
+      new PackageNotFoundError('testpkg@1.0.1 not found')
+    );
   });
 });

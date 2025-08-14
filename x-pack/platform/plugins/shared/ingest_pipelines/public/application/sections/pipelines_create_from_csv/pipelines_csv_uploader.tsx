@@ -102,6 +102,7 @@ export const PipelinesCsvUploader: FC<Props> = ({
           options={options}
           idSelected={action}
           onChange={(id) => setAction(id as FieldCopyAction)}
+          name="defaultAction"
         />
       </EuiFormRow>
 

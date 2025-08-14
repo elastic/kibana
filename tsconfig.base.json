@@ -1262,6 +1262,8 @@
       "@kbn/license-management-plugin/*": ["x-pack/platform/plugins/shared/license_management/*"],
       "@kbn/licensing-plugin": ["x-pack/platform/plugins/shared/licensing"],
       "@kbn/licensing-plugin/*": ["x-pack/platform/plugins/shared/licensing/*"],
+      "@kbn/licensing-types": ["src/platform/packages/shared/kbn-licensing-types"],
+      "@kbn/licensing-types/*": ["src/platform/packages/shared/kbn-licensing-types/*"],
       "@kbn/links-plugin": ["src/platform/plugins/private/links"],
       "@kbn/links-plugin/*": ["src/platform/plugins/private/links/*"],
       "@kbn/lint-packages-cli": ["packages/kbn-lint-packages-cli"],

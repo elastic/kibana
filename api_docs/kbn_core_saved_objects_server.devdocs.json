@@ -9086,6 +9086,10 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
               },
               {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/saved_objects/setup_saved_objects.ts"
+              },
+              {
                 "plugin": "dashboard",
                 "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
               },
@@ -9128,10 +9132,6 @@
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/connector_mappings.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/saved_objects/setup_saved_objects.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -9881,6 +9881,10 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
               },
               {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/saved_objects/setup_saved_objects.ts"
+              },
+              {
                 "plugin": "dashboard",
                 "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
               },
@@ -9915,10 +9919,6 @@
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/connector_mappings.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/saved_objects/setup_saved_objects.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",

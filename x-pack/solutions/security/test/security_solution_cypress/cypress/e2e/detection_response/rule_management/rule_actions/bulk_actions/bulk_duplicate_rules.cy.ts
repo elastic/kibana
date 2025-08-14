@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { installMockPrebuiltRulesPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
   goToRuleDetailsOf,
@@ -54,6 +55,10 @@ describe(
   'Detection rules, bulk duplicate',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     beforeEach(() => {
       login();
       // Make sure persisted rules table state is cleared

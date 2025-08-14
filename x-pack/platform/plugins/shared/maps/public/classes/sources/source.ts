@@ -12,7 +12,6 @@ import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import { IField } from '../fields/field';
 import { FieldFormatter, LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 import {
-  AbstractSourceDescriptor,
   Attribution,
   DataFilters,
   DataRequestMeta,
@@ -61,7 +60,7 @@ export interface ISource {
   getAttributionProvider(): (() => Promise<Attribution[]>) | null;
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
-  cloneDescriptor(): AbstractSourceDescriptor;
+  cloneDescriptor(): object;
   getApplyGlobalQuery(): boolean;
   getApplyGlobalTime(): boolean;
   getApplyForceRefresh(): boolean;
@@ -74,13 +73,13 @@ export interface ISource {
 }
 
 export class AbstractSource implements ISource {
-  readonly _descriptor: AbstractSourceDescriptor;
+  readonly _descriptor: object;
 
-  constructor(descriptor: AbstractSourceDescriptor) {
+  constructor(descriptor: object) {
     this._descriptor = descriptor;
   }
 
-  cloneDescriptor(): AbstractSourceDescriptor {
+  cloneDescriptor(): object {
     return copyPersistentState(this._descriptor);
   }
 
@@ -97,7 +96,7 @@ export class AbstractSource implements ISource {
   }
 
   getType(): string {
-    return this._descriptor.type;
+    return (this._descriptor as { type?: string }).type ?? '';
   }
 
   async getDisplayName(): Promise<string> {

@@ -348,7 +348,13 @@
           ") => string | undefined; }; } | { generateAssetComponent: React.ReactNode; copyAssetURIConfig?: undefined; } | { generateAssetComponent?: undefined; copyAssetURIConfig?: undefined; }); prerequisiteCheck?: ((args: { capabilities: ",
           "Capabilities",
           "; objectType: string; license?: ",
-          "ILicense",
+          {
+            "pluginId": "@kbn/licensing-types",
+            "scope": "common",
+            "docId": "kibKbnLicensingTypesPluginApi",
+            "section": "def-common.ILicense",
+            "text": "ILicense"
+          },
           " | undefined; }) => boolean) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
@@ -396,7 +402,13 @@
           "[]; }) => boolean; }; prerequisiteCheck?: ((args: { capabilities: ",
           "Capabilities",
           "; objectType: string; license?: ",
-          "ILicense",
+          {
+            "pluginId": "@kbn/licensing-types",
+            "scope": "common",
+            "docId": "kibKbnLicensingTypesPluginApi",
+            "section": "def-common.ILicense",
+            "text": "ILicense"
+          },
           " | undefined; }) => boolean) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
@@ -1483,7 +1495,13 @@
         ") => void; registerShareIntegration: <I extends { id: string; groupId?: string | undefined; shareType: \"integration\"; config: (ctx: ShareActionConfigArgs) => Record<string, unknown>; prerequisiteCheck?: ((args: { capabilities: ",
         "Capabilities",
         "; objectType: string; license?: ",
-        "ILicense",
+        {
+          "pluginId": "@kbn/licensing-types",
+          "scope": "common",
+          "docId": "kibKbnLicensingTypesPluginApi",
+          "section": "def-common.ILicense",
+          "text": "ILicense"
+        },
         " | undefined; }) => boolean) | undefined; }>(...args: [string, Omit<I, \"shareType\">] | [Omit<I, \"shareType\">]) => void; }"
       ],
       "path": "src/platform/plugins/shared/share/public/plugin.ts",

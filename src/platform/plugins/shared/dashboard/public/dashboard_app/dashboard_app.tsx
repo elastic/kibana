@@ -16,6 +16,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { SerializableRecord } from '@kbn/utility-types';
 import { DashboardState } from '../../common/types';
 import { DashboardApi, DashboardCreationOptions } from '..';
 import { DASHBOARD_APP_ID } from '../../common/constants';
@@ -139,6 +140,7 @@ export function DashboardApp({
    */
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+
     const getInitialInput = () => {
       let stateFromLocator: Partial<DashboardState> = {};
       try {
@@ -188,6 +190,9 @@ export function DashboardApp({
         removeSessionIdFromUrl: () => removeSearchSessionIdFromURL(kbnUrlStateStorage),
       },
       getInitialInput,
+      getPassThroughContext: () =>
+        (getScopedHistory().location.state as { passThroughContext?: SerializableRecord })
+          ?.passThroughContext,
       validateLoadedSavedObject: validateOutcome,
       fullScreenMode:
         kbnUrlStateStorage.get<{ fullScreenMode?: boolean }>(DASHBOARD_STATE_STORAGE_KEY)

@@ -13,7 +13,7 @@ import { UseEuiTheme, euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
 import type { CoreStart } from '@kbn/core/public';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { MapCache } from 'lodash';

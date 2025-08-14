@@ -27,7 +27,7 @@ import {
   MessageMetadata,
   ScreenContext,
 } from '@kbn/elastic-assistant-common';
-import { ILicense } from '@kbn/licensing-plugin/server';
+import { ILicense } from '@kbn/licensing-types';
 import { i18n } from '@kbn/i18n';
 import { AwaitedProperties, PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
