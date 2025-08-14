@@ -5192,21 +5192,6 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL",
-        "type": "string",
-        "tags": [],
-        "label": "ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL",
-        "description": [],
-        "signature": [
-          "\"/internal/elastic_assistant/knowledge_base/_indices\""
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL",
         "type": "string",
         "tags": [],
@@ -6128,21 +6113,6 @@
           "{ results: { id: string; status: string; }[]; datasets: string[]; graphs: string[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/evaluation/get_evaluate_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.GetKnowledgeBaseIndicesResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "GetKnowledgeBaseIndicesResponse",
-        "description": [],
-        "signature": [
-          "{} & { [k: string]: string[]; }"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/get_knowledge_base_indices_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10726,21 +10696,6 @@
           "Zod.ZodObject<{ datasets: Zod.ZodArray<Zod.ZodString, \"many\">; graphs: Zod.ZodArray<Zod.ZodString, \"many\">; results: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; status: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; status: string; }, { id: string; status: string; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { results: { id: string; status: string; }[]; datasets: string[]; graphs: string[]; }, { results: { id: string; status: string; }[]; datasets: string[]; graphs: string[]; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/evaluation/get_evaluate_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.GetKnowledgeBaseIndicesResponse",
-        "type": "Object",
-        "tags": [],
-        "label": "GetKnowledgeBaseIndicesResponse",
-        "description": [],
-        "signature": [
-          "Zod.ZodObject<{}, \"strip\", Zod.ZodArray<Zod.ZodString, \"many\">, Zod.objectOutputType<{}, Zod.ZodArray<Zod.ZodString, \"many\">, \"strip\">, Zod.objectInputType<{}, Zod.ZodArray<Zod.ZodString, \"many\">, \"strip\">>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/get_knowledge_base_indices_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

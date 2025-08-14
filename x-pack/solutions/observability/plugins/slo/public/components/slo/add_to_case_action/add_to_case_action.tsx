@@ -35,7 +35,11 @@ export function AddToCaseAction({ slo, onCancel, onConfirm }: Props) {
   );
 
   return hasCasesPermissions && !!permissions && CasesContext ? (
-    <CasesContext owner={['observability']} permissions={permissions}>
+    <CasesContext
+      owner={['observability']}
+      permissions={permissions}
+      features={{ alerts: { sync: false } }}
+    >
       <Content slo={slo} onCancel={onCancel} onConfirm={onConfirm} />
     </CasesContext>
   ) : null;
