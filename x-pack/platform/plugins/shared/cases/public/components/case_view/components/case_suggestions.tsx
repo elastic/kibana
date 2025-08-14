@@ -5,59 +5,40 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getCaseSuggestions } from '../../../containers/api';
-import { useCasesContext } from '../../cases_context/use_cases_context';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import type { CaseUI } from '../../../../common';
+import { CaseSuggestionItem } from './case_suggestion_item';
+import { useCaseSuggestions } from '../use_case_suggestions';
 
-const MOCK_SERVICE_NAME = 'slo';
+const MOCK_SERVICE_NAME = 'synth-service-2';
 
-export const getSuggestionsQueryKey = (serviceName: string) => ['suggestions', serviceName];
-
-export const useFetchSuggestion = (serviceName: string) => {
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: getSuggestionsQueryKey(serviceName),
-    queryFn: () =>
-      getCaseSuggestions({
-        owners: ['observability'],
-        context: {
-          timeRange: {
-            from: 'now-15m',
-            to: 'now',
-          },
-          'service.name': serviceName,
-        },
-      }),
-    refetchOnWindowFocus: false,
+export const CaseSuggestions = ({ caseData }: { caseData: CaseUI }) => {
+  const { visibleSuggestions, isLoadingSuggestions, onDismissSuggestion } = useCaseSuggestions({
+    caseData,
+    serviceName: MOCK_SERVICE_NAME,
   });
-
-  return {
-    isLoadingSuggestions: isLoading,
-    suggestions: data?.suggestions || [],
-    refetchSuggestions: refetch,
-  };
-};
-
-export const CaseSuggestions = React.memo(() => {
-  const { suggestions, isLoadingSuggestions } = useFetchSuggestion(MOCK_SERVICE_NAME);
-
-  const { attachmentSuggestionRegistry } = useCasesContext();
-  const components = attachmentSuggestionRegistry.list();
 
   if (isLoadingSuggestions) {
     return <EuiLoadingSpinner size="m" />;
   }
 
   return (
-    <EuiFlexItem>
-      {suggestions.map((suggestion) => {
-        const component = components.find((c) => c.id === suggestion.id);
-        if (!component) return null;
-        return <component.children key={suggestion.id} suggestion={suggestion} />;
-      })}
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="m" wrap>
+        {visibleSuggestions.map((suggestion) => {
+          return (
+            <CaseSuggestionItem
+              key={suggestion.id}
+              suggestion={suggestion}
+              caseData={caseData}
+              onDismissSuggestion={onDismissSuggestion}
+            />
+          );
+        })}
+      </EuiFlexGroup>
     </EuiFlexItem>
   );
-});
+};
 
 CaseSuggestions.displayName = 'CaseSuggestions';

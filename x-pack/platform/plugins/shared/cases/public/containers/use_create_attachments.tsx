@@ -11,6 +11,7 @@ import * as i18n from './translations';
 import type { CaseAttachmentsWithoutOwner, ServerError } from '../types';
 import { useCasesToast } from '../common/use_cases_toast';
 import { casesMutationsKeys } from './constants';
+import type { CaseUI } from './types';
 
 export interface PostComment {
   caseId: string;
@@ -18,7 +19,11 @@ export interface PostComment {
   attachments: CaseAttachmentsWithoutOwner;
 }
 
-export const useCreateAttachments = () => {
+export const useCreateAttachments = ({
+  onSuccess,
+}: {
+  onSuccess?: (data: CaseUI, variables: PostComment, context: unknown) => unknown;
+} = {}) => {
   const { showErrorToast } = useCasesToast();
 
   return useMutation(
@@ -35,6 +40,7 @@ export const useCreateAttachments = () => {
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_TITLE });
       },
+      onSuccess,
     }
   );
 };
