@@ -71,7 +71,6 @@ export const EmptyMappingsContent: React.FC<EmptyMappingsProps> = ({ onClick }) 
               </EuiLink>
             </>,
           ]}
-          //   footer={}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
