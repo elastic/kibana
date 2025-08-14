@@ -10,7 +10,7 @@
 import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import timerange from '../../fixtures/es_archiver/metric_experience/timerange.json';
+import { timerange } from '../../fixtures/es_archiver/metrics_experience/timerange';
 
 const ENDPOINT = '/internal/metrics_experience/dimensions';
 
@@ -24,13 +24,13 @@ export default function ({ getService }: FtrProviderContext) {
   describe('GET /internal/metrics_experience/dimensions', () => {
     before(async () => {
       await esArchiver.load(
-        'src/platform/test/api_integration/fixtures/es_archiver/metric_experience'
+        'src/platform/test/api_integration/fixtures/es_archiver/metrics_experience'
       );
     });
 
     after(async () => {
       await esArchiver.unload(
-        'src/platform/test/api_integration/fixtures/es_archiver/metric_experience'
+        'src/platform/test/api_integration/fixtures/es_archiver/metrics_experience'
       );
     });
 

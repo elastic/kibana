@@ -1189,6 +1189,9 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
 /x-pack/platform/test/api_integration/apis/entity_manager @elastic/obs-entities
 
+# Metrics Experience
+/src/platform/test/api_integration/apis/metrics_experience @elastic/obs-ux-infra_services-team
+/src/platform/test/api_integration/fixtures/es_archiver/metrics_experience @elastic/obs-ux-infra_services-team
 
 # Data Discovery
 /x-pack/platform/test/api_integration/services/data_view_api.ts @elastic/kibana-data-discovery
