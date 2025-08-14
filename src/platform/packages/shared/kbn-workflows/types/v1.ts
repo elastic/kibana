@@ -146,6 +146,16 @@ export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string(),
 });
 
+export const SearchWorkflowCommandSchema = z.object({
+  triggerType: z.string().optional(),
+  limit: z.number().default(100),
+  offset: z.number().default(0),
+  createdBy: z.array(z.string()).optional(),
+  status: z.array(z.string()).optional(),
+  query: z.string().optional(),
+  _full: z.boolean().default(false),
+});
+
 export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
 export interface UpdatedWorkflowResponseDto {
@@ -219,4 +229,13 @@ export interface WorkflowStatsDto {
     inactive: number;
   };
   executions: WorkflowExecutionsHistoryStats[];
+}
+
+export interface WorkflowAggsDto {
+  [key: string]: {
+    value: {
+      value: string;
+      name: string;
+    }[];
+  };
 }

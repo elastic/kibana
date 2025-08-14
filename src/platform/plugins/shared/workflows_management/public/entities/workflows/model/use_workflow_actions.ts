@@ -65,10 +65,21 @@ export function useWorkflowActions() {
     },
   });
 
+  const cloneWorkflow = useMutation({
+    mutationKey: ['POST', 'workflows', 'clone'],
+    mutationFn: ({ id }: { id: string }) => {
+      return http!.post(`/api/workflows/${id}/clone`);
+    },
+    onSuccess: ({ id }) => {
+      queryClient.invalidateQueries({ queryKey: ['workflows'] });
+    },
+  });
+
   return {
     createWorkflow,
     updateWorkflow, // kc: maybe return mutation.mutate? where the navigation is handled?
     deleteWorkflows,
     runWorkflow,
+    cloneWorkflow,
   };
 }

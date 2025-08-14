@@ -10,12 +10,22 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { WorkflowStatsDto } from '@kbn/workflows/types/v1';
+import { FieldValueOptionType } from '@elastic/eui/src/components/search_bar/filters/field_value_selection_filter';
 
 export function useWorkflowStats() {
   const { http } = useKibana().services;
 
   return useQuery<WorkflowStatsDto>({
-    queryKey: ['workflows', 'overview'],
+    queryKey: ['workflows', 'stats'],
     queryFn: () => http!.get(`/api/workflows/stats`),
+  });
+}
+
+export function useWorkflowFiltersOptions(fields: string[]) {
+  const { http } = useKibana().services;
+
+  return useQuery<Record<string, Array<FieldValueOptionType>>>({
+    queryKey: ['workflows', 'aggs', fields],
+    queryFn: () => http!.get(`/api/workflows/aggs`, { query: { fields } }),
   });
 }
