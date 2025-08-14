@@ -6,7 +6,7 @@
  */
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { ChartType } from '@kbn/visualization-utils';
+import { ChartType } from '@kbn/visualization-utils';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import type { DatasourceMap, VisualizationMap, VisualizeEditorContext } from '../types';
 import type { DataViewsState } from '../state_management';
@@ -92,7 +92,15 @@ export const suggestionsApi = ({
     activeVisualization: visualizationMap[activeVisualization.visualizationId],
     visualizationState: activeVisualization.visualizationState,
     dataViews,
-  }).filter((sug) => !sug.hide && sug.visualizationId !== 'lnsLegacyMetric');
+  }).filter(
+    (sug) =>
+      // Datatables are always return as hidden suggestions
+      // if the user has requested for a datatable (preferredChartType), we want to return it
+      // although it is a hidden suggestion
+      (sug.hide && sug.visualizationId === 'lnsDatatable') ||
+      // Filter out suggestions that are hidden and legacy metrics
+      (!sug.hide && sug.visualizationId !== 'lnsLegacyMetric')
+  );
 
   // check if there is an XY chart suggested
   // if user has requested for a line or area, we want to sligthly change the state
@@ -116,7 +124,7 @@ export const suggestionsApi = ({
   // in case the user asks for another type (except from area, line) check if it exists
   // in suggestions and return this instead
   const suggestionsList = [activeVisualization, ...newSuggestions];
-  if (suggestionsList.length > 1 && preferredChartType) {
+  if (suggestionsList.length > 1 && preferredChartType && preferredChartType !== ChartType.Table) {
     const compatibleSuggestion = suggestionsList.find(
       (s) => s.title.includes(preferredChartType) || s.visualizationId.includes(preferredChartType)
     );
@@ -132,6 +140,16 @@ export const suggestionsApi = ({
 
       return [suggestion];
     }
+  } else if (suggestionsList.length === 1 && preferredChartType === ChartType.Table) {
+    if (preferredVisAttributes) {
+      const suggestion = mergeSuggestionWithVisContext({
+        suggestion: suggestionsList[0],
+        visAttributes: preferredVisAttributes,
+        context,
+      });
+      return [suggestion];
+    }
+    return suggestionsList;
   }
 
   // if there is no preference from the user, send everything
