@@ -34,6 +34,8 @@ import { generateId } from '../../../../id_generator/id_generator';
 import { ChartSwitchSelectable, SelectableEntry } from './chart_switch_selectable';
 import { ChartSwitchOptionPrepend } from './chart_option';
 
+const LOCAL_STORAGE_USER_CHART_TYPE = 'LENS_USER_CHART_TYPE';
+
 type VisChartSwitchPosition = VisualizationType & {
   visualizationId: string;
   selection: VisualizationSelection;
@@ -97,6 +99,7 @@ export const ChartSwitch = memo(function ChartSwitch({
   const [searchTerm, setSearchTerm] = useState('');
 
   const commitSelection = (selection: VisualizationSelection) => {
+    localStorage.setItem(LOCAL_STORAGE_USER_CHART_TYPE, selection.visualizationId);
     switchToSuggestion(
       dispatchLens,
       {

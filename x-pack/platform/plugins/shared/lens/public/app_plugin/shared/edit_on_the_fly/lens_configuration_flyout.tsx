@@ -34,6 +34,8 @@ import { useApplicationUserMessages } from '../../get_application_user_messages'
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { useCurrentAttributes } from './use_current_attributes';
 
+const LOCAL_STORAGE_USER_CHART_TYPE = 'LENS_USER_CHART_TYPE';
+
 export function LensEditConfigurationFlyout({
   attributes,
   coreStart,
@@ -146,6 +148,7 @@ export function LensEditConfigurationFlyout({
       if (savedObjectId) {
         updateByRefInput?.(savedObjectId);
       }
+      localStorage.removeItem(LOCAL_STORAGE_USER_CHART_TYPE);
     }
     onCancelCallback?.();
     closeFlyout?.();
@@ -194,6 +197,7 @@ export function LensEditConfigurationFlyout({
     }
 
     onApplyCallback?.(currentAttributes);
+    localStorage.removeItem(LOCAL_STORAGE_USER_CHART_TYPE);
     closeFlyout?.();
   }, [
     visualization.activeId,

@@ -172,9 +172,9 @@ export function ESQLEditor({
       visualizationMap,
       adHocDataViews,
       esqlVariables,
+      currentAttributes,
       setCurrentAttributes,
       updateSuggestion,
-      currentAttributes,
     ]
   );
 

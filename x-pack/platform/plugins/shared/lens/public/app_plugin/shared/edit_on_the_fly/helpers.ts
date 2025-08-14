@@ -24,6 +24,8 @@ import { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { suggestionsApi } from '../../../lens_suggestions_api';
 
+const LOCAL_STORAGE_USER_CHART_TYPE = 'LENS_USER_CHART_TYPE';
+
 export interface ESQLDataGridAttrs {
   rows: ESQLRow[];
   dataView: DataView;
@@ -124,8 +126,15 @@ export const getSuggestions = async (
       return;
     }
 
-    const preferredChartType = preferredVisAttributes
-      ? mapVisToChartType(preferredVisAttributes.visualizationType)
+    // User deliberately changed the chart type
+    const userDefinedChartType = localStorage.getItem(LOCAL_STORAGE_USER_CHART_TYPE);
+
+    // const preferredChartType = preferredVisAttributes
+    //   ? mapVisToChartType(preferredVisAttributes.visualizationType)
+    //   : undefined;
+
+    const preferredChartType = userDefinedChartType
+      ? mapVisToChartType(userDefinedChartType)
       : undefined;
 
     const context = {
