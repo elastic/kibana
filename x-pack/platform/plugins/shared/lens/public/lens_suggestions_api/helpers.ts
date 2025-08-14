@@ -132,7 +132,7 @@ export function mergeSuggestionWithVisContext({
       visualizationId: updatedVisAttributes.visualizationType,
       visualizationState: updatedVisAttributes.state.visualization,
       keptLayerIds: layerIds,
-      datasourceState,
+      datasourceState: updatedVisAttributes.state.datasourceStates[datasourceId],
       datasourceId,
       columns: suggestion.columns,
       changeType: suggestion.changeType,
