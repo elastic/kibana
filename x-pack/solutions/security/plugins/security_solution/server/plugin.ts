@@ -15,7 +15,7 @@ import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
-import type { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
@@ -117,6 +117,7 @@ import {
   ENDPOINT_SEARCH_STRATEGY,
 } from '../common/endpoint/constants';
 
+import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
 import { registerEntityStoreFieldRetentionEnrichTask } from './lib/entity_analytics/entity_store/tasks';
@@ -138,7 +139,6 @@ import {
   CASE_ATTACHMENT_TYPE_ID,
   THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
 } from '../common/threat_intelligence/constants';
-import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -285,7 +285,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       getStartServices: core.getStartServices,
       taskManager: plugins.taskManager,
       logger: this.logger,
-      auditLogger: plugins.security?.audit.withoutRequest,
       telemetry: core.analytics,
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,
