@@ -221,7 +221,7 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
       );
     }
 
-    private async waitForIndex(
+    async waitForIndex(
       ids: string[],
       index: string,
       body: any = {},
