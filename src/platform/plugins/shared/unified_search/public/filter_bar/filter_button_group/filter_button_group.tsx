@@ -79,8 +79,6 @@ const filterButtonStyles = {
         borderRight: `1px solid ${euiTheme.colors.borderBasePlain}`,
       },
       '& .euiButtonIcon': {
-        height: euiTheme.size.xl,
-        width: euiTheme.size.xl,
         inlineSize: euiTheme.size.xl,
         blockSize: euiTheme.size.xl,
       },
