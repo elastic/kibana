@@ -8,37 +8,13 @@
  */
 
 /* eslint-disable no-restricted-syntax */
-
-const singlePath = [
-  'writeFile',
-  'writeFileSync',
-  'appendFile',
-  'appendFileSync',
-  'createWriteStream',
-];
-
-const dualPath = ['copyFile', 'copyFileSync'];
-
 const { REPO_ROOT } = require('@kbn/repo-info');
 
 const { fsEventBus, FS_CONFIG_EVENT } = require('@kbn/security-hardening/fs-event-bus');
 
 const { join, normalize } = require('path');
 const { homedir, tmpdir } = require('os');
-const {
-  realpathSync,
-  createWriteStream,
-  writeFile,
-  writeFileSync,
-  appendFile,
-  appendFileSync,
-  copyFile,
-  copyFileSync,
-  rename,
-  renameSync,
-} = require('fs');
-
-const fsPromises = require('fs/promises');
+const { realpathSync } = require('fs');
 
 const isDevOrCI = process.env.NODE_ENV !== 'production' || process.env.CI === 'true';
 
@@ -84,31 +60,10 @@ const devOrCIPaths = [
 const safePaths = [...baseSafePaths, ...(isDevOrCI ? devOrCIPaths : [])];
 let hardeningConfig = null;
 
-const realMethods = {
-  createWriteStream,
-  writeFile,
-  writeFileSync,
-  appendFile,
-  appendFileSync,
-  copyFile,
-  copyFileSync,
-  rename,
-  renameSync,
-};
-
-const realFsMethods = {
-  createWriteStream: fsPromises.createWriteStream,
-  writeFile: fsPromises.writeFile,
-  appendFile: fsPromises.appendFile,
-  copyFile: fsPromises.copyFile,
-  rename: fsPromises.rename,
-};
-
 // TODO: propagate here file specified for file logger (it can change in the runtime)
 // Idea 1: Use EventEmitter to propagate file logger path.
 // Checked it, it works, though we need to find a proper folder/package for that event emitter.
 fsEventBus.on(FS_CONFIG_EVENT, (config) => {
-  console.log('CONFIG', config);
   hardeningConfig = config;
   safePaths.push(...config.safe_paths);
 });
@@ -133,162 +88,105 @@ const getSafePath = (userPath) => {
   return normalizedPath;
 };
 
-const isMockFsActive = () => {
-  try {
-    // This is the most reliable way to detect mock-fs
-    // It checks the internal binding that mock-fs modifies
-    const realBinding = process.binding('fs');
-    const isActive = Boolean(realBinding._mockedBinding);
+const shouldEnableHardenedFs = () => {
+  const isJestTest = Boolean(process.env.JEST_WORKER_ID);
 
-    // Once mock-fs is restored, the binding is no longer mocked, but the method is still patched
-    // which leades to recursion problems
-    return isActive || process.env.JEST_WORKER_ID !== undefined;
-  } catch (e) {
-    // If process.binding is not available (it's deprecated), fallback to other methods
-    return false;
+  console.log(isJestTest);
+
+  // If the hardening config is not set or disabled, we also skip
+  return (
+    Boolean(hardeningConfig?.enabled) &&
+    (!isJestTest || (isJestTest && process.env.KBN_ENABLE_HARDENED_FS))
+  );
+};
+
+const patchSingleMethod = (target, thisArg, argumentsList) => {
+  if (!shouldEnableHardenedFs()) {
+    return target.apply(thisArg, argumentsList);
   }
+
+  const [userPath, ...args] = argumentsList;
+  const safePath = getSafePath(userPath);
+
+  return target.apply(thisArg, [safePath, ...args]);
+};
+
+const patchDualMethod = (target, thisArg, argumentsList) => {
+  if (!shouldEnableHardenedFs()) {
+    return target.apply(thisArg, argumentsList);
+  }
+
+  const [userSrc, userDest, ...args] = argumentsList;
+  const srcSafePath = getSafePath(userSrc);
+  const destSafePath = getSafePath(userDest);
+
+  return target.apply(thisArg, [srcSafePath, destSafePath, ...args]);
+};
+
+const patchAsyncSingleMethod = (target, thisArg, argumentsList) => {
+  if (!shouldEnableHardenedFs()) {
+    return target.apply(thisArg, argumentsList);
+  }
+
+  const [userPath, ...args] = argumentsList;
+  const [, options, cb] = args;
+  const callback = typeof options === 'function' ? options : cb;
+  let safePath;
+
+  try {
+    safePath = getSafePath(userPath);
+  } catch (err) {
+    // ensure that we invoke the callback asynchronously
+    if (typeof callback === 'function') return process.nextTick(() => callback(err));
+
+    throw err;
+  }
+
+  return target.apply(thisArg, [safePath, ...args]);
+};
+
+const patchAsyncDualMethod = (target, thisArg, argumentsList) => {
+  if (!shouldEnableHardenedFs()) {
+    return target.apply(thisArg, argumentsList);
+  }
+
+  const [userSrc, userDest, ...args] = argumentsList;
+  const [modeOrCallback, callbackArg] = args;
+  const callback = typeof modeOrCallback === 'function' ? modeOrCallback : callbackArg;
+  let srcSafePath;
+  let destSafePath;
+
+  try {
+    srcSafePath = getSafePath(userSrc);
+    destSafePath = getSafePath(userDest);
+  } catch (err) {
+    // ensure that we invoke the callback asynchronously
+    if (typeof callback === 'function') return process.nextTick(() => callback(err));
+
+    throw err;
+  }
+
+  return target.apply(thisArg, [srcSafePath, destSafePath, ...args]);
 };
 
 const createFsProxy = (fs) => {
-  const proxiedFs = new Proxy(fs, {
-    get(target, prop) {
-      if (!hardeningConfig?.enabled) {
-        return Reflect.get(target, prop);
-      }
+  fs.writeFileSync = new Proxy(fs.writeFileSync, { apply: patchSingleMethod });
+  fs.writeFile = new Proxy(fs.writeFile, { apply: patchAsyncSingleMethod });
+  fs.copyFileSync = new Proxy(fs.copyFileSync, { apply: patchDualMethod });
+  fs.copyFile = new Proxy(fs.copyFile, { apply: patchAsyncDualMethod });
 
-      const isSyncMethod = typeof prop === 'string' && prop.endsWith('Sync');
+  fs.appendFileSync = new Proxy(fs.appendFileSync, { apply: patchSingleMethod });
+  fs.appendFile = new Proxy(fs.appendFile, { apply: patchAsyncSingleMethod });
+  fs.createWriteStream = new Proxy(fs.createWriteStream, { apply: patchAsyncSingleMethod });
 
-      if (isSyncMethod && singlePath.includes(prop)) {
-        return (userPath, ...args) => {
-          const safePath = getSafePath(userPath);
-          // console.log('isMockFsActive', isMockFsActive(), prop);
-          if (isMockFsActive()) {
-            // Use the original createWriteStream function directly to avoid infinite recursion.
-            // When mock-fs is active, it replaces the fs.createWriteStream with its own implementation,
-            // which internally calls a stored reference to our proxy function.
-            // This creates an infinite loop: proxy -> mock-fs -> proxy -> mock-fs
-            return realMethods[prop](userPath, ...args);
-          }
-
-          return Reflect.apply(target[prop], target, [safePath, ...args]);
-        };
-      }
-
-      if (isSyncMethod && dualPath.includes(prop)) {
-        return (userSrc, userDest, ...args) => {
-          const srcSafePath = getSafePath(userSrc);
-          const destSafePath = getSafePath(userDest);
-          // console.log('isMockFsActive', isMockFsActive(), prop, userSrc, userDest);
-          if (isMockFsActive()) {
-            // Use the original function directly to avoid infinite recursion.
-            // When mock-fs is active, it replaces the fs.[method] with its own implementation,
-            // which internally calls a stored reference to our proxy function.
-            // This creates an infinite loop: proxy -> mock-fs -> proxy -> mock-fs
-            return realMethods[prop](userSrc, userDest, ...args);
-          }
-
-          return Reflect.apply(target[prop], target, [srcSafePath, destSafePath, ...args]);
-        };
-      }
-
-      if (singlePath.includes(prop) && typeof target[prop] === 'function') {
-        return (userPath, ...args) => {
-          const [, options, cb] = args;
-          const callback = typeof options === 'function' ? options : cb;
-          let safePath;
-
-          try {
-            safePath = getSafePath(userPath);
-          } catch (err) {
-            // ensure that we invoke the callback asynchronously
-            if (typeof callback === 'function') return process.nextTick(() => callback(err));
-
-            throw err;
-          }
-
-          if (isMockFsActive()) {
-            // Use the original function directly to avoid infinite recursion.
-            // When mock-fs is active, it replaces the fs.[method] with its own implementation,
-            // which internally calls a stored reference to our proxy function.
-            // This creates an infinite loop: proxy -> mock-fs -> proxy -> mock-fs
-            return realMethods[prop](userPath, ...args);
-          }
-
-          return Reflect.apply(target[prop], target, [safePath, ...args]);
-        };
-      }
-
-      if (dualPath.includes(prop) && typeof target[prop] === 'function') {
-        return (userSrc, userDest, ...args) => {
-          const [modeOrCallback, callbackArg] = args;
-          const callback = typeof modeOrCallback === 'function' ? modeOrCallback : callbackArg;
-          let srcSafePath;
-          let destSafePath;
-
-          try {
-            srcSafePath = getSafePath(userSrc);
-            destSafePath = getSafePath(userDest);
-          } catch (err) {
-            // ensure that we invoke the callback asynchronously
-            if (typeof callback === 'function') return process.nextTick(() => callback(err));
-
-            throw err;
-          }
-
-          if (isMockFsActive()) {
-            return realMethods[prop](userSrc, userDest, ...args);
-          }
-
-          return Reflect.apply(target[prop], target, [srcSafePath, destSafePath, ...args]);
-        };
-      }
-
-      return Reflect.get(target, prop);
-    },
-  });
-
-  return proxiedFs;
+  return fs;
 };
 
 const createFsPromisesProxy = (fs) => {
-  const proxiedFsPromises = new Proxy(fs, {
-    get(target, prop) {
-      if (typeof target[prop] === 'function' && singlePath.includes(prop)) {
-        return (userPath, ...args) => {
-          const safePath = getSafePath(userPath);
-          if (isMockFsActive()) {
-            // Use the original function directly to avoid infinite recursion.
-            // When mock-fs is active, it replaces the fs.[method] with its own implementation,
-            // which internally calls a stored reference to our proxy function.
-            // This creates an infinite loop: proxy -> mock-fs -> proxy -> mock-fs
-            return realFsMethods[prop](safePath, ...args);
-          }
+  fs.writeFile = new Proxy(fs.writeFile, { apply: patchSingleMethod });
+  fs.appendFile = new Proxy(fs.appendFile, { apply: patchSingleMethod });
 
-          return Reflect.apply(target[prop], target, [safePath, ...args]);
-        };
-      }
-
-      if (typeof target[prop] === 'function' && dualPath.includes(prop)) {
-        return (userSrc, userDest, ...args) => {
-          const srcSafePath = getSafePath(userSrc);
-          const destSafePath = getSafePath(userDest);
-          if (isMockFsActive()) {
-            // Use the original function directly to avoid infinite recursion.
-            // When mock-fs is active, it replaces the fs.[method] with its own implementation,
-            // which internally calls a stored reference to our proxy function.
-            // This creates an infinite loop: proxy -> mock-fs -> proxy -> mock-fs
-            return realFsMethods[prop](srcSafePath, destSafePath, ...args);
-          }
-
-          return Reflect.apply(target[prop], target, [srcSafePath, destSafePath, ...args]);
-        };
-      }
-
-      return Reflect.get(target, prop);
-    },
-  });
-
-  return proxiedFsPromises;
+  return fs;
 };
 
 module.exports = { createFsProxy, createFsPromisesProxy };
