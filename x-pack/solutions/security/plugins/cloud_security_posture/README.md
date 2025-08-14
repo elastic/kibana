@@ -20,7 +20,7 @@ For general guidelines, read [Kibana Testing Guide](https://www.elastic.co/guide
 1. [End-to-End Tests](../../../../test/cloud_security_posture_functional/config.ts)
 1. [Serverless API Integration tests](../../../../test_serverless/api_integration/test_suites/security/config.ts)
 1. [Serverless End-to-End Tests](../../../../test_serverless/functional/test_suites/security/config.ts)
-1. [Cypress End-to-End Tests](../../../../test/security_solution_cypress/cypress/e2e/cloud_security_posture)
+2. [Cypress End-to-End Tests](../../test/security_solution_cypress/cypress/e2e/cloud_security_posture)
 
 ### Tools
 
@@ -77,7 +77,7 @@ yarn test:ftr --config x-pack/solutions/security/test/cloud_security_posture_fun
 yarn test:ftr --config x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.ts
 ```
 
-Run [**End-to-End Cypress Tests**](https://github.com/elastic/kibana/tree/main/x-pack/test/security_solution_cypress/cypress):
+Run [**End-to-End Cypress Tests**](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/test/security_solution_cypress/cypress):
 
 > **Note**
 >
