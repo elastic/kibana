@@ -138,7 +138,6 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      // API and CSV
       it('should add label', async () => {
         await privMonUtils.initPrivMonEngine();
         await api.createEntitySource({
@@ -151,7 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
         await privMonUtils.waitForSyncTaskRun();
 
         const users = (await api.listPrivMonUsers({ query: {} })).body as ListPrivMonUsersResponse;
-        const user = findUser(users, user1.name);
+        const user = privMonUtils.findUser(users, user1.name);
 
         expect(user?.entity_analytics_monitoring?.labels).toEqual([
           expect.objectContaining({
@@ -202,7 +201,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const updatedUsers = (await api.listPrivMonUsers({ query: {} }))
           .body as ListPrivMonUsersResponse;
-        const updatedUser = findUser(updatedUsers, user1.name);
+        const updatedUser = privMonUtils.findUser(updatedUsers, user1.name);
 
         expect(updatedUser?.entity_analytics_monitoring?.labels).toEqual([
           expect.objectContaining({
@@ -238,9 +237,9 @@ export default ({ getService }: FtrProviderContext) => {
         await privMonUtils.waitForSyncTaskRun();
 
         const users = (await api.listPrivMonUsers({ query: {} })).body as ListPrivMonUsersResponse;
-        const user = findUser(users, user1.name);
+        const user = privMonUtils.findUser(users, user1.name);
 
-        assertIsPrivileged(user, false);
+        privMonUtils.assertIsPrivileged(user, false);
         expect(user?.entity_analytics_monitoring?.labels).toBeUndefined();
       });
 
@@ -288,8 +287,8 @@ export default ({ getService }: FtrProviderContext) => {
 
           const users = (await api.listPrivMonUsers({ query: {} }))
             .body as ListPrivMonUsersResponse;
-          const user = findUser(users, user1.name);
-          assertIsPrivileged(user, true);
+          const user = privMonUtils.findUser(users, user1.name);
+          privMonUtils.assertIsPrivileged(user, true);
           expect(user?.entity_analytics_monitoring?.labels).toEqual([
             expect.objectContaining({
               field: 'label',
@@ -348,9 +347,9 @@ export default ({ getService }: FtrProviderContext) => {
 
           const users = (await api.listPrivMonUsers({ query: {} }))
             .body as ListPrivMonUsersResponse;
-          const user = findUser(users, user1.name);
+          const user = privMonUtils.findUser(users, user1.name);
 
-          assertIsPrivileged(user, true);
+          privMonUtils.assertIsPrivileged(user, true);
           expect(user?.entity_analytics_monitoring?.labels).toEqual([
             expect.objectContaining({
               field: 'label',
