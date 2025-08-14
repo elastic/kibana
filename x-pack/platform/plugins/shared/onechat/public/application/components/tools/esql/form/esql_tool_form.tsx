@@ -17,7 +17,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { useToolTags } from '../../../../hooks/tools/use_tool_tags';
+import { useToolsTags } from '../../../../hooks/tools/use_tool_tags';
 import { OnechatEsqlEditorField } from './components/esql_editor_field';
 import { OnechatEsqlToolFormData } from './types/esql_tool_form_types';
 
@@ -34,7 +34,7 @@ export interface OnechatEsqlToolFormProps {
 
 export const OnechatEsqlToolForm = ({ mode, formId, saveTool }: OnechatEsqlToolFormProps) => {
   const { euiTheme } = useEuiTheme();
-  const { tags, isLoading: isLoadingTags } = useToolTags();
+  const { tags, isLoading: isLoadingTags } = useToolsTags();
   const {
     control,
     handleSubmit,
