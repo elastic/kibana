@@ -15,13 +15,9 @@ import type {
 } from '@kbn/actions-plugin/server/types';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { api } from './api';
-import {
-  ExecutorParamsSchema,
-  ExternalWorkflowServiceConfigurationSchema,
-  ExternalWorkflowServiceSecretConfigurationSchema,
-  WorkflowsRuleActionParamsSchema,
-} from './schema';
+import { ExecutorParamsSchema, WorkflowsRuleActionParamsSchema } from './schema';
 import { createExternalService, type WorkflowsServiceFunction } from './service';
 import * as i18n from './translations';
 import type {
@@ -29,10 +25,7 @@ import type {
   ExecutorSubActionRunParams,
   WorkflowsActionParamsType,
   WorkflowsExecutorResultData,
-  WorkflowsPublicConfigurationType,
-  WorkflowsSecretConfigurationType,
 } from './types';
-import { validateConnector, validateWorkflowsConfig } from './validators';
 
 const supportedSubActions: string[] = ['run'];
 export type ActionParamsType = WorkflowsActionParamsType;
@@ -55,8 +48,8 @@ export interface GetWorkflowsConnectorTypeArgs {
 export function getConnectorType(
   deps?: GetWorkflowsConnectorTypeArgs
 ): ConnectorType<
-  WorkflowsPublicConfigurationType,
-  WorkflowsSecretConfigurationType,
+  Record<string, unknown>,
+  Record<string, unknown>,
   ExecutorParams,
   WorkflowsExecutorResultData
 > {
@@ -65,17 +58,15 @@ export function getConnectorType(
     minimumLicenseRequired: 'gold',
     name: i18n.NAME,
     validate: {
-      config: {
-        schema: ExternalWorkflowServiceConfigurationSchema,
-        customValidator: validateWorkflowsConfig,
-      },
-      secrets: {
-        schema: ExternalWorkflowServiceSecretConfigurationSchema,
-      },
       params: {
         schema: ExecutorParamsSchema,
       },
-      connector: validateConnector,
+      config: {
+        schema: schema.object({}),
+      },
+      secrets: {
+        schema: schema.object({}),
+      },
     },
     executor: (execOptions) => executor(execOptions, deps),
     supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
@@ -86,8 +77,8 @@ export function getConnectorType(
 // action executor
 export async function executor(
   execOptions: ConnectorTypeExecutorOptions<
-    WorkflowsPublicConfigurationType,
-    WorkflowsSecretConfigurationType,
+    Record<string, unknown>,
+    Record<string, unknown>,
     WorkflowsActionParamsType
   >,
   deps?: GetWorkflowsConnectorTypeArgs
