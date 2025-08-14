@@ -93,6 +93,7 @@ export function mergeSuggestionWithVisContext({
   if (context && 'query' in context && context.query && 'esql' in context.query) {
     const contextIndexPattern = getIndexPatternFromESQLQuery(context.query.esql);
     const visQuery = visAttributes.state.query;
+    console.log(visQuery);
     const visIndexPattern = isOfAggregateQueryType(visQuery)
       ? getIndexPatternFromESQLQuery(visQuery.esql)
       : null;

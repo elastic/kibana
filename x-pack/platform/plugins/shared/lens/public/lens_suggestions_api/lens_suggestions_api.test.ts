@@ -429,7 +429,6 @@ describe('suggestionsApi', () => {
       dataView,
       datasourceMap,
       visualizationMap,
-      preferredChartType: ChartType.XY,
       preferredVisAttributes: {
         visualizationType: 'lnsXY',
         state: {
@@ -441,6 +440,9 @@ describe('suggestionsApi', () => {
             },
           },
           datasourceStates: { textBased: { layers: {} } },
+          query: {
+            esql: 'FROM "index1" | keep field1',
+          },
         },
       } as unknown as TypedLensByValueInput['attributes'],
     });
