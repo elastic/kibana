@@ -74,6 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   // NOTE: Add to second quality gate after feature is GA
   // Failing: See https://github.com/elastic/kibana/issues/202940
+  // Failing: See https://github.com/elastic/kibana/issues/202940
   describe.skip('@ess @serverless Alert Suppression for EQL rules', () => {
     before(async () => {
       await esArchiver.load(

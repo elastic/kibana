@@ -46,6 +46,8 @@ export function DatasetsQualityIndicators() {
       meta: {
         rangeFrom: timeRange.from,
         rangeTo: timeRange.to,
+        description:
+          '[ttfmp_dataset_quality] The dataset quality has finished loading. Summary panel is showing the qualities categorized.',
       },
     });
   }
