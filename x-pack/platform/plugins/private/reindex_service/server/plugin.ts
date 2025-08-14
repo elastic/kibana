@@ -22,7 +22,10 @@ import {
 import { reindexOperationSavedObjectType, Version } from '@kbn/upgrade-assistant-pkg-server';
 import { RouteDependencies, ReindexServiceServerPluginStart } from './types';
 
-import { ReindexServiceWrapper } from './src/lib/reindex_service_wrapper';
+import {
+  ReindexServiceWrapper,
+  ReindexServiceInternalApi,
+} from './src/lib/reindex_service_wrapper';
 import { CredentialStore, credentialStoreFactory } from './src/lib/credential_store';
 import { registerBatchReindexIndicesRoutes, registerReindexIndicesRoutes } from './src/routes';
 
@@ -37,7 +40,7 @@ interface PluginsStart {
 export class ReindexServiceServerPlugin
   implements Plugin<void, ReindexServiceServerPluginStart, PluginsSetup, PluginsStart>
 {
-  private reindexService: ReturnType<ReindexServiceWrapper['getInternalApis']> | null = null;
+  private reindexService: ReindexServiceInternalApi | null = null;
 
   // Properties set at setup
   private licensing?: LicensingPluginSetup;
@@ -88,7 +91,7 @@ export class ReindexServiceServerPlugin
 
     registerReindexIndicesRoutes(dependencies);
     // might be possible to avoid padding the worker here
-    registerBatchReindexIndicesRoutes(dependencies, () => this.getReindexService().getWorker());
+    registerBatchReindexIndicesRoutes(dependencies);
   }
 
   public start(
@@ -125,19 +128,10 @@ export class ReindexServiceServerPlugin
 
     return {
       getScopedClient: service.getScopedClient,
-      // todo move internally
-      cleanupReindexOperations: service.cleanupReindexOperations.bind(service),
     };
   }
 
   public stop() {
     this.reindexService?.stop();
-  }
-
-  private getReindexService() {
-    if (!this.reindexService) {
-      throw new Error('Worker unavailable');
-    }
-    return this.reindexService;
   }
 }

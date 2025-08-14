@@ -28,6 +28,9 @@ import { reindexActionsFactory } from './reindex_actions';
 import { reindexServiceFactory } from './reindex_service';
 import { error } from './error';
 import { generateNewIndexName } from './index_settings';
+import { sortAndOrderReindexOperations } from './op_utils';
+import { GetBatchQueueResponse, PostBatchResponse } from '../../types';
+import { reindexHandler } from './reindex_handler';
 
 export interface ReindexServiceScopedClientArgs {
   savedObjects: SavedObjectsClientContract;
@@ -46,6 +49,12 @@ export interface ReindexServiceScopedClient {
   reindex: (indexName: string) => Promise<ReindexOperation>;
   getStatus: (indexName: string) => Promise<ReindexStatusResponse>;
   cancel: (indexName: string) => Promise<ReindexSavedObject>;
+  getBatchQueueResponse: () => Promise<GetBatchQueueResponse>;
+  addToBatch: (indexNames: string[]) => Promise<PostBatchResponse>;
+}
+
+export interface ReindexServiceInternalApi {
+  stop: () => void;
 }
 
 export class ReindexServiceWrapper {
@@ -81,17 +90,10 @@ export class ReindexServiceWrapper {
     this.reindexWorker.start();
   }
 
-  public getInternalApis() {
+  public getInternalApis(): ReindexServiceInternalApi {
     return {
-      cleanupReindexOperations: (indexNames: string[]): Promise<void> =>
-        this.reindexWorker.cleanupReindexOperations(indexNames),
       stop: () => this.reindexWorker.stop(),
-      getWorker: () => this.reindexWorker,
     };
-  }
-
-  public async cleanupReindexOperations(indexNames: string[]): Promise<void> {
-    return this.reindexWorker.cleanupReindexOperations(indexNames);
   }
 
   public getScopedClient({
@@ -126,6 +128,54 @@ export class ReindexServiceWrapper {
     };
 
     return {
+      getBatchQueueResponse: async (): Promise<GetBatchQueueResponse> => {
+        const inProgressOps = await reindexActions.findAllByStatus(ReindexStatus.inProgress);
+        const { queue } = sortAndOrderReindexOperations(inProgressOps);
+        return {
+          queue: queue.map((savedObject) => savedObject.attributes),
+        };
+      },
+      addToBatch: async (indexNames: string[]): Promise<PostBatchResponse> => {
+        const results: PostBatchResponse = {
+          enqueued: [],
+          errors: [],
+        };
+
+        for (const indexName of indexNames) {
+          try {
+            // todo this duplicates code in reindex method and reindexOrResume method
+            const result = await reindexHandler({
+              savedObjects,
+              dataClient,
+              indexName,
+              log,
+              licensing,
+              request,
+              credentialStore,
+              reindexOptions: {
+                enqueue: true,
+              },
+              security,
+              version,
+            });
+            results.enqueued.push(result);
+          } catch (e) {
+            results.errors.push({
+              indexName,
+              message: e.message,
+            });
+          }
+        }
+
+        // todo make sure this happens
+        /*
+              if (results.errors.length < indexNames.length) {
+        // Kick the worker on this node to immediately pickup the batch.
+        getWorker().forceRefresh();
+      }
+        */
+        return results;
+      },
       hasRequiredPrivileges: reindexService.hasRequiredPrivileges.bind(reindexService),
       reindexOrResume: async (
         indexName: string,

@@ -9,28 +9,20 @@ import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 
 import { versionCheckHandlerWrapper, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
-import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { API_BASE_PATH_UPRGRADE_ASSISTANT } from '../constants';
-import { ReindexWorker } from '../lib';
-import { reindexActionsFactory } from '../lib/reindex_actions';
-import { sortAndOrderReindexOperations } from '../lib/op_utils';
 import { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
-import { reindexHandler } from '../lib/reindex_handler';
-import { GetBatchQueueResponse, PostBatchResponse } from './types';
 
-export function registerBatchReindexIndicesRoutes(
-  {
-    credentialStore,
-    router,
-    licensing,
-    log,
-    getSecurityPlugin,
-    lib: { handleEsError },
-    version,
-  }: RouteDependencies,
-  getWorker: () => ReindexWorker
-) {
+export function registerBatchReindexIndicesRoutes({
+  credentialStore,
+  router,
+  licensing,
+  log,
+  getSecurityPlugin,
+  lib: { handleEsError },
+  version,
+  getReindexService,
+}: RouteDependencies) {
   const BASE_PATH = `${API_BASE_PATH_UPRGRADE_ASSISTANT}/reindex`;
 
   // Get the current batch queue
@@ -51,19 +43,19 @@ export function registerBatchReindexIndicesRoutes(
         savedObjects,
       } = await core;
       const { getClient } = savedObjects;
-      const callAsCurrentUser = esClient.asCurrentUser;
-      const reindexActions = reindexActionsFactory(
-        getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-        callAsCurrentUser,
-        log,
-        version
-      );
+
       try {
-        const inProgressOps = await reindexActions.findAllByStatus(ReindexStatus.inProgress);
-        const { queue } = sortAndOrderReindexOperations(inProgressOps);
-        const result: GetBatchQueueResponse = {
-          queue: queue.map((savedObject) => savedObject.attributes),
-        };
+        const reindexService = (await getReindexService()).getScopedClient({
+          savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
+          dataClient: esClient,
+          log,
+          licensing,
+          request,
+          credentialStore,
+          security: await getSecurityPlugin(),
+          version,
+        });
+        const result = await reindexService.getBatchQueueResponse();
         return response.ok({
           body: result,
         });
@@ -98,39 +90,18 @@ export function registerBatchReindexIndicesRoutes(
         elasticsearch: { client: esClient },
       } = await core;
       const { indexNames } = request.body;
-      const results: PostBatchResponse = {
-        enqueued: [],
-        errors: [],
-      };
-      for (const indexName of indexNames) {
-        try {
-          const result = await reindexHandler({
-            savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-            dataClient: esClient,
-            indexName,
-            log,
-            licensing,
-            request,
-            credentialStore,
-            reindexOptions: {
-              enqueue: true,
-            },
-            security: await getSecurityPlugin(),
-            version,
-          });
-          results.enqueued.push(result);
-        } catch (e) {
-          results.errors.push({
-            indexName,
-            message: e.message,
-          });
-        }
-      }
 
-      if (results.errors.length < indexNames.length) {
-        // Kick the worker on this node to immediately pickup the batch.
-        getWorker().forceRefresh();
-      }
+      const reindexService = (await getReindexService()).getScopedClient({
+        savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
+        dataClient: esClient,
+        log,
+        licensing,
+        request,
+        credentialStore,
+        security: await getSecurityPlugin(),
+        version,
+      });
+      const results = await reindexService.addToBatch(indexNames);
 
       return response.ok({ body: results });
     })

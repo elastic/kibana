@@ -10,8 +10,6 @@ import { errors } from '@elastic/elasticsearch';
 
 import { versionCheckHandlerWrapper, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH_UPRGRADE_ASSISTANT } from '../constants';
-import { reindexServiceFactory } from '../lib';
-import { reindexActionsFactory } from '../lib/reindex_actions';
 import { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 
@@ -50,7 +48,6 @@ export function registerReindexIndicesRoutes({
       } = await core;
       const { indexName } = request.params;
       try {
-        // todo try to simplify some of the dependency passing
         const reindexService = (await getReindexService()).getScopedClient({
           savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
           dataClient: esClient,
@@ -148,23 +145,19 @@ export function registerReindexIndicesRoutes({
       } = await core;
       const { indexName } = request.params;
       const { getClient } = savedObjects;
-      const callAsCurrentUser = esClient.asCurrentUser;
-      const reindexActions = reindexActionsFactory(
-        getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-        callAsCurrentUser,
-        log,
-        version
-      );
-      const reindexService = reindexServiceFactory(
-        callAsCurrentUser,
-        reindexActions,
-        log,
-        licensing,
-        version
-      );
 
       try {
-        await reindexService.cancelReindexing(indexName);
+        const reindexService = (await getReindexService()).getScopedClient({
+          savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
+          dataClient: esClient,
+          log,
+          licensing,
+          request,
+          credentialStore,
+          security: await getSecurityPlugin(),
+          version,
+        });
+        await reindexService.cancel(indexName);
 
         return response.ok({ body: { acknowledged: true } });
       } catch (error) {
