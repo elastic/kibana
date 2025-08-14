@@ -719,7 +719,7 @@ export class ManifestManager {
 
             const updateErrors: (typeof bulkUpdateResponse)['failedPolicies'] = [];
 
-            for (const failedPolicy of response.failedPolicies) {
+            for (const failedPolicy of bulkUpdateResponse.failedPolicies) {
               // We retry the update 1 more time for SO conflict. It's possible that a policy could have
               // been updated while manifest manager was in progress. In these cases, we try the update
               // again to ensure that the policy receives the updated manifest.
@@ -892,8 +892,10 @@ export class ManifestManager {
       }
     }
 
-    await Promise.allSettled(inflightRequests);
     await policyUpdateBatchProcessor.complete();
+
+    // Since processing of batches could have triggered a retry update, ensure we wait for those to process
+    await Promise.allSettled(inflightRequests).then(() => policyUpdateBatchProcessor.complete());
 
     this.logger.debug(
       `Processed [${updatedPolicies.length + unChangedPolicies.length}] Policies: updated: [${
