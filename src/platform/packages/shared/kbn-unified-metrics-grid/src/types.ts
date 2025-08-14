@@ -18,5 +18,5 @@ export interface MetricField {
   source?: string;
   stability?: string;
   display?: string;
-  no_data?: boolean;
+  noData?: boolean;
 }
