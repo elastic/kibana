@@ -73,6 +73,26 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     ],
   },
   {
+    key: 'polling_interval',
+    type: 'duration',
+    defaultValue: '30s',
+    min: '1s',
+    label: i18n.translate('xpack.apm.agentConfig.pollingInterval.label', {
+      defaultMessage: 'OpAMP HTTP polling interval',
+    }),
+    description: i18n.translate('xpack.apm.agentConfig.pollingInterval.description', {
+      defaultMessage:
+        "The default interval between checking the collector for new changes to config. Note the interval is automatically exponentially extended on failures then reset to the value specified here, on recovery",
+    }),
+    includeAgents: [
+      'opentelemetry/java/elastic',
+//      'opentelemetry/nodejs/elastic',
+//      'opentelemetry/python/elastic',
+//      'opentelemetry/php/elastic',
+//      'opentelemetry/dotnet/elastic',
+    ],
+  },
+  {
     key: 'send_traces',
     type: 'boolean',
     defaultValue: 'true',
