@@ -71,7 +71,7 @@ export interface SavedSearchAttributes {
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
   controlGroupJson?: string; // JSON string of ControlPanelsState<ESQLControlState>
-  tabs?: DiscoverSessionTab[];
+  tabs: DiscoverSessionTab[];
 }
 
 /** @internal **/

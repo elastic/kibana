@@ -61,6 +61,23 @@ describe('getSavedSearch', () => {
           grid: {},
           hideChart: false,
           sampleSize: 100,
+          tabs: [
+            {
+              id: 'my_tab',
+              label: 'My Tab',
+              attributes: {
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON:
+                    '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+                },
+                sort: [['order_date', 'desc']],
+                columns: ['_source'],
+                grid: {},
+                hideChart: false,
+                sampleSize: 100,
+              },
+            },
+          ],
         },
         id: 'ccf1af80-2297-11ec-86e0-1155ffb9c7a7',
         type: 'search',
@@ -146,7 +163,29 @@ describe('getSavedSearch', () => {
             "desc",
           ],
         ],
-        "tabs": undefined,
+        "tabs": Array [
+          Object {
+            "attributes": Object {
+              "columns": Array [
+                "_source",
+              ],
+              "grid": Object {},
+              "hideChart": false,
+              "kibanaSavedObjectMeta": Object {
+                "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"\\",\\"language\\":\\"kuery\\"},\\"filter\\":[],\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+              },
+              "sampleSize": 100,
+              "sort": Array [
+                Array [
+                  "order_date",
+                  "desc",
+                ],
+              ],
+            },
+            "id": "my_tab",
+            "label": "My Tab",
+          },
+        ],
         "tags": undefined,
         "timeRange": undefined,
         "timeRestore": undefined,
@@ -173,6 +212,23 @@ describe('getSavedSearch', () => {
           grid: {},
           hideChart: true,
           isTextBasedQuery: true,
+          tabs: [
+            {
+              id: 'my_tab',
+              label: 'My Tab',
+              attributes: {
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON:
+                    '{"query":{"sql":"SELECT * FROM foo"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+                },
+                sort: [['order_date', 'desc']],
+                columns: ['_source'],
+                grid: {},
+                hideChart: true,
+                isTextBasedQuery: true,
+              },
+            },
+          ],
         },
         id: 'ccf1af80-2297-11ec-86e0-1155ffb9c7a7',
         type: 'search',
@@ -258,7 +314,29 @@ describe('getSavedSearch', () => {
             "desc",
           ],
         ],
-        "tabs": undefined,
+        "tabs": Array [
+          Object {
+            "attributes": Object {
+              "columns": Array [
+                "_source",
+              ],
+              "grid": Object {},
+              "hideChart": true,
+              "isTextBasedQuery": true,
+              "kibanaSavedObjectMeta": Object {
+                "searchSourceJSON": "{\\"query\\":{\\"sql\\":\\"SELECT * FROM foo\\"},\\"filter\\":[],\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+              },
+              "sort": Array [
+                Array [
+                  "order_date",
+                  "desc",
+                ],
+              ],
+            },
+            "id": "my_tab",
+            "label": "My Tab",
+          },
+        ],
         "tags": undefined,
         "timeRange": undefined,
         "timeRestore": undefined,
@@ -285,6 +363,23 @@ describe('getSavedSearch', () => {
           grid: {},
           hideChart: true,
           isTextBasedQuery: true,
+          tabs: [
+            {
+              id: 'my_tab',
+              label: 'My Tab',
+              attributes: {
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON:
+                    '{"query":{"sql":"SELECT * FROM foo"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+                },
+                sort: [['order_date', 'desc']],
+                columns: ['_source'],
+                grid: {},
+                hideChart: true,
+                isTextBasedQuery: true,
+              },
+            },
+          ],
         },
         id: 'ccf1af80-2297-11ec-86e0-1155ffb9c7a7',
         type: 'search',

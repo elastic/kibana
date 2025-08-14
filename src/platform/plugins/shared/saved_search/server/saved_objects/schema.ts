@@ -142,16 +142,19 @@ export const SCHEMA_SEARCH_MODEL_VERSION_7 = SCHEMA_SEARCH_MODEL_VERSION_5.exten
   controlGroupJson: schema.maybe(schema.string()),
 });
 
+const DISCOVER_SESSION_TAB_ATTRIBUTES = SCHEMA_SEARCH_MODEL_VERSION_7.extends({
+  title: undefined,
+  description: undefined,
+});
+
 const SCHEMA_DISCOVER_SESSION_TAB = schema.object({
   id: schema.string(),
   label: schema.string(),
   // Remove `title` and `description` from the tab schema as they exist at the top level of the saved object
-  attributes: SCHEMA_SEARCH_MODEL_VERSION_7.extends({
-    title: undefined,
-    description: undefined,
-  }),
+  attributes: DISCOVER_SESSION_TAB_ATTRIBUTES,
 });
 
+export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES>;
 export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB>;
 
 export const SCHEMA_SEARCH_MODEL_VERSION_6 = SCHEMA_SEARCH_MODEL_VERSION_7.extends({
