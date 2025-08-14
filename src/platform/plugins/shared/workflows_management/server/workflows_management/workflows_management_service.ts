@@ -527,7 +527,7 @@ export class WorkflowsService {
     }
   }
 
-  public async getExecutionLogs(executionId: string): Promise<LogSearchResult> {
+  public async getExecutionLogs(executionId: string, spaceId: string): Promise<LogSearchResult> {
     const query = {
       bool: {
         must: [

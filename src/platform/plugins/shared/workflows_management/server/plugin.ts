@@ -77,7 +77,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
           }
 
           // Get the workflow first
-          const workflow = await this.api.getWorkflow(workflowId);
+          const workflow = await this.api.getWorkflow(workflowId, spaceId);
           if (!workflow) {
             throw new Error(`Workflow not found: ${workflowId}`);
           }
