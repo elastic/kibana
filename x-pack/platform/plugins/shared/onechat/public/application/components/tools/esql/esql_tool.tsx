@@ -15,10 +15,11 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
+import { EsqlToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
+import { i18n } from '@kbn/i18n';
 import {
   CreateToolPayload,
   CreateToolResponse,
@@ -36,6 +37,7 @@ import {
 import { OnechatEsqlToolForm, OnechatEsqlToolFormMode } from './form/esql_tool_form';
 import { OnechatEsqlToolFormData } from './form/types/esql_tool_form_types';
 import { useEsqlToolForm } from '../../../hooks/tools/use_esql_tool_form';
+import { OnechatTestFlyout } from '../test/test_tools';
 
 interface EsqlToolBaseProps {
   tool?: EsqlToolDefinitionWithSchema;
@@ -67,6 +69,8 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
   const form = useEsqlToolForm();
   const { reset, formState } = form;
   const { errors } = formState;
+  const [showTestFlyout, setShowTestFlyout] = useState(false);
+  const [testToolData, setTestToolData] = useState<OnechatEsqlToolFormData>(form.getValues());
 
   const handleClear = useCallback(() => {
     reset();
@@ -107,6 +111,28 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
     </EuiButton>
   );
 
+  const saveAndTestButton = (
+    <EuiButton
+      fill
+      onClick={async () => {
+        const formData = form.getValues();
+        if (mode === OnechatEsqlToolFormMode.Edit) {
+          await saveTool(transformEsqlFormDataForUpdate(formData));
+        } else {
+          await saveTool(transformEsqlFormDataForCreate(formData));
+        }
+        setTestToolData(formData);
+        setShowTestFlyout(true);
+      }}
+      disabled={Object.keys(errors).length > 0 || isSubmitting}
+      isLoading={isSubmitting}
+    >
+      {i18n.translate('xpack.onechat.tools.esqlToolFlyout.saveButtonLabel', {
+        defaultMessage: 'Save and Test',
+      })}
+    </EuiButton>
+  );
+
   return (
     <FormProvider {...form}>
       <KibanaPageTemplate>
@@ -127,7 +153,35 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
               <EuiLoadingSpinner size="xxl" />
             </EuiFlexGroup>
           ) : (
-            <OnechatEsqlToolForm mode={mode} formId={esqlToolFormId} saveTool={handleSave} />
+            <>
+              <OnechatEsqlToolForm mode={mode} formId={esqlToolFormId} saveTool={handleSave} />
+              {showTestFlyout && (
+                <OnechatTestFlyout
+                  isOpen={showTestFlyout}
+                  isLoading={isLoading}
+                  tool={
+                    testToolData
+                      ? {
+                          id: testToolData.name,
+                          type: ToolType.esql,
+                          description: testToolData.description,
+                          tags: testToolData.tags,
+                          configuration: {
+                            query: testToolData.esql,
+                            params: Object.fromEntries(
+                              testToolData.params.map((param: any) => [
+                                param.name,
+                                { type: param.type, description: param.description },
+                              ])
+                            ),
+                          },
+                        }
+                      : tool
+                  }
+                  onClose={() => setShowTestFlyout(false)}
+                />
+              )}
+            </>
           )}
         </KibanaPageTemplate.Section>
         <KibanaPageTemplate.BottomBar
@@ -148,6 +202,7 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
                 saveButton
               )}
             </EuiFlexItem>
+            <EuiFlexItem>{saveAndTestButton}</EuiFlexItem>
           </EuiFlexGroup>
         </KibanaPageTemplate.BottomBar>
       </KibanaPageTemplate>
