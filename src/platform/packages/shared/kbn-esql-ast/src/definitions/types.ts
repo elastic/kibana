@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLSignatureLicenseType } from '@kbn/esql-types';
+import type { LicenseType } from '@kbn/licensing-types';
 import { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLNumericLiteralType } from '../types';
 import { Location } from '../commands_registry/types';
@@ -177,7 +177,7 @@ export interface FunctionParameter {
 export interface ElasticsearchCommandDefinition {
   type: string;
   name: string;
-  license?: ESQLSignatureLicenseType;
+  license?: LicenseType;
   observability_tier?: string;
 }
 
@@ -192,7 +192,7 @@ export interface Signature {
   params: FunctionParameter[];
   minParams?: number;
   returnType: FunctionReturnType;
-  license?: ESQLSignatureLicenseType;
+  license?: LicenseType;
 }
 
 export interface FunctionDefinition {
@@ -207,7 +207,7 @@ export interface FunctionDefinition {
   examples?: string[];
   operator?: string;
   customParametersSnippet?: string;
-  license?: ESQLSignatureLicenseType;
+  license?: LicenseType;
   observabilityTier?: Uppercase<Extract<PricingProduct, { type: 'observability' }>['tier']>;
 }
 
