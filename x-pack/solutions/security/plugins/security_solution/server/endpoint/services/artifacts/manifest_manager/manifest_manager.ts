@@ -7,10 +7,12 @@
 
 import semver from 'semver';
 import { chunk, isEmpty, isEqual, keyBy } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import {
   type Logger,
   type SavedObjectsClientContract,
   type ElasticsearchClient,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -667,6 +669,9 @@ export class ManifestManager {
     const manifestVersion = manifest.getSemanticVersion();
     const execId = Math.random().toString(32).substring(3, 8);
     const savedObjects = this.savedObjectsClientFactory;
+    const wasPolicyUpdateRetried = new Set<string>();
+    // inflightRequests: stores promises that may be curently processing that are outside of the batch processor (ex. retries)
+    const inflightRequests = new Set<Promise<unknown>>();
     const policyUpdateBatchProcessor = new QueueProcessor<PackagePolicy>({
       batchSize: this.packagerTaskPackagePolicyUpdateBatchSize,
       logger: this.logger,
@@ -711,7 +716,71 @@ export class ManifestManager {
 
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             response.updatedPolicies!.push(...(bulkUpdateResponse.updatedPolicies ?? []));
-            response.failedPolicies.push(...(bulkUpdateResponse.failedPolicies ?? []));
+
+            const updateErrors: (typeof bulkUpdateResponse)['failedPolicies'] = [];
+
+            for (const failedPolicy of response.failedPolicies) {
+              // We retry the update 1 more time for SO conflict. It's possible that a policy could have
+              // been updated while manifest manager was in progress. In these cases, we try the update
+              // again to ensure that the policy receives the updated manifest.
+              if (
+                SavedObjectsErrorHelpers.isConflictError(failedPolicy.error as Error) &&
+                !wasPolicyUpdateRetried.has(failedPolicy.packagePolicy.id ?? '') &&
+                failedPolicy.packagePolicy.id
+              ) {
+                wasPolicyUpdateRetried.add(failedPolicy.packagePolicy.id);
+
+                this.logger.debug(
+                  () =>
+                    `Conflict error encountered for policy [${failedPolicy.packagePolicy.id}]. Retrying update...`
+                );
+
+                // retrieve latest policy - but don't error case it was deleted
+                inflightRequests.add(
+                  this.packagePolicyService
+                    .get(
+                      savedObjects.createInternalScopedSoClient({ spaceId }),
+                      failedPolicy.packagePolicy.id,
+                      { spaceId }
+                    )
+                    .then((latestPolicy) => {
+                      if (!latestPolicy) {
+                        response.failedPolicies.push(failedPolicy);
+                        return;
+                      }
+
+                      set(
+                        latestPolicy,
+                        'inputs[0].config.artifact_manifest.value',
+                        failedPolicy.packagePolicy.inputs[0]?.config?.artifact_manifest?.value
+                      );
+
+                      this.logger.debug(
+                        () =>
+                          `Sending retry update for policy [${latestPolicy.id}]:\n${stringify(
+                            latestPolicy,
+                            20
+                          )}`
+                      );
+
+                      policyUpdateBatchProcessor.addToQueue(latestPolicy);
+                    })
+                    .catch((err) => {
+                      // If unable to get latest version of policy (ex. policy was deleted), then just report update as a failure
+                      this.logger.debug(
+                        () =>
+                          `Failed to retrieve policy [${failedPolicy.packagePolicy.id}] for space [${spaceId}] in order to retry policy update. Retry will be skipped:\n${err.message}`
+                      );
+
+                      response.failedPolicies.push(failedPolicy);
+                    })
+                );
+              } else {
+                updateErrors.push(failedPolicy);
+              }
+            }
+
+            response.failedPolicies.push(...(updateErrors ?? []));
           }
 
           if (!isEmpty(response.failedPolicies)) {
@@ -823,6 +892,7 @@ export class ManifestManager {
       }
     }
 
+    await Promise.allSettled(inflightRequests);
     await policyUpdateBatchProcessor.complete();
 
     this.logger.debug(
