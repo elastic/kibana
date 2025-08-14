@@ -124,12 +124,6 @@ const semConvContainerExtendedMetadata = (metadataInfo: InfraMetadata['info']): 
     tooltipLink:
       'https://opentelemetry.io/docs/specs/semconv/registry/attributes/cloud/#cloud-resource-id',
   },
-  // is this deprecated??
-  {
-    field: 'cloudImageId',
-    value: metadataInfo?.resource?.attributes?.cloud?.imageId,
-    tooltipFieldLabel: 'cloud.image.id',
-  },
   {
     field: 'cloudProvider',
     value: metadataInfo?.resource?.attributes?.cloud?.provider,

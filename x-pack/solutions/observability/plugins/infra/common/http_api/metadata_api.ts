@@ -103,7 +103,6 @@ export const InfraMetadataResourceRT = rt.partial({
     agent: rt.partial({}),
     cloud: rt.partial({
       provider: rt.string,
-      imageId: rt.string,
       resource: rt.partial({
         id: rt.string,
       }),
