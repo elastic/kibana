@@ -19,6 +19,7 @@ import {
   CanExpandPanels,
   HasLastSavedChildState,
   HasSerializedChildState,
+  PassThroughContext,
   PresentationContainer,
   PublishesSettings,
   TrackContentfulRender,
@@ -62,6 +63,7 @@ export interface DashboardCreationOptions {
   getInitialInput?: () => Partial<DashboardState & { viewMode?: ViewMode }>;
 
   getIncomingEmbeddables?: () => EmbeddablePackageState[] | undefined;
+  getPassThroughContext?: PassThroughContext['getPassThroughContext'];
 
   useSearchSessionsIntegration?: boolean;
   searchSessionSettings?: {
@@ -96,6 +98,7 @@ export type DashboardApi = CanExpandPanels &
   HasSerializedChildState &
   HasType<typeof DASHBOARD_API_TYPE> &
   HasUniqueId &
+  PassThroughContext &
   PresentationContainer &
   PublishesDataLoading &
   PublishesDataViews &
