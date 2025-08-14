@@ -1397,6 +1397,7 @@
     "type-fest": "^4.17.0",
     "typescript-fsa": "^3.0.0",
     "typescript-fsa-reducers": "^1.2.2",
+    "undici": "6.21.2",
     "unidiff": "^1.0.4",
     "unified": "9.2.2",
     "use-resize-observer": "^9.1.0",
