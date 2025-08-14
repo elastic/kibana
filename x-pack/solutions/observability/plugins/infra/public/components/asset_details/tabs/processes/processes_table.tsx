@@ -15,11 +15,7 @@ import {
   EuiTableBody,
   EuiTableHeaderCell,
   EuiTableRowCell,
-  EuiEmptyPrompt,
   useEuiTheme,
-  EuiText,
-  EuiLink,
-  EuiButton,
   SortableProperties,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
@@ -35,6 +31,7 @@ import { FORMATTERS } from '../../../../../common/formatters';
 import type { SortBy } from '../../hooks/use_process_list';
 import type { Process } from './types';
 import { ProcessRow } from './process_row';
+import { ProcessesEmptyMessage } from './processes_empty_message';
 import { StateBadge } from './state_badge';
 import { STATE_ORDER } from './states';
 import type { ProcessListAPIResponse } from '../../../../../common/http_api';
@@ -137,53 +134,7 @@ export const ProcessesTable = ({
   );
 
   if (!isLoading && currentItems.length === 0)
-    return (
-      <EuiEmptyPrompt
-        iconType="search"
-        titleSize="s"
-        title={
-          <strong>
-            <FormattedMessage
-              id="xpack.infra.metrics.nodeDetails.noProcesses"
-              defaultMessage="No processes found"
-            />
-          </strong>
-        }
-        body={
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.infra.metrics.nodeDetails.noProcessesBody"
-              defaultMessage="Try modifying your filter. Only processes that are within the configured {metricbeatDocsLink} will display here."
-              values={{
-                metricbeatDocsLink: (
-                  <EuiLink
-                    data-test-subj="infraProcessesTableTopNByCpuOrMemoryLink"
-                    href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-module-system.html"
-                    target="_blank"
-                  >
-                    <FormattedMessage
-                      id="xpack.infra.metrics.nodeDetails.noProcessesBody.metricbeatDocsLinkText"
-                      defaultMessage="top N by CPU or Memory"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiText>
-        }
-        actions={
-          <EuiButton
-            data-test-subj="infraProcessesTableClearFiltersButton"
-            onClick={clearSearchBar}
-          >
-            <FormattedMessage
-              id="xpack.infra.metrics.nodeDetails.noProcessesClearFilters"
-              defaultMessage="Clear filters"
-            />
-          </EuiButton>
-        }
-      />
-    );
+    return <ProcessesEmptyMessage schema={schema} clearSearchBar={clearSearchBar} />;
 
   return (
     <EuiTable data-test-subj="infraAssetDetailsProcessesTable" responsiveBreakpoint={false}>
