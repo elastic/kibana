@@ -12,9 +12,11 @@ import {
   AGENT_NAME,
   AGENT_VERSION,
   AT_TIMESTAMP,
+  DURATION,
   EVENT_OUTCOME,
   HOST_NAME,
   HTTP_RESPONSE_STATUS_CODE,
+  KIND,
   PARENT_ID,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
@@ -31,6 +33,7 @@ import React from 'react';
 import { UnifiedDocViewerStorybookArgs } from '../../../../.storybook/preview';
 import APMSpanFixture from '../../../__fixtures__/span_apm.json';
 import APMTransactionFixture from '../../../__fixtures__/transaction_apm.json';
+import SpanOtelRedisClientFixture from '../../../__fixtures__/span_otel_redis_client.json';
 import { ContentFrameworkTable, ContentFrameworkTableProps } from '.';
 
 type Args = UnifiedDocViewerStorybookArgs<ContentFrameworkTableProps>;
@@ -111,6 +114,30 @@ export const APMTransaction: Story = {
       },
       [EVENT_OUTCOME]: {
         title: 'Outcome',
+        description: 'Custom field description',
+        formatter: (value) => (
+          <div>
+            Custom formatter with highlight: <mark className="ffSearch__highlight">{value}</mark>
+          </div>
+        ),
+      },
+    },
+  },
+};
+export const SpanOtelRedisClient: Story = {
+  name: 'Span Otel Redis Client',
+  args: {
+    hit: SpanOtelRedisClientFixture,
+    fieldNames: [AT_TIMESTAMP, SERVICE_NAME, 'db.system', 'db.statement', DURATION, KIND],
+    title: 'APM Transaction data',
+    fieldConfigurations: {
+      [DURATION]: {
+        title: 'Duration',
+        description: 'Custom field description',
+        formatter: (value) => <div>Custom formatter for: {value}</div>,
+      },
+      ['db.system']: {
+        title: 'Database',
         description: 'Custom field description',
         formatter: (value) => (
           <div>
