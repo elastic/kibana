@@ -81,8 +81,8 @@ const filterButtonStyles = {
       '& .euiButtonIcon': {
         height: euiTheme.size.xl,
         width: euiTheme.size.xl,
-        inlineSize: '32px',
-        blockSize: '32px',
+        inlineSize: euiTheme.size.xl,
+        blockSize: euiTheme.size.xl,
       },
     }),
 };
