@@ -49093,7 +49093,7 @@
                                                           "minLength": 1,
                                                           "type": "string"
                                                         },
-                                                        "if": {
+                                                        "where": {
                                                           "anyOf": [
                                                             {
                                                               "anyOf": [
@@ -49372,7 +49372,7 @@
                                                       },
                                                       "required": [
                                                         "destination",
-                                                        "if"
+                                                        "where"
                                                       ],
                                                       "type": "object"
                                                     },
@@ -58191,7 +58191,19 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
-                  "if": {
+                  "stream": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "type": "object"
+                  },
+                  "where": {
                     "anyOf": [
                       {
                         "anyOf": [
@@ -58466,23 +58478,11 @@
                         "type": "object"
                       }
                     ]
-                  },
-                  "stream": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "name"
-                    ],
-                    "type": "object"
                   }
                 },
                 "required": [
                   "stream",
-                  "if"
+                  "where"
                 ],
                 "type": "object"
               }
@@ -61509,7 +61509,7 @@
                                           "minLength": 1,
                                           "type": "string"
                                         },
-                                        "if": {
+                                        "where": {
                                           "anyOf": [
                                             {
                                               "anyOf": [
@@ -61788,7 +61788,7 @@
                                       },
                                       "required": [
                                         "destination",
-                                        "if"
+                                        "where"
                                       ],
                                       "type": "object"
                                     },
