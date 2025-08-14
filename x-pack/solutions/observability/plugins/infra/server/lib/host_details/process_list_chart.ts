@@ -134,7 +134,7 @@ const getEcsProcessListChart = async (
         }, initialResponse)
       : initialResponse;
 
-  return timeseries as ProcessListAPIChartResponse;
+  return timeseries;
 };
 
 const getSemConvProcessListChart = async (
@@ -259,7 +259,7 @@ const getSemConvProcessListChart = async (
           return tsResult;
         }, initialResponse)
       : initialResponse;
-  return timeseries as ProcessListAPIChartResponse;
+  return timeseries;
 };
 
 export const getProcessListChart = async (
