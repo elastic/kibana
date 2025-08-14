@@ -310,7 +310,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       const artifact = await artifactService.getArtifact(QUERY_ARTIFACT_ID);
       return parseDiagnosticQueries(artifact.data);
     } catch (error) {
-      this.logger.warn('Error getting health diagnostic queries', { error });
+      this.logger.warn(`Error getting health diagnostic queries: ${error.message}`, { error });
       return [];
     }
   }
