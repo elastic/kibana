@@ -7,6 +7,7 @@
 
 import Papa from 'papaparse';
 import { Readable } from 'stream';
+import { isRight } from 'fp-ts/Either';
 import type { HapiReadableStream } from '../../../../types';
 import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import { privilegedUserParserTransform } from './streams/privileged_user_parse_transform';
@@ -18,7 +19,7 @@ import { queryExistingUsers } from './bulk/query_existing_users';
 
 import { softDeleteOmittedUsers } from './bulk/soft_delete_omitted_users';
 import { createPrivmonIndexService } from '../engine/elasticsearch/indices';
-import type { BulkProcessingResults } from './bulk/types';
+import type { BulkProcessingResults, Batch } from './bulk/types';
 
 export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringDataClient) => {
   const { deps, index } = dataClient;
@@ -26,9 +27,27 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
 
   const bulkUpload = async (
     stream: HapiReadableStream,
-    options: { retries: number; flushBytes: number }
+    options: { retries: number; flushBytes: number; maxUsersAllowed: number }
   ) => {
+    // Generate unique identifier for this upload session
+    const uploadId = `upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    dataClient.log(
+      'debug',
+      `[${uploadId}] Starting CSV bulk upload with maxUsersAllowed: ${options.maxUsersAllowed}`
+    );
+
     await checkAndInitPrivilegedMonitoringResources();
+
+    // Get current user count but don't fail immediately
+    const currentUserCount = await esClient.count({
+      index,
+      query: {
+        term: {
+          'user.is_privileged': true,
+        },
+      },
+    });
 
     const csvStream = Papa.parse(Papa.NODE_STREAM_INPUT, {
       header: false,
@@ -46,18 +65,85 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
       failed: 0,
       successful: 0,
     };
-    for await (const batch of batches) {
-      const usrs = await queryExistingUsers(esClient, index)(batch);
-      const upserted = await bulkUpsertBatch(esClient, index, options)(usrs);
-      results = accumulateUpsertResults(
-        { users: [], errors: [], failed: 0, successful: 0 },
-        upserted
-      );
-    }
 
+    let runningUserCount = currentUserCount.count;
+    let batchNumber = 0;
+
+    for await (const batch of batches) {
+      batchNumber++;
+      const batchId = `${uploadId}_batch_${batchNumber}`;
+
+      // Query existing users to separate new vs existing
+      const batchWithExisting = await queryExistingUsers(esClient, index)(batch);
+
+      // Filtering: separate new users from existing users
+      const { newUsersBatch, existingUsersBatch } = separateNewAndExistingUsers(batchWithExisting);
+
+      const newUsersCount = newUsersBatch.uploaded.length;
+      const existingUsersCount = existingUsersBatch.uploaded.length;
+
+      dataClient.log(
+        'debug',
+        `[${batchId}] Separated users - New: ${newUsersCount}, Existing: ${existingUsersCount}`
+      );
+
+      // Calculate how many new users we can still add based on current running count
+      const availableSlots = Math.max(0, options.maxUsersAllowed - runningUserCount);
+
+      // Limit new users to available slots
+      const newUsersToProcess =
+        availableSlots > 0 ? newUsersBatch.uploaded.slice(0, availableSlots) : [];
+      const newUsersRejected = newUsersBatch.uploaded.slice(availableSlots);
+
+      const newUsersAccepted = newUsersToProcess.length;
+
+      // Create batch with allowed users (all existing + limited new users)
+      const processedBatch: Batch = {
+        uploaded: [...existingUsersBatch.uploaded, ...newUsersToProcess],
+        existingUsers: batchWithExisting.existingUsers,
+      };
+      // Process the allowed users
+      if (processedBatch.uploaded.length > 0) {
+        const upserted = await bulkUpsertBatch(esClient, index, options)(processedBatch);
+        results = accumulateUpsertResults(results, upserted);
+
+        // Update running count with new users that were actually successfully created
+        // Only count new users, not existing user updates
+        const previousRunningCount = runningUserCount;
+        runningUserCount += newUsersAccepted; // Add the new users we attempted to process
+        dataClient.log(
+          'debug',
+          `[${batchId}] Updated running count after processing: ${previousRunningCount} → ${runningUserCount}`
+        );
+      } else {
+        dataClient.log('debug', `[${batchId}] Skipping bulk upsert - no users to process`);
+      }
+
+      // Add errors for rejected new users
+      let rejectedErrorsAdded = 0;
+      newUsersRejected.forEach((userEither) => {
+        if (isRight(userEither)) {
+          results.errors.push({
+            message: `Maximum user limit of ${options.maxUsersAllowed} reached. Cannot add new user.`,
+            username: userEither.right.username,
+            index: userEither.right.index,
+          });
+          results.failed++;
+          rejectedErrorsAdded++;
+        }
+      });
+
+      // Log if we've reached the limit
+      if (runningUserCount >= options.maxUsersAllowed) {
+        dataClient.log(
+          'info',
+          `Maximum user limit reached (${options.maxUsersAllowed}). All subsequent new users will be rejected.`
+        );
+      }
+    }
     const softDeletedResults = await softDeleteOmittedUsers(esClient, index, options)(results);
 
-    return {
+    const finalStats = {
       errors: softDeletedResults.updated.errors.concat(softDeletedResults.deleted.errors),
       stats: {
         failed: softDeletedResults.updated.failed + softDeletedResults.deleted.failed,
@@ -69,6 +155,15 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
           softDeletedResults.deleted.successful,
       },
     };
+
+    dataClient.log('info', `[${uploadId}] CSV bulk upload completed`);
+    dataClient.log(
+      'info',
+      `[${uploadId}] Final statistics: ${finalStats.stats.successful} successful, ${finalStats.stats.failed} failed, ${finalStats.stats.total} total`
+    );
+    dataClient.log('info', `[${uploadId}] Total errors: ${finalStats.errors.length}`);
+
+    return finalStats;
   };
 
   /**
@@ -85,6 +180,27 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
       await IndexService.upsertIndex();
       dataClient.log('info', 'Privilege monitoring resources installed');
     }
+  };
+
+  // Helper function to separate new and existing users
+  const separateNewAndExistingUsers = (batch: Batch) => {
+    const newUsersBatch: Batch = { uploaded: [], existingUsers: batch.existingUsers };
+    const existingUsersBatch: Batch = { uploaded: [], existingUsers: batch.existingUsers };
+
+    batch.uploaded.forEach((userEither) => {
+      if (isRight(userEither)) {
+        const username = userEither.right.username;
+        if (batch.existingUsers[username]) {
+          // User already exists in the system
+          existingUsersBatch.uploaded.push(userEither);
+        } else {
+          // New user to be created
+          newUsersBatch.uploaded.push(userEither);
+        }
+      }
+    });
+
+    return { newUsersBatch, existingUsersBatch };
   };
 
   return { bulkUpload };

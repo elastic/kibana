@@ -73,14 +73,19 @@ export const uploadUsersCSVRoute = (
           );
 
           const secSol = await context.securitySolution;
+          const maxUsersAllowed =
+            config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
+
           const fileStream = request.body.file as HapiReadableStream;
 
           const dataClient = secSol.getPrivilegeMonitoringDataClient();
+
           const csvService = createPrivilegedUsersCsvService(dataClient);
 
           const body = await csvService.bulkUpload(fileStream, {
             retries: errorRetries,
             flushBytes: maxBulkRequestBodySizeBytes,
+            maxUsersAllowed,
           });
 
           return response.ok({ body });

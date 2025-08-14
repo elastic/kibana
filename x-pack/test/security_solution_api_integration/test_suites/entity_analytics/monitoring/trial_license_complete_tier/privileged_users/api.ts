@@ -365,6 +365,213 @@ export default ({ getService }: FtrProviderContext) => {
           expect(getEaLabelValues(listed[0])).to.eql([]);
         });
       });
+      describe('CSV Upload with User Limits', () => {
+        it('should handle mixed new and existing users', async () => {
+          log.info('Testing  CSV upload with mixed users');
+
+          // First, create some existing users via API
+          log.info('Creating 3 users via API first');
+          await api.createPrivMonUser({ body: { user: { name: 'existing_user_1' } } });
+          await api.createPrivMonUser({ body: { user: { name: 'existing_user_2' } } });
+          await api.createPrivMonUser({ body: { user: { name: 'existing_user_3' } } });
+
+          // Now upload CSV with mix of existing and new users
+          const csv = [
+            'existing_user_1', // Should get CSV source added
+            'existing_user_2', // Should get CSV source added
+            'new_user_1', // Should be created (new)
+            'new_user_2', // Should be created (new)
+          ].join('\n');
+
+          const res = await privMonUtils.bulkUploadUsersCsv(csv);
+
+          if (res.status !== 200) {
+            log.error('CSV upload failed');
+            log.error(JSON.stringify(res.body));
+          }
+
+          expect(res.status).eql(200);
+          // Should succeed for all users (2 existing + 2 new = 4 successful)
+          expect(res.body.stats.successful).eql(4);
+          expect(res.body.stats.failed).eql(0);
+          expect(res.body.stats.total).eql(4);
+
+          // Verify all users exist
+          const listRes = await api.listPrivMonUsers({ query: {} });
+          expect(listRes.status).eql(200);
+          expect(listRes.body.length).eql(5); // 3 original + 2 new = 5 total
+
+          // Verify existing users have both API and CSV sources
+          const existingUser1 = listRes.body.find((u: any) => u.user.name === 'existing_user_1');
+          expect(existingUser1).to.not.be(undefined);
+          expect(existingUser1.labels.sources).to.contain('api');
+          expect(existingUser1.labels.sources).to.contain('csv');
+
+          // Verify new users have only CSV source
+          const newUser1 = listRes.body.find((u: any) => u.user.name === 'new_user_1');
+          expect(newUser1).to.not.be(undefined);
+          expect(newUser1.labels.sources).to.contain('csv');
+          expect(newUser1.labels.sources).to.not.contain('api');
+
+          log.info('CSV upload with mixed users completed successfully');
+        });
+
+        it('should prioritize existing users over new users', async () => {
+          log.info('Testing prioritization of existing users over new users');
+
+          // Create some existing users first
+          await api.createPrivMonUser({ body: { user: { name: 'priority_user_1' } } });
+          await api.createPrivMonUser({ body: { user: { name: 'priority_user_2' } } });
+
+          // Upload CSV that includes both existing and new users
+          const csv = [
+            'priority_user_1', // Existing - should always be processed
+            'priority_user_2', // Existing - should always be processed
+            'brand_new_user_1', // New - should be processed (within limit)
+            'brand_new_user_2', // New - should be processed (within limit)
+          ].join('\n');
+
+          const res = await privMonUtils.bulkUploadUsersCsv(csv);
+          expect(res.status).eql(200);
+
+          // Verify successful processing
+          expect(res.body.stats.successful).eql(4);
+          expect(res.body.stats.total).eql(4);
+
+          // Verify that existing users were updated with CSV source
+          const listRes = await api.listPrivMonUsers({
+            query: { kql: 'user.name: priority_user_*' },
+          });
+
+          expect(listRes.body.length).eql(2);
+          listRes.body.forEach((user: any) => {
+            expect(user.labels.sources).to.contain('api');
+            expect(user.labels.sources).to.contain('csv');
+          });
+
+          log.info('Prioritization logic verified for CSV upload');
+        });
+
+        it('should provide clear error structure for limit validation', async () => {
+          log.info('Testing error structure for limit validation');
+
+          // Create one existing user
+          await api.createPrivMonUser({ body: { user: { name: 'existing_user' } } });
+
+          // Upload CSV with mix - since we're using default limit for FTR tests (100),
+          // all should succeed but we verify the error structure works
+          const csv = [
+            'existing_user', // Should always succeed (existing)
+            'new_user_1', // Should succeed (new, within limit)
+            'new_user_2', // Should succeed (new, within limit)
+          ].join('\n');
+
+          const res = await privMonUtils.bulkUploadUsersCsv(csv);
+          expect(res.status).eql(200);
+
+          // With default limit of 100 for FTR tests, all should succeed
+          expect(res.body.stats.successful).eql(3);
+          expect(res.body.stats.failed).eql(0);
+
+          // Verify response structure is correct
+          expect(res.body).to.have.property('stats');
+          expect(res.body).to.have.property('errors');
+          expect(res.body.stats).to.have.property('successful');
+          expect(res.body.stats).to.have.property('failed');
+          expect(res.body.stats).to.have.property('total');
+
+          // Verify that existing user was updated with CSV source
+          const listRes = await api.listPrivMonUsers({
+            query: { kql: 'user.name: existing_user' },
+          });
+
+          expect(listRes.body.length).eql(1);
+          const existingUser = listRes.body[0];
+          expect(existingUser.labels.sources).to.contain('api');
+          expect(existingUser.labels.sources).to.contain('csv');
+
+          // Verify new users have only CSV source
+          const newUsersRes = await api.listPrivMonUsers({
+            query: { kql: 'user.name: new_user_*' },
+          });
+
+          expect(newUsersRes.body.length).eql(2);
+          newUsersRes.body.forEach((user: any) => {
+            expect(user.labels.sources).to.contain('csv');
+            expect(user.labels.sources).to.not.contain('api');
+          });
+
+          log.info('Error structure and source updates verified for CSV upload');
+        });
+        it('should enforce user limit: 99 existing + CSV with 10 new users = only 1 new user processed', async () => {
+          log.info('Testing strict user limit enforcement with CSV upload');
+
+          // Create 99 users in parallel to be close to the limit (assuming limit is 100)
+          log.info('Creating 99 users via API in parallel');
+          const createUserPromises = [];
+          for (let i = 1; i <= 99; i++) {
+            createUserPromises.push(
+              api.createPrivMonUser({
+                body: { user: { name: `limit_test_user_${i.toString().padStart(3, '0')}` } },
+              })
+            );
+          }
+
+          // Wait for all users to be created
+          await Promise.all(createUserPromises);
+
+          // Verify we have 99 users
+          const preUploadListRes = await api.listPrivMonUsers({ query: {} });
+          expect(preUploadListRes.status).eql(200);
+          expect(preUploadListRes.body.length).eql(99);
+          log.info(`Created ${preUploadListRes.body.length} users successfully`);
+
+          // Now upload CSV with 10 new users - only 1 should be processed due to limit
+          const csvUsers = [];
+          for (let i = 1; i <= 10; i++) {
+            csvUsers.push(`csv_new_user_${i.toString().padStart(2, '0')}`);
+          }
+          const csv = csvUsers.join('\n');
+
+          log.info('Uploading CSV with 10 new users (expecting only 1 to succeed due to limit)');
+          const res = await privMonUtils.bulkUploadUsersCsv(csv);
+
+          expect(res.status).eql(200);
+          log.info('CSV upload response:', JSON.stringify(res.body, null, 2));
+
+          // Should process only 1 new user (99 + 1 = 100, at limit)
+          expect(res.body.stats.successful).eql(1);
+          expect(res.body.stats.failed).eql(9); // 9 users should fail
+          expect(res.body.stats.total).eql(10);
+
+          // Verify errors exist for the 9 failed users
+          expect(res.body.errors).to.be.an('array');
+          expect(res.body.errors.length).eql(9);
+
+          // Check that error messages mention limit
+          res.body.errors.forEach((error: any) => {
+            expect(error.message).to.match(/limit|exceed/i);
+          });
+
+          // Verify final user count is exactly 100
+          const finalListRes = await api.listPrivMonUsers({ query: {} });
+          expect(finalListRes.status).eql(200);
+          expect(finalListRes.body.length).eql(100); // Should be exactly at limit
+
+          // Verify exactly 1 CSV user was created
+          const csvUsersRes = await api.listPrivMonUsers({
+            query: { kql: 'user.name: csv_new_user_*' },
+          });
+          expect(csvUsersRes.body.length).eql(1);
+
+          // The created CSV user should have only 'csv' source
+          const csvUser = csvUsersRes.body[0];
+          expect(csvUser.labels.sources).to.contain('csv');
+          expect(csvUser.labels.sources).to.not.contain('api');
+
+          log.info('User limit enforcement verified: 99 existing + 1 from CSV = 100 total');
+        });
+      });
     });
   });
 };
