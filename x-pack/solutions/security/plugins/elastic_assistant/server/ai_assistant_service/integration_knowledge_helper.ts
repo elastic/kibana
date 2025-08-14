@@ -28,14 +28,9 @@ export const checkIntegrationKnowledgeIndexEntryExists = async ({
       filter: `type:index AND index:${INTEGRATION_KNOWLEDGE_INDEX_NAME}`,
     });
 
-    const exists =
-      results?.data?.hits?.total &&
-      (typeof results.data.hits.total === 'number'
-        ? results.data.hits.total > 0
-        : results.data.hits.total.value > 0);
-
+    const exists = results.total > 0;
     logger.debug(`Integration knowledge index entry exists: ${exists}`);
-    return !!exists;
+    return exists;
   } catch (error) {
     logger.debug(`Error checking integration knowledge index entry: ${error.message}`);
     return false;

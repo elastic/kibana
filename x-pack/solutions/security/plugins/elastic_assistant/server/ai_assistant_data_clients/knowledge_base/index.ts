@@ -296,7 +296,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       }
 
       // Ensure integration knowledge index entry exists first (synchronous)
-      this.options.logger.debug('Checking integration knowledge index entry...');
       try {
         await ensureIntegrationKnowledgeIndexEntry(
           this,
