@@ -138,11 +138,6 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       );
     };
 
-    let decodedId: DecodedCloudId | undefined;
-    if (this.config.id) {
-      decodedId = decodeCloudId(this.config.id, this.logger);
-    }
-
     return {
       CloudContextProvider,
       isCloudEnabled: this.isCloudEnabled,
