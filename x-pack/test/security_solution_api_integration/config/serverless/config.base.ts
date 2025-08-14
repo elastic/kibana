@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import path from 'path';
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import path from 'path';
+import { FtrConfigProviderContext, defineDockerServersConfig } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { installMockPrebuiltRulesPackage } from '../../test_suites/detections_response/utils';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
 import { services } from './services';
 
@@ -25,6 +23,7 @@ export interface CreateTestConfigOptions {
    */
   kbnTestServerWait?: RegExp;
   suiteTags?: { include?: string[]; exclude?: string[] };
+  dockerServers?: ReturnType<typeof defineDockerServersConfig>;
 }
 
 export function createTestConfig(options: CreateTestConfigOptions) {
@@ -39,6 +38,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       services: {
         ...services,
       },
+      ...options.dockerServers,
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
@@ -54,6 +54,17 @@ export function createTestConfig(options: CreateTestConfigOptions) {
             __dirname,
             '../../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
           )}`,
+          '--xpack.fleet.registryUrl=http://localhost:8081',
+          `--logging.loggers=${JSON.stringify([
+            {
+              name: 'plugins.securitySolution',
+              level: 'debug',
+            },
+            {
+              name: 'plugins.fleet',
+              level: 'debug',
+            },
+          ])}`,
         ],
         env: {
           ...svlSharedConfig.get('kbnTestServer.env'),
@@ -66,20 +77,6 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       },
       testFiles: options.testFiles,
       junit: options.junit,
-
-      mochaOpts: {
-        ...svlSharedConfig.get('mochaOpts'),
-        grep: '/^(?!.*(^|\\s)@skipInServerless(\\s|$)).*@serverless.*/',
-        rootHooks: {
-          // Some of the Rule Management API endpoints install prebuilt rules package under the hood.
-          // Prebuilt rules package installation has been known to be flakiness reason since
-          // EPR might be unavailable or the network may have faults.
-          // Real prebuilt rules package installation is prevented by
-          // installing a lightweight mock package.
-          beforeAll: ({ getService }: FtrProviderContext) =>
-            installMockPrebuiltRulesPackage({ getService }),
-        },
-      },
     };
   };
 }
