@@ -76,7 +76,7 @@ export function initializeUnsavedChangesManager({
 
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
 
-  const hasPanelChanges$ = childrenUnsavedChanges$(layoutManager.api.children$).pipe(
+  const hasChildrenUnsavedChanges$ = childrenUnsavedChanges$(layoutManager.api.children$).pipe(
     tap((childrenWithChanges) => {
       // propagate the latest serialized state back to the layout manager.
       for (const { uuid, hasUnsavedChanges } of childrenWithChanges) {
@@ -104,7 +104,7 @@ export function initializeUnsavedChangesManager({
   const unsavedChangesSubscription = combineLatest([
     viewMode$,
     dashboardStateChanges$,
-    hasPanelChanges$,
+    hasChildrenUnsavedChanges$,
     controlGroupManager.api.controlGroupApi$.pipe(
       skipWhile((controlGroupApi) => !controlGroupApi),
       switchMap((controlGroupApi) => {
@@ -113,38 +113,42 @@ export function initializeUnsavedChangesManager({
     ),
   ])
     .pipe(debounceTime(DEBOUNCE_TIME))
-    .subscribe(([viewMode, dashboardChanges, hasPanelChanges, hasControlGroupChanges]) => {
-      const hasDashboardChanges = Object.keys(dashboardChanges ?? {}).length > 0;
-      const hasUnsavedChanges = hasDashboardChanges || hasPanelChanges || hasControlGroupChanges;
+    .subscribe(
+      ([viewMode, dashboardChanges, hasChildrenUnsavedChanges, hasControlGroupChanges]) => {
+        const hasDashboardChanges = Object.keys(dashboardChanges ?? {}).length > 0;
+        const hasLayoutChanges = dashboardChanges.panels;
+        const hasUnsavedChanges =
+          hasDashboardChanges || hasChildrenUnsavedChanges || hasControlGroupChanges;
 
-      if (hasUnsavedChanges !== hasUnsavedChanges$.value) {
-        hasUnsavedChanges$.next(hasUnsavedChanges);
-      }
-
-      if (storeUnsavedChanges) {
-        const dashboardBackupState: DashboardBackupState = omit(dashboardChanges ?? {}, [
-          'timeRange',
-          'refreshInterval',
-        ]);
-
-        // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
-        dashboardBackupState.viewMode = viewMode;
-        // Backup latest state from children that have unsaved changes
-        if (hasPanelChanges || hasControlGroupChanges || dashboardChanges.panels) {
-          const { panels, references } = layoutManager.internalApi.serializeLayout();
-          const { controlGroupInput, controlGroupReferences } =
-            controlGroupManager.internalApi.serializeControlGroup();
-          // dashboardStateToBackup.references will be used instead of savedObjectResult.references
-          // To avoid missing references, make sure references contains all references
-          // even if panels or control group does not have unsaved changes
-          dashboardBackupState.references = [...(references ?? []), ...controlGroupReferences];
-          if (hasPanelChanges) dashboardBackupState.panels = panels;
-          if (hasControlGroupChanges) dashboardBackupState.controlGroupInput = controlGroupInput;
+        if (hasUnsavedChanges !== hasUnsavedChanges$.value) {
+          hasUnsavedChanges$.next(hasUnsavedChanges);
         }
 
-        getDashboardBackupService().setState(savedObjectId$.value, dashboardBackupState);
+        if (storeUnsavedChanges) {
+          const dashboardBackupState: DashboardBackupState = omit(dashboardChanges ?? {}, [
+            'timeRange',
+            'refreshInterval',
+          ]);
+
+          // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
+          dashboardBackupState.viewMode = viewMode;
+          // Backup latest state from children that have unsaved changes
+          if (hasChildrenUnsavedChanges || hasControlGroupChanges || hasLayoutChanges) {
+            const { panels, references } = layoutManager.internalApi.serializeLayout();
+            const { controlGroupInput, controlGroupReferences } =
+              controlGroupManager.internalApi.serializeControlGroup();
+            // dashboardStateToBackup.references will be used instead of savedObjectResult.references
+            // To avoid missing references, make sure references contains all references
+            // even if panels or control group does not have unsaved changes
+            dashboardBackupState.references = [...(references ?? []), ...controlGroupReferences];
+            if (hasChildrenUnsavedChanges) dashboardBackupState.panels = panels;
+            if (hasControlGroupChanges) dashboardBackupState.controlGroupInput = controlGroupInput;
+          }
+
+          getDashboardBackupService().setState(savedObjectId$.value, dashboardBackupState);
+        }
       }
-    });
+    );
 
   const getLastSavedStateForChild = (childId: string) => {
     const lastSavedDashboardState = lastSavedState$.value;
