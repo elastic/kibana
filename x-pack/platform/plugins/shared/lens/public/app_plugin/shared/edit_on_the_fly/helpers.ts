@@ -11,15 +11,10 @@ import {
   formatESQLColumns,
   mapVariableToColumn,
 } from '@kbn/esql-utils';
-import { isEqual } from 'lodash';
 import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLRow } from '@kbn/es-types';
-import {
-  getLensAttributesFromSuggestion,
-  mapVisToChartType,
-  getDatasourceId,
-} from '@kbn/visualization-utils';
+import { getLensAttributesFromSuggestion, mapVisToChartType } from '@kbn/visualization-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -147,9 +142,7 @@ export const getSuggestions = async (
         datasourceMap,
         visualizationMap,
         preferredChartType,
-        preferredVisAttributes: preferredVisAttributes
-          ? injectESQLQueryIntoLensLayers(preferredVisAttributes, query)
-          : undefined,
+        preferredVisAttributes: preferredVisAttributes ?? undefined,
       }) ?? [];
 
     // Lens might not return suggestions for some cases, i.e. in case of errors
@@ -174,46 +167,4 @@ export const getSuggestions = async (
     setErrors?.([e]);
   }
   return undefined;
-};
-
-/**
- * Injects the ESQL query into the lens layers. This is used to keep the query in sync with the lens layers.
- * @param attributes, the current lens attributes
- * @param query, the new query to inject
- * @returns the new lens attributes with the query injected
- */
-export const injectESQLQueryIntoLensLayers = (
-  attributes: TypedLensSerializedState['attributes'],
-  query: AggregateQuery
-) => {
-  const datasourceId = getDatasourceId(attributes.state.datasourceStates);
-
-  // if the datasource is formBased, we should not fix the query
-  if (!datasourceId || datasourceId === 'formBased') {
-    return attributes;
-  }
-
-  if (!attributes.state.datasourceStates[datasourceId]) {
-    return attributes;
-  }
-
-  const datasourceState = structuredClone(attributes.state.datasourceStates[datasourceId]);
-
-  if (datasourceState && datasourceState.layers) {
-    Object.values(datasourceState.layers).forEach((layer) => {
-      if (!isEqual(layer.query, query)) {
-        layer.query = query;
-      }
-    });
-  }
-  return {
-    ...attributes,
-    state: {
-      ...attributes.state,
-      datasourceStates: {
-        ...attributes.state.datasourceStates,
-        [datasourceId]: datasourceState,
-      },
-    },
-  };
 };

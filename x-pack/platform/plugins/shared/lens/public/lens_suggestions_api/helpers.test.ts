@@ -5,9 +5,9 @@
  * 2.0.
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { mergeSuggestionWithVisContext } from './helpers';
+import { mergeSuggestionWithVisContext, injectESQLQueryIntoLensLayers } from './helpers';
 import { mockAllSuggestions } from '../mocks';
-import { TypedLensByValueInput } from '../react_embeddable/types';
+import { TypedLensByValueInput, TypedLensSerializedState } from '../react_embeddable/types';
 
 const context = {
   dataViewSpec: {
@@ -184,6 +184,12 @@ describe('lens suggestions api helpers', () => {
     });
 
     it('should return the suggestion updated with the attributes if the visualization types and the context columns match', async () => {
+      const newContext = {
+        ...context,
+        query: {
+          esql: 'FROM kibana_sample_data_flights | keep field1, field2',
+        },
+      };
       const suggestion = mockAllSuggestions[0];
       const visAttributes = {
         visualizationType: 'lnsHeatmap',
@@ -214,7 +220,7 @@ describe('lens suggestions api helpers', () => {
                 layer1: {
                   index: 'layer1',
                   query: {
-                    esql: 'FROM index1 | keep field1, field2',
+                    esql: 'FROM kibana_sample_data_flights | keep field1, field2',
                   },
                   columns: [
                     {
@@ -237,14 +243,87 @@ describe('lens suggestions api helpers', () => {
               },
             },
           },
+          query: {
+            esql: 'FROM kibana_sample_data_flights | keep field1, field2',
+          },
         },
       } as unknown as TypedLensByValueInput['attributes'];
       const updatedSuggestion = mergeSuggestionWithVisContext({
         suggestion,
         visAttributes,
-        context,
+        context: newContext,
       });
       expect(updatedSuggestion.visualizationState).toStrictEqual(visAttributes.state.visualization);
+    });
+  });
+
+  describe('injectESQLQueryIntoLensLayers', () => {
+    const query = {
+      esql: 'from index1 | limit 10 | stats average = avg(bytes)',
+    };
+
+    it('should inject the query correctly for ES|QL charts', async () => {
+      const lensAttributes = {
+        title: 'test',
+        visualizationType: 'testVis',
+        state: {
+          datasourceStates: {
+            textBased: { layers: { layer1: { query: { esql: 'from index1 | limit 10' } } } },
+          },
+          visualization: { preferredSeriesType: 'line' },
+        },
+        filters: [],
+        query: {
+          esql: 'from index1 | limit 10',
+        },
+        references: [],
+      } as unknown as TypedLensSerializedState['attributes'];
+
+      const expectedLensAttributes = {
+        ...lensAttributes,
+        state: {
+          ...lensAttributes.state,
+          datasourceStates: {
+            ...lensAttributes.state.datasourceStates,
+            textBased: {
+              ...lensAttributes.state.datasourceStates.textBased,
+              layers: {
+                layer1: {
+                  query: { esql: 'from index1 | limit 10 | stats average = avg(bytes)' },
+                },
+              },
+            },
+          },
+        },
+      };
+      const newAttributes = injectESQLQueryIntoLensLayers(lensAttributes, query);
+      expect(newAttributes).toStrictEqual(expectedLensAttributes);
+    });
+
+    it('should return the Lens attributes as they are for unknown datasourceId', async () => {
+      const attributes = {
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: { preferredSeriesType: 'line' },
+          datasourceStates: { unknownId: { layers: {} } },
+        },
+      } as unknown as TypedLensSerializedState['attributes'];
+      expect(injectESQLQueryIntoLensLayers(attributes, { esql: 'from foo' })).toStrictEqual(
+        attributes
+      );
+    });
+
+    it('should return the Lens attributes as they are for form based charts', async () => {
+      const attributes = {
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: { preferredSeriesType: 'line' },
+          datasourceStates: { formBased: { layers: {} } },
+        },
+      } as TypedLensSerializedState['attributes'];
+      expect(injectESQLQueryIntoLensLayers(attributes, { esql: 'from foo' })).toStrictEqual(
+        attributes
+      );
     });
   });
 });
