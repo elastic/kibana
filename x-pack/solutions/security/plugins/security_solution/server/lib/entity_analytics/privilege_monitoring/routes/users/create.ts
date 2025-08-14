@@ -50,9 +50,12 @@ export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
           );
           const secSol = await context.securitySolution;
           const dataClient = secSol.getPrivilegeMonitoringDataClient();
+          const config = secSol.getConfig();
+          const maxUsersAllowed =
+            config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
           const crudService = createPrivilegedUsersCrudService(dataClient);
 
-          const body = await crudService.create(request.body, 'api');
+          const body = await crudService.create(request.body, 'api', maxUsersAllowed);
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
