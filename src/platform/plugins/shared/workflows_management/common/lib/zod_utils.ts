@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { ZodFirstPartySchemaTypes, z } from '@kbn/zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 export function parsePath(path: string) {
@@ -119,4 +119,29 @@ export function inferZodType(obj: any): z.ZodType {
 
 export function expectZodSchemaEqual(a: z.ZodType, b: z.ZodType) {
   expect(zodToJsonSchema(a)).toEqual(zodToJsonSchema(b));
+}
+
+export function getZodTypeName(schema: z.ZodType) {
+  const typedSchema = schema as ZodFirstPartySchemaTypes;
+  const def = typedSchema._def;
+  switch (def.typeName) {
+    case 'ZodString':
+      return 'string';
+    case 'ZodNumber':
+      return 'number';
+    case 'ZodBoolean':
+      return 'boolean';
+    case 'ZodArray':
+      return 'array';
+    case 'ZodObject':
+      return 'object';
+    case 'ZodDate':
+      return 'date';
+    case 'ZodAny':
+      return 'any';
+    case 'ZodNull':
+      return 'null';
+    default:
+      return 'unknown';
+  }
 }

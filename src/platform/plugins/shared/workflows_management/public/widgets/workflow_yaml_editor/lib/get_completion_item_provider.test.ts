@@ -191,12 +191,18 @@ steps:
       });
     });
 
-    it('should provide const completion', () => {
+    it('should provide const completion with type', () => {
       const yamlContent = `
 version: "1"
 name: "test"
 consts:
   apiUrl: "https://api.example.com"
+  threshold: 100
+  templates:
+    - name: template1
+      template:
+        subject: 'Suspicious activity detected'
+        body: 'Go look at the activity'
 steps:
   - name: step1
     type: console.log  
@@ -204,7 +210,48 @@ steps:
       message: "{{consts.|<-}}"
 `.trim();
 
-      testCompletion(completionProvider, yamlContent, ['apiUrl']);
+      testCompletion(completionProvider, yamlContent, (suggestion) => {
+        if (suggestion.label === 'apiUrl') {
+          return suggestion.detail!.startsWith('string');
+        }
+        if (suggestion.label === 'threshold') {
+          return suggestion.detail!.startsWith('number');
+        }
+        if (suggestion.label === 'templates') {
+          return suggestion.detail!.startsWith('array');
+        }
+        return false;
+      });
+    });
+
+    it('should provide const completion with type in array', () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+  threshold: 100
+  templates:
+    - name: template1
+      template:
+        subject: 'Suspicious activity detected'
+        body: 'Go look at the activity'
+steps:
+  - name: step1
+    type: console.log  
+    with:
+      message: "{{consts.templates[0].|<-}}"
+`.trim();
+
+      testCompletion(completionProvider, yamlContent, (suggestion) => {
+        if (suggestion.label === 'name') {
+          return suggestion.detail!.startsWith('string');
+        }
+        if (suggestion.label === 'template') {
+          return suggestion.detail!.startsWith('object');
+        }
+        return false;
+      });
     });
 
     it('should provide previous step completion', () => {

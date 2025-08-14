@@ -65,10 +65,16 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
   const [hasChanges, setHasChanges] = useState(false);
 
-  const workflowYamlObject = useMemo(
-    () => (workflowYaml ? parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE) : null),
-    [workflowYaml]
-  );
+  const workflowYamlObject = useMemo(() => {
+    if (!workflowYaml) {
+      return null;
+    }
+    const result = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+    if (result.error) {
+      return null;
+    }
+    return result.data;
+  }, [workflowYaml]);
 
   useEffect(() => {
     setWorkflowYaml(workflow?.yaml ?? '');
@@ -152,9 +158,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           )}
         </EuiFlexItem>
         <EuiFlexItem>
-          {workflowYamlObject?.data && (
+          {workflowYamlObject && (
             <React.Suspense fallback={<EuiLoadingSpinner />}>
-              <WorkflowVisualEditor workflow={workflowYamlObject.data as WorkflowYaml} />
+              <WorkflowVisualEditor workflow={workflowYamlObject as WorkflowYaml} />
             </React.Suspense>
           )}
         </EuiFlexItem>

@@ -18,7 +18,7 @@ import {
   PROPERTY_PATH_REGEX,
   UNFINISHED_MUSTACHE_REGEX_GLOBAL,
 } from '../../../../common/lib/regex';
-import { getSchemaAtPath, parsePath } from '../../../../common/lib/zod_utils';
+import { getSchemaAtPath, getZodTypeName, parsePath } from '../../../../common/lib/zod_utils';
 
 export interface LineParseResult {
   fullKey: string;
@@ -186,24 +186,22 @@ export function getCompletionItemProvider(
         if (parseResult.fullKey) {
           const schemaAtPath = getSchemaAtPath(context, parseResult.fullKey, { partial: true });
           if (schemaAtPath) {
-            context = schemaAtPath as z.ZodType;
+            context = schemaAtPath;
           }
         }
 
+        // currently, we only suggest properties for objects
         if (!(context instanceof z.ZodObject)) {
           return {
             suggestions: [],
           };
         }
 
-        Object.keys(context.shape).forEach((key) => {
+        for (const [key, currentSchema] of Object.entries(context.shape) as [string, z.ZodType][]) {
           if (lastPathSegment && !key.startsWith(lastPathSegment)) {
             return;
           }
-          const current = getSchemaAtPath(context, key);
-          const propertyTypeName = (current?._def as any)?.typeName
-            ?.toLowerCase()
-            .replace('zod', '');
+          const propertyTypeName = getZodTypeName(currentSchema);
           suggestions.push(
             getSuggestion(
               key,
@@ -212,10 +210,10 @@ export function getCompletionItemProvider(
               scalarType,
               shouldBeQuoted,
               propertyTypeName,
-              current?.description
+              currentSchema?.description
             )
           );
-        });
+        }
 
         return {
           suggestions,

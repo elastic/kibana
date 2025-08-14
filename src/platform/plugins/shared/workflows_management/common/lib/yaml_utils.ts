@@ -36,15 +36,13 @@ export function getYamlStringFromJSON(json: any) {
 export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
   yamlString: string,
   schema: T
-):
-  | z.SafeParseReturnType<z.input<T>, z.output<T>>
-  | { success: false; error: Error; data: undefined } {
+): z.SafeParseReturnType<z.input<T>, z.output<T>> | { success: false; error: Error } {
   try {
     let error: Error | undefined;
     const doc = parseDocument(yamlString);
 
     // Visit all pairs, and check if there're any non-scalar keys
-    // TODO: replace with { stringKeys: true } parse options, when 'yaml' package updated to 2.6.1
+    // TODO: replace with parseDocument(yamlString, { stringKeys: true }) when 'yaml' package updated to 2.6.1
     visit(doc, {
       Pair(_, pair) {
         if (isScalar(pair.key)) {
@@ -74,7 +72,6 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
       return {
         success: false,
         error,
-        data: undefined,
       };
     }
 
