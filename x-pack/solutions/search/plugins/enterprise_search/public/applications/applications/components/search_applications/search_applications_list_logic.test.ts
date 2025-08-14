@@ -228,7 +228,7 @@ describe('SearchApplicationsListLogic', () => {
         });
       });
     });
-    describe('request to delete Search Application', () => {
+    describe('request to delete search application', () => {
       it('should set isDeleteLoading to true on delete search application request', () => {
         SearchApplicationsListLogic.actions.deleteSearchApplication({
           searchApplicationName: results[0].name,

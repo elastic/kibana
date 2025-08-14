@@ -22,7 +22,7 @@ import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { RangeSliderStrings } from '../range_slider_strings';
 import { rangeSliderControlStyles } from './range_slider.styles';
 
-interface Props {
+export interface Props {
   compressed: boolean;
   controlPanelClassName?: string;
   isInvalid: boolean;
@@ -151,7 +151,7 @@ export const RangeSliderControl: FC<Props> = ({
       placeholder: string;
       ariaLabel: string;
       id: string;
-    }) => {
+    }): Partial<EuiDualRangeProps['minInputProps']> => {
       return {
         isInvalid: undefined, // disabling this prop to handle our own validation styling
         placeholder,
@@ -161,7 +161,7 @@ export const RangeSliderControl: FC<Props> = ({
           isInvalid ? styles.fieldNumbers.invalid : styles.fieldNumbers.valid,
         ],
         className: 'rangeSliderAnchor__fieldNumber',
-        value: inputValue === placeholder ? '' : inputValue,
+        value: inputValue,
         title: !isInvalid && step ? '' : undefined, // overwrites native number input validation error when the value falls between two steps
         'data-test-subj': `rangeSlider__${testSubj}`,
         'aria-label': ariaLabel,
@@ -178,7 +178,7 @@ export const RangeSliderControl: FC<Props> = ({
       testSubj: 'lowerBoundFieldNumber',
       placeholder: String(min ?? -Infinity),
       ariaLabel: RangeSliderStrings.control.getLowerBoundAriaLabel(fieldName),
-      id: uuid,
+      id: `${uuid}-lowerBound`,
     });
   }, [getCommonInputProps, displayedValue, min, fieldName, uuid]);
 
@@ -188,7 +188,7 @@ export const RangeSliderControl: FC<Props> = ({
       testSubj: 'upperBoundFieldNumber',
       placeholder: String(max ?? Infinity),
       ariaLabel: RangeSliderStrings.control.getUpperBoundAriaLabel(fieldName),
-      id: uuid,
+      id: `${uuid}-upperBound`,
     });
   }, [getCommonInputProps, displayedValue, max, fieldName, uuid]);
 
@@ -251,7 +251,16 @@ export const RangeSliderControl: FC<Props> = ({
         minInputProps={minInputProps}
         maxInputProps={maxInputProps}
         value={[displayedValue[0] || displayedMin, displayedValue[1] || displayedMax]}
-        onChange={([minSelection, maxSelection]: [number | string, number | string]) => {
+        onChange={([minSelection, maxSelection]: [number | string, number | string], _, ev) => {
+          const originatingInputId = ev?.currentTarget.getAttribute('id');
+
+          if (originatingInputId?.includes('lowerBound')) {
+            // preserve original upper bound selection if only lower bound number field changed
+            maxSelection = displayedValue[1];
+          } else if (originatingInputId?.includes('upperBound')) {
+            // preserve original lower bound selection if only upper bound number field changed
+            minSelection = displayedValue[0];
+          }
           setDisplayedValue([String(minSelection), String(maxSelection)]);
           debouncedOnChange([String(minSelection), String(maxSelection)]);
         }}
