@@ -35,6 +35,7 @@ import { useAppStateSelector } from '../../../../main/state_management/discover_
 import type { DiscoverStateContainer } from '../../../../main/state_management/discover_state';
 import { fetchEsql } from '../../../../main/data_fetching/fetch_esql';
 import { constructCascadeQuery, type CascadeQueryArgs, getESQLStatsQueryMeta } from './util';
+import { getPatternCellRenderer } from '../../../../../context_awareness/profile_providers/common/patterns/pattern_cell_renderer';
 
 export { getESQLStatsQueryMeta } from './util';
 
@@ -183,6 +184,20 @@ export const ESQLDataCascade = ({
       >
         <DataCascadeRow<ESQLDataGroupNode>
           rowHeaderTitleSlot={({ row }) => {
+            if (/categorize/i.test(cascadeGroups[row.depth])) {
+              return (
+                <React.Fragment>
+                  {getPatternCellRenderer(
+                    // @ts-expect-error - necessary to match the data shape expectation
+                    { flattened: row.original },
+                    cascadeGroups[row.depth],
+                    false,
+                    48
+                  )}
+                </React.Fragment>
+              );
+            }
+
             return (
               <EuiText size="s">
                 <h4>{row.original[cascadeGroups[row.depth]] as string}</h4>
