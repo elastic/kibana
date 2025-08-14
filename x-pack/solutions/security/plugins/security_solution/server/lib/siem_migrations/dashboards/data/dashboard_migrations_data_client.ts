@@ -16,9 +16,6 @@ import { SiemMigrationsDataClient } from '../../common/data/siem_migrations_data
 import { SiemMigrationsDataResourcesClient } from '../../common/data/siem_migrations_data_resources_client';
 
 export class DashboardMigrationsDataClient extends SiemMigrationsDataClient {
-  protected logger: Logger;
-  protected esClient: IScopedClusterClient['asInternalUser'];
-
   public readonly migrations: SiemMigrationsDataMigrationClient<DashboardMigration>;
   public readonly items: DashboardMigrationsDataDashboardsClient;
   public readonly resources: SiemMigrationsDataResourcesClient;
@@ -31,10 +28,7 @@ export class DashboardMigrationsDataClient extends SiemMigrationsDataClient {
     spaceId: string,
     dependencies: SiemMigrationsClientDependencies
   ) {
-    super();
-
-    this.logger = logger;
-    this.esClient = esScopedClient.asInternalUser;
+    super(esScopedClient, logger);
 
     this.migrations = new SiemMigrationsDataMigrationClient<DashboardMigration>(
       indexNameProviders.migrations,

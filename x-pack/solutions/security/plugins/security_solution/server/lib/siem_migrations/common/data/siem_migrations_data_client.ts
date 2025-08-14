@@ -15,12 +15,20 @@ export abstract class SiemMigrationsDataClient<
   M extends MigrationDocument = MigrationDocument,
   I extends ItemDocument = ItemDocument
 > {
-  protected abstract logger: Logger;
-  protected abstract esClient: IScopedClusterClient['asInternalUser'];
+  // Data clients use the ES client `asInternalUser` by default.
+  // We may want to use `asCurrentUser` instead in the future if the APIs are made public.
+  protected readonly esClient: IScopedClusterClient['asInternalUser'];
 
   public abstract readonly migrations: SiemMigrationsDataMigrationClient<M>;
   public abstract readonly items: SiemMigrationsDataItemClient<I>;
   public abstract readonly resources: SiemMigrationsDataResourcesClient;
+
+  constructor(
+    public readonly esScopedClient: IScopedClusterClient,
+    protected readonly logger: Logger
+  ) {
+    this.esClient = esScopedClient.asInternalUser;
+  }
 
   /** Deletes a migration and all its associated items and resources. */
   public async deleteMigration(migrationId: string) {

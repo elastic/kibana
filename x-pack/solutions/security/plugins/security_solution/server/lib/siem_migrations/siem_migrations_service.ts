@@ -31,7 +31,6 @@ export class SiemMigrationsService {
       kibanaVersion,
       config.siemRuleMigrations?.elserInferenceId
     );
-
     this.dashboardsService = new SiemDashboardMigrationsService(
       logger,
       kibanaVersion,
@@ -42,10 +41,10 @@ export class SiemMigrationsService {
   setup(params: SiemMigrationsSetupParams) {
     if (!this.config.experimentalFeatures.siemMigrationsDisabled) {
       this.rulesService.setup({ ...params, pluginStop$: this.pluginStop$ });
-    }
 
-    if (this.config.experimentalFeatures.automaticDashboardsMigration) {
-      this.dashboardsService.setup({ ...params, pluginStop$: this.pluginStop$ });
+      if (this.config.experimentalFeatures.automaticDashboardsMigration) {
+        this.dashboardsService.setup({ ...params, pluginStop$: this.pluginStop$ });
+      }
     }
   }
 

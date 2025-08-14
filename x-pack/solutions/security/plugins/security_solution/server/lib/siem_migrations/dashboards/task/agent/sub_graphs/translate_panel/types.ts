@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
 import type { EsqlKnowledgeBase } from '../../../../../common/task/util/esql_knowledge_base';
@@ -25,6 +25,7 @@ export type GraphNode = (
 
 export interface TranslatePanelGraphParams {
   model: ChatModel;
+  esScopedClient: IScopedClusterClient;
   esqlKnowledgeBase: EsqlKnowledgeBase;
   dashboardMigrationsRetriever: DashboardMigrationsRetriever;
   telemetryClient: DashboardMigrationTelemetryClient;

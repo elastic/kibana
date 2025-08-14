@@ -15,13 +15,12 @@ import type { GraphNode } from '../../types';
 export const getTranslateQueryNode = (params: GetTranslateSplToEsqlParams): GraphNode => {
   const translateSplToEsql = getTranslateSplToEsql(params);
   return async (state) => {
-    const { title, description = '' } = state.original_panel;
     const { esqlQuery, comments } = await translateSplToEsql({
-      title,
-      description,
+      title: state.parsed_panel.title,
+      description: state.description,
       taskDescription: TASK_DESCRIPTION.migrate_dashboard,
       inlineQuery: state.inline_query,
-      indexPattern: 'logs-*', // The index_pattern state is still undefined at this point
+      indexPattern: state.index_pattern || '[indexPattern]',
     });
 
     if (!esqlQuery) {
@@ -29,12 +28,7 @@ export const getTranslateQueryNode = (params: GetTranslateSplToEsqlParams): Grap
     }
 
     return {
-      elastic_panel: {
-        title,
-        description,
-        query: esqlQuery,
-        query_language: 'esql',
-      },
+      esql_query: esqlQuery,
       comments,
     };
   };

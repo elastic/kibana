@@ -17,9 +17,6 @@ import { SiemMigrationsDataClient } from '../../common/data/siem_migrations_data
 import { SiemMigrationsDataResourcesClient } from '../../common/data/siem_migrations_data_resources_client';
 
 export class RuleMigrationsDataClient extends SiemMigrationsDataClient {
-  protected logger: Logger;
-  protected esClient: IScopedClusterClient['asInternalUser'];
-
   public readonly migrations: RuleMigrationsDataMigrationClient;
   public readonly items: RuleMigrationsDataRulesClient;
   public readonly resources: SiemMigrationsDataResourcesClient;
@@ -35,7 +32,7 @@ export class RuleMigrationsDataClient extends SiemMigrationsDataClient {
     spaceId: string,
     dependencies: SiemMigrationsClientDependencies
   ) {
-    super();
+    super(esScopedClient, logger);
 
     this.migrations = new RuleMigrationsDataMigrationClient(
       indexNameProviders.migrations,
@@ -78,8 +75,5 @@ export class RuleMigrationsDataClient extends SiemMigrationsDataClient {
       logger,
       spaceId
     );
-
-    this.logger = logger;
-    this.esClient = esScopedClient.asInternalUser;
   }
 }

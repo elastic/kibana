@@ -19,12 +19,12 @@ export const getValidationNode = (params: GetValidateEsqlParams): GraphNode => {
   const validateEsql = getValidateEsql(params);
   return async (state) => {
     const iterations = state.validation_errors.iterations + 1;
-    if (!state.elastic_panel.query) {
+    if (!state.esql_query) {
       params.logger.warn('Missing query in validation node');
       return { iterations };
     }
 
-    const { error } = await validateEsql({ query: state.elastic_panel.query });
+    const { error } = await validateEsql({ query: state.esql_query });
 
     return { validation_errors: { iterations, esql_errors: error } };
   };

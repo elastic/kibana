@@ -13,8 +13,9 @@ import type { GraphNode } from '../../types';
 export const getInlineQueryNode = (params: GetInlineSplQueryParams): GraphNode => {
   const inlineSplQuery = getInlineSplQuery(params);
   return async (state) => {
+    // NOTE: "inputlookup" is not currently supported, to make it supported we need to parametrize the unsupported check logic here, and the Splunk lookups identifier.
     const { inlineQuery, isUnsupported, comments } = await inlineSplQuery({
-      query: state.original_panel.query,
+      query: state.parsed_panel.query,
       resources: state.resources,
     });
     if (isUnsupported) {
@@ -22,7 +23,7 @@ export const getInlineQueryNode = (params: GetInlineSplQueryParams): GraphNode =
       return { inline_query: undefined, comments };
     }
     return {
-      inline_query: inlineQuery ?? state.original_panel.query,
+      inline_query: inlineQuery ?? state.parsed_panel.query,
       comments,
     };
   };

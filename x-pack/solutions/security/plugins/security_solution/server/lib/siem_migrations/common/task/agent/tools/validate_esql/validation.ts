@@ -31,7 +31,7 @@ export const getValidateEsql: NodeToolCreator<
     // We want to prevent infinite loops, so we increment the iterations counter for each validation run.
     let error: string = '';
     try {
-      const sanitizedQuery = input.query ? removePlaceHolders(input.query) : '';
+      const sanitizedQuery = input.query ? sanitizeQuery(input.query) : '';
       if (!isEmpty(sanitizedQuery)) {
         const { errors, isEsqlQueryAggregating, hasMetadataOperator } =
           parseEsqlQuery(sanitizedQuery);
@@ -52,8 +52,9 @@ export const getValidateEsql: NodeToolCreator<
   };
 };
 
-function removePlaceHolders(query: string): string {
+function sanitizeQuery(query: string): string {
   return query
+    .replace('FROM [indexPattern]', 'FROM *') // Replace the index pattern placeholder with a wildcard
     .replaceAll(/\[(macro|lookup):.*?\]/g, '') // Removes any macro or lookup placeholders
     .replaceAll(/\n(\s*?\|\s*?\n)*/g, '\n'); // Removes any empty lines with | (pipe) alone after removing the placeholders
 }

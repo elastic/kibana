@@ -14,6 +14,7 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataI
   protected type = 'dashboard' as const;
 
   protected getSortOptions(sort: SiemMigrationItemSort = {}): estypes.Sort {
+    // TODO: implement sorting logic similar to getSortOptions in the rules client
     return [];
   }
 }

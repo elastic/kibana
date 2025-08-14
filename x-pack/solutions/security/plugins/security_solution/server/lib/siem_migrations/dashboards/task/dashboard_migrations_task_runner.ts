@@ -60,12 +60,16 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
       migrationId: this.migrationId,
       abortController: this.abortController,
     });
+    const modelName = this.actionsClientChat.getModelName(model);
+
+    // TODO: inference model name
+    // console.log('modelName', modelName);
 
     const telemetryClient = new DashboardMigrationTelemetryClient(
       this.dependencies.telemetry,
       this.logger,
       this.migrationId,
-      model.model
+      modelName
     );
 
     const esqlKnowledgeBase = new EsqlKnowledgeBase(
@@ -76,8 +80,9 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
     );
 
     const agent = getDashboardMigrationAgent({
-      esqlKnowledgeBase,
       model,
+      esScopedClient: this.data.esScopedClient,
+      esqlKnowledgeBase,
       dashboardMigrationsRetriever: this.retriever,
       logger: this.logger,
       telemetryClient,

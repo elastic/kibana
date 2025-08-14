@@ -21,21 +21,13 @@ import { getSelectIndexPatternNode } from './nodes/select_index_pattern/select_i
 // How many times we will try to self-heal when validation fails, to prevent infinite graph recursions
 const MAX_VALIDATION_ITERATIONS = 3;
 
-export function getTranslatePanelGraph({
-  model,
-  esqlKnowledgeBase,
-  logger,
-  telemetryClient,
-}: TranslatePanelGraphParams) {
-  const translateQueryNode = getTranslateQueryNode({
-    esqlKnowledgeBase,
-    logger,
-  });
-  const inlineQueryNode = getInlineQueryNode({ model, logger });
-  const validationNode = getValidationNode({ logger });
-  const fixQueryErrorsNode = getFixQueryErrorsNode({ esqlKnowledgeBase, logger });
-  const ecsMappingNode = getEcsMappingNode({ esqlKnowledgeBase, logger });
-  const selectIndexPatternNode = getSelectIndexPatternNode({ model, telemetryClient, logger });
+export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
+  const translateQueryNode = getTranslateQueryNode(params);
+  const inlineQueryNode = getInlineQueryNode(params);
+  const validationNode = getValidationNode(params);
+  const fixQueryErrorsNode = getFixQueryErrorsNode(params);
+  const ecsMappingNode = getEcsMappingNode(params);
+  const selectIndexPatternNode = getSelectIndexPatternNode(params);
   const translationResultNode = getTranslationResultNode();
 
   const translateDashboardPanelGraph = new StateGraph(
@@ -44,24 +36,32 @@ export function getTranslatePanelGraph({
   )
     // Nodes
     .addNode('inlineQuery', inlineQueryNode)
+    // TODO: .addNode('createDescription', createDescriptionNode) -> ask the LLM to create a description of the panel
+    .addNode('selectIndexPattern', selectIndexPatternNode)
+
+    // Consider this block by the entire Assistant nlToEsql graph
     .addNode('translateQuery', translateQueryNode)
     .addNode('validation', validationNode)
     .addNode('fixQueryErrors', fixQueryErrorsNode)
-    .addNode('ecsMapping', ecsMappingNode)
-    .addNode('selectIndexPattern', selectIndexPatternNode)
+    .addNode('ecsMapping', ecsMappingNode) // Not sure about this one, maybe we should keep it anyway, tests need to be done
+    // Consider this block by the entire Assistant nlToEsql graph
+
     .addNode('translationResult', translationResultNode)
+
     // Edges
     .addEdge(START, 'inlineQuery')
-    .addEdge('inlineQuery', 'translateQuery')
+    // .addEdge('inlineQuery', 'createDescription') // createDescription would go after inlineQuery
+    .addEdge('inlineQuery', 'selectIndexPattern')
+    // .addEdge('createDescription', 'selectIndexPattern') // And before selectIndexPattern, the description is sent to the selectIndexPattern graph
+    .addEdge('selectIndexPattern', 'translateQuery')
     .addEdge('translateQuery', 'validation')
     .addEdge('fixQueryErrors', 'validation')
     .addEdge('ecsMapping', 'validation')
     .addConditionalEdges('validation', validationRouter, [
       'fixQueryErrors',
       'ecsMapping',
-      'selectIndexPattern',
+      'translationResult',
     ])
-    .addEdge('selectIndexPattern', 'translationResult')
     .addEdge('translationResult', END);
 
   const graph = translateDashboardPanelGraph.compile();
@@ -80,5 +80,5 @@ const validationRouter = (state: TranslateDashboardPanelState) => {
     return 'ecsMapping';
   }
 
-  return 'selectIndexPattern';
+  return 'translationResult';
 };

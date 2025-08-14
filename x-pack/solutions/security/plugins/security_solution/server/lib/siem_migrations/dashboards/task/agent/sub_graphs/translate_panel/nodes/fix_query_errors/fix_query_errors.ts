@@ -15,12 +15,12 @@ export const getFixQueryErrorsNode = (params: GetFixEsqlQueryErrorsParams): Grap
   const fixEsqlQueryErrors = getFixEsqlQueryErrors(params);
   return async (state) => {
     const { query } = await fixEsqlQueryErrors({
-      invalidQuery: state.elastic_panel.query,
+      invalidQuery: state.esql_query,
       validationErrors: state.validation_errors.esql_errors,
     });
     if (!query) {
       return {};
     }
-    return { elastic_panel: { ...state.elastic_panel, query } };
+    return { esql_query: query };
   };
 };

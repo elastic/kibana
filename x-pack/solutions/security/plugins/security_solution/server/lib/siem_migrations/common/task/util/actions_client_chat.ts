@@ -7,28 +7,32 @@
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/core/server';
-import type { ActionsClientSimpleChatModel } from '@kbn/langchain/server';
 import {
-  ActionsClientBedrockChatModel,
+  ActionsClientChatBedrockConverse,
   ActionsClientChatOpenAI,
   ActionsClientChatVertexAI,
 } from '@kbn/langchain/server';
 import type { CustomChatModelInput as ActionsClientBedrockChatModelParams } from '@kbn/langchain/server/language_models/bedrock_chat';
 import type { ActionsClientChatOpenAIParams } from '@kbn/langchain/server/language_models/chat_openai';
-import type { CustomChatModelInput as ActionsClientChatVertexAIParams } from '@kbn/langchain/server/language_models/gemini_chat';
+import type {
+  CustomChatModelInput as ActionsClientChatVertexAIParams,
+  ActionsClientGeminiChatModel,
+} from '@kbn/langchain/server/language_models/gemini_chat';
 import type { CustomChatModelInput as ActionsClientSimpleChatModelParams } from '@kbn/langchain/server/language_models/simple_chat_model';
+import { InferenceChatModel } from '@kbn/inference-langchain';
 import { TELEMETRY_SIEM_MIGRATION_ID } from './constants';
 
 export type ChatModel =
-  | ActionsClientSimpleChatModel
+  | ActionsClientChatBedrockConverse
   | ActionsClientChatOpenAI
-  | ActionsClientBedrockChatModel
-  | ActionsClientChatVertexAI;
+  | ActionsClientGeminiChatModel
+  | ActionsClientChatVertexAI
+  | InferenceChatModel;
 
 export type ActionsClientChatModelClass =
-  | typeof ActionsClientSimpleChatModel
+  | typeof ActionsClientChatBedrockConverse
   | typeof ActionsClientChatOpenAI
-  | typeof ActionsClientBedrockChatModel
+  | typeof ActionsClientGeminiChatModel
   | typeof ActionsClientChatVertexAI;
 
 export type ChatModelParams = Partial<ActionsClientSimpleChatModelParams> &
@@ -36,11 +40,17 @@ export type ChatModelParams = Partial<ActionsClientSimpleChatModelParams> &
   Partial<ActionsClientBedrockChatModelParams> &
   Partial<ActionsClientChatVertexAIParams>;
 
-const llmTypeDictionary: Record<string, string> = {
-  [`.gen-ai`]: `openai`,
-  [`.bedrock`]: `bedrock`,
-  [`.gemini`]: `gemini`,
-  [`.inference`]: `inference`,
+const llmTypeDictionary = {
+  '.gen-ai': 'openai',
+  '.bedrock': 'bedrock',
+  '.gemini': 'gemini',
+  '.inference': 'inference',
+} as const;
+type SupportedActionTypeId = keyof typeof llmTypeDictionary;
+type LlmType = (typeof llmTypeDictionary)[SupportedActionTypeId];
+
+const isSupportedActionTypeId = (actionTypeId: string): actionTypeId is SupportedActionTypeId => {
+  return actionTypeId in llmTypeDictionary;
 };
 
 interface CreateModelParams {
@@ -61,8 +71,16 @@ export class ActionsClientChat {
     if (!connector) {
       throw new Error(`Connector not found: ${connectorId}`);
     }
+    if (!isSupportedActionTypeId(connector.actionTypeId)) {
+      throw new Error(`Connector type not supported: ${connector.actionTypeId}`);
+    }
 
     const llmType = this.getLLMType(connector.actionTypeId);
+    if (llmType === 'inference') {
+      // TODO: instantiate from inferenceService
+      throw new Error('Inference model creation not implemented yet');
+    }
+
     const ChatModelClass = this.getLLMClass(llmType);
 
     const model = new ChatModelClass({
@@ -81,21 +99,28 @@ export class ActionsClientChat {
     return model;
   }
 
-  private getLLMType(actionTypeId: string): string | undefined {
+  public getModelName(model: ChatModel): string {
+    if (model instanceof InferenceChatModel) {
+      const modelName = model.identifyingParams().model_name;
+      return `inference${modelName ? ` (${modelName})` : ''}`;
+    }
+    return model.model;
+  }
+
+  private getLLMType(actionTypeId: SupportedActionTypeId): LlmType {
     if (llmTypeDictionary[actionTypeId]) {
       return llmTypeDictionary[actionTypeId];
     }
     throw new Error(`Unknown LLM type for action type ID: ${actionTypeId}`);
   }
 
-  private getLLMClass(llmType?: string): ActionsClientChatModelClass {
+  private getLLMClass(llmType: Omit<LlmType, 'inference'>): ActionsClientChatModelClass {
     switch (llmType) {
       case 'bedrock':
-        return ActionsClientBedrockChatModel;
+        return ActionsClientChatBedrockConverse;
       case 'gemini':
         return ActionsClientChatVertexAI;
       case 'openai':
-      case 'inference':
       default:
         return ActionsClientChatOpenAI;
     }
