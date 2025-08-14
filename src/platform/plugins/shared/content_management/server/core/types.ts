@@ -82,7 +82,7 @@ export interface ContentStorage<
   delete(ctx: StorageContext, id: string, options?: object): Promise<DeleteResult>;
 
   /** Search items */
-  search(ctx: StorageContext, query: SearchQuery, options?: object): Promise<SearchResult<T>>;
+  search(ctx: StorageContext, query: SearchQuery, options?: object): Promise<SearchResult<GetResult<T, any>>>;
 
   /**
    * Opt-in to multi-type search.

@@ -34,6 +34,7 @@ import {
   dashboardResponseMetaSchema,
   mayBeDashboardItemSchema,
   dashboardCreateRequestAttributesSchema,
+  dashboardUpdateRequestAttributesSchema,
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
 
@@ -51,7 +52,7 @@ export type DashboardPanel = Omit<TypeOf<typeof panelSchema>, 'panelConfig'> & {
 export type DashboardSection = TypeOf<typeof sectionSchema>;
 // TODO rename to DashboardState once DashboardState in src/platform/plugins/shared/dashboard/common/types.ts is merged with this type
 export type DashboardAttributes = Omit<
-  TypeOf<typeof dashboardCreateRequestAttributesSchema>,
+  TypeOf<typeof dashboardUpdateRequestAttributesSchema>,
   'panels'
 > & {
   panels: Array<DashboardPanel | DashboardSection>;

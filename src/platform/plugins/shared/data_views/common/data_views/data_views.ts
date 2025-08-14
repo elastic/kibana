@@ -804,15 +804,9 @@ export class DataViewsService {
    */
 
   savedObjectToSpec = (savedObject: SavedObject<DataViewAttributes>): DataViewSpec => {
+    console.log('savedobjecttospec------', JSON.stringify(savedObject, null, 2));
 
-    console.log('savedobjecttospec------', JSON.stringify(savedObject, null, 2))
-
-    const {
-      id,
-      type,
-      meta,
-      data,
-    } = savedObject;
+    const { id, type, version, attributes, namespaces } = savedObject;
     const {
       title,
       timeFieldName,
@@ -825,12 +819,8 @@ export class DataViewsService {
       allowHidden = false,
       name,
       runtimeFieldMap,
-    } = data;
+    } = attributes;
 
-    const {
-    namespaces,
-    version,
-    } = meta;
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
@@ -875,7 +865,7 @@ export class DataViewsService {
     refreshFields: boolean = false
   ): Promise<DataView> => {
     const savedObject = await this.savedObjectsClient.get(id);
-console.log('getSavedObjectAndInit------', JSON.stringify(savedObject, null, 2))
+    console.log('getSavedObjectAndInit------', JSON.stringify(savedObject, null, 2));
     return this.initFromSavedObject(savedObject, displayErrors, refreshFields);
   };
 
@@ -964,8 +954,8 @@ console.log('getSavedObjectAndInit------', JSON.stringify(savedObject, null, 2))
     }
 
     spec.fields = fields;
-    spec.fieldFormats = savedObject.data.fieldFormatMap
-      ? JSON.parse(savedObject.data.fieldFormatMap)
+    spec.fieldFormats = savedObject.attributes.fieldFormatMap
+      ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
 
     const indexPattern = await this.createFromSpec(spec, true, displayErrors);

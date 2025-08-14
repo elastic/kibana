@@ -23,7 +23,8 @@ export const search: ProcedureDefinition<Context, SearchIn<string>> = {
       ...ctx,
       version,
     });
-
-    return client.search(query, options);
+    const result = await client.search(query, options);
+    console.log('----search result-----', JSON.stringify(result, null, 2));
+    return result;
   },
 };

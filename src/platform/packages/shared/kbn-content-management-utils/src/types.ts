@@ -190,6 +190,7 @@ export type GetResultSO<T extends object = object> = GetResult<
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
     aliasTargetId?: string;
     aliasPurpose?: 'savedObjectConversion' | 'savedObjectImport';
+    references?: Reference[];
   }
 >;
 
@@ -215,6 +216,32 @@ export interface SOWithMetadata<Attributes extends object = object> {
   references: Reference[];
   namespaces?: string[];
   originId?: string;
+}
+
+
+export interface CMItem {
+  id: string;
+  type: string;
+  data: {
+    title: string;
+    timeFieldName?: string;
+    allowNoIndex?: boolean;
+    name?: string;
+  };
+  meta?: {
+    version?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    createdBy?: string;
+    updatedBy?: string;
+    error?: {
+      error: string;
+      message: string;
+      statusCode: number;
+      metadata?: Record<string, unknown>;
+    };
+    managed?: boolean;
+  };
 }
 
 export type SOWithMetadataPartial<Attributes extends object = object> = Omit<
@@ -267,7 +294,7 @@ export interface CMCrudTypes {
   /**
    * Search item result
    */
-  SearchOut: SearchResult<SOWithMetadata>;
+  SearchOut: SearchResult<GetResultSO<SOWithMetadata>>;
   /**
    *
    */
@@ -336,7 +363,7 @@ export interface ContentManagementCrudTypes<
   /**
    * Get item result
    */
-  GetOut: GetResultSO<SOWithMetadata<Attributes>>;
+  GetOut: GetResultSO<Attributes>;
   /**
    * Create item params
    */
@@ -344,7 +371,7 @@ export interface ContentManagementCrudTypes<
   /**
    * Create item result
    */
-  CreateOut: CreateResult<SOWithMetadata<Attributes>>;
+  CreateOut: CreateResult<Attributes>;
 
   /**
    * Search item params
@@ -353,7 +380,7 @@ export interface ContentManagementCrudTypes<
   /**
    * Search item result
    */
-  SearchOut: SearchResult<SOWithMetadata<Attributes>>;
+  SearchOut: SearchResult<GetResultSO<Attributes>>;
 
   /**
    * Update item params
@@ -362,7 +389,7 @@ export interface ContentManagementCrudTypes<
   /**
    * Update item result
    */
-  UpdateOut: UpdateResult<SOWithMetadataPartial<Attributes>>;
+  UpdateOut: UpdateResult<Attributes>;
 
   /**
    * Delete item params

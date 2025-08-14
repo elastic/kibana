@@ -73,13 +73,12 @@ export async function findDashboardById(id: string): Promise<FindDashboardsByIdR
 
   /** If the dashboard exists in the cache, then return the result from that */
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
-  const { ...attributes } = cachedDashboard?.data;
   const references = cachedDashboard?.data.references ?? [];
   if (cachedDashboard) {
     return {
       id,
       status: 'success',
-      attributes,
+      attributes: cachedDashboard?.data,
       references,
     };
   }

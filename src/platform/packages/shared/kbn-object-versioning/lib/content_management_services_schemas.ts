@@ -84,6 +84,27 @@ const createSchemas = getOptionalInOutSchemas({
   ),
 });
 
+const updateSchemas = getOptionalInOutSchemas({
+  in: schema.maybe(
+    schema.object(
+      {
+        data: schema.maybe(versionableObjectSchema),
+        options: schema.maybe(versionableObjectSchema),
+      },
+      { unknowns: 'forbid' }
+    )
+  ),
+  out: schema.maybe(
+    schema.object(
+      {
+        result: schema.maybe(versionableObjectSchema),
+      },
+      { unknowns: 'forbid' }
+    )
+  ),
+});
+
+
 // Schema to validate the "search" service objects
 const searchSchemas = getOptionalInOutSchemas({
   in: schema.maybe(
@@ -123,7 +144,7 @@ export const serviceDefinitionSchema = schema.object(
     get: getSchemas,
     bulkGet: getSchemas,
     create: createSchemas,
-    update: createSchemas,
+    update: updateSchemas,
     delete: getSchemas,
     search: searchSchemas,
     mSearch: mSearchSchemas,
