@@ -17,7 +17,7 @@ const MOCK_TIME_RANGE = {
   from: 'now-15m',
   to: 'now',
 };
-const MAX_SUGGESTIONS = 3;
+const MAX_SUGGESTIONS = 2;
 
 export const useCaseSuggestions = ({
   caseData,
