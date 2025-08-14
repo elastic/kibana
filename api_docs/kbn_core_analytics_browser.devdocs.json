@@ -849,6 +849,14 @@
               },
               {
                 "plugin": "@kbn/langchain",
+                "path": "x-pack/platform/packages/shared/kbn-langchain/server/tracers/telemetry/telemetry_tracer.ts"
+              },
+              {
+                "plugin": "@kbn/langchain",
+                "path": "x-pack/platform/packages/shared/kbn-langchain/server/tracers/telemetry/telemetry_tracer.test.ts"
+              },
+              {
+                "plugin": "@kbn/langchain",
                 "path": "x-pack/platform/packages/shared/kbn-langchain/server/tracers/telemetry/telemetry_tracer.test.ts"
               },
               {
@@ -990,10 +998,6 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/ai_assistant_data_clients/knowledge_base/create_knowledge_base_entry.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/nodes/execute_tools.ts"
               },
               {
                 "plugin": "elasticAssistant",
