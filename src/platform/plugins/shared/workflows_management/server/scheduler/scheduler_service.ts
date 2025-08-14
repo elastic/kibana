@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import { Logger } from '@kbn/core/server';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
@@ -24,16 +23,13 @@ const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineMod
 
 export class SchedulerService {
   private readonly logger: Logger;
-  private readonly actionsClient: IUnsecuredActionsClient;
 
   constructor(
     logger: Logger,
     workflowsService: WorkflowsService,
-    actionsClient: IUnsecuredActionsClient,
     private readonly taskManager: TaskManagerStartContract
   ) {
     this.logger = logger;
-    this.actionsClient = actionsClient;
   }
 
   public async start() {
