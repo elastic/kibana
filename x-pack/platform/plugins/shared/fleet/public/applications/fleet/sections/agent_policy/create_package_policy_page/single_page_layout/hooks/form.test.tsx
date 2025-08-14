@@ -307,7 +307,10 @@ describe('useOnSubmit', () => {
     });
 
     it('should disable inputs when policy_template deployment mode is not declared when in agentless deployment mode', async () => {
-      // Mock packageInfo with inputs that have deployment_modes
+      // Mock packageInfo with a policy template that doesn't declare agentless deployment mode
+      // But also has a policy template that does so the package is deemed supports_agentless
+      // We will try to install the non-agentless policy template
+
       const packageInfoWithInputs: PackageInfo = {
         ...packageInfo,
         policy_templates: [
@@ -315,6 +318,35 @@ describe('useOnSubmit', () => {
             name: 'test_template',
             title: 'Test Template',
             description: 'Test template',
+            inputs: [
+              {
+                type: 'logs',
+                title: 'Logs',
+                description: 'Log collection',
+                deployment_modes: ['default', 'agentless'],
+              },
+              {
+                type: 'metrics',
+                title: 'Metrics',
+                description: 'Metrics collection',
+                deployment_modes: ['default'],
+              },
+              {
+                type: 'http_endpoint',
+                title: 'HTTP Endpoint',
+                description: 'HTTP endpoint',
+                deployment_modes: ['agentless'],
+              },
+            ],
+          },
+          {
+            name: 'test_template_2',
+            title: 'Test Template 2',
+            description: 'Test template',
+            deployment_modes: {
+              agentless: { enabled: true },
+              default: { enabled: true },
+            },
             inputs: [
               {
                 type: 'logs',
@@ -349,6 +381,7 @@ describe('useOnSubmit', () => {
         useOnSubmit({
           agentCount: 0,
           packageInfo: packageInfoWithInputs,
+          integrationToEnable: 'test_template_1',
           withSysMonitoring: false,
           selectedPolicyTab: SelectedPolicyTab.NEW,
           newAgentPolicy: { name: 'test', namespace: '', supports_agentless: true },
@@ -359,7 +392,6 @@ describe('useOnSubmit', () => {
         })
       );
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
       act(() => {
         // Simulate switching to agentless setup technology
         renderResult.result.current.handleSetupTechnologyChange('agentless' as any);
@@ -371,9 +403,8 @@ describe('useOnSubmit', () => {
         const metricsInput = packagePolicy.inputs.find((input: any) => input.type === 'metrics');
         const httpInput = packagePolicy.inputs.find((input: any) => input.type === 'http_endpoint');
 
-        // Expect logs and http_endpoint to be enabled, and metrics to be disabled
-        expect(logsInput?.enabled).toBe(true);
-        expect(httpInput?.enabled).toBe(true);
+        expect(logsInput?.enabled).toBe(false);
+        expect(httpInput?.enabled).toBe(false);
         expect(metricsInput?.enabled).toBe(false);
       });
     });
