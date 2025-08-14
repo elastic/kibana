@@ -9,7 +9,7 @@
 
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { DataLayerConfig, XYChartProps } from '../../common';
-import { sampleArgs } from '../../common/__mocks__';
+import { sampleArgs } from '../../common/test_utils';
 import { calculateMinInterval } from './interval';
 
 describe('calculateMinInterval', () => {

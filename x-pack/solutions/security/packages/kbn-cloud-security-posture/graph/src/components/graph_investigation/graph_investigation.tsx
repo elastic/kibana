@@ -87,6 +87,11 @@ export interface GraphInvestigationProps {
    */
   initialState: {
     /**
+     * The index patterns to use for the graph investigation view.
+     */
+    indexPatterns?: string[];
+
+    /**
      * The data view to use for the graph investigation view.
      */
     dataView: DataView;
@@ -145,7 +150,7 @@ type EsQuery = UseFetchGraphDataParams['req']['query']['esQuery'];
  */
 export const GraphInvestigation = memo<GraphInvestigationProps>(
   ({
-    initialState: { dataView, originEventIds, timeRange: initialTimeRange },
+    initialState: { indexPatterns, dataView, originEventIds, timeRange: initialTimeRange },
     showInvestigateInTimeline = false,
     showToggleSearch = false,
     onInvestigateInTimeline,
@@ -211,6 +216,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       req: {
         query: {
           originEventIds,
+          indexPatterns,
           esQuery,
           start: timeRange.from,
           end: timeRange.to,

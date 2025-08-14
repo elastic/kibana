@@ -52,7 +52,7 @@ spec:
           cronline: '0 0 * * 0' # Sunday at midnight
           env:
             IMAGES_CONFIG: kibana/base_image.yml
-            FORCE_PROMOTE: true
+            FORCE_PROMOTE: "true"
           message: Builds Kibana VM base image daily (24.04)
         "[ubuntu24.04] weekly kibana packages layer build":
           branch: kibana-upgrade-ubuntu
@@ -61,7 +61,7 @@ spec:
             IMAGES_CONFIG: kibana/packages_layer.yml
             BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'
             KIBANA_BRANCH: 'adopt-moon-clean'
-            FORCE_PROMOTE: true
+            FORCE_PROMOTE: "true"
           message: Builds Kibana Packages Layer Weekly (24.04)
         "[ubuntu24.04] daily kibana cache image build":
           branch: kibana-upgrade-ubuntu
@@ -70,7 +70,7 @@ spec:
             IMAGES_CONFIG: kibana/image_cache.tpl.yml
             BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
             KIBANA_BRANCH: 'adopt-moon-clean'
-            FORCE_PROMOTE: true
+            FORCE_PROMOTE: "true"
           message: Builds Kibana VM base image daily (24.04)
         "[ubuntu24.04] daily kibana fips image build":
           branch: kibana-upgrade-ubuntu
@@ -79,7 +79,7 @@ spec:
             BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml,kibana/image_cache.tpl.yml'
             IMAGES_CONFIG: kibana/fips.yml
             KIBANA_BRANCH: 'adopt-moon-clean'
-            FORCE_PROMOTE: true
+            FORCE_PROMOTE: "true"
           message: Builds Kibana FIPS VM image daily (24.04)
       teams:
         kibana-operations:

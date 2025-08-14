@@ -233,9 +233,11 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         fields.add(key);
       });
     });
-    // Keep the detected fields as first columns on the table
+    // Keep the detected fields as first columns on the table and sort the rest alphabetically
     const uniqDetectedFields = getUniqueDetectedFields(detectedFields);
-    return Array.from(fields).sort((curr) => (uniqDetectedFields.includes(curr) ? -1 : 1));
+    const otherFields = Array.from(fields).filter((field) => !uniqDetectedFields.includes(field));
+
+    return [...uniqDetectedFields, ...otherFields.sort()];
   }, [detectedFields, previewDocuments]);
 
   const draftProcessor = useStreamEnrichmentSelector((snapshot) =>
