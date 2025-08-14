@@ -101,7 +101,6 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/220243
   describe('@ess @serverless @serverlessQA Query type rules', () => {
     before(async () => {
       await esArchiver.load(auditbeatPath);
