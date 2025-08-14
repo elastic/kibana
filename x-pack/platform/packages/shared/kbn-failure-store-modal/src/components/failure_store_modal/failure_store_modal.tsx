@@ -270,7 +270,10 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="cancelButton" onClick={() => onCloseModal()}>
+        <EuiButtonEmpty
+          data-test-subj="failureStoreModalCancelButton"
+          onClick={() => onCloseModal()}
+        >
           <FormattedMessage
             id="xpack.failureStoreModal.cancelButtonLabel"
             defaultMessage="Cancel"
@@ -281,7 +284,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
           fill
           type="submit"
           isLoading={false}
-          data-test-subj="saveButton"
+          data-test-subj="failureStoreModalSaveButton"
           onClick={onSubmitForm}
           disabled={disableSubmit}
         >
