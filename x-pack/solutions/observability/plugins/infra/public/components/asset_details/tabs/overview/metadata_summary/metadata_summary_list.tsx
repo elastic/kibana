@@ -27,7 +27,7 @@ import { MetadataHeader } from './metadata_header';
 import { MetadataExplanationMessage } from '../../../components/metadata_explanation';
 import { SectionTitle } from '../../../components/section_title';
 import { Section } from '../../../components/section';
-import { getMetadataBySchema } from './metadata_by_schema';
+import { getContainerMetadata, getHostMetadataBySchema } from './metadata_by_schema';
 
 interface MetadataSummaryProps {
   metadata?: InfraMetadata;
@@ -131,7 +131,8 @@ export const MetadataSummaryList = ({
   entityType,
   schema,
 }: MetadataSummaryProps) => {
-  const { host, container } = getMetadataBySchema(metadata?.info, schema);
+  const host = getHostMetadataBySchema(metadata?.info, schema);
+  const container = getContainerMetadata(metadata?.info);
 
   switch (entityType) {
     case 'host':
@@ -170,7 +171,8 @@ export const MetadataSummaryListCompact = ({
   entityType,
   schema,
 }: MetadataSummaryProps) => {
-  const { host, container } = getMetadataBySchema(metadata?.info, schema);
+  const host = getHostMetadataBySchema(metadata?.info, schema);
+  const container = getContainerMetadata(metadata?.info);
 
   switch (entityType) {
     case 'host':

@@ -109,43 +109,27 @@ const semConvHostMetadataData = (metadataInfo: InfraMetadata['info']): MetadataD
   },
 ];
 
-export const getMetadataBySchema = (
+export const getHostMetadataBySchema = (
   metadata: InfraMetadata['info'],
   schema: DataSchemaFormat | null
 ) => {
   switch (schema) {
     case 'ecs':
       return {
-        host: {
-          metadata: ecsHostMetadataData(metadata),
-          extended: ecsHostExtendedMetadata(metadata),
-        },
-        container: {
-          metadata: ecsContainerMetadataData(metadata),
-          extended: ecsContainerExtendedMetadata(metadata),
-        },
-      };
-    case 'semconv':
-      return {
-        host: {
-          metadata: semConvHostMetadataData(metadata),
-          extended: semConvHostExtendedMetadata(metadata),
-        },
-        container: {
-          metadata: [],
-          extended: [],
-        },
+        metadata: ecsHostMetadataData(metadata),
+        extended: ecsHostExtendedMetadata(metadata),
       };
     default:
       return {
-        host: {
-          metadata: [],
-          extended: [],
-        },
-        container: {
-          metadata: [],
-          extended: [],
-        },
+        metadata: semConvHostMetadataData(metadata),
+        extended: semConvHostExtendedMetadata(metadata),
       };
   }
+};
+
+export const getContainerMetadata = (metadata: InfraMetadata['info']) => {
+  return {
+    metadata: ecsContainerMetadataData(metadata),
+    extended: ecsContainerExtendedMetadata(metadata),
+  };
 };
