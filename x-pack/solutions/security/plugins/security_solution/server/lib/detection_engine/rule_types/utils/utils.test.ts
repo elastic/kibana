@@ -400,7 +400,7 @@ describe('utils', () => {
     test('it successfully returns array of exception list items', async () => {
       listMock.getExceptionListClient = () =>
         ({
-          findExceptionListsItemPointInTimeFinder: jest
+          findExceptionListItemsPointInTimeFinder: jest
             .fn()
             .mockImplementationOnce(({ executeFunctionOnStream }) => {
               executeFunctionOnStream({ data: [getExceptionListItemSchemaMock()] });
@@ -412,7 +412,7 @@ describe('utils', () => {
         lists: getListArrayMock(),
       });
 
-      expect(client.findExceptionListsItemPointInTimeFinder).toHaveBeenCalledWith(
+      expect(client.findExceptionListItemsPointInTimeFinder).toHaveBeenCalledWith(
         expect.objectContaining({
           listId: ['list_id_single', 'endpoint_list'],
           namespaceType: ['single', 'agnostic'],
@@ -426,11 +426,11 @@ describe('utils', () => {
       expect(exceptions).toEqual([getExceptionListItemSchemaMock()]);
     });
 
-    test('it throws if "findExceptionListsItemPointInTimeFinder" fails anywhere', async () => {
+    test('it throws if "findExceptionListItemsPointInTimeFinder" fails anywhere', async () => {
       const err = new Error('error fetching list');
       listMock.getExceptionListClient = () =>
         ({
-          findExceptionListsItemPointInTimeFinder: jest.fn().mockRejectedValue(err),
+          findExceptionListItemsPointInTimeFinder: jest.fn().mockRejectedValue(err),
         } as unknown as ExceptionListClient);
 
       await expect(() =>

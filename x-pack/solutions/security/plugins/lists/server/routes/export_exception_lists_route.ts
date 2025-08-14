@@ -8,17 +8,17 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { ExportExceptionListRequestQuery } from '@kbn/securitysolution-exceptions-common/api';
+import { ExportExceptionListsRequestQuery } from '@kbn/securitysolution-exceptions-common/api';
 
 import type { ListsPluginRouter } from '../types';
 
 import { buildSiemResponse, getExceptionListClient } from './utils';
 
-export const exportExceptionListRoute = (router: ListsPluginRouter): void => {
+export const exportExceptionListsRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .post({
       access: 'public',
-      path: `${EXCEPTION_LIST_URL}/_export`,
+      path: `${EXCEPTION_LIST_URL}/_bulk_export`,
       security: {
         authz: {
           requiredPrivileges: ['lists-read'],
@@ -29,7 +29,7 @@ export const exportExceptionListRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: buildRouteValidationWithZod(ExportExceptionListRequestQuery),
+            query: buildRouteValidationWithZod(ExportExceptionListsRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -39,36 +39,32 @@ export const exportExceptionListRoute = (router: ListsPluginRouter): void => {
 
         try {
           const {
-            id,
-            list_id: listId,
-            namespace_type: namespaceType,
+            filter,
             include_expired_exceptions: includeExpiredExceptionsString,
+            namespace_type: namespaceType,
           } = request.query;
           const exceptionListsClient = await getExceptionListClient(context);
 
           // Defaults to including expired exceptions if query param is not present
-          const includeExpiredExceptions =
-            includeExpiredExceptionsString !== undefined
-              ? includeExpiredExceptionsString === 'true'
-              : true;
-          const exportContent = await exceptionListsClient.exportExceptionListAndItems({
-            id,
+          const includeExpiredExceptions = (includeExpiredExceptionsString ?? 'true') === 'true';
+
+          const exportContent = await exceptionListsClient.exportExceptionListsAndItems({
+            filter,
             includeExpiredExceptions,
-            listId,
             namespaceType,
           });
 
           if (exportContent == null) {
             return siemResponse.error({
-              body: `exception list with list_id: ${listId} or id: ${id} does not exist`,
-              statusCode: 400,
+              body: `No lists found for filter: "${filter}"`,
+              statusCode: 404,
             });
           }
 
           return response.ok({
             body: `${exportContent.exportData}${JSON.stringify(exportContent.exportDetails)}\n`,
             headers: {
-              'Content-Disposition': `attachment; filename="${listId}"`,
+              'Content-Disposition': `attachment; filename="TODOAllExceptionListsMaybeAddTimestampHere.ndjson"`,
               'Content-Type': 'application/ndjson',
             },
           });
