@@ -12,7 +12,7 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Subject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiDelayRender, EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiDelayRender, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableComponentProps,
@@ -153,7 +153,7 @@ export function UnifiedHistogramChart({
     dataView,
     request,
     hits,
-    chartVisible, // `false` for metrics mode here will trigger the fetch of total hits in a separate request
+    chartVisible,
     filters,
     query,
     getTimeRange,

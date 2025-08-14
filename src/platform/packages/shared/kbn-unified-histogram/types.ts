@@ -221,17 +221,18 @@ export interface ChartSectionContext {
    * Callback to pass to the Lens embeddable to handle brush events
    */
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
-
   /**
    * CSS styles for toggleable actions container
    */
   chartToolbarCss?: SerializedStyles;
-
   /**
    * CSS styles for the charts section
    */
   histogramCss?: SerializedStyles;
-
+  /**
+   * Renders the toggle actions
+   * @returns The toggle action elements
+   */
   renderToggleActions: () => React.ReactElement | undefined;
 }
 /**
@@ -241,5 +242,9 @@ export type ChartSectionConfiguration =
   | {
       Component: React.ComponentType<ChartSectionContext>;
       replaceDefaultHistogram: true;
+      localStorageKeyPrefix: string;
+      containerInitialHeight: number;
     }
-  | { replaceDefaultHistogram: false; Component?: never };
+  | {
+      replaceDefaultHistogram: false;
+    };
