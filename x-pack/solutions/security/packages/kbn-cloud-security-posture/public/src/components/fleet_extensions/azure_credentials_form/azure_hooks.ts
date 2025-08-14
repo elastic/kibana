@@ -129,7 +129,7 @@ export const useAzureCredentialsForm = ({
 
   useEffect(() => {
     const isInvalid = setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && !hasArmTemplateUrl;
-    if (isInvalid !== isValid) {
+    if (isInvalid && isValid) {
       updatePolicy({
         isValid: !isInvalid,
         updatedPolicy: newPolicy,

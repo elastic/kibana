@@ -325,12 +325,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     ({ isValid, updatedPolicy, isExtensionLoaded }) => {
       updatePackagePolicy(updatedPolicy);
       setIsFleetExtensionLoaded(isExtensionLoaded);
-      setFormState((prevState) => {
-        if (prevState === 'VALID' && !isValid) {
-          return 'INVALID';
-        }
-        return prevState;
-      });
+
+      if (isValid !== undefined) {
+        // override the form state
+        setFormState((prevState) => {
+          if (prevState === 'VALID' && !isValid) {
+            return 'INVALID';
+          }
+          return prevState;
+        });
+      }
     },
     [updatePackagePolicy, setFormState]
   );
