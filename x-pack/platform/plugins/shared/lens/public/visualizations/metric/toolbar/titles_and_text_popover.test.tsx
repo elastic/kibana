@@ -158,7 +158,9 @@ describe('TitlesAndTextPopover', () => {
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
     textOptionsButton.click();
 
-    const secondaryAlignBtnGroup = new EuiButtonGroupTestHarness('lens-secondary-metric-alignment-btn');
+    const secondaryAlignBtnGroup = new EuiButtonGroupTestHarness(
+      'lens-secondary-metric-alignment-btn'
+    );
 
     secondaryAlignBtnGroup.select('Center');
     secondaryAlignBtnGroup.select('Left');
@@ -239,9 +241,9 @@ describe('TitlesAndTextPopover', () => {
     textOptionsButton.click();
 
     const positionBtnGroup = new EuiButtonGroupTestHarness('lens-primary-position-btn');
-    
+
     positionBtnGroup.select('Top');
-    
+
     expect(mockSetState).toHaveBeenCalledWith(
       expect.objectContaining({
         primaryPosition: 'top',
@@ -258,7 +260,7 @@ describe('TitlesAndTextPopover', () => {
     const positionBtnGroup = new EuiButtonGroupTestHarness('lens-primary-position-btn');
 
     positionBtnGroup.select('Bottom');
-    
+
     expect(mockSetState).toHaveBeenCalledWith(
       expect.objectContaining({
         primaryPosition: 'bottom',

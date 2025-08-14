@@ -1016,7 +1016,7 @@ export function DimensionEditorAdditionalSection({
             idSelected={`${buttonIdPrefix}${selectedSupportingVisualization}`}
             onChange={(_id, value) => {
               const supportingVisualizationType = value as SupportingVisType;
-              if (supportingVisualizationType == supportingVisualization(state)) return;
+              if (supportingVisualizationType === supportingVisualization(state)) return;
 
               setState({
                 ...state,
