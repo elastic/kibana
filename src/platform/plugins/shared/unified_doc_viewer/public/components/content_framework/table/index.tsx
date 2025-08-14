@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
+import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 import { DataGrid, DataGridField } from './components/data_grid';
 
@@ -28,7 +30,7 @@ export type FieldConfigValue = string | number | undefined;
 
 export interface FieldConfiguration {
   title: string;
-  formatter?: (value: FieldConfigValue) => React.ReactNode;
+  formatter?: (value: FieldConfigValue, formattedValue: string) => React.ReactNode;
   description?: string;
 }
 
@@ -45,13 +47,23 @@ export function ContentFrameworkTable({
   onRemoveColumn,
 }: ContentFrameworkTableProps) {
   const { euiTheme } = useEuiTheme();
+
   const {
     fieldsMetadata: { useFieldsMetadata },
+    fieldFormats,
   } = getUnifiedDocViewerServices();
   const { fieldsMetadata = {} } = useFieldsMetadata({
     attributes: ['short', 'flat_name', 'name'],
     fieldNames,
   });
+
+  const { formattedHit, flattenedHit } = useMemo(
+    () => ({
+      formattedHit: getFormattedFields(hit, fieldNames, { dataView, fieldFormats }),
+      flattenedHit: getFlattenedFields(hit, fieldNames),
+    }),
+    [dataView, fieldFormats, hit, fieldNames]
+  );
 
   const nameCellValue = ({
     id,
@@ -89,11 +101,22 @@ export function ContentFrameworkTable({
   if (!hit.flattened) {
     return null;
   }
+
+  const FormattedValue = ({ value }: { value: string }) => (
+    <EuiText
+      className="eui-textTruncate"
+      size="xs"
+      // Value returned from formatFieldValue is always sanitized
+      dangerouslySetInnerHTML={{ __html: value }}
+    />
+  );
+
   const fields: Record<string, DataGridField> = fieldNames.reduce<Record<string, DataGridField>>(
     (acc, fieldName) => {
-      const value = hit.flattened[fieldName] as string; // make sure it's a string
+      const value = flattenedHit[fieldName];
       const fieldConfiguration = fieldConfigurations?.[fieldName];
       const fieldDescription = fieldConfiguration?.description || fieldsMetadata[fieldName]?.short;
+      const formattedValue = formattedHit[fieldName];
 
       if (!value) return acc;
 
@@ -106,9 +129,9 @@ export function ContentFrameworkTable({
           ...(fieldDescription && { description: fieldDescription }),
         }),
         valueCellContent: fieldConfiguration?.formatter ? (
-          <>{fieldConfiguration?.formatter(value)}</>
+          <>{fieldConfiguration?.formatter(value, formattedValue)}</>
         ) : (
-          value
+          <FormattedValue value={formattedValue} />
         ),
       };
 
