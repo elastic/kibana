@@ -81,7 +81,6 @@ export const DashboardGrid = ({
         height: gridData.h,
         resizeOptions: {
           minWidth: 6,
-          maxWidth: 12,
           minHeight: 2,
           maxHeight: 10,
         },

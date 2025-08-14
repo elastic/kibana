@@ -44,13 +44,12 @@ const getRowCountInPixels = ({
 export const getResizePreviewRect = ({
   activePanel,
   pointerPixel,
-  maxRight,
+
   runtimeSettings,
   resizeOptions,
 }: {
   pointerPixel: PointerPosition;
   activePanel: ActivePanelEvent;
-  maxRight: number;
   runtimeSettings: RuntimeGridSettings;
   resizeOptions: GridPanelData['resizeOptions'];
 }) => {
@@ -72,8 +71,10 @@ export const getResizePreviewRect = ({
     right: Math.max(
       Math.min(
         pointerPixel.clientX - activePanel.sensorOffsets.right, // actual width based on mouse position
-        maxRight - runtimeSettings.gutterSize, // cannot extend width past edge of the grid layout
-        panelRect.left + getColumnCountInPixels({ columnCount: maxWidth, runtimeSettings }) // max width of panel
+        panelRect.left + getColumnCountInPixels({ columnCount: maxWidth, runtimeSettings }), // max width of panel
+        // cannot extend width past the right edge of the grid layout
+        getColumnCountInPixels({ columnCount: runtimeSettings.columnCount, runtimeSettings }) +
+          runtimeSettings.gutterSize
       ),
       panelRect.left + getColumnCountInPixels({ columnCount: minWidth, runtimeSettings }) // min width of panel
     ),

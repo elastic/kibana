@@ -75,14 +75,10 @@ export const moveAction = (
 
   const previewRect = (() => {
     if (isResize) {
-      const layoutRef = gridLayoutStateManager.layoutRef.current;
-      // LIMIT SIZE HERE
       const { resizeOptions } = currentPanelData;
-      const maxRight = layoutRef ? layoutRef.getBoundingClientRect().right : window.innerWidth;
       return getResizePreviewRect({
         activePanel,
         pointerPixel,
-        maxRight,
         runtimeSettings,
         resizeOptions,
       });

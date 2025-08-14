@@ -25,7 +25,6 @@ export interface GridPanelData extends GridRect {
     maxWidth?: number;
     minHeight?: number;
     maxHeight?: number;
-    direction?: 'horizontal' | 'vertical' | 'both';
   };
 }
 
