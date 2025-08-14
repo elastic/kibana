@@ -158,7 +158,7 @@ LOGLEVEL ([Aa]lert|ALERT|[Tt]race|TRACE|[Dd]ebug|DEBUG|[Nn]otice|NOTICE|[Ii]nfo?
 
 1. Identify and describe the structure of each log line (for example, how the timestamp, log level, message, etc. are arranged).  
 2. Determine if the timestamp is in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format, or if it matches one of Elasticsearch's built-in Grok timestamp patterns, such as \`TIMESTAMP_ISO8601\`, \`SYSLOGTIMESTAMP\`, etc.  
-3. If the timestamp does **not** match a single built-in pattern that fully captures the date/time **and** year, you must define a new custom capture group for the timestamp, this should use the Oniguruma syntax for named capture which will let you match a piece of text and save it as a field, the syntax looks like this: \`(?<field_name>the pattern here)\`, where \`field_name\` is the name of the field you want to capture, and the pattern that follows is valid regex.
+3. If the timestamp does **not** match a single built-in pattern that fully captures the date/time **and** year, you must define a new custom pattern named \`CUSTOM_TIMESTAMP\` (for example, \`"%{DAY} %{MONTH} %{MONTHDAY} %{TIME} %{YEAR}"\`).  
 4. If the logs suggest an optional component might be present in some lines but absent in others), ensure you handle that via optional non-capturing groups (e.g. \`(?: ... )?\`).
 
 ---
@@ -167,7 +167,7 @@ LOGLEVEL ([Aa]lert|ALERT|[Tt]race|TRACE|[Dd]ebug|DEBUG|[Nn]otice|NOTICE|[Ii]nfo?
 
 1. **If the timestamp is valid ISO 8601, then capture it directly into \`@timestamp\`.  
 2. **Otherwise**, store the entire timestamp in a field named \`custom_timestamp\` (or similar) and use a date processor to convert it to \`@timestamp\`.  
-3. **Important**: Custom pattern definitions are not supported, so you must use the built-in Grok patterns or alternatively you can use the Oniguruma syntax for named capture which will let you match a piece of text and save it as a field, the syntax looks like this: \`(?<field_name>the pattern here)\`, where \`field_name\` is the name of the field you want to capture, and the pattern that follows is valid regex.
+3. **Important**: If you define a pattern named \`CUSTOM_TIMESTAMP\`, you **must** actually use it in the final Grok expression. Do **not** define separate captures for day, month, year, etc. if you choose the custom approach.  
 4. Capture relevant fields into [ECS-compatible keys](https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html) when possible (e.g. \`log.level\`, \`client.ip\`, \`process.name\`, \`message\`, etc.).  
 5. If there are optional fields in the logs, handle them using optional groups: \`(?: ... )?\`.  
 6. Use \`\\s+\` for 2+ spaces if needed; otherwise rely on direct match patterns.
@@ -189,6 +189,9 @@ LOGLEVEL ([Aa]lert|ALERT|[Tt]race|TRACE|[Dd]ebug|DEBUG|[Nn]otice|NOTICE|[Ii]nfo?
       "grok": {
         "field": "${field}",
         "patterns": ["Your Grok pattern here"],
+        "pattern_definitions": {
+          "CUSTOM_TIMESTAMP": "..."
+        }
       }
     },
     {
@@ -215,7 +218,7 @@ ${exampleValues.join('\n')}
 
 **Important**:
 
-- If you define a custom timestamp pattern, you must use it in your final Grok expression using the Oniguruma syntax for named capture.  
+- If you define a custom timestamp pattern, you must use it in your final Grok expression (e.g. \`\\[%{CUSTOM_TIMESTAMP:custom_timestamp}\\]\`).  
 - Do not define separate day, month, or year captures if you claim you are using a custom pattern.  
   `;
 
@@ -295,6 +298,10 @@ const ingestPipelineSchema = {
             properties: {
               field: { type: 'string' },
               patterns: { type: 'array', items: { type: 'string' } },
+              pattern_definitions: {
+                type: 'object',
+                properties: {},
+              },
               ignore_missing: { type: 'boolean' },
               ignore_failure: { type: 'boolean' },
             },
@@ -402,13 +409,15 @@ async function suggestAndValidateGrokProcessor({
     );
   }
 
+  // NOTE: Inline patterns until we support custom pattern definitions in Streamlang
+  grokProcessor.grok.patterns = inlineGrokPatterns(grokProcessor.grok);
+
   const simulationResult = await simulateProcessing({
     params: {
       path: { name: streamName },
       body: {
         processing: {
           steps: [
-            // TODO: Revisit this, as pattern_definitons are not supported in streamlang
             {
               action: 'grok',
               customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
@@ -453,4 +462,38 @@ ${JSON.stringify(
     grokProcessor: grokProcessor.grok,
     simulationResult,
   };
+}
+
+function inlineGrokPatterns(grokProcessor: GrokProcessor['grok']): string[] {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { patterns, pattern_definitions } = grokProcessor;
+  const patternDefs = pattern_definitions as Record<string, string>;
+
+  if (!patternDefs || Object.keys(patternDefs).length === 0) {
+    return patterns;
+  }
+
+  // Recursively inline a single pattern
+  function inlinePattern(pattern: string, seen: Set<string> = new Set()): string {
+    // Match %{PATTERN_NAME} or %{PATTERN_NAME:field}
+    return pattern.replace(/%{([A-Z0-9_]+)(:[^}]*)?}/g, (match, key, fieldName) => {
+      if (patternDefs && patternDefs[key]) {
+        if (seen.has(key)) {
+          // Prevent infinite recursion on cyclic definitions
+          return match;
+        }
+        seen.add(key);
+        const inlined = inlinePattern(patternDefs[key], seen);
+        seen.delete(key);
+        if (fieldName) {
+          // Named capture group
+          return `(?<${fieldName.substring(1)}>${inlined})`;
+        }
+        return `(${inlined})`;
+      }
+      return match; // Leave as is if not in patternDefs
+    });
+  }
+
+  return patterns.map((pattern) => inlinePattern(pattern));
 }
