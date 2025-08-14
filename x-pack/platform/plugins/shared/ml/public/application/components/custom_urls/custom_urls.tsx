@@ -319,6 +319,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
         initialFocus="[name=label]"
         style={{ width: 500 }}
         data-test-subj="mlJobNewCustomUrlFormModal"
+        aria-label="Add custom URL to job"
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
