@@ -69,6 +69,15 @@ export const APMSpan: Story = {
         description: 'Custom field description',
         formatter: (value) => <div>Custom formatter for: {value}</div>,
       },
+      [EVENT_OUTCOME]: {
+        title: 'Outcome',
+        description: 'Custom field description',
+        formatter: (value) => (
+          <div>
+            Custom formatter with highlight: <mark className="ffSearch__highlight">{value}</mark>
+          </div>
+        ),
+      },
     },
   },
 };
@@ -99,6 +108,15 @@ export const APMTransaction: Story = {
         title: 'Duration',
         description: 'Custom field description',
         formatter: (value) => <div>Custom formatter for: {value}</div>,
+      },
+      [EVENT_OUTCOME]: {
+        title: 'Outcome',
+        description: 'Custom field description',
+        formatter: (value) => (
+          <div>
+            Custom formatter with highlight: <mark className="ffSearch__highlight">{value}</mark>
+          </div>
+        ),
       },
     },
   },
