@@ -148,12 +148,6 @@ export const getNavigationTreeDefinition = ({
                       },
                       link: 'enterpriseSearchApplications:searchApplications',
                       renderAs: 'item',
-                      title: i18n.translate(
-                        'xpack.enterpriseSearch.searchNav.build.searchApplications',
-                        {
-                          defaultMessage: 'Search applications',
-                        }
-                      ),
                       ...(searchApps
                         ? {
                             children: searchApps.map(euiItemTypeToNodeDefinition),
