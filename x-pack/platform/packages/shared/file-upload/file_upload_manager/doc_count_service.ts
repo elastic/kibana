@@ -39,7 +39,7 @@ export class DocCountService {
     return this.data.search
       .search({
         params: {
-          index: this.indexName + 'www',
+          index: this.indexName,
           size: 1,
           body: { query: { match_all: {} } },
         },
