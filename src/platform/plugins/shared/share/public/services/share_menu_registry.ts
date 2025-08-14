@@ -8,7 +8,7 @@
  */
 
 import { ApplicationStart } from '@kbn/core/public';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import type {
   BrowserUrlService,
   ShareContext,

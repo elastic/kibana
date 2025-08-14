@@ -131,7 +131,7 @@ const openKnowledgeBasePage = (
   knowledgeBaseEntryId: string
 ) =>
   navigateToApp('management', {
-    path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}&entry_search_term=${knowledgeBaseEntryId}`,
+    path: `ai/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}&entry_search_term=${knowledgeBaseEntryId}`,
     openInNewTab: true,
   });
 

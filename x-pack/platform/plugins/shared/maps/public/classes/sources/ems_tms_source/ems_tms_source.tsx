@@ -45,8 +45,13 @@ export function getSourceTitle() {
   }
 }
 
+type NormalizedEMSTMSSourceDescriptor = EMSTMSSourceDescriptor &
+  Required<Pick<EMSTMSSourceDescriptor, 'isAutoSelect' | 'lightModeDefault'>>;
+
 export class EMSTMSSource extends AbstractSource implements ITMSSource {
-  static createDescriptor(descriptor: Partial<EMSTMSSourceDescriptor>): EMSTMSSourceDescriptor {
+  static createDescriptor(
+    descriptor: Partial<EMSTMSSourceDescriptor>
+  ): NormalizedEMSTMSSourceDescriptor {
     return {
       type: SOURCE_TYPES.EMS_TMS,
       id: descriptor.id,
@@ -60,7 +65,7 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
     };
   }
 
-  readonly _descriptor: EMSTMSSourceDescriptor;
+  readonly _descriptor: NormalizedEMSTMSSourceDescriptor;
 
   constructor(descriptor: Partial<EMSTMSSourceDescriptor>) {
     const emsTmsDescriptor = EMSTMSSource.createDescriptor(descriptor);

@@ -28,6 +28,7 @@
     "@kbn/utility-types",
     "@kbn/share-plugin",
     "@kbn/react-kibana-context-render",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

@@ -12,9 +12,14 @@ import { i18n } from '@kbn/i18n';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 import {
   MVTFieldDescriptor,
-  TiledSingleLayerVectorSourceSettings,
+  TiledSingleLayerVectorSourceDescriptor,
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
+
+export type TiledSingleLayerVectorSourceSettings = Omit<
+  TiledSingleLayerVectorSourceDescriptor,
+  'tooltipProperties' | 'type'
+>;
 
 interface Props {
   onSourceConfigChange: (sourceConfig: TiledSingleLayerVectorSourceSettings) => void;

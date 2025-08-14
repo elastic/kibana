@@ -122,5 +122,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/core-chrome-layout-constants",
     "@kbn/core-di",
+    "@kbn/licensing-types",
   ]
 }

@@ -30,7 +30,8 @@ import {
   GetColumnsByTypeFn,
   ISuggestionItem,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import { ESQLLicenseType, ESQLVariableType } from '@kbn/esql-types';
+import { ESQLVariableType } from '@kbn/esql-types';
+import type { LicenseType } from '@kbn/licensing-types';
 import { isSourceCommand } from '../shared/helpers';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
 import { getAstContext } from '../shared/context';
@@ -85,7 +86,7 @@ export async function suggest(
 
         // Check license requirements
         const hasLicenseAccess =
-          !license || hasMinimumLicenseRequired?.(license.toLocaleLowerCase() as ESQLLicenseType);
+          !license || hasMinimumLicenseRequired?.(license.toLocaleLowerCase() as LicenseType);
 
         // Check observability tier requirements
         const hasObservabilityAccess =
@@ -232,7 +233,7 @@ async function getSuggestionsWithinCommandExpression(
   getFieldsMap: GetFieldsMapFn,
   callbacks?: ESQLCallbacks,
   offset?: number,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean
 ) {
   const innerText = fullText.substring(0, offset);
   const commandDefinition = esqlCommandRegistry.getCommandByName(astContext.command.name);

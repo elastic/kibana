@@ -26,6 +26,9 @@ import {
   UpdateEntitySourceRequestParams,
 } from '../../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
+import { createEngineStatusService } from '../../engine/status_service';
+import { PrivilegeMonitoringApiKeyType } from '../../auth/saved_object';
+import { monitoringEntitySourceType } from '../../saved_objects/monitoring_entity_source_type';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../../constants';
 
 export const monitoringEntitySourceRoute = (
@@ -66,10 +69,19 @@ export const monitoringEntitySourceRoute = (
 
           const body = await client.init(request.body);
           const privMonDataClient = await secSol.getPrivilegeMonitoringDataClient();
-          const engineStatus = await privMonDataClient.getEngineStatus();
+          const soClient = privMonDataClient.getScopedSoClient(request, {
+            includedHiddenTypes: [
+              PrivilegeMonitoringApiKeyType.name,
+              monitoringEntitySourceType.name,
+            ],
+          });
+
+          const statusService = createEngineStatusService(privMonDataClient, soClient);
+          const engineStatus = await statusService.get();
+
           try {
             if (engineStatus.status === PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
-              await privMonDataClient.scheduleNow();
+              await statusService.scheduleNow();
             }
           } catch (e) {
             logger.warn(`[Privilege Monitoring] Error scheduling task, received ${e.message}`);
@@ -150,12 +162,21 @@ export const monitoringEntitySourceRoute = (
           const secSol = await context.securitySolution;
           const client = secSol.getMonitoringEntitySourceDataClient();
           const body = await client.update({ ...request.body, id: request.params.id });
-          const privMonDataClient = await secSol.getPrivilegeMonitoringDataClient();
-          const engineStatus = await privMonDataClient.getEngineStatus();
+
+          const privMonDataClient = secSol.getPrivilegeMonitoringDataClient();
+          const soClient = privMonDataClient.getScopedSoClient(request, {
+            includedHiddenTypes: [
+              PrivilegeMonitoringApiKeyType.name,
+              monitoringEntitySourceType.name,
+            ],
+          });
+
+          const statusService = createEngineStatusService(privMonDataClient, soClient);
+          const engineStatus = await statusService.get();
 
           try {
             if (engineStatus.status === PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
-              await privMonDataClient.scheduleNow();
+              await statusService.scheduleNow();
             }
           } catch (e) {
             logger.warn(`[Privilege Monitoring] Error scheduling task, received ${e.message}`);

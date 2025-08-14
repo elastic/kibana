@@ -19,7 +19,8 @@
       "features",
       "security",
       "triggersActionsUi",
-      "spaces"
+      "spaces",
+      "embeddable"
     ],
     "optionalPlugins": [
       "alerting"
