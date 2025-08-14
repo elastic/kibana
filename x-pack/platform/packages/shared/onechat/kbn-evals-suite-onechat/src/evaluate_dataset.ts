@@ -6,7 +6,14 @@
  */
 
 import { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
-import { DefaultEvaluators, KibanaPhoenixClient } from '@kbn/evals';
+import {
+  CorrectnessAnalysis,
+  DefaultEvaluators,
+  KibanaPhoenixClient,
+  calculateFactualScore,
+  calculateProceduralFidelityScore,
+  calculateRelevanceScore,
+} from '@kbn/evals';
 import { EvaluationDataset } from '@kbn/evals/src/types';
 import { OnechatEvaluationChatClient } from './chat_client';
 
@@ -56,19 +63,31 @@ export function createEvaluateDataset({
     await phoenixClient.runExperiment(
       {
         dataset,
-        task: async ({ input }) => {
+        task: async ({ input, output, metadata }) => {
           const response = await chatClient.converse({
             messages: input.question,
           });
 
+          // Running correctness evaluator as part of the experiment task since quantitative correctness calculations need its output
+          let correctnessAnalysis = null;
+          if (!response.errors?.length) {
+            const correctnessResult = await evaluators.corectness().evaluate({
+              input,
+              expected: output,
+              output: response,
+              metadata,
+            });
+            correctnessAnalysis = correctnessResult.metadata as unknown as CorrectnessAnalysis;
+          }
+
           return {
             errors: response.errors,
             messages: response.messages,
+            correctnessAnalysis,
           };
         },
       },
       [
-        // Simple, generic response evaluator until more specific evaluators are implemented
         {
           name: 'response-evaluator',
           kind: 'LLM',
@@ -86,17 +105,74 @@ export function createEvaluateDataset({
           },
         },
         {
-          name: 'correctness-evaluator',
+          name: 'factuality',
           kind: 'LLM',
-          evaluate: async ({ input, output, expected, metadata }) => {
-            const result = await evaluators.corectness().evaluate({
-              input,
-              expected,
-              output,
-              metadata,
-            });
+          evaluate: async ({ output, metadata }) => {
+            if (!output.correctnessAnalysis) {
+              return {
+                score: null,
+                label: 'unavailable',
+                explanation: 'No correctness analysis available',
+                metadata,
+              };
+            }
 
-            return result;
+            const correctnessAnalysis = output.correctnessAnalysis as CorrectnessAnalysis;
+            const score = calculateFactualScore(correctnessAnalysis);
+            return {
+              score,
+              label: correctnessAnalysis.summary.factual_accuracy_summary,
+              explanation: correctnessAnalysis.analysis.join(', '),
+              metadata,
+            };
+          },
+        },
+        {
+          name: 'relevance',
+          kind: 'LLM',
+          evaluate: async ({ output, metadata }) => {
+            if (!output.correctnessAnalysis) {
+              return {
+                score: null,
+                label: 'unavailable',
+                explanation: 'No correctness analysis available',
+                metadata,
+              };
+            }
+
+            const correctnessAnalysis = output.correctnessAnalysis as CorrectnessAnalysis;
+            const score = calculateRelevanceScore(correctnessAnalysis);
+
+            return {
+              score,
+              label: correctnessAnalysis.summary.relevance_summary,
+              explanation: correctnessAnalysis.analysis.join(', '),
+              metadata,
+            };
+          },
+        },
+        {
+          name: 'sequence-accuracy',
+          kind: 'LLM',
+          evaluate: async ({ output, metadata }) => {
+            if (!output.correctnessAnalysis) {
+              return {
+                score: null,
+                label: 'unavailable',
+                explanation: 'No correctness analysis available',
+                metadata,
+              };
+            }
+
+            const correctnessAnalysis = output.correctnessAnalysis as CorrectnessAnalysis;
+            const score = calculateProceduralFidelityScore(correctnessAnalysis);
+
+            return {
+              score,
+              label: correctnessAnalysis.summary.sequence_accuracy_summary,
+              explanation: correctnessAnalysis.analysis.join(', '),
+              metadata,
+            };
           },
         },
       ]

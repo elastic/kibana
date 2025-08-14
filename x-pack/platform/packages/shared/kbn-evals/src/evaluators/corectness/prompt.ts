@@ -102,6 +102,7 @@ export const LlmCorrectnessEvaluationPrompt = createPrompt({
                   },
                   justification_snippet: {
                     type: 'string',
+                    nullable: true,
                     description:
                       'A direct snippet from the Ground Truth Response supporting the verdict, or null if not applicable.',
                   },

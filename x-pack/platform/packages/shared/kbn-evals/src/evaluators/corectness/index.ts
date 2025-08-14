@@ -10,6 +10,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
 import { Evaluator } from '../../types';
 import { LlmCorrectnessEvaluationPrompt } from './prompt';
+import { CorrectnessAnalysis } from './types';
 
 export function createCorrectnessEvaluator({
   inferenceClient,
@@ -20,7 +21,7 @@ export function createCorrectnessEvaluator({
 }): Evaluator {
   return {
     evaluate: async ({ input, output, expected }) => {
-      async function scoreTask() {
+      async function runCorrectnessAnalysis(): Promise<CorrectnessAnalysis> {
         const response = await inferenceClient.prompt({
           prompt: LlmCorrectnessEvaluationPrompt,
           input: {
@@ -36,30 +37,24 @@ export function createCorrectnessEvaluator({
           throw new Error('No tool call found in LLM response');
         }
 
-        const { summary, analysis } = toolCall.function.arguments;
-        return { summary, analysis };
+        return toolCall.function.arguments;
       }
 
-      const { summary, analysis } = await pRetry(scoreTask, {
+      const correctnessAnalysisResult = await pRetry(runCorrectnessAnalysis, {
         retries: 0,
         onFailedAttempt: (error) => {
           log.error(new Error(`Failed to score correctness task`, { cause: error }));
         },
       });
 
-      const explanation = `Factual: ${summary.factual_accuracy_summary}, Relevance: ${summary.relevance_summary}, Sequence: ${summary.sequence_accuracy_summary}`;
+      const summary = correctnessAnalysisResult.summary;
+      const explanation = `Factuality: ${summary.factual_accuracy_summary}, Relevance: ${summary.relevance_summary}, Sequence: ${summary.sequence_accuracy_summary}`;
 
-      // Hard-coding some values - to be refined as part of this PR.
       return {
-        score: 1,
-        label: summary.factual_accuracy_summary,
+        score: null,
+        label: 'correctness-analysis',
         explanation,
-        metadata: {
-          factual_accuracy_summary: summary.factual_accuracy_summary,
-          relevance_summary: summary.relevance_summary,
-          sequence_accuracy_summary: summary.sequence_accuracy_summary,
-          analysis,
-        },
+        metadata: { ...correctnessAnalysisResult },
       };
     },
     kind: 'LLM',
