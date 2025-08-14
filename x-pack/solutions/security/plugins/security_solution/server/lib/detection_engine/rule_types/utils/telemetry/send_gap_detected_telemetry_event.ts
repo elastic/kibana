@@ -8,6 +8,7 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import moment from 'moment';
 import { GAP_DETECTED_EVENT } from '../../../../telemetry/event_based/events';
 import { parseInterval } from '../utils';
+import type { RuleParams } from '../../../rule_schema';
 
 export const sendGapDetectedTelemetryEvent = ({
   analytics,
@@ -15,12 +16,14 @@ export const sendGapDetectedTelemetryEvent = ({
   gapDuration,
   originalFrom,
   originalTo,
+  ruleParams,
 }: {
   analytics: AnalyticsServiceSetup;
   interval: string;
   gapDuration: moment.Duration;
   originalFrom: moment.Moment;
   originalTo: moment.Moment;
+  ruleParams: RuleParams;
 }) => {
   const intervalDuration = parseInterval(interval);
 
@@ -28,9 +31,16 @@ export const sendGapDetectedTelemetryEvent = ({
     return;
   }
 
+  const ruleType = ruleParams.type;
+  const ruleSource = ruleParams.ruleSource;
+  const isCustomized = ruleSource?.type === 'external' ? ruleSource.isCustomized : false;
+
   analytics.reportEvent(GAP_DETECTED_EVENT.eventType, {
     gapDuration: gapDuration.asMilliseconds(),
     intervalDuration: intervalDuration.asMilliseconds(),
     intervalAndLookbackDuration: moment.duration(originalTo.diff(originalFrom)).asMilliseconds(),
+    ruleType,
+    ruleSource: ruleSource?.type,
+    isCustomized,
   });
 };

@@ -1458,6 +1458,9 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
   gapDuration: number;
   intervalDuration: number;
   intervalAndLookbackDuration: number;
+  ruleType: string;
+  ruleSource: string;
+  isCustomized: boolean;
 }> = {
   eventType: 'gap_detected_event',
   schema: {
@@ -1477,6 +1480,24 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
       type: 'long',
       _meta: {
         description: 'The duration of the interval and lookback',
+      },
+    },
+    ruleType: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the rule',
+      },
+    },
+    ruleSource: {
+      type: 'keyword',
+      _meta: {
+        description: 'The source of the rule',
+      },
+    },
+    isCustomized: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the prebuilt rule is customized',
       },
     },
   },

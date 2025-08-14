@@ -409,6 +409,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 gapDuration: remainingGap,
                 originalFrom,
                 originalTo,
+                ruleParams: params,
               });
             }
             wrapperErrors.push(gapErrorMessage);
