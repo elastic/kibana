@@ -238,7 +238,7 @@ export function DetectionsPageObjectProvider({ getService, getPageObjects }: Ftr
 
     async navigateToDetectionsPage(path: string = ''): Promise<void> {
       const subUrl = `detections${path ? `/${path}` : ''}`;
-      awaitpageObjects.common.navigateToUrl('securitySolution', subUrl, {
+      await pageObjects.common.navigateToUrl('securitySolution', subUrl, {
         shouldUseHashForSubUrl: false,
       });
     },
