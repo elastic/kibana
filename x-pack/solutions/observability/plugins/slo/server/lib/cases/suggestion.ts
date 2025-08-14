@@ -105,6 +105,7 @@ export function getSLOByServiceName(
                 id: 'slo',
                 description: `Found ${suggestions.length} SLOs linked to service "${serviceName}"`,
                 data: suggestions.map((suggestion) => ({
+                  id: `${suggestion.id}-${suggestion.instanceId}`,
                   description: `SLO "${suggestion.name}" is ${suggestion.status}`,
                   payload: {
                     id: suggestion.id,

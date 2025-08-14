@@ -35,6 +35,8 @@ export interface AttachmentItem<
   /* A plaintext description of the attachment */
   description: string;
   attachment: CaseAttachmentWithoutOwner;
+  /* Unique identifier for the attachment item */
+  id: string;
 }
 
 /* Corresponds to each individual suggestion box presented to the user on the Cases UI.
