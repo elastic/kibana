@@ -56,7 +56,8 @@
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/spaces-utils",
-    "@kbn/css-utils"
+    "@kbn/css-utils",
+    "@kbn/licensing-types"
   ],
   "exclude": ["target/**/*"]
 }

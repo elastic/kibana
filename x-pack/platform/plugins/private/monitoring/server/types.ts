@@ -17,7 +17,7 @@ import type Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { TypeOf } from '@kbn/config-schema';
-import { LicenseFeature, ILicense } from '@kbn/licensing-plugin/server';
+import { LicenseFeature, ILicense } from '@kbn/licensing-types';
 import type {
   PluginStartContract as ActionsPluginsStartContact,
   ActionsApiRequestHandlerContext,

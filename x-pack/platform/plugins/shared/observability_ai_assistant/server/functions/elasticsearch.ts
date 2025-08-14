@@ -6,25 +6,12 @@
  */
 
 import type { FunctionRegistrationParameters } from '.';
-
-export const ELASTICSEARCH_FUNCTION_NAME = 'elasticsearch';
+import { ELASTICSEARCH_FUNCTION_NAME } from '..';
 
 export function registerElasticsearchFunction({
   functions,
   resources,
 }: FunctionRegistrationParameters) {
-  functions.registerInstruction(({ availableFunctionNames }) => {
-    if (availableFunctionNames.includes(ELASTICSEARCH_FUNCTION_NAME)) {
-      return `You can use the ${ELASTICSEARCH_FUNCTION_NAME} tool to call Elasticsearch APIs on behalf of the user.
-      You are only allowed to perform GET requests (Some examples for GET requests are: Retrieving cluster information, cluster license, cluster health, indices stats, index stats, etc.) and GET/POST requests for the \`/_search\` endpoint (for search operations).
-      If the user asks to perform destructive actions or actions that are not allowed (e.g. PUT, PATCH, DELETE requests or POST requests that are not to the \`/_search\` endpoint), **NEVER** attempt to call the ${ELASTICSEARCH_FUNCTION_NAME} tool.
-      Instead, inform the user that you do not have the capability to perform those actions.
-      If you attempt to call the ${ELASTICSEARCH_FUNCTION_NAME} tool with disallowed methods (PUT, DELETE, PATCH, POST requests that are not to the \`/_search\` endpoint), it will fail.
-      For POST \`/_search\` operations, if a request body is needed, make sure the request body is a valid object.`;
-    }
-    return '';
-  });
-
   functions.registerFunction(
     {
       name: ELASTICSEARCH_FUNCTION_NAME,
