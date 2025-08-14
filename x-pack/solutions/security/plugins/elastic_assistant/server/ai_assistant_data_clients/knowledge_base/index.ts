@@ -296,19 +296,17 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       }
 
       // Ensure integration knowledge index entry exists first (synchronous)
-      if (this.options.currentUser) {
-        this.options.logger.debug('Checking integration knowledge index entry...');
-        try {
-          await ensureIntegrationKnowledgeIndexEntry(
-            this,
-            this.options.logger.get('integrationKnowledge'),
-            this.options.telemetry
-          );
-        } catch (error) {
-          this.options.logger.error(
-            `Failed to ensure integration knowledge index entry: ${error.message}`
-          );
-        }
+      this.options.logger.debug('Checking integration knowledge index entry...');
+      try {
+        await ensureIntegrationKnowledgeIndexEntry(
+          this,
+          this.options.logger.get('integrationKnowledge'),
+          this.options.telemetry
+        );
+      } catch (error) {
+        this.options.logger.error(
+          `Failed to ensure integration knowledge index entry: ${error.message}`
+        );
       }
 
       if (!ignoreSecurityLabs) {
