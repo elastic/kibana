@@ -37,7 +37,7 @@ import {
 import { OnechatEsqlToolForm, OnechatEsqlToolFormMode } from './form/esql_tool_form';
 import { OnechatEsqlToolFormData } from './form/types/esql_tool_form_types';
 import { useEsqlToolForm } from '../../../hooks/tools/use_esql_tool_form';
-import { OnechatTestFlyout } from '../test/test_tools';
+import { OnechatTestFlyout } from '../execute/test_tools';
 
 interface EsqlToolBaseProps {
   tool?: EsqlToolDefinitionWithSchema;
