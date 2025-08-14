@@ -27,7 +27,7 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
   const modalTitleId = useGeneratedHtmlId();
 
   const exitAttemptWithUnsavedFields = useObservable(
-    indexUpdateService.exitAttemptWithUnsavedFields$,
+    indexUpdateService.exitAttemptWithUnsavedChanges$,
     false
   );
 
@@ -37,7 +37,7 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
   };
 
   const continueEditing = () => {
-    indexUpdateService.setExitAttemptWithUnsavedFields(false);
+    indexUpdateService.setExitAttemptWithUnsavedChanges(false);
   };
 
   if (!exitAttemptWithUnsavedFields) {

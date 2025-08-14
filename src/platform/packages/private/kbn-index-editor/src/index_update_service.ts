@@ -161,9 +161,9 @@ export class IndexUpdateService {
   private readonly _error$ = new BehaviorSubject<IndexEditorErrors | null>(null);
   public readonly error$: Observable<IndexEditorErrors | null> = this._error$.asObservable();
 
-  private readonly _exitAttemptWithUnsavedFields$ = new BehaviorSubject<boolean>(false);
-  public readonly exitAttemptWithUnsavedFields$ =
-    this._exitAttemptWithUnsavedFields$.asObservable();
+  private readonly _exitAttemptWithUnsavedChanges$ = new BehaviorSubject<boolean>(false);
+  public readonly exitAttemptWithUnsavedChanges$ =
+    this._exitAttemptWithUnsavedChanges$.asObservable();
 
   /** ES Documents */
   private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([this.buildPlaceholderRow()]);
@@ -779,8 +779,8 @@ export class IndexUpdateService {
     this.addAction('delete-column', { name });
   }
 
-  public setExitAttemptWithUnsavedFields(value: boolean) {
-    this._exitAttemptWithUnsavedFields$.next(value);
+  public setExitAttemptWithUnsavedChanges(value: boolean) {
+    this._exitAttemptWithUnsavedChanges$.next(value);
   }
 
   public discardUnsavedChanges() {
@@ -805,7 +805,7 @@ export class IndexUpdateService {
     this._indexCrated$.complete();
     this._qstr$.complete();
     this._refreshSubject$.complete();
-    this._exitAttemptWithUnsavedFields$.complete();
+    this._exitAttemptWithUnsavedChanges$.complete();
     this.data.dataViews.clearCache();
     this._indexName$.complete();
   }
@@ -828,10 +828,10 @@ export class IndexUpdateService {
     }
   }
 
-  public async exit() {
+  public exit() {
     const hasUnsavedChanges = this._hasUnsavedChanges$.getValue();
     if (hasUnsavedChanges) {
-      this.setExitAttemptWithUnsavedFields(true);
+      this.setExitAttemptWithUnsavedChanges(true);
     } else {
       this.destroy();
     }
