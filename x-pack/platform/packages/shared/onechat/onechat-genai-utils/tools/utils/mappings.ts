@@ -62,7 +62,7 @@ export const cleanupMapping = (mapping: MappingTypeMapping): MappingTypeMapping 
     'dynamic',
     '_meta',
     'meta',
-    '_description',
+    'briefing',
     'description',
     'enabled',
   ];
