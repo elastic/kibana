@@ -39,7 +39,7 @@ function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep
     return visitForeachStep(graph, previousStep, currentStep);
   }
 
-  if (currentStep.type === 'wait' || currentStep.type === 'delay') {
+  if (currentStep.type === 'wait') {
     return visitWaitStep(graph, previousStep, currentStep);
   }
 
