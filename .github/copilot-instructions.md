@@ -10,6 +10,47 @@ Kibana is a browser-based analytics and search dashboard for Elasticsearch, cons
 - **Primary Languages:** TypeScript, JavaScript (React for frontend)
 - **Architecture:** Microservice plugin architecture with shared core platform
 
+## Branch Management & Version Control
+
+### Active Branches
+The repository maintains multiple active branches defined in `versions.json` in the root directory. This file changes frequently and contains:
+- Current major/minor versions (e.g., 9.2.0 on main, 9.1.x, 9.0.x)
+- Previous major versions (e.g., 8.19.x, 8.18.x, 8.17.x)
+- Legacy versions (e.g., 7.17.x)
+
+**CRITICAL:** Always validate that your current branch aligns with your assigned task. Tasks may target specific version branches, not just `main`.
+
+```bash
+# Check current branch and available versions
+git branch -a
+cat versions.json
+```
+
+### Backporting Process
+Backporting commits from `main` to release branches is handled by the `backport` tool:
+
+```bash
+# Backport a commit interactively (recommended)
+yarn backport
+
+# Backport specific commits to specific branches
+yarn backport --sha <commit-sha> --branch 8.19 --branch 9.1
+
+# Use backport script directly
+node scripts/backport
+```
+
+The `.backportrc.json` configuration defines:
+- Target branch choices (matches `versions.json`)
+- Auto-merge settings (enabled with squash method)
+- PR description templates with commit tracking
+
+**Backport Workflow:**
+1. Merge your changes to `main` first
+2. Run `yarn backport` to select commits and target branches
+3. Tool automatically creates backport PRs with proper labels
+4. Monitor auto-merge process or resolve conflicts manually
+
 ## Critical Setup Requirements
 
 ### Environment Setup
@@ -80,26 +121,210 @@ node scripts/eslint_all_files --fix  # Auto-fix ESLint issues
 yarn build                  # Production build
 ```
 
+## Development Container Setup
+
+Kibana supports development containers for consistent environments across different machines. The dev container is based on Ubuntu Jammy (22.04) and only requires Docker locally.
+
+### Setting up the Dev Container
+
+1. **Environment Configuration:**
+   ```bash
+   # Copy and customize environment file
+   cp .devcontainer/.env.template .devcontainer/.env
+   # Edit .env file for your preferences (FIPS mode, etc.)
+   ```
+
+2. **Container Options (VS Code recommended):**
+   - **Local Filesystem:** Open existing repo in VS Code → "Reopen in Dev Container"
+   - **Docker Volume:** Use `Dev Containers: Clone Repository in Named Container Volume...`
+   - **PR Testing:** Use `Dev Containers: Clone GitHub Pull Request in Named Container Volume...`
+
+3. **Automatic Setup:**
+   ```bash
+   # Container automatically runs on startup:
+   NODE_OPTIONS='' yarn kbn bootstrap  # Disables FIPS for installation
+   Xvfb :99 -screen 0 1920x1080x24 &  # Starts virtual display
+   export DISPLAY=:99
+   ```
+
+4. **Development Workflow:**
+   ```bash
+   # Inside container - start Elasticsearch
+   yarn es snapshot
+   
+   # Start Kibana (in separate terminal)
+   yarn start
+   
+   # Enable FIPS mode if needed
+   # Set FIPS=1 in .env file and reopen terminal
+   ```
+
+### Dev Container Features
+- Pre-configured VS Code extensions (ESLint, Docker, EditorConfig, etc.)
+- Port forwarding (5601 for Kibana, 9200 for ES, debug ports)
+- Docker-in-Docker support for container operations
+- GitHub CLI integration
+- Chrome testing capabilities
+
+**Limitations:**
+- Git worktrees not supported with Local Filesystem mount
+- Some rebuild errors require retry (VS Code reconnection timing)
+
+## Functional Test Runner (FTR) - Comprehensive Guide
+
+FTR tests are critical for Kibana QA and come in two main flavors: `api_integration` and `ui` tests. They require building plugins, starting servers, and running specific configurations.
+
+### FTR Architecture
+```
+Build Kibana → Start Test Server → Run Test Config → Execute Tests
+```
+
+### Core FTR Commands
+```bash
+# Main FTR commands
+yarn test:ftr                    # Run functional tests
+yarn test:ftr:runner             # Direct test runner
+yarn test:ftr:server             # Start FTR server only
+
+# Run specific config
+yarn test:ftr --config x-pack/test/functional/config.ts
+
+# Run specific test file
+yarn test:ftr --config path/to/config.ts --grep "test name"
+```
+
+### FTR Test Types
+
+**API Integration Tests:**
+- Test REST API endpoints
+- Located in `*/test/api_integration/`
+- Config pattern: `*/test/api_integration/config.ts`
+- Example: `x-pack/test/api_integration/`
+
+**UI Functional Tests:**
+- Test user interface interactions
+- Located in `*/test/functional/`
+- Config pattern: `*/test/functional/config.ts`
+- Example: `x-pack/test/functional/`
+
+### Writing FTR Tests
+
+**1. Test Configuration Structure:**
+```typescript
+// config.ts example
+import { FtrConfigProviderContext } from '@kbn/test';
+
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const baseConfig = await readConfigFile(require.resolve('../config.base.ts'));
+  
+  return {
+    ...baseConfig.getAll(),
+    testFiles: [require.resolve('./my_test_suite')],
+    kbnTestServer: {
+      ...baseConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...baseConfig.get('kbnTestServer.serverArgs'),
+        '--custom.setting=value',
+      ],
+    },
+  };
+}
+```
+
+**2. Test Implementation:**
+```typescript
+// test.ts example
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['common', 'dashboard']);
+
+  describe('My Feature', () => {
+    it('should work correctly', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await testSubjects.click('myButton');
+      // assertions...
+    });
+  });
+}
+```
+
+### FTR Development Workflow
+
+**1. Build and Start:**
+```bash
+# Build Kibana plugins first
+yarn kbn bootstrap
+
+# Option A: Start server and run tests separately
+yarn test:ftr:server --config path/to/config.ts
+yarn test:ftr:runner --config path/to/config.ts
+
+# Option B: Run everything together
+yarn test:ftr --config path/to/config.ts
+```
+
+**2. Debug FTR Tests:**
+```bash
+# Run with debug output
+yarn test:ftr --config path/to/config.ts --debug
+
+# Run specific test pattern
+yarn test:ftr --config path/to/config.ts --grep "my test pattern"
+
+# Keep browser open for debugging
+yarn test:ftr --config path/to/config.ts --debug --bail
+```
+
+**3. FTR Configuration Examples:**
+- Core functional: `test/functional/config.js`
+- X-Pack functional: `x-pack/test/functional/config.ts`
+- API integration: `x-pack/test/api_integration/config.ts`
+- Serverless: `x-pack/test_serverless/functional/config.ts`
+- Solution-specific: `x-pack/solutions/*/test/functional/config.ts`
+
+### Common FTR Issues
+- **Build Required:** Always run `yarn kbn bootstrap` before FTR tests
+- **Server Conflicts:** Ensure no other Kibana instances running on 5601
+- **ES Dependencies:** Some tests require specific Elasticsearch setup
+- **Browser Dependencies:** UI tests need proper display/browser setup
+- **Config Inheritance:** Verify config extends correct base configuration
+
+```
+
 ## Project Architecture
 
 ### Directory Structure
 ```
 kibana/
 ├── src/                    # Core Kibana platform
+│   ├── cli/               # CLI command implementations
+│   ├── cli_encryption_keys/  # Encryption key CLI tools
+│   ├── cli_health_gateway/   # Health gateway CLI
+│   ├── cli_keystore/      # Keystore CLI tools
+│   ├── cli_plugin/        # Plugin CLI tools
+│   ├── cli_setup/         # Setup CLI tools
+│   ├── cli_verification_code/  # Verification code CLI
 │   ├── core/              # Core services and APIs
+│   ├── dev/               # Development tools and utilities
 │   ├── platform/          # Platform-level packages/plugins
-│   └── cli*/              # Command-line tools
+│   └── setup_node_env/    # Node.js environment setup
 ├── x-pack/                # Commercial/licensed features
+│   ├── build_chromium/    # Chromium build artifacts
+│   ├── dev-tools/         # X-Pack development tools
+│   ├── examples/          # X-Pack development examples
+│   ├── packages/          # X-Pack specific packages
+│   ├── performance/       # Performance testing tools
 │   ├── platform/          # X-Pack platform plugins
-│   ├── solutions/         # Solution-specific plugins (Security, Observability)
+│   ├── scripts/           # X-Pack specific scripts
+│   ├── solutions/         # Solution-specific plugins (Security, Observability, Search, Chat)
 │   ├── test/              # X-Pack functional and API integration tests
-│   ├── test_serverless/   # Serverless-specific tests
-│   └── examples/          # X-Pack development examples
+│   └── test_serverless/   # Serverless-specific tests
 ├── examples/              # Core platform development examples
 ├── packages/              # Shared packages
 ├── config/                # Configuration files (kibana.yml, etc.)
 ├── scripts/               # Build and utility scripts
 ├── .buildkite/            # CI/CD pipeline definitions
+├── .devcontainer/         # Development container configuration
 └── dev_docs/              # Development documentation
 ```
 
@@ -237,9 +462,9 @@ yarn test:jest --testPathPattern=path/to/changed/files
 yarn test:type_check --project path/to/changed/tsconfig.json
 
 # Lint specific files
-node scripts/eslint_all_files path/to/files --fix
+node scripts/eslint.js [options] [<file>...]
 ```
 
 ## Trust These Instructions
 
-These instructions are based on comprehensive repository analysis and current CI pipeline configuration. Only search for additional information if these instructions are incomplete or found to be incorrect for your specific use case. The build system is complex but well-documented - following this guide will save significant exploration time.
+These instructions are based on comprehensive repository analysis and current CI pipeline configuration. Only search for additional information if these instructions are incomplete or found to be incorrect for your specific use case. The build system is complex but well-documented - following this guide will save significant exploration time.nificant exploration time.
