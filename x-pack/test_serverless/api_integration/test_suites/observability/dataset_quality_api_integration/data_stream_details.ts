@@ -46,8 +46,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/194599
-  describe.skip('gets the data stream details', () => {
+  describe('gets the data stream details', () => {
     let roleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
 
