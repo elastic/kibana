@@ -28,27 +28,27 @@ spec:
         trigger_mode: none
       schedules:
         "[ubuntu24.04] daily kibana base image build":
-          branch: main
+          branch: 8.18
           cronline: '0 0 * * *'
           env:
             IMAGES_CONFIG: kibana/base_image.yml
           message: Builds Kibana VM base image daily (24.04)
         "[ubuntu24.04] daily kibana packages layer build":
-          branch: main
+          branch: 8.18
           cronline: '0 1 * * *' # make sure this runs after the daily kibana base image build
           env:
             IMAGES_CONFIG: kibana/packages_layer.yml
             BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'
           message: Builds Kibana Packages Layer daily (24.04)
         "[ubuntu24.04] daily kibana cache image build":
-          branch: main
+          branch: 8.18
           cronline: '0 2 * * *' # make sure this runs after the daily kibana packages layer build
           env:
             IMAGES_CONFIG: kibana/image_cache.tpl.yml
             BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
           message: Builds Kibana VM cache image daily (24.04)
         "[ubuntu24.04] daily kibana fips image build":
-          branch: main
+          branch: 8.18
           cronline: '0 4 * * *' # make sure this runs after the daily kibana cache image build
           env:
             BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml,kibana/image_cache.tpl.yml'
