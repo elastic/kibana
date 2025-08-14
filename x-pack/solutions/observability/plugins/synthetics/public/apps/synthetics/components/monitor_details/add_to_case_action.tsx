@@ -56,7 +56,11 @@ export function AddToCaseContextItem() {
   }
 
   return hasCasesPermissions ? (
-    <CasesContext permissions={casesPermissions} owner={['observability']}>
+    <CasesContext
+      owner={['observability']}
+      permissions={casesPermissions}
+      features={{ alerts: { sync: false } }}
+    >
       <AddToCaseButtonContent />
     </CasesContext>
   ) : null;
