@@ -75,6 +75,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   const {
     assistantAvailability: { hasManageGlobalKnowledgeBase, isAssistantEnabled },
     assistantTelemetry,
+    docLinks,
     http,
     knowledgeBase,
     setKnowledgeBase,
@@ -429,7 +430,6 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
             />
           ) : (
             <IndexEntryEditor
-              http={http}
               entry={selectedEntry as IndexEntry}
               originalEntry={originalEntry as IndexEntry}
               dataViews={dataViews}
@@ -437,6 +437,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
                 setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>
               }
               hasManageGlobalKnowledgeBase={hasManageGlobalKnowledgeBase}
+              docLink={docLinks.links.securitySolution.aiAssistantKnowledgeBaseIndexEntries}
             />
           )}
         </>
