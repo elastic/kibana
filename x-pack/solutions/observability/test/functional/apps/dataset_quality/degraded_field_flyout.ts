@@ -485,6 +485,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           expect(await countColumn.getCellTexts()).to.eql(['5', '5', '5']);
 
           // Check value in Flyout
+          await PageObjects.datasetQuality.openDegradedFieldFlyout('test_field');
           await retry.tryForTime(5000, async () => {
             const countValue = await PageObjects.datasetQuality.doesTextExist(
               'datasetQualityDetailsDegradedFieldFlyoutFieldsList-docCount',
@@ -492,6 +493,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
             );
             expect(countValue).to.be(true);
           });
+          await PageObjects.datasetQuality.closeFlyout();
 
           // Toggle the switch
           await testSubjects.click(
@@ -505,6 +507,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           expect(await newCountColumn.getCellTexts()).to.eql(['15', '15', '5', '5']);
 
           // Check value in Flyout
+          await PageObjects.datasetQuality.openDegradedFieldFlyout('test_field');
           await retry.tryForTime(5000, async () => {
             const newCountValue = await PageObjects.datasetQuality.doesTextExist(
               'datasetQualityDetailsDegradedFieldFlyoutFieldsList-docCount',
