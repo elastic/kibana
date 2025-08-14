@@ -244,7 +244,6 @@ export enum TaskStatus {
   Running = 'running',
   Failed = 'failed',
   ShouldDelete = 'should_delete',
-  ShouldDisable = 'should_disable',
   Unrecognized = 'unrecognized',
   DeadLetter = 'dead_letter',
 }
