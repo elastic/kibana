@@ -5,38 +5,57 @@
  * 2.0.
  */
 
-import { RuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
+import fs from 'fs';
+import path from 'path';
+import { MigrationTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
+import { processPanel } from './process_panel';
 
 export const getTranslationResultNode = (): GraphNode => {
   return async (state) => {
-    // Set defaults
-    const elasticVisualization = {
-      title: state.original_panel.title,
-      description: state.original_panel.description || state.original_panel.title,
-      ...state.elastic_panel,
-    };
+    const vizType = state.parsed_panel?.viz_type;
+    let panel: object;
+    try {
+      if (!vizType) {
+        throw new Error('Panel visualization type could not be extracted');
+      }
 
-    const query = elasticVisualization.query;
+      const templatePath = path.join(__dirname, `./templates/${vizType}.viz.json`);
+      const template = fs.readFileSync(templatePath, 'utf-8');
+
+      if (!template) {
+        throw new Error(`Template not found for visualization type: ${vizType}`);
+      }
+      panel = JSON.parse(template);
+    } catch (error) {
+      // TODO: log the error
+      return {
+        // TODO: add comment: "panel chart type not supported"
+        translation_result: MigrationTranslationResult.UNTRANSLATABLE,
+      };
+    }
+    const query = state.esql_query;
+
     let translationResult;
 
     if (!query) {
-      translationResult = RuleTranslationResult.UNTRANSLATABLE;
+      translationResult = MigrationTranslationResult.UNTRANSLATABLE;
     } else {
-      if (query.startsWith('FROM logs-*')) {
-        elasticVisualization.query = query.replace('FROM logs-*', 'FROM [indexPattern]');
-        translationResult = RuleTranslationResult.PARTIAL;
+      if (query.startsWith('FROM [indexPattern]')) {
+        translationResult = MigrationTranslationResult.PARTIAL;
       } else if (state.validation_errors?.esql_errors) {
-        translationResult = RuleTranslationResult.PARTIAL;
+        translationResult = MigrationTranslationResult.PARTIAL;
       } else if (query.match(/\[(macro|lookup):.*?\]/)) {
-        translationResult = RuleTranslationResult.PARTIAL;
+        translationResult = MigrationTranslationResult.PARTIAL;
       } else {
-        translationResult = RuleTranslationResult.FULL;
+        translationResult = MigrationTranslationResult.FULL;
       }
     }
 
+    const panelJSON = processPanel(panel, query, state.parsed_panel);
+
     return {
-      elastic_visualization: elasticVisualization,
+      elastic_panel: panelJSON,
       translation_result: translationResult,
     };
   };

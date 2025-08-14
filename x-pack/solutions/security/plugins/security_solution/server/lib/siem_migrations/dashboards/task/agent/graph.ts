@@ -14,22 +14,12 @@ import {
   getTranslatePanelNode,
 } from './nodes/translate_panel/translate_panel';
 import { getAggregateDashboardNode } from './nodes/aggregate_dashboard';
+import { getTranslatePanelGraph } from './sub_graphs/translate_panel';
 
-export function getDashboardMigrationAgent({
-  model,
-  esqlKnowledgeBase,
-  dashboardMigrationsRetriever,
-  logger,
-  telemetryClient,
-}: MigrateDashboardGraphParams) {
+export function getDashboardMigrationAgent(params: MigrateDashboardGraphParams) {
   const parseOriginalDashboardNode = getParseOriginalDashboardNode();
-  const translatePanelNode = getTranslatePanelNode({
-    model,
-    esqlKnowledgeBase,
-    dashboardMigrationsRetriever,
-    telemetryClient,
-    logger,
-  });
+  const translatePanelNode = getTranslatePanelNode(params);
+  const translatePanelSubGraph = getTranslatePanelGraph(params); // only for graph drawing
   const aggregateDashboardNode = getAggregateDashboardNode();
 
   const siemMigrationAgentGraph = new StateGraph(
@@ -38,7 +28,7 @@ export function getDashboardMigrationAgent({
   )
     // Nodes
     .addNode('parseOriginalDashboard', parseOriginalDashboardNode)
-    .addNode('translatePanel', translatePanelNode)
+    .addNode('translatePanel', translatePanelNode, { subgraphs: [translatePanelSubGraph] })
     .addNode('aggregateDashboard', aggregateDashboardNode)
     // Edges
     .addEdge(START, 'parseOriginalDashboard')

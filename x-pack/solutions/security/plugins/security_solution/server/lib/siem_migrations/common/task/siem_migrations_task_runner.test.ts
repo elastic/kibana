@@ -40,7 +40,8 @@ mockTimeout.mockImplementation((cb) => {
 
 const mockSetup = jest.fn().mockResolvedValue(undefined);
 const mockInvoke = jest.fn().mockResolvedValue(undefined);
-const mockTaskPrepare = jest.fn().mockResolvedValue(mockInvoke);
+const mockPrepareTaskInput = jest.fn().mockResolvedValue({});
+const mockProcessTaskOutput = jest.fn().mockResolvedValue({});
 const mockInitialize = jest.fn().mockResolvedValue(undefined);
 
 class TestMigrationTaskRunner extends SiemMigrationTaskRunner {
@@ -49,7 +50,7 @@ class TestMigrationTaskRunner extends SiemMigrationTaskRunner {
 
   public async setup(connectorId: string): Promise<void> {
     await mockSetup();
-    this.task = { prepare: mockTaskPrepare };
+    this.task = mockInvoke;
     this.telemetry = new SiemMigrationTelemetryClient(
       this.dependencies.telemetry,
       this.logger,
@@ -57,6 +58,9 @@ class TestMigrationTaskRunner extends SiemMigrationTaskRunner {
       TELEMETRY_SIEM_MIGRATION_ID
     );
   }
+
+  prepareTaskInput = mockPrepareTaskInput;
+  processTaskOutput = mockProcessTaskOutput;
 
   public async initialize(): Promise<void> {
     await mockInitialize();
@@ -125,8 +129,9 @@ describe('SiemMigrationTaskRunner', () => {
       expect(mockTimeout).toHaveBeenCalledTimes(1); // random execution sleep
       expect(mockTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), expect.any(Number));
 
-      expect(mockTaskPrepare).toHaveBeenCalledTimes(1);
+      expect(mockPrepareTaskInput).toHaveBeenCalledTimes(1);
       expect(mockInvoke).toHaveBeenCalledTimes(1);
+      expect(mockProcessTaskOutput).toHaveBeenCalledTimes(1);
       expect(mockSiemMigrationsDataClient.items.saveCompleted).toHaveBeenCalled();
       expect(mockSiemMigrationsDataClient.items.get).toHaveBeenCalledTimes(2); // One with data, one without
       expect(mockLogger.info).toHaveBeenCalledWith('Migration completed successfully');
@@ -222,7 +227,7 @@ describe('SiemMigrationTaskRunner', () => {
 
             await expect(taskRunner.run({})).resolves.toBeUndefined(); // success
 
-            expect(mockTaskPrepare).toHaveBeenCalledTimes(2); // 2 items
+            expect(mockPrepareTaskInput).toHaveBeenCalledTimes(2); // 2 items
             /**
              * Invoke calls:
              * item 1 -> failure -> start backoff retries
@@ -258,7 +263,7 @@ describe('SiemMigrationTaskRunner', () => {
             expect(mockLogger.debug).toHaveBeenCalledWith(
               `Awaiting backoff task for document "${item2Id}"`
             );
-            expect(mockTaskPrepare).toHaveBeenCalledTimes(2); // 2 items
+            expect(mockPrepareTaskInput).toHaveBeenCalledTimes(2); // 2 items
             expect(mockInvoke).toHaveBeenCalledTimes(6); // 3 retries + 3 executions
             expect(mockSiemMigrationsDataClient.items.saveCompleted).toHaveBeenCalledTimes(2); // 2 items
           });
@@ -268,7 +273,7 @@ describe('SiemMigrationTaskRunner', () => {
 
             await expect(taskRunner.run({})).resolves.toBeUndefined(); // success
 
-            expect(mockTaskPrepare).toHaveBeenCalledTimes(2); // 2 items
+            expect(mockPrepareTaskInput).toHaveBeenCalledTimes(2); // 2 items
             // maxRetries = 8
             expect(mockInvoke).toHaveBeenCalledTimes(10); // 8 retries + 2 executions
             expect(mockTimeout).toHaveBeenCalledTimes(10); // 2 execution sleeps + 8 backoff sleeps

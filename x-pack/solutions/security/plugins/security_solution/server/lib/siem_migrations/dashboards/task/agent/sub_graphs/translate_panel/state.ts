@@ -6,34 +6,31 @@
  */
 
 import { Annotation } from '@langchain/langgraph';
-import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
+import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { DashboardMigrationDashboard } from '../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { MigrationResources } from '../../../../../common/task/retrievers/resource_retriever';
 import type { ValidationErrors } from './types';
-import type { ParsedOriginalPanel, ElasticPanel } from '../../types';
+import type { ParsedPanel } from '../../../../lib/parsers/types';
 
 export const translateDashboardPanelState = Annotation.Root({
-  original_panel: Annotation<ParsedOriginalPanel>(),
-  elastic_panel: Annotation<ElasticPanel>({
-    reducer: (current, value) => ({ ...current, ...value }),
-  }),
-  index_pattern: Annotation<string>,
+  parsed_panel: Annotation<ParsedPanel>(),
+  elastic_panel: Annotation<object>(), // The visualization panel object
+  index_pattern: Annotation<string>(),
   resources: Annotation<MigrationResources>(),
   includes_ecs_mapping: Annotation<boolean>({
     reducer: (current, value) => value ?? current,
     default: () => false,
   }),
-  inline_query: Annotation<string>({
-    reducer: (current, value) => value ?? current,
-    default: () => '',
-  }),
+  inline_query: Annotation<string>(),
+  description: Annotation<string>(),
+  esql_query: Annotation<string>(),
   validation_errors: Annotation<ValidationErrors>({
     reducer: (current, value) => value ?? current,
     default: () => ({ iterations: 0 }),
   }),
-  translation_result: Annotation<RuleTranslationResult>({
+  translation_result: Annotation<MigrationTranslationResult>({
     reducer: (current, value) => value ?? current,
-    default: () => RuleTranslationResult.UNTRANSLATABLE,
+    default: () => MigrationTranslationResult.UNTRANSLATABLE,
   }),
   comments: Annotation<DashboardMigrationDashboard['comments']>({
     reducer: (current, value) => (value ? (current ?? []).concat(value) : current),

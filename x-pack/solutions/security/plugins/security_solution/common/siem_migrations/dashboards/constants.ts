@@ -9,6 +9,11 @@ import { SIEM_MIGRATIONS_PATH } from '../constants';
 
 export const SIEM_DASHBOARD_MIGRATIONS_PATH = `${SIEM_MIGRATIONS_PATH}/dashboards` as const;
 
+export const SIEM_DASHBOARD_MIGRATION_EVALUATE_PATH =
+  `${SIEM_DASHBOARD_MIGRATIONS_PATH}/evaluate` as const;
+
+// Migration ID specific routes
+
 export const SIEM_DASHBOARD_MIGRATION_PATH =
   `${SIEM_DASHBOARD_MIGRATIONS_PATH}/{migration_id}` as const;
 

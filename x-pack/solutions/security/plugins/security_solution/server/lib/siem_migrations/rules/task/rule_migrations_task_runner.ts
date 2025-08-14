@@ -52,17 +52,19 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
   /** Retrieves the connector and creates the migration agent */
   public async setup(connectorId: string): Promise<void> {
     const { inferenceClient } = this.dependencies;
+
     const model = await this.actionsClientChat.createModel({
       connectorId,
       migrationId: this.migrationId,
       abortController: this.abortController,
     });
+    const modelName = this.actionsClientChat.getModelName(model);
 
     const telemetryClient = new RuleMigrationTelemetryClient(
       this.dependencies.telemetry,
       this.logger,
       this.migrationId,
-      model.model
+      modelName
     );
 
     const esqlKnowledgeBase = new EsqlKnowledgeBase(

@@ -5,25 +5,45 @@
  * 2.0.
  */
 
+import path from 'path';
+import fs from 'fs';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
 
+interface DashboardData {
+  attributes: {
+    title: string;
+    panelsJSON: string;
+  };
+}
+
 export const getAggregateDashboardNode = (): GraphNode => {
   return async (state) => {
-    // dashboard data is the SO data ready to be installed
-    // TODO: use the templates (viz_type) to generate the correct dashboardData, this is still dummy data
-    const dashboardData = state.translated_panels
-      .sort((a, b) => a.index - b.index)
-      .map(({ panel }) => ({
-        title: panel.title,
-        description: panel.description,
-        query: panel.query,
-        // id
-        // position
-        // viz_type
-      }));
+    let dashboardData: DashboardData;
+    try {
+      const templatePath = path.join(__dirname, `./dashboard.json`);
+      const template = fs.readFileSync(templatePath, 'utf-8');
 
-    // TODO: Consider adding individual translation results for each panel, and aggregate them here
+      if (!template) {
+        throw new Error(`Dashboard template not found`);
+      }
+      dashboardData = JSON.parse(template);
+    } catch (error) {
+      // TODO: log the error
+      return {
+        // TODO: add comment: "panel chart type not supported"
+        translation_result: MigrationTranslationResult.UNTRANSLATABLE,
+      };
+    }
+
+    const panels = state.translated_panels.sort((a, b) => a.index - b.index);
+
+    dashboardData.attributes.title = state.original_dashboard.title;
+    dashboardData.attributes.panelsJSON = JSON.stringify(panels.map(({ data }) => data));
+
+    // TODO: Use individual translation results for each panel:
+    // panels.map((panel) => panel.translation_result)
+    // and aggregate the top level translation_result here
     let translationResult;
     if (state.translated_panels.length > 0) {
       if (state.translated_panels.length > 0) {

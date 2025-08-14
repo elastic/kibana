@@ -22,9 +22,11 @@ export const migrateDashboardState = Annotation.Root({
   parsed_original_dashboard: Annotation<ParsedOriginalDashboard>(),
   translated_panels: Annotation<TranslatedPanels>({
     reducer: (current, value) => current.concat(value),
+    default: () => [],
   }),
   failed_panel_translations: Annotation<FailedPanelTranslations>({
     reducer: (current, value) => current.concat(value),
+    default: () => [],
   }),
   elastic_dashboard: Annotation<ElasticDashboard>({
     reducer: (current, value) => ({ ...current, ...value }),

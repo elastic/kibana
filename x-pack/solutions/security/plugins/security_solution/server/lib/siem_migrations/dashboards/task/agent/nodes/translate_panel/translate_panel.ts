@@ -6,14 +6,9 @@
  */
 
 import { Send } from '@langchain/langgraph';
-import type { MigrateDashboardState, ParsedOriginalPanel } from '../../types';
+import type { MigrateDashboardState, TranslatePanelNodeParams } from '../../types';
 import { getTranslatePanelGraph } from '../../sub_graphs/translate_panel';
 import type { TranslatePanelGraphParams } from '../../sub_graphs/translate_panel/types';
-
-export interface TranslatePanelNodeParams {
-  panel: ParsedOriginalPanel;
-  index: number;
-}
 
 export type TranslatePanelNode = (
   params: TranslatePanelNodeParams
@@ -27,15 +22,30 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
   const translatePanelSubGraph = getTranslatePanelGraph(params);
   return async ({ panel, index }) => {
     try {
-      const output = await translatePanelSubGraph.invoke({ original_panel: panel });
+      if (!panel.query) {
+        throw new Error('Panel query is missing');
+      }
+      const output = await translatePanelSubGraph.invoke({ parsed_panel: panel });
       return {
         // Fan-in: translated panels are concatenated by the state reducer, so the results can be aggregated later
-        translated_panels: [{ index, panel: output.elastic_panel }],
+        translated_panels: [
+          {
+            index,
+            data: output.elastic_panel,
+            translation_result: output.translation_result,
+          },
+        ],
       };
     } catch (err) {
       // Fan-in: failed panels are concatenated by the state reducer, so the results can be aggregated later
       return {
-        failed_panel_translations: [{ index, error_message: err.toString(), details: err }],
+        failed_panel_translations: [
+          {
+            index,
+            error_message: err.toString(),
+            details: err,
+          },
+        ],
       };
     }
   };

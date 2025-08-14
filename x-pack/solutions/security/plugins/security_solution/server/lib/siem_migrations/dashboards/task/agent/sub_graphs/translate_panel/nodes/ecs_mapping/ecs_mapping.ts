@@ -15,9 +15,9 @@ export const getEcsMappingNode = (params: GetConvertEsqlSchemaCisToEcsParams): G
   const convertEsqlSchemaCimToEcs = getConvertEsqlSchemaCisToEcs(params);
   return async (state) => {
     const { query, comments } = await convertEsqlSchemaCimToEcs({
-      title: state.elastic_panel.title ?? '',
-      description: state.elastic_panel.description ?? '',
-      query: state.elastic_panel.query ?? '',
+      title: state.parsed_panel.title ?? '',
+      description: state.description ?? '',
+      query: state.esql_query ?? '',
       originalQuery: state.inline_query,
     });
 
@@ -25,7 +25,7 @@ export const getEcsMappingNode = (params: GetConvertEsqlSchemaCisToEcsParams): G
     return {
       includes_ecs_mapping: true,
       comments,
-      ...(query && { elastic_panel: { ...state.elastic_panel, query } }),
+      ...(query && { esql_query: query }),
     };
   };
 };
