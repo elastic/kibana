@@ -18,13 +18,13 @@ const DeleteAttachmentConfirmationModalComponent: React.FC<Pros> = ({
   onConfirm,
   onCancel,
 }) => {
-  const titleId = useGeneratedHtmlId();
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiConfirmModal
       title={title}
       titleProps={{
-        id: titleId,
+        id: modalTitleId,
       }}
       onCancel={onCancel}
       onConfirm={onConfirm}
@@ -33,7 +33,7 @@ const DeleteAttachmentConfirmationModalComponent: React.FC<Pros> = ({
       buttonColor="danger"
       defaultFocusedButton="confirm"
       data-test-subj="property-actions-confirm-modal"
-      aria-labelledby={titleId}
+      aria-labelledby={modalTitleId}
     />
   );
 };

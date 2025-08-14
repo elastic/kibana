@@ -15,9 +15,9 @@ import {
   KnowledgeBaseEntryUpdateProps,
   PerformKnowledgeBaseEntryBulkActionResponse,
 } from '@kbn/elastic-assistant-common';
-import type { User } from './auth/types';
+import type { User } from '../../../utils/auth/types';
 
-import { routeWithNamespace } from '../../../../../../common/utils/security_solution';
+import { routeWithNamespace } from '../../../../../config/services/detections_response';
 
 /**
  * Performs bulk actions on Knowledge Base entries

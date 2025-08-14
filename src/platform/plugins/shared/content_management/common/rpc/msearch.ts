@@ -14,7 +14,7 @@ import { searchQuerySchema, searchResultSchema, SearchQuery, SearchResult } from
 
 import type { ProcedureSchemas } from './types';
 
-export const mSearchSchemas: ProcedureSchemas = {
+export const mSearchSchemas = {
   in: schema.object(
     {
       contentTypes: schema.arrayOf(
@@ -36,7 +36,7 @@ export const mSearchSchemas: ProcedureSchemas = {
     },
     { unknowns: 'forbid' }
   ),
-};
+} satisfies ProcedureSchemas;
 
 export type MSearchQuery = SearchQuery;
 

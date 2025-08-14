@@ -17,6 +17,7 @@ import {
   EuiTitle,
   EuiFlyout,
   EuiButton,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -75,13 +76,15 @@ export const AddOrEditLocationFlyout = ({
 
   const { handleSubmit } = form;
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
     <ContextWrapper>
       <FormProvider {...form}>
-        <EuiFlyout onClose={onCloseFlyout} css={{ width: 540 }}>
+        <EuiFlyout onClose={onCloseFlyout} css={{ width: 540 }} aria-labelledby={flyoutTitleId}>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2>
+              <h2 id={flyoutTitleId}>
                 {privateLocationToEdit !== undefined ? EDIT_PRIVATE_LOCATION : ADD_PRIVATE_LOCATION}
               </h2>
             </EuiTitle>

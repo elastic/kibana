@@ -131,7 +131,22 @@ describe('Microsoft Defender for Endpoint Connector', () => {
             cancellationComment: '',
             cancellationDateTimeUtc: '',
             cancellationRequestor: '',
-            commands: ['RunScript'],
+            commands: [
+              {
+                index: 0,
+                startTime: '2025-07-07T18:50:10.186354Z',
+                endTime: '2025-07-07T18:50:21.811356Z',
+                commandStatus: 'Completed',
+                errors: [],
+                command: {
+                  type: 'RunScript',
+                  params: [
+                    { key: 'ScriptName', value: 'hello.sh' },
+                    { key: 'Args', value: '--noargs' },
+                  ],
+                },
+              },
+            ],
             computerDnsName: 'desktop-test',
             creationDateTimeUtc: '2019-01-02T14:39:38.2262283Z',
             externalID: 'abc',

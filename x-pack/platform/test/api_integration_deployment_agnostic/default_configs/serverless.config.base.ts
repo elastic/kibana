@@ -32,11 +32,7 @@ interface CreateTestConfigOptions<T> {
 // https://github.com/elastic/elasticsearch-controller/blob/main/helm/values.yaml
 const esServerArgsFromController = {
   es: [],
-  oblt: [
-    'xpack.apm_data.enabled=true',
-    // for ML, data frame analytics are not part of this project type
-    'xpack.ml.dfa.enabled=false',
-  ],
+  oblt: ['xpack.apm_data.enabled=true'],
   security: ['xpack.security.authc.api_key.cache.max_keys=70000'],
   chat: [],
 };
@@ -84,7 +80,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     const svlSharedConfig = await readConfigFile(
-      require.resolve('@kbn/test-suites-serverless/shared/config.base')
+      require.resolve('../../serverless/shared/config.base.ts')
     );
 
     return {

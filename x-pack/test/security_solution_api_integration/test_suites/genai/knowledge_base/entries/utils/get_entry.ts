@@ -14,9 +14,9 @@ import {
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
   ReadKnowledgeBaseEntryRequestParamsInput,
 } from '@kbn/elastic-assistant-common';
-import type { User } from './auth/types';
+import type { User } from '../../../utils/auth/types';
 
-import { routeWithNamespace } from '../../../../../../common/utils/security_solution';
+import { routeWithNamespace } from '../../../../../config/services/detections_response';
 
 /**
  * Get Knowledge Base Entry

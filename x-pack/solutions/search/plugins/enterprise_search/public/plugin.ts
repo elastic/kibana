@@ -25,7 +25,6 @@ import {
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FleetStart } from '@kbn/fleet-plugin/public';
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
@@ -48,6 +47,7 @@ import {
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
   SEARCH_HOMEPAGE,
+  SEARCH_APPS_TITLE,
 } from '../common/constants';
 import { registerLocators } from '../common/locators';
 import { ClientConfigType, InitialAppData } from '../common/types';
@@ -82,7 +82,6 @@ export interface PluginsStart {
   contentConnectors?: SearchConnectorsPluginStart;
   data?: DataPublicPluginStart;
   fleet?: FleetStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   indexManagement?: IndexManagementPluginStart;
   lens?: LensPublicStart;
   licensing?: LicensingPluginStart;
@@ -122,12 +121,7 @@ const applicationsLinks: AppDeepLink[] = [
   {
     id: 'searchApplications',
     path: `/${SEARCH_APPLICATIONS_PATH}`,
-    title: i18n.translate(
-      'xpack.enterpriseSearch.navigation.applicationsSearchApplicationsLinkLabel',
-      {
-        defaultMessage: 'Search Applications',
-      }
-    ),
+    title: SEARCH_APPS_TITLE,
     visibleIn: [],
   },
 ];

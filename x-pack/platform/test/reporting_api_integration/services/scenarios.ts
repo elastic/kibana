@@ -33,8 +33,9 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
 
-  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
-  const logsSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs';
+  const ecommerceSOPath =
+    'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce.json';
+  const logsSOPath = 'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/logs';
 
   const DATA_ANALYST_USERNAME = 'data_analyst';
   const DATA_ANALYST_PASSWORD = 'data_analyst-password';
@@ -65,23 +66,23 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       concurrency: 1,
     }
   ) => {
-    await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce', {
+    await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce', {
       performance,
     });
     await kibanaServer.importExport.load(ecommerceSOPath);
   };
   const teardownEcommerce = async () => {
-    await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+    await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce');
     await kibanaServer.importExport.unload(ecommerceSOPath);
   };
 
   const initLogs = async () => {
-    await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+    await esArchiver.load('x-pack/platform/test/fixtures/es_archives/logstash_functional');
     await kibanaServer.importExport.load(logsSOPath);
   };
   const teardownLogs = async () => {
     await kibanaServer.importExport.unload(logsSOPath);
-    await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+    await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
   };
 
   const createDataAnalystRole = async () => {

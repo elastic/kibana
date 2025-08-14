@@ -30,7 +30,7 @@ export const createTableVisCell =
          */
         dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
         data-test-subj="tbvChartCellContent"
-        className={autoFitRowToContent ? '' : 'tbvChartCellContent'}
+        className={autoFitRowToContent ? '' : 'tbvChartCellContent eui-textTruncate'}
       />
     );
 

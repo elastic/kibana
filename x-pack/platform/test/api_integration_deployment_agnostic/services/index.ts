@@ -12,6 +12,7 @@ import { PackageApiProvider } from './package_api';
 import { RoleScopedSupertestProvider, SupertestWithRoleScope } from './role_scoped_supertest';
 import { CustomRoleScopedSupertestProvider } from './custom_role_scoped_supertest';
 import { services as apiIntegrationServices } from '../../api_integration/services';
+import { AlertingApiProvider } from './alerting_api';
 
 export type {
   InternalRequestHeader,
@@ -31,6 +32,7 @@ export const services = {
   roleScopedSupertest: RoleScopedSupertestProvider,
   customRoleScopedSupertest: CustomRoleScopedSupertestProvider,
   // create a new deployment-agnostic service and load here
+  alertingApiCommon: AlertingApiProvider,
 };
 
 export type SupertestWithRoleScopeType = SupertestWithRoleScope;

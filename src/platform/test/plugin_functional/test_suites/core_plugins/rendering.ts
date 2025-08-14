@@ -384,8 +384,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observabilityAiAssistantManagement.logSourcesEnabled (boolean?)',
         'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
         'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
+        'xpack.observabilityShared.unsafe.investigativeExperienceEnabled (boolean?)',
         'share.new_version.enabled (boolean?)',
         'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?|security?)',
+        'xpack.genAiSettings.showAiBreadcrumb (boolean?)',
+        'xpack.genAiSettings.showSpacesIntegration (boolean?)',
         /**
          * Rule form V2 feature flags
          */

@@ -27,7 +27,7 @@ export class HeaderPageObject extends FtrService {
   }
 
   public async clickVisualize(ignoreAppLeaveWarning = false) {
-    await this.appsMenu.clickLink('Visualize Library', { category: 'kibana' });
+    await this.appsMenu.clickLink('Visualize library', { category: 'kibana' });
     await this.onAppLeaveWarning(ignoreAppLeaveWarning);
     await this.awaitGlobalLoadingIndicatorHidden();
     await this.retry.waitFor('Visualize app to be loaded', async () => {

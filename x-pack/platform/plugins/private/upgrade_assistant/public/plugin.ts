@@ -53,7 +53,7 @@ export class UpgradeAssistantUIPlugin
         title: pluginName,
         order: 1,
         async mount(params) {
-          const [coreStart, { data }] = await coreSetup.getStartServices();
+          const [coreStart, { data, reindexService }] = await coreSetup.getStartServices();
 
           const {
             chrome: { docTitle },
@@ -67,6 +67,7 @@ export class UpgradeAssistantUIPlugin
             plugins: {
               cloud,
               share,
+              reindexService,
             },
             services: {
               core: coreStart,

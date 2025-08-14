@@ -14,7 +14,7 @@ import {
   MonitorsQuery,
   parseMappingKey,
   QuerySchema,
-  SEARCH_FIELDS,
+  MONITOR_SEARCH_FIELDS,
 } from '../common';
 
 export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -46,7 +46,7 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
         page: queryParams.page ?? 1,
         sortField: parseMappingKey(queryParams.sortField),
         sortOrder: queryParams.sortOrder,
-        searchFields: SEARCH_FIELDS,
+        searchFields: MONITOR_SEARCH_FIELDS,
         search: queryParams.query,
         filter: filtersStr,
         searchAfter: queryParams.searchAfter,

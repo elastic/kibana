@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './monitor_details.journey';
-export * from './monitor_alerts.journey';
-export * from './ping_redirects.journey';
+export type * from './monitor_details.journey';
+export type * from './monitor_alerts.journey';
+export type * from './ping_redirects.journey';

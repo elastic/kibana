@@ -13,13 +13,22 @@ import { compact, uniqBy, map, every, isUndefined } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
-import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
+import {
+  type EuiPopoverProps,
+  EuiIcon,
+  keys,
+  htmlIdGenerator,
+  type UseEuiTheme,
+  euiScrollBarStyles,
+  euiFontSize,
+} from '@elastic/eui';
 
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 
 import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
+import chroma from 'chroma-js';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './legend_item';
 import { BasicVislibParams } from '../../../types';
@@ -59,6 +68,78 @@ const visLegendStyles = {
       opacity: 1, // Always show in editing mode
     },
   }),
+  base: css({
+    display: `flex`,
+    minHeight: 0,
+    height: `100%`,
+  }),
+  toggle: ({ euiTheme }: UseEuiTheme) =>
+    css`
+      border-radius: ${euiTheme.border.radius.medium};
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      display: flex;
+      padding: ${euiTheme.size.xs};
+      margin: ${euiTheme.size.s};
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+      transition: opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
+        background-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance}
+          ${euiTheme.animation.extraSlow};
+
+      &:focus {
+        box-shadow: none;
+        background-color: ${euiTheme.focus.backgroundColor} !important;
+      }
+    `,
+  openToggle: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: chroma(euiTheme.colors.darkestShade).alpha(0.1).css(),
+      opacity: 1,
+    }),
+  list: (euiThemeContext: UseEuiTheme) => css`
+    display: flex;
+    width: 150px; // Must be a hard-coded width for the chart to get its correct dimensions
+    flex: 1 1 auto;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    ${euiScrollBarStyles(euiThemeContext)}
+    .visLegend__button {
+      font-size: ${euiFontSize(euiThemeContext, 'xs').fontSize};
+      text-align: left;
+      overflow: hidden; // Ensures scrollbars don't appear because EuiButton__text has a high line-height
+
+      .visLegend__valueTitle {
+        vertical-align: middle;
+      }
+    }
+
+    .vislib--legend-top &,
+    .vislib--legend-bottom & {
+      width: auto;
+      flex-direction: row;
+      flex-wrap: wrap;
+
+      .visLegend__value {
+        flex-grow: 0;
+        max-width: 150px;
+      }
+    }
+
+    .vislib--legend-left & {
+      margin-bottom: ${euiThemeContext.euiTheme.size.l};
+    }
+
+    .vislib--legend-bottom & {
+      margin-left: ${euiThemeContext.euiTheme.size.xl};
+    }
+
+    &.hidden {
+      visibility: hidden;
+    }
+  `,
 };
 
 export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
@@ -261,7 +342,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   };
 
   renderLegend = (anchorPosition: EuiPopoverProps['anchorPosition']) => (
-    <ul className="visLegend__list" id={this.legendId}>
+    <ul className="visLegend__list" id={this.legendId} css={visLegendStyles.list}>
       {this.state.labels.map((item) => (
         <VisLegendItem
           item={item}
@@ -285,7 +366,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     const anchorPosition = this.getAnchorPosition();
 
     return (
-      <div className="visLegend">
+      <div className="visLegend" css={visLegendStyles.base}>
         <button
           type="button"
           onClick={this.toggleLegend}
@@ -301,7 +382,11 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
           title={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonTitle', {
             defaultMessage: 'Toggle legend',
           })}
-          css={visLegendStyles.inEmbPanel}
+          css={[
+            visLegendStyles.inEmbPanel,
+            visLegendStyles.toggle,
+            open && visLegendStyles.openToggle,
+          ]}
         >
           <EuiIcon color="text" type="list" />
         </button>

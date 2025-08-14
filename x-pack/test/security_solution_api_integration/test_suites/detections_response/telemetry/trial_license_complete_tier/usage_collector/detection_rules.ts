@@ -43,7 +43,7 @@ import {
   waitForRuleSuccess,
   waitForAlertsToBePresent,
   getRuleForAlertTesting,
-} from '../../../../../../common/utils/security_solution';
+} from '../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -77,11 +77,15 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       // Just in case other tests do not clean up the event logs, let us clear them now and here only once.
       await deleteAllEventLogExecutionEvents(es, log);
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/telemetry');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/telemetry'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/telemetry');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/telemetry'
+      );
     });
 
     beforeEach(async () => {
@@ -1854,7 +1858,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "has_exceptions" greater than 1 when rule has attached exceptions', async () => {
+      // installMockPrebuiltRules and then fetching rule seems to not work in MKI
+      it('@skipInServerlessMKI should show "has_exceptions" greater than 1 when rule has attached exceptions', async () => {
         await installMockPrebuiltRules(supertest, es);
         const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
 

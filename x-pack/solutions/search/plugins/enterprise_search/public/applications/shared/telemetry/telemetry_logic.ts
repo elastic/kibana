@@ -34,6 +34,7 @@ export const TelemetryLogic = kea<MakeLogicType<TelemetryActions>>({
       try {
         const body = JSON.stringify({ product, action, metric });
         await http.put('/internal/enterprise_search/stats', { headers, body });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         throw new Error('Unable to send telemetry');
       }

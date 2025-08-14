@@ -39,7 +39,12 @@ const createStartContractMock = () => {
     addToQueryLog: jest.fn(),
     filterManager: createFilterManagerMock(),
     queryString: queryStringManagerMock.createStartContract(),
-    savedQueries: { getSavedQuery: jest.fn(), getSavedQueryCount: jest.fn() } as any,
+    savedQueries: {
+      getSavedQuery: jest.fn(),
+      getSavedQueryCount: jest.fn(),
+      isDuplicateTitle: jest.fn(),
+      createQuery: jest.fn(),
+    } as any,
     state$: new Observable(),
     getState: jest.fn(),
     timefilter: timefilterServiceMock.createStartContract(),

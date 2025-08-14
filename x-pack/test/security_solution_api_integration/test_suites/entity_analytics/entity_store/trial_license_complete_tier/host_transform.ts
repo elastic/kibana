@@ -72,9 +72,26 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       after(async () => {
+        const log = providerContext.getService('log');
         await es.indices.deleteDataStream({ name: DATASTREAM_NAME });
-        await es.indices.deleteAlias({ name: FROZEN_INDEX_NAME, index: `*${FROZEN_INDEX_NAME}*` });
-        await es.indices.deleteAlias({ name: COLD_INDEX_NAME, index: `*${COLD_INDEX_NAME}*` });
+
+        try {
+          await es.indices.deleteAlias({
+            name: FROZEN_INDEX_NAME,
+            index: `*${FROZEN_INDEX_NAME}*`,
+          });
+        } catch (e: any) {
+          // we should not fail a test on the tear down
+          log.error(`Failed to tear down ${FROZEN_INDEX_NAME}} (${e.toString()})`);
+        }
+
+        try {
+          await es.indices.deleteAlias({ name: COLD_INDEX_NAME, index: `*${COLD_INDEX_NAME}*` });
+        } catch (e: any) {
+          // we should not fail a test on the tear down
+          log.error(`Failed to tear down ${FROZEN_INDEX_NAME}} (${e.toString()})`);
+        }
+
         await dataView.delete('security-solution');
       });
 
@@ -108,7 +125,11 @@ export default function (providerContext: FtrProviderContext) {
 
       it('Should successfully trigger a host transform', async () => {
         const hostName: string = 'host-transform-test-ip';
-        const testDocs: EcsHost[] = [
+        const testDocs = [
+          // should be ignored because the @timestamp is too old
+          { timestamp: '1996-03-21T09:15:00.000Z', name: '', ip: '3.3.3.22' },
+          // Should be ignored because the key is empty
+          { name: '', ip: '3.3.3.3' },
           { name: hostName, ip: '1.1.1.1' },
           { name: hostName, ip: '2.2.2.2' },
         ];
@@ -313,9 +334,18 @@ function expectFieldToEqualValues(field: string[] | undefined, values: string[] 
   }
 }
 
-function buildHostTransformDocument(host: EcsHost, dataStream: string): IndexRequest {
+function buildHostTransformDocument(
+  host: EcsHost & { timestamp?: string },
+  dataStream: string
+): IndexRequest {
+  // If not timestamp provided
   // Get timestamp without the millisecond part
-  const isoTimestamp: string = new Date().toISOString().split('.')[0];
+  const isoTimestamp: string = !!host.timestamp
+    ? host.timestamp
+    : new Date().toISOString().split('.')[0];
+
+  delete host.timestamp;
+
   const document: IndexRequest = {
     index: dataStream,
     document: {
@@ -328,7 +358,7 @@ function buildHostTransformDocument(host: EcsHost, dataStream: string): IndexReq
 
 async function createDocumentsAndTriggerTransform(
   providerContext: FtrProviderContext,
-  docs: EcsHost[],
+  docs: (EcsHost & { timestamp?: string })[],
   dataStream: string
 ): Promise<void> {
   const retry = providerContext.getService('retry');

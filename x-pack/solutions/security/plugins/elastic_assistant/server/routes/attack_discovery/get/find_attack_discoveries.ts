@@ -96,6 +96,7 @@ export const findAttackDiscoveriesRoute = (
             esClient,
             findAttackDiscoveryAlertsParams: {
               alertIds: query.alert_ids,
+              includeUniqueAlertIds: query.include_unique_alert_ids ?? false,
               ids: query.ids,
               search: query.search,
               shared: query.shared,

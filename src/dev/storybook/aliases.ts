@@ -37,6 +37,7 @@ export const storybookAliases = {
     'src/platform/plugins/shared/chart_expressions/expression_partition_vis/.storybook',
   expression_tagcloud:
     'src/platform/plugins/shared/chart_expressions/expression_tagcloud/.storybook',
+  failure_store_modal: 'x-pack/platform/packages/shared/kbn-failure-store-modal/.storybook',
   fleet: 'x-pack/platform/plugins/shared/fleet/.storybook',
   grouping: 'src/platform/packages/shared/kbn-grouping/.storybook',
   home: 'src/platform/plugins/shared/home/.storybook',
@@ -65,7 +66,8 @@ export const storybookAliases = {
   streams_app: 'x-pack/platform/plugins/shared/streams_app/.storybook',
   triggers_actions_ui: 'x-pack/platform/plugins/shared/triggers_actions_ui/.storybook',
   ui_actions_enhanced: 'src/platform/plugins/shared/ui_actions_enhanced/.storybook',
+  unified_doc_viewer: 'src/platform/plugins/shared/unified_doc_viewer/.storybook',
   unified_search: 'src/platform/plugins/shared/unified_search/.storybook',
   unified_tabs: 'src/platform/packages/shared/kbn-unified-tabs/.storybook',
-  upgrade_assistant: 'x-pack/platform/packages/private/upgrade-assistant/.storybook',
+  upgrade_assistant: 'x-pack/platform/packages/private/upgrade-assistant/public/.storybook',
 };

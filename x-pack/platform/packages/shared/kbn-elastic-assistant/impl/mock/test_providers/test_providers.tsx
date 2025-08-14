@@ -43,6 +43,7 @@ export const mockAssistantAvailability: AssistantAvailability = {
   hasManageGlobalKnowledgeBase: true,
   isAssistantEnabled: true,
   isAssistantVisible: true,
+  isAssistantManagementEnabled: true,
 };
 
 /** A utility for wrapping children in the providers required to run tests */

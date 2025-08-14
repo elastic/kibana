@@ -55,7 +55,6 @@ export class SampleDataIngestPlugin
       artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,
       elserInferenceId: this.context.config.get().elserInferenceId,
       logger: this.logger,
-      indexPrefixName: 'sample-data',
       isServerlessPlatform: this.isServerlessPlatform,
     });
 

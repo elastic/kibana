@@ -27,6 +27,7 @@ import {
   AttachmentType,
 } from '../common/types/domain';
 import type { CasePostRequest } from '../common/types/api';
+import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 import type { CasesServerStart } from './types';
 
 const lensPersistableState = {
@@ -734,6 +735,22 @@ export const mockCasesContract = (): CasesServerStart => ({
   getCasesClientWithRequest: jest.fn().mockResolvedValue(casesClientMock),
   getExternalReferenceAttachmentTypeRegistry: jest.fn(),
   getPersistableStateAttachmentTypeRegistry: jest.fn(),
+  config: {
+    enabled: true,
+    stack: {
+      enabled: true,
+    },
+    markdownPlugins: { lens: true },
+    files: {
+      allowedMimeTypes: ALLOWED_MIME_TYPES,
+      maxSize: 1,
+    },
+    analytics: {
+      index: {
+        enabled: true,
+      },
+    },
+  },
 });
 
 export const casesPluginMock = {

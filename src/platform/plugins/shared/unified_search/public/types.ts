@@ -23,6 +23,12 @@ import type { IndexPatternSelectProps, QueryStringInputProps, StatefulSearchBarP
 import type { FiltersBuilderProps } from './filters_builder/filters_builder';
 import { StatefulSearchBarDeps } from './search_bar/create_search_bar';
 
+export interface UnifiedSearchDraft {
+  query?: AggregateQuery | Query;
+  dateRangeFrom?: string;
+  dateRangeTo?: string;
+}
+
 export interface UnifiedSearchSetupDependencies {
   uiActions: UiActionsSetup;
   data: DataPublicPluginStart;

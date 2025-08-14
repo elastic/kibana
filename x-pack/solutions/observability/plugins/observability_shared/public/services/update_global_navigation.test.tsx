@@ -63,7 +63,7 @@ describe('updateGlobalNavigation', () => {
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
-        visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
+        visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
       });
     });
 
@@ -99,7 +99,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['sideNav', 'globalSearch'], // visibility set
             },
           ],
-          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
+          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
     });
@@ -131,7 +131,7 @@ describe('updateGlobalNavigation', () => {
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [], // Deeplink has been filtered out
-          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
+          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
     });
@@ -170,7 +170,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['sideNav', 'globalSearch'],
             },
           ],
-          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
+          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
 
@@ -207,7 +207,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['sideNav', 'globalSearch'],
             },
           ],
-          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
+          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
     });

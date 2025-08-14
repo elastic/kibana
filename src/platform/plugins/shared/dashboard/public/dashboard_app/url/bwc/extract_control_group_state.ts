@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 import {
-  ControlGroupSerializedState,
   DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROL_LABEL_POSITION,
-} from '@kbn/controls-plugin/common';
+  DEFAULT_CONTROLS_LABEL_POSITION,
+} from '@kbn/controls-constants';
 import { serializeRuntimeState } from '@kbn/controls-plugin/public';
 import { DashboardState } from '../../../../common';
 
@@ -27,7 +27,7 @@ export function extractControlGroupState(state: {
 
   const controlGroupInput = state.controlGroupInput as { [key: string]: unknown };
 
-  let autoApplySelections: ControlGroupSerializedState['autoApplySelections'] =
+  let autoApplySelections: ControlsGroupState['autoApplySelections'] =
     DEFAULT_AUTO_APPLY_SELECTIONS;
   if (typeof controlGroupInput.autoApplySelections === 'boolean') {
     autoApplySelections = controlGroupInput.autoApplySelections;
@@ -36,7 +36,7 @@ export function extractControlGroupState(state: {
     autoApplySelections = !controlGroupInput.showApplySelections;
   }
 
-  let controls: ControlGroupSerializedState['controls'] = [];
+  let controls: ControlsGroupState['controls'] = [];
   if (Array.isArray(controlGroupInput.controls)) {
     controls = controlGroupInput.controls;
   } else if (controlGroupInput.panels && typeof controlGroupInput.panels === 'object') {
@@ -50,28 +50,27 @@ export function extractControlGroupState(state: {
         ...restOfControlState,
         controlConfig: explicitInput,
       };
-    }) as ControlGroupSerializedState['controls'];
+    }) as ControlsGroupState['controls'];
   }
 
-  let labelPosition: ControlGroupSerializedState['labelPosition'] = DEFAULT_CONTROL_LABEL_POSITION;
+  let labelPosition: ControlsGroupState['labelPosition'] = DEFAULT_CONTROLS_LABEL_POSITION;
   if (typeof controlGroupInput.labelPosition === 'string') {
-    labelPosition = controlGroupInput.labelPosition as ControlGroupSerializedState['labelPosition'];
+    labelPosition = controlGroupInput.labelPosition as ControlsGroupState['labelPosition'];
   } else if (typeof controlGroupInput.controlStyle === 'string') {
     // <8.16 labelPosition exported as controlStyle
-    labelPosition = controlGroupInput.controlStyle as ControlGroupSerializedState['labelPosition'];
+    labelPosition = controlGroupInput.controlStyle as ControlsGroupState['labelPosition'];
   }
 
   return {
     autoApplySelections,
     controls,
-    chainingSystem:
-      controlGroupInput.chainingSystem as ControlGroupSerializedState['chainingSystem'],
+    chainingSystem: controlGroupInput.chainingSystem as ControlsGroupState['chainingSystem'],
     labelPosition,
     ...(controlGroupInput.ignoreParentSettings &&
     typeof controlGroupInput.ignoreParentSettings === 'object'
       ? {
           ignoreParentSettings:
-            controlGroupInput.ignoreParentSettings as ControlGroupSerializedState['ignoreParentSettings'],
+            controlGroupInput.ignoreParentSettings as ControlsGroupState['ignoreParentSettings'],
         }
       : {}),
   };

@@ -8,7 +8,6 @@
 import createContainer from 'constate';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useMemo, useEffect } from 'react';
-import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { GetInfraEntityCountResponsePayloadRT } from '../../../../../common/http_api';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
@@ -19,7 +18,6 @@ export const useHostCount = () => {
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
-  const config = usePluginConfig();
 
   const payload = useMemo(
     () =>
@@ -27,10 +25,9 @@ export const useHostCount = () => {
         query: buildQuery(),
         from: parsedDateRange.from,
         to: parsedDateRange.to,
-        // TODO: Replace this with the schema selector value
-        schema: config.featureFlags.hostOtelEnabled ? 'semconv' : 'ecs',
+        schema: searchCriteria?.preferredSchema || 'ecs',
       }),
-    [buildQuery, config.featureFlags.hostOtelEnabled, parsedDateRange.from, parsedDateRange.to]
+    [buildQuery, parsedDateRange.from, parsedDateRange.to, searchCriteria?.preferredSchema]
   );
 
   const { data, status, error } = useFetcher(

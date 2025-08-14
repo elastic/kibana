@@ -17,6 +17,7 @@ import {
   EuiSearchBarProps,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,7 +29,6 @@ import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
-import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
 import { useSearchParams } from 'react-router-dom-v5-compat';
@@ -70,9 +70,12 @@ interface Params {
 }
 
 export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ dataViews }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const {
     assistantAvailability: { hasManageGlobalKnowledgeBase, isAssistantEnabled },
     assistantTelemetry,
+    docLinks,
     http,
     knowledgeBase,
     setKnowledgeBase,
@@ -260,12 +263,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   const search: EuiSearchBarProps = useMemo(
     () => ({
       toolsRight: (
-        <EuiFlexGroup
-          gutterSize={'m'}
-          css={css`
-            margin-left: -5px;
-          `}
-        >
+        <EuiFlexGroup gutterSize={'m'}>
           <EuiFlexItem>
             <EuiButton
               color={'text'}
@@ -432,7 +430,6 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
             />
           ) : (
             <IndexEntryEditor
-              http={http}
               entry={selectedEntry as IndexEntry}
               originalEntry={originalEntry as IndexEntry}
               dataViews={dataViews}
@@ -440,12 +437,15 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
                 setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>
               }
               hasManageGlobalKnowledgeBase={hasManageGlobalKnowledgeBase}
+              docLink={docLinks.links.securitySolution.aiAssistantKnowledgeBaseIndexEntries}
             />
           )}
         </>
       </Flyout>
       {deleteKBItem && (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
+          titleProps={{ id: confirmModalTitleId }}
           data-test-subj="delete-entry-confirmation"
           title={i18n.DELETE_ENTRY_CONFIRMATION_TITLE(deleteKBItem.name)}
           onCancel={handleCancelDeleteEntry}
@@ -462,6 +462,8 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       )}
       {duplicateKBItem && (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
+          titleProps={{ id: confirmModalTitleId }}
           title={i18n.DUPLICATE_ENTRY_CONFIRMATION_TITLE}
           onCancel={handleCancelDuplicateEntry}
           onConfirm={handleDuplicateEntry}

@@ -11,6 +11,7 @@ import {
   ApplicationStart,
   AppDeepLink,
   type PricingServiceStart,
+  AppDeepLinkLocations,
 } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
 import { casesFeatureId } from '../../common';
@@ -76,8 +77,18 @@ export function updateGlobalNavigation({
     })
     .filter((link): link is AppDeepLink => link !== null);
 
-  updater$.next(() => ({
-    deepLinks: updatedDeepLinks,
-    visibleIn: someVisible ? ['sideNav', 'globalSearch', 'home', 'kibanaOverview'] : [],
-  }));
+  updater$.next(() => {
+    const visibleIn: AppDeepLinkLocations[] = someVisible
+      ? ['sideNav', 'home', 'kibanaOverview']
+      : [];
+
+    if (isCompleteOverviewEnabled && someVisible) {
+      visibleIn.push('globalSearch');
+    }
+
+    return {
+      deepLinks: updatedDeepLinks,
+      visibleIn,
+    };
+  });
 }

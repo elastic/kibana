@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-export * from './agent_policy';
+export type * from './agent_policy';
 export * from './agent';
-export * from './app';
-export * from './common';
-export * from './data_stream';
-export * from './download_sources';
-export * from './enrollment_api_key';
-export * from './epm';
-export * from './error';
-export * from './fleet_setup';
-export * from './output';
-export * from './package_policy';
-export * from './settings';
-export * from './health_check';
-export * from './fleet_server_hosts';
-export * from './standalone_agent_api_key';
-export * from './remote_synced_integrations';
-export * from './custom_integrations';
+export type * from './app';
+export type * from './common';
+export type * from './data_stream';
+export type * from './download_sources';
+export type * from './enrollment_api_key';
+export type * from './epm';
+export type * from './error';
+export type * from './fleet_setup';
+export type * from './output';
+export type * from './package_policy';
+export type * from './settings';
+export type * from './health_check';
+export type * from './fleet_server_hosts';
+export type * from './standalone_agent_api_key';
+export type * from './remote_synced_integrations';
+export type * from './custom_integrations';

@@ -6,7 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { createSpacesAndUsers, deleteSpacesAndUsers } from '../utils/auth';
+import { createSpacesAndUsers, deleteSpacesAndUsers } from '../../../utils/auth';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('GenAI - Knowledge Base Entries APIs', function () {
@@ -19,6 +19,5 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./entries'));
-    loadTestFile(require.resolve('./semantic_text_indices'));
   });
 }

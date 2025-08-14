@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { useArgs } from '@storybook/preview-api';
 import { action } from '@storybook/addon-actions';
 
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
@@ -19,10 +18,10 @@ import { UnsavedFieldChanges, OnFieldChangeFn } from '@kbn/management-settings-t
 export interface Params {
   isFiltered: boolean;
   isSavingEnabled: boolean;
+  onClearQuery?: () => void;
 }
 
-export const useCategoryStory = ({ isFiltered, isSavingEnabled }: Params) => {
-  const [_args, updateArgs] = useArgs();
+export const useCategoryStory = ({ isFiltered, isSavingEnabled, onClearQuery }: Params) => {
   const settings = getSettingsMock();
 
   // Markdown and JSON fields require Monaco, which are *notoriously* slow in Storybook due
@@ -43,8 +42,6 @@ export const useCategoryStory = ({ isFiltered, isSavingEnabled }: Params) => {
       categorizedFields[category].fields = categorizedFields[category].fields.slice(0, 1);
     });
   }
-
-  const onClearQuery = () => updateArgs({ isFiltered: false });
 
   const [unsavedChanges, setUnsavedChanges] = React.useState<UnsavedFieldChanges>({});
 
@@ -69,7 +66,7 @@ export const useCategoryStory = ({ isFiltered, isSavingEnabled }: Params) => {
   );
 
   return {
-    onClearQuery,
+    onClearQuery: onClearQuery || (() => {}),
     onFieldChange,
     isSavingEnabled,
     unsavedChanges,

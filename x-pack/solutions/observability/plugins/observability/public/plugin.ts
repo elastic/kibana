@@ -78,6 +78,7 @@ import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -99,6 +100,7 @@ import {
   CaseDetailsLocatorDefinition,
   CasesOverviewLocatorDefinition,
 } from '../common/locators/cases';
+import { getPageAttachmentType } from './attachments/page/attachment';
 import { TelemetryService } from './services/telemetry/telemetry_service';
 
 export interface ConfigSchema {
@@ -180,6 +182,7 @@ export interface ObservabilityPublicPluginsStart {
   streams?: StreamsPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   inspector: InspectorPluginStart;
+  savedObjectsTagging: SavedObjectTaggingPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -268,6 +271,13 @@ export class Plugin
 
     const logsLocator =
       pluginsSetup.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+
+    if (
+      pluginsSetup.cases &&
+      pluginsSetup.observabilityShared.config.unsafe?.investigativeExperienceEnabled
+    ) {
+      pluginsSetup.cases.attachmentFramework.registerPersistableState(getPageAttachmentType());
+    }
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle

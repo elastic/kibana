@@ -19,6 +19,7 @@ import {
   EuiTableActionsColumnType,
   EuiText,
   useEuiBackgroundColor,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -43,6 +44,8 @@ export const SearchApplicationIndices: React.FC = () => {
     () => share?.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID'),
     [share]
   );
+
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   if (!searchApplicationData) return null;
   const { indices } = searchApplicationData;
@@ -281,6 +284,8 @@ export const SearchApplicationIndices: React.FC = () => {
             'xpack.enterpriseSearch.searchApplications.searchApplication.indices.removeIndexConfirm.title',
             { defaultMessage: 'Remove this index from the search application' }
           )}
+          aria-labelledby={confirmModalTitleId}
+          titleProps={{ id: confirmModalTitleId }}
           buttonColor="danger"
           cancelButtonText={CANCEL_BUTTON_LABEL}
           confirmButtonText={i18n.translate(

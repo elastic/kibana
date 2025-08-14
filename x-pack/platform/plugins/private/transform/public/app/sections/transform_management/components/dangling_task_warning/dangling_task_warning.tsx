@@ -13,6 +13,7 @@ import {
   EuiConfirmModal,
   EUI_MODAL_CONFIRM_BUTTON,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,6 +25,8 @@ export const DanglingTasksWarning: FC<{
 }> = ({ transformIdsWithoutConfig }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const deleteTransforms = useDeleteTransforms();
+
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   const closeModal = () => setIsModalVisible(false);
   const openModal = () => setIsModalVisible(true);
@@ -92,7 +95,9 @@ export const DanglingTasksWarning: FC<{
       <EuiSpacer />
       {isModalVisible && (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
           title={isBulkAction ? bulkDeleteModalTitle : deleteModalTitle}
+          titleProps={{ id: confirmModalTitleId }}
           onCancel={closeModal}
           onConfirm={confirmDelete}
           cancelButtonText={i18n.translate(

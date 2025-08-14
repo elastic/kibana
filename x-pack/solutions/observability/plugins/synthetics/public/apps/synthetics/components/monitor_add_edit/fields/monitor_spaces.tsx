@@ -97,6 +97,7 @@ export const MonitorSpaces = ({ value, onChange, ...rest }: MonitorSpacesProps) 
   return (
     <EuiComboBox<string>
       fullWidth
+      isDisabled={rest.readOnly}
       aria-label={SPACES_LABEL}
       placeholder={SPACES_LABEL}
       isInvalid={showFieldInvalid}

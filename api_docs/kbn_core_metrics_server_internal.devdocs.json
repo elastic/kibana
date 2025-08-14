@@ -55,7 +55,22 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/core-metrics-server-internal",
+        "id": "def-server.EluTerm",
+        "type": "Enum",
+        "tags": [],
+        "label": "EluTerm",
+        "description": [
+          "\nThe period of time for the average ELU calculation."
+        ],
+        "path": "src/core/packages/metrics/server-internal/src/metrics_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [],
     "objects": [
       {

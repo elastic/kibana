@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboard.switchToEditMode();
         await dashboard.expectExistsQuickSaveOption();
-        await dashboardAddPanel.clickAddMarkdownPanel();
+        await dashboardAddPanel.clickAddCustomVisualization();
         await visualize.saveVisualizationAndReturn();
         await dashboard.waitForRenderComplete();
         await dashboard.clickQuickSave();

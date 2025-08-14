@@ -130,6 +130,34 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await testSubjects.click('uploadFileButton');
             expect(await browser.getCurrentUrl()).contain('ml/filedatavisualizer');
           });
+
+          describe('Sample data section', function () {
+            it('renders the sample data section', async () => {
+              await testSubjects.existOrFail('sampleDataSection');
+            });
+
+            describe('when kibana_sample_data_elasticsearch_documentation index does not exist', function () {
+              it('renders the "Install sample data" button', async () => {
+                await testSubjects.existOrFail('installSampleBtn');
+              });
+            });
+
+            describe('when kibana_sample_data_elasticsearch_documentation index exists', function () {
+              before(async () => {
+                await es.indices.create({
+                  index: 'kibana_sample_data_elasticsearch_documentation',
+                });
+              });
+
+              after(async () => {
+                await esDeleteAllIndices(['kibana_sample_data_elasticsearch_documentation']);
+              });
+
+              it('renders the "View data" button', async () => {
+                await testSubjects.existOrFail('viewDataBtn');
+              });
+            });
+          });
         });
 
         describe('AI search capabilities', function () {

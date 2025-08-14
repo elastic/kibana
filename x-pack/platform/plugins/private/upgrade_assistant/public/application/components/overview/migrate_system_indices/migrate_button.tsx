@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiConfirmModal, EuiButtonProps } from '@elastic/eui';
+import { EuiButton, EuiConfirmModal, EuiButtonProps, useGeneratedHtmlId } from '@elastic/eui';
 
 const i18nTexts = {
   inProgressButtonLabel: i18n.translate(
@@ -61,6 +61,7 @@ export const MigrateSystemIndicesButton = ({
   isMigrating,
 }: MigrateButtonProps) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const modalTitleId = useGeneratedHtmlId();
 
   const isButtonDisabled = isInitialRequest && isLoading;
 
@@ -83,7 +84,9 @@ export const MigrateSystemIndicesButton = ({
 
       {isModalVisible && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18nTexts.modalTitle}
+          titleProps={{ id: modalTitleId }}
           onCancel={() => setIsModalVisible(false)}
           onConfirm={handleConfirmMigration}
           cancelButtonText={i18nTexts.modalButtonCancel}

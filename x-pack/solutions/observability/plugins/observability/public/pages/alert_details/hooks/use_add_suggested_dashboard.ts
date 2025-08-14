@@ -12,7 +12,7 @@ import { Rule, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { IHttpFetchError } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useState } from 'react';
-import { DashboardMetadata } from '../components/related_dashboards/dashboard_tile';
+import type { RelatedDashboard } from '@kbn/observability-schema';
 
 export const useAddSuggestedDashboards = ({
   rule,
@@ -58,7 +58,7 @@ export const useAddSuggestedDashboards = ({
   const { mutateAsync: updateRule } = useUpdateRule({ http, onError, onSuccess });
 
   const onClickAddSuggestedDashboard = useCallback(
-    (d: DashboardMetadata) => {
+    (d: RelatedDashboard) => {
       const updatedRule: UpdateRuleBody = {
         ...rule,
         artifacts: {

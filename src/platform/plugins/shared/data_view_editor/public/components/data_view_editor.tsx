@@ -31,7 +31,12 @@ export const DataViewEditor = ({
 
   return (
     <KibanaReactContextProvider>
-      <EuiFlyout onClose={() => {}} hideCloseButton={true} size="l">
+      <EuiFlyout
+        onClose={() => {}}
+        hideCloseButton={true}
+        size="l"
+        aria-labelledby="dataViewEditorFlyoutTitle"
+      >
         <DataViewEditorLazy
           onSave={onSave}
           onCancel={onCancel}

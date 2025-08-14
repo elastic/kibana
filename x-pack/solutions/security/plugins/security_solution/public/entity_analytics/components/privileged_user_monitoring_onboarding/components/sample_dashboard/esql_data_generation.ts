@@ -6,8 +6,10 @@
  */
 
 import type { Moment } from 'moment';
+import { map, right } from 'fp-ts/Either';
 import { CURRENT_TIME, GRANTED_RIGHTS_DATA, PAGE_SIZE } from './constants';
 import type { UserRowData } from './types';
+import type { EsqlQueryOrInvalidFields } from '../../../privileged_user_monitoring/queries/helpers';
 
 export const getToTime = () => CURRENT_TIME.clone().set({ minute: 0, second: 0, millisecond: 0 }); // Start of the current hour
 export const getFromTime = () => getToTime().subtract(1, 'day'); // 24 hours ago
@@ -24,11 +26,11 @@ const generateRandomDate = (from: Moment, to: Moment) => {
   return randomDate.toISOString();
 };
 
-const generateUserRowData = ({ quantity, user, target, right, ip }: UserRowData) => {
+const generateUserRowData = ({ quantity, user, target, right: userPrivilege, ip }: UserRowData) => {
   const userRowData = [];
   for (let i = 0; i < quantity; i++) {
     userRowData.push(
-      `"${user},${target},${right},${ip},${generateRandomDate(getFromTime(), getToTime())}"`
+      `"${user},${target},${userPrivilege},${ip},${generateRandomDate(getFromTime(), getToTime())}"`
     );
   }
   return userRowData.join(',');
@@ -36,21 +38,27 @@ const generateUserRowData = ({ quantity, user, target, right, ip }: UserRowData)
 
 export const generateESQLSource = () => {
   const rows = GRANTED_RIGHTS_DATA.map((row) => generateUserRowData(row)).join(',');
-  return `ROW data=[${rows}]
+  return right(`ROW data=[${rows}]
             | MV_EXPAND data
             | EVAL row = SPLIT(data, ",")
-            | EVAL privileged_user = MV_SLICE(row, 0), target_user = MV_SLICE(row, 1), right = MV_SLICE(row, 2), ip = MV_SLICE(row, 3), @timestamp = MV_SLICE(row, 4)
-            | DROP row`;
+            | EVAL privileged_user = MV_SLICE(row, 0), target_user = MV_SLICE(row, 1), right = MV_SLICE(row, 2), ip = MV_SLICE(row, 3), @timestamp = TO_DATETIME(MV_SLICE(row, 4))
+            | DROP row`);
 };
 
 export const generateListESQLQuery =
-  (esqlSource: string) =>
-  (sortField: string | number | symbol, sortDirection: string, currentPage: number) =>
-    `${esqlSource}
+  (esqlSource: EsqlQueryOrInvalidFields) =>
+  (sortField: string | number | symbol, sortDirection: string, currentPage: number) => {
+    return map<string, string>(
+      (src) => `${src}
         | SORT ${String(sortField)} ${sortDirection}
-        | LIMIT ${1 + currentPage * PAGE_SIZE}`; // Load one extra item for the pagination
+        | LIMIT ${1 + currentPage * PAGE_SIZE}`
+    )(esqlSource);
+  };
 
-export const generateVisualizationESQLQuery = (esqlSource: string) => (stackByField: string) =>
-  `${esqlSource}
-    | EVAL timestamp=DATE_TRUNC(1 hour, TO_DATETIME(@timestamp))
-    | STATS results = COUNT(*) by timestamp, ${stackByField}`;
+export const generateVisualizationESQLQuery =
+  (esqlSource: EsqlQueryOrInvalidFields) =>
+  (stackByField: string, timerange: { from: string; to: string }) =>
+    map<string, string>(
+      (src) => `${src}
+        | STATS results = COUNT(*) by timestamp = BUCKET(@timestamp, 30, "${timerange.from}", "${timerange.to}"), ${stackByField}`
+    )(esqlSource);

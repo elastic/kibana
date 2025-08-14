@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Monitoring Entity Source Schema
- *   version: 1
+ *   version: 2023-10-31
  */
 
 import { z } from '@kbn/zod';
@@ -103,7 +103,7 @@ export const CreateEntitySourceRequestBody = CreateMonitoringEntitySource;
 export type CreateEntitySourceRequestBodyInput = z.input<typeof CreateEntitySourceRequestBody>;
 
 export type CreateEntitySourceResponse = z.infer<typeof CreateEntitySourceResponse>;
-export const CreateEntitySourceResponse = UpdatedMonitoringEntitySource;
+export const CreateEntitySourceResponse = MonitoringEntitySource;
 
 export type DeleteEntitySourceRequestParams = z.infer<typeof DeleteEntitySourceRequestParams>;
 export const DeleteEntitySourceRequestParams = z.object({
@@ -141,4 +141,4 @@ export const UpdateEntitySourceRequestBody = MonitoringEntitySourceNoId;
 export type UpdateEntitySourceRequestBodyInput = z.input<typeof UpdateEntitySourceRequestBody>;
 
 export type UpdateEntitySourceResponse = z.infer<typeof UpdateEntitySourceResponse>;
-export const UpdateEntitySourceResponse = UpdatedMonitoringEntitySource;
+export const UpdateEntitySourceResponse = MonitoringEntitySource;

@@ -52,8 +52,8 @@ export const mountInlinePanel = async ({
     flyoutProps: {
       ...lensFlyoutProps,
       'data-test-subj': dataTestSubj ?? 'customizeLens',
+      focusedPanelId: uuid,
     },
-    uuid,
   });
 };
 
