@@ -14,6 +14,7 @@ import type { ScopedRunner, Runner } from '@kbn/onechat-server';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { CreateScopedRunnerDeps } from './runner';
+import type { DataServiceStart } from '../data';
 
 export interface RunnerFactoryDeps {
   // core services
@@ -26,6 +27,7 @@ export interface RunnerFactoryDeps {
   // internal service deps
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;
+  dataService: DataServiceStart;
 }
 
 export type CreateScopedRunnerExtraParams = Pick<

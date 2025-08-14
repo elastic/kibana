@@ -16,6 +16,7 @@ import type {
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AgentClient } from './services/agents';
+import type { DataTypeRegistry, DataServiceSetup } from './services/data';
 
 export interface OnechatSetupDependencies {
   actions: ActionsPluginSetup;
@@ -65,11 +66,20 @@ export interface AgentsStart {
   execute: RunAgentFn;
 }
 
+export interface DataSetup {
+  register: DataServiceSetup['register'];
+}
+
+export interface DataStart {
+  getRegistry: (opts: { request: KibanaRequest }) => Promise<DataTypeRegistry>;
+}
+
 /**
  * Setup contract of the onechat plugin.
  */
 export interface OnechatPluginSetup {
   tools: ToolsSetup;
+  data: DataSetup;
 }
 
 /**
@@ -78,4 +88,5 @@ export interface OnechatPluginSetup {
 export interface OnechatPluginStart {
   tools: ToolsStart;
   agents: AgentsStart;
+  data: DataStart;
 }
