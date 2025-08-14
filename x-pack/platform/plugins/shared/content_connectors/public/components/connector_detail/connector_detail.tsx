@@ -162,32 +162,29 @@ export const ConnectorDetail: React.FC = () => {
   ];
 
   const CONNECTOR_TABS = [
-    ...(hasFilteringFeature
-      ? [
-          {
-            content: <ConnectorSyncRules />,
-            disabled: !index,
-            id: ConnectorDetailTabId.SYNC_RULES,
-            isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
-            label: i18n.translate(
-              'xpack.contentConnectors.connectors.connectorDetail.syncRulesTabLabel',
-              {
-                defaultMessage: 'Sync rules',
-              }
-            ),
-            onClick: () =>
-              application?.navigateToUrl(
-                generateEncodedPath(
-                  `/app/management/data/content_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
-                  {
-                    connectorId,
-                    tabId: ConnectorDetailTabId.SYNC_RULES,
-                  }
-                )
-              ),
-          },
-        ]
-      : []),
+    {
+      content: <ConnectorSyncRules />,
+      disabled: !index || !hasFilteringFeature,
+      id: ConnectorDetailTabId.SYNC_RULES,
+      isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
+      label: i18n.translate(
+        'xpack.contentConnectors.connectors.connectorDetail.syncRulesTabLabel',
+        {
+          defaultMessage: 'Sync rules',
+        }
+      ),
+      onClick: () =>
+        application?.navigateToUrl(
+          generateEncodedPath(
+            `/app/management/data/content_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
+            {
+              connectorId,
+              tabId: ConnectorDetailTabId.SYNC_RULES,
+            }
+          )
+        ),
+    },
+
     {
       content: <ConnectorScheduling />,
       disabled: !connector?.index_name,

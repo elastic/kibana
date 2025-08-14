@@ -26,7 +26,9 @@ import {
   getDefaultDefendInsightsGraph,
 } from '../../defend_insights/graphs/default_defend_insights_graph';
 
-export type GetAssistantGraph = (params: GetDefaultAssistantGraphParams) => DefaultAssistantGraph;
+export type GetAssistantGraph = (
+  params: GetDefaultAssistantGraphParams
+) => Promise<DefaultAssistantGraph>;
 export type GetAttackDiscoveryGraph = (
   params: GetDefaultAttackDiscoveryGraphParams
 ) => DefaultAttackDiscoveryGraph;

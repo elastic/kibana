@@ -55,7 +55,7 @@ import {
   deleteAllAlerts,
   deleteAllRules,
   createRule,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
@@ -202,7 +202,6 @@ export default ({ getService }: FtrProviderContext) => {
   /**
    * Specific api integration tests for threat matching rule type
    */
-  // FLAKY: https://github.com/elastic/kibana/issues/155304
   describe('@ess @serverless @serverlessQA Threat match type rules', () => {
     before(async () => {
       await esArchiver.load(audibeatHostsPath);
@@ -703,7 +702,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('timeout behavior', () => {
       // TODO: unskip this and see if we can make it not flaky
-      it.skip('will return an error if a rule execution exceeds the rule interval', async () => {
+      it('will return an error if a rule execution exceeds the rule interval', async () => {
         const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
           override: {
             concurrent_searches: 1,
