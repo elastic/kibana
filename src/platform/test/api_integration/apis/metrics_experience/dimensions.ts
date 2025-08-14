@@ -10,7 +10,7 @@
 import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { timerange } from '../../fixtures/es_archiver/metrics_experience/timerange';
+import { timerange } from './timerange';
 
 const ENDPOINT = '/internal/metrics_experience/dimensions';
 
