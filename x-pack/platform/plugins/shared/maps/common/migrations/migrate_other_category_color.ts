@@ -13,6 +13,7 @@ import {
   VectorStyleDescriptor,
 } from '../descriptor_types';
 import type { MapAttributes } from '../content_management';
+import { Writable } from '@kbn/utility-types';
 
 const COLOR_STYLES = [
   VECTOR_STYLES.FILL_COLOR,
@@ -77,7 +78,7 @@ export function migrateOtherCategoryColor({
         return;
       }
 
-      (layerDescriptor.style as VectorStyleDescriptor)!.properties = {
+      (layerDescriptor.style as Writable<VectorStyleDescriptor>)!.properties = {
         ...(layerDescriptor.style as VectorStyleDescriptor)!.properties,
         [styleName]: migrateColorProperty(
           (layerDescriptor.style as VectorStyleDescriptor)!.properties[

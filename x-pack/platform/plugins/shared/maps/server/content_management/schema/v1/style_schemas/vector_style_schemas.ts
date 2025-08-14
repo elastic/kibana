@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { VECTOR_STYLES } from '../../../../../common';
-import { FIELD_ORIGIN } from '../../../../../common/constants';
+import { FIELD_ORIGIN, LAYER_STYLE_TYPE } from '../../../../../common/constants';
 import { colorSchema } from './color_schemas';
 import {
   labelBorderSizeSchema,
@@ -22,7 +22,7 @@ import {
   symbolizeAsStylePropertySchema,
 } from './marker_schemas';
 
-export const fieldMetaSchema = schema.object({
+export const fieldMetaOptions = schema.object({
   isEnabled: schema.boolean(),
   sigma: schema.maybe(schema.number()),
   percentiles: schema.maybe(schema.arrayOf(schema.number())),
@@ -48,4 +48,10 @@ export const vectorStylePropertiesSchema = schema.object({
   [VECTOR_STYLES.LABEL_BORDER_COLOR]: colorSchema,
   [VECTOR_STYLES.LABEL_BORDER_SIZE]: labelBorderSizeSchema,
   [VECTOR_STYLES.LABEL_POSITION]: labelPositionSchema,
+});
+
+export const vectorStyleSchema = schema.object({
+  properties: vectorStylePropertiesSchema,
+  isTimeAware: schema.boolean(),
+  type: schema.literal(LAYER_STYLE_TYPE.VECTOR),
 });

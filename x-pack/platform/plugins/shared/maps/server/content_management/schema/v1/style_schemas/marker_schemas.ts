@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { ICON_SOURCE, STYLE_TYPE, SYMBOLIZE_AS_TYPES } from '../../../../../common/constants';
-import { fieldMetaSchema, styleField } from './vector_style_schemas';
+import { fieldMetaOptions, styleField } from './vector_style_schemas';
 
 export const symbolizeAsOptionsSchema = schema.object({
   value: schema.maybe(
@@ -37,7 +37,7 @@ export const iconDynamicOptions = schema.object({
   customIconStops: schema.maybe(schema.arrayOf(iconStop)),
   useCustomIconMap: schema.maybe(schema.boolean()),
   field: schema.maybe(styleField),
-  fieldMetaOptions: fieldMetaSchema,
+  fieldMetaOptions: fieldMetaOptions,
 });
 
 export const iconStaticOptions = schema.object({
@@ -64,7 +64,7 @@ export const iconSchema = schema.oneOf([
 
 export const orientationDynamicOptions = schema.object({
   field: schema.maybe(styleField),
-  fieldMetaOptions: fieldMetaSchema,
+  fieldMetaOptions: fieldMetaOptions,
 });
 
 export const orientationStaticOptions = schema.object({
@@ -86,7 +86,7 @@ export const sizeDynamicOptions = schema.object({
   minSize: schema.number(),
   maxSize: schema.number(),
   field: schema.maybe(styleField),
-  fieldMetaOptions: fieldMetaSchema,
+  fieldMetaOptions: fieldMetaOptions,
   invert: schema.maybe(schema.boolean()),
 });
 

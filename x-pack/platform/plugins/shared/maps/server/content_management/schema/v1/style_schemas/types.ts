@@ -7,14 +7,137 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { heatmapStyleSchema } from './heatmap_style_schemas';
-import { colorDynamicSchema, colorStaticSchema, colorSchema } from './color_schemas';
-import { symbolizeAsOptionsSchema } from './marker_schemas';
+import {
+  colorDynamicSchema,
+  colorStaticSchema,
+  colorSchema,
+  colorDynamicOptions,
+  colorStaticOptions,
+  ordinalColorStop,
+  categoryColorStop,
+} from './color_schemas';
+import {
+  iconDynamicOptions,
+  iconSchema,
+  iconStaticOptions,
+  iconStop,
+  orientationDynamicOptions,
+  orientationSchema,
+  orientationStaticOptions,
+  sizeDynamicOptions,
+  sizeSchema,
+  sizeStaticOptions,
+  symbolizeAsOptionsSchema,
+} from './marker_schemas';
+import { fieldMetaOptions, styleField, vectorStylePropertiesSchema, vectorStyleSchema } from './vector_style_schemas';
+import {
+  labelBorderSizeOptions,
+  labelDynamicOptions,
+  labelPositionSchema,
+  labelSchema,
+  labelStaticOptions,
+  labelZoomRangeSchema,
+} from './label_schemas';
+import { STYLE_TYPE } from '../../../../../common/constants';
+import { Writable } from '@kbn/utility-types';
 
 export type HeatmapStyleDescriptor = TypeOf<typeof heatmapStyleSchema>;
 
-type SymbolizeAsOptions = TypeOf<typeof symbolizeAsOptionsSchema>;
-export type StylePropertyOptions = SymbolizeAsOptions;
+export type SymbolizeAsOptions = TypeOf<typeof symbolizeAsOptionsSchema>;
 
 export type ColorStaticStylePropertyDescriptor = TypeOf<typeof colorStaticSchema>;
+export type ColorDynamicOptions = TypeOf<typeof colorDynamicOptions>;
+export type ColorStaticOptions = TypeOf<typeof colorStaticOptions>;
 export type ColorDynamicStylePropertyDescriptor = TypeOf<typeof colorDynamicSchema>;
 export type ColorStylePropertyDescriptor = TypeOf<typeof colorSchema>;
+
+export type CategoryColorStop = TypeOf<typeof categoryColorStop>;
+export type OrdinalColorStop = TypeOf<typeof ordinalColorStop>;
+
+export type IconDynamicOptions = TypeOf<typeof iconDynamicOptions>;
+export type IconStaticOptions = TypeOf<typeof iconStaticOptions>;
+export type IconStylePropertyDescriptor = TypeOf<typeof iconSchema>;
+
+export type IconStop = TypeOf<typeof iconStop>;
+
+export type LabelDynamicOptions = TypeOf<typeof labelDynamicOptions>;
+export type LabelStaticOptions = TypeOf<typeof labelStaticOptions>;
+export type LabelStylePropertyDescriptor = TypeOf<typeof labelSchema>;
+
+export type LabelBorderSizeOptions = TypeOf<typeof labelBorderSizeOptions>;
+export type LabelPositionStylePropertyDescriptor = TypeOf<typeof labelPositionSchema>;
+export type LabelZoomRangeStylePropertyDescriptor = TypeOf<typeof labelZoomRangeSchema>;
+
+export type OrientationDynamicOptions = TypeOf<typeof orientationDynamicOptions>;
+export type OrientationStaticOptions = TypeOf<typeof orientationStaticOptions>;
+export type OrientationStylePropertyDescriptor = TypeOf<typeof orientationSchema>;
+
+export type SizeDynamicOptions = TypeOf<typeof sizeDynamicOptions>;
+export type SizeStaticOptions = TypeOf<typeof sizeStaticOptions>;
+export type SizeStylePropertyDescriptor = TypeOf<typeof sizeSchema>;
+
+export type DynamicStylePropertyOptions =
+  | ColorDynamicOptions
+  | IconDynamicOptions
+  | LabelDynamicOptions
+  | OrientationDynamicOptions
+  | SizeDynamicOptions;
+
+export interface DynamicStyleProperties {
+  type: STYLE_TYPE.DYNAMIC;
+  options: DynamicStylePropertyOptions;
+}
+
+export type StaticStylePropertyOptions =
+  | ColorStaticOptions
+  | IconStaticOptions
+  | LabelStaticOptions
+  | OrientationStaticOptions
+  | SizeStaticOptions;
+
+export type StylePropertyOptions =
+  | LabelBorderSizeOptions
+  | LabelPositionStylePropertyDescriptor['options']
+  | LabelZoomRangeStylePropertyDescriptor['options']
+  | SymbolizeAsOptions
+  | DynamicStylePropertyOptions
+  | StaticStylePropertyOptions;
+
+export type VectorStylePropertiesDescriptor = Writable<TypeOf<typeof vectorStylePropertiesSchema>>;
+
+export type FieldMetaOptions = TypeOf<typeof fieldMetaOptions>;
+export type StylePropertyField = TypeOf<typeof styleField>;
+
+export interface RangeFieldMeta {
+  min: number;
+  max: number;
+  delta: number;
+  isMinOutsideStdRange?: boolean;
+  isMaxOutsideStdRange?: boolean;
+}
+export type PercentilesFieldMeta = Array<{
+  percentile: string;
+  value: number;
+}>;
+export interface Category {
+  key: string;
+  count: number;
+}
+export interface GeometryTypes {
+  isPointsOnly: boolean;
+  isLinesOnly: boolean;
+  isPolygonsOnly: boolean;
+}
+export interface FieldMeta {
+  [key: string]: {
+    range?: RangeFieldMeta;
+    categories: Category[];
+  };
+}
+export interface StyleMetaDescriptor {
+  geometryTypes?: GeometryTypes;
+  fieldMeta: FieldMeta;
+}
+export type VectorStyleDescriptor = TypeOf<typeof vectorStyleSchema> & {
+  __styleMeta?: StyleMetaDescriptor;
+};

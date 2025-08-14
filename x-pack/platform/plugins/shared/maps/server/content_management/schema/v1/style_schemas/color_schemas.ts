@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { COLOR_MAP_TYPE, DATA_MAPPING_FUNCTION, STYLE_TYPE } from '../../../../../common/constants';
-import { fieldMetaSchema, styleField } from './vector_style_schemas';
+import { fieldMetaOptions, styleField } from './vector_style_schemas';
 
 export const categoryColorStop = schema.object({
   stop: schema.nullable(schema.string()),
@@ -39,7 +39,7 @@ export const colorDynamicOptions = schema.object({
   otherCategoryColor: schema.maybe(schema.string()),
 
   field: schema.maybe(styleField),
-  fieldMetaOptions: fieldMetaSchema,
+  fieldMetaOptions: fieldMetaOptions,
 
   type: schema.maybe(
     schema.oneOf([

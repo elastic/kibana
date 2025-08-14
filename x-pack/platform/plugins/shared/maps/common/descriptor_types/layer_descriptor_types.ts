@@ -12,13 +12,11 @@ import type { Query } from '@kbn/es-query';
 import { Feature } from 'geojson';
 import {
   EMSVectorTileStyleDescriptor,
-  StyleDescriptor,
-  VectorStyleDescriptor,
 } from './style_property_descriptor_types';
 import { HeatmapStyleDescriptor } from '.';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
-import type { JoinSourceDescriptor, SourceDescriptor } from '.';
-import { LAYER_TYPE } from '../constants';
+import type { JoinSourceDescriptor, SourceDescriptor, VectorStyleDescriptor } from '.';
+import { LAYER_STYLE_TYPE, LAYER_TYPE } from '../constants';
 
 export type Attribution = {
   label: string;
@@ -75,7 +73,7 @@ export type LayerDescriptor = {
   sourceDescriptor: SourceDescriptor | null;
   type?: string;
   visible?: boolean;
-  style?: StyleDescriptor | null;
+  style?: { type: LAYER_STYLE_TYPE } | VectorStyleDescriptor | HeatmapStyleDescriptor | EMSVectorTileStyleDescriptor | null;
   query?: Query;
   includeInFitToBounds?: boolean;
   parent?: string;
