@@ -217,8 +217,6 @@ export const reportingPDFExportProvider = ({
         license.check('reporting', 'gold')
       );
 
-      console.log('capabilities', capabilities);
-
       const capabilityHasDashboardScreenshotReporting =
         capabilities.dashboard_v2?.generateScreenshot === true ||
         capabilities.reportingLegacy?.generateReport === true;
