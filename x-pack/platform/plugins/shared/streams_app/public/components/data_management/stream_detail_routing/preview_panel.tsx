@@ -190,7 +190,7 @@ const RuleCreationPanel = () => {
               isLoading={isLoadingDocumentCounts}
             />
           </EuiFlexItem>
-          <PreviewTable documents={documents} isLoading={isLoadingDocuments} />
+          <PreviewTable documents={documents} />
         </EuiFlexGroup>
       </EuiFlexItem>
     );

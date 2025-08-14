@@ -14,8 +14,6 @@ import { FieldTypeOption } from '../../../../../public/components/data_managemen
 export class StreamsApp {
   constructor(private readonly page: ScoutPage) {}
 
-  private pageLoadingTimeout = 20_000;
-
   async goto() {
     await this.page.gotoApp('streams');
     await expect(this.page.getByText('StreamsTechnical Preview')).toBeVisible();
@@ -33,30 +31,12 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'lifecycle');
   }
 
-  async gotoProcessingTab(streamName: string, options?: { waitForTableLoaded?: boolean }) {
+  async gotoProcessingTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'enrich');
-    const { waitForTableLoaded = true } = options || {};
-
-    if (waitForTableLoaded) {
-      // Wait for the processing table to load
-      return this.page.testSubj.waitForSelector('streamsAppPreviewTableLoaded', {
-        state: 'visible',
-        timeout: this.pageLoadingTimeout,
-      });
-    }
   }
 
-  async gotoSchemaEditorTab(streamName: string, options?: { waitForTableLoaded?: boolean }) {
+  async gotoSchemaEditorTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'schemaEditor');
-    const { waitForTableLoaded = true } = options || {};
-
-    if (waitForTableLoaded) {
-      // Wait for the schema editor table to load
-      return this.page.testSubj.waitForSelector('streamsAppSchemaEditorFieldsTableLoaded', {
-        state: 'visible',
-        timeout: this.pageLoadingTimeout,
-      });
-    }
   }
 
   async gotoSignificantEventsTab(streamName: string) {
