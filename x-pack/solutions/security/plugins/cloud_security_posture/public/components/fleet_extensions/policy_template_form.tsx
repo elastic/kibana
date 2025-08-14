@@ -80,7 +80,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const AZURE_MINIMUM_ORGANIZATION_VERSION = '1.7.0';
     const AZURE_MANUAL_FIELDS_PACKAGE_VERSION = '1.7.0';
 
-    const showCloudConnectors = semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS);
     const showCloudTemplates = semverGte(packageInfo.version, CLOUD_CREDENTIALS_PACKAGE_VERSION);
     const enableGcpOrganization = semverGte(packageInfo.version, GCP_MINIMUM_ORGANIZATION_VERSION);
     const enableAwsOrganization = semverGte(packageInfo.version, AWS_MINIMUM_ORGANIZATION_VERSION);
@@ -107,7 +106,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       }),
       overviewPath: `https://ela.st/cspm-overview`,
       getStartedPath: `https://ela.st/cspm-get-started`,
-      showCloudConnectors,
+      cloudConnectorEnabledVersion: CLOUD_CONNECTOR_VERSION_ENABLED_ESS,
       showCloudTemplates,
       providers: {
         aws: {

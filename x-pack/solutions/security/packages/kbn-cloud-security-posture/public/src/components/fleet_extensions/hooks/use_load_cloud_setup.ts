@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { useCallback } from 'react';
+import semverGte from 'semver/functions/gte';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/common/types';
@@ -46,7 +47,7 @@ interface UseLoadCloudSetupProps {
   defaultProviderType: string;
   templateName: string;
   config: CloudSetupConfig;
-  showCloudConnectorsConfig: boolean;
+  cloudConnectorEnabledVersion: string;
   getCloudSetupProviderByInputType: (inputType: string) => CloudProviders;
 }
 
@@ -65,7 +66,7 @@ export const useLoadCloudSetup = ({
   templateName,
   config,
   getCloudSetupProviderByInputType,
-  showCloudConnectorsConfig,
+  cloudConnectorEnabledVersion,
 }: UseLoadCloudSetupProps) => {
   const isServerless = !!cloud.serverless.projectType;
   const input = getSelectedInput(newPolicy.inputs, defaultProviderType);
@@ -95,7 +96,9 @@ export const useLoadCloudSetup = ({
   });
 
   const showCloudConnectors =
-    cloudConnectorsEnabled && !!cloudConnectorRemoteRoleTemplate && showCloudConnectorsConfig;
+    cloudConnectorsEnabled &&
+    !!cloudConnectorRemoteRoleTemplate &&
+    semverGte(packageInfo.version, cloudConnectorEnabledVersion);
 
   const setEnabledPolicyInput = useCallback(
     (provider: CloudProviders) => {

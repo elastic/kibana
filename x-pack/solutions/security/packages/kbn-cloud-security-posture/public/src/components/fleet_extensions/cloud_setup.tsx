@@ -86,7 +86,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       config,
       defaultProviderType,
       getCloudSetupProviderByInputType,
-      showCloudConnectors: showCloudConnectorsConfig,
+      cloudConnectorEnabledVersion,
     } = useCloudSetup();
     const {
       input,
@@ -113,7 +113,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       defaultProviderType,
       config,
       getCloudSetupProviderByInputType,
-      showCloudConnectorsConfig,
+      cloudConnectorEnabledVersion,
     });
 
     const namespaceSupportEnabled = config.namespaceSupportEnabled;

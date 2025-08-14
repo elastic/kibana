@@ -129,7 +129,7 @@ export function useCloudSetup() {
       getCloudSetupProviderByInputType,
       templateInputOptions: getCloudSetupTemplateInputOptions(),
       config,
-      showCloudConnectors: config.showCloudConnectors,
+      cloudConnectorEnabledVersion: config.cloudConnectorEnabledVersion,
       showCloudTemplates: config.showCloudTemplates,
       defaultProvider: config.defaultProvider,
       defaultProviderType: config.providers[config.defaultProvider].type,

@@ -37,7 +37,7 @@ export interface CloudSetupConfig {
   namespaceSupportEnabled?: boolean;
   overviewPath: string;
   getStartedPath: string;
-  showCloudConnectors: boolean;
+  cloudConnectorEnabledVersion: string;
   showCloudTemplates: boolean;
   providers: Record<CloudProviders, CloudProviderConfig>;
 }
