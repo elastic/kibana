@@ -14,17 +14,13 @@ import type {
   SecuritySolutionPluginStart,
   SecuritySolutionPluginStartDependencies,
 } from '../../../../plugin_contract';
-// import { getResourcesStats } from './resources_stats_collector';
-import {
-  assetInventoryUsageSchema,
-  type AssetInventoryUsage,
-  type AssetInventoryUsageCollectorType,
-} from '../schema';
+import { assetInventoryUsageSchema } from '../schema';
 import { getEntityStats } from './entities_stats_collector';
 import { getEntitiesTypeStats } from './entities_type_stats_collector';
 import { getAssetCriticalityStats } from './asset_criticality_stats_collector';
 import { getEntitySourceStats } from './entity_source_stats_collector';
 import { getEntityStoreStats } from './entity_store_stats_collector';
+import type { AssetInventoryUsage, AssetInventoryUsageCollectorType } from '../type';
 
 export function registerAssetInventoryUsageCollector(
   logger: Logger,

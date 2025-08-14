@@ -6,7 +6,7 @@
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { EntitiesTypeStats } from '../schema';
+import type { AggregationBucket, AggregationOnlyResponse, EntitiesTypeStats } from '../type';
 
 /**
  * Elasticsearch aggregation query for top entity types by most recent timestamp.
@@ -35,31 +35,12 @@ export const getEntityTypeAggsQuery = (index: string) => ({
 });
 
 /**
- * Bucket structure returned from Elasticsearch aggregation.
- */
-interface EntityTypeAggBucket {
-  key: string;
-  doc_count: number;
-  last_doc_timestamp: {
-    value: number;
-    value_as_string: string;
-  };
-}
-
-/**
- * Expected structure passed to the parser.
- */
-export interface AggregationOnlyResponse {
-  buckets: EntityTypeAggBucket[];
-}
-
-/**
  * Structure of the full Elasticsearch aggregation response.
  */
 export interface AggregationResponse {
   aggregations: {
     entity_type_terms: {
-      buckets: EntityTypeAggBucket[];
+      buckets: AggregationBucket[];
     };
   };
 }
@@ -96,7 +77,7 @@ export const getEntitiesTypeStats = async (
       unknown,
       {
         entity_type_terms: {
-          buckets: EntityTypeAggBucket[];
+          buckets: AggregationBucket[];
         };
       }
     >(getEntityTypeAggsQuery('.entities.v1.latest*'));

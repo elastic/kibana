@@ -6,16 +6,19 @@
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { AssetCriticalityStats } from '../schema';
+import type { AggregationBucket, AggregationOnlyResponse, EntityStoreStats } from '../type';
 
-const getAssetCriticalityAggsQuery = (index: string) => ({
+/**
+ * Elasticsearch aggregation query for top entity types by most recent timestamp.
+ */
+export const getEntityStoreAggsQuery = (index: string) => ({
   size: 0,
   index,
   aggs: {
-    asset_criticality_terms: {
+    entity_store_terms: {
       terms: {
-        field: 'asset.criticality',
-        size: 10,
+        field: 'entity.EngineMetadata.Type',
+        size: 100,
         order: {
           last_doc_timestamp: 'desc' as const,
         },
@@ -32,31 +35,12 @@ const getAssetCriticalityAggsQuery = (index: string) => ({
 });
 
 /**
- * Bucket structure returned from Elasticsearch aggregation.
- */
-interface AssetCriticalityAggBucket {
-  key: string;
-  doc_count: number;
-  last_doc_timestamp: {
-    value: number;
-    value_as_string: string;
-  };
-}
-
-/**
- * Expected structure passed to the parser.
- */
-export interface AggregationOnlyResponse {
-  buckets: AssetCriticalityAggBucket[];
-}
-
-/**
  * Structure of the full Elasticsearch aggregation response.
  */
 export interface AggregationResponse {
   aggregations: {
-    entity_type_terms: {
-      buckets: AssetCriticalityAggBucket[];
+    entity_store_terms: {
+      buckets: AggregationBucket[];
     };
   };
 }
@@ -64,11 +48,9 @@ export interface AggregationResponse {
 /**
  * Parses aggregation buckets into a simplified list of entity stats.
  */
-export const parseAssetCriticalityAggs = (
-  response: AggregationOnlyResponse
-): AssetCriticalityStats[] => {
+export const parseEntityStoreAggs = (response: AggregationOnlyResponse): EntityStoreStats[] => {
   return response.buckets.map((bucket) => ({
-    criticality: bucket.key,
+    entity_store: bucket.key,
     doc_count: bucket.doc_count,
     last_doc_timestamp: bucket.last_doc_timestamp.value_as_string,
   }));
@@ -77,10 +59,10 @@ export const parseAssetCriticalityAggs = (
 /**
  * Queries Elasticsearch for entity type stats, parses, and returns them.
  */
-export const getAssetCriticalityStats = async (
+export const getEntityStoreStats = async (
   esClient: ElasticsearchClient,
   logger: Logger
-): Promise<AssetCriticalityStats[]> => {
+): Promise<EntityStoreStats[]> => {
   try {
     const isIndexExists = await esClient.indices.exists({
       index: '.entities.v1.latest*',
@@ -94,14 +76,14 @@ export const getAssetCriticalityStats = async (
     const entityTypeStats = await esClient.search<
       unknown,
       {
-        asset_criticality_terms: {
-          buckets: AssetCriticalityAggBucket[];
+        entity_store_terms: {
+          buckets: AggregationBucket[];
         };
       }
-    >(getAssetCriticalityAggsQuery('.entities.v1.latest*'));
+    >(getEntityStoreAggsQuery('.entities.v1.latest*'));
 
-    const buckets = entityTypeStats.aggregations?.asset_criticality_terms?.buckets ?? [];
-    return parseAssetCriticalityAggs({ buckets });
+    const buckets = entityTypeStats.aggregations?.entity_store_terms?.buckets ?? [];
+    return parseEntityStoreAggs({ buckets });
   } catch (e) {
     logger.error(`Failed to get entity type stats: ${e instanceof Error ? e.message : String(e)}`);
     return [];

@@ -6,7 +6,7 @@
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { EntitySourceStats } from '../schema';
+import type { AggregationBucket, AggregationOnlyResponse, EntitySourceStats } from '../type';
 
 const getEntitySourceAggsQuery = (index: string) => ({
   size: 0,
@@ -32,31 +32,12 @@ const getEntitySourceAggsQuery = (index: string) => ({
 });
 
 /**
- * Bucket structure returned from Elasticsearch aggregation.
- */
-interface EntitySourceAggBucket {
-  key: string;
-  doc_count: number;
-  last_doc_timestamp: {
-    value: number;
-    value_as_string: string;
-  };
-}
-
-/**
- * Expected structure passed to the parser.
- */
-export interface AggregationOnlyResponse {
-  buckets: EntitySourceAggBucket[];
-}
-
-/**
  * Structure of the full Elasticsearch aggregation response.
  */
 export interface AggregationResponse {
   aggregations: {
     entity_source_terms: {
-      buckets: EntitySourceAggBucket[];
+      buckets: AggregationBucket[];
     };
   };
 }
@@ -93,7 +74,7 @@ export const getEntitySourceStats = async (
       unknown,
       {
         entity_source_terms: {
-          buckets: EntitySourceAggBucket[];
+          buckets: AggregationBucket[];
         };
       }
     >(getEntitySourceAggsQuery('.entities.v1.latest*'));

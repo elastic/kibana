@@ -27,7 +27,7 @@ import type {
   SecuritySolutionPluginStart,
   SecuritySolutionPluginStartDependencies,
 } from '../../plugin_contract';
-import { registerAssetInventoryUsageCollector } from './telemetry/collectors.ts/register';
+import { registerAssetInventoryUsageCollector } from './telemetry/collectors/register';
 
 interface AssetInventoryClientOpts {
   logger: Logger;

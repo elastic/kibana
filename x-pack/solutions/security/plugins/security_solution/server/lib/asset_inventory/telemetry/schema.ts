@@ -6,53 +6,7 @@
  */
 
 import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-
-export type AssetInventoryUsageCollectorType =
-  | 'Entities'
-  | 'Entities Type'
-  | 'Entity Store'
-  | 'Entity Source'
-  | 'Asset Criticality';
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-
-export interface EntitiesStats {
-  doc_count: number;
-  last_doc_timestamp: string;
-}
-export interface EntitiesTypeStats {
-  entity_type: string;
-  doc_count: number;
-  last_doc_timestamp: string;
-}
-
-export interface EntityStoreStats {
-  entity_store: string;
-  doc_count: number;
-  last_doc_timestamp: string;
-}
-
-export interface EntitySourceStats {
-  entity_source: string;
-  doc_count: number;
-  last_doc_timestamp: string;
-}
-
-export interface AssetCriticalityStats {
-  criticality: string;
-  doc_count: number;
-  last_doc_timestamp: string;
-}
-
-export interface AssetInventoryUsage {
-  entities: EntitiesStats;
-  entities_type_stats: EntitiesTypeStats[];
-  entity_store_stats: EntityStoreStats[];
-  entity_source_stats: EntitySourceStats[];
-  asset_criticality_stats: AssetCriticalityStats[];
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////
+import type { AssetInventoryUsage } from './type';
 
 export const assetInventoryUsageSchema: MakeSchemaFrom<AssetInventoryUsage> = {
   entities: {
