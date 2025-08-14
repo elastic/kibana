@@ -42,7 +42,7 @@ export const useGridLayoutPanelEvents = ({
   sectionId?: string;
   panelId: string;
 }) => {
-  const { gridLayoutStateManager } = useGridLayoutContext();
+  const { gridLayoutStateManager, onResize } = useGridLayoutContext();
 
   const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
 
@@ -55,8 +55,8 @@ export const useGridLayoutPanelEvents = ({
   );
 
   const onEnd = useCallback(() => {
-    commitAction(gridLayoutStateManager);
-  }, [gridLayoutStateManager]);
+    commitAction(gridLayoutStateManager, { onResize });
+  }, [gridLayoutStateManager, onResize]);
 
   const onBlur = useCallback(() => {
     const {
@@ -64,9 +64,9 @@ export const useGridLayoutPanelEvents = ({
     } = gridLayoutStateManager;
     // make sure the user hasn't started another interaction in the meantime
     if (id === panelId && sectionId === targetSection) {
-      commitAction(gridLayoutStateManager);
+      commitAction(gridLayoutStateManager, { onResize });
     }
-  }, [gridLayoutStateManager, panelId, sectionId]);
+  }, [gridLayoutStateManager, panelId, sectionId, onResize]);
 
   const onCancel = useCallback(() => {
     cancelAction(gridLayoutStateManager);

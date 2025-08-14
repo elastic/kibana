@@ -76,12 +76,21 @@ export const moveAction = (
   const previewRect = (() => {
     if (isResize) {
       const layoutRef = gridLayoutStateManager.layoutRef.current;
+      // LIMIT SIZE HERE
+      const { resizeOptions } = currentPanelData;
       const maxRight = layoutRef ? layoutRef.getBoundingClientRect().right : window.innerWidth;
-      return getResizePreviewRect({ activePanel, pointerPixel, maxRight });
+      return getResizePreviewRect({
+        activePanel,
+        pointerPixel,
+        maxRight,
+        runtimeSettings,
+        resizeOptions,
+      });
     } else {
       return getDragPreviewRect({ activePanel, pointerPixel });
     }
   })();
+  console.log(previewRect);
 
   // find the grid that the preview rect is over
   const lastSectionId = activePanel.targetSection;
@@ -235,14 +244,19 @@ export const moveAction = (
   });
 };
 
-export const commitAction = ({
-  activePanelEvent$: activePanelEvent$,
-  panelRefs,
-}: GridLayoutStateManager) => {
+export const commitAction = (
+  { activePanelEvent$: activePanelEvent$, panelRefs, gridLayout$ }: GridLayoutStateManager,
+  callbacks: { onResize?: (newPanel: GridPanelData) => void }
+) => {
   const event = activePanelEvent$.getValue();
   activePanelEvent$.next(undefined);
 
   if (!event) return;
+  if (event.type === 'resize') {
+    const layout = gridLayout$.getValue();
+    // console.log('REISZE', gridLayout$.getValue(), event);
+    callbacks.onResize?.(layout[event.targetSection].panels[event.id]);
+  }
   panelRefs.current[event.id]?.scrollIntoView({
     behavior: 'smooth',
     block: 'center',

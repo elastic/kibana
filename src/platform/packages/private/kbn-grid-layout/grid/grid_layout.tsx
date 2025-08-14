@@ -15,7 +15,7 @@ import { cloneDeep } from 'lodash';
 import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
-import { GridPanel, GridPanelDragPreview } from './grid_panel';
+import { GridPanel, GridPanelData, GridPanelDragPreview } from './grid_panel';
 import {
   GridSectionDragPreview,
   GridSectionFooter,
@@ -37,10 +37,13 @@ import { isOrderedLayoutEqual } from './utils/equality_checks';
 export type GridLayoutProps = {
   layout: GridLayoutData;
   gridSettings: GridSettings;
-  onLayoutChange: (newLayout: GridLayoutData) => void;
   expandedPanelId?: string;
   accessMode?: GridAccessMode;
   className?: string; // this makes it so that custom CSS can be passed via Emotion
+  callbacks: {
+    onLayoutChange: (newLayout: GridLayoutData) => void;
+    onResize?: (newPanel: GridPanelData) => void;
+  };
 } & UseCustomDragHandle;
 
 type GridLayoutElementsInOrder = Array<{
@@ -52,7 +55,7 @@ export const GridLayout = ({
   layout,
   gridSettings,
   renderPanelContents,
-  onLayoutChange,
+  callbacks: { onLayoutChange, onResize },
   expandedPanelId,
   accessMode = 'EDIT',
   className,
@@ -191,8 +194,9 @@ export const GridLayout = ({
         renderPanelContents,
         useCustomDragHandle,
         gridLayoutStateManager,
+        onResize,
       } as GridLayoutContextType),
-    [renderPanelContents, useCustomDragHandle, gridLayoutStateManager]
+    [renderPanelContents, useCustomDragHandle, gridLayoutStateManager, onResize]
   );
 
   return (

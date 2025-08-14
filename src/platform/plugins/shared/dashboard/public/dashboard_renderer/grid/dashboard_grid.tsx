@@ -79,6 +79,12 @@ export const DashboardGrid = ({
         column: gridData.x,
         width: gridData.w,
         height: gridData.h,
+        resizeOptions: {
+          minWidth: 6,
+          maxWidth: 24,
+          minHeight: 2,
+          maxHeight: 10,
+        },
       } as GridPanelData;
       if (gridData.sectionId) {
         (newLayout[gridData.sectionId] as GridSectionData).panels[panelId] = basePanel;
@@ -214,7 +220,12 @@ export const DashboardGrid = ({
         }}
         useCustomDragHandle={true}
         renderPanelContents={renderPanelContents}
-        onLayoutChange={onLayoutChange}
+        callbacks={{
+          onLayoutChange,
+          onResize: (panel) => {
+            console.log('RESIZE FROM DASHBOARD', panel);
+          },
+        }}
         expandedPanelId={expandedPanelId}
         accessMode={viewMode === 'edit' ? 'EDIT' : 'VIEW'}
       />
