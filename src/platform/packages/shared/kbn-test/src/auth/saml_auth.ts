@@ -229,8 +229,9 @@ export const createSAMLResponse = async (params: SAMLResponseValueParams) => {
     value = $('input').attr('value');
   } catch (err) {
     if (err.isAxiosError) {
+      const requestId = err?.response?.headers?.['x-request-id'] || 'not found';
       log.error(
-        `Create SAML Response failed with status code ${err?.response?.status}: ${err?.response?.data}`
+        `Create SAML Response failed with status code ${err?.response?.status}: ${err?.response?.data}.\nLocation: ${location}.\nX-Request-ID: ${requestId}`
       );
     }
   }
