@@ -57,7 +57,6 @@ const SnapshotMetricTypeKeysArray = [
 type SnapshotMetricTypeKeys = (typeof SNAPSHOT_CUSTOM_AGGREGATIONS)[number];
 
 const comparators = Object.values({ ...COMPARATORS, ...LEGACY_COMPARATORS });
-const dataSchemaFormats = ['ecs', 'semconv'] as const;
 
 export const metricInventoryThresholdRuleParamsSchema = schema.object(
   {
