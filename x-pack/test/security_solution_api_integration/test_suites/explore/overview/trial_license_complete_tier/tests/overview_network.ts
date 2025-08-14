@@ -113,13 +113,8 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     describe('With auditbeat', () => {
       before(async () => {
         supertest = await utils.createSuperTest();
-<<<<<<< HEAD
         bsearch = await utils.createBsearch();
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/overview');
-=======
-        search = await utils.createSearch();
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/auditbeat/overview');
->>>>>>> 2fb428aa876 ([ska] relocate esArchives to platform/test/fixtures (#229750))
       });
       after(
         async () =>
