@@ -11,3 +11,5 @@ export function plugin() {
   return new DataQualityPlugin();
 }
 export type { DataQualityPluginSetup, DataQualityPluginStart } from './types';
+
+export { getDatasetQualityDetailsStateFromUrl, updateUrlFromDatasetQualityDetailsState } from './routes/dataset_quality_details/url_state_storage_service';

@@ -177,7 +177,7 @@ export function StreamDetailDataQualityIndicator({
   definition: Streams.ingest.all.GetResponse;
 }) {
   const { datasetQuality } = useKibana().dependencies.start;
-  const controller = useDatasetQualityController(definition);
+  const controller = useDatasetQualityController(definition, false);
 
   return controller ? (
     <datasetQuality.DatasetQualityIndicator controller={controller} />

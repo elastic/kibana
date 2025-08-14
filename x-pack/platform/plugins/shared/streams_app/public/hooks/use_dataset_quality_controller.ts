@@ -5,59 +5,96 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Streams } from '@kbn/streams-schema';
+import { useHistory } from 'react-router-dom';
 import {
   DatasetQualityDetailsController,
   DatasetQualityView,
 } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
+import {
+  getDatasetQualityDetailsStateFromUrl,
+  updateUrlFromDatasetQualityDetailsState,
+} from '@kbn/data-quality-plugin/public';
 import { useKibana } from './use_kibana';
+import { useKbnUrlStateStorageFromRouterContext } from '../util/kbn_url_state_context';
 
 export const useDatasetQualityController = (
-  definition: Streams.ingest.all.GetResponse
+  definition: Streams.ingest.all.GetResponse,
+  saveStateInUrl: boolean = true
 ): DatasetQualityDetailsController | undefined => {
-  const controllerRef = useRef<DatasetQualityDetailsController>();
   const { datasetQuality } = useKibana().dependencies.start;
+  const {
+    core: {
+      notifications: { toasts },
+    },
+  } = useKibana();
   const [controller, setController] = useState<DatasetQualityDetailsController>();
+  const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
+
+  const history = useHistory();
 
   useEffect(() => {
-    let isMounted = true;
+    async function getDatasetQualityDetailsController() {
+      let initialState = getDatasetQualityDetailsStateFromUrl({
+        urlStateStorageContainer,
+        toastsService: toasts,
+      });
 
-    const initController = async () => {
-      if (controllerRef.current) {
-        // Already created, just set the state
-        setController(controllerRef.current);
+      // state initialization is under progress
+      if (initialState === undefined) {
         return;
       }
 
-      const initialState = {
-        dataStream: definition.stream.name,
-        view: 'streams' as DatasetQualityView,
-      };
+      // state initialized but empty
+      if (initialState === null) {
+        initialState = {
+          dataStream: definition.stream.name,
+          view: 'streams' as DatasetQualityView,
+        };
+      }
 
       const datasetQualityDetailsController =
         await datasetQuality.createDatasetQualityDetailsController({
-          initialState,
+          initialState: {
+            ...initialState,
+            view: 'streams' as DatasetQualityView,
+          },
         });
-
       datasetQualityDetailsController.service.start();
 
-      if (isMounted) {
-        controllerRef.current = datasetQualityDetailsController;
-        setController(datasetQualityDetailsController);
-      }
-    };
+      setController(datasetQualityDetailsController);
 
-    initController();
-
-    return () => {
-      isMounted = false;
-      if (controllerRef.current) {
-        controllerRef.current.service.stop();
-        controllerRef.current = undefined;
+      if (!saveStateInUrl) {
+        return () => {
+          datasetQualityDetailsController.service.stop();
+        };
       }
-    };
-  }, [datasetQuality, definition.stream.name]);
+
+      const datasetQualityStateSubscription = datasetQualityDetailsController.state$.subscribe(
+        (state) => {
+          updateUrlFromDatasetQualityDetailsState({
+            urlStateStorageContainer,
+            datasetQualityDetailsState: state,
+          });
+        }
+      );
+
+      return () => {
+        datasetQualityDetailsController.service.stop();
+        datasetQualityStateSubscription.unsubscribe();
+      };
+    }
+
+    getDatasetQualityDetailsController();
+  }, [
+    datasetQuality,
+    history,
+    toasts,
+    urlStateStorageContainer,
+    definition.stream.name,
+    saveStateInUrl,
+  ]);
 
   return controller;
 };
