@@ -35,6 +35,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         '--data.search.sessions.enabled=true', // enable search sessions
+        '--feature_flags.overrides.search.backgroundSearchEnabled=false', // disable background search
         '--data.search.sessions.management.refreshInterval=10s', // enable automatic refresh for sessions management screen
       ],
     },
