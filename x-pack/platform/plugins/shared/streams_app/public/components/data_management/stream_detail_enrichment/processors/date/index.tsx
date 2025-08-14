@@ -19,12 +19,7 @@ import { ProcessorFieldSelector } from '../processor_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { IgnoreFailureToggle } from '../ignore_toggles';
-import {
-  DateTargetField,
-  DateTimezoneField,
-  DateOutputFormatField,
-  DateLocaleField,
-} from './date_optional_fields';
+import { DateTargetField, DateOutputFormatField } from './date_optional_fields';
 import { DateFormatsField } from './date_formats_field';
 
 import { selectPreviewRecords } from '../../state_management/simulation_state_machine/selectors';
@@ -147,8 +142,6 @@ export const DateProcessorForm = () => {
       <EuiSpacer size="m" />
       <FieldsAccordion>
         <DateTargetField />
-        <DateTimezoneField />
-        <DateLocaleField />
         <DateOutputFormatField />
         <EuiSpacer size="m" />
         <ProcessorConditionEditor />
