@@ -21,7 +21,6 @@ import type {
   UnifiedHistogramPartialLayoutProps,
 } from '@kbn/unified-histogram';
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
-import { useEuiTheme } from '@elastic/eui';
 import { useStateProps } from '@kbn/unified-histogram/hooks/use_state_props';
 import { createStateService } from '@kbn/unified-histogram/services/state_service';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
@@ -242,7 +241,9 @@ const CustomChartSectionWrapper = ({
   stateContainer,
   panelsToggle,
   chartSectionConfig,
-}: UnifiedHistogramChartProps & { chartSectionConfig: ChartSectionConfiguration }) => {
+}: UnifiedHistogramChartProps & {
+  chartSectionConfig: Extract<ChartSectionConfiguration, { replaceDefaultHistogram: true }>;
+}) => {
   const { currentTabId, unifiedHistogramProps } =
     useUnifiedHistogramWithRuntimeState(stateContainer);
 
@@ -255,7 +256,11 @@ const CustomChartSectionWrapper = ({
   // Extracted from useUnifiedHistogram
   const [stateService] = useState(() => {
     const { services, initialState, localStorageKeyPrefix } = restProps;
-    return createStateService({ services, initialState, localStorageKeyPrefix });
+    return createStateService({
+      services,
+      initialState: { ...initialState, topPanelHeight: chartSectionConfig.containerInitialHeight },
+      localStorageKeyPrefix: chartSectionConfig.localStorageKeyPrefix ?? localStorageKeyPrefix,
+    });
   });
 
   // Extracted from useUnifiedHistogram
@@ -275,13 +280,8 @@ const CustomChartSectionWrapper = ({
     });
   });
 
-  const { euiTheme } = useEuiTheme();
-
-  // TODO: Figure out a way to calculate this in a more dynamic way
-  const defaultTopPanelHeight = euiTheme.base * 30;
-
   // Extracted from useUnifiedHistogram
-  const { onTopPanelHeightChange, chart } = useStateProps({
+  const stateProps = useStateProps({
     services: restProps.services,
     localStorageKeyPrefix: restProps.localStorageKeyPrefix,
     stateService,
@@ -297,14 +297,14 @@ const CustomChartSectionWrapper = ({
 
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({
-      onTopPanelHeightChange,
+      onTopPanelHeightChange: stateProps.onTopPanelHeightChange,
       // always available?
       isChartAvailable: true,
       // we need this to control the chart section visibility
-      chart,
-      topPanelHeight: defaultTopPanelHeight,
+      chart: stateProps.chart,
+      topPanelHeight: stateProps.topPanelHeight,
     }),
-    [onTopPanelHeightChange, chart, defaultTopPanelHeight]
+    [stateProps.onTopPanelHeightChange, stateProps.chart, stateProps.topPanelHeight]
   );
 
   useEffect(() => {

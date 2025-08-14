@@ -30,6 +30,8 @@ export const createMetricsDataSourceProfileProvider = (
       ...(prev ? prev() : {}),
       Component: LazyMetricsGridSection,
       replaceDefaultHistogram: true,
+      localStorageKeyPrefix: 'discover:metricsExperience',
+      containerInitialHeight: 800,
     }),
   },
   resolve: (params) => {
