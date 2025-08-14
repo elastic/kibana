@@ -39,15 +39,4 @@ export class TelemetryClient implements ITelemetryClient {
       new_case_created: newCaseCreated,
     });
   }
-
-  reportLinkedDashboardViewed(dashboardId: string): void {
-    this.analytics.reportEvent(TelemetryEventTypes.LINKED_DASHBOARD_VIEW, {
-      dashboard_id: dashboardId,
-    });
-  }
-  reportCaseSelectedFromObservability(caseContext: string): void {
-    this.analytics.reportEvent(TelemetryEventTypes.CASE_SELECTED_FROM_OBSERVABILITY, {
-      caseContext,
-    });
-  }
 }
