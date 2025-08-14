@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, Suspense } from 'react';
+import React, { memo, Suspense, useMemo } from 'react';
 
 import { EuiTitle, EuiSpacer, EuiErrorBoundary } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,6 +15,7 @@ import { SectionLoading } from '../../components/section_loading';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorFormFieldsGlobal } from './connector_form_fields_global';
+import { connectorOverrides } from './connector_overrides';
 
 interface ConnectorFormFieldsProps {
   actionTypeModel: ActionTypeModel | null;
@@ -32,6 +33,12 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
   const FieldsComponent = actionTypeModel?.actionConnectorFields ?? null;
+  const overrides = useMemo(() => {
+    if (actionTypeModel) {
+      return connectorOverrides(actionTypeModel.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionTypeModel?.id]);
 
   return (
     <>
@@ -39,7 +46,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
       <EuiSpacer size="m" />
       {FieldsComponent !== null ? (
         <>
-          {actionTypeModel?.id && actionTypeModel.id !== '.inference' ? (
+          {overrides?.shouldHideConnectorSettingsTitle ? null : (
             <>
               <EuiTitle size="xxs" data-test-subj="connector-settings-label">
                 <h4>
@@ -51,7 +58,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
               </EuiTitle>
               <EuiSpacer size="s" />
             </>
-          ) : null}
+          )}
           <EuiErrorBoundary>
             <Suspense
               fallback={
