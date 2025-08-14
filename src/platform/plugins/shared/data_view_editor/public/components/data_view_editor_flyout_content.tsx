@@ -112,18 +112,18 @@ const IndexPatternEditorFlyoutContentComponent = ({
       isAdHoc: false,
       ...(editData
         ? {
-          title: editData.getIndexPattern(),
-          id: editData.id,
-          name: editData.name,
-          allowHidden: editData.getAllowHidden(),
-          ...(editData.timeFieldName === noTimeFieldValue
-            ? { timestampField: { label: noTimeFieldLabel, value: noTimeFieldValue } }
-            : editData.timeFieldName
-              ? {
-                timestampField: { label: editData.timeFieldName, value: editData.timeFieldName },
-              }
-              : {}),
-        }
+            title: editData.getIndexPattern(),
+            id: editData.id,
+            name: editData.name,
+            allowHidden: editData.getAllowHidden(),
+            ...(editData.timeFieldName === noTimeFieldValue
+              ? { timestampField: { label: noTimeFieldLabel, value: noTimeFieldValue } }
+              : editData.timeFieldName
+                ? {
+                  timestampField: { label: editData.timeFieldName, value: editData.timeFieldName },
+                }
+                : {}),
+          }
         : {}),
     },
     schema,
