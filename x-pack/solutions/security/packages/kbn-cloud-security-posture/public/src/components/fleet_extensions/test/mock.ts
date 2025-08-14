@@ -401,7 +401,7 @@ export const mockConfig: CloudSetupConfig = {
   shortName: 'Test',
   overviewPath: '/overview',
   getStartedPath: '/get-started',
-  showCloudConnectors: true,
+  cloudConnectorEnabledVersion: '3.0.0',
   showCloudTemplates: true,
   providers: {
     aws: {
