@@ -80,7 +80,10 @@ function runProfilerWithFlags(flags: Partial<ProfilerCliFlags>) {
     log: new ToolingLog({
       level: 'verbose',
       writeTo: {
-        write: (s) => {},
+        write: (s) => {
+          // eslint-disable-next-line no-console
+          console.log(s);
+        },
       },
     }),
   });
@@ -109,6 +112,9 @@ describe('@kbn/profiler-cli real-process tests', () => {
   function startFakeLongLivedProcess(port: number): FakeProcess {
     // Start a simple Node.js HTTP server on the specified port
     return startProcess(`
+
+    console.log('Long-lived process starting');
+
     const http = require('http');
     const server = http.createServer((req, res) => {
       res.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -120,9 +126,11 @@ describe('@kbn/profiler-cli real-process tests', () => {
     
     // Keep the process alive
     process.on('SIGTERM', () => {
+      console.log('SIGTERM, exiting');
       server.close(() => process.exit(0));
     });
     process.on('SIGINT', () => {
+    console.log('SIGINT, exiting');
       server.close(() => process.exit(0));
     });
   `);
@@ -183,7 +191,10 @@ describe('@kbn/profiler-cli real-process tests', () => {
         }
         
         console.log('Work completed, result:', result);
-        process.exit(0);
+        setTimeout(( ) => {
+        console.log('exiting');
+          process.exit(0);
+        }, 1000);
       `,
       ],
     });
