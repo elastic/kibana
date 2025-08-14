@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBasicTable, EuiPanel, EuiBadge } from '@elastic/eui';
+import { EuiBasicTable, EuiPanel } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ExitSpanFields } from '../../../../../common/service_map_diagnostic_types';
@@ -28,20 +28,7 @@ const columns: Array<EuiBasicTableColumn<ExitSpanFields>> = [
     name: i18n.translate('xpack.apm.serviceMap.diagnosticResults.table.destinationService', {
       defaultMessage: 'Destination Service',
     }),
-    render: (value: string | undefined, item: ExitSpanFields) => (
-      <div>
-        {value || <em>—</em>}
-        {item.isOtel && (
-          <div style={{ marginTop: '4px' }}>
-            <EuiBadge color="accent">
-              {i18n.translate('xpack.apm.serviceMap.diagnosticResults.table.otelBadge', {
-                defaultMessage: 'OTEL (destination.address)',
-              })}
-            </EuiBadge>
-          </div>
-        )}
-      </div>
-    ),
+    render: (value: string | undefined, item: ExitSpanFields) => <div>{value || <em>—</em>}</div>,
   },
   {
     field: 'agentName',
@@ -51,23 +38,9 @@ const columns: Array<EuiBasicTableColumn<ExitSpanFields>> = [
     render: (value: string | undefined) => value || <em>—</em>,
   },
   {
-    field: 'spanSubType',
-    name: i18n.translate('xpack.apm.serviceMap.diagnosticResults.table.subtype', {
-      defaultMessage: 'Subtype',
-    }),
-    render: (value: string | undefined) => value || <em>—</em>,
-  },
-  {
     field: 'spanId',
     name: i18n.translate('xpack.apm.serviceMap.diagnosticResults.table.spanId', {
       defaultMessage: 'Span ID',
-    }),
-    render: (value: string | undefined) => value || <em>—</em>,
-  },
-  {
-    field: 'spanType',
-    name: i18n.translate('xpack.apm.serviceMap.diagnosticResults.table.type', {
-      defaultMessage: 'Type',
     }),
     render: (value: string | undefined) => value || <em>—</em>,
   },
