@@ -7,6 +7,7 @@
 
 import { pageObjects as svlPlatformPageObjects } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects';
 import { SvlObltOverviewPageProvider } from './svl_oblt_overview_page';
+import { SvlObltOnboardingStreamLogFilePageProvider } from './svl_oblt_onboarding_stream_log_file';
 import { ObservabilityLogsExplorerPageObject } from '../../../functional/page_objects/observability_logs_explorer';
 import { DatasetQualityPageObject } from '../../../functional/page_objects/dataset_quality';
 import { AssetDetailsProvider } from '../../../functional/page_objects/asset_details';
@@ -23,4 +24,5 @@ export const pageObjects = {
   observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,
   // Observability Solution serverless FTR page objects
   svlObltOverviewPage: SvlObltOverviewPageProvider,
+  SvlObltOnboardingStreamLogFilePage: SvlObltOnboardingStreamLogFilePageProvider,
 };
