@@ -7,15 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { WorkflowListDto } from '@kbn/workflows';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-
-export function useWorkflows() {
-  const { http } = useKibana().services;
-
-  return useQuery<WorkflowListDto>({
-    queryKey: ['workflows'],
-    queryFn: () => http!.post('/api/workflows/search'),
-  });
-}
+export const WORKFLOWS_TABLE_INITIAL_PAGE_SIZE = 10;
+export const WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50];

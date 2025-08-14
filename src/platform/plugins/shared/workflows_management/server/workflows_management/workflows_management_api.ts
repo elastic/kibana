@@ -25,9 +25,12 @@ import { SchedulerService } from '../scheduler/scheduler_service';
 import { WorkflowsService } from './workflows_management_service';
 
 export interface GetWorkflowsParams {
-  triggerType?: 'schedule' | 'event';
+  triggerType?: 'schedule' | 'event' | 'manual';
   limit: number;
-  offset: number;
+  page: number;
+  createdBy: string[];
+  status: string[];
+  query: string;
   _full?: boolean;
 }
 
@@ -78,6 +81,10 @@ export class WorkflowsManagementApi {
 
   public async createWorkflow(workflow: CreateWorkflowCommand): Promise<WorkflowDetailDto> {
     return await this.workflowsService.createWorkflow(workflow);
+  }
+
+  public async cloneWorkflow(workflow: WorkflowDetailDto): Promise<WorkflowDetailDto> {
+    return await this.workflowsService.createWorkflow({ yaml: workflow.yaml }, true);
   }
 
   public async updateWorkflow(
@@ -177,5 +184,9 @@ export class WorkflowsManagementApi {
 
   public async getWorkflowStats() {
     return await this.workflowsService.getWorkflowStats();
+  }
+
+  public async getWorkflowAggs(fields: string[] = []) {
+    return await this.workflowsService.getWorkflowAggs(fields);
   }
 }

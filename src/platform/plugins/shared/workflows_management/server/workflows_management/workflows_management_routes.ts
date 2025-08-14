@@ -10,6 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter, Logger } from '@kbn/core/server';
 import { CreateWorkflowCommandSchema } from '@kbn/workflows';
+import { SearchWorkflowCommandSchema } from '@kbn/workflows/types/v1';
 import { WorkflowsManagementApi, type GetWorkflowsParams } from './workflows_management_api';
 
 export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logger: Logger) {
@@ -34,7 +35,40 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
       try {
         const stats = await api.getWorkflowStats();
 
-        return response.ok({ body: stats });
+        return response.ok({ body: stats || {} });
+      } catch (error) {
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
+  router.get(
+    {
+      path: '/api/workflows/aggs',
+      options: {
+        tags: ['access:workflowsManagement'],
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: ['read', 'workflow_read'],
+            },
+          ],
+        },
+      },
+      validate: { query: schema.object({ fields: schema.arrayOf(schema.string()) }) },
+    },
+    async (context, request, response) => {
+      try {
+        const { fields } = request.query as { fields: string[] };
+        const aggs = await api.getWorkflowAggs(fields);
+
+        return response.ok({ body: aggs || {} });
       } catch (error) {
         return response.customError({
           statusCode: 500,
@@ -103,15 +137,20 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
           ],
         },
       },
-      validate: false,
+      validate: {
+        body: SearchWorkflowCommandSchema,
+      },
     },
     async (context, request, response) => {
       try {
-        const { limit, offset } = request.query as GetWorkflowsParams;
+        const { limit, page, status, createdBy, query } = request.body as GetWorkflowsParams;
         return response.ok({
           body: await api.getWorkflows({
             limit,
-            offset,
+            page,
+            status,
+            createdBy,
+            query,
           }),
         });
       } catch (error) {
@@ -304,6 +343,46 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
         return response.ok({
           body: workflowRunId,
         });
+      } catch (error) {
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
+  router.post(
+    {
+      path: '/api/workflows/{id}/clone',
+      options: {
+        tags: ['access:workflowsManagement'],
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: ['all', 'workflow_create'],
+            },
+          ],
+        },
+      },
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { id } = request.params as { id: string };
+        const workflow = await api.getWorkflow(id);
+        if (!workflow) {
+          return response.notFound();
+        }
+        const createdWorkflow = await api.cloneWorkflow(workflow);
+        return response.ok({ body: createdWorkflow });
       } catch (error) {
         return response.customError({
           statusCode: 500,
