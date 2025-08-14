@@ -11,27 +11,39 @@ import { schema } from '@kbn/config-schema';
 
 export const itemResultSchema = schema.object(
   {
-    data: schema.object({
-      title: schema.string(),
-      timeFieldName: schema.maybe(schema.string()),
-      allowNoIndex: schema.maybe(schema.boolean()),
-      name: schema.maybe(schema.string()),
-      sourceFilters: schema.maybe(schema.arrayOf(schema.string())),
-      fieldFormatMap: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    }, { unknowns: 'allow' }),
-    meta: schema.maybe(schema.object({
-      updatedAt: schema.maybe(schema.string()),
-      createdAt: schema.maybe(schema.string()),
-      updatedBy: schema.maybe(schema.string()),
-      createdBy: schema.maybe(schema.string()),
-      managed: schema.maybe(schema.boolean()),
-      references: schema.maybe(schema.arrayOf(schema.object({
-        id: schema.string(),
-        name: schema.string(),
-        type: schema.string(),
-      }))),
-      namespaces: schema.maybe(schema.arrayOf(schema.string())),
-    }, { unknowns: 'allow' })),
+    data: schema.object(
+      {
+        title: schema.string(),
+        timeFieldName: schema.maybe(schema.string()),
+        allowNoIndex: schema.maybe(schema.boolean()),
+        name: schema.maybe(schema.string()),
+        sourceFilters: schema.maybe(schema.arrayOf(schema.string())),
+        fieldFormatMap: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+      },
+      { unknowns: 'allow' }
+    ),
+    meta: schema.maybe(
+      schema.object(
+        {
+          updatedAt: schema.maybe(schema.string()),
+          createdAt: schema.maybe(schema.string()),
+          updatedBy: schema.maybe(schema.string()),
+          createdBy: schema.maybe(schema.string()),
+          managed: schema.maybe(schema.boolean()),
+          references: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                id: schema.string(),
+                name: schema.string(),
+                type: schema.string(),
+              })
+            )
+          ),
+          namespaces: schema.maybe(schema.arrayOf(schema.string())),
+        },
+        { unknowns: 'allow' }
+      )
+    ),
     id: schema.string(),
     type: schema.string(),
   },

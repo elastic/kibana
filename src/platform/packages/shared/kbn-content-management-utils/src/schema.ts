@@ -47,15 +47,18 @@ export const savedObjectSchema = (attributesSchema: ObjectType<any>) =>
 export const objectTypeToGetResultSchema = (soSchema: ObjectType<any>) =>
   schema.object(
     {
-      data: schema.object({
-        title: schema.string(),
-        timeFieldName: schema.maybe(schema.string()),
-        allowNoIndex: schema.maybe(schema.boolean()),
-        fields: schema.maybe(schema.arrayOf(schema.string())),
-        name: schema.maybe(schema.string()),
-        sourceFilters: schema.maybe(schema.arrayOf(schema.string())),
-        fieldFormatMap: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-      }, { unknowns: 'allow' }),
+      data: schema.object(
+        {
+          title: schema.string(),
+          timeFieldName: schema.maybe(schema.string()),
+          allowNoIndex: schema.maybe(schema.boolean()),
+          fields: schema.maybe(schema.arrayOf(schema.string())),
+          name: schema.maybe(schema.string()),
+          sourceFilters: schema.maybe(schema.arrayOf(schema.string())),
+          fieldFormatMap: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+        },
+        { unknowns: 'allow' }
+      ),
       type: schema.string(),
       id: schema.string(),
       meta: schema.object(

@@ -218,7 +218,6 @@ export interface SOWithMetadata<Attributes extends object = object> {
   originId?: string;
 }
 
-
 export interface CMItem {
   id: string;
   type: string;

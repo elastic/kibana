@@ -12,7 +12,6 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { DataViewSavedObjectConflictError } from '../common/errors';
 import {
   DataViewAttributes,
-  SavedObject,
   PersistenceAPI,
   SavedObjectsClientCommonFindArgs,
 } from '../common/types';

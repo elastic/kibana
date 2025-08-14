@@ -313,9 +313,10 @@ export const dashboardCreateRequestAttributesSchema = schema.object({
   spaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
-export const dashboardUpdateRequestAttributesSchema = dashboardCreateRequestAttributesSchema.extends({
-  version: schema.number()
-});
+export const dashboardUpdateRequestAttributesSchema =
+  dashboardCreateRequestAttributesSchema.extends({
+    version: schema.number(),
+  });
 
 export const dashboardAttributesSchemaRequest = dashboardCreateRequestAttributesSchema.extends(
   dashboardCreationResponsePanels
