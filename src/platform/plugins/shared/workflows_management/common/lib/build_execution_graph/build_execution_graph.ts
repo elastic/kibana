@@ -214,7 +214,9 @@ export function convertToWorkflowGraph(workflowSchema: WorkflowYaml): graphlib.G
       } as IfStep;
     }
 
-    if (currentStep.foreach) {
+    // currentStep.type !== 'foreach' is needed to avoid double wrapping in foreach
+    // when the step is already a foreach step
+    if (currentStep.foreach && currentStep.type !== 'foreach') {
       toVisit = {
         name: `foreach_${getNodeId(currentStep)}`,
         type: 'foreach',
