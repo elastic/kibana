@@ -201,7 +201,7 @@ describe('Controls integration with Graph', () => {
         edges: [
           { id: 'edge1', color: 'primary', source: 'origin1', target: 'regular1' },
           { id: 'edge2', color: 'primary', source: 'origin1', target: 'origin2' },
-          { id: 'edge1', color: 'primary', source: 'regular1', target: 'regular2' },
+          { id: 'edge3', color: 'primary', source: 'regular1', target: 'regular2' },
         ],
         interactive: true,
       });
