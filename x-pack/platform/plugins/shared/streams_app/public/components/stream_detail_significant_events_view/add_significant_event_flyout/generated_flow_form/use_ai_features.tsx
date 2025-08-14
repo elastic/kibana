@@ -6,15 +6,11 @@
  */
 
 import { STREAMS_TIERED_AI_FEATURE } from '@kbn/streams-plugin/common';
+import { isEmpty } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../../../hooks/use_kibana';
 
-export function useAIFeatures(): {
-  loading: boolean;
-  enabled: boolean;
-  couldBeEnabled: boolean;
-  selectedConnector: string | undefined;
-} {
+export function useAIFeatures() {
   const {
     dependencies: {
       start: { observabilityAIAssistant, licensing },
@@ -27,31 +23,20 @@ export function useAIFeatures(): {
   const genAiConnectors = observabilityAIAssistant?.useGenAIConnectors();
 
   if (!observabilityAIAssistant || !genAiConnectors || genAiConnectors.loading) {
-    return {
-      loading: true,
-      enabled: false,
-      couldBeEnabled: false,
-      selectedConnector: undefined,
-    };
+    return null;
   }
 
-  const selectedConnector = genAiConnectors.selectedConnector;
   const couldBeEnabled = Boolean(
     isAIAvailableForTier &&
       license?.hasAtLeast('enterprise') &&
       core.application.capabilities.actions?.save
   );
   const enabled =
-    isAIAvailableForTier &&
-    observabilityAIAssistant.service.isEnabled() &&
-    Boolean(selectedConnector);
+    observabilityAIAssistant.service.isEnabled() && !isEmpty(genAiConnectors.connectors);
 
   return {
-    loading: false,
     enabled,
     couldBeEnabled,
-    selectedConnector,
+    genAiConnectors,
   };
 }
-
-export type AIFeatures = NonNullable<ReturnType<typeof useAIFeatures>>;

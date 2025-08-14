@@ -5,24 +5,18 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiText,
-  EuiTitle,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import { v4 } from 'uuid';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../../hooks/use_significant_events_api';
+import { validateQuery } from '../common/validate_query';
+import { AIConnectorSelector } from './ai_connector_selector';
+import { AIFeaturesDisabledCallout } from './ai_features_disabled_callout';
 import { SignificantEventsGeneratedTable } from './significant_events_generated_table';
 import { useAIFeatures } from './use_ai_features';
-import { validateQuery } from '../common/validate_query';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -33,10 +27,12 @@ interface Props {
 
 export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmitting }: Props) {
   const {
-    core: { notifications, http },
+    core: { notifications },
   } = useKibana();
   const aiFeatures = useAIFeatures();
   const { generate } = useSignificantEventsApi({ name: definition.name });
+
+  const isAIFeaturesEnabled = aiFeatures && aiFeatures.enabled;
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
@@ -61,114 +57,84 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
         </h3>
       </EuiTitle>
 
-      {aiFeatures.loading && <EuiLoadingSpinner size="m" />}
-
-      {!aiFeatures.loading && !aiFeatures.enabled && (
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.streams.addSignificantEventFlyout.aiFlow.aiAssistantNotEnabledTooltip',
-            {
-              defaultMessage:
-                'AI Assistant features are not enabled. To enable features, add an AI connector on the management page.',
-            }
-          )}
-        >
-          {aiFeatures.couldBeEnabled ? (
-            <EuiLink
-              target="_blank"
-              href={http.basePath.prepend(
-                `/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`
-              )}
-            >
-              {i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.aiFlow.aiAssistantNotEnabled',
-                { defaultMessage: 'Enable AI Assistant features' }
-              )}
-            </EuiLink>
-          ) : (
-            <EuiText>
-              <h3>
-                {i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.aiFlow.aiAssistantNotEnabledAskAdmin',
-                  { defaultMessage: 'Ask your administrator to enable AI Assistant features' }
-                )}
-              </h3>
-            </EuiText>
-          )}
-        </EuiToolTip>
+      {!isAIFeaturesEnabled && (
+        <AIFeaturesDisabledCallout couldBeEnabled={aiFeatures?.couldBeEnabled ?? false} />
       )}
 
-      {!aiFeatures.loading && aiFeatures.enabled && (
+      {isAIFeaturesEnabled && (
         <>
-          <EuiFlexGroup>
-            <EuiButton
-              isLoading={isGenerating}
-              disabled={
-                isSubmitting ||
-                isGenerating ||
-                !aiFeatures ||
-                !aiFeatures.enabled ||
-                !aiFeatures.selectedConnector
-              }
-              iconType="sparkles"
-              onClick={() => {
-                setIsGenerating(true);
-                setGeneratedQueries([]);
-                setSelectedQueries([]);
+          <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                isLoading={isGenerating}
+                size="s"
+                disabled={
+                  isSubmitting || isGenerating || !aiFeatures.genAiConnectors.selectedConnector
+                }
+                iconType="sparkles"
+                onClick={() => {
+                  setIsGenerating(true);
+                  setGeneratedQueries([]);
+                  setSelectedQueries([]);
 
-                const generation$ = generate(aiFeatures?.selectedConnector!);
-                generation$.subscribe({
-                  next: (result) => {
-                    const validation = validateQuery({
-                      title: result.query.title,
-                      kql: { query: result.query.kql },
-                    });
+                  const generation$ = generate(aiFeatures.genAiConnectors.selectedConnector!);
+                  generation$.subscribe({
+                    next: (result) => {
+                      const validation = validateQuery({
+                        title: result.query.title,
+                        kql: { query: result.query.kql },
+                      });
 
-                    if (!validation.kql.isInvalid) {
-                      setGeneratedQueries((prev) => [
-                        ...prev,
-                        { id: v4(), kql: { query: result.query.kql }, title: result.query.title },
-                      ]);
-                    }
-                  },
-                  error: (error) => {
-                    setIsGenerating(false);
-                    if (error.name === 'AbortError') {
-                      return;
-                    }
+                      if (!validation.kql.isInvalid) {
+                        setGeneratedQueries((prev) => [
+                          ...prev,
+                          { id: v4(), kql: { query: result.query.kql }, title: result.query.title },
+                        ]);
+                      }
+                    },
+                    error: (error) => {
+                      setIsGenerating(false);
+                      if (error.name === 'AbortError') {
+                        return;
+                      }
 
-                    notifications.showErrorDialog({
-                      title: i18n.translate(
-                        'xpack.streams.addSignificantEventFlyout.aiFlow.generateErrorToastTitle',
-                        { defaultMessage: `Could not generate significant events queries` }
-                      ),
-                      error,
-                    });
-                  },
-                  complete: () => {
-                    notifications.toasts.addSuccess({
-                      title: i18n.translate(
-                        'xpack.streams.addSignificantEventFlyout.aiFlow.generateSuccessToastTitle',
-                        { defaultMessage: `Generated significant events queries successfully` }
-                      ),
-                    });
-                    setIsGenerating(false);
-                  },
-                });
-              }}
-            >
-              {isGenerating
-                ? i18n.translate(
-                    'xpack.streams.addSignificantEventFlyout.aiFlow.generatingButtonLabel',
-                    { defaultMessage: 'Generating...' }
-                  )
-                : i18n.translate(
-                    'xpack.streams.addSignificantEventFlyout.aiFlow.generateButtonLabel',
-                    {
-                      defaultMessage: 'Generate',
-                    }
-                  )}
-            </EuiButton>
+                      notifications.showErrorDialog({
+                        title: i18n.translate(
+                          'xpack.streams.addSignificantEventFlyout.aiFlow.generateErrorToastTitle',
+                          { defaultMessage: `Could not generate significant events queries` }
+                        ),
+                        error,
+                      });
+                    },
+                    complete: () => {
+                      notifications.toasts.addSuccess({
+                        title: i18n.translate(
+                          'xpack.streams.addSignificantEventFlyout.aiFlow.generateSuccessToastTitle',
+                          { defaultMessage: `Generated significant events queries successfully` }
+                        ),
+                      });
+                      setIsGenerating(false);
+                    },
+                  });
+                }}
+              >
+                {isGenerating
+                  ? i18n.translate(
+                      'xpack.streams.addSignificantEventFlyout.aiFlow.generatingButtonLabel',
+                      { defaultMessage: 'Generating...' }
+                    )
+                  : i18n.translate(
+                      'xpack.streams.addSignificantEventFlyout.aiFlow.generateButtonLabel',
+                      {
+                        defaultMessage: 'Generate',
+                      }
+                    )}
+              </EuiButton>
+            </EuiFlexItem>
+            <AIConnectorSelector
+              genAiConnectors={aiFeatures.genAiConnectors}
+              disabled={isSubmitting || isGenerating}
+            />
           </EuiFlexGroup>
 
           <SignificantEventsGeneratedTable
