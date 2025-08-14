@@ -563,6 +563,10 @@ export class IndexUpdateService {
                 } as unknown as DataTableRecord;
               });
 
+            if (resultRows.length === 0) {
+              resultRows.push(this.buildPlaceholderRow());
+            }
+
             this._rows$.next(resultRows);
             this._totalHits$.next(total ?? 0);
             this._isFetching$.next(false);
@@ -686,6 +690,12 @@ export class IndexUpdateService {
     // Remove rows with matching ids from _rows$
     const currentRows = this._rows$.getValue();
     const updatedRows = currentRows.filter((row) => !ids.includes(row.id));
+
+    // If no rows left, add a placeholder row
+    if (updatedRows.length === 0) {
+      updatedRows.push(this.buildPlaceholderRow());
+    }
+
     this._rows$.next(updatedRows);
   }
 
