@@ -46,7 +46,7 @@ export interface DeleteItemResponse {
 
 export interface SearchResponse<T = unknown> {
   contentTypeId: string;
-  result: SearchResult<T>;
+  result: SearchResult<GetResult<T>>;
 }
 
 export class ContentCrud<T = unknown> {
@@ -91,10 +91,7 @@ export class ContentCrud<T = unknown> {
         options,
       });
 
-      const { id, type, data, meta } = result;
-
-
-      return { contentTypeId: this.contentTypeId, result: {id, type: type, data, meta} };
+      return { contentTypeId: this.contentTypeId, result };
     } catch (e) {
       this.eventBus.emit({
         type: 'getItemError',
@@ -213,12 +210,15 @@ export class ContentCrud<T = unknown> {
       console.log('content crud update-----', JSON.stringify(result, null, 2));
       const { id: savedObjectId, type, data: savedObjectData, meta } = result;
 
-      return { contentTypeId: this.contentTypeId, result: {
-        id: savedObjectId,
-        type,
-        data: savedObjectData,
-        meta,
-      }};
+      return {
+        contentTypeId: this.contentTypeId,
+        result: {
+          id: savedObjectId,
+          type,
+          data: savedObjectData,
+          meta,
+        },
+      };
     } catch (e) {
       this.eventBus.emit({
         type: 'updateItemError',
@@ -293,7 +293,10 @@ export class ContentCrud<T = unknown> {
 
       console.log('content crud search-----', JSON.stringify(result, null, 2));
 
-      return { contentTypeId: this.contentTypeId, result };
+      return {
+        contentTypeId: this.contentTypeId,
+        result,
+      };
     } catch (e) {
       this.eventBus.emit({
         type: 'searchItemError',
