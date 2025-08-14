@@ -9,6 +9,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
 import { generateLatestTransform } from './transform/generate_latest_transform';
+import { generateLatestBackfillTransform } from './transform/generate_latest_backfill_transform';
 
 export async function createAndInstallTransforms(
   esClient: ElasticsearchClient,
@@ -24,6 +25,30 @@ export async function createAndInstallTransforms(
   } catch (e) {
     logger.error(
       `Cannot create entity history transform for [${definition.id}] entity definition`,
+      { error: e }
+    );
+    throw e;
+  }
+}
+
+export async function createAndInstallBackfillTransforms(
+  esClient: ElasticsearchClient,
+  definition: EntityDefinition,
+  logger: Logger
+): Promise<Array<{ type: 'transform'; id: string }>> {
+  if (!definition.latest.initialBackfillPeriod) {
+    logger.info(`Skipping creation of entity backfill transform for [${definition.id}], initial backfill period not set`)
+    return [];
+  }
+  try {
+    const latestBackfillTransform = generateLatestBackfillTransform(definition);
+    await retryTransientEsErrors(() => esClient.transform.putTransform(latestBackfillTransform), {
+      logger,
+    });
+    return [{ type: 'transform', id: latestBackfillTransform.transform_id }];
+  } catch (e) {
+    logger.error(
+      `Cannot create entity backfill transform for [${definition.id}] entity definition`,
       { error: e }
     );
     throw e;

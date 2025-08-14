@@ -11,11 +11,11 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { Logger } from '@kbn/logging';
 import { generateLatestIndexTemplateId } from './helpers/generate_component_id';
-import { createAndInstallIngestPipelines } from './create_and_install_ingest_pipeline';
-import { createAndInstallTransforms } from './create_and_install_transform';
+import { createAndInstallIngestPipelines, createAndInstallBackfillIngestPipelines } from './create_and_install_ingest_pipeline';
+import { createAndInstallTransforms, createAndInstallBackfillTransforms } from './create_and_install_transform';
 import { validateDefinitionCanCreateValidTransformIds } from './transform/validate_transform_ids';
 import { deleteEntityDefinition } from './delete_entity_definition';
-import { deleteLatestIngestPipeline } from './delete_ingest_pipeline';
+import { deleteIngestPipelines, deleteLatestIngestPipeline } from './delete_ingest_pipeline';
 import { findEntityDefinitionById } from './find_entity_definition';
 import {
   entityDefinitionExists,
@@ -27,8 +27,8 @@ import { EntityIdConflict } from './errors/entity_id_conflict_error';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
 import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
 import { EntityDefinitionWithState } from './types';
-import { stopLatestTransform, stopTransforms } from './stop_transforms';
-import { deleteLatestTransform, deleteTransforms } from './delete_transforms';
+import { stopTransforms } from './stop_transforms';
+import { deleteTransforms } from './delete_transforms';
 import { deleteIndices } from './delete_index';
 
 export interface InstallDefinitionParams {
@@ -65,10 +65,13 @@ export async function installEntityDefinition({
   } catch (e) {
     logger.error(`Failed to install entity definition [${definition.id}]: ${e}`);
 
-    await stopLatestTransform(esClient, definition, logger);
-    await deleteLatestTransform(esClient, definition, logger);
+    await stopAndDeleteTransforms(esClient, definition, logger);
 
+    // NOTE(kuba): Related to the install note; if install fails we do not get
+    // a complete list of installed resources and we cannot use the global
+    // methods to properly clean them up
     await deleteLatestIngestPipeline(esClient, definition, logger);
+    await deleteIngestPipelines(esClient, definition, logger);
 
     await deleteTemplate({
       esClient,
@@ -161,13 +164,18 @@ async function install({
 
   logger.debug(`Installing ingest pipelines for definition [${definition.id}]`);
   const pipelines = await createAndInstallIngestPipelines(esClient, definition, logger);
+  const backfillPipelines = await createAndInstallBackfillIngestPipelines(esClient, definition, logger);
 
   logger.debug(`Installing transforms for definition [${definition.id}]`);
   const transforms = await createAndInstallTransforms(esClient, definition, logger);
+  const backfillTransforms = await createAndInstallBackfillTransforms(esClient, definition, logger);
 
+  // NOTE(kuba): We should update list of installed components after every
+  // successful install. Otherwise clean-up methods that delete by checking
+  // list of installedComponents will fail to clean up.
   const updatedProps = await updateEntityDefinition(soClient, definition.id, {
     installStatus: 'installed',
-    installedComponents: [...templates, ...pipelines, ...transforms],
+    installedComponents: [...templates, ...pipelines, ...backfillPipelines, ...transforms, ...backfillTransforms],
   });
   return { ...definition, ...updatedProps.attributes };
 }

@@ -21,9 +21,12 @@ import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 import {
   generateLatestIndexTemplateId,
   generateLatestIngestPipelineId,
+  generateLatestBackfillIngestPipelineId,
   generateLatestTransformId,
+  generateLatestBackfillTransformId,
 } from './helpers/generate_component_id';
 import { generateLatestTransform } from './transform/generate_latest_transform';
+import { generateLatestBackfillTransform } from './transform/generate_latest_backfill_transform';
 import { entityDefinition as mockEntityDefinition } from './helpers/fixtures/entity_definition';
 import { EntityDefinitionIdInvalid } from './errors/entity_definition_id_invalid';
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
@@ -32,7 +35,9 @@ const getExpectedInstalledComponents = (definition: EntityDefinition) => {
   return [
     { type: 'template', id: generateLatestIndexTemplateId(definition) },
     { type: 'ingest_pipeline', id: generateLatestIngestPipelineId(definition) },
+    { type: 'ingest_pipeline', id: generateLatestBackfillIngestPipelineId(definition) },
     { type: 'transform', id: generateLatestTransformId(definition) },
+    { type: 'transform', id: generateLatestBackfillTransformId(definition) },
   ];
 };
 
@@ -69,7 +74,7 @@ const assertHasCreatedDefinition = (
     })
   );
 
-  expect(esClient.ingest.putPipeline).toBeCalledTimes(1);
+  expect(esClient.ingest.putPipeline).toBeCalledTimes(2);
   expect(esClient.ingest.putPipeline).toBeCalledWith({
     id: generateLatestIngestPipelineId(definition),
     processors: expect.anything(),
@@ -78,9 +83,18 @@ const assertHasCreatedDefinition = (
       managed: definition.managed,
     },
   });
+  expect(esClient.ingest.putPipeline).toBeCalledWith({
+    id: generateLatestBackfillIngestPipelineId(definition),
+    processors: expect.anything(),
+    _meta: {
+      definition_version: definition.version,
+      managed: definition.managed,
+    },
+  });
 
-  expect(esClient.transform.putTransform).toBeCalledTimes(1);
+  expect(esClient.transform.putTransform).toBeCalledTimes(2);
   expect(esClient.transform.putTransform).toBeCalledWith(generateLatestTransform(definition));
+  expect(esClient.transform.putTransform).toBeCalledWith(generateLatestBackfillTransform(definition));
 };
 
 const assertHasUpgradedDefinition = (
@@ -107,7 +121,7 @@ const assertHasUpgradedDefinition = (
     })
   );
 
-  expect(esClient.ingest.putPipeline).toBeCalledTimes(1);
+  expect(esClient.ingest.putPipeline).toBeCalledTimes(2);
   expect(esClient.ingest.putPipeline).toBeCalledWith({
     id: generateLatestIngestPipelineId(definition),
     processors: expect.anything(),
@@ -116,17 +130,29 @@ const assertHasUpgradedDefinition = (
       managed: definition.managed,
     },
   });
+  expect(esClient.ingest.putPipeline).toBeCalledWith({
+    id: generateLatestBackfillIngestPipelineId(definition),
+    processors: expect.anything(),
+    _meta: {
+      definition_version: definition.version,
+      managed: definition.managed,
+    },
+  });
 
-  expect(esClient.transform.putTransform).toBeCalledTimes(1);
+  expect(esClient.transform.putTransform).toBeCalledTimes(2);
   expect(esClient.transform.putTransform).toBeCalledWith(generateLatestTransform(definition));
+  expect(esClient.transform.putTransform).toBeCalledWith(generateLatestBackfillTransform(definition));
 };
 
 const assertHasDeletedDefinition = (
   definition: EntityDefinition,
   soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  skipTransforms: bool = false
 ) => {
-  assertHasDeletedTransforms(definition, esClient);
+  if (!skipTransforms) {
+    assertHasDeletedTransforms(definition, esClient);
+  }
 
   expect(esClient.ingest.deletePipeline).toBeCalledTimes(1);
   expect(esClient.ingest.deletePipeline).toBeCalledWith(
@@ -152,18 +178,30 @@ const assertHasDeletedTransforms = (
   definition: EntityDefinition,
   esClient: ElasticsearchClient
 ) => {
-  expect(esClient.transform.stopTransform).toBeCalledTimes(1);
+  expect(esClient.transform.stopTransform).toBeCalledTimes(2);
   expect(esClient.transform.stopTransform).toBeCalledWith(
     expect.objectContaining({
       transform_id: generateLatestTransformId(definition),
     }),
     expect.anything()
   );
+  expect(esClient.transform.stopTransform).toBeCalledWith(
+    expect.objectContaining({
+      transform_id: generateLatestBackfillTransformId(definition),
+    }),
+    expect.anything()
+  );
 
-  expect(esClient.transform.deleteTransform).toBeCalledTimes(1);
+  expect(esClient.transform.deleteTransform).toBeCalledTimes(2);
   expect(esClient.transform.deleteTransform).toBeCalledWith(
     expect.objectContaining({
       transform_id: generateLatestTransformId(definition),
+    }),
+    expect.anything()
+  );
+  expect(esClient.transform.deleteTransform).toBeCalledWith(
+    expect.objectContaining({
+      transform_id: generateLatestBackfillTransformId(definition),
     }),
     expect.anything()
   );
@@ -253,7 +291,7 @@ describe('install_entity_definition', () => {
         })
       ).rejects.toThrow(/cannot install transform/);
 
-      assertHasDeletedDefinition(mockEntityDefinition, soClient, esClient);
+      assertHasDeletedDefinition(mockEntityDefinition, soClient, esClient, true);
     });
   });
 

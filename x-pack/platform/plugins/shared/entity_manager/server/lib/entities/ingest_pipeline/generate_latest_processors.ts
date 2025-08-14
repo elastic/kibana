@@ -186,6 +186,12 @@ export function generateLatestProcessors(definition: EntityDefinition): IngestPr
         value: `${generateLatestIndexName(definition)}`,
       },
     },
+    {
+      remove: {
+        field: 'synthetic_ingest_ts',
+        ignore_missing: true,
+      },
+    },
     ...getCustomIngestPipelines(definition),
   ];
 }

@@ -7,9 +7,10 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
-import { generateLatestIngestPipelineId } from './helpers/generate_component_id';
+import { generateLatestIngestPipelineId, generateLatestBackfillIngestPipelineId } from './helpers/generate_component_id';
 import { retryTransientEsErrors } from './helpers/retry';
 import { generateLatestProcessors } from './ingest_pipeline/generate_latest_processors';
+import { generateLatestBackfillProcessors } from './ingest_pipeline/generate_backfill_processors';
 
 export async function createAndInstallIngestPipelines(
   esClient: ElasticsearchClient,
@@ -32,6 +33,36 @@ export async function createAndInstallIngestPipelines(
       { logger }
     );
     return [{ type: 'ingest_pipeline', id: latestId }];
+  } catch (e) {
+    logger.error(
+      `Cannot create entity latest ingest pipelines for [${definition.id}] entity definition`,
+      { error: e }
+    );
+    throw e;
+  }
+}
+
+export async function createAndInstallBackfillIngestPipelines(
+  esClient: ElasticsearchClient,
+  definition: EntityDefinition,
+  logger: Logger
+): Promise<Array<{ type: 'ingest_pipeline'; id: string }>> {
+  try {
+    const backfillProcessors = generateLatestBackfillProcessors(definition);
+    const backfillId = generateLatestBackfillIngestPipelineId(definition);
+    await retryTransientEsErrors(
+      () =>
+        esClient.ingest.putPipeline({
+          id: backfillId,
+          processors: backfillProcessors,
+          _meta: {
+            definition_version: definition.version,
+            managed: definition.managed,
+          },
+        }),
+      { logger }
+    );
+    return [{ type: 'ingest_pipeline', id: backfillId }];
   } catch (e) {
     logger.error(
       `Cannot create entity latest ingest pipelines for [${definition.id}] entity definition`,
