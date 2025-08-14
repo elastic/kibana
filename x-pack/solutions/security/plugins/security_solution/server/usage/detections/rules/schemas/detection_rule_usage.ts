@@ -1193,6 +1193,13 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
       type: 'long',
       _meta: { description: 'Number of threat match rules with exceptions' },
     },
+    has_does_not_match_condition: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of threat match rules with does_not_match condition in threat mappings',
+      },
+    },
   },
   threat_match_custom: {
     enabled: {
@@ -1334,6 +1341,13 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
     has_exceptions: {
       type: 'long',
       _meta: { description: 'Number of custom threat match rules with exceptions' },
+    },
+    has_does_not_match_condition: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of threat match rules with does_not_match condition in threat mappings',
+      },
     },
   },
   new_terms: {
