@@ -45,13 +45,14 @@ export function maybeAddCloudLinks({
           href: cloud.deploymentUrl,
         });
       }
-      const userMenuLinks = createUserMenuLinks({
+      createUserMenuLinks({
         core,
         cloud,
         security,
         isServerless,
+      }).then((userMenuLinks) => {
+        security.navControlService.addUserMenuLinks(userMenuLinks);
       });
-      security.navControlService.addUserMenuLinks(userMenuLinks);
     })
   );
 

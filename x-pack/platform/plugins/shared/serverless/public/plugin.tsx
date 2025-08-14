@@ -52,7 +52,10 @@ export class ServerlessPlugin
     if (cloud.serverless.projectName) {
       project.setProjectName(cloud.serverless.projectName);
     }
-    project.setCloudUrls(cloud);
+
+    cloud.getPrivilegedUrls().then((privilegedUrls) => {
+      project.setCloudUrls({ ...privilegedUrls, ...cloud.getUrls() });
+    });
 
     chrome.navControls.registerRight({
       order: 1,

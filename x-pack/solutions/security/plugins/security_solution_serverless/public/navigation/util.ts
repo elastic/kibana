@@ -25,8 +25,6 @@ export const getProjectFeaturesUrl = (cloud: CloudStart): string | undefined => 
 
 export const getCloudUrl: GetCloudUrl = (cloudUrlKey, cloud) => {
   switch (cloudUrlKey) {
-    case 'billing':
-      return cloud.billingUrl;
     case 'deployment':
       return cloud.deploymentUrl;
     case 'organization':
