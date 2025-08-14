@@ -195,6 +195,7 @@ describe('toSavedSearch', () => {
           "tab",
           "columns",
         ],
+        "controlGroupJson": undefined,
         "density": undefined,
         "description": "",
         "grid": Object {},
