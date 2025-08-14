@@ -288,19 +288,19 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
       }),
     [
       conversationOptions,
-      deletedConversations.length,
       deletedConversationsIds,
       excludedIds,
-      getColumns,
       handlePageChecked,
       handlePageUnchecked,
       handleRowChecked,
       handleRowUnChecked,
       isDeleteAll,
+      deletedConversations.length,
       isExcludedMode,
       onDeleteActionClicked,
       onEditActionClicked,
       totalItemCount,
+      getColumns,
     ]
   );
 

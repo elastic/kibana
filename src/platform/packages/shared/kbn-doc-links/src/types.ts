@@ -301,6 +301,7 @@ export interface DocLinks {
   };
   readonly securitySolution: {
     readonly aiAssistant: string;
+    readonly aiAssistantKnowledgeBaseIndexEntries: string;
     readonly cloudSecurityPosture: string;
     readonly installElasticDefend: string;
     readonly artifactControl: string;

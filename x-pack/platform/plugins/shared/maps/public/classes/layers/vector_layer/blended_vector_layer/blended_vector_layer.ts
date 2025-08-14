@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Writable } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { IVectorLayer } from '../vector_layer';
@@ -40,6 +41,7 @@ import {
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStylePropertiesDescriptor,
+  ESGeoGridSourceDescriptor,
 } from '../../../../../common/descriptor_types';
 import { IVectorSource } from '../../../sources/vector_source';
 import { LICENSED_FEATURES } from '../../../../licensed_features';
@@ -60,7 +62,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
     geoField: documentSource.getGeoFieldName(),
     requestType: RENDER_AS.POINT,
     resolution: GRID_RESOLUTION.COARSE,
-  });
+  }) as Writable<ESGeoGridSourceDescriptor>;
   clusterSourceDescriptor.applyGlobalQuery = documentSource.getApplyGlobalQuery();
   clusterSourceDescriptor.applyGlobalTime = documentSource.getApplyGlobalTime();
   clusterSourceDescriptor.applyForceRefresh = documentSource.getApplyForceRefresh();

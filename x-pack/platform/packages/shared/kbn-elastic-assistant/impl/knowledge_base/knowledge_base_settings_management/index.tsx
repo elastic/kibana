@@ -29,7 +29,6 @@ import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
-import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
 import { useSearchParams } from 'react-router-dom-v5-compat';
@@ -76,6 +75,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   const {
     assistantAvailability: { hasManageGlobalKnowledgeBase, isAssistantEnabled },
     assistantTelemetry,
+    docLinks,
     http,
     knowledgeBase,
     setKnowledgeBase,
@@ -263,12 +263,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   const search: EuiSearchBarProps = useMemo(
     () => ({
       toolsRight: (
-        <EuiFlexGroup
-          gutterSize={'m'}
-          css={css`
-            margin-left: -5px;
-          `}
-        >
+        <EuiFlexGroup gutterSize={'m'}>
           <EuiFlexItem>
             <EuiButton
               color={'text'}
@@ -435,7 +430,6 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
             />
           ) : (
             <IndexEntryEditor
-              http={http}
               entry={selectedEntry as IndexEntry}
               originalEntry={originalEntry as IndexEntry}
               dataViews={dataViews}
@@ -443,6 +437,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
                 setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>
               }
               hasManageGlobalKnowledgeBase={hasManageGlobalKnowledgeBase}
+              docLink={docLinks.links.securitySolution.aiAssistantKnowledgeBaseIndexEntries}
             />
           )}
         </>

@@ -164,6 +164,7 @@ export const GcpAccountTypeSelect = ({
           accountType !== getGcpAccountType(input) && onSetupFormatChange(accountType)
         }
         size="m"
+        name="gcpAccountType"
       />
       {getGcpAccountType(input) === GCP_ORGANIZATION_ACCOUNT && (
         <>

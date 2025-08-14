@@ -35,6 +35,8 @@ export interface EsWorkflowExecution {
   finishedAt: string;
   duration: number;
   triggeredBy?: string; // 'manual' or 'scheduled'
+  traceId?: string; // APM trace ID for observability
+  entryTransactionId?: string; // APM root transaction ID for trace embeddable
 }
 
 export interface ProviderInput {

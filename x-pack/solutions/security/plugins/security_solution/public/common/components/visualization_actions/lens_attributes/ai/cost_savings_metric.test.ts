@@ -17,6 +17,7 @@ describe('getCostSavingsMetricLensAttributes', () => {
     extraOptions: undefined,
     stackByField: undefined,
     esql: undefined,
+    backgroundColor: '#00FF00',
   };
 
   it('includes the correct formula in the countColumn', () => {

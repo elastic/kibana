@@ -170,10 +170,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show the detail panel actions', async function () {
         await retry.try(async function () {
           await dataGrid.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
-          const [surroundingActionEl, singleActionEl] = await dataGrid.getRowActions({
-            isAnchorRow: false,
-            rowIndex: rowToInspect - 1,
-          });
+          const [surroundingActionEl, singleActionEl] = await dataGrid.getRowActions();
           expect(surroundingActionEl).to.be.ok();
           expect(singleActionEl).to.be.ok();
           await dataGrid.closeFlyout();

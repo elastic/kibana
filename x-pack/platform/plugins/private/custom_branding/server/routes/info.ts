@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ILicense } from '@kbn/licensing-plugin/server';
+import { ILicense } from '@kbn/licensing-types';
 import { CustomBrandingInfoResponse } from '../../common/types';
 import { CustomBrandingRouter } from '../types';
 

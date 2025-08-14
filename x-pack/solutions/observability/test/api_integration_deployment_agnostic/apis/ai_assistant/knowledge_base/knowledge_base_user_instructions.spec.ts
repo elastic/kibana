@@ -7,8 +7,11 @@
 
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/context';
+import {
+  CONTEXT_FUNCTION_NAME,
+  Message,
+  MessageRole,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import pRetry from 'p-retry';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';

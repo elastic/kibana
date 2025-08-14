@@ -117,7 +117,7 @@ export class WorkflowsExecutionEnginePlugin
 
       const contextManager = new WorkflowContextManager({
         workflowRunId,
-        workflow: workflow as any,
+        workflow: workflow.definition,
         event: context.event,
         logger: this.logger,
         workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,

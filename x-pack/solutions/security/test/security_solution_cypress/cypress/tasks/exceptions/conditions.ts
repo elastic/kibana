@@ -80,7 +80,7 @@ export const addExceptionConditions = (exception: Exception) => {
 };
 
 export const validateExceptionConditionField = (value: string) => {
-  cy.get(EXCEPTION_ITEM_CONTAINER).contains('span', value);
+  cy.get(EXCEPTION_ITEM_CONTAINER).get(`input[value="${value}"]`).should('exist');
 };
 
 export const addTwoAndedConditions = (
