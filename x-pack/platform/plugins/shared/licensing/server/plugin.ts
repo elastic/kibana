@@ -29,8 +29,8 @@ import {
   IClusterClient,
   ServiceStatusLevels,
 } from '@kbn/core/server';
+import type { ILicense } from '@kbn/licensing-types';
 import { registerAnalyticsContextProvider } from '../common/register_analytics_context_provider';
-import type { ILicense } from '../common/types';
 import type { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { createLicenseUpdate } from '../common/license_update';
 import { registerRoutes } from './routes';

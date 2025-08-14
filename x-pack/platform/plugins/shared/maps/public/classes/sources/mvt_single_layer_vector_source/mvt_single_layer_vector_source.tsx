@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { v4 as uuidv4 } from 'uuid';
 import React from 'react';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
@@ -49,10 +48,9 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     maxSourceZoom,
     fields,
     tooltipProperties,
-  }: Partial<TiledSingleLayerVectorSourceDescriptor>) {
+  }: Partial<TiledSingleLayerVectorSourceDescriptor>): Required<TiledSingleLayerVectorSourceDescriptor> {
     return {
       type: SOURCE_TYPES.MVT_SINGLE_LAYER,
-      id: uuidv4(),
       urlTemplate: urlTemplate ? urlTemplate : '',
       layerName: layerName ? layerName : '',
       minSourceZoom:
@@ -64,7 +62,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     };
   }
 
-  readonly _descriptor: TiledSingleLayerVectorSourceDescriptor;
+  readonly _descriptor: Required<TiledSingleLayerVectorSourceDescriptor>;
   readonly _tooltipFields: MVTField[];
 
   constructor(sourceDescriptor: TiledSingleLayerVectorSourceDescriptor) {

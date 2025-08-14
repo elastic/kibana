@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useMessages } from '../../../context/messages_context';
+import { useSendMessage } from '../../../context/send_message_context';
 import { useConversationRounds } from '../../../hooks/use_conversation';
 import { ConversationContent } from '../conversation_grid';
 import { RoundError } from './round_error';
@@ -18,7 +18,7 @@ import { RoundResponse } from './round_response';
 
 export const ConversationRounds: React.FC<{}> = () => {
   const conversationRounds = useConversationRounds();
-  const { isResponseLoading, retry, error } = useMessages();
+  const { isResponseLoading, retry, error } = useSendMessage();
   return (
     <ConversationContent>
       <EuiFlexGroup
