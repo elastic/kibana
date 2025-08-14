@@ -12,9 +12,6 @@ import {
 } from '@kbn/metrics-data-access-plugin/common';
 import { DataSchemaFormatRT } from '../shared';
 
-const AggValueRT = rt.type({
-  value: rt.number,
-});
 
 export const ProcessListAPIRequestRT = rt.type({
   hostTerm: rt.record(rt.string, rt.string),
@@ -75,34 +72,10 @@ export const ProcessListAPIChartRequestRT = rt.type({
   ]),
 });
 
-export const ProcessListAPIChartQueryAggregationRT = rt.type({
-  process: rt.type({
-    filteredProc: rt.type({
-      buckets: rt.array(
-        rt.type({
-          timeseries: rt.type({
-            buckets: rt.array(
-              rt.type({
-                key: rt.number,
-                memory: AggValueRT,
-                cpu: AggValueRT,
-              })
-            ),
-          }),
-        })
-      ),
-    }),
-  }),
-});
-
 export const ProcessListAPIChartResponseRT = rt.type({
   cpu: MetricsAPISeriesRT,
   memory: MetricsAPISeriesRT,
 });
-
-export type ProcessListAPIChartQueryAggregation = rt.TypeOf<
-  typeof ProcessListAPIChartQueryAggregationRT
->;
 
 export type ProcessListAPIChartRequest = rt.TypeOf<typeof ProcessListAPIChartRequestRT>;
 
