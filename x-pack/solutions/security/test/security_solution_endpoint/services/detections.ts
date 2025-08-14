@@ -32,7 +32,6 @@ export function DetectionsTestServiceProvider({ getService }: FtrProviderContext
     private readonly supertest = supertest;
     private readonly log = log;
     private readonly retry = retry;
-    private readonly config = config;
     private readonly esClient = esClient;
     private readonly defaultTimeout = config.get('timeouts.waitFor');
 
