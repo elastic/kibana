@@ -48,10 +48,6 @@ import {
   VALIDATION_WARNINGS,
 } from '../translations';
 
-interface FormState {
-  visited: Record<string, boolean>;
-  isValid: boolean;
-}
 
 interface ValidationResult {
   isValid: boolean;
@@ -82,7 +78,7 @@ const DetailsSection = memo<{
   handleNameBlur: (event: React.FocusEvent<HTMLInputElement>) => void;
   handleDescriptionChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   disabled: boolean;
-  formState: FormState;
+  visitedFields: Record<string, boolean>;
   validationResult: ValidationResult;
 }>(
   ({
@@ -93,7 +89,7 @@ const DetailsSection = memo<{
     handleNameBlur,
     handleDescriptionChange,
     disabled,
-    formState,
+    visitedFields,
     validationResult,
   }) => (
     <>
@@ -112,10 +108,10 @@ const DetailsSection = memo<{
         label={NAME_LABEL}
         fullWidth
         data-test-subj={getTestId('nameRow')}
-        isInvalid={formState.visited.name && !!validationResult.errors.name}
-        error={formState.visited.name ? validationResult.errors.name : undefined}
+        isInvalid={visitedFields.name && !!validationResult.errors.name}
+        error={visitedFields.name ? validationResult.errors.name : undefined}
         helpText={
-          formState.visited.name && validationResult.warnings.name
+          visitedFields.name && validationResult.warnings.name
             ? validationResult.warnings.name[0]
             : undefined
         }
@@ -129,7 +125,7 @@ const DetailsSection = memo<{
           maxLength={256}
           data-test-subj={getTestId('nameTextField')}
           disabled={disabled}
-          isInvalid={formState.visited.name && !!validationResult.errors.name}
+          isInvalid={visitedFields.name && !!validationResult.errors.name}
         />
       </EuiFormRow>
 
@@ -172,7 +168,7 @@ const ConditionsSection = memo<{
   handleValueChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleValueBlur: () => void;
   disabled: boolean;
-  formState: FormState;
+  visitedFields: Record<string, boolean>;
   validationResult: ValidationResult;
 }>(
   ({
@@ -185,7 +181,7 @@ const ConditionsSection = memo<{
     handleValueChange,
     handleValueBlur,
     disabled,
-    formState,
+    visitedFields,
     validationResult,
   }) => (
     <>
@@ -200,16 +196,16 @@ const ConditionsSection = memo<{
         label={SELECT_OS_LABEL}
         fullWidth
         data-test-subj={getTestId('osRow')}
-        isInvalid={formState.visited.os && !!validationResult.errors.os}
-        error={formState.visited.os ? validationResult.errors.os : undefined}
+        isInvalid={visitedFields.os && !!validationResult.errors.os}
+        error={visitedFields.os ? validationResult.errors.os : undefined}
         helpText={
-          formState.visited.os && validationResult.warnings.os
+          visitedFields.os && validationResult.warnings.os
             ? validationResult.warnings.os[0]
             : undefined
         }
       >
         <EuiComboBox
-          isInvalid={formState.visited.os && !!validationResult.errors.os}
+          isInvalid={visitedFields.os && !!validationResult.errors.os}
           placeholder="Select an operating system"
           singleSelection={{ asPlainText: true }}
           options={OS_OPTIONS}
@@ -226,10 +222,10 @@ const ConditionsSection = memo<{
       <EuiFormRow
         fullWidth
         data-test-subj={getTestId('conditionsRow')}
-        isInvalid={formState.visited.entries && !!validationResult.errors.entries}
-        error={formState.visited.entries ? validationResult.errors.entries : undefined}
+        isInvalid={visitedFields.entries && !!validationResult.errors.entries}
+        error={visitedFields.entries ? validationResult.errors.entries : undefined}
         helpText={
-          formState.visited.entries && validationResult.warnings.entries
+          visitedFields.entries && validationResult.warnings.entries
             ? validationResult.warnings.entries[0]
             : undefined
         }
@@ -306,7 +302,7 @@ const OPERATOR_OPTIONS = [
 export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
   ({ item, onChange, mode = 'create', disabled = false, error: submitError }) => {
     // For new TD items, ensure we start with the correct OS types
-    const initialItem = useMemo(() => {
+    const currentItem = useMemo(() => {
       if (
         mode === 'create' &&
         item.os_types?.length === 1 &&
@@ -319,10 +315,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
     }, [item, mode]);
     const getTestId = useTestIdGenerator('trustedDevices-form');
 
-    const [formState, setFormState] = useState<FormState>({
-      visited: {},
-      isValid: false,
-    });
+    const [visitedFields, setVisitedFields] = useState<Record<string, boolean>>({});
 
     const [validationResult, setValidationResult] = useState<ValidationResult>({
       isValid: false,
@@ -330,8 +323,8 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
       warnings: {},
     });
 
-    const updateFormState = useCallback((updates: Partial<FormState>) => {
-      setFormState((prev) => ({ ...prev, ...updates }));
+    const updateVisitedFields = useCallback((updates: Record<string, boolean>) => {
+      setVisitedFields((prev) => ({ ...prev, ...updates }));
     }, []);
 
     const validateForm = useCallback(
@@ -341,7 +334,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
 
         // Name validation
         if (!formData.name?.trim()) {
-          errors.name = [INPUT_ERRORS.name('trusted device')];
+          errors.name = [INPUT_ERRORS.name];
         } else if (formData.name.trim().length > 256) {
           errors.name = [INPUT_ERRORS.nameMaxLength];
         }
@@ -358,7 +351,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
 
         // Condition validation (backend schema: entries minSize: 1, value length > 0)
         const hasOsSelected = (formData.os_types?.length ?? 0) > 0;
-        const hasVisitedEntries = formState.visited.entries;
+        const hasVisitedEntries = visitedFields.entries;
 
         if (hasOsSelected || hasVisitedEntries) {
           const entry = formData.entries?.[0];
@@ -390,20 +383,19 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
           warnings,
         };
       },
-      [formState.visited]
+      [visitedFields]
     );
 
     const updateField = useCallback(
       (field: string, value: string) => {
-        const updatedItem = { ...initialItem, [field]: value };
+        const updatedItem = { ...currentItem, [field]: value };
         const validation = validateForm(updatedItem);
 
-        updateFormState({ isValid: validation.isValid });
         setValidationResult(validation);
 
         onChange({ item: updatedItem, isValid: validation.isValid });
       },
-      [initialItem, onChange, validateForm, updateFormState]
+      [currentItem, onChange, validateForm]
     );
 
     const handleNameChange = useCallback(
@@ -415,9 +407,9 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
 
     const handleNameBlur = useCallback(
       (event: React.FocusEvent<HTMLInputElement>) => {
-        updateFormState({ visited: { ...formState.visited, name: true } });
+        updateVisitedFields({ ...visitedFields, name: true });
       },
-      [formState.visited, updateFormState]
+      [visitedFields, updateVisitedFields]
     );
 
     const handleDescriptionChange = useCallback(
@@ -432,7 +424,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         const osTypes = selectedOptions[0]?.value || [];
 
         const updatedItem = {
-          ...initialItem,
+          ...currentItem,
           os_types: osTypes,
           entries: [
             {
@@ -446,34 +438,30 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
 
         const validation = validateForm(updatedItem);
 
-        updateFormState({
-          isValid: validation.isValid,
-          visited: { ...formState.visited, os: true },
-        });
+        updateVisitedFields({ ...visitedFields, os: true });
 
         onChange({ item: updatedItem, isValid: validation.isValid });
       },
-      [initialItem, onChange, validateForm, updateFormState, formState.visited]
+      [currentItem, onChange, validateForm, updateVisitedFields, visitedFields]
     );
 
     const updateConditionField = useCallback(
       (updates: Record<string, string>) => {
-        const currentEntry = initialItem.entries?.[0] || {
+        const currentEntry = currentItem.entries?.[0] || {
           field: TrustedDeviceConditionEntryField.USERNAME,
           operator: 'included',
           type: 'match',
           value: '',
         };
         const updatedEntry = { ...currentEntry, ...updates };
-        const updatedItem = { ...initialItem, entries: [updatedEntry] };
+        const updatedItem = { ...currentItem, entries: [updatedEntry] };
         const validation = validateForm(updatedItem);
 
-        updateFormState({ isValid: validation.isValid });
         setValidationResult(validation);
 
         onChange({ item: updatedItem, isValid: validation.isValid });
       },
-      [initialItem, onChange, validateForm, updateFormState, setValidationResult]
+      [currentItem, onChange, validateForm, setValidationResult]
     );
 
     const handleFieldChange = useCallback(
@@ -499,27 +487,26 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
     );
 
     const handleValueBlur = useCallback(() => {
-      updateFormState({ visited: { ...formState.visited, entries: true } });
-    }, [formState.visited, updateFormState]);
+      updateVisitedFields({ ...visitedFields, entries: true });
+    }, [visitedFields, updateVisitedFields]);
 
     const handlePolicyChange = useCallback<EffectedPolicySelectProps['onChange']>(
       (updatedItem) => {
         const validation = validateForm(updatedItem);
-        updateFormState({ isValid: validation.isValid });
 
         onChange({ item: updatedItem, isValid: validation.isValid });
       },
-      [onChange, validateForm, updateFormState]
+      [onChange, validateForm]
     );
 
     const selectedOs = useMemo((): OsTypeArray => {
-      return initialItem.os_types?.length
-        ? initialItem.os_types
+      return currentItem.os_types?.length
+        ? currentItem.os_types
         : [OperatingSystem.WINDOWS, OperatingSystem.MAC];
-    }, [initialItem.os_types]);
+    }, [currentItem.os_types]);
 
     const currentEntry = useMemo(() => {
-      const entry = initialItem.entries?.[0];
+      const entry = currentItem.entries?.[0];
       if (entry && 'value' in entry) {
         return entry;
       }
@@ -529,7 +516,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         type: 'match' as const,
         value: '',
       };
-    }, [initialItem.entries]);
+    }, [currentItem.entries]);
 
     return (
       <EuiForm
@@ -545,12 +532,12 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         <DetailsSection
           mode={mode}
           getTestId={getTestId}
-          item={initialItem}
+          item={currentItem}
           handleNameChange={handleNameChange}
           handleNameBlur={handleNameBlur}
           handleDescriptionChange={handleDescriptionChange}
           disabled={disabled}
-          formState={formState}
+          visitedFields={visitedFields}
           validationResult={validationResult}
         />
 
@@ -566,7 +553,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
           handleValueChange={handleValueChange}
           handleValueBlur={handleValueBlur}
           disabled={disabled}
-          formState={formState}
+          visitedFields={visitedFields}
           validationResult={validationResult}
         />
 
@@ -574,7 +561,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
 
         <EuiFormRow fullWidth data-test-subj={getTestId('policySelection')}>
           <EffectedPolicySelect
-            item={initialItem}
+            item={currentItem}
             description={POLICY_SELECT_DESCRIPTION}
             data-test-subj={getTestId('effectedPolicies')}
             onChange={handlePolicyChange}
