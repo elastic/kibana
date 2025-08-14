@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-  
+
 import { DataSchemaFormatEnum } from '@kbn/metrics-data-access-plugin/common';
 import {
   TIMESTAMP_FIELD,
@@ -13,15 +13,13 @@ import {
   MANDATORY_PROCESS_FIELDS_SEMCONV,
   TOP_N,
 } from '../../../common/constants';
-import type {
-  ProcessListAPIRequest,
-} from '../../../common/http_api';
-import { InfraMetricsClient } from '../helpers/get_infra_metrics_client';
+import type { ProcessListAPIRequest } from '../../../common/http_api';
+import type { InfraMetricsClient } from '../helpers/get_infra_metrics_client';
 
 interface EcsMetaSource {
   process: { pid: number };
-  system: { 
-    process: { 
+  system: {
+    process: {
       state: string;
       summary: { [key: string]: number };
     };
@@ -40,13 +38,13 @@ const getEcsProcessList = async (
   }));
 
   const filter = searchFilter ? searchFilter : [{ match_all: {} }];
- const response = await infraMetricsClient.search({
-   track_total_hits: true,
-   size: 0,
-   query: {
-     bool: {
-       filter: [
-         {
+  const response = await infraMetricsClient.search({
+    track_total_hits: true,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
             range: {
               [TIMESTAMP_FIELD]: {
                 gte: to - 60 * 1000, // 1 minute
@@ -145,9 +143,9 @@ const getEcsProcessList = async (
     const meta = bucket.meta.hits.hits[0]._source as EcsMetaSource;
 
     return {
-      cpu: (bucket as any).cpu.value ?? null,
-      memory: (bucket as any).memory.value ?? null,
-      startTime: (bucket as any).startTime.value,
+      cpu: bucket.cpu.value ?? null,
+      memory: bucket.memory.value ?? null,
+      startTime: bucket.startTime.value,
       pid: meta.process.pid,
       state: meta.system.process.state,
       user: meta.user.name,
@@ -155,8 +153,9 @@ const getEcsProcessList = async (
     };
   });
 
-  const summary: { [p: string]: number } = response.aggregations!.summaryEvent.summary.hits.hits
-    ? (response.aggregations!.summaryEvent.summary.hits.hits[0]._source as EcsMetaSource).system.process.summary
+  const summary: { [p: string]: number } = response.aggregations?.summaryEvent.summary.hits.hits
+    ? (response.aggregations?.summaryEvent.summary.hits.hits[0]._source as EcsMetaSource).system
+        .process.summary
     : {};
 
   return {
@@ -176,9 +175,9 @@ const getSemConvProcessList = async (
   }));
 
   const filter = searchFilter ? searchFilter : [{ match_all: {} }];
- const response = await infraMetricsClient.search({
-   track_total_hits: true,
-   size: 0,
+  const response = await infraMetricsClient.search({
+    track_total_hits: true,
+    size: 0,
     query: {
       bool: {
         filter: [
@@ -215,17 +214,17 @@ const getSemConvProcessList = async (
             },
             aggs: {
               // Dual CPU aggregation approach to handle sorting vs display accuracy
-              
+
               // PROBLEM: Pipeline aggregations (like sum_bucket) cannot be used for sorting in ES
               // SOLUTION: Use two separate CPU aggregations:
-              
+
               // 1. 'cpu' - Simple average for sorting
               //    Used in the 'order' clause above for sorting buckets
-              
+
               // 2. 'cpu_total' - Complex state-based aggregation for accurate display values
               //    Aggregates CPU utilization across all process states, then sums them up
               //    More accurate but cannot be used for sorting (pipeline aggregation)
-              
+
               // This ensures sorting works correctly while maintaining accurate CPU calculations
               // the difference between simple average and state-aggregated CPU is likely minimal
               cpu: {
@@ -281,23 +280,23 @@ const getSemConvProcessList = async (
     },
   });
 
-  const { buckets: processListBuckets } = response.aggregations!.processes.filteredProcs;
-  const processList = processListBuckets.map((bucket) => {
-    const meta = bucket.meta.hits.hits[0].fields as {
-      'process.pid': number[];
-      'process.owner': string[];  
-    };
+  const processList =
+    response.aggregations?.processes.filteredProcs.buckets.map((bucket) => {
+      const meta = bucket.meta.hits.hits[0].fields as {
+        'process.pid': number[];
+        'process.owner': string[];
+      };
 
-    return {
-      cpu: (bucket as any).cpu_total.value,
-      memory: (bucket as any).memory.value !== null ? (bucket as any).memory.value / 100 : null,
-      startTime: (bucket as any).startTime.value,
-      pid: meta['process.pid'][0],
-      state: '', // Not available in SEMCONV
-      user: meta['process.owner'][0],
-      command: bucket.key as string,
-    };
-  });
+      return {
+        cpu: bucket.cpu_total.value,
+        memory: bucket.memory.value !== null ? bucket.memory.value / 100 : null,
+        startTime: bucket.startTime.value,
+        pid: meta['process.pid'][0],
+        state: '', // Not available in SEMCONV
+        user: meta['process.owner'][0],
+        command: bucket.key as string,
+      };
+    }) || [];
 
   return {
     processList,
@@ -309,24 +308,23 @@ export const getProcessList = async (
   infraMetricsClient: InfraMetricsClient,
   { hostTerm, to, sortBy, searchFilter, schema, sourceId }: ProcessListAPIRequest
 ) => {
- 
-    const detectedSchema = schema || DataSchemaFormatEnum.ECS;
+  const detectedSchema = schema || DataSchemaFormatEnum.ECS;
 
-    if (detectedSchema === DataSchemaFormatEnum.SEMCONV) {
-      return await getSemConvProcessList(infraMetricsClient, {
-        hostTerm,
-        to,
-        sortBy,
-        searchFilter,
-        sourceId,
-      });
-    } else {
-      return await getEcsProcessList(infraMetricsClient, {
-        hostTerm,
-        to,
-        sortBy,
-        searchFilter,
-        sourceId,
-      });
-    }
+  if (detectedSchema === DataSchemaFormatEnum.SEMCONV) {
+    return await getSemConvProcessList(infraMetricsClient, {
+      hostTerm,
+      to,
+      sortBy,
+      searchFilter,
+      sourceId,
+    });
+  } else {
+    return await getEcsProcessList(infraMetricsClient, {
+      hostTerm,
+      to,
+      sortBy,
+      searchFilter,
+      sourceId,
+    });
+  }
 };

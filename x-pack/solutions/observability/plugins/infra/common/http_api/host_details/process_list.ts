@@ -6,12 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import {
-  MetricsAPISeriesRT,
-  type MetricsAPIRow,
-} from '@kbn/metrics-data-access-plugin/common';
+import { MetricsAPISeriesRT, type MetricsAPIRow } from '@kbn/metrics-data-access-plugin/common';
 import { DataSchemaFormatRT } from '../shared';
-
 
 export const ProcessListAPIRequestRT = rt.type({
   hostTerm: rt.record(rt.string, rt.string),
@@ -22,10 +18,7 @@ export const ProcessListAPIRequestRT = rt.type({
     isAscending: rt.boolean,
   }),
   searchFilter: rt.array(rt.record(rt.string, rt.record(rt.string, rt.unknown))),
-  schema: rt.union([
-    DataSchemaFormatRT,
-    rt.null,
-  ]),
+  schema: rt.union([DataSchemaFormatRT, rt.null]),
 });
 
 // string in case of 'N?A'
@@ -66,10 +59,7 @@ export const ProcessListAPIChartRequestRT = rt.type({
   indexPattern: rt.string,
   to: rt.number,
   command: rt.string,
-  schema: rt.union([
-    DataSchemaFormatRT,
-    rt.null,
-  ]),
+  schema: rt.union([DataSchemaFormatRT, rt.null]),
 });
 
 export const ProcessListAPIChartResponseRT = rt.type({

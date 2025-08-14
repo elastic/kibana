@@ -5,15 +5,29 @@
  * 2.0.
  */
 
-import { first } from 'lodash';
-import { DataSchemaFormatEnum, HOST_METRICS_RECEIVER_OTEL } from '@kbn/metrics-data-access-plugin/common';
+import {
+  DataSchemaFormatEnum,
+  HOST_METRICS_RECEIVER_OTEL,
+} from '@kbn/metrics-data-access-plugin/common';
+import { EVENT_DATASET } from '@kbn/metrics-data-access-plugin/common/constants';
 import { TIMESTAMP_FIELD, PROCESS_COMMANDLINE_FIELD } from '../../../common/constants';
 import type {
   ProcessListAPIChartRequest,
   ProcessListAPIRow,
   ProcessListAPIChartResponse,
 } from '../../../common/http_api';
-import { InfraMetricsClient } from '../helpers/get_infra_metrics_client';
+import type { InfraMetricsClient } from '../helpers/get_infra_metrics_client';
+
+const TS_COLUMNS: Array<{ name: string; type: 'string' | 'number' | 'date' }> = [
+  {
+    name: 'timestamp',
+    type: 'date',
+  },
+  {
+    name: 'metric_0',
+    type: 'number',
+  },
+];
 
 const getEcsProcessListChart = async (
   infraMetricsClient: InfraMetricsClient,
@@ -21,7 +35,7 @@ const getEcsProcessListChart = async (
 ) => {
   const from = to - 60 * 15 * 1000; // 15 minutes
 
-   const response = await infraMetricsClient.search({
+  const response = await infraMetricsClient.search({
     track_total_hits: false,
     size: 0,
     query: {
@@ -91,38 +105,35 @@ const getEcsProcessListChart = async (
     },
   });
 
-
-
   const { buckets } = response.aggregations!.process.filteredProc;
-  const timeseries = first(
-    buckets.map((bucket) =>
-      bucket.timeseries.buckets.reduce(
-        (tsResult, tsBucket) => {
+  const initialResponse: ProcessListAPIChartResponse = {
+    cpu: {
+      id: 'cpu',
+      columns: TS_COLUMNS,
+      rows: [] as ProcessListAPIRow[],
+    },
+    memory: {
+      id: 'memory',
+      columns: TS_COLUMNS,
+      rows: [] as ProcessListAPIRow[],
+    },
+  };
+
+  const timeseries =
+    buckets.length > 0
+      ? buckets[0].timeseries.buckets.reduce((tsResult, tsBucket) => {
           tsResult.cpu.rows.push({
             metric_0: tsBucket.cpu.value,
             timestamp: tsBucket.key,
           });
           tsResult.memory.rows.push({
-            metric_0: tsBucket.memory.value,
+            metric_0: tsBucket.memory.value !== null ? tsBucket.memory.value / 100 : null, // convert to ratio (0-1)
             timestamp: tsBucket.key,
           });
           return tsResult;
-        },
-        {
-          cpu: {
-            id: 'cpu',
-            columns: TS_COLUMNS,
-            rows: [] as ProcessListAPIRow[],
-          },
-          memory: {
-            id: 'memory',
-            columns: TS_COLUMNS,
-            rows: [] as ProcessListAPIRow[],
-          },
-        }
-      )
-    )
-  );
+        }, initialResponse)
+      : initialResponse;
+
   return timeseries as ProcessListAPIChartResponse;
 };
 
@@ -132,7 +143,7 @@ const getSemConvProcessListChart = async (
 ) => {
   const from = to - 60 * 15 * 1000; // 15 minutes
 
-   const response = await infraMetricsClient.search({
+  const response = await infraMetricsClient.search({
     track_total_hits: false,
     size: 0,
     query: {
@@ -152,7 +163,7 @@ const getSemConvProcessListChart = async (
           },
           {
             term: {
-              'event.dataset': HOST_METRICS_RECEIVER_OTEL,
+              [EVENT_DATASET]: HOST_METRICS_RECEIVER_OTEL,
             },
           },
         ],
@@ -221,10 +232,22 @@ const getSemConvProcessListChart = async (
   });
 
   const { buckets } = response.aggregations!.process.filteredProc;
-  const timeseries = first(
-    buckets.map((bucket) =>
-      bucket.timeseries.buckets.reduce(
-        (tsResult, tsBucket) => {
+  const initialResponse: ProcessListAPIChartResponse = {
+    cpu: {
+      id: 'cpu',
+      columns: TS_COLUMNS,
+      rows: [] as ProcessListAPIRow[],
+    },
+    memory: {
+      id: 'memory',
+      columns: TS_COLUMNS,
+      rows: [] as ProcessListAPIRow[],
+    },
+  };
+
+  const timeseries =
+    buckets.length > 0
+      ? buckets[0].timeseries.buckets.reduce((tsResult, tsBucket) => {
           tsResult.cpu.rows.push({
             metric_0: tsBucket.cpu_total.value,
             timestamp: tsBucket.key,
@@ -234,22 +257,8 @@ const getSemConvProcessListChart = async (
             timestamp: tsBucket.key,
           });
           return tsResult;
-        },
-        {
-          cpu: {
-            id: 'cpu',
-            columns: TS_COLUMNS,
-            rows: [] as ProcessListAPIRow[],
-          },
-          memory: {
-            id: 'memory',
-            columns: TS_COLUMNS,
-            rows: [] as ProcessListAPIRow[],
-          },
-        }
-      )
-    )
-  );
+        }, initialResponse)
+      : initialResponse;
   return timeseries as ProcessListAPIChartResponse;
 };
 
@@ -257,32 +266,21 @@ export const getProcessListChart = async (
   infraMetricsClient: InfraMetricsClient,
   { hostTerm, indexPattern, to, command, schema }: ProcessListAPIChartRequest
 ) => {
-    const detectedSchema = schema || DataSchemaFormatEnum.ECS;
+  const detectedSchema = schema || DataSchemaFormatEnum.ECS;
 
-    if (detectedSchema === DataSchemaFormatEnum.SEMCONV) {
-      return await getSemConvProcessListChart(infraMetricsClient, {
-        hostTerm,
-        indexPattern,
-        to,
-        command,
-      });
-    } else {
-      return await getEcsProcessListChart(infraMetricsClient, {
-        hostTerm,
-        indexPattern,
-        to,
-        command,
-      });
-    }
+  if (detectedSchema === DataSchemaFormatEnum.SEMCONV) {
+    return await getSemConvProcessListChart(infraMetricsClient, {
+      hostTerm,
+      indexPattern,
+      to,
+      command,
+    });
+  } else {
+    return await getEcsProcessListChart(infraMetricsClient, {
+      hostTerm,
+      indexPattern,
+      to,
+      command,
+    });
+  }
 };
-
-const TS_COLUMNS = [
-  {
-    name: 'timestamp',
-    type: 'date',
-  },
-  {
-    name: 'metric_0',
-    type: 'number',
-  },
-];

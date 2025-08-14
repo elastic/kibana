@@ -36,21 +36,20 @@ export const initProcessListRoute = (libs: InfraBackendLibs) => {
     },
     async (context, request, response) => {
       try {
-      const options = pipe(
-        ProcessListAPIRequestRT.decode(request.body),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
+        const options = pipe(
+          ProcessListAPIRequestRT.decode(request.body),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
 
-      const infraMetricsClient = await getInfraMetricsClient({  request, libs, context });
+        const infraMetricsClient = await getInfraMetricsClient({ request, libs, context });
 
-      const processListResponse = await getProcessList(infraMetricsClient,  options);
+        const processListResponse = await getProcessList(infraMetricsClient, options);
 
-      return response.ok({
-        body: ProcessListAPIResponseRT.encode(processListResponse),
-      });
-
-    } catch (err) {
-     if (Boom.isBoom(err)) {
+        return response.ok({
+          body: ProcessListAPIResponseRT.encode(processListResponse),
+        });
+      } catch (err) {
+        if (Boom.isBoom(err)) {
           return response.customError({
             statusCode: err.output.statusCode,
             body: { message: err.output.payload.message },
@@ -77,32 +76,31 @@ export const initProcessListRoute = (libs: InfraBackendLibs) => {
     },
     async (context, request, response) => {
       try {
-      const options = pipe(
-        ProcessListAPIChartRequestRT.decode(request.body),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
-      const infraMetricsClient = await getInfraMetricsClient({  request, libs, context });
-      const processListResponse = await getProcessListChart(infraMetricsClient, options);
+        const options = pipe(
+          ProcessListAPIChartRequestRT.decode(request.body),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
+        const infraMetricsClient = await getInfraMetricsClient({ request, libs, context });
+        const processListResponse = await getProcessListChart(infraMetricsClient, options);
 
-      return response.ok({
-        body: ProcessListAPIChartResponseRT.encode(processListResponse),
-      });
+        return response.ok({
+          body: ProcessListAPIChartResponseRT.encode(processListResponse),
+        });
+      } catch (err) {
+        if (Boom.isBoom(err)) {
+          return response.customError({
+            statusCode: err.output.statusCode,
+            body: { message: err.output.payload.message },
+          });
+        }
 
-    } catch (err) {
-      if (Boom.isBoom(err)) {
         return response.customError({
-          statusCode: err.output.statusCode,
-          body: { message: err.output.payload.message },
+          statusCode: err.statusCode ?? 500,
+          body: {
+            message: err.message ?? 'An unexpected error occurred',
+          },
         });
       }
-
-      return response.customError({
-        statusCode: err.statusCode ?? 500,
-        body: {
-          message: err.message ?? 'An unexpected error occurred',
-        },
-      });
     }
-  }
   );
 };

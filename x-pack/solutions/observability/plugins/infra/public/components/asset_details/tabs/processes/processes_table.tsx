@@ -27,6 +27,7 @@ import { css } from '@emotion/react';
 import { EuiTableRow } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { EuiProgress } from '@elastic/eui';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { FORMATTERS } from '../../../../../common/formatters';
 import type { SortBy } from '../../hooks/use_process_list';
 import type { Process } from './types';
@@ -37,9 +38,8 @@ import { STATE_ORDER } from './states';
 import type { ProcessListAPIResponse } from '../../../../../common/http_api';
 import { MetricNotAvailableExplanationTooltip } from '../../components/metric_not_available_explanation';
 import { NOT_AVAILABLE_LABEL } from '../../translations';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 
-type ProcessColumn = {
+interface ProcessColumn {
   field: keyof Process;
   name: string;
   sortable: boolean;
@@ -48,7 +48,7 @@ type ProcessColumn = {
   textOnly?: boolean;
   truncateText?: boolean;
   align?: typeof RIGHT_ALIGNMENT | typeof LEFT_ALIGNMENT;
-};
+}
 
 interface TableProps {
   processList: ProcessListAPIResponse['processList'];
@@ -129,7 +129,7 @@ export const ProcessesTable = ({
 
   const hideStateColumn = schema === 'semconv' && isHostOtelEnabled;
   const visibleColumns = useMemo(
-    () => (hideStateColumn ? columns.filter(col => col.field !== 'state') : columns),
+    () => (hideStateColumn ? columns.filter((col) => col.field !== 'state') : columns),
     [hideStateColumn]
   );
 
@@ -185,7 +185,11 @@ export const ProcessesTable = ({
             <EuiIcon type="minusInCircle" color="danger" /> {error}
           </ProcessesTableMessage>
         ) : (
-          <ProcessesTableBody items={currentItems} currentTime={currentTime} visibleColumns={visibleColumns} />
+          <ProcessesTableBody
+            items={currentItems}
+            currentTime={currentTime}
+            visibleColumns={visibleColumns}
+          />
         )}
       </EuiTableBody>
     </EuiTable>
@@ -239,7 +243,15 @@ const ProcessesTableBody = ({ items, currentTime, visibleColumns }: TableBodyPro
           {column.render ? column.render(item[column.field], currentTime) : item[column.field]}
         </EuiTableRowCell>
       ));
-      return <ProcessRow cells={cells} item={item} key={`row-${i}`} supportAIAssistant={true} visibleColumnsCount={visibleColumns.length} />;
+      return (
+        <ProcessRow
+          cells={cells}
+          item={item}
+          key={`row-${i}`}
+          supportAIAssistant={true}
+          visibleColumnsCount={visibleColumns.length}
+        />
+      );
     })}
   </>
 );
