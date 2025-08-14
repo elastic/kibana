@@ -224,6 +224,10 @@ interface NodeDefinitionBase {
     /** Text shown on tooltip attached to the badge. */
     tooltip?: string;
   };
+  /**
+   * Sidenav v2 for now supports only 2 types of badges:
+   */
+  badgeTypeV2?: 'beta' | 'techPreview';
 }
 
 /** @public */

@@ -82,6 +82,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 {
                   link: 'streams' as const,
                   withBadge: true,
+                  badgeTypeV2: 'techPreview' as const,
                   badgeOptions: {
                     icon: 'beaker',
                     tooltip: i18n.translate('xpack.observability.obltNav.streamsBadgeTooltip', {

@@ -193,6 +193,7 @@ export const toNavigationItems = (
         href: warnIfMissing(child, 'href', 'Missing Href 😭'),
         isExternal: child.isExternalLink,
         'data-test-subj': getTestSubj(child),
+        badgeType: child.badgeTypeV2,
       };
     };
 
@@ -287,7 +288,8 @@ export const toNavigationItems = (
       href: itemHref,
       sections: secondarySections,
       'data-test-subj': getTestSubj(navNode),
-    };
+      badgeType: navNode.badgeTypeV2,
+    } as MenuItem;
   };
 
   const primaryItems = filterEmpty(primaryNodes.flatMap(toMenuItem));
