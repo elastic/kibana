@@ -108,6 +108,12 @@ export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par'> {
 export type ComposerSourceShorthand = string | ESQLSource;
 
 /**
+ * A shorthand for specifying a column in the query.
+ * It can be a string a simple column or an array of strings for a nested column.
+ */
+export type ComposerColumnShorthand = string | synth.SynthColumnShorthand;
+
+/**
  * A shorthand for specifying a sort condition.
  */
 export type ComposerSortShorthand =
@@ -125,7 +131,7 @@ export type ComposerSortShorthand =
        * or an array of strings for a nested column. For example,
        * `['user', 'name']` is equivalent to `user.name`.
        */
-      column: string | synth.SynthColumnShorthand,
+      column: ComposerColumnShorthand,
       order?: ESQLOrderExpression['order'],
       nulls?: ESQLOrderExpression['nulls']
     ];

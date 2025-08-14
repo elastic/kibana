@@ -125,6 +125,62 @@ describe('.pipe``', () => {
 });
 
 describe('high-level helpers', () => {
+  describe('.change_point()', () => {
+    test('appends command to the end', () => {
+      const query = esql`FROM index`;
+
+      query.change_point('foo');
+
+      expect(query.print('basic')).toBe('FROM index | CHANGE_POINT foo');
+    });
+
+    test('can specify ON <key>', () => {
+      const query = esql`FROM index`;
+
+      query.change_point(['foo', 'bar'], { on: ['baz', 'qux'] });
+
+      expect(query.print('basic')).toBe('FROM index | CHANGE_POINT foo.bar ON baz.qux');
+    });
+
+    test('can specify AS <type_name>, <pvalue_name> option', () => {
+      const query = esql`FROM index`;
+
+      query.change_point(['foo', 'bar'], { as: ['type', ['pvalue', 'name']] });
+
+      expect(query.print('basic')).toBe('FROM index | CHANGE_POINT foo.bar AS type, pvalue.name');
+    });
+
+    test('can specify ON and AS options at the same time', () => {
+      const query = esql`FROM index`;
+
+      query.change_point(['foo', 'bar'], { as: ['type', ['pvalue', 'name']], on: ['baz', 'qux'] });
+
+      expect(query.print('basic')).toBe(
+        'FROM index | CHANGE_POINT foo.bar ON baz.qux AS type, pvalue.name'
+      );
+    });
+  });
+
+  describe('.dissect()', () => {
+    test('can specify input column and pattern', () => {
+      const query = esql`FROM index`;
+
+      query.dissect(['foo', 'bar'], '%{date} - %{msg} - %{ip}');
+
+      expect(query.print('basic')).toBe('FROM index | DISSECT foo.bar "%{date} - %{msg} - %{ip}"');
+    });
+
+    test('DISSECT with option', () => {
+      const query = esql`FROM index`;
+
+      query.dissect('field', 'pattern', { APPEND_SEPARATOR: ',' });
+
+      expect(query.print('basic')).toBe(
+        'FROM index | DISSECT field "pattern" APPEND_SEPARATOR = ","'
+      );
+    });
+  });
+
   describe('.limit()', () => {
     test('appends command to the end', () => {
       const query = esql`FROM kibana_ecommerce_index`;
@@ -296,6 +352,19 @@ describe('high-level helpers', () => {
       expect(query.print('basic')).toBe('FROM a | WHERE abc > FN(?param)');
     });
 
+    test('can parametrize a tagged template', () => {
+      const query = esql`FROM a`;
+
+      expect(query.print('basic')).toBe('FROM a');
+
+      const param = 123;
+
+      query.where({ param, param2: 456 })`abc > fn(?param) AND xyz < fn(?param2)`;
+
+      expect(query.print('basic')).toBe('FROM a | WHERE abc > FN(?param) AND xyz < FN(?param2)');
+      expect(query.getParams()).toEqual({ param: 123, param2: 456 });
+    });
+
     test('can parametrize a string query', () => {
       const query = esql`FROM a`;
 
@@ -303,9 +372,10 @@ describe('high-level helpers', () => {
 
       const param = 123;
 
-      query.where('abc > fn(?param)', { param });
+      query.where('abc > fn(?param) AND xyz < fn(?param2)', { param, param2: 456 });
 
-      expect(query.print('basic')).toBe('FROM a | WHERE abc > FN(?param)');
+      expect(query.print('basic')).toBe('FROM a | WHERE abc > FN(?param) AND xyz < FN(?param2)');
+      expect(query.getParams()).toEqual({ param: 123, param2: 456 });
     });
   });
 });

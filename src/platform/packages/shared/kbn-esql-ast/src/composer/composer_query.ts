@@ -14,11 +14,10 @@ import { processTemplateHoles, validateParamName } from './util';
 import { Builder } from '../builder';
 import type { ESQLAstQueryExpression, ESQLCommand, ESQLNamedParamLiteral } from '../types';
 import type {
+  ComposerColumnShorthand,
   ComposerQueryTagHole,
   ComposerSortShorthand,
   EsqlRequest,
-  ComposerQueryTag,
-  ComposerQueryGenerator,
   QueryCommandTag,
   QueryCommandTagParametrized,
 } from './types';
@@ -30,86 +29,249 @@ export class ComposerQuery {
     protected readonly params: Map<string, unknown> = new Map()
   ) {}
 
-  public readonly pipe: QueryCommandTag = ((templateOrQueryOrParamValues, ...rest: unknown[]) => {
-    const tagOrGeneratorWithParams =
-      (initialParamValues: Record<string, unknown>): QueryCommandTagParametrized =>
-      (templateOrQuery: any, ...holes: unknown[]) => {
-        const params: Record<string, unknown> = { ...initialParamValues };
-        let command: ESQLCommand;
+  /**
+   * Create a template tag function which can be parametrized:
+   *
+   * ```typescript
+   * const more = 42;
+   *
+   * // Parameter specified as ${{more}} in the template:
+   * query.pipe `FROM index | WHERE foo > ${{more}}`;
+   *
+   * // Parameter specified ahead of the template:
+   * query.pipe({more}) `FROM index | WHERE foo > ?more`;
+   * ```
+   */
+  private readonly _createCommandTag = (
+    synthCommandTag: synth.SynthMethod<ESQLCommand>
+  ): QueryCommandTag =>
+    ((templateOrQueryOrParamValues, ...rest: unknown[]) => {
+      const tagOrGeneratorWithParams =
+        (initialParamValues: Record<string, unknown>): QueryCommandTagParametrized =>
+        (templateOrQuery: any, ...holes: unknown[]) => {
+          const params: Record<string, unknown> = { ...initialParamValues };
+          let command: ESQLCommand;
 
-        if (typeof templateOrQuery === 'string') {
-          const moreParamValues =
-            typeof holes[0] === 'object' && !Array.isArray(holes[0]) ? holes[0] : {};
+          if (typeof templateOrQuery === 'string') {
+            const moreParamValues =
+              typeof holes[0] === 'object' && !Array.isArray(holes[0]) ? holes[0] : {};
 
-          Object.assign(params, moreParamValues);
+            Object.assign(params, moreParamValues);
 
-          command = synth.cmd(templateOrQuery);
-        } else {
-          if (Array.isArray(holes))
-            processTemplateHoles(holes as ComposerQueryTagHole[], this.params);
-
-          command = synth.cmd(
-            templateOrQuery as TemplateStringsArray,
-            ...(holes as synth.SynthTemplateHole[])
-          );
-        }
-
-        for (const [name, value] of Object.entries(params)) {
-          validateParamName(name);
-          const exists = this.params.has(name);
-
-          if (exists) {
-            // If a parameter with the same name already exists, we rename it
-            // as somebody might have already used it in the query in a
-            // different command.
-            let newName: string;
-            while (true) {
-              newName = `${name}_${this.params.size}`;
-              if (!this.params.has(newName)) break;
-            }
-
-            this.params.set(newName, value);
-
-            const nodes = Walker.matchAll(command, {
-              type: 'literal',
-              literalType: 'param',
-              value: name,
-            }) as ESQLNamedParamLiteral[];
-
-            for (const node of nodes) {
-              node.value = newName;
-            }
+            command = synthCommandTag(templateOrQuery);
           } else {
-            this.params.set(name, value);
+            if (Array.isArray(holes))
+              processTemplateHoles(holes as ComposerQueryTagHole[], this.params);
+
+            command = synthCommandTag(
+              templateOrQuery as TemplateStringsArray,
+              ...(holes as synth.SynthTemplateHole[])
+            );
           }
-        }
 
-        this.ast.commands.push(command);
+          for (const [name, value] of Object.entries(params)) {
+            validateParamName(name);
+            const exists = this.params.has(name);
 
-        return this;
-      };
+            if (exists) {
+              // If a parameter with the same name already exists, we rename it
+              // as somebody might have already used it in the query in a
+              // different command.
+              let newName: string;
+              while (true) {
+                newName = `${name}_${this.params.size}`;
+                if (!this.params.has(newName)) break;
+              }
 
-    if (
-      !!templateOrQueryOrParamValues &&
-      typeof templateOrQueryOrParamValues === 'object' &&
-      !Array.isArray(templateOrQueryOrParamValues)
-    ) {
-      return tagOrGeneratorWithParams(
-        templateOrQueryOrParamValues as Record<string, unknown>
-      ) as QueryCommandTagParametrized;
+              this.params.set(newName, value);
+
+              const nodes = Walker.matchAll(command, {
+                type: 'literal',
+                literalType: 'param',
+                value: name,
+              }) as ESQLNamedParamLiteral[];
+
+              for (const node of nodes) {
+                node.value = newName;
+              }
+            } else {
+              this.params.set(name, value);
+            }
+          }
+
+          this.ast.commands.push(command);
+
+          return this;
+        };
+
+      if (
+        !!templateOrQueryOrParamValues &&
+        typeof templateOrQueryOrParamValues === 'object' &&
+        !Array.isArray(templateOrQueryOrParamValues)
+      ) {
+        return tagOrGeneratorWithParams(
+          templateOrQueryOrParamValues as Record<string, unknown>
+        ) as QueryCommandTagParametrized;
+      }
+
+      const parametrized = tagOrGeneratorWithParams({});
+
+      if (typeof templateOrQueryOrParamValues === 'string') {
+        return parametrized(templateOrQueryOrParamValues, rest[0] as Record<string, unknown>);
+      } else {
+        return parametrized(
+          templateOrQueryOrParamValues as TemplateStringsArray,
+          ...(rest as ComposerQueryTagHole[])
+        );
+      }
+    }) as QueryCommandTag;
+
+  public readonly pipe: QueryCommandTag = this._createCommandTag(synth.cmd);
+
+  /**
+   * Appends a `CHANGE_POINT` command to detect change points in time series data.
+   * Equivalent to calling `.pipe` with a `CHANGE_POINT` command.
+   *
+   * The `CHANGE_POINT` command is used to identify points in time where the statistical
+   * properties of a time series change significantly.
+   *
+   * ```typescript
+   * // Basic usage - detect change points in a column
+   * query.change_point('metric_value');
+   * // Result: CHANGE_POINT metric_value
+   *
+   * // Specify a key column to group by
+   * query.change_point('metric_value', { on: 'timestamp' });
+   * // Result: CHANGE_POINT metric_value ON timestamp
+   *
+   * // Specify output column names for type and p-value
+   * query.change_point('metric_value', { as: ['change_type', 'p_value'] });
+   * // Result: CHANGE_POINT metric_value AS change_type, p_value
+   *
+   * // Use all options together
+   * query.change_point('metric_value', {
+   *   on: 'timestamp',
+   *   as: ['change_type', 'p_value']
+   * });
+   * // Result: CHANGE_POINT metric_value ON timestamp AS change_type, p_value
+   * ```
+   *
+   * Columns can be specified as strings or arrays for nested columns:
+   *
+   * ```typescript
+   * query.change_point(['metrics', 'cpu'], {
+   *   on: ['timestamp', 'field'],
+   *   as: [['change', 'type'], ['p', 'value']]
+   * });
+   * // Result: CHANGE_POINT metrics.cpu ON timestamp.field AS change.type, p.value
+   * ```
+   *
+   * @param value The column to analyze for change points. Can be a string
+   *     column name or an array of column parts for nested columns
+   *     (e.g., ['metrics', 'cpu'] for 'metrics.cpu').
+   * @param options Configuration options for the change point detection.
+   * @param options.on Optional column to use as the key for grouping or
+   *     ordering data. Can be a string or array of column parts.
+   * @param options.as Optional tuple specifying the output column names for the change type
+   *     and p-value. Must be a 2-element array where the first element is the column name
+   *     for the change type and the second is for the p-value.
+   * @returns The updated ComposerQuery instance.
+   */
+  public readonly change_point = (
+    value: ComposerColumnShorthand,
+    options: {
+      on?: ComposerColumnShorthand;
+      as?: [type: ComposerColumnShorthand, pvalue: ComposerColumnShorthand];
+    } = {}
+  ): ComposerQuery => {
+    const val = Builder.expression.column(value);
+    const key = options.on ? Builder.expression.column(options.on) : void 0;
+    const type = options.as ? Builder.expression.column(options.as[0]) : void 0;
+    const pvalue = options.as ? Builder.expression.column(options.as[1]) : void 0;
+
+    if (type && pvalue && key) {
+      return this.pipe`CHANGE_POINT ${val} ON ${key} AS ${type}, ${pvalue}`;
     }
 
-    const parametrized = tagOrGeneratorWithParams({});
-
-    if (typeof templateOrQueryOrParamValues === 'string') {
-      return parametrized(templateOrQueryOrParamValues, rest[0] as Record<string, unknown>);
-    } else {
-      return parametrized(
-        templateOrQueryOrParamValues as TemplateStringsArray,
-        ...(rest as ComposerQueryTagHole[])
-      );
+    if (type && pvalue) {
+      return this.pipe`CHANGE_POINT ${val} AS ${type}, ${pvalue}`;
     }
-  }) as QueryCommandTag;
+
+    if (key) {
+      return this.pipe`CHANGE_POINT ${val} ON ${key}`;
+    }
+
+    return this.pipe`CHANGE_POINT ${val}`;
+  };
+
+  /**
+   * Appends a `DISSECT` command to extract structured data from unstructured text.
+   * Equivalent to calling `.pipe` with a `DISSECT` command.
+   *
+   * The `DISSECT` command uses pattern matching to extract key-value pairs from text
+   * fields based on a delimiter-based pattern. It's particularly useful for parsing
+   * log entries, CSV data, or other structured text formats.
+   *
+   * Read more: {@link https://www.elastic.co/docs/reference/query-languages/esql/commands/processing-commands#esql-dissect}.
+   *
+   * ```typescript
+   * // Basic usage - extract fields from a text column
+   * query.dissect('message', '%{timestamp} - %{level} - %{msg}');
+   * // Result: DISSECT message "%{timestamp} - %{level} - %{msg}"
+   *
+   * // Extract from nested column
+   * query.dissect(['log', 'entry'], '%{date} %{time} [%{level}] %{message}');
+   * // Result: DISSECT log.entry "%{date} %{time} [%{level}] %{message}"
+   *
+   * // Using APPEND_SEPARATOR option
+   * query.dissect('data', '%{field1},%{field2},%{field3}', {
+   *   APPEND_SEPARATOR: ','
+   * });
+   * // Result: DISSECT data "%{field1},%{field2},%{field3}" APPEND_SEPARATOR = ","
+   * ```
+   *
+   * Examples with different patterns:
+   *
+   * ```typescript
+   * // CSV-like data
+   * query.dissect('csv_data', '%{name},%{age},%{city}');
+   *
+   * // Log entries with timestamps
+   * query.dissect('log_line', '[%{timestamp}] %{level}: %{message}');
+   *
+   * // Key-value pairs
+   * query.dissect('kv_data', 'user=%{user} action=%{action} result=%{result}');
+   *
+   * // Skip unwanted parts
+   * query.dissect('complex_log', '%{date} %{time} %{} [%{level}] %{message}');
+   * ```
+   *
+   * @param input The column containing the text to dissect. Can be a string
+   *     column name or an array of column parts for nested columns
+   *     (e.g., ['log', 'message'] for 'log.message').
+   * @param pattern The dissect pattern that defines how to extract fields
+   *     from the input text.
+   * @param options Configuration options for the dissect operation.
+   * @param options.APPEND_SEPARATOR Optional separator string to use when
+   *     appending multiple values to the same field name.
+   * @returns The updated ComposerQuery instance.
+   */
+  public readonly dissect = (
+    input: ComposerColumnShorthand,
+    pattern: string,
+    options: {
+      APPEND_SEPARATOR?: string;
+    } = {}
+  ): ComposerQuery => {
+    const inputNode = Builder.expression.column(input);
+
+    if (options.APPEND_SEPARATOR) {
+      return this
+        .pipe`DISSECT ${inputNode} ${pattern} APPEND_SEPARATOR = ${options.APPEND_SEPARATOR}`;
+    }
+
+    return this.pipe`DISSECT ${inputNode} ${pattern}`;
+  };
 
   /**
    * Appends a new `LIMIT` command to the query. Equivalent to calling
@@ -147,8 +309,8 @@ export class ComposerQuery {
    * @returns The updated ComposerQuery instance.
    */
   public readonly keep = (
-    column: string | synth.SynthColumnShorthand,
-    ...columns: Array<string | synth.SynthColumnShorthand>
+    column: ComposerColumnShorthand,
+    ...columns: Array<ComposerColumnShorthand>
   ): ComposerQuery => {
     const nodes = [column, ...columns].map((name) => {
       return Builder.expression.column(name);
@@ -182,8 +344,8 @@ export class ComposerQuery {
    * @returns The updated ComposerQuery instance.
    */
   public readonly drop = (
-    column: string | synth.SynthColumnShorthand,
-    ...columns: Array<string | synth.SynthColumnShorthand>
+    column: ComposerColumnShorthand,
+    ...columns: Array<ComposerColumnShorthand>
   ): ComposerQuery => {
     const nodes = [column, ...columns].map((name) => {
       return Builder.expression.column(name);
@@ -239,23 +401,53 @@ export class ComposerQuery {
     return this.pipe`SORT ${nodes}`;
   };
 
-  public readonly where: ComposerQueryTag & ComposerQueryGenerator<ComposerQuery> = (
-    templateOrQuery: string | TemplateStringsArray,
+  /**
+   * Appends a `WHERE` command to filter rows based on a condition. Equivalent to
+   * calling `.pipe` with a `WHERE` command.
+   *
+   * ```typescript
+   * query.where `foo > 42 AND bar < 24`;
+   * ```
+   *
+   * You can use parameters in the WHERE condition:
+   *
+   * ```typescript
+   * const threshold = 42;
+   * query.where `foo > ${{threshold}}`;
+   * ```
+   *
+   * You can also parametrize the template by providing parameters upfront:
+   *
+   * ```typescript
+   * query.where({threshold: 42}) `foo > ?threshold`;
+   * ```
+   *
+   * Or use string syntax with parameters:
+   *
+   * ```typescript
+   * query.where('foo > ?threshold', {threshold: 42});
+   * ```
+   *
+   * @param templateOrQuery The WHERE condition as a template literal or string.
+   * @param holes Template holes for parameter substitution when using template
+   *     literals.
+   * @returns The updated ComposerQuery instance.
+   */
+  public readonly where = this._createCommandTag(((
+    templateOrQuery: TemplateStringsArray | string,
     ...holes: unknown[]
   ) => {
     if (typeof templateOrQuery === 'string') {
-      const paramsValues: Record<string, unknown> | undefined = holes[0];
+      return synth.cmd(`WHERE ${templateOrQuery}`);
     }
-
-    if (Array.isArray(holes)) processTemplateHoles(holes, this.params);
 
     const expression = synth.exp(
       templateOrQuery as TemplateStringsArray,
       ...(holes as synth.SynthTemplateHole[])
     );
 
-    return this.pipe`WHERE ${expression}`;
-  };
+    return synth.cmd`WHERE ${expression}`;
+  }) as synth.SynthMethod<ESQLCommand>);
 
   public inlineParams(): this {
     // TODO: Replace all param AST nodes. Throws if there is not enough values?
