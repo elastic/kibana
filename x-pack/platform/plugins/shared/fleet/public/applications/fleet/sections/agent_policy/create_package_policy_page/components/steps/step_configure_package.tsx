@@ -20,10 +20,7 @@ import {
   isIntegrationPolicyTemplate,
   getRegistryStreamWithDataStreamForInputType,
 } from '../../../../../../../../common/services';
-import {
-  isInputAllowedForDeploymentMode,
-  isAgentlessIntegration,
-} from '../../../../../../../../common/services/agentless_policy_helper';
+import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 
 import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../../../types';
 import { Loading } from '../../../../../components';
@@ -73,12 +70,6 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
         {!noTopRule && <EuiHorizontalRule margin="m" />}
         <EuiFlexGroup direction="column" gutterSize="none">
           {packagePolicyTemplates.map((policyTemplate) => {
-            if (
-              !integrationSupportsDeploymentMode(deploymentMode, packageInfo, policyTemplate.name)
-            ) {
-              return null;
-            }
-
             const inputs = getNormalizedInputs(policyTemplate);
             const packagePolicyInputs = packagePolicy.inputs;
             return inputs.map((packageInput) => {
@@ -158,26 +149,4 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
     );
 
   return validationResults ? renderConfigureInputs() : <Loading />;
-};
-
-const integrationSupportsDeploymentMode = (
-  deploymentMode: string,
-  packageInfo: PackageInfo,
-  integrationName: string
-) => {
-  if (deploymentMode === 'agentless') {
-    return isAgentlessIntegration(packageInfo, integrationName);
-  }
-
-  const integration = packageInfo.policy_templates?.find(({ name }) => name === integrationName);
-
-  if (!integration) {
-    return false;
-  }
-
-  if (integration.deployment_modes?.default) {
-    return integration.deployment_modes?.default.enabled;
-  }
-
-  return true;
 };

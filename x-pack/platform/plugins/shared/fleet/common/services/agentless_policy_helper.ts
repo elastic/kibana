@@ -113,6 +113,15 @@ export function isInputAllowedForDeploymentMode(
     return true;
   }
 
+  // Check first if policy_template for input supports the deployment type
+  if (
+    packageInfo &&
+    input.policy_template &&
+    !integrationSupportsDeploymentMode(deploymentMode, packageInfo, input.policy_template)
+  ) {
+    return false;
+  }
+
   // Find the registry input definition for this input type and policy template
   const registryInput = extractRegistryInputsForDeploymentMode(packageInfo).find(
     (rInput) =>
@@ -134,6 +143,28 @@ export function isInputAllowedForDeploymentMode(
 
   return true; // Allow all inputs for default mode when deployment_modes is not specified
 }
+
+const integrationSupportsDeploymentMode = (
+  deploymentMode: string,
+  packageInfo: PackageInfo,
+  integrationName: string
+) => {
+  if (deploymentMode === 'agentless') {
+    return isAgentlessIntegration(packageInfo, integrationName);
+  }
+
+  const integration = packageInfo.policy_templates?.find(({ name }) => name === integrationName);
+
+  if (!integration) {
+    return false;
+  }
+
+  if (integration.deployment_modes?.default) {
+    return integration.deployment_modes?.default.enabled;
+  }
+
+  return true;
+};
 
 /*
  * Throw error if trying to enabling an input that is not allowed in agentless
