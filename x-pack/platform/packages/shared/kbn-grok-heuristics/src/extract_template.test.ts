@@ -11,35 +11,6 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { SampleParserClient, StreamLogGenerator } from '@kbn/sample-log-parser';
 
 describe('extractTemplate', () => {
-  const client = new SampleParserClient({
-    logger: new ToolingLog({
-      level: 'silent',
-      writeTo: process.stdout,
-    }),
-  });
-
-  let generators: StreamLogGenerator[];
-
-  beforeAll(async () => {
-    generators = await client.getLogGenerators({ rpm: 16 * 2000, distribution: 'uniform' });
-  });
-
-  async function getLogsFrom(name: string) {
-    const generator = generators.find((gen) => gen.name === name);
-
-    if (!generator) {
-      throw new Error(`Could not find generator for ${name}`);
-    }
-
-    const start = new Date('2025-05-01T00:00:00.000Z').getTime();
-    const end = new Date('2025-05-01T00:01:00.000Z').getTime() - 1;
-
-    const docs = await generator.next(start);
-    docs.push(...(await generator.next(end)));
-
-    return docs.map((doc) => doc.message);
-  }
-
   it('generates a consistent root template structure', async () => {
     const { roots, delimiter } = await syncExtractTemplate([
       '2023-05-30 12:34:56 INFO  Service started on port 8080',
@@ -221,6 +192,36 @@ describe('extractTemplate', () => {
   });
 
   describe('with LogHub sample data', () => {
+    const client = new SampleParserClient({
+      logger: new ToolingLog({
+        level: 'silent',
+        writeTo: process.stdout,
+      }),
+    });
+
+    let generators: StreamLogGenerator[];
+
+    beforeAll(async () => {
+      jest.setTimeout(10_000); // Ensure there's enough time to gather sample logs
+      generators = await client.getLogGenerators({ rpm: 16 * 2000, distribution: 'uniform' });
+    });
+
+    async function getLogsFrom(name: string) {
+      const generator = generators.find((gen) => gen.name === name);
+
+      if (!generator) {
+        throw new Error(`Could not find generator for ${name}`);
+      }
+
+      const start = new Date('2025-05-01T00:00:00.000Z').getTime();
+      const end = new Date('2025-05-01T00:01:00.000Z').getTime() - 1;
+
+      const docs = await generator.next(start);
+      docs.push(...(await generator.next(end)));
+
+      return docs.map((doc) => doc.message);
+    }
+
     it('processes HealthApp logs correctly', async () => {
       const healthAppLogs = await getLogsFrom('HealthApp');
       const { roots, delimiter } = await syncExtractTemplate(healthAppLogs);
