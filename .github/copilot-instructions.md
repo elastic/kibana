@@ -5,7 +5,7 @@
 Kibana is a browser-based analytics and search dashboard for Elasticsearch, consisting of approximately 74,000 TypeScript/JavaScript files spanning 1.7GB. This is a large, complex monorepo with strict build requirements and extensive CI validation.
 
 **Key Technologies:**
-- **Runtime:** Node.js 22.17.1 (exact version required, specified in `.nvmrc` and `.node-version`)
+- **Runtime:** Node.js (exact version required, check `.nvmrc` and `.node-version`)
 - **Package Manager:** Yarn ^1.22.19 (Yarn 2.0+ not supported)
 - **Primary Languages:** TypeScript, JavaScript (React for frontend)
 - **Architecture:** Microservice plugin architecture with shared core platform
@@ -13,11 +13,11 @@ Kibana is a browser-based analytics and search dashboard for Elasticsearch, cons
 ## Critical Setup Requirements
 
 ### Environment Setup
-**ALWAYS** use the exact Node.js version specified:
+**ALWAYS** use the exact Node.js version specified in `.nvmrc` or `.node-version`:
 ```bash
-# Install/use Node 22.17.1 (check .nvmrc file)
+# Install/use the required Node version (check .nvmrc file)
 nvm use
-# or install if not available: nvm install 22.17.1
+# or install if not available: nvm install $(cat .nvmrc)
 ```
 
 **NEVER** skip the bootstrap process - it's required for any other commands to work:
@@ -163,7 +163,7 @@ git clean -fdx -e /config -e /.vscode
 
 ### Node Version Mismatch
 - Error: `The engine "node" is incompatible with this module`
-- Solution: Use exact Node 22.17.1 via `nvm use`
+- Solution: Use the exact Node version via `nvm use` (check `.nvmrc` file for version)
 
 ### Dependency Issues
 - Check `yarn.lock` for integrity issues
