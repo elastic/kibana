@@ -84,9 +84,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
       defaultMessage:
         'The default interval between checking the collector for new changes to config. Note the interval is automatically exponentially extended on failures then reset to the value specified here, on recovery',
     }),
-    includeAgents: [
-      'opentelemetry/java/elastic',
-    ],
+    includeAgents: ['opentelemetry/java/elastic'],
   },
   {
     key: 'send_traces',
