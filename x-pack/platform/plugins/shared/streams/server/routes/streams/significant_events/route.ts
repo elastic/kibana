@@ -146,11 +146,7 @@ const readSignificantEventsRoute = createServerRoute({
       request,
     });
     await assertLicenseAndPricingTier(server, licensing);
-
-    const isStreamEnabled = await streamsClient.isStreamsEnabled();
-    if (!isStreamEnabled) {
-      throw badRequest('Streams are not enabled');
-    }
+    await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
     const { from, to, bucketSize } = params.query;
@@ -222,11 +218,7 @@ const generateSignificantEventsRoute = createServerRoute({
     const { streamsClient, scopedClusterClient, licensing, inferenceClient } =
       await getScopedClients({ request });
     await assertLicenseAndPricingTier(server, licensing);
-
-    const isStreamEnabled = await streamsClient.isStreamsEnabled();
-    if (!isStreamEnabled) {
-      throw badRequest('Streams are not enabled');
-    }
+    await streamsClient.ensureStream(params.path.name);
 
     const definition = await streamsClient.getStream(params.path.name);
 
