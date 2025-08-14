@@ -13,31 +13,16 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { getCaseSuggestions } from '../../containers/api';
 import type { SuggestionType } from '../../client/attachment_framework/types';
 
-const MOCK_TIME_RANGE = {
-  from: 'now-15m',
-  to: 'now',
-};
 const MAX_SUGGESTIONS = 2;
 
-export const useCaseSuggestions = ({
-  caseData,
-  serviceName,
-}: {
-  caseData: CaseUI;
-  serviceName: string;
-}) => {
+export const useCaseSuggestions = ({ caseData }: { caseData: CaseUI }) => {
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ['suggestions', serviceName, caseData.id],
+    queryKey: ['suggestions', caseData.id],
     queryFn: () =>
       getCaseSuggestions({
-        // TODO: get the owner from the caseData, right now the owner in case data does not have the same type as the owner in the suggestion request
-        owners: ['observability'],
-        context: {
-          timeRange: MOCK_TIME_RANGE,
-          'service.name': serviceName,
-        },
+        caseId: caseData.id,
       }),
     refetchOnWindowFocus: false,
   });

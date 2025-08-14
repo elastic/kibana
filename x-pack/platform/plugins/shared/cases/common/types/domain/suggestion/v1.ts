@@ -5,19 +5,12 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
+import { OWNERS } from '../../../constants';
 import type { CaseAttachmentWithoutOwner } from '../attachment/v1';
 
-export const suggestionOwnerSchema = z.enum(['observability', 'security', 'stack']);
+export const suggestionOwnerSchema = z.enum(OWNERS);
 
-export const suggestionContextRt = z.object({
-  'service.name': z.string().optional(),
-  timeRange: z
-    .object({
-      from: z.string(),
-      to: z.string(),
-    })
-    .optional(),
-});
+export const suggestionContextRt = z.record(z.string(), z.array(z.string()));
 
 export type SuggestionContext = z.infer<typeof suggestionContextRt>;
 

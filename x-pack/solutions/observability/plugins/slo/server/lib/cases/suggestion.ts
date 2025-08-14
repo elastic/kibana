@@ -13,6 +13,7 @@ import {
 import type { SuggestionType } from '@kbn/cases-plugin/server';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { AttachmentItem } from '@kbn/cases-plugin/common/types/domain';
 import { sloPaths } from '../../../common';
 import type { SLOSuggestion } from '../../../common/cases/suggestions';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
@@ -44,15 +45,16 @@ export function getSLOByServiceName(
     },
     handlers: {
       searchSLOByServiceName: async ({
-        context: { 'service.name': serviceName },
+        context,
         request,
       }: {
         context: SuggestionContext;
         request: KibanaRequest;
       }): Promise<SuggestionHandlerResponse<SLOSuggestion>> => {
+        const serviceNames = 'service.name' in context ? context['service.name'] : [];
         const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
 
-        if (!serviceName) {
+        if (!serviceNames.length) {
           return { suggestions: [] };
         }
 
@@ -70,8 +72,8 @@ export function getSLOByServiceName(
             bool: {
               filter: [
                 {
-                  term: {
-                    'slo.groupings.service.name': serviceName,
+                  terms: {
+                    'slo.groupings.service.name': serviceNames,
                   },
                 },
               ],
@@ -95,8 +97,14 @@ export function getSLOByServiceName(
           },
         });
 
-        const suggestions = results.hits.hits.map((doc) => {
-          const src = doc._source!;
+        const itemsByService = new Map<string, AttachmentItem<SLOSuggestion>[]>();
+
+        // TODO: remove all casting and any
+        for (const doc of results.hits.hits) {
+          const src = doc._source;
+          if (!src) continue;
+          const svcName = (src.slo.groupings as { service: { name: string } }).service.name;
+
           const payload: SLOSuggestion = {
             id: src.slo.id,
             name: src.slo.name,
@@ -143,40 +151,46 @@ export function getSLOByServiceName(
               summaryUpdatedAt: src.summaryUpdatedAt,
             },
           };
-          return { ...payload, status: src.status };
-        });
 
-        return {
-          suggestions: [
-            {
-              id: 'slo',
-              description: `Found ${suggestions.length} SLOs linked to service "${serviceName}"`,
-              data: suggestions.map((suggestion) => ({
-                id: `${suggestion.id}-${suggestion.instanceId}`,
-                description: `SLO "${suggestion.name}" is ${suggestion.status} for the service "${serviceName}"`,
-                payload: suggestion,
-                attachment: {
-                  type: AttachmentType.persistableState,
-                  persistableStateAttachmentTypeId: '.page',
-                  persistableStateAttachmentState: {
-                    type: 'slo_history',
-                    url: {
-                      pathAndQuery: sloPaths.sloDetailsHistory({
-                        id: suggestion.id,
-                        instanceId: suggestion.instanceId,
-                      }),
-                      label: suggestion.name,
-                      actionLabel: i18n.translate('xpack.slo.addToCase.caseAttachmentLabel', {
-                        defaultMessage: 'Go to SLO history',
-                      }),
-                      iconType: 'metricbeatApp',
-                    },
-                  },
+          const item: AttachmentItem<SLOSuggestion> = {
+            id: `${payload.id}-${payload.instanceId}`,
+            description: `SLO "${payload.name}" is ${payload.summary.status} for the service "${svcName}"`,
+            payload,
+            attachment: {
+              type: AttachmentType.persistableState,
+              persistableStateAttachmentTypeId: '.page',
+              persistableStateAttachmentState: {
+                type: 'slo_history',
+                url: {
+                  pathAndQuery: sloPaths.sloDetailsHistory({
+                    id: payload.id,
+                    instanceId: payload.instanceId,
+                  }),
+                  label: payload.name,
+                  actionLabel: i18n.translate('xpack.slo.addToCase.caseAttachmentLabel', {
+                    defaultMessage: 'Go to SLO history',
+                  }),
+                  iconType: 'metricbeatApp',
                 },
-              })),
+              },
             },
-          ],
-        };
+          };
+
+          const existing = itemsByService.get(svcName);
+          if (existing) {
+            existing.push(item);
+          } else {
+            itemsByService.set(svcName, [item]);
+          }
+        }
+
+        const suggestions = Array.from(itemsByService.entries()).map(([svcName, data]) => ({
+          id: 'slo',
+          description: `Found ${data.length} SLOs linked to service "${svcName}"`,
+          data,
+        }));
+
+        return { suggestions };
       },
     },
   };

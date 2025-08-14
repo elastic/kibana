@@ -11,12 +11,9 @@ import type { CaseUI } from '../../../../common';
 import { CaseSuggestionItem } from './case_suggestion_item';
 import { useCaseSuggestions } from '../use_case_suggestions';
 
-const MOCK_SERVICE_NAME = 'synth-service-2';
-
 export const CaseSuggestions = ({ caseData }: { caseData: CaseUI }) => {
   const { visibleSuggestions, isLoadingSuggestions, onDismissSuggestion } = useCaseSuggestions({
     caseData,
-    serviceName: MOCK_SERVICE_NAME,
   });
 
   if (isLoadingSuggestions) {

@@ -11,11 +11,7 @@ describe('Suggestion Schemas and Types', () => {
   describe('suggestionContextRt', () => {
     it('should validate a valid context', () => {
       const validContext = {
-        'service.name': 'my-service',
-        timeRange: {
-          from: '2023-01-01T00:00:00Z',
-          to: '2023-01-02T00:00:00Z',
-        },
+        'service.name': ['my-service'],
       };
 
       expect(() => suggestionContextRt.parse(validContext)).not.toThrow();

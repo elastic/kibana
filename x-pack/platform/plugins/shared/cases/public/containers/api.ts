@@ -25,7 +25,6 @@ import type {
   AddObservableRequest,
   UpdateObservableRequest,
   UserActionInternalFindResponse,
-  SuggestionRequest,
   SuggestionResponse,
 } from '../../common/types/api';
 import type {
@@ -665,23 +664,16 @@ export const getSimilarCases = async ({
 };
 
 export const getCaseSuggestions = async ({
-  owners,
-  context,
+  caseId,
   signal,
 }: {
-  owners: SuggestionRequest['owners'];
-  context: SuggestionRequest['context'];
+  caseId: string;
   signal?: AbortSignal;
 }): Promise<SuggestionResponse> => {
-  const requestBody: SuggestionRequest = {
-    owners,
-    context,
-  };
   const response = await KibanaServices.get().http.fetch<SuggestionResponse>(
-    getCaseSuggestionsUrl(),
+    getCaseSuggestionsUrl(caseId),
     {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
+      method: 'GET',
       signal,
     }
   );

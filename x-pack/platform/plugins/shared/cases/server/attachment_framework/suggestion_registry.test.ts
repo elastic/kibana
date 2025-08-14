@@ -54,7 +54,7 @@ describe('AttachmentSuggestionRegistry', () => {
       const suggestionType2: SuggestionType = {
         id: 'suggestion-2',
         attachmentId: 'attachment-2',
-        owner: 'security',
+        owner: 'securitySolution',
         tools: {},
         handlers: {},
       };
@@ -111,11 +111,7 @@ describe('AttachmentSuggestionRegistry', () => {
       registry.register(suggestionType);
 
       const context: SuggestionContext = {
-        'service.name': 'test-service',
-        timeRange: {
-          from: '2023-01-01T00:00:00Z',
-          to: '2023-01-02T00:00:00Z',
-        },
+        'service.name': ['test-service'],
       };
 
       const request = {} as KibanaRequest;
@@ -170,11 +166,7 @@ describe('AttachmentSuggestionRegistry', () => {
       registry.register(suggestionType);
 
       const context: SuggestionContext = {
-        'service.name': 'test-service',
-        timeRange: {
-          from: '2023-01-01T00:00:00Z',
-          to: '2023-01-02T00:00:00Z',
-        },
+        'service.name': ['test-service'],
       };
 
       const request = {} as KibanaRequest;

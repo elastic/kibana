@@ -113,6 +113,6 @@ export const getCaseSimilarCasesUrl = (caseId: string) => {
   return INTERNAL_CASE_SIMILAR_CASES_URL.replace('{case_id}', caseId);
 };
 
-export const getCaseSuggestionsUrl = () => {
-  return INTERNAL_CASE_SUGGESTIONS_URL;
+export const getCaseSuggestionsUrl = (caseId: string) => {
+  return INTERNAL_CASE_SUGGESTIONS_URL.replace('{case_id}', caseId);
 };
