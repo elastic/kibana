@@ -18,7 +18,7 @@ export const getEcsMappingNode = (params: GetConvertEsqlSchemaCisToEcsParams): G
       title: state.parsed_panel.title ?? '',
       description: state.description ?? '',
       query: state.esql_query ?? '',
-      originalQuery: state.inline_query,
+      originalQuery: state.inline_query ?? '',
     });
 
     // Set includes_ecs_mapping to indicate that this node has been executed to ensure it only runs once

@@ -50,6 +50,10 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
 
     // Edges
     .addEdge(START, 'inlineQuery')
+    .addConditionalEdges('inlineQuery', translatableRouter, [
+      'selectIndexPattern',
+      'translationResult',
+    ])
     // .addEdge('inlineQuery', 'createDescription') // createDescription would go after inlineQuery
     .addEdge('inlineQuery', 'selectIndexPattern')
     // .addEdge('createDescription', 'selectIndexPattern') // And before selectIndexPattern, the description is sent to the selectIndexPattern graph
@@ -68,6 +72,13 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
   graph.name = 'Translate Dashboard Panel Graph';
   return graph;
 }
+
+const translatableRouter = (state: TranslateDashboardPanelState) => {
+  if (!state.inline_query) {
+    return 'translationResult';
+  }
+  return 'selectIndexPattern';
+};
 
 const validationRouter = (state: TranslateDashboardPanelState) => {
   if (

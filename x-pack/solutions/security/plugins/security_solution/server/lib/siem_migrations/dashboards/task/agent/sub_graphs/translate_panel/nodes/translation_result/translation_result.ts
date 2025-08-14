@@ -13,6 +13,23 @@ import { processPanel } from './process_panel';
 
 export const getTranslationResultNode = (): GraphNode => {
   return async (state) => {
+    const query = state.esql_query;
+    if (!query) {
+      return { translation_result: MigrationTranslationResult.UNTRANSLATABLE };
+    }
+
+    let translationResult;
+    // TODO: use placeholder constant
+    if (query.startsWith('FROM [indexPattern]')) {
+      translationResult = MigrationTranslationResult.PARTIAL;
+    } else if (state.validation_errors?.esql_errors) {
+      translationResult = MigrationTranslationResult.PARTIAL;
+    } else if (query.match(/\[(macro|lookup):.*?\]/)) {
+      translationResult = MigrationTranslationResult.PARTIAL;
+    } else {
+      translationResult = MigrationTranslationResult.FULL;
+    }
+
     const vizType = state.parsed_panel?.viz_type;
     let panel: object;
     try {
@@ -33,23 +50,6 @@ export const getTranslationResultNode = (): GraphNode => {
         // TODO: add comment: "panel chart type not supported"
         translation_result: MigrationTranslationResult.UNTRANSLATABLE,
       };
-    }
-    const query = state.esql_query;
-
-    let translationResult;
-
-    if (!query) {
-      translationResult = MigrationTranslationResult.UNTRANSLATABLE;
-    } else {
-      if (query.startsWith('FROM [indexPattern]')) {
-        translationResult = MigrationTranslationResult.PARTIAL;
-      } else if (state.validation_errors?.esql_errors) {
-        translationResult = MigrationTranslationResult.PARTIAL;
-      } else if (query.match(/\[(macro|lookup):.*?\]/)) {
-        translationResult = MigrationTranslationResult.PARTIAL;
-      } else {
-        translationResult = MigrationTranslationResult.FULL;
-      }
     }
 
     const panelJSON = processPanel(panel, query, state.parsed_panel);
