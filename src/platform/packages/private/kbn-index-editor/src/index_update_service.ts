@@ -252,8 +252,6 @@ export class IndexUpdateService {
   // Accumulate actions in a buffer
   private bufferState$: Observable<BulkUpdateOperations> = this._actions$.pipe(
     scan((acc: BulkUpdateOperations, action: Action) => {
-      this._error$.next(null);
-
       switch (action.type) {
         case 'add-doc':
           return [...acc, action];
