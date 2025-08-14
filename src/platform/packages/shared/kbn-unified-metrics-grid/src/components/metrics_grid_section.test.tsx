@@ -9,8 +9,9 @@
 
 import React from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
-import { DiscoverMetricsLayout } from './discover_metrics_layout';
+import { MetricsGridSection } from './metrics_grid_section';
 import { queryByTestId } from '@testing-library/dom';
+import '@testing-library/jest-dom';
 
 const fields = [
   {
@@ -52,14 +53,14 @@ const timeRange = { from: 'now-1h', to: 'now' };
 describe('Discover metrics layout component', () => {
   it('should render MetricsGridSection', async () => {
     const component = renderWithKibanaRenderContext(
-      <DiscoverMetricsLayout fields={fields} timeRange={timeRange} indexPattern={'metrics-*'} />
+      <MetricsGridSection fields={fields} timeRange={timeRange} indexPattern={'metrics-*'} />
     );
     expect(await component.findByTestId('metrics-grid')).toBeInTheDocument();
   });
 
   it('should render all metric charts', async () => {
     const component = renderWithKibanaRenderContext(
-      <DiscoverMetricsLayout fields={fields} timeRange={timeRange} indexPattern={'metrics-*'} />
+      <MetricsGridSection fields={fields} timeRange={timeRange} indexPattern={'metrics-*'} />
     );
     for (const field of fields) {
       expect(await component.findByTestId(`metric-chart-${field.name}`)).toBeInTheDocument();
@@ -68,7 +69,7 @@ describe('Discover metrics layout component', () => {
 
   it('should render header actions (explore and insights) for each metric chart by default', async () => {
     const component = renderWithKibanaRenderContext(
-      <DiscoverMetricsLayout fields={fields} timeRange={timeRange} indexPattern="metrics-*" />
+      <MetricsGridSection fields={fields} timeRange={timeRange} indexPattern="metrics-*" />
     );
     // The length is 4 because there are 4 metric charts rendered
     expect(await component.findAllByTestId('metricsChartExploreAction')).toHaveLength(4);
@@ -77,7 +78,7 @@ describe('Discover metrics layout component', () => {
 
   it('should render both actions when both are true', async () => {
     const component = renderWithKibanaRenderContext(
-      <DiscoverMetricsLayout
+      <MetricsGridSection
         fields={fields}
         timeRange={timeRange}
         indexPattern="metrics-*"
@@ -90,7 +91,7 @@ describe('Discover metrics layout component', () => {
 
   it('should render only Explore action when only hasExploreAction is true', async () => {
     const component = renderWithKibanaRenderContext(
-      <DiscoverMetricsLayout
+      <MetricsGridSection
         fields={fields}
         timeRange={timeRange}
         indexPattern="metrics-*"
@@ -103,7 +104,7 @@ describe('Discover metrics layout component', () => {
 
   it('should render only Insights action when only hasMetricsInsightsAction is true', async () => {
     const component = renderWithKibanaRenderContext(
-      <DiscoverMetricsLayout
+      <MetricsGridSection
         fields={fields}
         timeRange={timeRange}
         indexPattern="metrics-*"
@@ -116,7 +117,7 @@ describe('Discover metrics layout component', () => {
 
   it('should render neither action when both are false', async () => {
     const component = renderWithKibanaRenderContext(
-      <DiscoverMetricsLayout
+      <MetricsGridSection
         fields={fields}
         timeRange={timeRange}
         indexPattern="metrics-*"
