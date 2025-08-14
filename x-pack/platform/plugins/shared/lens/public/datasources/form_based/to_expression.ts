@@ -160,6 +160,7 @@ function getExpressionForLayer(
             dateRange,
             now: nowInstant,
             targetBars: histogramBarsTarget,
+            maxBars: uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
           })
         );
       }

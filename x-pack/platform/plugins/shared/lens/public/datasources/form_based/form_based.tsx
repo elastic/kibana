@@ -15,7 +15,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -796,14 +796,7 @@ export function getFormBasedDatasource({
             // this is a different issue that should be catched earlier
             return false;
           }
-          return isColumnInvalid(
-            layer,
-            column,
-            columnId,
-            indexPattern,
-            framePublicAPI.dateRange,
-            uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
-          );
+          return isColumnInvalid(layer, column, columnId, indexPattern, framePublicAPI.dateRange);
         }
       );
 

@@ -332,8 +332,7 @@ interface BaseOperationDefinitionProps<
     columnId: string,
     indexPattern: IndexPattern,
     dateRange?: DateRange,
-    operationDefinitionMap?: Record<string, GenericOperationDefinition>,
-    targetBars?: number
+    operationDefinitionMap?: Record<string, GenericOperationDefinition>
   ) => FieldBasedOperationErrorMessage[];
 
   /*
@@ -694,7 +693,7 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
     layer: FormBasedLayer,
     columnId: string,
     indexPattern: IndexPattern,
-    context?: { dateRange?: DateRange; now?: Date; targetBars?: number }
+    context?: { dateRange?: DateRange; now?: Date; targetBars?: number; maxBars?: number }
   ) => ExpressionAstFunction[];
   /**
    * Managed references control the IDs of their inner columns, so we need to be able to copy from the
