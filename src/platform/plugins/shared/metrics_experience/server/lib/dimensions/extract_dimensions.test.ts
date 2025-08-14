@@ -18,11 +18,17 @@ describe('extractDimensions', () => {
   const mockFields = {
     'host.name': {
       keyword: {
+        aggregatable: true,
+        searchable: true,
+        type: 'keyword',
         time_series_dimension: true,
       },
     },
     'cloud.provider': {
       keyword: {
+        aggregatable: true,
+        searchable: true,
+        type: 'keyword',
         time_series_dimension: true,
         meta: {
           description: ['The cloud provider'],
@@ -31,16 +37,25 @@ describe('extractDimensions', () => {
     },
     'service.name': {
       keyword: {
+        aggregatable: true,
+        searchable: true,
+        type: 'keyword',
         time_series_dimension: true,
       },
     },
     'process.pid': {
       number: {
+        aggregatable: true,
+        searchable: true,
+        type: 'number',
         time_series_dimension: false,
       },
     },
     _metric_names_hash: {
       keyword: {
+        aggregatable: true,
+        searchable: true,
+        type: 'keyword',
         time_series_dimension: true,
       },
     },
@@ -93,6 +108,9 @@ describe('extractDimensions', () => {
     const result = extractDimensions({
       'process.pid': {
         number: {
+          aggregatable: true,
+          searchable: true,
+          type: 'number',
           time_series_dimension: false,
         },
       },
@@ -109,9 +127,15 @@ describe('extractDimensions', () => {
     const fieldsWithMultipleTypes = {
       'host.name': {
         keyword: {
+          aggregatable: true,
+          searchable: true,
+          type: 'keyword',
           time_series_dimension: true,
         },
         text: {
+          aggregatable: false,
+          searchable: true,
+          type: 'text',
           time_series_dimension: false,
         },
       },
