@@ -54,6 +54,7 @@ export const PolicyTemplateSelector = ({
         idSelected={selectedTemplate}
         onChange={(id: CloudSecurityPolicyTemplate) => setPolicyTemplate(id)}
         disabled={disabled}
+        name="policyTemplate"
       />
     </div>
   );
@@ -81,6 +82,7 @@ export const PolicyTemplateInputSelector = ({ input, disabled, setInput }: Props
       options={options}
       onChange={(inputType) => setInput(inputType as PostureInput)}
       size="m"
+      name="policyTemplateInput"
     />
   );
 };
