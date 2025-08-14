@@ -132,6 +132,7 @@ paths-ignore:
   - x-pack/solutions/*/test
   - x-pack/test
   - x-pack/test_serverless
+  - x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant
 query-filters:
   - exclude:
       paths:
