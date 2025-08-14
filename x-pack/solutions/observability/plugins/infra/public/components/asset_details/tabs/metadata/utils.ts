@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPlainObject } from 'lodash';
+import { get, isPlainObject } from 'lodash';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraMetadata } from '../../../../../common/http_api';
 
@@ -14,7 +14,7 @@ export interface Field {
   value?: string | string[];
 }
 interface FieldsByCategory {
-  [key: string]: string | boolean | string[] | { [key: string]: string };
+  [key: string]: string | boolean | string[] | { [key: string]: any };
 }
 
 type FieldCategory =
@@ -28,14 +28,14 @@ type FieldCategory =
   | 'resource.attributes.agent'
   | 'resource.attributes.cloud';
 
-export const getAllFields = (metadata: InfraMetadata, schema: DataSchemaFormat | null) => {
+export const getAllFields = (
+  metadata: InfraMetadata | undefined,
+  schema: DataSchemaFormat | null
+) => {
   if (!metadata?.info) return [];
 
   const mapNestedProperties = (category: FieldCategory, property: string) => {
-    const categoryPath = category.split('.');
-    const formattedCategory = categoryPath.reduce((obj, key) => obj?.[key], metadata?.info as any);
-
-    const fieldsByCategory: FieldsByCategory = formattedCategory ?? {};
+    const fieldsByCategory: FieldsByCategory = get(metadata?.info, category) ?? {};
     if (Object.hasOwn(fieldsByCategory, property)) {
       const value = fieldsByCategory[property];
 

@@ -30,10 +30,7 @@ export const Metadata = () => {
   } = useMetadataStateContext();
   const { showActionsColumn = false } = overrides?.metadata ?? {};
 
-  const fields = useMemo(
-    () => (metadata ? getAllFields(metadata, schema) : []),
-    [metadata, schema]
-  );
+  const fields = useMemo(() => getAllFields(metadata, schema), [metadata, schema]);
 
   const onSearchChange = useCallback(
     (newQuery: string) => {
