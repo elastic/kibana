@@ -21,6 +21,8 @@ const baseConfig = {
   users_and_roles_url: '/users_and_roles/',
 };
 
+const kibanaUrl = 'https://cloud.elastic.co/abc123/kibana';
+
 describe('Cloud Plugin URLs Service', () => {
   const setupServiceWithRoles = (userRoles: string[] = []) => {
     const urls = new CloudUrlsService();
@@ -36,10 +38,31 @@ describe('Cloud Plugin URLs Service', () => {
     );
     coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
 
-    urls.setup(baseConfig, coreSetup);
+    urls.setup(baseConfig, coreSetup, kibanaUrl);
 
     return { urls };
   };
+
+  const setupService = () => {
+    return setupServiceWithRoles([]);
+  };
+
+  it('exposes basic Cloud URLs', () => {
+    const { urls } = setupService();
+
+    expect(urls.getUrls()).toEqual({
+      baseUrl: 'https://cloud.elastic.co',
+      deploymentUrl: 'https://cloud.elastic.co/abc123',
+      deploymentsUrl: 'https://cloud.elastic.co/user/deployments',
+      kibanaUrl: 'https://cloud.elastic.co/abc123/kibana',
+      organizationUrl: 'https://cloud.elastic.co/account/',
+      performanceUrl: 'https://cloud.elastic.co/performance/',
+      profileUrl: 'https://cloud.elastic.co/user/settings/',
+      projectsUrl: 'https://cloud.elastic.co/projects/',
+      snapshotsUrl: 'https://cloud.elastic.co/abc123/elasticsearch/snapshots/',
+      usersAndRolesUrl: 'https://cloud.elastic.co/users_and_roles/',
+    });
+  });
 
   it('exposes privileged billing URL', () => {
     const { urls } = setupServiceWithRoles([CLOUD_USER_BILLING_ADMIN_ROLE, 'other_role']); // Include specially-named billing admin role

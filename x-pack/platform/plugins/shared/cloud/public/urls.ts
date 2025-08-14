@@ -6,10 +6,10 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
+import { CloudConfigType } from '.';
 import { CLOUD_SNAPSHOTS_PATH, CLOUD_USER_BILLING_ADMIN_ROLE } from '../common/constants';
 import { getFullCloudUrl } from '../common/utils';
-import { CloudPrivilegedUrls, CloudUrls } from './types';
-import { CloudConfigType } from '.';
+import { CloudBasicUrls, CloudPrivilegedUrls } from './types';
 
 /**
  * Service that manages all URLs for the Cloud plugin.
@@ -17,21 +17,23 @@ import { CloudConfigType } from '.';
 export class CloudUrlsService {
   private config?: CloudConfigType;
   private coreSetup?: CoreSetup;
+  private kibanaUrl?: string;
 
-  public setup(config: CloudConfigType, coreSetup: CoreSetup) {
+  public setup(config: CloudConfigType, coreSetup: CoreSetup, kibanaUrl: string | undefined) {
     this.config = config;
     this.coreSetup = coreSetup;
+    this.kibanaUrl = kibanaUrl;
   }
 
   /**
-   * Returns basic URLs for the Cloud plugin, such as deployments, deployment, profile,
-   * organization, snapshots, performance, users and roles, and projects.
+   * Returns the set of "basic" URLs. No special privileges needed
    */
-  public getUrls(): CloudUrls {
+  public getUrls(): CloudBasicUrls {
     if (!this.config) {
       throw new Error('Cloud configuration is not set up');
     }
 
+    const kibanaUrl = this.kibanaUrl;
     const {
       base_url: baseUrl,
       profile_url: profileUrl,
@@ -53,6 +55,8 @@ export class CloudUrlsService {
     const fullCloudSnapshotsUrl = `${fullCloudDeploymentUrl}/${CLOUD_SNAPSHOTS_PATH}`;
 
     return {
+      baseUrl,
+      kibanaUrl,
       deploymentsUrl: fullCloudDeploymentsUrl,
       deploymentUrl: fullCloudDeploymentUrl,
       profileUrl: fullCloudProfileUrl,
@@ -65,7 +69,7 @@ export class CloudUrlsService {
   }
 
   /**
-   * Returns privileged URLs that require specific user roles to access, such as billing.
+   * Returns the set of "privilged" URLs. Each requires a specific privilege to access.
    */
   public async getPrivilegedUrls(): Promise<CloudPrivilegedUrls> {
     if (!this.config) {
@@ -85,7 +89,7 @@ export class CloudUrlsService {
   }
 
   /**
-   * Needed for determining access to privileged URLs like billing.
+   * Needed for determining access to privileged URLs, such as billing.
    */
   private async getCurrentUserRoles(): Promise<readonly string[]> {
     const [coreStart] = (await this.coreSetup?.getStartServices()) || [];

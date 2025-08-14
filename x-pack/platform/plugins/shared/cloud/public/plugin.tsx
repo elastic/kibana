@@ -72,7 +72,6 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     const {
       id,
       cname,
-      base_url: baseUrl,
       trial_end_date: trialEndDate,
       is_elastic_staff_owned: isElasticStaffOwned,
       csp,
@@ -82,8 +81,9 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     if (id) {
       decodedId = decodeCloudId(id, this.logger);
     }
+    const kibanaUrl = decodedId?.kibanaUrl;
 
-    this.cloudUrls.setup(this.config, core);
+    this.cloudUrls.setup(this.config, core, kibanaUrl);
 
     return {
       cloudId: id,
@@ -114,10 +114,9 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         this.contextProviders.push(contextProvider);
       },
       fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(this, core.http),
-      baseUrl,
-      kibanaUrl: decodedId?.kibanaUrl,
+      ...this.cloudUrls.getUrls(), // TODO: Deprecate directly accessing URLs, use `getUrls` instead
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
-      ...this.cloudUrls.getUrls(), // TODO: For consistency, establish the `getUrls` method on the contract instead of spreading it into the setup contract
+      getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),
     };
   }
 
@@ -155,9 +154,9 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         projectType: this.config.serverless?.project_type,
       },
       fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(this, coreStart.http),
-      kibanaUrl: decodedId?.kibanaUrl,
+      ...this.cloudUrls.getUrls(), // TODO: Deprecate directly accessing URLs, use `getUrls` instead
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
-      ...this.cloudUrls.getUrls(), // TODO: For consistency, establish the `getUrls` method on the contract instead of spreading it into the start contract
+      getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),
     };
   }
 

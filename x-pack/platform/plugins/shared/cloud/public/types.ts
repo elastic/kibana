@@ -11,9 +11,16 @@ import type { FC, PropsWithChildren } from 'react';
 
 /**
  * Represents basic URLs for the Cloud plugin, that do not require specific user roles to access.
- * TODO: Absorb `kibanaUrl` and `baseUrl` into this for more consistency.
  */
-export interface CloudUrls {
+export interface CloudBasicUrls {
+  /**
+   * This is the URL of the Cloud interface.
+   */
+  baseUrl?: string;
+  /**
+   * The full URL to the Kibana deployment.
+   */
+  kibanaUrl?: string;
   /**
    * This is the path to the Cloud deployments management page. The value is already prepended with `baseUrl`.
    *
@@ -64,7 +71,9 @@ export interface CloudPrivilegedUrls {
   billingUrl?: string;
 }
 
-export interface CloudStart extends CloudUrls {
+export type CloudUrls = CloudBasicUrls & CloudPrivilegedUrls;
+
+export interface CloudStart extends CloudBasicUrls {
   /**
    * A React component that provides a pre-wired `React.Context` which connects components to Cloud services.
    */
@@ -82,13 +91,13 @@ export interface CloudStart extends CloudUrls {
    */
   fetchElasticsearchConfig: () => Promise<PublicElasticsearchConfigType>;
   /**
-   * Service that manages getPrivilegedUrls URLs for the Cloud plugin.
+   * Method to retrieve privileged URLs for the Cloud plugin.
    */
   getPrivilegedUrls: () => Promise<CloudPrivilegedUrls>;
   /**
-   * The full URL to the Kibana deployment.
+   * Method to retrieve basic URLs for the Cloud plugin.
    */
-  kibanaUrl?: string;
+  getUrls: () => CloudBasicUrls;
   /**
    * `true` when running on Serverless Elastic Cloud
    * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
@@ -116,7 +125,7 @@ export interface CloudStart extends CloudUrls {
   };
 }
 
-export interface CloudSetup extends CloudUrls {
+export interface CloudSetup extends CloudBasicUrls {
   /**
    * Cloud ID. Undefined if not running on Cloud.
    */
@@ -142,21 +151,17 @@ export interface CloudSetup extends CloudUrls {
    */
   csp?: string;
   /**
-   * This is the URL of the Cloud interface.
-   */
-  baseUrl?: string;
-  /**
-   * Service that manages getPrivilegedUrls URLs for the Cloud plugin.
+   * Method to retrieve privileged URLs for the Cloud plugin.
    */
   getPrivilegedUrls: () => Promise<CloudPrivilegedUrls>;
+  /**
+   * Method to retrieve basic URLs for the Cloud plugin.
+   */
+  getUrls: () => CloudUrls;
   /**
    * Fetches the full URL to the elasticsearch cluster.
    */
   fetchElasticsearchConfig: () => Promise<PublicElasticsearchConfigType>;
-  /**
-   * The full URL to the Kibana deployment.
-   */
-  kibanaUrl?: string;
   /**
    * {host} from the deployment url https://<deploymentId>.<application>.<host><?:port>
    */

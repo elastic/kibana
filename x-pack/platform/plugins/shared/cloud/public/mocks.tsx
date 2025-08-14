@@ -6,9 +6,11 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import type { CloudSetup, CloudStart, CloudUrls } from './types';
+import type { CloudBasicUrls, CloudSetup, CloudStart } from './types';
 
-const mockCloudUrls: CloudUrls = {
+const mockCloudUrls: CloudBasicUrls = {
+  baseUrl: 'base-url',
+  kibanaUrl: 'kibana-url',
   deploymentUrl: 'deployment-url',
   profileUrl: 'profile-url',
   organizationUrl: 'organization-url',
@@ -36,8 +38,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
       projectType: undefined,
       productTier: undefined,
     },
-    baseUrl: 'base-url',
-    kibanaUrl: 'kibana-url',
+    getUrls: jest.fn().mockReturnValue({}),
     getPrivilegedUrls: jest.fn().mockResolvedValue({}),
     ...mockCloudUrls,
   };
@@ -57,6 +58,7 @@ const createStartMock = (): jest.Mocked<CloudStart> => ({
     projectId: undefined,
   },
   fetchElasticsearchConfig: jest.fn().mockResolvedValue({ elasticsearchUrl: 'elasticsearch-url' }),
+  getUrls: jest.fn().mockReturnValue({}),
   getPrivilegedUrls: jest.fn().mockResolvedValue({}),
   ...mockCloudUrls,
 });
