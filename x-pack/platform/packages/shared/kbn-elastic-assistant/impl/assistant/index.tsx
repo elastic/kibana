@@ -443,6 +443,18 @@ const AssistantComponent: React.FC<Props> = ({
     [assistantTelemetry, currentConversation?.title]
   );
 
+  const conversationShared = useMemo(() => {
+    const conversationUsers = currentConversation?.users.length ?? 0;
+    if (conversationUsers === 0) {
+      return 'globally_shared';
+    }
+    if (conversationUsers > 1) {
+      return 'selected_shared';
+    }
+    // length is 1
+    return 'not_shared';
+  }, [currentConversation?.users.length]);
+
   return (
     <>
       <AnonymizedValuesAndCitationsTour conversation={currentConversation} />
@@ -551,7 +563,7 @@ const AssistantComponent: React.FC<Props> = ({
                     handleOnConversationSelected={handleOnConversationSelected}
                     http={http}
                     isConversationOwner={isConversationOwner}
-                    isConversationShared={currentConversation?.users.length !== 1 ?? false}
+                    conversationShared={conversationShared}
                     isAssistantEnabled={isAssistantEnabled}
                     isLoading={isInitialLoad}
                     isSettingsModalVisible={isSettingsModalVisible}

@@ -88,6 +88,8 @@ export const ConversationListItem: FunctionComponent<Props> = ({
     [handleCopyUrl, handleDuplicateConversation, setDeleteConversationItem, conversation]
   );
 
+  const shouldShowIcon = useMemo(() => conversation.users.length !== 1, [conversation.users]);
+
   return (
     <span key={conversation.id + conversation.title}>
       <EuiFlexGroup gutterSize="xs">
@@ -98,11 +100,12 @@ export const ConversationListItem: FunctionComponent<Props> = ({
           css={css`
             flex: 1;
             .euiListGroupItem__button {
-              flex-direction: row-reverse;
+              // forces the icon to be on the right side of the text
+              flex-direction: ${shouldShowIcon ? 'row-reverse' : 'row'};
             }
           `}
           label={conversation.title}
-          iconType={conversation.users.length !== 1 ? 'users' : undefined}
+          iconType={shouldShowIcon ? 'users' : undefined}
           iconProps={{
             size: 's',
             title: iconTitle,
