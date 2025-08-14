@@ -1,5 +1,83 @@
 {
   "properties": {
+    "asset_inventory": {
+      "properties": {
+        "entities": {
+          "properties": {
+            "doc_count": {
+              "type": "long"
+            },
+            "last_doc_timestamp": {
+              "type": "date"
+            }
+          }
+        },
+        "entities_type_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "entity_type": {
+                "type": "keyword"
+              },
+              "doc_count": {
+                "type": "long"
+              },
+              "last_doc_timestamp": {
+                "type": "date"
+              }
+            }
+          }
+        },
+        "entity_store_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "entity_store": {
+                "type": "keyword"
+              },
+              "doc_count": {
+                "type": "long"
+              },
+              "last_doc_timestamp": {
+                "type": "date"
+              }
+            }
+          }
+        },
+        "entity_source_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "entity_source": {
+                "type": "keyword"
+              },
+              "doc_count": {
+                "type": "long"
+              },
+              "last_doc_timestamp": {
+                "type": "date"
+              }
+            }
+          }
+        },
+        "asset_criticality_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "criticality": {
+                "type": "keyword"
+              },
+              "doc_count": {
+                "type": "long"
+              },
+              "last_doc_timestamp": {
+                "type": "date"
+              }
+            }
+          }
+        }
+      }
+    },
     "cloud_security_posture": {
       "properties": {
         "indices": {
