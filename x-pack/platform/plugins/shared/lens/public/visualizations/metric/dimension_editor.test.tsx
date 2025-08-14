@@ -345,6 +345,18 @@ describe('dimension editor', () => {
         await userEvent.clear(staticColorPicker);
       };
 
+      const labelPositionGroup = screen.queryByRole('group', { name: /Label position/i });
+      const clickOnLabelPosition = async (position: 'before' | 'after') => {
+        if (!labelPositionGroup) {
+          throw new Error('Label position group not found');
+        }
+        const labelPositionOption = getByTitle(labelPositionGroup, position, { exact: false });
+        if (!labelPositionOption) {
+          throw new Error(`Label position option '${position}' not found`);
+        }
+        await userEvent.click(labelPositionOption);
+      };
+
       return {
         getSettingNone: () => getByTitle(customLabelGroup, 'none', { exact: false }),
         getSettingAuto: () => getByTitle(customLabelGroup, 'auto', { exact: false }),
@@ -363,6 +375,8 @@ describe('dimension editor', () => {
         getStaticColorPicker,
         typeColor,
         clearColor,
+        labelPositionGroup,
+        clickOnLabelPosition,
         ...rtlRender,
       };
     }
@@ -463,6 +477,47 @@ describe('dimension editor', () => {
           expect(setState).toHaveBeenCalledWith(
             expect.objectContaining({ secondaryLabel: newCustomSecondaryLabel })
           )
+        );
+      });
+
+      it('does not show the label position option if Label is None', async () => {
+        const { labelPositionGroup: labelPostionGroup } = renderSecondaryMetricEditor({
+          state: {
+            ...localState,
+            secondaryLabel: NONE_SECONDARY_LABEL,
+          },
+        });
+        expect(labelPostionGroup).not.toBeInTheDocument();
+      });
+
+      it('sets the label position to after', async () => {
+        const setState = jest.fn();
+        const { clickOnLabelPosition: clickOnLabelPostion } = renderSecondaryMetricEditor({
+          setState,
+          state: localState,
+        });
+        await clickOnLabelPostion('after');
+        expect(setState).toHaveBeenCalledWith(
+          expect.objectContaining({
+            secondaryLabelPosition: 'after',
+          })
+        );
+      });
+
+      it('sets the label position to before', async () => {
+        const setState = jest.fn();
+        const { clickOnLabelPosition: clickOnLabelPostion } = renderSecondaryMetricEditor({
+          setState,
+          state: {
+            ...localState,
+            secondaryLabelPosition: 'after',
+          },
+        });
+        await clickOnLabelPostion('before');
+        expect(setState).toHaveBeenCalledWith(
+          expect.objectContaining({
+            secondaryLabelPosition: 'before',
+          })
         );
       });
     });
@@ -1153,7 +1208,11 @@ describe('dimension editor', () => {
               applyColorTo: 'value',
             },
           });
-          expect(screen.getByText(/Color palette has been automatically adjusted for provide the required contrast for text elements/i))
+          expect(
+            screen.getByText(
+              /Color palette has been automatically adjusted for provide the required contrast for text elements/i
+            )
+          );
         });
 
         it('should show help message when color by value dynamic, supporting visualization is panel, apply color to value', () => {
@@ -1164,7 +1223,7 @@ describe('dimension editor', () => {
               applyColorTo: 'value',
             },
           });
-          expect(screen.getByText(/Color scales might cause accessibility issues./i))
+          expect(screen.getByText(/Color scales might cause accessibility issues./i));
         });
       });
     });
