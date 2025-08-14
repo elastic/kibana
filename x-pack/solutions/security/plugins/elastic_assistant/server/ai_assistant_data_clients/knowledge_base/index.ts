@@ -73,6 +73,7 @@ import { ASSISTANT_ELSER_INFERENCE_ID } from './field_maps_configuration';
 import { BulkOperationError } from '../../lib/data_stream/documents_data_writer';
 import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from './audit_events';
 import { findDocuments } from '../find';
+import { ensureIntegrationKnowledgeIndexEntry } from '../../ai_assistant_service/integration_knowledge_helper';
 
 /**
  * Params for when creating KbDataClient in Request Context Factory. Useful if needing to modify
@@ -289,6 +290,21 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         } else {
           this.options.logger.debug(
             `Inference endpoint for ELSER model '${elserId}' is already deployed`
+          );
+        }
+      }
+
+      // Ensure integration knowledge index entry exists first (synchronous)
+      if (this.options.currentUser) {
+        this.options.logger.debug('Checking integration knowledge index entry...');
+        try {
+          await ensureIntegrationKnowledgeIndexEntry(
+            this,
+            this.options.logger.get('integrationKnowledge')
+          );
+        } catch (error) {
+          this.options.logger.error(
+            `Failed to ensure integration knowledge index entry: ${error.message}`
           );
         }
       }
