@@ -72,9 +72,9 @@ export interface DataViewEditorProps {
    */
   showManagementLink?: boolean;
   /**
-   * Optional help text to show when editing a data view
+   * Optional callback to get help text based on the active data view
    */
-  indexHelpText?: string;
+  getDataViewHelpText?: (dataView: DataView) => string | undefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

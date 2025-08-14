@@ -137,15 +137,18 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
     [dataViewId, data.dataViews, scope, dataViewFieldEditor, handleChangeDataView]
   );
 
-  const indexHelpText = useMemo(() => {
-    if (dataViewId === defaultDataViewId) {
-      return i18n.translate('xpack.securitySolution.dataViewManager.indexHelpText', {
-        defaultMessage:
-          'Security default indices are managed in advanced settings. To change the indices permanently, edit the indices in advanced settings.',
-      });
-    }
-    return undefined;
-  }, [dataViewId, defaultDataViewId]);
+  const getDataViewHelpText = useMemo(
+    () => (dv: DataView) => {
+      if (dv.id === defaultDataViewId) {
+        return i18n.translate('xpack.securitySolution.dataViewManager.getDataViewHelpText', {
+          defaultMessage:
+            'Security default indices are managed in Advanced Settings. To change the indices permanently, edit the indices in Advanced Settings.',
+        });
+      }
+      return undefined;
+    },
+    [defaultDataViewId]
+  );
 
   /**
    * Selects data view again. After changes are made to the data view, this results in cache invalidation and will force the reload everywhere.
@@ -191,7 +194,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
         savedDataViews={savedDataViews}
         managedDataViews={managedDataViews}
         onClosePopover={onClosePopover}
-        indexHelpText={indexHelpText}
+        getDataViewHelpText={getDataViewHelpText}
       />
     </div>
   );

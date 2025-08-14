@@ -77,9 +77,9 @@ export interface DataViewPickerProps {
    */
   onClosePopover?: () => void;
   /**
-   * Message to show when editing a managed data view
+   * Optional callback to get help text based on the active data view
    */
-  indexHelpText?: string;
+  getDataViewHelpText?: (dataView: DataView) => string | undefined;
 }
 
 export const DataViewPicker = ({
@@ -97,7 +97,7 @@ export const DataViewPicker = ({
   selectableProps,
   onCreateDefaultAdHocDataView,
   isDisabled,
-  indexHelpText,
+  getDataViewHelpText,
 }: DataViewPickerProps) => {
   return (
     <ChangeDataView
@@ -115,7 +115,7 @@ export const DataViewPicker = ({
       savedDataViews={savedDataViews}
       selectableProps={selectableProps}
       isDisabled={isDisabled}
-      indexHelpText={indexHelpText}
+      getDataViewHelpText={getDataViewHelpText}
     />
   );
 };

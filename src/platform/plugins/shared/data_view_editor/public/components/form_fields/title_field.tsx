@@ -30,7 +30,7 @@ interface TitleFieldProps {
     matchedIndices: MatchedIndicesSet;
     rollupIndex: string | null | undefined;
   }>;
-  indexHelpText?: string;
+  titleHelpText?: string;
 }
 
 const rollupIndexPatternNoMatchError = {
@@ -115,13 +115,13 @@ interface GetTitleConfigArgs {
   isRollup: boolean;
   matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
-  indexHelpText?: string;
+  titleHelpText?: string;
 }
 
 const getTitleConfig = ({
   isRollup,
   rollupIndicesCapabilities,
-  indexHelpText,
+  titleHelpText,
 }: GetTitleConfigArgs): FieldConfig<string> => {
   const titleFieldConfig = schema.title;
 
@@ -137,7 +137,7 @@ const getTitleConfig = ({
   return {
     ...titleFieldConfig!,
     validations,
-    helpText: indexHelpText,
+    helpText: titleHelpText,
   };
 };
 
@@ -146,7 +146,7 @@ export const TitleField = ({
   matchedIndices$,
   rollupIndicesCapabilities,
   indexPatternValidationProvider,
-  indexHelpText,
+  titleHelpText,
 }: TitleFieldProps) => {
   const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
   const matchedIndices = useObservable(matchedIndices$, matchedIndiciesDefault).exactMatchedIndices;
@@ -157,9 +157,9 @@ export const TitleField = ({
         isRollup,
         matchedIndices,
         rollupIndicesCapabilities,
-        indexHelpText,
+        titleHelpText,
       }),
-    [isRollup, matchedIndices, rollupIndicesCapabilities, indexHelpText]
+    [isRollup, matchedIndices, rollupIndicesCapabilities, titleHelpText]
   );
 
   return (

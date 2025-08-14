@@ -50,7 +50,7 @@ export const getEditorOpener =
       requireTimestampField = false,
       allowAdHocDataView = false,
       editData,
-      indexHelpText,
+      getDataViewHelpText,
     }: DataViewEditorProps): CloseEditor => {
       const closeEditor = () => {
         if (overlayRef) {
@@ -81,7 +81,7 @@ export const getEditorOpener =
               requireTimestampField={requireTimestampField}
               allowAdHocDataView={allowAdHocDataView}
               showManagementLink={Boolean(editData && editData.isPersisted())}
-              indexHelpText={indexHelpText}
+              getDataViewHelpText={getDataViewHelpText}
             />
           </KibanaReactContextProvider>,
           core

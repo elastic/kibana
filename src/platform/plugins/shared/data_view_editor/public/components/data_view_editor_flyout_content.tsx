@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiTitle,
@@ -70,7 +70,7 @@ export interface Props {
   showManagementLink?: boolean;
   allowAdHoc: boolean;
   dataViewEditorService: DataViewEditorService;
-  indexHelpText?: string;
+  getDataViewHelpText?: (dataView: DataView) => string | undefined;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
@@ -88,7 +88,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   editData,
   allowAdHoc,
   showManagementLink,
-  indexHelpText,
+  getDataViewHelpText,
   dataViewEditorService,
 }: Props) => {
   const styles = useMemoCss(componentStyles);
@@ -197,6 +197,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
   }, [dataViewEditorService, type]);
 
   const getRollupIndices = (rollupCapsRes: RollupIndicesCapsResponse) => Object.keys(rollupCapsRes);
+  const titleHelpText = useMemo(
+    () => editData && getDataViewHelpText && getDataViewHelpText(editData),
+    [editData, getDataViewHelpText]
+  );
 
   const onTypeChange = useCallback(
     (newType: INDEX_PATTERN_TYPE) => {
@@ -300,7 +304,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                   indexPatternValidationProvider={
                     dataViewEditorService.indexPatternValidationProvider
                   }
-                  indexHelpText={indexHelpText}
+                  titleHelpText={titleHelpText}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
