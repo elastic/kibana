@@ -203,7 +203,27 @@ export function convertToWorkflowGraph(workflowSchema: WorkflowYaml): graphlib.G
   let previousNode: any | null = null;
 
   workflowSchema.steps.forEach((currentStep, index) => {
-    const currentNode = visitAbstractStep(graph, previousNode, currentStep);
+    let toVisit = currentStep;
+
+    if (currentStep.if) {
+      toVisit = {
+        name: `if_${getNodeId(currentStep)}`,
+        type: 'if',
+        condition: currentStep.if,
+        steps: [toVisit],
+      } as IfStep;
+    }
+
+    if (currentStep.foreach) {
+      toVisit = {
+        name: `foreach_${getNodeId(currentStep)}`,
+        type: 'foreach',
+        foreach: currentStep.foreach,
+        steps: [toVisit],
+      } as ForEachStep;
+    }
+
+    const currentNode = visitAbstractStep(graph, previousNode, toVisit);
     previousNode = currentNode;
   });
 
