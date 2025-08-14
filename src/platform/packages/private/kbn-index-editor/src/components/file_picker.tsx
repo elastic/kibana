@@ -18,7 +18,7 @@ export const FilePicker = () => {
 
   return (
     <EuiButton
-      size={'m'}
+      size={'s'}
       color={'text'}
       onClick={() => {
         onFileSelectorClick();

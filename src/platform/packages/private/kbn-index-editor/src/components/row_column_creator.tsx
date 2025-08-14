@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { RefObject } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { EuiDataGridRefProps } from '@kbn/unified-data-table';
@@ -49,12 +49,16 @@ export const RowColumnCreator = ({
     <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty onClick={toggleAddRow} iconType="plusInCircle" size="s">
-          <FormattedMessage defaultMessage="Add document" id="indexEditor.addRow" />
+          <EuiText size="xs">
+            <FormattedMessage defaultMessage="Add document" id="indexEditor.addRow" />
+          </EuiText>
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty onClick={toggleAddColumn} iconType="plusInCircle" size="s">
-          <FormattedMessage defaultMessage="Add field" id="indexEditor.addColumn" />
+          <EuiText size="xs">
+            <FormattedMessage defaultMessage="Add field" id="indexEditor.addColumn" />
+          </EuiText>
         </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>
