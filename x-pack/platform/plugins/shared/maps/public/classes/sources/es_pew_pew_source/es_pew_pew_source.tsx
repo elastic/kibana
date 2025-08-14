@@ -44,9 +44,12 @@ export const sourceTitle = i18n.translate('xpack.maps.source.pewPewTitle', {
 });
 
 export class ESPewPewSource extends AbstractESAggSource {
-  readonly _descriptor: ESPewPewSourceDescriptor;
+  readonly _descriptor: ESPewPewSourceDescriptor &
+    Required<Pick<ESPewPewSourceDescriptor, 'metrics'>>;
 
-  static createDescriptor(descriptor: Partial<ESPewPewSourceDescriptor>): ESPewPewSourceDescriptor {
+  static createDescriptor(
+    descriptor: Partial<ESPewPewSourceDescriptor>
+  ): ESPewPewSourceDescriptor & Required<Pick<ESPewPewSourceDescriptor, 'metrics'>> {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
     if (!isValidStringConfig(descriptor.sourceGeoField)) {
       throw new Error('Cannot create ESPewPewSourceDescriptor, sourceGeoField is not provided');
@@ -63,8 +66,9 @@ export class ESPewPewSource extends AbstractESAggSource {
   }
 
   constructor(descriptor: ESPewPewSourceDescriptor) {
-    super(descriptor);
-    this._descriptor = descriptor;
+    const normalizedDescriptor = ESPewPewSource.createDescriptor(descriptor);
+    super(normalizedDescriptor);
+    this._descriptor = normalizedDescriptor;
   }
 
   getBucketsName() {

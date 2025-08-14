@@ -16,7 +16,7 @@ import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { isEsqlTool } from '@kbn/onechat-common/tools';
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { useToolsPreferences } from '../../../context/tools_preferences_provider';
-import { useOnechatTools } from '../../../hooks/tools/use_tools';
+import { useToolsService } from '../../../hooks/tools/use_tools';
 import { labels } from '../../../utils/i18n';
 import { getToolsTableColumns } from './tools_table_columns';
 import { ToolsTableHeader } from './tools_table_header';
@@ -30,7 +30,7 @@ export const OnechatToolsTable = memo(() => {
     tools,
     isLoading: isLoadingTools,
     error: toolsError,
-  } = useOnechatTools({
+  } = useToolsService({
     includeSystemTools,
   });
   const [tablePageIndex, setTablePageIndex] = useState(0);
