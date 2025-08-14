@@ -34,7 +34,7 @@ import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import type { DiagnosticFormState } from './types';
 import type { ServiceMapDiagnosticResponse } from '../../../../../common/service_map_diagnostic_types';
 
- const FORBIDDEN_SERVICE_NAMES = ['constructor'];
+const FORBIDDEN_SERVICE_NAMES = ['constructor'];
 
 interface DiagnosticFlyoutProps {
   onClose: () => void;
