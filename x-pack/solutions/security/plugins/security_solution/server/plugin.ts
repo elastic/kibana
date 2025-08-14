@@ -15,7 +15,7 @@ import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
-import type { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
