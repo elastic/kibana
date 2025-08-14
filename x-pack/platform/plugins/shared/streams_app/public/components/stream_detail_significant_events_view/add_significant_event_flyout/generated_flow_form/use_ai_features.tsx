@@ -22,7 +22,7 @@ export function useAIFeatures() {
   const license = useObservable(licensing.license$);
   const genAiConnectors = observabilityAIAssistant?.useGenAIConnectors();
 
-  if (!observabilityAIAssistant || !genAiConnectors || genAiConnectors.loading) {
+  if (!observabilityAIAssistant || !genAiConnectors) {
     return null;
   }
 

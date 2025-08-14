@@ -32,8 +32,6 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
   const aiFeatures = useAIFeatures();
   const { generate } = useSignificantEventsApi({ name: definition.name });
 
-  const isAIFeaturesEnabled = aiFeatures && aiFeatures.enabled;
-
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
   const [selectedQueries, setSelectedQueries] = useState<StreamQueryKql[]>([]);
@@ -57,11 +55,11 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
         </h3>
       </EuiTitle>
 
-      {!isAIFeaturesEnabled && (
+      {aiFeatures && !aiFeatures.enabled && !aiFeatures.genAiConnectors.loading && (
         <AIFeaturesDisabledCallout couldBeEnabled={aiFeatures?.couldBeEnabled ?? false} />
       )}
 
-      {isAIFeaturesEnabled && (
+      {aiFeatures && aiFeatures.enabled && (
         <>
           <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
