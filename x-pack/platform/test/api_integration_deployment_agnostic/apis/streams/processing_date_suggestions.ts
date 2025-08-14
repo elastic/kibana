@@ -57,7 +57,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream: {
           name: TEST_STREAM_NAME,
         },
-        if: {
+        where: {
           field: 'host.name',
           eq: 'test-host',
         },

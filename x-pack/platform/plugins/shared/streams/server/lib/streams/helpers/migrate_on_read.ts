@@ -10,7 +10,6 @@ import { BaseStream } from '@kbn/streams-schema/src/models/base';
 import {
   migrateRoutingIfConditionToStreamlang,
   migrateOldProcessingArrayToStreamlang,
-  isLegacyCondition,
 } from './migrate_to_streamlang_on_read';
 
 export function migrateOnRead(definition: Record<string, unknown>): Streams.all.Definition {
@@ -52,9 +51,7 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     (migratedDefinition.ingest as { wired?: unknown }).wired &&
     typeof (migratedDefinition.ingest as { wired?: any }).wired === 'object' &&
     Array.isArray((migratedDefinition.ingest as { wired?: any }).wired.routing) &&
-    (migratedDefinition.ingest as { wired?: any }).wired.routing.some((route: any) =>
-      isLegacyCondition(route.if)
-    )
+    (migratedDefinition.ingest as { wired?: any }).wired.routing.some((route: any) => 'if' in route)
   ) {
     migratedDefinition = migrateRoutingIfConditionToStreamlang(migratedDefinition);
     hasBeenMigrated = true;

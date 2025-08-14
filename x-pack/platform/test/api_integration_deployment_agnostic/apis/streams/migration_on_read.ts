@@ -162,7 +162,7 @@ const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
       routing: [
         {
           destination: 'logs.wiredChild.child',
-          if: {
+          where: {
             field: 'resource.attributes.host.name',
             eq: 'myHost',
           },

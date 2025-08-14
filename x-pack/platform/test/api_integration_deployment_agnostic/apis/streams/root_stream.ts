@@ -167,7 +167,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               routing: [
                 {
                   destination: 'logs.gcpcloud',
-                  if: {
+                  where: {
                     field: 'cloud.provider',
                     eq: 'gcp',
                   },

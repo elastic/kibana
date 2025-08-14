@@ -148,7 +148,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
               routing: [
                 {
                   destination: this._definition.name,
-                  if: { never: {} },
+                  where: { never: {} },
                 },
               ],
             },
@@ -206,7 +206,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
                     ...currentParentRouting,
                     {
                       destination: this._definition.name,
-                      if: { never: {} },
+                      where: { never: {} },
                     },
                   ],
                 },

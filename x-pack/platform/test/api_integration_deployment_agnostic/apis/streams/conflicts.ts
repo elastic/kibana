@@ -40,7 +40,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx',
           },
-          if: {
+          where: {
             field: 'resource.attributes.host.name',
             eq: 'routeme',
           },
@@ -49,7 +49,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.apache',
           },
-          if: {
+          where: {
             field: 'resource.attributes.host.name',
             eq: 'routeme2',
           },
@@ -110,7 +110,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should not allow to create a wired stream with the same name as an existing index', async () => {
         const stream = {
           stream: { name: 'logs.existingindex' },
-          if: {
+          where: {
             field: 'resource.attributes.host.name',
             eq: 'routeme',
           },
@@ -121,7 +121,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should not allow to create a wired stream with the same name as an existing data stream', async () => {
         const stream = {
           stream: { name: 'logs.existingstream' },
-          if: {
+          where: {
             field: 'resource.attributes.host.name',
             eq: 'routeme',
           },

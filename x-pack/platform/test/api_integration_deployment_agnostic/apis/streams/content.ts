@@ -78,7 +78,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           routing: [
             {
               destination: 'logs.branch_a.child1.nested',
-              if: { field: 'resource.attributes.hello', eq: 'yes' },
+              where: { field: 'resource.attributes.hello', eq: 'yes' },
             },
           ],
         })
@@ -96,11 +96,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           routing: [
             {
               destination: 'logs.branch_a.child1',
-              if: { field: 'resource.attributes.foo', eq: 'bar' },
+              where: { field: 'resource.attributes.foo', eq: 'bar' },
             },
             {
               destination: 'logs.branch_a.child2',
-              if: { field: 'resource.attributes.bar', eq: 'foo' },
+              where: { field: 'resource.attributes.bar', eq: 'foo' },
             },
           ],
         })
@@ -112,11 +112,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           routing: [
             {
               destination: 'logs.branch_b.child1',
-              if: { field: 'resource.attributes.foo', eq: 'bar' },
+              where: { field: 'resource.attributes.foo', eq: 'bar' },
             },
             {
               destination: 'logs.branch_b.child2',
-              if: { field: 'resource.attributes.bar', eq: 'foo' },
+              where: { field: 'resource.attributes.bar', eq: 'foo' },
             },
           ],
         })
@@ -224,7 +224,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(rootEntry.request.stream.ingest.wired.routing).to.eql([
           {
             destination: 'branch_a',
-            if: { never: {} },
+            where: { never: {} },
           },
         ]);
         const leafEntry = contentPack.entries.find(
@@ -368,7 +368,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(updatedStream.stream.ingest.wired.routing).to.eql([
           {
             destination: 'logs.branch_c.nested',
-            if: {
+            where: {
               field: 'resource.attributes.hello',
               eq: 'yes',
             },
@@ -438,7 +438,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(updatedStream.stream.ingest.wired.routing).to.eql([
           {
             destination: 'logs.branch_d.branch_b',
-            if: { never: {} },
+            where: { never: {} },
           },
         ]);
       });
@@ -561,7 +561,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       routing: [
                         {
                           destination: 'child',
-                          if: { never: {} },
+                          where: { never: {} },
                         },
                       ],
                     },

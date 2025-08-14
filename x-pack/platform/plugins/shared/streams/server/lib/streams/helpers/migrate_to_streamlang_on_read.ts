@@ -17,9 +17,11 @@ export const migrateRoutingIfConditionToStreamlang = (definition: Record<string,
   const routingArr = (definition.ingest as { wired: { routing: OldRoutingDefinition[] } }).wired
     .routing;
   const migratedRouting = routingArr.map((route) => {
+    const { if: oldIf, ...rest } = route;
+    const where = recursivelyConvertCondition(oldIf);
     return {
-      ...route,
-      if: recursivelyConvertCondition(route.if),
+      ...rest,
+      where,
     };
   });
   return {
@@ -109,25 +111,6 @@ export const migrateOldProcessingArrayToStreamlang = (definition: Record<string,
     },
   };
 };
-
-export function isLegacyCondition(condition: OldCondition): boolean {
-  if (!condition || typeof condition !== 'object') return false;
-
-  if ('operator' in condition && typeof condition.operator === 'string') {
-    return true;
-  }
-
-  if ('and' in condition && Array.isArray(condition.and)) {
-    return condition.and.some(isLegacyCondition);
-  }
-
-  if ('or' in condition && Array.isArray(condition.or)) {
-    return condition.or.some(isLegacyCondition);
-  }
-
-  // always/never and other types do not have operator
-  return false;
-}
 
 /** Drills down until we find filter conditions and converts from the old
  * syntax to the new Streamlang syntax.

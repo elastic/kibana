@@ -56,7 +56,7 @@ export function createUpsertStreamActor({
 export type ForkStreamResponse = APIReturnType<'POST /api/streams/{name}/_fork 2023-10-31'>;
 export interface ForkStreamInput {
   definition: Streams.WiredStream.GetResponse;
-  if: Condition;
+  where: Condition;
   destination: string;
 }
 export function createForkStreamActor({
@@ -75,7 +75,7 @@ export function createForkStreamActor({
             name: input.definition.stream.name,
           },
           body: {
-            if: input.if,
+            where: input.where,
             stream: {
               name: input.destination,
             },

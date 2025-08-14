@@ -80,7 +80,7 @@ const streams: StreamPutItem[] = [
           routing: [
             {
               destination: 'logs.test',
-              if: {
+              where: {
                 and: [
                   {
                     field: 'attributes.numberfield',
@@ -91,7 +91,7 @@ const streams: StreamPutItem[] = [
             },
             {
               destination: 'logs.test2',
-              if: {
+              where: {
                 and: [
                   {
                     field: 'attributes.field2',

@@ -11,12 +11,12 @@ import { NonEmptyString } from '@kbn/zod-helpers';
 
 export interface RoutingDefinition {
   destination: string;
-  if: Condition;
+  where: Condition;
 }
 
 export const routingDefinitionSchema: z.Schema<RoutingDefinition> = z.object({
   destination: NonEmptyString,
-  if: conditionSchema,
+  where: conditionSchema,
 });
 
 export const routingDefinitionListSchema: z.Schema<RoutingDefinition[]> =

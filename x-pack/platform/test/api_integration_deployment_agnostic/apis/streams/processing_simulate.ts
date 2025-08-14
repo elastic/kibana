@@ -91,7 +91,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream: {
           name: 'logs.test',
         },
-        if: {
+        where: {
           field: 'resource.attributes.host.name',
           eq: TEST_HOST,
         },

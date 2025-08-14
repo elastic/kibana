@@ -295,11 +295,11 @@ export class StreamsClient {
   async forkStream({
     parent,
     name,
-    if: condition,
+    where: condition,
   }: {
     parent: string;
     name: string;
-    if: Condition;
+    where: Condition;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = Streams.WiredStream.Definition.parse(await this.getStream(parent));
 
@@ -321,7 +321,7 @@ export class StreamsClient {
                 ...parentDefinition.ingest.wired,
                 routing: parentDefinition.ingest.wired.routing.concat({
                   destination: name,
-                  if: condition,
+                  where: condition,
                 }),
               },
             },

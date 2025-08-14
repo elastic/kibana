@@ -91,7 +91,7 @@ export function RoutingStreamEntry({
             <EuiIcon type="grabOmnidirectional" />
           </EuiPanel>
         </EuiFlexItem>
-        {isNeverCondition(routingRule.if) && (
+        {isNeverCondition(routingRule.where) && (
           <EuiBadge color="hollow">
             {i18n.translate('xpack.streams.streamDetailRouting.disabled', {
               defaultMessage: 'Disabled',
@@ -112,7 +112,7 @@ export function RoutingStreamEntry({
           `}
         >
           <EuiText component="p" size="s" color="subdued" className="eui-textTruncate">
-            <ConditionMessage condition={routingRule.if} />
+            <ConditionMessage condition={routingRule.where} />
           </EuiText>
         </EuiFlexItem>
         {childrenCount > 0 && (
@@ -136,8 +136,8 @@ export function RoutingStreamEntry({
       {isEditing && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <RoutingConditionEditor
-            condition={routingRule.if}
-            onConditionChange={(condition) => onChange({ if: condition })}
+            condition={routingRule.where}
+            onConditionChange={(condition) => onChange({ where: condition })}
           />
           <EditRoutingRuleControls
             relatedStreams={availableStreams.filter(

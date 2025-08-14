@@ -63,7 +63,7 @@ export const getStreamsApiService = ({
           method: 'POST',
           path: `${basePath}/api/streams/${streamName}/_fork`,
           body: {
-            if: condition,
+            where: condition,
             stream: {
               name: newStreamName,
             },

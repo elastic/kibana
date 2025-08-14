@@ -222,7 +222,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...wiredPutBody.stream.ingest,
               wired: {
                 fields: {},
-                routing: [{ destination: 'logs.overrides.lifecycle', if: { never: {} } }],
+                routing: [{ destination: 'logs.overrides.lifecycle', where: { never: {} } }],
               },
               lifecycle: { dsl: { data_retention: '1d' } },
             },
@@ -275,7 +275,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...wiredPutBody.stream.ingest,
               wired: {
                 fields: {},
-                routing: [{ destination: 'logs.10d.20d.inherits', if: { never: {} } }],
+                routing: [{ destination: 'logs.10d.20d.inherits', where: { never: {} } }],
               },
             },
           },
@@ -349,7 +349,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 ...wiredPutBody.stream.ingest,
                 wired: {
                   fields: {},
-                  routing: [{ destination: 'logs.ilm.stream', if: { never: {} } }],
+                  routing: [{ destination: 'logs.ilm.stream', where: { never: {} } }],
                 },
                 lifecycle: { ilm: { policy: 'my-policy' } },
               },

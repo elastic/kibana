@@ -217,7 +217,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx',
           },
-          if: {
+          where: {
             field: 'attributes.log.logger',
             eq: 'nginx',
           },
@@ -231,7 +231,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx',
           },
-          if: {
+          where: {
             field: 'log.logger',
             eq: 'nginx',
           },
@@ -266,7 +266,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx.access',
           },
-          if: { field: 'severity_text', eq: 'info' },
+          where: { field: 'severity_text', eq: 'info' },
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
@@ -298,7 +298,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx.error',
           },
-          if: { field: 'attributes.log', eq: 'error' },
+          where: { field: 'attributes.log', eq: 'error' },
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
@@ -330,7 +330,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.number-test',
           },
-          if: { field: 'attributes.code', gte: '500' },
+          where: { field: 'attributes.code', gte: '500' },
         };
         const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
@@ -360,7 +360,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.string-test',
           },
-          if: {
+          where: {
             or: [
               { field: 'body.text', contains: '500' },
               { field: 'body.text', contains: 400 },
@@ -393,7 +393,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.weird-characters',
           },
-          if: {
+          where: {
             or: [
               {
                 field: 'attributes.@abc.weird fieldname',
@@ -535,7 +535,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ).to.eql([
           {
             destination: 'logs.nginx.error',
-            if: {
+            where: {
               field: 'attributes.log',
               eq: 'error',
             },

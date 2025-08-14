@@ -21,7 +21,7 @@ export function generateReroutePipeline({ definition }: GenerateReroutePipelineP
       return {
         reroute: {
           destination: child.destination,
-          if: conditionToPainless(child.if),
+          if: conditionToPainless(child.where),
         },
       };
     }),
