@@ -55,6 +55,7 @@ export const createMockConfig = (): ConfigType => {
       monitoring: {
         privileges: {
           users: {
+            maxPrivilegedUsersAllowed: 100,
             csvUpload: {
               errorRetries: 3,
               maxBulkRequestBodySizeBytes: 10_485_760,
