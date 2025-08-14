@@ -57,4 +57,4 @@ export const useKibana = () => _useKibana<AppServicesContext>();
 
 export type { CloudSetup } from '@kbn/cloud-plugin/public';
 
-export type { ILicense } from '@kbn/licensing-plugin/public';
+export type { ILicense } from '@kbn/licensing-types';

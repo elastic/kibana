@@ -14,7 +14,7 @@ import {
 } from '@kbn/core/server';
 
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { LicenseType } from '@kbn/licensing-types';
 
 export interface LicenseStatus {
   isValid: boolean;

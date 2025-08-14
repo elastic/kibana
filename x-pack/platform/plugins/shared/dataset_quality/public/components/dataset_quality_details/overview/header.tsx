@@ -7,17 +7,15 @@
 
 import {
   EuiFlexGroup,
-  EuiIcon,
   EuiSuperDatePicker,
   EuiTitle,
-  EuiToolTip,
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { useDatasetQualityDetailsState } from '../../../hooks';
-import { overviewHeaderTitle, overviewTitleTooltip } from '../../../../common/translations';
+import { overviewHeaderTitle } from '../../../../common/translations';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -50,9 +48,6 @@ export default function OverviewHeader({
         <EuiTitle size="s">
           <span>{overviewHeaderTitle}</span>
         </EuiTitle>
-        <EuiToolTip content={overviewTitleTooltip}>
-          <EuiIcon size="m" color="subdued" type="question" className="eui-alignTop" />
-        </EuiToolTip>
       </EuiFlexGroup>
 
       <EuiFlexGroup

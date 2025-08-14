@@ -70,7 +70,8 @@ export type ManagementId =
   | 'triggersActionsConnectors'
   | 'upgrade_assistant'
   | 'users'
-  | 'watcher';
+  | 'watcher'
+  | 'genAiSettings';
 
 export type ManagementDeepLinkId = MonitoringAppId | `${ManagementAppId}:${ManagementId}`;
 

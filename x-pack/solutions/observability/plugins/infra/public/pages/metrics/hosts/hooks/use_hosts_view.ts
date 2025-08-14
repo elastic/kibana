@@ -26,15 +26,15 @@ import type {
 } from '../../../../../common/http_api';
 import type { StringDateRange } from './use_unified_search_url_state';
 
-const HOST_TABLE_METRICS: InfraEntityMetricType[] = [
+const COMMON_HOST_METRICS: InfraEntityMetricType[] = [
   'cpuV2',
   'diskSpaceUsage',
   'memory',
   'memoryFree',
   'normalizedLoad1m',
-  'rxV2',
-  'txV2',
 ];
+const HOST_TABLE_METRICS: InfraEntityMetricType[] = [...COMMON_HOST_METRICS, 'rxV2', 'txV2'];
+const OTEL_HOSTS_TABLE_METRICS: InfraEntityMetricType[] = [...COMMON_HOST_METRICS];
 
 const BASE_INFRA_METRICS_PATH = '/api/metrics/infra';
 
@@ -107,10 +107,7 @@ const createInfraMetricsRequest = ({
   query: esQuery,
   from: dateRange.from,
   to: dateRange.to,
-  metrics:
-    schema === 'ecs'
-      ? HOST_TABLE_METRICS
-      : HOST_TABLE_METRICS.filter((metric) => !['rxV2', 'txV2'].includes(metric)),
+  metrics: schema === 'semconv' ? OTEL_HOSTS_TABLE_METRICS : HOST_TABLE_METRICS,
   limit,
   schema,
 });

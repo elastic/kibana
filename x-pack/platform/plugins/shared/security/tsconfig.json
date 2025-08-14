@@ -94,6 +94,7 @@
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/react-kibana-context-theme",
     "@kbn/css-utils",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

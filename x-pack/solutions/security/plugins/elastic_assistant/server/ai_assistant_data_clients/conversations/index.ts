@@ -35,7 +35,7 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
   }
 
   /**
-   * Updates a conversation with the new messages.
+   * Gets a conversation by its id.
    * @param options
    * @param options.id The existing conversation id.
    * @param options.authenticatedUser Current authenticated user.
