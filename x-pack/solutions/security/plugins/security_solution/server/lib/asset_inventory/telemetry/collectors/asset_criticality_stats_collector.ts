@@ -7,40 +7,7 @@
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { AggregationBucket, AggregationOnlyResponse, AssetCriticalityStats } from '../type';
-
-const getAssetCriticalityAggsQuery = (index: string) => ({
-  size: 0,
-  index,
-  aggs: {
-    asset_criticality_terms: {
-      terms: {
-        field: 'asset.criticality',
-        size: 10,
-        order: {
-          last_doc_timestamp: 'desc' as const,
-        },
-      },
-      aggs: {
-        last_doc_timestamp: {
-          max: {
-            field: '@timestamp',
-          },
-        },
-      },
-    },
-  },
-});
-
-/**
- * Structure of the full Elasticsearch aggregation response.
- */
-export interface AggregationResponse {
-  aggregations: {
-    entity_type_terms: {
-      buckets: AggregationBucket[];
-    };
-  };
-}
+import { getAggsQuery } from '../helper';
 
 /**
  * Parses aggregation buckets into a simplified list of entity stats.
@@ -64,27 +31,29 @@ export const getAssetCriticalityStats = async (
 ): Promise<AssetCriticalityStats[]> => {
   try {
     const isIndexExists = await esClient.indices.exists({
-      index: '.entities.v1.latest*',
+      index: '.entities*',
     });
 
     if (!isIndexExists) {
-      logger.debug('Index ".entities.v1.latest*" does not exist.');
+      logger.debug('Index ".entities*" does not exist.');
       return [];
     }
 
-    const entityTypeStats = await esClient.search<
+    const assetCriticalityStats = await esClient.search<
       unknown,
       {
-        asset_criticality_terms: {
+        field_terms: {
           buckets: AggregationBucket[];
         };
       }
-    >(getAssetCriticalityAggsQuery('.entities.v1.latest*'));
+    >(getAggsQuery('asset.criticality', 10));
 
-    const buckets = entityTypeStats.aggregations?.asset_criticality_terms?.buckets ?? [];
+    const buckets = assetCriticalityStats.aggregations?.field_terms?.buckets ?? [];
     return parseAssetCriticalityAggs({ buckets });
   } catch (e) {
-    logger.error(`Failed to get entity type stats: ${e instanceof Error ? e.message : String(e)}`);
+    logger.error(
+      `Failed to get asset criticality stats: ${e instanceof Error ? e.message : String(e)}`
+    );
     return [];
   }
 };

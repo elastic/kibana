@@ -58,9 +58,6 @@ export function registerAssetInventoryUsageCollector(
       };
 
       const esClient = collectorFetchContext.esClient;
-      //   const encryptedSoClient = (await coreServices)[0].savedObjects.createInternalRepository([
-      //     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-      //   ]);
 
       const [
         entitiesStats,
@@ -69,9 +66,8 @@ export function registerAssetInventoryUsageCollector(
         entitySourceStats,
         assetCriticalityStats,
       ] = await Promise.all([
-        awaitPromiseSafe('Entities', getEntityStats(esClient, '.entities.v1.latest*', logger)),
+        awaitPromiseSafe('Entities', getEntityStats(esClient, '.entities*', logger)),
         awaitPromiseSafe('Entities Type', getEntitiesTypeStats(esClient, logger)),
-        // Fix this
         awaitPromiseSafe('Entity Store', getEntityStoreStats(esClient, logger)),
         awaitPromiseSafe('Entity Source', getEntitySourceStats(esClient, logger)),
         awaitPromiseSafe('Asset Criticality', getAssetCriticalityStats(esClient, logger)),

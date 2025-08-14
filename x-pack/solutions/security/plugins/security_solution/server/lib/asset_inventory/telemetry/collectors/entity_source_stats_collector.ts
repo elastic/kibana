@@ -7,40 +7,7 @@
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { AggregationBucket, AggregationOnlyResponse, EntitySourceStats } from '../type';
-
-const getEntitySourceAggsQuery = (index: string) => ({
-  size: 0,
-  index,
-  aggs: {
-    entity_source_terms: {
-      terms: {
-        field: 'entity.source',
-        size: 5,
-        order: {
-          last_doc_timestamp: 'desc' as const,
-        },
-      },
-      aggs: {
-        last_doc_timestamp: {
-          max: {
-            field: '@timestamp',
-          },
-        },
-      },
-    },
-  },
-});
-
-/**
- * Structure of the full Elasticsearch aggregation response.
- */
-export interface AggregationResponse {
-  aggregations: {
-    entity_source_terms: {
-      buckets: AggregationBucket[];
-    };
-  };
-}
+import { getAggsQuery } from '../helper';
 
 /**
  * Parses aggregation buckets into a simplified list of entity stats.
@@ -62,27 +29,29 @@ export const getEntitySourceStats = async (
 ): Promise<EntitySourceStats[]> => {
   try {
     const isIndexExists = await esClient.indices.exists({
-      index: '.entities.v1.latest*',
+      index: '.entities*',
     });
 
     if (!isIndexExists) {
-      logger.debug('Index ".entities.v1.latest*" does not exist.');
+      logger.debug('Index ".entities*" does not exist.');
       return [];
     }
 
-    const entityTypeStats = await esClient.search<
+    const entitySourceStats = await esClient.search<
       unknown,
       {
-        entity_source_terms: {
+        field_terms: {
           buckets: AggregationBucket[];
         };
       }
-    >(getEntitySourceAggsQuery('.entities.v1.latest*'));
+    >(getAggsQuery('entity.source', 500));
 
-    const buckets = entityTypeStats.aggregations?.entity_source_terms?.buckets ?? [];
+    const buckets = entitySourceStats.aggregations?.field_terms?.buckets ?? [];
     return parseEntitySourceAggs({ buckets });
   } catch (e) {
-    logger.error(`Failed to get entity type stats: ${e instanceof Error ? e.message : String(e)}`);
+    logger.error(
+      `Failed to get entity source stats: ${e instanceof Error ? e.message : String(e)}`
+    );
     return [];
   }
 };

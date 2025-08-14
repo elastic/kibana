@@ -7,43 +7,7 @@
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { AggregationBucket, AggregationOnlyResponse, EntitiesTypeStats } from '../type';
-
-/**
- * Elasticsearch aggregation query for top entity types by most recent timestamp.
- */
-export const getEntityTypeAggsQuery = (index: string) => ({
-  size: 0,
-  index,
-  aggs: {
-    entity_type_terms: {
-      terms: {
-        field: 'entity.type',
-        size: 100,
-        order: {
-          last_doc_timestamp: 'desc' as const,
-        },
-      },
-      aggs: {
-        last_doc_timestamp: {
-          max: {
-            field: '@timestamp',
-          },
-        },
-      },
-    },
-  },
-});
-
-/**
- * Structure of the full Elasticsearch aggregation response.
- */
-export interface AggregationResponse {
-  aggregations: {
-    entity_type_terms: {
-      buckets: AggregationBucket[];
-    };
-  };
-}
+import { getAggsQuery } from '../helper';
 
 /**
  * Parses aggregation buckets into a simplified list of entity stats.
@@ -65,24 +29,24 @@ export const getEntitiesTypeStats = async (
 ): Promise<EntitiesTypeStats[]> => {
   try {
     const isIndexExists = await esClient.indices.exists({
-      index: '.entities.v1.latest*',
+      index: '.entities*',
     });
 
     if (!isIndexExists) {
-      logger.debug('Index ".entities.v1.latest*" does not exist.');
+      logger.debug('Index ".entities*" does not exist.');
       return [];
     }
 
     const entityTypeStats = await esClient.search<
       unknown,
       {
-        entity_type_terms: {
+        field_terms: {
           buckets: AggregationBucket[];
         };
       }
-    >(getEntityTypeAggsQuery('.entities.v1.latest*'));
+    >(getAggsQuery('entity.type', 100));
 
-    const buckets = entityTypeStats.aggregations?.entity_type_terms?.buckets ?? [];
+    const buckets = entityTypeStats.aggregations?.field_terms?.buckets ?? [];
     return parseEntityTypeAggs({ buckets });
   } catch (e) {
     logger.error(`Failed to get entity type stats: ${e instanceof Error ? e.message : String(e)}`);
