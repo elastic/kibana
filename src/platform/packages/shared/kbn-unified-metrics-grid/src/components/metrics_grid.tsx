@@ -58,7 +58,12 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
 
   if (loading) {
     return (
-      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '400px' }}>
+      <EuiFlexGroup
+        data-test-subj="loading-metrics-charts"
+        justifyContent="center"
+        alignItems="center"
+        style={{ minHeight: '400px' }}
+      >
         <EuiFlexItem grow={false}>
           <EuiLoadingChart size="m" />
         </EuiFlexItem>
@@ -75,10 +80,18 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
   }
 
   return (
-    <EuiFlexGrid columns={getColumns()} gutterSize="l" style={{ margin: '16px' }}>
+    <EuiFlexGrid
+      data-test-subj="metrics-grid"
+      columns={getColumns()}
+      gutterSize="l"
+      style={{ margin: '16px' }}
+    >
       {pivotOn === 'metric'
         ? fields.map((field, index) => (
-            <EuiFlexItem key={`${field.name}-${displayDensity}`}>
+            <EuiFlexItem
+              key={`${field.name}-${displayDensity}`}
+              data-test-subj={`metric-chart-${field.name}`}
+            >
               <MetricChart
                 metric={field}
                 timeRange={timeRange}
@@ -86,6 +99,7 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
                 filters={filters}
                 colorIndex={index}
                 displayDensity={displayDensity}
+                data-test-subj={`metric-chart-${field.name}`}
               />
             </EuiFlexItem>
           ))
