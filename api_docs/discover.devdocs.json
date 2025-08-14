@@ -2359,7 +2359,9 @@
               "\nState manager for runtime state that can't be stored in Redux"
             ],
             "signature": [
-              "ReactiveRuntimeState<DiscoverRuntimeState, never> & { tabs: { byId: Record<string, ReactiveTabRuntimeState>; }; }"
+              "ReactiveRuntimeState<DiscoverRuntimeState, never> & { tabs: { byId: Record<string, ",
+              "ReactiveTabRuntimeState",
+              ">; }; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,
