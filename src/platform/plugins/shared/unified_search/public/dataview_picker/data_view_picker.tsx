@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { ChangeDataView } from './change_dataview';
@@ -79,7 +79,7 @@ export interface DataViewPickerProps {
   /**
    * Optional callback to get help text based on the active data view
    */
-  getDataViewHelpText?: (dataView: DataView) => string | undefined;
+  getDataViewHelpText?: (dataView: DataView) => ReactNode | string | undefined;
 }
 
 export const DataViewPicker = ({

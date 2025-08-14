@@ -8,8 +8,9 @@
 import { DataViewPicker as UnifiedDataViewPicker } from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useRef, useMemo, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { i18n } from '@kbn/i18n';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { EuiCode } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EXPLORE_DATA_VIEW_PREFIX } from '../../../../common/constants';
 import type { SourcererUrlState } from '../../../sourcerer/store/model';
 import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
@@ -137,16 +138,17 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
     [dataViewId, data.dataViews, scope, dataViewFieldEditor, handleChangeDataView]
   );
 
-  const getDataViewHelpText = useMemo(
-    () => (dv: DataView) => {
-      if (dv.id === defaultDataViewId) {
-        return i18n.translate('xpack.securitySolution.dataViewManager.getDataViewHelpText', {
-          defaultMessage:
-            'Security default indices are managed in Advanced Settings. To change the indices permanently, edit the indices in Advanced Settings.',
-        });
-      }
-      return undefined;
-    },
+  const getDataViewHelpText = useCallback(
+    (dv: DataView) =>
+      dv.id === defaultDataViewId ? (
+        <FormattedMessage
+          id="xpack.securitySolution.dataViewManager.getDataViewHelpText"
+          defaultMessage="Changes made here won't be saved permanently. To update the default Security indices, edit {code} in Advanced Settings."
+          values={{
+            code: <EuiCode>{'securitySolution:defaultIndex'}</EuiCode>,
+          }}
+        />
+      ) : undefined,
     [defaultDataViewId]
   );
 

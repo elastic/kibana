@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import type {
   ApplicationStart,
   IUiSettingsClient,
@@ -74,7 +74,7 @@ export interface DataViewEditorProps {
   /**
    * Optional callback to get help text based on the active data view
    */
-  getDataViewHelpText?: (dataView: DataView) => string | undefined;
+  getDataViewHelpText?: (dataView: DataView) => ReactNode | string | undefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

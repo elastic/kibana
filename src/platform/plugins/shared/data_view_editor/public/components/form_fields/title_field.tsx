@@ -8,7 +8,7 @@
  */
 
 import type { ChangeEvent } from 'react';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import type { Observable } from 'rxjs';
@@ -30,7 +30,7 @@ interface TitleFieldProps {
     matchedIndices: MatchedIndicesSet;
     rollupIndex: string | null | undefined;
   }>;
-  titleHelpText?: string;
+  titleHelpText?: ReactNode | string;
 }
 
 const rollupIndexPatternNoMatchError = {
@@ -115,7 +115,7 @@ interface GetTitleConfigArgs {
   isRollup: boolean;
   matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
-  titleHelpText?: string;
+  titleHelpText?: ReactNode | string;
 }
 
 const getTitleConfig = ({

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, { useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiTitle,
@@ -70,7 +70,7 @@ export interface Props {
   showManagementLink?: boolean;
   allowAdHoc: boolean;
   dataViewEditorService: DataViewEditorService;
-  getDataViewHelpText?: (dataView: DataView) => string | undefined;
+  getDataViewHelpText?: (dataView: DataView) => ReactNode | string | undefined;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
