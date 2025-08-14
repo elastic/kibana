@@ -13,21 +13,17 @@ export function HostsPageObjectProvider({ getService, getPageObjects }: FtrProvi
   const pageObjects = getPageObjects(['common', 'header']);
   const testSubjects = getService('testSubjects');
 
-  return new (class HostsPageObject {
-    readonly find = find;
-    readonly pageObjects = pageObjects;
-    readonly testSubjects = testSubjects;
-
+  return {
     async navigateToHostDetails(hostName: string): Promise<void> {
-      await this.pageObjects.common.navigateToUrl('securitySolution', `hosts/${hostName}`, {
+      await pageObjects.common.navigateToUrl('securitySolution', `hosts/${hostName}`, {
         shouldUseHashForSubUrl: false,
       });
-      await this.pageObjects.header.waitUntilLoadingHasFinished();
-    }
+      await pageObjects.header.waitUntilLoadingHasFinished();
+    },
 
     async ensureOnHostDetails(): Promise<void> {
-      await this.testSubjects.existOrFail('hostDetailsPage');
-    }
+      await testSubjects.existOrFail('hostDetailsPage');
+    },
 
     /**
      * Returns an object with the Endpoint overview data, where the keys are the visible labels in the UI.
@@ -35,7 +31,7 @@ export function HostsPageObjectProvider({ getService, getPageObjects }: FtrProvi
      */
     async hostDetailsEndpointOverviewData(): Promise<Record<string, string>> {
       await this.ensureOnHostDetails();
-      const endpointDescriptionLists: WebElementWrapper[] = await this.testSubjects.findAll(
+      const endpointDescriptionLists: WebElementWrapper[] = await testSubjects.findAll(
         'endpoint-overview'
       );
 
@@ -62,6 +58,6 @@ export function HostsPageObjectProvider({ getService, getPageObjects }: FtrProvi
       }
 
       return data;
-    }
-  })();
+    },
+  };
 }

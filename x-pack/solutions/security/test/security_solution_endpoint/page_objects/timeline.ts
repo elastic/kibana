@@ -31,52 +31,46 @@ export function TimelinePageObjectProvider({ getService, getPageObjects }: FtrPr
   const defaultTimeoutMs = getService('config').get('timeouts.waitFor');
   const logger = getService('log');
 
-  return new (class TimelinePageObject {
-    readonly pageObjects = pageObjects;
-    readonly testSubjects = testSubjects;
-    readonly retry = retry;
-    readonly defaultTimeoutMs = defaultTimeoutMs;
-    readonly logger = logger;
-
+  return {
     async navigateToTimelineList(): Promise<void> {
-      await this.pageObjects.common.navigateToUrlWithBrowserHistory('securitySolutionTimelines');
-      await this.pageObjects.header.waitUntilLoadingHasFinished();
-    }
+      await pageObjects.common.navigateToUrlWithBrowserHistory('securitySolutionTimelines');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+    },
 
     /**
      * Ensure that the timeline bottom bar is accessible
      */
     async ensureTimelineAccessible(): Promise<void> {
-      await this.testSubjects.existOrFail(TIMELINE_BOTTOM_BAR_CONTAINER_TEST_SUBJ);
-    }
+      await testSubjects.existOrFail(TIMELINE_BOTTOM_BAR_CONTAINER_TEST_SUBJ);
+    },
 
     async openTimelineFromBottomBar() {
       await this.ensureTimelineAccessible();
-      await this.testSubjects.findService.clickByCssSelector(
+      await testSubjects.findService.clickByCssSelector(
         TIMELINE_CSS_SELECTOR.bottomBarTimelineTitle
       );
-    }
+    },
 
     async openTimelineById(id: string): Promise<void> {
       await this.openTimelineFromBottomBar();
-      await this.testSubjects.click('timeline-bottom-bar-open-timeline');
-      await this.testSubjects.findService.clickByCssSelector(
+      await testSubjects.click('timeline-bottom-bar-open-timeline');
+      await testSubjects.findService.clickByCssSelector(
         `${testSubjSelector('open-timeline-modal')} ${testSubjSelector(`timeline-title-${id}`)}`
       );
 
       await this.ensureTimelineIsOpen();
-    }
+    },
 
     async closeTimeline(): Promise<void> {
-      if (await this.testSubjects.exists(TIMELINE_CLOSE_BUTTON_TEST_SUBJ)) {
-        await this.testSubjects.click(TIMELINE_CLOSE_BUTTON_TEST_SUBJ);
-        await this.testSubjects.waitForHidden(TIMELINE_MODAL_PAGE_TEST_SUBJ);
+      if (await testSubjects.exists(TIMELINE_CLOSE_BUTTON_TEST_SUBJ)) {
+        await testSubjects.click(TIMELINE_CLOSE_BUTTON_TEST_SUBJ);
+        await testSubjects.waitForHidden(TIMELINE_MODAL_PAGE_TEST_SUBJ);
       }
-    }
+    },
 
     async ensureTimelineIsOpen(): Promise<void> {
-      await this.testSubjects.existOrFail(TIMELINE_MODAL_PAGE_TEST_SUBJ);
-    }
+      await testSubjects.existOrFail(TIMELINE_MODAL_PAGE_TEST_SUBJ);
+    },
 
     /**
      * From a visible timeline, clicks the "view details" for an event on the list
@@ -84,42 +78,39 @@ export function TimelinePageObjectProvider({ getService, getPageObjects }: FtrPr
      */
     async showEventDetails(index: number = 0): Promise<void> {
       await this.ensureTimelineIsOpen();
-      await this.testSubjects.findService.clickByCssSelector(
+      await testSubjects.findService.clickByCssSelector(
         `${testSubjSelector('event')}:nth-child(${index + 1}) ${testSubjSelector('expand-event')}`
       );
-      await this.testSubjects.existOrFail('eventDetails');
-    }
+      await testSubjects.existOrFail('eventDetails');
+    },
 
     /**
      * Clicks the Refresh button at the top of the timeline page and waits for the refresh to complete
      */
     async clickRefresh(): Promise<void> {
       await this.ensureTimelineIsOpen();
-      await this.pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await (
-        await this.testSubjects.findService.byCssSelector(TIMELINE_CSS_SELECTOR.refreshButton)
+        await testSubjects.findService.byCssSelector(TIMELINE_CSS_SELECTOR.refreshButton)
       ).isEnabled();
-      await this.testSubjects.findService.clickByCssSelector(TIMELINE_CSS_SELECTOR.refreshButton);
-      await this.retry.waitFor(
-        'Timeline refresh button to be enabled',
-        async (): Promise<boolean> => {
-          return (
-            await this.testSubjects.findService.byCssSelector(TIMELINE_CSS_SELECTOR.refreshButton)
-          ).isEnabled();
-        }
-      );
-    }
+      await testSubjects.findService.clickByCssSelector(TIMELINE_CSS_SELECTOR.refreshButton);
+      await retry.waitFor('Timeline refresh button to be enabled', async (): Promise<boolean> => {
+        return (
+          await testSubjects.findService.byCssSelector(TIMELINE_CSS_SELECTOR.refreshButton)
+        ).isEnabled();
+      });
+    },
 
     /**
      * Check to see if the timeline has events in the list
      */
     async hasEvents(): Promise<boolean> {
-      const eventRows = await this.testSubjects.findService.allByCssSelector(
+      const eventRows = await testSubjects.findService.allByCssSelector(
         `${testSubjSelector(TIMELINE_MODAL_PAGE_TEST_SUBJ)} ${testSubjSelector('event')}`
       );
 
       return eventRows.length > 0;
-    }
+    },
 
     /**
      * Waits for events to be displayed in the timeline. It will click on the "Refresh" button to trigger a data fetch
@@ -127,20 +118,20 @@ export function TimelinePageObjectProvider({ getService, getPageObjects }: FtrPr
      */
     async waitForEvents(timeoutMs?: number): Promise<void> {
       if (await this.hasEvents()) {
-        this.logger.info(`Timeline already has events displayed`);
+        logger.info(`Timeline already has events displayed`);
         return;
       }
 
-      await this.retry.waitForWithTimeout(
+      await retry.waitForWithTimeout(
         'waiting for events to show up on timeline',
-        timeoutMs ?? this.defaultTimeoutMs,
+        timeoutMs ?? defaultTimeoutMs,
         async (): Promise<boolean> => {
           await this.clickRefresh();
 
           return this.hasEvents();
         }
       );
-    }
+    },
 
     /**
      * Sets the date range on the timeline by clicking on a commonly used preset from the super date picker
@@ -148,14 +139,14 @@ export function TimelinePageObjectProvider({ getService, getPageObjects }: FtrPr
      */
     async setDateRange(range: keyof typeof DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP): Promise<void> {
       await this.ensureTimelineIsOpen();
-      await this.testSubjects.findService.clickByCssSelector(
+      await testSubjects.findService.clickByCssSelector(
         `${testSubjSelector(TIMELINE_TAB_QUERY_TEST_SUBJ)} ${testSubjSelector(
           'superDatePickerToggleQuickMenuButton'
         )}`
       );
-      await this.testSubjects.existOrFail('superDatePickerQuickMenu');
-      await this.testSubjects.click(DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP[range]);
-      await this.testSubjects.missingOrFail('superDatePickerQuickMenu');
-    }
-  })();
+      await testSubjects.existOrFail('superDatePickerQuickMenu');
+      await testSubjects.click(DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP[range]);
+      await testSubjects.missingOrFail('superDatePickerQuickMenu');
+    },
+  };
 }

@@ -16,16 +16,10 @@ export function DetectionsPageObjectProvider({ getService, getPageObjects }: Ftr
   const retry = getService('retry');
   const defaultTimeoutMs = getService('config').get('timeouts.waitFor');
 
-  return new (class DetectionsTestService {
-    readonly find = find;
-    readonly pageObjects = pageObjects;
-    readonly testSubjects = testSubjects;
-    readonly retry = retry;
-    readonly defaultTimeoutMs = defaultTimeoutMs;
-
+  return {
     async navigateHome(): Promise<void> {
       await this.navigateToDetectionsPage();
-    }
+    },
 
     /**
      * Navigate to the Alerts list page.
@@ -37,7 +31,7 @@ export function DetectionsPageObjectProvider({ getService, getPageObjects }: Ftr
      * navigateToAlerts(`query=(language:kuery,query:'host.hostname: "HOST-abc"')`)
      */
     async navigateToAlerts(searchParams: string = ''): Promise<void> {
-      await this.pageObjects.common.navigateToUrlWithBrowserHistory(
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
         'securitySolution',
         '/alerts',
         searchParams,
@@ -45,129 +39,126 @@ export function DetectionsPageObjectProvider({ getService, getPageObjects }: Ftr
           ensureCurrentUrl: !Boolean(searchParams),
         }
       );
-      await this.pageObjects.header.waitUntilLoadingHasFinished();
-    }
+      await pageObjects.header.waitUntilLoadingHasFinished();
+    },
 
     async navigateToRules(): Promise<void> {
       await this.navigateToDetectionsPage('rules');
-    }
+    },
 
     async navigateToCreateRule(): Promise<void> {
       await this.navigateToDetectionsPage('rules/create');
-    }
+    },
 
     async replaceIndexPattern(): Promise<void> {
-      const buttons = await this.find.allByCssSelector('[data-test-subj="comboBoxInput"] button');
+      const buttons = await find.allByCssSelector('[data-test-subj="comboBoxInput"] button');
       await buttons.map(async (button: WebElementWrapper) => await button.click());
-      await this.testSubjects.setValue('comboBoxSearchInput', '*');
-    }
+      await testSubjects.setValue('comboBoxSearchInput', '*');
+    },
 
     async openImportQueryModal(): Promise<void> {
-      const element = await this.testSubjects.find('importQueryFromSavedTimeline');
+      const element = await testSubjects.find('importQueryFromSavedTimeline');
       await element.click(500);
-      await this.testSubjects.exists('open-timeline-modal-body-filter-default');
-    }
+      await testSubjects.exists('open-timeline-modal-body-filter-default');
+    },
 
     async viewTemplatesInImportQueryModal(): Promise<void> {
-      await this.pageObjects.common.clickAndValidate(
+      await pageObjects.common.clickAndValidate(
         'open-timeline-modal-body-filter-template',
         'timelines-table'
       );
-    }
+    },
 
     async closeImportQueryModal(): Promise<void> {
-      await this.find.clickByCssSelector('.euiButtonIcon.euiModal__closeIcon');
-    }
+      await find.clickByCssSelector('.euiButtonIcon.euiModal__closeIcon');
+    },
 
     async selectMachineLearningJob(): Promise<void> {
-      await this.find.clickByCssSelector('[data-test-subj="mlJobSelect"] button');
-      await this.find.clickByCssSelector('#high_distinct_count_error_message');
-    }
+      await find.clickByCssSelector('[data-test-subj="mlJobSelect"] button');
+      await find.clickByCssSelector('#high_distinct_count_error_message');
+    },
 
     async openAddFilterPopover(): Promise<void> {
-      const addButtons = await this.testSubjects.findAll('addFilter');
+      const addButtons = await testSubjects.findAll('addFilter');
       await addButtons[1].click();
-      await this.testSubjects.exists('saveFilter');
-    }
+      await testSubjects.exists('saveFilter');
+    },
 
     async closeAddFilterPopover(): Promise<void> {
-      await this.testSubjects.click('cancelSaveFilter');
-    }
+      await testSubjects.click('cancelSaveFilter');
+    },
 
     async toggleFilterActions(): Promise<void> {
-      const filterActions = await this.testSubjects.findAll('addFilter');
+      const filterActions = await testSubjects.findAll('addFilter');
       await filterActions[1].click();
-    }
+    },
 
     async toggleSavedQueries(): Promise<void> {
-      const filterActions = await this.find.allByCssSelector(
+      const filterActions = await find.allByCssSelector(
         '[data-test-subj="saved-query-management-popover-button"]'
       );
       await filterActions[1].click();
-    }
+    },
 
     async addNameAndDescription(
       name: string = 'test rule name',
       description: string = 'test rule description'
     ): Promise<void> {
-      await this.find.setValue(`[aria-describedby="detectionEngineStepAboutRuleName"]`, name, 500);
-      await this.find.setValue(
+      await find.setValue(`[aria-describedby="detectionEngineStepAboutRuleName"]`, name, 500);
+      await find.setValue(
         `[aria-describedby="detectionEngineStepAboutRuleDescription"]`,
         description,
         500
       );
-    }
+    },
 
     async goBackToAllRules(): Promise<void> {
-      await this.pageObjects.common.clickAndValidate(
-        'ruleDetailsBackToAllRules',
-        'create-new-rule'
-      );
-    }
+      await pageObjects.common.clickAndValidate('ruleDetailsBackToAllRules', 'create-new-rule');
+    },
 
     async revealAdvancedSettings(): Promise<void> {
-      await this.pageObjects.common.clickAndValidate(
+      await pageObjects.common.clickAndValidate(
         'advancedSettings',
         'detectionEngineStepAboutRuleReferenceUrls'
       );
-    }
+    },
 
     async preview(): Promise<void> {
-      await this.pageObjects.common.clickAndValidate(
+      await pageObjects.common.clickAndValidate(
         'previewSubmitButton',
         'queryPreviewCustomHistogram',
         undefined,
         500
       );
-    }
+    },
 
     async continue(prefix: string): Promise<void> {
-      await this.testSubjects.click(`${prefix}-continue`);
-    }
+      await testSubjects.click(`${prefix}-continue`);
+    },
 
     async addCustomQuery(query: string): Promise<void> {
-      await this.testSubjects.setValue('queryInput', query, undefined, 500);
-    }
+      await testSubjects.setValue('queryInput', query, undefined, 500);
+    },
 
     async selectMLRule(): Promise<void> {
-      await this.pageObjects.common.clickAndValidate('machineLearningRuleType', 'mlJobSelect');
-    }
+      await pageObjects.common.clickAndValidate('machineLearningRuleType', 'mlJobSelect');
+    },
 
     async selectEQLRule(): Promise<void> {
-      await this.pageObjects.common.clickAndValidate('eqlRuleType', 'eqlQueryBarTextInput');
-    }
+      await pageObjects.common.clickAndValidate('eqlRuleType', 'eqlQueryBarTextInput');
+    },
 
     async selectIndicatorMatchRule(): Promise<void> {
-      await this.pageObjects.common.clickAndValidate('threatMatchRuleType', 'comboBoxInput');
-    }
+      await pageObjects.common.clickAndValidate('threatMatchRuleType', 'comboBoxInput');
+    },
 
     async selectThresholdRule(): Promise<void> {
-      await this.pageObjects.common.clickAndValidate('thresholdRuleType', 'input');
-    }
+      await pageObjects.common.clickAndValidate('thresholdRuleType', 'input');
+    },
 
     async ensureOnAlertsPage(): Promise<void> {
-      await this.testSubjects.existOrFail('detectionsAlertsPage');
-    }
+      await testSubjects.existOrFail('detectionsAlertsPage');
+    },
 
     /**
      * Opens the first alert on the Alerts List page for the given host name
@@ -179,24 +170,18 @@ export function DetectionsPageObjectProvider({ getService, getPageObjects }: Ftr
       let foundAndHandled = false;
 
       // Get all event rows
-      const allEvents = await this.testSubjects.findService.allByCssSelector(
+      const allEvents = await testSubjects.findService.allByCssSelector(
         ALERT_TABLE_ROW_CSS_SELECTOR
       );
 
       for (const eventRow of allEvents) {
-        const hostNameButton = await this.testSubjects.findDescendant(
-          'host-details-button',
-          eventRow
-        );
+        const hostNameButton = await testSubjects.findDescendant('host-details-button', eventRow);
         const eventRowHostName = (await hostNameButton.getVisibleText()).trim();
 
         if (eventRowHostName === hostName) {
-          const expandAlertButton = await this.testSubjects.findDescendant(
-            'expand-event',
-            eventRow
-          );
+          const expandAlertButton = await testSubjects.findDescendant('expand-event', eventRow);
           await expandAlertButton.click();
-          await this.testSubjects.existOrFail('eventDetails');
+          await testSubjects.existOrFail('eventDetails');
           foundAndHandled = true;
           break;
         }
@@ -205,57 +190,57 @@ export function DetectionsPageObjectProvider({ getService, getPageObjects }: Ftr
       if (!foundAndHandled) {
         throw new Error(`no alerts found for host: ${hostName}`);
       }
-    }
+    },
 
     /**
      * Opens the Response console from the alert Details. Alert details must be already opened/displayed
      */
     async openResponseConsoleFromAlertDetails(): Promise<void> {
-      await this.testSubjects.existOrFail('eventDetails');
-      await this.testSubjects.click('securitySolutionFlyoutFooterDropdownButton');
-      await this.testSubjects.clickWhenNotDisabled('endpointResponseActions-action-item');
-      await this.testSubjects.existOrFail('consolePageOverlay');
-    }
+      await testSubjects.existOrFail('eventDetails');
+      await testSubjects.click('securitySolutionFlyoutFooterDropdownButton');
+      await testSubjects.clickWhenNotDisabled('endpointResponseActions-action-item');
+      await testSubjects.existOrFail('consolePageOverlay');
+    },
 
     /**
      * Clicks the refresh button on the Alerts page and waits for it to complete
      */
     async clickRefresh(): Promise<void> {
       await this.ensureOnAlertsPage();
-      await this.testSubjects.click('querySubmitButton');
+      await testSubjects.click('querySubmitButton');
 
       // wait for refresh to complete
-      await this.retry.waitFor(
+      await retry.waitFor(
         'Alerts pages refresh button to be enabled',
         async (): Promise<boolean> => {
-          const refreshButton = await this.testSubjects.find('querySubmitButton');
+          const refreshButton = await testSubjects.find('querySubmitButton');
 
           return (await refreshButton.isDisplayed()) && (await refreshButton.isEnabled());
         }
       );
-    }
+    },
 
     async waitForListToHaveAlerts(timeoutMs?: number): Promise<void> {
-      await this.retry.waitForWithTimeout(
+      await retry.waitForWithTimeout(
         'waiting for alerts to show up on alerts page',
-        timeoutMs ?? this.defaultTimeoutMs,
+        timeoutMs ?? defaultTimeoutMs,
         async (): Promise<boolean> => {
           await this.clickRefresh();
 
-          const allEventRows = await this.testSubjects.findService.allByCssSelector(
+          const allEventRows = await testSubjects.findService.allByCssSelector(
             ALERT_TABLE_ROW_CSS_SELECTOR
           );
 
           return Boolean(allEventRows.length);
         }
       );
-    }
+    },
 
     async navigateToDetectionsPage(path: string = ''): Promise<void> {
       const subUrl = `detections${path ? `/${path}` : ''}`;
-      await this.pageObjects.common.navigateToUrl('securitySolution', subUrl, {
+      awaitpageObjects.common.navigateToUrl('securitySolution', subUrl, {
         shouldUseHashForSubUrl: false,
       });
-    }
-  })();
+    },
+  };
 }
