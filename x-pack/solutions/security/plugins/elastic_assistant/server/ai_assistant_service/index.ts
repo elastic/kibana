@@ -133,6 +133,7 @@ export class AIAssistantService {
   private isProductDocumentationInProgress: boolean = false;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
+    this.options.logger.debug(`[${Date.now()}] AIAssistantService constructor called`);
     this.initialized = false;
     this.getElserId = createGetElserId(options.ml.trainedModelsProvider);
     this.elserInferenceId = options.elserInferenceId;
@@ -325,6 +326,10 @@ export class AIAssistantService {
   }
 
   private async initializeResources(): Promise<InitializationPromise> {
+    const initId = Date.now();
+    this.options.logger.debug(
+      `[${initId}] initializeResources called, isInitializing=${this.isInitializing}`
+    );
     this.isInitializing = true;
     try {
       this.options.logger.debug(`Initializing resources for AIAssistantService`);
@@ -362,6 +367,9 @@ export class AIAssistantService {
         );
       } catch (error) {
         /* empty */
+        this.options.logger.warn(
+          `[${initId}] Error initializing AI assistant resources: ${error.message}`
+        );
       }
 
       const isUsingDedicatedInferenceEndpoint = some(
@@ -448,6 +456,9 @@ export class AIAssistantService {
     }
     this.initialized = true;
     this.isInitializing = false;
+    this.options.logger.debug(
+      `[${initId}] initializeResources completed, initialized=${this.initialized}`
+    );
     return successResult();
   }
 
@@ -494,15 +505,29 @@ export class AIAssistantService {
   };
 
   private async checkResourcesInstallation(opts: CreateAIAssistantClientParams) {
+    const checkId = Date.now();
+    this.options.logger.debug(
+      `[${checkId}] checkResourcesInstallation called for spaceId=${opts.spaceId}`
+    );
+
     const licensing = await opts.licensing;
     if (!hasAIAssistantLicense(licensing.license)) return null;
     // Check if resources installation has succeeded
+    this.options.logger.debug(
+      `[${checkId}] Getting initialization promise for spaceId=${opts.spaceId}`
+    );
     const { result: initialized, error } = await this.getSpaceResourcesInitializationPromise(
       opts.spaceId
+    );
+    this.options.logger.debug(
+      `[${checkId}] Initialization status: initialized=${initialized}, error=${error}, for spaceId=${opts.spaceId}`
     );
 
     // If space level resources initialization failed, retry
     if (!initialized && error) {
+      this.options.logger.debug(
+        `[${checkId}] Initialization failed, considering retry for spaceId=${opts.spaceId}`
+      );
       let initRetryPromise: Promise<InitializationPromise> | undefined;
 
       // If !this.initialized, we know that resource initialization failed
@@ -740,6 +765,10 @@ export class AIAssistantService {
   private async installAndUpdateSpaceLevelResources(
     spaceId: string | undefined = DEFAULT_NAMESPACE_STRING
   ) {
+    const installId = Date.now();
+    this.options.logger.debug(
+      `[${installId}] installAndUpdateSpaceLevelResources called for spaceId=${spaceId}`
+    );
     try {
       this.options.logger.debug(`Initializing spaceId level resources for AIAssistantService`);
       const conversationsIndexName = await this.conversationsDataStream.getInstalledSpaceName(
@@ -760,12 +789,23 @@ export class AIAssistantService {
       if (!promptsIndexName) {
         await this.promptsDataStream.installSpace(spaceId);
       }
-
+      this.options.logger.debug(
+        `[${installId}] Checking anonymizationFields for spaceId=${spaceId}`
+      );
       const anonymizationFieldsIndexName =
         await this.anonymizationFieldsDataStream.getInstalledSpaceName(spaceId);
+      this.options.logger.debug(
+        `[${installId}] anonymizationFieldsIndexName=${anonymizationFieldsIndexName} for spaceId=${spaceId}`
+      );
 
       if (!anonymizationFieldsIndexName) {
+        this.options.logger.debug(
+          `[${installId}] Installing anonymizationFields for spaceId=${spaceId}`
+        );
         await this.anonymizationFieldsDataStream.installSpace(spaceId);
+        this.options.logger.debug(
+          `[${installId}] Calling createDefaultAnonymizationFields for spaceId=${spaceId}`
+        );
         await this.createDefaultAnonymizationFields(spaceId);
       }
       const alertSummaryIndexName = await this.alertSummaryDataStream.getInstalledSpaceName(
@@ -776,6 +816,9 @@ export class AIAssistantService {
       }
     } catch (error) {
       this.options.logger.warn(
+        `[${installId}] Error in installAndUpdateSpaceLevelResources: ${error.message}`
+      );
+      this.options.logger.warn(
         `Error initializing AI assistant namespace level resources: ${error.message}`
       );
       throw error;
@@ -783,6 +826,11 @@ export class AIAssistantService {
   }
 
   private async createDefaultAnonymizationFields(spaceId: string) {
+    const createId = Date.now();
+    this.options.logger.debug(
+      `[${createId}] createDefaultAnonymizationFields called for spaceId=${spaceId}`
+    );
+
     const dataClient = new AIAssistantDataClient({
       logger: this.options.logger,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
@@ -792,18 +840,39 @@ export class AIAssistantService {
       currentUser: null,
     });
 
-    const existingAnonymizationFields = await (
-      await dataClient?.getReader()
-    ).search({
+    this.options.logger.debug(`Checking for existing anonymization fields in space: ${spaceId}`);
+    this.options.logger.debug(`[${createId}] Getting reader for spaceId=${spaceId}`);
+    this.options.logger.debug(`[${createId}] Searching for existing fields for spaceId=${spaceId}`);
+    const reader = await dataClient?.getReader();
+    const existingAnonymizationFields = await reader.search({
       size: 1,
       allow_no_indices: true,
     });
+    this.options.logger.debug(
+      `[${createId}] Search results: found ${existingAnonymizationFields.hits.total.value} fields for spaceId=${spaceId}`
+    );
+    this.options.logger.debug(
+      `Found ${existingAnonymizationFields.hits.total.value} existing anonymization fields`
+    );
+
+    const initId = Date.now();
+    this.options.logger.debug(
+      `[${initId}] Starting anonymization fields check for space: ${spaceId}`
+    );
+
     if (existingAnonymizationFields.hits.total.value === 0) {
+      this.options.logger.debug(
+        `[${createId}] No existing fields found, creating defaults for spaceId=${spaceId}`
+      );
       const writer = await dataClient?.getWriter();
       const res = await writer?.bulk({
         documentsToCreate: getDefaultAnonymizationFields(spaceId),
       });
       this.options.logger.info(`Created default anonymization fields: ${res?.docs_created.length}`);
+
+      this.options.logger.info(
+        `[${initId}] Created default anonymization fields: ${res?.docs_created.length}`
+      );
     }
   }
 }
