@@ -45,7 +45,7 @@ export type DataCascadeRowCellProps<G extends GroupNode, L extends LeafNode> = P
 
 export type DataCascadeRowProps<G extends GroupNode, L extends LeafNode> = Pick<
   CascadeRowPrimitiveProps<G, L>,
-  'onCascadeGroupNodeExpanded' | 'rowHeaderMetaSlots' | 'rowHeaderTitleSlot'
+  'onCascadeGroupNodeExpanded' | 'rowHeaderMetaSlots' | 'rowHeaderTitleSlot' | 'rowHeaderActions'
 > & {
   /**
    * Child element for the cascade row.
