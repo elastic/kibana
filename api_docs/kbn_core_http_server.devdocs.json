@@ -14908,10 +14908,6 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/get_knowledge_base_indices.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/get_knowledge_base_status.ts"
               },
               {
