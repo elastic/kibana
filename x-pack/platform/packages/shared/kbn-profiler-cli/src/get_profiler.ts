@@ -86,7 +86,7 @@ export async function getProfiler({
 
   const client = await CDP({ port: inspectorPort });
 
-  log.info(`Attached to remote debugger at 9229`);
+  log.info(`Attached to remote debugger at ${inspectorPort}`);
 
   const stop =
     type === 'cpu' ? await getCpuProfiler({ client, log }) : await getHeapProfiler({ client, log });

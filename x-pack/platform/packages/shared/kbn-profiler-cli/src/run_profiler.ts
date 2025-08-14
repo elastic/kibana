@@ -13,9 +13,7 @@ import { runUntilSigInt } from './run_until_sigint';
 import { getProfiler } from './get_profiler';
 import { untilStdinCompletes } from './until_stdin_completes';
 import { runInspectableProcess } from './run_inspectable_process';
-import { NO_GREP, ProfilerCliFlags } from './flags';
-
-const INSPECTOR_PORT = 9229;
+import { DEFAULT_INSPECTOR_PORT, NO_GREP, ProfilerCliFlags } from './flags';
 
 export async function runProfiler({
   flags,
@@ -55,13 +53,17 @@ export async function runProfiler({
 
   let spawnedClose$: Observable<void> | null = null;
 
+  const inspectorPort = flags['inspector-port']
+    ? Number(flags['inspector-port'])
+    : DEFAULT_INSPECTOR_PORT;
+
   if (spawn) {
     const [file, ...args] = flags._;
 
     const spawned = await runInspectableProcess({
       file,
       args,
-      inspectorPort: INSPECTOR_PORT,
+      inspectorPort,
       log,
       signal: controller.signal,
     });
@@ -84,7 +86,7 @@ export async function runProfiler({
       pid,
       log,
       type: flags.heap ? 'heap' : 'cpu',
-      inspectorPort: INSPECTOR_PORT,
+      inspectorPort,
     })
   );
 

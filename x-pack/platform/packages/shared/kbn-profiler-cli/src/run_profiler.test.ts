@@ -11,6 +11,9 @@ import { runProfiler } from './run_profiler';
 import { ProfilerCliFlags } from './flags';
 import { ToolingLog } from '@kbn/tooling-log';
 import * as fs from 'fs';
+import { getProcessId } from './get_process_id';
+
+const INSPECTOR_PORT = '9229';
 
 // Use the real execa, but spy on `command` to observe calls in tests
 jest.mock('execa', () => {
@@ -74,6 +77,7 @@ function runProfilerWithFlags(flags: Partial<ProfilerCliFlags>) {
       verbose: true,
       debug: true,
       help: false,
+      'inspector-port': INSPECTOR_PORT,
       ...flags,
     },
     addCleanupTask: jest.fn(() => {}),
@@ -161,6 +165,12 @@ describe('@kbn/profiler-cli real-process tests', () => {
     });
 
     await Promise.all(exitPromises);
+
+    const pid = await getProcessId({ ports: [Number(INSPECTOR_PORT)], grep: false });
+
+    if (pid) {
+      await execa.command(`kill -9 ${pid}`);
+    }
 
     processes.length = 0;
   });

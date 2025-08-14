@@ -6,12 +6,23 @@
  */
 import { run } from '@kbn/dev-cli-runner';
 import { runProfiler } from './run_profiler';
-import { NO_GREP } from './flags';
+import { DEFAULT_INSPECTOR_PORT, NO_GREP } from './flags';
 
 export function cli() {
   run(runProfiler, {
     flags: {
-      string: ['port', 'pid', 't', 'timeout', 'c', 'connections', 'a', 'amount', 'grep'] as const,
+      string: [
+        'port',
+        'pid',
+        't',
+        'timeout',
+        'c',
+        'connections',
+        'a',
+        'amount',
+        'grep',
+        'inspector-port',
+      ] as const,
       boolean: ['heap', 'spawn'] as const,
       help: `
           Usage: node scripts/profiler.js <args> <command>
@@ -24,6 +35,7 @@ export function cli() {
           --heap              Collect a heap snapshot
           --grep              Grep through running Node.js processes
           --spawn             Spawn and profile a new Node.js process until completion
+          --inspector-port    Port at which the inspector will be running. Defaults to ${DEFAULT_INSPECTOR_PORT}
         `,
       default: {
         grep: NO_GREP,

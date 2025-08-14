@@ -9,6 +9,7 @@ import { BaseFlags } from '@kbn/dev-cli-runner';
 
 export type ProfilerCliFlags = BaseFlags<{
   port?: string;
+  ['inspector-port']?: string;
   pid?: string;
   timeout?: string;
   grep?: string;
@@ -20,5 +21,7 @@ export type ProfilerCliFlags = BaseFlags<{
   spawn?: boolean;
   heap?: boolean;
 }>;
+
+export const DEFAULT_INSPECTOR_PORT = 9229;
 
 export const NO_GREP = '__NO_GREP__';
