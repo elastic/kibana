@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { AwsCredentialsTypeOptions } from './get_aws_credentials_form_options';
 import type { AwsCredentialsType } from '../types';
-import { AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ } from './aws_test_subjects';
+import { AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ } from '../test_subjects';
 
 export const AwsCredentialTypeSelector = ({
   type,

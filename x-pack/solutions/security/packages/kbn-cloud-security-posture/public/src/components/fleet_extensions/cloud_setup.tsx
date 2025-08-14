@@ -34,6 +34,7 @@ import { useLoadCloudSetup } from './hooks/use_load_cloud_setup';
 import { CloudSetupProvider } from './cloud_setup_context';
 import { AWS_PROVIDER, GCP_PROVIDER, AZURE_PROVIDER } from './constants';
 import { useCloudSetup } from './hooks/use_cloud_setup_context';
+import { ADVANCED_OPTION_ACCORDION_TEST_SUBJ, NAMESPACE_INPUT_TEST_SUBJ } from './test_subjects';
 
 const EditScreenStepTitle = () => (
   <>
@@ -184,7 +185,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             <EuiSpacer size="m" />
             <EuiAccordion
               id="advancedOptions"
-              data-test-subj="advancedOptionsAccordion"
+              data-test-subj={ADVANCED_OPTION_ACCORDION_TEST_SUBJ}
               buttonContent={
                 <EuiText
                   size="xs"
@@ -210,7 +211,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
                 onNamespaceChange={(namespace: string) => {
                   updatePolicy({ updatedPolicy: { ...newPolicy, namespace } });
                 }}
-                data-test-subj="namespaceInput"
+                data-test-subj={NAMESPACE_INPUT_TEST_SUBJ}
                 labelId="securitySolutionPackages.fleetIntegration.namespaceLabel"
                 helpTextId="securitySolutionPackages.fleetIntegration.awsAccountType.awsOrganizationDescription"
               />

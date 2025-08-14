@@ -18,7 +18,7 @@ import { updatePolicyWithInputs } from '../utils';
 import { useAwsCredentialsForm } from './aws_hooks';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SETUP_FORMAT } from '../constants';
 import { AwsInputVarFields } from './aws_input_var_fields';
-import { AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ } from './aws_test_subjects';
+import { AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS } from '../test_subjects';
 import { ReadDocumentation } from '../common';
 import { AWSSetupInfoContent } from './aws_setup_info';
 import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
@@ -29,14 +29,14 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
   {
     id: AWS_SETUP_FORMAT.CLOUD_FORMATION,
     label: 'CloudFormation',
-    testId: AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUDFORMATION,
+    testId: AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.CLOUDFORMATION,
   },
   {
     id: AWS_SETUP_FORMAT.MANUAL,
     label: i18n.translate('securitySolutionPackages.awsIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
-    testId: AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL,
+    testId: AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL,
   },
 ];
 

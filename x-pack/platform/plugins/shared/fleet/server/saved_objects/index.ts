@@ -39,7 +39,10 @@ import {
   migratePackagePolicyToV8110,
 } from './migrations/security_solution/to_v8_11_0';
 
-import { migrateCspPackagePolicyToV8110 } from './migrations/cloud_security_posture';
+import {
+  migrateCspPackagePolicyToV8110,
+  migrateCspPackagePolicyToV920,
+} from './migrations/cloud_security_posture';
 
 import { migrateOutputEvictionsFromV8100, migrateOutputToV8100 } from './migrations/to_v8_10_0';
 

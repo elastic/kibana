@@ -43,7 +43,10 @@ import { AwsInputVarFields } from './aws_input_var_fields';
 import { AWSSetupInfoContent } from './aws_setup_info';
 import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
 
-import { AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ } from './aws_test_subjects';
+import {
+  AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ,
+  AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ,
+} from '../test_subjects';
 import { ReadDocumentation } from '../common';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_credential_guide';
 import type { UpdatePolicy } from '../types';
@@ -256,7 +259,7 @@ export const AwsCredentialsFormAgentless = ({
           </EuiAccordion>
           <EuiSpacer size="l" />
           <EuiButton
-            data-test-subj="launchCloudFormationAgentlessButton"
+            data-test-subj={AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ}
             target="_blank"
             iconSide="left"
             iconType="launch"
