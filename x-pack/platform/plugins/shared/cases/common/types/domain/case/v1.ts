@@ -189,3 +189,4 @@ export type AttachmentTotals = rt.TypeOf<typeof AttachmentTotalsRt>;
 export type CaseBaseOptionalFields = rt.TypeOf<typeof CaseBaseOptionalFieldsRt>;
 export type SimilarCase = rt.TypeOf<typeof SimilarCaseRt>;
 export type SimilarCases = SimilarCase[];
+export type CaseMetadata = Record<string, string[]>;

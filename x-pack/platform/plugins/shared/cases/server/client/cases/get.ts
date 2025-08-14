@@ -6,7 +6,14 @@
  */
 
 import type { SavedObject, SavedObjectsResolveResponse } from '@kbn/core/server';
-import type { AttachmentTotals, Case, CaseAttributes, User } from '../../../common/types/domain';
+import type {
+  Attachment,
+  AttachmentTotals,
+  Case,
+  CaseAttributes,
+  CaseMetadata,
+  User,
+} from '../../../common/types/domain';
 import type {
   AllCategoriesFindRequest,
   AllReportersFindRequest,
@@ -38,6 +45,7 @@ import type {
   CaseTransformedAttributes,
 } from '../../common/types/case';
 import { CaseRt } from '../../../common/types/domain';
+import { getAlertMetadataFromComments } from '../alerts/get';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -148,6 +156,41 @@ export const getCasesByAlertID = async (
 const getAttachmentTotalsForCaseId = (id: string, stats: Map<string, AttachmentTotals>) =>
   stats.get(id) ?? { alerts: 0, userComments: 0 };
 
+const getCaseComments = async (id: string, clientArgs: CasesClientArgs) => {
+  const {
+    services: { caseService },
+  } = clientArgs;
+  return caseService.getAllCaseComments({
+    id,
+    options: {
+      sortField: 'created_at',
+      sortOrder: 'asc',
+    },
+  });
+};
+
+/**
+ * The parameters for retrieving a case metadata
+ */
+export interface GetMetadataParams {
+  /**
+   * The comments for a case
+   */
+  comments: Attachment[];
+}
+
+/**
+ * Retrieves a case metadata from the comments.
+ *
+ * @ignore
+ */
+export const getMetadata = async (
+  { comments }: GetMetadataParams,
+  clientArgs: CasesClientArgs
+): Promise<CaseMetadata> => {
+  return getAlertMetadataFromComments(comments, clientArgs);
+};
+
 /**
  * The parameters for retrieving a case
  */
@@ -204,13 +247,7 @@ export const get = async (
       );
     }
 
-    const theComments = await caseService.getAllCaseComments({
-      id,
-      options: {
-        sortField: 'created_at',
-        sortOrder: 'asc',
-      },
-    });
+    const theComments = await getCaseComments(id, clientArgs);
 
     const res = flattenCaseSavedObject({
       savedObject: theCase,
