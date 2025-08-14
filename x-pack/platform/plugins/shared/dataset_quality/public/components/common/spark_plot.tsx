@@ -6,39 +6,13 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLoadingChart,
-  euiPaletteColorBlind,
-  useEuiTheme,
-} from '@elastic/eui';
-import { ScaleType, Settings, Tooltip, Chart, BarSeries } from '@elastic/charts';
+import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { ScaleType, Settings, Tooltip, Chart, AreaSeries } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { Coordinate } from '../../../common/types';
 
 export function SparkPlot({
-  valueLabel,
-  isLoading,
-  series,
-}: {
-  valueLabel: React.ReactNode;
-  isLoading: boolean;
-  series?: Coordinate[] | null;
-}) {
-  return (
-    <EuiFlexGroup justifyContent="flexStart" gutterSize="s" responsive={false} alignItems="center">
-      <EuiFlexItem grow={false}>
-        <SparkPlotItem isLoading={isLoading} series={series} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>{valueLabel}</EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
-
-function SparkPlotItem({
   isLoading,
   series,
 }: {
@@ -58,7 +32,6 @@ function SparkPlotItem({
     alignItems: 'center',
     justifyContent: 'center',
   };
-  const palette = euiPaletteColorBlind({ rotations: 2 });
 
   if (isLoading) {
     return (
@@ -70,22 +43,28 @@ function SparkPlotItem({
 
   if (hasValidTimeSeries(series)) {
     return (
-      <div
-        style={{ backgroundColor: `${palette[0]}`, padding: 1, height: '100%' }}
-        data-test-subj="datasetQualitySparkPlot"
-      >
+      <div style={{ padding: 1, height: '100%' }} data-test-subj="datasetQualitySparkPlot">
         <Chart size={chartSize}>
-          <Settings showLegend={false} locale={i18n.getLocale()} baseTheme={chartBaseTheme} />
-          <Tooltip type="none" />
-          <BarSeries
-            id="barseries"
+          <Settings
+            showLegend={false}
+            locale={i18n.getLocale()}
+            baseTheme={chartBaseTheme}
+            theme={{
+              background: {
+                color: 'transparent',
+              },
+            }}
+          />
+          <AreaSeries
+            id="areaseries"
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={['y']}
             data={series}
-            color={palette[1]}
+            color={euiTheme.colors.vis.euiColorVis6}
           />
+          <Tooltip type="none" />
         </Chart>
       </div>
     );

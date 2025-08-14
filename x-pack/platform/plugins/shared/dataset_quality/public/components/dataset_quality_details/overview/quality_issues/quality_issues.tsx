@@ -6,83 +6,31 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiPanel,
-  EuiTitle,
-  EuiIconTip,
-  EuiAccordion,
-  useGeneratedHtmlId,
-  EuiBadge,
-  EuiBetaBadge,
-  EuiSwitch,
-} from '@elastic/eui';
-import {
-  overviewQualityIssuesSectionTitle,
-  overviewQualityIssueSectionTitleTooltip,
-  currentIssuesToggleSwitch,
-  currentIssuesToggleSwitchTooltip,
-  overviewQualityIssuesAccordionTechPreviewBadge,
-} from '../../../../../common/translations';
+import { EuiFlexGroup, EuiSpacer, EuiTitle, EuiFilterGroup } from '@elastic/eui';
 import { QualityIssuesTable } from './table';
-import { useQualityIssues } from '../../../../hooks';
+import { issuesTableName } from '../../../../../common/translations';
+import { FieldSelector, DegradedFieldsToggleButton, IssueTypeSelector } from './filters';
 
 export function QualityIssues() {
-  const accordionId = useGeneratedHtmlId({
-    prefix: overviewQualityIssuesSectionTitle,
-  });
-  const toggleTextSwitchId = useGeneratedHtmlId({ prefix: 'toggleTextSwitch' });
-
-  const { totalItemCount, toggleCurrentQualityIssues, showCurrentQualityIssues } =
-    useQualityIssues();
-
-  const latestBackingIndexToggle = (
-    <>
-      <EuiSwitch
-        label={currentIssuesToggleSwitch}
-        checked={showCurrentQualityIssues}
-        onChange={toggleCurrentQualityIssues}
-        aria-describedby={toggleTextSwitchId}
-        compressed
-        data-test-subj="datasetQualityDetailsOverviewDegradedFieldToggleSwitch"
-        css={{ marginRight: '5px' }}
-      />
-      <EuiIconTip content={currentIssuesToggleSwitchTooltip} position="top" />
-    </>
-  );
-
-  const accordionTitle = (
-    <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
-      <EuiTitle size="xxs">
-        <h6>{overviewQualityIssuesSectionTitle}</h6>
-      </EuiTitle>
-      <EuiIconTip content={overviewQualityIssueSectionTitleTooltip} color="subdued" size="m" />
-      <EuiBadge
-        color="default"
-        data-test-subj="datasetQualityDetailsOverviewDegradedFieldTitleCount"
-      >
-        {totalItemCount}
-      </EuiBadge>
-      <EuiBetaBadge
-        label={overviewQualityIssuesAccordionTechPreviewBadge}
-        color="hollow"
-        data-test-subj="datasetQualityDetailsOverviewDegradedFieldsTechPreview"
-        size="s"
-      />
-    </EuiFlexGroup>
-  );
   return (
-    <EuiPanel hasBorder grow={false}>
-      <EuiAccordion
-        id={accordionId}
-        buttonContent={accordionTitle}
-        paddingSize="none"
-        initialIsOpen={true}
-        extraAction={latestBackingIndexToggle}
-        data-test-subj="datasetQualityDetailsOverviewDocumentTrends"
+    <>
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        justifyContent="spaceBetween"
+        data-test-subj="datasetQualityDetailsFiltersContainer"
       >
-        <QualityIssuesTable />
-      </EuiAccordion>
-    </EuiPanel>
+        <EuiTitle size="xxs">
+          <h4>{issuesTableName}</h4>
+        </EuiTitle>
+        <EuiFilterGroup>
+          <FieldSelector />
+          <IssueTypeSelector />
+          <DegradedFieldsToggleButton />
+        </EuiFilterGroup>
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
+      <QualityIssuesTable />
+    </>
   );
 }
