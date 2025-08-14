@@ -25,7 +25,7 @@ export const CaseSuggestions = ({ caseData }: { caseData: CaseUI }) => {
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="m" wrap>
+      <EuiFlexGroup gutterSize="m" wrap direction="column">
         {visibleSuggestions.map((suggestion) => {
           return (
             <CaseSuggestionItem
