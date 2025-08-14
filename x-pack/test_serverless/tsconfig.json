@@ -49,14 +49,12 @@
     "@kbn/test-suites-src",
     "@kbn/cloud-security-posture-common",
     "@kbn/scout-info",
-    "@kbn/streams-schema",
     "@kbn/test-suites-xpack-platform",
     "@kbn/infra-plugin",
     "@kbn/observability-plugin",
     "@kbn/response-ops-rule-params",
     "@kbn/telemetry-collection-manager-plugin",
     "@kbn/security-solution-plugin",
-    "@kbn/test-suites-xpack-observability",
-    "@kbn/security-plugin-types-common",
+    "@kbn/apm-synthtrace",
   ]
 }
