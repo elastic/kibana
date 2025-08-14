@@ -69,11 +69,14 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not create a user if the maximum user limit is reached', async () => {
         log.info(`creating a user when the maximum limit is reached`);
-        await api.createPrivMonUser({
-          body: { user: { name: 'test_user1' } },
-        });
+        const userCreationPromises = Array.from({ length: 100 }, (_, i) =>
+          api.createPrivMonUser({
+            body: { user: { name: `privmon_testuser_${i + 1}` } },
+          })
+        );
+        await Promise.all(userCreationPromises);
         const res = await api.createPrivMonUser({
-          body: { user: { name: 'test_user2' } },
+          body: { user: { name: 'privmon_testuser_maxPlusOne' } },
         });
 
         if (res.status !== 500) {
