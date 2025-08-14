@@ -49,6 +49,7 @@ export function registerFeatures({ isServerless, features }: FeatureRegistration
         defaultMessage: 'Reporting Legacy',
       }),
       category: DEFAULT_APP_CATEGORIES.management,
+      management: { insightsAndAlerting: ['reporting'] },
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [],
       privileges: null,
