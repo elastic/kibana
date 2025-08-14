@@ -31,7 +31,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
 import React, { ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
@@ -550,7 +550,8 @@ const ESQLEditorInternal = function ESQLEditor({
         }
 
         return {
-          hasAtLeast: ls.hasAtLeast.bind(ls), // keep the original context this
+          ...ls,
+          hasAtLeast: ls.hasAtLeast.bind(ls),
         };
       },
       getActiveProduct: () => core.pricing.getActiveProduct(),
