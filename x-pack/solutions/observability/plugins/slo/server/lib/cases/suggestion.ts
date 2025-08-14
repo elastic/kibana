@@ -17,6 +17,8 @@ import { sloPaths } from '../../../common';
 import type { SLOSuggestion } from '../../../common/cases/suggestions';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 import type { EsSummaryDocument } from '../../services/summary_transform_generator/helpers/create_temp_summary';
+import { getFlattenedGroupings } from '../../services/utils';
+import { toHighPrecision } from '../../utils/number';
 
 export function getSLOByServiceName(
   coreStart: CoreStart,
@@ -94,13 +96,54 @@ export function getSLOByServiceName(
         });
 
         const suggestions = results.hits.hits.map((doc) => {
-          return {
-            id: doc._source!.slo.id,
-            instanceId: doc._source!.slo.instanceId,
-            name: doc._source!.slo.name,
-            spaceId: doc._source!.spaceId,
-            status: doc._source!.status,
+          const src = doc._source!;
+          const payload: SLOSuggestion = {
+            id: src.slo.id,
+            name: src.slo.name,
+            description: src.slo.description,
+            indicator: src.slo.indicator as any,
+            timeWindow: src.slo.timeWindow,
+            budgetingMethod: src.slo.budgetingMethod,
+            objective: {
+              target: src.slo.objective.target,
+              timesliceTarget: src.slo.objective.timesliceTarget ?? undefined,
+              timesliceWindow: src.slo.objective.timesliceWindow ?? undefined,
+            },
+            settings: {
+              syncDelay: '1m',
+              frequency: '1m',
+              preventInitialBackfill: false,
+            },
+            revision: src.slo.revision,
+            enabled: true,
+            tags: src.slo.tags,
+            createdAt: src.slo.createdAt ?? '2024-01-01T00:00:00.000Z',
+            updatedAt: src.slo.updatedAt ?? '2024-01-01T00:00:00.000Z',
+            groupBy: src.slo.groupBy,
+            version: 1,
+            ...(src.slo.createdBy ? { createdBy: src.slo.createdBy } : {}),
+            ...(src.slo.updatedBy ? { updatedBy: src.slo.updatedBy } : {}),
+            instanceId: src.slo.instanceId,
+            groupings: getFlattenedGroupings({
+              groupings: src.slo.groupings,
+              groupBy: src.slo.groupBy,
+            }),
+            summary: {
+              status: src.status,
+              sliValue: toHighPrecision(src.sliValue),
+              errorBudget: {
+                initial: toHighPrecision(src.errorBudgetInitial),
+                consumed: toHighPrecision(src.errorBudgetConsumed),
+                remaining: toHighPrecision(src.errorBudgetRemaining),
+                isEstimated: src.errorBudgetEstimated,
+              },
+              fiveMinuteBurnRate: toHighPrecision(src.fiveMinuteBurnRate?.value ?? 0),
+              oneHourBurnRate: toHighPrecision(src.oneHourBurnRate?.value ?? 0),
+              oneDayBurnRate: toHighPrecision(src.oneDayBurnRate?.value ?? 0),
+              summaryUpdatedAt: src.summaryUpdatedAt,
+            },
           };
+          return { ...payload, status: src.status };
         });
 
         return {
@@ -111,12 +154,7 @@ export function getSLOByServiceName(
               data: suggestions.map((suggestion) => ({
                 id: `${suggestion.id}-${suggestion.instanceId}`,
                 description: `SLO "${suggestion.name}" is ${suggestion.status} for the service "${serviceName}"`,
-                payload: {
-                  id: suggestion.id,
-                  name: suggestion.name,
-                  instanceId: suggestion.instanceId,
-                  status: suggestion.status,
-                },
+                payload: suggestion,
                 attachment: {
                   type: AttachmentType.persistableState,
                   persistableStateAttachmentTypeId: '.page',

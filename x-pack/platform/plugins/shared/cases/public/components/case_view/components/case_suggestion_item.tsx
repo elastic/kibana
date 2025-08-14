@@ -22,7 +22,7 @@ import type { CaseUI } from '../../../../common';
 import * as i18n from '../../../common/translations';
 import { useCaseSuggestionItem } from '../use_case_suggestion_item';
 
-const ITEM_HEIGHT = 200;
+const ITEM_HEIGHT = 350;
 
 export const CaseSuggestionItem = ({
   suggestion,
@@ -71,7 +71,7 @@ export const CaseSuggestionItem = ({
 
         <suggestion.injectedComponent suggestion={{ data: [suggestion], id: suggestion.id }} />
 
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty size="s" color="primary" onClick={onDismissSuggestionNew}>
               {i18n.DISMISS}
