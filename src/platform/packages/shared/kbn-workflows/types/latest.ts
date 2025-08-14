@@ -22,6 +22,7 @@ export type {
   WorkflowExecutionDto,
   WorkflowExecutionListDto,
   WorkflowExecutionListItemDto,
+  WorkflowListItemAction,
 
   // commands
   CreateWorkflowCommand,
@@ -42,4 +43,14 @@ export {
   CreateWorkflowCommandSchema,
 } from './v1';
 
-export type { EnterIfNode, ExitIfNode, EnterForeachNode, ExitForeachNode } from './execution';
+export type {
+  EnterIfNode,
+  ExitIfNode,
+  EnterConditionBranchNode,
+  EnterConditionBranchNodeSchema,
+  ExitConditionBranchNode,
+  ExitConditionBranchNodeSchema,
+  EnterForeachNode,
+  ExitForeachNode,
+  AtomicGraphNode,
+} from './execution';

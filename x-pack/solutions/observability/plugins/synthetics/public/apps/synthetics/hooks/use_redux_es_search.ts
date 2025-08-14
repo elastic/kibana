@@ -42,7 +42,7 @@ export const useReduxEsSearch = <
 
   return useMemo(() => {
     return {
-      data: results[name] as ESSearchResponse<DocumentSource, TParams>,
+      data: results[name] as unknown as ESSearchResponse<DocumentSource, TParams> | undefined,
       loading: loadings[name],
       error: errors[name],
     };

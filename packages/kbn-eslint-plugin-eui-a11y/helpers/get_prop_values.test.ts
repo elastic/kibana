@@ -34,7 +34,7 @@ describe('getPropValues', () => {
             } as any),
         } as any,
       })
-    ).toEqual({
+    ).toMatchObject({
       prop1: { type: 'Literal', value: 'bar', raw: '"bar"' },
       prop2: element.openingElement.attributes[1].value,
     });

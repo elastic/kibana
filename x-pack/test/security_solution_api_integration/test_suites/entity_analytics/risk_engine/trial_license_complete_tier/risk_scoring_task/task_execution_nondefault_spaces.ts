@@ -8,7 +8,10 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { dataGeneratorFactory } from '../../../../detections_response/utils';
-import { deleteAllRules, deleteAllAlerts } from '../../../../../../common/utils/security_solution';
+import {
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../config/services/detections_response';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
@@ -45,12 +48,14 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
 
       before(async () => {
         await riskEngineRoutesForNamespace.cleanUp();
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
       });
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
         );
       });
 

@@ -152,7 +152,7 @@ export const usePrivilegedUsersTableData = (
         JSON.stringify(
           {
             index: [getPrivilegedMonitorUsersIndex(spaceId)],
-            body: prettifyQuery(privilegedUsersTableQuery, false),
+            body: prettifyQuery(privilegedUsersTableQuery),
           },
           null,
           2

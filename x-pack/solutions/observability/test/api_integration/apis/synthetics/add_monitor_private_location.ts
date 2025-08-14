@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('add a test private location', async () => {
-      pvtLoc = await testPrivateLocations.addPrivateLocation();
+      pvtLoc = await testPrivateLocations.createPrivateLocation();
       testFleetPolicyID = pvtLoc.agentPolicyId;
 
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);

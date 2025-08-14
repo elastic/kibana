@@ -18,7 +18,7 @@ import {
   createContainerWithEntries,
   createContainerWithEndpointEntries,
 } from '../exception_list_and_item';
-import { createRule } from '../../../../../common/utils/security_solution';
+import { createRule } from '../../../../config/services/detections_response';
 
 /**
  * Convenience testing function where you can pass in just the entries and you will

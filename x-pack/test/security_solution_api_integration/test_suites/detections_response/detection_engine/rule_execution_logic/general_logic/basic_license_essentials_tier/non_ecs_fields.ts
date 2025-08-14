@@ -16,7 +16,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   getRuleForAlertTesting,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 const getQueryRule = (docIdToQuery: string) => ({
@@ -61,13 +61,13 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless @serverlessQA Non ECS fields in alert document source', () => {
     before(async () => {
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_non_compliant'
       );
     });
 
     after(async () => {
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_non_compliant'
       );
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);

@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
-import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty } from '@elastic/eui';
 
 const KIBANA_VERSION_QUERY_PARAM = 'entry.548460210';
 const KIBANA_DEPLOYMENT_TYPE_PARAM = 'entry.573002982';
 const SANITIZED_PATH_PARAM = 'entry.1876422621';
 const ML_JOB_TYPE = 'entry.170406579';
+const FEEDBACK_BUTTON_DEFAULT_TEXT = i18n.translate(
+  'xpack.observabilityShared.featureFeedbackButton.defaultText',
+  {
+    defaultMessage: 'Give feedback',
+  }
+);
 
 export type NodeType = 'host' | 'pod';
 
@@ -91,7 +97,7 @@ export interface FormConfig {
 interface FeatureFeedbackButtonProps {
   formUrl: string;
   'data-test-subj': string;
-  surveyButtonText?: ReactElement;
+  surveyButtonText?: string;
   onClickCapture?: () => void;
   defaultButton?: boolean;
   kibanaVersion?: string;
@@ -113,15 +119,11 @@ export const FeatureFeedbackButton = ({
   isServerlessEnv,
   sanitizedPath,
   nodeType,
-  surveyButtonText = (
-    <FormattedMessage
-      id="xpack.observabilityShared.featureFeedbackButton.tellUsWhatYouThinkLink"
-      defaultMessage="Tell us what you think!"
-    />
-  ),
+  surveyButtonText = FEEDBACK_BUTTON_DEFAULT_TEXT,
 }: FeatureFeedbackButtonProps) => {
   return (
-    <EuiButton
+    <EuiButtonEmpty
+      aria-label={surveyButtonText ?? FEEDBACK_BUTTON_DEFAULT_TEXT}
       href={getSurveyFeedbackURL({
         formUrl,
         formConfig,
@@ -131,13 +133,15 @@ export const FeatureFeedbackButton = ({
         isServerlessEnv,
         sanitizedPath,
       })}
+      size="s"
+      iconType={defaultButton ? undefined : 'popout'}
+      iconSide="right"
       target="_blank"
-      color={defaultButton ? undefined : 'warning'}
-      iconType={defaultButton ? undefined : 'editorComment'}
-      data-test-subj={dts}
       onClickCapture={onClickCapture}
+      data-test-subj={dts}
+      color="primary"
     >
       {surveyButtonText}
-    </EuiButton>
+    </EuiButtonEmpty>
   );
 };

@@ -4,18 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
-import { formatValueForKql } from '@kbn/observability-utils-common/es/format_value_for_kql';
-import type { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
-import { ShortIdTable } from '@kbn/observability-utils-common/llm/short_id_table';
+import type { TruncatedDocumentAnalysis } from '@kbn/ai-tools';
 import {
   P_VALUE_SIGNIFICANCE_HIGH,
   P_VALUE_SIGNIFICANCE_MEDIUM,
-} from '@kbn/observability-utils-common/ml/p_value_to_label';
-import {
-  FieldPatternResultWithChanges,
   getLogPatterns,
-} from '@kbn/observability-utils-server/entities/get_log_patterns';
+  type FieldPatternResultWithChanges,
+} from '@kbn/ai-tools';
+import { ShortIdTable } from '@kbn/inference-common';
+import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
+import { formatValueForKql } from '@kbn/observability-utils-common/es/format_value_for_kql';
 import { castArray, compact, groupBy, orderBy } from 'lodash';
 import { RCA_PROMPT_CHANGES, RCA_PROMPT_ENTITIES } from '../../prompts';
 import { RootCauseAnalysisContext } from '../../types';
@@ -117,7 +115,7 @@ export async function analyzeLogPatterns({
       index: [...indices.logs, ...indices.traces],
       start,
       end,
-      kuery,
+      kql: kuery,
       includeChanges: true,
       fields,
       metadata: [],
@@ -127,7 +125,7 @@ export async function analyzeLogPatterns({
       index: [...indices.logs],
       start,
       end,
-      kuery: kueryForOtherEntities,
+      kql: kueryForOtherEntities,
       metadata: Object.keys(entity),
       includeChanges: true,
       fields,

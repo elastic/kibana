@@ -6,4 +6,4 @@
  */
 
 export * from './log_data_service';
-export * from './types';
+export type * from './types';

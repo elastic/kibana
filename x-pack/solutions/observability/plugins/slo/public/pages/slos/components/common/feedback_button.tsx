@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const SLO_FEEDBACK_LINK = 'https://ela.st/slo-feedback';
@@ -15,19 +15,24 @@ interface Props {
   disabled?: boolean;
 }
 
+const feedbackButtonLabel = i18n.translate('xpack.slo.featureFeedbackButtonLabel', {
+  defaultMessage: 'Give feedback',
+});
+
 export function FeedbackButton({ disabled }: Props) {
   return (
-    <EuiButton
-      data-test-subj="sloFeedbackButton"
-      isDisabled={disabled}
+    <EuiHeaderLink
+      aria-label={feedbackButtonLabel}
       href={SLO_FEEDBACK_LINK}
+      size="s"
+      iconType="popout"
+      iconSide="right"
       target="_blank"
-      color="warning"
-      iconType="editorComment"
+      color="primary"
+      isDisabled={disabled}
+      data-test-subj="sloFeedbackButton"
     >
-      {i18n.translate('xpack.slo.feedbackButtonLabel', {
-        defaultMessage: 'Tell us what you think!',
-      })}
-    </EuiButton>
+      {feedbackButtonLabel}
+    </EuiHeaderLink>
   );
 }

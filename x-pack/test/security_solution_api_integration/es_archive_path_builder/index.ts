@@ -18,16 +18,17 @@ export class EsArchivePathBuilder {
    */
 
   /**
-   * List of archives that have been relocated to the new path.
-   * Add more archive prefixes as needed.
+   * List of archive prefixes that are stored in the x-pack/platform/test directory.
+   * If the resourceUri starts with any of these prefixes and is not serverless,
+   * the path will be resolved to the platform archive location.
    */
-  private static readonly RELOCATED_ARCHIVES = ['auditbeat', 'filebeat'];
+  private static readonly PLATFORM_ARCHIVES = ['auditbeat', 'filebeat'];
 
   getPath(resourceUri: string): string {
-    // Check if resourceUri matches any relocated archive prefix
+    // Check if resourceUri matches any platform archive prefix
     if (
       !this.isServerless &&
-      EsArchivePathBuilder.RELOCATED_ARCHIVES.some((prefix) => resourceUri.startsWith(prefix))
+      EsArchivePathBuilder.PLATFORM_ARCHIVES.some((prefix) => resourceUri.startsWith(prefix))
     ) {
       return `x-pack/platform/test/fixtures/es_archives/${resourceUri}`;
     }

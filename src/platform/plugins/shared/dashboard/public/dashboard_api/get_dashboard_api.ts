@@ -174,6 +174,7 @@ export function getDashboardApi({
       }
 
       if (saveResult) {
+        references$.next(saveResult.references);
         unsavedChangesManager.internalApi.onSave(saveResult.savedState);
         const settings = settingsManager.api.getSettings();
         settingsManager.api.setSettings({
@@ -185,8 +186,6 @@ export function getDashboardApi({
           title: saveResult.savedState.title,
         });
         savedObjectId$.next(saveResult.id);
-
-        references$.next(saveResult.references);
       }
 
       return saveResult;
@@ -203,8 +202,8 @@ export function getDashboardApi({
       });
 
       if (saveResult?.error) return;
-      unsavedChangesManager.internalApi.onSave(dashboardState);
       references$.next(saveResult.references);
+      unsavedChangesManager.internalApi.onSave(dashboardState);
 
       return;
     },
@@ -218,6 +217,7 @@ export function getDashboardApi({
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
     type: DASHBOARD_API_TYPE as 'dashboard',
     uuid: v4(),
+    getPassThroughContext: () => creationOptions?.getPassThroughContext?.(),
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const internalApi: DashboardInternalApi = {

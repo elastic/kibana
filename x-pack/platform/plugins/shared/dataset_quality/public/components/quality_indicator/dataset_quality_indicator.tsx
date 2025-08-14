@@ -15,11 +15,9 @@ import { QualityIndicator } from '.';
 export const DatasetQualityIndicator = ({
   isLoading,
   quality,
-  textSize = 's',
 }: {
   isLoading: boolean;
   quality: QualityIndicators;
-  textSize?: 'xs' | 's' | 'm';
 }) => {
   const translatedQuality = i18n.translate('xpack.datasetQuality.datasetQualityIdicator', {
     defaultMessage: '{quality}',
@@ -29,12 +27,7 @@ export const DatasetQualityIndicator = ({
   return (
     <EuiSkeletonRectangle width="50px" height="20px" borderRadius="m" isLoading={isLoading}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        <QualityIndicator
-          textSize={textSize}
-          quality={quality}
-          description={translatedQuality}
-          isColoredDescription
-        />
+        <QualityIndicator quality={quality} description={translatedQuality} />
       </EuiFlexGroup>
     </EuiSkeletonRectangle>
   );

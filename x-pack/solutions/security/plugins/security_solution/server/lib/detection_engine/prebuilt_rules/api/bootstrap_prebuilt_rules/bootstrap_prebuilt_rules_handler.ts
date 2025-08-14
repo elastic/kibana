@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type {
+  Logger,
+  IKibanaResponse,
+  KibanaRequest,
+  KibanaResponseFactory,
+} from '@kbn/core/server';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { installSecurityAiPromptsPackage } from '../../logic/integrations/install_ai_prompts';
@@ -25,7 +30,8 @@ import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebui
 export const bootstrapPrebuiltRulesHandler = async (
   context: SecuritySolutionRequestHandlerContext,
   _: KibanaRequest,
-  response: KibanaResponseFactory
+  response: KibanaResponseFactory,
+  logger: Logger
 ): Promise<IKibanaResponse<BootstrapPrebuiltRulesResponse>> => {
   const siemResponse = buildSiemResponse(response);
 
@@ -47,7 +53,7 @@ export const bootstrapPrebuiltRulesHandler = async (
     const packageResults: PackageInstallStatus[] = [];
 
     // Install packages sequentially to avoid high memory usage
-    const prebuiltRulesResult = await installPrebuiltRulesPackage(securityContext);
+    const prebuiltRulesResult = await installPrebuiltRulesPackage(securityContext, logger);
     packageResults.push({
       name: prebuiltRulesResult.package.name,
       version: prebuiltRulesResult.package.version,
@@ -62,9 +68,10 @@ export const bootstrapPrebuiltRulesHandler = async (
         ruleAssetsClient,
         ruleObjectsClient,
         fleetServices: securityContext.getInternalFleetServices(),
+        logger,
       });
     } else {
-      const endpointResult = await installEndpointPackage(securityContext);
+      const endpointResult = await installEndpointPackage(securityContext, logger);
       packageResults.push({
         name: endpointResult.package.name,
         version: endpointResult.package.version,
@@ -72,7 +79,7 @@ export const bootstrapPrebuiltRulesHandler = async (
       });
     }
 
-    const securityAiPromptsResult = await installSecurityAiPromptsPackage(securityContext);
+    const securityAiPromptsResult = await installSecurityAiPromptsPackage(securityContext, logger);
 
     if (securityAiPromptsResult !== null) {
       packageResults.push({
@@ -87,10 +94,15 @@ export const bootstrapPrebuiltRulesHandler = async (
       rules: ruleResults,
     };
 
+    logger.debug(
+      `bootstrapPrebuiltRulesHandler: Total packages installed: ${packageResults.length}`
+    );
+
     return response.ok({
       body: responseBody,
     });
   } catch (err) {
+    logger.error(`bootstrapPrebuiltRulesHandler: Caught error:`, err);
     const error = transformError(err);
     return siemResponse.error({
       body: error.message,

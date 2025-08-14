@@ -6,17 +6,33 @@
  */
 
 import { Streams } from '@kbn/streams-schema';
-import { BaseStream } from '@kbn/streams-schema/src/models/base';
 
 export function migrateOnRead(definition: Record<string, unknown>): Streams.all.Definition {
   let migratedDefinition = definition;
-  if (typeof definition.description !== 'string') {
+  // Add required description
+  if (typeof migratedDefinition.description !== 'string') {
     migratedDefinition = {
-      ...definition,
+      ...migratedDefinition,
       description: '',
     };
   }
-  Streams.all.Definition.asserts(migratedDefinition as unknown as BaseStream.Definition);
-
+  // Rename unwired to classic
+  if (
+    typeof migratedDefinition.ingest === 'object' &&
+    migratedDefinition.ingest &&
+    'unwired' in migratedDefinition.ingest &&
+    typeof migratedDefinition.ingest.unwired === 'object'
+  ) {
+    migratedDefinition = {
+      ...migratedDefinition,
+      ingest: {
+        ...migratedDefinition.ingest,
+        classic: {
+          ...migratedDefinition.ingest.unwired,
+        },
+      },
+    };
+    delete (migratedDefinition.ingest as { unwired?: {} }).unwired;
+  }
   return migratedDefinition as unknown as Streams.all.Definition;
 }

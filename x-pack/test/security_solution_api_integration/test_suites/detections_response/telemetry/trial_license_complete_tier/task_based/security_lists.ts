@@ -21,7 +21,7 @@ import {
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-} from '../../../../../../common/utils/security_solution';
+} from '../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -35,11 +35,15 @@ export default ({ getService }: FtrProviderContext) => {
   // Failing: See https://github.com/elastic/kibana/issues/164334
   describe.skip('@ess @serverless Security lists task telemetry', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/telemetry');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/telemetry'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/telemetry');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/telemetry'
+      );
     });
 
     beforeEach(async () => {

@@ -107,7 +107,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         showAssistantOverlay?.({ showOverlay: false });
       } else {
         navigateToApp('management', {
-          path: 'kibana/securityAiAssistantManagement',
+          path: 'ai/securityAiAssistantManagement',
         });
       }
     }, [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp, showAssistantOverlay]);
@@ -126,7 +126,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         showAssistantOverlay?.({ showOverlay: false });
       } else {
         navigateToApp('management', {
-          path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
+          path: `ai/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
         });
       }
     }, [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp, showAssistantOverlay]);
@@ -157,6 +157,11 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
 
     const selectedConversationHasAnonymizedValues = useMemo(
       () => conversationContainsAnonymizedValues(selectedConversation),
+      [selectedConversation]
+    );
+
+    const selectedConversationExists = useMemo(
+      () => selectedConversation && selectedConversation.id !== '',
       [selectedConversation]
     );
 
@@ -327,20 +332,23 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiContextMenuItem>
-
-          <EuiHorizontalRule margin="none" />
-          <EuiContextMenuItem
-            aria-label={'clear-chat'}
-            key={'clear-chat'}
-            onClick={showDestroyModal}
-            icon={'refresh'}
-            data-test-subj={'clear-chat'}
-            css={css`
-              color: ${euiTheme.colors.textDanger};
-            `}
-          >
-            {i18n.RESET_CONVERSATION}
-          </EuiContextMenuItem>
+          {selectedConversationExists && (
+            <>
+              <EuiHorizontalRule margin="none" />
+              <EuiContextMenuItem
+                aria-label={'clear-chat'}
+                key={'clear-chat'}
+                onClick={showDestroyModal}
+                icon={'refresh'}
+                data-test-subj={'clear-chat'}
+                css={css`
+                  color: ${euiTheme.colors.textDanger};
+                `}
+              >
+                {i18n.RESET_CONVERSATION}
+              </EuiContextMenuItem>
+            </>
+          )}
         </EuiPanel>,
       ],
       [
@@ -357,6 +365,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         showDestroyModal,
         euiTheme.size.m,
         euiTheme.size.xs,
+        selectedConversationExists,
         selectedConversationHasCitations,
         selectedConversationHasAnonymizedValues,
       ]

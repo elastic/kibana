@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import type { CriteriaWithPagination, EuiSuperDatePickerProps } from '@elastic/eui';
 import {
   EuiBasicTable,
   type EuiBasicTableColumn,
@@ -18,6 +17,8 @@ import {
   EuiHorizontalRule,
   EuiLoadingLogo,
   type EuiSelectableProps,
+  type CriteriaWithPagination,
+  type EuiSuperDatePickerProps,
   EuiSpacer,
   EuiSuperDatePicker,
   EuiText,

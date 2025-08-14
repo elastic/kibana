@@ -6,9 +6,13 @@
  */
 
 import createContainer from 'constate';
+import { useEffect, useMemo } from 'react';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
 import type { AssetDetailsProps } from '../types';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 import { useMetadataStateContext } from './use_metadata_state';
+import { useTimeRangeMetadataContext } from '../../../hooks/use_time_range_metadata';
 
 export type UseAssetDetailsRenderProps = Pick<
   AssetDetailsProps,
@@ -18,7 +22,18 @@ export type UseAssetDetailsRenderProps = Pick<
 export function useAssetDetailsRenderProps(props: UseAssetDetailsRenderProps) {
   const [urlState] = useAssetDetailsUrlState();
   const { metadata } = useMetadataStateContext();
+  const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
+  const { updateTopbarMenuVisibilityBySchema } = useInfraMLCapabilitiesContext();
   const { entityId, entityName, entityType, ...rest } = props;
+
+  const schema = useMemo<DataSchemaFormat | null>(() => {
+    if (!timeRangeMetadata) return null;
+    return timeRangeMetadata.preferredSchema;
+  }, [timeRangeMetadata]);
+
+  useEffect(() => {
+    updateTopbarMenuVisibilityBySchema(schema);
+  }, [schema, updateTopbarMenuVisibilityBySchema]);
 
   // When the asset entity.name is known we can load the page faster
   // Otherwise we need to use metadata response.
@@ -30,6 +45,7 @@ export function useAssetDetailsRenderProps(props: UseAssetDetailsRenderProps) {
       name: entityName || urlState?.name || metadata?.name || '',
       type: entityType,
     },
+    schema,
     loading,
   };
 }

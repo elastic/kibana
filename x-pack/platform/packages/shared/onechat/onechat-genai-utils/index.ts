@@ -30,5 +30,4 @@ export {
   relevanceSearch,
   type RelevanceSearchResponse,
   naturalLanguageSearch,
-  type NaturalLanguageSearchResponse,
 } from './tools';
