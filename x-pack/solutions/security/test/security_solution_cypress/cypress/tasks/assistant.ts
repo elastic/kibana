@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { closeToast } from './common/toast';
 import { visitGetStartedPage } from './navigation';
 import { CONNECTOR_NAME_INPUT, SAVE_ACTION_CONNECTOR_BTN } from '../screens/common/rule_actions';
 import { azureConnectorAPIPayload } from './api_calls/connectors';
@@ -376,31 +377,34 @@ export const assertNotSharedConversationIcon = (title: string) => {
   cy.get(CONVERSATION_LIST_ICON(title)).should('not.exist');
 };
 
+export const shareConversation = (share: string) => {
+  openShareMenu();
+  selectShareModal();
+  if (share === 'global') {
+    submitShareModal();
+    assertOwnerSharedCallout();
+  } else {
+    selectShareType('selected');
+    shareConversationWithUser(share);
+    submitShareModal();
+    assertOwnerSharedCallout();
+  }
+};
+
 export const shareConversations = (convos: Array<{ title: string; share: string }>) => {
   visitGetStartedPage();
   openAssistant();
   convos.forEach(({ title, share }) => {
     selectConversation(title);
     selectConnector(azureConnectorAPIPayload.name);
-    typeAndSendMessage('hello');
-    assertMessageSent('hello');
-    openShareMenu();
-    selectShareModal();
-    if (share === 'global') {
-      submitShareModal();
-      assertOwnerSharedCallout();
-    } else {
-      selectShareType('selected');
-      shareConversationWithUser(share);
-      submitShareModal();
-      assertOwnerSharedCallout();
-    }
+    shareConversation(share);
   });
 };
 
 export const duplicateConversation = (conversationName: string) => {
   cy.get(SHARED_CALLOUT).find(DUPLICATE_CONVERSATION).click();
   assertConversationTitle(`[Duplicate] ${conversationName}`);
+  closeToast();
 };
 
 export const assertMessageUser = (user: string, messageIndex: number) => {

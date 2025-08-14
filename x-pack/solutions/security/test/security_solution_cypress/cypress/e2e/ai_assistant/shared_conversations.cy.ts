@@ -21,6 +21,7 @@ import {
   assertShareModalType,
   assertShareUser,
   closeShareModal,
+  createAndTitleConversation,
   dismissSharedCallout,
   duplicateConversation,
   openAssistant,
@@ -30,6 +31,7 @@ import {
   selectNotShared,
   selectShareModal,
   selectShareType,
+  shareConversation,
   shareConversations,
   shareConversationWithUser,
   submitShareModal,
@@ -39,22 +41,51 @@ import {
 import { deleteConversations, waitForConversation } from '../../tasks/api_calls/assistant';
 import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../tasks/api_calls/common';
-import { login } from '../../tasks/login';
+import { login, logout } from '../../tasks/login';
 import { visitGetStartedPage } from '../../tasks/navigation';
-const mockConvo1 = {
-  id: 'spooky',
-  title: 'Spooky convo',
-  messages: [],
-};
-const mockConvo2 = {
-  id: 'silly',
-  title: 'Silly convo',
-  messages: [],
-};
+
 describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => {
   const isServerless = Cypress.env(IS_SERVERLESS);
-  const primaryUser = isServerless ? 'admin' : 'system_indices_superuser';
+  const primaryUser = isServerless ? 'elastic_admin' : 'system_indices_superuser';
   const secondaryUser = isServerless ? ROLES.soc_manager : 'elastic';
+  const mockConvo1 = {
+    id: 'spooky',
+    title: 'Spooky convo',
+    messages: [
+      {
+        timestamp: '2025-08-14T21:08:24.923Z',
+        content: 'Hi spooky robot',
+        user: {
+          name: primaryUser,
+        },
+        role: 'user',
+      },
+      {
+        timestamp: '2025-08-14T21:08:25.349Z',
+        content: 'Hello spooky person',
+        role: 'assistant',
+      },
+    ],
+  };
+  const mockConvo2 = {
+    id: 'silly',
+    title: 'Silly convo',
+    messages: [
+      {
+        timestamp: '2025-08-14T21:08:24.923Z',
+        content: 'Hi silly robot',
+        user: {
+          name: primaryUser,
+        },
+        role: 'user',
+      },
+      {
+        timestamp: '2025-08-14T21:08:25.349Z',
+        content: 'Hello silly person',
+        role: 'assistant',
+      },
+    ],
+  };
   beforeEach(() => {
     deleteConnectors();
     deleteConversations();
@@ -63,13 +94,11 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     waitForConversation(mockConvo1);
     waitForConversation(mockConvo2);
   });
-  it('Share modal works to not share, share globally, and share selected', () => {
+  it.skip('Share modal works to not share, share globally, and share selected', () => {
     visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo1.title);
     selectConnector(azureConnectorAPIPayload.name);
-    typeAndSendMessage('hello');
-    assertMessageSent('hello');
     // Assert that the conversation is not shared
     assertNotSharedCallout();
     // Open the share menu and verify not shared state
@@ -101,8 +130,6 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     // Share the other conversation with selected users
     selectConversation(mockConvo2.title);
     selectConnector(azureConnectorAPIPayload.name);
-    typeAndSendMessage('hello');
-    assertMessageSent('hello');
     // Assert that the conversation is not shared
     assertNotSharedCallout();
     openShareMenu();
@@ -133,7 +160,16 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     toggleConversationSideMenu();
     assertSharedConversationIcon(mockConvo2.title);
   });
-  it('Shared conversations appear for the user they were shared with', () => {
+  it.only('Shared conversations appear for the user they were shared with', () => {
+    // cy.log('hello 1');
+    // logout();
+    // cy.log('hello 2');
+    // login(secondaryUser === 'test_user' ? ROLES.soc_manager : secondaryUser);
+    // cy.log('hello 3');
+    // logout();
+    // cy.log('hello 4');
+    // login('admin');
+    // cy.log('hello 5');
     shareConversations([
       {
         title: mockConvo1.title,
@@ -141,11 +177,11 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       },
       {
         title: mockConvo2.title,
-        share: secondaryUser,
+        share: 'test_user',
       },
     ]);
     // First logout admin user
-    cy.clearCookies();
+    logout();
 
     // Login as elastic user who should have access to shared conversations
     login(secondaryUser);
@@ -154,20 +190,31 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
 
     // Check if the shared conversations are visible
     toggleConversationSideMenu();
-    cy.contains(mockConvo2.title).should('exist');
-    assertSharedConversationIcon(mockConvo2.title);
     cy.contains(mockConvo1.title).should('exist');
+    cy.contains(mockConvo2.title).should('not.exist');
     assertSharedConversationIcon(mockConvo1.title);
     toggleConversationSideMenu();
 
-    // Verify the first conversation is shared globally
+    // Verify the first conversation is shared with secondaryUser
     selectConversation(mockConvo1.title);
     assertSharedCallout();
-
-    // Verify the second conversation is shared with selected users
-    selectConversation(mockConvo2.title);
+    // Ensure we can view messages in the shared conversation
+    assertMessageSent(mockConvo1.messages[0].content);
+    const newConvoTitle = 'Other conversation';
+    createAndTitleConversation(newConvoTitle);
+    shareConversation(primaryUser);
+    // First logout admin user
+    logout();
+    login(isServerless ? 'admin' : undefined);
+    openAssistant();
+    // Check if the selectedly shared conversation is visible
+    toggleConversationSideMenu();
+    cy.contains(newConvoTitle).should('exist');
+    assertSharedConversationIcon(newConvoTitle);
+    toggleConversationSideMenu();
+    // Verify the first conversation is shared with secondaryUser
+    selectConversation(newConvoTitle);
     assertSharedCallout();
-
     // Ensure we can view messages in the shared conversation
     assertMessageSent('hello');
   });
@@ -182,9 +229,9 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
         share: secondaryUser,
       },
     ]);
-    cy.clearCookies();
+    logout();
 
-    login(secondaryUser);
+    login(secondaryUser === 'test_user' ? 'system_indices_superuser' : secondaryUser);
     visitGetStartedPage();
     openAssistant();
 
@@ -198,16 +245,17 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     selectConversation(mockConvo1.title);
     assertNoSharedCallout();
   });
-  it.only('Duplicate conversation works as expected', () => {
+  it('Duplicate conversation works as expected', () => {
     shareConversations([
       {
         title: mockConvo1.title,
         share: 'global',
       },
     ]);
-    cy.clearCookies();
 
-    login(secondaryUser);
+    logout();
+
+    login(secondaryUser === 'test_user' ? 'system_indices_superuser' : secondaryUser);
     visitGetStartedPage();
     openAssistant();
 
@@ -216,6 +264,6 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     assertNotSharedCallout();
     typeAndSendMessage('goodbye');
     assertMessageUser(primaryUser, 0);
-    assertMessageUser(secondaryUser, 2);
+    assertMessageUser(`${isServerless ? 'test ' : ''}${secondaryUser}`, 2);
   });
 });

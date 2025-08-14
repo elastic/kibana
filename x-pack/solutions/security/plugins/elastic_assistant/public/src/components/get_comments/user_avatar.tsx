@@ -30,5 +30,5 @@ export const SecurityUserName: React.FC<Props> = ({ user }) => {
   if (userProfile) {
     return userProfile.user.full_name ?? userProfile.user.username;
   }
-  return i18n.YOU;
+  return user?.name ?? user?.id ?? i18n.YOU;
 };

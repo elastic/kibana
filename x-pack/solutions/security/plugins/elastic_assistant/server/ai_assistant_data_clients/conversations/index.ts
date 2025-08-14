@@ -98,6 +98,7 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
   }: {
     conversation: ConversationCreateProps;
   }): Promise<ConversationResponse | null> => {
+    console.log('optionsUser ==>', this.options.currentUser);
     if (!this.options.currentUser) {
       throw new Error('AIAssistantConversationsDataClient currentUser is not defined.');
     }
