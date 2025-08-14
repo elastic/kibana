@@ -104,7 +104,6 @@ const updateSchemas = getOptionalInOutSchemas({
   ),
 });
 
-
 // Schema to validate the "search" service objects
 const searchSchemas = getOptionalInOutSchemas({
   in: schema.maybe(

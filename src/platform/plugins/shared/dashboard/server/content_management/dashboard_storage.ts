@@ -233,7 +233,7 @@ export class DashboardStorage {
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
-console.log('get dashboard result---', JSON.stringify(value, null, 2));
+    console.log('get dashboard result---', JSON.stringify(value, null, 2));
     return value;
   }
 
@@ -339,7 +339,7 @@ console.log('get dashboard result---', JSON.stringify(value, null, 2));
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
     const allTags = (await tagsClient?.getAll()) ?? [];
-console.log('DashboardStorage update data:', data);
+    console.log('DashboardStorage update data:', data);
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
       DashboardAttributes,
@@ -463,7 +463,7 @@ console.log('DashboardStorage update data:', data);
         total: soResponse.total,
       },
     };
-console.log('search dashboard storage result---', JSON.stringify(response, null, 2));
+    console.log('search dashboard storage result---', JSON.stringify(response, null, 2));
     const validationError = transforms.search.out.result.validate(response);
     if (validationError) {
       if (this.throwOnResultValidationError) {
@@ -486,7 +486,7 @@ console.log('search dashboard storage result---', JSON.stringify(response, null,
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
-console.log('search dashboard result---', JSON.stringify(value, null, 2));
+    console.log('search dashboard result---', JSON.stringify(value, null, 2));
     return value;
   }
 }

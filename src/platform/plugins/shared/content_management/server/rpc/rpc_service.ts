@@ -47,7 +47,7 @@ export class RpcService<Context extends object | void = void, Names extends stri
 
     // 2. Execute procedure
     const result = await fn(context, input);
-console.log('----procedure result-----', JSON.stringify(result, null, 2));
+    console.log('----procedure result-----', JSON.stringify(result, null, 2));
     // 3. Validate output
     if (schemas?.out) {
       const error = validate(result, schemas.out);

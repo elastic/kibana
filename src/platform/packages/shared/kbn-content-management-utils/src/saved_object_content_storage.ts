@@ -257,7 +257,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
 
     const item = savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false);
 
-    const { id: savedObjectId, type, attributes, ...meta} = item;
+    const { id: savedObjectId, type, attributes, ...meta } = item;
     const response = {
       id: savedObjectId,
       type,
@@ -273,7 +273,11 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
 
     const validationError = transforms.get.out.result.validate(response);
     if (validationError) {
-      console.log('validationError---', this.throwOnResultValidationError, JSON.stringify(validationError, null, 2));
+      console.log(
+        'validationError---',
+        this.throwOnResultValidationError,
+        JSON.stringify(validationError, null, 2)
+      );
       if (this.throwOnResultValidationError) {
         throw Boom.badRequest(`Invalid response. ${validationError.message}`);
       } else {
@@ -478,11 +482,11 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     // Execute the query in the DB
     const soResponse = await soClient.find<Types['Attributes']>(soQuery);
     const response = {
-      hits: soResponse.saved_objects.map((so) =>{
-        const item = savedObjectToItem(so, this.allowedSavedObjectAttributes, false)
+      hits: soResponse.saved_objects.map((so) => {
+        const item = savedObjectToItem(so, this.allowedSavedObjectAttributes, false);
         const { id: savedObjectId, type, attributes: savedObjectData, ...meta } = item;
 
-         return { id: savedObjectId, type, data: savedObjectData, meta }
+        return { id: savedObjectId, type, data: savedObjectData, meta };
       }),
       pagination: {
         total: soResponse.total,
@@ -511,7 +515,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
-console.log('SOContentStorage search value-----', JSON.stringify(value, null, 2));
+    console.log('SOContentStorage search value-----', JSON.stringify(value, null, 2));
     return value;
   }
 }

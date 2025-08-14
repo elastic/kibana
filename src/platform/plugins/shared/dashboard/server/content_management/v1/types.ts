@@ -33,7 +33,6 @@ import {
   dashboardAttributesSchemaResponse,
   dashboardResponseMetaSchema,
   mayBeDashboardItemSchema,
-  dashboardCreateRequestAttributesSchema,
   dashboardUpdateRequestAttributesSchema,
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
@@ -92,6 +91,4 @@ export type DashboardUpdateOptions = TypeOf<typeof dashboardUpdateOptionsSchema>
 
 export type DashboardSearchIn = SearchIn<typeof CONTENT_ID>;
 export type DashboardSearchOptions = TypeOf<typeof dashboardSearchOptionsSchema>;
-export type DashboardSearchOut = SearchResult<
-  TypeOf<typeof dashboardItemSchema>
->;
+export type DashboardSearchOut = SearchResult<TypeOf<typeof dashboardItemSchema>>;
