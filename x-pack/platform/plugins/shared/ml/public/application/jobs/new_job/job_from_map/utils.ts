@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/es-query';
-import { apiIsOfType } from '@kbn/presentation-publishing';
+import { apiIsOfType } from '@kbn/presentation-publishing/interfaces/has_type';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapApi } from '@kbn/maps-plugin/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import { MlManagementLocatorInternal } from '../../../../locator/ml_management_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { MlManagementLocatorInternal } from '@kbn/ml-locator/ml_management_locator';
 
 export async function redirectToGeoJobWizard(
   embeddable: MapApi,

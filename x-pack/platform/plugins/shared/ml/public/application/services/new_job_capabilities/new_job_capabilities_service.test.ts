@@ -7,8 +7,7 @@
 
 import { mlJobCapsServiceFactory } from './new_job_capabilities_service';
 import type { DataView } from '@kbn/data-views-plugin/public';
-
-import type { MlApi } from '../ml_api_service';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 
 // there is magic happening here. starting the include name with `mock..`
 // ensures it can be lazily loaded by the jest.mock function below.

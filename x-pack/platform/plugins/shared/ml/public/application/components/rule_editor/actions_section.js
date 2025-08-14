@@ -21,7 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
+import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils/detector_rule';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 // TODO: add onForceTimeShift action

@@ -12,24 +12,29 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
 import { Subscription, map, merge } from 'rxjs';
-import { fetch$, timeRangeComparators, titleComparators } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { fetch$ } from '@kbn/presentation-publishing/interfaces/fetch/fetch';
 import useUnmount from 'react-use/lib/useUnmount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { apiHasExecutionContext } from '@kbn/presentation-publishing/interfaces/has_execution_context';
 import {
-  apiHasExecutionContext,
-  initializeTimeRangeManager,
+  titleComparators,
   initializeTitleManager,
-} from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+} from '@kbn/presentation-publishing/interfaces/titles/title_manager';
+import {
+  timeRangeComparators,
+  initializeTimeRangeManager,
+} from '@kbn/presentation-publishing/interfaces/fetch/time_range_manager';
 import { distinctUntilChanged } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import type { MlPluginStart, MlStartDependencies } from '../../plugin';
-import type { AnomalyChartsEmbeddableApi, AnomalyChartsEmbeddableState } from '..';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
+import type { MlStartDependencies } from '../../plugin';
+import type { AnomalyChartsEmbeddableApi, AnomalyChartsEmbeddableState } from '../types';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import {
   anomalyChartsComparators,

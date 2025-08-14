@@ -11,9 +11,9 @@ import React, { useCallback, useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SpacesPluginStart, ShareToSpaceFlyoutProps } from '@kbn/spaces-plugin/public';
-import type { SavedObjectResult, MlSavedObjectType } from '../../../../common/types/saved_objects';
-import { ML_JOB_SAVED_OBJECT_TYPE } from '../../../../common/types/saved_objects';
-import { useMlApi } from '../../contexts/kibana';
+import type { SavedObjectResult, MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
+import { ML_JOB_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
 interface Props {
@@ -112,7 +112,7 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
       <EuiButtonEmpty
         disabled={disabled}
         onClick={() => setShowFlyout(true)}
-        style={{ height: 'auto' }}
+        css={{ height: 'auto' }}
         data-test-subj="mlJobListRowManageSpacesButton"
         aria-label={i18n.translate(
           'xpack.ml.management.jobsSpacesList.manageSpacesButtonAriaLabel',
