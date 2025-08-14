@@ -14,7 +14,7 @@ import {
   appendToESQLQuery,
   isESQLColumnSortable,
   hasTransformationalCommand,
-  isCategorizeQuery,
+  getCategorizeField,
 } from '@kbn/esql-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
@@ -243,7 +243,8 @@ export class LensVisService {
 
     if (queryParams.isPlainRecord) {
       if (isOfAggregateQueryType(queryParams.query)) {
-        if (isCategorizeQuery(queryParams.query.esql)) {
+        if (getCategorizeField(queryParams.query.esql).length > 0) {
+          // query uses categorize, override the chart to be a simple doc count histogram
           const histogramSuggestionForESQL = this.getHistogramSuggestionForESQL({
             queryParams: {
               ...queryParams,
