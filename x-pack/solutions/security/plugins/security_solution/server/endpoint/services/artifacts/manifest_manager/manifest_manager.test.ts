@@ -1611,11 +1611,24 @@ describe('ManifestManager', () => {
           },
         },
       });
+      const latestPolicy = createPackagePolicyWithConfigMock({
+        id: TEST_POLICY_ID_1,
+        description: 'updated policy',
+        config: {
+          artifact_manifest: {
+            value: {
+              artifacts: {},
+              manifest_version: '1.0.0',
+              schema_version: 'v1',
+            },
+          },
+        },
+      });
 
       const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
-      context.packagePolicyService.get = jest.fn().mockResolvedValue(policy);
+      context.packagePolicyService.get = jest.fn().mockResolvedValue(latestPolicy);
       context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([policy]);
       context.packagePolicyService.bulkUpdate = jest
         .fn()
@@ -1629,6 +1642,44 @@ describe('ManifestManager', () => {
 
       expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(2);
       expect(context.packagePolicyService.get).toHaveBeenCalledTimes(1);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.anything(),
+        [
+          {
+            ...latestPolicy,
+            inputs: [
+              {
+                config: {
+                  artifact_manifest: {
+                    value: {
+                      artifacts: {
+                        'endpoint-exceptionlist-macos-v1': {
+                          compression_algorithm: 'none',
+                          decoded_sha256:
+                            '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+                          decoded_size: 432,
+                          encoded_sha256:
+                            '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+                          encoded_size: 432,
+                          encryption_algorithm: 'none',
+                          relative_url:
+                            '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+                        },
+                      },
+                      manifest_version: '1.0.1',
+                      schema_version: 'v1',
+                    },
+                  },
+                },
+                enabled: true,
+                streams: [],
+                type: 'endpoint',
+              },
+            ],
+          },
+        ]
+      );
     });
 
     test('Should only attempt a retry of conflict error once', async () => {
