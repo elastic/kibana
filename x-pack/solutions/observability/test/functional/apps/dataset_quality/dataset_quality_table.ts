@@ -116,11 +116,11 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       // This is to accomodate for failure if the integration hasn't been loaded successfully
       // Dataset name is shown in this case
       expect([apacheAccessDatasetHumanName, apacheAccessDatasetName]).to.contain(
-        datasetNameColCellTexts[0]
+        datasetNameColCellTexts[datasetNameColCellTexts.length - 1]
       );
 
       // Check the rest of the array matches the expected pattern
-      expect(datasetNameColCellTexts.slice(1)).to.eql(datasetNames.reverse());
+      expect(datasetNameColCellTexts.slice(0, -1)).to.eql([...datasetNames].reverse());
 
       const namespaceCol = cols.Namespace;
       const namespaceColCellTexts = await namespaceCol.getCellTexts();
