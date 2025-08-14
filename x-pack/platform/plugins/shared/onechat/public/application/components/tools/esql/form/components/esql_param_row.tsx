@@ -9,12 +9,11 @@ import {
   EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
-  EuiIcon,
+  EuiIconTip,
   EuiSelect,
   EuiTableRow,
   EuiTableRowCell,
   EuiText,
-  EuiToolTip,
   useEuiTheme,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
@@ -82,15 +81,20 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
     >
       <EuiTableRowCell>
         {!isMobile && errorMessages ? (
-          <EuiToolTip content={errorMessages}>
-            <EuiIcon type="errorFilled" color={euiTheme.colors.danger} size="m" />
-          </EuiToolTip>
+          <EuiIconTip
+            content={errorMessages}
+            type="errorFilled"
+            color={euiTheme.colors.danger}
+            size="m"
+          />
         ) : (
-          !isMobile &&
           warning && (
-            <EuiToolTip content={warning}>
-              <EuiIcon type="warningFilled" color={euiTheme.colors.warning} size="m" />
-            </EuiToolTip>
+            <EuiIconTip
+              content={warning}
+              type="warningFilled"
+              color={euiTheme.colors.warning}
+              size="m"
+            />
           )
         )}
       </EuiTableRowCell>
@@ -111,7 +115,7 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFieldText
                 compressed
-                fullWidth={isMobile}
+                fullWidth
                 placeholder={i18nMessages.paramNamePlaceholder}
                 inputRef={ref}
                 isInvalid={invalid}
@@ -154,7 +158,7 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFieldText
                 compressed
-                fullWidth={isMobile}
+                fullWidth
                 placeholder={i18nMessages.paramDescriptionPlaceholder}
                 inputRef={ref}
                 isInvalid={invalid}
@@ -183,7 +187,7 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiSelect
                 compressed
-                fullWidth={isMobile}
+                fullWidth
                 options={Object.values(EsqlToolFieldType).map((option) => ({
                   value: option,
                   text: capitalize(option),

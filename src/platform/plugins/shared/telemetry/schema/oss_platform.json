@@ -11047,6 +11047,12 @@
           "_meta": {
             "description": "Enable significant events in streams."
           }
+        },
+        "observability:enableDiagnosticMode": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Enable diagnostic mode"
+          }
         }
       }
     },

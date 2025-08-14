@@ -54,7 +54,7 @@ export const render = (
       application: {
         capabilities: {
           management: {
-            kibana: {
+            ai: {
               observabilityAiAssistantManagement: true,
             },
           },
