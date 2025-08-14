@@ -128,14 +128,7 @@ export const CascadeGridImplementation: StoryObj<
                 </EuiText>
               )}
               rowHeaderMetaSlots={({ row }) => {
-                const baseSlotDef: React.ReactNode[] = [
-                  <EuiButtonEmpty iconSide="right" iconType="arrowDown" flush="right">
-                    <FormattedMessage
-                      id="sharedUXPackages.data_cascade.demo.row.action"
-                      defaultMessage="Take Action"
-                    />
-                  </EuiButtonEmpty>,
-                ];
+                const baseSlotDef: React.ReactNode[] = [];
 
                 return row.depth === groupByFields.length - 1
                   ? [
@@ -159,6 +152,14 @@ export const CascadeGridImplementation: StoryObj<
                     ]
                   : baseSlotDef;
               }}
+              rowHeaderActions={({ row }) => [
+                <EuiButtonEmpty iconSide="right" iconType="arrowDown" flush="right">
+                  <FormattedMessage
+                    id="sharedUXPackages.data_cascade.demo.row.action"
+                    defaultMessage="Take Action"
+                  />
+                </EuiButtonEmpty>,
+              ]}
             >
               <DataCascadeRowCell
                 onCascadeLeafNodeExpanded={async ({ row, nodePathMap, nodePath }) => {

@@ -62,6 +62,10 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
    */
   rowHeaderMetaSlots?: (props: { row: Row<G> }) => React.ReactNode[];
   /**
+   * @description The row header actions slot for the cascade row.
+   */
+  rowHeaderActions?: (props: { row: Row<G> }) => React.ReactNode[];
+  /**
    * @description The size of the row component, can be 's' (small), 'm' (medium), or 'l' (large).
    */
   size: CascadeRowCellPrimitiveProps<G, L>['size'];
@@ -85,6 +89,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   onCascadeGroupNodeExpanded,
   rowHeaderTitleSlot: RowTitleSlot,
   rowHeaderMetaSlots,
+  rowHeaderActions,
   rowInstance,
   size,
   virtualRow,
@@ -204,21 +209,40 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup direction="row">
-                <EuiFlexItem grow={4} css={{ justifyContent: 'center' }}>
+                <EuiFlexItem grow={6} css={{ justifyContent: 'center' }}>
                   <RowTitleSlot row={rowInstance} />
                 </EuiFlexItem>
-                <EuiFlexItem grow={6}>
+                <EuiFlexItem grow={4}>
                   <EuiFlexGroup
                     direction="row"
                     gutterSize={size}
                     alignItems="center"
                     justifyContent="flexEnd"
                   >
-                    {rowHeaderMetaSlots?.({ row: rowInstance }).map((metaSlot, index) => (
-                      <EuiFlexItem grow={false} key={index}>
-                        {metaSlot}
-                      </EuiFlexItem>
-                    ))}
+                    {rowHeaderMetaSlots?.({ row: rowInstance })
+                      .map((metaSlot, index) => (
+                        <EuiFlexItem css={styles.rowHeaderSlotWrapper} key={index} grow>
+                          {metaSlot}
+                        </EuiFlexItem>
+                      ))
+                      .concat([
+                        <EuiFlexItem
+                          key="actions"
+                          css={[
+                            styles.rowHeaderSlotWrapper,
+                            {
+                              paddingLeft: `${euiTheme.size[size]}`,
+                            },
+                          ]}
+                          grow={false}
+                        >
+                          <EuiFlexGroup alignItems="center" key="cascade-row-actions">
+                            {rowHeaderActions?.({ row: rowInstance }).map((action, index) => (
+                              <EuiFlexItem key={index}>{action}</EuiFlexItem>
+                            ))}
+                          </EuiFlexGroup>
+                        </EuiFlexItem>,
+                      ])}
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>

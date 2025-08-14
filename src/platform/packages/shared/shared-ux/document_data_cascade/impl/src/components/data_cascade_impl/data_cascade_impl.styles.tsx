@@ -23,7 +23,7 @@ export const dataCascadeImplStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
     position: 'sticky',
     willChange: 'transform',
     zIndex: euiTheme.levels.header,
-    background: euiTheme.colors.backgroundBaseSubdued,
+    background: euiTheme.colors.backgroundBasePlain,
   }),
   cascadeTreeGridHeaderScrolled: css({
     borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
