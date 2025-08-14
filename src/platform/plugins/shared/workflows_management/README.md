@@ -1,60 +1,118 @@
-# Workflows Execution Engine Plugin
+# Workflows Management Plugin
 
-Stateless execution engine for workflows.
+This plugin contains the Workflows management application and APIs.
 
-The workflows execution engine is responsible for executing workflow definitions and managing their lifecycle. It provides the core runtime for workflow processing, step execution, and state management.
+The workflows management plugin provides the user interface and management capabilities for creating, editing, scheduling, and monitoring workflows. It serves as the primary interface for workflow operations and integrates with the workflows execution engine.
 
-## Feature Control
+## Enable the feature flag
 
-The workflows execution engine is controlled by the workflows management UI setting. When `workflows:ui:enabled` is set to `true`, both the management interface and execution engine are activated together.
+The workflows management UI is developed behind a UI setting (feature flag). By default, the feature is disabled. To enable it for development or testing, add the following to your `kibana.dev.yml`:
 
-The execution engine does not have its own separate UI setting as it operates as a dependency of the workflows management plugin.
+```yml
+uiSettings.overrides:
+  workflows:ui:enabled: true
+```
+
+If running in Serverless or Cloud dev environments, it may be more practical to adjust these via API:
+
+```
+POST kbn://internal/kibana/settings
+{
+   "changes": {
+      "workflows:ui:enabled": true,
+   }
+}
+```
 
 ## Overview
 
-The workflows execution engine plugin provides:
+The workflows management plugin provides:
 
-- **Workflow Execution**: Core runtime for executing workflow definitions
-- **Step Management**: Individual step execution and state tracking
-- **Context Management**: Runtime context and variable management
-- **Event Logging**: Comprehensive execution logging and monitoring
-- **Repository Layer**: Persistence for executions and state
+- **Workflow Designer**: Visual interface for creating and editing workflows
+- **Workflow Library**: Browse and manage existing workflows
+- **Execution Monitoring**: Track workflow runs and performance
+- **Scheduling**: Configure automated workflow execution
+- **Connector Integration**: Manage workflow connectors and actions
+
+## Features
+
+### Workflow Creation
+- Drag-and-drop workflow designer
+- Step configuration and validation
+- Variable and context management
+- Template support
+
+### Workflow Management
+- Workflow versioning and history
+- Import/export capabilities
+- Workflow sharing and permissions
+- Bulk operations
+
+### Execution & Monitoring
+- Real-time execution tracking
+- Execution history and logs
+- Performance metrics
+- Error handling and debugging
+
+### Scheduling
+- Cron-based scheduling
+- Event-driven triggers
+- Conditional execution
+- Schedule management
 
 ## Architecture
 
-The execution engine follows a modular architecture:
+The management plugin follows a layered architecture:
 
-- **Plugin Core**: Main plugin setup and lifecycle management
-- **Step Factory**: Creates and manages different step types
-- **Context Manager**: Handles workflow and step execution context
-- **Event Logger**: Logs workflow execution events and state changes
-- **Repositories**: Data persistence layer for executions and logs
+- **Public UI**: React-based user interface components
+- **Server APIs**: REST endpoints for workflow operations
+- **Service Layer**: Business logic and workflow management
+- **Scheduler**: Task-based workflow scheduling
+- **Connectors**: Integration with external systems
 
 ## Key Components
 
-### Step Execution
-The engine supports various step types and provides a factory pattern for step creation and execution.
+### Workflows Management Service
+Core service for workflow CRUD operations and execution management.
 
-### Context Management
-Workflow context is managed throughout execution, allowing steps to access and modify shared state.
+### Scheduler Service
+Handles scheduled workflow execution using Kibana's task manager.
 
-### Event Logging
-All workflow execution events are logged to Elasticsearch for monitoring and debugging.
+### Workflows API
+RESTful API endpoints for all workflow operations.
+
+### Saved Objects
+Workflow definitions stored as Kibana saved objects.
 
 ## Dependencies
 
-- **Task Manager**: For scheduled workflow execution
-- **Actions**: For connector-based step execution
+- **Workflows Execution Engine**: Core execution runtime
+- **Task Manager**: For scheduled execution
+- **Actions**: For connector support
+- **Features**: For feature registration
+- **Security**: For access control
+- **Triggers Actions UI**: For action configuration
+- **Spaces**: For multi-tenancy
+- **Embeddable**: For workflow visualization
 
-## Usage
+## API Endpoints
 
-The execution engine is primarily used by the workflows management plugin to execute workflow definitions. It provides APIs for:
+The plugin exposes various API endpoints for workflow management:
 
-- Starting workflow executions
-- Managing execution state
-- Retrieving execution logs and status
-- Handling step-by-step execution flow
+- `GET /api/workflows` - List workflows
+- `POST /api/workflows` - Create workflow
+- `GET /api/workflows/{id}` - Get workflow
+- `PUT /api/workflows/{id}` - Update workflow
+- `DELETE /api/workflows/{id}` - Delete workflow
+- `POST /api/workflows/{id}/execute` - Execute workflow
+- `GET /api/workflows/{id}/executions` - Get execution history
 
-## Integration
+## UI Application
 
-This plugin is designed to work as a dependency of the workflows management plugin. It does not expose user-facing functionality directly, but rather provides the execution runtime that powers the workflow management interface.
+The workflows management UI is available at `/app/workflows` when the feature flag is enabled. It provides:
+
+- Workflow designer interface
+- Workflow library and search
+- Execution monitoring dashboard
+- Schedule management
+- Settings and configuration
