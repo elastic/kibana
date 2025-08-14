@@ -144,13 +144,20 @@ export class FileUploadManager {
     private removePipelinesAfterImport: boolean = true,
     existingIndexName: string | null = null,
     indexSettingsOverride: IndicesIndexSettings | undefined = undefined,
-    private onIndexSearchable?: (indexName: string) => void
+    onIndexSearchable?: (indexName: string) => void
   ) {
     this.setExistingIndexName(existingIndexName);
 
     this.autoAddSemanticTextField = this.autoAddInferenceEndpointName !== null;
     this.updateSettings(indexSettingsOverride ?? {});
-    this.docCountService = new DocCountService(this.data);
+    this.docCountService = new DocCountService(this.data, (indexName) => {
+      this.setStatus({
+        indexSearchable: true,
+      });
+      if (onIndexSearchable) {
+        onIndexSearchable(indexName);
+      }
+    });
 
     this.mappingsCheckSubscription = combineLatest([
       this.fileAnalysisStatus$,
@@ -219,6 +226,7 @@ export class FileUploadManager {
     this.existingIndexMappings$.complete();
     this._uploadStatus$.complete();
     this.mappingsCheckSubscription.unsubscribe();
+    this.docCountService.forceStop();
   }
   private setStatus(status: Partial<UploadStatus>) {
     this._uploadStatus$.next({
@@ -470,14 +478,7 @@ export class FileUploadManager {
         this.isExistingIndexUpload()
       );
 
-      this.docCountService.start(indexName, () => {
-        this.setStatus({
-          indexSearchable: true,
-        });
-        if (this.onIndexSearchable) {
-          this.onIndexSearchable(indexName);
-        }
-      });
+      this.docCountService.start(indexName);
 
       this.timeFieldName = this.importer.getTimeField();
       indexCreated = initializeImportResp.index !== undefined;

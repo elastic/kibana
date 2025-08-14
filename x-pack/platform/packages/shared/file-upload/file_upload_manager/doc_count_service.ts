@@ -6,59 +6,51 @@
  */
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { lastValueFrom } from 'rxjs';
+import { catchError, exhaustMap, finalize, map, takeWhile, throwError, timer } from 'rxjs';
 
 const POLL_INTERVAL = 1; // seconds
 
 export class DocCountService {
   private indexName: string | null = null;
-  private searchError: Error | null = null;
 
-  constructor(private data: DataPublicPluginStart) {}
+  constructor(
+    private data: DataPublicPluginStart,
+    private onIndexSearchable: (indexName: string) => void
+  ) {}
 
-  public start(indexName: string, callback: (indexName: string) => void): void {
+  public start(indexName: string): void {
     this.indexName = indexName;
-    this.pollIsSearchable().then(() => callback(indexName));
+    this.pollIsSearchable()
+      .pipe(finalize(() => this.onIndexSearchable(indexName)))
+      .subscribe({
+        error: (err) => {
+          // eslint-disable-next-line no-console
+          console.error('Failure when polling for index searchability:', err);
+        },
+      });
   }
-
-  private async isSearchable() {
-    if (this.indexName === null) {
-      return false;
-    }
-
-    try {
-      this.searchError = null;
-      const result = await lastValueFrom(
-        this.data.search.search({
-          params: {
-            index: this.indexName,
-            size: 1,
-            body: {
-              query: {
-                match_all: {},
-              },
-            },
-          },
-        })
+  private pollIsSearchable() {
+    return timer(0, POLL_INTERVAL * 1000).pipe(
+      exhaustMap(() => this.isSearchable$()),
+      takeWhile((isSearchable) => this.indexName !== null && !isSearchable, true) // takeUntil we get `true`, including the final one
+    );
+  }
+  private isSearchable$() {
+    return this.data.search
+      .search({
+        params: {
+          index: this.indexName + 'www',
+          size: 1,
+          body: { query: { match_all: {} } },
+        },
+      })
+      .pipe(
+        map((response) => response.rawResponse.hits.hits.length > 0),
+        catchError((err) => throwError(() => err))
       );
-      return result.rawResponse.hits.hits.length > 0;
-    } catch (error) {
-      this.searchError = error as Error;
-      return false;
-    }
   }
 
-  private async pollIsSearchable() {
-    while (true) {
-      if (this.searchError !== null) {
-        throw this.searchError;
-      }
-      const isSearchable = await this.isSearchable();
-      if (isSearchable) {
-        // break out of the loop once have retrieved a doc
-        return;
-      }
-      await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL * 1000));
-    }
+  public forceStop() {
+    this.indexName = null;
   }
 }
