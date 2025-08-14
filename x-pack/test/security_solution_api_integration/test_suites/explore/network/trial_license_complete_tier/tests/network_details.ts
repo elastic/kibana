@@ -54,7 +54,9 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       before(async () => {
         supertest = await utils.createSuperTest();
         bsearch = await utils.createBsearch();
-        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/packetbeat/default');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/packetbeat/default'
+        );
       });
       after(
         async () =>
