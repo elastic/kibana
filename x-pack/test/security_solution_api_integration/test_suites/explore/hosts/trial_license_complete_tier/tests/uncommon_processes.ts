@@ -31,7 +31,9 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     before(async () => {
       supertest = await utils.createSuperTest();
       bsearch = await utils.createBsearch();
-      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/auditbeat/uncommon_processes');
+      await esArchiver.load(
+        'x-pack/platform/test/fixtures/es_archives/auditbeat/uncommon_processes'
+      );
     });
     after(async () => {
       await esArchiver.unload(
