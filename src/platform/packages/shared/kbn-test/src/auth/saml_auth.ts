@@ -236,10 +236,10 @@ export const createSAMLResponse = async (params: SAMLResponseValueParams) => {
       // If response is 3XX, also log the Location header from response
       if (responseStatus >= 300 && responseStatus < 400) {
         const locationHeader = err?.response?.headers?.location || 'not found';
-        logMessage += `.\nLocation: ${locationHeader}.\nX-Request-ID: ${requestId}`;
-      } else {
-        logMessage += `.\nX-Request-ID: ${requestId}`;
+        logMessage += `.\nLocation: ${locationHeader}`;
       }
+
+      logMessage += `.\nX-Request-ID: ${requestId}`;
 
       log.error(logMessage);
     }
