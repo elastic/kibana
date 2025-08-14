@@ -181,7 +181,11 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
     ? centerSelectedNode
     : (_event: MouseEvent<HTMLAnchorElement>) => deselect();
 
-  const ContentsComponent = getContentsComponent(selectedElementData, isTraceExplorerEnabled, isDiagnosticModeEnabled);
+  const ContentsComponent = getContentsComponent(
+    selectedElementData,
+    isTraceExplorerEnabled,
+    isDiagnosticModeEnabled
+  );
 
   // Handler to open the diagnostic flyout
   const handleDiagnoseClick = () => setIsDiagnosticFlyoutOpen(true);
