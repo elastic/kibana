@@ -8,7 +8,11 @@
 import React from 'react';
 import { EuiText, EuiLink } from '@elastic/eui';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
-import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import {
+  findInventoryFields,
+  type DataSchemaFormat,
+  type InventoryItemType,
+} from '@kbn/metrics-data-access-plugin/common';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { Popover } from '../tabs/common/popover';
 import { useMetadataStateContext } from '../hooks/use_metadata_state';
@@ -71,9 +75,8 @@ export const MetadataExplanationMessage = ({
 }) => {
   const { metadata, loading } = useMetadataStateContext();
   const hostLink = entityType === 'host' ? 'host' : 'container';
-  const schemaLink = schema === 'semconv' ? 'semconv' : 'ecs';
-  const docsLink = DOCS_LINKS[`${schemaLink}_${hostLink}`];
-  const metadataField = hostLink === 'host' ? 'host.name' : 'container.id';
+  const docsLink = DOCS_LINKS[`${schema ?? 'ecs'}_${hostLink}`];
+  const metadataField = findInventoryFields(entityType).id;
 
   return loading && !metadata ? (
     <EuiLoadingSpinner />

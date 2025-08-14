@@ -14,7 +14,7 @@ export interface Field {
   value?: string | string[];
 }
 interface FieldsByCategory {
-  [key: string]: string | boolean | string[] | { [key: string]: any };
+  [key: string]: string | boolean | string[] | { [key: string]: string };
 }
 
 type FieldCategory =
