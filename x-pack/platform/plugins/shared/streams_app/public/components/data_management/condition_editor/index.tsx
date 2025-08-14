@@ -90,7 +90,6 @@ const operatorMap = {
   startsWith: i18n.translate('xpack.streams.filter.startsWith', { defaultMessage: 'starts with' }),
   endsWith: i18n.translate('xpack.streams.filter.endsWith', { defaultMessage: 'ends with' }),
   exists: i18n.translate('xpack.streams.filter.exists', { defaultMessage: 'exists' }),
-  notExists: i18n.translate('xpack.streams.filter.notExists', { defaultMessage: 'not exists' }),
 };
 
 const operatorOptions: EuiSelectOption[] = Object.entries(operatorMap).map(([value, text]) => ({
