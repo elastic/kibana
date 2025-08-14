@@ -2359,7 +2359,9 @@
               "\nState manager for runtime state that can't be stored in Redux"
             ],
             "signature": [
-              "ReactiveRuntimeState<DiscoverRuntimeState, never> & { tabs: { byId: Record<string, ReactiveTabRuntimeState>; }; }"
+              "ReactiveRuntimeState<DiscoverRuntimeState, never> & { tabs: { byId: Record<string, ",
+              "ReactiveTabRuntimeState",
+              ">; }; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,
@@ -3795,9 +3797,7 @@
           },
           "> & { rawSavedObjectAttributes?: Partial<Pick<",
           "SavedSearchAttributes",
-          ", keyof ",
-          "SavedSearchAttributes",
-          ">> | undefined; savedObjectTitle?: string | undefined; savedObjectId?: string | undefined; savedObjectDescription?: string | undefined; nonPersistedDisplayOptions?: ",
+          ", \"sort\" | \"columns\" | \"grid\" | \"rowHeight\" | \"headerRowHeight\" | \"rowsPerPage\" | \"sampleSize\" | \"density\">> | undefined; savedObjectTitle?: string | undefined; savedObjectId?: string | undefined; savedObjectDescription?: string | undefined; nonPersistedDisplayOptions?: ",
           {
             "pluginId": "discover",
             "scope": "public",
@@ -3845,9 +3845,7 @@
           },
           "> & Partial<Pick<",
           "SavedSearchAttributes",
-          ", keyof ",
-          "SavedSearchAttributes",
-          ">> & { attributes?: (",
+          ", \"sort\" | \"columns\" | \"grid\" | \"rowHeight\" | \"headerRowHeight\" | \"rowsPerPage\" | \"sampleSize\" | \"density\">> & { attributes?: (",
           "SavedSearchAttributes",
           " & { references: ",
           "SavedObjectReference",
