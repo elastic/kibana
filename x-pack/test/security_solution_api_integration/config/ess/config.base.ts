@@ -7,11 +7,15 @@
 
 import path from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext, kbnTestConfig, kibanaTestUser } from '@kbn/test';
+import {
+  FtrConfigProviderContext,
+  fleetPackageRegistryDockerImage,
+  defineDockerServersConfig,
+  kbnTestConfig,
+  kibanaTestUser,
+} from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
-import { installMockPrebuiltRulesPackage } from '../../test_suites/detections_response/utils';
-import { FtrProviderContext } from '../../ftr_provider_context';
 import { services as baseServices } from './services';
 
 interface CreateTestConfigOptions {
@@ -52,6 +56,9 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
     ilmPollInterval,
   } = options;
 
+  const packageRegistryConfig = path.join(__dirname, './package_registry_config.yml');
+  const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
       require.resolve('../../../api_integration/config.ts')
@@ -66,6 +73,17 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
 
     return {
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
+      dockerServers: defineDockerServersConfig({
+        registry: {
+          enabled: true,
+          image: fleetPackageRegistryDockerImage,
+          portInContainer: 8080,
+          port: 8081,
+          args: dockerArgs,
+          waitForLogLine: 'package manifests loaded',
+          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
+        },
+      }),
       testFiles,
       servers,
       services,
@@ -125,19 +143,18 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
                 `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
               ]
             : []),
+          '--xpack.fleet.registryUrl=http://localhost:8081',
+          `--logging.loggers=${JSON.stringify([
+            {
+              name: 'plugins.securitySolution',
+              level: 'debug',
+            },
+            {
+              name: 'plugins.fleet',
+              level: 'debug',
+            },
+          ])}`,
         ],
-      },
-      mochaOpts: {
-        grep: '/^(?!.*@skipInEss).*@ess.*/',
-        rootHooks: {
-          // Some of the Rule Management API endpoints install prebuilt rules package under the hood.
-          // Prebuilt rules package installation has been known to be flakiness reason since
-          // EPR might be unavailable or the network may have faults.
-          // Real prebuilt rules package installation is prevented by
-          // installing a lightweight mock package.
-          beforeAll: ({ getService }: FtrProviderContext) =>
-            installMockPrebuiltRulesPackage({ getService }),
-        },
       },
     };
   };
