@@ -18,6 +18,48 @@
         "@timestamp": {
           "type": "date"
         },
+        "file": {
+          "properties": {
+            "Ext": {
+              "properties": {
+                "code_signature": {
+                  "type": "nested",
+                  "properties": {
+                    "subject_name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "trusted": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            },
+            "hash": {
+              "properties": {
+                "sha256": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "path": {
+              "type": "keyword",
+              "ignore_above": 1024,
+              "fields": {
+                "caseless": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "normalizer": "lowercase"
+                },
+                "text": {
+                  "type": "text"
+                }
+              }
+            }
+          }
+        },
         "agent": {
           "properties": {
             "ephemeral_id": {
