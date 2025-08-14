@@ -119,10 +119,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
             ...(editData.timeFieldName === noTimeFieldValue
               ? { timestampField: { label: noTimeFieldLabel, value: noTimeFieldValue } }
               : editData.timeFieldName
-                ? {
+              ? {
                   timestampField: { label: editData.timeFieldName, value: editData.timeFieldName },
                 }
-                : {}),
+              : {}),
           }
         : {}),
     },
