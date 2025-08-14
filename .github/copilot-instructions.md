@@ -30,6 +30,12 @@ yarn kbn bootstrap
 - If running as root: add `--allow-root` flag
 - Force dependency reinstall with: `yarn kbn bootstrap --force-install`
 
+**Bootstrap Clean Commands:**
+```bash
+yarn kbn clean              # Clear build artifacts and cached packages/plugins
+yarn kbn reset              # Full reset (deletes node_modules and build artifacts)
+```
+
 ## Build & Development Commands
 
 ### Bootstrap (REQUIRED FIRST STEP)
@@ -57,7 +63,7 @@ yarn serverless-security    # Security serverless
 ```bash
 yarn test:jest              # Unit tests
 yarn test:jest_integration  # Integration tests
-yarn test:ftr               # Functional tests
+yarn test:ftr               # Functional tests (FTR - has api_integration & ui flavors)
 yarn test:type_check        # TypeScript type checking
 ```
 
@@ -72,8 +78,6 @@ node scripts/eslint_all_files --fix  # Auto-fix ESLint issues
 ### Build & Clean
 ```bash
 yarn build                  # Production build
-yarn kbn clean              # Clear build artifacts
-yarn kbn reset              # Full reset (deletes node_modules)
 ```
 
 ## Project Architecture
@@ -87,7 +91,11 @@ kibana/
 │   └── cli*/              # Command-line tools
 ├── x-pack/                # Commercial/licensed features
 │   ├── platform/          # X-Pack platform plugins
-│   └── solutions/         # Solution-specific plugins (Security, Observability)
+│   ├── solutions/         # Solution-specific plugins (Security, Observability)
+│   ├── test/              # X-Pack functional and API integration tests
+│   ├── test_serverless/   # Serverless-specific tests
+│   └── examples/          # X-Pack development examples
+├── examples/              # Core platform development examples
 ├── packages/              # Shared packages
 ├── config/                # Configuration files (kibana.yml, etc.)
 ├── scripts/               # Build and utility scripts
@@ -123,7 +131,7 @@ kibana/
 **Testing Phases:**
 - Jest unit tests (parallel execution)
 - Jest integration tests
-- Functional Test Runner (FTR) tests
+- Functional Test Runner (FTR) tests - `api_integration` and `ui` flavors
 - Playwright tests for specific features
 
 ### Quick Validation Workflow
@@ -187,6 +195,50 @@ git clean -fdx -e /config -e /.vscode
 - Follow TypeScript strict mode conventions
 - Use existing shared packages before creating new ones
 - Maintain backward compatibility for public APIs
+
+## Code Review Guidelines
+
+### Review Focus Areas
+**Architecture & Design**
+- Plugin placement: Ensure new plugins are in appropriate directories (`src/platform/`, `x-pack/platform/`, `x-pack/solutions/`)
+- API design: Check for consistent patterns with existing Kibana APIs
+- Performance impact: Review bundle size changes and lazy loading usage
+- Accessibility: Verify ARIA labels, keyboard navigation, and screen reader compatibility
+
+**Code Quality Checks**
+- TypeScript usage: Prefer TypeScript over JavaScript for new code
+- Testing coverage: Unit tests co-located with source, integration tests in dedicated directories
+- Error handling: Proper error boundaries and user-friendly error messages
+- Security considerations: Input validation, privilege escalation prevention
+
+**Kibana-Specific Patterns**
+- Service injection: Use dependency injection patterns consistently
+- Observable patterns: RxJS usage following Kibana conventions
+- Elasticsearch integration: Proper client usage and query patterns
+- Plugin lifecycle: Correct setup/start/stop implementation
+
+### Common Review Issues
+- Missing or inadequate tests (especially for edge cases)
+- Hardcoded strings instead of i18n keys
+- Direct DOM manipulation instead of React patterns
+- Missing telemetry for new features
+- Inconsistent naming conventions (check `casing_check_config.js`)
+- Bundle size increases without lazy loading consideration
+
+### Review Tools & Commands
+```bash
+# Check bundle size impact
+yarn build --analyze
+
+# Run affected tests only
+yarn test:jest --testPathPattern=path/to/changed/files
+
+# Check type coverage
+yarn test:type_check --project path/to/changed/tsconfig.json
+
+# Lint specific files
+node scripts/eslint_all_files path/to/files --fix
+```
 
 ## Trust These Instructions
 
