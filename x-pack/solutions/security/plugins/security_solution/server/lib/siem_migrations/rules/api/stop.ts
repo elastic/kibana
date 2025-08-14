@@ -39,7 +39,10 @@ export const registerSiemRuleMigrationsStopRoute = (
         withExistingMigration(
           async (context, req, res): Promise<IKibanaResponse<StopRuleMigrationResponse>> => {
             const migrationId = req.params.migration_id;
-            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+              context.securitySolution,
+              'rules'
+            );
             try {
               const ctx = await context.resolve(['securitySolution']);
               const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();

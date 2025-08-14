@@ -16,10 +16,10 @@ import {
   ExitIfNode,
   EnterForeachNode,
   ExitForeachNode,
-  WorkflowSchema,
   EnterConditionBranchNode,
   ExitConditionBranchNode,
   AtomicGraphNode,
+  WorkflowYaml,
 } from '@kbn/workflows';
 import { omit } from 'lodash';
 
@@ -140,18 +140,19 @@ function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep:
   const enterForeachNodeId = getNodeId(currentStep);
   const foreachStep = currentStep as ForEachStep;
   const foreachNestedSteps: BaseStep[] = foreachStep.steps || [];
-
+  const exitNodeId = `exitForeach(${enterForeachNodeId})`;
   const enterForeachNode: EnterForeachNode = {
     id: enterForeachNodeId,
     type: 'enter-foreach',
     itemNodeIds: [],
+    exitNodeId,
     configuration: {
       ...omit(foreachStep, ['steps']), // No need to include them as they will be represented in the graph
     },
   };
   const exitForeachNode: ExitForeachNode = {
     type: 'exit-foreach',
-    id: `exitForeach(${enterForeachNodeId})`,
+    id: exitNodeId,
     startNodeId: enterForeachNodeId,
   };
 
@@ -175,7 +176,7 @@ function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep:
   return exitForeachNode;
 }
 
-export function convertToWorkflowGraph(workflowSchema: WorkflowSchema): graphlib.Graph {
+export function convertToWorkflowGraph(workflowSchema: WorkflowYaml): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
   let previousNode: any | null = null;
 

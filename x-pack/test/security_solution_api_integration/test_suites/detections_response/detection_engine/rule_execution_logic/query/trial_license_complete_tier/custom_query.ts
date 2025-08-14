@@ -71,7 +71,7 @@ import {
   deleteAllAlerts,
   getRuleForAlertTesting,
   getLuceneRuleForTesting,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../config/services/detections_response';
 
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -101,8 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/220243
-  describe.skip('@ess @serverless @serverlessQA Query type rules', () => {
+  describe('@ess @serverless @serverlessQA Query type rules', () => {
     before(async () => {
       await esArchiver.load(auditbeatPath);
       await esArchiver.load(

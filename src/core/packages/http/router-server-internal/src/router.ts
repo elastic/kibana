@@ -9,7 +9,7 @@
 
 import { EventEmitter } from 'node:events';
 import type { Request, ResponseToolkit } from '@hapi/hapi';
-import apm from 'elastic-apm-node';
+import apm, { Span } from 'elastic-apm-node';
 import type { Logger } from '@kbn/logging';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
@@ -211,8 +211,11 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     handler: InternalRouteHandler;
   }) {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
+    let apmSpan: Span | null | undefined;
     try {
+      apmSpan = apm.startSpan('route handler');
       const kibanaResponse = await handler(request);
+      apmSpan?.end();
       if (getProtocolFromRequest(request) === 'http2' && kibanaResponse.options.headers) {
         kibanaResponse.options.headers = stripIllegalHttp2Headers({
           headers: kibanaResponse.options.headers,
@@ -225,6 +228,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     } catch (error) {
       // capture error
       apm.captureError(error);
+      apmSpan?.end();
 
       // forward 401 errors from ES client
       if (isElasticsearchUnauthorizedError(error)) {

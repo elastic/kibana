@@ -534,10 +534,8 @@ export class DataGridService extends FtrService {
     return textArr;
   }
 
-  public async getRowActions(
-    options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
-  ): Promise<WebElementWrapper[]> {
-    const detailsRow = (await this.getDetailsRows())[options.rowIndex || 0];
+  public async getRowActions(): Promise<WebElementWrapper[]> {
+    const detailsRow = await this.testSubjects.find('docViewerFlyout');
     return await detailsRow.findAllByTestSubject('~docTableRowAction');
   }
 

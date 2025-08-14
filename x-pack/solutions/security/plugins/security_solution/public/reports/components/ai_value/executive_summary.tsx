@@ -16,6 +16,7 @@ import {
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { ExecutiveSummaryListItem } from './executive_summary_list_item';
 import { CostSavings } from './cost_savings';
 import { getPercChange } from '../../../overview/components/detection_response/soc_trends/helpers';
@@ -30,12 +31,12 @@ import {
 import * as i18n from './translations';
 import type { ValueMetrics } from './metrics';
 import logo from './logo.svg';
+import logoDark from './logo-dark.svg';
 import { useGetCurrentUserProfile } from '../../../common/components/user_profiles/use_get_current_user_profile';
 import { TimeSaved } from './time_saved';
 interface Props {
   from: string;
   to: string;
-  attackAlertIds: string[];
   hasAttackDiscoveries: boolean;
   valueMetrics: ValueMetrics;
   valueMetricsCompare: ValueMetrics;
@@ -48,7 +49,6 @@ const LI_PADDING = css`
 `;
 
 export const ExecutiveSummary: React.FC<Props> = ({
-  attackAlertIds,
   minutesPerAlert,
   analystHourlyRate,
   hasAttackDiscoveries,
@@ -59,6 +59,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
 }) => {
   const { data: currentUserProfile } = useGetCurrentUserProfile();
 
+  const isDarkMode = useKibanaIsDarkMode();
   const isSmall = useIsWithinMaxBreakpoint('l');
   const costSavings = useMemo(
     () => formatDollars(valueMetrics.costSavings),
@@ -88,6 +89,8 @@ export const ExecutiveSummary: React.FC<Props> = ({
   ]);
   const timerangeAsDays = useMemo(() => getTimeRangeAsDays({ from, to }), [from, to]);
 
+  const logoSvg = useMemo(() => (isDarkMode ? logoDark : logo), [isDarkMode]);
+
   return (
     <div
       data-test-subj="executiveSummaryContainer"
@@ -97,7 +100,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
             rgba(89, 159, 254, 0.08) 3.58%,
             rgba(240, 78, 152, 0.08) 98.48%
           ),
-          url(${logo}) no-repeat bottom right;
+          url(${logoSvg}) no-repeat bottom right;
         border-radius: 8px;
         padding: 24px;
         min-height: 200px;
@@ -264,7 +267,6 @@ export const ExecutiveSummary: React.FC<Props> = ({
               <EuiFlexItem>
                 <CostSavings
                   analystHourlyRate={analystHourlyRate}
-                  attackAlertIds={attackAlertIds}
                   costSavings={valueMetrics.costSavings}
                   costSavingsCompare={valueMetricsCompare.costSavings}
                   minutesPerAlert={minutesPerAlert}
@@ -275,7 +277,6 @@ export const ExecutiveSummary: React.FC<Props> = ({
               <EuiFlexItem>
                 <TimeSaved
                   minutesPerAlert={minutesPerAlert}
-                  attackAlertIds={attackAlertIds}
                   hoursSaved={valueMetrics.hoursSaved}
                   hoursSavedCompare={valueMetricsCompare.hoursSaved}
                   from={from}

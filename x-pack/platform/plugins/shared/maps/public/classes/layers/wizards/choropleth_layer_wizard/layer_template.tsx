@@ -377,6 +377,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
 
         <EuiFormRow>
           <EuiRadioGroup
+            name="boundariesSource"
             options={BOUNDARIES_OPTIONS}
             idSelected={this.state.leftSource}
             onChange={this._onLeftSourceChange}

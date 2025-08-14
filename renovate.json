@@ -526,6 +526,8 @@
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
+        "effort:high",
+        "risk:high",
         "backport:all-open"
       ],
       "enabled": true
@@ -590,7 +592,9 @@
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
-        "backport:all-open"
+        "backport:all-open",
+        "effort:high",
+        "risk:high"
       ],
       "enabled": true
     },
@@ -753,7 +757,6 @@
       "groupName": "@elastic/fleet dependencies",
       "matchDepNames": [
         "exponential-backoff",
-        "@paralleldrive/cuid2",
         "isbinaryfile",
         "js-search",
         "openpgp",
@@ -886,6 +889,7 @@
         "fetch-mock",
         "fp-ts",
         "getos",
+        "inversify",
         "joi-to-json",
         "@apidevtools/json-schema-ref-parser",
         "@fast-check/jest",
@@ -1550,26 +1554,6 @@
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
-    },
-    {
-      "groupName": "bazel",
-      "matchDepNames": [],
-      "matchDepPatterns": [
-        "^@bazel"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": false
     },
     {
       "groupName": "typescript",
@@ -2344,7 +2328,8 @@
         "release_note:skip",
         "Team:Search",
         "Team:Enterprise Search",
-        "backport:all-open"
+        "backport:all-open",
+        "effort:high"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -2372,6 +2357,7 @@
     {
       "groupName": "workchat gen-ai dependencies",
       "matchDepNames": [
+        "@a2a-js/sdk",
         "@modelcontextprotocol/sdk",
         "@n8n/json-schema-to-zod",
         "expr-eval"
@@ -3950,7 +3936,9 @@
       "labels": [
         "release_note:skip",
         "backport:all-open",
-        "ci:all-cypress-suites"
+        "ci:all-cypress-suites",
+        "effort:high",
+        "risk:high"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -3980,25 +3968,6 @@
         "@types/cytoscape",
         "cytoscape",
         "cytoscape-dagre"
-      ],
-      "reviewers": [
-        "team:obs-ux-infra_services-team"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "fnv-plus",
-      "matchDepNames": [
-        "fnv-plus",
-        "@types/fnv-plus"
       ],
       "reviewers": [
         "team:obs-ux-infra_services-team"
@@ -4489,7 +4458,8 @@
     {
       "groupName": "Kibana ES|QL Team",
       "matchDepNames": [
-        "recast"
+        "recast",
+        "tree-dump"
       ],
       "reviewers": [
         "team:kibana-esql"
@@ -4538,25 +4508,6 @@
         "Team:Visualizations",
         "release_note:skip",
         "backport:prev-minor"
-      ],
-      "enabled": true
-    },
-    {
-      "groupName": "set-value",
-      "matchDepNames": [
-        "set-value",
-        "@types/set-value"
-      ],
-      "reviewers": [
-        "team:visualizations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open",
-        "Team:Visualizations"
       ],
       "enabled": true
     },

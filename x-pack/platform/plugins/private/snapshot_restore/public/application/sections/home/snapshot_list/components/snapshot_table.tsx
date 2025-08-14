@@ -331,7 +331,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
       ) : (
         <EuiBasicTable
           items={snapshots}
-          itemId="uuid"
+          itemId={(item) => `${item?.uuid}-${item?.repository}`}
           columns={columns}
           sorting={sorting}
           onChange={(criteria: Criteria<SnapshotDetails>) => {

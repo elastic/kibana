@@ -116,7 +116,7 @@ describe('Attack discovery tour', () => {
     );
     fireEvent.click(getByTestId('tryKb'));
     expect(navigateToApp).toHaveBeenCalledWith('management', {
-      path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
+      path: `ai/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
     });
   });
 
