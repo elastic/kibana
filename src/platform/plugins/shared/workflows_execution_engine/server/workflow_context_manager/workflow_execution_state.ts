@@ -14,13 +14,13 @@ import { StepExecutionRepository } from '../repositories/step_execution_reposito
 interface Change {
   objectId: string;
   changeType: 'create' | 'update';
-  objectType: 'workflow' | 'step';
 }
 
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
   private workflowExecution: EsWorkflowExecution;
-  private changes: Map<string, Change> = new Map();
+  private workflowChanges: Map<string, Change> = new Map();
+  private stepChanges: Map<string, Change> = new Map();
 
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
@@ -48,10 +48,9 @@ export class WorkflowExecutionState {
       ...this.workflowExecution,
       ...workflowExecution,
     };
-    this.changes.set(this.workflowExecution.id, {
+    this.workflowChanges.set(this.workflowExecution.id, {
       objectId: this.workflowExecution.id,
       changeType: 'update',
-      objectType: 'workflow',
     });
   }
 
@@ -74,10 +73,9 @@ export class WorkflowExecutionState {
           workflowId: this.workflowExecution.workflowId,
         } as EsWorkflowStepExecution
       );
-      this.changes.set(step.stepId, {
+      this.stepChanges.set(step.stepId, {
         objectId: step.stepId,
         changeType: 'create',
-        objectType: 'step',
       });
     } else {
       this.stepExecutions.set(step.stepId, {
@@ -86,29 +84,24 @@ export class WorkflowExecutionState {
       } as EsWorkflowStepExecution);
 
       // only update if the step is not in changes
-      if (!this.changes.has(step.stepId)) {
-        this.changes.set(step.stepId, {
+      if (!this.stepChanges.has(step.stepId)) {
+        this.stepChanges.set(step.stepId, {
           objectId: step.stepId,
           changeType: 'update',
-          objectType: 'step',
         });
       }
     }
   }
 
   public async flush(): Promise<void> {
-    const workflowChanges = Array.from(this.changes.values()).filter(
-      (change) => change.objectType === 'workflow'
-    );
+    const workflowChanges = Array.from(this.workflowChanges.values());
     const tasks: Promise<void>[] = [];
 
     if (workflowChanges.length > 0) {
       tasks.push(this.workflowExecutionRepository.updateWorkflowExecution(this.workflowExecution));
     }
 
-    const stepChanges = Array.from(this.changes.values()).filter(
-      (change) => change.objectType === 'step'
-    );
+    const stepChanges = Array.from(this.stepChanges.values());
 
     if (stepChanges.length > 0) {
       const createChanges = stepChanges.filter((change) => change.changeType === 'create');
@@ -138,6 +131,7 @@ export class WorkflowExecutionState {
 
     await Promise.all(tasks);
 
-    this.changes.clear();
+    this.workflowChanges.clear();
+    this.stepChanges.clear();
   }
 }
