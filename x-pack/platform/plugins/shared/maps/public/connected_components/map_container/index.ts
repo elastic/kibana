@@ -26,6 +26,7 @@ import {
   getMapInitError,
   getMapSettings,
   getQueryableUniqueIndexPatternIds,
+  getSelectedLayerId,
 } from '../../selectors/map_selectors';
 import { MapStoreState } from '../../reducers/store';
 import { FLYOUT_STATE } from '../../reducers/ui';
@@ -40,6 +41,7 @@ function mapStateToProps(state: MapStoreState) {
     indexPatternIds: getQueryableUniqueIndexPatternIds(state),
     settings: getMapSettings(state),
     layerList: getLayerList(state),
+    selectedLayerId: getSelectedLayerId(state),
   };
 }
 

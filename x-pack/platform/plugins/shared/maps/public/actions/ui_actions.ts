@@ -59,13 +59,14 @@ export function updateFlyout(display: FLYOUT_STATE) {
         });
         // Return focus to the button used to open this flyout
         if (triggerElement) {
-          // If offsetParent is null, flyout was triggered by a hover action that's now hidden, so locate
-          // its enclosing layerName and focus the popover button
-          const nextTarget = triggerElement.offsetParent
-            ? triggerElement
-            : (triggerElement
-                .closest('[data-layerid]')
-                ?.querySelector('button.mapTocEntry__layerName') as HTMLButtonElement) ?? null;
+          // If previous flyout state was the edit panel, flyout was triggered by a hover action that's now hidden,
+          // so locate its enclosing layerName and focus the popover button
+          const nextTarget =
+            getFlyoutDisplay(getState()) !== FLYOUT_STATE.LAYER_PANEL
+              ? triggerElement
+              : (triggerElement
+                  .closest('[data-layerid]')
+                  ?.querySelector('button.mapTocEntry__layerName') as HTMLButtonElement) ?? null;
 
           // Wait for rendering to finish to ensure focusable elements are all re-enabled
           requestAnimationFrame(() => {

@@ -46,6 +46,7 @@ export interface Props {
   isTimesliderOpen: boolean;
   indexPatternIds: string[];
   mapInitError: string | null | undefined;
+  selectedLayerId: string | null;
   renderTooltipContent?: RenderToolTipContent;
   title?: string;
   description?: string;
@@ -100,7 +101,14 @@ export class MapContainer extends Component<Props, State> {
       this._isInitalLoadRenderTimerStarted = true;
       this._startInitialLoadRenderTimer();
     }
-    if (prevProps.flyoutDisplay !== this.props.flyoutDisplay) {
+
+    if (
+      // If a new type of flyout opens
+      prevProps.flyoutDisplay !== this.props.flyoutDisplay ||
+      // Or if an edit panel is open and the user opens a different edit panel
+      (this.props.flyoutDisplay === FLYOUT_STATE.LAYER_PANEL &&
+        prevProps.selectedLayerId !== this.props.selectedLayerId)
+    ) {
       this._updateFlyout(this.props.flyoutDisplay);
     }
   }
