@@ -10,10 +10,10 @@ import { pageObjects as platformPageObjects } from '@kbn/test-suites-xpack-platf
 import { EndpointPageProvider } from './endpoint_page';
 import { EndpointPageUtils } from './page_utils';
 import { IngestManagerCreatePackagePolicy } from './ingest_manager_create_package_policy_page';
-import { DetectionsPageObject } from './detections';
-import { HostsPageObject } from './hosts';
+import { DetectionsPageObjectProvider } from './detections';
+import { HostsPageObjectProvider } from './hosts';
 import { EndpointResponderPageObjects } from './endpoint_responder';
-import { TimelinePageObject } from './timeline';
+import { TimelinePageObjectProvider } from './timeline';
 import { EndpointPolicyPageProvider } from './policy_page';
 import { TrustedAppsPageProvider } from './trusted_apps_page';
 import { FleetIntegrations } from './fleet_integrations_page';
@@ -25,9 +25,9 @@ export const pageObjects = {
   endpoint: EndpointPageProvider,
   endpointPageUtils: EndpointPageUtils,
   ingestManagerCreatePackagePolicy: IngestManagerCreatePackagePolicy,
-  detections: DetectionsPageObject,
-  timeline: TimelinePageObject,
-  hosts: HostsPageObject,
+  detections: DetectionsPageObjectProvider,
+  timeline: TimelinePageObjectProvider,
+  hosts: HostsPageObjectProvider,
   responder: EndpointResponderPageObjects,
   policy: EndpointPolicyPageProvider,
   trustedApps: TrustedAppsPageProvider,
