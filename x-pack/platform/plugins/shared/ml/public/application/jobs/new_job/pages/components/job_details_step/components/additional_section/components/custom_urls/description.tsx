@@ -25,15 +25,21 @@ export const Description: FC<PropsWithChildren<unknown>> = memo(({ children }) =
     }
   );
 
-  const cssOverride = css({
-    '> .euiFlexGroup': {
-      '> .euiFlexItem': {
-        '&:last-child': {
-          flexBasis: '50%',
-        },
-      },
-    },
-  });
+  const cssOverride = css`
+    /* Force EuiDescribedFormGroup to use column layout instead of row */
+    &.euiDescribedFormGroup {
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    > .euiFlexGroup {
+      > .euiFlexItem {
+        &:last-child {
+          flex-basis: 50%;
+        }
+      }
+    }
+  `;
 
   return (
     <EuiDescribedFormGroup
