@@ -9,9 +9,8 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
 import { esClient } from './support/es_client';
 
-// eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
-  reporter: '../../../node_modules/cypress-multi-reporters',
+  reporter: '../../../../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
     configFile: './cypress/reporter_config.json',
   },
@@ -28,10 +27,10 @@ export default defineCypressConfig({
   retries: {
     runMode: 1,
   },
-  screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
+  screenshotsFolder: '../../../../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
-  videosFolder: '../../../target/kibana-security-solution/cypress/videos',
+  videosFolder: '../../../../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 1200,
   viewportWidth: 1920,
   e2e: {
