@@ -6,15 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLSingleAstItem } from '../../../types';
+import type { ESQLAstItem, ESQLFunction } from '../../../types';
 import {
   isFunctionExpression,
   isFieldExpression,
   isWhereExpression,
   isParamLiteral,
   isLiteral,
-  isOptionNode,
-  isAssignment,
 } from '../../../ast/is';
 import { Walker } from '../../../walker';
 import {
@@ -25,97 +23,6 @@ import type { ISuggestionItem } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../../definitions/types';
-import { mapToNonMarkerNode, isNotMarkerNodeOrArray } from '../../../definitions/utils/ast';
-import {
-  getCommaAndPipe as getCommaAndPipeStats,
-  rightAfterColumn as rightAfterColumnStats,
-} from '../stats/utils';
-
-function isAssignmentComplete(node: ESQLFunction | undefined) {
-  const assignExpression = removeMarkerArgFromArgsList(node)?.args?.[1];
-  return Boolean(assignExpression && Array.isArray(assignExpression) && assignExpression.length);
-}
-
-const noCaseCompare = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
-
-function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLCommand>(
-  node: T | undefined
-) {
-  if (!node) {
-    return;
-  }
-  if (node.type === 'command' || node.type === 'option' || node.type === 'function') {
-    return {
-      ...node,
-      args: node.args.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode),
-    };
-  }
-  return node;
-}
-
-/**
- * Position of the caret in the sort command:
-*
-* ```
-* STATS [column1 =] expression1[, ..., [columnN =] expressionN] [BY [column1 =] grouping_expression1[, ..., grouping_expressionN]]
-        |           |          |                                    |           |                   |
-        |           |          expression_complete                  |           |                   grouping_expression_complete
-        |           expression_after_assignment                     |           grouping_expression_after_assignment
-        expression_without_assignment                               grouping_expression_without_assignment
-
-* ```
-*/
-export type CaretPosition =
-  | 'expression_without_assignment'
-  | 'expression_after_assignment'
-  | 'expression_complete'
-  | 'grouping_expression_without_assignment'
-  | 'grouping_expression_after_assignment'
-  | 'grouping_expression_complete'
-  | 'after_where';
-
-export const getPosition = (innerText: string, command: ESQLCommand): CaretPosition => {
-  const lastCommandArg = command.args[command.args.length - 1];
-
-  if (isOptionNode(lastCommandArg) && lastCommandArg.name === 'by') {
-    // in the BY clause
-
-    const lastOptionArg = lastCommandArg.args[lastCommandArg.args.length - 1];
-    if (isAssignment(lastOptionArg) && !isAssignmentComplete(lastOptionArg)) {
-      return 'grouping_expression_after_assignment';
-    }
-
-    // check if the cursor follows a comma or the BY keyword
-    // optionally followed by a fragment of a word
-    // e.g. ", field/"
-    // Also treat caret right after a NOT token as "inside expression" to align with STATS
-    const afterNot =
-      /\bnot\s*$/i.test(innerText) || noCaseCompare(findPreviousWord(innerText), 'not');
-    if (
-      /\,\s+\S*$/.test(innerText) ||
-      noCaseCompare(findPreviousWord(innerText), 'by') ||
-      afterNot
-    ) {
-      return 'grouping_expression_without_assignment';
-    } else {
-      return 'grouping_expression_complete';
-    }
-  }
-
-  if (isAssignment(lastCommandArg) && !isAssignmentComplete(lastCommandArg)) {
-    return 'expression_after_assignment';
-  }
-
-  if (getLastNonWhitespaceChar(innerText) === ',' || /inlinestats\s+\S*$/i.test(innerText)) {
-    return 'expression_without_assignment';
-  }
-
-  if (isFunctionExpression(lastCommandArg) && lastCommandArg.name === 'where') {
-    return 'after_where';
-  }
-
-  return 'expression_complete';
-};
 
 export const byCompleteItem: ISuggestionItem = {
   label: 'BY',
@@ -199,6 +106,3 @@ export function checkFunctionContent(arg: ESQLFunction) {
       (isNotAnAggregation(subArg) ? checkFunctionContent(subArg) : false)
   );
 }
-
-export const getCommaAndPipe = getCommaAndPipeStats;
-export const rightAfterColumn = rightAfterColumnStats;
