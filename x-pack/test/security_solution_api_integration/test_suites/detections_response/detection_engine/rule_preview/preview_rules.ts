@@ -9,16 +9,16 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_PREVIEW } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { getSimplePreviewRule, getSimpleRulePreviewOutput } from '../../../utils';
-import { deleteAllRules } from '../../../../../../common/utils/security_solution';
+import { getSimplePreviewRule, getSimpleRulePreviewOutput } from '../../utils';
+import { deleteAllRules } from '../../../../../common/utils/security_solution';
 
 import {
   createUserAndRole,
   deleteUserAndRole,
-} from '../../../../../../common/services/security_solution';
+} from '../../../../../common/services/security_solution';
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -81,7 +81,8 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).to.eql({ logs });
         });
 
-        it('should limit concurrent requests to 10', async () => {
+        // https://github.com/elastic/kibana/issues/208568
+        it('@skipInServerlessMKI should limit concurrent requests to 10', async () => {
           const responses = await Promise.all(
             Array.from({ length: 15 }).map(() =>
               supertest
