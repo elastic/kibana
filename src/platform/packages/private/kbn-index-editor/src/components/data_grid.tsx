@@ -50,6 +50,8 @@ const ROWS_PER_PAGE_OPTIONS = [10, 25];
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const [sortOrder, setSortOrder] = useState<SortOrder[]>([]);
 
+  const [editingRow, setEditingRow] = useState<DataTableRecord | null>(null);
+
   const { rows } = props;
 
   const {
@@ -164,17 +166,17 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const renderCellPopover = useMemo(
     () =>
       getValueInputPopover({
-        rows,
+        row: editingRow,
         columns: props.columns,
         onValueChange,
         savingDocs,
         dataTableRef,
       }),
-    [rows, props.columns, onValueChange, dataTableRef, savingDocs]
+    [editingRow, props.columns, onValueChange, dataTableRef, savingDocs]
   );
   const CellValueRenderer = useMemo(() => {
-    return getCellValueRenderer(rows, savingDocs, dataTableRef, isIndexCreated);
-  }, [rows, savingDocs, isIndexCreated]);
+    return getCellValueRenderer(savingDocs, dataTableRef, isIndexCreated, setEditingRow);
+  }, [savingDocs, isIndexCreated, setEditingRow]);
 
   const externalCustomRenderers: CustomCellRenderer = useMemo(() => {
     return renderedColumns.reduce((acc, columnId) => {

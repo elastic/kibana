@@ -21,22 +21,25 @@ import { isPlaceholderColumn } from '../../utils';
 export type OnCellValueChange = (docId: string, update: any) => void;
 export const getValueInputPopover =
   ({
-    rows,
+    row,
     columns,
     onValueChange,
     savingDocs,
     dataTableRef,
   }: {
-    rows: DataTableRecord[];
+    row: DataTableRecord | null;
     columns: DatatableColumn[];
     onValueChange: OnCellValueChange;
     savingDocs: PendingSave | undefined;
     dataTableRef: RefObject<EuiDataGridRefProps>;
   }) =>
   ({ rowIndex, colIndex, columnId, cellContentsElement }: EuiDataGridCellPopoverElementProps) => {
-    const row = rows[rowIndex];
+    if (!row) {
+      return null;
+    }
+
     const docId = row.raw._id as string;
-    const cellValue = row.flattened[columnId]?.toString() ?? savingDocs?.get(docId)?.[columnId];
+    const cellValue = savingDocs?.get(docId)?.[columnId] ?? row.flattened[columnId]?.toString();
 
     const isPlaceholder = isPlaceholderColumn(columnId);
 

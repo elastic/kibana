@@ -18,13 +18,12 @@ import type { PendingSave } from '../../index_update_service';
 
 export const getCellValueRenderer =
   (
-    rows: DataTableRecord[],
     savingDocs: PendingSave | undefined,
     dataTableRef: RefObject<EuiDataGridRefProps>,
-    isIndexCreated: boolean
+    isIndexCreated: boolean,
+    setEditingRow: (row: DataTableRecord) => void
   ): FunctionComponent<DataGridCellValueElementProps> =>
-  ({ rowIndex, colIndex, columnId }) => {
-    const row = rows[rowIndex];
+  ({ row, rowIndex, colIndex, columnId }) => {
     const docId = row.raw._id as string;
 
     const pendingSaveValue = savingDocs?.get(docId)?.[columnId];
@@ -42,6 +41,7 @@ export const getCellValueRenderer =
     }
 
     const onEditStartHandler = () => {
+      setEditingRow(row);
       dataTableRef.current?.openCellPopover({
         rowIndex,
         colIndex,
