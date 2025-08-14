@@ -161,12 +161,6 @@ export const getNavigationTreeDefinition = ({
                       link: 'enterpriseSearchApplications:searchApplications',
                       iconV2: 'searchProfilerApp' /* TODO: review icon */,
                       renderAs: 'item',
-                      title: i18n.translate(
-                        'xpack.enterpriseSearch.searchNav.build.searchApplications',
-                        {
-                          defaultMessage: 'Search applications',
-                        }
-                      ),
                       ...(searchApps
                         ? {
                             children: searchApps.map(euiItemTypeToNodeDefinition),

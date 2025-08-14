@@ -191,7 +191,7 @@ export const toNavigationItems = (
         id: child.id,
         label: warnIfMissing(child, 'title', 'Missing Title 😭'),
         href: warnIfMissing(child, 'href', 'Missing Href 😭'),
-        external: child.isExternalLink,
+        isExternal: child.isExternalLink,
         'data-test-subj': getTestSubj(child),
       };
     };
