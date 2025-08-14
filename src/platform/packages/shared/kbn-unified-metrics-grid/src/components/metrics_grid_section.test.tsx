@@ -19,7 +19,7 @@ const fields = [
     index: 'metrics-*',
     dimensions: [{ name: 'host.name', type: 'string' }],
     type: 'float',
-    time_series_metric: 'avg',
+    timeSeriesMetric: 'avg',
     unit: '%',
   },
   {
@@ -27,7 +27,7 @@ const fields = [
     index: 'metrics-*',
     dimensions: [{ name: 'host.name', type: 'string' }],
     type: 'float',
-    time_series_metric: 'avg',
+    timeSeriesMetric: 'avg',
     unit: 'MB',
   },
   {
@@ -35,7 +35,7 @@ const fields = [
     index: 'metrics-*',
     dimensions: [{ name: 'host.name', type: 'string' }],
     type: 'float',
-    time_series_metric: 'avg',
+    timeSeriesMetric: 'avg',
     unit: 'IOPS',
   },
   {
@@ -43,7 +43,7 @@ const fields = [
     index: 'metrics-*',
     dimensions: [{ name: 'host.name', type: 'string' }],
     type: 'float',
-    time_series_metric: 'avg',
+    timeSeriesMetric: 'avg',
     unit: 'KB/s',
   },
 ];

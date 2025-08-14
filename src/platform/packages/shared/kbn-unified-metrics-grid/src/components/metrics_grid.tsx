@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGrid, EuiFlexItem, EuiLoadingChart, EuiFlexGroup, EuiText } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGrid, EuiFlexItem, EuiLoadingChart, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { MetricChart } from './metric_chart';
 
 interface MetricField {
@@ -16,7 +16,7 @@ interface MetricField {
   index: string;
   dimensions: Array<{ name: string; type: string; description?: string }>;
   type: string;
-  time_series_metric?: string;
+  timeSeriesMetric?: string;
   unit?: string;
   brief?: string;
   stability?: string;
@@ -44,7 +44,7 @@ type MetricsGridProps = {
     }
 );
 
-export const MetricsGrid: React.FC<MetricsGridProps> = ({
+export const MetricsGrid = ({
   fields,
   timeRange,
   loading,
@@ -54,7 +54,7 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
   filters = [],
   displayDensity = 'normal',
   headerActions,
-}) => {
+}: MetricsGridProps) => {
   const getColumns = (): 1 | 2 | 3 | 4 => {
     return Array.isArray(fields)
       ? ((fields?.length >= 4 ? 4 : fields?.length) as 1 | 2 | 3 | 4)
