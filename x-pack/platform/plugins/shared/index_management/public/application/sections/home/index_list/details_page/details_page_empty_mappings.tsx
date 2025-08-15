@@ -9,24 +9,27 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiEmptyPrompt,
-  EuiButton,
   EuiLink,
   EuiText,
   EuiHorizontalRule,
+  EuiButtonProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { documentationService } from '../../../../services/documentation';
 
 interface EmptyMappingsProps {
-  onClick: () => void;
+  addFieldButton: React.ComponentType<EuiButtonProps>;
 }
 
-export const EmptyMappingsContent: React.FC<EmptyMappingsProps> = ({ onClick }) => {
+export const EmptyMappingsContent: React.FC<EmptyMappingsProps> = ({
+  addFieldButton: AddFieldButtonComponent,
+}) => {
   return (
     <EuiFlexGroup justifyContent="center" alignItems="center" direction="column">
       <EuiFlexItem grow={false}>
         <EuiEmptyPrompt
+          data-test-subj="indexDetailsMappingsEmptyPrompt"
           title={
             <h2>
               <FormattedMessage
@@ -46,17 +49,7 @@ export const EmptyMappingsContent: React.FC<EmptyMappingsProps> = ({ onClick }) 
             </EuiText>
           }
           actions={[
-            <EuiButton
-              key="addFields"
-              iconType="plusInCircle"
-              data-test-subj="addFieldButton"
-              onClick={onClick}
-            >
-              <FormattedMessage
-                id="xpack.idxMgmt.mappings.emptyState.addFieldsButton"
-                defaultMessage="Add fields"
-              />
-            </EuiButton>,
+            <AddFieldButtonComponent />,
             <>
               <EuiHorizontalRule />
               <EuiLink

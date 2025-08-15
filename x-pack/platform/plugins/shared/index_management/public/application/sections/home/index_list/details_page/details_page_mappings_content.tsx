@@ -24,6 +24,7 @@ import {
   useGeneratedHtmlId,
   useEuiBreakpoint,
   EuiToolTip,
+  EuiButtonProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -435,6 +436,37 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     </EuiButton>
   );
 
+  const AddFieldButton: React.FC<EuiButtonProps> = ({ color }) => {
+    const isDisabled = hasUpdateMappingsPrivilege === false;
+    return (
+      <EuiToolTip
+        position="bottom"
+        data-test-subj="indexDetailsMappingsAddFieldTooltip"
+        content={
+          isDisabled
+            ? i18n.translate('xpack.idxMgmt.indexDetails.mappings.addNewFieldToolTip', {
+                defaultMessage: 'You do not have permission to add fields in an Index',
+              })
+            : undefined
+        }
+      >
+        <EuiButton
+          onClick={addFieldButtonOnClick}
+          iconType="plusInCircle"
+          color={color}
+          size="m"
+          data-test-subj="indexDetailsMappingsAddField"
+          isDisabled={isDisabled}
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.indexDetails.mappings.addNewField"
+            defaultMessage="Add field"
+          />
+        </EuiButton>
+      </EuiToolTip>
+    );
+  };
+
   return (
     // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
     <>
@@ -492,7 +524,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         <EuiFlexGroup direction="column" gutterSize="s">
           {!hasMappings &&
             (!isAddingFields ? (
-              <EmptyMappingsContent onClick={addFieldButtonOnClick} />
+              <EmptyMappingsContent addFieldButton={AddFieldButton} />
             ) : (
               <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>{saveMappingsButton}</EuiFlexItem>
@@ -512,40 +544,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               <EuiFlexItem>{fieldSearchComponent}</EuiFlexItem>
               {!index.hidden && (
                 <EuiFlexItem grow={false}>
-                  {!isAddingFields ? (
-                    <EuiToolTip
-                      position="bottom"
-                      data-test-subj="indexDetailsMappingsAddFieldTooltip"
-                      content={
-                        /* for serverless search users hasUpdateMappingsPrivilege flag indicates if user has privilege to update index mappings, for stack hasUpdateMappingsPrivilege would be undefined */
-                        hasUpdateMappingsPrivilege === false
-                          ? i18n.translate(
-                              'xpack.idxMgmt.indexDetails.mappings.addNewFieldToolTip',
-                              {
-                                defaultMessage:
-                                  'You do not have permission to add fields in an Index',
-                              }
-                            )
-                          : undefined
-                      }
-                    >
-                      <EuiButton
-                        onClick={addFieldButtonOnClick}
-                        iconType="plusInCircle"
-                        color="text"
-                        size="m"
-                        data-test-subj="indexDetailsMappingsAddField"
-                        isDisabled={hasUpdateMappingsPrivilege === false}
-                      >
-                        <FormattedMessage
-                          id="xpack.idxMgmt.indexDetails.mappings.addNewField"
-                          defaultMessage="Add field"
-                        />
-                      </EuiButton>
-                    </EuiToolTip>
-                  ) : (
-                    saveMappingsButton
-                  )}
+                  {!isAddingFields ? <AddFieldButton color={'text'} /> : saveMappingsButton}
                 </EuiFlexItem>
               )}
 
