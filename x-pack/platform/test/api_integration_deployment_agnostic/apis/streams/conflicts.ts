@@ -24,7 +24,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let apiClient: StreamsSupertestRepositoryClient;
   const esClient = getService('es');
 
-  describe('conflicts', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/231906
+  describe.skip('conflicts', function () {
     describe('concurrency handling', function () {
       before(async () => {
         apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
