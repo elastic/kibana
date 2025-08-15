@@ -193,6 +193,18 @@ export const DashboardGrid = ({
     topOffset,
   ]);
 
+  useEffect(() => {
+    // update `data-grid-row` attribute for all panels because it is used for some styling
+    Object.values(layout).forEach((widget) => {
+      if (widget.type === 'panel') {
+        const panelRef = panelRefs.current[widget.id];
+        if (typeof panelRef !== 'function' && panelRef?.current) {
+          panelRef.current.setAttribute('data-grid-row', `${widget.row}`);
+        }
+      }
+    });
+  }, [layout]);
+
   return (
     <div
       ref={layoutRef}

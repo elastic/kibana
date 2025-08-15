@@ -8,9 +8,9 @@
  */
 
 import classNames from 'classnames';
-import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest } from 'rxjs';
+import { cloneDeep } from 'lodash';
 
 import { css } from '@emotion/react';
 
@@ -26,21 +26,21 @@ import type { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle 
 import type { GridLayoutContextType } from './use_grid_layout_context';
 import { GridLayoutContext } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
-import { getOrderedLayout } from './utils/conversions';
-import { isOrderedLayoutEqual } from './utils/equality_checks';
 import {
   getPanelKeysInOrder,
   getSectionsInOrder,
   resolveGridSection,
 } from './utils/resolve_grid_section';
+import { getOrderedLayout } from './utils/conversions';
+import { isOrderedLayoutEqual } from './utils/equality_checks';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
   gridSettings: GridSettings;
+  onLayoutChange: (newLayout: GridLayoutData) => void;
   expandedPanelId?: string;
   accessMode?: GridAccessMode;
   className?: string; // this makes it so that custom CSS can be passed via Emotion
-  onLayoutChange: (newLayout: GridLayoutData) => void;
 } & UseCustomDragHandle;
 
 type GridLayoutElementsInOrder = Array<{
