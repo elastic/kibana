@@ -19,6 +19,7 @@ import {
 import { SavedObjectsReference } from '@kbn/content-management-content-editor';
 import type { RelatedDashboard } from '@kbn/observability-schema';
 import { useKibana } from '../../../../utils/kibana_react';
+import { AlertAnnotationForDashboard } from '../../types';
 
 export interface ActionButtonProps {
   onClick: (dashboard: RelatedDashboard) => void;
@@ -37,7 +38,7 @@ export function DashboardTile({
   dashboard: RelatedDashboard;
   actionButtonProps?: ActionButtonProps;
   timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
-  alertAnnotation: NonNullable<DashboardLocatorParams['alert']>;
+  alertAnnotation: AlertAnnotationForDashboard;
 }) {
   const {
     services: {
@@ -61,8 +62,10 @@ export function DashboardTile({
             href={dashboardLocator?.getRedirectUrl({
               dashboardId: dashboard.id,
               timeRange,
-              alert: {
-                start: alertAnnotation.start,
+              passThroughContext: {
+                alert: {
+                  start: alertAnnotation.start,
+                },
               },
             })}
             target="_blank"

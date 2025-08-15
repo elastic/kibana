@@ -19,6 +19,7 @@ import {
 import type { RelatedDashboard } from '@kbn/observability-schema';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import { ActionButtonProps, DashboardTile } from './dashboard_tile';
+import { AlertAnnotationForDashboard } from '../../types';
 
 export function DashboardTiles({
   title,
@@ -33,7 +34,7 @@ export function DashboardTiles({
   dashboards?: Array<RelatedDashboard & { actionButtonProps?: ActionButtonProps }>;
   dataTestSubj: string;
   timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
-  alertAnnotation: NonNullable<DashboardLocatorParams['alert']>;
+  alertAnnotation: AlertAnnotationForDashboard;
 }) {
   const wrapWithHeader = (component: React.ReactNode) => {
     return (

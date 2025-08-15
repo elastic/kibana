@@ -19,7 +19,7 @@ import {
 } from './types';
 
 import { loadEmbeddableData } from './data_loader';
-import { isTextBasedLanguage, deserializeState, handleAdhocAnnotations } from './helper';
+import { isTextBasedLanguage, deserializeState } from './helper';
 import { initializeEditApi } from './initializers/initialize_edit';
 import { initializeInspector } from './initializers/initialize_inspector';
 import {
@@ -35,6 +35,7 @@ import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
+import { annotateAlertFromContext } from './annotate_alert';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
@@ -65,7 +66,7 @@ export const createLensEmbeddableFactory = (
         initialState
       );
 
-      handleAdhocAnnotations(parentApi, initialState.rawState);
+      annotateAlertFromContext(parentApi, initialState.rawState);
 
       const initialRuntimeState = await deserializeState(
         services,

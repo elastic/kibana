@@ -74,12 +74,6 @@ export function apiPublishesInlineEditingCapabilities(
   return isObject(api) && Object.hasOwn(api, 'canEditInline');
 }
 
-export function apiHasGetAlertForAnnotation(
-  api: unknown
-): api is { getAlertForAnnotation: () => { start: string } } {
-  return isObject(api) && Object.hasOwn(api, 'getAlertForAnnotation');
-}
-
-export function isXYState(visualization: unknown): visualization is { layers: XYLayerConfig[] } {
+export function hasXYState(visualization: unknown): visualization is { layers: XYLayerConfig[] } {
   return isObject(visualization) && Object.hasOwn(visualization, 'layers');
 }

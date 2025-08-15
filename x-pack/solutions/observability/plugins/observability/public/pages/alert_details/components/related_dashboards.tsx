@@ -12,6 +12,7 @@ import type { LinkedDashboard, SuggestedDashboard } from '@kbn/observability-sch
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import { DashboardTiles } from './related_dashboards/dashboard_tiles';
 import { useAddSuggestedDashboards } from '../hooks/use_add_suggested_dashboard';
+import { AlertAnnotationForDashboard } from '../types';
 
 interface RelatedDashboardsProps {
   rule: Rule;
@@ -20,7 +21,7 @@ interface RelatedDashboardsProps {
   isLoadingRelatedDashboards: boolean;
   onSuccessAddSuggestedDashboard: () => Promise<void>;
   timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
-  alertAnnotation: NonNullable<DashboardLocatorParams['alert']>;
+  alertAnnotation: AlertAnnotationForDashboard;
 }
 
 export function RelatedDashboards({

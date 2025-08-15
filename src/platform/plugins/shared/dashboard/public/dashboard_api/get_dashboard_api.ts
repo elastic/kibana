@@ -214,9 +214,6 @@ export function getDashboardApi({
         ? controlGroupManager.internalApi.getStateForControlGroup()
         : layoutManager.internalApi.getSerializedStateForPanel(childId);
     },
-    getAlertForAnnotation: () => {
-      return creationOptions?.getInitialInput?.().alert;
-    },
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
     type: DASHBOARD_API_TYPE as 'dashboard',
     uuid: v4(),

@@ -53,9 +53,6 @@ export interface DashboardState extends DashboardSettings {
    * Contains state loaded from dashboard saved object
    */
   controlGroupInput?: ControlsGroupState;
-  alert?: {
-    start: string;
-  };
 }
 
 export type DashboardLocatorParams = Partial<
