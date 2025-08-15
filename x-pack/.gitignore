@@ -6,3 +6,5 @@
 /.kibana-plugin-helpers.dev.*
 .cache
 **/test/scout/ui/output
+/test/
+/test_serverless/
