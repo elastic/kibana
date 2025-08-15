@@ -535,7 +535,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const resetFieldCol = resetTable[PageObjects.datasetQuality.texts.datasetFieldColumn];
         const resetFieldCellTexts = await resetFieldCol.getCellTexts();
         expect(resetFieldCellTexts).to.eql(initialFieldCellTexts);
-
+      });
+    });
 
     describe('overview summary panel', () => {
       it('should show summary KPIs', async () => {
@@ -568,7 +569,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // metering stats API is cached for 30seconds, waiting for the exact value is not optimal in this case
         // rather we can just check if any value is present
         expect(size).to.be.ok();
-
       });
     });
   });
