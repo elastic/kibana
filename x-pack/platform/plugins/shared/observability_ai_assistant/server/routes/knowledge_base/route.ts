@@ -113,9 +113,10 @@ const startupMigrationsKnowledgeBase = createObservabilityAIAssistantServerRoute
       requiredPrivileges: ['ai_assistant'],
     },
   },
-  handler: async (resources): Promise<void> => {
+  handler: async (resources): Promise<{ success: boolean }> => {
     const client = await resources.service.getClient({ request: resources.request });
-    return client.runStartupMigrations();
+    await client.runStartupMigrations();
+    return { success: true };
   },
 });
 

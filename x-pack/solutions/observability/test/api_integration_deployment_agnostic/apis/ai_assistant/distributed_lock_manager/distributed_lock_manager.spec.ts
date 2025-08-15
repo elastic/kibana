@@ -18,15 +18,14 @@ import {
   LockManager,
   LockDocument,
   withLock,
-  rerunSetupIndexAsset,
 } from '@kbn/lock-manager/src/lock_manager_client';
 import {
   LOCKS_COMPONENT_TEMPLATE_NAME,
   LOCKS_CONCRETE_INDEX_NAME,
   LOCKS_INDEX_TEMPLATE_NAME,
   setupLockManagerIndex,
-} from '@kbn/lock-manager/src/setup_lock_manager_index';
-
+  rerunSetupIndexAsset,
+} from '@kbn/lock-manager/src/utils/setup_lock_manager_index';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getLoggerMock } from '../utils/kibana_mocks';
 import { dateAsTimestamp, durationAsMs, sleep } from '../utils/time';
@@ -132,11 +131,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           nock.restore();
         });
 
-        function addElasticsearchMock({ numberOfMocks }: { numberOfMocks: number }) {
+        function respondWithElasticsearchServerError({
+          failedResponseCount,
+        }: {
+          failedResponseCount: number;
+        }) {
           nock(/localhost:9220/, { allowUnmocked: true })
             .filteringRequestBody(() => '*')
             .post(`/${LOCKS_CONCRETE_INDEX_NAME}/_update/${LOCK_ID}`)
-            .times(numberOfMocks)
+            .times(failedResponseCount)
             .reply((uri, requestBody, cb) => {
               log.debug(`Returning mock error for ${uri}`);
               retryCounter++;
@@ -146,8 +149,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             });
         }
 
-        it('eventually succeeds', async () => {
-          addElasticsearchMock({ numberOfMocks: 3 });
+        it('succeeds after 3 retries', async () => {
+          respondWithElasticsearchServerError({ failedResponseCount: 3 });
 
           const acquired = await lockManager.acquire();
 
@@ -155,13 +158,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(retryCounter).to.be(3);
         });
 
-        it('eventually fails', async () => {
-          addElasticsearchMock({ numberOfMocks: 4 });
+        it('fails after 6 retries', async () => {
+          respondWithElasticsearchServerError({ failedResponseCount: 6 });
 
-          const acquired = await lockManager.acquire();
+          let errorMessage: string | undefined;
+          try {
+            await lockManager.acquire();
+          } catch (err) {
+            errorMessage = err.message;
+          }
 
-          expect(acquired).to.be(false);
-          expect(retryCounter).to.be(4);
+          expect(errorMessage).to.be('Service Unavailable');
+          expect(retryCounter).to.be(6);
         });
       });
 

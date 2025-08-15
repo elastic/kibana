@@ -110,3 +110,21 @@ export async function setupLockManagerIndex(esClient: ElasticsearchClient, logge
   await removeLockIndexWithIncorrectMappings(esClient, logger); // TODO: should be removed in the future (after 9.1). See https://github.com/elastic/kibana/issues/218944
   await ensureTemplatesAndIndexCreated(esClient, logger);
 }
+
+// The index assets should only be set up once
+let runLockManagerSetupSuccessfully = false;
+export const runSetupIndexAssetOnce = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  if (runLockManagerSetupSuccessfully) {
+    return;
+  }
+  await setupLockManagerIndex(esClient, logger);
+  runLockManagerSetupSuccessfully = true;
+};
+
+// For testing purposes, we need to be able to set it up every time
+export function rerunSetupIndexAsset() {
+  runLockManagerSetupSuccessfully = false;
+}
