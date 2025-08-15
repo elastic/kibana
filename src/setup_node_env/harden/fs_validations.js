@@ -14,6 +14,7 @@ const { REPO_ROOT } = require('@kbn/repo-info');
 const { tmpdir, homedir } = require('os');
 const { realpathSync } = require('fs');
 const { sanitizeSvg } = require('./fs_sanitizations');
+const { fsEventBus, FS_CONFIG_EVENT } = require('@kbn/security-hardening/fs-event-bus');
 
 const allowedExtensions = ['.txt', '.md', '.log', '.json', '.yml', '.yaml', '.csv', '.svg', '.png'];
 const allowedMimeTypes = [
@@ -60,11 +61,14 @@ const devOrCIPaths = [
   'cache-test',
   join(REPO_ROOT, 'target'),
   join(REPO_ROOT, 'x-pack'),
-  join(REPO_ROOT, 'scripts'),
-  join(REPO_ROOT, '.vscode'),
+  join(REPO_ROOT, 'scripts')
 ];
 
 const safePaths = [...baseSafePaths, ...(isDevOrCI ? devOrCIPaths : [])];
+
+fsEventBus.on(FS_CONFIG_EVENT, (config) => {
+  safePaths.push(...config.safe_paths);
+});
 
 /**
  * Validates that a path does not contain any path traversal sequences or dangerous characters

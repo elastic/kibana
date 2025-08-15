@@ -79,6 +79,27 @@ describe('Hardened FS', () => {
   });
 
   describe('stream', () => {
+    it('should allow creating write streams to safe paths', (done) => {
+      const filePath = join(DATA_PATH, 'stream.json');
+      const ws = safeFs.createWriteStream(filePath);
+
+      ws.write('streaming');
+      ws.end();
+
+      ws.on('error', done);
+
+      ws.on('close', () => {
+        safeFsPromises
+          .readFile(filePath, 'utf8')
+          .then((content) => {
+            expect(content).toBe('streaming');
+            return safeFsPromises.unlink(filePath);
+          })
+          .then(() => done())
+          .catch(done);
+      });
+    });
+
     it('path traversal sequences not allowed', () => {
       expect(() => {
         safeFs.createWriteStream('../../stream-bad.json');

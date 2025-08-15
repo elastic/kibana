@@ -35,31 +35,7 @@ const getRealTmpPath = () => {
 
 const realTmpPath = getRealTmpPath();
 
-const baseSafePaths = [
-  join(REPO_ROOT, 'data'),
-  join(REPO_ROOT, '.es'),
-  join(REPO_ROOT, 'oas_docs'),
-  'docs/openapi',
-  join(tmpdir(), 'synthetics'),
-  join(realTmpPath, 'synthetics'),
-];
 
-const devOrCIPaths = [
-  tmpdir(),
-  realTmpPath,
-  join(homedir(), '.kibanaSecuritySolutionCliTools'),
-  'target',
-  '/target',
-  '/opt/buildkite-agent',
-  '/output',
-  'cache-test',
-  join(REPO_ROOT, 'target'),
-  join(REPO_ROOT, 'x-pack'),
-  join(REPO_ROOT, 'scripts'),
-  join(REPO_ROOT, '.vscode'),
-];
-
-const safePaths = [...baseSafePaths, ...(isDevOrCI ? devOrCIPaths : [])];
 let hardeningConfig = null;
 
 // TODO: propagate here file specified for file logger (it can change in the runtime)
@@ -67,7 +43,6 @@ let hardeningConfig = null;
 // Checked it, it works, though we need to find a proper folder/package for that event emitter.
 fsEventBus.on(FS_CONFIG_EVENT, (config) => {
   hardeningConfig = config;
-  safePaths.push(...config.safe_paths);
 });
 
 const shouldEnableHardenedFs = () => {
@@ -79,6 +54,18 @@ const shouldEnableHardenedFs = () => {
     (!isJestTest || (isJestTest && process.env.KBN_ENABLE_HARDENED_FS))
   );
 };
+
+// Since that is a stream, we don't validate the data here, but we do ensure that the path is safe
+const patchWriteStream = (target, thisArg, argumentsList) => {
+  if (!shouldEnableHardenedFs()) {
+    return target.apply(thisArg, argumentsList);
+  }
+
+  const [userPath, ...args] = argumentsList;
+  const safePath = getSafePath(userPath);
+
+  return target.apply(thisArg, [safePath, ...args]);
+}
 
 const patchSingleMethod = (target, thisArg, argumentsList) => {
   if (!shouldEnableHardenedFs()) {
@@ -159,7 +146,7 @@ const createFsProxy = (fs) => {
 
   fs.appendFileSync = new Proxy(fs.appendFileSync, { apply: patchSingleMethod });
   fs.appendFile = new Proxy(fs.appendFile, { apply: patchAsyncSingleMethod });
-  fs.createWriteStream = new Proxy(fs.createWriteStream, { apply: patchAsyncSingleMethod });
+  fs.createWriteStream = new Proxy(fs.createWriteStream, { apply: patchWriteStream });
 
   return fs;
 };
