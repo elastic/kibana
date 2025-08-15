@@ -21,7 +21,7 @@ export class TaskManagerUtils {
     this.retry = retry;
   }
 
-  async waitForDisabled(id: string, taskRunAtFilter: Date = new Date(0)) {
+  async waitForDisabled(id: string, taskRunAtFilter: Date) {
     return await this.retry.try(async () => {
       const searchResult = await this.es.search({
         index: '.kibana_task_manager',

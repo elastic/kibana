@@ -285,7 +285,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
           getTestRuleData({
             enabled: true,
             schedule: {
-              interval: '1s',
+              interval: '3s',
             },
           })
         )
@@ -295,20 +295,27 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       // wait for rule to run once
       await retry.try(async () => {
         const rule = await getRule(createdRule.id);
-        expect(rule?.monitoring?.run?.last_run?.timestamp).to.be.ok();
+        expect(rule?.monitoring?.run?.last_run?.timestamp).not.to.be(undefined);
       });
 
       // disable rule, and implicitly task
       await ruleUtils.disable(createdRule.id);
 
       // wait for the task to be disabled
-      taskManagerUtils.waitForDisabled(createdRule.scheduled_task_id);
+      await waitForDisabledTask(createdRule.scheduled_task_id);
 
       // manually enable task
-      taskManagerUtils.setTaskEnabled(createdRule.scheduled_task_id, true);
+      await taskManagerUtils.setTaskEnabled(createdRule.scheduled_task_id, true);
 
-      // on it's next run, the task will disable itself
-      taskManagerUtils.waitForDisabled(createdRule.scheduled_task_id);
+      // wait for the task to be disabled
+      await waitForDisabledTask(createdRule.scheduled_task_id);
     });
+
+    async function waitForDisabledTask(taskId: string) {
+      await retry.try(async () => {
+        const taskDoc = await getScheduledTask(taskId);
+        expect(taskDoc.task.enabled).to.be(false);
+      });
+    }
   });
 }
