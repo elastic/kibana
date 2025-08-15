@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { VECTOR_STYLES } from '../../../../../common';
-import { FIELD_ORIGIN, LAYER_STYLE_TYPE } from '../../../../../common/constants';
+import { VECTOR_STYLES } from '../../../../../../common';
+import { FIELD_ORIGIN, LAYER_STYLE_TYPE } from '../../../../../../common/constants';
 import { colorSchema } from './color_schemas';
 import {
   labelBorderSizeSchema,

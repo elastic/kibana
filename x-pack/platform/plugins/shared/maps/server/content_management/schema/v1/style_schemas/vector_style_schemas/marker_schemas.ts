@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ICON_SOURCE, STYLE_TYPE, SYMBOLIZE_AS_TYPES } from '../../../../../common/constants';
+import { ICON_SOURCE, STYLE_TYPE, SYMBOLIZE_AS_TYPES } from '../../../../../../common/constants';
 import { fieldMetaOptions, styleField } from './vector_style_schemas';
 
 export const symbolizeAsOptionsSchema = schema.object({

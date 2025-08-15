@@ -6,7 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LABEL_BORDER_SIZES, LABEL_POSITIONS, STYLE_TYPE } from '../../../../../common/constants';
+import {
+  LABEL_BORDER_SIZES,
+  LABEL_POSITIONS,
+  STYLE_TYPE,
+} from '../../../../../../common/constants';
 import { styleField } from './vector_style_schemas';
 
 export const labelBorderSizeOptions = schema.object({

@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { heatmapStyleSchema } from './heatmap_style_schemas';
-
-export type HeatmapStyleDescriptor = TypeOf<typeof heatmapStyleSchema>;
+export type * from './types';

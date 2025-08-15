@@ -6,7 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { COLOR_MAP_TYPE, DATA_MAPPING_FUNCTION, STYLE_TYPE } from '../../../../../common/constants';
+import {
+  COLOR_MAP_TYPE,
+  DATA_MAPPING_FUNCTION,
+  STYLE_TYPE,
+} from '../../../../../../common/constants';
 import { fieldMetaOptions, styleField } from './vector_style_schemas';
 
 export const categoryColorStop = schema.object({
