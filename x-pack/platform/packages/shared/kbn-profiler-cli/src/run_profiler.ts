@@ -5,15 +5,17 @@
  * 2.0.
  */
 import { compact, once, uniq } from 'lodash';
-import { Observable, lastValueFrom } from 'rxjs';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { Observable } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { getProcessId } from './get_process_id';
 import { runCommand } from './run_command';
 import { runUntilSigInt } from './run_until_sigint';
 import { getProfiler } from './get_profiler';
 import { untilStdinCompletes } from './until_stdin_completes';
 import { runInspectableProcess } from './run_inspectable_process';
-import { DEFAULT_INSPECTOR_PORT, NO_GREP, ProfilerCliFlags } from './flags';
+import type { ProfilerCliFlags } from './flags';
+import { DEFAULT_INSPECTOR_PORT, NO_GREP } from './flags';
 
 export async function runProfiler({
   flags,

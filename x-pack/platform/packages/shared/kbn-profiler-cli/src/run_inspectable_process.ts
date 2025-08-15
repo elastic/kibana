@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import { createInterface } from 'readline';
-import { Observable, Subject, lastValueFrom } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { Subject, lastValueFrom } from 'rxjs';
 
 function extendNodeOptions(existing: string | undefined, inspectorPort: number) {
   const debugOpt = `--inspect-wait=${inspectorPort}`;

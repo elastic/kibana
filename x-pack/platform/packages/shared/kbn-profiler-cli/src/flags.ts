@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BaseFlags } from '@kbn/dev-cli-runner';
+import type { BaseFlags } from '@kbn/dev-cli-runner';
 
 export type ProfilerCliFlags = BaseFlags<{
   port?: string;
