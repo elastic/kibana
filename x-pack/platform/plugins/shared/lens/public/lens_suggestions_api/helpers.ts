@@ -9,8 +9,18 @@ import { getDatasourceId } from '@kbn/visualization-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import { isEqual } from 'lodash';
-import type { VisualizeEditorContext, Suggestion } from '../types';
+import type { VisualizeEditorContext, Suggestion, IndexPatternRef } from '../types';
 import { TypedLensByValueInput, TypedLensSerializedState } from '../react_embeddable/types';
+import { TextBasedPrivateState } from '../datasources/form_based/esql_layer/types';
+
+const datasourceHasIndexPatternRefs = (
+  unknownDatasource: unknown
+): unknownDatasource is TextBasedPrivateState => {
+  return Boolean(
+    unknownDatasource &&
+      (unknownDatasource as TextBasedPrivateState)?.indexPatternRefs !== undefined
+  );
+};
 
 /**
  * Injects the ESQL query into the lens layers. This is used to keep the query in sync with the lens layers.
@@ -20,7 +30,8 @@ import { TypedLensByValueInput, TypedLensSerializedState } from '../react_embedd
  */
 export const injectESQLQueryIntoLensLayers = (
   attributes: TypedLensSerializedState['attributes'],
-  query: AggregateQuery
+  query: AggregateQuery,
+  suggestion: Suggestion
 ) => {
   const datasourceId = getDatasourceId(attributes.state.datasourceStates);
 
@@ -33,12 +44,26 @@ export const injectESQLQueryIntoLensLayers = (
     return attributes;
   }
 
+  const indexPattern = getIndexPatternFromESQLQuery(query.esql);
+
+  // Find matching index pattern reference from suggestion
+  let indexPatternRef: IndexPatternRef | undefined;
+  if (datasourceHasIndexPatternRefs(suggestion.datasourceState)) {
+    const suggestionRefs = suggestion.datasourceState.indexPatternRefs;
+    indexPatternRef = suggestionRefs?.find((ref) => ref.title === indexPattern);
+  }
+
   const datasourceState = structuredClone(attributes.state.datasourceStates[datasourceId]);
 
-  if (datasourceState && datasourceState.layers) {
+  // Update each layer with the new query and index pattern if needed
+  if (datasourceState?.layers) {
     Object.values(datasourceState.layers).forEach((layer) => {
       if (!isEqual(layer.query, query)) {
         layer.query = query;
+        const index = indexPatternRef?.id ?? layer.index;
+        if (index) {
+          layer.index = index;
+        }
       }
     });
   }
@@ -123,7 +148,7 @@ export function mergeSuggestionWithVisContext({
   // Update attributes with current query if available
   const updatedVisAttributes =
     context && 'query' in context && context.query
-      ? injectESQLQueryIntoLensLayers(visAttributes, context.query)
+      ? injectESQLQueryIntoLensLayers(visAttributes, context.query, suggestion)
       : visAttributes;
 
   try {

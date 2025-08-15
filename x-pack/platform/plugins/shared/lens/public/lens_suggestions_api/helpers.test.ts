@@ -296,7 +296,8 @@ describe('lens suggestions api helpers', () => {
           },
         },
       };
-      const newAttributes = injectESQLQueryIntoLensLayers(lensAttributes, query);
+      const suggestion = mockAllSuggestions[0];
+      const newAttributes = injectESQLQueryIntoLensLayers(lensAttributes, query, suggestion);
       expect(newAttributes).toStrictEqual(expectedLensAttributes);
     });
 
@@ -308,9 +309,10 @@ describe('lens suggestions api helpers', () => {
           datasourceStates: { unknownId: { layers: {} } },
         },
       } as unknown as TypedLensSerializedState['attributes'];
-      expect(injectESQLQueryIntoLensLayers(attributes, { esql: 'from foo' })).toStrictEqual(
-        attributes
-      );
+      const suggestion = mockAllSuggestions[0];
+      expect(
+        injectESQLQueryIntoLensLayers(attributes, { esql: 'from foo' }, suggestion)
+      ).toStrictEqual(attributes);
     });
 
     it('should return the Lens attributes as they are for form based charts', async () => {
@@ -321,9 +323,266 @@ describe('lens suggestions api helpers', () => {
           datasourceStates: { formBased: { layers: {} } },
         },
       } as TypedLensSerializedState['attributes'];
-      expect(injectESQLQueryIntoLensLayers(attributes, { esql: 'from foo' })).toStrictEqual(
-        attributes
+      const suggestion = mockAllSuggestions[0];
+      expect(
+        injectESQLQueryIntoLensLayers(attributes, { esql: 'from foo' }, suggestion)
+      ).toStrictEqual(attributes);
+    });
+
+    it('should update the index pattern reference when suggestion has matching indexPatternRefs', async () => {
+      const newQuery = {
+        esql: 'from index2 | limit 15',
+      };
+
+      const lensAttributes = {
+        title: 'test',
+        visualizationType: 'testVis',
+        state: {
+          datasourceStates: {
+            textBased: {
+              layers: {
+                layer1: {
+                  query: { esql: 'from index1 | limit 10' },
+                  index: 'old-index-id',
+                },
+              },
+            },
+          },
+          visualization: { preferredSeriesType: 'line' },
+        },
+        filters: [],
+        query: {
+          esql: 'from index1 | limit 10',
+        },
+        references: [],
+      } as unknown as TypedLensSerializedState['attributes'];
+
+      const suggestionWithIndexRefs = {
+        ...mockAllSuggestions[0],
+        datasourceState: {
+          indexPatternRefs: [
+            { id: 'new-index-id', title: 'index2' },
+            { id: 'other-index-id', title: 'index3' },
+          ],
+        },
+      };
+
+      const expectedLensAttributes = {
+        ...lensAttributes,
+        state: {
+          ...lensAttributes.state,
+          datasourceStates: {
+            ...lensAttributes.state.datasourceStates,
+            textBased: {
+              ...lensAttributes.state.datasourceStates.textBased,
+              layers: {
+                layer1: {
+                  query: { esql: 'from index2 | limit 15' },
+                  index: 'new-index-id',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const newAttributes = injectESQLQueryIntoLensLayers(
+        lensAttributes,
+        newQuery,
+        suggestionWithIndexRefs
       );
+      expect(newAttributes).toStrictEqual(expectedLensAttributes);
+    });
+
+    it('should keep original index when no matching indexPatternRef is found', async () => {
+      const secondQuery = {
+        esql: 'from nonexistent_index | limit 15',
+      };
+
+      const lensAttributes = {
+        title: 'test',
+        visualizationType: 'testVis',
+        state: {
+          datasourceStates: {
+            textBased: {
+              layers: {
+                layer1: {
+                  query: { esql: 'from index1 | limit 10' },
+                  index: 'original-index-id',
+                },
+              },
+            },
+          },
+          visualization: { preferredSeriesType: 'line' },
+        },
+        filters: [],
+        query: {
+          esql: 'from index1 | limit 10',
+        },
+        references: [],
+      } as unknown as TypedLensSerializedState['attributes'];
+
+      const suggestionWithIndexRefs = {
+        ...mockAllSuggestions[0],
+        datasourceState: {
+          indexPatternRefs: [
+            { id: 'other-index-id', title: 'index2' },
+            { id: 'another-index-id', title: 'index3' },
+          ],
+        },
+      };
+
+      const expectedLensAttributes = {
+        ...lensAttributes,
+        state: {
+          ...lensAttributes.state,
+          datasourceStates: {
+            ...lensAttributes.state.datasourceStates,
+            textBased: {
+              ...lensAttributes.state.datasourceStates.textBased,
+              layers: {
+                layer1: {
+                  query: { esql: 'from nonexistent_index | limit 15' },
+                  index: 'original-index-id',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const newAttributes = injectESQLQueryIntoLensLayers(
+        lensAttributes,
+        secondQuery,
+        suggestionWithIndexRefs
+      );
+      expect(newAttributes).toStrictEqual(expectedLensAttributes);
+    });
+
+    it('should not update layers when query is the same', async () => {
+      const sameQuery = {
+        esql: 'from index1 | limit 10',
+      };
+
+      const lensAttributes = {
+        title: 'test',
+        visualizationType: 'testVis',
+        state: {
+          datasourceStates: {
+            textBased: {
+              layers: {
+                layer1: {
+                  query: { esql: 'from index1 | limit 10' },
+                  index: 'original-index-id',
+                },
+              },
+            },
+          },
+          visualization: { preferredSeriesType: 'line' },
+        },
+        filters: [],
+        query: {
+          esql: 'from index1 | limit 10',
+        },
+        references: [],
+      } as unknown as TypedLensSerializedState['attributes'];
+
+      const suggestionWithIndexRefs = {
+        ...mockAllSuggestions[0],
+        datasourceState: {
+          indexPatternRefs: [{ id: 'new-index-id', title: 'index1' }],
+        },
+      };
+
+      // Should return the same structure since query hasn't changed
+      const expectedLensAttributes = {
+        ...lensAttributes,
+        state: {
+          ...lensAttributes.state,
+          datasourceStates: {
+            ...lensAttributes.state.datasourceStates,
+            textBased: {
+              ...lensAttributes.state.datasourceStates.textBased,
+              layers: {
+                layer1: {
+                  query: { esql: 'from index1 | limit 10' },
+                  index: 'original-index-id',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const newAttributes = injectESQLQueryIntoLensLayers(
+        lensAttributes,
+        sameQuery,
+        suggestionWithIndexRefs
+      );
+      expect(newAttributes).toStrictEqual(expectedLensAttributes);
+    });
+
+    it('should handle suggestion datasourceState without indexPatternRefs', async () => {
+      const anotherQuery = {
+        esql: 'from index2 | limit 15',
+      };
+
+      const lensAttributes = {
+        title: 'test',
+        visualizationType: 'testVis',
+        state: {
+          datasourceStates: {
+            textBased: {
+              layers: {
+                layer1: {
+                  query: { esql: 'from index1 | limit 10' },
+                  index: 'original-index-id',
+                },
+              },
+            },
+          },
+          visualization: { preferredSeriesType: 'line' },
+        },
+        filters: [],
+        query: {
+          esql: 'from index1 | limit 10',
+        },
+        references: [],
+      } as unknown as TypedLensSerializedState['attributes'];
+
+      const suggestionWithoutIndexRefs = {
+        ...mockAllSuggestions[0],
+        datasourceState: {
+          // No indexPatternRefs property
+          someOtherProperty: 'value',
+        },
+      };
+
+      const expectedLensAttributes = {
+        ...lensAttributes,
+        state: {
+          ...lensAttributes.state,
+          datasourceStates: {
+            ...lensAttributes.state.datasourceStates,
+            textBased: {
+              ...lensAttributes.state.datasourceStates.textBased,
+              layers: {
+                layer1: {
+                  query: { esql: 'from index2 | limit 15' },
+                  index: 'original-index-id',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const newAttributes = injectESQLQueryIntoLensLayers(
+        lensAttributes,
+        anotherQuery,
+        suggestionWithoutIndexRefs
+      );
+      expect(newAttributes).toStrictEqual(expectedLensAttributes);
     });
   });
 });
