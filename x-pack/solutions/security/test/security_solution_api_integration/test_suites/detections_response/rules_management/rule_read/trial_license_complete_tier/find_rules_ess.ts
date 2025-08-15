@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { Rule } from '@kbn/alerting-plugin/common';
-import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -26,7 +26,7 @@ import {
   checkInvestigationFieldSoValue,
 } from '../../../utils';
 import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

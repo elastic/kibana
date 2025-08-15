@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ActorRef, Snapshot } from 'xstate5';
-import { DraftGrokExpression } from '@kbn/grok-ui';
-import { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { ActorRef, Snapshot } from 'xstate5';
+import type { DraftGrokExpression } from '@kbn/grok-ui';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
 
 export type ProcessorToParentEvent =
   | { type: 'processor.cancel'; id: string }

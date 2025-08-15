@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TestType, test as base, mergeTests } from 'playwright/test';
+import type { TestType } from 'playwright/test';
+import { test as base, mergeTests } from 'playwright/test';
 import {
   coreWorkerFixtures,
   esArchiverFixture,

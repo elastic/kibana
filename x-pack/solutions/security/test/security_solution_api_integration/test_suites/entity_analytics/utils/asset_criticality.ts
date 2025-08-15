@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import SuperTest from 'supertest';
+import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
@@ -28,8 +28,11 @@ import type {
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import querystring from 'querystring';
-import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
-import { IndicesIndexSettings, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
+import type {
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
 import { routeWithNamespace, waitFor } from '../../../config/services/detections_response';
 
 export const getAssetCriticalityIndex = (namespace?: string) =>

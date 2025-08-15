@@ -21,7 +21,7 @@ import {
   SPACE_IDS,
   VERSION,
 } from '@kbn/rule-data-utils';
-import { MachineLearningRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { MachineLearningRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -51,7 +51,7 @@ import {
   waitForRuleFailure,
   routeWithNamespace,
 } from '../../../../../../config/services/detections_response';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import { getMetricsRequest, getMetricsWithRetry } from '../../utils';
 

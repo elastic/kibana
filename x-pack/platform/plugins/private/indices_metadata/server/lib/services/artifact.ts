@@ -6,7 +6,7 @@
  */
 
 import type { Logger, LogMeta } from '@kbn/core/server';
-import { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import axios from 'axios';
 import { createVerify } from 'crypto';
 import AdmZip from 'adm-zip';

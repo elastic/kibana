@@ -5,10 +5,14 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { StreamlangDSL, streamlangDSLSchema } from '@kbn/streamlang';
-import { ModelValidation, modelValidation } from '../validation/model_validation';
-import { Validation, validation } from '../validation/validation';
-import { IngestStreamLifecycle, ingestStreamLifecycleSchema } from './lifecycle';
+import type { StreamlangDSL } from '@kbn/streamlang';
+import { streamlangDSLSchema } from '@kbn/streamlang';
+import type { ModelValidation } from '../validation/model_validation';
+import { modelValidation } from '../validation/model_validation';
+import type { Validation } from '../validation/validation';
+import { validation } from '../validation/validation';
+import type { IngestStreamLifecycle } from './lifecycle';
+import { ingestStreamLifecycleSchema } from './lifecycle';
 import { BaseStream } from '../base';
 
 interface IngestStreamPrivileges {

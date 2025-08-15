@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
-import { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { IToasts } from '@kbn/core/public';
-import { Query } from '@kbn/es-query';
-import { DataPublicPluginStart, QueryState } from '@kbn/data-plugin/public';
-import { StreamlangProcessorDefinition } from '@kbn/streamlang';
-import { PreviewDocsFilterOption } from './simulation_documents_search';
-import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
+import type { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { IToasts } from '@kbn/core/public';
+import type { Query } from '@kbn/es-query';
+import type { DataPublicPluginStart, QueryState } from '@kbn/data-plugin/public';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { PreviewDocsFilterOption } from './simulation_documents_search';
+import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 
 export type Simulation = APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
 export type DetectedField = Simulation['detected_fields'][number];

@@ -24,26 +24,28 @@ import type {
   VisualizationDimensionGroupConfig,
 } from '../../types';
 import { columnToOperation } from './form_based';
+import type {
+  BaseIndexPatternColumn,
+  OperationType,
+  FormulaIndexPatternColumn,
+  ColumnAdvancedParams,
+} from './operations';
 import {
   insertNewColumn,
   replaceColumn,
   getMetricOperationTypes,
   getOperationTypesForField,
   operationDefinitionMap,
-  BaseIndexPatternColumn,
-  OperationType,
   getExistingColumnGroups,
   isReferenced,
   getReferencedColumnIds,
   hasTermsWithManyBuckets,
-  FormulaIndexPatternColumn,
   updateColumnLabel,
-  ColumnAdvancedParams,
 } from './operations';
 import { hasField } from './pure_utils';
 import type { FormBasedPrivateState, FormBasedLayer } from './types';
 import { documentField } from './document_field';
-import { OperationDefinition } from './operations/definitions';
+import type { OperationDefinition } from './operations/definitions';
 import { insertOrReplaceFormulaColumn } from './operations/definitions/formula';
 
 export type IndexPatternSuggestion = DatasourceSuggestion<FormBasedPrivateState>;

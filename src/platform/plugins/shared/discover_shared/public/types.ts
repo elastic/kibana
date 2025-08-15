@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin } from '@kbn/core/public';
-import {
+import type { Plugin } from '@kbn/core/public';
+import type {
   DiscoverFeaturesServiceSetup,
   DiscoverFeaturesServiceStart,
 } from './services/discover_features';

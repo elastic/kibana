@@ -6,15 +6,18 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
-import { AIMessageChunk, BaseMessage, isToolMessage } from '@langchain/core/messages';
-import { EMPTY, mergeMap, of, OperatorFunction } from 'rxjs';
-import {
+import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
+import type { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
+import { isToolMessage } from '@langchain/core/messages';
+import type { OperatorFunction } from 'rxjs';
+import { EMPTY, mergeMap, of } from 'rxjs';
+import type {
   MessageChunkEvent,
   MessageCompleteEvent,
   ToolCallEvent,
   ToolResultEvent,
 } from '@kbn/onechat-common';
+import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
 import {
   matchGraphName,
   matchEvent,
@@ -27,9 +30,8 @@ import {
   extractToolCalls,
   extractToolReturn,
   toolIdentifierFromToolCall,
-  ToolIdMapping,
 } from '@kbn/onechat-genai-utils/langchain';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { StateType } from './graph';
 
 export type ConvertedEvents =

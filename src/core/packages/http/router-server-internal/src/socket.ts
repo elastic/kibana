@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Socket } from 'net';
-import { DetailedPeerCertificate, PeerCertificate, TLSSocket } from 'tls';
+import type { Socket } from 'net';
+import type { DetailedPeerCertificate, PeerCertificate } from 'tls';
+import { TLSSocket } from 'tls';
 import { promisify } from 'util';
 import type { IKibanaSocket } from '@kbn/core-http-server';
 
