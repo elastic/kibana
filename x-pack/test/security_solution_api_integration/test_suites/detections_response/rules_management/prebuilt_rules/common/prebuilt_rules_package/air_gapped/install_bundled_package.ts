@@ -10,9 +10,9 @@ import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import JSON5 from 'json5';
 import expect from 'expect';
-import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
+import type { PackageSpecManifest } from '@kbn/fleet-plugin/common';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
-import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
   deletePrebuiltRulesFleetPackage,

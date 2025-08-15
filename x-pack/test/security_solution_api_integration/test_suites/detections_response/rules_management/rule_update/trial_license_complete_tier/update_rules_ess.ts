@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Rule } from '@kbn/alerting-plugin/common';
-import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 
 import {
   removeServerGeneratedProperties,
@@ -29,7 +29,7 @@ import {
   deleteAllAlerts,
   createRule,
 } from '../../../../../config/services/detections_response';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

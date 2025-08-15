@@ -20,21 +20,21 @@ import {
 } from '@kbn/core-http-common';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
-import { CreateListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/create_list/create_list.gen';
-import { CreateListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/create_list_item/create_list_item.gen';
-import { DeleteListRequestQueryInput } from '@kbn/securitysolution-lists-common/api/delete_list/delete_list.gen';
-import { DeleteListItemRequestQueryInput } from '@kbn/securitysolution-lists-common/api/delete_list_item/delete_list_item.gen';
-import { ExportListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/export_list_items/export_list_items.gen';
-import { FindListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/find_list_items/find_list_items.gen';
-import { FindListsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/find_lists/find_lists.gen';
-import { ImportListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/import_list_items/import_list_items.gen';
-import { PatchListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/patch_list/patch_list.gen';
-import { PatchListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/patch_list_item/patch_list_item.gen';
-import { ReadListRequestQueryInput } from '@kbn/securitysolution-lists-common/api/read_list/read_list.gen';
-import { ReadListItemRequestQueryInput } from '@kbn/securitysolution-lists-common/api/read_list_item/read_list_item.gen';
-import { UpdateListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/update_list/update_list.gen';
-import { UpdateListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/update_list_item/update_list_item.gen';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { CreateListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/create_list/create_list.gen';
+import type { CreateListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/create_list_item/create_list_item.gen';
+import type { DeleteListRequestQueryInput } from '@kbn/securitysolution-lists-common/api/delete_list/delete_list.gen';
+import type { DeleteListItemRequestQueryInput } from '@kbn/securitysolution-lists-common/api/delete_list_item/delete_list_item.gen';
+import type { ExportListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/export_list_items/export_list_items.gen';
+import type { FindListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/find_list_items/find_list_items.gen';
+import type { FindListsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/find_lists/find_lists.gen';
+import type { ImportListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/import_list_items/import_list_items.gen';
+import type { PatchListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/patch_list/patch_list.gen';
+import type { PatchListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/patch_list_item/patch_list_item.gen';
+import type { ReadListRequestQueryInput } from '@kbn/securitysolution-lists-common/api/read_list/read_list.gen';
+import type { ReadListItemRequestQueryInput } from '@kbn/securitysolution-lists-common/api/read_list_item/read_list_item.gen';
+import type { UpdateListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/update_list/update_list.gen';
+import type { UpdateListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/update_list_item/update_list_item.gen';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
