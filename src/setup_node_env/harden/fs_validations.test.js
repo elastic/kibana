@@ -13,7 +13,7 @@
 const validations = require('./fs_validations');
 const path = require('path');
 const { REPO_ROOT } = require('@kbn/repo-info');
-const { tmpdir, homedir } = require('os');
+const { tmpdir } = require('os');
 const fs = require('fs');
 const { Buffer } = require('buffer');
 const { fsEventBus, FS_CONFIG_EVENT } = require('@kbn/security-hardening/fs-event-bus');
@@ -352,6 +352,7 @@ describe('fs_validations', () => {
         // it should be caught by this function after normalization
         try {
           validations.validatePathIsSubdirectoryOfSafeDirectory(normalizedUnusualPath);
+          // eslint-disable-next-line no-undef
           fail('Path traversal with unusual pattern should be rejected');
         } catch (error) {
           expect(error.message).toContain('Unsafe path');
@@ -366,6 +367,7 @@ describe('fs_validations', () => {
         // it should be caught
         try {
           validations.validatePathIsSubdirectoryOfSafeDirectory(path.normalize(symlinkLikePath));
+          // eslint-disable-next-line no-undef
           fail('Symlink-like traversal should be rejected');
         } catch (error) {
           // Either we'll get a path traversal error or an unsafe path error

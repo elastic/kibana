@@ -9,7 +9,7 @@
 
 /* eslint-disable no-restricted-syntax */
 
-const { join, normalize, resolve, sep } = require('path');
+const { join, resolve, sep } = require('path');
 const { REPO_ROOT } = require('@kbn/repo-info');
 const { tmpdir, homedir } = require('os');
 const { realpathSync } = require('fs');
@@ -244,6 +244,7 @@ function validateFileSize(data) {
  * @param {string} mimeType - The detected MIME type
  * @throws {Error} - Throws if validation fails
  */
+// eslint-disable-next-line no-unused-vars
 function validateContentLength(content, mimeType) {
   const sizeRanges = {
     'application/json': { min: 2, max: 10 * 1024 * 1024 }, // 2B to 10MB

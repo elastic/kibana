@@ -99,4 +99,6 @@ export const LICENSE_OVERRIDES = {
   'buffers@0.1.1': ['MIT'], // license in importing module https://www.npmjs.com/package/binary
   '@bufbuild/protobuf@2.5.2': ['Apache-2.0'], // license (Apache-2.0 AND BSD-3-Clause)
   '@arizeai/phoenix-client@2.3.4': ['Elastic License 2.0'], // see https://github.com/Arize-ai/phoenix/blob/main/LICENSE
+  '@img/sharp-libvips-linux-x64': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-linuxmusl-x64': ['LGPL-3.0-or-later'],
 };

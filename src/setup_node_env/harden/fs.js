@@ -8,32 +8,9 @@
  */
 
 /* eslint-disable no-restricted-syntax */
-const { REPO_ROOT } = require('@kbn/repo-info');
-
 const { fsEventBus, FS_CONFIG_EVENT } = require('@kbn/security-hardening/fs-event-bus');
 
-const { join } = require('path');
-const { homedir, tmpdir } = require('os');
-const { realpathSync } = require('fs');
-
 const { getSafePath, validateAndSanitizeFileData } = require('./fs_validations');
-
-const isDevOrCI = process.env.NODE_ENV !== 'production' || process.env.CI === 'true';
-
-const tmpPath = tmpdir();
-
-const getRealTmpPath = () => {
-  let realTmpPath;
-  try {
-    realTmpPath = realpathSync(tmpPath);
-  } catch (e) {
-    realTmpPath = tmpPath;
-  }
-
-  return realTmpPath;
-};
-
-const realTmpPath = getRealTmpPath();
 
 let hardeningConfig = null;
 
