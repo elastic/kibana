@@ -48,14 +48,11 @@ export const BottomBarActions = ({
         >
           <EuiHealth color="warning" />
           <EuiText>
-            {i18n.translate(
-              'xpack.gen_ai_settings.bottomBarActions.unsavedChanges',
-              {
-                defaultMessage:
-                  '{unsavedChangesCount, plural, =0{0 unsaved changes} one {1 unsaved change} other {# unsaved changes}} ',
-                values: { unsavedChangesCount },
-              }
-            )}
+            {i18n.translate('xpack.gen_ai_settings.bottomBarActions.unsavedChanges', {
+              defaultMessage:
+                '{unsavedChangesCount, plural, =0{0 unsaved changes} one {1 unsaved change} other {# unsaved changes}} ',
+              values: { unsavedChangesCount },
+            })}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -66,12 +63,9 @@ export const BottomBarActions = ({
                 color="text"
                 onClick={onDiscardChanges}
               >
-                {i18n.translate(
-                  'xpack.gen_ai_settings.bottomBarActions.discardChangesButton',
-                  {
-                    defaultMessage: 'Discard changes',
-                  }
-                )}
+                {i18n.translate('xpack.gen_ai_settings.bottomBarActions.discardChangesButton', {
+                  defaultMessage: 'Discard changes',
+                })}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

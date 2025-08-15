@@ -7,26 +7,30 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { Logger, PluginInitializerContext } from '@kbn/core/server';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
+import { schema } from '@kbn/config-schema';
 import { registerServerRoutes } from './routes/register_routes';
 import type {
   GenAiSettingsPluginSetupDependencies,
   GenAiSettingsPluginStartDependencies,
 } from './types';
 import type { GenAiSettingsRouteHandlerResources } from './routes/types';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY } from '@kbn/management-settings-ids';
-import { schema } from '@kbn/config-schema';
 
 export type GenAiSettingsPluginSetup = Record<string, never>;
 export type GenAiSettingsPluginStart = Record<string, never>;
 
 export class GenAiSettingsPlugin
   implements
-  Plugin<
-    GenAiSettingsPluginSetup,
-    GenAiSettingsPluginStart,
-    GenAiSettingsPluginSetupDependencies,
-    GenAiSettingsPluginStartDependencies
-  > {
+    Plugin<
+      GenAiSettingsPluginSetup,
+      GenAiSettingsPluginStart,
+      GenAiSettingsPluginSetupDependencies,
+      GenAiSettingsPluginStartDependencies
+    >
+{
   private readonly logger: Logger;
 
   constructor(initContext: PluginInitializerContext) {
@@ -75,10 +79,10 @@ export class GenAiSettingsPlugin
        * {"readonlyMode": "ui", "schema": schema.string(), "value": "NO_DEFAULT_CONNECTOR"}
        */
       [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: {
-        "readonlyMode": "ui",
-        "readonly": true,
-        "schema": schema.string(),
-        "value": "NO_DEFAULT_CONNECTOR",
+        readonlyMode: 'ui',
+        readonly: true,
+        schema: schema.string(),
+        value: 'NO_DEFAULT_CONNECTOR',
       },
     });
 
@@ -89,10 +93,10 @@ export class GenAiSettingsPlugin
        * {"readonlyMode": "ui", "schema": schema.boolean(), "value": false}
        */
       [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: {
-        "readonlyMode": "ui",
-        "readonly": true,
-        "schema": schema.boolean(),
-        "value": false,
+        readonlyMode: 'ui',
+        readonly: true,
+        schema: schema.boolean(),
+        value: false,
       },
     });
 
@@ -103,5 +107,5 @@ export class GenAiSettingsPlugin
     return {};
   }
 
-  public stop() { }
+  public stop() {}
 }
