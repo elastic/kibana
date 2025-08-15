@@ -23,7 +23,7 @@ import type {
   RecommendedQuery,
   RecommendedField,
 } from '@kbn/esql-types';
-import { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
 
 export interface ControlsContext {
   /** The editor supports the creation of controls,

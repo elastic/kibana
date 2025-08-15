@@ -9,18 +9,19 @@ import { schema } from '@kbn/config-schema';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
-import { sendMessageEvent, SendMessageEventData } from './analytics/events';
+import type { SendMessageEventData } from './analytics/events';
+import { sendMessageEvent } from './analytics/events';
 import { fetchFields } from './lib/fetch_query_source_fields';
 import { createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './lib/conversational_chain';
 import { errorHandler } from './utils/error_handler';
 import { handleStreamResponse } from './utils/handle_stream_response';
-import {
-  APIRoutes,
+import type {
   DefineRoutesOptions,
   ElasticsearchRetrieverContentField,
   QueryTestResponse,
 } from './types';
+import { APIRoutes } from './types';
 import { getChatParams } from './lib/get_chat_params';
 import { fetchIndices } from './lib/fetch_indices';
 import { isNotNullish } from '../common/is_not_nullish';

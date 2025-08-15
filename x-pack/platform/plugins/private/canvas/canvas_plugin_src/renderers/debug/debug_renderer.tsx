@@ -8,8 +8,8 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { CoreStart } from '@kbn/core/public';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
+import type { CoreStart } from '@kbn/core/public';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';

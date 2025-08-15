@@ -7,7 +7,7 @@
 
 import { fetchBeatsStats, processResults } from './get_beats_stats';
 import sinon from 'sinon';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const beatsStatsResultSet = require('./__mocks__/fixtures/beats_stats_results.json');
 

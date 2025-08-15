@@ -6,7 +6,7 @@
  */
 
 import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');

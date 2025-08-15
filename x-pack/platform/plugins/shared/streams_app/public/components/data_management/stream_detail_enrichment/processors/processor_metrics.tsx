@@ -7,20 +7,14 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiCallOutProps,
-  EuiFlexGroup,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiCallOutProps } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
 import { css } from '@emotion/react';
 import { getPercentageFormatter } from '../../../../util/formatters';
-import { ProcessorMetrics } from '../state_management/simulation_state_machine';
+import type { ProcessorMetrics } from '../state_management/simulation_state_machine';
 
 type ProcessorMetricBadgesProps = ProcessorMetrics;
 
