@@ -36,33 +36,8 @@ describe('utils', () => {
   describe('constructCascadeQuery', () => {
     describe('query with single stats command', () => {
       describe('column options', () => {
-        it('should construct a valid cascade leaf query', () => {
-          const query = {
-            esql: `
-          FROM kibana_sample_data_logs
-          | STATS count() BY clientip
-          | LIMIT 100
-          `,
-          };
-
-          const nodeType = 'leaf';
-          const nodePath = ['clientip'];
-          const nodePathMap = { clientip: '192.168.1.1' };
-
-          const result = constructCascadeQuery({
-            query,
-            nodeType,
-            nodePath,
-            nodePathMap,
-          });
-
-          expect(result).toEqual({
-            esql: "FROM kibana_sample_data_logs | WHERE clientip == '192.168.1.1'",
-          });
-        });
-
-        it('returns the query as is when there is only one column specified for the stats by option', () => {
-          const query = {
+        it('returns the query without a limit when a group query is requested but there is only one column specified for the stats by option', () => {
+          const editorQuery = {
             esql: `
           FROM kibana_sample_data_logs
           | STATS count() BY clientip
@@ -74,15 +49,65 @@ describe('utils', () => {
           const nodePath = ['clientip'];
           const nodePathMap = { clientip: '192.168.1.1' };
 
-          const result = constructCascadeQuery({
-            query,
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
             nodeType,
             nodePath,
             nodePathMap,
           });
 
-          expect(result).toEqual({
-            esql: 'FROM kibana_sample_data_logs | STATS count() BY clientip | LIMIT 100',
+          expect(cascadeQuery).toEqual({
+            esql: 'FROM kibana_sample_data_logs | STATS COUNT() BY clientip',
+          });
+        });
+
+        it('should construct a valid cascade leaf query for a query with just one column', () => {
+          const editorQuery = {
+            esql: `
+          FROM kibana_sample_data_logs
+          | STATS count() BY clientip
+          | LIMIT 100
+          `,
+          };
+
+          const nodeType = 'leaf';
+          const nodePath = ['clientip'];
+          const nodePathMap = { clientip: '192.168.1.1' };
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+
+          expect(cascadeQuery).toEqual({
+            esql: 'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1"',
+          });
+        });
+
+        it('returns a valid group query, when one is requested in an instance where the editor query has multiple columns specified for the stats by option', () => {
+          const editorQuery = {
+            esql: `
+          FROM kibana_sample_data_logs
+          | STATS count() BY clientip, url.keyword
+          | LIMIT 100
+          `,
+          };
+
+          const nodeType = 'group';
+          const nodePath = ['clientip', 'url.keyword'];
+          const nodePathMap = { clientip: '192.168.1.1' };
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+
+          expect(cascadeQuery).toEqual({
+            esql: 'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1" | STATS COUNT() BY url.keyword',
           });
         });
       });
