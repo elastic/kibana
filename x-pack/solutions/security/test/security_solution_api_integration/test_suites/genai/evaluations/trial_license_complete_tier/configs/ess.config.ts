@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { getSecurityGenAIConfigFromEnvVar } from '../../../../../scripts/genai/vault/manage_secrets';
 import { getTinyElserServerArgs } from '../../../knowledge_base/entries/utils/helpers';
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CloudStart } from '@kbn/cloud-plugin/public';
-import { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { useKibana as useKibanaBase } from '@kbn/kibana-react-plugin/public';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { SearchConnectorsPluginStart } from '@kbn/content-connectors-plugin/public';
-import { SecurityPluginStart } from '@kbn/security-plugin-types-public';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { SearchConnectorsPluginStart } from '@kbn/content-connectors-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 
 export interface ServerlessSearchContext {
   cloud: CloudStart;

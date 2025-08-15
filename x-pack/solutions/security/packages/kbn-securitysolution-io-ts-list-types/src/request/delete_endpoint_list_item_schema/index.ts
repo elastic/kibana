@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 
 import { id } from '../../common/id';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { item_id } from '../../common/item_id';
 
 export const deleteEndpointListItemSchema = t.exact(

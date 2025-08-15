@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Condition, conditionSchema } from '@kbn/streamlang';
+import type { Condition } from '@kbn/streamlang';
+import { conditionSchema } from '@kbn/streamlang';
 import { z } from '@kbn/zod';
 import { NonEmptyString, createIsNarrowSchema } from '@kbn/zod-helpers';
 

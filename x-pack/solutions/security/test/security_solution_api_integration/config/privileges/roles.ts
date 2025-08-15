@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
-import { Role } from '../services/types';
+import type { Role } from '../services/types';
 
 /**
  * Roles for privilege tests

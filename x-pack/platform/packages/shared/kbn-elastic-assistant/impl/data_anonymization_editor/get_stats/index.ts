@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { isAllowed, isAnonymized, isDenied, Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
+import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common';
 
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import { Stats } from '../helpers';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { Stats } from '../helpers';
 
 export const getStats = ({
   anonymizationFieldsStatus,

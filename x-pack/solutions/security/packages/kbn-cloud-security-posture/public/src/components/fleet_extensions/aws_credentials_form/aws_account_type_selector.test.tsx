@@ -11,7 +11,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { AwsAccountTypeSelect } from './aws_account_type_selector';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '../constants';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
-import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackageInfo,
+} from '@kbn/fleet-plugin/common';
 
 jest.mock('../hooks/use_cloud_setup_context');
 (useCloudSetup as jest.Mock).mockReturnValue({

@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { DashboardMigrationDashboard } from '@kbn/security-solution-plugin/common/siem_migrations/model/dashboard_migration.gen';
+import type { DashboardMigrationDashboard } from '@kbn/security-solution-plugin/common/siem_migrations/model/dashboard_migration.gen';
 import { INDEX_PATTERN as SIEM_MIGRATIONS_DASHBOARDS_BASE_INDEX_PATTERN } from '@kbn/security-solution-plugin/server/lib/siem_migrations/dashboards/data/dashboard_migrations_data_service';
 
 const MIGRATIONS_INDEX_PATTERN = `${SIEM_MIGRATIONS_DASHBOARDS_BASE_INDEX_PATTERN}-migrations-default`;

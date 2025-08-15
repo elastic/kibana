@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiAvatar,
-  EuiAvatarProps,
-  EuiLoadingSpinner,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiAvatarProps } from '@elastic/eui';
+import { EuiAvatar, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ProcessorConfigurationProps } from './processors';
+import type { ProcessorConfigurationProps } from './processors';
 import {
   useSimulatorSelector,
   useStreamEnrichmentSelector,
