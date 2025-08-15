@@ -8,7 +8,7 @@
  */
 
 import { Type, TypeOf, schema } from '@kbn/config-schema';
-import type { Client } from '@elastic/elasticsearch';
+import type { Client, TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch';
 import type api from '@elastic/elasticsearch/lib/api/types';
 
 // Example usage...
@@ -29,8 +29,10 @@ import type api from '@elastic/elasticsearch/lib/api/types';
 
 const dataStream: DataStreamHelpers = {} as any; // static functions to help declare and manage data streams.
 const mappings: MappingsHelpers = {} as any; // static functions to help declare mappings for data streams.
+const searchRuntimeHelpers: SearchRuntimeMappingsHelpers = {} as any; // static functions to help declare mappings for data streams.
 const appendXSetup: AppendXServiceSetup = {} as any;
 const appendXStart: AppendXServiceStart = {} as any;
+const log: any = {} as any;
 
 const esClient: Client = {} as any;
 const integrationTestHelpers: JestIntegrationTestHelpers = {} as any;
@@ -47,12 +49,12 @@ const myDocumentSchema = schema.object({
     test: schema.string(),
   }),
   someField: schema.string(),
-  someFieldV2: schema.maybe(schema.string()), // This is a new field that will be runtime mapped, so searchable/aggable...
+  someFieldV2: schema.maybe(schema.string()),
 });
 
 type MyDocument = TypeOf<typeof myDocumentSchema>;
 
-const myDataStream: DataStreamDefinition<MyDocument> = {
+const myDataStream = dataStream.createDefinition({
   name: 'my-data-stream',
   schema: myDocumentSchema,
   mappings: {
@@ -69,13 +71,13 @@ const myDataStream: DataStreamDefinition<MyDocument> = {
     },
   },
   searchRuntimeMappings: {
-    // full declaration, or you could write:
-    // someFieldV2: mappings.searchRuntimeMappings.remap({
-    //   previousFieldName: 'someField',
-    //   fieldName: 'someFieldV2',
-    //   type: 'keyword',
-    // }),
-    someFieldV2: {
+    someFieldV2: searchRuntimeHelpers.remap({
+      previousFieldName: 'someField',
+      fieldName: 'someFieldV2',
+      type: 'keyword',
+    }),
+    // full declaration
+    someFieldV3: {
       type: 'keyword',
       script: {
         source: `
@@ -89,7 +91,7 @@ const myDataStream: DataStreamDefinition<MyDocument> = {
       },
     },
   },
-};
+});
 
 // This could be a nice way to expose the "low-level" requests we are making so that
 // the data stream abstraction feels more like a thin helper or layer around the
@@ -101,13 +103,27 @@ esClient.indices.createDataStream(dataStream.asCreateDataStreamRequestArgs(myDat
 // Register your data stream with the AppendX service
 appendXSetup.registerDataStream(myDataStream);
 
-// Searching
-// const client = appendXStart.client.scopeTo<TDoc>(myDataStream, myDataStream2, myDataStream3);
+//* ************************************************ Searching
+const client = appendXStart.getClient(myDataStream);
+const { helpers } = client;
+client
+  .search<{ test: {} }>({
+    fields: ['someFieldV2'],
+  })
+  .then((result) => {
+    log.info(result.hits.hits[0]._source?.someField);
+    log.info(helpers.getFieldsFromSearchResponse(result).someFieldV2);
+  });
 // const result = await client.search({...}) // ES API
 
-// Authoring integ tests
+// Index template metadata
+/**
+ * { _meta: { version: "{hash-3}", previous_version: ["hash-1", "hash-2"] } }
+ */
 
-const previousDeclaration: DataStreamDefinition<MyDocument> = {
+//* ************************************************ Authoring integ tests
+// integration_tests/previous_datastreams.fixtures.ts
+const v1: DataStreamDefinition<MyDocument> = {
   name: 'my-data-stream',
   schema: myDocumentSchema,
   mappings: {
@@ -139,11 +155,41 @@ const previousDeclaration: DataStreamDefinition<MyDocument> = {
   },
 };
 
+// integration_tests/my_data_stream.test.ts
+const current = myDataStream;
+
 test('myDataStream should be backwards compatible', async () => {
-  await integrationTestHelpers.assertBackwardsCompatible(previousDeclaration, myDataStream);
+  await integrationTestHelpers.assertBackwardsCompatible([
+    {
+      sampleDocs: [
+        {
+          /* 1 */
+        },
+        // and so on...
+      ],
+      dataStream: v1,
+    },
+    {
+      sampleDocs: [
+        {
+          /* 1 */
+        },
+        // and so on...
+      ],
+      dataStream: current,
+    },
+  ]);
 });
 
-// Type shenanigans
+test('snapshot', async () => {
+  expect(integrationTestHelpers.toSnapshot(myDataStream)).toMatchSnapshot();
+});
+
+test('mappings hash v1', async () => {
+  expect(integrationTestHelpers.mappingsHash(myDataStream)).toMatchInlineSnapshot(`hash-1`);
+});
+
+//* ************************************************ Type shenanigans
 
 type StrictDynamic = false | 'strict';
 
@@ -163,21 +209,28 @@ type DateNanosMapping = Strict<api.MappingDateNanosProperty>;
 type StringMapping = KeywordMapping | TextMapping | DateMapping | DateNanosMapping;
 
 interface JestIntegrationTestHelpers {
-  assertBackwardsCompatible: (...dataStream: DataStreamDefinition[]) => void;
+  assertBackwardsCompatible: (
+    definitions: Array<{
+      sampleDocs: Array<Record<string, unknown>>;
+      dataStream: DataStreamDefinition;
+    }>
+  ) => Promise<void>;
+  toSnapshot: (...dataStream: DataStreamDefinition[]) => void;
+  mappingsHash: (dataStream: DataStreamDefinition) => string;
 }
 
 interface MappingsHelpers {
   date: () => KeywordMapping;
   keyword: () => KeywordMapping;
   text: () => TextMapping;
-  // Helpers for declaring runtime fields
-  searchRuntimeMappings: {
-    remap: (args: {
-      previousFieldName: string;
-      fieldName: string;
-      type: api.MappingRuntimeFieldType;
-    }) => api.MappingRuntimeField;
-  };
+}
+
+interface SearchRuntimeMappingsHelpers {
+  remap: (args: {
+    previousFieldName: string;
+    fieldName: string;
+    type: api.MappingRuntimeFieldType;
+  }) => api.MappingRuntimeField;
 }
 
 type DataStreamDeclarationMappings<Schema extends Record<string, unknown>> = Pick<
@@ -187,7 +240,14 @@ type DataStreamDeclarationMappings<Schema extends Record<string, unknown>> = Pic
   'dynamic' | 'properties'
 >;
 
-interface DataStreamDefinition<Schema extends Record<string, unknown> = {}> {
+interface BaseSearchRuntimeMappings {
+  [objectPath: string]: api.MappingRuntimeField;
+}
+
+interface DataStreamDefinition<
+  Schema extends Record<string, unknown> = {},
+  SearchRuntimeMappings extends BaseSearchRuntimeMappings = {}
+> {
   /**
    * @remark Once delcared this can never change.
    */
@@ -201,14 +261,22 @@ interface DataStreamDefinition<Schema extends Record<string, unknown> = {}> {
   mappings?: DataStreamDeclarationMappings<Schema>;
 
   // https://www.elastic.co/docs/manage-data/data-store/mapping/define-runtime-fields-in-search-request
-  searchRuntimeMappings?: {
-    [K in keyof Schema]?: api.MappingRuntimeField;
-  };
+  searchRuntimeMappings?: SearchRuntimeMappings;
 }
 
 interface DataStreamHelpers {
+  createDefinition: <S extends Record<string, unknown>, SRM extends BaseSearchRuntimeMappings>(
+    ds: DataStreamDefinition<S, SRM>
+  ) => DataStreamDefinition<S, SRM>;
   asPutIndexTemplateRequestArgs(ds: DataStreamDefinition): api.IndicesPutIndexTemplateRequest;
   asCreateDataStreamRequestArgs(ds: DataStreamDefinition): api.IndicesCreateDataStreamRequest;
+}
+
+// Data client
+
+interface SearchRequestImproved<SearchRuntimeMappings extends BaseSearchRuntimeMappings = {}>
+  extends Omit<api.SearchRequest, 'index' | 'fields'> {
+  fields?: Array<keyof SearchRuntimeMappings>;
 }
 
 export interface AppendXServiceSetup {
@@ -216,15 +284,21 @@ export interface AppendXServiceSetup {
 }
 
 export interface AppendXServiceStart {
-  getClient<Schema extends Record<string, unknown>>(
-    dataStream: DataStreamDefinition<Schema>
+  getClient<S extends Record<string, unknown>, SRM extends BaseSearchRuntimeMappings>(
+    dataStream: DataStreamDefinition<S, SRM>
   ): {
-    search: (req: Omit<api.SearchRequest, 'index'>) => Promise<api.SearchResponse<unknown>>; // For TS schema to hold true we must merge `fields` into `_source`...
-    searchMergeFields: (
-      req: Omit<api.SearchRequest, 'index'>
-    ) => Promise<api.SearchResponse<Schema>>; // For TS schema to hold true we must merge `fields` into `_source`...
+    search: <Agg extends Record<string, api.AggregationsAggregate> = {}>(
+      req: SearchRequestImproved<SRM>,
+      transportOpts?: TransportRequestOptionsWithOutMeta
+    ) => Promise<api.SearchResponse<S, Agg>>;
+
     index: (req: Omit<api.IndexRequest, 'index'>) => Promise<api.IndexResponse>;
-    delete: (req: Omit<api.DeleteRequest, 'index'>) => Promise<api.DeleteResponse>;
+    // delete: (req: Omit<api.DeleteRequest, 'index'>) => Promise<api.DeleteResponse>;
+    helpers: {
+      getFieldsFromSearchResponse: (response: api.SearchResponse) => {
+        [key in keyof SRM]: unknown[];
+      };
+    };
   };
 }
 
