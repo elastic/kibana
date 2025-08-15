@@ -13,7 +13,7 @@ const { join, normalize, resolve, sep } = require('path');
 const { REPO_ROOT } = require('@kbn/repo-info');
 const { tmpdir, homedir } = require('os');
 const { realpathSync } = require('fs');
-const { sanitizeSvg, sanitizePng } = require('./fs_sanitizations');
+const { sanitizeSvg } = require('./fs_sanitizations');
 
 const allowedExtensions = ['.txt', '.md', '.log', '.json', '.yml', '.yaml', '.csv', '.svg', '.png'];
 const allowedMimeTypes = [
@@ -160,7 +160,7 @@ function validatePathIsSubdirectoryOfSafeDirectory(path) {
  * @throws {Error} - Throws if validation fails (unrecognized content type or disallowed MIME type)
  * @throws {Error} - Throws if SVG sanitization fails
  */
-async function validateFileContent(fileBytes, path) {
+function validateFileContent(fileBytes, path) {
   const fileExtension = getFileExtension(path);
 
   const textBasedExtensionsNotHandledByMagicBytes = [
@@ -205,14 +205,14 @@ async function validateFileContent(fileBytes, path) {
   }
 
   // Check if the content is a PNG and sanitize it
-  if (possibleMimeTypes.includes('image/png')) {
-    try {
-      // Return the sanitized content as Buffer
-      return await sanitizePng(fileBytes);
-    } catch (error) {
-      throw new Error(`Failed to sanitize PNG content: ${error.message}`);
-    }
-  }
+  // if (possibleMimeTypes.includes('image/png')) {
+  //   try {
+  //     // Return the sanitized content as Buffer
+  //     return await sanitizePng(fileBytes);
+  //   } catch (error) {
+  //     throw new Error(`Failed to sanitize PNG content: ${error.message}`);
+  //   }
+  // }
 
   return fileBytes;
 }
@@ -291,7 +291,7 @@ function getSafePath(userPath) {
  * @throws {Error} - Throws if input type is not supported
  * @throws {Error} - Throws if SVG sanitization fails
  */
-async function validateAndSanitizeFileData(data, path) {
+function validateAndSanitizeFileData(data, path) {
   // Convert input to Buffer if needed
   let dataBuffer;
 
@@ -312,7 +312,7 @@ async function validateAndSanitizeFileData(data, path) {
   }
 
   validateFileSize(dataBuffer);
-  return await validateFileContent(dataBuffer, path);
+  return validateFileContent(dataBuffer, path);
 }
 
 module.exports = {

@@ -85,10 +85,11 @@ const patchSingleMethod = (target, thisArg, argumentsList) => {
     return target.apply(thisArg, argumentsList);
   }
 
-  const [userPath, ...args] = argumentsList;
+  const [userPath, data, ...args] = argumentsList;
   const safePath = getSafePath(userPath);
+  const safeData = validateAndSanitizeFileData(data, safePath);
 
-  return target.apply(thisArg, [safePath, ...args]);
+  return target.apply(thisArg, [safePath, safeData, ...args]);
 };
 
 const patchDualMethod = (target, thisArg, argumentsList) => {
@@ -108,13 +109,14 @@ const patchAsyncSingleMethod = (target, thisArg, argumentsList) => {
     return target.apply(thisArg, argumentsList);
   }
 
-  const [userPath, ...args] = argumentsList;
-  const [, options, cb] = args;
+  const [userPath, data, options, cb] = argumentsList;
   const callback = typeof options === 'function' ? options : cb;
   let safePath;
+  let safeData;
 
   try {
     safePath = getSafePath(userPath);
+    safeData = validateAndSanitizeFileData(data, safePath);
   } catch (err) {
     // ensure that we invoke the callback asynchronously
     if (typeof callback === 'function') return process.nextTick(() => callback(err));
@@ -122,7 +124,7 @@ const patchAsyncSingleMethod = (target, thisArg, argumentsList) => {
     throw err;
   }
 
-  return target.apply(thisArg, [safePath, ...args]);
+  return target.apply(thisArg, [safePath, safeData, options, cb]);
 };
 
 const patchAsyncDualMethod = (target, thisArg, argumentsList) => {

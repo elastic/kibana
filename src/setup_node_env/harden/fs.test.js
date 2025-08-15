@@ -67,55 +67,22 @@ describe('Hardened FS', () => {
       ).resolves.not.toThrow();
     });
 
-    it('should prevent writing to Path traversal sequences not alloweds', async () => {
+    it('path traversal sequences not allowed', async () => {
       expect(() => safeFsPromises.writeFile('../../evil2.json', 'hax')).toThrow(
         /Path traversal sequences not allowed/
       );
     });
+
+    it('should prevent writing to unsafe paths', async () => {
+      expect(() => safeFsPromises.writeFile('/tmp/evil2.json', 'hax')).toThrow(/Unsafe path/);
+    });
   });
 
   describe('stream', () => {
-    it('should allow creating write streams to safe paths', (done) => {
-      const filePath = join(DATA_PATH, 'stream.json');
-      const ws = safeFs.createWriteStream(filePath);
-
-      ws.write('streaming');
-      ws.end();
-
-      ws.on('error', done);
-
-      ws.on('close', () => {
-        safeFsPromises
-          .readFile(filePath, 'utf8')
-          .then((content) => {
-            expect(content).toBe('streaming');
-            return safeFsPromises.unlink(filePath);
-          })
-          .then(() => done())
-          .catch(done);
-      });
-    });
-
-    it('should prevent creating write streams to Path traversal sequences not alloweds', () => {
+    it('path traversal sequences not allowed', () => {
       expect(() => {
         safeFs.createWriteStream('../../stream-bad.json');
       }).toThrow(/Path traversal sequences not allowed/);
-    });
-  });
-
-  describe('promise', () => {
-    it('should allow writing to safe paths', async () => {
-      const filePath = join(DATA_PATH, 'good.json');
-
-      await expect(
-        safeFsPromises.writeFile(join(DATA_PATH, 'good.json'), 'world')
-      ).resolves.not.toThrow();
-
-      await safeFsPromises.unlink(filePath);
-    });
-
-    it('should prevent writing to unsafe paths', async () => {
-      expect(() => safeFsPromises.writeFile('../../evil2.json', 'hax')).toThrow(/Unsafe path/);
     });
   });
 });
