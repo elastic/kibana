@@ -7,19 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
-import { type HtmlPortalNode, InPortal, createHtmlPortalNode } from 'react-reverse-portal';
-import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
+import React, {
+  type PropsWithChildren,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
+import {
+  UnifiedHistogramChart,
+  UnifiedHistogramMode,
+  useUnifiedHistogram,
+} from '@kbn/unified-histogram';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
-  useInternalStateSelector,
-  type RuntimeStateManager,
-  selectTabRuntimeState,
-  selectRestorableTabRuntimeHistogramLayoutProps,
-  useRuntimeState,
   CurrentTabProvider,
+  type RuntimeStateManager,
   RuntimeStateProvider,
+  selectRestorableTabRuntimeHistogramLayoutProps,
+  selectTabRuntimeState,
   useCurrentTabSelector,
+  useInternalStateSelector,
+  useRuntimeState,
 } from '../../state_management/redux';
 import type { DiscoverMainContentProps } from '../layout/discover_main_content';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
@@ -27,6 +38,7 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
+import { useProfileAccessor } from '../../../../context_awareness';
 
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
@@ -172,6 +184,13 @@ const UnifiedHistogramChartWrapper = ({
     [panelsToggle]
   );
 
+  const getChartConfigAccessor = useProfileAccessor('getChartConfig');
+  const chartConfig = useMemo(() => {
+    return getChartConfigAccessor(() => ({
+      mode: UnifiedHistogramMode.default,
+    }))();
+  }, [getChartConfigAccessor]);
+
   // Initialized when the first search has been requested or
   // when in ES|QL mode since search sessions are not supported
   if (!unifiedHistogram.isInitialized || (!unifiedHistogramProps.searchSessionId && !isEsqlMode)) {
@@ -181,6 +200,7 @@ const UnifiedHistogramChartWrapper = ({
   return (
     <UnifiedHistogramChart
       {...unifiedHistogram.chartProps}
+      mode={chartConfig.mode}
       renderCustomChartToggleActions={renderCustomChartToggleActions}
     />
   );

@@ -24,6 +24,7 @@ import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { UnifiedHistogramMode } from '@kbn/unified-histogram/types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
@@ -167,6 +168,10 @@ export interface DefaultAppStateExtension {
    * The state for chart visibility toggle
    */
   hideChart?: boolean;
+  /**
+   * The state for sidebar visibility toggle
+   */
+  hideSidebar?: boolean;
 }
 
 /**
@@ -317,6 +322,13 @@ export interface AdditionalCellAction {
   execute: (context: AdditionalCellActionContext) => void | Promise<void>;
 }
 
+export interface ChartConfigExtension {
+  /**
+   * Supports customizing the chart (UnifiedHistogram) section in Discover
+   */
+  mode: UnifiedHistogramMode;
+}
+
 /**
  * The core profile interface for Discover context awareness.
  * Each of the available methods map to a specific extension point in the Discover application.
@@ -438,4 +450,10 @@ export interface Profile {
    * Example use case is to overwrite the column header display name or to add icons to the column headers.
    */
   getColumnsConfiguration: () => CustomGridColumnsConfiguration;
+
+  /**
+   * Gets configuration for the Discover chart (UnifiedHistogram) section
+   * @returns The custom configuration for the chart
+   */
+  getChartConfig: () => ChartConfigExtension;
 }
