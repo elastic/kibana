@@ -428,32 +428,36 @@ export function useCustomCards(
       isCollectionCard: true,
       onCardClick: createCollectionCardHandler('gcp'),
     },
-    {
-      id: 'upload-file-virtual',
-      type: 'virtual',
-      title: i18n.translate('xpack.observability_onboarding.packageList.uploadFileTitle', {
-        defaultMessage: 'Upload a file',
-      }),
-      description: i18n.translate(
-        'xpack.observability_onboarding.packageList.uploadFileDescription',
-        {
-          defaultMessage:
-            'Upload data from a CSV, TSV, JSON or other log file to Elasticsearch for analysis.',
-        }
-      ),
-      name: 'upload-file',
-      categories: ['observability'],
-      icons: [
-        {
-          type: 'eui',
-          src: 'addDataApp',
-        },
-      ],
-      url: `${getUrlForApp?.('home')}#/tutorial_directory/fileDataViz`,
-      version: '',
-      integration: '',
-      isCollectionCard: false,
-    },
+    ...(application.capabilities.fileUpload.show
+      ? [
+          {
+            id: 'upload-file-virtual',
+            type: 'virtual',
+            title: i18n.translate('xpack.observability_onboarding.packageList.uploadFileTitle', {
+              defaultMessage: 'Upload a file',
+            }),
+            description: i18n.translate(
+              'xpack.observability_onboarding.packageList.uploadFileDescription',
+              {
+                defaultMessage:
+                  'Upload data from a CSV, TSV, JSON or other log file to Elasticsearch for analysis.',
+              }
+            ),
+            name: 'upload-file',
+            categories: ['observability'],
+            icons: [
+              {
+                type: 'eui',
+                src: 'addDataApp',
+              },
+            ],
+            url: `${getUrlForApp?.('home')}#/tutorial_directory/fileDataViz`,
+            version: '',
+            integration: '',
+            isCollectionCard: false,
+          },
+        ]
+      : []),
     /**
      * The new Firehose card should only be visible on Cloud
      * as Firehose integration requires additional proxy,

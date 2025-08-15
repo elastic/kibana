@@ -22,6 +22,7 @@ export enum USER {
   ML_VIEWER_ALL_SPACES = 'ft_ml_viewer_all_spaces',
   ML_UNAUTHORIZED = 'ft_ml_unauthorized',
   ML_DISABLED = 'ft_ml_disabled',
+  ML_POWERUSER_NO_FILE_UPLOAD = 'ft_ml_poweruser_no_file_upload',
 }
 
 export function MachineLearningSecurityCommonProvider({ getService }: FtrProviderContext) {
@@ -185,6 +186,32 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
         },
       ],
     },
+    {
+      name: 'ft_file_upload_all',
+      elasticsearch: { cluster: [], indices: [], run_as: [] },
+      kibana: [
+        {
+          base: [],
+          feature: {
+            fileUpload: ['all'],
+          },
+          spaces: ['*'],
+        },
+      ],
+    },
+    {
+      name: 'ft_file_upload_none',
+      elasticsearch: { cluster: [], indices: [], run_as: [] },
+      kibana: [
+        {
+          base: [],
+          feature: {
+            fileUpload: ['none'],
+          },
+          spaces: ['*'],
+        },
+      ],
+    },
   ];
 
   const users = [
@@ -198,6 +225,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
         'ft_ml_source',
         'ft_ml_dest',
         'ft_ml_ui_extras',
+        'ft_file_upload_all',
         ...(remoteEsRoles ? Object.keys(remoteEsRoles) : []),
       ],
     },
@@ -205,19 +233,37 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       name: 'ft_ml_poweruser_spaces',
       full_name: 'ML Poweruser',
       password: 'mlps001',
-      roles: ['ft_default_space_ml_all', 'ft_ml_source', 'ft_ml_dest', 'ft_ml_ui_extras'],
+      roles: [
+        'ft_default_space_ml_all',
+        'ft_ml_source',
+        'ft_ml_dest',
+        'ft_ml_ui_extras',
+        'ft_file_upload_all',
+      ],
     },
     {
       name: 'ft_ml_poweruser_space1',
       full_name: 'ML Poweruser',
       password: 'mlps1001',
-      roles: ['ft_default_space1_ml_all', 'ft_ml_source', 'ft_ml_dest', 'ft_ml_ui_extras'],
+      roles: [
+        'ft_default_space1_ml_all',
+        'ft_ml_source',
+        'ft_ml_dest',
+        'ft_ml_ui_extras',
+        'ft_file_upload_all',
+      ],
     },
     {
       name: 'ft_ml_poweruser_all_spaces',
       full_name: 'ML Poweruser',
       password: 'mlpas001',
-      roles: ['ft_all_spaces_ml_all', 'ft_ml_source', 'ft_ml_dest', 'ft_ml_ui_extras'],
+      roles: [
+        'ft_all_spaces_ml_all',
+        'ft_ml_source',
+        'ft_ml_dest',
+        'ft_ml_ui_extras',
+        'ft_file_upload_all',
+      ],
     },
     {
       name: 'ft_ml_viewer',
@@ -228,37 +274,65 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
         'machine_learning_user',
         'ft_ml_source_readonly',
         'ft_ml_dest_readonly',
+        'ft_file_upload_all',
       ],
     },
     {
       name: 'ft_ml_viewer_spaces',
       full_name: 'ML Viewer',
       password: 'mlvs001',
-      roles: ['ft_default_space_ml_read', 'ft_ml_source_readonly', 'ft_ml_dest_readonly'],
+      roles: [
+        'ft_default_space_ml_read',
+        'ft_ml_source_readonly',
+        'ft_ml_dest_readonly',
+        'ft_file_upload_all',
+      ],
     },
     {
       name: 'ft_ml_viewer_space1',
       full_name: 'ML Viewer',
       password: 'mlvs1001',
-      roles: ['ft_default_space1_ml_read', 'ft_ml_source_readonly', 'ft_ml_dest_readonly'],
+      roles: [
+        'ft_default_space1_ml_read',
+        'ft_ml_source_readonly',
+        'ft_ml_dest_readonly',
+        'ft_file_upload_all',
+      ],
     },
     {
       name: 'ft_ml_viewer_all_spaces',
       full_name: 'ML Viewer',
       password: 'mlvs1001',
-      roles: ['ft_all_spaces_ml_read', 'ft_ml_source_readonly', 'ft_ml_dest_readonly'],
+      roles: [
+        'ft_all_spaces_ml_read',
+        'ft_ml_source_readonly',
+        'ft_ml_dest_readonly',
+        'ft_file_upload_all',
+      ],
     },
     {
       name: 'ft_ml_unauthorized',
       full_name: 'ML Unauthorized',
       password: 'mlu001',
-      roles: ['ft_default_space_ml_none', 'ft_ml_source_readonly'],
+      roles: ['ft_default_space_ml_none', 'ft_ml_source_readonly', 'ft_file_upload_all'],
     },
     {
       name: 'ft_ml_disabled',
       full_name: 'ML Disabled',
       password: 'mlud001',
-      roles: ['ft_ml_disabled'],
+      roles: ['ft_ml_disabled', 'ft_file_upload_all'],
+    },
+    {
+      name: 'ft_ml_poweruser_no_file_upload',
+      full_name: 'ML Poweruser no file upload',
+      password: 'mlps001',
+      roles: [
+        'ft_default_space_ml_all',
+        'ft_ml_source',
+        'ft_ml_dest',
+        'ft_ml_ui_extras',
+        'ft_file_upload_none',
+      ],
     },
   ];
 

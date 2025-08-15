@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const PLUGIN_ID = 'fileUpload';
+
 export const OPEN_FILE_UPLOAD_LITE_ACTION = 'openFileUploadLiteTrigger';
 
 export const OPEN_FILE_UPLOAD_LITE_TRIGGER = 'OPEN_FILE_UPLOAD_LITE_TRIGGER';
