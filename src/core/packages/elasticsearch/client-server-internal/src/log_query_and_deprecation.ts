@@ -10,7 +10,8 @@
 import type { IncomingHttpHeaders } from 'http';
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
-import { errors, DiagnosticResult, RequestBody, Client } from '@elastic/elasticsearch';
+import type { DiagnosticResult, RequestBody, Client } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import numeral from '@elastic/numeral';
 import type { Logger } from '@kbn/logging';
 import { isMaximumResponseSizeExceededError, type ElasticsearchErrorDetails } from '@kbn/es-errors';

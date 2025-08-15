@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
-import { ToolingLog } from '@kbn/tooling-log';
-import { Client } from '@elastic/elasticsearch';
-import { Config, ParsedSchedule } from '../../types';
+import type { Moment } from 'moment';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
+import type { Config, ParsedSchedule } from '../../types';
 import { createQueue } from '../queue';
 import { wait } from '../wait';
 import { computeTotalEvents } from './helpers/compute_total_events';

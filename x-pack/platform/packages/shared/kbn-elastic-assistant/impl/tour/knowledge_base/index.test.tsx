@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react';
-import { EuiTourStepProps } from '@elastic/eui';
+import type { EuiTourStepProps } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { KnowledgeBaseTour } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
