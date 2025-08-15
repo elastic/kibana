@@ -29,13 +29,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { useScopedServices } from '../../../../../components/scoped_services_provider/scoped_services_provider';
-import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
-import { useAppStateSelector } from '../../../../main/state_management/discover_app_state_container';
-import type { DiscoverStateContainer } from '../../../../main/state_management/discover_state';
-import { fetchEsql } from '../../../../main/data_fetching/fetch_esql';
+import { useScopedServices } from '../../../../components/scoped_services_provider/scoped_services_provider';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { useAppStateSelector } from '../../../main/state_management/discover_app_state_container';
+import type { DiscoverStateContainer } from '../../../main/state_management/discover_state';
+import { fetchEsql } from '../../../main/data_fetching/fetch_esql';
 import { constructCascadeQuery, type CascadeQueryArgs, getESQLStatsQueryMeta } from './util';
-import { getPatternCellRenderer } from '../../../../../context_awareness/profile_providers/common/patterns/pattern_cell_renderer';
+import { getPatternCellRenderer } from '../../../../context_awareness/profile_providers/common/patterns/pattern_cell_renderer';
 
 export { getESQLStatsQueryMeta } from './util';
 
@@ -179,7 +179,11 @@ export const ESQLDataCascade = ({
       >
         <DataCascadeRow<ESQLDataGroupNode>
           rowHeaderTitleSlot={({ row }) => {
-            if (/categorize/i.test(cascadeGroups[row.depth])) {
+            const type = queryMeta.groupByFields.find(
+              (field) => field.field === cascadeGroups[row.depth]
+            )!.type;
+
+            if (/categorize/i.test(type)) {
               return (
                 <React.Fragment>
                   {getPatternCellRenderer(
@@ -246,9 +250,9 @@ export const ESQLDataCascade = ({
               return (
                 <EuiBasicTable
                   columns={[
-                    ...queryMeta.groupByFields.map((field, index, groupArray) => ({
-                      field,
-                      name: field.replace(/_/g, ' '),
+                    ...queryMeta.groupByFields.map((group, index, groupArray) => ({
+                      field: group.field,
+                      name: group.field.replace(/_/g, ' '),
                       ...(index === groupArray.length - 1
                         ? { align: 'right' as HorizontalAlignment }
                         : {}),
@@ -257,9 +261,9 @@ export const ESQLDataCascade = ({
                   items={(cellData ?? []).map((datum) => ({
                     id: datum.id,
                     ...queryMeta.groupByFields.reduce(
-                      (acc, field) => ({
+                      (acc, group) => ({
                         ...acc,
-                        [field]: datum.flattened[field] as string,
+                        [group.field]: datum.flattened[group.field] as string,
                       }),
                       {} as Record<string, string>
                     ),
