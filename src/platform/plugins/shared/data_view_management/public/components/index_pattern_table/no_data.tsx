@@ -16,7 +16,7 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { getHasApiKeys$ } from '@kbn/shared-ux-page-analytics-no-data';
-import { HttpStart } from '@kbn/core-http-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { AddDataPrompt } from '../add_data_prompt';
 import { EmptyIndexListPrompt } from '../empty_index_list_prompt';
 import type { DataViewTableController } from './data_view_table_controller';

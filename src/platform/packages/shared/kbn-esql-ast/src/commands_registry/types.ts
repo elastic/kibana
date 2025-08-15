@@ -13,7 +13,7 @@ import type {
   ESQLControlVariable,
   ESQLSourceResult,
 } from '@kbn/esql-types';
-import { LicenseType } from '@kbn/licensing-types';
+import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLLocation } from '../types';
 import type { FieldType, SupportedDataType } from '../definitions/types';

@@ -9,7 +9,7 @@ import { checkReferences, checkForDataLayerType } from './utils';
 import { operationDefinitionMap } from '..';
 import { createMockedFullReference } from '../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { DateHistogramIndexPatternColumn } from '../date_histogram';
+import type { DateHistogramIndexPatternColumn } from '../date_histogram';
 import {
   CALCULATIONS_MISSING_COLUMN_REFERENCE,
   CALCULATIONS_WRONG_DIMENSION_CONFIG,

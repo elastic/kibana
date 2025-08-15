@@ -7,29 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
-import {
-  GlobalQueryStateFromUrl,
-  RefreshInterval,
-  connectToQueryState,
-  syncGlobalQueryStateWithUrl,
-} from '@kbn/data-plugin/public';
-import {
-  COMPARE_ALL_OPTIONS,
-  Filter,
-  Query,
-  TimeRange,
-  compareFilters,
-  isFilterPinned,
-} from '@kbn/es-query';
-import { ESQLControlVariable } from '@kbn/esql-types';
-import { PublishingSubject, StateComparators, diffComparators } from '@kbn/presentation-publishing';
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
+import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
+import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import { diffComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
+import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
-  Observable,
   Subject,
   Subscription,
   combineLatest,
@@ -45,8 +37,9 @@ import {
 import { dataService } from '../services/kibana_services';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
-import { DashboardCreationOptions } from './types';
-import { DashboardState, cleanFiltersForSerialize } from '../../common';
+import type { DashboardCreationOptions } from './types';
+import type { DashboardState } from '../../common';
+import { cleanFiltersForSerialize } from '../../common';
 
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,

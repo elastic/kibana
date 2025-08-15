@@ -6,17 +6,17 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { noop } from 'lodash';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { LensPluginStartDependencies } from './plugin';
 import type { LensSavedObjectAttributes as LensSavedObjectAttributesWithoutReferences } from '../common/content_management';
 import { extract, inject } from '../common/embeddable_factory';
 import { LensDocumentService } from './persistence';
 import { DOC_TYPE } from '../common/constants';
-import { SharingSavedObjectProps } from './types';
-import { LensRuntimeState, LensSavedObjectAttributes } from './react_embeddable/types';
+import type { SharingSavedObjectProps } from './types';
+import type { LensRuntimeState, LensSavedObjectAttributes } from './react_embeddable/types';
 
 type CheckDuplicateTitleProps = OnSaveProps & {
   id?: string;

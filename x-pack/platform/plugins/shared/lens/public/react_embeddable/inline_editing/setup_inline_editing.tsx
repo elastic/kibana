@@ -7,11 +7,11 @@
 
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import React from 'react';
-import { EditLensConfigurationProps } from '../../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
-import { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
+import type { EditLensConfigurationProps } from '../../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
+import type { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
 import { isTextBasedLanguage } from '../helper';
-import {
+import type {
   GetStateType,
   LensEmbeddableStartServices,
   LensInspectorAdapters,
@@ -19,7 +19,7 @@ import {
   LensRuntimeState,
   TypedLensSerializedState,
 } from '../types';
-import { PanelManagementApi } from './panel_management';
+import type { PanelManagementApi } from './panel_management';
 import { getStateManagementForInlineEditing } from './state_management';
 
 export function prepareInlineEditPanel(

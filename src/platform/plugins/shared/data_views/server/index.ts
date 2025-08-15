@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 export { getFieldByName, findIndexPatternById } from './utils';
 export type { FieldDescriptor, RollupIndexCapability } from './fetcher';
@@ -19,9 +20,9 @@ export type {
   DataViewsServerPluginStartDependencies,
 } from './types';
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import type { DataViewsServerPlugin } from './plugin';
-import { DataViewsServerPluginSetup, DataViewsServerPluginStart } from './types';
+import type { DataViewsServerPluginSetup, DataViewsServerPluginStart } from './types';
 export type { dataViewsServiceFactory } from './data_views_service_factory';
 
 /**
