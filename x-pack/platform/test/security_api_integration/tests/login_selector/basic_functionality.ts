@@ -587,7 +587,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           // Delete all sessions directly using the ES client
-          await es.deleteByQuery({
+          const esResponseAfterDelete = await es.deleteByQuery({
             index: '.kibana_security_session*',
             refresh: true,
             conflicts: 'proceed',
@@ -597,8 +597,29 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
+          log.info('ES response after delete:');
+
+          log.info(JSON.stringify(esResponseAfterDelete));
+
           // Refresh the index to make sure changes are visible
           await es.indices.refresh({ index: '.kibana_security_session*' });
+
+          const responseFromSearchAfterDelete = await es.search<SessionValue>({
+            index: '.kibana_security_session*',
+            size: 100,
+            query: {
+              bool: {
+                must: [
+                  {
+                    match_all: {},
+                  },
+                ],
+              },
+            },
+          });
+
+          log.info('Search after delete:');
+          log.info(responseFromSearchAfterDelete.hits.hits);
         });
 
         it('should be able to have many pending SP initiated logins all successfully succeed', async () => {
