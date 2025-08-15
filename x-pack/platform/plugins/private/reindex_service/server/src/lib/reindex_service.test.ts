@@ -21,7 +21,7 @@ import {
   ReindexStep,
 } from '@kbn/upgrade-assistant-pkg-common';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 import { getMockVersionInfo } from '../__fixtures__/version';
 import { esIndicesStateCheck, type Version } from '@kbn/upgrade-assistant-pkg-server';
@@ -45,7 +45,7 @@ describe('reindexService', () => {
   let clusterClient: ScopedClusterClientMock;
   let log: Logger;
   let service: ReindexService;
-  let licensingPluginSetup: LicensingPluginSetup;
+  let licensingPluginSetup: LicensingPluginStart;
 
   const updateMockImpl = (reindexOp: ReindexSavedObject, attrs: Partial<ReindexOperation> = {}) =>
     Promise.resolve({
@@ -70,7 +70,7 @@ describe('reindexService', () => {
     };
     clusterClient = elasticsearchServiceMock.createScopedClusterClient();
     log = loggingSystemMock.create().get();
-    licensingPluginSetup = licensingMock.createSetup();
+    licensingPluginSetup = licensingMock.createStart();
     licensingPluginSetup.license$ = new BehaviorSubject(
       licensingMock.createLicense({
         features: { security: { isAvailable: true, isEnabled: true } },

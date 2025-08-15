@@ -59,10 +59,10 @@ describe('reindex API', () => {
       router: mockRouter,
       licensing: licensingMock.createSetup(),
       lib: { handleEsError },
-      getSecurityPlugin: () => securityMock.createStart(),
+      getSecurityPlugin: () => Promise.resolve(securityMock.createStart()),
       version: { getMajorVersion: () => 8 },
     };
-    registerBatchReindexIndicesRoutes(routeDependencies, () => worker);
+    registerBatchReindexIndicesRoutes(routeDependencies);
 
     mockReindexService.hasRequiredPrivileges.mockResolvedValue(true);
     mockReindexService.detectReindexWarnings.mockReset();

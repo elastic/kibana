@@ -8,7 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { firstValueFrom } from 'rxjs';
 
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 import { IndicesAlias, IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -131,7 +131,7 @@ export const reindexServiceFactory = (
   esClient: ElasticsearchClient,
   actions: ReindexActions,
   log: Logger,
-  licensing: LicensingPluginSetup,
+  licensing: LicensingPluginStart,
   kibanaVersion: Version
 ): ReindexService => {
   // ------ Utility functions

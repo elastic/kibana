@@ -5,25 +5,30 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
+import { IRouter } from '@kbn/core/server';
 import type { Version } from '@kbn/upgrade-assistant-pkg-server';
-import { CredentialStore } from './src/lib/credential_store';
+import { ReindexOperation } from '@kbn/upgrade-assistant-pkg-common';
+import {
+  ReindexServiceScopedClient,
+  ReindexServiceScopedClientArgs,
+} from './src/lib/reindex_service_wrapper';
 
 export interface RouteDependencies {
   router: IRouter;
-  credentialStore: CredentialStore;
-  log: Logger;
-  getSecurityPlugin: () => SecurityPluginStart | undefined;
-  licensing: LicensingPluginSetup;
-  lib: {
-    handleEsError: typeof handleEsError;
-  };
   version: Version;
+  getReindexService: () => Promise<ReindexServiceServerPluginStart>;
 }
 
 export interface ReindexServiceServerPluginStart {
   cleanupReindexOperations: (indexNames: string[]) => Promise<void>;
+  getScopedClient: (scopedClientArgs: ReindexServiceScopedClientArgs) => ReindexServiceScopedClient;
+}
+
+export interface PostBatchResponse {
+  enqueued: ReindexOperation[];
+  errors: Array<{ indexName: string; message: string }>;
+}
+
+export interface GetBatchQueueResponse {
+  queue: ReindexOperation[];
 }

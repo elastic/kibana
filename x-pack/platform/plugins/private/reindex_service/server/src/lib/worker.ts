@@ -9,7 +9,7 @@ import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from 
 import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
 import moment from 'moment';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { ReindexSavedObject, ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { Version } from '@kbn/upgrade-assistant-pkg-server';
 import { Credential, CredentialStore } from './credential_store';
@@ -67,7 +67,7 @@ export class ReindexWorker {
     credentialStore: CredentialStore,
     clusterClient: IClusterClient,
     log: Logger,
-    licensing: LicensingPluginSetup,
+    licensing: LicensingPluginStart,
     security: SecurityPluginStart,
     version: Version
   ): ReindexWorker {
@@ -93,7 +93,7 @@ export class ReindexWorker {
     private credentialStore: CredentialStore,
     private clusterClient: IClusterClient,
     log: Logger,
-    private licensing: LicensingPluginSetup,
+    private licensing: LicensingPluginStart,
     security: SecurityPluginStart,
     version: Version
   ) {

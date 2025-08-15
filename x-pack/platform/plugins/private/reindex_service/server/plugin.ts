@@ -6,9 +6,8 @@
  */
 
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import {
   CoreSetup,
   Logger,
@@ -22,59 +21,52 @@ import {
 import { reindexOperationSavedObjectType, Version } from '@kbn/upgrade-assistant-pkg-server';
 import { RouteDependencies, ReindexServiceServerPluginStart } from './types';
 
-import { ReindexWorker } from './src/lib';
-import { CredentialStore, credentialStoreFactory } from './src/lib/credential_store';
+import {
+  ReindexServiceWrapper,
+  ReindexServiceInternalApi,
+} from './src/lib/reindex_service_wrapper';
+import { credentialStoreFactory } from './src/lib/credential_store';
 import { registerBatchReindexIndicesRoutes, registerReindexIndicesRoutes } from './src/routes';
 
-interface PluginsSetup {
-  licensing: LicensingPluginSetup;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface PluginsSetup {}
 
 interface PluginsStart {
   security: SecurityPluginStart;
+  licensing: LicensingPluginStart;
 }
 
 export class ReindexServiceServerPlugin
   implements Plugin<void, ReindexServiceServerPluginStart, PluginsSetup, PluginsStart>
 {
-  private reindexWorker: ReindexWorker | null = null;
-
-  // Properties set at setup
-  private licensing?: LicensingPluginSetup;
-
+  private reindexService: ReindexServiceInternalApi | null = null;
   private readonly logger: Logger;
-  private readonly credentialStore: CredentialStore;
-  private securityPluginStart?: SecurityPluginStart;
   private version: Version;
 
   constructor({ logger, env }: PluginInitializerContext) {
     this.logger = logger.get();
-    // used by worker and passed to routes
-    this.credentialStore = credentialStoreFactory(this.logger);
     this.version = new Version();
     this.version.setup(env.packageInfo.version);
   }
 
-  public setup({ http, savedObjects }: CoreSetup, { licensing }: PluginsSetup) {
-    this.licensing = licensing;
-    const router = http.createRouter();
-
+  public setup({
+    http,
+    savedObjects,
+    getStartServices,
+  }: CoreSetup<PluginsStart, ReindexServiceServerPluginStart>) {
     const dependencies: RouteDependencies = {
-      router,
-      credentialStore: this.credentialStore,
-      log: this.logger,
-      licensing,
-      getSecurityPlugin: () => this.securityPluginStart,
-      lib: {
-        handleEsError,
-      },
+      router: http.createRouter(),
       version: this.version,
+      getReindexService: async () => {
+        const [, , reindexService] = await getStartServices();
+        return reindexService;
+      },
     };
 
     savedObjects.registerType(reindexOperationSavedObjectType);
 
-    registerReindexIndicesRoutes(dependencies, () => this.getWorker());
-    registerBatchReindexIndicesRoutes(dependencies, () => this.getWorker());
+    registerReindexIndicesRoutes(dependencies);
+    registerBatchReindexIndicesRoutes(dependencies);
   }
 
   public start(
@@ -82,10 +74,8 @@ export class ReindexServiceServerPlugin
       savedObjects,
       elasticsearch,
     }: { savedObjects: SavedObjectsServiceStart; elasticsearch: ElasticsearchServiceStart },
-    { security }: PluginsStart
-  ) {
-    this.securityPluginStart = security;
-
+    { security, licensing }: PluginsStart
+  ): ReindexServiceServerPluginStart {
     const soClient = new SavedObjectsClient(
       savedObjects.createInternalRepository([reindexOperationSavedObjectType.name])
     );
@@ -99,35 +89,27 @@ export class ReindexServiceServerPlugin
 
     // The ReindexWorker will use the credentials stored in the cache to reindex the data
 
-    this.reindexWorker = ReindexWorker.create(
+    const service = new ReindexServiceWrapper({
       soClient,
-      this.credentialStore,
-      elasticsearch.client,
-      this.logger,
-      this.licensing!,
+      credentialStore: credentialStoreFactory(this.logger),
+      clusterClient: elasticsearch.client,
+      logger: this.logger,
+      licensing,
       security,
-      this.version
-    );
+      version: this.version,
+    });
 
-    this.reindexWorker?.start();
+    this.reindexService = service.getInternalApis();
+
+    const worker = service.getWorker();
 
     return {
-      cleanupReindexOperations: this.reindexWorker?.cleanupReindexOperations.bind(
-        this.reindexWorker
-      ),
+      cleanupReindexOperations: worker.cleanupReindexOperations.bind(worker),
+      getScopedClient: service.getScopedClient,
     };
   }
 
   public stop() {
-    if (this.reindexWorker) {
-      this.reindexWorker.stop();
-    }
-  }
-
-  private getWorker() {
-    if (!this.reindexWorker) {
-      throw new Error('Worker unavailable');
-    }
-    return this.reindexWorker;
+    this.reindexService?.stop();
   }
 }
