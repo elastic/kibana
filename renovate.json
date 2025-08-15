@@ -3460,6 +3460,8 @@
         "js-yaml",
         "load-esm",
         "magic-bytes.js",
+        "fnv-plus",
+        "set-value",
         "marked",
         "minimist",
         "node-forge",
