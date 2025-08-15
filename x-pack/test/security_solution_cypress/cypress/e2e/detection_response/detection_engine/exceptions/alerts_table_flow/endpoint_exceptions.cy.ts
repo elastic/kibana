@@ -29,7 +29,7 @@ import {
 } from '../../../../../tasks/exceptions';
 import { ALERTS_COUNT } from '../../../../../screens/alerts';
 import {
-  ADD_NESTED_BTN,
+  ADD_AND_BTN,
   EXCEPTION_CARD_ITEM_CONDITIONS,
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -101,8 +101,7 @@ describe(
       validateExceptionConditionField('file.Ext.code_signature');
       addExceptionFlyoutItemName(ITEM_NAME);
 
-      // Add non-nested condition
-      cy.get(ADD_NESTED_BTN).click();
+      cy.get(ADD_AND_BTN).click();
       // edit conditions
       addExceptionEntryFieldValueAndSelectSuggestion(ADDITIONAL_ENTRY, 6);
       addExceptionEntryFieldValueValue('foo', 4);
