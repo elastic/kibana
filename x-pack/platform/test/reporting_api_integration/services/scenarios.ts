@@ -39,9 +39,11 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const DATA_ANALYST_USERNAME = 'data_analyst';
   const DATA_ANALYST_PASSWORD = 'data_analyst-password';
+  const DATA_ANALYST_ROLE = 'data_analyst';
   const REPORTING_USER_USERNAME = 'reporting_user';
   const REPORTING_USER_PASSWORD = 'reporting_user-password';
   const REPORTING_ROLE = 'test_reporting_user';
+  const REPORTING_ROLE_BUILT_IN = 'reporting_user';
   const MANAGE_REPORTING_USER_USERNAME = 'manage_reporting_user';
   const MANAGE_REPORTING_USER_PASSWORD = 'manage_reporting_user-password';
   const MANAGE_REPORTING_ROLE = 'manage_reporting_role';
@@ -85,8 +87,12 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
   };
 
+  /**
+   * Creates a role for a data analyst user with read access to the ecommerce index and minimal Kibana
+   * privileges to Kibana applications like Discover, Dashboard, Canvas, and Visualize in the default space.
+   */
   const createDataAnalystRole = async () => {
-    await security.role.create('data_analyst', {
+    await security.role.create(DATA_ANALYST_ROLE, {
       metadata: {},
       elasticsearch: {
         cluster: [],
@@ -114,18 +120,16 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
+  /**
+   * Creates a role for a reporting user with minimal Kibana privileges to Kibana applications
+   * in the default space.
+   */
   const createTestReportingUserRole = async () => {
     await security.role.create(REPORTING_ROLE, {
       metadata: {},
       elasticsearch: {
         cluster: [],
-        indices: [
-          {
-            names: ['ecommerce'],
-            privileges: ['read', 'view_index_metadata'],
-            allow_restricted_indices: false,
-          },
-        ],
+        indices: [],
         run_as: [],
       },
       kibana: [
@@ -143,6 +147,10 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
+  /**
+   * Creates a role for a user that can manage reporting features, including generating reports
+   * and managing scheduled reports in the default space.
+   */
   const createManageReportingUserRole = async () => {
     await security.role.create(MANAGE_REPORTING_ROLE, {
       metadata: {},
@@ -173,10 +181,14 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
+  /**
+   * Methods for creating users with specific roles for testing purposes.
+   */
+
   const createDataAnalyst = async () => {
-    await security.user.create('data_analyst', {
-      password: 'data_analyst-password',
-      roles: ['data_analyst'],
+    await security.user.create(DATA_ANALYST_USERNAME, {
+      password: DATA_ANALYST_PASSWORD,
+      roles: [DATA_ANALYST_ROLE],
       full_name: 'Data Analyst User',
     });
   };
@@ -196,6 +208,10 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       full_name: 'Reporting User',
     });
   };
+
+  /**
+   * Methods for generating and scheduling reports.
+   */
 
   const generatePdf = async (
     username: string,
@@ -290,6 +306,10 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams, schedule: scheduleToUse });
   };
+
+  /**
+   * Methods for various Reporting API operations.
+   */
 
   const listScheduledReports = async (
     username = 'elastic',
@@ -453,9 +473,11 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     teardownLogs,
     DATA_ANALYST_USERNAME,
     DATA_ANALYST_PASSWORD,
+    DATA_ANALYST_ROLE,
     REPORTING_USER_USERNAME,
     REPORTING_USER_PASSWORD,
     REPORTING_ROLE,
+    REPORTING_ROLE_BUILT_IN,
     MANAGE_REPORTING_USER_USERNAME,
     MANAGE_REPORTING_USER_PASSWORD,
     MANAGE_REPORTING_ROLE,
