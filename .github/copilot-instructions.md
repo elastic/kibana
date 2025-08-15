@@ -282,9 +282,9 @@ kibana/
 ```
 
 ### Plugin Organization
-- **Core Platform:** `src/platform/plugins/`
-- **X-Pack Platform:** `x-pack/platform/plugins/`
-- **Solutions:** `x-pack/solutions/{security,observability,search}/`
+- **Core:** `src/core/`
+- **Platform:** `src/platform/` and `x-pack/platform/`
+- **Solutions:** `x-pack/solutions/{security,observability,search,chat}/`
 - **Examples:** `examples/` and `x-pack/examples/`
 
 ### Configuration Files
