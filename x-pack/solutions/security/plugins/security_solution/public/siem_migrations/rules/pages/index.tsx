@@ -23,7 +23,7 @@ import { SecuritySolutionPageWrapper } from '../../../common/components/page_wra
 import { SecurityPageName } from '../../../app/types';
 
 import { MigrationRulesTable } from '../components/rules_table';
-import { NeedAdminForUpdateRulesCallOut } from '../../../detections/components/callouts/need_admin_for_update_callout';
+import { NeedAdminForUpdateRulesCallOut } from '../../../detections/components/callouts/need_admin_for_update_rules_callout';
 import { MissingPrivilegesCallOut } from './missing_privileges_callout';
 import { HeaderButtons } from '../components/header_buttons';
 import { UnknownMigration } from '../components/unknown_migration';
