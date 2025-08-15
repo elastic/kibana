@@ -5912,6 +5912,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/indices-metadata-plugin@link:x-pack/platform/plugins/private/indices_metadata":
+  version "0.0.0"
+  uid ""
+
 "@kbn/inference-common@link:x-pack/platform/packages/shared/ai-infra/inference-common":
   version "0.0.0"
   uid ""
