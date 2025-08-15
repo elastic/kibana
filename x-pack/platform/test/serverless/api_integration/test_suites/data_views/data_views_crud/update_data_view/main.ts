@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { RoleCredentials, InternalRequestHeader } from '../../../../../shared/services';
+import type { RoleCredentials, InternalRequestHeader } from '../../../../../shared/services';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { configArray } from '../../constants';
 

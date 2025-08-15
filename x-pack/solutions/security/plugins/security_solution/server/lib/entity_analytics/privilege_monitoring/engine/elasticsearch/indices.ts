@@ -16,7 +16,7 @@ export const createPrivmonIndexService = (dataClient: PrivilegeMonitoringDataCli
   const internalUserClient = deps.clusterClient.asInternalUser;
 
   const upsertIndex = async () => {
-    dataClient.log('info', `Creating or updating index: ${index}`);
+    dataClient.log('debug', `Creating or updating index: ${index}`);
     await createOrUpdateIndex({
       esClient: internalUserClient,
       logger: deps.logger,

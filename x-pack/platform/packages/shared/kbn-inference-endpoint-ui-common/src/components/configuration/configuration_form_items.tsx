@@ -8,8 +8,7 @@
 import React from 'react';
 
 import { EuiFlexGroup } from '@elastic/eui';
-
-import { ConfigEntryView } from '../../types/types';
+import type { ConfigEntryView } from '../../types/types';
 import { ItemFormRow } from './item_form_row';
 
 interface ConfigurationFormItemsProps {

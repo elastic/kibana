@@ -10,10 +10,10 @@
 import useObservable from 'react-use/lib/useObservable';
 import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
 import React, { useCallback } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import { css, Global } from '@emotion/react';
 import { Navigation } from './navigation';
-import { NavigationProps } from './types';
+import type { NavigationProps } from './types';
 
 export interface Props {
   isCollapsed$: BehaviorSubject<boolean>;

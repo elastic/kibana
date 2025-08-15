@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { catchError, mergeMap, Observable, of, tap, from } from 'rxjs';
-import { Logger } from '@kbn/logging';
-import { ChatCompleteResponse } from '@kbn/inference-common';
+import type { Observable } from 'rxjs';
+import { catchError, mergeMap, of, tap, from } from 'rxjs';
+import type { Logger } from '@kbn/logging';
+import type { ChatCompleteResponse } from '@kbn/inference-common';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ObservabilityAIAssistantClient } from '..';
-import { Message, MessageRole } from '../../../../common';
+import type { Message } from '../../../../common';
+import { MessageRole } from '../../../../common';
 
 export const TITLE_CONVERSATION_FUNCTION_NAME = 'title_conversation';
 export const getTitleSystemMessage = (scopes: AssistantScope[]) =>

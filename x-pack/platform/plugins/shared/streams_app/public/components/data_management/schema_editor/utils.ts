@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FieldDefinitionConfig } from '@kbn/streams-schema';
-import { MappedSchemaField } from './types';
+import type { FieldDefinitionConfig } from '@kbn/streams-schema';
+import type { MappedSchemaField } from './types';
 
 export const convertToFieldDefinitionConfig = (
   field: MappedSchemaField

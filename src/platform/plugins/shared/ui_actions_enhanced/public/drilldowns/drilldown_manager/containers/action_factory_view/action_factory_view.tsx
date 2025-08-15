@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { ActionFactory as ActionFactoryUi } from '../../components/action_factory';
-import { ActionFactory, BaseActionFactoryContext } from '../../../../dynamic_actions';
+import type { ActionFactory, BaseActionFactoryContext } from '../../../../dynamic_actions';
 import { useDrilldownManager } from '../context';
 
 export interface ActionFactoryViewProps {

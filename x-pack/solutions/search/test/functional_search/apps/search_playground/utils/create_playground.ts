@@ -13,7 +13,7 @@ import {
   APIRoutes,
   ROUTE_VERSIONS,
 } from '@kbn/search-playground/common';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 function prefixApiRouteWithSpace(route: string, space?: string) {
   if (!space) return route;

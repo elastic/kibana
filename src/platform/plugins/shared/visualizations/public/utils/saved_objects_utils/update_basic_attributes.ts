@@ -10,10 +10,10 @@
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { extractReferences } from '../saved_visualization_references';
 import { visualizationsClient } from '../../content_management';
-import { TypesStart } from '../../vis_types';
+import type { TypesStart } from '../../vis_types';
 
 interface UpdateBasicSoAttributesDependencies {
   savedObjectsTagging?: SavedObjectsTaggingApi;

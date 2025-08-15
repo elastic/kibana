@@ -13,7 +13,7 @@ export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
 
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
-import { CommonPageObject } from './common_page';
+import type { CommonPageObject } from './common_page';
 
 interface SaveDashboardOptions {
   /**

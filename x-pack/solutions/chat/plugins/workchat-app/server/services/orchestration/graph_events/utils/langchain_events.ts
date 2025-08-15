@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StreamEvent as LangchainEvent } from '@langchain/core/tracers/log_stream';
+import type { StreamEvent as LangchainEvent } from '@langchain/core/tracers/log_stream';
 
 /**
  * Checks if the given event was sent from the given graph

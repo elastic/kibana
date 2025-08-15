@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { InferenceConnector } from '@kbn/inference-common';
-import { KibanaClient } from '@kbn/kibana-api-cli';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { InferenceConnector } from '@kbn/inference-common';
+import type { KibanaClient } from '@kbn/kibana-api-cli';
 
 export interface InferenceCliClientOptions {
   log: ToolingLog;

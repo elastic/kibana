@@ -10,7 +10,7 @@ import React from 'react';
 
 import { useQuickTimeRanges } from '@kbn/observability-shared-plugin/public';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { SeriesUrl } from '../../types';
+import type { SeriesUrl } from '../../types';
 import { ReportTypes } from '../../configurations/constants';
 
 interface Props {
