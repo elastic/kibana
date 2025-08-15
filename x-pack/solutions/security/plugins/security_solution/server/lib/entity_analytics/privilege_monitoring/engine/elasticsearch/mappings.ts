@@ -15,6 +15,9 @@ export const PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING: MappingProperties = 
       name: {
         type: 'keyword',
       },
+      labels: {
+        type: 'keyword',
+      },
     },
   },
 };

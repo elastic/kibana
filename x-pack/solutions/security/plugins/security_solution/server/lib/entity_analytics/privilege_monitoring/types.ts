@@ -11,4 +11,5 @@ export interface PrivMonBulkUser {
   username: string;
   existingUserId?: string;
   sourceId: string;
+  label: string | undefined;
 }
