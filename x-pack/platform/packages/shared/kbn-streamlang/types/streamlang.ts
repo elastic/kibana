@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { isSchema } from '@kbn/streams-schema';
+import { isSchema } from '@kbn/zod-helpers';
 import { Condition, conditionSchema } from './conditions';
 import { StreamlangProcessorDefinition, streamlangProcessorSchema } from './processors';
 

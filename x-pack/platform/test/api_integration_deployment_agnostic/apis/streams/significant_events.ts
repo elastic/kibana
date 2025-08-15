@@ -59,7 +59,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         description: '',
         ingest: {
           lifecycle: { inherit: {} },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           wired: {
             routing: [],
             fields: {},
@@ -104,7 +106,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 routing: [
                   {
                     destination: 'logs.queries-test.child',
-                    if: {
+                    where: {
                       always: {},
                     },
                   },
@@ -133,18 +135,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 routing: [
                   {
                     destination: 'logs.queries-test.child.first',
-                    if: {
+                    where: {
                       field: 'attributes.field',
-                      operator: 'lt',
-                      value: 15,
+                      lt: 15,
                     },
                   },
                   {
                     destination: 'logs.queries-test.child.second',
-                    if: {
+                    where: {
                       field: 'attributes.field',
-                      operator: 'gt',
-                      value: 15,
+                      gt: 15,
                     },
                   },
                 ],
@@ -194,7 +194,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: [],
+            processing: {
+              steps: [],
+            },
             classic: {},
           },
         },

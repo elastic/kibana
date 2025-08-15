@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { Condition, RoutingDefinition, Streams } from '@kbn/streams-schema';
+import { RoutingDefinition, Streams } from '@kbn/streams-schema';
 import { ErrorActorEvent, fromPromise } from 'xstate5';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { Condition } from '@kbn/streamlang';
 import { getFormattedError } from '../../../../../util/errors';
 import { StreamRoutingServiceDependencies } from './types';
 
@@ -55,7 +56,7 @@ export function createUpsertStreamActor({
 export type ForkStreamResponse = APIReturnType<'POST /api/streams/{name}/_fork 2023-10-31'>;
 export interface ForkStreamInput {
   definition: Streams.WiredStream.GetResponse;
-  if: Condition;
+  where: Condition;
   destination: string;
 }
 export function createForkStreamActor({
@@ -74,7 +75,7 @@ export function createForkStreamActor({
             name: input.definition.stream.name,
           },
           body: {
-            if: input.if,
+            where: input.where,
             stream: {
               name: input.destination,
             },

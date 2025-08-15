@@ -27,7 +27,9 @@ export const testContentPackEntry = ({
     stream: {
       description: '',
       ingest: {
-        processing: [],
+        processing: {
+          steps: [],
+        },
         lifecycle: { inherit: {} },
         wired: { routing, fields },
       },

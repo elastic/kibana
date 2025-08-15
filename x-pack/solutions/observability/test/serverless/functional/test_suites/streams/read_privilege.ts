@@ -27,7 +27,9 @@ const request: Streams.WiredStream.UpsertRequest = {
     description: '',
     ingest: {
       lifecycle: { inherit: {} },
-      processing: [],
+      processing: {
+        steps: [],
+      },
       wired: {
         routing: [],
         fields: {
