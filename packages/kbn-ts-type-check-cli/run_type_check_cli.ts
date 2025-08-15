@@ -15,13 +15,9 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { asyncForEachWithLimit, asyncMapWithLimit } from '@kbn/std';
 import { SomeDevLog } from '@kbn/some-dev-log';
-import { type TsProject, TS_PROJECTS } from '@kbn/ts-projects';
+import { TS_PROJECTS, type TsProject } from '@kbn/ts-projects';
 
-import {
-  updateRootRefsConfig,
-  cleanupRootRefsConfig,
-  ROOT_REFS_CONFIG_PATH,
-} from './root_refs_config';
+import { cleanupRootRefsConfig, ROOT_REFS_CONFIG_PATH, updateRootRefsConfig } from './root_refs_config';
 
 const rel = (from: string, to: string) => {
   const path = Path.relative(from, to);
@@ -96,11 +92,21 @@ run(
       log.warning('Deleted all typescript caches');
     }
 
+    let projectOverride = null;
+    const file = flagsReader.path('file');
+    if (file) {
+      // if a file is specified, find the closest project to it
+      projectOverride = findClosestProjectPath(file);
+      if (!projectOverride) {
+        throw createFailError(`No TypeScript project found containing file: ${file}`);
+      }
+    }
+
     // if the tsconfig.refs.json file is not self-managed then make sure it has
     // a reference to every composite project in the repo
     await updateRootRefsConfig(log);
 
-    const projectFilter = flagsReader.path('project');
+    const projectFilter = projectOverride || flagsReader.path('project');
 
     const projects = TS_PROJECTS.filter(
       (p) => !p.isTypeCheckDisabled() && (!projectFilter || p.path === projectFilter)
@@ -163,12 +169,16 @@ run(
 
         # check types in a single project
         node scripts/type_check --project packages/kbn-pm/tsconfig.json
+
+        # check types for a project containing a specific file
+        node scripts/type_check --file src/core/packages/saved-objects/api-server-internal/src/lib/apis/update.ts
     `,
     flags: {
-      string: ['project'],
+      string: ['project', 'file'],
       boolean: ['clean-cache', 'cleanup'],
       help: `
         --project [path]        Path to a tsconfig.json file determines the project to check
+        --file [path]           Path to a file to check types for. If specified, the closest project will be tested.
         --help                  Show this message
         --clean-cache           Delete any existing TypeScript caches before running type check
         --cleanup               Pass to avoid leaving temporary tsconfig files on disk. Leaving these
@@ -179,3 +189,12 @@ run(
     },
   }
 );
+
+function findClosestProjectPath(filePath: string): string | null {
+  const absolutePath = Path.resolve(filePath);
+  const projectCandidates = TS_PROJECTS.filter((p) => absolutePath.startsWith(p.directory));
+  const depth = path => path.split('').filter(c => c === Path.sep).length;
+
+  projectCandidates.sort((a,b) => depth(b.path) - depth(a.path));
+  return projectCandidates[0]?.path || null;
+}
