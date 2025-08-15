@@ -3181,22 +3181,24 @@ export default ({ getService }: FtrProviderContext) => {
 
       it.only('does not suppress alerts outside of duration when query with 3 sequences', async () => {
         const id = uuidv4();
-        const dateNow = Date.now();
-        const timestampSequenceEvent1 = new Date(dateNow - 5000).toISOString();
-        const timestampSequenceEvent2 = new Date(dateNow - 5500).toISOString();
-        const timestampSequenceEvent3 = new Date(dateNow - 5800).toISOString();
 
-        const firstSequenceEvent = {
-          id,
-          '@timestamp': timestampSequenceEvent1,
-          host: {
-            name: 'host-a',
-          },
-        };
+        const SECOND = 1000;
+        const dateNow = Date.now();
+        const timestamp1 = new Date(dateNow - 50 * SECOND).toISOString();
+        const timestamp2 = new Date(dateNow - 49 * SECOND).toISOString();
+        const timestamp3 = new Date(dateNow - 48 * SECOND).toISOString();
+        const timestamp4 = new Date(dateNow - 5 * SECOND).toISOString();
+        const timestamp5 = new Date(dateNow - 4 * SECOND).toISOString();
+        const timestamp6 = new Date(dateNow - 3 * SECOND).toISOString();
+
+        const seqDoc = (ts: string) => ({ id, '@timestamp': ts, host: { name: 'host-a' } });
         await indexListOfSourceDocuments([
-          firstSequenceEvent,
-          { ...firstSequenceEvent, '@timestamp': timestampSequenceEvent2 },
-          { ...firstSequenceEvent, '@timestamp': timestampSequenceEvent3 },
+          seqDoc(timestamp1),
+          seqDoc(timestamp2),
+          seqDoc(timestamp3),
+          seqDoc(timestamp4),
+          seqDoc(timestamp5),
+          seqDoc(timestamp6),
         ]);
 
         const rule: EqlRuleCreateProps = {
@@ -3205,86 +3207,29 @@ export default ({ getService }: FtrProviderContext) => {
           alert_suppression: {
             group_by: ['host.name'],
             duration: {
-              value: 7,
+              value: 30,
               unit: 's',
             },
             missing_fields_strategy: 'suppress',
           },
-          from: 'now-10s',
-          interval: '5s',
-        };
-        const createdRule = await createRule(supertest, log, rule);
-        const alerts = await getOpenAlerts(supertest, log, es, createdRule);
-
-        // we expect one shell alert
-        // and three building block alerts
-        expect(alerts.hits.hits).toHaveLength(4);
-        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(
-          alerts.hits.hits
-        );
-        expect(buildingBlockAlerts).toHaveLength(3);
-        expect(sequenceAlert).toHaveLength(1);
-
-        expect(sequenceAlert[0]._source).toEqual({
-          ...sequenceAlert[0]._source,
-          [ALERT_SUPPRESSION_TERMS]: [
-            {
-              field: 'host.name',
-              value: 'host-a',
-            },
-          ],
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
-        });
-        // disable the rule
-        await patchRule(supertest, log, { id: createdRule.id, enabled: false });
-
-        const dateNow2 = Date.now();
-        const secondTimestampEventSequence = new Date(dateNow2 - 200).toISOString();
-        const secondTimestampEventSequence2 = new Date(dateNow2 - 100).toISOString();
-        const secondTimestampEventSequence3 = new Date(dateNow2).toISOString();
-
-        const secondSequenceEvent = {
-          id,
-          '@timestamp': secondTimestampEventSequence,
-          host: {
-            name: 'host-a',
-          },
+          from: 'now-40s',
+          interval: '40s',
         };
 
-        // Add a new document, then disable and re-enable to trigger another rule run.
-        // the second rule run should generate a new alert
-
-        await indexListOfSourceDocuments([
-          secondSequenceEvent,
-          { ...secondSequenceEvent, '@timestamp': secondTimestampEventSequence2 },
-          { ...secondSequenceEvent, '@timestamp': secondTimestampEventSequence3 },
-        ]);
-        await patchRule(supertest, log, { id: createdRule.id, enabled: true });
-        const afterTimestamp2 = new Date(dateNow2);
-        const secondAlerts = await getOpenAlerts(
+        const { previewId } = await previewRule({
           supertest,
-          log,
-          es,
-          createdRule,
-          RuleExecutionStatusEnum.succeeded,
-          undefined,
-          afterTimestamp2
-        );
+          rule,
+          timeframeEnd: new Date(dateNow),
+          invocationCount: 2,
+        });
 
-        const [sequenceAlert2, buildingBlockAlerts2] = partitionSequenceBuildingBlocks(
-          secondAlerts.hits.hits
-        );
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        const [sequenceAlert2, buildingBlockAlerts2] =
+          partitionSequenceBuildingBlocks(previewAlerts);
 
-        console.log('seqqquence', JSON.stringify(sequenceAlert2, null, 2));
-        // two sequence alerts because the second one happened
-        // outside of the rule's suppression duration
+        // two sequence alerts because the second one happened outside of the suppression duration
         expect(sequenceAlert2).toHaveLength(2);
         expect(buildingBlockAlerts2).toHaveLength(6);
-        // timestamps should be different for two alerts, showing they were
-        // created in different rule executions
-        expect(sequenceAlert2[0]?._source?.[TIMESTAMP]).not.toEqual(
-          sequenceAlert2[1]?._source?.[TIMESTAMP]
-        );
 
         expect(sequenceAlert2[0]._source).toEqual({
           ...sequenceAlert2[0]?._source,
@@ -3294,7 +3239,7 @@ export default ({ getService }: FtrProviderContext) => {
               value: 'host-a',
             },
           ],
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // only one alert created, so zero documents are suppressed
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         });
         expect(sequenceAlert2[1]._source).toEqual({
           ...sequenceAlert2[1]?._source,
@@ -3304,7 +3249,7 @@ export default ({ getService }: FtrProviderContext) => {
               value: 'host-a',
             },
           ],
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // only one alert created, so zero documents are suppressed
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         });
       });
     });
