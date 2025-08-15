@@ -50,6 +50,8 @@ export const getEditorOpener =
       requireTimestampField = false,
       allowAdHocDataView = false,
       editData,
+      onDuplicate,
+      isDuplicatingManaged,
     }: DataViewEditorProps): CloseEditor => {
       const closeEditor = () => {
         if (overlayRef) {
@@ -80,6 +82,8 @@ export const getEditorOpener =
               requireTimestampField={requireTimestampField}
               allowAdHocDataView={allowAdHocDataView}
               showManagementLink={Boolean(editData && editData.isPersisted())}
+              onDuplicate={onDuplicate}
+              isDuplicatingManaged={isDuplicatingManaged}
             />
           </KibanaReactContextProvider>,
           core
