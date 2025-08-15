@@ -29,7 +29,7 @@ import {
 } from '../../../../../tasks/exceptions';
 import { ALERTS_COUNT } from '../../../../../screens/alerts';
 import {
-  ADD_NESTED_BTN,
+  ADD_AND_BTN,
   EXCEPTION_CARD_ITEM_CONDITIONS,
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
