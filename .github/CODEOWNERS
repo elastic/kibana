@@ -1946,7 +1946,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/serverless/functional/test_suites/management/index.ts @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/test_suites/examples/index.ts @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/page_objects/svl_common_page.ts @elastic/appex-qa
-/x-pack/test_serverless/README.md @elastic/appex-qa
+/x-pack/platform/test/README.md @elastic/appex-qa
+/x-pack/platform/test/serverless/README.md @elastic/appex-qa
 /x-pack/test_serverless/api_integration/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/platform/test/serverless/api_integration/test_suites/README.md @elastic/appex-qa
 /src/dev/code_coverage @elastic/appex-qa
