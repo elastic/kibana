@@ -40,10 +40,17 @@ const AlertCloseConfirmationModal = ({
 
   const onCancel = useCallback(() => onConfirmationResult(false), [onConfirmationResult]);
 
-  const title =
+  const { title, message } =
     currentSettingValue === SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow
-      ? i18n.ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_TITLE
-      : i18n.ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_TITLE;
+      ? {
+        title: i18n.ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_TITLE,
+        message: i18n.ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_MESSAGE,
+      }
+      : {
+        title: i18n.ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_TITLE,
+        message: i18n.ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_MESSAGE,
+      }
+
 
   return (
     <EuiConfirmModal
@@ -57,6 +64,8 @@ const AlertCloseConfirmationModal = ({
       defaultFocusedButton="confirm"
       data-test-subj="alertCloseInfoModal"
     >
+      <EuiText>{message}</EuiText>
+      <EuiSpacer size="m" />
       <EuiText>{i18n.ALERT_CLOSE_INFO_MODAL_CONTACT_ADMIN_MESSAGE}</EuiText>
       <EuiSpacer size="m" />
       <EuiCheckbox

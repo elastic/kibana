@@ -115,14 +115,28 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
 export const ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_TITLE = i18n.translate(
   'xpack.securitySolution.alert.closeInfoModal.continueSuppressionTitle',
   {
-    defaultMessage: 'The alert suppression window will be restarted',
+    defaultMessage: 'Closing alert restarts alert suppression',
+  }
+);
+
+export const ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_MESSAGE = i18n.translate(
+  'xpack.securitySolution.alert.closeInfoModal.continueSuppressionMessage',
+  {
+    defaultMessage: 'Any new, duplicate events will be grouped and suppressed. Each unique group will be associated with a new alert.',
   }
 );
 
 export const ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_TITLE = i18n.translate(
   'xpack.securitySolution.alert.closeInfoModal.continueSuppressionTitle',
   {
-    defaultMessage: 'The alert suppression window will continue',
+    defaultMessage: "Closing alert doesn't interrupt alert suppression",
+  }
+);
+
+export const ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_MESSAGE = i18n.translate(
+  'xpack.securitySolution.alert.closeInfoModal.continueSuppressionMessage',
+  {
+    defaultMessage: "Duplicate events will continue to be grouped and suppressed, but new alerts won't be created for these groups.",
   }
 );
 
