@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
+export const GCP_INPUT_FIELDS_TEST_SUBJECTS = {
   GOOGLE_CLOUD_SHELL_SETUP: 'google_cloud_shell_setup_test_id',
   PROJECT_ID: 'project_id_test_id',
   ORGANIZATION_ID: 'organization_id_test_id',
