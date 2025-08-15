@@ -56,7 +56,7 @@ export const UnifiedHistogramLayout = ({
   children,
 }: UnifiedHistogramLayoutProps) => {
   const [mainPanelNode] = useState(() =>
-    createHtmlPortalNode({ attributes: { css: 'eui-fullHeight' } })
+    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);

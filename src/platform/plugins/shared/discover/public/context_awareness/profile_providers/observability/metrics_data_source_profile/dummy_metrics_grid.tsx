@@ -28,7 +28,7 @@ import {
   EMPTY_OPTION,
   ToolbarSelector,
 } from '@kbn/unified-histogram/components/chart/toolbar_selector';
-import type { ChartSectionContext } from '@kbn/unified-histogram/types';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import React, { useCallback, useMemo } from 'react';
 
 // Dummy component to demonstrate how the actual metrics experience grid will hook into discover state and event handlers
@@ -44,7 +44,7 @@ export const DummyMetricsGrid = ({
   query,
   searchSessionId,
   timeRange,
-}: ChartSectionContext) => {
+}: ChartSectionProps) => {
   const [breakdownField, setBreakdown] = React.useState<DataViewField | undefined>(undefined);
   const actions: IconButtonGroupProps['buttons'] = [
     {

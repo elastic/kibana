@@ -148,7 +148,6 @@ export function UnifiedHistogramChart({
   });
 
   useTotalHits({
-    // keep this hook if we want to support the new metrics view in KQL mode too
     services,
     dataView,
     request,

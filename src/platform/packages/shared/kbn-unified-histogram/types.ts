@@ -188,7 +188,7 @@ export interface UnifiedHistogramVisContext {
 }
 
 // A shared interface for communication between Discover and custom components.
-export interface ChartSectionContext {
+export interface ChartSectionProps {
   /**
    * The current search session ID
    */
@@ -240,7 +240,7 @@ export interface ChartSectionContext {
  */
 export type ChartSectionConfiguration =
   | {
-      Component: React.ComponentType<ChartSectionContext>;
+      Component: React.ComponentType<ChartSectionProps>;
       replaceDefaultHistogram: true;
       localStorageKeyPrefix: string;
       containerInitialHeight: number;
