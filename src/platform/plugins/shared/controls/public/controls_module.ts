@@ -10,12 +10,13 @@
 export { ClearControlAction } from './actions/clear_control_action';
 export { DeleteControlAction } from './actions/delete_control_action';
 export { EditControlAction } from './actions/edit_control_action';
+export { createOptionsListAction } from './actions/create_options_list_action';
 
 export { getControlGroupEmbeddableFactory } from './control_group/get_control_group_factory';
+export { optionsListEmbeddableFactory } from './controls/data_controls/options_list_control/options_list_embeddable_factory';
 
 export { getOptionsListControlFactory } from './controls/data_controls/options_list_control/get_options_list_control_factory';
 export { getRangesliderControlFactory } from './controls/data_controls/range_slider/get_range_slider_control_factory';
 export { getTimesliderControlFactory } from './controls/timeslider_control/get_timeslider_control_factory';
 export { getESQLControlFactory } from './controls/esql_control/get_esql_control_factory';
-
 export { ControlGroupRenderer } from './control_group/control_group_renderer/control_group_renderer';

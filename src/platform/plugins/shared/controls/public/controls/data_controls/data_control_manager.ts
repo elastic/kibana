@@ -32,12 +32,12 @@ import { initializeStateManager } from '@kbn/presentation-publishing/state_manag
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import type { DefaultDataControlState } from '../../../common';
 import { dataViewsService } from '../../services/kibana_services';
-import type { ControlGroupApi } from '../../control_group/types';
 import { defaultControlComparators, defaultControlDefaultValues } from '../default_control_manager';
 import type { ControlApiInitialization } from '../types';
 import { openDataControlEditor } from './open_data_control_editor';
 import { getReferenceName } from './reference_name_utils';
 import type { DataControlApi, DataControlFieldFormatter } from './types';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 
 export const defaultDataControlComparators: StateComparators<DefaultDataControlState> = {
   ...defaultControlComparators,
@@ -52,7 +52,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
   state: DefaultDataControlState,
   getEditorState: () => EditorState,
   setEditorState: (state: Partial<EditorState>) => void,
-  controlGroupApi: ControlGroupApi
+  parentApi?: unknown
 ): {
   api: StateManager<DefaultDataControlState>['api'] &
     Omit<ControlApiInitialization<DataControlApi>, 'hasUnsavedChanges$' | 'resetUnsavedChanges'>;
@@ -66,6 +66,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
   getLatestState: () => DefaultDataControlState;
   reinitializeState: (lastState?: DefaultDataControlState) => void;
 } => {
+  console.log(state);
   const dataControlManager = initializeStateManager<DefaultDataControlState>(
     state,
     {
@@ -170,10 +171,12 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
           setEditorState(newState);
         } else {
           // replace the control with a new one of the updated type
-          controlGroupApi.replacePanel(controlId, {
-            panelType: newType,
-            serializedState: { rawState: newState },
-          });
+          if (apiIsPresentationContainer(parentApi)) {
+            parentApi.replacePanel(controlId, {
+              panelType: newType,
+              serializedState: { rawState: newState },
+            });
+          }
         }
       },
       initialState: {
@@ -182,7 +185,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
       controlType,
       controlId,
       initialDefaultPanelTitle: defaultTitle$.getValue(),
-      controlGroupApi,
+      parentApi,
     });
   };
 
@@ -198,8 +201,6 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
       ...dataControlManager.api,
       dataLoading$,
       blockingError$,
-      setBlockingError,
-      setDataLoading,
       defaultTitle$,
       dataViews$,
       field$,

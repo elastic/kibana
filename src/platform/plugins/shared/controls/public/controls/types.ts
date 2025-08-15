@@ -18,12 +18,8 @@ import {
   PublishesDisabledActionIds,
   PublishesTitle,
   PublishesUnsavedChanges,
-  PublishingSubject,
 } from '@kbn/presentation-publishing';
-import type { ControlWidth } from '@kbn/controls-schemas';
-
 import { DefaultControlState } from '../../common/types';
-import { ControlGroupApi } from '../control_group/types';
 import { CanClearSelections } from '../types';
 
 export interface HasCustomPrepend {
@@ -38,12 +34,7 @@ export type DefaultControlApi = PublishesDataLoading &
   HasType &
   HasUniqueId &
   HasSerializableState<DefaultControlState> &
-  HasParentApi<ControlGroupApi> & {
-    setDataLoading: (loading: boolean) => void;
-    setBlockingError: (error: Error | undefined) => void;
-    grow$: PublishingSubject<boolean | undefined>;
-    width$: PublishingSubject<ControlWidth | undefined>;
-  };
+  HasParentApi;
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<
   ControlApi,
@@ -68,12 +59,12 @@ export interface ControlFactory<
     initialState,
     finalizeApi,
     uuid,
-    controlGroupApi,
+    parentApi,
   }: {
     initialState: State;
     finalizeApi: (apiRegistration: ControlApiRegistration<ControlApi>) => ControlApi;
     uuid: string;
-    controlGroupApi: ControlGroupApi;
+    parentApi?: unknown;
   }) => Promise<{ api: ControlApi; Component: React.FC<{ className: string }> }>;
 }
 

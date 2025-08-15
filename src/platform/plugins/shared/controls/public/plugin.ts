@@ -29,7 +29,7 @@ export class ControlsPlugin
     const { embeddable } = _setupPlugins;
 
     registerControlGroupEmbeddable(embeddable);
-    registerOptionsListControl();
+    registerOptionsListControl(embeddable);
     registerRangeSliderControl();
     registerTimeSliderControl();
     registerESQLControl();

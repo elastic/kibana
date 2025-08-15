@@ -18,7 +18,7 @@ import {
   withLatestFrom,
 } from 'rxjs';
 
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import { fetch$, PublishingSubject } from '@kbn/presentation-publishing';
 import {
   OptionsListSearchTechnique,
   OptionsListSortingType,
@@ -26,7 +26,6 @@ import {
 import { OptionsListSuccessResponse } from '../../../../common/options_list/types';
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
 import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
-import { ControlFetchContext } from '../../../control_group/control_fetch';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
 import { OptionsListComponentApi, OptionsListControlApi } from './types';
 
@@ -37,9 +36,8 @@ export function fetchAndValidate$({
   selectedOptions$,
   searchTechnique$,
   sort$,
-  controlFetch$,
 }: {
-  api: Pick<OptionsListControlApi, 'dataViews$' | 'field$' | 'setBlockingError' | 'parentApi'> &
+  api: Pick<OptionsListControlApi, 'dataViews$' | 'field$' | 'parentApi'> &
     Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
@@ -49,7 +47,6 @@ export function fetchAndValidate$({
   selectedOptions$: PublishingSubject<OptionsListSelection[] | undefined>;
   searchTechnique$: PublishingSubject<OptionsListSearchTechnique | undefined>;
   sort$: PublishingSubject<OptionsListSortingType | undefined>;
-  controlFetch$: (onReload: () => void) => Observable<ControlFetchContext>;
 }): Observable<OptionsListSuccessResponse | { error: Error }> {
   const requestCache = new OptionsListFetchCache();
   let abortController: AbortController | undefined;
@@ -57,9 +54,13 @@ export function fetchAndValidate$({
   return combineLatest([
     api.dataViews$,
     api.field$,
-    controlFetch$(requestCache.clearCache),
-    api.parentApi.allowExpensiveQueries$,
-    api.parentApi.ignoreParentSettings$,
+    fetch$(api).pipe(
+      tap((fetchContext) => {
+        if (fetchContext.isReload) requestCache.clearCache();
+      })
+    ),
+    // api.parentApi.allowExpensiveQueries$, // TODO restore this?
+    // api.parentApi.ignoreParentSettings$, // TODO restore this?
     api.debouncedSearchString,
     sort$,
     searchTechnique$,
@@ -79,16 +80,7 @@ export function fetchAndValidate$({
     withLatestFrom(requestSize$, runPastTimeout$, selectedOptions$),
     switchMap(
       async ([
-        [
-          dataViews,
-          field,
-          controlFetchContext,
-          allowExpensiveQueries,
-          ignoreParentSettings,
-          searchString,
-          sort,
-          searchTechnique,
-        ],
+        [dataViews, field, controlFetchContext, searchString, sort, searchTechnique],
         requestSize,
         runPastTimeout,
         selectedOptions,
@@ -114,8 +106,8 @@ export function fetchAndValidate$({
           selectedOptions,
           field: field.toSpec(),
           size: requestSize,
-          allowExpensiveQueries,
-          ignoreValidations: ignoreParentSettings?.ignoreValidations,
+          allowExpensiveQueries: true,
+          ignoreValidations: false,
           ...controlFetchContext,
         };
 

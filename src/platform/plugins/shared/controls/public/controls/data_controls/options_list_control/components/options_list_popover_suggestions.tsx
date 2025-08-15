@@ -50,7 +50,6 @@ export const OptionsListPopoverSuggestions = ({
     totalCardinality,
     loading,
     fieldFormatter,
-    allowExpensiveQueries,
   ] = useBatchedPublishingSubjects(
     componentApi.sort$,
     componentApi.searchString$,
@@ -62,9 +61,11 @@ export const OptionsListPopoverSuggestions = ({
     componentApi.availableOptions$,
     componentApi.totalCardinality$,
     componentApi.dataLoading$,
-    componentApi.fieldFormatter,
-    componentApi.parentApi.allowExpensiveQueries$
+    componentApi.fieldFormatter
   );
+
+  // TODO Fix allowExpensiveQueries
+  const allowExpensiveQueries = true;
 
   const listRef = useRef<HTMLDivElement>(null);
 

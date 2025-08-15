@@ -62,7 +62,7 @@ export const ControlRenderer = <
           initialState: initialState as StateType,
           finalizeApi,
           uuid,
-          controlGroupApi,
+          parentApi: controlGroupApi,
         });
       }
 

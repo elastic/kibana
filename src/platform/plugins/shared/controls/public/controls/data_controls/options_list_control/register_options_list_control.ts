@@ -10,13 +10,22 @@
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import { untilPluginStartServicesReady } from '../../../services/kibana_services';
 import { registerControlFactory } from '../../../control_factory_registry';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 
-export function registerOptionsListControl() {
+export function registerOptionsListControl(embeddable: EmbeddableSetup) {
   registerControlFactory(OPTIONS_LIST_CONTROL, async () => {
     const [{ getOptionsListControlFactory }] = await Promise.all([
       import('../../../controls_module'),
       untilPluginStartServicesReady(),
     ]);
     return getOptionsListControlFactory();
+  });
+
+  embeddable.registerReactEmbeddableFactory(OPTIONS_LIST_CONTROL, async () => {
+    const [{ optionsListEmbeddableFactory }] = await Promise.all([
+      import('../../../controls_module'),
+      untilPluginStartServicesReady(),
+    ]);
+    return optionsListEmbeddableFactory;
   });
 }

@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ACTION_CLEAR_CONTROL, ACTION_DELETE_CONTROL, ACTION_EDIT_CONTROL } from './constants';
+import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  ACTION_CLEAR_CONTROL,
+  ACTION_DELETE_CONTROL,
+  ACTION_EDIT_CONTROL,
+  ADD_OPTIONS_LIST_ACTION_ID,
+} from './constants';
 import { CONTROL_HOVER_TRIGGER, controlHoverTrigger } from './controls_hover_trigger';
 
 export function registerActions(uiActions: UiActionsStart) {
@@ -31,4 +36,9 @@ export function registerActions(uiActions: UiActionsStart) {
     return new ClearControlAction();
   });
   uiActions.attachAction(CONTROL_HOVER_TRIGGER, ACTION_CLEAR_CONTROL);
+
+  uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_OPTIONS_LIST_ACTION_ID, async () => {
+    const { createOptionsListAction } = await import('../controls_module');
+    return createOptionsListAction();
+  });
 }

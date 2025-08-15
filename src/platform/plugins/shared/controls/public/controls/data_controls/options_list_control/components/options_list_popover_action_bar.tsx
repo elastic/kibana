@@ -85,7 +85,6 @@ export const OptionsListPopoverActionBar = ({
     totalCardinality,
     field,
     fieldName,
-    allowExpensiveQueries,
     availableOptions = [],
     dataLoading,
     singleSelect,
@@ -96,11 +95,13 @@ export const OptionsListPopoverActionBar = ({
     componentApi.totalCardinality$,
     componentApi.field$,
     componentApi.fieldName$,
-    componentApi.parentApi.allowExpensiveQueries$,
     componentApi.availableOptions$,
     componentApi.dataLoading$,
     componentApi.singleSelect$
   );
+
+  // TODO Fix allowExpensiveQueries
+  const allowExpensiveQueries = true;
 
   const compatibleSearchTechniques = useMemo(() => {
     if (!field) return [];

@@ -42,10 +42,9 @@ import {
 import { asyncMap } from '@kbn/std';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import type { ControlWidth } from '@kbn/controls-schemas';
-import type { DefaultDataControlState } from '../../../common';
+import type { ControlGroupEditorConfig, DefaultDataControlState } from '../../../common';
 import { dataViewsService } from '../../services/kibana_services';
 import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
-import type { ControlGroupApi } from '../../control_group/types';
 import { DataControlEditorStrings } from './data_control_constants';
 import { getDataControlFieldRegistry } from './data_control_editor_utils';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
@@ -56,6 +55,7 @@ import {
 } from './types';
 import { ControlFactory } from '../types';
 import { confirmDeleteControl } from '../../common';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 
 export interface ControlEditorProps<
   State extends DefaultDataControlState = DefaultDataControlState
@@ -64,7 +64,7 @@ export interface ControlEditorProps<
   controlType?: string;
   controlId?: string;
   initialDefaultPanelTitle?: string;
-  controlGroupApi: ControlGroupApi; // controls must always have a parent API
+  parentApi?: unknown;
   onCancel: (newState: Partial<State>) => void;
   onSave: (newState: Partial<State>, type: string) => void;
   ariaLabelledBy: string;
@@ -170,6 +170,18 @@ const CompatibleControlTypesComponent = ({
   );
 };
 
+// todo export this type guard into some other file
+const hasEditorConfig = (
+  api?: unknown
+): api is { getEditorConfig: () => ControlGroupEditorConfig | undefined } => {
+  return (
+    typeof api === 'object' &&
+    api !== null &&
+    'getEditorConfig' in api &&
+    typeof (api as { getEditorConfig: unknown }).getEditorConfig === 'function'
+  );
+};
+
 export const DataControlEditor = <State extends DefaultDataControlState = DefaultDataControlState>({
   initialState,
   controlId,
@@ -177,7 +189,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   initialDefaultPanelTitle,
   onSave,
   onCancel,
-  controlGroupApi,
+  parentApi,
   ariaLabelledBy,
 }: ControlEditorProps<State>) => {
   const [editorState, setEditorState] = useState<Partial<State>>(initialState);
@@ -187,7 +199,10 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   const [panelTitle, setPanelTitle] = useState<string>(initialState.title ?? defaultPanelTitle);
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
-  const editorConfig = useMemo(() => controlGroupApi.getEditorConfig(), [controlGroupApi]);
+  const editorConfig = useMemo(
+    () => (hasEditorConfig(parentApi) ? parentApi?.getEditorConfig() : {}),
+    [parentApi]
+  );
 
   const {
     loading: dataViewListLoading,
@@ -256,11 +271,11 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
           field={fieldRegistry[editorState.fieldName].field}
           updateState={(newState) => setEditorState({ ...editorState, ...newState })}
           setControlEditorValid={setControlOptionsValid}
-          controlGroupApi={controlGroupApi}
+          parentApi={parentApi}
         />
       </div>
     );
-  }, [fieldRegistry, controlFactory, initialState, editorState, controlGroupApi]);
+  }, [fieldRegistry, controlFactory, initialState, editorState, parentApi]);
 
   return (
     <>
@@ -440,7 +455,9 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                     confirmDeleteControl().then((confirmed) => {
                       if (confirmed) {
                         onCancel(initialState); // don't want to show "lost changes" warning
-                        controlGroupApi.removePanel(controlId!);
+                        if (apiIsPresentationContainer(parentApi)) {
+                          parentApi.removePanel(controlId!);
+                        }
                       }
                     });
                   }}
