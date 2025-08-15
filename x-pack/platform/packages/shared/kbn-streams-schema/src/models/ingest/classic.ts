@@ -14,15 +14,20 @@ import { ElasticsearchAssets, elasticsearchAssetsSchema } from './common';
 import { Validation, validation } from '../validation/validation';
 import { ModelValidation, modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
+import { FieldDefinition, fieldDefinitionSchema } from '../../fields';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
 export interface IngestClassic {
-  classic: {};
+  classic: {
+    field_overrides?: FieldDefinition;
+  };
 }
 
 export const IngestClassic: z.Schema<IngestClassic> = z.object({
-  classic: z.object({}),
+  classic: z.object({
+    field_overrides: z.optional(fieldDefinitionSchema),
+  }),
 });
 
 export type ClassicIngest = IngestBase & IngestClassic;

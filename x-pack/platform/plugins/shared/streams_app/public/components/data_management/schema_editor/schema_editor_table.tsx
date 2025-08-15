@@ -121,7 +121,7 @@ const createCellRenderer =
                   'xpack.streams.streamDetailSchemaEditorFieldsTableTypeEsTypeTooltip',
                   {
                     defaultMessage:
-                      'This field is not managed by Streams, but is defined in Elasticsearch. It can be controlled via the underlying index template and component templates available in the "Advanced" tab.',
+                      'This field is not managed by Streams, but is defined in Elasticsearch. It can also be controlled via the underlying index template and component templates available in the "Advanced" tab.',
                   }
                 )}
                 position="right"

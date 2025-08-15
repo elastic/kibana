@@ -78,7 +78,7 @@ export const FIELD_STATUS_MAP = {
   unmapped: {
     color: 'default',
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorUnmappedStatusLabel', {
-      defaultMessage: 'Unmapped',
+      defaultMessage: 'Unmanaged',
     }),
   },
 };

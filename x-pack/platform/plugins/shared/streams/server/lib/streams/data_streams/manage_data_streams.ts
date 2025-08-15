@@ -16,6 +16,7 @@ import {
   isInheritLifecycle,
 } from '@kbn/streams-schema';
 import { IndicesSimulateTemplateTemplate } from '@elastic/elasticsearch/lib/api/types';
+import { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -34,6 +35,13 @@ interface UpdateOrRolloverDataStreamOptions {
   esClient: ElasticsearchClient;
   name: string;
   logger: Logger;
+}
+
+interface UpdateDataStreamsMappingsOptions {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  name: string;
+  mappings: StreamsMappingProperties;
 }
 
 interface UpdateDefaultIngestPipelineOptions {
@@ -96,6 +104,47 @@ export async function updateDefaultIngestPipeline({
       },
     });
   }
+}
+
+// TODO: Remove once client lib has been updated
+export interface DataStreamMappingsUpdateResponse {
+  data_streams: Array<{
+    name: string;
+    applied_to_data_stream: boolean;
+    error?: string;
+    mappings: Record<string, any>;
+    effective_mappings: Record<string, any>;
+  }>;
+}
+
+export async function updateDataStreamsMappings({
+  esClient,
+  logger,
+  name,
+  mappings,
+}: UpdateDataStreamsMappingsOptions) {
+  // update the mappings on the data stream level
+  const response = (await esClient.transport.request({
+    method: 'PUT',
+    path: `/_data_stream/${name}/_mappings`,
+    body: {
+      properties: mappings,
+      _meta: {
+        managed_by: 'streams',
+      },
+    },
+  })) as DataStreamMappingsUpdateResponse;
+  if (response.data_streams.length === 0) {
+    throw new Error(`Data stream ${name} not found`);
+  }
+  if (response.data_streams[0].error) {
+    throw new Error(
+      `Error updating data stream mappings for ${name}: ${response.data_streams[0].error}`
+    );
+  }
+  await retryTransientEsErrors(() => esClient.indices.rollover({ alias: name, lazy: true }), {
+    logger,
+  });
 }
 
 export async function updateDataStreamsLifecycle({
