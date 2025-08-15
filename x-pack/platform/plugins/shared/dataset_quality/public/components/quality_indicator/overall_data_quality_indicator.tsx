@@ -5,62 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import React from 'react';
 import { EuiSkeletonRectangle, EuiFlexGroup } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { DatasetQualityDetailsController } from '../../controller/dataset_quality_details';
-import { DatasetQualityStartDeps } from '../../types';
-import { ITelemetryClient } from '../../services/telemetry';
-import { useKibanaContextForPluginProvider } from '../../utils';
 import { useOverviewSummaryPanel } from '../../hooks/use_overview_summary_panel';
-import { QualityIndicator } from '.';
-import {
-  DatasetQualityDetailsContext,
-  DatasetQualityDetailsContextValue,
-} from '../dataset_quality_details/context';
 
-export interface DatasetQualityIndicatorProps {
-  controller: DatasetQualityDetailsController;
-}
+const QualityIndicator = dynamic(() => import('./indicator'));
 
-export interface CreateDatasetQualityArgs {
-  core: CoreStart;
-  plugins: DatasetQualityStartDeps;
-  telemetryClient: ITelemetryClient;
-}
-
-export const createDatasetQualityIndicator = ({
-  core,
-  plugins,
-  telemetryClient,
-}: CreateDatasetQualityArgs) => {
-  return ({ controller }: DatasetQualityIndicatorProps) => {
-    const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
-
-    const datasetQualityDetailsProviderValue: DatasetQualityDetailsContextValue = useMemo(
-      () => ({
-        service: controller.service,
-        telemetryClient,
-      }),
-      [controller.service]
-    );
-
-    return (
-      <PerformanceContextProvider>
-        <DatasetQualityDetailsContext.Provider value={datasetQualityDetailsProviderValue}>
-          <KibanaContextProviderForPlugin>
-            <OverallDataQualityIndicator />
-          </KibanaContextProviderForPlugin>
-        </DatasetQualityDetailsContext.Provider>
-      </PerformanceContextProvider>
-    );
-  };
-};
-
-function OverallDataQualityIndicator() {
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default function OverallDataQualityIndicator() {
   const { isSummaryPanelLoading, quality } = useOverviewSummaryPanel();
   const translatedQuality = i18n.translate('xpack.datasetQuality.datasetQualityIdicator', {
     defaultMessage: '{quality}',

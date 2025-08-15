@@ -19,6 +19,7 @@ import {
   EuiToolTip,
   formatNumber,
 } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
@@ -36,9 +37,11 @@ import { DataStreamStat } from '../../../../common/data_streams_stats/data_strea
 import { TimeRangeConfig } from '../../../../common/types';
 import { useDatasetRedirectLinkTelemetry, useRedirectLink } from '../../../hooks';
 import { IntegrationIcon, PrivilegesWarningIconWrapper } from '../../common';
-import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicator';
+import { DatasetQualityIndicator } from '../../quality_indicator';
 import { DatasetQualityDetailsLink } from './dataset_quality_details_link';
 import { QualityStatPercentageLink } from './quality_stat_percentage_link';
+
+const QualityIndicator = dynamic(() => import('../../quality_indicator/indicator'));
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
   defaultMessage: 'Data set name',

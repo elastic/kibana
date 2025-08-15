@@ -6,12 +6,14 @@
  */
 
 import { EuiFilterButton, EuiPopover, EuiSelectable, EuiText } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
 import React, { useState } from 'react';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
 import { QualityIndicators } from '../../../../common/types';
-import { QualityIndicator } from '../../quality_indicator';
+
+const QualityIndicator = dynamic(() => import('../../quality_indicator/indicator'));
 
 const qualitiesSelectorLabel = i18n.translate('xpack.datasetQuality.qualitiesSelectorLabel', {
   defaultMessage: 'Qualities',

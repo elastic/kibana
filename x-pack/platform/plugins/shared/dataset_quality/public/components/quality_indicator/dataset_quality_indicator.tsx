@@ -6,11 +6,13 @@
  */
 
 import { EuiSkeletonRectangle, EuiFlexGroup } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { QualityIndicators } from '../../../common/types';
-import { QualityIndicator } from '.';
+
+const QualityIndicator = dynamic(() => import('./indicator'));
 
 export const DatasetQualityIndicator = ({
   isLoading,

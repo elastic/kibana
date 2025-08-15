@@ -9,7 +9,9 @@ import { EuiBadge, EuiText, IconType } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import type { QualityIndicators, InfoIndicators } from '../../../common/types';
 
-export function QualityIndicator({
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default function QualityIndicator({
   quality,
   description,
 }: {
