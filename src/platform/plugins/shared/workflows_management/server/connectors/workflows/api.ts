@@ -26,8 +26,8 @@ const run = async ({
     };
   }
 
-  const { workflowId, inputs } = params;
-  const res = await externalService.runWorkflow({ workflowId, inputs });
+  const { workflowId, spaceId, inputs } = params;
+  const res = await externalService.runWorkflow({ workflowId, spaceId, inputs });
   return { workflowRunId: res.workflowRunId, status: res.status };
 };
 
