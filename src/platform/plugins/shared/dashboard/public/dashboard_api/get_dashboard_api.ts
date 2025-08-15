@@ -96,8 +96,8 @@ export function getDashboardApi({
     creationOptions
   );
   const unsavedChangesManager = initializeUnsavedChangesManager({
-    viewModeManager,
-    creationOptions,
+    viewMode$: viewModeManager.api.viewMode$,
+    storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
     controlGroupManager,
     lastSavedState: savedObjectResult?.dashboardInput ?? DEFAULT_DASHBOARD_STATE,
     layoutManager,
@@ -217,6 +217,7 @@ export function getDashboardApi({
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
     type: DASHBOARD_API_TYPE as 'dashboard',
     uuid: v4(),
+    getPassThroughContext: () => creationOptions?.getPassThroughContext?.(),
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const internalApi: DashboardInternalApi = {
