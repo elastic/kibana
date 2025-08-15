@@ -24,12 +24,7 @@ import {
   CascadeRowCellPrimitive,
   type CascadeRowCellPrimitiveProps,
 } from './data_cascade_row_cell';
-import {
-  useDataCascadeState,
-  useDataCascadeActions,
-  type GroupNode,
-  type LeafNode,
-} from '../../store_provider';
+import { useDataCascadeActions, type GroupNode, type LeafNode } from '../../store_provider';
 import { useTableHelper } from '../../lib/core/table';
 import {
   useRowVirtualizerHelper,
@@ -125,8 +120,6 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
 
   const { euiTheme } = useEuiTheme();
   const actions = useDataCascadeActions<G, L>();
-  const state = useDataCascadeState<G, L>();
-  const tableRef = useRef<ReturnType<typeof useTableHelper<G>>>();
 
   // The scrollable element for your list
   const scrollElementRef = useRef(null);
@@ -138,9 +131,8 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     actions.setInitialState(data);
   }, [data, actions]);
 
-  tableRef.current = useTableHelper<G>({
-    data: state.groupNodes,
-    state: state.table,
+  const { table } = useTableHelper<G, L>({
+    allowExpandMultiple,
     columns: (columnsHelper) => [
       columnsHelper.display({
         id: 'groupBy',
@@ -172,27 +164,10 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
         }),
       }),
     ],
-    getRowId: (rowData) => rowData.id,
-    getRowCanExpand: (row) => {
-      if (allowExpandMultiple) {
-        return true;
-      }
-
-      const expandedRowIds = Object.keys(state.table.expanded ?? {});
-
-      return expandedRowIds.length === 0 || expandedRowIds.includes(row.id)
-        ? true
-        : // when not supporting expansions on multiple row, expansion is not allowed if there's an existing expanded item with the same parent
-          !expandedRowIds
-            .map((id) => tableRef.current?.getRow?.(id)?.parentId)
-            .includes(row.parentId);
-    },
-    getSubRows: (row) => row.children as G[],
-    onExpandedChange: actions.setExpandedRows,
   });
 
-  const headerColumns = tableRef.current.getHeaderGroups()[0].headers;
-  const { rows } = tableRef.current.getRowModel();
+  const headerColumns = table.getHeaderGroups()[0].headers;
+  const { rows } = table.getRowModel();
 
   const {
     activeStickyIndex,
