@@ -376,6 +376,8 @@ export class CoreSystem {
         rendering,
       });
 
+      const featureFlags = await this.featureFlags.start();
+
       const chrome = await this.chrome.start({
         application,
         docLinks,
@@ -388,6 +390,7 @@ export class CoreSystem {
         userProfile,
         uiSettings,
         analytics,
+        featureFlags,
       });
       const deprecations = this.deprecations.start({ http });
 
@@ -403,7 +406,6 @@ export class CoreSystem {
         userProfile,
       });
 
-      const featureFlags = await this.featureFlags.start();
       const pricing = await this.pricing.start({ http });
 
       const core: InternalCoreStart = {
