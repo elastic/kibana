@@ -8,12 +8,23 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiEmptyPrompt, EuiTitle, EuiLink } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiTitle, EuiLink, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useServicesContext } from '../contexts';
 
+import './testing.scss';
+
 export const OutputPanelEmptyState: FunctionComponent = () => {
   const { docLinks } = useServicesContext();
+
+  return (
+    <EuiPanel className="testing">
+      <div className="testing__content">
+        <h2>EUI testing output</h2>
+        <p>Lorem ipsum</p>
+      </div>
+    </EuiPanel>
+  );
 
   return (
     <EuiEmptyPrompt
