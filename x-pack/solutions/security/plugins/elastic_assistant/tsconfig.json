@@ -90,6 +90,8 @@
     "@kbn/security-solution-features",
     "@kbn/core-http-server-mocks",
     "@kbn/inference-common",
+    "@kbn/user-profile-components",
+    "@kbn/core-user-profile-common",
   ],
   "exclude": [
     "target/**/*",
