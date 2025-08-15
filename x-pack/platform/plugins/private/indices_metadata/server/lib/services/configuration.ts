@@ -23,7 +23,7 @@ import {
   IndicesMetadataConfigurationSchema,
 } from './indices_metadata.types';
 export const REFRESH_CONFIG_INTERVAL_MS = 60 * 60 * 1000;
-const CONFIGURATION_ARTIFACT_NAME = 'indices-metadata-configuration';
+const CONFIGURATION_ARTIFACT_NAME = 'indices-metadata-configuration-v1';
 
 export class ConfigurationService {
   private readonly logger: Logger;
