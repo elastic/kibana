@@ -18,7 +18,7 @@ import {
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
-import { getDetailedErrorMessage } from '../../errors';
+import { getDetailedErrorMessage, InvalidGrantError } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -597,30 +597,28 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
-    let refreshTokenResult: RefreshTokenResult | null;
+    let refreshTokenResult: RefreshTokenResult;
     try {
       refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
     } catch (err) {
-      this.logger.error(`Failed to refresh access token: ${getDetailedErrorMessage(err)}`);
-      return AuthenticationResult.failed(err);
-    }
+      // When user has neither valid access nor refresh token, the only way to resolve this issue is to get new
+      // SAML LoginResponse and exchange it for a new access/refresh token pair. To do that we initiate a new SAML
+      // handshake. Obviously we can't do that for AJAX requests, so we just reply with `400` and clear error message.
+      // There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it seems logical
+      // to do the same on Kibana side and `401` would force user to logout and do full SLO if it's supported.
+      if (err instanceof InvalidGrantError) {
+        if (canStartNewSession(request)) {
+          this.logger.warn(
+            'Both access and refresh tokens are expired. Capturing redirect URL and re-initiating SAML handshake.'
+          );
+          return this.initiateAuthenticationHandshake(request);
+        }
 
-    // When user has neither valid access nor refresh token, the only way to resolve this issue is to get new
-    // SAML LoginResponse and exchange it for a new access/refresh token pair. To do that we initiate a new SAML
-    // handshake. Obviously we can't do that for AJAX requests, so we just reply with `400` and clear error message.
-    // There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it seems logical
-    // to do the same on Kibana side and `401` would force user to logout and do full SLO if it's supported.
-    if (refreshTokenResult === null) {
-      if (canStartNewSession(request)) {
-        this.logger.warn(
-          'Both access and refresh tokens are expired. Capturing redirect URL and re-initiating SAML handshake.'
-        );
-        return this.initiateAuthenticationHandshake(request);
+        return AuthenticationResult.failed(Boom.badRequest(err.message));
       }
 
-      return AuthenticationResult.failed(
-        Boom.badRequest('Both access and refresh tokens are expired.')
-      );
+      this.logger.error(`Failed to refresh access token: ${getDetailedErrorMessage(err)}`);
+      return AuthenticationResult.failed(err);
     }
 
     this.logger.debug('Request has been authenticated via refreshed token.');

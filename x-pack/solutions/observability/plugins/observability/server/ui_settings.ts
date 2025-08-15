@@ -45,6 +45,7 @@ import {
   apmEnableServiceInventoryTableSearchBar,
   profilingFetchTopNFunctionsFromStacktraces,
   searchExcludedDataTiers,
+  enableDiagnosticMode,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -665,6 +666,20 @@ export const uiSettings: Record<string, UiSettings> = {
     schema: schema.arrayOf(
       schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
     ),
+    requiresPageReload: false,
+    solution: 'oblt',
+  },
+  [enableDiagnosticMode]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableDiagnosticMode', {
+      defaultMessage: 'Enable diagnostic mode',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.enableDiagnosticModeDescription', {
+      defaultMessage:
+        'Enable diagnostic mode for debugging and troubleshooting capabilities. Currently available only in the Service map view.',
+    }),
+    schema: schema.boolean(),
     requiresPageReload: false,
     solution: 'oblt',
   },
