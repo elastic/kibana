@@ -91,8 +91,6 @@ const getSafePath = (userPath) => {
 const shouldEnableHardenedFs = () => {
   const isJestTest = Boolean(process.env.JEST_WORKER_ID);
 
-  console.log(isJestTest);
-
   // If the hardening config is not set or disabled, we also skip
   return (
     Boolean(hardeningConfig?.enabled) &&
