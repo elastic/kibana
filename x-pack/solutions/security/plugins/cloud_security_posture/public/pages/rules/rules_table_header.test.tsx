@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { RulesTableHeader } from './rules_table_header';
-import { CspBenchmarkRulesWithStates } from './rules_container';
+import type { CspBenchmarkRulesWithStates } from './rules_container';
 import { TestProvider } from '../../test/test_provider';
 import { coreMock } from '@kbn/core/public/mocks';
 import { RULES_TABLE_HEADER_TEST_SUBJ } from './test_subjects';

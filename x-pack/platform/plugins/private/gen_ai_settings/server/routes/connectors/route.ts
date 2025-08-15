@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FindActionResult } from '@kbn/actions-plugin/server';
+import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { isSupportedConnector } from '@kbn/inference-common';
 import { createGenAiSettingsServerRoute } from '../create_gen_ai_settings_server_route';
 

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import * as http from 'http';
+import type * as http from 'http';
 import expect from '@kbn/expect';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../../../constants';
 import { setupMockServer } from './mock_agentless_api';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -20,7 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'cisAddIntegration',
   ]);
 
-  const CIS_AWS_OPTION_TEST_ID = 'cisAwsTestId';
+  const CIS_AWS_OPTION_TEST_ID = 'cloudSetupAwsTestId';
   const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
   const DIRECT_ACCESS_KEY_ID_TEST_ID = 'awsDirectAccessKeyId';
   const DIRECT_ACCESS_SECRET_KEY_TEST_ID = 'passwordInput-secret-access-key';
@@ -42,9 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it(`should create agentless-agent`, async () => {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
-      await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
-      );
+      await cisIntegration.navigateToAddIntegrationCspmPage();
 
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
       await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
@@ -75,9 +72,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it(`should create default agent-based agent`, async () => {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
 
-      await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
-      );
+      await cisIntegration.navigateToAddIntegrationCspmPage();
 
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
       await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 
 export class ConnectorExecutor {
   constructor(

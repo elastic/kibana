@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FlattenRecord } from '@kbn/streams-schema';
+import type { FlattenRecord } from '@kbn/streams-schema';
 import { getDefaultFormStateByType } from './utils';
-import { ALWAYS_CONDITION } from '../../../util/condition';
 import { DraftGrokExpression, GrokCollection } from '@kbn/grok-ui';
 import { omit } from 'lodash';
+import { ALWAYS_CONDITION } from '@kbn/streamlang';
 
 let grokCollection: GrokCollection;
 
@@ -33,12 +33,11 @@ describe('utils', () => {
       const result = getDefaultFormStateByType('grok', sampleDocs, { grokCollection });
 
       expect(omit(result, 'patterns')).toEqual({
-        type: 'grok',
-        field: '',
-        pattern_definitions: {},
+        action: 'grok',
+        from: '',
         ignore_failure: true,
         ignore_missing: true,
-        if: ALWAYS_CONDITION,
+        where: ALWAYS_CONDITION,
       });
 
       if ('patterns' in result) {
@@ -64,12 +63,11 @@ describe('utils', () => {
       const result = getDefaultFormStateByType('grok', sampleDocs, { grokCollection });
 
       expect(omit(result, 'patterns')).toEqual({
-        type: 'grok',
-        field: 'error.message',
-        pattern_definitions: {},
+        action: 'grok',
+        from: 'error.message',
         ignore_failure: true,
         ignore_missing: true,
-        if: ALWAYS_CONDITION,
+        where: ALWAYS_CONDITION,
       });
 
       if ('patterns' in result) {
@@ -98,12 +96,11 @@ describe('utils', () => {
       const result = getDefaultFormStateByType('grok', sampleDocs, { grokCollection });
 
       expect(omit(result, 'patterns')).toEqual({
-        type: 'grok',
-        field: 'error.message', // 'error.message' appears 3 times vs 'message' 2 times
-        pattern_definitions: {},
+        action: 'grok',
+        from: 'error.message', // 'error.message' appears 3 times vs 'message' 2 times
         ignore_failure: true,
         ignore_missing: true,
-        if: ALWAYS_CONDITION,
+        where: ALWAYS_CONDITION,
       });
 
       if ('patterns' in result) {
@@ -132,12 +129,11 @@ describe('utils', () => {
 
       // In WELL_KNOWN_TEXT_FIELDS, 'message' comes before 'error.message' and 'event.original'
       expect(omit(result, 'patterns')).toEqual({
-        type: 'grok',
-        field: 'message',
-        pattern_definitions: {},
+        action: 'grok',
+        from: 'message',
         ignore_failure: true,
         ignore_missing: true,
-        if: ALWAYS_CONDITION,
+        where: ALWAYS_CONDITION,
       });
 
       if ('patterns' in result) {

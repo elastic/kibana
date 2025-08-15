@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiIconProps } from '@elastic/eui';
+import type { EuiIconProps } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 // TODO: can be removed once added to EUI.
 import assistantIcon from './svg/assistant';
 
