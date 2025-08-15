@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { login } from '../../tasks/login';
 import {
   activeStateSwitchComponentSelector,
   customActionEditSavedQuerySelector,
@@ -43,7 +44,7 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
   });
 
   beforeEach(() => {
-    cy.login(ServerlessRoleName.READER);
+    login(ServerlessRoleName.READER);
   });
 
   after(() => {

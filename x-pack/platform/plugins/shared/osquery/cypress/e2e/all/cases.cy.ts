@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { ServerlessRoleName } from '../../support/roles';
-import { initializeDataViews } from '../../tasks/login';
+import { login } from '../../tasks/login';
 import {
   addLiveQueryToCase,
   checkActionItemsInResults,
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
-import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
+import { cleanupCase, loadCase, loadLiveQuery } from '../../tasks/api_fixtures';
 
 describe('Add to Cases', () => {
   let liveQueryId: string;
   let liveQueryQuery: string;
+
   before(() => {
-    initializeDataViews();
     loadLiveQuery({
       agent_all: true,
       query: 'SELECT * FROM os_version;',
@@ -30,15 +29,19 @@ describe('Add to Cases', () => {
     });
   });
 
+  beforeEach(() => {
+    login();
+  });
+
   describe('observability', { tags: ['@ess'] }, () => {
     let caseId: string;
     let caseTitle: string;
+
     beforeEach(() => {
       loadCase('observability').then((caseInfo) => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      cy.login(ServerlessRoleName.SOC_MANAGER, false);
       navigateTo('/app/osquery');
     });
 
@@ -70,7 +73,6 @@ describe('Add to Cases', () => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      cy.login(ServerlessRoleName.SOC_MANAGER, false);
       navigateTo('/app/osquery');
     });
 
