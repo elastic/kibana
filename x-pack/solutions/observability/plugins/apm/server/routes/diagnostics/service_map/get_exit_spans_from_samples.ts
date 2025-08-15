@@ -55,38 +55,40 @@ export async function getExitSpans({
     apm: {
       events: [ProcessorEvent.transaction],
     },
-    track_total_hits: false,
-    size: 0,
-    query: {
-      bool: {
-        filter: [...rangeQuery(start, end), ...termsQuery(PARENT_ID, ...ids)],
-      },
-    },
-    aggs: {
-      matching_destination_resources: {
-        filter: {
-          term: {
-            [SERVICE_NAME]: destinationNode,
-          },
+    body: {
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [...rangeQuery(start, end), ...termsQuery(PARENT_ID, ...ids)],
         },
-        aggs: {
-          sample_docs: {
-            top_hits: {
-              size: 5,
+      },
+      aggs: {
+        matching_destination_resources: {
+          filter: {
+            term: {
+              [SERVICE_NAME]: destinationNode,
+            },
+          },
+          aggs: {
+            sample_docs: {
+              top_hits: {
+                size: 5,
+              },
             },
           },
         },
-      },
-      destination_services: {
-        terms: {
-          field: SERVICE_NAME,
-          size: 50,
-        },
-        aggs: {
-          sample_docs: {
-            top_hits: {
-              size: 5,
-              fields: [...requiredFields],
+        destination_services: {
+          terms: {
+            field: SERVICE_NAME,
+            size: 50,
+          },
+          aggs: {
+            sample_docs: {
+              top_hits: {
+                size: 5,
+                fields: [...requiredFields],
+              },
             },
           },
         },
@@ -143,28 +145,30 @@ export async function getSourceSpanIds({
     apm: {
       events: [ProcessorEvent.span],
     },
-    track_total_hits: false,
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          ...rangeQuery(start, end),
-          ...termsQuery(SERVICE_NAME, sourceNode),
-          ...termsQuery(TRACE_ID, ...traceIds),
-        ],
-      },
-    },
-    aggs: {
-      sample_docs: {
-        terms: {
-          field: SPAN_NAME,
-          size: 500,
+    body: {
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(start, end),
+            ...termsQuery(SERVICE_NAME, sourceNode),
+            ...termsQuery(TRACE_ID, ...traceIds),
+          ],
         },
-        aggs: {
-          top_span_ids: {
-            top_hits: {
-              size: 10,
-              fields: [...requiredFields],
+      },
+      aggs: {
+        sample_docs: {
+          terms: {
+            field: SPAN_NAME,
+            size: 500,
+          },
+          aggs: {
+            top_span_ids: {
+              top_hits: {
+                size: 10,
+                fields: [...requiredFields],
+              },
             },
           },
         },
@@ -203,22 +207,24 @@ export async function getDestinationParentIds({
     apm: {
       events: [ProcessorEvent.transaction],
     },
-    track_total_hits: false,
-    size: 1,
-    query: {
-      bool: {
-        filter: [
-          ...rangeQuery(start, end),
-          ...(ids ? termsQuery(PARENT_ID, ...ids) : []),
-          ...termQuery(SERVICE_NAME, destinationNode),
-        ],
+    body: {
+      track_total_hits: false,
+      size: 1,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(start, end),
+            ...(ids ? termsQuery(PARENT_ID, ...ids) : []),
+            ...termQuery(SERVICE_NAME, destinationNode),
+          ],
+        },
       },
-    },
-    aggs: {
-      sample_docs: {
-        top_hits: {
-          size: 5,
-          fields: [PARENT_ID, SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE],
+      aggs: {
+        sample_docs: {
+          top_hits: {
+            size: 5,
+            fields: [PARENT_ID, SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE],
+          },
         },
       },
     },

@@ -29,38 +29,40 @@ export async function getTraceCorrelation({
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
-    track_total_hits: true,
-    size: 0,
-    query: {
-      bool: {
-        filter: [...rangeQuery(start, end), ...termQuery(TRACE_ID, traceId)],
-      },
-    },
-    aggs: {
-      source_node_traces: {
-        filter: {
-          term: {
-            [SERVICE_NAME]: sourceNode,
-          },
+    body: {
+      track_total_hits: true,
+      size: 0,
+      query: {
+        bool: {
+          filter: [...rangeQuery(start, end), ...termQuery(TRACE_ID, traceId)],
         },
-        aggs: {
-          sample_docs: {
-            top_hits: {
-              size: 5,
+      },
+      aggs: {
+        source_node_traces: {
+          filter: {
+            term: {
+              [SERVICE_NAME]: sourceNode,
+            },
+          },
+          aggs: {
+            sample_docs: {
+              top_hits: {
+                size: 5,
+              },
             },
           },
         },
-      },
-      destination_node_traces: {
-        filter: {
-          term: {
-            [SERVICE_NAME]: destinationNode,
+        destination_node_traces: {
+          filter: {
+            term: {
+              [SERVICE_NAME]: destinationNode,
+            },
           },
-        },
-        aggs: {
-          sample_docs: {
-            top_hits: {
-              size: 5,
+          aggs: {
+            sample_docs: {
+              top_hits: {
+                size: 5,
+              },
             },
           },
         },
