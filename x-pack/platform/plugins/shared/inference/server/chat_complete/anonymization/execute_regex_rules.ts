@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RegexAnonymizationRule } from '@kbn/inference-common';
-import { DetectedMatch } from './types';
-import { RegexWorkerService } from './regex_worker_service';
+import type { RegexAnonymizationRule } from '@kbn/inference-common';
+import type { DetectedMatch } from './types';
+import type { RegexWorkerService } from './regex_worker_service';
 
 /**
  * Executes multiple regex anonymization rules, detecting all matches in the original text
