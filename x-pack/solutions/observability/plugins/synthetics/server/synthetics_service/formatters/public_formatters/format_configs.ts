@@ -8,6 +8,7 @@
 import { isEmpty, isNil, omitBy } from 'lodash';
 import { Logger } from '@kbn/logging';
 import { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import { periodToSeconds } from '../../../routes/overview_status/utils';
 import { formatMWs, replaceStringWithParams } from '../formatting_utils';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
 import {
@@ -125,6 +126,7 @@ export const formatHeartbeatRequest = (
       'monitor.project.id': projectId || undefined,
       run_once: runOnce,
       test_run_id: testRunId,
+      'monitor.interval': periodToSeconds(monitor[ConfigKey.SCHEDULE]),
       meta: {
         space_id: monSpaces,
       },

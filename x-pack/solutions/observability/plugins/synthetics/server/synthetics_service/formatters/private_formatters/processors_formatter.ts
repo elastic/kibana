@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
+import { periodToSeconds } from '../../../routes/overview_status/utils';
 import { ProcessorFields } from './format_synthetics_policy';
 import { ConfigKey, HeartbeatFields, MonitorFields } from '../../../../common/runtime_types';
 
@@ -31,6 +32,7 @@ export const processorsFormatter = (config: MonitorFields & ProcessorFields) => 
           'monitor.id': config['monitor.id'],
           'monitor.project.name': config['monitor.project.name'],
           'monitor.project.id': config['monitor.project.id'],
+          'monitor.interval': periodToSeconds(config[ConfigKey.SCHEDULE]),
           meta: {
             space_id: spaces.length === 1 ? spaces[0] : spaces,
           },

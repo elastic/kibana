@@ -18,3 +18,7 @@ export function periodToMs(schedule: { number: string; unit: Unit }) {
 
   return parseInt(schedule.number, 10) * datemath.unitsMap[schedule.unit].base;
 }
+
+export function periodToSeconds(schedule: { number: string; unit: Unit }) {
+  return periodToMs(schedule) / 1000;
+}
