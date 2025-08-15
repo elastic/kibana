@@ -11,7 +11,8 @@ import { identity, range } from 'lodash';
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
 
-import { errors as esErrors, estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import {
@@ -23,13 +24,13 @@ import {
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
 import type { ISearchClient, IKibanaSearchResponse } from '@kbn/search-types';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { CancellationToken } from '@kbn/reporting-common';
-import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,

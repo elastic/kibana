@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { DataViewEditorLazy } from './data_view_editor_lazy';
-import { DataViewEditorContext, DataViewEditorProps } from '../types';
+import type { DataViewEditorContext, DataViewEditorProps } from '../types';
 import { createKibanaReactContext } from '../shared_imports';
 
 export interface DataViewEditorPropsWithServices extends DataViewEditorProps {

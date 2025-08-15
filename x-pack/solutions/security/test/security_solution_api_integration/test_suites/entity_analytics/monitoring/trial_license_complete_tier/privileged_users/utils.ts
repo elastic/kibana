@@ -10,9 +10,9 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common/src/constants';
 import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
-import { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/list.gen';
+import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/list.gen';
 import { routeWithNamespace, waitFor } from '../../../../../config/services/detections_response';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export const PrivMonUtils = (
   getService: FtrProviderContext['getService'],

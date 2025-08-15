@@ -9,15 +9,17 @@
 
 import { setTimeout as delay } from 'timers/promises';
 import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-utils';
-import { ToolingLog } from '@kbn/tooling-log';
-import axios, { AxiosResponse } from 'axios';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { AxiosResponse } from 'axios';
+import axios from 'axios';
 import util from 'util';
 import * as cheerio from 'cheerio';
-import { Cookie, parse as parseCookie } from 'tough-cookie';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
 import { randomInt } from 'crypto';
 import { isValidUrl } from './helper';
-import {
+import type {
   CloudSamlSessionParams,
   CreateSamlSessionParams,
   LocalSamlSessionParams,

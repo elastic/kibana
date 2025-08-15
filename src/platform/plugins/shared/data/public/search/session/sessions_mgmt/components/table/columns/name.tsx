@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBasicTableColumn, EuiIconTip, EuiLink } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiIconTip, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { SearchSessionStatus } from '../../../../../../../common';
-import { SearchUsageCollector } from '../../../../../collectors';
-import { UISession } from '../../../types';
+import type { SearchUsageCollector } from '../../../../../collectors';
+import type { UISession } from '../../../types';
 import { TableText } from '../..';
 
 function isSessionRestorable(status: SearchSessionStatus) {

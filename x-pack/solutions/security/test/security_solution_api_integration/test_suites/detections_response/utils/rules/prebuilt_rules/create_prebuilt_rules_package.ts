@@ -8,8 +8,8 @@
 import AdmZip from 'adm-zip';
 import { dump } from 'js-yaml';
 import semver from 'semver';
-import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
-import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
+import type { PackageSpecManifest } from '@kbn/fleet-plugin/common';
+import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 
 interface CreatePrebuiltRulesPackageParams {
   packageName: string;

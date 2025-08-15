@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EnterForeachNode } from '@kbn/workflows';
-import { StepImplementation } from '../step_base';
-import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { EnterForeachNode } from '@kbn/workflows';
+import type { StepImplementation } from '../step_base';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 
 export class EnterForeachNodeImpl implements StepImplementation {
   constructor(

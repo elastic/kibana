@@ -21,16 +21,11 @@ import { css } from '@emotion/react';
 import { EsqlToolFieldType } from '@kbn/onechat-common';
 import { capitalize } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
-import {
-  Controller,
-  FieldArrayWithId,
-  FieldError,
-  useFormContext,
-  useWatch,
-} from 'react-hook-form';
+import type { FieldArrayWithId, FieldError } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useEsqlParamsValidation } from '../hooks/use_esql_params_validation';
 import { i18nMessages } from '../i18n';
-import { OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
+import type { OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
 
 interface EsqlParamRowProps {
   index: number;

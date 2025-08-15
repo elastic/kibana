@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { TLSRuleParams, tlsRuleParamsSchema } from '@kbn/response-ops-rule-params/synthetics_tls';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
+import { tlsRuleParamsSchema } from '@kbn/response-ops-rule-params/synthetics_tls';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { TLSRuleExecutor } from '../../alert_rules/tls_rule/tls_rule_executor';
 
