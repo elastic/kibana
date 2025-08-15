@@ -17,5 +17,7 @@ export const ProcessorConditionEditor = () => {
     return null;
   }
 
-  return <ConditionEditor condition={field.value} onConditionChange={field.onChange} />;
+  return (
+    <ConditionEditor status="enabled" where={field.value} onConditionChange={field.onChange} />
+  );
 };
