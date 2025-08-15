@@ -86,28 +86,7 @@ function sanitizeSvg(svgContent) {
   }
 }
 
-/**
- * Sanitizes PNG images by stripping metadata and keeping only essential chunks
- * @param {Buffer} pngContent - The PNG image content to sanitize
- * @returns {Buffer} - The sanitized PNG content
- * @throws {Error} - Throws if sanitization fails
- */
-async function sanitizePng(pngContent) {
-  const sharp = require('sharp');
-
-  // Validate input is a Buffer
-  if (!Buffer.isBuffer(pngContent)) {
-    throw new Error('PNG content must be a Buffer');
-  }
-
-  // Use sharp to process the PNG, removing metadata
-  return await sharp(pngContent)
-    .png({ compressionLevel: 9, adaptiveFiltering: true }) // High compression, adaptive filtering
-    .toBuffer();
-}
-
 module.exports = {
   sanitizeSvg,
-  sanitizePng,
   isBase64Encoded,
 };

@@ -9,8 +9,7 @@
 
 /* eslint-disable no-restricted-syntax */
 
-const { isBase64Encoded, sanitizeSvg, sanitizePng } = require('./fs_sanitizations');
-const sharp = require('sharp');
+const { isBase64Encoded, sanitizeSvg } = require('./fs_sanitizations');
 
 describe('isBase64Encoded', () => {
   it('should return true for valid base64 encoded strings', () => {
@@ -264,88 +263,5 @@ describe('sanitizeSvg', () => {
     expect(resultStr).toContain('<stop');
     expect(resultStr).toContain('<g');
     expect(resultStr).toContain('<path');
-  });
-});
-
-describe('sanitizePng', () => {
-  it('should return a Buffer when given valid PNG content', async () => {
-    // Create a simple PNG buffer for testing
-
-    const testPngBuffer = await sharp({
-      create: {
-        width: 100,
-        height: 100,
-        channels: 4,
-        background: { r: 255, g: 0, b: 0, alpha: 0.5 },
-      },
-    })
-      .png()
-      .toBuffer();
-
-    const sanitizedPng = await sanitizePng(testPngBuffer);
-
-    // Check that the result is a Buffer
-    expect(Buffer.isBuffer(sanitizedPng)).toBe(true);
-
-    // Check that the result is a valid PNG by reading its metadata with Sharp
-    const metadata = await sharp(sanitizedPng).metadata();
-    expect(metadata.format).toBe('png');
-    expect(metadata.width).toBe(100);
-    expect(metadata.height).toBe(100);
-  });
-
-  it('should throw an error when given non-Buffer input', async () => {
-    await expect(async () => {
-      await sanitizePng('not a buffer');
-    }).rejects.toThrow('PNG content must be a Buffer');
-  });
-
-  it('should sanitize PNG by removing metadata', async () => {
-    // Create a PNG with metadata
-    const testPngWithMetadata = await sharp({
-      create: {
-        width: 50,
-        height: 50,
-        channels: 4,
-        background: { r: 0, g: 0, b: 255, alpha: 1 },
-      },
-    })
-      .png()
-      .withMetadata({
-        exif: {
-          IFD0: {
-            Copyright: 'Test copyright',
-            Software: 'Test software',
-          },
-        },
-      })
-      .toBuffer();
-
-    const sanitizedPng = await sanitizePng(testPngWithMetadata);
-
-    // Check that metadata was removed
-    const metadata = await sharp(sanitizedPng).metadata();
-
-    expect(metadata.exif).toBeUndefined();
-  });
-
-  it('should handle empty but valid PNG buffers', async () => {
-    // Create a minimal valid PNG
-    const minimalPng = await sharp({
-      create: {
-        width: 1,
-        height: 1,
-        channels: 4,
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      },
-    })
-      .png()
-      .toBuffer();
-
-    const sanitizedPng = await sanitizePng(minimalPng);
-
-    // Should not throw and should return a valid PNG
-    const metadata = await sharp(sanitizedPng).metadata();
-    expect(metadata.format).toBe('png');
   });
 });
