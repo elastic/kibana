@@ -7,26 +7,17 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import {
-  isSupportedConnector,
-  connectorToInference,
-  InferenceConnector,
-} from '@kbn/inference-common';
+import { InferenceConnector } from '@kbn/inference-common';
+import { getDefaultConnector } from '../../common/utils/get_default_connector';
+import { getConnectorList } from './get_connector_list';
 
-export const getConnectorList = async ({
+export const loadDefaultConnector = async ({
   actions,
   request,
 }: {
   actions: ActionsPluginStart;
   request: KibanaRequest;
-}): Promise<InferenceConnector[]> => {
-  const actionClient = await actions.getActionsClientWithRequest(request);
-
-  const allConnectors = await actionClient.getAll({
-    includeSystemActions: false,
-  });
-
-  return allConnectors
-    .filter((connector) => isSupportedConnector(connector))
-    .map(connectorToInference);
+}): Promise<InferenceConnector> => {
+  const connectors = await getConnectorList({ actions, request });
+  return getDefaultConnector({ connectors });
 };

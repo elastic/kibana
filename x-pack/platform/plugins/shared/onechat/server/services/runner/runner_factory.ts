@@ -33,10 +33,10 @@ export class RunnerFactoryImpl implements RunnerFactory {
   }
 
   private createRunnerDeps(): CreateRunnerDeps {
-    const { inference, actions, ...otherDeps } = this.deps;
+    const { inference, ...otherDeps } = this.deps;
     return {
       ...otherDeps,
-      modelProviderFactory: createModelProviderFactory({ inference, actions }),
+      modelProviderFactory: createModelProviderFactory({ inference }),
     };
   }
 }
