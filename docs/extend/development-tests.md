@@ -9,11 +9,11 @@ mapped_pages:
 
 The following table outlines possible test file locations and how to invoke them:
 
-| Test runner        | Test location                                    | Runner command (working directory is {{kib}} root)                                                                                                       |
-| ------------------ | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Jest               | `**/*.test.{js,mjs,ts,tsx}`                      | `yarn test:jest [test path]`                                                                                                                             |
-| Jest (integration) | `**/integration_tests/**/*.test.{js,mjs,ts,tsx}` | `yarn test:jest_integration [test path]`                                                                                                                 |
-| Functional         | `test/**/config.js` `x-pack/test/**/config.js`   | `node scripts/functional_tests_server --config [directory]/config.js` `node scripts/functional_test_runner --config [directory]/config.js --grep=regexp` |
+| Test runner        | Test location                                           | Runner command (working directory is {{kib}} root)                                                                                                       |
+| ------------------ | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Jest               | `**/*.test.{js,mjs,ts,tsx}`                             | `yarn test:jest [test path]`                                                                                                                             |
+| Jest (integration) | `**/integration_tests/**/*.test.{js,mjs,ts,tsx}`        | `yarn test:jest_integration [test path]`                                                                                                                 |
+| Functional         | `test/**/config.js` `x-pack/platform/test/**/config.js` | `node scripts/functional_tests_server --config [directory]/config.js` `node scripts/functional_test_runner --config [directory]/config.js --grep=regexp` |
 
 Test runner arguments: - Where applicable, the optional arguments `--grep=regexp` will only run tests or test suites whose descriptions matches the regular expression. - `[test path]` is the relative path to the test file.
 

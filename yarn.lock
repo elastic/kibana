@@ -8148,10 +8148,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-suites-serverless@link:x-pack/test_serverless":
-  version "0.0.0"
-  uid ""
-
 "@kbn/test-suites-src@link:src/platform/test":
   version "0.0.0"
   uid ""
@@ -8177,10 +8173,6 @@
   uid ""
 
 "@kbn/test-suites-xpack-security@link:x-pack/solutions/security/test":
-  version "0.0.0"
-  uid ""
-
-"@kbn/test-suites-xpack@link:x-pack/test":
   version "0.0.0"
   uid ""
 

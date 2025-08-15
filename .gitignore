@@ -38,20 +38,20 @@ __tmp__
 /src/platform/test/*/screenshots/visual_regression_gallery.html
 
 # Ignore the same artifacts in x-pack
-/x-pack/test/*/failure_debug
-/x-pack/test/*/screenshots/diff
-/x-pack/test/*/screenshots/failure
-/x-pack/test/*/screenshots/session
-/x-pack/test/*/screenshots/visual_regression_gallery.html
-/x-pack/test/functional/apps/*/*/reporting/reports/failure
+/x-pack/platform/test/**/failure_debug
+/x-pack/platform/test/**/screenshots/diff
+/x-pack/platform/test/**/screenshots/failure
+/x-pack/platform/test/**/screenshots/session
+/x-pack/platform/test/**/screenshots/visual_regression_gallery.html
+/x-pack/platform/test/**/functional/**/reporting/reports/failure
 
-# Ignore the same artifacts in x-pack/test_serverless
-/x-pack/test_serverless/*/failure_debug
-/x-pack/test_serverless/*/screenshots/diff
-/x-pack/test_serverless/*/screenshots/failure
-/x-pack/test_serverless/*/screenshots/session
-/x-pack/test_serverless/*/screenshots/visual_regression_gallery.html
-/x-pack/test_serverless/functional/apps/*/*/reporting/reports/failure
+# Ignore the same artifacts in x-pack/solutions
+/x-pack/solutions/*/test/**/failure_debug
+/x-pack/solutions/*/test/**/screenshots/diff
+/x-pack/solutions/*/test/**/screenshots/failure
+/x-pack/solutions/*/test/**/screenshots/session
+/x-pack/solutions/*/test/**/screenshots/visual_regression_gallery.html
+/x-pack/solutions/*/test/**/functional/**/reporting/reports/failure
 
 /html_docs
 .eslintcache
