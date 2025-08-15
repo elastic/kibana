@@ -22,7 +22,7 @@ import {
   EuiStat,
 } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
-import { DataCascade, DataCascadeRow, DataCascadeRowCell } from '.';
+import { DataCascade, DataCascadeRow, DataCascadeRowCell, LeafNode } from '.';
 import { getESQLStatsQueryMeta } from './src/lib/parse_esql';
 
 /**
@@ -163,8 +163,9 @@ export const CascadeGridImplementation: StoryObj<
             >
               <DataCascadeRowCell
                 onCascadeLeafNodeExpanded={async ({ row, nodePathMap, nodePath }) => {
-                  // Simulate a data fetch for the expanded leaf, ideally we'd want to use nodePath information to fetch this data
-                  return new Promise((resolve) => {
+                  // Simulate a data fetch for the expanded leaf,
+                  // ideally we'd want to use nodePath information to fetch this data
+                  return new Promise<LeafNode[]>((resolve) => {
                     setTimeout(() => {
                       resolve(
                         new Array(row.original.count).fill(null).map(() => {
