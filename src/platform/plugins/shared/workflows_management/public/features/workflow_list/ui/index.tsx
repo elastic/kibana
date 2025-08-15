@@ -27,10 +27,11 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { capitalize } from 'lodash';
+import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflows } from '../../../entities/workflows/model/use_workflows';
 import type { WorkflowsSearchParams } from '../../../types';
-import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE, WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
+import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 
 const EXECUTION_STATUS_MAP = {
   [ExecutionStatus.COMPLETED]: {
@@ -45,9 +46,30 @@ const EXECUTION_STATUS_MAP = {
     icon: 'crossInCircle',
     color: 'disabled',
   },
+  [ExecutionStatus.RUNNING]: {
+    icon: 'play',
+    color: 'primary',
+  },
+  [ExecutionStatus.PENDING]: {
+    icon: 'clock',
+    color: 'subdued',
+  },
+  [ExecutionStatus.SKIPPED]: {
+    icon: 'checkInCircleFilled',
+    color: 'grey',
+  },
+  [ExecutionStatus.WAITING_FOR_INPUT]: {
+    icon: 'inputOutput',
+    color: 'warning',
+  },
 };
 
-export function WorkflowList({ search, setSearch }: { search: WorkflowsSearchParams }) {
+interface WorkflowListProps {
+  search: WorkflowsSearchParams;
+  setSearch: (search: WorkflowsSearchParams) => void;
+}
+
+export function WorkflowList({ search, setSearch }: WorkflowListProps) {
   const { application, notifications } = useKibana().services;
   const { data: workflows, isLoading: isLoadingWorkflows, error } = useWorkflows(search);
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
@@ -173,7 +195,7 @@ export function WorkflowList({ search, setSearch }: { search: WorkflowsSearchPar
         name: 'Last run',
         field: 'runHistory',
         render: (value, item) => {
-          if (!item.history.length > 0) return;
+          if (item.history.length === 0) return;
           const lastRun = item.history[0];
           return (
             <EuiText size="s">
@@ -186,7 +208,7 @@ export function WorkflowList({ search, setSearch }: { search: WorkflowsSearchPar
         name: 'Last run status',
         field: 'runHistory',
         render: (value, item) => {
-          if (!item.history.length > 0) return;
+          if (item.history.length === 0) return;
           const lastRun = item.history[0];
           const { icon, color } = EXECUTION_STATUS_MAP[lastRun.status];
 
@@ -206,6 +228,7 @@ export function WorkflowList({ search, setSearch }: { search: WorkflowsSearchPar
               disabled={!canUpdateWorkflow}
               checked={item.status === WorkflowStatus.ACTIVE}
               onChange={() => handleToggleWorkflow(item)}
+              label={'Enabled'}
             />
           );
         },
@@ -215,7 +238,7 @@ export function WorkflowList({ search, setSearch }: { search: WorkflowsSearchPar
         actions: [
           {
             isPrimary: true,
-            enabled: (item) => canExecuteWorkflow && item.status === WorkflowStatus.ACTIVE,
+            enabled: (item) => !!canExecuteWorkflow && item.status === WorkflowStatus.ACTIVE,
             type: 'icon',
             color: 'primary',
             name: 'Run',
@@ -224,16 +247,16 @@ export function WorkflowList({ search, setSearch }: { search: WorkflowsSearchPar
             onClick: (item: WorkflowListItemDto) => handleRunWorkflow(item),
           },
           {
-            enabled: () => canUpdateWorkflow,
+            enabled: () => !!canUpdateWorkflow,
             type: 'icon',
             color: 'primary',
             name: 'Edit',
             icon: 'pencil',
             description: 'Edit workflow',
-            href: (item) => application.getUrlForApp('workflows', { path: `/${item.id}` }),
+            href: (item) => application!.getUrlForApp('workflows', { path: `/${item.id}` }),
           },
           {
-            enabled: () => canCreateWorkflow,
+            enabled: () => !!canCreateWorkflow,
             type: 'icon',
             color: 'primary',
             name: 'Clone',
@@ -252,7 +275,7 @@ export function WorkflowList({ search, setSearch }: { search: WorkflowsSearchPar
             description: 'Export',
           },
           {
-            enabled: () => canDeleteWorkflow,
+            enabled: () => !!canDeleteWorkflow,
             type: 'icon',
             color: 'danger',
             name: 'Delete',
@@ -295,8 +318,8 @@ export function WorkflowList({ search, setSearch }: { search: WorkflowsSearchPar
 
   const showStart = search.page * search.limit + 1;
   let showEnd = (search.page + 1) * search.limit;
-  if (showEnd > workflows?._pagination.total) {
-    showEnd = workflows?._pagination.total;
+  if (showEnd > (workflows!._pagination.total || 0)) {
+    showEnd = workflows!._pagination.total;
   }
 
   return (
@@ -332,7 +355,7 @@ export function WorkflowList({ search, setSearch }: { search: WorkflowsSearchPar
         itemId="id"
         responsiveBreakpoint={false}
         tableLayout={'auto'}
-        onChange={({ page: { index: pageIndex, size } }) =>
+        onChange={({ page: { index: pageIndex, size } }: CriteriaWithPagination<any>) =>
           setSearch({ ...search, page: pageIndex, limit: size })
         }
         selection={{
@@ -341,10 +364,9 @@ export function WorkflowList({ search, setSearch }: { search: WorkflowsSearchPar
           initialSelected: selectedItems,
         }}
         pagination={{
-          initialPageSize: WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
           pageSize: search.limit,
           pageSizeOptions: WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS,
-          totalItemCount: workflows._pagination.total,
+          totalItemCount: workflows!._pagination.total,
           pageIndex: search.page,
         }}
       />

@@ -115,7 +115,7 @@ export type WorkflowExecutionListItemDto = Omit<WorkflowExecutionDto, 'stepExecu
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
   _pagination: {
-    offset: number;
+    page: number;
     limit: number;
     total: number;
     next?: string;
@@ -149,7 +149,7 @@ export const CreateWorkflowCommandSchema = z.object({
 export const SearchWorkflowCommandSchema = z.object({
   triggerType: z.string().optional(),
   limit: z.number().default(100),
-  offset: z.number().default(0),
+  page: z.number().default(0),
   createdBy: z.array(z.string()).optional(),
   status: z.array(z.string()).optional(),
   query: z.string().optional(),
@@ -190,7 +190,7 @@ export interface WorkflowListItemDto {
 
 export interface WorkflowListDto {
   _pagination: {
-    offset: number;
+    page: number;
     limit: number;
     total: number;
     next?: string;

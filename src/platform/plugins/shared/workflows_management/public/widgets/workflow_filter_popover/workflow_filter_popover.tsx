@@ -10,6 +10,7 @@
 import React, { useEffect, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import { FieldValueOptionType } from '@elastic/eui/src/components/search_bar/filters/field_value_selection_filter';
 
 const WORKFLOW_POPOVER_WIDTH = 500;
 
@@ -17,7 +18,7 @@ interface WorkflowFilterPopoverProps {
   filter: string;
   title: string;
   selectedValues: string[];
-  values: string[];
+  values: FieldValueOptionType[];
   onSelectedValuesChanged: (newValues: string[]) => void;
 }
 
@@ -47,10 +48,12 @@ const WorkflowsFilterPopoverComponent = ({
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>(() => {
     const selectedValuesSet = new Set(selectedValues);
 
-    return values.map(({ value }) => ({
-      label: value,
-      checked: selectedValuesSet.has(value) ? 'on' : undefined,
-    }));
+    return values.map(
+      ({ value }): EuiSelectableOption => ({
+        label: value as string,
+        checked: selectedValuesSet.has(value as string) ? 'on' : undefined,
+      })
+    );
   });
 
   const handleSelectableOptionsChange = (
@@ -64,10 +67,14 @@ const WorkflowsFilterPopoverComponent = ({
 
   useEffect(() => {
     const selectedValuesSet = new Set(selectedValues);
-    const newSelectableOptions: EuiSelectableOption[] = values.map(({ value }) => ({
-      label: value,
-      checked: selectedValuesSet.has(value) ? 'on' : undefined,
-    }));
+    const newSelectableOptions: EuiSelectableOption[] = values.map(
+      ({ value }): EuiSelectableOption => {
+        return {
+          label: value as string,
+          checked: selectedValuesSet.has(value as string) ? 'on' : undefined,
+        };
+      }
+    );
 
     setSelectableOptions(newSelectableOptions);
   }, [values, selectedValues]);

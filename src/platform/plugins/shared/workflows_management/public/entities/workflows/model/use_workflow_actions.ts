@@ -52,7 +52,7 @@ export function useWorkflowActions() {
   });
 
   const runWorkflow = useMutation({
-    mutationKey: ['POST', 'workflows', 'run'],
+    mutationKey: ['POST', 'workflows', 'id', 'run'],
     mutationFn: ({ id, inputs }: { id: string; inputs: Record<string, any> }) => {
       return http!.post(`/api/workflows/${id}/run`, {
         body: JSON.stringify({ inputs }),
@@ -66,11 +66,11 @@ export function useWorkflowActions() {
   });
 
   const cloneWorkflow = useMutation({
-    mutationKey: ['POST', 'workflows', 'clone'],
+    mutationKey: ['POST', 'workflows', 'id', 'clone'],
     mutationFn: ({ id }: { id: string }) => {
       return http!.post(`/api/workflows/${id}/clone`);
     },
-    onSuccess: ({ id }) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
     },
   });
