@@ -50,3 +50,7 @@ export type BulkDeleteToolResult = BulkDeleteToolSuccessResult | BulkDeleteToolF
 export interface BulkDeleteToolResponse {
   results: BulkDeleteToolResult[];
 }
+
+export interface ExecuteToolResponse {
+  result: any;
+}
