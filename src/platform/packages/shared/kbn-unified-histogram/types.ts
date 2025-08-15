@@ -212,7 +212,7 @@ export interface ChartSectionProps {
   /**
    * The current time range
    */
-  timeRange?: TimeRange;
+  getTimeRange?: () => TimeRange;
   /**
    * Callback to pass to the Lens embeddable to handle filter changes
    */

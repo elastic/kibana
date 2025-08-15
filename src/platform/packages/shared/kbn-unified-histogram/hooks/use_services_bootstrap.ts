@@ -90,6 +90,7 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
 
   return {
     api,
+    input$,
     stateProps,
     requestParams,
   };

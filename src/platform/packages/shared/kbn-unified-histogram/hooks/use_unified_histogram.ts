@@ -15,7 +15,7 @@ import type {
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
 import { useEffect, useMemo, useState } from 'react';
-import { Observable, Subject, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
 import { cloneDeep } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -24,7 +24,6 @@ import useLatest from 'react-use/lib/useLatest';
 import { UnifiedHistogramChartProps } from '../components/chart/chart';
 import {
   UnifiedHistogramExternalVisContextStatus,
-  UnifiedHistogramInputMessage,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
@@ -163,9 +162,8 @@ const EMPTY_SUGGESTION_CONTEXT: Observable<UnifiedHistogramSuggestionContext> = 
 
 export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnifiedHistogramResult => {
   const [lensVisService, setLensVisService] = useState<LensVisService>();
-  const [input$] = useState(() => new Subject<UnifiedHistogramInputMessage>());
 
-  const { stateProps, requestParams, api } = useServicesBootstrap(props);
+  const { stateProps, requestParams, api, input$ } = useServicesBootstrap(props);
 
   // Load async services and initialize API
   useMount(async () => {
