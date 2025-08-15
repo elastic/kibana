@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RegexAnonymizationRule } from '@kbn/inference-common';
+import type { RegexAnonymizationRule } from '@kbn/inference-common';
 import { executeRegexRulesTask } from './execute_regex_rule_task';
 
 describe('executeRegexRulesTask', () => {

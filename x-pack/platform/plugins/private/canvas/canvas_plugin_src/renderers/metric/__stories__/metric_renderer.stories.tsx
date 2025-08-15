@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
+import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { Style } from '@kbn/expressions-plugin/common';
+import type { Style } from '@kbn/expressions-plugin/common';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
-import { getMetricRenderer, MetricRendererConfig } from '../metric_renderer';
+import type { MetricRendererConfig } from '../metric_renderer';
+import { getMetricRenderer } from '../metric_renderer';
 
 const labelFontSpec: CSSProperties = {
   fontFamily: "Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif",

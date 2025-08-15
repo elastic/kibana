@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RegexAnonymizationRule } from '@kbn/inference-common';
-import { AnonymizationState, DetectedMatch } from './types';
+import type { RegexAnonymizationRule } from '@kbn/inference-common';
+import type { AnonymizationState, DetectedMatch } from './types';
 import { getEntityMask } from './get_entity_mask';
 
 /**

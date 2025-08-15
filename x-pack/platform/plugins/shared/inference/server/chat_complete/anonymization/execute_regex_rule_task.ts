@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RegexAnonymizationRule } from '@kbn/inference-common';
-import { DetectedMatch } from './types';
+import type { RegexAnonymizationRule } from '@kbn/inference-common';
+import type { DetectedMatch } from './types';
 
 export const executeRegexRulesTask = ({
   rules,

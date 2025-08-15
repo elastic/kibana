@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RegexAnonymizationRule } from '@kbn/inference-common';
+import type { RegexAnonymizationRule } from '@kbn/inference-common';
 import { processMatches } from './process_matches';
-import { AnonymizationState } from './types';
+import type { AnonymizationState } from './types';
 import { getEntityMask } from './get_entity_mask';
 
 describe('processMatches', () => {

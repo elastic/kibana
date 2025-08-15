@@ -8,14 +8,8 @@
  */
 import React, { useCallback, useMemo, useRef } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import {
-  EuiSpacer,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSwitch,
-  EuiSwitchEvent,
-} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiSpacer, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils';

@@ -7,13 +7,8 @@
 
 import { DEFAULT_CONTEXT_DOCUMENTS } from '../../common';
 import { DEFAULT_LLM_PROMPT } from '../../common/prompt';
-import {
-  LLMModel,
-  PlaygroundForm,
-  PlaygroundResponse,
-  SavedPlaygroundForm,
-  SavedPlaygroundFormFields,
-} from '../types';
+import type { LLMModel, PlaygroundForm, PlaygroundResponse, SavedPlaygroundForm } from '../types';
+import { SavedPlaygroundFormFields } from '../types';
 import {
   parseSavedPlayground,
   fetchSavedPlaygroundError,

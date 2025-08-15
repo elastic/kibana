@@ -894,6 +894,26 @@
           },
           {
             "parentPluginId": "discover",
+            "id": "def-public.DiscoverServices.contentManagement",
+            "type": "Object",
+            "tags": [],
+            "label": "contentManagement",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "public",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-public.ContentManagementPublicStart",
+                "text": "ContentManagementPublicStart"
+              }
+            ],
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
             "id": "def-public.DiscoverServices.core",
             "type": "Object",
             "tags": [],
