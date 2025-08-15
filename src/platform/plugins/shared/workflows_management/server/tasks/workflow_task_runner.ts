@@ -16,7 +16,6 @@ import {
   convertToSerializableGraph,
   convertToWorkflowGraph,
 } from '../../common/lib/build_execution_graph/build_execution_graph';
-import { extractConnectorIds } from '../scheduler/lib/extract_connector_ids';
 import type { WorkflowsService } from '../workflows_management/workflows_management_service';
 
 export interface WorkflowTaskParams {
@@ -68,9 +67,6 @@ export function createWorkflowTaskRunner({
             executionGraph: convertToSerializableGraph(executionGraph),
           };
 
-          // Extract connector credentials for the workflow
-          const connectorCredentials = await extractConnectorIds(actionsClient);
-
           // Execute the workflow
           const executionId = await workflowsExecutionEngine.executeWorkflow(
             workflowExecutionModel,
@@ -82,7 +78,6 @@ export function createWorkflowTaskRunner({
                 timestamp: new Date().toISOString(),
                 source: 'task-manager',
               },
-              connectorCredentials,
               triggeredBy: 'scheduled', // <-- mark as scheduled
             }
           );

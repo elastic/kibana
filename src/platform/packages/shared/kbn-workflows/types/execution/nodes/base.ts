@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { WaitStepSchema } from '../../../spec/schema';
 
 export const ExecutionGraphNodeSchema = z.object({
   id: z.string(),
@@ -23,3 +24,10 @@ export const AtomicGraphNodeSchema = z.object({
   configuration: z.any(),
 });
 export type AtomicGraphNode = z.infer<typeof AtomicGraphNodeSchema>;
+
+export const WaitGraphNodeSchema = z.object({
+  id: z.string(),
+  type: z.literal('wait'),
+  configuration: WaitStepSchema,
+});
+export type WaitGraphNode = z.infer<typeof WaitGraphNodeSchema>;

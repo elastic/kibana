@@ -69,6 +69,15 @@ const connectors = [
       },
     ],
   },
+  {
+    type: 'wait',
+    params: [
+      {
+        name: 'duration',
+        type: 'string' as const,
+      },
+    ],
+  },
 ];
 
 export const WORKFLOW_ZOD_SCHEMA = generateYamlSchemaFromConnectors(connectors);
