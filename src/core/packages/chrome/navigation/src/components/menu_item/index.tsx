@@ -7,16 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, ReactNode, HTMLAttributes, ForwardedRef } from 'react';
+import type { ReactNode, HTMLAttributes, ForwardedRef } from 'react';
+import React, { forwardRef } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiIcon,
-  EuiScreenReaderOnly,
-  EuiText,
-  IconType,
-  euiFontSize,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { EuiIcon, EuiScreenReaderOnly, EuiText, euiFontSize, useEuiTheme } from '@elastic/eui';
 
 export interface MenuItemProps extends HTMLAttributes<HTMLAnchorElement | HTMLButtonElement> {
   as?: 'a' | 'button';

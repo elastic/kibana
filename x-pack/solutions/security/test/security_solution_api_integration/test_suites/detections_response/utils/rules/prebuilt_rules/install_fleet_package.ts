@@ -7,10 +7,10 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
-import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
+import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import { EPM_API_ROUTES, epmRouteService } from '@kbn/fleet-plugin/common';
 import { getPrebuiltRuleMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
-import { FtrProviderContext, RetryService } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext, RetryService } from '@kbn/ftr-common-functional-services';
 import expect from 'expect';
 import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import { refreshSavedObjectIndices } from '../../refresh_index';

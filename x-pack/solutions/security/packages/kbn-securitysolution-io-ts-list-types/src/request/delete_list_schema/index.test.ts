@@ -9,7 +9,8 @@ import { left } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import { DeleteListSchema, deleteListSchema } from '.';
+import type { DeleteListSchema } from '.';
+import { deleteListSchema } from '.';
 import { getDeleteListSchemaMock } from './index.mock';
 
 describe('delete_list_schema', () => {

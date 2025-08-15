@@ -6,15 +6,20 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { compareFilters, Query, TimeRange } from '@kbn/es-query';
-import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
+import type { Query, TimeRange } from '@kbn/es-query';
+import { compareFilters } from '@kbn/es-query';
+import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { isSiemRuleType } from '@kbn/rule-data-utils';
-import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
-import { isQuickFiltersGroup, QuickFiltersMenuItem } from './quick_filters';
+import type { QuickFiltersMenuItem } from './quick_filters';
+import { isQuickFiltersGroup } from './quick_filters';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
-import { AlertsSearchBarProps, QueryLanguageType } from './types';
+import type { AlertsSearchBarProps, QueryLanguageType } from './types';
 import { useKibana } from '../../../common/lib/kibana';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;

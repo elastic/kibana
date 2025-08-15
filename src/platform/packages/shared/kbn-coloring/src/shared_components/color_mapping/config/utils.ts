@@ -8,7 +8,13 @@
  */
 
 import { DEFAULT_OTHER_ASSIGNMENT_INDEX } from './default_color_mapping';
-import { Config, CategoricalConfig, GradientConfig, CategoricalColor, ColorCode } from './types';
+import type {
+  Config,
+  CategoricalConfig,
+  GradientConfig,
+  CategoricalColor,
+  ColorCode,
+} from './types';
 
 export function isCategoricalColorConfig(config: Config): config is CategoricalConfig {
   return config.colorMode.type === 'categorical';

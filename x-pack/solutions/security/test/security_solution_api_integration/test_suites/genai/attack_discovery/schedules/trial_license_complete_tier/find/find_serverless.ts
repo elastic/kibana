@@ -8,7 +8,7 @@
 import expect from 'expect';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { ATTACK_DISCOVERY_SCHEDULES_FIND } from '@kbn/elastic-assistant-common';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createAttackDiscoverySchedules,
   deleteAllAttackDiscoverySchedules,

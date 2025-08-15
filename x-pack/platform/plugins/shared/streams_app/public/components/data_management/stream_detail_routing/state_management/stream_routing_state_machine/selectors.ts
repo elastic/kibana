@@ -7,9 +7,9 @@
 
 import { createSelector } from 'reselect';
 import { flattenObject } from '@kbn/object-utils';
-import { FlattenRecord } from '@kbn/streams-schema';
-import { StreamRoutingContext } from './types';
-import { RoutingSamplesContext } from './routing_samples_state_machine';
+import type { FlattenRecord } from '@kbn/streams-schema';
+import type { StreamRoutingContext } from './types';
+import type { RoutingSamplesContext } from './routing_samples_state_machine';
 
 /**
  * Selects the set of dotted fields that are not supported by the current simulation.
