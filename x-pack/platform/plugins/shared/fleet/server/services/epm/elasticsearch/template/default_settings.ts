@@ -7,6 +7,14 @@
 
 import { appContextService } from '../../../app_context';
 
+// ILM policy names in use by integrations before introduction of the @lifecycle naming convention
+export const LEGACY_DEFAULT_ILM_POLICY_NAMES = ['logs', 'metrics', 'synthetics'];
+const ILM_POLICY_NAME_SUFFIX = '@lifecycle';
+
+function getILMPolicyName(type: string) {
+  return LEGACY_DEFAULT_ILM_POLICY_NAMES.includes(type) ? type : `${type}${ILM_POLICY_NAME_SUFFIX}`;
+}
+
 export function buildDefaultSettings({
   ilmPolicy,
   type,
@@ -23,7 +31,7 @@ export function buildDefaultSettings({
         : {
             // ILM Policy must be added here, for now point to the default global ILM policy name
             lifecycle: {
-              name: ilmPolicy ? ilmPolicy : type,
+              name: ilmPolicy ? ilmPolicy : getILMPolicyName(type),
             },
           }),
     },
