@@ -13,10 +13,10 @@ import {
   SetupTechnologySelector,
 } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
-import { CloudSetup as ICloudSetup } from '@kbn/cloud-plugin/public';
-import { PackageInfo } from '@kbn/fleet-plugin/common';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import type { CloudSetup as ICloudSetup } from '@kbn/cloud-plugin/public';
+import type { PackageInfo } from '@kbn/fleet-plugin/common';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { CloudSecurityPolicyTemplate, PostureInput, UpdatePolicy } from './types';
 import { getPosturePolicy, getDefaultCloudCredentialsType } from './utils';
 import { PolicyTemplateInputSelector } from './policy_template_selectors';

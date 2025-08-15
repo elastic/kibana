@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import {
   cspIntegrationDocsNavigation,
   AWS_CREDENTIALS_TYPE,
@@ -19,7 +19,7 @@ import {
   getAwsCredentialsFormOptions,
   getInputVarsFields,
 } from './get_aws_credentials_form_options';
-import {
+import type {
   NewPackagePolicyPostureInput,
   AwsCredentialsType,
   AwsSetupFormat,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana as useKibanaBase } from '@kbn/kibana-react-plugin/public';
 

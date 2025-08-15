@@ -10,7 +10,7 @@ import { EuiAccordion, EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elasti
 import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import { getTemplateUrlFromPackageInfo, getPosturePolicy } from '../utils';
 import {
   CLOUD_CREDENTIALS_PACKAGE_VERSION,
@@ -24,7 +24,7 @@ import { GcpInputVarFields } from './gcp_input_var_fields';
 import { ReadDocumentation } from '../common';
 import { GoogleCloudShellCredentialsGuide } from './gcp_credentials_guide';
 import { getInputVarsFields, gcpField } from './gcp_utils';
-import { NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
+import type { NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
 
 interface GcpFormAgentlessProps {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;

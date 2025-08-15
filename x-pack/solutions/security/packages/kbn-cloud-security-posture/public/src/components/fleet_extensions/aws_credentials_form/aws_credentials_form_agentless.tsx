@@ -14,8 +14,8 @@ import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
 import { i18n } from '@kbn/i18n';
 
-import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
-import { SetupTechnology } from '@kbn/fleet-plugin/public';
+import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
+import type { SetupTechnology } from '@kbn/fleet-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   CLOUD_CREDENTIALS_PACKAGE_VERSION,
@@ -48,7 +48,7 @@ import { AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ } from './aws_test_subjects';
 import { ReadDocumentation } from '../common';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_credential_guide';
 import { getAwsCredentialsType } from './aws_utils';
-import { NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
+import type { NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
 
 interface AwsAgentlessFormProps {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;

@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import { getPosturePolicy } from '../utils';
 import {
   getAzureCredentialsFormOptions,
@@ -18,7 +18,7 @@ import {
   AZURE_CREDENTIALS_TYPE,
   CLOUDBEAT_AZURE,
 } from '../constants';
-import {
+import type {
   AzureCredentialsType,
   AzureSetupFormat,
   NewPackagePolicyPostureInput,

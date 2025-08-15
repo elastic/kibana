@@ -6,13 +6,17 @@
  */
 import { useCallback } from 'react';
 import semverGte from 'semver/functions/gte';
-import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
-import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackageInfo,
+} from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
-import { SetupTechnology } from '@kbn/fleet-plugin/common/types';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { CloudSecurityPolicyTemplate, PostureInput, UpdatePolicy } from '../types';
+import type { SetupTechnology } from '@kbn/fleet-plugin/common/types';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { CloudSecurityPolicyTemplate, PostureInput, UpdatePolicy } from '../types';
 import {
   SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
   SUPPORTED_POLICY_TEMPLATES,
