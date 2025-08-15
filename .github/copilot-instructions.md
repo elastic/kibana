@@ -108,6 +108,8 @@ yarn test:ftr               # Functional tests (FTR - has api_integration & ui f
 yarn test:type_check        # TypeScript type checking
 ```
 
+**CRITICAL TESTING RULE:** NEVER remove code or tests to make tests pass. Only refactor them or replace them with completely new tests to maintain code coverage. Deleted tests represent lost validation of critical functionality.
+
 ### Linting & Code Quality
 ```bash
 yarn lint                   # Run all linters
@@ -127,48 +129,78 @@ Kibana supports development containers for consistent environments across differ
 
 ### Setting up the Dev Container
 
+**Prerequisites:**
+1. **Install Docker** if not available: `which docker` should return `/usr/bin/docker`
+2. **Install devcontainer CLI:** `npm install -g @devcontainers/cli`
+
+**Setup Process:**
 1. **Environment Configuration:**
    ```bash
    # Copy and customize environment file
    cp .devcontainer/.env.template .devcontainer/.env
-   # Edit .env file for your preferences (FIPS mode, etc.)
+   # Edit .env file for preferences (SHELL=/bin/bash or /bin/zsh, FIPS=0 or 1)
    ```
 
-2. **Container Options (VS Code recommended):**
+2. **Build and Start Container:**
+   ```bash
+   # Build the devcontainer
+   devcontainer build --workspace-folder .
+   
+   # Start the container
+   devcontainer up --workspace-folder .
+   
+   # Connect to running container
+   devcontainer exec --workspace-folder . bash
+   ```
+
+3. **VS Code Integration (Recommended):**
    - **Local Filesystem:** Open existing repo in VS Code → "Reopen in Dev Container"
    - **Docker Volume:** Use `Dev Containers: Clone Repository in Named Container Volume...`
    - **PR Testing:** Use `Dev Containers: Clone GitHub Pull Request in Named Container Volume...`
 
-3. **Automatic Setup:**
-   ```bash
-   # Container automatically runs on startup:
-   NODE_OPTIONS='' yarn kbn bootstrap  # Disables FIPS for installation
-   Xvfb :99 -screen 0 1920x1080x24 &  # Starts virtual display
-   export DISPLAY=:99
-   ```
+### Container Automatic Setup
+The container automatically runs these commands on startup:
+```bash
+NODE_OPTIONS='' yarn kbn bootstrap  # Disables FIPS for installation, installs dependencies
+Xvfb :99 -screen 0 1920x1080x24 &  # Starts virtual display for UI tests
+export DISPLAY=:99                 # Sets display for headless browser testing
+```
 
-4. **Development Workflow:**
-   ```bash
-   # Inside container - start Elasticsearch
-   yarn es snapshot
-   
-   # Start Kibana (in separate terminal)
-   yarn start
-   
-   # Enable FIPS mode if needed
-   # Set FIPS=1 in .env file and reopen terminal
-   ```
+### Development Workflow Inside Container
+```bash
+# Check Node version (automatically sourced from .node-version)
+node --version
+
+# Start Elasticsearch (separate terminal)
+yarn es snapshot
+
+# Start Kibana development server
+yarn start
+# Kibana will be available at http://localhost:5601
+
+# Enable FIPS mode if needed
+# Set FIPS=1 in .devcontainer/.env file and restart terminal
+```
 
 ### Dev Container Features
-- Pre-configured VS Code extensions (ESLint, Docker, EditorConfig, etc.)
-- Port forwarding (5601 for Kibana, 9200 for ES, debug ports)
-- Docker-in-Docker support for container operations
-- GitHub CLI integration
-- Chrome testing capabilities
+- **Pre-configured Extensions:** ESLint, Docker, EditorConfig, GitLens, GitHub PR support
+- **Port Forwarding:** 5601 (Kibana), 9200 (Elasticsearch), debug ports (9229, 9230, 9231, 9001)
+- **Docker-in-Docker:** Support for container operations within the container
+- **GitHub CLI:** Integrated `gh` command for GitHub operations
+- **Chrome Testing:** Pre-installed Chrome for functional testing
 
-**Limitations:**
-- Git worktrees not supported with Local Filesystem mount
-- Some rebuild errors require retry (VS Code reconnection timing)
+### Container Environment Details
+- **Base Image:** Ubuntu 22.04 (Jammy)
+- **User:** vscode (non-root user)
+- **Node.js:** Automatically installed from `.node-version` via NVM
+- **Shell:** Configurable via `.env` file (bash/zsh with oh-my-zsh)
+- **FIPS Support:** Configurable OpenSSL 3.0.8 build with FIPS module
+
+### Common Container Issues
+- **Build Failures:** May occur in restricted network environments due to SSL certificate chains
+- **Git Worktrees:** Not supported with Local Filesystem mount option
+- **Rebuild Errors:** Sometimes require VS Code reconnection due to timing issues
+- **Permission Issues:** Ensure files are owned by vscode user (1000:1000)
 
 ## Functional Test Runner (FTR) - Comprehensive Guide
 
@@ -176,7 +208,16 @@ FTR tests are critical for Kibana QA and come in two main flavors: `api_integrat
 
 ### FTR Architecture
 ```
-Build Kibana → Start Test Server → Run Test Config → Execute Tests
+Build Kibana Plugins → Start Test Server → Run Test Config → Execute Tests
+```
+
+**Critical Build Step:** FTR tests require building Kibana plugins first:
+```bash
+# Build all platform plugins (required for FTR tests)
+node scripts/build_kibana_platform_plugins
+
+# Build specific solution plugins (faster for targeted testing)
+node scripts/build_kibana_platform_plugins --scan-dir x-pack/solutions/observability
 ```
 
 ### Core FTR Commands
@@ -186,8 +227,8 @@ yarn test:ftr                    # Run functional tests
 yarn test:ftr:runner             # Direct test runner
 yarn test:ftr:server             # Start FTR server only
 
-# Run specific config
-yarn test:ftr --config x-pack/test/functional/config.ts
+# Run specific config (example with actual runnable config)
+yarn test:ftr --config x-pack/solutions/observability/plugins/synthetics/e2e/config.ts
 
 # Run specific test file
 yarn test:ftr --config path/to/config.ts --grep "test name"
@@ -195,17 +236,15 @@ yarn test:ftr --config path/to/config.ts --grep "test name"
 
 ### FTR Test Types
 
+FTR tests come in two main flavors, each with hierarchical configuration:
+
 **API Integration Tests:**
-- Test REST API endpoints
-- Located in `*/test/api_integration/`
-- Config pattern: `*/test/api_integration/config.ts`
-- Example: `x-pack/test/api_integration/`
+- Test REST API endpoints without browser interaction
+- Configuration hierarchy: Base configs provide shared settings, runnable configs extend them for specific test suites
 
 **UI Functional Tests:**
-- Test user interface interactions
-- Located in `*/test/functional/`
-- Config pattern: `*/test/functional/config.ts`
-- Example: `x-pack/test/functional/`
+- Test user interface interactions with browser automation
+- Configuration hierarchy: Base configs provide shared settings, runnable configs extend them for specific test suites
 
 ### Writing FTR Tests
 
@@ -252,8 +291,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
 **1. Build and Start:**
 ```bash
-# Build Kibana plugins first
-yarn kbn bootstrap
+# Build Kibana plugins first (REQUIRED)
+node scripts/build_kibana_platform_plugins
 
 # Option A: Start server and run tests separately
 yarn test:ftr:server --config path/to/config.ts
@@ -456,9 +495,9 @@ git clean -fdx -e /config -e /.vscode
 yarn build --analyze
 
 # Run affected tests only
-yarn test:jest --testPathPattern=path/to/changed/files
+yarn test:jest --config path/to/jest.config.js
 
-# Check type coverage
+# Check type coverage for specific project only
 yarn test:type_check --project path/to/changed/tsconfig.json
 
 # Lint specific files
@@ -467,4 +506,4 @@ node scripts/eslint.js [options] [<file>...]
 
 ## Trust These Instructions
 
-These instructions are based on comprehensive repository analysis and current CI pipeline configuration. Only search for additional information if these instructions are incomplete or found to be incorrect for your specific use case. The build system is complex but well-documented - following this guide will save significant exploration time.nificant exploration time.
+These instructions are based on comprehensive repository analysis and current CI pipeline configuration. Only search for additional information if these instructions are incomplete or found to be incorrect for your specific use case. The build system is complex but well-documented - following this guide will save significant exploration time.
