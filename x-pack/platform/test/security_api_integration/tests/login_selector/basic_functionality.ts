@@ -33,6 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
   const security = getService('security');
   const es = getService('es');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
   const log = getService('log');
 
   const kibanaServerConfig = config.get('servers.kibana');
@@ -95,40 +96,27 @@ export default function ({ getService }: FtrProviderContext) {
         wait_for_status: 'green',
       });
 
-      // Delete all sessions directly using the ES client
-      const esResponseAfterDelete = await es.deleteByQuery({
-        index: '.kibana_security_session*',
-        refresh: true,
-        conflicts: 'proceed',
-        wait_for_completion: true,
-        query: {
-          match_all: {}, // Delete all documents
-        },
-      });
+      // Use the same approach as other session tests - delete all indices completely
+      await esDeleteAllIndices('.kibana_security_session*');
 
-      log.info('ES response after delete:');
-
-      log.info(JSON.stringify(esResponseAfterDelete));
-
-      // Refresh the index to make sure changes are visible
-      await es.indices.refresh({ index: '.kibana_security_session*' });
-
-      const responseFromSearchAfterDelete = await es.search<SessionValue>({
-        index: '.kibana_security_session*',
-        size: 100,
-        query: {
-          bool: {
-            must: [
-              {
-                match_all: {},
-              },
-            ],
+      // Verify that all sessions have been removed
+      try {
+        const responseFromSearchAfterDelete = await es.search<SessionValue>({
+          index: '.kibana_security_session*',
+          size: 100,
+          query: {
+            match_all: {},
           },
-        },
-      });
+        });
 
-      log.info('Search after delete:');
-      log.info(responseFromSearchAfterDelete.hits.hits);
+        log.info('Search after delete:');
+        log.info(responseFromSearchAfterDelete.hits.hits);
+      } catch (error) {
+        // Index might not exist after deletion, which is expected
+        if (!error.message.includes('index_not_found_exception')) {
+          log.error(`Unexpected error during post-cleanup verification: ${error}`);
+        }
+      }
     });
 
     it('should redirect user to a login selector', async () => {
