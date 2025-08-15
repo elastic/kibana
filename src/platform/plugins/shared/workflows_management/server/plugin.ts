@@ -71,7 +71,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       // Create workflows service function for the connector
       const getWorkflowsService = async (request: KibanaRequest) => {
         // Return a function that will be called by the connector
-        return async (workflowId: string, inputs: Record<string, unknown>) => {
+        return async (workflowId: string, spaceId: string, inputs: Record<string, unknown>) => {
           if (!this.api) {
             throw new Error('Workflows management API not initialized');
           }
