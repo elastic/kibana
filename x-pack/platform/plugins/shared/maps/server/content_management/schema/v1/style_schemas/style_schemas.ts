@@ -7,6 +7,19 @@
 
 import { schema } from '@kbn/config-schema';
 import { LAYER_STYLE_TYPE } from '../../../../../common/constants';
+import { vectorStyleSchema } from './vector_style_schemas/vector_style_schemas';
+
+export const EMSVectorTileStyleSchema = schema.object(
+  {
+    color: schema.string(),
+    type: schema.literal(LAYER_STYLE_TYPE.EMS_VECTOR_TILE),
+  },
+  {
+    meta: {
+      description: 'Elastic Maps Service (EMS) Vector Tile style configuration.',
+    },
+  }
+);
 
 export const heatmapStyleSchema = schema.object(
   {
@@ -35,3 +48,17 @@ export const heatmapStyleSchema = schema.object(
     },
   }
 );
+
+export const styleSchema = schema.oneOf([
+  schema.object(
+    {
+      type: schema.string(),
+    },
+    {
+      unknowns: 'allow',
+    }
+  ),
+  EMSVectorTileStyleSchema,
+  heatmapStyleSchema,
+  vectorStyleSchema,
+]);

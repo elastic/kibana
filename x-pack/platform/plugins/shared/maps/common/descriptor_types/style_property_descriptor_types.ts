@@ -12,7 +12,3 @@ export interface CustomIcon {
   cutoff: number;
   radius: number;
 }
-
-export interface StyleDescriptor {
-  type: string;
-}

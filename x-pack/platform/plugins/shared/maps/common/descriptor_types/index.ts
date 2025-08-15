@@ -72,6 +72,7 @@ export type {
   SizeStaticOptions,
   SizeStylePropertyDescriptor,
   StaticStylePropertyOptions,
+  StyleDescriptor,
   StyleMetaDescriptor,
   StylePropertyField,
   StylePropertyOptions,
