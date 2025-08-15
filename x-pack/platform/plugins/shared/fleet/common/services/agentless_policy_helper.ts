@@ -55,13 +55,13 @@ export const isAgentlessIntegration = (
   if (integrationToEnable) {
     return Boolean(
       packageInfo?.policy_templates?.find(({ name }) => name === integrationToEnable)
-        ?.deployment_modes?.agentless.enabled === true
+        ?.deployment_modes?.agentless?.enabled === true
     );
   }
 
   return Boolean(
     packageInfo?.policy_templates?.some(
-      (policyTemplate) => policyTemplate?.deployment_modes?.agentless.enabled === true
+      (policyTemplate) => policyTemplate?.deployment_modes?.agentless?.enabled === true
     )
   );
 };
