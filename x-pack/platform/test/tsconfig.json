@@ -161,5 +161,6 @@
     "@kbn/management-settings-ids",
     "@kbn/core-chrome-browser",
     "@kbn/product-intercept-plugin",
+    "@kbn/core-chrome-browser",
   ]
 }

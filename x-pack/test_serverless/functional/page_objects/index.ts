@@ -15,25 +15,16 @@ import { SvlApiKeysProvider } from '@kbn/test-suites-xpack-platform/serverless/f
 import { SvlDataUsagePageProvider } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects/svl_data_usage';
 import { SvlRuleDetailsPageProvider } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects/svl_rule_details_ui_page';
 import { SvlTriggersActionsPageProvider } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects/svl_triggers_actions_ui_page';
-import { SvlSecLandingPageProvider } from './svl_sec_landing_page';
-import { CspDashboardPageProvider } from './csp_dashboard_page';
-import { AddCisIntegrationFormPageProvider } from './add_cis_integration_form_page';
-import { CspSecurityCommonProvider } from './security_common';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
 
   svlCommonPage: SvlCommonPageProvider,
   svlCommonNavigation: SvlCommonNavigationProvider,
-  svlSecLandingPage: SvlSecLandingPageProvider,
   svlTriggersActionsUI: SvlTriggersActionsPageProvider,
   svlRuleDetailsUI: SvlRuleDetailsPageProvider,
   svlManagementPage: SvlManagementPageProvider,
   svlIngestPipelines: SvlIngestPipelines,
   svlApiKeys: SvlApiKeysProvider,
   svlDataUsagePage: SvlDataUsagePageProvider,
-  // Cloud Security Posture specific page objects
-  cloudPostureDashboard: CspDashboardPageProvider,
-  cisAddIntegration: AddCisIntegrationFormPageProvider,
-  cspSecurity: CspSecurityCommonProvider,
 };
