@@ -57,8 +57,6 @@ export const DEFAULT_INDEX_TYPES_MAP: IndexTypesMap = {
     'fleet-preconfiguration-deletion-record',
     'fleet-proxy',
     'graph-workspace',
-    'guided-onboarding-guide-state',
-    'guided-onboarding-plugin-state',
     'index-pattern',
     'infrastructure-monitoring-log-view',
     'infrastructure-ui-source',
