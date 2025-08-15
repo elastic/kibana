@@ -9,7 +9,7 @@
 
 import { ExtendedDataLayerArgs } from '../types';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
-import { mockPaletteOutput, sampleArgs } from '../__mocks__';
+import { mockPaletteOutput, sampleArgs } from '../test_utils';
 import { LayerTypes } from '../constants';
 import { extendedDataLayerFunction } from './extended_data_layer';
 

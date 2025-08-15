@@ -138,6 +138,37 @@ const availableProcessors: TAvailableProcessors = {
       />
     ),
   },
+  set: {
+    type: 'set' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.setInputDisplay',
+      {
+        defaultMessage: 'Set',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.setHelpText"
+          defaultMessage="{setLink} If the field already exists, its value will be replaced with the provided one."
+          values={{
+            setLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsSetLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.set}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.setLinkLabel', {
+                  defaultMessage: 'Sets one field and associates it with the specified value.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   manual_ingest_pipeline: {
     type: 'manual_ingest_pipeline',

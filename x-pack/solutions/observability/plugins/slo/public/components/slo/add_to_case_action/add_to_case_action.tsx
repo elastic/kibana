@@ -7,10 +7,10 @@
 
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { sloDetailsHistoryLocatorID } from '@kbn/observability-plugin/common';
 import { encode } from '@kbn/rison';
 import { ALL_VALUE, SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useEffect } from 'react';
-import { sloPaths } from '../../../../common';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useUrlAppState } from '../../../pages/slo_details/components/history/hooks/use_url_app_state';
 
@@ -35,7 +35,11 @@ export function AddToCaseAction({ slo, onCancel, onConfirm }: Props) {
   );
 
   return hasCasesPermissions && !!permissions && CasesContext ? (
-    <CasesContext owner={['observability']} permissions={permissions}>
+    <CasesContext
+      owner={['observability']}
+      permissions={permissions}
+      features={{ alerts: { sync: false } }}
+    >
       <Content slo={slo} onCancel={onCancel} onConfirm={onConfirm} />
     </CasesContext>
   ) : null;
@@ -43,9 +47,15 @@ export function AddToCaseAction({ slo, onCancel, onConfirm }: Props) {
 
 function Content({ slo, onCancel, onConfirm }: Props) {
   const {
-    services: { cases },
+    services: {
+      cases,
+      share: {
+        url: { locators },
+      },
+    },
   } = useKibana();
   const { state } = useUrlAppState(slo);
+  const locator = locators.get(sloDetailsHistoryLocatorID);
 
   const useCasesAddToExistingCaseModal = cases?.hooks?.useCasesAddToExistingCaseModal!;
   const casesModal = useCasesAddToExistingCaseModal({
@@ -66,7 +76,7 @@ function Content({ slo, onCancel, onConfirm }: Props) {
             persistableStateAttachmentState: {
               type: 'slo_history',
               url: {
-                pathAndQuery: sloPaths.sloDetailsHistory({
+                pathAndQuery: locator?.getRedirectUrl({
                   id: slo.id,
                   instanceId: 'instanceId' in slo ? slo.instanceId : ALL_VALUE,
                   encodedAppState: encode(state),
@@ -86,7 +96,7 @@ function Content({ slo, onCancel, onConfirm }: Props) {
     });
 
     return () => casesModal.close();
-  }, [casesModal, slo, state]);
+  }, [casesModal, slo, state, locator]);
 
   return null;
 }
