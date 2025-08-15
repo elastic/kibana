@@ -9,7 +9,7 @@
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { isRetryableEsClientError } from './retryable_es_client_errors';
+import { isRetryableEsClientError } from './is_retryable_es_client_errors';
 
 describe('isRetryableEsClientError', () => {
   describe('returns `false` for', () => {
