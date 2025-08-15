@@ -169,7 +169,7 @@ export const ESQLDataCascade = ({
               defaultMessage: '{entitiesCount} {entitiesAlias} | {groupCount} groups',
               values: {
                 entitiesCount: Infinity,
-                groupCount: rows.length,
+                groupCount: rows.length - 1,
                 entitiesAlias: 'documents',
               },
             })}
