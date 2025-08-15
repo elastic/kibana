@@ -178,5 +178,5 @@ export interface UsageStats {
   'securitySolution:excludedDataTiersForRuleExecution': string[];
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];
-  'observability:streamsEnableSignificantEvents': boolean;
+  'observability:enableDiagnosticMode': boolean;
 }
