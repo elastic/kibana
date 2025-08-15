@@ -575,6 +575,34 @@
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowExecution.traceId",
+            "type": "string",
+            "tags": [],
+            "label": "traceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowExecution.entryTransactionId",
+            "type": "string",
+            "tags": [],
+            "label": "entryTransactionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1881,7 +1909,7 @@
         "label": "EnterForeachNode",
         "description": [],
         "signature": [
-          "{ id: string; type: \"enter-foreach\"; configuration: { type: \"foreach\"; name: string; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }; itemNodeIds: string[]; }"
+          "{ id: string; type: \"enter-foreach\"; configuration: { type: \"foreach\"; name: string; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }; exitNodeId: string; itemNodeIds: string[]; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/loop_nodes.ts",
         "deprecated": false,

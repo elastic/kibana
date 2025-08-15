@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { BuildFlavor } from '@kbn/config';
 import type {
   CustomBrandingSetup,
   ElasticsearchServiceSetup,
@@ -63,6 +64,7 @@ interface AuthenticationServiceStartParams {
   kibanaFeatures: KibanaFeature[];
   isElasticCloudDeployment: () => boolean;
   customLogoutURL?: string;
+  buildFlavor?: BuildFlavor;
 }
 
 export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
@@ -338,6 +340,7 @@ export class AuthenticationService {
     kibanaFeatures,
     isElasticCloudDeployment,
     customLogoutURL,
+    buildFlavor = 'traditional',
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
@@ -345,6 +348,7 @@ export class AuthenticationService {
       license: this.license,
       applicationName,
       kibanaFeatures,
+      buildFlavor,
     });
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config

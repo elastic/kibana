@@ -771,6 +771,7 @@ export const RulesList = ({
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
       <MaintenanceWindowCallout kibanaServices={kibanaServices} categories={allRuleCategories} />
+      <EuiSpacer size="s" />
       <RulesListPrompts
         showNoAuthPrompt={showNoAuthPrompt}
         showCreateFirstRulePrompt={showCreateFirstRulePrompt}

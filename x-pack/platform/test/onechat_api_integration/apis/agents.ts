@@ -42,10 +42,6 @@ export default function ({ getService }: FtrProviderContext) {
           log.warning(`Failed to delete agent ${agentId}: ${error.message}`);
         }
       }
-
-      await kibanaServer.uiSettings.update({
-        'onechat:api:enabled': false,
-      });
     });
 
     describe('POST /api/chat/agents', () => {

@@ -487,7 +487,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  aknowledged:
+                  acknowledged:
                     description: Indicates if the deletion was successful
                     type: boolean
                   message:
@@ -1795,7 +1795,7 @@ components:
         labels:
           type: object
           properties:
-            source_indices:
+            source_ids:
               items:
                 type: string
               type: array
