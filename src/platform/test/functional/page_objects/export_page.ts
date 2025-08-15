@@ -19,6 +19,10 @@ export class ExportPageObject extends FtrService {
     return await this.testSubjects.exists('exportTopNavButton');
   }
 
+  async exportButtonMissingOrFail() {
+    await this.testSubjects.missingOrFail('exportTopNavButton', { timeout: 1000 });
+  }
+
   async clickExportTopNavButton() {
     return this.testSubjects.click('exportTopNavButton');
   }

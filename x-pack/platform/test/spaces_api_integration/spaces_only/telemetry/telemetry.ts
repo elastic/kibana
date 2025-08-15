@@ -76,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
         fleetv2: 0,
         fleet: 0,
         osquery: 0,
+        reportingLegacy: 0,
         observabilityCases: 0,
         observabilityCasesV2: 0,
         observabilityCasesV3: 0,
