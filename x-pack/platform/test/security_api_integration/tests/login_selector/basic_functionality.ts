@@ -88,6 +88,49 @@ export default function ({ getService }: FtrProviderContext) {
 
   // Failing: See https://github.com/elastic/kibana/issues/218378
   describe('Login Selector', () => {
+    afterEach(async () => {
+      // Wait for the index to be available
+      await es.cluster.health({
+        index: '.kibana_security_session*',
+        wait_for_status: 'green',
+      });
+
+      // Delete all sessions directly using the ES client
+      const esResponseAfterDelete = await es.deleteByQuery({
+        index: '.kibana_security_session*',
+        refresh: true,
+        conflicts: 'proceed',
+        wait_for_completion: true,
+        query: {
+          match_all: {}, // Delete all documents
+        },
+      });
+
+      log.info('ES response after delete:');
+
+      log.info(JSON.stringify(esResponseAfterDelete));
+
+      // Refresh the index to make sure changes are visible
+      await es.indices.refresh({ index: '.kibana_security_session*' });
+
+      const responseFromSearchAfterDelete = await es.search<SessionValue>({
+        index: '.kibana_security_session*',
+        size: 100,
+        query: {
+          bool: {
+            must: [
+              {
+                match_all: {},
+              },
+            ],
+          },
+        },
+      });
+
+      log.info('Search after delete:');
+      log.info(responseFromSearchAfterDelete.hits.hits);
+    });
+
     it('should redirect user to a login selector', async () => {
       const response = await supertest
         .get('/abc/xyz/handshake?one=two three')
@@ -579,49 +622,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('SAML Multi tab', () => {
-        beforeEach(async () => {
-          // Wait for the index to be available
-          await es.cluster.health({
-            index: '.kibana_security_session*',
-            wait_for_status: 'green',
-          });
-
-          // Delete all sessions directly using the ES client
-          const esResponseAfterDelete = await es.deleteByQuery({
-            index: '.kibana_security_session*',
-            refresh: true,
-            conflicts: 'proceed',
-            wait_for_completion: true,
-            query: {
-              match_all: {}, // Delete all documents
-            },
-          });
-
-          log.info('ES response after delete:');
-
-          log.info(JSON.stringify(esResponseAfterDelete));
-
-          // Refresh the index to make sure changes are visible
-          await es.indices.refresh({ index: '.kibana_security_session*' });
-
-          const responseFromSearchAfterDelete = await es.search<SessionValue>({
-            index: '.kibana_security_session*',
-            size: 100,
-            query: {
-              bool: {
-                must: [
-                  {
-                    match_all: {},
-                  },
-                ],
-              },
-            },
-          });
-
-          log.info('Search after delete:');
-          log.info(responseFromSearchAfterDelete.hits.hits);
-        });
-
         it('should be able to have many pending SP initiated logins all successfully succeed', async () => {
           const samlResponseMapByRequestId: Record<string, { samlResponse: string; cookie: any }> =
             {};
