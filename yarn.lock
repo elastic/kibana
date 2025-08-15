@@ -6252,6 +6252,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/indices-metadata-plugin@link:x-pack/platform/plugins/private/indices_metadata":
+  version "0.0.0"
+  uid ""
+
 "@kbn/inference-cli@link:x-pack/platform/packages/shared/kbn-inference-cli":
   version "0.0.0"
   uid ""
@@ -8337,6 +8341,10 @@
   uid ""
 
 "@kbn/unified-histogram@link:src/platform/packages/shared/kbn-unified-histogram":
+  version "0.0.0"
+  uid ""
+
+"@kbn/unified-metrics-grid@link:src/platform/packages/shared/kbn-unified-metrics-grid":
   version "0.0.0"
   uid ""
 

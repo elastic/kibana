@@ -437,7 +437,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
                 setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>
               }
               hasManageGlobalKnowledgeBase={hasManageGlobalKnowledgeBase}
-              docLink={docLinks.links.securitySolution.aiAssistantKnowledgeBaseIndexEntries}
+              docLink={docLinks.links.securitySolution.aiAssistant.knowledgeBaseIndexEntries}
             />
           )}
         </>
