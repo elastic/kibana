@@ -10,9 +10,9 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { DefendInsightType, Replacements } from '@kbn/elastic-assistant-common';
 
 import type { DefendInsightsGraphState } from '../../../../../langchain/graphs';
+import { DEFEND_INSIGHTS } from '../../../../../prompt/prompts';
 import { mockAnonymizedEvents } from '../../mock/mock_anonymized_events';
 import { getRetrieveAnonymizedEventsNode } from '.';
-import { DEFEND_INSIGHTS } from '../../../../../prompt/prompts';
 
 const insightType = DefendInsightType.Enum.incompatible_antivirus;
 const initialGraphState: DefendInsightsGraphState = {
@@ -35,7 +35,7 @@ const initialGraphState: DefendInsightsGraphState = {
   unrefinedResults: null,
 };
 
-jest.mock('./anonymized_events_retriever', () => ({
+jest.mock('./events_retriever', () => ({
   AnonymizedEventsRetriever: jest
     .fn()
     .mockImplementation(
@@ -75,6 +75,7 @@ describe('getRetrieveAnonymizedEventsNode', () => {
       insightType,
       endpointIds: [],
       esClient,
+      kbDataClient: null,
       logger,
     });
     expect(typeof result).toBe('function');
@@ -87,6 +88,7 @@ describe('getRetrieveAnonymizedEventsNode', () => {
       insightType,
       endpointIds: [],
       esClient,
+      kbDataClient: null,
       logger,
     });
 
@@ -104,6 +106,7 @@ describe('getRetrieveAnonymizedEventsNode', () => {
       insightType,
       endpointIds: [],
       esClient,
+      kbDataClient: null,
       logger,
       onNewReplacements,
       replacements,

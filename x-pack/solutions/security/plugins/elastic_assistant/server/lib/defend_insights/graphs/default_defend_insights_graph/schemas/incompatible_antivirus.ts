@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 
-import type { DefendInsightsGenerationPrompts } from '../prompts/incompatible_antivirus';
+import type { DefendInsightsGenerationPrompts } from '../prompts';
 
 export function getDefendInsightsIncompatibleVirusGenerationSchema(
   prompts: DefendInsightsGenerationPrompts
