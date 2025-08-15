@@ -8,6 +8,7 @@
 import { bulkUpdateConversations } from './bulk_update_actions_conversations';
 import {
   API_VERSIONS,
+  ConversationCategory,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
 } from '@kbn/elastic-assistant-common';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -18,7 +19,7 @@ const conversation1 = {
   title: 'Conversation 1',
   apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
   replacements: {},
-  category: 'default',
+  category: 'assistant' as ConversationCategory,
   messages: [
     {
       id: 'message1',

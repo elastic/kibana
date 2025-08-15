@@ -25,6 +25,7 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import { css } from '@emotion/react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
+import { SharedConversationOwnerCallout } from '../shared_conversation_callout/owner';
 import { EmptyConvo } from './empty_convo';
 import { WelcomeSetup } from './welcome_setup';
 import { Conversation } from '../../..';
@@ -37,6 +38,8 @@ interface Props {
   currentSystemPromptId: string | undefined;
   handleOnConversationSelected: ({ cId }: { cId: string }) => Promise<void>;
   isAssistantEnabled: boolean;
+  isConversationOwner: boolean;
+  conversationShared: 'not_shared' | 'globally_shared' | 'selected_shared';
   isSettingsModalVisible: boolean;
   isWelcomeSetup: boolean;
   isLoading: boolean;
@@ -54,6 +57,8 @@ export const AssistantBody: FunctionComponent<Props> = ({
   handleOnConversationSelected,
   setCurrentSystemPromptId,
   http,
+  isConversationOwner,
+  conversationShared,
   isAssistantEnabled,
   isLoading,
   isSettingsModalVisible,
@@ -141,6 +146,14 @@ export const AssistantBody: FunctionComponent<Props> = ({
           >
             {comments}
           </EuiPanel>
+        )}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {isConversationOwner && conversationShared !== 'not_shared' && (
+          <SharedConversationOwnerCallout
+            id={currentConversation?.id ?? ''}
+            isGloballyShared={conversationShared === 'globally_shared'}
+          />
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>

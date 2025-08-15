@@ -14,7 +14,7 @@ import {
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
-import { EsQueryConfig, Query, buildEsQuery } from '@kbn/es-query';
+import { EsQueryConfig, Query, buildEsQuery, Filter } from '@kbn/es-query';
 
 interface FindOptions {
   filter?: string;
@@ -159,9 +159,10 @@ export const findDocuments = async <TSearchSchema>({
 
 export interface GetQueryFilterOptions {
   filter?: string;
+  esFilter?: Filter | Filter[];
 }
 
-export const getQueryFilter = ({ filter }: GetQueryFilterOptions) => {
+export const getQueryFilter = ({ filter, esFilter }: GetQueryFilterOptions) => {
   const kqlQuery: Query | Query[] = filter
     ? {
         language: 'kuery',
@@ -175,5 +176,5 @@ export const getQueryFilter = ({ filter }: GetQueryFilterOptions) => {
     queryStringOptions: { analyze_wildcard: true },
   };
 
-  return buildEsQuery(undefined, kqlQuery, [], config);
+  return buildEsQuery(undefined, kqlQuery, esFilter ?? [], config);
 };

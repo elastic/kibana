@@ -53,6 +53,9 @@ export const getUpdateScript = ({
     if (params.assignEmpty == true || params.containsKey('title')) {
       ctx._source.title = params.title;
     }
+    if (params.assignEmpty == true || params.containsKey('users')) {
+      ctx._source.users = params.users;
+    }
     if (params.assignEmpty == true || params.containsKey('messages')) {
       def messages = [];
       for (message in params.messages) {

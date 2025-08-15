@@ -93,6 +93,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
                   ).apiConfig ?? {}),
                   defaultSystemPromptId: newSystemPromptId,
                 },
+                id: updatedConversation.id,
               },
             },
           });
@@ -149,6 +150,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
                   provider: config?.apiProvider,
                   model: config?.defaultModel,
                 },
+                id: updatedConversation.id,
               },
             },
           });
@@ -190,6 +192,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
                   ).apiConfig ?? {}),
                   model,
                 },
+                id: updatedConversation.id,
               },
             },
           });

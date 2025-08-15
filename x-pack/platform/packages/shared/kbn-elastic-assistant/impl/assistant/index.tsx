@@ -29,6 +29,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import useEvent from 'react-use/lib/useEvent';
+import { SharedConversationCallout } from './shared_conversation_callout';
 import { AssistantBody } from './assistant_body';
 import { useCurrentConversation } from './use_current_conversation';
 import { useDataStreamApis } from './use_data_stream_apis';
@@ -95,7 +96,7 @@ const AssistantComponent: React.FC<Props> = ({
     getComments,
     http,
     promptContexts,
-    currentUserAvatar,
+    currentUser,
     contentReferencesVisible,
     showAnonymizedValues,
     setContentReferencesVisible,
@@ -127,7 +128,7 @@ const AssistantComponent: React.FC<Props> = ({
     refetchPrompts,
     refetchCurrentUserConversations,
     setIsStreaming,
-  } = useDataStreamApis({ http, isAssistantEnabled });
+  } = useDataStreamApis({ currentUser, http, isAssistantEnabled });
 
   // Connector details
   const { data: connectors, isFetchedAfterMount: isFetchedConnectors } = useLoadConnectors({
@@ -155,6 +156,7 @@ const AssistantComponent: React.FC<Props> = ({
     currentAppId,
     connectors,
     conversations,
+    currentUser,
     defaultConnector,
     spaceId,
     refetchCurrentUserConversations,
@@ -179,6 +181,14 @@ const AssistantComponent: React.FC<Props> = ({
     isFetchedCurrentUserConversations,
     isFetchedPrompts,
   ]);
+
+  const isConversationOwner = useMemo(() => {
+    return (
+      currentConversation?.id === '' ||
+      currentConversation?.createdBy.id === currentUser?.id ||
+      currentConversation?.createdBy.name === currentUser?.name
+    );
+  }, [currentConversation, currentUser]);
 
   // Welcome setup state
   const isWelcomeSetup = useMemo(
@@ -381,12 +391,12 @@ const AssistantComponent: React.FC<Props> = ({
           comments={getComments({
             abortStream,
             currentConversation,
+            isConversationOwner,
             showAnonymizedValues,
             refetchCurrentConversation,
             regenerateMessage: handleRegenerateResponse,
             isFetchingResponse: isLoadingChatSend,
             setIsStreaming,
-            currentUserAvatar,
             systemPromptContent: currentSystemPrompt?.content,
             contentReferencesVisible,
           })}
@@ -412,9 +422,9 @@ const AssistantComponent: React.FC<Props> = ({
       showAnonymizedValues,
       refetchCurrentConversation,
       handleRegenerateResponse,
+      isConversationOwner,
       isLoadingChatSend,
       setIsStreaming,
-      currentUserAvatar,
       currentSystemPrompt?.content,
       contentReferencesVisible,
       euiTheme.size.l,
@@ -432,6 +442,22 @@ const AssistantComponent: React.FC<Props> = ({
     },
     [assistantTelemetry, currentConversation?.title]
   );
+
+  const conversationShared = useMemo(() => {
+    if (!currentConversation || currentConversation?.id === '') {
+      // while loading or initializing, conversation is not shared
+      return 'not_shared';
+    }
+    const conversationUsers = currentConversation?.users.length ?? 0;
+    if (conversationUsers === 0) {
+      return 'globally_shared';
+    }
+    if (conversationUsers > 1) {
+      return 'selected_shared';
+    }
+    // length is 1
+    return 'not_shared';
+  }, [currentConversation]);
 
   return (
     <>
@@ -454,6 +480,7 @@ const AssistantComponent: React.FC<Props> = ({
               isFetchingCurrentUserConversations={isFetchingCurrentUserConversations}
               refetchCurrentUserConversations={refetchCurrentUserConversations}
               setPaginationObserver={setPaginationObserver}
+              setCurrentConversation={setCurrentConversation}
             />
           </EuiFlexItem>
         )}
@@ -480,6 +507,7 @@ const AssistantComponent: React.FC<Props> = ({
                     conversationsLoaded={isFetchedCurrentUserConversations}
                     defaultConnector={defaultConnector}
                     isAssistantEnabled={isAssistantEnabled}
+                    isConversationOwner={isConversationOwner}
                     isDisabled={isDisabled || isLoadingChatSend}
                     isLoading={isInitialLoad}
                     isSettingsModalVisible={isSettingsModalVisible}
@@ -492,6 +520,7 @@ const AssistantComponent: React.FC<Props> = ({
                     refetchPrompts={refetchPrompts}
                     selectedConversation={currentConversation}
                     setChatHistoryVisible={setChatHistoryVisible}
+                    setCurrentConversation={setCurrentConversation}
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
                     setPaginationObserver={setPaginationObserver}
                   />
@@ -537,6 +566,8 @@ const AssistantComponent: React.FC<Props> = ({
                     currentSystemPromptId={currentSystemPrompt?.id}
                     handleOnConversationSelected={handleOnConversationSelected}
                     http={http}
+                    isConversationOwner={isConversationOwner}
+                    conversationShared={conversationShared}
                     isAssistantEnabled={isAssistantEnabled}
                     isLoading={isInitialLoad}
                     isSettingsModalVisible={isSettingsModalVisible}
@@ -549,79 +580,91 @@ const AssistantComponent: React.FC<Props> = ({
                 <EuiFlyoutFooter
                   css={css`
                     background: none;
-                    border-top: ${euiTheme.border.thin};
+                    border-top: ${isConversationOwner ? euiTheme.border.thin : 'none'};
                     overflow: hidden;
                     max-height: 60%;
                     display: flex;
                     flex-direction: column;
                   `}
                 >
-                  <EuiPanel
-                    paddingSize="m"
-                    hasShadow={false}
-                    css={css`
-                      overflow: auto;
-                    `}
-                  >
-                    {!isDisabled &&
-                      Object.keys(promptContexts).length !== selectedPromptContextsCount && (
-                        <EuiFlexGroup>
-                          <EuiFlexItem>
-                            <>
-                              <ContextPills
-                                anonymizationFields={anonymizationFields}
+                  {isConversationOwner ? (
+                    <>
+                      <EuiPanel
+                        paddingSize="m"
+                        hasShadow={false}
+                        css={css`
+                          overflow: auto;
+                        `}
+                      >
+                        {!isDisabled &&
+                          Object.keys(promptContexts).length !== selectedPromptContextsCount && (
+                            <EuiFlexGroup>
+                              <EuiFlexItem>
+                                <>
+                                  <ContextPills
+                                    anonymizationFields={anonymizationFields}
+                                    promptContexts={promptContexts}
+                                    selectedPromptContexts={selectedPromptContexts}
+                                    setSelectedPromptContexts={setSelectedPromptContexts}
+                                  />
+                                  {Object.keys(promptContexts).length > 0 && (
+                                    <EuiSpacer size={'s'} />
+                                  )}
+                                </>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          )}
+
+                        <EuiFlexGroup direction="column" gutterSize="s">
+                          {Object.keys(selectedPromptContexts).length ? (
+                            <EuiFlexItem grow={false}>
+                              <SelectedPromptContexts
                                 promptContexts={promptContexts}
                                 selectedPromptContexts={selectedPromptContexts}
                                 setSelectedPromptContexts={setSelectedPromptContexts}
+                                currentReplacements={currentConversation?.replacements}
                               />
-                              {Object.keys(promptContexts).length > 0 && <EuiSpacer size={'s'} />}
-                            </>
+                            </EuiFlexItem>
+                          ) : null}
+
+                          <EuiFlexItem grow={false}>
+                            <ChatSend
+                              handleChatSend={handleChatSend}
+                              setUserPrompt={setUserPrompt}
+                              handleRegenerateResponse={handleRegenerateResponse}
+                              isDisabled={isSendingDisabled}
+                              isLoading={isLoadingChatSend}
+                              shouldRefocusPrompt={shouldRefocusPrompt}
+                              userPrompt={userPrompt}
+                            />
                           </EuiFlexItem>
                         </EuiFlexGroup>
-                      )}
+                      </EuiPanel>
 
-                    <EuiFlexGroup direction="column" gutterSize="s">
-                      {Object.keys(selectedPromptContexts).length ? (
-                        <EuiFlexItem grow={false}>
-                          <SelectedPromptContexts
-                            promptContexts={promptContexts}
-                            selectedPromptContexts={selectedPromptContexts}
-                            setSelectedPromptContexts={setSelectedPromptContexts}
-                            currentReplacements={currentConversation?.replacements}
+                      {!isDisabled && (
+                        <EuiPanel
+                          css={css`
+                            background: ${euiTheme.colors.backgroundBaseSubdued};
+                          `}
+                          hasShadow={false}
+                          paddingSize="m"
+                          borderRadius="none"
+                        >
+                          <QuickPrompts
+                            setInput={setUserPrompt}
+                            setIsSettingsModalVisible={setIsSettingsModalVisible}
+                            trackPrompt={trackPrompt}
+                            allPrompts={allPrompts}
                           />
-                        </EuiFlexItem>
-                      ) : null}
-
-                      <EuiFlexItem grow={false}>
-                        <ChatSend
-                          handleChatSend={handleChatSend}
-                          setUserPrompt={setUserPrompt}
-                          handleRegenerateResponse={handleRegenerateResponse}
-                          isDisabled={isSendingDisabled}
-                          isLoading={isLoadingChatSend}
-                          shouldRefocusPrompt={shouldRefocusPrompt}
-                          userPrompt={userPrompt}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPanel>
-
-                  {!isDisabled && (
-                    <EuiPanel
-                      css={css`
-                        background: ${euiTheme.colors.backgroundBaseSubdued};
-                      `}
-                      hasShadow={false}
-                      paddingSize="m"
-                      borderRadius="none"
-                    >
-                      <QuickPrompts
-                        setInput={setUserPrompt}
-                        setIsSettingsModalVisible={setIsSettingsModalVisible}
-                        trackPrompt={trackPrompt}
-                        allPrompts={allPrompts}
-                      />
-                    </EuiPanel>
+                        </EuiPanel>
+                      )}
+                    </>
+                  ) : (
+                    <SharedConversationCallout
+                      selectedConversation={currentConversation}
+                      refetchCurrentUserConversations={refetchCurrentUserConversations}
+                      setCurrentConversation={setCurrentConversation}
+                    />
                   )}
                 </EuiFlyoutFooter>
               </EuiFlexItem>

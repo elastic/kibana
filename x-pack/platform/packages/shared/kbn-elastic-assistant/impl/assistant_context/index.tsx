@@ -7,6 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { omit } from 'lodash/fp';
+import type { User } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
@@ -115,7 +116,7 @@ export interface UseAssistantContext {
   };
   docLinks: DocLinksStart;
   basePath: string;
-  currentUserAvatar?: UserAvatar;
+  currentUser?: User;
   getComments: GetAssistantMessages;
   getUrlForApp: GetUrlForApp;
   http: HttpSetup;
@@ -276,14 +277,14 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
   /**
    * Current User Avatar
    */
-  const { data: currentUserAvatar } = useQuery({
-    queryKey: ['currentUserAvatar'],
-    queryFn: async () =>
-      userProfileService.getCurrent<{ avatar: UserAvatar }>({
-        dataPath: 'avatar',
-      }),
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: async () => userProfileService.getCurrent(),
     select: (data) => {
-      return data.data.avatar;
+      return {
+        id: data.uid,
+        name: data.user.username,
+      };
     },
     keepPreviousData: true,
     refetchOnWindowFocus: false,
@@ -312,7 +313,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       augmentMessageCodeBlocks,
       basePath,
       basePromptContexts,
-      currentUserAvatar,
+      currentUser,
       docLinks,
       getComments,
       getUrlForApp,
@@ -362,7 +363,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       augmentMessageCodeBlocks,
       basePath,
       basePromptContexts,
-      currentUserAvatar,
+      currentUser,
       docLinks,
       getComments,
       getUrlForApp,

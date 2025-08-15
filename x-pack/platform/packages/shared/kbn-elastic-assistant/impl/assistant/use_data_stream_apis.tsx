@@ -7,7 +7,7 @@
 
 import { useMemo, useState } from 'react';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
+import { PromptResponse, PromptTypeEnum, User } from '@kbn/elastic-assistant-common';
 import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import {
   InfiniteData,
@@ -20,6 +20,7 @@ import { FetchConversationsResponse, useFetchPrompts } from './api';
 import { Conversation, useFetchCurrentUserConversations } from '../..';
 
 interface Props {
+  currentUser?: User;
   http: HttpSetup;
   isAssistantEnabled: boolean;
 }
@@ -29,6 +30,7 @@ export interface DataStreamApis {
   allSystemPrompts: PromptResponse[];
   anonymizationFields: FindAnonymizationFieldsResponse;
   conversations: Record<string, Conversation>;
+  currentUser?: User;
   isErrorAnonymizationFields: boolean;
   isFetchedAnonymizationFields: boolean;
   isFetchedCurrentUserConversations: boolean;
@@ -47,7 +49,11 @@ export interface DataStreamApis {
   setPaginationObserver: (ref: HTMLDivElement) => void;
 }
 
-export const useDataStreamApis = ({ http, isAssistantEnabled }: Props): DataStreamApis => {
+export const useDataStreamApis = ({
+  currentUser,
+  http,
+  isAssistantEnabled,
+}: Props): DataStreamApis => {
   const [isStreaming, setIsStreaming] = useState(false);
   const {
     data: conversations,
@@ -57,10 +63,12 @@ export const useDataStreamApis = ({ http, isAssistantEnabled }: Props): DataStre
     isFetched: isFetchedCurrentUserConversations,
     setPaginationObserver,
   } = useFetchCurrentUserConversations({
+    currentUser,
     http,
     perPage: 28,
     refetchOnWindowFocus: !isStreaming,
     isAssistantEnabled,
+    fields: ['id', 'title', 'apiConfig', 'updatedAt', 'users', 'createdBy'],
   });
 
   const {

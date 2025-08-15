@@ -68,13 +68,13 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
           const userFilter = currentUser?.username
             ? `name: "${currentUser?.username}"`
             : `id: "${currentUser?.profile_uid}"`;
-
+          const sharedFilter = ` OR users: "" OR NOT users: { name: * }`;
           const result = await dataClient?.findDocuments<EsConversationSchema>({
             perPage: query.per_page,
             page: query.page,
             sortField: query.sort_field,
             sortOrder: query.sort_order,
-            filter: `users:{ ${userFilter} }${additionalFilter}`,
+            filter: `users:{ ${userFilter} }${sharedFilter}${additionalFilter}`,
             fields: query.fields ? transformFieldNamesToSourceScheme(query.fields) : undefined,
           });
 

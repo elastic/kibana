@@ -13,6 +13,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { Conversation } from '../../..';
 import { find } from 'lodash';
 import { AIConnector } from '../../connectorland/connector_selector';
+import { MOCK_CURRENT_USER } from '../use_conversation/sample_conversations';
 
 // Mock dependencies
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
@@ -20,6 +21,7 @@ jest.mock('../use_conversation');
 jest.mock('../helpers');
 jest.mock('fast-deep-equal');
 jest.mock('lodash');
+const MOCK_DATE = '2025-02-19T23:28:54.962Z';
 const defaultConnectorMock: AIConnector = {
   actionTypeId: '.gen-ai',
   isPreconfigured: false,
@@ -47,6 +49,9 @@ const mockData = {
       defaultSystemPromptId: 'system-prompt-id',
     },
     replacements: {},
+    createdAt: MOCK_DATE,
+    createdBy: MOCK_CURRENT_USER,
+    users: [MOCK_CURRENT_USER],
   },
   electric_sheep_id: {
     id: 'electric_sheep_id',
@@ -55,9 +60,13 @@ const mockData = {
     messages: [],
     apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
     replacements: {},
+    createdAt: MOCK_DATE,
+    createdBy: MOCK_CURRENT_USER,
+    users: [MOCK_CURRENT_USER],
   },
 };
 const setLastConversationMock = jest.fn();
+
 describe('useCurrentConversation', () => {
   const mockUseConversation = {
     createConversation: jest.fn(),
@@ -65,7 +74,10 @@ describe('useCurrentConversation', () => {
     getConversation: jest.fn(),
     setApiConfig: jest.fn(),
   };
-
+  beforeAll(() => {
+    const mockDate = new Date(MOCK_DATE);
+    jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
+  });
   beforeEach(() => {
     (useConversation as jest.Mock).mockReturnValue(mockUseConversation);
     (deepEqual as jest.Mock).mockReturnValue(false);
@@ -75,6 +87,10 @@ describe('useCurrentConversation', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    (Date as unknown as jest.Mock).mockRestore();
   });
 
   const defaultProps: Props = {
@@ -101,6 +117,9 @@ describe('useCurrentConversation', () => {
       messages: [],
       replacements: {},
       title: '',
+      createdAt: MOCK_DATE,
+      createdBy: {},
+      users: [{}],
     });
     expect(result.current.currentSystemPrompt).toBeUndefined();
   });
@@ -121,6 +140,9 @@ describe('useCurrentConversation', () => {
         actionTypeId: defaultConnectorMock.actionTypeId,
         connectorId: defaultConnectorMock.id,
       },
+      createdAt: MOCK_DATE,
+      createdBy: {},
+      users: [{}],
     });
     expect(result.current.currentSystemPrompt).toBeUndefined();
   });
@@ -157,6 +179,9 @@ describe('useCurrentConversation', () => {
       messages: [],
       replacements: {},
       title: '',
+      createdAt: MOCK_DATE,
+      createdBy: {},
+      users: [{}],
     });
 
     // @ts-ignore
@@ -173,6 +198,9 @@ describe('useCurrentConversation', () => {
           actionTypeId: defaultConnectorMock.actionTypeId,
           connectorId: defaultConnectorMock.id,
         },
+        createdAt: MOCK_DATE,
+        createdBy: {},
+        users: [{}],
       });
     });
   });
@@ -202,6 +230,9 @@ describe('useCurrentConversation', () => {
         actionTypeId: '.bedrock',
         connectorId: '456',
       },
+      createdAt: MOCK_DATE,
+      createdBy: {},
+      users: [{}],
     });
     expect(result.current.currentSystemPrompt).toBeUndefined();
   });
@@ -226,6 +257,9 @@ describe('useCurrentConversation', () => {
       messages: [],
       replacements: {},
       title: '',
+      createdAt: MOCK_DATE,
+      createdBy: {},
+      users: [{}],
     });
     expect(result.current.currentSystemPrompt).toBeUndefined();
   });
@@ -322,6 +356,9 @@ describe('useCurrentConversation', () => {
         },
         id: '',
         title: '',
+        createdAt: MOCK_DATE,
+        createdBy: {},
+        users: [{}],
       })
     );
     expect(result.current.currentSystemPrompt?.id).toBe('system-prompt-id');
@@ -352,6 +389,9 @@ describe('useCurrentConversation', () => {
         },
         id: '',
         title: '',
+        createdAt: MOCK_DATE,
+        createdBy: {},
+        users: [{}],
       })
     );
   });
@@ -380,6 +420,9 @@ describe('useCurrentConversation', () => {
       messages: [],
       replacements: {},
       title: '',
+      createdAt: MOCK_DATE,
+      createdBy: {},
+      users: [{}],
     });
   });
 

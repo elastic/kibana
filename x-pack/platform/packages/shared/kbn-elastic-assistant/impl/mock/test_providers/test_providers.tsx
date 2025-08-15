@@ -24,6 +24,7 @@ import {
 } from '../../assistant_context';
 import { AssistantAvailability } from '../../assistant_context/types';
 import { AssistantSpaceIdProvider } from '../../assistant/use_space_aware_context';
+import { MOCK_CURRENT_USER } from '../../assistant/use_conversation/sample_conversations';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
@@ -126,5 +127,9 @@ const TestAssistantProviders = ({
   children: React.ReactNode;
 }) => {
   const assistantContextValue = useAssistantContextValue(assistantProviderProps);
-  return <AssistantProvider value={assistantContextValue}>{children}</AssistantProvider>;
+  return (
+    <AssistantProvider value={{ ...assistantContextValue, currentUser: MOCK_CURRENT_USER }}>
+      {children}
+    </AssistantProvider>
+  );
 };

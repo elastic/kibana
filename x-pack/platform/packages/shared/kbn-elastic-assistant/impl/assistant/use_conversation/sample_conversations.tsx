@@ -7,7 +7,7 @@
 
 import { Conversation } from '../../assistant_context/types';
 import { WELCOME_CONVERSATION_TITLE } from './translations';
-
+export const MOCK_CURRENT_USER = { id: '123', name: 'elastic' };
 export const WELCOME_CONVERSATION: Conversation = {
   id: '',
   title: WELCOME_CONVERSATION_TITLE,
@@ -15,4 +15,7 @@ export const WELCOME_CONVERSATION: Conversation = {
   messages: [],
   replacements: {},
   excludeFromLastConversationStorage: true,
+  createdBy: MOCK_CURRENT_USER,
+  users: [MOCK_CURRENT_USER],
+  createdAt: '2025-08-06T17:33:12.110Z',
 };

@@ -17,6 +17,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ApiConfig } from '@kbn/elastic-assistant-common';
+import { ConversationSettingsMenu } from '../settings/settings_context_menu/conversation_settings_menu';
+import { ShareBadge } from '../share_conversation/share_badge';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import { DataStreamApis } from '../use_data_stream_apis';
 import { Conversation } from '../../..';
@@ -25,7 +27,7 @@ import { ConnectorSelectorInline } from '../../connectorland/connector_selector_
 import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
 import { AssistantSettingsModal } from '../settings/assistant_settings_modal';
 import { AIConnector } from '../../connectorland/connector_selector';
-import { SettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
+import { AssistantSettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
 import * as i18n from './translations';
 import { ElasticLLMCostAwarenessTour } from '../../tour/elastic_llm';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../tour/const';
@@ -33,6 +35,7 @@ import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../tour/const';
 interface OwnProps {
   selectedConversation: Conversation | undefined;
   defaultConnector?: AIConnector;
+  isConversationOwner: boolean;
   isDisabled: boolean;
   isLoading: boolean;
   isSettingsModalVisible: boolean;
@@ -59,6 +62,7 @@ interface OwnProps {
   refetchPrompts?: (
     options?: RefetchOptions & RefetchQueryFilters<unknown>
   ) => Promise<QueryObserverResult<unknown, unknown>>;
+  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation | undefined>>;
   setPaginationObserver: (ref: HTMLDivElement) => void;
 }
 
@@ -76,6 +80,7 @@ export const AssistantHeader: React.FC<Props> = ({
   conversations,
   conversationsLoaded,
   defaultConnector,
+  isConversationOwner,
   isAssistantEnabled,
   isDisabled,
   isLoading,
@@ -89,6 +94,7 @@ export const AssistantHeader: React.FC<Props> = ({
   refetchPrompts,
   selectedConversation,
   setChatHistoryVisible,
+  setCurrentConversation,
   setIsSettingsModalVisible,
   setPaginationObserver,
 }) => {
@@ -108,6 +114,11 @@ export const AssistantHeader: React.FC<Props> = ({
       });
     },
     [onConversationSelected]
+  );
+
+  const isNewConversation = useMemo(
+    () => !selectedConversation || selectedConversation.id === '',
+    [selectedConversation]
   );
 
   return (
@@ -158,26 +169,48 @@ export const AssistantHeader: React.FC<Props> = ({
           padding-bottom: ${euiTheme.size.s};
         `}
       >
-        <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize="s">
+        <EuiFlexGroup gutterSize="xs" wrap justifyContent="flexEnd">
           <EuiFlexItem
             css={css`
               overflow: hidden;
+              min-width: 160px;
             `}
           >
-            {isLoading ? (
-              <EuiSkeletonTitle data-test-subj="skeletonTitle" size="xs" />
-            ) : (
-              <AssistantTitle
-                isDisabled={isDisabled || selectedConversation?.id === ''}
-                title={selectedConversation?.title || NEW_CHAT}
-                selectedConversation={selectedConversation}
-                refetchCurrentUserConversations={refetchCurrentUserConversations}
-              />
-            )}
-          </EuiFlexItem>
+            <EuiFlexGroup alignItems={'center'} justifyContent="flexStart" gutterSize="s">
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  overflow: hidden;
+                `}
+              >
+                {isLoading ? (
+                  <EuiSkeletonTitle data-test-subj="skeletonTitle" size="xs" />
+                ) : (
+                  <AssistantTitle
+                    isDisabled={
+                      isDisabled || selectedConversation?.id === '' || !isConversationOwner
+                    }
+                    title={selectedConversation?.title || NEW_CHAT}
+                    selectedConversation={selectedConversation}
+                    refetchCurrentUserConversations={refetchCurrentUserConversations}
+                  />
+                )}
+              </EuiFlexItem>
 
+              {!isNewConversation && (
+                <EuiFlexItem grow={false}>
+                  <ShareBadge
+                    isConversationOwner={isConversationOwner}
+                    selectedConversation={selectedConversation}
+                    refetchCurrentUserConversations={refetchCurrentUserConversations}
+                    refetchCurrentConversation={refetchCurrentConversation}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems={'center'}>
+            <EuiFlexGroup gutterSize="xs" alignItems={'center'} justifyContent="spaceBetween">
               <EuiFlexItem>
                 <ElasticLLMCostAwarenessTour
                   isDisabled={isDisabled}
@@ -185,19 +218,31 @@ export const AssistantHeader: React.FC<Props> = ({
                   storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ASSISTANT_HEADER}
                 >
                   <ConnectorSelectorInline
-                    isDisabled={isDisabled || selectedConversation === undefined}
+                    isDisabled={
+                      isDisabled || selectedConversation === undefined || !isConversationOwner
+                    }
                     selectedConnectorId={selectedConnectorId}
                     selectedConversation={selectedConversation}
                     onConnectorSelected={onConversationChange}
                   />
                 </ElasticLLMCostAwarenessTour>
               </EuiFlexItem>
-              <EuiFlexItem id={AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID}>
-                <SettingsContextMenu
-                  isDisabled={isDisabled}
-                  onChatCleared={onChatCleared}
-                  selectedConversation={selectedConversation}
-                />
+              {!isNewConversation && (
+                <EuiFlexItem>
+                  <div id={AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID}>
+                    <ConversationSettingsMenu
+                      isConversationOwner={isConversationOwner}
+                      isDisabled={isDisabled}
+                      onChatCleared={onChatCleared}
+                      refetchCurrentUserConversations={refetchCurrentUserConversations}
+                      selectedConversation={selectedConversation}
+                      setCurrentConversation={setCurrentConversation}
+                    />
+                  </div>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem>
+                <AssistantSettingsContextMenu isDisabled={isDisabled} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
