@@ -72,7 +72,10 @@ import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
 
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
-import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
+import {
+  registerSearchSessionsMgmt,
+  updateSearchSessionMgmtSectionTitle,
+} from './session/sessions_mgmt';
 import { createConnectedSearchSessionIndicator } from './session/session_indicator';
 import { ISearchSetup, ISearchStart } from './types';
 import { openSearchSessionsFlyout } from './session/sessions_mgmt';
@@ -199,16 +202,18 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const config = this.initializerContext.config.get<ConfigSchema>();
     if (config.search.sessions.enabled) {
       const sessionsConfig = config.search.sessions;
-      registerSearchSessionsMgmt(
+
+      const searchSessionsApp = registerSearchSessionsMgmt(
         core as CoreSetup<DataStartDependencies>,
         {
+          management,
           searchUsageCollector: this.usageCollector!,
           sessionsClient: this.sessionsClient,
-          management,
         },
         sessionsConfig,
         this.initializerContext.env.packageInfo.version
       );
+      updateSearchSessionMgmtSectionTitle(getStartServices, searchSessionsApp);
     }
 
     return {
