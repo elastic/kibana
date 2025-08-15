@@ -68,3 +68,47 @@ export const colorDynamicSchema = schema.object({
 });
 
 export const colorSchema = schema.oneOf([colorStaticSchema, colorDynamicSchema]);
+export const fillColorSchema = schema.oneOf([colorStaticSchema, colorDynamicSchema], {
+  defaultValue: {
+    type: STYLE_TYPE.STATIC,
+    options: {
+      color: '#16C5C0',
+    },
+  },
+  meta: {
+    description: 'Configure to set feature filled color',
+  },
+});
+export const lineColorSchema = schema.oneOf([colorStaticSchema, colorDynamicSchema], {
+  defaultValue: {
+    type: STYLE_TYPE.STATIC,
+    options: {
+      color: '#16C5C0',
+    },
+  },
+  meta: {
+    description: 'Configure to set feature border color. Ignored when border size is 0',
+  },
+});
+export const labelColorSchema = schema.oneOf([colorStaticSchema, colorDynamicSchema], {
+  defaultValue: {
+    type: STYLE_TYPE.STATIC,
+    options: {
+      color: '#000000',
+    },
+  },
+  meta: {
+    description: 'Configure to set label text color',
+  },
+});
+export const labelBorderColorSchema = schema.oneOf([colorStaticSchema, colorDynamicSchema], {
+  defaultValue: {
+    type: STYLE_TYPE.STATIC,
+    options: {
+      color: '#FFFFFF',
+    },
+  },
+  meta: {
+    description: 'Configure to set label border color',
+  },
+});

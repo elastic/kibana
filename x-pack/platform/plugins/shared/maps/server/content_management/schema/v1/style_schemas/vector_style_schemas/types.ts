@@ -27,7 +27,7 @@ import {
   sizeDynamicOptions,
   sizeSchema,
   sizeStaticOptions,
-  symbolizeAsOptionsSchema,
+  symbolizeAsOptions,
 } from './marker_schemas';
 import {
   fieldMetaOptions,
@@ -76,7 +76,7 @@ export type SizeDynamicOptions = TypeOf<typeof sizeDynamicOptions>;
 export type SizeStaticOptions = TypeOf<typeof sizeStaticOptions>;
 export type SizeStylePropertyDescriptor = TypeOf<typeof sizeSchema>;
 
-export type SymbolizeAsOptions = TypeOf<typeof symbolizeAsOptionsSchema>;
+export type SymbolizeAsOptions = TypeOf<typeof symbolizeAsOptions>;
 
 export type DynamicStylePropertyOptions =
   | ColorDynamicOptions

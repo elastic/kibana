@@ -8,19 +8,19 @@
 import { schema } from '@kbn/config-schema';
 import { VECTOR_STYLES } from '../../../../../../common';
 import { FIELD_ORIGIN, LAYER_STYLE_TYPE } from '../../../../../../common/constants';
-import { colorSchema } from './color_schemas';
+import {
+  labelBorderColorSchema,
+  fillColorSchema,
+  labelColorSchema,
+  lineColorSchema,
+} from './color_schemas';
 import {
   labelBorderSizeSchema,
   labelPositionSchema,
   labelSchema,
   labelZoomRangeSchema,
 } from './label_schemas';
-import {
-  iconSchema,
-  orientationSchema,
-  sizeSchema,
-  symbolizeAsStylePropertySchema,
-} from './marker_schemas';
+import { iconSchema, orientationSchema, sizeSchema, symbolizeAsSchema } from './marker_schemas';
 
 export const fieldMetaOptions = schema.object({
   isEnabled: schema.boolean(),
@@ -34,18 +34,18 @@ export const styleField = schema.object({
 });
 
 export const vectorStylePropertiesSchema = schema.object({
-  [VECTOR_STYLES.SYMBOLIZE_AS]: schema.maybe(symbolizeAsStylePropertySchema),
-  [VECTOR_STYLES.FILL_COLOR]: colorSchema,
-  [VECTOR_STYLES.LINE_COLOR]: colorSchema,
+  [VECTOR_STYLES.SYMBOLIZE_AS]: schema.maybe(symbolizeAsSchema),
+  [VECTOR_STYLES.FILL_COLOR]: fillColorSchema,
+  [VECTOR_STYLES.LINE_COLOR]: lineColorSchema,
   [VECTOR_STYLES.LINE_WIDTH]: sizeSchema,
   [VECTOR_STYLES.ICON]: iconSchema,
   [VECTOR_STYLES.ICON_SIZE]: sizeSchema,
   [VECTOR_STYLES.ICON_ORIENTATION]: orientationSchema,
   [VECTOR_STYLES.LABEL_TEXT]: labelSchema,
   [VECTOR_STYLES.LABEL_ZOOM_RANGE]: labelZoomRangeSchema,
-  [VECTOR_STYLES.LABEL_COLOR]: colorSchema,
+  [VECTOR_STYLES.LABEL_COLOR]: labelColorSchema,
   [VECTOR_STYLES.LABEL_SIZE]: sizeSchema,
-  [VECTOR_STYLES.LABEL_BORDER_COLOR]: colorSchema,
+  [VECTOR_STYLES.LABEL_BORDER_COLOR]: labelBorderColorSchema,
   [VECTOR_STYLES.LABEL_BORDER_SIZE]: labelBorderSizeSchema,
   [VECTOR_STYLES.LABEL_POSITION]: labelPositionSchema,
 });

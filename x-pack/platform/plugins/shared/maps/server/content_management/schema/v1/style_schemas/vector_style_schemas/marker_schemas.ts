@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { ICON_SOURCE, STYLE_TYPE, SYMBOLIZE_AS_TYPES } from '../../../../../../common/constants';
 import { fieldMetaOptions, styleField } from './vector_style_schemas';
 
-export const symbolizeAsOptionsSchema = schema.object({
+export const symbolizeAsOptions = schema.object({
   value: schema.maybe(
     schema.oneOf([
       schema.literal(SYMBOLIZE_AS_TYPES.CIRCLE),
@@ -18,9 +18,28 @@ export const symbolizeAsOptionsSchema = schema.object({
   ),
 });
 
-export const symbolizeAsStylePropertySchema = schema.object({
-  options: symbolizeAsOptionsSchema,
-});
+export const symbolizeAsSchema = schema.object(
+  {
+    options: schema.object({
+      value: schema.maybe(
+        schema.oneOf([
+          schema.literal(SYMBOLIZE_AS_TYPES.CIRCLE),
+          schema.literal(SYMBOLIZE_AS_TYPES.ICON),
+        ])
+      ),
+    }),
+  },
+  {
+    defaultValue: {
+      options: {
+        value: SYMBOLIZE_AS_TYPES.CIRCLE,
+      },
+    },
+    meta: {
+      description: 'Configure to symbolize Point features as Circle markers or Icons',
+    },
+  }
+);
 
 const iconSource = schema.maybe(
   schema.oneOf([schema.literal(ICON_SOURCE.CUSTOM), schema.literal(ICON_SOURCE.MAKI)])
