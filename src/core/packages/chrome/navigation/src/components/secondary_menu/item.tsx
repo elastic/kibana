@@ -10,7 +10,9 @@
 import { EuiButton, EuiButtonEmpty, IconType, useEuiTheme } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { css } from '@emotion/react';
+
 import { SecondaryMenuItem } from '../../../types';
+import { BetaBadge } from '../beta_badge';
 
 export interface SecondaryMenuItemProps extends SecondaryMenuItem {
   children: ReactNode;
@@ -27,20 +29,23 @@ export interface SecondaryMenuItemProps extends SecondaryMenuItem {
  * The only style overrides are making the button labels left-aligned.
  */
 export const SecondaryMenuItemComponent = ({
+  badgeType,
   children,
   iconType,
   id,
   isActive,
+  isExternal,
   testSubjPrefix = 'secondaryMenuItem',
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
 
   const iconSide = iconType ? 'left' : 'right';
-
   const iconProps = {
     iconSide: iconSide as 'left' | 'right',
-    iconType,
+    iconType: isExternal ? 'popout' : iconType,
+    // Ensure external links open in a new tab
+    ...(isExternal && { target: '_blank' }),
   };
 
   const styles = css`
@@ -51,7 +56,24 @@ export const SecondaryMenuItemComponent = ({
     > span {
       justify-content: ${iconSide === 'left' ? 'flex-start' : 'space-between'};
     }
+
+    svg:not(.euiBetaBadge__icon) {
+      color: ${euiTheme.colors.textDisabled};
+    }
   `;
+
+  const labelAndBadgeStyles = css`
+    align-items: center;
+    display: flex;
+    gap: ${euiTheme.size.xs};
+  `;
+
+  const content = (
+    <div css={labelAndBadgeStyles}>
+      {children}
+      {badgeType && <BetaBadge type={badgeType} />}
+    </div>
+  );
 
   return (
     <li>
@@ -66,7 +88,7 @@ export const SecondaryMenuItemComponent = ({
           {...iconProps}
           {...props}
         >
-          {children}
+          {content}
         </EuiButton>
       ) : (
         <EuiButtonEmpty
@@ -79,7 +101,7 @@ export const SecondaryMenuItemComponent = ({
           {...iconProps}
           {...props}
         >
-          {children}
+          {content}
         </EuiButtonEmpty>
       )}
     </li>
