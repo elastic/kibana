@@ -24,6 +24,7 @@ import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { ChartSectionConfiguration } from '@kbn/unified-histogram/types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
@@ -167,6 +168,10 @@ export interface DefaultAppStateExtension {
    * The state for chart visibility toggle
    */
   hideChart?: boolean;
+  /**
+   * The state for sidebar visibility toggle
+   */
+  hideSidebar?: boolean;
 }
 
 /**
@@ -438,4 +443,10 @@ export interface Profile {
    * Example use case is to overwrite the column header display name or to add icons to the column headers.
    */
   getColumnsConfiguration: () => CustomGridColumnsConfiguration;
+
+  /**
+   * Gets configuration for the Discover chart (UnifiedHistogram) section
+   * @returns The custom configuration for the chart
+   */
+  getChartSectionConfiguration: () => ChartSectionConfiguration;
 }

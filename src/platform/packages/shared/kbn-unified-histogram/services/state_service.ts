@@ -145,7 +145,7 @@ export const createStateService = (
     totalHitsResult: undefined,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     ...initialState,
-    topPanelHeight: initialState?.topPanelHeight ?? initialTopPanelHeight,
+    topPanelHeight: initialTopPanelHeight ?? initialState?.topPanelHeight,
   });
 
   const updateState = (stateUpdate: Partial<UnifiedHistogramState>) => {

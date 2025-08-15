@@ -39,6 +39,19 @@ export type UnifiedHistogramLayoutProps = PropsWithChildren<{
    * Current top panel height -- leave undefined to use the default
    */
   topPanelHeight?: number;
+
+  /**
+   * The height ratio of the top panel, relative to the total container height.
+   * For example, a value of 0.3 means the top panel takes up 30% of the height.
+   */
+  topPanelHeightRatio?: number;
+
+  /**
+   * The height ratio of the main panel, relative to the total container height.
+   * For example, a value of 0.7 means the main panel takes up 70% of the height.
+   */
+  mainPanelHeightRatio?: number;
+
   /**
    * Callback to update the topPanelHeight prop when a resize is triggered
    */
@@ -51,6 +64,8 @@ export const UnifiedHistogramLayout = ({
   isChartAvailable,
   hits,
   topPanelHeight,
+  topPanelHeightRatio,
+  mainPanelHeightRatio,
   onTopPanelHeightChange,
   children,
 }: UnifiedHistogramLayoutProps) => {
@@ -99,6 +114,9 @@ export const UnifiedHistogramLayout = ({
         fixedPanelSize={currentTopPanelHeight}
         minFixedPanelSize={defaultTopPanelHeight}
         minFlexPanelSize={minMainPanelHeight}
+        fixedPanelSizePct={topPanelHeightRatio}
+        flexPanelSizePct={mainPanelHeightRatio}
+        keepPanelsPctRatio={!!topPanelHeightRatio || !!mainPanelHeightRatio}
         fixedPanel={unifiedHistogramChart}
         flexPanel={<OutPortal node={mainPanelNode} />}
         data-test-subj="unifiedHistogram"
