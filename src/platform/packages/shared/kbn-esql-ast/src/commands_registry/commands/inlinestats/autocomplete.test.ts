@@ -12,7 +12,7 @@ import {
   getMockCallbacks,
 } from '../../../__tests__/context_fixtures';
 import { Location } from '../../types';
-import { autocomplete } from './autocomplete';
+import { autocomplete } from '../stats/autocomplete';
 import {
   expectSuggestions,
   getFieldNamesByType,
