@@ -23,7 +23,16 @@ describe('utils', () => {
     | LIMIT 123`;
 
       const result = getESQLStatsQueryMeta(queryString);
-      expect(result.groupByFields).toEqual(['type', 'url.keyword']);
+      expect(result.groupByFields).toEqual([
+        {
+          field: 'type',
+          type: 'column',
+        },
+        {
+          field: 'url.keyword',
+          type: 'column',
+        },
+      ]);
       expect(result.appliedFunctions).toEqual([
         { identifier: 'Visits', operator: 'COUNT' },
         { identifier: 'Unique', operator: 'COUNT_DISTINCT' },
