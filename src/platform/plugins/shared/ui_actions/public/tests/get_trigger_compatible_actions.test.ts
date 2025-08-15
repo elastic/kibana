@@ -24,33 +24,33 @@ beforeEach(() => {
     execute: () => Promise.resolve(),
   };
 
-  uiActions.setup.registerAction(action as ActionDefinition);
+  uiActions.setup.registerActionAsync('test', async () => action as ActionDefinition);
   uiActions.setup.registerTrigger({
     id: 'trigger',
     title: 'trigger',
   });
-  uiActions.setup.addTriggerAction('trigger', action as ActionDefinition);
+  uiActions.setup.addTriggerActionAsync('trigger', 'test', async () => action as ActionDefinition);
 });
 
 test('can register action', async () => {
   const { setup } = uiActions;
   const helloWorldAction = createHelloWorldAction(coreStart);
 
-  setup.registerAction(helloWorldAction);
+  setup.registerActionAsync('helloWorld', async () => helloWorldAction);
 });
 
 test('getTriggerCompatibleActions returns attached actions', async () => {
   const { setup, doStart } = uiActions;
   const helloWorldAction = createHelloWorldAction(coreStart);
 
-  setup.registerAction(helloWorldAction);
+  setup.registerActionAsync('helloWorld', async () => helloWorldAction);
 
   const testTrigger: Trigger = {
     id: 'MY-TRIGGER',
     title: 'My trigger',
   };
   setup.registerTrigger(testTrigger);
-  setup.addTriggerAction('MY-TRIGGER', helloWorldAction);
+  setup.addTriggerActionAsync('MY-TRIGGER', 'helloWorld', async () => helloWorldAction);
 
   const start = doStart();
   const actions = await start.getTriggerCompatibleActions('MY-TRIGGER', {});
@@ -76,8 +76,8 @@ test('filters out actions not applicable based on the context', async () => {
   };
 
   setup.registerTrigger(testTrigger);
-  setup.registerAction(action1);
-  setup.addTriggerAction(testTrigger.id, action1);
+  setup.registerActionAsync('test1', async () => action1);
+  setup.addTriggerActionAsync(testTrigger.id, 'test1', async () => action1);
 
   const start = doStart();
   let actions = await start.getTriggerCompatibleActions(testTrigger.id, { accept: true });

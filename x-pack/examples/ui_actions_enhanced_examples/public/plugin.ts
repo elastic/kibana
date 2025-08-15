@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { createElement as h } from 'react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
@@ -32,8 +30,6 @@ import {
   sampleApp1ClickTrigger,
   sampleApp2ClickTrigger,
   SAMPLE_APP2_CLICK_TRIGGER,
-  SampleApp2ClickContext,
-  sampleApp2ClickContext,
 } from './triggers';
 import { mount } from './mount';
 import { App2ToDashboardDrilldown } from './drilldowns/app2_to_dashboard_drilldown';
@@ -60,7 +56,10 @@ export interface UiActionsEnhancedExamplesStart {
   managerWithoutEmbeddableSingleButton: UiActionsEnhancedDynamicActionManager;
   managerWithEmbeddable: UiActionsEnhancedDynamicActionManager;
 }
-
+export const SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_CREATE =
+  'SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_CREATE';
+export const SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_MANAGE =
+  'SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_MANAGE';
 export class UiActionsEnhancedExamplesPlugin
   implements Plugin<void, UiActionsEnhancedExamplesStart, SetupDependencies, StartDependencies>
 {
@@ -80,58 +79,27 @@ export class UiActionsEnhancedExamplesPlugin
     uiActions.registerTrigger(sampleApp1ClickTrigger);
     uiActions.registerTrigger(sampleApp2ClickTrigger);
 
-    uiActions.addTriggerAction(SAMPLE_APP2_CLICK_TRIGGER, {
-      id: 'SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_CREATE',
-      order: 2,
-      getDisplayName: () => 'Add drilldown',
-      getIconType: () => 'plusInCircle',
-      isCompatible: async ({ workpadId, elementId }: SampleApp2ClickContext) =>
-        workpadId === '123' && elementId === '456',
-      execute: async () => {
-        const { core: coreStart, plugins: pluginsStart, self } = start();
-        const handle = coreStart.overlays.openFlyout(
-          toMountPoint(
-            h(pluginsStart.uiActionsEnhanced.DrilldownManager, {
-              onClose: () => handle.close(),
-              initialRoute: '/create',
-              dynamicActionManager: self.managerWithoutEmbeddableSingleButton,
-              triggers: [SAMPLE_APP2_CLICK_TRIGGER],
-              placeContext: {},
-            }),
-            coreStart.rendering
-          ),
-          {
-            ownFocus: true,
-          }
+    uiActions.addTriggerActionAsync(
+      SAMPLE_APP2_CLICK_TRIGGER,
+      SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_CREATE,
+      async () => {
+        const { createOpenFlyoutAtCreateAction } = await import(
+          './actions/open_flyout_at_create_action'
         );
-      },
-    });
-    uiActions.addTriggerAction(SAMPLE_APP2_CLICK_TRIGGER, {
-      id: 'SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_MANAGE',
-      order: 1,
-      getDisplayName: () => 'Manage drilldowns',
-      getIconType: () => 'list',
-      isCompatible: async ({ workpadId, elementId }: SampleApp2ClickContext) =>
-        workpadId === '123' && elementId === '456',
-      execute: async () => {
-        const { core: coreStart, plugins: pluginsStart, self } = start();
-        const handle = coreStart.overlays.openFlyout(
-          toMountPoint(
-            h(pluginsStart.uiActionsEnhanced.DrilldownManager, {
-              onClose: () => handle.close(),
-              initialRoute: '/manage',
-              dynamicActionManager: self.managerWithoutEmbeddableSingleButton,
-              triggers: [SAMPLE_APP2_CLICK_TRIGGER],
-              placeContext: { sampleApp2ClickContext },
-            }),
-            coreStart.rendering
-          ),
-          {
-            ownFocus: true,
-          }
+        return createOpenFlyoutAtCreateAction({ start });
+      }
+    );
+
+    uiActions.addTriggerActionAsync(
+      SAMPLE_APP2_CLICK_TRIGGER,
+      SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_MANAGE,
+      async () => {
+        const { createOpenFlyoutAtManageAction } = await import(
+          './actions/open_flyout_at_manage_action'
         );
-      },
-    });
+        return createOpenFlyoutAtManageAction({ start });
+      }
+    );
 
     core.application.register({
       id: 'ui_actions_enhanced-explorer',

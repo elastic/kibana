@@ -9,12 +9,12 @@
 
 import { PluginInitializer } from '@kbn/core/public';
 import {
-  SampelPanelActionTestPlugin,
-  SampelPanelActionTestPluginSetup,
-  SampelPanelActionTestPluginStart,
+  SamplePanelActionTestPlugin,
+  SamplePanelActionTestPluginSetup,
+  SamplePanelActionTestPluginStart,
 } from './plugin';
 
 export const plugin: PluginInitializer<
-  SampelPanelActionTestPluginSetup,
-  SampelPanelActionTestPluginStart
-> = () => new SampelPanelActionTestPlugin();
+  SamplePanelActionTestPluginSetup,
+  SamplePanelActionTestPluginStart
+> = () => new SamplePanelActionTestPlugin();

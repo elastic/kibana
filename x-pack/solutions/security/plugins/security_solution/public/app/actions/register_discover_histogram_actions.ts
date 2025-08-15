@@ -26,7 +26,7 @@ const createDiscoverHistogramCustomFilterAction = async (
     EsqlInTimelineAction.VIS_FILTER_ACTION,
     EsqlInTimelineAction.VIS_FILTER_ACTION
   );
-  services.uiActions.registerAction(histogramApplyFilter);
+  services.uiActions.registerActionAsync(histogramApplyFilter.id, async () => histogramApplyFilter);
 
   return histogramApplyFilter;
 };
@@ -49,12 +49,14 @@ export const registerDiscoverHistogramActions = async (
 ) => {
   createDiscoverHistogramCustomTrigger(store, history, services);
 
-  const histogramApplyFilter = await createDiscoverHistogramCustomFilterAction(
-    store,
-    history,
-    coreSetup,
-    services
-  );
+  services.uiActions.registerActionAsync(EsqlInTimelineAction.VIS_FILTER_ACTION, async () => {
+    const [coreStart] = await coreSetup.getStartServices();
+    const { createHistogramFilterAction } = await import('./histogram_filter_action');
+    return createHistogramFilterAction(coreStart, services);
+  });
 
-  services.uiActions.attachAction(EsqlInTimelineTrigger.HISTOGRAM_TRIGGER, histogramApplyFilter.id);
+  services.uiActions.attachAction(
+    EsqlInTimelineTrigger.HISTOGRAM_TRIGGER,
+    EsqlInTimelineAction.VIS_FILTER_ACTION
+  );
 };
