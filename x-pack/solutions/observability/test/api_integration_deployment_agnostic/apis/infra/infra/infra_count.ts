@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
+import type {
   GetInfraEntityCountRequestBodyPayloadClient,
   GetInfraEntityCountRequestParamsPayload,
   GetInfraEntityCountResponsePayload,

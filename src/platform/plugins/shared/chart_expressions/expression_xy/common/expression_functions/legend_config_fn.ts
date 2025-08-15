@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { LEGEND_CONFIG } from '../constants';
-import { LegendConfigFn } from '../types';
+import type { LegendConfigFn } from '../types';
 
 const errors = {
   positionUsageWithIsInsideError: () =>

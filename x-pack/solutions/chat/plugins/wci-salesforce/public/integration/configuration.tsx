@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { IntegrationConfigurationFormProps } from '@kbn/wci-browser';
+import type { IntegrationConfigurationFormProps } from '@kbn/wci-browser';
 import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { Controller } from 'react-hook-form';
 

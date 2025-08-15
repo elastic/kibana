@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import { PLUGIN } from '../common/constants/plugin';
-import { Dependencies } from './types';
+import type { Dependencies } from './types';
 import { ApiRoutes } from './routes';
 import { IndexDataEnricher } from './services';
 import { handleEsError } from './shared_imports';
-import { IndexManagementConfig } from './config';
+import type { IndexManagementConfig } from './config';
 
 export interface IndexManagementPluginSetup {
   indexDataEnricher: {

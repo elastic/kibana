@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ICommandContext } from '../../commands_registry/types';
+import type { ICommandContext } from '../../commands_registry/types';
 import type { ESQLColumn, ESQLIdentifier } from '../../types';
 import { fuzzySearch } from './shared';
 

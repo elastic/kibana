@@ -8,8 +8,8 @@
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import type { InternalRequestHeader, RoleCredentials } from '../../services';
-import { DatasetQualityApiClient } from './common/dataset_quality_api_supertest';
-import { DatasetQualityFtrContextProvider } from './common/services';
+import type { DatasetQualityApiClient } from './common/dataset_quality_api_supertest';
+import type { DatasetQualityFtrContextProvider } from './common/services';
 
 export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const datasetQualityApiClient: DatasetQualityApiClient = getService('datasetQualityApiClient');

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 
-import { IRouter, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
   DEFEND_INSIGHTS,
@@ -18,7 +17,8 @@ import {
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { buildResponse } from '../../lib/build_response';
-import { CallbackIds, ElasticAssistantRequestHandlerContext } from '../../types';
+import type { ElasticAssistantRequestHandlerContext } from '../../types';
+import { CallbackIds } from '../../types';
 import {
   isDefendInsightsEnabled,
   runExternalCallbacks,

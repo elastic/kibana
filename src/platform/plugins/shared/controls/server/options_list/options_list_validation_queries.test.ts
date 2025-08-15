@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 
-import { OptionsListRequestBody } from '../../common/options_list/types';
+import type { OptionsListRequestBody } from '../../common/options_list/types';
 import { getValidationAggregationBuilder } from './options_list_validation_queries';
 
 describe('options list queries', () => {

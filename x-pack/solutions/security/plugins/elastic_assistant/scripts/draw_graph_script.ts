@@ -9,16 +9,17 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs/promises';
 import path from 'path';
-import {
+import type {
   ActionsClientChatOpenAI,
-  type ActionsClientLlm,
   ActionsClientSimpleChatModel,
+  ActionsClientLlm,
 } from '@kbn/langchain/server/language_models';
 import type { Logger } from '@kbn/logging';
 import { FakeChatModel, FakeLLM } from '@langchain/core/utils/testing';
-import { ContentReferencesStore, DefendInsightType } from '@kbn/elastic-assistant-common';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import {
   ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN,
   ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN,
