@@ -8,7 +8,7 @@
 /* eslint-disable playwright/no-nth-methods */
 
 import { ScoutPage, expect } from '@kbn/scout';
-import { ProcessorType } from '@kbn/streams-schema';
+import { ProcessorType } from '@kbn/streamlang';
 import { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
@@ -295,7 +295,7 @@ export class StreamsApp {
   async getProcessorsListItems() {
     try {
       await expect(this.page.getByRole('list', { name: 'Processors list' })).toBeVisible({
-        timeout: 5000,
+        timeout: 15_000,
       });
     } catch {
       // If the list is not visible, it might be empty or not rendered yet

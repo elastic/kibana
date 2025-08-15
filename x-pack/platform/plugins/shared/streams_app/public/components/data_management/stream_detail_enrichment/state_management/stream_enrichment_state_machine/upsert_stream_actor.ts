@@ -11,16 +11,16 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import { getFormattedError } from '../../../../../util/errors';
 import { StreamEnrichmentServiceDependencies } from './types';
 import { processorConverter } from '../../utils';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
 
 export type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_ingest 2023-10-31'>;
 
 export interface UpsertStreamInput {
   definition: Streams.ingest.all.GetResponse;
-  processors: ProcessorDefinitionWithUIAttributes[];
+  processors: StreamlangProcessorDefinition[];
   fields?: FieldDefinition;
 }
 
@@ -38,7 +38,9 @@ export function createUpsertStreamActor({
           ? {
               ingest: {
                 ...input.definition.stream.ingest,
-                processing: input.processors.map(processorConverter.toAPIDefinition),
+                processing: {
+                  steps: input.processors.map(processorConverter.toAPIDefinition),
+                },
                 ...(input.fields && {
                   wired: { ...input.definition.stream.ingest.wired, fields: input.fields },
                 }),
@@ -47,7 +49,9 @@ export function createUpsertStreamActor({
           : {
               ingest: {
                 ...input.definition.stream.ingest,
-                processing: input.processors.map(processorConverter.toAPIDefinition),
+                processing: {
+                  steps: input.processors.map(processorConverter.toAPIDefinition),
+                },
               },
             },
       },
