@@ -47,7 +47,7 @@ import {
 import { deleteConversations, waitForConversation } from '../../tasks/api_calls/assistant';
 import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../tasks/api_calls/common';
-import { login, logout } from '../../tasks/login';
+import { login } from '../../tasks/login';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
 
 describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => {
@@ -92,6 +92,12 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       },
     ],
   };
+  before(() => {
+    if (!isServerless) {
+      login(secondaryUser);
+      cy.clearCookies();
+    }
+  });
   beforeEach(() => {
     deleteConnectors();
     deleteConversations();
@@ -181,7 +187,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       },
     ]);
     // First logout admin user
-    logout();
+    cy.clearCookies();
 
     // Login as elastic user who should have access to shared conversations
     login(secondaryUser);
@@ -191,7 +197,12 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     // Check if the shared conversations are visible
     toggleConversationSideMenu();
     cy.contains(mockConvo1.title).should('exist');
-    cy.contains(mockConvo2.title).should('not.exist');
+    if (isServerless) {
+      cy.contains(mockConvo2.title).should('not.exist');
+    } else {
+      cy.contains(mockConvo2.title).should('exist');
+      assertSharedConversationIcon(mockConvo2.title);
+    }
     assertSharedConversationIcon(mockConvo1.title);
     toggleConversationSideMenu();
 
@@ -200,23 +211,28 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     assertSharedCallout();
     // Ensure we can view messages in the shared conversation
     assertMessageSent(mockConvo1.messages[0].content);
-    const newConvoTitle = 'Other conversation';
-    createAndTitleConversation(newConvoTitle);
-    shareConversation(primaryUser);
-    // First logout admin user
-    logout();
-    login(isServerless ? 'admin' : undefined);
-    openAssistant();
-    // Check if the selectedly shared conversation is visible
-    toggleConversationSideMenu();
-    cy.contains(newConvoTitle).should('exist');
-    assertSharedConversationIcon(newConvoTitle);
-    toggleConversationSideMenu();
-    // Verify the first conversation is shared with secondaryUser
-    selectConversation(newConvoTitle);
-    assertSharedCallout();
-    // Ensure we can view messages in the shared conversation
-    assertMessageSent('hello');
+
+    // only run this test if we are in serverless mode
+    // as the secondary user share works in ess
+    if (isServerless) {
+      const newConvoTitle = 'Other conversation';
+      createAndTitleConversation(newConvoTitle);
+      shareConversation(primaryUser);
+      // First logout admin user
+      cy.clearCookies();
+      login(isServerless ? 'admin' : undefined);
+      openAssistant();
+      // Check if the selectedly shared conversation is visible
+      toggleConversationSideMenu();
+      cy.contains(newConvoTitle).should('exist');
+      assertSharedConversationIcon(newConvoTitle);
+      toggleConversationSideMenu();
+      // Verify the first conversation is shared with secondaryUser
+      selectConversation(newConvoTitle);
+      assertSharedCallout();
+      // Ensure we can view messages in the shared conversation
+      assertMessageSent('hello');
+    }
   });
   it('Dismissed callout remains dismissed when conversation is unselected and selected again', () => {
     shareConversations([
@@ -229,9 +245,9 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
         share: 'global',
       },
     ]);
-    logout();
+    cy.clearCookies();
 
-    login(secondaryUser === 'test_user' ? 'system_indices_superuser' : secondaryUser);
+    login(secondaryUser);
     visitGetStartedPage();
     openAssistant();
 
@@ -253,7 +269,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       },
     ]);
 
-    logout();
+    cy.clearCookies();
 
     login(secondaryUser);
     visitGetStartedPage();
@@ -268,18 +284,21 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
   });
 
   it('Duplicate conversation from conversation menu creates a duplicate', () => {
+    visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo1.title);
     duplicateFromMenu(mockConvo1.title);
   });
 
   it('Duplicate conversation from conversation side menu creates a duplicate', () => {
+    visitGetStartedPage();
     openAssistant();
     toggleConversationSideMenu();
     duplicateFromConversationSideContextMenu(mockConvo2.title);
   });
 
   it('Copy URL copies the proper url from conversation menu', () => {
+    visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo1.title);
     selectConnector(azureConnectorAPIPayload.name);
@@ -287,6 +306,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     // Cypress paste (doc.execCommand('paste')) is flaky, so skipping that assertion
   });
   it('Copy URL copies the proper url from conversation side menu', () => {
+    visitGetStartedPage();
     openAssistant();
     toggleConversationSideMenu();
     copyUrlFromConversationSideContextMenu();
@@ -294,6 +314,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
   });
 
   it('Copy URL copies the proper url from share modal', () => {
+    visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo1.title);
     selectConnector(azureConnectorAPIPayload.name);
@@ -301,7 +322,8 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     // Cypress paste (doc.execCommand('paste')) is flaky, so skipping that assertion
   });
 
-  it('Visiting a copied URL opens the assistant to the proper conversation', () => {
+  it('Visiting a URL with the assistant param opens the assistant to the proper conversation', () => {
+    visitGetStartedPage();
     cy.location('origin').then((origin) => {
       visit(`${origin}/app/security/get_started?assistant=${mockConvo1.id}`);
     });
