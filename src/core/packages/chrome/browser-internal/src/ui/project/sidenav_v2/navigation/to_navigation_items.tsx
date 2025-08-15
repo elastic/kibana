@@ -189,14 +189,14 @@ export const toNavigationItems = (
             items: navNode.children.map((child) => {
               warnUnsupportedNavNodeOptions(child);
               maybeMarkActive(child, 2);
-              return {
+              const item: SecondaryMenuItem = {
                 id: child.id,
+                isExternal: child.isExternalLink,
                 label: warnIfMissing(child, 'title', 'Missing Title 😭'),
                 href: warnIfMissing(child, 'href', 'Missing Href 😭'),
-                external: child.isExternalLink,
-                iconType: child.icon,
                 'data-test-subj': getTestSubj(child),
               };
+              return item;
             }),
           },
         ];
@@ -215,13 +215,14 @@ export const toNavigationItems = (
                 .map((subChild) => {
                   warnUnsupportedNavNodeOptions(subChild);
                   maybeMarkActive(subChild, 2);
-                  return {
+                  const item: SecondaryMenuItem = {
                     id: subChild.id,
+                    isExternal: subChild.isExternalLink,
                     label: warnIfMissing(subChild, 'title', 'Missing Title 😭'),
                     href: warnIfMissing(subChild, 'href', 'Missing Href 😭'),
-                    external: subChild.isExternalLink,
                     'data-test-subj': getTestSubj(subChild),
                   };
+                  return item;
                 }) ?? [];
 
             if (child.href) {

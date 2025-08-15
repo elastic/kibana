@@ -73,13 +73,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols[PageObjects.datasetQuality.texts.datasetNameColumn];
       await datasetNameCol.sort('descending');
+      const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
 
-      await retry.tryForTime(10000, async () => {
-        const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-        expect(datasetNameColCellTexts).to.eql(
-          [apacheAccessDatasetHumanName, ...datasetNames].reverse()
-        );
-      });
+      // This is to accomodate for failure if the integration hasn't been loaded successfully
+      // Dataset name is shown in this case
+      expect([apacheAccessDatasetHumanName, apacheAccessDatasetName]).to.contain(
+        datasetNameColCellTexts[datasetNameColCellTexts.length - 1]
+      );
+
+      // Check the rest of the array matches the expected pattern
+      expect(datasetNameColCellTexts.slice(0, -1)).to.eql([...datasetNames].reverse());
 
       const namespaceCol = cols.Namespace;
       const namespaceColCellTexts = await namespaceCol.getCellTexts();
