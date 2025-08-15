@@ -3179,6 +3179,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      // Failing: See https://github.com/elastic/kibana/issues/202940
       it.skip('does not suppress alerts outside of duration when query with 3 sequences', async () => {
         const id = uuidv4();
         const dateNow = Date.now();
