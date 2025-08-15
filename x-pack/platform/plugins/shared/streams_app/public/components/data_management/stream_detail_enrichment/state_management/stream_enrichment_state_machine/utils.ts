@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { AssignArgs } from 'xstate5';
 import type { StreamlangProcessorDefinition } from '@kbn/streamlang/types/processors';
 import type { StreamEnrichmentContextType } from './types';
+import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine';
 import {
   convertToFieldDefinition,
   getMappedSchemaFields,
