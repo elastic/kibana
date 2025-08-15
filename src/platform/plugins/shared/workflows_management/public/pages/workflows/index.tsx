@@ -48,7 +48,7 @@ export function WorkflowsPage() {
   const { createWorkflow } = useWorkflowActions();
   const [search, setSearch] = useState<WorkflowsSearchParams>({
     limit: WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
-    page: 0,
+    page: 1,
     query: '',
   });
 

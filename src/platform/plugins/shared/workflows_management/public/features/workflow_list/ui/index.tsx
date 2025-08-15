@@ -316,8 +316,8 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
     return <EuiText>Error loading workflows</EuiText>;
   }
 
-  const showStart = search.page * search.limit + 1;
-  let showEnd = (search.page + 1) * search.limit;
+  const showStart = (search.page - 1) * search.limit + 1;
+  let showEnd = search.page * search.limit;
   if (showEnd > (workflows!._pagination.total || 0)) {
     showEnd = workflows!._pagination.total;
   }
@@ -356,7 +356,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
         responsiveBreakpoint={false}
         tableLayout={'auto'}
         onChange={({ page: { index: pageIndex, size } }: CriteriaWithPagination<any>) =>
-          setSearch({ ...search, page: pageIndex, limit: size })
+          setSearch({ ...search, page: pageIndex + 1, limit: size })
         }
         selection={{
           onSelectionChange: setSelectedItems,
@@ -367,7 +367,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
           pageSize: search.limit,
           pageSizeOptions: WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS,
           totalItemCount: workflows!._pagination.total,
-          pageIndex: search.page,
+          pageIndex: search.page - 1,
         }}
       />
     </>
