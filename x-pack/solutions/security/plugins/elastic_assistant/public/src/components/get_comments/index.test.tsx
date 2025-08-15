@@ -20,6 +20,9 @@ const currentConversation = {
   category: 'assistant',
   id: '1',
   title: '1',
+  createdBy: { name: 'elastic' },
+  createdAt: '2024-03-19T18:59:18.174',
+  users: [{ name: 'elastic' }],
   messages: [
     {
       role: user,
@@ -32,13 +35,14 @@ const currentConversation = {
 const showAnonymizedValues = false;
 const testProps = {
   abortStream: jest.fn(),
-  setIsStreaming: jest.fn(),
+  contentReferencesVisible: true,
+  currentConversation,
+  isConversationOwner: true,
+  isFetchingResponse: false,
   refetchCurrentConversation: jest.fn(),
   regenerateMessage: jest.fn(),
-  isFetchingResponse: false,
-  currentConversation,
+  setIsStreaming: jest.fn(),
   showAnonymizedValues,
-  contentReferencesVisible: true,
 };
 describe('getComments', () => {
   it('Does not add error state message has no error', () => {
@@ -66,6 +70,9 @@ describe('getComments', () => {
             isError: true,
           },
         ],
+        users: [{ name: 'elastic' }],
+        createdAt: '2022-03-19T18:59:18.174Z',
+        createdBy: { name: 'elastic' },
       },
     });
     expect(result[0].eventColor).toEqual('danger');

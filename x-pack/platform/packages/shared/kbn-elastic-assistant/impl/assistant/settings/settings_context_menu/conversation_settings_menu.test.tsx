@@ -21,6 +21,8 @@ import {
 const props = {
   selectedConversation: welcomeConvo,
   isConversationOwner: true,
+  refetchCurrentUserConversations: jest.fn(),
+  setCurrentConversation: jest.fn(),
 };
 describe('ConversationSettingsMenu', () => {
   it('renders an accessible menu button icon', () => {

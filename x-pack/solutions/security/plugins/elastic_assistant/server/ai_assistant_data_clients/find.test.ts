@@ -52,6 +52,10 @@ export const getSearchConversationMock = (): estypes.SearchResponse<EsConversati
               name: 'elastic',
             },
           ],
+          created_by: {
+            id: '1111',
+            name: 'elastic',
+          },
           replacements: undefined,
         },
       },
@@ -127,6 +131,10 @@ describe('findDocuments', () => {
                     name: 'elastic',
                   },
                 ],
+                created_by: {
+                  id: '1111',
+                  name: 'elastic',
+                },
               },
             },
           ],

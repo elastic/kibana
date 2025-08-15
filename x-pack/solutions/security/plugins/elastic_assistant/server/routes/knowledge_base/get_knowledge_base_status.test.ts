@@ -18,7 +18,7 @@ describe('Get Knowledge Base Status Route', () => {
   let { context } = requestContextMock.createTools();
 
   const mockUser = {
-    username: 'my_username',
+    username: 'elastic',
     authentication_realm: {
       type: 'my_realm_type',
       name: 'my_realm_name',

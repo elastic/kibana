@@ -139,7 +139,7 @@ export const postActionsConnectorExecuteRoute = (
               id: conversationId,
             });
             if (
-              conversation?.createdBy.name !== checkResponse.currentUser?.username ||
+              conversation?.createdBy.name !== checkResponse.currentUser?.username &&
               conversation?.createdBy.id !== checkResponse.currentUser?.profile_uid
             ) {
               return resp.error({

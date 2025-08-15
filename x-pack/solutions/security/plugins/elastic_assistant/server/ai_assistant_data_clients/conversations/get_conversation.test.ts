@@ -40,6 +40,10 @@ export const getConversationResponseMock = (): ConversationResponse => ({
       name: 'elastic',
     },
   ],
+  createdBy: {
+    id: '1111',
+    name: 'elastic',
+  },
   replacements: undefined,
 });
 
@@ -85,6 +89,10 @@ export const getSearchConversationMock = (): estypes.SearchResponse<EsConversati
               name: 'elastic',
             },
           ],
+          created_by: {
+            id: '1111',
+            name: 'elastic',
+          },
           replacements: undefined,
         },
       },

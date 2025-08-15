@@ -105,4 +105,8 @@ export const getConversationResponseMock = (
       name: 'elastic',
     },
   ],
+  createdBy: {
+    id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+    name: 'elastic',
+  },
 });

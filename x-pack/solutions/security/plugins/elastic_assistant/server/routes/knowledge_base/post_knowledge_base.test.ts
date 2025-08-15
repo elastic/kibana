@@ -20,7 +20,7 @@ describe('Post Knowledge Base Route', () => {
   clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
 
   const mockUser = {
-    username: 'my_username',
+    username: 'elastic',
     authentication_realm: {
       type: 'my_realm_type',
       name: 'my_realm_name',

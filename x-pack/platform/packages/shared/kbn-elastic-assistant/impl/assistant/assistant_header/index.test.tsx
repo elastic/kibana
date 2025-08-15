@@ -48,6 +48,7 @@ const testProps = {
   contentReferencesVisible: true,
   setContentReferencesVisible: jest.fn(),
   setPaginationObserver: jest.fn(),
+  setCurrentConversation: jest.fn(),
 };
 
 jest.mock('../../connectorland/use_load_connectors', () => ({

@@ -65,7 +65,7 @@ const mockContext = {
       logger: loggingSystemMock.createLogger(),
       telemetry: { ...coreMock.createSetup().analytics, reportEvent },
       getCurrentUser: () => ({
-        username: 'user',
+        username: 'elastic',
         email: 'email',
         fullName: 'full name',
         roles: ['user-role'],

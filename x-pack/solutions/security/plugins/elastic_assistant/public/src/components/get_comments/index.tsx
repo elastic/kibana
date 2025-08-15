@@ -59,15 +59,15 @@ export const getComments: GetComments =
   (args) =>
   ({
     abortStream,
+    contentReferencesVisible,
     currentConversation,
+    isConversationOwner,
     isFetchingResponse,
     refetchCurrentConversation,
     regenerateMessage,
-    showAnonymizedValues,
-    isConversationOwner,
     setIsStreaming,
+    showAnonymizedValues,
     systemPromptContent,
-    contentReferencesVisible,
   }) => {
     if (!currentConversation) return [];
 

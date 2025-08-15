@@ -34,6 +34,7 @@ import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../lib/defend_insights/persistence';
 import { authenticatedUser } from './user';
 import { AttackDiscoveryScheduleDataClient } from '../lib/attack_discovery/schedules/data_client';
+import { Promise } from 'cypress/types/cy-bluebird';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -113,6 +114,11 @@ const createElasticAssistantRequestContextMock = (
     actions: clients.elasticAssistant.actions as unknown as ActionsPluginStart,
     eventLogger: clients.eventLogger,
     eventLogIndex: '.kibana-event-log-*',
+    userProfiles: {
+      suggest: jest.fn(),
+      getCurrent: jest.fn(),
+      bulkGet: jest.fn(),
+    },
     getRegisteredFeatures: jest.fn((pluginName: string) => defaultAssistantFeatures),
     getRegisteredTools: jest.fn(),
     logger: clients.elasticAssistant.logger,

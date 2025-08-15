@@ -23,7 +23,7 @@ describe('Find user conversations route', () => {
       Promise.resolve(getFindConversationsResultWithSingleHit())
     );
     context.elasticAssistant.getCurrentUser.mockResolvedValueOnce({
-      username: 'my_username',
+      username: 'elastic',
       authentication_realm: {
         type: 'my_realm_type',
         name: 'my_realm_name',
