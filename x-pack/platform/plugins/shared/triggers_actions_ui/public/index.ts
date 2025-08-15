@@ -77,14 +77,8 @@ export {
   SectionLoading,
 } from './application/components';
 
-export {
-  hasMustacheTokens,
-  templateActionVariable,
-  updateActionConnector,
-  executeAction,
-} from './application/lib';
-
 export { AlertProvidedActionVariables } from '@kbn/alerts-ui-shared';
+export { templateActionVariable, updateActionConnector, executeAction } from './application/lib';
 
 export function plugin(context: PluginInitializerContext) {
   return new Plugin(context);
@@ -120,13 +114,7 @@ export type {
 } from './plugin';
 export { Plugin } from './plugin';
 
-// TODO remove this import when we expose the Rules tables as a component
-export { loadRuleSummary } from './application/lib/rule_api/rule_summary';
-export { bulkDeleteRules } from './application/lib/rule_api/bulk_delete';
 export { loadRuleAggregations } from './application/lib/rule_api/aggregate';
-export { loadRule } from './application/lib/rule_api/get_rule';
-export { suspendedComponentWithProps } from './application/lib/suspended_component_with_props';
-export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
 export { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
 export type { TriggersAndActionsUiServices } from './application/rules_app';

@@ -49,7 +49,7 @@ const StyledEuiFlexItemButtonGroup = styled(EuiFlexItem)`
   }
 `;
 
-const StyledButtonGroup = styled(EuiButtonGroup)`
+export const StyledButtonGroup = styled(EuiButtonGroup)`
   display: flex;
   justify-content: right;
   .euiButtonGroupButton {
@@ -77,6 +77,9 @@ export interface EffectedPolicySelectProps {
   'data-test-subj'?: string;
 }
 
+/**
+ * Policy Selection component used on Endpoint Artifact forms for setting Global/Per-Policy assignment.
+ */
 export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   ({ item, description, onChange, disabled = false, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -90,6 +93,11 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     const artifactRestrictedPolicyIds = useArtifactRestrictedPolicyAssignments(item);
     const [selectedPolicyIds, setSelectedPolicyIds] = useState(getPolicyIdsFromArtifact(item));
 
+    const accessiblePolicyIds = useMemo(() => {
+      return selectedPolicyIds.filter(
+        (policyId) => !artifactRestrictedPolicyIds.policyIds.includes(policyId)
+      );
+    }, [artifactRestrictedPolicyIds.policyIds, selectedPolicyIds]);
     const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
     const selectedAssignmentType = useMemo(() => {
       if (isSpaceAwarenessEnabled) {
@@ -126,18 +134,52 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
       ];
     }, [canManageGlobalArtifacts, getTestId, isSpaceAwarenessEnabled, selectedAssignmentType]);
 
+    const unAccessiblePolicies: PolicySelectorProps['additionalListItems'] = useMemo(() => {
+      const additionalPolicyItems: PolicySelectorProps['additionalListItems'] = [];
+
+      if (artifactRestrictedPolicyIds.policyIds.length > 0) {
+        additionalPolicyItems.push({
+          label: i18n.translate(
+            'xpack.securitySolution.effectedPolicySelect.unaccessibleGroupLabel',
+            { defaultMessage: 'Assigned policies not accessible from current space' }
+          ),
+          isGroupLabel: true,
+          'data-test-subj': getTestId('unaccessibleGroupLabel'),
+        });
+      }
+
+      for (const policyId of artifactRestrictedPolicyIds.policyIds) {
+        additionalPolicyItems.push({
+          label: policyId,
+          toolTipContent: i18n.translate(
+            'xpack.securitySolution.effectedPolicySelect.unaccessiblePolicyTooltip',
+            { defaultMessage: 'Policy is not accessible from the current space' }
+          ),
+          disabled: true,
+          checked: 'on',
+          'data-test-subj': getTestId(`unAccessiblePolicy-${policyId}`),
+        });
+      }
+
+      return additionalPolicyItems;
+    }, [artifactRestrictedPolicyIds.policyIds, getTestId]);
+
     const handleOnPolicySelectChange = useCallback<PolicySelectorProps['onChange']>(
       (updatedSelectedPolicyIds) => {
-        setSelectedPolicyIds(updatedSelectedPolicyIds);
+        const artifactCompleteSelectedPolicyIds = updatedSelectedPolicyIds.concat(
+          ...artifactRestrictedPolicyIds.policyIds
+        );
+
+        setSelectedPolicyIds(artifactCompleteSelectedPolicyIds);
         onChange({
           ...item,
           tags: getTagsUpdatedBy(
             'policySelection',
-            updatedSelectedPolicyIds.map(buildPerPolicyTag)
+            artifactCompleteSelectedPolicyIds.map(buildPerPolicyTag)
           ),
         });
       },
-      [getTagsUpdatedBy, item, onChange]
+      [artifactRestrictedPolicyIds.policyIds, getTagsUpdatedBy, item, onChange]
     );
 
     const handleGlobalButtonChange = useCallback(
@@ -203,7 +245,8 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         {selectedAssignmentType === 'perPolicy' && (
           <EuiFormRow fullWidth>
             <PolicySelector
-              selectedPolicyIds={selectedPolicyIds}
+              selectedPolicyIds={accessiblePolicyIds}
+              additionalListItems={unAccessiblePolicies}
               onChange={handleOnPolicySelectChange}
               data-test-subj={getTestId('policiesSelector')}
               useCheckbox={true}

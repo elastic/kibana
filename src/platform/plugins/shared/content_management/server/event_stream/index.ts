@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './types';
+export type * from './types';
 export * from './es';
 export { EventStreamService } from './event_stream_service';

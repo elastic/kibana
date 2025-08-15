@@ -78,7 +78,9 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
       after('unload test docs', async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank'
+        );
       });
 
       it('retrieves expected cert data', async () => {

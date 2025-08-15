@@ -30,7 +30,7 @@ describe('LogLevelBadge', () => {
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveTextContent('info');
     expect(getComputedStyle(badge).getPropertyValue('--euiBadgeBackgroundColor')).toEqual(
-      '#90bdff'
+      '#a8caff'
     );
   });
 

@@ -203,6 +203,7 @@ const XSOARParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParam
         helpText={translations.PLAYBOOK_HELP}
       >
         <EuiComboBox
+          isInvalid={!!errors.playbook?.length && selectedPlaybookOption !== undefined}
           aria-label={translations.PLAYBOOK_ARIA_LABEL}
           placeholder={translations.PLAYBOOK_PLACEHOLDER}
           singleSelection={{ asPlainText: true }}

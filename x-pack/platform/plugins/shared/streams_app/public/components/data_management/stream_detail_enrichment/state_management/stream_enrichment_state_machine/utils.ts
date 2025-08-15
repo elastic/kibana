@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldDefinition, Streams } from '@kbn/streams-schema';
+import { FieldDefinition, ProcessorDefinition, Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { AssignArgs } from 'xstate5';
 import { StreamEnrichmentContextType } from './types';
@@ -22,7 +22,8 @@ import {
   CustomSamplesDataSource,
   EnrichmentDataSource,
 } from '../../../../../../common/url_schema';
-import { dataSourceConverter } from '../../utils';
+import { dataSourceConverter, processorConverter } from '../../utils';
+import { isProcessorUnderEdit } from '../processor_state_machine';
 
 export const defaultRandomSamplesDataSource: RandomSamplesDataSource = {
   type: 'random-samples',
@@ -84,11 +85,28 @@ export function getDataSourcesSamples(
   });
 }
 
-export function getStagedProcessors(context: StreamEnrichmentContextType) {
-  return context.processorsRefs
-    .map((proc) => proc.getSnapshot())
-    .filter((proc) => proc.context.isNew)
-    .map((proc) => proc.context.processor);
+/**
+ * Gets processors for simulation based on current editing state.
+ * - If no processor is being edited: returns all new processors
+ * - If a processor is being edited: returns new processors up to and including the one being edited
+ */
+export function getProcessorsForSimulation({
+  processorsRefs,
+}: Pick<StreamEnrichmentContextType, 'processorsRefs'>) {
+  let newProcessorsSnapshots = processorsRefs
+    .map((procRef) => procRef.getSnapshot())
+    .filter((snapshot) => snapshot.context.isNew);
+
+  // Find if any processor is currently being edited
+  const editingProcessorIndex = newProcessorsSnapshots.findIndex(isProcessorUnderEdit);
+
+  // If a processor is being edited, set new processors up to and including the one being edited
+  if (editingProcessorIndex !== -1) {
+    newProcessorsSnapshots = newProcessorsSnapshots.slice(0, editingProcessorIndex + 1);
+  }
+
+  // Return processors
+  return newProcessorsSnapshots.map((snapshot) => snapshot.context.processor);
 }
 
 export function getConfiguredProcessors(context: StreamEnrichmentContextType) {
@@ -101,7 +119,7 @@ export function getConfiguredProcessors(context: StreamEnrichmentContextType) {
 export function getUpsertWiredFields(
   context: StreamEnrichmentContextType
 ): FieldDefinition | undefined {
-  if (!Streams.WiredStream.GetResponse.is(context.definition) || !context.simulatorRef) {
+  if (!Streams.WiredStream.GetResponse.is(context.definition)) {
     return undefined;
   }
 
@@ -123,6 +141,26 @@ export function getUpsertWiredFields(
 
   return { ...originalFieldDefinition, ...simulationMappedFieldDefinition };
 }
+
+export const spawnProcessor = <
+  TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
+>(
+  processor: ProcessorDefinition,
+  assignArgs: Pick<TAssignArgs, 'self' | 'spawn'>,
+  options?: { isNew: boolean }
+) => {
+  const { spawn, self } = assignArgs;
+  const processorWithUIAttributes = processorConverter.toUIDefinition(processor);
+
+  return spawn('processorMachine', {
+    id: processorWithUIAttributes.id,
+    input: {
+      parentRef: self,
+      processor: processorWithUIAttributes,
+      isNew: options?.isNew ?? false,
+    },
+  });
+};
 
 export const spawnDataSource = <
   TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>

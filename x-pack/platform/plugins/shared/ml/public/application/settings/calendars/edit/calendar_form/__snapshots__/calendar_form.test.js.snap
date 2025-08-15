@@ -419,9 +419,11 @@ exports[`CalendarForm Renders calendar form 1`] = `
       >
         <div
           class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <input
             aria-describedby="generated-id-error-0"
+            aria-invalid="true"
             class="euiFieldText emotion-euiFieldText"
             data-test-subj="mlCalendarIdInput"
             id="generated-id"
@@ -429,6 +431,14 @@ exports[`CalendarForm Renders calendar form 1`] = `
             type="text"
             value=""
           />
+          <div
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
+          >
+            <span
+              color="danger"
+              data-euiicon-type="warning"
+            />
+          </div>
         </div>
       </div>
       <div

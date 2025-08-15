@@ -30,7 +30,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const isServerless = config.get('serverless');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Burn rate rule', () => {
+  describe('Burn rate rule - consumers and privileges', function () {
     let dataForgeConfig: PartialConfig;
     let dataForgeIndices: string[];
     let actionId: string;
@@ -141,7 +141,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Burn rate rule - slo consumer', function () {
-      this.tags(['skipMKI']);
       const consumer = 'slo';
       it('creates rule successfully', async () => {
         sloId = uuidv4();
@@ -241,7 +240,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Burn rate rule - consumer alerts', function () {
-      this.tags(['skipMKI']);
       const consumer = 'alerts';
       it('creates rule successfully', async () => {
         sloId = uuidv4();
@@ -341,7 +339,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Burn rate rule - consumer observability', function () {
-      this.tags(['skipMKI']);
       const consumer = 'observability';
 
       it('creates rule successfully', async () => {
@@ -442,7 +439,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Burn rate rule - can create - slo only role', function () {
-      this.tags(['skipMKI']);
       const consumer = 'slo';
       let sloOnlyRole: RoleCredentials;
 
@@ -510,7 +506,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Burn rate rule - can NOT create - synthetics only role', function () {
-      this.tags(['skipMKI']);
       const consumer = 'slo';
       let syntheticsOnlyRole: RoleCredentials;
 

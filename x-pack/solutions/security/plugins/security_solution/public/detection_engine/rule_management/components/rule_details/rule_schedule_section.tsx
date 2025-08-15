@@ -49,13 +49,11 @@ const LookBack = ({ value }: LookBackProps) => (
 export interface RuleScheduleSectionProps extends React.ComponentProps<typeof EuiDescriptionList> {
   rule: Partial<RuleResponse>;
   columnWidths?: EuiDescriptionListProps['columnWidths'];
-  showModifiedFields?: boolean;
 }
 
 export const RuleScheduleSection = ({
   rule,
   columnWidths = DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
-  showModifiedFields = false,
   ...descriptionListProps
 }: RuleScheduleSectionProps) => {
   if (!rule.interval || !rule.from) {
@@ -75,11 +73,7 @@ export const RuleScheduleSection = ({
         {
           title: (
             <span data-test-subj="intervalPropertyTitle">
-              <RuleFieldName
-                label={i18n.INTERVAL_FIELD_LABEL}
-                fieldName="rule_schedule"
-                showModifiedFields={showModifiedFields}
-              />
+              <RuleFieldName label={i18n.INTERVAL_FIELD_LABEL} fieldName="rule_schedule" />
             </span>
           ),
           description: <Interval interval={rule.interval} />,
@@ -90,7 +84,6 @@ export const RuleScheduleSection = ({
               <RuleFieldName
                 label={i18n.RULE_SOURCE_EVENTS_TIME_RANGE_FIELD_LABEL}
                 fieldName="rule_schedule"
-                showModifiedFields={showModifiedFields}
               />
             </span>
           ),
@@ -108,11 +101,7 @@ export const RuleScheduleSection = ({
         {
           title: (
             <span data-test-subj="intervalPropertyTitle">
-              <RuleFieldName
-                label={i18n.INTERVAL_FIELD_LABEL}
-                fieldName="rule_schedule"
-                showModifiedFields={showModifiedFields}
-              />
+              <RuleFieldName label={i18n.INTERVAL_FIELD_LABEL} fieldName="rule_schedule" />
             </span>
           ),
           description: <Interval interval={simpleRuleSchedule.interval} />,
@@ -120,11 +109,7 @@ export const RuleScheduleSection = ({
         {
           title: (
             <span data-test-subj="lookBackPropertyTitle">
-              <RuleFieldName
-                label={i18n.LOOK_BACK_FIELD_LABEL}
-                fieldName="rule_schedule"
-                showModifiedFields={showModifiedFields}
-              />
+              <RuleFieldName label={i18n.LOOK_BACK_FIELD_LABEL} fieldName="rule_schedule" />
             </span>
           ),
           description: <LookBack value={simpleRuleSchedule.lookback} />,

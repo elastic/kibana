@@ -38,6 +38,7 @@ export const AddParamForm = ({
         error={errors?.key?.message}
       >
         <EuiFieldText
+          isInvalid={Boolean(errors?.key)}
           data-test-subj="syntheticsAddParamFormFieldText"
           fullWidth
           aria-label={KEY_LABEL}

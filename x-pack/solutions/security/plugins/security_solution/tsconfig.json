@@ -77,7 +77,6 @@
     "@kbn/lens-plugin",
     "@kbn/dashboard-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
-    "@kbn/guided-onboarding-plugin",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
     "@kbn/ecs-data-quality-dashboard",
@@ -136,7 +135,6 @@
     "@kbn/core-saved-objects-common",
     "@kbn/core-saved-objects-import-export-server-mocks",
     "@kbn/user-profile-components",
-    "@kbn/guided-onboarding",
     "@kbn/securitysolution-ecs",
     "@kbn/cell-actions",
     "@kbn/shared-ux-router",
@@ -256,5 +254,7 @@
     "@kbn/elastic-assistant-shared-state",
     "@kbn/elastic-assistant-shared-state-plugin",
     "@kbn/spaces-utils",
+    "@kbn/licensing-types",
+    "@kbn/core-metrics-server",
   ]
 }

@@ -18,7 +18,7 @@ import {
   FieldConfiguration,
   getCommonFieldConfiguration,
 } from '../../resources/get_field_configuration';
-import { HighlightField } from '../../components/highlight_field.tsx';
+import { HighlightField } from '../../components/highlight_field';
 
 export const getTransactionFieldConfiguration = ({
   attributes,

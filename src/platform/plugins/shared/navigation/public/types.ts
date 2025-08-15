@@ -21,11 +21,8 @@ export interface NavigationPublicSetup {
   registerMenuItem: TopNavMenuExtensionsRegistrySetup['register'];
 }
 
-export type SolutionNavigation = Omit<SolutionNavigationDefinition, 'sideNavComponentGetter'>;
-export type AddSolutionNavigationArg = Omit<SolutionNavigation, 'sideNavComponent'> & {
-  /** Data test subj for the side navigation */
-  dataTestSubj?: string;
-};
+export type SolutionNavigation = SolutionNavigationDefinition;
+export type AddSolutionNavigationArg = SolutionNavigation;
 
 export interface NavigationPublicStart {
   ui: {

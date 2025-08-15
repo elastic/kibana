@@ -26,11 +26,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
   describe('migrations', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/task_manager_tasks');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/task_manager_tasks');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/task_manager_tasks');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/task_manager_tasks');
     });
 
     it('8.0.0 migrates actions tasks with legacy id to saved object ids', async () => {

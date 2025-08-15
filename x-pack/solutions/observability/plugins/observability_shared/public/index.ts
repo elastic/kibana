@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { PluginInitializerContext } from '@kbn/core/public';
 import { ObservabilitySharedPlugin } from './plugin';
 export type {
   ObservabilitySharedPlugin,
@@ -12,8 +12,8 @@ export type {
   ObservabilitySharedPluginStart,
   ProfilingLocators,
 } from './plugin';
-export const plugin = () => {
-  return new ObservabilitySharedPlugin();
+export const plugin = (initializerContext: PluginInitializerContext) => {
+  return new ObservabilitySharedPlugin(initializerContext);
 };
 
 export type {
@@ -23,7 +23,6 @@ export type {
   NavigationEntry,
 } from './components/page_template/page_template';
 export { HeaderMenuPortal } from './components/header_menu';
-export { useObservabilityTourContext, observTourStepStorageKey } from './components/tour';
 export { ActionMenu, ActionMenuDivider } from './components/action_menu/action_menu';
 export {
   Section,

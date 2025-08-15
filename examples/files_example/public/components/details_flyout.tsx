@@ -22,6 +22,7 @@ import {
   EuiTitle,
   EuiDescriptionList,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { FileJSON } from '@kbn/files-plugin/common';
 import { css } from '@emotion/react';
@@ -36,11 +37,13 @@ interface Props {
 }
 
 export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss }) => {
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={onDismiss}>
+    <EuiFlyout onClose={onDismiss} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>{file.name}</h2>
+          <h2 id={flyoutTitleId}>{file.name}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

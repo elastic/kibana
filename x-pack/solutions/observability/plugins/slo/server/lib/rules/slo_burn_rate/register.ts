@@ -8,7 +8,7 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { LicenseType } from '@kbn/licensing-plugin/server';
+import { LicenseType } from '@kbn/licensing-types';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -93,7 +93,24 @@ export function sloBurnRateRuleType(
     },
     alerts: {
       context: SLO_RULE_REGISTRATION_CONTEXT,
-      mappings: { fieldMap: { ...legacyExperimentalFieldMap, ...sloRuleFieldMap } },
+      mappings: {
+        fieldMap: {
+          ...legacyExperimentalFieldMap,
+          ...sloRuleFieldMap,
+        },
+        dynamicTemplates: [
+          {
+            strings_as_keywords: {
+              path_match: 'kibana.alert.grouping.*',
+              match_mapping_type: 'string',
+              mapping: {
+                type: 'keyword' as const,
+                ignore_above: 1024,
+              },
+            },
+          },
+        ],
+      },
       useEcs: true,
       useLegacyAlerts: true,
       shouldWrite: true,

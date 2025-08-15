@@ -17,9 +17,8 @@ export const getBuildUnvalidatedReportFromLastMessageNode = () => {
     return new Command({
       update: {
         messages: [
-          `${
-            lastMessageWithUnvalidatedReport(lastMessage.content as string).content
-          }\n\n The resulting query was generated as a best effort example, but we are unable to validate it. Please provide the name of the index and fields that should be used in the query. Make sure to include this in the final response`,
+          `${lastMessageWithUnvalidatedReport(lastMessage.content as string).content}\n\n` +
+            'I was unable to generate a ESQL query matching your specification. In your final response include this warning: \n\n"The resulting query was generated as a best effort example, but I am unable to validate it. To help generate a valid query, please provide the name of the index and fields that should be used in the query."\n\n Do not modify query any further.',
         ],
       },
     });

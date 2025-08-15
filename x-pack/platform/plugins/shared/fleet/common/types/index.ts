@@ -91,6 +91,7 @@ export interface FleetConfigType {
       excludePackages: string[];
       searchAiLakePackageAllowlistEnabled?: boolean;
     };
+    excludeDataStreamTypes?: string[];
   };
   createArtifactsBulkBatchSize?: number;
   autoUpgrades?: {
@@ -101,6 +102,9 @@ export interface FleetConfigType {
     taskInterval?: string;
   };
   autoInstallContentPackages?: {
+    taskInterval?: string;
+  };
+  agentStatusChange?: {
     taskInterval?: string;
   };
   integrationsHomeOverride?: string;

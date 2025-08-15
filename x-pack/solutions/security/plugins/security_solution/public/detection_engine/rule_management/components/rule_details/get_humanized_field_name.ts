@@ -42,6 +42,10 @@ export const getHumanizedFieldName = (fieldName: string) => {
       return i18n.MAX_SIGNALS_FIELD_LABEL;
     case 'tags':
       return i18n.TAGS_FIELD_LABEL;
+    case 'setup':
+      return i18n.SETUP_GUIDE_SECTION_LABEL;
+    case 'note':
+      return i18n.INVESTIGATION_GUIDE_TAB_LABEL;
 
     // Definition section fields
     case 'type':

@@ -79,11 +79,7 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
   const isDisabled = !hasEngineBeenInstalled && !isLoading;
 
   if (isDisabled) {
-    return (
-      <EuiPanel hasBorder>
-        <EnableRiskScore isDisabled={isDisabled} entityType={EntityType.user} />
-      </EuiPanel>
-    );
+    return <EnableRiskScore isDisabled={isDisabled} entityType={EntityType.user} />;
   }
 
   return (
@@ -119,7 +115,6 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
                 <EuiBasicTable
                   responsiveBreakpoint={false}
                   data-test-subj="severity-level-table"
-                  compressed
                   columns={columns}
                   items={severityTableData}
                   loading={isLoading}

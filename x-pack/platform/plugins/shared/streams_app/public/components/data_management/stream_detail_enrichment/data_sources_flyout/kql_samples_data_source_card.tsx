@@ -55,6 +55,14 @@ export const KqlSamplesDataSourceCard = ({ dataSourceRef }: KqlSamplesDataSource
       timeRange: dateRange,
     });
 
+  const dateFilterProps = dataSource.timeRange
+    ? {
+        showDatePicker: true,
+        dataRangeFrom: dataSource.timeRange.from,
+        dataRangeTo: dataSource.timeRange.to,
+      }
+    : {};
+
   return (
     <DataSourceCard
       dataSourceRef={dataSourceRef}
@@ -71,17 +79,15 @@ export const KqlSamplesDataSourceCard = ({ dataSourceRef }: KqlSamplesDataSource
       {streamDataView && (
         <>
           <UncontrolledStreamsAppSearchBar
-            dateRangeFrom={dataSource.timeRange.from}
-            dateRangeTo={dataSource.timeRange.to}
             filters={dataSource.filters}
             indexPatterns={[streamDataView]}
             isDisabled={isDisabled}
             onFiltersUpdated={(filters) => handleChange({ filters })}
             onQuerySubmit={handleQueryChange}
             query={dataSource.query}
-            showDatePicker
             showFilterBar
             showQueryInput
+            {...dateFilterProps}
           />
           <EuiSpacer size="s" />
         </>

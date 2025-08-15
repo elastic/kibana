@@ -14,7 +14,7 @@ import {
   PackagePolicyMetadata,
 } from './services';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { createAgentPolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { AgentlessConnectorsInfraServiceFactory } from './services/infra_service_factory';
 
@@ -218,7 +218,7 @@ describe('infraSyncTaskRunner', () => {
         throw new Error('Cannot deploy these connectors');
       }
 
-      return createPackagePolicyMock();
+      return createAgentPolicyMock();
     });
 
     await infraSyncTaskRunner(

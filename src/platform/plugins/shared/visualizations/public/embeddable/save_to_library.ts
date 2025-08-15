@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Reference } from '../../common/content_management';
+import type { Reference } from '@kbn/content-management-utils';
 import { PersistedState } from '../persisted_state';
 import { getAnalytics, getI18n, getOverlays, getTheme, getUserProfile } from '../services';
 import { saveVisualization } from '../utils/saved_visualize_utils';

@@ -19,12 +19,12 @@ export default function (providerContext: FtrProviderContext) {
   describe('agent policy with root integrations', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await fleetAndAgents.setup();
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
     describe('root integrations', () => {

@@ -24,7 +24,7 @@ import {
   apiPublishesTimeslice,
 } from '@kbn/presentation-publishing';
 
-import type { ControlGroupChainingSystem } from '../../../common';
+import type { ControlsChainingSystem } from '@kbn/controls-schemas';
 
 export interface ChainingContext {
   chainingFilters?: Filter[] | undefined;
@@ -33,7 +33,7 @@ export interface ChainingContext {
 
 export function chaining$(
   uuid: string,
-  chainingSystem$: PublishingSubject<ControlGroupChainingSystem>,
+  chainingSystem$: PublishingSubject<ControlsChainingSystem>,
   controlsInOrder$: PublishingSubject<Array<{ id: string; type: string }>>,
   children$: PublishingSubject<{ [key: string]: unknown }>
 ) {

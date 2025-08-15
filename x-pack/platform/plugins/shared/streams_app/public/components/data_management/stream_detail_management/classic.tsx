@@ -34,7 +34,7 @@ export function ClassicStreamDetailManagement({
   definition,
   refreshDefinition,
 }: {
-  definition: Streams.UnwiredStream.GetResponse;
+  definition: Streams.ClassicStream.GetResponse;
   refreshDefinition: () => void;
 }) {
   const {
@@ -58,7 +58,7 @@ export function ClassicStreamDetailManagement({
                 values: { streamId: key },
               })}
               <EuiBadgeGroup gutterSize="s">
-                {Streams.UnwiredStream.Definition.is(definition.stream) && <ClassicStreamBadge />}
+                {Streams.ClassicStream.Definition.is(definition.stream) && <ClassicStreamBadge />}
                 <LifecycleBadge lifecycle={definition.effective_lifecycle} />
               </EuiBadgeGroup>
             </EuiFlexGroup>

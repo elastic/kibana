@@ -59,8 +59,7 @@ export function registerInternalDeleteRoute(router: InternalUiSettingsRouter) {
       options: { access: 'internal' },
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the UI Settings Client',
+          requiredPrivileges: ['manage_advanced_settings'],
         },
       },
     },
@@ -76,8 +75,7 @@ export function registerInternalDeleteRoute(router: InternalUiSettingsRouter) {
       options: { access: 'internal' },
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the UI Settings Client',
+          requiredPrivileges: ['manage_advanced_settings'],
         },
       },
     },

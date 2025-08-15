@@ -28,6 +28,8 @@ export interface AgentHandlerParams {
   agentParams: AgentParams;
   /** ID of this run */
   runId: string;
+  /** optional signal to abort the execution of the agent */
+  abortSignal?: AbortSignal;
 }
 
 export interface AgentHandlerReturn {

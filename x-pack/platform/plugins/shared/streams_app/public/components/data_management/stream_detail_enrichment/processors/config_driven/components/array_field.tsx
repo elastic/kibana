@@ -48,6 +48,7 @@ export const ArrayField = ({ fieldConfiguration }: { fieldConfiguration: FieldCo
       error={error?.message}
     >
       <EuiComboBox
+        isInvalid={invalid}
         fullWidth
         noSuggestions
         inputRef={field.ref}

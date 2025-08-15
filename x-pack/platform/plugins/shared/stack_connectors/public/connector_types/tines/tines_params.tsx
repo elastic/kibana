@@ -236,6 +236,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
           helpText={i18n.STORY_HELP}
         >
           <EuiComboBox
+            isInvalid={!!errors.story?.length && selectedStoryOption !== undefined}
             aria-label={i18n.STORY_PLACEHOLDER}
             placeholder={
               webhookUrl ? i18n.DISABLED_BY_WEBHOOK_URL_PLACEHOLDER : i18n.STORY_ARIA_LABEL
@@ -259,6 +260,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
           helpText={i18n.WEBHOOK_HELP}
         >
           <EuiComboBox
+            isInvalid={!!errors.webhook?.length && selectedWebhookOption !== undefined}
             aria-label={i18n.WEBHOOK_ARIA_LABEL}
             placeholder={
               webhookUrl
@@ -313,6 +315,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
             helpText={i18n.WEBHOOK_URL_HELP}
           >
             <EuiFieldText
+              isInvalid={!!errors.webhookUrl?.length}
               placeholder={i18n.WEBHOOK_URL_PLACEHOLDER}
               value={webhookUrl}
               onChange={(ev) => {

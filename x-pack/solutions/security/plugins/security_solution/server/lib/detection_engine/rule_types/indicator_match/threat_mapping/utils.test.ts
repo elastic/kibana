@@ -19,7 +19,7 @@ import {
   decodeThreatMatchNamedQuery,
   encodeThreatMatchNamedQuery,
   getMatchedFields,
-  getSignalValueMap,
+  getFieldAndValueToDocIdsMap,
   getMaxClauseCountErrorValue,
 } from './utils';
 
@@ -727,6 +727,23 @@ describe('utils', () => {
         expect(decoded).toEqual(query);
       });
 
+      it('can decode an encoded query with negate=true', () => {
+        const query: ThreatMatchNamedQuery = {
+          id: 'my_id',
+          index: 'index',
+          field: 'threat.indicator.domain',
+          value: 'host.name',
+          queryType: 'mq',
+          negate: true,
+        };
+
+        const encoded = encodeThreatMatchNamedQuery(query);
+        const decoded = decodeThreatMatchNamedQuery(encoded);
+        // Check that `query` and `encoded` contain the same data but are different objects by reference
+        expect(decoded).not.toBe(query);
+        expect(decoded).toEqual(query);
+      });
+
       it('can decode if some parameters not passed', () => {
         const query: ThreatTermNamedQuery = {
           field: 'threat.indicator.domain',
@@ -978,9 +995,9 @@ describe('utils', () => {
     });
   });
 
-  describe('getSignalValueMap', () => {
+  describe('getFieldAndValueToDocIdsMap', () => {
     it('return empty object if there no events', () => {
-      const valueMap = getSignalValueMap({
+      const valueMap = getFieldAndValueToDocIdsMap({
         eventList: [],
         threatMatchedFields: {
           source: [],
@@ -991,7 +1008,7 @@ describe('utils', () => {
     });
 
     it('return empty object if there some events but no fields', () => {
-      const valueMap = getSignalValueMap({
+      const valueMap = getFieldAndValueToDocIdsMap({
         eventList: [
           {
             _id: '1',
@@ -1014,7 +1031,7 @@ describe('utils', () => {
         _index: `index`,
         fields,
       });
-      const valueMap = getSignalValueMap({
+      const valueMap = getFieldAndValueToDocIdsMap({
         eventList: [
           createEvent('1', {
             'host.name': ['host-1'],

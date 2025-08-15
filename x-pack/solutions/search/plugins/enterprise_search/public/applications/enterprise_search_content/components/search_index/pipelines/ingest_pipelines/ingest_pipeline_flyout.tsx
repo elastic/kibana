@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -61,13 +62,15 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
 }) => {
   const { name } = pipeline;
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={closeFlyout} maxWidth={'40rem'}>
+    <EuiFlyout onClose={closeFlyout} maxWidth={'40rem'} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader>
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
             <EuiTitle>
-              <h2>
+              <h2 id={flyoutTitleId}>
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalHeaderTitle',
                   {

@@ -17,7 +17,7 @@ export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
 
   const idSpace1 = 'space1';
-  const sourceDataArchive = 'x-pack/test/functional/es_archives/ml/module_sample_logs';
+  const sourceDataArchive = 'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs';
   const moduleInfo = {
     moduleId: 'sample_data_weblogs',
     jobIds: ['low_request_rate', 'response_code_rates', 'url_scanning'],

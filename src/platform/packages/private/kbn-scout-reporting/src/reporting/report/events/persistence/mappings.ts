@@ -120,6 +120,20 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
   id: {
     type: 'wildcard',
   },
+  target: {
+    type: 'object',
+    properties: {
+      type: {
+        type: 'keyword',
+      },
+      mode: {
+        type: 'keyword',
+      },
+    },
+  },
+  fully_parallel: {
+    type: 'boolean',
+  },
   status: {
     type: 'keyword',
   },

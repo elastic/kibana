@@ -15,7 +15,7 @@ import {
 } from '@kbn/onechat-common';
 import { useOnechatServices } from '../use_onechat_service';
 import { useOnechatAgentById } from './use_agent_by_id';
-import { useOnechatTools } from '../use_tools';
+import { useToolsService } from '../tools/use_tools';
 import { queryKeys } from '../../query_keys';
 
 export type AgentEditState = Omit<AgentDefinition, 'type'>;
@@ -50,7 +50,7 @@ export function useAgentEdit({
   const queryClient = useQueryClient();
   const [state, setState] = useState<AgentEditState>(emptyState());
 
-  const { tools, isLoading: toolsLoading, error: toolsError } = useOnechatTools();
+  const { tools, isLoading: toolsLoading, error: toolsError } = useToolsService();
 
   const { agent, isLoading: agentLoading, error: agentError } = useOnechatAgentById(agentId || '');
 

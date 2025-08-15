@@ -25,8 +25,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let internalReqHeader: InternalRequestHeader;
 
   describe('Query DSL - Consumers and privileges', function () {
-    // skip until custom roles are supported in serverless
-    this.tags(['skipInMKI']);
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     const RULE_ALERT_INDEX = '.alerts-stack.alerts-default';
     let ruleId: string;

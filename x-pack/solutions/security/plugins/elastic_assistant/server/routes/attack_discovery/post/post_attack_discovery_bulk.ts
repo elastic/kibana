@@ -74,7 +74,7 @@ export const postAttackDiscoveryBulkRoute = (
 
         const attackDiscoveryAlertsEnabled = await featureFlags.getBooleanValue(
           ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
-          false
+          true
         );
 
         if (!attackDiscoveryAlertsEnabled) {

@@ -22,7 +22,7 @@ import {
 import { Span } from '@opentelemetry/api';
 import { isObservable, tap } from 'rxjs';
 import { isPromise } from 'util/types';
-import { withInferenceSpan } from './with_inference_span';
+import { withActiveInferenceSpan } from './with_active_inference_span';
 import {
   AssistantMessageEvent,
   ChoiceEvent,
@@ -144,7 +144,7 @@ function mapAssistantResponse({
 }
 
 /**
- * Wrapper around {@link withInferenceSpan} that sets the right attributes for a chat operation span.
+ * Wrapper around {@link withActiveInferenceSpan} that sets the right attributes for a chat operation span.
  * @param options
  * @param cb
  */
@@ -159,16 +159,18 @@ export function withChatCompleteSpan(
 ): ChatCompleteCompositeResponse {
   const { system, messages, model, toolChoice, tools, ...attributes } = options;
 
-  const next = withInferenceSpan(
+  const next = withActiveInferenceSpan(
+    'ChatComplete',
     {
-      name: 'chatComplete',
-      ...attributes,
-      [GenAISemanticConventions.GenAIOperationName]: 'chat',
-      [GenAISemanticConventions.GenAIResponseModel]: model?.family ?? 'unknown',
-      [GenAISemanticConventions.GenAISystem]: model?.provider ?? 'unknown',
-      [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
-      [ElasticGenAIAttributes.Tools]: tools ? JSON.stringify(tools) : undefined,
-      [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
+      attributes: {
+        ...attributes,
+        [GenAISemanticConventions.GenAIOperationName]: 'chat',
+        [GenAISemanticConventions.GenAIResponseModel]: model?.family ?? 'unknown',
+        [GenAISemanticConventions.GenAISystem]: model?.provider ?? 'unknown',
+        [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
+        [ElasticGenAIAttributes.Tools]: tools ? JSON.stringify(tools) : undefined,
+        [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
+      },
     },
     (span) => {
       if (!span) {

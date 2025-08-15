@@ -103,6 +103,7 @@ export const getNormalizeCommonFields = ({
     [ConfigKey.LABELS]: monitor.fields || defaultFields[ConfigKey.LABELS],
     [ConfigKey.MAINTENANCE_WINDOWS]:
       monitor.maintenanceWindows || defaultFields[ConfigKey.MAINTENANCE_WINDOWS],
+    [ConfigKey.KIBANA_SPACES]: monitor.spaces || defaultFields[ConfigKey.KIBANA_SPACES],
     ...(monitor[ConfigKey.APM_SERVICE_NAME] && {
       [ConfigKey.APM_SERVICE_NAME]: monitor[ConfigKey.APM_SERVICE_NAME],
     }),

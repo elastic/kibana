@@ -29,8 +29,9 @@ interface FindOptions {
   logger: Logger;
   aggs?: Record<string, AggregationsAggregationContainer>;
   mSearch?: {
-    filter: string;
+    filter?: string;
     perPage: number;
+    aggs?: Record<string, AggregationsAggregationContainer>;
   };
 }
 

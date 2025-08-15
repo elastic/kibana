@@ -420,6 +420,7 @@ export const AlertDeleteModal = ({
             isInvalid={!validations.isDeleteConfirmationValid}
           >
             <EuiFieldText
+              isInvalid={!validations.isDeleteConfirmationValid}
               value={deleteConfirmation}
               disabled={isDisabled || !currentSettingsWouldDeleteAlerts}
               onChange={onChangeDeleteConfirmation}

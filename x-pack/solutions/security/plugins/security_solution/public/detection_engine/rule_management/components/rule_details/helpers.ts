@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPlainObject } from 'lodash';
+import { camelCase, isPlainObject, startCase } from 'lodash';
 import type { Filter } from '@kbn/es-query';
 import type {
   DiffableAllFields,
@@ -22,6 +22,7 @@ import {
 } from './constants';
 import * as i18n from './translations';
 import { assertUnreachable } from '../../../../../common/utility_types';
+import { fieldToDisplayNameMap } from './diff_components/translations';
 
 export const getSectionedFieldDiffs = (fields: FieldsGroupDiff[]) => {
   const aboutFields = [];
@@ -115,3 +116,6 @@ export function getDataSourceProps(dataSource: DiffableAllFields['data_source'])
 
   return assertUnreachable(dataSource);
 }
+
+export const convertFieldToDisplayName = (fieldName: string) =>
+  fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName));

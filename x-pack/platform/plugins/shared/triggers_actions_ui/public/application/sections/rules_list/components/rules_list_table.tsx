@@ -541,7 +541,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             />
           </span>
         ),
-        width: '14%',
+        width: '100px',
         'data-test-subj': 'rulesTableCell-rulesListNotify',
         render: (rule: RuleTableItem) => {
           if (!rule.enabled) {
@@ -671,7 +671,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
               {<RuleDurationFormat duration={value} />}
               {showDurationWarning && (
                 <EuiIconTip
-                  data-test-subj="ruleDurationWarning"
+                  iconProps={{ 'data-test-subj': 'ruleDurationWarning' }}
                   anchorClassName="ruleDurationWarningIcon"
                   css={css`
                     .ruleDurationWarningIcon {

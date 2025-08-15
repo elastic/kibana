@@ -33,7 +33,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { ruleDetailsRoute, createRuleRoute, editRuleRoute } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -66,7 +65,6 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
-  dashboard: DashboardStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;

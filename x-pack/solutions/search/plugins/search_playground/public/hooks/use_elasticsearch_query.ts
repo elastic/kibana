@@ -7,6 +7,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useFormContext } from 'react-hook-form';
+
+import { SearchPlaygroundQueryKeys } from '../../common';
 import {
   APIRoutes,
   PlaygroundForm,
@@ -14,8 +16,8 @@ import {
   PlaygroundPageMode,
   QueryTestResponse,
 } from '../types';
-import { useKibana } from './use_kibana';
 import { elasticsearchQueryString } from '../utils/user_query';
+import { useKibana } from './use_kibana';
 
 export const useElasticsearchQuery = (pageMode: PlaygroundPageMode) => {
   const { http } = useKibana().services;
@@ -53,7 +55,7 @@ export const useElasticsearchQuery = (pageMode: PlaygroundPageMode) => {
   };
 
   const { refetch: executeQuery, ...rest } = useQuery({
-    queryKey: ['searchPlayground', 'queryTest'],
+    queryKey: [SearchPlaygroundQueryKeys.SearchQueryTest],
     queryFn: executeEsQuery,
     enabled: false,
     retry: false,

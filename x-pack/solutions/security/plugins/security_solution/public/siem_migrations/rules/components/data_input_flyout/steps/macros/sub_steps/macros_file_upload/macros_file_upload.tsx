@@ -74,6 +74,7 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
             fullWidth
           >
             <EuiFilePicker
+              isInvalid={error != null}
               id="macrosFilePicker"
               ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
               fullWidth

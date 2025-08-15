@@ -54,5 +54,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./get_templates_inputs'));
     loadTestFile(require.resolve('./data_views'));
     loadTestFile(require.resolve('./custom_integrations'));
+    loadTestFile(require.resolve('./rollback'));
   });
 }

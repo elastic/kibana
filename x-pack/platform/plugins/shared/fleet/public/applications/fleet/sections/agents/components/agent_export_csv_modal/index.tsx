@@ -15,6 +15,7 @@ import {
   EuiNotificationBadge,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { uniqBy } from 'lodash';
@@ -43,6 +44,8 @@ export const AgentExportCSVModal: React.FunctionComponent<Props> = ({
   const [selection, setSelection] = useState<ExportFieldWithDescription[]>(
     INITIAL_AGENT_FIELDS_TO_EXPORT
   );
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const items = uniqBy([...INITIAL_AGENT_FIELDS_TO_EXPORT, ...AGENT_FIELDS_TO_EXPORT], 'field');
 
@@ -77,6 +80,8 @@ export const AgentExportCSVModal: React.FunctionComponent<Props> = ({
           defaultMessage="Download table results as a CSV file"
         />
       }
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       onCancel={onClose}
       onConfirm={() => onSubmit(selection.map((s) => ({ field: s.field })))}
       cancelButtonText={

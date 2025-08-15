@@ -42,6 +42,7 @@ export const FielddataFrequencyFilterAbsolute = ({ min, max }: Props) => {
       }
     >
       <EuiFormControlLayoutDelimited
+        isInvalid={minIsInvalid || maxIsInvalid}
         startControl={
           <EuiFieldNumber
             value={min.value as EuiFieldNumberProps['value']}

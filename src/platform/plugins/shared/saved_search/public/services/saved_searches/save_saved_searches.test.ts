@@ -138,6 +138,23 @@ describe('saveSavedSearch', () => {
         title: 'title',
         usesAdHocDataView: undefined,
         viewMode: undefined,
+        tabs: [
+          {
+            id: expect.any(String),
+            label: 'Untitled',
+            attributes: {
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: '{}',
+              },
+              sort: [],
+              columns: [],
+              grid: {},
+              hideChart: false,
+              isTextBasedQuery: false,
+              timeRestore: false,
+            },
+          },
+        ],
       },
       options: { references: [] },
     });
@@ -174,6 +191,23 @@ describe('saveSavedSearch', () => {
         timeRestore: false,
         usesAdHocDataView: undefined,
         viewMode: undefined,
+        tabs: [
+          {
+            id: expect.any(String),
+            label: 'Untitled',
+            attributes: {
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: '{}',
+              },
+              sort: [],
+              columns: [],
+              grid: {},
+              hideChart: false,
+              isTextBasedQuery: false,
+              timeRestore: false,
+            },
+          },
+        ],
       },
       id: 'id',
       options: { references: [] },
@@ -225,6 +259,23 @@ describe('saveSavedSearch', () => {
         title: 'title',
         usesAdHocDataView: undefined,
         viewMode: undefined,
+        tabs: [
+          {
+            id: expect.any(String),
+            label: 'Untitled',
+            attributes: {
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: '{}',
+              },
+              sort: [],
+              columns: [],
+              grid: {},
+              hideChart: false,
+              isTextBasedQuery: false,
+              timeRestore: false,
+            },
+          },
+        ],
       },
       id: 'id',
       options: { references: ['tag-1', 'tag-2'] },

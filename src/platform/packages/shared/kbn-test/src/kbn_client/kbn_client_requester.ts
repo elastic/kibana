@@ -75,6 +75,7 @@ export interface ReqOptions {
   headers?: Record<string, string>;
   ignoreErrors?: number[];
   responseType?: ResponseType;
+  signal?: AbortSignal;
 }
 
 const delay = (ms: number) =>

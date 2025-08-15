@@ -469,12 +469,11 @@ export class TagManagementPageObject extends FtrService {
       await this.openActionMenu();
     }
 
-    const actionExists = await this.testSubjects.exists(`actionBar-button-${actionId}`);
-
     if (!menuWasOpened) {
       await this.toggleActionMenu();
     }
 
+    const actionExists = await this.testSubjects.exists(`actionBar-button-${actionId}`);
     return actionExists;
   }
 

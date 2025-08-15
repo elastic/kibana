@@ -151,16 +151,17 @@ export const SettingsApplicationKibanaProvider: FC<
   };
 
   const getAllowlistedSettings = (scope: UiSettingsScope, solution: SolutionView | undefined) => {
+    const { filterSettings } = application.capabilities;
     const scopeClient = getScopeClient(scope);
     const rawSettings = Object.fromEntries(
       Object.entries(scopeClient.getAll()).filter(
         ([settingId, settingDef]) =>
           !settingDef.readonly &&
           !client.isCustom(settingId) &&
-          (!solution ||
-            solution === 'classic' ||
-            !settingDef.solution ||
-            settingDef.solution === solution)
+          (!filterSettings.bySolutionView ||
+            !solution ||
+            !settingDef.solutionViews ||
+            settingDef.solutionViews.includes(solution))
       )
     );
     return normalizeSettings(rawSettings);
@@ -173,7 +174,7 @@ export const SettingsApplicationKibanaProvider: FC<
   };
 
   const getCapabilities = () => {
-    const { advancedSettings, globalSettings } = application.capabilities;
+    const { advancedSettings, globalSettings, filterSettings } = application.capabilities;
     return {
       spaceSettings: {
         show: advancedSettings.show as boolean,
@@ -182,6 +183,9 @@ export const SettingsApplicationKibanaProvider: FC<
       globalSettings: {
         show: globalSettings.show as boolean,
         save: globalSettings.save as boolean,
+      },
+      filterSettings: {
+        bySolutionView: filterSettings.bySolutionView as boolean,
       },
     };
   };

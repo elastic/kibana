@@ -10,7 +10,6 @@
 import { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type {
   ChromeNavLinks,
-  SideNavComponent,
   ChromeBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
@@ -61,9 +60,6 @@ interface StartDeps {
 
 export class ProjectNavigationService {
   private logger: Logger | undefined;
-  private customProjectSideNavComponent$ = new BehaviorSubject<{
-    current: SideNavComponent | null;
-  }>({ current: null });
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
   private projectName$ = new BehaviorSubject<string | undefined>(undefined);
   private navigationTree$ = new BehaviorSubject<ChromeProjectNavigationNode[] | undefined>(
@@ -90,6 +86,7 @@ export class ProjectNavigationService {
   private readonly nextSolutionNavDefinitionId$ = new BehaviorSubject<SolutionId | null>(null);
   // The active solution navigation definition id that has been initiated and is currently active
   private readonly activeSolutionNavDefinitionId$ = new BehaviorSubject<SolutionId | null>(null);
+  private readonly activeDataTestSubj$ = new BehaviorSubject<string | undefined>(undefined);
   private readonly location$ = new BehaviorSubject<Location>(createLocation('/'));
   private deepLinksMap$: Observable<Record<string, ChromeNavLink>> = of({});
   private cloudLinks$ = new BehaviorSubject<CloudLinks>({});
@@ -140,17 +137,14 @@ export class ProjectNavigationService {
       },
       initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
         id: SolutionId,
-        navTreeDefinition$: Observable<NavigationTreeDefinition<LinkId>>
+        navTreeDefinition$: Observable<NavigationTreeDefinition<LinkId>>,
+        config?: { dataTestSubj?: string }
       ) => {
-        this.initNavigation(id, navTreeDefinition$);
+        this.initNavigation(id, navTreeDefinition$, config);
       },
       getNavigationTreeUi$: this.getNavigationTreeUi$.bind(this),
       getActiveNodes$: () => {
         return this.activeNodes$.pipe(takeUntil(this.stop$), distinctUntilChanged(deepEqual));
-      },
-      setSideNavComponent: this.setSideNavComponent.bind(this),
-      getProjectSideNavComponent$: () => {
-        return this.customProjectSideNavComponent$.asObservable();
       },
       setProjectBreadcrumbs: (
         breadcrumbs: ChromeBreadcrumb | ChromeBreadcrumb[],
@@ -193,6 +187,7 @@ export class ProjectNavigationService {
       getActiveSolutionNavId$: () => this.activeSolutionNavDefinitionId$.asObservable(),
       getPanelSelectedNode$: () => this.panelSelectedNode$.asObservable(),
       setPanelSelectedNode: this.setPanelSelectedNode.bind(this),
+      getActiveDataTestSubj$: () => this.activeDataTestSubj$.asObservable(),
     };
   }
 
@@ -202,9 +197,18 @@ export class ProjectNavigationService {
    *
    * @param id Id for the navigation tree definition
    * @param navTreeDefinition$ The navigation tree definition
+   * @param config Optional configuration object, currently only supports `dataTestSubj` to set the data-test-subj attribute for the navigation container
    */
-  private initNavigation(id: SolutionId, navTreeDefinition$: Observable<NavigationTreeDefinition>) {
+  private initNavigation(
+    id: SolutionId,
+    navTreeDefinition$: Observable<NavigationTreeDefinition>,
+    config?: { dataTestSubj?: string }
+  ) {
     if (this.activeSolutionNavDefinitionId$.getValue() === id) return;
+
+    if (config?.dataTestSubj) {
+      this.activeDataTestSubj$.next(config.dataTestSubj);
+    }
 
     if (this.navigationChangeSubscription) {
       this.navigationChangeSubscription.unsubscribe();
@@ -313,10 +317,6 @@ export class ProjectNavigationService {
       });
   }
 
-  private setSideNavComponent(component: SideNavComponent | null) {
-    this.customProjectSideNavComponent$.next({ current: component });
-  }
-
   private handleSolutionNavDefinitionChange() {
     combineLatest([
       this.solutionNavDefinitions$,
@@ -334,17 +334,15 @@ export class ProjectNavigationService {
           return;
         }
 
-        const { sideNavComponent, homePage = '' } = definition;
-
-        if (sideNavComponent) {
-          this.setSideNavComponent(sideNavComponent);
-        }
+        const { homePage = '' } = definition;
 
         this.waitForLink(homePage, (navLink: ChromeNavLink) => {
           this.setProjectHome(navLink.href);
         });
 
-        this.initNavigation(nextId, definition.navigationTree$);
+        this.initNavigation(nextId, definition.navigationTree$, {
+          dataTestSubj: definition.dataTestSubj,
+        });
       });
   }
 
@@ -400,9 +398,7 @@ export class ProjectNavigationService {
         if (Object.keys(definitions).length === 0) return null;
         if (!definitions[id]) return null;
 
-        // We strip out the sideNavComponent from the definition as it should only be used internally
-        const { sideNavComponent, ...definition } = definitions[id]!;
-        return definition;
+        return definitions[id]!;
       })
     );
   }

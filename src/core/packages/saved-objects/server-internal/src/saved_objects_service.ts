@@ -35,7 +35,9 @@ import type {
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
   SavedObjectsExtensions,
+  SavedObjectsExtensionFactory,
 } from '@kbn/core-saved-objects-server';
+import { ENCRYPTION_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectConfig,
   SavedObjectsSerializer,
@@ -362,6 +364,15 @@ export class SavedObjectsService
 
     return {
       getScopedClient: clientProvider.getClient.bind(clientProvider),
+      getUnsafeInternalClient: ({ includedHiddenTypes, excludedExtensions = [] } = {}) => {
+        const safeExcludedExtensions = Array.isArray(excludedExtensions) ? excludedExtensions : [];
+        const extensions = this.getInternalExtensions(safeExcludedExtensions);
+        const repository = repositoryFactory.createInternalRepository(
+          includedHiddenTypes,
+          extensions
+        );
+        return new SavedObjectsClient(repository);
+      },
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
       createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),
@@ -398,6 +409,42 @@ export class SavedObjectsService
       metrics: {
         migrationDuration,
       },
+    };
+  }
+
+  private getInternalExtensions(excludedExtensions: string[] = []): SavedObjectsExtensions {
+    // For internal clients, we automatically exclude security extension to avoid user scoping
+    // and handle extensions that can work without a request context
+    const createExt = <T>(
+      extensionId: string,
+      extensionFactory?: SavedObjectsExtensionFactory<T | undefined>
+    ): T | undefined => {
+      if (excludedExtensions.includes(extensionId) || !extensionFactory) {
+        return undefined;
+      }
+
+      // Create a minimal request-like object for extensions that need it
+      // but don't require actual user context (like encryption/spaces)
+      // Using 'unknown' cast is intentional here as we're creating a minimal fake request
+      const internalRequest = {
+        headers: {},
+        getBasePath: () => '',
+        path: '/',
+        route: { settings: {} },
+        url: { href: '/' },
+        raw: { req: { url: '/' } },
+      } as unknown as KibanaRequest;
+
+      return extensionFactory({
+        typeRegistry: this.typeRegistry,
+        request: internalRequest,
+      });
+    };
+
+    return {
+      encryptionExtension: createExt(ENCRYPTION_EXTENSION_ID, this.encryptionExtensionFactory),
+      securityExtension: undefined, // Always undefined for internal clients
+      spacesExtension: createExt(SPACES_EXTENSION_ID, this.spacesExtensionFactory),
     };
   }
 

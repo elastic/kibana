@@ -26,6 +26,7 @@ import {
   EuiFieldText,
   EuiFormHelpText,
   EuiAvatar,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui';
@@ -46,6 +47,8 @@ export const EditAssistantBasicInfo: React.FC<EditAssistantBasicInfoProps> = ({
   agentId,
   onSaveSuccess,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const {
     services: { notifications },
   } = useKibana();
@@ -73,9 +76,9 @@ export const EditAssistantBasicInfo: React.FC<EditAssistantBasicInfoProps> = ({
   const avatarColor = watch('avatarColor');
 
   return (
-    <EuiModal onClose={onClose} style={{ width: 800 }}>
+    <EuiModal onClose={onClose} style={{ width: 800 }} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('workchatApp.assistants.editBasicsModal.title', {
             defaultMessage: 'Edit Assistant Basics',
           })}

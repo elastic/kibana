@@ -107,14 +107,13 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
 
   const euiThemeContext = useEuiTheme();
 
-  const kibana = useKibana<
+  const { services, overlays } = useKibana<
     IUnifiedSearchPluginServices & {
       contentManagement: ContentManagementPublicStart;
       unifiedSearch: UnifiedSearchPublicPluginStart;
     }
   >();
 
-  const { services, overlays } = kibana;
   const {
     uiSettings,
     appName,

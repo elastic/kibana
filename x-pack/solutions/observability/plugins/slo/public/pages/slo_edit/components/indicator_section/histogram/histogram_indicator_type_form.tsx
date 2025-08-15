@@ -94,6 +94,7 @@ export function HistogramIndicatorTypeForm() {
             type="good"
             histogramFields={histogramFields ?? []}
             isLoadingIndex={isIndexFieldsLoading}
+            dataView={dataView}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -113,6 +114,7 @@ export function HistogramIndicatorTypeForm() {
             type="total"
             histogramFields={histogramFields ?? []}
             isLoadingIndex={isIndexFieldsLoading}
+            dataView={dataView}
           />
         </EuiFlexItem>
         <EuiFlexItem>

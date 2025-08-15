@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
+import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
 import {
   TimelineAxisContainer,
   VerticalLinesContainer,
@@ -19,7 +20,6 @@ import { getErrorMarks } from '../marks/get_error_marks';
 import { AccordionWaterfall } from './accordion_waterfall';
 import type {
   IWaterfall,
-  IWaterfallGetRelatedErrorsHref,
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
 

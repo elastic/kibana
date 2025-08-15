@@ -27,7 +27,7 @@ export const installDataView = async (
       {
         id: currentSpaceDataViewId,
         title: `${indexPattern}${currentSpaceId}`,
-        name: `${dataViewName} - ${currentSpaceId} `,
+        name: `${dataViewName} - ${currentSpaceId}`,
         namespaces: [currentSpaceId],
         allowNoIndex: true,
         timeFieldName: DATA_VIEW_TIME_FIELD,

@@ -514,7 +514,7 @@
         "label": "RowHeightSettings",
         "description": [],
         "signature": [
-          "({\n  lineCountInput,\n  label,\n  rowHeight,\n  onChangeRowHeight,\n  onChangeLineCountInput,\n  maxRowHeight,\n  ['data-test-subj']: dataTestSubj,\n}: ",
+          "({\n  lineCountInput,\n  label,\n  rowHeight = RowHeightMode.custom,\n  onChangeRowHeight,\n  onChangeLineCountInput,\n  maxRowHeight = 20,\n  ['data-test-subj']: dataTestSubj,\n}: ",
           {
             "pluginId": "@kbn/unified-data-table",
             "scope": "public",
@@ -533,7 +533,7 @@
             "id": "def-public.RowHeightSettings.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  lineCountInput,\n  label,\n  rowHeight,\n  onChangeRowHeight,\n  onChangeLineCountInput,\n  maxRowHeight,\n  ['data-test-subj']: dataTestSubj,\n}",
+            "label": "{\n  lineCountInput,\n  label,\n  rowHeight = RowHeightMode.custom,\n  onChangeRowHeight,\n  onChangeLineCountInput,\n  maxRowHeight = 20,\n  ['data-test-subj']: dataTestSubj,\n}",
             "description": [],
             "signature": [
               {
@@ -1069,6 +1069,9 @@
             "tags": [],
             "label": "lineCountInput",
             "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1156,7 +1159,7 @@
             "label": "onChangeLineCountInput",
             "description": [],
             "signature": [
-              "(newRowHeightLines: number) => void"
+              "(newRowHeightLines: number, isValid: boolean) => void"
             ],
             "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
             "deprecated": false,
@@ -1171,6 +1174,21 @@
                 "description": [],
                 "signature": [
                   "number"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.RowHeightSettingsProps.onChangeLineCountInput.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "isValid",
+                "description": [],
+                "signature": [
+                  "boolean"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
                 "deprecated": false,
@@ -1372,6 +1390,48 @@
             "signature": [
               "\"basic\" | \"chars\" | \"words\" | \"lines\""
             ],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.density",
+            "type": "Enum",
+            "tags": [],
+            "label": "density",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.DataGridDensity",
+                "text": "DataGridDensity"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.rowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "rowHeight",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.headerRowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "headerRowHeight",
+            "description": [],
             "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
             "deprecated": false,
             "trackAdoption": false

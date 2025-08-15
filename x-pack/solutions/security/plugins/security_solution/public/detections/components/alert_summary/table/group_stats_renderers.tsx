@@ -89,7 +89,7 @@ export const getIntegrationComponent = (
 /**
  * Returns stats to be used in the`extraAction` property of the EuiAccordion component used within the kbn-grouping package.
  * It handles custom renders for the following fields:
- * - signal.rule.id
+ * - signal.rule.rule_id
  * - kibana.alert.severity
  * - kibana.alert.rule.name
  * And returns a default view for all the other fields.
@@ -106,7 +106,7 @@ export const groupStatsRenderer = (
   const rulesBadge: GroupStatsItem = getRulesBadge(bucket);
 
   switch (selectedGroup) {
-    case 'signal.rule.id':
+    case 'signal.rule.rule_id':
       return [...severityComponent, rulesBadge, ...defaultBadges];
     case 'kibana.alert.severity':
       return [...integrationComponent, rulesBadge, ...defaultBadges];

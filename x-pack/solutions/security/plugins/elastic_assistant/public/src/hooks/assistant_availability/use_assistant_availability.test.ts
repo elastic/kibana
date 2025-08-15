@@ -55,6 +55,11 @@ describe('useAssistantAvailability', () => {
               save: true,
               delete: true,
             },
+            management: {
+              ai: {
+                aiAssistantManagementSelection: true,
+              },
+            },
           },
         },
         aiAssistantManagementSelection: {
@@ -75,6 +80,7 @@ describe('useAssistantAvailability', () => {
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
       isAssistantVisible: true,
+      isAssistantManagementEnabled: true,
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
     });
@@ -107,6 +113,11 @@ describe('useAssistantAvailability', () => {
               save: true,
               delete: true,
             },
+            management: {
+              ai: {
+                aiAssistantManagementSelection: true,
+              },
+            },
           },
         },
         aiAssistantManagementSelection: {
@@ -127,6 +138,7 @@ describe('useAssistantAvailability', () => {
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
       isAssistantVisible: false,
+      isAssistantManagementEnabled: true,
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
     });
@@ -155,6 +167,11 @@ describe('useAssistantAvailability', () => {
               save: false,
               delete: false,
             },
+            management: {
+              ai: {
+                aiAssistantManagementSelection: false,
+              },
+            },
           },
         },
         featureFlags: {
@@ -172,6 +189,7 @@ describe('useAssistantAvailability', () => {
       hasConnectorsReadPrivilege: false,
       isAssistantEnabled: false,
       isAssistantVisible: false,
+      isAssistantManagementEnabled: false,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });
@@ -200,6 +218,11 @@ describe('useAssistantAvailability', () => {
               save: false,
               delete: false,
             },
+            management: {
+              ai: {
+                aiAssistantManagementSelection: false,
+              },
+            },
           },
         },
         featureFlags: {
@@ -217,6 +240,7 @@ describe('useAssistantAvailability', () => {
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
       isAssistantVisible: true,
+      isAssistantManagementEnabled: false,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });
@@ -247,6 +271,7 @@ describe('useAssistantAvailability', () => {
       hasConnectorsReadPrivilege: false,
       isAssistantEnabled: true,
       isAssistantVisible: true,
+      isAssistantManagementEnabled: false,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });

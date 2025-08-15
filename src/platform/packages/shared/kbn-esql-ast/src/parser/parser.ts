@@ -94,6 +94,19 @@ export class Parser {
     return Parser.create(src).parseErrors();
   };
 
+  public static readonly parseQuery = (
+    src: string,
+    options?: ParseOptions
+  ): ParseResult<ESQLAstQueryExpression> => {
+    const result = Parser.parse(src, options);
+
+    if (result.errors.length) {
+      throw result.errors[0];
+    }
+
+    return result;
+  };
+
   /**
    * Parse a single ES|QL command, generating an AST and a list of parsing errors.
    *

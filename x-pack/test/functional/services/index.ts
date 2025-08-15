@@ -20,9 +20,10 @@ import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/functio
 import { CanvasElementProvider } from '@kbn/test-suites-xpack-platform/functional/services/canvas_element';
 import { TransformProvider } from '@kbn/test-suites-xpack-platform/functional/services/transform';
 import { ReportingFunctionalProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services';
-import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
-import { services as commonServices } from '../../common/services';
-
+import { RandomProvider } from '@kbn/test-suites-xpack-platform/functional/services/random';
+import { PipelineListProvider } from '@kbn/test-suites-xpack-platform/functional/services/pipeline_list';
+import { DataStreamProvider } from '@kbn/test-suites-xpack-platform/functional/services/data_stream';
+import { PipelineEditorProvider } from '@kbn/test-suites-xpack-platform/functional/services/pipeline_editor';
 import {
   MonitoringNoDataProvider,
   MonitoringClusterListProvider,
@@ -54,18 +55,9 @@ import {
   MonitoringEnterpriseSearchOverviewProvider,
   MonitoringEnterpriseSearchSummaryStatusProvider,
   // @ts-ignore not ts yet
-} from './monitoring';
-// @ts-ignore not ts yet
-import { PipelineListProvider } from './pipeline_list';
-// @ts-ignore not ts yet
-import { PipelineEditorProvider } from './pipeline_editor';
-// @ts-ignore not ts yet
-import { RandomProvider } from './random';
-// @ts-ignore not ts yet
-import { UptimeProvider } from './uptime';
-import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
-import { ObservabilityProvider } from './observability';
-import { DataStreamProvider } from './data_stream';
+} from '@kbn/test-suites-xpack-platform/functional/services/monitoring';
+import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
+import { services as commonServices } from '../../common/services';
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
 // only the built-in services will be available
@@ -112,14 +104,11 @@ export const services = {
   canvasElement: CanvasElementProvider,
   grokDebugger: GrokDebuggerProvider,
   userMenu: UserMenuProvider,
-  uptime: UptimeProvider,
-  infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
   ml: MachineLearningProvider,
   transform: TransformProvider,
   reporting: ReportingFunctionalProvider,
   sampleData: SampleDataServiceProvider,
   searchSessions: SearchSessionsService,
-  observability: ObservabilityProvider,
   actions: ActionsServiceProvider,
   rules: RulesServiceProvider,
   cases: CasesServiceProvider,

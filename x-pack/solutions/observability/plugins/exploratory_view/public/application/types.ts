@@ -15,7 +15,6 @@ import type {
   IUiSettingsClient,
   NotificationsStart,
   OverlayStart,
-  SavedObjectsStart,
   ThemeServiceStart,
 } from '@kbn/core/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
@@ -46,7 +45,6 @@ export interface ObservabilityAppServices {
   notifications: NotificationsStart;
   observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   overlays: OverlayStart;
-  savedObjectsClient: SavedObjectsStart['client'];
   share: SharePluginStart;
   stateTransfer: EmbeddableStateTransfer;
   storage: IStorageWrapper;

@@ -173,7 +173,7 @@ export const installTranslated = async ({
   savedObjectsClient,
 }: InstallTranslatedProps): Promise<number> => {
   const detectionRulesClient = securitySolutionContext.getDetectionRulesClient();
-  const ruleMigrationsClient = securitySolutionContext.getSiemRuleMigrationsClient();
+  const ruleMigrationsClient = securitySolutionContext.siemMigrations.getRulesClient();
 
   let installedCount = 0;
   const installationErrors: Error[] = [];

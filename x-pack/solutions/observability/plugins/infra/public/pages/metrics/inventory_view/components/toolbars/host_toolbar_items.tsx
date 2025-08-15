@@ -5,11 +5,10 @@
  * 2.0.
  */
 import React from 'react';
-import { hostSnapshotMetricTypes } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
 import type { ToolbarProps } from './types';
 
-export const hostGroupByFields = [
+export const ecsHostGroupByFields = [
   'cloud.availability_zone',
   'cloud.machine.type',
   'cloud.project.id',
@@ -17,12 +16,30 @@ export const hostGroupByFields = [
   'service.type',
 ];
 
+const semconvHostGroupByFields = [
+  'os.name',
+  'os.version',
+  'os.type',
+  'host.type',
+  'host.arch',
+  'host.image.id',
+  'host.image.name',
+  'host.image.version',
+  'cloud.account_id',
+  'cloud.platform',
+  'cloud.provider',
+  'cloud.availability_zone',
+  'cloud.region',
+];
+
 export const HostToolbarItems = (props: ToolbarProps) => {
   return (
     <MetricsAndGroupByToolbarItems
       {...props}
-      metricTypes={hostSnapshotMetricTypes}
-      groupByFields={hostGroupByFields}
+      groupByFields={
+        props.preferredSchema === 'semconv' ? semconvHostGroupByFields : ecsHostGroupByFields
+      }
+      allowSchemaSelection
     />
   );
 };

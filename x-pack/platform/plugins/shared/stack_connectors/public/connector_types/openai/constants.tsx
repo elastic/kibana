@@ -10,6 +10,7 @@ import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
+import * as commonI18n from '../../common/genai_connectors/translations';
 import * as i18n from './translations';
 import { Config } from './types';
 
@@ -103,7 +104,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
     euiFieldProps: {
       append: (
         <EuiText size="xs" color="subdued">
-          {i18n.OPTIONAL_LABEL}
+          {commonI18n.OPTIONAL_LABEL}
         </EuiText>
       ),
     },
@@ -126,7 +127,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
       },
       append: (
         <EuiText size="xs" color="subdued">
-          {i18n.OPTIONAL_LABEL}
+          {commonI18n.OPTIONAL_LABEL}
         </EuiText>
       ),
     },

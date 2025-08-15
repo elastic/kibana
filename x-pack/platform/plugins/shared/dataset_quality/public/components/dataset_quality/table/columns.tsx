@@ -28,7 +28,7 @@ import React from 'react';
 import {
   BYTE_NUMBER_FORMAT,
   DEGRADED_DOCS_QUERY,
-  DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
+  WARNING_QUALITY_MINIMUM_PERCENTAGE,
   FAILURE_STORE_SELECTOR,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
 } from '../../../../common/constants';
@@ -144,10 +144,10 @@ const datasetQualityColumnTooltip = (
           </EuiFlexItem>
           <EuiFlexItem>
             <QualityIndicator
-              quality="degraded"
+              quality="warning"
               description={` ${degradedDocsDescription(
                 'Degraded',
-                DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
+                WARNING_QUALITY_MINIMUM_PERCENTAGE,
                 ' greater than'
               )}`}
             />
@@ -157,7 +157,7 @@ const datasetQualityColumnTooltip = (
               quality="good"
               description={` ${degradedDocsDescription(
                 'Good',
-                DEGRADED_QUALITY_MINIMUM_PERCENTAGE
+                WARNING_QUALITY_MINIMUM_PERCENTAGE
               )}`}
             />
           </EuiFlexItem>
@@ -169,7 +169,7 @@ const datasetQualityColumnTooltip = (
 
 export const getDatasetQualityTableColumns = ({
   fieldFormats,
-  canUserMonitorDataset,
+  canUserMonitorAnyDataset,
   canUserMonitorAnyDataStream,
   loadingDataStreamStats,
   loadingDocStats,
@@ -182,7 +182,7 @@ export const getDatasetQualityTableColumns = ({
   canReadFailureStore,
 }: {
   fieldFormats: FieldFormatsStart;
-  canUserMonitorDataset: boolean;
+  canUserMonitorAnyDataset: boolean;
   canUserMonitorAnyDataStream: boolean;
   loadingDataStreamStats: boolean;
   loadingDocStats: boolean;
@@ -247,7 +247,7 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '160px',
     },
-    ...(canUserMonitorDataset && canUserMonitorAnyDataStream
+    ...(canUserMonitorAnyDataset && canUserMonitorAnyDataStream
       ? [
           {
             name: (
@@ -417,7 +417,7 @@ export const getDatasetQualityTableColumns = ({
           },
         ]
       : []),
-    ...(canUserMonitorDataset && canUserMonitorAnyDataStream
+    ...(canUserMonitorAnyDataset && canUserMonitorAnyDataStream
       ? [
           {
             name: (

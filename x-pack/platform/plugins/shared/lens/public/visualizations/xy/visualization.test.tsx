@@ -45,7 +45,7 @@ import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { layerTypes, Visualization } from '../..';
 import { set } from '@kbn/safer-lodash-set';
-import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import type { Reference } from '@kbn/content-management-utils';
 import {
   getAnnotationsLayers,
   isAnnotationsLayer,
@@ -353,7 +353,7 @@ describe('xy_visualization', () => {
       const refName1 = 'my-reference';
       const refName2 = 'my-other-reference';
 
-      const references: SavedObjectReference[] = [
+      const references: Reference[] = [
         {
           name: refName1,
           id: annotationGroupId1,
@@ -429,7 +429,7 @@ describe('xy_visualization', () => {
 
       const dataViewId = 'some-index-pattern-*';
 
-      const references: SavedObjectReference[] = [
+      const references: Reference[] = [
         {
           name: refName1,
           id: annotationGroupId1,
@@ -539,7 +539,7 @@ describe('xy_visualization', () => {
 
       const dataViewId = 'some-index-pattern-*';
 
-      const references: SavedObjectReference[] = [
+      const references: Reference[] = [
         {
           name: refName1,
           id: annotationGroupId1,
@@ -3608,8 +3608,7 @@ describe('xy_visualization', () => {
       };
       state.layers = [layer];
 
-      const { state: persistableState, savedObjectReferences } =
-        xyVisualization.getPersistableState!(state);
+      const { state: persistableState, references } = xyVisualization.getPersistableState!(state);
 
       expect(persistableState.layers).toMatchInlineSnapshot(`
         Array [
@@ -3632,7 +3631,7 @@ describe('xy_visualization', () => {
         ]
       `);
 
-      expect(savedObjectReferences).toMatchInlineSnapshot(`
+      expect(references).toMatchInlineSnapshot(`
         Array [
           Object {
             "id": "some-index-pattern",
@@ -3693,25 +3692,24 @@ describe('xy_visualization', () => {
 
       state.layers = layers;
 
-      const { state: persistableState, savedObjectReferences } =
-        xyVisualization.getPersistableState!(state);
+      const { state: persistableState, references } = xyVisualization.getPersistableState!(state);
 
       expect(persistableState.layers).toEqual([
         {
-          annotationGroupRef: savedObjectReferences[0].name,
+          annotationGroupRef: references[0].name,
           layerId: 'layer-id',
           layerType: 'annotations',
           persistanceType: 'byReference',
         },
         {
-          annotationGroupRef: savedObjectReferences[1].name,
+          annotationGroupRef: references[1].name,
           layerId: 'layer-id2',
           layerType: 'annotations',
           persistanceType: 'byReference',
         },
       ]);
 
-      expect(savedObjectReferences).toEqual([
+      expect(references).toEqual([
         {
           name: (persistableState.layers[0] as XYPersistedByReferenceAnnotationLayerConfig)
             .annotationGroupRef,
@@ -3726,7 +3724,7 @@ describe('xy_visualization', () => {
         },
       ]);
 
-      expect(savedObjectReferences[0].name).not.toBe(savedObjectReferences[1].name);
+      expect(references[0].name).not.toBe(references[1].name);
     });
 
     it('should persist unsaved changes to by-reference annotation layers', () => {
@@ -3784,13 +3782,11 @@ describe('xy_visualization', () => {
 
       state.layers = layers;
 
-      const { state: persistableState, savedObjectReferences } =
-        xyVisualization.getPersistableState!(state);
+      const { state: persistableState, references } = xyVisualization.getPersistableState!(state);
 
-      expect(savedObjectReferences).toHaveLength(4);
+      expect(references).toHaveLength(4);
 
-      expect(savedObjectReferences.filter(({ type }) => type === 'index-pattern'))
-        .toMatchInlineSnapshot(`
+      expect(references.filter(({ type }) => type === 'index-pattern')).toMatchInlineSnapshot(`
         Array [
           Object {
             "id": "some-index-pattern",
@@ -3805,7 +3801,7 @@ describe('xy_visualization', () => {
         ]
       `);
 
-      const annotationGroupRefs = savedObjectReferences.filter(
+      const annotationGroupRefs = references.filter(
         ({ type }) => type === 'event-annotation-group'
       );
 
@@ -4047,7 +4043,7 @@ describe('xy_visualization', () => {
     const refName1 = 'my-reference';
     const refName2 = 'my-other-reference';
 
-    const references1: SavedObjectReference[] = [
+    const references1: Reference[] = [
       {
         name: refName1,
         id: annotationGroupId1,
@@ -4060,7 +4056,7 @@ describe('xy_visualization', () => {
       },
     ];
 
-    const references2: SavedObjectReference[] = [
+    const references2: Reference[] = [
       {
         name: refName2,
         id: annotationGroupId1,

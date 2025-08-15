@@ -29,7 +29,9 @@ export const HEADER_INTEGRATION_TITLE_TEST_ID = 'ai-for-soc-alert-flyout-header-
  */
 export const HeaderTitle = memo(() => {
   const { dataFormattedForFieldBrowser, getFieldsData } = useAIForSOCDetailsContext();
-  const { ruleId, ruleName, timestamp } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const { ruleRuleId, ruleName, timestamp } = useBasicDataFromDetailsData(
+    dataFormattedForFieldBrowser
+  );
   const title = useMemo(() => getAlertTitle({ ruleName }), [ruleName]);
 
   const date = useMemo(() => new Date(timestamp), [timestamp]);
@@ -83,7 +85,7 @@ export const HeaderTitle = memo(() => {
                 />
               }
             >
-              <IntegrationIcon ruleId={ruleId} />
+              <IntegrationIcon ruleId={ruleRuleId} />
             </AlertHeaderBlock>
           </EuiFlexItem>
         </EuiFlexGroup>

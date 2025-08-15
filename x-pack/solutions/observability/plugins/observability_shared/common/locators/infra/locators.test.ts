@@ -8,7 +8,7 @@
 import rison from '@kbn/rison';
 import { AssetDetailsLocatorDefinition } from './asset_details_locator';
 import { AssetDetailsFlyoutLocatorDefinition } from './asset_details_flyout_locator';
-import { HostsLocatorDefinition } from './hosts_locator';
+import { HostsLocatorDefinition, HostsLocatorParams } from './hosts_locator';
 import { InventoryLocatorDefinition } from './inventory_locator';
 import querystring from 'querystring';
 
@@ -143,7 +143,7 @@ describe('Infra Locators', () => {
   });
 
   describe('Hosts Locator', () => {
-    const params = {
+    const params: HostsLocatorParams = {
       query: {
         language: 'kuery',
         query: 'host.name: "foo"',
@@ -165,9 +165,18 @@ describe('Infra Locators', () => {
           field: 'alertsCount',
         },
       },
+      preferredSchema: 'ecs',
     };
-    const { query, dateRange, filters, panelFilters, limit, tableProperties } = params;
-    const searchString = rison.encodeUnknown({ query, dateRange, filters, panelFilters, limit });
+    const { query, dateRange, filters, panelFilters, limit, tableProperties, preferredSchema } =
+      params;
+    const searchString = rison.encodeUnknown({
+      query,
+      dateRange,
+      filters,
+      panelFilters,
+      limit,
+      preferredSchema,
+    });
     const tablePropertiesString = rison.encodeUnknown(tableProperties);
 
     it('should create a link to Hosts with no state', async () => {

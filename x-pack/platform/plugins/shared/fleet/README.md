@@ -206,15 +206,15 @@ The process for running serverless API integration tests is similar to above. Se
 Security:
 
 ```sh
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/solutions/security/test/serverless/api_integration/test_suites/fleet/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/solutions/security/test/serverless/api_integration/test_suites/fleet/config.ts
 ```
 
 Observability:
 
 ```sh
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/solutions/observability/test/serverless/api_integration/test_suites/fleet/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/solutions/observability/test/serverless/api_integration/test_suites/fleet/config.ts
 ```
 
 #### Cypress tests
@@ -232,13 +232,13 @@ Note: Docker needs to be running to run these tests.
 Run the tests from the Kibana root folder with:
 
 ```sh
-node scripts/jest_integration.js x-pack/platform/plugins/shared/fleet/server/integration_tests/<YOUR_TEST_FILE>
+node scripts/jest_integration.js --config x-pack/platform/plugins/shared/fleet/jest.integration.config.js x-pack/platform/plugins/shared/fleet/server/integration_tests/<YOUR_TEST_FILE>
 ```
 
 Running the tests with [Node Inspector](https://nodejs.org/en/learn/getting-started/debugging) allows inspecting Elasticsearch indices. To do this, add a `debugger;` statement in the test (cf. [Jest documentation](https://jestjs.io/docs/troubleshooting)) and run `node` with `--inspect` or `--inspect-brk`:
 
 ```sh
-node --inspect scripts/jest_integration.js x-pack/platform/plugins/shared/fleet/server/integration_tests/<YOUR_TEST_FILE>
+node --inspect scripts/jest_integration.js --config x-pack/platform/plugins/shared/fleet/jest.integration.config.js x-pack/platform/plugins/shared/fleet/server/integration_tests/<YOUR_TEST_FILE>
 ```
 
 ### Storybook

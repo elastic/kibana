@@ -237,6 +237,7 @@ export const staticValueOperation: OperationDefinition<
         }
       >
         <EuiFieldNumber
+          isInvalid={!inputValueIsValid}
           fullWidth
           data-test-subj="lns-indexPattern-static_value-input"
           compressed

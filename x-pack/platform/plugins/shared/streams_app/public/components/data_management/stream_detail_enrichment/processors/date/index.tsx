@@ -75,7 +75,9 @@ export const DateProcessorForm = () => {
       if (!isEmpty(suggestions.formats)) {
         // Merge the suggested formats with the existing ones
         const prevFormats = form.getValues('formats');
-        form.setValue('formats', uniq([...prevFormats, ...suggestions.formats]));
+        form.setValue('formats', uniq([...prevFormats, ...suggestions.formats]), {
+          shouldValidate: true,
+        });
         form.clearErrors();
       }
     } catch (error) {

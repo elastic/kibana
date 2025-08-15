@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SimpleSavedObject } from '@kbn/core/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { SavedObject } from '@kbn/core-saved-objects-api-server';
+import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
 import type { GenericIcon } from '../helpers/style_choices';
 import { OutlinkEncoder } from '../helpers/outlink_encoders';
 
@@ -38,7 +38,7 @@ export interface AdvancedSettings {
   timeoutMillis: number;
 }
 
-export type IndexPatternSavedObject = SimpleSavedObject<{ title: string }>;
+export type IndexPatternSavedObject = SavedObject<DataViewAttributes>;
 
 export interface IndexPatternProvider {
   get(id: string): Promise<DataView>;

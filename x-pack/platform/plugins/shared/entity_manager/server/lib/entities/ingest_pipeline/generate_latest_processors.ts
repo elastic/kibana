@@ -6,6 +6,7 @@
  */
 
 import { EntityDefinition, ENTITY_SCHEMA_VERSION_V1, MetadataField } from '@kbn/entities-schema';
+import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   initializePathScript,
   cleanScript,
@@ -15,7 +16,7 @@ import { isBuiltinDefinition } from '../helpers/is_builtin_definition';
 
 function getMetadataSourceField({ aggregation, destination, source }: MetadataField) {
   if (aggregation.type === 'terms') {
-    return `ctx.entity.metadata.${destination}.data.keySet()`;
+    return `ctx.entity.metadata.${destination}.keySet()`;
   } else if (aggregation.type === 'top_value') {
     return `ctx.entity.metadata.${destination}.top_value["${source}"]`;
   }
@@ -40,7 +41,7 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
 
     if (metadata.aggregation.type === 'terms') {
       const next = `
-        if (ctx.entity?.metadata?.${optionalFieldPath}?.data != null) {
+        if (ctx.entity?.metadata?.${optionalFieldPath} != null) {
           ${mapDestinationToPainless(metadata)}
         }
       `;
@@ -58,7 +59,9 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
   }, '');
 }
 
-function liftIdentityFieldsToDocumentRoot(definition: EntityDefinition) {
+function liftIdentityFieldsToDocumentRoot(
+  definition: EntityDefinition
+): IngestProcessorContainer[] {
   return definition.identityFields.map((key) => ({
     set: {
       if: `ctx.entity?.identity?.${key.field.replaceAll('.', '?.')} != null`,
@@ -68,7 +71,7 @@ function liftIdentityFieldsToDocumentRoot(definition: EntityDefinition) {
   }));
 }
 
-function getCustomIngestPipelines(definition: EntityDefinition) {
+function getCustomIngestPipelines(definition: EntityDefinition): IngestProcessorContainer[] {
   if (isBuiltinDefinition(definition)) {
     return [];
   }
@@ -101,7 +104,7 @@ function getCustomIngestPipelines(definition: EntityDefinition) {
   ];
 }
 
-export function generateLatestProcessors(definition: EntityDefinition) {
+export function generateLatestProcessors(definition: EntityDefinition): IngestProcessorContainer[] {
   return [
     {
       set: {

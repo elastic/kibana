@@ -22,5 +22,13 @@ export interface LayoutSidebarProps {
  * @returns The rendered LayoutSidebar component.
  */
 export const LayoutSidebar = ({ children }: LayoutSidebarProps) => {
-  return <nav css={styles.root}>{children}</nav>;
+  return (
+    <nav
+      css={styles.root}
+      className="kbnChromeLayoutSidebar"
+      data-test-subj="kbnChromeLayoutSidebar"
+    >
+      {children}
+    </nav>
+  );
 };

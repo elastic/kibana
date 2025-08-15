@@ -50,7 +50,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--plugin-path=${path.resolve(__dirname, 'plugins/foo_plugin')}`,
           `--plugin-path=${path.resolve(
             __dirname,
-            '../../../../test/security_api_integration/plugins/features_provider'
+            '../../security_api_integration/plugins/features_provider'
           )}`,
         ],
       },

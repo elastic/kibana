@@ -28,6 +28,7 @@ import {
   EuiCallOut,
   EuiButton,
   EuiButtonEmpty,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -50,6 +51,8 @@ export interface CreateSearchApplicationFlyoutProps {
 }
 
 export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyoutProps) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { createSearchApplication, setName, setSelectedIndices } = useActions(
     CreateSearchApplicationLogic
   );
@@ -78,14 +81,14 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
   }, []);
 
   return (
-    <EuiFlyout onClose={onClose} size="m">
+    <EuiFlyout onClose={onClose} size="m" aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h3>
+          <h3 id={modalTitleId}>
             {i18n.translate(
               'xpack.enterpriseSearch.searchApplications.createSearchApplication.headerTitle',
               {
-                defaultMessage: 'Create a Search Application',
+                defaultMessage: 'Create a search application',
               }
             )}
           </h3>
@@ -106,7 +109,7 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
                   >
                     {i18n.translate(
                       'xpack.enterpriseSearch.searchApplications.createSearchApplication.header.docsLink',
-                      { defaultMessage: 'Search Applications documentation' }
+                      { defaultMessage: 'Search applications documentation' }
                     )}
                   </EuiLink>
                 ),

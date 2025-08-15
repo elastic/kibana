@@ -68,6 +68,7 @@ export const MaxSnapshotsField: React.FunctionComponent<Props> = ({
         }
       >
         <EuiFieldText
+          isInvalid={isInvalid}
           defaultValue={defaultValue}
           fullWidth
           onChange={(e) => updateSettings('maxSnapshotBytesPerSec', e.target.value)}

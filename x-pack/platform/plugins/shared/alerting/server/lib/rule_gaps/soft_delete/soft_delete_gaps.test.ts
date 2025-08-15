@@ -13,6 +13,7 @@ import { Gap } from '../gap';
 import { softDeleteGapsBatch } from './soft_delete_gaps_batch';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 import { softDeleteGaps } from './soft_delete_gaps';
+import { gapStatus } from '../../../../common/constants';
 
 jest.mock('../process_all_rule_gaps');
 jest.mock('./soft_delete_gaps_batch');
@@ -54,6 +55,7 @@ describe('softDeleteGaps', () => {
         logger: mockLogger,
         ruleId: 'test-rule-id',
         processGapsBatch: expect.any(Function),
+        statuses: Object.values(gapStatus),
       });
     });
 

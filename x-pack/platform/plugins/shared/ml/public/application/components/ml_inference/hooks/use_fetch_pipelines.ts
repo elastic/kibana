@@ -25,8 +25,7 @@ export const useFetchPipelines = () => {
     async function fetchPipelines() {
       let names: string[] = [];
       try {
-        const results = await getAllIngestPipelines();
-        names = Object.keys(results);
+        names = await getAllIngestPipelines();
         setPipelineNames(names);
       } catch (e) {
         toasts.addDanger({

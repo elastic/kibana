@@ -72,7 +72,7 @@ function getDefaultLensApiMock() {
     supportedTriggers: jest.fn(() => []),
     canLinkToLibrary: jest.fn(async () => false),
     canUnlinkFromLibrary: jest.fn(async () => false),
-    checkForDuplicateTitle: jest.fn(),
+    checkForDuplicateTitle: jest.fn().mockResolvedValue(false),
     /** New embeddable api inherited methods */
     serializeState: jest.fn(),
     saveToLibrary: jest.fn(async () => 'saved-id'),

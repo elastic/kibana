@@ -10,6 +10,7 @@ import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
+import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
 import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
@@ -25,7 +26,7 @@ import { FailureBadge } from './failure_badge';
 import { OrphanItemTooltipIcon } from './orphan_item_tooltip_icon';
 import { SpanMissingDestinationTooltip } from './span_missing_destination_tooltip';
 import type {
-  IWaterfallGetRelatedErrorsHref,
+  IWaterfallSpan,
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
 
@@ -259,6 +260,11 @@ export function WaterfallItem({
 
   const waterfallItemFlyoutTab = 'metadata';
 
+  const itemName =
+    item.docType === 'transaction'
+      ? item.doc.transaction.name
+      : (item as IWaterfallSpan).doc.span.name;
+
   return (
     <Container
       ref={waterfallItemRef}
@@ -266,6 +272,29 @@ export function WaterfallItem({
       timelineMargins={timelineMargins}
       isSelected={isSelected}
       hasToggle={hasToggle}
+      data-test-subj="waterfallItem"
+      onKeyDown={(e) => {
+        if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+          // Ignore event if it comes from a link
+          if (e.target instanceof HTMLAnchorElement) {
+            return;
+          }
+          e.preventDefault(); // Prevent scroll if Space is pressed
+          onClick(item.id);
+        }
+      }}
+      tabIndex={onClick ? 0 : -1}
+      role={onClick ? 'button' : undefined}
+      aria-label={
+        onClick
+          ? i18n.translate('xpack.apm.waterfall.openDetailsButton', {
+              defaultMessage: 'View details for {name}',
+              values: {
+                name: itemName,
+              },
+            })
+          : undefined
+      }
       onClick={(e: React.MouseEvent) => {
         if (onClick) {
           e.stopPropagation();

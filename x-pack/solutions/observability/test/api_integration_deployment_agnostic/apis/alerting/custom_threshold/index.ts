@@ -18,7 +18,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./group_by_fired'));
     loadTestFile(require.resolve('./p99_pct_fired'));
     loadTestFile(require.resolve('./rate_bytes_fired'));
-    // moved to feature flag config until custom roles in serverless are supported
-    // loadTestFile(require.resolve('./consumers_and_privileges'));
+    loadTestFile(require.resolve('./consumers_and_privileges'));
   });
 }

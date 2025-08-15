@@ -7,7 +7,8 @@
 
 import { useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+
+import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
@@ -33,9 +34,9 @@ interface WorkspaceUrlParams {
 }
 
 export interface SharingSavedObjectProps {
-  outcome?: ResolvedSimpleSavedObject['outcome'];
-  aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
-  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+  outcome?: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 interface WorkspaceLoadedState {
