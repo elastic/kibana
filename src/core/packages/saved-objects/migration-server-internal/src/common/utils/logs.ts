@@ -9,6 +9,7 @@
 
 import type { Logger, LogMeta } from '@kbn/logging';
 import { MigrationLog } from '../../types';
+import { ControlStateTransitionDiag } from './control_state_transition_diag';
 
 export interface LogAwareState {
   controlState: string;
@@ -47,18 +48,14 @@ export const logStateTransition = (
   }
 
   const logMessage = `${logPrefix}${prevState.controlState} -> ${currState.controlState}. took: ${tookMs}ms.`;
-  if (logger.isLevelEnabled('debug')) {
-    logger.debug<StateTransitionLogMeta>(logMessage, {
-      kibana: {
-        migrations: {
-          state: currState,
-          duration: tookMs,
-        },
+  logger.debug<StateTransitionLogMeta>(logMessage, {
+    kibana: {
+      migrations: {
+        state: currState,
+        duration: tookMs,
       },
-    });
-  } else {
-    logger.info(logMessage);
-  }
+    },
+  });
 };
 
 export const logActionResponse = (
@@ -69,3 +66,17 @@ export const logActionResponse = (
 ) => {
   logger.debug(logMessagePrefix + `${state.controlState} RESPONSE`);
 };
+
+export function logMigrationFailureDetails({
+  logger,
+  index,
+  cstDiag,
+}: {
+  logger: Logger;
+  index: string;
+  cstDiag: ControlStateTransitionDiag;
+}): void {
+  logger
+    .get('control-state-transitions')
+    .error(`[${index}] Migration failed after transitioning through: ${cstDiag.prettyPrint()}`);
+}

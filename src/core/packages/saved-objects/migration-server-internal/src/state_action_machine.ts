@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import apm from 'elastic-apm-node';
 
 export interface ControlState {
   controlState: string;
@@ -67,13 +68,23 @@ export async function stateActionMachine<S extends ControlState>(
   let nextAction = next(state);
 
   while (nextAction != null) {
-    // Perform the action that triggers the next step
-    const actionResponse = await nextAction();
-    const newState = model(state, actionResponse);
+    const span = apm.startSpan(`${state.controlState.toLowerCase()}-action`, 'migration');
+    try {
+      // Perform the action that triggers the next step
+      const actionResponse = await nextAction();
+      const newState = model(state, actionResponse);
 
-    // Get ready for the next step
-    state = newState;
-    nextAction = next(state);
+      span?.addLabels({ state_transition: `${state.controlState}->${newState.controlState}` });
+
+      // Get ready for the next step
+      state = newState;
+      nextAction = next(state);
+    } catch (err) {
+      span?.setOutcome('failure');
+      throw err;
+    } finally {
+      span?.end();
+    }
   }
 
   return state;

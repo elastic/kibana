@@ -7,5 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { logActionResponse, logStateTransition, type LogAwareState } from './logs';
+export {
+  logActionResponse,
+  logStateTransition,
+  logMigrationFailureDetails,
+  type LogAwareState,
+} from './logs';
 export { createDelayFn, type RetryableState } from './delay';
+export { ControlStateTransitionDiag } from './control_state_transition_diag';

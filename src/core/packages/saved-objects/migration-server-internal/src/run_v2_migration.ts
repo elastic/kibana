@@ -42,6 +42,7 @@ import {
   extractVersionFromKibanaIndexAliases,
   getIndexDetails,
 } from './core/get_index_details';
+import { ControlStateTransitionDiag, logMigrationFailureDetails } from './common/utils';
 
 export interface RunV2MigrationOpts {
   /** The current Kibana version */
@@ -184,6 +185,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
         const indexTypes = Object.keys(typeDefinitions);
         // store only the model versions of SO types that belong to the index
         const mappingVersions = pick(appVersions, indexTypes);
+        const cstDiag = ControlStateTransitionDiag.create();
 
         const _meta: IndexMappingMeta = {
           indexTypesMap,
@@ -222,6 +224,14 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
           typeRegistry: options.typeRegistry,
           docLinks: options.docLinks,
           esCapabilities: options.esCapabilities,
+          cstDiag,
+        }).catch((e) => {
+          logMigrationFailureDetails({
+            logger: options.logger,
+            index: options.kibanaIndexPrefix,
+            cstDiag,
+          });
+          throw e;
         });
       },
     };

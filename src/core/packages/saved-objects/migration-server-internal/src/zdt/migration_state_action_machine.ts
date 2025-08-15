@@ -14,7 +14,11 @@ import {
   getRequestDebugMeta,
 } from '@kbn/core-elasticsearch-client-server-internal';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import { logStateTransition, logActionResponse } from '../common/utils';
+import {
+  logStateTransition,
+  logActionResponse,
+  type ControlStateTransitionDiag,
+} from '../common/utils';
 import { type Next, stateActionMachine } from '../state_action_machine';
 import { cleanup } from '../migrations_state_machine_cleanup';
 import type {
@@ -40,12 +44,14 @@ export async function migrationStateActionMachine({
   next,
   model,
   logger,
+  cstDiag,
 }: {
   initialState: State;
   context: MigratorContext;
   next: Next<State>;
   model: (state: State, res: any, context: MigratorContext) => State;
   logger: Logger;
+  cstDiag: ControlStateTransitionDiag;
 }) {
   const startTime = Date.now();
   // Since saved object index names usually start with a `.` and can be
@@ -59,6 +65,7 @@ export async function migrationStateActionMachine({
       initialState,
       (state) => next(state),
       (state, res) => {
+        const previousState = lastState?.controlState;
         lastState = state;
         logActionResponse(logger, logMessagePrefix, state, res);
         const newState = model(state, res, context);
@@ -76,13 +83,11 @@ export async function migrationStateActionMachine({
         };
 
         const now = Date.now();
-        logStateTransition(
-          logger,
-          logMessagePrefix,
-          state,
-          redactedNewState as State,
-          now - prevTimestamp
-        );
+        const tookMs = now - prevTimestamp;
+        logStateTransition(logger, logMessagePrefix, state, redactedNewState as State, tookMs);
+
+        cstDiag.observeTransition(previousState ?? 'INIT', newState.controlState, tookMs);
+
         prevTimestamp = now;
         return newState;
       }
