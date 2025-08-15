@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiSpacer, EuiAccordion, EuiTextColor, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ConfigurationFormItems } from './configuration/configuration_form_items';
-import { ConfigEntryView } from '../types/types';
+import type { ConfigEntryView } from '../types/types';
 import { accordionCss, buttonCss } from './inference_service_form_fields';
 
 interface AdditionalOptionsFieldsProps {

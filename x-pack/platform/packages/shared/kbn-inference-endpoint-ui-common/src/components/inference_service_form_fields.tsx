@@ -28,7 +28,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
-import { HttpSetup, IToasts } from '@kbn/core/public';
+import type { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
 import type { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
 import {

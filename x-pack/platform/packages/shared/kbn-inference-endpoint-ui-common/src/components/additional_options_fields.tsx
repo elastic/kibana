@@ -34,8 +34,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import * as LABELS from '../translations';
 import { DEFAULT_TASK_TYPE } from '../constants';
-import { Config } from '../types/types';
-import { TaskTypeOption } from '../utils/helpers';
+import type { Config } from '../types/types';
+import type { TaskTypeOption } from '../utils/helpers';
 import { buttonCss, accordionCss } from './inference_service_form_fields';
 
 const taskTypeConfig = {
