@@ -259,6 +259,12 @@ describe('commands', () => {
     });
   });
 
+  describe('DISSECT', () => {
+    test('prints basic DISSECT command', () => {
+      assertPrint('FROM index | DISSECT foo.bar "asdf"');
+    });
+  });
+
   /**
    * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
    * get back to it after 9.1 release.
