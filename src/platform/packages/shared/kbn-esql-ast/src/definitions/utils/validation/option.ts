@@ -39,8 +39,7 @@ export function validateOption(
       messages.push(
         ...validateFunction({
           fn: arg,
-          parentCommand: command.name,
-          parentOption: option.name,
+          parentCommand: command,
           context,
           callbacks,
         })

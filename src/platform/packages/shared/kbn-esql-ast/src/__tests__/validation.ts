@@ -22,6 +22,7 @@
  * on the generated definitions provided by Elasticsearch.
  */
 import { ESQLUserDefinedColumn, ESQLFieldWithMetadata } from '../commands_registry/types';
+import { buildFunctionLookup } from '../definitions/utils/functions';
 import { Parser } from '../parser';
 import type { ESQLCommand, ESQLMessage } from '../types';
 import { mockContext } from './context_fixtures';
@@ -59,4 +60,28 @@ export const expectErrors = (
     errors.push(error.text);
   });
   expect(errors).toEqual(expectedErrors);
+};
+
+export const getNoValidCallSignatureError = (fnName: string, givenTypes: string[]) => {
+  const definition = buildFunctionLookup().get(fnName)!;
+  return `The arguments to [${fnName}] don't match a valid call signature.\n\nReceived [${givenTypes.join(
+    ', '
+  )}].\n\nExpected one of:\n  ${definition.signatures
+    .toSorted((a, b) => a.params.length - b.params.length)
+    .map(
+      (sig) =>
+        `- [${sig.params
+          .map((p) => {
+            let ret = p.type as string;
+            if (sig.minParams) {
+              ret = '...' + ret;
+            }
+            if (p.optional) {
+              ret = `[${ret}]`;
+            }
+            return ret;
+          })
+          .join(', ')}]`
+    )
+    .join('\n  ')}`;
 };

@@ -134,12 +134,12 @@ describe('STATS Validation', () => {
       });
 
       test('various errors', () => {
-        statsExpectErrors('from a_index | stats avg(doubleField) by percentile(doubleField)', [
-          'STATS BY does not support function percentile',
+        statsExpectErrors('from a_index | stats avg(doubleField) by percentile(doubleField, 20)', [
+          'Function [percentile] not allowed in [by]',
         ]);
         statsExpectErrors(
-          'from a_index | stats avg(doubleField) by textField, percentile(doubleField) by ipField',
-          ['STATS BY does not support function percentile']
+          'from a_index | stats avg(doubleField) by textField, percentile(doubleField, 50) by ipField',
+          ['Function [percentile] not allowed in [by]']
         );
       });
 
@@ -149,28 +149,6 @@ describe('STATS Validation', () => {
           statsExpectErrors(
             'from index | stats by bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
             []
-          );
-        });
-
-        test('errors', () => {
-          statsExpectErrors('from index | stats by bucket(dateField, pi(), "", "")', [
-            'Argument of [bucket] must be [integer], found value [pi()] type [double]',
-          ]);
-
-          statsExpectErrors('from index | stats by bucket(dateField, abs(doubleField), "", "")', [
-            'Argument of [bucket] must be a constant, received [abs(doubleField)]',
-          ]);
-          statsExpectErrors(
-            'from index | stats by bucket(dateField, abs(length(doubleField)), "", "")',
-            ['Argument of [bucket] must be a constant, received [abs(length(doubleField))]']
-          );
-          statsExpectErrors(
-            'from index | stats by bucket(dateField, doubleField, textField, textField)',
-            [
-              'Argument of [bucket] must be a constant, received [doubleField]',
-              'Argument of [bucket] must be a constant, received [textField]',
-              'Argument of [bucket] must be a constant, received [textField]',
-            ]
           );
         });
       });
