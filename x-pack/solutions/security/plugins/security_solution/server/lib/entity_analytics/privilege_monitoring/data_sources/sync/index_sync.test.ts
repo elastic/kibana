@@ -130,39 +130,17 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
     });
 
     it('should retrieve all usernames from index and perform bulk ops', async () => {
-      const mockHits = [
-        {
-          _source: { user: { name: 'frodo' } },
-          _id: '1',
-          sort: [1],
-        },
-        {
-          _source: { user: { name: 'samwise' } },
-          _id: '2',
-          sort: [2],
-        },
-      ];
-
-      const mockMonitoredUserHits = {
-        hits: {
-          hits: [
-            {
-              _source: { user: { name: 'frodo' } },
-              _id: '1',
-            },
-            {
-              _source: { user: { name: 'samwise' } },
-              _id: '2',
-            },
-          ],
-        },
-      };
+      const mockUsers = [{ name: 'frodo' }, { name: 'samwise' }];
+      const mockMonitoredUser = new Map([
+        ['frodo', '1'],
+        ['samwise', '2'],
+      ]);
 
       mockSearchUsernamesInIndex
-        .mockResolvedValueOnce({ hits: { hits: mockHits } }) // first batch
-        .mockResolvedValueOnce({ hits: { hits: [] } }); // second batch = end
+        .mockResolvedValueOnce({ users: mockUsers, searchAfter: undefined }) // first batch
+        .mockResolvedValueOnce({ users: [], searchAfter: undefined }); // second batch = end
 
-      mockGetMonitoredUsers.mockResolvedValue(mockMonitoredUserHits);
+      mockGetMonitoredUsers.mockResolvedValue(mockMonitoredUser);
 
       mockBulkUpsertOperations.mockReturnValue([{ index: { _id: '1' } }]);
       dataClient.index = 'test-index';
