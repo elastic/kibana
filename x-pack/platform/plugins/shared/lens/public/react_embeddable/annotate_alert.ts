@@ -6,8 +6,8 @@
  */
 
 import { getAlertContext, type AlertContext } from '@kbn/alerting-context';
-import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
+import { v4 as uuidv4 } from 'uuid';
 import { hasXYState } from './type_guards';
 import { LensSerializedState } from '..';
 import { XYByValueAnnotationLayerConfig } from '../visualizations/xy/types';
@@ -26,12 +26,9 @@ function buildAnnotationLayer(
       layerType: 'annotations',
       annotations: [
         {
-          label: i18n.translate(
-            'app_not_found_in_i18nrc.visualization.adhocAnnotation.alertStarted',
-            {
-              defaultMessage: 'Alert started',
-            }
-          ),
+          label: i18n.translate('xpack.lens.visualization.annotation.alertStarted', {
+            defaultMessage: 'Alert started',
+          }),
           type: 'manual',
           key: {
             type: 'point_in_time',
