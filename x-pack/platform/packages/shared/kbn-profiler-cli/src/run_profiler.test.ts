@@ -5,10 +5,11 @@
  * 2.0.
  */
 import execa from 'execa';
-import { Overwrite } from 'utility-types';
-import { spawn, ChildProcess } from 'child_process';
+import type { Overwrite } from 'utility-types';
+import type { ChildProcess } from 'child_process';
+import { spawn } from 'child_process';
 import { runProfiler } from './run_profiler';
-import { ProfilerCliFlags } from './flags';
+import type { ProfilerCliFlags } from './flags';
 import { ToolingLog } from '@kbn/tooling-log';
 import * as fs from 'fs';
 import { getProcessId } from './get_process_id';
@@ -85,8 +86,7 @@ function runProfilerWithFlags(flags: Partial<ProfilerCliFlags>) {
       level: 'verbose',
       writeTo: {
         write: (s) => {
-          // eslint-disable-next-line no-console
-          console.log(s);
+          // console.log(s);
         },
       },
     }),
@@ -192,9 +192,7 @@ describe('@kbn/profiler-cli real-process tests', () => {
       _: [
         `node`,
         '-e',
-        `console.log('Short-lived process starting');
-    
-        // Simulate some CPU work
+        `// Simulate some CPU work
         let result = 0;
         for (let i = 0; i < 1000000; i++) {
           result += Math.sqrt(i);
