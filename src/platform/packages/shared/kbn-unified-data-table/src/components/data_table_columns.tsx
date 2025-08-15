@@ -35,7 +35,6 @@ import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_
 import { buildEditFieldButton } from './build_edit_field_button';
 import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
 import { UnifiedDataTableProps } from './data_table';
-import { UnifiedDataTableSummaryColumnHeader } from './data_table_summary_column_header';
 import { isSortable } from '../hooks/use_sorting';
 
 export const getColumnDisplayName = (
