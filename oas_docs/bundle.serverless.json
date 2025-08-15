@@ -58199,6 +58199,13 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
+                  "status": {
+                    "enum": [
+                      "enabled",
+                      "disabled"
+                    ],
+                    "type": "string"
+                  },
                   "stream": {
                     "additionalProperties": false,
                     "properties": {
@@ -58490,7 +58497,8 @@
                 },
                 "required": [
                   "stream",
-                  "where"
+                  "where",
+                  "status"
                 ],
                 "type": "object"
               }
