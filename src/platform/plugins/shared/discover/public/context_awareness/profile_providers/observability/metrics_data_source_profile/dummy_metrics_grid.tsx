@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { useCallback, useMemo } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { css } from '@emotion/react';
 import {
@@ -19,7 +19,6 @@ import {
 } from '@kbn/field-utils';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
 import type {
   SelectableEntry,
   ToolbarSelectorProps,
@@ -29,7 +28,7 @@ import {
   ToolbarSelector,
 } from '@kbn/unified-histogram/components/chart/toolbar_selector';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import React, { useCallback, useMemo } from 'react';
+import { ChartSectionTemplate } from '@kbn/unified-histogram';
 
 // Dummy component to demonstrate how the actual metrics experience grid will hook into discover state and event handlers
 export const DummyMetricsGrid = ({
@@ -43,7 +42,7 @@ export const DummyMetricsGrid = ({
   onFilter,
   query,
   searchSessionId,
-  timeRange,
+  getTimeRange,
 }: ChartSectionProps) => {
   const [breakdownField, setBreakdown] = React.useState<DataViewField | undefined>(undefined);
   const actions: IconButtonGroupProps['buttons'] = [
@@ -115,69 +114,39 @@ export const DummyMetricsGrid = ({
     [fields, setBreakdown]
   );
 
-  // The structure here is VERY similar to that of the `chart.tsx` component
-  // Perhaps there should be a shared template for this?
+  const rightSideComponents = useMemo(
+    () => [
+      renderToggleActions(),
+      <ToolbarSelector
+        data-test-subj="metricsExperienceBreakdownSelector"
+        data-selected-value=""
+        searchable
+        buttonLabel="Metrics Experience Breakdown by"
+        popoverTitle={i18n.translate(
+          'metricsExperience.breakdownFieldSelector.breakdownFieldPopoverTitle',
+          {
+            defaultMessage: 'Select breakdown field',
+          }
+        )}
+        optionMatcher={comboBoxFieldOptionMatcher}
+        options={fieldOptions}
+        onChange={onChange}
+      />,
+    ],
+    [fieldOptions, onChange, renderToggleActions]
+  );
+
   return (
-    <EuiFlexGroup
-      className="metricsExperience__chart"
-      direction="column"
-      alignItems="stretch"
-      gutterSize="none"
-      responsive={false}
+    <ChartSectionTemplate
+      id="unifiedMetricsExperienceGridPanel"
+      toolbarCss={chartToolbarCss}
+      toolbar={{
+        rightSide: rightSideComponents,
+        leftSide: actions,
+      }}
     >
-      <EuiFlexItem grow={false} css={chartToolbarCss}>
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="s"
-          responsive={false}
-          alignItems="center"
-          justifyContent="spaceBetween"
-        >
-          <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-            <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
-              <EuiFlexItem grow={false}>
-                {renderToggleActions ? renderToggleActions() : null}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-                <div>
-                  {/* if we need to use <ToolbarSelector /> for our custom dropdowns, 
-                  this component needs to be moved to another package  */}
-                  <ToolbarSelector
-                    data-test-subj="metricsExperienceBreakdownSelector"
-                    data-selected-value=""
-                    searchable
-                    buttonLabel="Metrics Experience Breakdown by"
-                    popoverTitle={i18n.translate(
-                      'metricsExperience.breakdownFieldSelector.breakdownFieldPopoverTitle',
-                      {
-                        defaultMessage: 'Select breakdown field',
-                      }
-                    )}
-                    optionMatcher={comboBoxFieldOptionMatcher}
-                    options={fieldOptions}
-                    onChange={onChange}
-                  />
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <IconButtonGroup
-              legend={i18n.translate('metricsExperience.chartActionsGroupLegend', {
-                defaultMessage: 'Chart actions',
-              })}
-              buttonSize="s"
-              buttons={actions}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <section css={histogramCss} tabIndex={-1}>
-          {'Dummy Metrics Grid'}
-        </section>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <div css={histogramCss}>{'Dummy Metrics Grid'}</div>
+    </ChartSectionTemplate>
   );
 };
 

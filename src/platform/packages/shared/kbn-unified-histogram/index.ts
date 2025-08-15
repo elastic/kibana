@@ -20,7 +20,11 @@ export {
   UnifiedBreakdownFieldSelector,
   type BreakdownFieldSelectorProps,
 } from './components/chart/lazy';
-export { UnifiedHistogramChart, type UnifiedHistogramChartProps } from './components/chart';
+export {
+  UnifiedHistogramChart,
+  type UnifiedHistogramChartProps,
+  ChartSectionTemplate,
+} from './components/chart';
 export { UnifiedHistogramLayout, type UnifiedHistogramLayoutProps } from './components/layout';
 
 export {

@@ -13,14 +13,16 @@ import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 
-export type MetricsDataSourceProfileProvider = DataSourceProfileProvider<{}>;
+export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvider<{}>;
+
+const METRICS_DATA_SOURCE_PROFILE_ID = 'metrics-data-source-profile';
 
 const LazyMetricsGridSection = dynamic(() => import('./dummy_metrics_grid'));
 
 export const createMetricsDataSourceProfileProvider = (
   services: ProfileProviderServices
-): MetricsDataSourceProfileProvider => ({
-  profileId: 'metrics-data-source-profile',
+): MetricsExperienceDataSourceProfileProvider => ({
+  profileId: METRICS_DATA_SOURCE_PROFILE_ID,
   profile: {
     getDefaultAppState: (prev) => (params) => ({
       ...(prev ? prev(params) : {}),
