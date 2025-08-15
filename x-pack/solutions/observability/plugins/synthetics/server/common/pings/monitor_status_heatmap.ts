@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SyntheticsEsClient } from '../../lib';
+import type { SyntheticsEsClient } from '../../lib';
 
 export async function queryMonitorHeatmap({
   syntheticsEsClient,

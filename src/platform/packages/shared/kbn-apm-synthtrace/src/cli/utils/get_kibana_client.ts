@@ -8,7 +8,7 @@
  */
 
 import { KibanaClient } from '../../lib/shared/base_kibana_client';
-import { Logger } from '../../lib/utils/create_logger';
+import type { Logger } from '../../lib/utils/create_logger';
 
 export function getKibanaClient({
   target,

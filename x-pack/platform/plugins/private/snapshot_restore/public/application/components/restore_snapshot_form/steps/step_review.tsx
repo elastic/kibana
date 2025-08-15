@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { serializeRestoreSettings } from '../../../../../common/lib';
 import { useServices } from '../../../app_context';
-import { StepProps } from '.';
+import type { StepProps } from '.';
 import { CollapsibleIndicesList } from '../../collapsible_lists';
 import { PolicyFeatureStatesSummary } from '../../summaries';
 

@@ -8,11 +8,11 @@
 import _ from 'lodash';
 import React from 'react';
 
-import { GeoJsonProperties } from 'geojson';
+import type { GeoJsonProperties } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { type Filter, buildPhraseFilter } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
   EMPTY_FEATURE_COLLECTION,
   FIELD_ORIGIN,
@@ -20,24 +20,27 @@ import {
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
 import { getField, addFieldToDSL } from '../../../../common/elasticsearch_util';
-import {
+import type {
   DataFilters,
   ESGeoLineSourceDescriptor,
   ESGeoLineSourceResponseMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
-import { AbstractESAggSource, ESAggsSourceSyncMeta } from '../es_agg_source';
-import { DataRequest } from '../../util/data_request';
+import type { ESAggsSourceSyncMeta } from '../es_agg_source';
+import { AbstractESAggSource } from '../es_agg_source';
+import type { DataRequest } from '../../util/data_request';
 import { convertToGeoJson } from './convert_to_geojson';
 import { ESDocField } from '../../fields/es_doc_field';
 import { InlineField } from '../../fields/inline_field';
 import { UpdateSourceEditor } from './update_source_editor';
-import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { GeoJsonWithMeta, getLayerFeaturesRequestName } from '../vector_source';
+import type { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import type { GeoJsonWithMeta } from '../vector_source';
+import { getLayerFeaturesRequestName } from '../vector_source';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { IField } from '../../fields/field';
-import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
+import type { IField } from '../../fields/field';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { TooltipProperty } from '../../tooltips/tooltip_property';
 import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 import { mergeExecutionContext } from '../execution_context_utils';

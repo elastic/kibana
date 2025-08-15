@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { GetSLOSuggestionsResponse } from '@kbn/slo-schema';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { GetSLOSuggestionsResponse } from '@kbn/slo-schema';
 import { SO_SLO_TYPE } from '../saved_objects';
 type Buckets = Array<{
   key: string;

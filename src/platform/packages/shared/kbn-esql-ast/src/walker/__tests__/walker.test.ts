@@ -10,7 +10,7 @@
 import { parse } from '../../parser';
 import { Parser } from '../../parser/parser';
 import { EsqlQuery } from '../../query';
-import {
+import type {
   ESQLColumn,
   ESQLCommand,
   ESQLCommandOption,

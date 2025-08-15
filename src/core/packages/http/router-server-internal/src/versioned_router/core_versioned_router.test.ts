@@ -8,7 +8,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { Router } from '../router';
+import type { Router } from '../router';
 import { CoreVersionedRouter } from '.';
 import { createRouter } from './mocks';
 import { createTestEnv } from '@kbn/config-mocks';
