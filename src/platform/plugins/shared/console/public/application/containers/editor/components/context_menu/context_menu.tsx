@@ -19,7 +19,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { NotificationsStart } from '@kbn/core/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { LanguageSelectorModal } from './language_selector_modal';

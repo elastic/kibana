@@ -12,7 +12,7 @@ import { render } from '../../../utils/test_helper';
 import { alertWithGroupsAndTags } from '../mock/alert';
 import { useKibana } from '../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
-import { Group } from '../../../../common/typings';
+import type { Group } from '../../../../common/typings';
 import { SourceBar } from './source_bar';
 
 jest.mock('react-router-dom', () => ({

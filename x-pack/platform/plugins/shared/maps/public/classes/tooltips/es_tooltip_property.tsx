@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import _ from 'lodash';
 import { type Filter, buildExistsFilter, buildPhraseFilter } from '@kbn/es-query';
-import { DataView, DataViewField } from '@kbn/data-plugin/common';
-import { ITooltipProperty } from './tooltip_property';
-import { IField } from '../fields/field';
+import type { DataView, DataViewField } from '@kbn/data-plugin/common';
+import type { ITooltipProperty } from './tooltip_property';
+import type { IField } from '../fields/field';
 
 export class ESTooltipProperty implements ITooltipProperty {
   private readonly _tooltipProperty: ITooltipProperty;

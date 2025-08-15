@@ -9,7 +9,7 @@ import expect from 'expect';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { ALERT_RULE_EXECUTION_TYPE, ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
-import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { orderBy } from 'lodash';
 import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 
@@ -32,7 +32,7 @@ import {
   deleteAllAlerts,
 } from '../../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 const historicalWindowStart = '2022-10-13T05:00:04.000Z';

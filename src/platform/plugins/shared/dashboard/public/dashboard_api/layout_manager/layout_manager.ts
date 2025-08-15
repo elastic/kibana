@@ -8,29 +8,18 @@
  */
 
 import { filter, map as lodashMap, max } from 'lodash';
-import {
-  BehaviorSubject,
-  Observable,
-  combineLatestWith,
-  debounceTime,
-  map,
-  merge,
-  tap,
-} from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, debounceTime, map, merge, tap } from 'rxjs';
 import { v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { Reference } from '@kbn/content-management-utils';
-import {
-  DefaultEmbeddableApi,
-  EmbeddablePackageState,
-  PanelNotFoundError,
-} from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { PanelPackage } from '@kbn/presentation-containers';
+import type { PanelPackage } from '@kbn/presentation-containers';
+import type { SerializedPanelState, SerializedTitles } from '@kbn/presentation-publishing';
 import {
-  SerializedPanelState,
-  SerializedTitles,
   apiHasLibraryTransforms,
   apiHasSerializableState,
   apiPublishesTitle,

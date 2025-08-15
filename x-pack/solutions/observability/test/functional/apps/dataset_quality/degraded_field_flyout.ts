@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import moment from 'moment/moment';
 import { generateShortId, log, timerange } from '@kbn/apm-synthtrace-client';
-import { DatasetQualityFtrProviderContext } from './config';
+import type { DatasetQualityFtrProviderContext } from './config';
 import {
   createDegradedFieldsRecord,
   defaultNamespace,

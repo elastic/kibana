@@ -10,8 +10,8 @@ import uniqBy from 'lodash/uniqBy';
 import type { ESQLCommand } from '../../../types';
 import { walk } from '../../../walker';
 import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
-import { ICommandContext } from '../../types';
-import { FieldType } from '../../../definitions/types';
+import type { ICommandContext } from '../../types';
+import type { FieldType } from '../../../definitions/types';
 import { isColumn } from '../../../ast/is';
 
 function transformMapToESQLFields(

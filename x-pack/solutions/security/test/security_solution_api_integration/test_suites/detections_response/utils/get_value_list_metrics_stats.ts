@@ -12,7 +12,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 
-import { ValueListMetricsSchema } from '@kbn/security-solution-plugin/server/usage/value_lists/types';
+import type { ValueListMetricsSchema } from '@kbn/security-solution-plugin/server/usage/value_lists/types';
 import { getStatsUrl } from './get_stats_url';
 import { getValueListMetricsFromBody } from './get_value_list_metrics_from_body';
 

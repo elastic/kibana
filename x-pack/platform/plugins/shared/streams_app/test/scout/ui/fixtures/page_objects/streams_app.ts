@@ -7,9 +7,10 @@
 
 /* eslint-disable playwright/no-nth-methods */
 
-import { ScoutPage, expect } from '@kbn/scout';
-import { ProcessorType } from '@kbn/streams-schema';
-import { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
+import type { ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout';
+import type { ProcessorType } from '@kbn/streamlang';
+import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
   constructor(private readonly page: ScoutPage) {}

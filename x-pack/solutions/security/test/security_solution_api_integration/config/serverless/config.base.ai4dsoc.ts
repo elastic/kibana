@@ -6,7 +6,7 @@
  */
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 export interface CreateTestConfigOptions {
   testFiles: string[];
   junit: { reportName: string };
