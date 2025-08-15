@@ -42,7 +42,7 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
       className="side-nav"
       css={css`
         background-color: ${euiTheme.colors.backgroundBasePlain};
-        border-right: 1px solid ${euiTheme.colors.borderBaseSubdued};
+        border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
         display: flex;
         flex-direction: column;
         gap: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};

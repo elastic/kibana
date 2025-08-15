@@ -255,6 +255,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         await PageObjects.datasetQuality.selectQualityIssueChart('failed');
 
+        // This line is required to solve problems where rendered lens visualisation below gets the hover bringing additional action icons
+        // which over lap with the button on top of the visualisation causing ElementClickInterceptedError to happen
+        await testSubjects.moveMouseTo(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
+        );
+
         await testSubjects.click(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
         );
@@ -437,8 +443,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: regularDataStreamName,
         });
-
-        await PageObjects.datasetQuality.openDatasetQualityDetailsActionsButton();
 
         const discoverButton = await PageObjects.datasetQuality.getOpenInDiscoverButton();
 
