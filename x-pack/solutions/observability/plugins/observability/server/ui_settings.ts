@@ -673,8 +673,6 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
     requiresPageReload: false,
-    solutionViews: ['classic', 'oblt'],
-    technicalPreview: true,
   },
 };
 
