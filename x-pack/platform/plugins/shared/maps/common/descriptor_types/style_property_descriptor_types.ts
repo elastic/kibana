@@ -16,7 +16,3 @@ export interface CustomIcon {
 export interface StyleDescriptor {
   type: string;
 }
-
-export type EMSVectorTileStyleDescriptor = StyleDescriptor & {
-  color: string;
-};

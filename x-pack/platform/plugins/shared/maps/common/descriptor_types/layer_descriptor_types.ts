@@ -10,8 +10,7 @@
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { Query } from '@kbn/es-query';
 import { Feature } from 'geojson';
-import { EMSVectorTileStyleDescriptor } from './style_property_descriptor_types';
-import { HeatmapStyleDescriptor } from '.';
+import { EMSVectorTileStyleDescriptor, HeatmapStyleDescriptor } from '.';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
 import type { JoinSourceDescriptor, SourceDescriptor, VectorStyleDescriptor } from '.';
 import { LAYER_STYLE_TYPE, LAYER_TYPE } from '../constants';

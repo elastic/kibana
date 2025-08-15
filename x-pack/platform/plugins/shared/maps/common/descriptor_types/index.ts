@@ -50,6 +50,7 @@ export type {
   ColorStylePropertyDescriptor,
   DynamicStyleProperties,
   DynamicStylePropertyOptions,
+  EMSVectorTileStyleDescriptor,
   FieldMetaOptions,
   HeatmapStyleDescriptor,
   IconDynamicOptions,
