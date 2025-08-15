@@ -8,8 +8,9 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { IndexStorageSettings, StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import type { ConversationRound } from '@kbn/onechat-common';
+import { chatSystemIndex } from '@kbn/onechat-server';
 
-export const conversationIndexName = '.kibana_onechat_conversations';
+export const conversationIndexName = chatSystemIndex('conversations');
 
 const storageSettings = {
   name: conversationIndexName,
