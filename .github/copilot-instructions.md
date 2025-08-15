@@ -137,8 +137,8 @@ Build Kibana Plugins → Start Test Server → Run Test Config → Execute Tests
 # Build all platform plugins (required for FTR tests)
 node scripts/build_kibana_platform_plugins
 
-# Build specific solution plugins (faster for targeted testing)
-node scripts/build_kibana_platform_plugins --scan-dir x-pack/solutions/observability
+# Build specific plugins by name (faster for targeted testing)
+node scripts/build_kibana_platform_plugins --filter securitySolution
 ```
 
 ### Core FTR Commands
