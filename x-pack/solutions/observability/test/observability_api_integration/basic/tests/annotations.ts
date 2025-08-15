@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { JsonObject } from '@kbn/utility-types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { JsonObject } from '@kbn/utility-types';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function annotationApiTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

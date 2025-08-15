@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import { css } from '@emotion/css';
-import { Navigation, NavigationProps } from './navigation';
+import type { NavigationProps } from './navigation';
+import { Navigation } from './navigation';
 
 export interface ProjectSideNavV1Props extends NavigationProps {
   toggle: (isVisible: boolean) => void;

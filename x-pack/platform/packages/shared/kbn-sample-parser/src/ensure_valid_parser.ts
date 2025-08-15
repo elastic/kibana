@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
-import { OpenAIClient } from './create_openai_client';
+import type { OpenAIClient } from './create_openai_client';
 import { type LoghubSystem } from './read_loghub_system_files';
 import { getParserFilename, writeFileRecursively } from './utils';
 import { validateParser } from './validate_parser';

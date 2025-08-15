@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
-import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
+import type { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
 import { postAttackDiscoveryGenerationsDismissRoute } from './post_attack_discovery_generations_dismiss';
 import { attackDiscoveryDataClientMock } from '../../../__mocks__/data_clients.mock';
 import { requestMock } from '../../../__mocks__/request';

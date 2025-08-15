@@ -19,6 +19,7 @@ import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generat
 import { getDateHistogramCompletionItem } from '@kbn/esql-ast/src/commands_registry/complete_items';
 import { getRecommendedQueriesTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import type { PartialSuggestionWithText, SuggestOptions } from './__tests__/helpers';
 import {
   attachTriggerCommand,
   createCustomCallbackMocks,
@@ -26,10 +27,8 @@ import {
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
   getPolicyFields,
-  PartialSuggestionWithText,
   policies,
   setup,
-  SuggestOptions,
   TIME_PICKER_SUGGESTION,
 } from './__tests__/helpers';
 import { suggest } from './autocomplete';

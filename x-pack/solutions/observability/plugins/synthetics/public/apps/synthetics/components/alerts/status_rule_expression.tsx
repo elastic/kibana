@@ -25,7 +25,7 @@ import {
   ForTheLastExpression,
   SHOW_RECOVERY_STRATEGY_SWITCH,
 } from './common/for_the_last_expression';
-import { StatusRuleParamsProps } from './status_rule_ui';
+import type { StatusRuleParamsProps } from './status_rule_ui';
 import { LocationsValueExpression } from './common/condition_locations_value';
 
 interface Props {

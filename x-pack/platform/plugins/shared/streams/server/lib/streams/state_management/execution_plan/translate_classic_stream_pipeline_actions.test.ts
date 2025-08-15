@@ -10,7 +10,7 @@ import {
   MANAGED_BY_STREAMS,
   translateClassicStreamPipelineActions,
 } from './translate_classic_stream_pipeline_actions';
-import { ActionsByType } from './types';
+import type { ActionsByType } from './types';
 import { ASSET_VERSION } from '../../../../../common/constants';
 
 describe('translateClassicStreamPipelineActions', () => {

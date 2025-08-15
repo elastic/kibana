@@ -18,7 +18,7 @@ import {
   EDIT_BUTTON_LABEL,
   SAVE_BUTTON_LABEL,
 } from '../../../connectors/translations';
-import { ItemWithAnID } from '../../types';
+import type { ItemWithAnID } from '../../types';
 
 interface ActionColumnProps<Item extends ItemWithAnID> {
   displayedItems: Item[];

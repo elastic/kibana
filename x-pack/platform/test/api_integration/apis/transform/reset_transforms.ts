@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 
-import { ResetTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/reset_transforms';
+import type { ResetTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/reset_transforms';
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import { getCommonRequestHeader } from '../../services/ml/common_api';
 import { USER } from '../../services/transform/security_common';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { asyncForEach, generateTransformConfig } from './common';
 

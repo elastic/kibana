@@ -6,13 +6,17 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { StorageContext } from '@kbn/content-management-plugin/server';
-import { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import type { StorageContext } from '@kbn/content-management-plugin/server';
+import type { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import Boom from '@hapi/boom';
-import { CreateResult, SearchQuery, DeleteResult } from '@kbn/content-management-plugin/common';
+import type {
+  CreateResult,
+  SearchQuery,
+  DeleteResult,
+} from '@kbn/content-management-plugin/common';
 import type { MapAttributes, MapItem, MapsSearchOut } from '../../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common';
-import {
+import type {
   MapsSavedObjectAttributes,
   MapsGetOut,
   MapsSearchOptions,

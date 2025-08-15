@@ -9,8 +9,8 @@
 
 import { EuiBadge, EuiStat, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   fetch$,
@@ -23,7 +23,7 @@ import { BehaviorSubject, switchMap, tap } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { getCount } from './get_count';
-import { SearchApi, Services, SearchSerializedState } from './types';
+import type { SearchApi, Services, SearchSerializedState } from './types';
 
 export const getSearchEmbeddableFactory = (services: Services) => {
   const factory: EmbeddableFactory<SearchSerializedState, SearchApi> = {

@@ -9,10 +9,10 @@
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import path from 'path';
-import { FlagOptions, FlagsReader } from '@kbn/dev-cli-runner';
+import type { FlagOptions, FlagsReader } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { SERVER_FLAG_OPTIONS, parseServerFlags } from '../../servers';
-import { CliSupportedServerModes } from '../../types';
+import type { CliSupportedServerModes } from '../../types';
 import { validatePlaywrightConfig } from './config_validator';
 
 export interface RunTestsOptions {

@@ -6,9 +6,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { PreviewChartResponse } from '../../../common/api_types';
-import { Coordinate } from '../../../common/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { PreviewChartResponse } from '../../../common/api_types';
+import type { Coordinate } from '../../../common/types';
 import { extractKey } from '../extract_key';
 import { MISSING_VALUE } from '../types';
 

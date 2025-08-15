@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { BaseCallbackHandlerInput } from '@langchain/core/callbacks/base';
-import { Run } from 'langsmith/schemas';
+import type { BaseCallbackHandlerInput } from '@langchain/core/callbacks/base';
+import type { Run } from 'langsmith/schemas';
 import { BaseTracer } from '@langchain/core/tracers/base';
-import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
-import { BaseMessage } from '@langchain/core/messages';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import type { BaseMessage } from '@langchain/core/messages';
 import { containsToolCalls } from '../../utils/tools';
 
 export interface TelemetryParams {

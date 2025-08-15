@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { map, merge, OperatorFunction, share, toArray } from 'rxjs';
-import {
+import type { OperatorFunction } from 'rxjs';
+import { map, merge, share, toArray } from 'rxjs';
+import type {
   ChatAgentEvent,
-  ChatEventType,
-  ConversationRoundStepType,
-  isMessageCompleteEvent,
-  isToolCallEvent,
-  isToolResultEvent,
-  isReasoningEvent,
   RoundCompleteEvent,
   RoundInput,
   ConversationRound,
   ConversationRoundStep,
   ReasoningEvent,
   ToolCallEvent,
+} from '@kbn/onechat-common';
+import {
+  ChatEventType,
+  ConversationRoundStepType,
+  isMessageCompleteEvent,
+  isToolCallEvent,
+  isToolResultEvent,
+  isReasoningEvent,
 } from '@kbn/onechat-common';
 import { getCurrentTraceId } from '../../../../tracing';
 

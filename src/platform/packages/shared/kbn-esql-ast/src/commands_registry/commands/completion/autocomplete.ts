@@ -8,11 +8,11 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
-import * as ast from '../../../types';
+import type { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import type * as ast from '../../../types';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { EDITOR_MARKER } from '../../../definitions/constants';
-import { ESQLCommand, ESQLAstCompletionCommand } from '../../../types';
+import type { ESQLCommand, ESQLAstCompletionCommand } from '../../../types';
 import {
   pipeCompleteItem,
   assignCompletionItem,

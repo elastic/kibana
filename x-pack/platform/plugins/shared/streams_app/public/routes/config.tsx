@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { createRouter, Outlet, RouteMap } from '@kbn/typed-react-router-config';
+import type { RouteMap } from '@kbn/typed-react-router-config';
+import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
 import { StreamsAppPageTemplate } from '../components/streams_app_page_template';

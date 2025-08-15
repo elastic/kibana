@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridLayoutStateManager } from '../../types';
+import type { GridLayoutStateManager } from '../../types';
 import { updateClientY } from '../keyboard_utils';
-import { KeyboardCode, UserKeyboardEvent } from '../sensors/keyboard/types';
+import type { UserKeyboardEvent } from '../sensors/keyboard/types';
+import { KeyboardCode } from '../sensors/keyboard/types';
 
 export const getNextKeyboardPosition = (
   ev: UserKeyboardEvent,

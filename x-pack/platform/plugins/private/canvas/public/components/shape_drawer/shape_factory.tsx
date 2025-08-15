@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { Ref } from 'react';
-import { ShapeProps, SvgConfig, SvgElementTypes, ViewBoxParams, ParentNodeParams } from './types';
+import type { Ref } from 'react';
+import React from 'react';
+import type { ShapeProps, SvgConfig, ViewBoxParams, ParentNodeParams } from './types';
+import { SvgElementTypes } from './types';
 
 export function viewBoxToString(viewBox?: ViewBoxParams): undefined | string {
   if (!viewBox) {

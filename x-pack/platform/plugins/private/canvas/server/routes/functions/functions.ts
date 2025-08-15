@@ -7,7 +7,7 @@
 
 import { serializeProvider } from '@kbn/expressions-plugin/common';
 import { schema } from '@kbn/config-schema';
-import { RouteInitializerDeps } from '..';
+import type { RouteInitializerDeps } from '..';
 import { API_ROUTE_FUNCTIONS } from '../../../common/lib/constants';
 
 interface FunctionCall {

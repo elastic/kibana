@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z, ZodRawShape, ZodTypeAny } from '@kbn/zod';
-import { MaybePromise } from '@kbn/utility-types';
+import type { z, ZodRawShape, ZodTypeAny } from '@kbn/zod';
+import type { MaybePromise } from '@kbn/utility-types';
 import type { ToolDescriptor } from '@kbn/wc-framework-types-common';
 
 /**

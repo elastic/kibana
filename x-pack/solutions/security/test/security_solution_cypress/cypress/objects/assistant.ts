@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   ConversationCategory,
   ConversationCreateProps,
   ConversationResponse,
   Provider,
 } from '@kbn/elastic-assistant-common';
-import { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas';
 
 export const getMockConversation = (body?: Partial<ConversationCreateProps>) => ({
   title: 'Test Conversation',

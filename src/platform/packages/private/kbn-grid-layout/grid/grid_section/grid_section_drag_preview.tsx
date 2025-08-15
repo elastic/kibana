@@ -10,7 +10,7 @@
 import React, { useEffect, useRef } from 'react';
 import { skip } from 'rxjs';
 
-import { UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';

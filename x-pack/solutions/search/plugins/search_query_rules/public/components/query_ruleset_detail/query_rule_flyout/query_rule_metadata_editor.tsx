@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 
-import { QueryRulesQueryRuleCriteria } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryRulesQueryRuleCriteria } from '@elastic/elasticsearch/lib/api/types';
 import {
   EuiButtonIcon,
   EuiComboBox,
@@ -22,7 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldError } from 'react-hook-form';
+import type { FieldError } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface QueryRuleMetadataEditorProps {

@@ -11,8 +11,8 @@ import type { Client } from '@elastic/elasticsearch';
 import AggregateError from 'aggregate-error';
 import { Writable } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
-import { Stats } from '../stats';
-import { Progress } from '../progress';
+import type { Stats } from '../stats';
+import type { Progress } from '../progress';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 enum BulkOperation {

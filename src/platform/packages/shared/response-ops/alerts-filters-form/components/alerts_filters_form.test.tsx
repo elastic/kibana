@@ -11,8 +11,9 @@ import React, { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { AlertsFiltersForm, AlertsFiltersFormProps } from './alerts_filters_form';
-import { AlertsFilter, AlertsFiltersExpression } from '../types';
+import type { AlertsFiltersFormProps } from './alerts_filters_form';
+import { AlertsFiltersForm } from './alerts_filters_form';
+import type { AlertsFilter, AlertsFiltersExpression } from '../types';
 import {
   ADD_AND_OPERATION_BUTTON_SUBJ,
   ADD_OR_OPERATION_BUTTON_SUBJ,

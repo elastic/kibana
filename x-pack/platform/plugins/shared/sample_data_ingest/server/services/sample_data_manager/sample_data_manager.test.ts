@@ -20,7 +20,7 @@ jest.mock('../index_manager', () => {
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { DatasetSampleType } from '../../../common';
+import type { DatasetSampleType } from '../../../common';
 import { SampleDataManager } from './sample_data_manager';
 import { ArtifactManager } from '../artifact_manager';
 import { IndexManager } from '../index_manager';

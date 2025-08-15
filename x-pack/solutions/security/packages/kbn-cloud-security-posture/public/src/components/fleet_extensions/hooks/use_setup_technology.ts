@@ -6,9 +6,10 @@
  */
 import { useState, useEffect } from 'react';
 
-import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { CLOUDBEAT_AWS, CLOUDBEAT_AZURE, CLOUDBEAT_GCP } from '../constants';
+import { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from '../constants';
+import type { CloudProviders } from '../types';
 
 export const useSetupTechnology = ({
   input,
@@ -16,16 +17,18 @@ export const useSetupTechnology = ({
   handleSetupTechnologyChange,
   defaultSetupTechnology,
   isEditPage,
+  selectedProvider,
 }: {
   input: NewPackagePolicyInput;
   isAgentlessEnabled?: boolean;
   handleSetupTechnologyChange?: (value: SetupTechnology) => void;
   defaultSetupTechnology?: SetupTechnology;
   isEditPage?: boolean;
+  selectedProvider?: CloudProviders;
 }) => {
-  const isCspmAws = input.type === CLOUDBEAT_AWS;
-  const isCspmGcp = input.type === CLOUDBEAT_GCP;
-  const isCspmAzure = input.type === CLOUDBEAT_AZURE;
+  const isCspmAws = selectedProvider === AWS_PROVIDER;
+  const isCspmGcp = selectedProvider === GCP_PROVIDER;
+  const isCspmAzure = selectedProvider === AZURE_PROVIDER;
   const isAgentlessSupportedForCloudProvider = isCspmAws || isCspmGcp || isCspmAzure;
   const isAgentlessAvailable = isAgentlessSupportedForCloudProvider && isAgentlessEnabled;
   const defaultEditSetupTechnology =

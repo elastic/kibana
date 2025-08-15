@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { StreamEndpointLatencyProps } from './types';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { StreamEndpointLatencyProps } from './types';
 import { STREAMS_ENDPOINT_LATENCY_EVENT } from './constants';
 
 const LATENCY_TRACKING_ENDPOINT_ALLOW_LIST = [

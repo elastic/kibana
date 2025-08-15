@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Subject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
@@ -25,17 +26,16 @@ import type {
 } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RequestStatus } from '@kbn/inspector-plugin/public';
-import { IKibanaSearchResponse } from '@kbn/search-types';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import { Histogram } from './histogram';
-import {
+import type {
   UnifiedHistogramSuggestionContext,
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
   UnifiedHistogramChartLoadEvent,
-  UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
   UnifiedHistogramInput$,
   UnifiedHistogramInputMessage,
@@ -43,6 +43,7 @@ import {
   UnifiedHistogramServices,
   UnifiedHistogramBucketInterval,
 } from '../../types';
+import { UnifiedHistogramFetchStatus } from '../../types';
 import { UnifiedHistogramSuggestionType } from '../../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { TimeIntervalSelector } from './time_interval_selector';
@@ -52,7 +53,7 @@ import { useChartActions } from './hooks/use_chart_actions';
 import { ChartConfigPanel } from './chart_config_panel';
 import { useFetch } from './hooks/use_fetch';
 import { useEditVisualization } from './hooks/use_edit_visualization';
-import { LensVisService } from '../../services/lens_vis_service';
+import type { LensVisService } from '../../services/lens_vis_service';
 import type { UseRequestParamsResult } from '../../hooks/use_request_params';
 import { removeTablesFromLensAttributes } from '../../utils/lens_vis_from_table';
 import { useLensProps } from './hooks/use_lens_props';

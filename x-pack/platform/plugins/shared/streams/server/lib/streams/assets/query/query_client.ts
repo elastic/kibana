@@ -6,14 +6,16 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import { Logger } from '@kbn/core/server';
-import { StreamQuery, buildEsqlQuery } from '@kbn/streams-schema';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { StreamQuery } from '@kbn/streams-schema';
+import { buildEsqlQuery } from '@kbn/streams-schema';
 import { map, partition } from 'lodash';
 import pLimit from 'p-limit';
-import { QueryLink } from '../../../../../common/assets';
-import { EsqlRuleParams } from '../../../rules/esql/types';
-import { AssetClient, getAssetLinkUuid } from '../asset_client';
+import type { QueryLink } from '../../../../../common/assets';
+import type { EsqlRuleParams } from '../../../rules/esql/types';
+import type { AssetClient } from '../asset_client';
+import { getAssetLinkUuid } from '../asset_client';
 import { ASSET_ID, ASSET_TYPE } from '../fields';
 import { getRuleIdFromQueryLink } from './helpers/query';
 

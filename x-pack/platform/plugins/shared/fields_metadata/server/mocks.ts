@@ -9,7 +9,7 @@ import {
   createFieldsMetadataServiceSetupMock,
   createFieldsMetadataServiceStartMock,
 } from './services/fields_metadata/fields_metadata_service.mock';
-import { FieldsMetadataServerSetup, FieldsMetadataServerStart } from './types';
+import type { FieldsMetadataServerSetup, FieldsMetadataServerStart } from './types';
 
 const createFieldsMetadataServerSetupMock = (): jest.Mocked<FieldsMetadataServerSetup> => ({
   registerIntegrationFieldsExtractor:

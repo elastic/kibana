@@ -8,14 +8,8 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import {
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-  EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { debounce } from 'lodash';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { OptionalFieldLabel } from '../optional_field_label';

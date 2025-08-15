@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
-import {
+import type { JsonObject } from '@kbn/utility-types';
+import type {
   CoreSetup,
   Plugin,
   PluginInitializerContext,
   Logger,
   ServiceStatus,
 } from '@kbn/core/server';
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { PrometheusExporter } from '@kbn/metrics';
-import { MonitoringCollectionConfig } from './config';
+import type { MonitoringCollectionConfig } from './config';
 import { registerDynamicRoute, registerV1PrometheusRoute, PROMETHEUS_PATH } from './routes';
 import { TYPE_ALLOWLIST } from './constants';
 

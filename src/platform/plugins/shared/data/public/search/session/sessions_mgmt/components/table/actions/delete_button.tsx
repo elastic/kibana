@@ -10,12 +10,12 @@ import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { SearchSessionsMgmtAPI } from '../../../lib/api';
-import { IClickActionDescriptor } from './types';
-import { OnActionDismiss } from './types';
-import { UISession } from '../../../types';
+import type { SearchSessionsMgmtAPI } from '../../../lib/api';
+import type { IClickActionDescriptor } from './types';
+import type { OnActionDismiss } from './types';
+import type { UISession } from '../../../types';
 
 interface DeleteButtonProps {
   api: SearchSessionsMgmtAPI;

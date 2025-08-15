@@ -8,7 +8,7 @@
  */
 
 import * as Either from 'fp-ts/Either';
-import * as TaskEither from 'fp-ts/TaskEither';
+import type * as TaskEither from 'fp-ts/TaskEither';
 import { flatten } from 'lodash';
 import type {
   AggregationsMultiBucketAggregateBase,

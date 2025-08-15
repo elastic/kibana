@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  SLODefinitionResponse,
-  timeslicesBudgetingMethodSchema,
-  durationType,
-} from '@kbn/slo-schema';
+import type { SLODefinitionResponse } from '@kbn/slo-schema';
+import { timeslicesBudgetingMethodSchema, durationType } from '@kbn/slo-schema';
 import { isLeft } from 'fp-ts/Either';
 
 export function getDelayInSecondsFromSLO(slo: SLODefinitionResponse) {

@@ -14,10 +14,10 @@ import type {
   StatsGetterConfig,
 } from '@kbn/telemetry-collection-manager-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { RequestHandler } from '@kbn/core-http-server';
+import type { RequestHandler } from '@kbn/core-http-server';
 import { ApiOperation } from '@kbn/core-security-server';
 import { FetchSnapshotTelemetry } from '../../common/routes';
-import { UsageStatsBody, v2 } from '../../common/types';
+import type { UsageStatsBody, v2 } from '../../common/types';
 
 export type SecurityGetter = () => SecurityPluginStart | undefined;
 

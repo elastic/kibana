@@ -8,7 +8,8 @@
  */
 
 import { eachSeries } from 'async';
-import { Duplex, Readable, Transform, PassThrough } from 'stream';
+import type { Duplex, Readable } from 'stream';
+import { Transform, PassThrough } from 'stream';
 
 /**
  * Pipe one or many streams sequentially into the destination stream. Once all

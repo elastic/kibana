@@ -15,6 +15,7 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiImage,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAssetBasePath } from '../hooks/use_asset_base_path';
@@ -42,7 +43,7 @@ export const SearchHomepageHeader: React.FC = () => {
             <EuiTitle size="l">
               <h1>
                 {i18n.translate('xpack.searchHomepage.pageTitle', {
-                  defaultMessage: 'Your vector database just got faster',
+                  defaultMessage: 'Build your first search solution',
                 })}
               </h1>
             </EuiTitle>
@@ -51,13 +52,21 @@ export const SearchHomepageHeader: React.FC = () => {
               <p>
                 {i18n.translate('xpack.searchHomepage.description', {
                   defaultMessage:
-                    'Elasticsearch and Lucene now offer “Better binary quantization”, delivering ~95% memory reduction while maintaining high ranking quality.',
+                    'Learn the fundamentals of creating a complete search experience with this hands-on tutorial.',
                 })}
               </p>
             </EuiText>
             <EuiSpacer size="xl" />
             {/* To DO: Enable the following once we have text content ready
             <FeatureUpdateGroup updates={['Feature update', 'Feature update', 'Feature update']} /> */}
+            <EuiLink
+              data-test-subj="searchHomepageSearchHomepageHeaderTutorialLink"
+              href="https://www.elastic.co/search-labs/tutorials/search-tutorial/welcome"
+              target="_blank"
+              data-telemetry-id="search-promo-homepage-8-search-tutorial" // keep "search-promo-homepage" as the prefix for every tracking ID so we can filter on that prefix for the total homepage promo clicks overall
+            >
+              Start the tutorial
+            </EuiLink>
           </EuiPanel>
         </EuiFlexItem>
 

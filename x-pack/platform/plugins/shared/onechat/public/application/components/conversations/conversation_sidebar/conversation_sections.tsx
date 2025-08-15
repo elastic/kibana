@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiListGroup, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ConversationWithoutRounds } from '@kbn/onechat-common';
+import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 import React, { useMemo } from 'react';
 import { groupConversationsByTime } from '../../../utils/group_conversations';
 import { ConversationItem } from './conversation_item';

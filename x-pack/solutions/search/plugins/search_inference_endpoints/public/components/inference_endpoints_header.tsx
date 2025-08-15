@@ -8,6 +8,7 @@
 import { EuiPageTemplate, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import React from 'react';
 import * as i18n from '../../common/translations';
+import { PLUGIN_TITLE } from '../../common/constants';
 import { docLinks } from '../../common/doc_links';
 import { useTrainedModelPageUrl } from '../hooks/use_trained_model_page_url';
 
@@ -22,7 +23,7 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
   return (
     <EuiPageTemplate.Header
       data-test-subj="allInferenceEndpointsPage"
-      pageTitle={i18n.INFERENCE_ENDPOINT_LABEL}
+      pageTitle={PLUGIN_TITLE}
       description={i18n.MANAGE_INFERENCE_ENDPOINTS_LABEL}
       bottomBorder={true}
       rightSideItems={[

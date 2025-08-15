@@ -10,8 +10,8 @@
 import { v4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardPanel } from '../../server';
+import type { DashboardState } from '../../common';
 import {
-  DashboardState,
   getReferencesForPanelId,
   isDashboardSection,
   prefixReferencesFromPanel,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { History } from 'history';
+import type { History } from 'history';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -15,7 +15,7 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { scopedHistoryMock } from './scoped_history.mock';
-import {
+import type {
   ApplicationSetup,
   ApplicationStart,
   PublicAppInfo,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ESQLSearchResponse } from '@kbn/es-types';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 
 type Response = Array<{
   _id: string;

@@ -25,8 +25,8 @@ import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 import { isEmpty, findIndex } from 'lodash';
 import { useConversationsByDate } from './use_conversations_by_date';
-import { DataStreamApis } from '../../use_data_stream_apis';
-import { Conversation } from '../../../..';
+import type { DataStreamApis } from '../../use_data_stream_apis';
+import type { Conversation } from '../../../..';
 import * as i18n from './translations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;

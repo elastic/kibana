@@ -300,7 +300,10 @@ export interface DocLinks {
     readonly enableDeprecationHttpDebugLogs: string;
   };
   readonly securitySolution: {
-    readonly aiAssistant: string;
+    readonly aiAssistant: {
+      home: string;
+      knowledgeBaseIndexEntries: string;
+    };
     readonly cloudSecurityPosture: string;
     readonly installElasticDefend: string;
     readonly artifactControl: string;

@@ -7,16 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { forwardRef, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIcon,
-  EuiSuperSelect,
-  EuiSuperSelectOption,
-} from '@elastic/eui';
+import type { EuiSuperSelectOption } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import { capitalize } from 'lodash';
-import { RuleTypeSolution } from '@kbn/alerting-types';
+import type { RuleTypeSolution } from '@kbn/alerting-types';
 import { SOLUTION_SELECTOR_SUBJ } from '../constants';
 import {
   RULE_TYPES_LOAD_ERROR_MESSAGE,

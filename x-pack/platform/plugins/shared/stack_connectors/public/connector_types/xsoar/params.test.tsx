@@ -8,11 +8,12 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ActionConnector, ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
 import XSOARParamsFields from './params';
 import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_sub_action';
 import { SUB_ACTION } from '../../../common/xsoar/constants';
-import { ExecutorParams, XSOARRunActionParams } from '../../../common/xsoar/types';
+import type { ExecutorParams, XSOARRunActionParams } from '../../../common/xsoar/types';
 import * as translations from './translations';
 
 interface Result {

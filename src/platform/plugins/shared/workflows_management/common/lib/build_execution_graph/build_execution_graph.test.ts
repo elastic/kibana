@@ -8,7 +8,7 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import {
+import type {
   AtomicGraphNode,
   ConnectorStep,
   EnterConditionBranchNode,
@@ -311,6 +311,7 @@ describe('convertToWorkflowGraph', () => {
       expect(enterForeachNode).toEqual({
         id: 'testForeachStep',
         type: 'enter-foreach',
+        exitNodeId: 'exitForeach(testForeachStep)',
         itemNodeIds: ['firstTestForeachConnectorStep', 'secondTestForeachConnectorStep'],
         configuration: {
           foreach: '["item1", "item2", "item3"]',

@@ -12,7 +12,7 @@ import { MSearchService } from './msearch';
 import { ContentRegistry } from './registry';
 import { createMockedStorage } from './mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { StorageContext } from '.';
+import type { StorageContext } from '.';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
 const SEARCH_LISTING_LIMIT = 100;

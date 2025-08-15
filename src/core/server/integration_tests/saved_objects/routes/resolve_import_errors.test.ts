@@ -10,22 +10,17 @@
 jest.mock('uuid');
 
 import supertest from 'supertest';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger, LogLevelId } from '@kbn/logging';
 import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import {
-  setupServer,
-  createExportableType,
-  SetupServerReturn,
-} from '@kbn/core-test-helpers-test-utils';
-import {
-  LEGACY_URL_ALIAS_TYPE,
-  SavedObjectConfig,
-} from '@kbn/core-saved-objects-base-server-internal';
+import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import { setupServer, createExportableType } from '@kbn/core-test-helpers-test-utils';
+import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsImporter } from '@kbn/core-saved-objects-import-export-server-internal';
 import {
   registerResolveImportErrorsRoute,

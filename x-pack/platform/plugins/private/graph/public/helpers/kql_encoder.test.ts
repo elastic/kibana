@@ -6,7 +6,7 @@
  */
 
 import { asKQL } from './kql_encoder';
-import { Workspace, WorkspaceNode } from '../types';
+import type { Workspace, WorkspaceNode } from '../types';
 
 describe('kql_encoder', () => {
   let workspaceMock: jest.Mocked<Workspace>;

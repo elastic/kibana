@@ -6,7 +6,7 @@
  */
 
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { EvaluatorT } from 'langsmith/evaluation';
+import type { EvaluatorT } from 'langsmith/evaluation';
 import { customIncompatibleAntivirusEvaluator } from './customIncompatibleAntivirusEvaluator';
 
 export const getDefendInsightsCustomEvaluator = ({

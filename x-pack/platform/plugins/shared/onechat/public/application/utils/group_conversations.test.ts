@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Conversation } from '@kbn/onechat-common';
+import type { Conversation } from '@kbn/onechat-common';
 import { groupConversationsByTime } from './group_conversations';
 import moment from 'moment';
 

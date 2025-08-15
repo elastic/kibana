@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { groupBy, orderBy } from 'lodash';
-import { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   deleteComponent,
   upsertComponent,

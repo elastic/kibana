@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { VulnSeverity } from './types/vulnerabilities';
-import { MisconfigurationEvaluationStatus } from './types/misconfigurations';
+import type { VulnSeverity } from './types/vulnerabilities';
+import type { MisconfigurationEvaluationStatus } from './types/misconfigurations';
 
 export const KSPM_POLICY_TEMPLATE = 'kspm';
 export const CSPM_POLICY_TEMPLATE = 'cspm';

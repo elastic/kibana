@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { createInferenceProviderError, InferenceTaskProviderError } from '@kbn/inference-common';
+import type { InferenceTaskProviderError } from '@kbn/inference-common';
+import { createInferenceProviderError } from '@kbn/inference-common';
 
 const connectorStatusCodeRegexp = /Status code: ([0-9]{3})/i;
 const inferenceStatusCodeRegexp = /status \[([0-9]{3})\]/i;

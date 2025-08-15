@@ -8,7 +8,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { UnifiedHistogramApi } from './hooks/use_unified_histogram';
+import type { UnifiedHistogramApi } from './hooks/use_unified_histogram';
 
 export const createMockUnifiedHistogramApi = () => {
   const api: UnifiedHistogramApi = {

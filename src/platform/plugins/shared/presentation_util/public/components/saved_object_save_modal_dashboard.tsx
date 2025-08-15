@@ -11,13 +11,10 @@ import React, { useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  OnSaveProps,
-  SavedObjectSaveModal,
-  type SaveModalState,
-} from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModal, type SaveModalState } from '@kbn/saved-objects-plugin/public';
 
-import { SaveModalDashboardProps } from './types';
+import type { SaveModalDashboardProps } from './types';
 import { SaveModalDashboardSelector } from './saved_object_save_modal_dashboard_selector';
 import { getPresentationCapabilities } from '../utils/get_presentation_capabilities';
 

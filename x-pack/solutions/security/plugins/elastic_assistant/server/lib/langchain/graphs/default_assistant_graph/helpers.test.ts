@@ -7,15 +7,15 @@
 
 import { streamGraph } from './helpers';
 import agent from 'elastic-apm-node';
-import { KibanaRequest } from '@kbn/core-http-server';
-import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { waitFor } from '@testing-library/react';
-import { APMTracer } from '@kbn/langchain/server/tracers/apm';
-import { DefaultAssistantGraph } from './graph';
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import type { DefaultAssistantGraph } from './graph';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { AIMessage, AIMessageChunk, HumanMessage } from '@langchain/core/messages';
 
 jest.mock('elastic-apm-node');

@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { Pipeline } from '../../../../../common/types';
+import type { Pipeline } from '../../../../../common/types';
 
 export interface Props {
   pipeline: Pipeline;

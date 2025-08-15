@@ -6,7 +6,7 @@
  */
 
 import { NodeType } from '@kbn/wc-framework-types-common';
-import {
+import type {
   NodeRunnerFactory,
   NodeFactoryContext,
   ToolExecutionNodeConfigType,
@@ -15,15 +15,17 @@ import {
   WorkflowExecutionState,
 } from '@kbn/wc-framework-types-server';
 import { getToolExecutionNodeTypeDefinition } from './tool_execution';
+import type {
+  MockedNodeFactoryBaseServices,
+  MockedState,
+  NodeEventReporterMock,
+} from '../../test_utils';
 import {
   createMockFactoryServices,
   createMockedState,
   createMockedNodeEventReporter,
   createExecutionState,
   createMockedTool,
-  MockedNodeFactoryBaseServices,
-  MockedState,
-  NodeEventReporterMock,
 } from '../../test_utils';
 
 describe('Node type: toolExecution', () => {

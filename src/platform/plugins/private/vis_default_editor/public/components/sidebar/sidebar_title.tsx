@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EventEmitter } from 'events';
+import type { EventEmitter } from 'events';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -26,9 +26,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { Vis } from '@kbn/visualizations-plugin/public';
-import { SavedSearch, getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
-import { ApplicationStart } from '@kbn/core/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';

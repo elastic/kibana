@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScoutPage } from '..';
+import type { ScoutPage } from '..';
 
 const DEFAULT_MAP_LOADING_TIMEOUT = 10_000;
 

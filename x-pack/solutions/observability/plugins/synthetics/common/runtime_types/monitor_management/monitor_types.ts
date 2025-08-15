@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { NonEmptyArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import { AlertConfigsCodec } from './alert_config';
-import { secretKeys } from '../../constants/monitor_management';
+import type { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
 import { MonitorServiceLocationCodec, ServiceLocationErrors } from './locations';
 import {

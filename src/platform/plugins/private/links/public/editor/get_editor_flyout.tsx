@@ -11,9 +11,9 @@ import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
-import { LinksLayoutType } from '../../common/content_management';
+import type { LinksLayoutType } from '../../common/content_management';
 import { linksClient, runSaveToLibrary } from '../content_management';
-import { ResolvedLink } from '../types';
+import type { ResolvedLink } from '../types';
 import LinksEditor from '../components/editor/links_editor';
 import { serializeResolvedLinks } from '../lib/resolve_links';
 
@@ -23,6 +23,7 @@ export interface EditorState {
   links?: ResolvedLink[];
   savedObjectId?: string;
   title?: string;
+  error?: Error;
 }
 
 export function getEditorFlyout({
@@ -66,6 +67,7 @@ export function getEditorFlyout({
           closeFlyout();
         } else {
           const saveResult = await runSaveToLibrary(newState);
+          if (saveResult?.error) throw saveResult.error;
           onCompleteEdit?.(saveResult);
           // If saveResult is undefined, the user cancelled the save as modal and we should not close the flyout
           if (saveResult) closeFlyout();

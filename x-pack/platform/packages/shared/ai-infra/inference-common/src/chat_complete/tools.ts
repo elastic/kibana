@@ -6,8 +6,8 @@
  */
 
 import type { ValuesType } from 'utility-types';
-import { FromToolSchema, ToolSchema } from './tool_schema';
-import { ToolMessage } from './messages';
+import type { FromToolSchema, ToolSchema } from './tool_schema';
+import type { ToolMessage } from './messages';
 
 type ToolsOfChoice<TToolOptions extends ToolOptions> = TToolOptions['toolChoice'] extends {
   function: infer TToolName;

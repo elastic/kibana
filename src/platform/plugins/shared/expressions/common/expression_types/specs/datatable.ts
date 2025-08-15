@@ -11,9 +11,9 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
-import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
-import { PointSeries, PointSeriesColumn } from './pointseries';
-import { ExpressionValueRender } from './render';
+import type { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
+import type { PointSeries, PointSeriesColumn } from './pointseries';
+import type { ExpressionValueRender } from './render';
 
 export enum DimensionType {
   Y_AXIS = 'y',

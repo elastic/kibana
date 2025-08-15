@@ -14,13 +14,8 @@ import {
 import type { Logger } from '@kbn/logging';
 import { ONECHAT_UI_SETTING_ID } from '../common/constants';
 import { registerAnalytics, registerApp } from './register';
-import {
-  AgentService,
-  ChatService,
-  ConversationsService,
-  OnechatInternalService,
-  ToolsService,
-} from './services';
+import type { OnechatInternalService } from './services';
+import { AgentService, ChatService, ConversationsService, ToolsService } from './services';
 import type {
   ConfigSchema,
   OnechatPluginSetup,

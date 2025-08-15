@@ -6,15 +6,15 @@
  */
 
 import { get } from 'lodash';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { EsQueryConfig } from '@kbn/es-query';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { EsQueryConfig } from '@kbn/es-query';
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import { CustomThresholdAlert } from '../../types';
+import type { CustomThresholdAlert } from '../../types';
 import { getGroupFilters } from '../../../../../../common/custom_threshold_rule/helpers/get_group';
 import { Aggregators } from '../../../../../../common/custom_threshold_rule/types';
 import { buildEsQuery } from '../../../../../utils/build_es_query';
 import type { CustomThresholdExpressionMetric } from '../../../../../../common/custom_threshold_rule/types';
-import { Group } from '../../../../../../common/typings';
+import type { Group } from '../../../../../../common/typings';
 
 const getKuery = (metrics: CustomThresholdExpressionMetric[], filter?: string) => {
   let query = '';

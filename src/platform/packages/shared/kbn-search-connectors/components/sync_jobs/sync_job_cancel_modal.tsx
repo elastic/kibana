@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiConfirmModal,
-  EuiText,
-  EuiCode,
-  EuiSpacer,
-  EuiConfirmModalProps,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import type { EuiConfirmModalProps } from '@elastic/eui';
+import { EuiConfirmModal, EuiText, EuiCode, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';

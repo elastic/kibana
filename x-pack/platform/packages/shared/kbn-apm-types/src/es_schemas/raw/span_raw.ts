@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { APMBaseDoc } from './apm_base_doc';
-import { EventOutcome } from './fields/event_outcome';
-import { Http } from './fields/http';
-import { Server } from './fields/server';
-import { SpanLink } from './fields/span_links';
-import { Stackframe } from './fields/stackframe';
-import { TimestampUs } from './fields/timestamp_us';
-import { Url } from './fields/url';
+import type { APMBaseDoc } from './apm_base_doc';
+import type { EventOutcome } from './fields/event_outcome';
+import type { Http } from './fields/http';
+import type { Server } from './fields/server';
+import type { SpanLink } from './fields/span_links';
+import type { Stackframe } from './fields/stackframe';
+import type { TimestampUs } from './fields/timestamp_us';
+import type { Url } from './fields/url';
 
 interface Processor {
   name: 'transaction';

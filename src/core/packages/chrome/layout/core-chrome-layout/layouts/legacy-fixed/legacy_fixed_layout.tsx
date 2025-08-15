@@ -10,11 +10,8 @@
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { LegacyFixedLayoutGlobalStyles } from './legacy_fixed_global_app_style';
-import {
-  LayoutService,
-  type LayoutServiceParams,
-  LayoutServiceStartDeps,
-} from '../../layout_service';
+import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
+import { type LayoutServiceParams } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
 

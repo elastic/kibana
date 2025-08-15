@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiListGroupItemProps } from '@elastic/eui';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { EuiListGroupItemProps } from '@elastic/eui';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { getFieldCapabilities } from '../utils/get_field_capabilities';

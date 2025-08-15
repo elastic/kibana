@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionExecutionContext, addPanelMenuTrigger } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { addPanelMenuTrigger } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { coreServices, uiActionsService } from '../services/kibana_services';
-import { DashboardApi } from '../dashboard_api/types';
+import type { DashboardApi } from '../dashboard_api/types';
 
 export async function executeAddLensPanelAction(dashboardApi: DashboardApi) {
   try {

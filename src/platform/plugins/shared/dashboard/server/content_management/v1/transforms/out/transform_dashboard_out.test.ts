@@ -15,11 +15,11 @@ import {
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_IGNORE_PARENT_SETTINGS,
 } from '@kbn/controls-constants';
-import {
+import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '../../../../dashboard_saved_object';
-import { DashboardAttributes } from '../../types';
+import type { DashboardAttributes } from '../../types';
 import { transformDashboardOut } from './transform_dashboard_out';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
 

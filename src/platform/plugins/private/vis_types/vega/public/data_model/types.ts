@@ -8,11 +8,11 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { Assign } from '@kbn/utility-types';
-import { Spec } from 'vega';
-import { EsQueryParser } from './es_query_parser';
-import { EmsFileParser } from './ems_file_parser';
-import { UrlParser } from './url_parser';
+import type { Assign } from '@kbn/utility-types';
+import type { Spec } from 'vega';
+import type { EsQueryParser } from './es_query_parser';
+import type { EmsFileParser } from './ems_file_parser';
+import type { UrlParser } from './url_parser';
 
 interface Body {
   aggs?: Record<string, estypes.AggregationsAggregationContainer>;

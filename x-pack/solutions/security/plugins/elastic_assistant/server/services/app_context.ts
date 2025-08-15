@@ -6,8 +6,9 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { defaultAssistantFeatures, AssistantFeatures } from '@kbn/elastic-assistant-common';
-import { AssistantTool } from '../types';
+import type { AssistantFeatures } from '@kbn/elastic-assistant-common';
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import type { AssistantTool } from '../types';
 
 export type PluginName = string;
 export type RegisteredToolsStorage = Map<PluginName, Set<AssistantTool>>;

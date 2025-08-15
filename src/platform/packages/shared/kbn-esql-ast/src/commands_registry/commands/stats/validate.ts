@@ -8,7 +8,7 @@
  */
 import type { ESQLCommand, ESQLMessage, ESQLAst } from '../../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
-import { ICommandContext, ICommandCallbacks } from '../../types';
+import type { ICommandContext, ICommandCallbacks } from '../../types';
 
 export const validate = (
   command: ESQLCommand,

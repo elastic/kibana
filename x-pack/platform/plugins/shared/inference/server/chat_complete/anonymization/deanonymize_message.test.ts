@@ -7,22 +7,21 @@
 
 import { from, lastValueFrom } from 'rxjs';
 import { toArray } from 'rxjs';
-import {
+import type {
   Anonymization,
   AnonymizationOutput,
   AnonymizationRule,
   AssistantMessage,
   ChatCompletionChunkEvent,
-  ChatCompletionEventType,
   ChatCompletionMessageEvent,
-  MessageRole,
   UserMessage,
 } from '@kbn/inference-common';
+import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import { deanonymizeMessage } from './deanonymize_message';
 import { chunkEvent, messageEvent, tokensEvent } from '../../test_utils';
 import { anonymizeMessages } from './anonymize_messages';
 import { RegexWorkerService } from './regex_worker_service';
-import { AnonymizationWorkerConfig } from '../../config';
+import type { AnonymizationWorkerConfig } from '../../config';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 function createMask(entityClass: string, value: string) {

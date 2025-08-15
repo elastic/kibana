@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowYaml, getStepId } from '@kbn/workflows';
+import type { WorkflowYaml } from '@kbn/workflows';
+import { getStepId } from '@kbn/workflows';
 import _ from 'lodash';
 import { getAllPredecessors } from '../../../shared/lib/graph_utils';
-import { WorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
-import { CurrentStepContext } from '../model/types';
+import type { WorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
+import type { CurrentStepContext } from '../model/types';
 
 function getRootContext(definition: WorkflowYaml): CurrentStepContext {
   return {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IngestPipelineFlyoutProps } from '../../../types';
-import { AppServices, CoreServices } from '../..';
+import type { IngestPipelineFlyoutProps } from '../../../types';
+import type { AppServices, CoreServices } from '../..';
 
 export interface IngestPipelineFlyoutWithContextProps extends IngestPipelineFlyoutProps {
   services: AppServices;

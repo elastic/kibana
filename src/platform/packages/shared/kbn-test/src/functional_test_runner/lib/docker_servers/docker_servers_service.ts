@@ -11,12 +11,12 @@ import Url from 'url';
 import execa from 'execa';
 import * as Rx from 'rxjs';
 import { filter, take, map } from 'rxjs';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { Lifecycle } from '../lifecycle';
+import type { Lifecycle } from '../lifecycle';
 import { observeContainerRunning } from './container_running';
 import { observeContainerLogs } from './container_logs';
-import { DockerServer, DockerServerSpec } from './define_docker_servers_config';
+import type { DockerServer, DockerServerSpec } from './define_docker_servers_config';
 
 const SECOND = 1000;
 

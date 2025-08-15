@@ -10,7 +10,7 @@ import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LocationLink } from '../../../common/location_link';
 import { MonitorStatusRow } from './monitor_status_row';
-import { Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
 import { STATUS, UNNAMED_LOCATION } from '../../../../../../common/constants';
 
 interface MonitorStatusListProps {

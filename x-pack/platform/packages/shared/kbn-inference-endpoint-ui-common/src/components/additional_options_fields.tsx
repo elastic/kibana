@@ -35,8 +35,8 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { ConfigurationFormItems } from './configuration/configuration_form_items';
 import * as LABELS from '../translations';
 import { DEFAULT_TASK_TYPE, internalProviderKeys } from '../constants';
-import { Config, ConfigEntryView } from '../types/types';
-import { TaskTypeOption } from '../utils/helpers';
+import type { Config, ConfigEntryView } from '../types/types';
+import type { TaskTypeOption } from '../utils/helpers';
 
 const taskTypeConfig = {
   validations: [

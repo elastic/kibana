@@ -10,7 +10,7 @@ import { CONCURRENT_SPACES_TO_CHECK } from '../../deprecations/constants';
 import { defaultLogViewId } from '../../../common/log_views';
 import { MIGRATE_LOG_VIEW_SETTINGS_URL } from '../../../common/http_api/deprecations';
 import { logSourcesKibanaAdvancedSettingRT } from '../../../common';
-import { LogsSharedBackendLibs } from '../../lib/logs_shared_types';
+import type { LogsSharedBackendLibs } from '../../lib/logs_shared_types';
 
 // This route facilitates automated one-click handling of updating log view's to use the
 // Kibana advanced setting as part of the upgrade assistant.

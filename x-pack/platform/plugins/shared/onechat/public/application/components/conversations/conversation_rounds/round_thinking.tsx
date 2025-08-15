@@ -6,8 +6,9 @@
  */
 
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ConversationRoundStep } from '@kbn/onechat-common';
-import React, { ReactNode } from 'react';
+import type { ConversationRoundStep } from '@kbn/onechat-common';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { RoundSteps } from './round_steps';
 
 interface RoundThinkingProps {

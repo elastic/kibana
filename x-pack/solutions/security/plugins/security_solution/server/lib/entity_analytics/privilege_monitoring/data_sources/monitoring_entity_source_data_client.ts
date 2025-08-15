@@ -42,7 +42,9 @@ export class MonitoringEntitySourceDataClient {
     return this.monitoringEntitySourceClient.get(id);
   }
 
-  public async update(update: Partial<MonitoringEntitySource> & { id: string }) {
+  public async update(
+    update: Partial<MonitoringEntitySource> & { id: string }
+  ): Promise<MonitoringEntitySource> {
     this.log('debug', `Updating Monitoring Entity Source Sync saved object with id: ${update.id}`);
 
     const sanitizedUpdate = {

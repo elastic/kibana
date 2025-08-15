@@ -6,7 +6,7 @@
  */
 import globby from 'globby';
 import path from 'path';
-import { FtrProviderContext } from '../common/ftr_provider_context';
+import type { FtrProviderContext } from '../common/ftr_provider_context';
 import { cleanUpProfilingData } from '../utils/profiling_data';
 import { getBettertest } from '../common/bettertest';
 

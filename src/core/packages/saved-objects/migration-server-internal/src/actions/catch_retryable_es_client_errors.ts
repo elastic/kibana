@@ -8,7 +8,7 @@
  */
 
 import * as Either from 'fp-ts/Either';
-import { errors as EsErrors } from '@elastic/elasticsearch';
+import type { errors as EsErrors } from '@elastic/elasticsearch';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-internal';
 
 export interface RetryableEsClientError {

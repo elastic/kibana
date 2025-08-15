@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
+import type { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { DataStreamsAction } from './data_stream_types';
 export type {

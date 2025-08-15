@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { createTestServers, TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import { Client as ESClient } from '@elastic/elasticsearch';
 import { ElasticSearchSaver } from '..';
-import { Checkpoint, CheckpointTuple, uuid6 } from '@langchain/langgraph-checkpoint';
+import type { Checkpoint, CheckpointTuple } from '@langchain/langgraph-checkpoint';
+import { uuid6 } from '@langchain/langgraph-checkpoint';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 const mockLoggerFactory = loggingSystemMock.create();

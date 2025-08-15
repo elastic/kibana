@@ -13,16 +13,14 @@ import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { of } from 'rxjs';
 import { UnifiedHistogramChart } from '../chart';
-import {
-  UnifiedHistogramChartContext,
-  UnifiedHistogramFetchStatus,
-  UnifiedHistogramHitsContext,
-} from '../../types';
+import type { UnifiedHistogramChartContext, UnifiedHistogramHitsContext } from '../../types';
+import { UnifiedHistogramFetchStatus } from '../../types';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import { UnifiedHistogramLayout } from './layout';
 import { ResizableLayout, ResizableLayoutMode } from '@kbn/resizable-layout';
-import { UseUnifiedHistogramProps, useUnifiedHistogram } from '../../hooks/use_unified_histogram';
+import type { UseUnifiedHistogramProps } from '../../hooks/use_unified_histogram';
+import { useUnifiedHistogram } from '../../hooks/use_unified_histogram';
 import { act } from 'react-dom/test-utils';
 
 let mockBreakpoint = 'l';

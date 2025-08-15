@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
 import { reorderFieldsInImportance, resultTitle } from './result_metadata';
-import { FieldProps } from './result_types';
+import type { FieldProps } from './result_types';
 
 const makeSearchHit = (source: undefined | unknown): SearchHit =>
   ({

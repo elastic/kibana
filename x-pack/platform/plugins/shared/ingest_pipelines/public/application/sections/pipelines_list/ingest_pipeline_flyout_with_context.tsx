@@ -13,14 +13,11 @@
 
 import React, { useCallback, useState } from 'react';
 import { AuthorizationProvider } from '@kbn/es-ui-shared-plugin/public';
-import {
-  INGEST_PIPELINES_APP_LOCATOR,
-  INGEST_PIPELINES_PAGES,
-  IngestPipelinesParams,
-} from '../../../locator';
+import type { IngestPipelinesParams } from '../../../locator';
+import { INGEST_PIPELINES_APP_LOCATOR, INGEST_PIPELINES_PAGES } from '../../../locator';
 import { API_BASE_PATH } from '../../../../common/constants';
-import { Pipeline } from '../../../../common/types';
-import { IngestPipelineFlyoutWithContextProps } from './ingest_pipeline_flyout_with_context_types';
+import type { Pipeline } from '../../../../common/types';
+import type { IngestPipelineFlyoutWithContextProps } from './ingest_pipeline_flyout_with_context_types';
 
 import { KibanaRenderContextProvider, KibanaContextProvider } from '../../../shared_imports';
 import { PipelineDeleteModal } from './delete_modal';

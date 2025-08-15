@@ -9,7 +9,8 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 
 import { SideNavFooter } from './footer';
 import { SideNavFooterItem } from './footer_item';
@@ -42,7 +43,7 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
       className="side-nav"
       css={css`
         background-color: ${euiTheme.colors.backgroundBasePlain};
-        border-right: 1px solid ${euiTheme.colors.borderBaseSubdued};
+        border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
         display: flex;
         flex-direction: column;
         gap: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};

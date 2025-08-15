@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { WCISalesforcePlugin } from './plugin';
-import {
+import type {
   WCISalesforcePluginSetup,
   WCISalesforcePluginStart,
   WCISalesforcePluginStartDependencies,

@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { FAILURE_STORE_PRIVILEGE } from '../../../../common/constants';
 import { streamPartsToIndexPattern } from '../../../../common/utils';
-import { DataStreamType } from '../../../../common/types';
+import type { DataStreamType } from '../../../../common/types';
 import { dataStreamService, datasetQualityPrivileges } from '../../../services';
 
 export async function getDataStreams(options: {

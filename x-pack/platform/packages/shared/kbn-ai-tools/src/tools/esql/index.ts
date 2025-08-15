@@ -6,16 +6,16 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
   BoundInferenceClient,
   PromptResponse,
   ToolCallbacksOf,
   ToolDefinition,
   ToolOptions,
-  truncateList,
 } from '@kbn/inference-common';
-import { PromptCompositeResponse, PromptOptions } from '@kbn/inference-common/src/prompt/api';
+import { truncateList } from '@kbn/inference-common';
+import type { PromptCompositeResponse, PromptOptions } from '@kbn/inference-common/src/prompt/api';
 import { EsqlDocumentBase, runAndValidateEsqlQuery } from '@kbn/inference-plugin/server';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { omit, once } from 'lodash';

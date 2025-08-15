@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FindPromptsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { FindPromptsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import { useQuery } from '@tanstack/react-query';
 import { API_VERSIONS, ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../../assistant_context';

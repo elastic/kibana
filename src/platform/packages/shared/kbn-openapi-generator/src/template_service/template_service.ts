@@ -9,7 +9,7 @@
 
 import Handlebars from 'handlebars';
 import { resolve } from 'path';
-import { BundleGenerationContext, GenerationContext } from '../parser/get_generation_context';
+import type { BundleGenerationContext, GenerationContext } from '../parser/get_generation_context';
 import { registerHelpers } from './register_helpers';
 import { registerTemplates } from './register_templates';
 

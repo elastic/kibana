@@ -6,25 +6,24 @@
  */
 
 import isDeepEqual from 'fast-deep-equal/react';
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { IngestPipelineParams } from '@kbn/search-connectors';
+import type { IngestPipelineParams } from '@kbn/search-connectors';
 
 import { DEFAULT_PIPELINE_VALUES } from '../../../../../common/constants';
 import { Status } from '../../../../../common/types/api';
 
-import { Actions } from '../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
 import { KibanaLogic } from '../../../shared/kibana';
 
-import {
-  FetchDefaultPipelineApiLogic,
-  FetchDefaultPipelineResponse,
-} from '../../api/connector/get_default_pipeline_api_logic';
-import {
+import type { FetchDefaultPipelineResponse } from '../../api/connector/get_default_pipeline_api_logic';
+import { FetchDefaultPipelineApiLogic } from '../../api/connector/get_default_pipeline_api_logic';
+import type {
   PostDefaultPipelineArgs,
   PostDefaultPipelineResponse,
-  UpdateDefaultPipelineApiLogic,
 } from '../../api/connector/update_default_pipeline_api_logic';
+import { UpdateDefaultPipelineApiLogic } from '../../api/connector/update_default_pipeline_api_logic';
 
 type PipelinesActions = Pick<
   Actions<PostDefaultPipelineArgs, PostDefaultPipelineResponse>,

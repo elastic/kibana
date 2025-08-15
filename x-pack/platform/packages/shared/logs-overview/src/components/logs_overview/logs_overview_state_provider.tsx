@@ -8,13 +8,14 @@
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { createActorContext } from '@xstate5/react';
 import { assign, setup } from 'xstate5';
-import { LogsOverviewFeatureFlags } from '../../types';
-import {
+import type { LogsOverviewFeatureFlags } from '../../types';
+import type {
   LogsSourceConfiguration,
   ResolvedIndexNameLogsSourceConfiguration,
-  resolveLogsSourceActor,
 } from '../../utils/logs_source';
-import { MlCapabilities, loadMlCapabilitiesActor } from '../../utils/ml_capabilities';
+import { resolveLogsSourceActor } from '../../utils/logs_source';
+import type { MlCapabilities } from '../../utils/ml_capabilities';
+import { loadMlCapabilitiesActor } from '../../utils/ml_capabilities';
 
 export const logsOverviewStateMachine = setup({
   types: {

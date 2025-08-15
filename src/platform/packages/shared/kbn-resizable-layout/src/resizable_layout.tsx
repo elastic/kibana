@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React from 'react';
 import { PanelsResizable } from './panels_resizable';
 import { PanelsStatic } from './panels_static';
-import { ResizableLayoutDirection, ResizableLayoutMode } from '../types';
+import type { ResizableLayoutDirection } from '../types';
+import { ResizableLayoutMode } from '../types';
 
 export interface ResizableLayoutProps {
   /**

@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import { Logger } from '@kbn/core/server';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { v4 as generateUuid } from 'uuid';
 import {
   convertToSerializableGraph,
   convertToWorkflowGraph,
 } from '../../common/lib/build_execution_graph/build_execution_graph';
-import { WorkflowsService } from '../workflows_management/workflows_management_service';
+import type { WorkflowsService } from '../workflows_management/workflows_management_service';
 import { extractConnectorIds } from './lib/extract_connector_ids';
 
 const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineModel[] => {

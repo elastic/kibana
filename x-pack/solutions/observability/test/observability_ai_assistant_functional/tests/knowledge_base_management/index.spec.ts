@@ -15,8 +15,8 @@ import {
   teardownTinyElserModelAndInferenceEndpoint,
 } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/model_and_inference';
 import { clearKnowledgeBase } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/knowledge_base';
-import { ObservabilityAIAssistantApiClient } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/observability_ai_assistant_api_client';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { ObservabilityAIAssistantApiClient } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/observability_ai_assistant_api_client';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -119,7 +119,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       });
     });
 
-    describe('User instruction management', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/230988
+    describe.skip('User instruction management', () => {
       async function openUserInstructionFlyout() {
         await testSubjects.click(ui.pages.kbManagementTab.editUserInstructionButton);
         await testSubjects.exists(ui.pages.kbManagementTab.saveEntryButton);
@@ -199,7 +200,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       });
     });
 
-    describe('Bulk import knowledge base entries', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/231420
+    describe.skip('Bulk import knowledge base entries', () => {
       const tempDir = os.tmpdir();
       const tempFilePath = path.join(tempDir, 'bulk_import.ndjson');
 

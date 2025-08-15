@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { WorkflowListDto } from '@kbn/workflows';
+import type { WorkflowListDto } from '@kbn/workflows';
 import React, { useCallback, useEffect, useState } from 'react';
 import * as i18n from './translations';
 import type { WorkflowsActionParams } from './types';

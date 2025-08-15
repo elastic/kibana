@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiListGroup,
   EuiTitle,
@@ -16,7 +17,8 @@ import {
   EuiSpacer,
   EuiAccordion,
 } from '@elastic/eui';
-import { Theme, css } from '@emotion/react';
+import type { Theme } from '@emotion/react';
+import { css } from '@emotion/react';
 
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { SubItemTitle } from '../subitem_title';

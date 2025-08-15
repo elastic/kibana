@@ -8,15 +8,15 @@
 import { createReducer } from '@reduxjs/toolkit';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
-import {
+import type {
   MonitorManagementListResult,
   MonitorFiltersResult,
   EncryptedSyntheticsSavedMonitor,
 } from '../../../../../common/runtime_types';
 
-import { IHttpSerializedFetchError } from '../utils/http_error';
+import type { IHttpSerializedFetchError } from '../utils/http_error';
 
-import { MonitorListPageState } from './models';
+import type { MonitorListPageState } from './models';
 import { getMonitorListPageStateWithDefaults } from './helpers';
 
 import {

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from '@kbn/zod';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { createMcpServer as createServer, McpServerTool, toolResultFactory } from '@kbn/wci-server';
+import type { McpServerTool } from '@kbn/wci-server';
+import { createMcpServer as createServer, toolResultFactory } from '@kbn/wci-server';
 import { getCases, getAccounts, searchDocs, getById } from './tools';
 
 // Define enum field structure upfront

@@ -9,7 +9,7 @@
 
 import { YAMLParseError, parseDocument } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import _ from 'lodash';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';

@@ -9,7 +9,7 @@ import { EuiBadge, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { STATUS } from '../../../../../../common/constants';
 import { getHealthMessage } from './monitor_status_column';
-import { PingError } from '../../../../../../common/runtime_types';
+import type { PingError } from '../../../../../../common/runtime_types';
 
 export const StatusBadge = ({
   status,

@@ -7,10 +7,10 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { isEmpty } from 'lodash';
-import { ToastsApi } from '@kbn/core/public';
+import type { ToastsApi } from '@kbn/core/public';
 import { getApplication as getApplicationApi } from './api';
 import * as i18n from './translations';
-import { SwimlaneFieldMappingConfig } from './types';
+import type { SwimlaneFieldMappingConfig } from './types';
 
 interface Props {
   toastNotifications: Pick<

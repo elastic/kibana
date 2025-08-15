@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import type { MapConfig } from '../server/config';
 import { LICENSE_CHECK_ID } from '../common';
 

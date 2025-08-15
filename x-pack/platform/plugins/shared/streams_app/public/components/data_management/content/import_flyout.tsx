@@ -6,8 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import { Streams } from '@kbn/streams-schema';
-import {
+import type { Streams } from '@kbn/streams-schema';
+import type {
   ContentPackEntry,
   ContentPackIncludedObjects,
   ContentPackManifest,

@@ -11,7 +11,7 @@ import moment from 'moment';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { tagsByMode } from '../tags';
-import { CliSupportedServerModes } from '../../types';
+import type { CliSupportedServerModes } from '../../types';
 
 export const execPromise = promisify(exec);
 

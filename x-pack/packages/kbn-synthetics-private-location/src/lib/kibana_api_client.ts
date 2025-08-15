@@ -6,10 +6,11 @@
  */
 
 import { isError } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import fs from 'fs';
-import https, { Agent } from 'https';
+import type { Agent } from 'https';
+import https from 'https';
 import axios from 'axios';
 
 export class KibanaAPIClient {

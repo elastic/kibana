@@ -26,7 +26,7 @@ import {
 } from '../../../ast/is';
 import { Walker } from '../../../walker';
 import { getFragmentData } from '../../../definitions/utils/autocomplete/helpers';
-import { ISuggestionItem } from '../../types';
+import type { ISuggestionItem } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../../definitions/types';

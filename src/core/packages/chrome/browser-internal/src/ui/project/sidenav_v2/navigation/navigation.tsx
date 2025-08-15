@@ -9,7 +9,8 @@
 
 import React, { useMemo } from 'react';
 import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
-import { combineLatest, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import type {
   ChromeNavLink,
   ChromeProjectNavigationNode,
@@ -20,7 +21,8 @@ import type { IBasePath as BasePath } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import useObservable from 'react-use/lib/useObservable';
 import { RedirectNavigationAppLinks } from './redirect_app_links';
-import { toNavigationItems, NavigationItems } from './to_navigation_items';
+import type { NavigationItems } from './to_navigation_items';
+import { toNavigationItems } from './to_navigation_items';
 
 export interface ChromeNavigationProps {
   // sidenav state

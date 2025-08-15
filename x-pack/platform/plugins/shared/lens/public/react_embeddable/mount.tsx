@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
+import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import { type UseEuiTheme } from '@elastic/eui';
 import { openLazyFlyout } from '@kbn/presentation-util';

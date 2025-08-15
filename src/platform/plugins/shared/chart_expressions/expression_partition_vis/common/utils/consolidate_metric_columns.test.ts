@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { consolidateMetricColumns } from './consolidate_metric_columns';
 
 describe('consolidateMetricColumns', () => {

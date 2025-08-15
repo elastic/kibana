@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TaskContext } from './task_context';
+import type { TaskContext } from './task_context';
 import { checkCompatibleTypeDescriptor } from '../check_collector_integrity';
 
 export function checkCompatibleTypesTask({ reporter, roots }: TaskContext) {

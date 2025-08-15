@@ -6,8 +6,8 @@
  */
 
 import { useContext, useCallback, useState } from 'react';
-import { CspFinding, CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common';
-import { DataTableRecord } from '@kbn/discover-utils';
+import type { CspFinding, CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { SecuritySolutionContext } from '../../application/security_solution_context';
 
 export const useExpandableFlyoutCsp = (

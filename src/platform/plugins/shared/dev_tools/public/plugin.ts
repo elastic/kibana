@@ -8,15 +8,17 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { Plugin, CoreSetup, AppMountParameters, AppDeepLink, AppStatus } from '@kbn/core/public';
-import { AppUpdater } from '@kbn/core/public';
+import type { Plugin, CoreSetup, AppMountParameters, AppDeepLink } from '@kbn/core/public';
+import { AppStatus } from '@kbn/core/public';
+import type { AppUpdater } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
+import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
 import { deepLinkIds as devtoolsDeeplinkIds } from '@kbn/deeplinks-devtools';
-import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
+import type { CreateDevToolArgs, DevToolApp } from './dev_tool';
+import { createDevToolApp } from './dev_tool';
 import { DocTitleService, BreadcrumbService } from './services';
 
 import './index.scss';

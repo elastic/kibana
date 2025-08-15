@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import { StatusError } from './status_error';
 
 export class InsufficientPermissionsError extends StatusError {

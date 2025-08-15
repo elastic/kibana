@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { HttpHandler } from '@kbn/core/public';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { HttpHandler } from '@kbn/core/public';
 import { AgentMode, oneChatDefaultAgentId } from '@kbn/onechat-common';
 
 type StringOrMessageList = string;

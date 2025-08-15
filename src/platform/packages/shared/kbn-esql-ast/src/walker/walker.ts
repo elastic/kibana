@@ -8,7 +8,8 @@
  */
 
 import type * as types from '../types';
-import { NodeMatchTemplate, templateToPredicate } from './helpers';
+import type { NodeMatchTemplate } from './helpers';
+import { templateToPredicate } from './helpers';
 
 type Node = types.ESQLAstNode | types.ESQLAstNode[];
 

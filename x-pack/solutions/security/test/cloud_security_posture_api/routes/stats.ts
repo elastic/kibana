@@ -7,7 +7,7 @@
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
-import {
+import type {
   BenchmarkData,
   Cluster,
   ComplianceDashboardData,
@@ -15,7 +15,7 @@ import {
   PostureTrend,
 } from '@kbn/cloud-security-posture-plugin/common/types_old';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 import {
   getBenchmarkScoreMockData,
   kspmComplianceDashboardDataMockV1,

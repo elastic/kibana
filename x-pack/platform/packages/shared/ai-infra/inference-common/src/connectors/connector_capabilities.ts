@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceConnector } from './connectors';
+import type { InferenceConnector } from './connectors';
 import { getModelDefinition } from './known_models';
 import { getConnectorDefaultModel } from './connector_config';
 import { elasticModelDictionary } from '../const';

@@ -27,11 +27,11 @@ import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-server';
 import { createRuntimePluginContractResolverMock } from './test_helpers';
 import { PluginWrapper } from './plugin';
 
+import type { InstanceInfo } from './plugin_context';
 import {
   createPluginInitializerContext,
   createPluginSetupContext,
   createPluginStartContext,
-  InstanceInfo,
 } from './plugin_context';
 
 const mockPluginInitializer = jest.fn();

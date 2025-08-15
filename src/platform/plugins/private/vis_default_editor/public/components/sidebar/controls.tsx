@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { SetStateAction, useCallback, useState } from 'react';
+import type { SetStateAction } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,10 +22,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
 
-import { Vis } from '@kbn/visualizations-plugin/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { discardChanges, EditorAction } from './state';
+import type { EditorAction } from './state';
+import { discardChanges } from './state';
 
 const defaultEditorControlsStyles = {
   base: ({ euiTheme }: UseEuiTheme) =>

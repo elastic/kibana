@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PopoverAnchorPosition } from '@elastic/eui';
 import {
   EuiPopover,
   EuiPopoverTitle,
-  PopoverAnchorPosition,
   EuiContextMenuItem,
   toSentenceCase,
   EuiHorizontalRule,
@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 export const strings = {

@@ -12,10 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { error } from '../../lib/data_streams/error';
 import { API_BASE_PATH } from '../../../common/constants';
-import { DataStreamReindexStatusResponse } from '../../../common/types';
+import type { DataStreamReindexStatusResponse } from '../../../common/types';
 import { dataStreamMigrationServiceFactory } from '../../lib/data_streams';
 
-import { RouteDependencies } from '../../types';
+import type { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 
 export function registerMigrateDataStreamRoutes({

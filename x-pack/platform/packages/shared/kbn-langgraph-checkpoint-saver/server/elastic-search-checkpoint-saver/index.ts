@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
+import type { CheckpointPendingWrite } from '@langchain/langgraph-checkpoint';
 import {
   BaseCheckpointSaver,
   type Checkpoint,
@@ -16,7 +17,6 @@ import {
   type SerializerProtocol,
   type PendingWrite,
   type CheckpointMetadata,
-  CheckpointPendingWrite,
 } from '@langchain/langgraph-checkpoint';
 
 interface CheckpointDocument {

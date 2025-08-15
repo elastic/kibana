@@ -11,7 +11,7 @@ import { TabbedAggResponseWriter } from './response_writer';
 import { AggConfigs, BUCKET_TYPES, METRIC_TYPES } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import type { TabbedResponseWriterOptions } from './types';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 describe('TabbedAggResponseWriter class', () => {
   let responseWriter: TabbedAggResponseWriter;

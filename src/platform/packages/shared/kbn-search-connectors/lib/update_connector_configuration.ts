@@ -9,7 +9,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-import { Result } from '@elastic/elasticsearch/lib/api/types';
+import type { Result } from '@elastic/elasticsearch/lib/api/types';
 import { fetchConnectorById } from './fetch_connectors';
 
 export const updateConnectorConfiguration = async (

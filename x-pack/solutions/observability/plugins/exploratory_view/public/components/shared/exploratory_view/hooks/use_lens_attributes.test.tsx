@@ -22,7 +22,7 @@ import { ExploratoryViewContextProvider } from '../contexts/exploratory_view_con
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import * as lensHook from './use_lens_formula_helper';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+import type { FormulaPublicApi } from '@kbn/lens-plugin/public';
 
 const mockSingleSeries = [
   {

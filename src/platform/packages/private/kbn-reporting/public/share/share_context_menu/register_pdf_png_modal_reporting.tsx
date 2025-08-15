@@ -10,12 +10,12 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { ShareContext } from '@kbn/share-plugin/public';
+import type { ShareContext } from '@kbn/share-plugin/public';
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
-import { ExportGenerationOpts, ExportShare } from '@kbn/share-plugin/public/types';
-import { ReportParamsGetter, ReportParamsGetterOptions } from '../../types';
-import { ExportModalShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
+import type { ExportGenerationOpts, ExportShare } from '@kbn/share-plugin/public/types';
+import type { ReportParamsGetter, ReportParamsGetterOptions } from '../../types';
+import type { ExportModalShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { checkLicense } from '../../license_check';
 
 const getBaseParams = (objectType: string) => {

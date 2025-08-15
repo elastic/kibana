@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { installMockPrebuiltRulesPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM } from '../../../../../screens/rules_bulk_actions';
 import { TOOLTIP } from '../../../../../screens/common';
@@ -24,6 +25,10 @@ import { getNewRule } from '../../../../../objects/rule';
 const queryRule = getNewRule({ rule_id: '1', name: 'Query rule', enabled: false });
 
 describe('Bulk Edit - Alert Suppression, Basic License', { tags: ['@ess'] }, () => {
+  before(() => {
+    installMockPrebuiltRulesPackage();
+  });
+
   beforeEach(() => {
     login();
     deleteAlertsAndRules();

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import * as Rx from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { filter, first, map, switchMap, tap, timeout } from 'rxjs';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const spacesService = getService('spaces');

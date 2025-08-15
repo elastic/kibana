@@ -7,26 +7,28 @@
 
 import React from 'react';
 
+import type {
+  EuiButtonEmptyProps,
+  EuiButtonIconProps,
+  EuiButtonProps,
+  EuiLinkAnchorProps,
+  EuiListGroupItemProps,
+  EuiCardProps,
+  EuiBadgeProps,
+} from '@elastic/eui';
 import {
   EuiLink,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonEmptyProps,
   EuiButtonIcon,
-  EuiButtonIconProps,
-  EuiButtonProps,
-  EuiLinkAnchorProps,
   EuiListGroupItem,
-  EuiListGroupItemProps,
   EuiPanel,
   EuiCard,
-  EuiCardProps,
   EuiBadge,
-  EuiBadgeProps,
 } from '@elastic/eui';
-import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
+import type { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
-import { ReactRouterProps } from '../types';
+import type { ReactRouterProps } from '../types';
 
 import { generateReactRouterProps } from '.';
 

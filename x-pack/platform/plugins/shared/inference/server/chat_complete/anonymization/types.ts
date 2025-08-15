@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Anonymization } from '@kbn/inference-common';
+import type { Anonymization } from '@kbn/inference-common';
 
 /**
  * AnonymizationRecord are named strings that will be anonymized

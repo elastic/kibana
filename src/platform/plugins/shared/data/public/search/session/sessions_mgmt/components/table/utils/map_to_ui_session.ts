@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-import { SearchSessionsFindResponse } from '../../../../../../../common';
-import { ACTION, LocatorsStart, SearchSessionSavedObject, UISession } from '../../../types';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { SearchSessionsFindResponse } from '../../../../../../../common';
+import type { ACTION, LocatorsStart, SearchSessionSavedObject, UISession } from '../../../types';
 import { getActions } from './get_actions';
 
 function getUrlFromState(locators: LocatorsStart, locatorId: string, state: SerializableRecord) {

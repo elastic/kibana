@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FlattenRecord } from '@kbn/streams-schema';
+import type { FlattenRecord } from '@kbn/streams-schema';
 import { useAbortController } from '@kbn/react-hooks';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { flattenObjectNestedLast } from '@kbn/object-utils';

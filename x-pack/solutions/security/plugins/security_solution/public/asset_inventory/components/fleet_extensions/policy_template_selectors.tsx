@@ -151,6 +151,7 @@ export const PolicyTemplateInputSelector = ({
       options={options}
       onChange={(inputType) => setInput(inputType as AssetInput)}
       size="m"
+      name="policyTemplateInput"
     />
   );
 };

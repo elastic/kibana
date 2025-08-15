@@ -45,7 +45,7 @@ export function AiAssistantSelectionPage() {
     securityAIAssistantEnabled && aiAssistantManagementSelection && securityAIAssistantVisibility;
 
   const observabilityDoc = getDocLinks({ buildFlavor, kibanaBranch }).observability.aiAssistant;
-  const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant;
+  const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant.home;
 
   useEffect(() => {
     setBreadcrumbs([

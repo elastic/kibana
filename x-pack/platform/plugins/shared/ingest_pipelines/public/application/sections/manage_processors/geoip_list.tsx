@@ -7,12 +7,12 @@
 
 import React, { useState } from 'react';
 
+import type { EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiInMemoryTableProps,
   EuiPageTemplate,
   EuiSpacer,
   EuiTitle,

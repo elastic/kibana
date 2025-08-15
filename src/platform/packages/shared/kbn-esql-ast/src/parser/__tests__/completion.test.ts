@@ -8,7 +8,7 @@
  */
 
 import { EsqlQuery } from '../../query';
-import { ESQLAstCompletionCommand, ESQLAstItem, ESQLFunction } from '../../types';
+import type { ESQLAstCompletionCommand, ESQLAstItem, ESQLFunction } from '../../types';
 
 describe('COMPLETION command', () => {
   describe('correctly formatted', () => {

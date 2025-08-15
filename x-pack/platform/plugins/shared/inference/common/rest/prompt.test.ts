@@ -7,7 +7,8 @@
 
 import { omit } from 'lodash';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { PromptAPI, PromptOptions, ToolOptions, createPrompt } from '@kbn/inference-common';
+import type { PromptAPI, PromptOptions, ToolOptions } from '@kbn/inference-common';
+import { createPrompt } from '@kbn/inference-common';
 import { z, ZodError } from '@kbn/zod';
 import { createPromptRestApi } from './prompt';
 import { lastValueFrom } from 'rxjs';

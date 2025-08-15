@@ -4,27 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-// x-pack/solutions/security/plugins/cloud_security_posture/public/components/fleet_extensions/aws_credentials_form/aws_credentials_form_agentless.tsx
-
 import React from 'react';
 import { EuiAccordion, EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import semverCompare from 'semver/functions/compare';
-import semverValid from 'semver/functions/valid';
 import { i18n } from '@kbn/i18n';
 
-import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
-import { SetupTechnology } from '@kbn/fleet-plugin/public';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackageInfo,
+} from '@kbn/fleet-plugin/common';
+import type { SetupTechnology } from '@kbn/fleet-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
-  CLOUD_CREDENTIALS_PACKAGE_VERSION,
   ORGANIZATION_ACCOUNT,
   SINGLE_ACCOUNT,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
-  cspIntegrationDocsNavigation,
   AWS_CREDENTIALS_TYPE,
+  AWS_PROVIDER,
 } from '../constants';
 import {
   getAgentlessCredentialsType,
@@ -38,7 +36,8 @@ import {
   getTemplateUrlFromPackageInfo,
   getCloudConnectorRemoteRoleTemplate,
   getCloudCredentialVarsConfig,
-  getPosturePolicy,
+  updatePolicyWithInputs,
+  getAwsCredentialsType,
 } from '../utils';
 import { AwsInputVarFields } from './aws_input_var_fields';
 import { AWSSetupInfoContent } from './aws_setup_info';
@@ -47,11 +46,11 @@ import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
 import { AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ } from './aws_test_subjects';
 import { ReadDocumentation } from '../common';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_credential_guide';
-import { getAwsCredentialsType } from './aws_utils';
-import { NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
+import type { UpdatePolicy } from '../types';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 interface AwsAgentlessFormProps {
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
+  input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
   updatePolicy: UpdatePolicy;
@@ -74,16 +73,16 @@ export const AwsCredentialsFormAgentless = ({
   showCloudConnectors,
   cloud,
 }: AwsAgentlessFormProps) => {
+  const { awsOverviewPath, awsPolicyType, templateName, showCloudTemplates } = useCloudSetup();
+
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
 
   const awsCredentialsType = getAgentlessCredentialsType(input, showCloudConnectors);
-
-  const documentationLink = cspIntegrationDocsNavigation.cspm.awsGetStartedPath;
   // This should ony set the credentials after the initial render
   if (!getAwsCredentialsType(input)) {
     updatePolicy({
       updatedPolicy: {
-        ...getPosturePolicy(newPolicy, input.type, {
+        ...updatePolicyWithInputs(newPolicy, awsPolicyType, {
           'aws.credentials.type': {
             value: awsCredentialsType,
             type: 'text',
@@ -97,19 +96,19 @@ export const AwsCredentialsFormAgentless = ({
     });
   }
 
-  const isValidSemantic = semverValid(packageInfo.version);
-  const showCloudCredentialsButton = isValidSemantic
-    ? semverCompare(packageInfo.version, CLOUD_CREDENTIALS_PACKAGE_VERSION) >= 0
-    : false;
-
   const automationCredentialTemplate = getTemplateUrlFromPackageInfo(
     packageInfo,
-    input.policy_template,
+    templateName ?? '',
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CREDENTIALS
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
   const cloudConnectorRemoteRoleTemplate = cloud
-    ? getCloudConnectorRemoteRoleTemplate({ input, cloud, packageInfo }) || undefined
+    ? getCloudConnectorRemoteRoleTemplate({
+        input,
+        cloud,
+        packageInfo,
+        templateName,
+      }) || undefined
     : undefined;
 
   const cloudFormationSettings: Record<
@@ -154,7 +153,7 @@ export const AwsCredentialsFormAgentless = ({
     awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS &&
     showCloudConnectors;
 
-  const showCloudFormationAccordion = isCloudFormationSupported && showCloudCredentialsButton;
+  const showCloudFormationAccordion = isCloudFormationSupported && showCloudTemplates;
 
   const accordianTitleLink = showCloudFormationAccordion
     ? cloudFormationSettings[awsCredentialsType].accordianTitleLink
@@ -173,7 +172,7 @@ export const AwsCredentialsFormAgentless = ({
               defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
               values={{
                 gettingStartedLink: (
-                  <EuiLink href={documentationLink} target="_blank">
+                  <EuiLink href={awsOverviewPath} target="_blank">
                     <FormattedMessage
                       id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentLink"
                       defaultMessage="Getting Started"
@@ -188,7 +187,7 @@ export const AwsCredentialsFormAgentless = ({
               defaultMessage="Utilize AWS Access Keys to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
               values={{
                 gettingStartedLink: (
-                  <EuiLink href={documentationLink} target="_blank">
+                  <EuiLink href={awsOverviewPath} target="_blank">
                     <FormattedMessage
                       id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentLink"
                       defaultMessage="Getting Started"
@@ -213,21 +212,21 @@ export const AwsCredentialsFormAgentless = ({
         disabled={!!disabled}
         onChange={(optionId) => {
           updatePolicy({
-            updatedPolicy: getPosturePolicy(
+            updatedPolicy: updatePolicyWithInputs(
               newPolicy,
-              input.type,
+              awsPolicyType,
               getCloudCredentialVarsConfig({
                 setupTechnology,
                 optionId,
                 showCloudConnectors,
-                inputType: input.type,
+                provider: AWS_PROVIDER,
               })
             ),
           });
         }}
       />
       <EuiSpacer size="m" />
-      {!showCloudCredentialsButton && isCloudFormationSupported && (
+      {!showCloudTemplates && isCloudFormationSupported && (
         <>
           <EuiCallOut color="warning">
             <FormattedMessage
@@ -272,13 +271,16 @@ export const AwsCredentialsFormAgentless = ({
         fields={fields}
         packageInfo={packageInfo}
         onChange={(key, value) => {
+          const updatedPolicy = updatePolicyWithInputs(newPolicy, awsPolicyType, {
+            [key]: { value },
+          });
           updatePolicy({
-            updatedPolicy: getPosturePolicy(newPolicy, input.type, { [key]: { value } }),
+            updatedPolicy,
           });
         }}
         hasInvalidRequiredVars={hasInvalidRequiredVars}
       />
-      <ReadDocumentation url={documentationLink} />
+      <ReadDocumentation url={awsOverviewPath} />
     </>
   );
 };

@@ -16,11 +16,8 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import {
-  DataStreamMigrationStatus,
-  DataStreamResolutionType,
-  DataStreamsAction,
-} from '../../../../../../common/types';
+import type { DataStreamResolutionType, DataStreamsAction } from '../../../../../../common/types';
+import { DataStreamMigrationStatus } from '../../../../../../common/types';
 import { getDataStreamReindexProgressLabel } from '../../../../lib/utils';
 import { LoadingState } from '../../../types';
 import { useDataStreamMigrationContext } from './context';

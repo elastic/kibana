@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { streamsEndpointLatencyEventType } from './events';
 import { StreamsTelemetryClient } from './client';
 

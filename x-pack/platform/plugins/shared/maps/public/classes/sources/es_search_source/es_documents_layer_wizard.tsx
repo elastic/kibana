@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CreateSourceEditor } from './create_source_editor';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
+import type { LayerWizard, RenderWizardArguments } from '../../layers';
 import { ESSearchSource, sourceTitle } from './es_search_source';
 import { BlendedVectorLayer, GeoJsonVectorLayer, MvtVectorLayer } from '../../layers/vector_layer';
 import {
@@ -19,7 +19,7 @@ import {
   WIZARD_ID,
 } from '../../../../common/constants';
 import { DocumentsLayerIcon } from '../../layers/wizards/icons/documents_layer_icon';
-import {
+import type {
   ESSearchSourceDescriptor,
   VectorLayerDescriptor,
 } from '../../../../common/descriptor_types';

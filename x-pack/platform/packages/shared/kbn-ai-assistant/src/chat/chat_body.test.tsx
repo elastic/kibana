@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { CONTEXT_FUNCTION_NAME, Message } from '@kbn/observability-ai-assistant-plugin/common';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
+import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/common';
 import { reverseToLastUserMessage } from './chat_body';
 
 describe('<ChatBody>', () => {

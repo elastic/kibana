@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiIconProps, useEuiTheme } from '@elastic/eui';
-import { AgentName } from '@kbn/elastic-agent-utils';
+import type { EuiIconProps } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import { getAgentIcon } from './get_agent_icon';
 
 export interface AgentIconProps extends Omit<EuiIconProps, 'type'> {

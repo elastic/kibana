@@ -6,8 +6,10 @@
  */
 import { z } from '@kbn/zod';
 import { BaseStream } from '../base';
-import { Validation, validation } from '../validation/validation';
-import { ModelValidation, modelValidation } from '../validation/model_validation';
+import type { Validation } from '../validation/validation';
+import { validation } from '../validation/validation';
+import type { ModelValidation } from '../validation/model_validation';
+import { modelValidation } from '../validation/model_validation';
 
 export interface Group {
   members: string[];

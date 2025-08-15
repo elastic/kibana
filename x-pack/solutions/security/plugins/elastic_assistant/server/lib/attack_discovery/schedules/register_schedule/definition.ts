@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup, DEFAULT_APP_CATEGORIES, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
   AttackDiscoveryScheduleParams,
@@ -13,7 +14,7 @@ import {
 
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '../constants';
-import { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleType } from '../types';
+import type { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleType } from '../types';
 import { attackDiscoveryScheduleExecutor } from './executor';
 
 export interface GetAttackDiscoveryScheduleParams {

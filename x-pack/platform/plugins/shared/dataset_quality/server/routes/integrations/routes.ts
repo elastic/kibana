@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { IntegrationType, IntegrationDashboardsResponse } from '../../../common/api_types';
+import type { IntegrationType, IntegrationDashboardsResponse } from '../../../common/api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { getIntegrations } from './get_integrations';
 import { getIntegrationDashboards } from './get_integration_dashboards';

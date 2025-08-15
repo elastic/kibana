@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { TracksOverlays } from '@kbn/presentation-util';
-import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { TracksOverlays } from '@kbn/presentation-util';
+import type { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 
 import { BehaviorSubject } from 'rxjs';
 import { core } from '../../kibana_services';
-import { CustomizePanelAction, CustomizePanelActionApi } from './customize_panel_action';
+import type { CustomizePanelActionApi } from './customize_panel_action';
+import { CustomizePanelAction } from './customize_panel_action';
 
 describe('Customize panel action', () => {
   let action: CustomizePanelAction;

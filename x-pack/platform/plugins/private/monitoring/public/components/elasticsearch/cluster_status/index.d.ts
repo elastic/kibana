@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
 
 export const ClusterStatus: FunctionComponent<ClusterStatusProps>;
 

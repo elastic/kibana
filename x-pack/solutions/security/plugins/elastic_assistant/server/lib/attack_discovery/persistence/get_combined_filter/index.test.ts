@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core/server';
 import {
   ALERT_ATTACK_DISCOVERY_USERS_NOT_EXISTS_KQL,
   EMPTY_ALERT_ATTACK_DISCOVERY_USERS_KQL,

@@ -6,9 +6,10 @@
  */
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { Provider } from 'react-redux';
-import { Store } from 'redux';
+import type { Store } from 'redux';
 import type { AddToTimelineButtonProps } from './actions/add_to_timeline';
 import type { CopyProps } from './actions/copy';
 import type { FilterValueFnArgs, HoverActionComponentProps } from './actions/types';

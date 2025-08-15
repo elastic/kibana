@@ -10,10 +10,11 @@
 import React, { useMemo, useState } from 'react';
 import { afterFrame } from '@elastic/apm-rum-core';
 import { useLocation } from 'react-router-dom';
-import { PerformanceApi, PerformanceContext } from './use_performance_context';
-import { PerformanceMetricEvent } from '../../performance_metric_events';
+import type { PerformanceApi } from './use_performance_context';
+import { PerformanceContext } from './use_performance_context';
+import type { PerformanceMetricEvent } from '../../performance_metric_events';
 import { measureInteraction } from './measure_interaction';
-import { DescriptionWithPrefix } from './types';
+import type { DescriptionWithPrefix } from './types';
 export type CustomMetrics = Omit<PerformanceMetricEvent, 'eventName' | 'meta' | 'duration'>;
 
 export interface Meta {

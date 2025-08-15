@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { ApmSynthtracePipelineSchema, apm, timerange } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import {
   TRANSACTION_DURATION_HISTOGRAM,
   TRANSACTION_DURATION_SUMMARY,
@@ -15,7 +15,7 @@ import {
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import type { ApmApiClient } from '../../../services/apm_api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 

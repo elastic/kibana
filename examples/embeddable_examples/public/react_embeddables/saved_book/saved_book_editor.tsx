@@ -24,10 +24,10 @@ import {
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React, { useState } from 'react';
-import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
+import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import { i18n } from '@kbn/i18n';
 import type { BookState } from '../../../server';
-import { BookApi } from './types';
+import type { BookApi } from './types';
 import { saveBook } from './library_utils';
 
 export const getSavedBookEditor = ({

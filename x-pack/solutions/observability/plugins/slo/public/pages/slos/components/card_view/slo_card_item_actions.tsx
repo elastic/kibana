@@ -6,10 +6,10 @@
  */
 import { useEuiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
-import { BurnRateRuleParams } from '../../../../typings';
+import type { BurnRateRuleParams } from '../../../../typings';
 import { SloItemActions } from '../slo_item_actions';
 
 interface Props {

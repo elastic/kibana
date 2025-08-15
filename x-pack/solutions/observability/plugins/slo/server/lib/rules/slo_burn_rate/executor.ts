@@ -7,9 +7,10 @@
 
 import numeral from '@elastic/numeral';
 import { flattenObject } from '@kbn/object-utils';
-import { AlertsClientError, ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
-import { IBasePath } from '@kbn/core/server';
+import type { ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import type { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
+import type { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { getFormattedGroups, getEcsGroupsFromFlattenGrouping } from '@kbn/alerting-rule-utils';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
@@ -36,14 +37,13 @@ import {
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
 } from '../../../../common/field_names/slo';
-import { Duration, SLODefinition } from '../../../domain/models';
+import type { Duration, SLODefinition } from '../../../domain/models';
 import { KibanaSavedObjectsSLORepository } from '../../../services';
 import { evaluate } from './lib/evaluate';
 import { evaluateDependencies } from './lib/evaluate_dependencies';
 import { shouldSuppressInstanceId } from './lib/should_suppress_instance_id';
 import { getSloSummary } from './lib/summary_repository';
-import {
-  AlertStates,
+import type {
   BurnRateAlertContext,
   BurnRateAlertState,
   BurnRateAllowedActionGroups,
@@ -52,6 +52,7 @@ import {
   Group,
   WindowSchema,
 } from './types';
+import { AlertStates } from './types';
 
 export type BurnRateAlert = Omit<ObservabilitySloAlert, 'kibana.alert.group'> & {
   [ALERT_GROUP]?: Group[];

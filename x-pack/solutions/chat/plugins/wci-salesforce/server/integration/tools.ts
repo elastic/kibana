@@ -12,7 +12,7 @@ import type {
   SortOrder,
 } from '@elastic/elasticsearch/lib/api/types';
 import { contentRefBuilder, ContentRefSourceType } from '@kbn/wci-common';
-import { ToolContentResult } from '@kbn/wci-server';
+import type { ToolContentResult } from '@kbn/wci-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SupportCase, Account, BaseObject } from './types';
 

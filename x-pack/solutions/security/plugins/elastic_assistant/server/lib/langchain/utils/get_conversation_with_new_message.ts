@@ -6,12 +6,11 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import {
-  Replacements,
-  replaceAnonymizedValuesWithOriginalValues,
-} from '@kbn/elastic-assistant-common';
-import { BaseMessage, _isMessageFieldWithRole } from '@langchain/core/messages';
-import { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
+import type { Replacements } from '@kbn/elastic-assistant-common';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import type { BaseMessage } from '@langchain/core/messages';
+import { _isMessageFieldWithRole } from '@langchain/core/messages';
+import type { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
 import { getLangChainMessages } from '../helpers';
 
 interface Params {

@@ -8,6 +8,7 @@
 import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
+import { installMockPrebuiltRulesPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { createRule, snoozeRule as snoozeRuleViaAPI } from '../../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/api_calls/common';
 import { login } from '../../../../../tasks/login';
@@ -43,8 +44,11 @@ import { TOOLTIP } from '../../../../../screens/common';
 
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 
-// Failing: See https://github.com/elastic/kibana/issues/228942
-describe.skip('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+  before(() => {
+    installMockPrebuiltRulesPackage();
+  });
+
   beforeEach(() => {
     login();
     deleteAlertsAndRules();

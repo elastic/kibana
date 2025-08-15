@@ -9,8 +9,8 @@
 
 import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldConfiguration } from '../../resources/get_field_configuration';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FieldConfiguration } from '../../resources/get_field_configuration';
 import { FieldWithActions } from '../../components/field_with_actions/field_with_actions';
 
 export interface TransactionSummaryFieldProps {

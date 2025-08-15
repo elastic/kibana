@@ -7,34 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
+import type { Observable, Subscription } from 'rxjs';
 import {
   BehaviorSubject,
   Subject,
   first,
   firstValueFrom,
   from,
-  Observable,
-  Subscription,
   map,
   distinctUntilChanged,
 } from 'rxjs';
 
-import {
+import type {
   DataViewsServicePublic,
   MatchedItem,
-  INDEX_PATTERN_TYPE,
   DataViewField,
 } from '@kbn/data-views-plugin/public';
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 
-import {
+import type {
   RollupIndicesCapsResponse,
   RollupIndiciesCapability,
   MatchedIndicesSet,
   TimestampOption,
 } from './types';
 import { getMatchedIndices, ensureMinimumTime, extractTimeFields, removeSpaces } from './lib';
-import { GetFieldsOptions } from './shared_imports';
+import type { GetFieldsOptions } from './shared_imports';
 
 export const matchedIndiciesDefault = {
   allIndices: [],

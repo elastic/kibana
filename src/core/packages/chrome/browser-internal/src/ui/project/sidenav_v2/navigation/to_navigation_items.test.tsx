@@ -9,7 +9,10 @@
 
 import { waitFor } from '@testing-library/dom';
 import { toNavigationItems } from './to_navigation_items';
-import { ChromeProjectNavigationNode, NavigationTreeDefinitionUI } from '@kbn/core-chrome-browser';
+import type {
+  ChromeProjectNavigationNode,
+  NavigationTreeDefinitionUI,
+} from '@kbn/core-chrome-browser';
 
 // use require to bypass unnecessary TypeScript checks for JSON imports
 // eslint-disable-next-line @typescript-eslint/no-var-requires

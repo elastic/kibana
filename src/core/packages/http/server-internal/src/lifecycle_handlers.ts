@@ -17,9 +17,9 @@ import {
   getWarningHeaderMessageFromRouteDeprecation,
   isSafeMethod,
 } from '@kbn/core-http-router-server-internal';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
-import { HttpConfig } from './http_config';
+import type { HttpConfig } from './http_config';
 
 const VERSION_HEADER = 'kbn-version';
 const XSRF_HEADER = 'kbn-xsrf';

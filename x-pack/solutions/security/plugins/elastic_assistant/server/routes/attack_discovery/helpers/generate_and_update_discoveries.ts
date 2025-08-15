@@ -7,25 +7,25 @@
 
 import moment from 'moment';
 
-import {
+import type {
   AnalyticsServiceSetup,
   AuthenticatedUser,
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import {
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
   AttackDiscoveryGenerationConfig,
   CreateAttackDiscoveryAlertsParams,
   Replacements,
 } from '@kbn/elastic-assistant-common';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { deduplicateAttackDiscoveries } from '../../../lib/attack_discovery/persistence/deduplication';
 import { updateAttackDiscoveries } from './helpers';
 import { handleGraphError } from '../post/helpers/handle_graph_error';
-import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
+import type { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
 import { generateAttackDiscoveries } from './generate_discoveries';
 
 export interface GenerateAndUpdateAttackDiscoveriesParams {

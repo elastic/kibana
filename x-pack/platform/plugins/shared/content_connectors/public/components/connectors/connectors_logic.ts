@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import type { Connector, Meta } from '@kbn/search-connectors';
 
-import { HttpSetup } from '@kbn/core/public';
-import {
-  DeleteConnectorApiLogic,
-  DeleteConnectorApiLogicActions,
-} from '../../api/connector/delete_connector_api_logic';
-import {
-  FetchConnectorsApiLogic,
-  FetchConnectorsApiLogicActions,
-} from '../../api/connector/fetch_connectors.api';
+import type { HttpSetup } from '@kbn/core/public';
+import type { DeleteConnectorApiLogicActions } from '../../api/connector/delete_connector_api_logic';
+import { DeleteConnectorApiLogic } from '../../api/connector/delete_connector_api_logic';
+import type { FetchConnectorsApiLogicActions } from '../../api/connector/fetch_connectors.api';
+import { FetchConnectorsApiLogic } from '../../api/connector/fetch_connectors.api';
 import { Status } from '../../../common/types/api';
 
 export type ConnectorViewItem = Connector & { docsCount?: number; indexExists: boolean };

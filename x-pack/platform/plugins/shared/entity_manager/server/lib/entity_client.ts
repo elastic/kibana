@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
+import type { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
 import {
   installEntityDefinition,
   installationInProgress,
@@ -20,7 +20,7 @@ import { uninstallEntityDefinition } from './entities/uninstall_entity_definitio
 import { EntityDefinitionNotFound } from './entities/errors/entity_not_found';
 import { stopTransforms } from './entities/stop_transforms';
 import { deleteIndices } from './entities/delete_index';
-import { EntityDefinitionWithState } from './entities/types';
+import type { EntityDefinitionWithState } from './entities/types';
 import { EntityDefinitionUpdateConflict } from './entities/errors/entity_definition_update_conflict';
 
 export class EntityClient {

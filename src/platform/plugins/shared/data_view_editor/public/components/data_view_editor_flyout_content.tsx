@@ -25,15 +25,8 @@ import useObservable from 'react-use/lib/useObservable';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
-import {
-  DataView,
-  DataViewSpec,
-  Form,
-  useForm,
-  useFormData,
-  useKibana,
-  UseField,
-} from '../shared_imports';
+import type { DataView, DataViewSpec } from '../shared_imports';
+import { Form, useForm, useFormData, useKibana, UseField } from '../shared_imports';
 
 import { FlyoutPanels } from './flyout_panels';
 
@@ -41,7 +34,7 @@ import { removeSpaces } from '../lib';
 
 import { noTimeFieldLabel, noTimeFieldValue } from '../lib/extract_time_fields';
 
-import {
+import type {
   DataViewEditorContext,
   RollupIndicesCapsResponse,
   IndexPatternConfig,
@@ -61,7 +54,7 @@ import {
   RollupDeprecatedWarning,
 } from '.';
 import { editDataViewModal } from './confirm_modals/edit_data_view_changed_modal';
-import { DataViewEditorService } from '../data_view_editor_service';
+import type { DataViewEditorService } from '../data_view_editor_service';
 
 export interface Props {
   /**

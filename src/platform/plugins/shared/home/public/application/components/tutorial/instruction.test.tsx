@@ -9,7 +9,8 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { Instruction, InstructionProps } from './instruction';
+import type { InstructionProps } from './instruction';
+import { Instruction } from './instruction';
 
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({

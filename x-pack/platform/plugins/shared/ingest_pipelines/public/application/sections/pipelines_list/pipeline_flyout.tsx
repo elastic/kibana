@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyout, EuiSplitPanel, useIsWithinBreakpoints } from '@elastic/eui';
 import { FlyoutFooter, DetailsPanel, TreePanel, NotFoundPanel } from './flyout_content';
-import { Pipeline } from '../../../../common/types';
+import type { Pipeline } from '../../../../common/types';
 import { SectionLoading, useKibana } from '../../../shared_imports';
 
 export interface Props {

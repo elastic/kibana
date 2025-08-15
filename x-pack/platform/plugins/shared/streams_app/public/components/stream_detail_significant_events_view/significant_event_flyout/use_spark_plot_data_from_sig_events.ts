@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AbortableAsyncState } from '@kbn/react-hooks';
-import { SignificantEventsPreviewResponse, StreamQueryKql } from '@kbn/streams-schema';
+import type { AbortableAsyncState } from '@kbn/react-hooks';
+import type { SignificantEventsPreviewResponse, StreamQueryKql } from '@kbn/streams-schema';
 import { useEuiTheme } from '@elastic/eui';
-import { TickFormatter } from '@elastic/charts';
+import type { TickFormatter } from '@elastic/charts';
 import { useMemo } from 'react';
 import { formatChangePoint } from '../change_point';
 import { getAnnotationFromFormattedChangePoint } from '../utils/get_annotation_from_formatted_change_point';

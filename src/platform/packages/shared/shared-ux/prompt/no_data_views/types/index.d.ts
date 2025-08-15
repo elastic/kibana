@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiEmptyPromptProps } from '@elastic/eui';
+import type { EuiEmptyPromptProps } from '@elastic/eui';
 import type { ILocatorClient } from '@kbn/share-plugin/common/url_service';
 
 /**

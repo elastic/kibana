@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { BaseMessage, AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
+import type { BaseMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
 import {
   type ConversationEvent,
   type UserMessage,

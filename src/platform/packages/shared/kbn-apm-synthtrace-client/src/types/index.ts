@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BulkCreateOperation, BulkIndexOperation } from '@elastic/elasticsearch/lib/api/types';
-import { Fields } from '../lib/entity';
-import { Serializable } from '../lib/serializable';
+import type { BulkCreateOperation, BulkIndexOperation } from '@elastic/elasticsearch/lib/api/types';
+import type { Fields } from '../lib/entity';
+import type { Serializable } from '../lib/serializable';
 
 export type SynthtraceESAction = { create: BulkCreateOperation } | { index: BulkIndexOperation };
 export type SynthtraceDynamicTemplate = Record<string, string>;

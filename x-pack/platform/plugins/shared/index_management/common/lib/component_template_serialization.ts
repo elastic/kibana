@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   TemplateFromEs,
   ComponentTemplateFromEs,
   ComponentTemplateDeserialized,
   ComponentTemplateListItem,
   ComponentTemplateSerialized,
 } from '../types';
-import { DataStreamOptions } from '../types/data_streams';
+import type { DataStreamOptions } from '../types/data_streams';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 

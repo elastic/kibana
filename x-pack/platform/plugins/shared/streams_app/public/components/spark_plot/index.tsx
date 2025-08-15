@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { PartialTheme, TickFormatter } from '@elastic/charts';
 import {
   AnnotationDomainType,
   Axis,
@@ -12,11 +13,9 @@ import {
   CurveType,
   LineAnnotation,
   LineSeries,
-  PartialTheme,
   Position,
   ScaleType,
   Settings,
-  TickFormatter,
   Tooltip,
   niceTimeFormatter,
 } from '@elastic/charts';

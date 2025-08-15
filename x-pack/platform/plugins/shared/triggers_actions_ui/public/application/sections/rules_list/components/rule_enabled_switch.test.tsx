@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { RuleEnabledSwitch, ComponentOpts } from './rule_enabled_switch';
+import type { ComponentOpts } from './rule_enabled_switch';
+import { RuleEnabledSwitch } from './rule_enabled_switch';
 
 describe('RuleEnabledSwitch', () => {
   const enableRule = jest.fn();

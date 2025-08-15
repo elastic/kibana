@@ -6,7 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { filterToolsBySelection, ToolSelection } from '@kbn/onechat-common';
+import type { ToolSelection } from '@kbn/onechat-common';
+import { filterToolsBySelection } from '@kbn/onechat-common';
 import type { ToolProvider, ExecutableTool } from '@kbn/onechat-server';
 
 export const selectProviderTools = async ({

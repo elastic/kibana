@@ -7,7 +7,7 @@
 
 import rison from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
-import { LayerDescriptor } from '../../../../common';
+import type { LayerDescriptor } from '../../../../common';
 import { getToasts } from '../../../kibana_services';
 import { INITIAL_LAYERS_KEY } from '../../../../common/constants';
 

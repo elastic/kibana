@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createIntl, createIntlCache, IntlConfig, IntlShape } from '@formatjs/intl';
-import type { MessageDescriptor, Formatters } from '@formatjs/intl';
+import { createIntl, createIntlCache } from '@formatjs/intl';
+import type { MessageDescriptor, Formatters, IntlConfig, IntlShape } from '@formatjs/intl';
 import { handleIntlError } from './error_handler';
 
-import { Translation, TranslationInput } from '../translation';
+import type { Translation, TranslationInput } from '../translation';
 import { defaultEnFormats } from './formats';
-import { FormatXMLElementFn, PrimitiveType } from './types';
+import type { FormatXMLElementFn, PrimitiveType } from './types';
 
 const EN_LOCALE = 'en';
 const defaultLocale = EN_LOCALE;

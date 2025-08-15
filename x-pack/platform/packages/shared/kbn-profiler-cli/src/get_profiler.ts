@@ -8,7 +8,7 @@ import CDP from 'chrome-remote-interface';
 import { promises as Fs } from 'fs';
 import Os from 'os';
 import Path from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import getPort from 'get-port';
 import { getNodeProcesses } from './get_node_processes';

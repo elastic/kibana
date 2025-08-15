@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, ForwardedRef, ReactNode } from 'react';
+import type { ForwardedRef, ReactNode } from 'react';
+import React, { forwardRef } from 'react';
 import { css } from '@emotion/react';
-import { EuiToolTip, IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { EuiToolTip, useEuiTheme } from '@elastic/eui';
 
-import { MenuItem } from '../../../types';
+import type { MenuItem } from '../../../types';
 import { MenuItem as MenuItemComponent } from '../menu_item';
+import { useTooltip } from '../../hooks/use_tooltip';
+import { BetaBadge } from '../beta_badge';
 
 export interface SideNavPrimaryMenuItemProps extends MenuItem {
   as?: 'a' | 'button';
@@ -27,14 +31,55 @@ export interface SideNavPrimaryMenuItemProps extends MenuItem {
 
 export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrimaryMenuItemProps>(
   (
-    { children, hasContent, href, iconType, id, isActive, isCollapsed, isHorizontal, ...props },
+    {
+      children,
+      hasContent,
+      href,
+      iconType,
+      id,
+      isActive,
+      isCollapsed,
+      isHorizontal,
+      badgeType,
+      ...props
+    },
     ref: ForwardedRef<HTMLAnchorElement>
   ): JSX.Element => {
+    const { euiTheme } = useEuiTheme();
+    const { tooltipRef, handleMouseOut } = useTooltip();
+
     const wrapperStyles = css`
       display: flex;
       justify-content: center;
       width: 100%;
     `;
+
+    const betaContentStyles = css`
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
+    `;
+
+    const getLabelWithBeta = (label: ReactNode) => (
+      <div css={betaContentStyles}>
+        <span>{label}</span>
+        {badgeType && <BetaBadge type={badgeType} isInverted={!isHorizontal} />}
+      </div>
+    );
+
+    const getTooltipContent = () => {
+      if (isHorizontal || (isCollapsed && hasContent)) return null;
+      if (isCollapsed) return badgeType ? getLabelWithBeta(children) : children;
+      // TODO: translate
+      if (!isCollapsed && badgeType)
+        return getLabelWithBeta(
+          badgeType === 'beta' ? 'Beta' : badgeType === 'techPreview' ? 'Tech preview' : children
+        );
+
+      return null;
+    };
+
+    const menuItemContent = isHorizontal && badgeType ? getLabelWithBeta(children) : children;
 
     const menuItem = (
       <MenuItemComponent
@@ -47,19 +92,21 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
         ref={ref}
         {...props}
       >
-        {children}
+        {menuItemContent}
       </MenuItemComponent>
     );
 
-    if (!isHorizontal && isCollapsed && !hasContent) {
+    const tooltipContent = getTooltipContent();
+
+    if (tooltipContent) {
       return (
         <EuiToolTip
-          anchorProps={{
-            css: wrapperStyles,
-          }}
-          content={children}
-          position="right"
+          ref={tooltipRef}
+          anchorProps={{ css: wrapperStyles }}
+          content={tooltipContent}
           disableScreenReaderOutput
+          onMouseOut={handleMouseOut}
+          position="right"
         >
           {menuItem}
         </EuiToolTip>

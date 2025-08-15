@@ -7,18 +7,18 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import {
+import type {
   BoundInferenceClient,
   InferenceClient,
-  aiAnonymizationSettings,
   AnonymizationSettings,
 } from '@kbn/inference-common';
+import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { createClient as createInferenceClient, createChatModel } from './inference_client';
 import { RegexWorkerService } from './chat_complete/anonymization/regex_worker_service';
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
-import {
+import type {
   InferenceBoundClientCreateOptions,
   InferenceClientCreateOptions,
   InferenceServerSetup,

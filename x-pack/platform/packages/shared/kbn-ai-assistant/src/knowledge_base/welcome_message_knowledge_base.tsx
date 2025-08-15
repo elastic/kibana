@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
 import usePrevious from 'react-use/lib/usePrevious';
-import { UseKnowledgeBaseResult } from '../hooks';
+import type { UseKnowledgeBaseResult } from '../hooks';
 import { KnowledgeBaseInstallationStatusPanel } from './knowledge_base_installation_status_panel';
 import { SettingUpKnowledgeBase } from './setting_up_knowledge_base';
 import { InspectKnowledgeBasePopover } from './inspect_knowlegde_base_popover';

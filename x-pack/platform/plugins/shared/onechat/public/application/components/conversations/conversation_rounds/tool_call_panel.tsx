@@ -14,7 +14,7 @@ import {
   EuiAccordion,
   EuiCodeBlock,
 } from '@elastic/eui';
-import { ToolCallStep } from '@kbn/onechat-common';
+import type { ToolCallStep } from '@kbn/onechat-common';
 import React from 'react';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';

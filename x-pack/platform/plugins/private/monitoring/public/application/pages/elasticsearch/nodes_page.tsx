@@ -12,12 +12,13 @@ import { ElasticsearchTemplate } from './elasticsearch_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ExternalConfigContext } from '../../contexts/external_config_context';
 import { ElasticsearchNodes } from '../../../components/elasticsearch';
-import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
+import type { ComponentProps } from '../../route_init';
+import type { SetupModeProps } from '../../../components/renderers/setup_mode';
+import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
-import { AlertsByName } from '../../../alerts/types';
+import type { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import {
   ELASTICSEARCH_SYSTEM_ID,

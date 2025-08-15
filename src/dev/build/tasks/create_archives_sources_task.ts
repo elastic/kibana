@@ -10,7 +10,8 @@
 import { REPO_ROOT } from '@kbn/repo-info';
 import { removePackagesFromPackageMap } from '@kbn/repo-packages';
 import { resolve, join } from 'path';
-import { scanCopy, Task, deleteAll, copyAll } from '../lib';
+import type { Task } from '../lib';
+import { scanCopy, deleteAll, copyAll } from '../lib';
 import { getNodeDownloadInfo } from './nodejs';
 
 export const CreateArchivesSources: Task = {

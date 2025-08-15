@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConnectorExecutor } from '../connector_executor';
-import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
-import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import { RunStepResult, StepBase, BaseStep } from './step_base';
+import type { ConnectorExecutor } from '../connector_executor';
+import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { RunStepResult, BaseStep } from './step_base';
+import { StepBase } from './step_base';
 
 // Extend BaseStep for connector-specific properties
 export interface ConnectorStep extends BaseStep {

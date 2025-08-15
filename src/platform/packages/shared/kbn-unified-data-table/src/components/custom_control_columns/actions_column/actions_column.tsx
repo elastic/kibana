@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
-  EuiFlexGroup,
   RenderCellValue,
 } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import type { RowControlColumn } from '@kbn/discover-utils';
 import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';

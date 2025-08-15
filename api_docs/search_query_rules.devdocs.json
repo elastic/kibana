@@ -73,7 +73,7 @@
         "label": "PLUGIN_NAME",
         "description": [],
         "signature": [
-          "\"Query Rules\""
+          "\"Query rules\""
         ],
         "path": "x-pack/solutions/search/plugins/search_query_rules/common/index.ts",
         "deprecated": false,

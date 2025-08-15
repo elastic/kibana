@@ -36,7 +36,8 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
-import { ElasticsearchService, SetupDeps } from './elasticsearch_service';
+import type { SetupDeps } from './elasticsearch_service';
+import { ElasticsearchService } from './elasticsearch_service';
 import { duration } from 'moment';
 import { isValidConnection } from './is_valid_connection';
 import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/ensure_es_version';

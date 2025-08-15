@@ -9,7 +9,7 @@ jest.mock('uuid', () => ({ v4: () => 'mock-report-id' }));
 
 import rison from '@kbn/rison';
 
-import {
+import type {
   AuditLogger,
   FakeRawRequest,
   KibanaRequest,
@@ -17,15 +17,15 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import type { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
-import { ReportingCore } from '../../..';
+import type { ReportingCore } from '../../..';
 import {
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../test_helpers';
-import { ReportingRequestHandlerContext, ReportingSetup } from '../../../types';
+import type { ReportingRequestHandlerContext, ReportingSetup } from '../../../types';
 import { ScheduleRequestHandler } from './schedule_request_handler';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { CoreSetup } from '@kbn/core/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 export function getKibanaUrl(coreSetup: CoreSetup, cloudSetup?: CloudSetup) {
   return (

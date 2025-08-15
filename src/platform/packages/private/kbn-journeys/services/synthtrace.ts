@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SynthtraceClientTypes, SynthtraceClientsManager } from '@kbn/apm-synthtrace';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { SynthtraceClientTypes } from '@kbn/apm-synthtrace';
+import { SynthtraceClientsManager } from '@kbn/apm-synthtrace';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { type Logger, extendToolingLog } from '@kbn/apm-synthtrace';
-import { Auth, Es } from '.';
-import { KibanaUrl } from './kibana_url';
+import type { Auth, Es } from '.';
+import type { KibanaUrl } from './kibana_url';
 
 export interface SynthtraceClientOptions {
   kbnUrl: KibanaUrl;

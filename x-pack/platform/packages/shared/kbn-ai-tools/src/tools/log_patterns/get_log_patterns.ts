@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   AggregationsAggregationContainer,
   AggregationsCategorizeTextAggregation,
   AggregationsDateHistogramAggregation,
@@ -15,11 +15,11 @@ import {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { categorizationAnalyzer } from '@kbn/aiops-log-pattern-analysis/categorization_analyzer';
-import { ChangePointType } from '@kbn/es-types/src';
+import type { ChangePointType } from '@kbn/es-types/src';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { omit, orderBy, uniqBy } from 'lodash';
 import moment from 'moment';
-import { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import { pValueToLabel } from '../../utils/p_value_to_label';
 

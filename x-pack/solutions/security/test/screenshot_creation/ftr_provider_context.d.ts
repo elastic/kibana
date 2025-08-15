@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
+import type { GenericFtrProviderContext } from '@kbn/test';
 
-import { pageObjects } from '@kbn/test-suites-xpack-platform/screenshot_creation/page_objects';
+import type { pageObjects } from '@kbn/test-suites-xpack-platform/screenshot_creation/page_objects';
 import { services as platformServices } from '@kbn/test-suites-xpack-platform/screenshot_creation/services';
 
 export const services = {

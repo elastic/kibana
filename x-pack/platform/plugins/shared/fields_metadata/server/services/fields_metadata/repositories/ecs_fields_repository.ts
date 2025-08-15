@@ -10,8 +10,9 @@ import { mapValues } from 'lodash';
 import { isLeft } from 'fp-ts/Either';
 import { fieldsMetadataDictionaryRT } from '../../../../common/fields_metadata';
 import { FieldsMetadataDictionary } from '../../../../common/fields_metadata/models/fields_metadata_dictionary';
-import { AnyFieldName, EcsFieldName, FieldMetadata, FieldMetadataPlain } from '../../../../common';
-import { TEcsFields } from '../../../../common/fields_metadata/types';
+import type { AnyFieldName, EcsFieldName, FieldMetadataPlain } from '../../../../common';
+import { FieldMetadata } from '../../../../common';
+import type { TEcsFields } from '../../../../common/fields_metadata/types';
 
 export interface EcsFieldsRepositoryDeps {
   ecsFields: TEcsFields;

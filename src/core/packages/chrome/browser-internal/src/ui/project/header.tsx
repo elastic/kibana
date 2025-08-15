@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiHeader,
   EuiHeaderLogo,
@@ -14,28 +15,28 @@ import {
   EuiHeaderSectionItem,
   EuiImage,
   EuiLoadingSpinner,
-  EuiThemeComputed,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import {
+import type {
   ChromeBreadcrumb,
-  type ChromeBreadcrumbsAppendExtension,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeHelpMenuLink,
   ChromeNavControl,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser/src';
+import { type ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser/src';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React, { type ComponentProps, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { debounceTime, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { debounceTime } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 import { Breadcrumbs } from './breadcrumbs';

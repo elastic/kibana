@@ -6,12 +6,8 @@
  */
 
 import { intersectionBy } from 'lodash';
-import {
-  ContentPackIncludedObjects,
-  ContentPackStream,
-  ROOT_STREAM_ID,
-  isIncludeAll,
-} from '@kbn/content-packs-schema';
+import type { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content-packs-schema';
+import { ROOT_STREAM_ID, isIncludeAll } from '@kbn/content-packs-schema';
 import { ContentPackIncludeError } from '../error';
 
 export function withoutRootPrefix(root: string, name: string) {

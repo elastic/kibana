@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { XYBrushEvent } from '@elastic/charts';
-import { History } from 'history';
+import type { XYBrushEvent } from '@elastic/charts';
+import type { History } from 'history';
 import { fromQuery, toQuery } from '../../../utils/url';
 
 export const onBrushEnd = ({ x, history }: { x: XYBrushEvent['x']; history: History }) => {

@@ -20,7 +20,7 @@ import {
   type Observable,
 } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   NotificationCoordinatorState,
   NotificationCoordinatorPublicApi,
 } from '@kbn/core-notifications-browser';

@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { TRIGGER_SUGGESTION_COMMAND } from './constants';
-import { ISuggestionItem } from './types';
+import type { ISuggestionItem } from './types';
 import { esqlCommandRegistry } from '.';
 import { buildDocumentation } from '../definitions/utils/documentation';
 import { TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';

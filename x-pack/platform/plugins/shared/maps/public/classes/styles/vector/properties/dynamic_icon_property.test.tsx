@@ -14,13 +14,14 @@ jest.mock('../components/vector_style_editor', () => ({
 }));
 
 import React from 'react';
-import { ICON_SOURCE, RawValue, VECTOR_STYLES } from '../../../../../common/constants';
+import type { RawValue } from '../../../../../common/constants';
+import { ICON_SOURCE, VECTOR_STYLES } from '../../../../../common/constants';
 // @ts-ignore
 import { DynamicIconProperty } from './dynamic_icon_property';
 import { mockField, MockLayer } from './test_helpers/test_util';
-import { IconDynamicOptions } from '../../../../../common/descriptor_types';
-import { IField } from '../../../fields/field';
-import { IVectorLayer } from '../../../layers/vector_layer';
+import type { IconDynamicOptions } from '../../../../../common/descriptor_types';
+import type { IField } from '../../../fields/field';
+import type { IVectorLayer } from '../../../layers/vector_layer';
 
 const makeProperty = (options: Partial<IconDynamicOptions>, field: IField = mockField) => {
   const defaultOptions: IconDynamicOptions = {

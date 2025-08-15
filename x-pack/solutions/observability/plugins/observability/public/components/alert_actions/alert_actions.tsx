@@ -17,21 +17,22 @@ import {
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useRouteMatch } from 'react-router-dom';
-import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
+import {
+  RELATED_ALERTS_TABLE_ID,
+  SLO_ALERTS_TABLE_ID,
+} from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
-import {
-  GetObservabilityAlertsTableProp,
-  ObservabilityAlertsTableContext,
-  observabilityFeatureId,
-} from '../..';
+import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../..';
+import { observabilityFeatureId } from '../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
+import { useKibana } from '../../utils/kibana_react';
 
-export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> = ({
+export function AlertActions({
   observabilityRuleTypeRegistry,
   alert,
   tableId,
@@ -40,7 +41,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
   parentAlert,
   services,
   ...rest
-}) => {
+}: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>) {
   const {
     http: {
       basePath: { prepend },
@@ -48,6 +49,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
     cases,
   } = services;
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
+  const { telemetryClient } = useKibana().services;
 
   const isInApp = Boolean(tableId === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
 
@@ -80,9 +82,19 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
     }
   }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
+  const onAddToCase = useCallback(
+    ({ isNewCase }: { isNewCase: boolean }) => {
+      if (tableId === RELATED_ALERTS_TABLE_ID) {
+        telemetryClient.reportRelatedAlertAddedToCase(isNewCase);
+      }
+      refresh?.();
+    },
+    [refresh, telemetryClient, tableId]
+  );
+
   const { isPopoverOpen, setIsPopoverOpen, handleAddToExistingCaseClick, handleAddToNewCaseClick } =
     useCaseActions({
-      refresh,
+      onAddToCase,
       alerts: [alert],
       services: {
         cases,
@@ -246,7 +258,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
       </EuiFlexItem>
     </>
   );
-};
+}
 
 // Default export used for lazy loading
 // eslint-disable-next-line import/no-default-export

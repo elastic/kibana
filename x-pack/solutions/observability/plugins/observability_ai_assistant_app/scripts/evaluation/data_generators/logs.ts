@@ -6,8 +6,10 @@
  */
 
 import moment from 'moment';
-import { timerange, log, LogDocument } from '@kbn/apm-synthtrace-client';
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { randomInt } from 'crypto';
+import type { LogDocument } from '@kbn/apm-synthtrace-client';
+import { timerange, log } from '@kbn/apm-synthtrace-client';
+import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export async function generateFrequentErrorLogs({
   logsSynthtraceEsClient,
@@ -247,7 +249,11 @@ export async function generateUniqueUserLoginLogs({
     const intervalInSeconds = Math.max(1, Math.floor(timeRangeInSeconds / dailyLogins));
 
     const logStream = timeRange.interval(`${intervalInSeconds}s`).generator((timestamp) => {
-      const userId = userPool[Math.floor(Math.random() * userPool.length)];
+      if (userPool.length === 0) {
+        throw new Error('userPool must not be empty');
+      }
+
+      const userId = userPool[randomInt(userPool.length)];
 
       const overrides = {
         'event.action': 'login',

@@ -6,51 +6,35 @@
  */
 import { useCallback } from 'react';
 import semverGte from 'semver/functions/gte';
-import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
-import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
-import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
-import { SetupTechnology } from '@kbn/fleet-plugin/common/types';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { CloudSecurityPolicyTemplate, PostureInput, UpdatePolicy } from '../types';
-import {
-  SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
-  SUPPORTED_POLICY_TEMPLATES,
-} from '../constants';
+import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackageInfo,
+} from '@kbn/fleet-plugin/common';
+import type { SetupTechnology } from '@kbn/fleet-plugin/common/types';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   getCloudConnectorRemoteRoleTemplate,
-  getPostureInputHiddenVars,
-  getPosturePolicy,
+  getInputHiddenVars,
+  updatePolicyWithInputs,
   hasErrors,
-  isPostureInput,
 } from '../utils';
 import { useSetupTechnology } from './use_setup_technology';
+import type { CloudProviders, CloudSetupConfig, UpdatePolicy } from '../types';
+import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '../constants';
 
-const assert: (condition: unknown, msg?: string) => asserts condition = (
-  condition: unknown,
-  msg?: string
-): asserts condition => {
-  if (!condition) {
-    throw new Error(msg);
-  }
-};
-
-const getSelectedOption = (
-  options: NewPackagePolicyInput[],
-  policyTemplate: string = CSPM_POLICY_TEMPLATE
-) => {
+const getSelectedInput = (options: NewPackagePolicyInput[], defaultProviderType: string) => {
   // Looks for the enabled deployment (aka input). By default, all inputs are disabled.
-  // Initial state when all inputs are disabled is to choose the first available of the relevant policyTemplate
-  // Default selected policy template is CSPM
-  const selectedOption =
-    options.find((i) => i.enabled) ||
-    options.find((i) => i.policy_template === policyTemplate) ||
-    options[0];
+  // Initial state when all inputs are disabled is to choose the default provider type
+  const selectedInput =
+    options.find((i) => i.enabled) || options.find((i) => i.type === defaultProviderType);
 
-  assert(selectedOption, 'Failed to determine selected option'); // We can't provide a default input without knowing the policy template
-  assert(isPostureInput(selectedOption), `Unknown option: ${selectedOption.type}`);
-
-  return selectedOption;
+  if (!selectedInput) {
+    throw new Error('Failed to determine selected input');
+  }
+  return selectedInput;
 };
 
 interface UseLoadCloudSetupProps {
@@ -59,13 +43,16 @@ interface UseLoadCloudSetupProps {
   validationResults?: PackagePolicyValidationResults;
   isEditPage: boolean;
   packageInfo: PackageInfo;
-  integrationToEnable?: CloudSecurityPolicyTemplate;
-  setIntegrationToEnable?: (integration: CloudSecurityPolicyTemplate) => void;
   defaultSetupTechnology?: SetupTechnology;
   isAgentlessEnabled?: boolean;
   handleSetupTechnologyChange?: (setupTechnology: SetupTechnology) => void;
   uiSettings: IUiSettingsClient;
   cloud: CloudSetup;
+  defaultProviderType: string;
+  templateName: string;
+  config: CloudSetupConfig;
+  cloudConnectorEnabledVersion: string;
+  getCloudSetupProviderByInputType: (inputType: string) => CloudProviders;
 }
 
 export const useLoadCloudSetup = ({
@@ -74,24 +61,24 @@ export const useLoadCloudSetup = ({
   validationResults,
   isEditPage,
   packageInfo,
-  integrationToEnable,
   defaultSetupTechnology,
   isAgentlessEnabled,
   handleSetupTechnologyChange,
   uiSettings,
   cloud,
+  defaultProviderType,
+  templateName,
+  config,
+  getCloudSetupProviderByInputType,
+  cloudConnectorEnabledVersion,
 }: UseLoadCloudSetupProps) => {
   const isServerless = !!cloud.serverless.projectType;
-  const integration =
-    integrationToEnable &&
-    SUPPORTED_POLICY_TEMPLATES.includes(integrationToEnable as CloudSecurityPolicyTemplate)
-      ? integrationToEnable
-      : undefined;
-  const input = getSelectedOption(newPolicy.inputs, integration);
+  const input = getSelectedInput(newPolicy.inputs, defaultProviderType);
+  const selectedProvider = getCloudSetupProviderByInputType(input.type);
+
   const hasInvalidRequiredVars = !!hasErrors(validationResults);
   const cloudConnectorsEnabled =
     uiSettings.get(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
-  const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '2.0.0-preview01';
 
   const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
     input,
@@ -99,6 +86,7 @@ export const useLoadCloudSetup = ({
     handleSetupTechnologyChange,
     isEditPage,
     defaultSetupTechnology,
+    selectedProvider,
   });
 
   const shouldRenderAgentlessSelector =
@@ -108,36 +96,49 @@ export const useLoadCloudSetup = ({
     input,
     cloud,
     packageInfo,
+    templateName,
   });
 
   const showCloudConnectors =
     cloudConnectorsEnabled &&
     !!cloudConnectorRemoteRoleTemplate &&
-    semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS);
+    semverGte(packageInfo.version, cloudConnectorEnabledVersion);
 
   const setEnabledPolicyInput = useCallback(
-    (inputType: PostureInput) => {
-      const inputVars = getPostureInputHiddenVars(
-        inputType,
+    (provider: CloudProviders) => {
+      const inputType = config.providers[provider].type;
+      const inputVars = getInputHiddenVars(
+        provider,
         packageInfo,
+        templateName,
         setupTechnology,
         showCloudConnectors
       );
-      const policy = getPosturePolicy(newPolicy, inputType, inputVars);
+
+      const policy = updatePolicyWithInputs(newPolicy, inputType, inputVars);
       updatePolicy({ updatedPolicy: policy });
     },
-    [newPolicy, updatePolicy, packageInfo, setupTechnology, showCloudConnectors]
+    [
+      config.providers,
+      packageInfo,
+      templateName,
+      setupTechnology,
+      showCloudConnectors,
+      newPolicy,
+      updatePolicy,
+    ]
   );
 
   return {
-    isServerless,
+    hasInvalidRequiredVars,
     input,
+    isServerless,
+    selectedProvider,
     setEnabledPolicyInput,
-    updatePolicy,
     setupTechnology,
-    updateSetupTechnology,
     shouldRenderAgentlessSelector,
     showCloudConnectors,
-    hasInvalidRequiredVars,
+    updatePolicy,
+    updateSetupTechnology,
   };
 };

@@ -10,7 +10,7 @@
 import type { PhrasesFilter, Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
 import { getPhrasesDisplayValue, mapPhrases } from './map_phrases';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 describe('filter manager utilities', () => {
   describe('mapPhrases()', () => {

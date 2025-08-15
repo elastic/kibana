@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
-import { CoreSetup } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
+import type { CoreSetup } from '@kbn/core/server';
 import { registerValueSuggestionsRoute } from './value_suggestions_route';
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../config';
 
 export function registerRoutes({ http }: CoreSetup, config$: Observable<ConfigSchema>): void {
   const router = http.createRouter();

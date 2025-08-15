@@ -6,9 +6,9 @@
  */
 import expect from '@kbn/expect';
 import { timerange, serviceMap } from '@kbn/apm-synthtrace-client';
-import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { extractExitSpansConnections } from './utils';
 

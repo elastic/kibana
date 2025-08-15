@@ -8,7 +8,7 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLAstQueryExpression } from '../../types';
+import type { ESQLAstQueryExpression } from '../../types';
 import { CommandVisitorContext, WhereCommandVisitorContext } from '../contexts';
 import { Visitor } from '../visitor';
 

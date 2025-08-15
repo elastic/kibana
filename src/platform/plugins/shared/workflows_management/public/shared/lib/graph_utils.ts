@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { graphlib } from '@dagrejs/dagre';
+import type { graphlib } from '@dagrejs/dagre';
 
 export function getAllPredecessors(graph: graphlib.Graph, nodeId: string): string[] {
   const predecessors = graph.predecessors(nodeId);

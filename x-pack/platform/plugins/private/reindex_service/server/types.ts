@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
+import type { IRouter, Logger } from '@kbn/core/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import type { Version } from '@kbn/upgrade-assistant-pkg-server';
-import { CredentialStore } from './src/lib/credential_store';
+import type { CredentialStore } from './src/lib/credential_store';
 
 export interface RouteDependencies {
   router: IRouter;

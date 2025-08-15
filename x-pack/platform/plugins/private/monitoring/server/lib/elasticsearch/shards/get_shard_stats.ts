@@ -6,9 +6,12 @@
  */
 
 import { get } from 'lodash';
-import { ElasticsearchModifiedSource, ElasticsearchResponse } from '../../../../common/types/es';
+import type {
+  ElasticsearchModifiedSource,
+  ElasticsearchResponse,
+} from '../../../../common/types/es';
 import { Globals } from '../../../static_globals';
-import { LegacyRequest } from '../../../types';
+import type { LegacyRequest } from '../../../types';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../../common/get_index_patterns';
 import { createQuery } from '../../create_query';
 import { ElasticsearchMetric } from '../../metrics';

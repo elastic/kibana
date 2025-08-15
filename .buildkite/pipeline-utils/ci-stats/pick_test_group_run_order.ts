@@ -14,8 +14,10 @@ import minimatch from 'minimatch';
 
 import { load as loadYaml } from 'js-yaml';
 
-import { BuildkiteClient, BuildkiteStep } from '../buildkite';
-import { CiStatsClient, TestGroupRunOrderResponse } from './client';
+import type { BuildkiteStep } from '../buildkite';
+import { BuildkiteClient } from '../buildkite';
+import type { TestGroupRunOrderResponse } from './client';
+import { CiStatsClient } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';

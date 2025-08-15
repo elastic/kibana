@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SolutionView } from '@kbn/spaces-plugin/common';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
 
 interface SolutionLabels {
   breadcrumbText: string;

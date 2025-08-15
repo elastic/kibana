@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
 import { useDispatch } from '../../mappings_state_context';
-import { NormalizedRuntimeField } from '../../types';
+import type { NormalizedRuntimeField } from '../../types';
 
 type DeleteFieldFunc = (property: NormalizedRuntimeField) => void;
 

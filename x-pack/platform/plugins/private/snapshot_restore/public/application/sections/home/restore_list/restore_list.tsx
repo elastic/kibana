@@ -21,12 +21,12 @@ import {
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common';
+import type { Error } from '../../../../shared_imports';
 import {
   WithPrivileges,
   NotAuthorizedSection,
   PageError,
   PageLoading,
-  Error,
   useExecutionContext,
 } from '../../../../shared_imports';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';

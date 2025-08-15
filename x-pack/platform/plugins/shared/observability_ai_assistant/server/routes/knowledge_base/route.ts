@@ -7,19 +7,15 @@
 
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import {
+import type {
   InferenceInferenceEndpointInfo,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import {
-  Instruction,
-  KnowledgeBaseEntry,
-  KnowledgeBaseEntryRole,
-  InferenceModelState,
-} from '../../../common/types';
+import type { Instruction, KnowledgeBaseEntry } from '../../../common/types';
+import { KnowledgeBaseEntryRole, InferenceModelState } from '../../../common/types';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',

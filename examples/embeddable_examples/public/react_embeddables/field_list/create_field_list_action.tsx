@@ -9,11 +9,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_FIELD_LIST_ACTION_ID, FIELD_LIST_ID } from './constants';
-import { FieldListSerializedState } from './types';
+import type { FieldListSerializedState } from './types';
 
 export const createFieldListAction = {
   id: ADD_FIELD_LIST_ACTION_ID,

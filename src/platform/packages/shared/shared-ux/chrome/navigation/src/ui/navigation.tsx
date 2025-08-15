@@ -14,9 +14,11 @@ import type {
   RecentlyAccessedDefinition,
   RootNavigationItemDefinition,
 } from '@kbn/core-chrome-browser';
-import React, { createContext, FC, useCallback, useContext, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { createContext, useCallback, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EMPTY, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { EMPTY } from 'rxjs';
 import { useNavigation as useNavigationService } from '../services';
 import {
   FeedbackBtn,

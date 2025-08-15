@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { CanvasRenderedPage } from '../../../types';
+import type { CanvasRenderedPage } from '../../../types';
 import { ExampleContext } from '../../../test/context_example';
 import { Scrubber, ScrubberComponent } from '../scrubber';
 import { workpads } from '../../../../__fixtures__/workpads';

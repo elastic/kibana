@@ -8,7 +8,8 @@
 import rison from '@kbn/rison';
 import { AssetDetailsLocatorDefinition } from './asset_details_locator';
 import { AssetDetailsFlyoutLocatorDefinition } from './asset_details_flyout_locator';
-import { HostsLocatorDefinition, HostsLocatorParams } from './hosts_locator';
+import type { HostsLocatorParams } from './hosts_locator';
+import { HostsLocatorDefinition } from './hosts_locator';
 import { InventoryLocatorDefinition } from './inventory_locator';
 import querystring from 'querystring';
 

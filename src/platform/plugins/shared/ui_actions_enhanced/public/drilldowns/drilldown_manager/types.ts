@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToastsStart } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { Trigger } from '@kbn/ui-actions-plugin/public';
-import {
+import type { ToastsStart } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import type {
   ActionFactory,
   BaseActionFactoryContext,
   DynamicActionManager,

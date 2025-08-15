@@ -14,7 +14,8 @@ import type {
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
 
-import { KbnClientRequester, uriencode } from './kbn_client_requester';
+import type { KbnClientRequester } from './kbn_client_requester';
+import { uriencode } from './kbn_client_requester';
 
 type MigrationVersion = Record<string, string>;
 

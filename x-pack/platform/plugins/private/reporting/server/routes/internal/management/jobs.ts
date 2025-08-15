@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { ROUTE_TAG_CAN_REDIRECT } from '@kbn/security-plugin/server';
-import { ReportingCore } from '../../..';
+import type { ReportingCore } from '../../..';
 import { authorizedUserPreRouting, getCounters } from '../../common';
 import { handleUnavailable } from '../../common/request_handler';
 import {

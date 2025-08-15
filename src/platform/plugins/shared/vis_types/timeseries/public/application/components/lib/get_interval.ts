@@ -15,7 +15,7 @@ import { GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
 import { AUTO_INTERVAL } from '../../../../common/constants';
 import { isVisTableData } from '../../../../common/vis_data_utils';
 import type { PanelData, TimeseriesVisData } from '../../../../common/types';
-import { TimeseriesVisParams } from '../../../types';
+import type { TimeseriesVisParams } from '../../../types';
 
 const { parseEsInterval } = search.aggs;
 

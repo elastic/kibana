@@ -13,7 +13,7 @@ import {
   deleteUsersAndRoles,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication';
 
-import {
+import type {
   Role,
   User,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication/types';
@@ -23,7 +23,7 @@ import {
   getCase,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import { getPostCaseRequest } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const secAll: Role = {
   name: 'sec_all_role',

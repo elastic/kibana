@@ -42,6 +42,9 @@ export interface FeatureTypeUsage {
   has_exceptions: number;
   response_actions: ResponseActionsUsage;
 }
+export interface ThreatMatchFeatureTypeUsage extends FeatureTypeUsage {
+  has_does_not_match_condition: number;
+}
 
 export interface UpgradeableRulesSummary {
   total: number;
@@ -59,8 +62,8 @@ export interface RulesTypeUsage {
   eql_custom: FeatureTypeUsage;
   machine_learning: FeatureTypeUsage;
   machine_learning_custom: FeatureTypeUsage;
-  threat_match: FeatureTypeUsage;
-  threat_match_custom: FeatureTypeUsage;
+  threat_match: ThreatMatchFeatureTypeUsage;
+  threat_match_custom: ThreatMatchFeatureTypeUsage;
   new_terms: FeatureTypeUsage;
   new_terms_custom: FeatureTypeUsage;
   elastic_total: FeatureTypeUsage;
@@ -107,6 +110,7 @@ export interface RuleMetric {
   has_response_actions: boolean;
   has_response_actions_endpoint: boolean;
   has_response_actions_osquery: boolean;
+  has_does_not_match_condition?: boolean; // Only for threat match rules
 }
 
 /**

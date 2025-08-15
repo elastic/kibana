@@ -8,7 +8,7 @@
  */
 
 import { extname } from 'path';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { chain } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';

@@ -18,7 +18,7 @@ import {
   TAGS,
 } from '../../constants/index.mock';
 
-import { UpdateEndpointListItemSchema } from '.';
+import type { UpdateEndpointListItemSchema } from '.';
 
 export const getUpdateEndpointListItemSchemaMock = (): UpdateEndpointListItemSchema => ({
   _version: undefined,

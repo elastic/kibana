@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { TRIGGER_USER_INTERACTION_METADATA_API_ROUTE } from '@kbn/intercepts-plugin/common/constants';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');

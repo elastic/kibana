@@ -23,15 +23,17 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
-import { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
-import {
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import type { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
+import type {
   LayoutService,
   LayoutFeatureFlag,
+  LayoutProjectSideNavVersion,
+} from '@kbn/core-chrome-layout';
+import {
   LAYOUT_FEATURE_FLAG_KEY,
   LAYOUT_DEBUG_FEATURE_FLAG_KEY,
   LAYOUT_PROJECT_SIDENAV_FEATURE_FLAG_KEY,
-  LayoutProjectSideNavVersion,
 } from '@kbn/core-chrome-layout';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { LegacyFixedLayout } from '@kbn/core-chrome-layout/layouts/legacy-fixed';

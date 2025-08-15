@@ -17,7 +17,7 @@ import {
 } from '@kbn/rule-data-utils';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type {
   CustomMetricExpressionParams,
   CustomThresholdExpressionMetric,
@@ -27,7 +27,7 @@ import type {
 import type { MetricExpression } from '../components/custom_threshold/types';
 import { getViewInAppUrl } from '../../common/custom_threshold_rule/get_view_in_app_url';
 import { getGroups } from '../../common/custom_threshold_rule/helpers/get_group';
-import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
+import type { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 import { validateCustomThreshold } from '../components/custom_threshold/components/validation';
 const thresholdDefaultActionMessage = i18n.translate(
   'xpack.observability.customThreshold.rule.alerting.threshold.defaultActionMessage',

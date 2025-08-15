@@ -12,7 +12,7 @@ export const labels = {
     title: i18n.translate('xpack.onechat.conversations.title', { defaultMessage: 'Conversations' }),
   },
   tools: {
-    // Page
+    // Landing page
     title: i18n.translate('xpack.onechat.tools.title', { defaultMessage: 'Tools' }),
     description: i18n.translate('xpack.onechat.tools.toolsDescription', {
       defaultMessage:
@@ -20,6 +20,23 @@ export const labels = {
     }),
     newToolButton: i18n.translate('xpack.onechat.tools.newToolButton', {
       defaultMessage: 'New tool',
+    }),
+
+    newEsqlToolTitle: i18n.translate('xpack.onechat.tools.newEsqlTool.title', {
+      defaultMessage: 'New ES|QL tool',
+    }),
+    editEsqlToolTitle: i18n.translate('xpack.onechat.tools.editEsqlTool.title', {
+      defaultMessage: 'Edit ES|QL tool',
+    }),
+
+    saveButtonLabel: i18n.translate('xpack.onechat.tools.saveButtonLabel', {
+      defaultMessage: 'Save',
+    }),
+    clearButtonLabel: i18n.translate('xpack.onechat.tools.clearButtonLabel', {
+      defaultMessage: 'Clear',
+    }),
+    saveButtonTooltip: i18n.translate('xpack.onechat.tools.saveButtonTooltip', {
+      defaultMessage: 'Resolve all form errors to save.',
     }),
 
     // Table columns and labels
@@ -129,6 +146,14 @@ export const labels = {
       }),
     searchToolsErrorToast: i18n.translate('xpack.onechat.tools.searchToolsErrorToast', {
       defaultMessage: 'Error searching tools',
+    }),
+    loadToolErrorToast: (toolId: string) =>
+      i18n.translate('xpack.onechat.tools.loadToolErrorToast', {
+        defaultMessage: 'Unable to load "{toolId}"',
+        values: { toolId },
+      }),
+    loadToolsErrorToast: i18n.translate('xpack.onechat.tools.loadToolsErrorToast', {
+      defaultMessage: 'Unable to load tools',
     }),
 
     // Delete modals

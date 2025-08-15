@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SearchQuery } from '@kbn/content-management-plugin/common';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { SearchQuery } from '@kbn/content-management-plugin/common';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type {
   ContentManagementCrudTypes,
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import { BaseVisType } from './base_vis_type';
-import { VisualizationSavedObject } from '../../common';
+import type { BaseVisType } from './base_vis_type';
+import type { VisualizationSavedObject } from '../../common';
 
 export type VisualizationStage = 'experimental' | 'beta' | 'production';
 

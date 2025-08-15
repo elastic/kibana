@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import axios, { AxiosInstance } from 'axios';
-import { execSync, ExecSyncOptions } from 'child_process';
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
+import type { ExecSyncOptions } from 'child_process';
+import { execSync } from 'child_process';
 
 import { dump } from 'js-yaml';
 
 import { parseLinkHeader } from './parse_link_header';
-import { Artifact } from './types/artifact';
-import { Build, BuildStatus } from './types/build';
-import { Job, JobState } from './types/job';
+import type { Artifact } from './types/artifact';
+import type { Build, BuildStatus } from './types/build';
+import type { Job, JobState } from './types/job';
 
 type ExecType =
   | ((command: string, execOpts: ExecSyncOptions) => Buffer | null)

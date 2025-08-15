@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CallToolResult, TextContent } from '@modelcontextprotocol/sdk/types.js';
-import { ContentRef } from '@kbn/wci-common';
+import type { CallToolResult, TextContent } from '@modelcontextprotocol/sdk/types.js';
+import type { ContentRef } from '@kbn/wci-common';
 
 export interface ToolContentResult {
   reference: ContentRef;

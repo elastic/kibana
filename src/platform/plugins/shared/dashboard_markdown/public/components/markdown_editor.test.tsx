@@ -10,7 +10,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
-import { MarkdownEditor, MarkdownEditorProps } from './markdown_editor';
+import type { MarkdownEditorProps } from './markdown_editor';
+import { MarkdownEditor } from './markdown_editor';
 import userEvent from '@testing-library/user-event';
 import { MarkdownEditorPreviewSwitch } from './markdown_editor_preview_switch';
 import { faker } from '@faker-js/faker';

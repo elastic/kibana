@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
+import type { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
 
 export const serviceContractMock = (): jest.Mocked<CustomBrandingService> => {
   return {

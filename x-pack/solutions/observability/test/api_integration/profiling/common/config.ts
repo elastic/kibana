@@ -6,18 +6,19 @@
  */
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
-import { format, UrlObject } from 'url';
+import type { UrlObject } from 'url';
+import { format } from 'url';
 import { getFips } from 'crypto';
-import { ProfilingFtrConfigName } from '../configs';
+import type { ProfilingFtrConfigName } from '../configs';
 import { createProfilingApiClient } from './api_supertest';
 import { createProfilingUsers } from './create_profiling_users';
 import {
   PROFILING_TEST_PASSWORD,
   ProfilingUsername,
 } from './create_profiling_users/authentication';
-import {
+import type {
   FtrProviderContext,
   InheritedFtrProviderContext,
   InheritedServices,

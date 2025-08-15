@@ -8,7 +8,8 @@
  */
 
 import { isPromise } from '@kbn/std';
-import { Context, Span, SpanOptions, SpanStatusCode, Tracer, context } from '@opentelemetry/api';
+import type { Context, Span, SpanOptions, Tracer } from '@opentelemetry/api';
+import { SpanStatusCode, context } from '@opentelemetry/api';
 import { core } from '@elastic/opentelemetry-node/sdk';
 import { Observable, isObservable } from 'rxjs';
 import { getDefaultTracer } from '@kbn/default-tracer';

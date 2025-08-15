@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import type { FilesClient } from '../../../common/files_client';
 import { NoDownloadAvailableError } from '../../file/errors';
 import { FileNotFoundError } from '../../file_service/errors';
@@ -17,10 +17,11 @@ import {
   FileShareTokenInvalidError,
 } from '../../file_share_service/errors';
 import type { FilesRouter } from '../types';
-import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
+import type { CreateRouteDefinition } from '../api_routes';
+import { FILES_API_ROUTES } from '../api_routes';
 import { getDownloadHeadersForFile, getDownloadedFileName } from '../common';
 import { fileNameWithExt } from '../common_schemas';
-import { CreateHandler } from '../types';
+import type { CreateHandler } from '../types';
 
 const method = 'get' as const;
 

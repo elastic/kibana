@@ -8,12 +8,13 @@
  */
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
-import {
-  httpServiceMock,
+import type { RouterMock } from '@kbn/core-http-router-server-mocks';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import type {
   InternalHttpServicePrebootMock,
   InternalHttpServiceSetupMock,
 } from '@kbn/core-http-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { of } from 'rxjs';
 import { PricingService } from './pricing_service';
 import type { PricingConfigType } from './pricing_config';

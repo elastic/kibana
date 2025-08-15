@@ -6,13 +6,14 @@
  */
 
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import { BaseMessage, AIMessage } from '@langchain/core/messages';
+import type { BaseMessage, AIMessage } from '@langchain/core/messages';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
-import { InferenceChatModel } from '@kbn/inference-langchain';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { extractTextContent } from '@kbn/onechat-genai-utils/langchain';
-import { ReasoningStep, AddedMessage, isMessage } from './actions';
+import type { ReasoningStep, AddedMessage } from './actions';
+import { isMessage } from './actions';
 import { getReasoningPrompt, getActPrompt } from './prompts';
 
 const StateAnnotation = Annotation.Root({

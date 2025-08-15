@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  UseEuiTheme,
   logicalCSS,
   logicalSizeCSS,
   useEuiTheme,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { FC, useMemo } from 'react';
-import { Observable, isObservable, of } from 'rxjs';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import type { Observable } from 'rxjs';
+import { isObservable, of } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 

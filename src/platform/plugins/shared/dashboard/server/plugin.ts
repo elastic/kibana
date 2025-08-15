@@ -7,15 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
-import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import { SharePluginStart } from '@kbn/share-plugin/server';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+} from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
@@ -27,7 +36,7 @@ import {
 import { getUISettings } from './ui_settings';
 import { DashboardStorage } from './content_management';
 import { capabilitiesProvider } from './capabilities_provider';
-import { DashboardPluginSetup, DashboardPluginStart } from './types';
+import type { DashboardPluginSetup, DashboardPluginStart } from './types';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { registerDashboardUsageCollector } from './usage/register_collector';

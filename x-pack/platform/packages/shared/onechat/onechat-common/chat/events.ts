@@ -6,7 +6,7 @@
  */
 
 import type { OnechatEvent } from '../base/events';
-import { ToolResult } from '../tools/tool_result';
+import type { ToolResult } from '../tools/tool_result';
 import type { ConversationRound } from './conversation';
 
 export enum ChatEventType {

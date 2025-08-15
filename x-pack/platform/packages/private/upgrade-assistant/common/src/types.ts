@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/types';
+import type { SavedObject } from '@kbn/core/types';
 
 // 8.0 -> 9.0 warnings
 export type IndexWarningType = 'indexSetting' | 'replaceIndexWithAlias' | 'makeIndexReadonly';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LanguageDefinition } from '../types';
+import type { LanguageDefinition } from '../types';
 
 const INDEX_NAME_PLACEHOLDER = 'index_name';
 

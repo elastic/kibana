@@ -8,9 +8,10 @@
 import { act } from 'react-dom/test-utils';
 import { i18nTexts } from '../../../public/application/sections/edit_policy/i18n_texts';
 
-import { PhaseWithDownsample } from '../../../common/types';
+import type { PhaseWithDownsample } from '../../../common/types';
 import { setupEnvironment } from '../../helpers';
-import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
+import type { ValidationTestBed } from './validation.helpers';
+import { setupValidationTestBed } from './validation.helpers';
 
 describe('<EditPolicy /> downsample interval validation', () => {
   let testBed: ValidationTestBed;

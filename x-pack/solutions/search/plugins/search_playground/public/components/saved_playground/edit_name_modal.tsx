@@ -23,7 +23,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { validatePlaygroundName } from '../../utils/saved_playgrounds';
-import { SavedPlaygroundForm, SavedPlaygroundFormFields } from '../../types';
+import type { SavedPlaygroundForm } from '../../types';
+import { SavedPlaygroundFormFields } from '../../types';
 
 export interface EditPlaygroundNameModalProps {
   playgroundName: string;

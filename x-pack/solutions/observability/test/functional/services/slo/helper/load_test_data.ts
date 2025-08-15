@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { generate } from '@kbn/infra-forge';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export async function loadTestData(getService: FtrProviderContext['getService']) {
   const DATE_VIEW = 'kbn-data-forge-fake_hosts';

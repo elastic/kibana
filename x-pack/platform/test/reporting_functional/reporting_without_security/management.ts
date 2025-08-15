@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 // This concatenates lines of multi-line string into a single line.
 // It is so long strings can be entered at short widths, making syntax highlighting easier on editors

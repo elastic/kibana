@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { discoverKibanaUrl } from './discover_kibana_url';
 import { KibanaClient } from './client';
 

@@ -5,15 +5,14 @@
  * 2.0.
  */
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import { IStorageClient } from '@kbn/storage-adapter';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IStorageClient } from '@kbn/storage-adapter';
 import { keyBy, partition } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
-import {
-  ASSET_TYPES,
+import type {
   Asset,
   AssetLink,
   AssetLinkRequest,
@@ -26,15 +25,10 @@ import {
   RuleLink,
   SloLink,
 } from '../../../../common/assets';
-import {
-  ASSET_ID,
-  ASSET_TYPE,
-  ASSET_UUID,
-  QUERY_KQL_BODY,
-  QUERY_TITLE,
-  STREAM_NAME,
-} from './fields';
-import { AssetStorageSettings } from './storage_settings';
+import { ASSET_TYPES } from '../../../../common/assets';
+import type { QUERY_KQL_BODY, QUERY_TITLE } from './fields';
+import { ASSET_ID, ASSET_TYPE, ASSET_UUID, STREAM_NAME } from './fields';
+import type { AssetStorageSettings } from './storage_settings';
 import { AssetNotFoundError } from '../errors/asset_not_found_error';
 
 interface TermQueryOpts {

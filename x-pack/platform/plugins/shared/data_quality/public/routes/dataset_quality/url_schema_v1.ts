@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DatasetQualityPublicStateUpdate } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
+import type { DatasetQualityPublicStateUpdate } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
 import * as rt from 'io-ts';
 import { deepCompactObject } from '../../../common/utils/deep_compact_object';
 import { datasetQualityUrlSchemaV1 } from '../../../common/url_schema';
@@ -15,7 +15,12 @@ export const getStateFromUrlValue = (
 ): DatasetQualityPublicStateUpdate =>
   deepCompactObject<DatasetQualityPublicStateUpdate>({
     table: urlValue.table,
-    filters: urlValue.filters,
+    filters: {
+      ...urlValue.filters,
+      qualities: urlValue.filters?.qualities?.map((quality) =>
+        quality === 'degraded' ? 'warning' : quality
+      ),
+    },
   });
 
 export const getUrlValueFromState = (
@@ -23,7 +28,12 @@ export const getUrlValueFromState = (
 ): datasetQualityUrlSchemaV1.UrlSchema =>
   deepCompactObject<datasetQualityUrlSchemaV1.UrlSchema>({
     table: state.table,
-    filters: state.filters,
+    filters: {
+      ...state.filters,
+      qualities: state.filters?.qualities?.map((quality) =>
+        quality === 'warning' ? 'degraded' : quality
+      ),
+    },
     v: 1,
   });
 

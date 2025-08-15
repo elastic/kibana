@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MaybePromise } from '@kbn/utility-types';
+import type { MaybePromise } from '@kbn/utility-types';
 import type { ConfigDeprecationProvider } from '@kbn/config';
 import type { Type } from '@kbn/config-schema';
 

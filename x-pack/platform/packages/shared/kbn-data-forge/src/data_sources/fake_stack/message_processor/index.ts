@@ -11,7 +11,7 @@ import { bad } from './lib/events/bad';
 import { badHost } from './lib/events/bad_host';
 import { weightedSample } from '../common/weighted_sample';
 
-import { Doc, GeneratorFunction, EventFunction, EventTemplate } from '../../../types';
+import type { Doc, GeneratorFunction, EventFunction, EventTemplate } from '../../../types';
 import { addEphemeralProjectId } from '../../../lib/add_ephemeral_project_id';
 
 let firstRun = true;

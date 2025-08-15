@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiContextMenu,
-  EuiFlyoutProps,
   EuiIcon,
   EuiPanel,
   EuiPopover,

@@ -8,8 +8,8 @@
 import { createValidationFunction } from '../../../common/runtime_types';
 import { FIND_FIELDS_METADATA_URL } from '../../../common/fields_metadata';
 import * as fieldsMetadataV1 from '../../../common/fields_metadata/v1';
-import { FieldsMetadataBackendLibs } from '../../lib/shared_types';
-import { FindFieldsMetadataResponsePayload } from '../../../common/fields_metadata/v1';
+import type { FieldsMetadataBackendLibs } from '../../lib/shared_types';
+import type { FindFieldsMetadataResponsePayload } from '../../../common/fields_metadata/v1';
 import { PackageNotFoundError } from '../../services/fields_metadata/errors';
 
 export const initFindFieldsMetadataRoute = ({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BaseMessageLike } from '@langchain/core/messages';
+import type { BaseMessageLike } from '@langchain/core/messages';
 import type { IndexSourceDefinition } from '@kbn/wci-common';
 import { type IndexInformation, type SampleDocument } from '../utils';
 

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Type, ValidationError } from '@kbn/config-schema';
-import { KibanaRequest } from '@kbn/core/server';
+import type { Type, ValidationError } from '@kbn/config-schema';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { validateVersion } from '@kbn/object-versioning/lib/utils';
 import type { Version } from '@kbn/object-versioning';

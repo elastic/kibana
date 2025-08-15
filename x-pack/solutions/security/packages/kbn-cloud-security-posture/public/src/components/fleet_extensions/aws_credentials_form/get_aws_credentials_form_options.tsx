@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
-import { AwsCredentialsType, NewPackagePolicyPostureInput } from '../types';
+import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import type { AwsCredentialsType } from '../types';
 import { AWS_CREDENTIALS_TYPE } from '../constants';
-import { getAwsCredentialsType } from './aws_utils';
+import { getAwsCredentialsType } from '../utils';
 
 const AssumeRoleDescription = (
   <div>
@@ -107,10 +107,10 @@ export type AwsCredentialsTypeOptions = Array<{
   text: string;
 }>;
 export const getAgentlessCredentialsType = (
-  postureInput: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>,
+  input: NewPackagePolicyInput,
   showCloudConnectors: boolean
 ): AwsCredentialsType => {
-  const credentialsType = getAwsCredentialsType(postureInput);
+  const credentialsType = getAwsCredentialsType(input);
   if (
     (!credentialsType && showCloudConnectors) ||
     (credentialsType === AWS_CREDENTIALS_TYPE.CLOUD_FORMATION && showCloudConnectors)
@@ -157,13 +157,6 @@ export const getAwsCloudConnectorsFormAgentlessOptions = (): AwsCredentialsTypeO
       value === AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS,
     getAwsCloudConnectorsCredentialsFormOptions
   );
-
-export const DEFAULT_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.CLOUD_FORMATION;
-export const DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE: typeof AWS_CREDENTIALS_TYPE.ASSUME_ROLE =
-  AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
-export const DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
-export const DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE =
-  AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
 
 export const getAwsCredentialsFormOptions = (): Omit<AwsOptions, 'cloud_connectors'> => ({
   [AWS_CREDENTIALS_TYPE.ASSUME_ROLE]: {

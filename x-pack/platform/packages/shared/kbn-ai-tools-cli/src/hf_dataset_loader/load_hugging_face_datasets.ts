@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createLocalDirDiskCacheStore, fromCache } from '@kbn/cache-cli';
 import { createCache } from 'cache-manager';
 import { errors } from '@elastic/elasticsearch';
 import { PREDEFINED_HUGGING_FACE_DATASETS } from './datasets/config';
-import { HuggingFaceDatasetSpec } from './types';
+import type { HuggingFaceDatasetSpec } from './types';
 import { ensureDatasetIndexExists } from './indexing/ensure_dataset_index_exists';
 import { fetchRowsFromDataset } from './processing/fetch_rows_from_dataset';
 import { indexDocuments } from './indexing/index_documents';

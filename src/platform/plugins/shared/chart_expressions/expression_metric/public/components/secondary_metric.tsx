@@ -14,7 +14,7 @@ import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/comm
 import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import type { VisParams } from '@kbn/visualizations-plugin/common/types';
 
-import { FormatOverrides } from './helpers';
+import type { FormatOverrides } from './helpers';
 import { getSecondaryMetricInfo } from './secondary_metric_info';
 import type { TrendConfig } from './secondary_metric_info';
 

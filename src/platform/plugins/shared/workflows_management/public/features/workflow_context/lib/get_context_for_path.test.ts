@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 import { getContextForPath } from './get_context_for_path';
 

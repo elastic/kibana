@@ -8,7 +8,8 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { ConnectorContract, generateYamlSchemaFromConnectors } from '@kbn/workflows';
+import type { ConnectorContract } from '@kbn/workflows';
+import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { getCompletionItemProvider, parseLineForCompletion } from './get_completion_item_provider';
 
 // Mock Monaco editor model

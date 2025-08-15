@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { get } from 'lodash';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { DataViewType } from '@kbn/data-views-plugin/common';
 

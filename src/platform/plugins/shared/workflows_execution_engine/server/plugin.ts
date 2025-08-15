@@ -14,7 +14,8 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { EsWorkflowExecution, ExecutionStatus, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 
 import { graphlib } from '@dagrejs/dagre';
 import { Client } from '@elastic/elasticsearch';
@@ -117,7 +118,7 @@ export class WorkflowsExecutionEnginePlugin
 
       const contextManager = new WorkflowContextManager({
         workflowRunId,
-        workflow: workflow as any,
+        workflow: workflow.definition,
         event: context.event,
         logger: this.logger,
         workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,

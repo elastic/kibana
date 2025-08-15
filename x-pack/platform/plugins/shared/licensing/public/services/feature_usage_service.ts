@@ -7,7 +7,7 @@
 
 import { isDate } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
-import { LicenseType } from '../../common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 
 /** @public */
 export interface FeatureUsageServiceSetup {

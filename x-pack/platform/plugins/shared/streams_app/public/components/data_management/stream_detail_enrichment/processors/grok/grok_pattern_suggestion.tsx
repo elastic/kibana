@@ -18,17 +18,19 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { APIReturnType } from '@kbn/streams-plugin/public/api';
-import { ValuesType } from 'utility-types';
-import { GrokCollection, DraftGrokExpression } from '@kbn/grok-ui';
-import { UseFormSetValue, FieldValues, useWatch } from 'react-hook-form';
+import type { APIReturnType } from '@kbn/streams-plugin/public/api';
+import type { ValuesType } from 'utility-types';
+import type { GrokCollection } from '@kbn/grok-ui';
+import { DraftGrokExpression } from '@kbn/grok-ui';
+import type { UseFormSetValue, FieldValues } from 'react-hook-form';
+import { useWatch } from 'react-hook-form';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { selectPreviewRecords } from '../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
-import { ProcessorFormState } from '../../types';
+import type { ProcessorFormState } from '../../types';
 import { GeneratePatternButton, AdditionalChargesCallout } from './generate_pattern_button';
 import { useGrokPatternSuggestion } from './use_grok_pattern_suggestion';
-import { AIFeatures } from './use_ai_features';
+import type { AIFeatures } from './use_ai_features';
 
 export const GrokPatternAISuggestions = ({
   aiFeatures,
@@ -51,7 +53,7 @@ export const GrokPatternAISuggestions = ({
 
   const [suggestionsState, refreshSuggestions] = useGrokPatternSuggestion();
 
-  const fieldValue = useWatch<ProcessorFormState, 'field'>({ name: 'field' });
+  const fieldValue = useWatch<ProcessorFormState, 'from'>({ name: 'from' });
   const isValidField = useMemo(() => {
     return Boolean(
       fieldValue &&
@@ -75,9 +77,6 @@ export const GrokPatternAISuggestions = ({
               ),
               { shouldValidate: true }
             );
-            setValue('pattern_definitions', suggestion.grokProcessor.pattern_definitions, {
-              shouldValidate: true,
-            });
           }
           refreshSuggestions(null);
         }}

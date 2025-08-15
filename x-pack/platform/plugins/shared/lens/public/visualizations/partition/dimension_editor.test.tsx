@@ -9,8 +9,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { PieVisualizationState } from '../../../common/types';
-import { DimensionEditor, DimensionEditorProps } from './dimension_editor';
+import type { PieVisualizationState } from '../../../common/types';
+import type { DimensionEditorProps } from './dimension_editor';
+import { DimensionEditor } from './dimension_editor';
 import { getKbnPalettes } from '@kbn/palettes';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';

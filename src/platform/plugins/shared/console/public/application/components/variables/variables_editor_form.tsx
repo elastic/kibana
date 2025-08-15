@@ -22,16 +22,8 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import {
-  useForm,
-  Form,
-  UseField,
-  TextField,
-  FieldConfig,
-  fieldValidators,
-  FormConfig,
-  ValidationFuncArg,
-} from '../../../shared_imports';
+import type { FieldConfig, FormConfig, ValidationFuncArg } from '../../../shared_imports';
+import { useForm, Form, UseField, TextField, fieldValidators } from '../../../shared_imports';
 
 import { type DevToolsVariable } from './types';
 import { isValidVariableName } from './utils';

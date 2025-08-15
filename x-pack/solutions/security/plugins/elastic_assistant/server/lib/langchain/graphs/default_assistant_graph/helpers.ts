@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import agent, { Span } from 'elastic-apm-node';
+import type { Span } from 'elastic-apm-node';
+import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/logging';
-import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
-import { streamFactory, StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
+import type { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
+import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
+import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assistant-common';
-import { APMTracer } from '@kbn/langchain/server/tracers/apm';
-import { AIMessageChunk } from '@langchain/core/messages';
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import type { AIMessageChunk } from '@langchain/core/messages';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../../telemetry/event_based_telemetry';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
-import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
-import { GraphInputs } from './types';
+import type { DefaultAssistantGraph } from './graph';
+import { DEFAULT_ASSISTANT_GRAPH_ID } from './graph';
+import type { GraphInputs } from './types';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';
 
 interface StreamGraphParams {

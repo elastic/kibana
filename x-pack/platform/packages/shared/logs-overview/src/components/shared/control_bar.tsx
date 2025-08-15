@@ -9,20 +9,16 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useMemo } from 'react';
-import { DiscoverLink, DiscoverLinkDependencies, DiscoverLinkProps } from '../discover_link';
-import {
-  GroupingLicenseCtaCallout,
-  GroupingLicenseCtaCalloutDependencies,
-} from './grouping_license_cta_callout';
-import {
-  GroupingLicenseCtaPopover,
-  GroupingLicenseCtaPopoverDependencies,
-} from './grouping_license_cta_popover';
-import {
-  GroupingLicenseDetailsModal,
-  GroupingLicenseDetailsModalDependencies,
-} from './grouping_license_details_modal';
-import { GroupingSelector, GroupingSelectorProps } from './grouping_selector';
+import type { DiscoverLinkDependencies, DiscoverLinkProps } from '../discover_link';
+import { DiscoverLink } from '../discover_link';
+import type { GroupingLicenseCtaCalloutDependencies } from './grouping_license_cta_callout';
+import { GroupingLicenseCtaCallout } from './grouping_license_cta_callout';
+import type { GroupingLicenseCtaPopoverDependencies } from './grouping_license_cta_popover';
+import { GroupingLicenseCtaPopover } from './grouping_license_cta_popover';
+import type { GroupingLicenseDetailsModalDependencies } from './grouping_license_details_modal';
+import { GroupingLicenseDetailsModal } from './grouping_license_details_modal';
+import type { GroupingSelectorProps } from './grouping_selector';
+import { GroupingSelector } from './grouping_selector';
 
 export type ControlBarProps = Pick<DiscoverLinkProps, 'logsSource' | 'timeRange'> &
   Pick<GroupingSelectorProps, 'grouping' | 'onChangeGrouping'> & {

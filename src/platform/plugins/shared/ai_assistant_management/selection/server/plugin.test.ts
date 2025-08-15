@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext, CoreSetup } from '@kbn/core/server';
+import type { PluginInitializerContext, CoreSetup } from '@kbn/core/server';
 import type { AIAssistantManagementSelectionPluginServerDependenciesSetup } from './types';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';

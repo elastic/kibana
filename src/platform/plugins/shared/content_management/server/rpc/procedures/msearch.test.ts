@@ -10,7 +10,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
-import { MSearchIn, MSearchQuery } from '../../../common';
+import type { MSearchIn, MSearchQuery } from '../../../common';
 import { validate, disableTransformsCache } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';

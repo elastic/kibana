@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
+import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 
 const TRACES_INDEX_PATTERN = 'traces-*';
 const METRICS_INDEX_PATTERN = 'metrics-*';

@@ -27,7 +27,7 @@ import {
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
+import type { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
 
 export const DashboardListing = ({
   children,

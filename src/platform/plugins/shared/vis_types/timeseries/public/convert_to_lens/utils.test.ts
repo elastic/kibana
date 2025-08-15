@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Column, DateHistogramColumn, TermsColumn } from './lib/convert';
+import type { Column, DateHistogramColumn, TermsColumn } from './lib/convert';
 import { getUniqueBuckets } from './utils';
 
 describe('getUniqueBuckets', () => {

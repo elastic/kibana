@@ -28,7 +28,7 @@ import { APP_ID } from '../../../../common/constants';
 import { getData, getSearchBar } from '../../../kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 import { GlobalTimeCheckbox } from '../../../components/global_time_checkbox';
-import { ILayer } from '../../../classes/layers/layer';
+import type { ILayer } from '../../../classes/layers/layer';
 import { hasESSourceMethod } from '../../../classes/sources/es_source';
 import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
 

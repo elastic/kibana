@@ -8,7 +8,7 @@
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import type { Meta } from '@storybook/react';
-import { ExpressionAstExpression } from '../../../../../types';
+import type { ExpressionAstExpression } from '../../../../../types';
 
 import { ExtendedTemplate } from '../extended_template';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FunctionRegistrationParameters } from '.';
+import type { FunctionRegistrationParameters } from '.';
 import { EXECUTE_CONNECTOR_FUNCTION_NAME } from '..';
 
 export function registerExecuteConnectorFunction({

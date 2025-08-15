@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import {
+import type * as t from 'io-ts';
+import type { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type {
   EntriesArray,
   NonEmptyNestedEntriesArray,
   OsTypeArray,
-  entriesNested,
   entry,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { entriesNested } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 
-import { ExceptionListSoSchema } from '../schemas/saved_objects';
+import type { ExceptionListSoSchema } from '../schemas/saved_objects';
 
 type EntryType = t.TypeOf<typeof entry> | t.TypeOf<typeof entriesNested>;
 

@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { all } from '../../../canvas_plugin_src/functions/common/all';
-import { FunctionHelp } from '../function_help';
-import { FunctionFactory } from '../../../types';
+import type { FunctionHelp } from '../function_help';
+import type { FunctionFactory } from '../../../types';
 import { BOOLEAN_TRUE } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof all>> = {

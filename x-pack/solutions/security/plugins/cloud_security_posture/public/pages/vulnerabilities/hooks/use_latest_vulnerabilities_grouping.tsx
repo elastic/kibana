@@ -5,22 +5,21 @@
  * 2.0.
  */
 import { getGroupingQuery } from '@kbn/grouping';
-import {
+import type {
   GroupingAggregation,
   GroupPanelRenderer,
   GetGroupStats,
-  isNoneGroup,
   NamedAggregation,
-  parseGroupingQuery,
-  MAX_RUNTIME_FIELD_SIZE,
 } from '@kbn/grouping/src';
+import { isNoneGroup, parseGroupingQuery, MAX_RUNTIME_FIELD_SIZE } from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import {
   CDR_EXTENDED_VULN_RETENTION_POLICY,
   VULNERABILITIES_SEVERITY,
 } from '@kbn/cloud-security-posture-common';
 import type { VulnerabilitiesGroupingAggregation } from '@kbn/cloud-security-posture';
-import { buildEsQuery, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { checkIsFlattenResults } from '@kbn/grouping/src/containers/query/helpers';
 import {
   LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
@@ -31,10 +30,8 @@ import {
   VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS,
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
-import {
-  VulnerabilitiesRootGroupingAggregation,
-  useGroupedVulnerabilities,
-} from './use_grouped_vulnerabilities';
+import type { VulnerabilitiesRootGroupingAggregation } from './use_grouped_vulnerabilities';
+import { useGroupedVulnerabilities } from './use_grouped_vulnerabilities';
 import { defaultGroupingOptions, getDefaultQuery } from '../constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { VULNERABILITIES_UNIT, groupingTitle, VULNERABILITIES_GROUPS_UNIT } from '../translations';

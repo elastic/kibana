@@ -8,7 +8,7 @@
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { type AgentDefinition, AgentType } from '@kbn/onechat-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../common/agents';
-import { AgentProperties } from './storage';
+import type { AgentProperties } from './storage';
 
 export type Document = Pick<GetResponse<AgentProperties>, '_source' | '_id'>;
 

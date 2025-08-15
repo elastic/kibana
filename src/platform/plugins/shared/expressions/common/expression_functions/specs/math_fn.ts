@@ -11,7 +11,7 @@ import { map, zipObject, isString } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { evaluate } from '@kbn/tinymath';
 import { isDatatable } from '../../expression_types';
-import { MathArguments, MathInput } from './math';
+import type { MathArguments, MathInput } from './math';
 
 function pivotObjectArray<
   RowType extends { [key: string]: unknown },

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CDPSession, TestInfo } from '@playwright/test';
-import { BundleInfo, PageInfo, PerformanceMetrics, PluginInfo } from './types';
+import type { CDPSession, TestInfo } from '@playwright/test';
+import type { BundleInfo, PageInfo, PerformanceMetrics, PluginInfo } from './types';
 
 export class PerformanceTracker {
   private bundleResponses = new Map<string, BundleInfo>();

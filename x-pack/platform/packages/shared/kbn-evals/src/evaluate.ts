@@ -5,25 +5,23 @@
  * 2.0.
  */
 
+import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
 import {
   getConnectorModel,
   type BoundInferenceClient,
-  InferenceConnectorType,
   getConnectorFamily,
   getConnectorProvider,
-  InferenceConnector,
-  Model,
 } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
 import { test as base } from '@kbn/scout';
-import { HttpHandler } from '@kbn/core/public';
-import { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
+import type { HttpHandler } from '@kbn/core/public';
+import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { getPhoenixConfig } from './utils/get_phoenix_config';
 import { KibanaPhoenixClient } from './kibana_phoenix_client/client';
-import { EvaluationTestOptions } from './config/create_playwright_eval_config';
+import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
-import { DefaultEvaluators } from './types';
+import type { DefaultEvaluators } from './types';
 import { reportModelScore } from './utils/report_model_score';
 import { createConnectorFixture } from './utils/create_connector_fixture';
 

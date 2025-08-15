@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiFlexGroup, EuiText } from '@elastic/eui';
-import { ToolDefinitionWithSchema, ToolType, isEsqlTool } from '@kbn/onechat-common/tools';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiFlexGroup, EuiText } from '@elastic/eui';
+import type { ToolDefinitionWithSchema } from '@kbn/onechat-common/tools';
+import { ToolType, isEsqlTool } from '@kbn/onechat-common/tools';
 import React from 'react';
 import { labels } from '../../../utils/i18n';
 import { OnechatToolTags } from '../tags/tool_tags';

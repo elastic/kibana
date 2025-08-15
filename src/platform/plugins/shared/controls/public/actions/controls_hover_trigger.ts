@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
 
 export const CONTROL_HOVER_TRIGGER = 'CONTROL_HOVER_TRIGGER';
 export const controlHoverTrigger: Trigger = {

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   AsyncSearchSubmitRequest,
   AsyncSearchGetRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ISearchOptions } from '@kbn/search-types';
-import { SearchConfigSchema } from '../../../config';
+import type { ISearchOptions } from '@kbn/search-types';
+import type { SearchConfigSchema } from '../../../config';
 
 /**
  @internal

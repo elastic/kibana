@@ -8,14 +8,15 @@
  */
 
 import type { Meta } from '@storybook/react';
-import React, { EventHandler, FC, MouseEvent, useState, useEffect } from 'react';
+import type { EventHandler, FC, MouseEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import { of } from 'rxjs';
 
+import type { EuiCollapsibleNavBetaProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
   EuiCollapsibleNavBeta,
-  EuiCollapsibleNavBetaProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeader,

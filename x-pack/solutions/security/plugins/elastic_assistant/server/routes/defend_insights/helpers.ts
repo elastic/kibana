@@ -6,7 +6,7 @@
  */
 
 import type { Document } from '@langchain/core/documents';
-import {
+import type {
   AnalyticsServiceSetup,
   AuthenticatedUser,
   KibanaRequest,
@@ -15,7 +15,7 @@ import {
 } from '@kbn/core/server';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import {
+import type {
   ApiConfig,
   ContentReferencesStore,
   DefendInsightGenerationInterval,
@@ -23,23 +23,27 @@ import {
   DefendInsightsPostRequestBody,
   DefendInsightsResponse,
   Replacements,
+} from '@kbn/elastic-assistant-common';
+import {
   DEFEND_INSIGHTS_ID,
   DefendInsightStatus,
   DefendInsightType,
 } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { DefendInsightsGraphState } from '../../lib/langchain/graphs';
-import { CallbackIds, GetRegisteredTools, appContextService } from '../../services/app_context';
+import type { CallbackIds, GetRegisteredTools } from '../../services/app_context';
+import { appContextService } from '../../services/app_context';
 import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../types';
 import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/prompts';
-import { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
+import type { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
 import {
   DEFEND_INSIGHT_ERROR_EVENT,
   DEFEND_INSIGHT_SUCCESS_EVENT,

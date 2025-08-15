@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RefObject } from 'react';
+import type { RefObject } from 'react';
 
 /**
  * Utility function for focus blur handling in the popover component.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ZodObject, ZodRawShape } from '@kbn/zod';
+import type { ZodObject, ZodRawShape } from '@kbn/zod';
 
 // Utility type to rename multiple fields in a type
 export type RenameFields<

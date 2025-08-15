@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { Readable } from 'stream';
+import type { Logger } from '@kbn/core/server';
+import type { Readable } from 'stream';
 import { createGunzip } from 'zlib';
 import * as readline from 'node:readline';
 import { pickBy } from 'lodash';
 import { format } from 'util';
 import Papa from 'papaparse';
-import { HuggingFaceDatasetSpec } from '../types';
+import type { HuggingFaceDatasetSpec } from '../types';
 import { createFileStream } from '../huggingface_utils';
 
 function toMb(bytes: number): string {

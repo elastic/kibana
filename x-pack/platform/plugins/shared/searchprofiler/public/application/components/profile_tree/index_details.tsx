@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiText, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { msToPretty } from '../../lib';
-import { Index } from '../../types';
+import type { Index } from '../../types';
 
 export interface Props {
   index: Index;

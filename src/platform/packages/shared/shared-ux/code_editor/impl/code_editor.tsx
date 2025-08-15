@@ -17,6 +17,7 @@ import React, {
   type FC,
   type PropsWithChildren,
 } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   htmlIdGenerator,
   EuiToolTip,
@@ -29,7 +30,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { Global } from '@emotion/react';
 import {
@@ -39,7 +39,8 @@ import {
 } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css, Interpolation, Theme } from '@emotion/react';
+import type { Interpolation, Theme } from '@emotion/react';
+import { css } from '@emotion/react';
 import {
   MonacoEditor as ReactMonacoEditor,
   type MonacoEditorProps as ReactMonacoEditorProps,

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
-import {
+import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type {
   EvaluationResult,
   Evaluator as PhoenixEvaluator,
   TaskOutput,
 } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import { EvaluationCriterion } from './evaluators/criteria';
+import type { EvaluationCriterion } from './evaluators/criteria';
 
 export interface EvaluationDataset {
   name: string;

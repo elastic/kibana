@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useKnowledgeBase } from '@kbn/ai-assistant';
-import { SolutionView } from '@kbn/spaces-plugin/common';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
 import type { TabsRt } from '../config';
 import { useAppContext } from '../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab/settings_tab';

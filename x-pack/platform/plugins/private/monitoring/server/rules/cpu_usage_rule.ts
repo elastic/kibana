@@ -7,14 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { AlertInstanceContext, RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import type {
+  AlertInstanceContext,
+  RawAlertInstance,
+  SanitizedRule,
+} from '@kbn/alerting-plugin/common';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { BaseRule } from './base_rule';
-import {
+import type {
   AlertData,
   AlertCluster,
   AlertState,

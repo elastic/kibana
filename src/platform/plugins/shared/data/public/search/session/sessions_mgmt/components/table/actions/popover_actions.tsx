@@ -7,24 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiButtonIcon,
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
-import {
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
+import type {
   EuiContextMenuPanelItemDescriptorEntry,
   EuiContextMenuPanelItemSeparator,
 } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import React, { useState } from 'react';
-import { SearchSessionsMgmtAPI } from '../../../lib/api';
-import { ACTION, UISession } from '../../../types';
+import type { SearchSessionsMgmtAPI } from '../../../lib/api';
+import type { UISession } from '../../../types';
+import { ACTION } from '../../../types';
 import { getAction } from './get_action';
-import { OnActionComplete } from './types';
+import type { OnActionComplete } from './types';
 
 interface PopoverActionItemsProps {
   session: UISession;

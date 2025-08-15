@@ -10,11 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 
+import type { ComponentTemplateDeserialized, CommonWizardSteps } from '../../shared_imports';
 import {
   serializers,
   Forms,
-  ComponentTemplateDeserialized,
-  CommonWizardSteps,
   StepSettingsContainer,
   StepMappingsContainer,
   StepAliasesContainer,

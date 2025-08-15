@@ -6,7 +6,7 @@
  */
 
 import { transformEntityTypeToIconAndShape } from './utils';
-import { EntityDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import type { EntityDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
 
 describe('utils', () => {
   describe('transformEntityTypeToIconAndShape', () => {

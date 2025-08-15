@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBasicTable, EuiCheckbox, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { StreamQuery } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
 
 export function StreamQueriesList({
   definition,
