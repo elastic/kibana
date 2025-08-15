@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChangeEvent } from 'react';
-import React, { useState, useMemo, ReactNode } from 'react';
+import type { ChangeEvent, ReactNode } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import type { Observable } from 'rxjs';

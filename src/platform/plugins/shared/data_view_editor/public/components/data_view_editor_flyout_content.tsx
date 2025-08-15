@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useCallback, useMemo, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiTitle,
