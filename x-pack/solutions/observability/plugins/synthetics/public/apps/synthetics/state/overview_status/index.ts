@@ -63,7 +63,6 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
     .addCase(clearOverviewStatusState, (state, action) => {
       state.status = null;
       state.loading = false;
-      state.loaded = false;
       state.error = null;
     })
     .addCase(clearOverviewStatusErrorAction, (state) => {
