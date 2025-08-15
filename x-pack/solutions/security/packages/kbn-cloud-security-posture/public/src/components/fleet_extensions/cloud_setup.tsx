@@ -17,7 +17,7 @@ import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/se
 import type { CloudSetup as ICloudSetup } from '@kbn/cloud-plugin/public';
 import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { CloudSetupConfig, type UpdatePolicy } from './types';
+import type { CloudSetupConfig, UpdatePolicy } from './types';
 import { updatePolicyWithInputs, getDefaultCloudCredentialsType } from './utils';
 import { ProviderSelector } from './provider_selector';
 import { AwsAccountTypeSelect } from './aws_credentials_form/aws_account_type_selector';

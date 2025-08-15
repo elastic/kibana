@@ -38,8 +38,8 @@ import type {
   GcpCredentialsType,
   GcpFields,
   GcpInputFields,
-  type GetAwsCredentialTypeConfigParams,
-  type GetCloudConnectorRemoteRoleTemplateParams,
+  GetAwsCredentialTypeConfigParams,
+  GetCloudConnectorRemoteRoleTemplateParams,
 } from './types';
 
 const buildPolicyInput = (

@@ -12,7 +12,7 @@ import path from 'path';
 import type {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
-  type ActionsClientLlm,
+  ActionsClientLlm,
 } from '@kbn/langchain/server/language_models';
 import type { Logger } from '@kbn/logging';
 import { FakeChatModel, FakeLLM } from '@langchain/core/utils/testing';
