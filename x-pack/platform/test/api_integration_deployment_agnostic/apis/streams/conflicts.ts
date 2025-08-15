@@ -25,6 +25,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
 
   // Failing: See https://github.com/elastic/kibana/issues/231906
+  // Failing: See https://github.com/elastic/kibana/issues/231905
   describe.skip('conflicts', function () {
     describe('concurrency handling', function () {
       before(async () => {
