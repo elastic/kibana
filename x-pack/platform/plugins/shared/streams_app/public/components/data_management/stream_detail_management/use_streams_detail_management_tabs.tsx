@@ -10,6 +10,7 @@ import React from 'react';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { StreamDetailSignificantEventsView } from '../../stream_detail_significant_events_view';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
+import { StreamDetailRelationshipsView } from '../../streams_graph/stream_detail_relationships_view';
 
 export function useStreamsDetailManagementTabs({
   definition,
@@ -19,7 +20,7 @@ export function useStreamsDetailManagementTabs({
   refreshDefinition: () => void;
 }) {
   const {
-    features: { significantEvents },
+    features: { significantEvents, groupStreams },
   } = useStreamsPrivileges();
 
   const isSignificantEventsEnabled = !!significantEvents?.available;
@@ -33,6 +34,16 @@ export function useStreamsDetailManagementTabs({
         defaultMessage: 'Processing',
       }),
     },
+    ...(groupStreams?.enabled
+      ? {
+          relationships: {
+            content: <StreamDetailRelationshipsView definition={definition} />,
+            label: i18n.translate('xpack.streams.streamDetailView.relationshipsTab', {
+              defaultMessage: 'Relationships',
+            }),
+          },
+        }
+      : {}),
     ...(isSignificantEventsEnabled
       ? {
           significantEvents: {

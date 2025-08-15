@@ -12,6 +12,8 @@ import {
   EuiBetaBadge,
   EuiLink,
   useEuiTheme,
+  EuiButton,
+  EuiFlexItem,
   EuiEmptyPrompt,
   EuiLoadingLogo,
 } from '@elastic/eui';
@@ -20,6 +22,9 @@ import {
   OBSERVABILITY_ONBOARDING_LOCATOR,
   ObservabilityOnboardingLocatorParams,
 } from '@kbn/deeplinks-observability';
+import { OverlayRef } from '@kbn/core/public';
+import { Streams } from '@kbn/streams-schema';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isEmpty } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
@@ -27,6 +32,9 @@ import { StreamsTreeTable } from './tree_table';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { GroupStreamModificationFlyout } from '../group_stream_modification_flyout/group_stream_modification_flyout';
+import { GroupStreamsCards } from './group_streams_cards';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -37,7 +45,7 @@ export function StreamListView() {
         share,
       },
     },
-    core: { docLinks },
+    core,
   } = useKibana();
   const onboardingLocator = share.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
@@ -63,6 +71,32 @@ export function StreamListView() {
     [streamsRepositoryClient, timeState.start, timeState.end]
   );
 
+  const {
+    features: { groupStreams },
+  } = useStreamsPrivileges();
+
+  const overlayRef = React.useRef<OverlayRef | null>(null);
+
+  function openGroupStreamModificationFlyout(existingStream?: Streams.GroupStream.Definition) {
+    overlayRef.current?.close();
+    overlayRef.current = core.overlays.openFlyout(
+      toMountPoint(
+        <GroupStreamModificationFlyout
+          client={streamsRepositoryClient}
+          streamsList={streamsListFetch.value}
+          refresh={() => {
+            streamsListFetch.refresh();
+            overlayRef.current?.close();
+          }}
+          notifications={core.notifications}
+          existingStream={existingStream}
+        />,
+        core
+      ),
+      { size: 's' }
+    );
+  }
+
   return (
     <>
       <StreamsAppPageTemplate.Header
@@ -71,21 +105,37 @@ export function StreamListView() {
           background: ${euiTheme.colors.backgroundBasePlain};
         `}
         pageTitle={
-          <EuiFlexGroup alignItems="center" gutterSize="m">
-            {i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
-              defaultMessage: 'Streams',
-            })}
-            <EuiBetaBadge
-              label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
-                defaultMessage: 'Technical Preview',
-              })}
-              tooltipContent={i18n.translate('xpack.streams.streamsListView.betaBadgeDescription', {
-                defaultMessage:
-                  'This functionality is experimental and not supported. It may change or be removed at any time.',
-              })}
-              alignment="middle"
-              size="s"
-            />
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="center" gutterSize="m">
+                {i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
+                  defaultMessage: 'Streams',
+                })}
+                <EuiBetaBadge
+                  label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
+                    defaultMessage: 'Technical Preview',
+                  })}
+                  tooltipContent={i18n.translate(
+                    'xpack.streams.streamsListView.betaBadgeDescription',
+                    {
+                      defaultMessage:
+                        'This functionality is experimental and not supported. It may change or be removed at any time.',
+                    }
+                  )}
+                  alignment="middle"
+                  size="s"
+                />
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {groupStreams?.enabled && (
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={() => openGroupStreamModificationFlyout()}>
+                  {i18n.translate('xpack.streams.streamsListView.createGroupStreamButtonLabel', {
+                    defaultMessage: 'Create Group stream',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         }
         description={
@@ -94,7 +144,7 @@ export function StreamListView() {
               defaultMessage:
                 'Use Streams to organize and process your data into clear structured flows, and simplify routing, field extraction, and retention management.',
             })}{' '}
-            <EuiLink target="_blank" href={docLinks.links.observability.logsStreams}>
+            <EuiLink target="_blank" href={core.docLinks.links.observability.logsStreams}>
               {i18n.translate('xpack.streams.streamsListView.pageHeaderDocsLink', {
                 defaultMessage: 'See docs',
               })}
@@ -117,7 +167,10 @@ export function StreamListView() {
         ) : !streamsListFetch.loading && isEmpty(streamsListFetch.value) ? (
           <StreamsListEmptyPrompt onAddData={handleAddData} />
         ) : (
-          <StreamsTreeTable loading={streamsListFetch.loading} streams={streamsListFetch.value} />
+          <>
+            <StreamsTreeTable loading={streamsListFetch.loading} streams={streamsListFetch.value} />
+            {groupStreams?.enabled && <GroupStreamsCards streams={streamsListFetch.value} />}
+          </>
         )}
       </StreamsAppPageTemplate.Body>
     </>
