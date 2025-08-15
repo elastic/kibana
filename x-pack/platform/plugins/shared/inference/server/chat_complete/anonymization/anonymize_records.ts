@@ -54,13 +54,11 @@ export async function anonymizeRecords({
   });
 
   // Process detected regex matches to resolve overlaps and apply masks
-  if (detectedRegexEntities.length > 0) {
-    state = processMatches({
-      detectedMatches: detectedRegexEntities,
-      state,
-      rules: regexRules,
-    });
-  }
+  state = processMatches({
+    detectedMatches: detectedRegexEntities,
+    state,
+    rules: regexRules,
+  });
 
   if (!nerRules.length) {
     return state;

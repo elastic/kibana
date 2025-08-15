@@ -27,19 +27,17 @@ export function processMatches({
   }
 
   // Group matches by record and field
-  const matchesByRecordAndField = new Map<number, Map<string, DetectedMatch[]>>();
-  for (const match of detectedMatches) {
-    if (!matchesByRecordAndField.has(match.recordIndex)) {
-      matchesByRecordAndField.set(match.recordIndex, new Map<string, DetectedMatch[]>());
+  const matchesByRecordAndField = detectedMatches.reduce((acc, match) => {
+    if (!acc.has(match.recordIndex)) {
+      acc.set(match.recordIndex, new Map<string, DetectedMatch[]>());
     }
-
-    const recordMatches = matchesByRecordAndField.get(match.recordIndex)!;
+    const recordMatches = acc.get(match.recordIndex)!;
     if (!recordMatches.has(match.recordKey)) {
       recordMatches.set(match.recordKey, []);
     }
-
     recordMatches.get(match.recordKey)!.push(match);
-  }
+    return acc;
+  }, new Map<number, Map<string, DetectedMatch[]>>());
 
   // Process each record and field
   matchesByRecordAndField.forEach((fieldMatches, recordIndex) => {
