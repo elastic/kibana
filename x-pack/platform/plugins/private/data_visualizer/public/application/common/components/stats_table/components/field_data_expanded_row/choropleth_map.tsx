@@ -18,6 +18,7 @@ import {
   STYLE_TYPE,
   COLOR_MAP_TYPE,
 } from '@kbn/maps-plugin/common';
+import { LAYER_STYLE_TYPE } from '@kbn/maps-plugin/common/constants';
 import type { EMSTermJoinConfig, TableSourceDescriptor } from '@kbn/maps-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { useDataVisualizerKibana } from '../../../../../kibana_context';
@@ -63,7 +64,7 @@ export const getChoroplethTopValuesLayer = (
       id: layerId,
     } as EMSFileSourceDescriptor,
     style: {
-      type: 'VECTOR',
+      type: LAYER_STYLE_TYPE.VECTOR,
       // @ts-ignore missing style properties. Remove once 'VectorLayerDescriptor' type is updated
       properties: {
         icon: { type: STYLE_TYPE.STATIC, options: { value: 'marker' } },
