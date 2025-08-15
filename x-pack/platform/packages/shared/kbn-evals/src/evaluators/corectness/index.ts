@@ -106,10 +106,10 @@ export function createQuantitativeCorrectnessEvaluators(): Evaluator[] {
   });
 
   return [
-    quantitativeEvaluator('factuality', calculateFactualScore, 'factual_accuracy_summary'),
-    quantitativeEvaluator('relevance', calculateRelevanceScore, 'relevance_summary'),
+    quantitativeEvaluator('Factuality', calculateFactualScore, 'factual_accuracy_summary'),
+    quantitativeEvaluator('Relevance', calculateRelevanceScore, 'relevance_summary'),
     quantitativeEvaluator(
-      'sequence-accuracy',
+      'Sequence Accuracy',
       calculateProceduralFidelityScore,
       'sequence_accuracy_summary'
     ),

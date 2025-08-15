@@ -86,7 +86,7 @@ export function createEvaluateDataset({
       },
       [
         {
-          name: 'response-evaluator',
+          name: 'Criteria',
           kind: 'LLM',
           evaluate: async ({ input, output, expected, metadata }) => {
             const result = await evaluators
