@@ -38,7 +38,7 @@ export interface CloudPostureIntegrationProps {
   policyTemplate: CloudSecurityPolicyTemplate;
   name: string;
   shortName: string;
-  options: Array<{
+  options?: Array<{
     type: PostureInput | typeof CLOUDBEAT_AKS | typeof CLOUDBEAT_GKE;
     name: string;
     benchmark: string;

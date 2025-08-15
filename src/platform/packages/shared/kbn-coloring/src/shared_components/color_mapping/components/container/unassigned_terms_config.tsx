@@ -17,13 +17,16 @@ import { css } from '@emotion/react';
 import type { KbnPalettes } from '@kbn/palettes';
 import { KbnPalette } from '@kbn/palettes';
 import { updateSpecialAssignmentColor } from '../../state/color_mapping';
-import {
-  DEFAULT_NEUTRAL_PALETTE_INDEX,
-  DEFAULT_OTHER_ASSIGNMENT_INDEX,
-} from '../../config/default_color_mapping';
+import { DEFAULT_NEUTRAL_PALETTE_INDEX } from '../../config/default_color_mapping';
 import { SpecialAssignment } from '../assignment/special_assignment';
-import { selectColorMode, selectPalette, selectSpecialAssignments } from '../../state/selectors';
+import {
+  selectColorMode,
+  selectComputedAssignments,
+  selectPalette,
+  selectSpecialAssignments,
+} from '../../state/selectors';
 import type { ColorMappingInputData } from '../../categorical_color_mapping';
+import { getOtherAssignmentColor } from '../../config/utils';
 
 export function UnassignedTermsConfig({
   palettes,
@@ -39,7 +42,8 @@ export function UnassignedTermsConfig({
   const palette = useSelector(selectPalette(palettes));
   const colorMode = useSelector(selectColorMode);
   const specialAssignments = useSelector(selectSpecialAssignments);
-  const otherAssignment = specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX];
+  const assignments = useSelector(selectComputedAssignments);
+  const otherAssignmentColor = getOtherAssignmentColor(specialAssignments, assignments);
 
   const colorModes: EuiButtonGroupOptionProps[] = [
     {
@@ -79,7 +83,7 @@ export function UnassignedTermsConfig({
           <EuiButtonGroup
             legend={'Color mode'}
             options={colorModes}
-            idSelected={otherAssignment.color.type === 'loop' ? 'loop' : 'static'}
+            idSelected={otherAssignmentColor.isLoop ? 'loop' : 'static'}
             onChange={(optionId) => {
               dispatch(
                 updateSpecialAssignmentColor({
@@ -105,18 +109,18 @@ export function UnassignedTermsConfig({
         <EuiFlexItem grow={0}>
           <div
             css={css`
-              visibility: ${otherAssignment.color.type === 'loop' ? 'hidden' : 'visible'};
+              visibility: ${otherAssignmentColor.isLoop ? 'hidden' : 'visible'};
               width: 32px;
               height: 32px;
             `}
           >
-            {data.type === 'categories' && otherAssignment.color.type !== 'loop' && (
+            {data.type === 'categories' && otherAssignmentColor.isLoop === false && (
               <SpecialAssignment
                 index={0}
                 palette={palette}
                 isDarkMode={isDarkMode}
                 palettes={palettes}
-                assignmentColor={otherAssignment.color}
+                assignmentColor={otherAssignmentColor.color}
                 total={specialAssignments.length}
               />
             )}

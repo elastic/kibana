@@ -13,7 +13,7 @@ import { Tooltip } from './tooltip';
 import type { InvertedRawValueMap, LayersAccessorsTitles, LayersFieldFormats } from '../../helpers';
 import { generateSeriesId } from '../../helpers';
 import type { XYChartSeriesIdentifier } from '@elastic/charts';
-import { sampleArgs, sampleLayer } from '../../../common/__mocks__';
+import { sampleArgs, sampleLayer } from '../../../common/test_utils';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import type { RawValue } from '@kbn/data-plugin/common';
 

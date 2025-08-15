@@ -11,8 +11,8 @@ import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/commo
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AwsInputVarFields } from '@kbn/cloud-security-posture';
+import { RadioGroup } from '@kbn/cloud-security-posture';
 import type { UpdatePolicy } from '../../../../common/types_old';
-import { RadioGroup } from '../csp_boxed_radio_group';
 import type { NewPackagePolicyPostureInput } from '../utils';
 import { getPosturePolicy } from '../utils';
 

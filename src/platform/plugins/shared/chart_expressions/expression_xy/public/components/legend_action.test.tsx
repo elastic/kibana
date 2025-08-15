@@ -18,7 +18,7 @@ import { LayerTypes } from '../../common/constants';
 import { getLegendAction } from './legend_action';
 import type { LegendCellValueActions } from './legend_action_popover';
 import { LegendActionPopover } from './legend_action_popover';
-import { mockPaletteOutput } from '../../common/__mocks__';
+import { mockPaletteOutput } from '../../common/test_utils';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { InvertedRawValueMap, LayerFieldFormats } from '../helpers';
 import type { RawValue } from '@kbn/data-plugin/common';
