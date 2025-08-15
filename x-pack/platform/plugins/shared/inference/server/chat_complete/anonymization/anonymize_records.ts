@@ -9,9 +9,10 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { AnonymizationRule, RegexAnonymizationRule } from '@kbn/inference-common';
 import { partition } from 'lodash';
 import { AnonymizationState } from './types';
-import { executeRegexRule } from './execute_regex_rule';
+import { executeRegexRules } from './execute_regex_rules';
 import { executeNerRule } from './execute_ner_rule';
 import { RegexWorkerService } from './regex_worker_service';
+import { processMatches } from './process_matches';
 
 export async function anonymizeRecords<T extends Record<string, string | undefined>>({
   input,
@@ -46,11 +47,18 @@ export async function anonymizeRecords({
     (rule): rule is RegexAnonymizationRule => rule.type === 'RegExp'
   );
 
-  for (const rule of regexRules) {
-    state = await executeRegexRule({
-      rule,
+  const detectedRegexEntities = await executeRegexRules({
+    records: state.records,
+    rules: regexRules,
+    regexWorker,
+  });
+
+  // Process detected regex matches to resolve overlaps and apply masks
+  if (detectedRegexEntities.length > 0) {
+    state = processMatches({
+      detectedMatches: detectedRegexEntities,
       state,
-      regexWorker,
+      rules: regexRules,
     });
   }
 

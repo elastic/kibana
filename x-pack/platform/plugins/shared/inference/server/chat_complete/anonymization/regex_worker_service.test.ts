@@ -23,8 +23,8 @@ const backTrackingRule: AnonymizationRule = {
   pattern: '(a+)+$',
 };
 const taskPayload = {
-  records: [{ email: 'jorge21@gmail.com' }],
-  rule: regexEmailRule,
+  records: [{ content: 'Contact me at jorge21@gmail.com for details' }],
+  rules: [regexEmailRule],
 };
 function createTestConfig(
   overrides: Partial<AnonymizationWorkerConfig> = {}
@@ -47,14 +47,24 @@ describe('RegexWorkerService', () => {
     logger = loggerMock.create();
   });
 
-  it('anonymizes through the worker', async () => {
+  it('detects regex matches through the worker', async () => {
     const regexWorker = new RegexWorkerService(createTestConfig(), logger);
     const result = await regexWorker.run(taskPayload);
     const worker = (regexWorker as any).worker;
     expect(worker).toBeDefined();
     expect(worker.completed).toBe(1);
-    expect(result.records[0].email).not.toContain('jorge21@gmail.com');
-    expect(result.anonymizations.length).toBe(1);
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBe(1);
+    expect(result[0]).toMatchObject({
+      recordIndex: 0,
+      recordKey: 'content',
+      start: expect.any(Number),
+      end: expect.any(Number),
+      matchValue: 'jorge21@gmail.com',
+      class_name: 'EMAIL',
+      ruleIndex: 0,
+    });
 
     // worker completed 2 tasks
     await regexWorker.run(taskPayload);
@@ -69,7 +79,7 @@ describe('RegexWorkerService', () => {
     await expect(
       regexWorker.run({
         records: [{ content: longA }],
-        rule: backTrackingRule,
+        rules: [backTrackingRule],
       })
     ).rejects.toThrow('Regex anonymization task timed out');
   });
@@ -78,7 +88,17 @@ describe('RegexWorkerService', () => {
     const result = await regexWorker.run(taskPayload);
     const worker = (regexWorker as any).worker;
     expect(worker).toBeUndefined();
-    expect(result.records[0].email).not.toContain('jorge21@gmail.com');
-    expect(result.anonymizations.length).toBe(1);
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBe(1);
+    expect(result[0]).toMatchObject({
+      recordIndex: 0,
+      recordKey: 'content',
+      start: expect.any(Number),
+      end: expect.any(Number),
+      matchValue: 'jorge21@gmail.com',
+      class_name: 'EMAIL',
+      ruleIndex: 0,
+    });
   });
 });

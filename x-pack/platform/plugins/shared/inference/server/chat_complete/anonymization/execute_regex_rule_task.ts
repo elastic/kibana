@@ -6,35 +6,48 @@
  */
 
 import { RegexAnonymizationRule } from '@kbn/inference-common';
-import { Anonymization } from '@kbn/inference-common';
-import { getEntityMask } from './get_entity_mask';
-import { AnonymizationState } from './types';
+import { DetectedMatch } from './types';
 
-export function executeRegexRuleTask({
-  rule,
+export const executeRegexRulesTask = ({
+  rules,
   records,
 }: {
-  rule: RegexAnonymizationRule;
+  rules: RegexAnonymizationRule[];
   records: Array<Record<string, string>>;
-}): AnonymizationState {
-  const regex = new RegExp(rule.pattern, 'g');
-  const anonymizations: Anonymization[] = [];
-  const nextRecords = records.map((record: Record<string, string>) => {
-    const newRecord: Record<string, string> = {};
-    for (const [key, value] of Object.entries(record)) {
-      newRecord[key] = value.replace(regex, (match) => {
-        const mask = getEntityMask({ value: match, class_name: rule.entityClass });
+}): DetectedMatch[] =>
+  rules.flatMap((rule, ruleIndex) => {
+    const regex = new RegExp(rule.pattern, 'g');
 
-        anonymizations.push({
-          entity: { value: match, class_name: rule.entityClass, mask },
-          rule: { type: rule.type },
-        });
+    return records.flatMap((record: Record<string, string>, recordIndex: number) =>
+      Object.entries(record).flatMap(([key, value]) => {
+        // Reset regex state for each field
+        regex.lastIndex = 0;
 
-        return mask;
-      });
-    }
-    return newRecord;
+        const matches: DetectedMatch[] = [];
+        let match: RegExpExecArray | null;
+        while ((match = regex.exec(value)) !== null) {
+          // get position of match in the record
+          const start = match.index;
+          const matchedText = match[0];
+          const end = start + matchedText.length;
+
+          // Guard against zero-length matches that could cause infinite loops
+          if (end <= start) {
+            regex.lastIndex = start + 1;
+            continue;
+          }
+
+          matches.push({
+            ruleIndex,
+            recordIndex,
+            recordKey: key,
+            start,
+            end,
+            matchValue: matchedText,
+            class_name: rule.entityClass,
+          });
+        }
+        return matches;
+      })
+    );
   });
-
-  return { records: nextRecords, anonymizations };
-}
