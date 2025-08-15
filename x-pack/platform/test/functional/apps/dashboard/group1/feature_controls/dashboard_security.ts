@@ -34,7 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const from = 'Sep 20, 2015 @ 00:00:00.000';
   const to = 'Sep 21, 2015 @ 00:00:00.000';
 
-  // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
+  // more tests are in x-pack/platform/test/functional/apps/saved_query_management/feature_controls/security.ts
 
   describe('dashboard feature controls security', () => {
     before(async () => {

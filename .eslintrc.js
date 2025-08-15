@@ -773,7 +773,6 @@ module.exports = {
         'src/platform/test/*/*.config.ts',
         'src/platform/test/*/{tests,test_suites,apis,apps}/**/*',
         'src/platform/test/server_integration/**/*.ts',
-        'x-pack/test/functional/apps/**/*.js',
         'x-pack/solutions/observability/plugins/apm/**/*.js',
         'x-pack/platform/test/*/{tests,test_suites,apis,apps}/**/*',
         'x-pack/platform/test/*api_integration*/**/*',
@@ -784,12 +783,9 @@ module.exports = {
         'x-pack/solutions/*/test/api_integration_deployment_agnostic/*configs/**/*',
         'x-pack/solutions/*/test/alerting_api_integration/**/*',
         'x-pack/solutions/*/test/serverless/*/configs/**/*',
-        'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
-        'x-pack/test/*/*config.*ts',
         'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/platform/test/ui_capabilities/*/tests/**/*',
         'x-pack/platform/test/upgrade_assistant_integration/**/*',
-        'x-pack/test/performance/**/*.ts',
         '**/cypress.config.{js,ts}',
         'x-pack/test_serverless/**/config*.ts',
         'x-pack/platform/test/serverless/shared/config*.ts',
@@ -797,7 +793,6 @@ module.exports = {
         'x-pack/platform/test/serverless/functional/config*.ts',
         'x-pack/platform/test/serverless/*/configs/**/*',
         'x-pack/test_serverless/*/test_suites/**/*',
-        'x-pack/test/profiling_api_integration/**/*.ts',
         'x-pack/solutions/security/test/security_solution_api_integration/*/test_suites/**/*',
         'x-pack/solutions/security/test/security_solution_api_integration/**/config*.ts',
         '**/playwright.config.ts',
@@ -1589,8 +1584,6 @@ module.exports = {
       files: [
         'src/platform/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
         'src/platform/test/*api_integration*/**/*.{js,ts}',
-        'x-pack/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
-        'x-pack/test/*api_integration*/**/*.{js,ts}',
         'x-pack/test_serverless/{functional,api_integration}/test_suites/**/*.{js,ts}',
       ],
       extends: ['plugin:mocha/recommended'],
@@ -1825,7 +1818,6 @@ module.exports = {
         'x-pack/platform/test/cases_api_integration/**/*.{ts, tsx}',
         'x-pack/solutions/**/test/cases_api_integration/**/*.{ts, tsx}',
         'x-pack/platform/test/rule_registry/**/*.{ts, tsx}',
-        'x-pack/test/api_integration/apis/cases/**/*.{ts, tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
@@ -2206,8 +2198,6 @@ module.exports = {
         'x-pack/platform/plugins/shared/security/**/*.{ts,tsx}',
         'x-pack/platform/packages/private/security/**/*.{ts,tsx}',
         'x-pack/platform/packages/shared/security/**/*.{ts,tsx}',
-        'x-pack/test/security_api_integration/**/*.{ts,tsx}',
-        'x-pack/test/security_functional/**/*.{ts,tsx}',
 
         'x-pack/platform/plugins/shared/spaces/**/*.{ts,tsx}',
         'x-pack/platform/test/spaces_api_integration/**/*.{ts,tsx}',
@@ -2334,8 +2324,6 @@ module.exports = {
 
         // For now, we keep the exception to let tests depend on anythying.
         // Ideally, we need to classify the solution specific ones to reduce CI times
-        'x-pack/test_serverless/**',
-        'x-pack/test/**',
         'x-pack/platform/test/plugin_functional/plugins/resolver_test/**',
       ],
       rules: {
