@@ -9,7 +9,12 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { type MetricsServiceSetup, ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
+import {
+  type MetricsServiceSetup,
+  ServiceStatus,
+  ServiceStatusLevels,
+  CoreStatus,
+} from '@kbn/core/server';
 import {
   loggingSystemMock,
   metricsServiceMock,
@@ -30,6 +35,7 @@ describe('/api/stats', () => {
   let server: HttpService;
   let httpSetup: HttpSetup;
   let overallStatus$: BehaviorSubject<ServiceStatus>;
+  let coreStatus$: BehaviorSubject<CoreStatus>;
   let metrics: MetricsServiceSetup;
 
   beforeEach(async () => {
@@ -39,6 +45,16 @@ describe('/api/stats', () => {
     overallStatus$ = new BehaviorSubject<ServiceStatus>({
       level: ServiceStatusLevels.available,
       summary: 'everything is working',
+    });
+    coreStatus$ = new BehaviorSubject<CoreStatus>({
+      elasticsearch: {
+        level: ServiceStatusLevels.available,
+        summary: 'everything is working',
+      },
+      savedObjects: {
+        level: ServiceStatusLevels.available,
+        summary: 'everything is working',
+      },
     });
     metrics = metricsServiceMock.createSetupContract();
 
@@ -62,6 +78,7 @@ describe('/api/stats', () => {
       },
       metrics,
       overallStatus$,
+      coreStatus$,
     });
 
     await server.start();

@@ -71,6 +71,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
       },
       metrics: core.metrics,
       overallStatus$: core.status.overall$,
+      coreStatus$: core.status.core$,
     });
 
     return {

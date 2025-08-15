@@ -8,6 +8,7 @@
  */
 
 import {
+  type CoreStatus,
   IRouter,
   ISavedObjectsRepository,
   type MetricsServiceSetup,
@@ -41,6 +42,7 @@ export function setupRoutes({
   collectorSet: ICollectorSet;
   metrics: MetricsServiceSetup;
   overallStatus$: Observable<ServiceStatus>;
+  coreStatus$: Observable<CoreStatus>;
 }) {
   registerUiCountersRoute(router, getSavedObjects, usageCounters);
   registerStatsRoute({ router, ...rest });
