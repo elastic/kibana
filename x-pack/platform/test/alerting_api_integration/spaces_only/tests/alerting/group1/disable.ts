@@ -20,6 +20,7 @@ import {
   getTestRuleData,
   ObjectRemover,
   getEventLog,
+  TaskManagerUtils,
 } from '../../../../common/lib';
 import { validateEvent } from './event_log';
 
@@ -30,6 +31,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
   const supertest = getService('supertest');
+  const taskManagerUtils = new TaskManagerUtils(es, retry);
 
   describe('disable', function () {
     this.tags('skipFIPS');
@@ -283,7 +285,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
           getTestRuleData({
             enabled: true,
             schedule: {
-              interval: '3s',
+              interval: '1s',
             },
           })
         )
@@ -300,27 +302,13 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await ruleUtils.disable(createdRule.id);
 
       // wait for the task to be disabled
-      await retry.try(async () => {
-        const taskDoc = await getScheduledTask(createdRule.scheduled_task_id);
-        expect(taskDoc.task.enabled).to.be(false);
-      });
+      taskManagerUtils.waitForDisabled(createdRule.scheduled_task_id);
 
       // manually enable task
-      await es.update({
-        id: `task:${createdRule.scheduled_task_id}`,
-        index: '.kibana_task_manager',
-        doc: {
-          task: {
-            enabled: true,
-          },
-        },
-      });
+      taskManagerUtils.setTaskEnabled(createdRule.scheduled_task_id, true);
 
       // on it's next run, the task will disable itself
-      await retry.try(async () => {
-        const taskDoc = await getScheduledTask(createdRule.scheduled_task_id);
-        expect(taskDoc.task.enabled).to.be(false);
-      });
+      taskManagerUtils.waitForDisabled(createdRule.scheduled_task_id);
     });
   });
 }

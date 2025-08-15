@@ -21,7 +21,7 @@ export class TaskManagerUtils {
     this.retry = retry;
   }
 
-  async waitForDisabled(id: string, taskRunAtFilter: Date) {
+  async waitForDisabled(id: string, taskRunAtFilter: Date = new Date(0)) {
     return await this.retry.try(async () => {
       const searchResult = await this.es.search({
         index: '.kibana_task_manager',
@@ -160,6 +160,18 @@ export class TaskManagerUtils {
           `Expected 0 action_task_params objects but received ${searchResult.hits.total.value}`
         );
       }
+    });
+  }
+
+  async setTaskEnabled(id: string, enabled: boolean) {
+    await this.es.update({
+      id: `task:${id}`,
+      index: '.kibana_task_manager',
+      doc: {
+        task: {
+          enabled,
+        },
+      },
     });
   }
 }
