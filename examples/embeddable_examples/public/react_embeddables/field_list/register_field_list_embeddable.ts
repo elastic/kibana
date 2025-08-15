@@ -11,15 +11,20 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
 import { FIELD_LIST_ID } from './constants';
 
-const getPanelPlacementSettings = () => ({
+const getPanelSettings = () => ({
   panelPlacementSettings: {
     // Consider using the serialized state to determine the width, height, and strategy
     width: 12,
     height: 36,
     strategy: PanelPlacementStrategy.placeAtTop,
   },
+  panelResizeSettings: {
+    minWidth: 12,
+    maxWidth: 24,
+    minHeight: 4,
+  },
 });
 
 export function registerFieldListPanelPlacementSetting(dashboard: DashboardStart) {
-  dashboard.registerDashboardPanelSettings(FIELD_LIST_ID, getPanelPlacementSettings);
+  dashboard.registerDashboardPanelSettings(FIELD_LIST_ID, getPanelSettings);
 }

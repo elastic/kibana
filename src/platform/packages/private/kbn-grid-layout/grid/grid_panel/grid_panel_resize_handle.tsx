@@ -29,7 +29,7 @@ export const ResizeHandle = React.memo(
     useEffect(() => {
       const resizeCursorSubscription = gridLayoutStateManager.layoutUpdated$.subscribe((layout) => {
         const panel = layout[panelId];
-        if (panel.type !== 'panel' || !buttonRef.current) return;
+        if (!panel || panel.type !== 'panel' || !buttonRef.current) return;
 
         const { minWidth, maxWidth, minHeight, maxHeight } = {
           ...getDefaultResizeOptions(gridLayoutStateManager.runtimeSettings$.getValue()),

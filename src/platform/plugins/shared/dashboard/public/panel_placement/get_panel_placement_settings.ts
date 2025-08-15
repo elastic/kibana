@@ -11,7 +11,7 @@ import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { getRegistryItem } from './panel_placement_registry';
 import type { PanelSettings } from './types';
 
-export async function getPanelSetting(
+export async function getPanelSettings(
   embeddableType: string,
   serializedState?: SerializedPanelState<object>
 ): Promise<undefined | PanelSettings> {

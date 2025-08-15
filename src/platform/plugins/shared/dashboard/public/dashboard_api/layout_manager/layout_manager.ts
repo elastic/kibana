@@ -34,7 +34,7 @@ import type { DashboardState } from '../../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/content_management';
 import { dashboardClonePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
-import { getPanelSetting } from '../../panel_placement/get_panel_placement_settings';
+import { getPanelSettings } from '../../panel_placement/get_panel_placement_settings';
 import { placeClonePanel } from '../../panel_placement/place_clone_panel_strategy';
 import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
 import { PanelPlacementStrategy } from '../../plugin_constants';
@@ -114,7 +114,7 @@ export function initializeLayoutManager(
         },
       };
     }
-    const panelSettings = await getPanelSetting(type, serializedState);
+    const panelSettings = await getPanelSettings(type, serializedState);
     const panelPlacementSettings = {
       strategy: PanelPlacementStrategy.findTopLeftMostOpenSpace,
       height: DEFAULT_PANEL_HEIGHT,
