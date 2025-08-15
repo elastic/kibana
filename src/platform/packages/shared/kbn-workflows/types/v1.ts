@@ -105,7 +105,7 @@ export type WorkflowExecutionListItemDto = Omit<WorkflowExecutionDto, 'stepExecu
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
   _pagination: {
-    offset: number;
+    page: number;
     limit: number;
     total: number;
     next?: string;
@@ -133,6 +133,16 @@ export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
 
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string(),
+});
+
+export const SearchWorkflowCommandSchema = z.object({
+  triggerType: z.string().optional(),
+  limit: z.number().default(100),
+  page: z.number().default(0),
+  createdBy: z.array(z.string()).optional(),
+  status: z.array(z.string()).optional(),
+  query: z.string().optional(),
+  _full: z.boolean().default(false),
 });
 
 export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
@@ -169,7 +179,7 @@ export interface WorkflowListItemDto {
 
 export interface WorkflowListDto {
   _pagination: {
-    offset: number;
+    page: number;
     limit: number;
     total: number;
     next?: string;
@@ -191,4 +201,30 @@ export interface WorkflowListItemAction {
   icon: string;
   description: string;
   onClick: (item: WorkflowListItemDto) => void;
+}
+
+export interface WorkflowExecutionsHistoryStats {
+  date: string;
+  timestamp: string;
+  completed: number;
+  failed: number;
+  cancelled: number;
+}
+
+export interface WorkflowStatsDto {
+  workflows: {
+    active: number;
+    draft: number;
+    inactive: number;
+  };
+  executions: WorkflowExecutionsHistoryStats[];
+}
+
+export interface WorkflowAggsDto {
+  [key: string]: {
+    value: {
+      value: string;
+      name: string;
+    }[];
+  };
 }

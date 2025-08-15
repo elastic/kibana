@@ -18,7 +18,13 @@ import {
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
   WorkflowListDto,
+  WorkflowStatus,
 } from '@kbn/workflows';
+import { WorkflowAggsDto, WorkflowStatsDto } from '@kbn/workflows/types/v1';
+import {
+  AggregationsAggregationContainer,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import {
@@ -35,6 +41,8 @@ import {
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 import { IWorkflowEventLogger, LogSearchResult, SimpleWorkflowLogger } from './lib/workflow_logger';
 import { GetWorkflowsParams } from './workflows_management_api';
+
+const SO_ATTRIBUTES_PREFIX = `${WORKFLOW_SAVED_OBJECT_TYPE}.attributes`;
 
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
@@ -100,12 +108,39 @@ export class WorkflowsService {
   }
 
   public async searchWorkflows(params: GetWorkflowsParams): Promise<WorkflowListDto> {
+    const { limit, page, query, createdBy, status } = params;
+
     const savedObjectsClient = await this.getSavedObjectsClient();
+
+    const filters: string[] = [];
+
+    if (createdBy && createdBy.length > 0) {
+      const createdByFilter = createdBy
+        .map((user) => `${SO_ATTRIBUTES_PREFIX}.createdBy:"${user}"`)
+        .join(' OR ');
+      filters.push(`(${createdByFilter})`);
+    }
+
+    if (status && status.length > 0) {
+      const statusFilter = status.map((s) => `${SO_ATTRIBUTES_PREFIX}.status:"${s}"`).join(' OR ');
+      filters.push(`(${statusFilter})`);
+    }
+
+    if (query) {
+      filters.push(
+        `(${SO_ATTRIBUTES_PREFIX}.name:"*${query}*" OR ${SO_ATTRIBUTES_PREFIX}.description:"*${query}*")`
+      );
+    }
+
+    const filterQuery = filters.join(' AND ');
+
     const response = await savedObjectsClient.find<WorkflowSavedObjectAttributes>({
       type: WORKFLOW_SAVED_OBJECT_TYPE,
-      perPage: 100,
+      perPage: limit,
+      page,
       sortField: 'updated_at',
       sortOrder: 'desc',
+      filter: filterQuery || undefined,
     });
 
     // Get workflow IDs to fetch execution history
@@ -174,8 +209,8 @@ export class WorkflowsService {
     return {
       results,
       _pagination: {
-        offset: 0,
-        limit: 100,
+        page,
+        limit,
         total: response.total,
       },
     };
@@ -222,7 +257,10 @@ export class WorkflowsService {
     }
   }
 
-  public async createWorkflow(workflow: CreateWorkflowCommand): Promise<WorkflowDetailDto> {
+  public async createWorkflow(
+    workflow: CreateWorkflowCommand,
+    isClone: boolean = false
+  ): Promise<WorkflowDetailDto> {
     const savedObjectsClient = await this.getSavedObjectsClient();
     const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
     if (!parsedYaml.success) {
@@ -232,7 +270,7 @@ export class WorkflowsService {
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
 
     const savedObjectData: WorkflowSavedObjectAttributes = {
-      name: workflowToCreate.name,
+      name: isClone ? `${workflowToCreate.name} Copy` : workflowToCreate.name,
       description: workflowToCreate.description,
       status: workflowToCreate.status,
       tags: workflowToCreate.tags || [],
@@ -475,5 +513,163 @@ export class WorkflowsService {
     };
 
     return this.searchWorkflowLogs(query);
+  }
+
+  public async getWorkflowStats(): Promise<WorkflowStatsDto | null> {
+    const savedObjectsClient = await this.getSavedObjectsClient();
+    try {
+      const [workflowStatusStats, workflowExecutionStatusStats] = await Promise.all([
+        this.getWorkflowStatusStats(savedObjectsClient),
+        this.getWorkflowExecutionStatusStats(),
+      ]);
+
+      return {
+        workflows: {
+          [WorkflowStatus.ACTIVE]: workflowStatusStats.active,
+          [WorkflowStatus.DRAFT]: workflowStatusStats.draft,
+          [WorkflowStatus.INACTIVE]: workflowStatusStats.inactive,
+        },
+        executions: workflowExecutionStatusStats,
+      };
+    } catch (error: any) {
+      if (error.statusCode === 404) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  public async getWorkflowAggs(fields: string[]): Promise<WorkflowAggsDto | null> {
+    const savedObjectsClient = await this.getSavedObjectsClient();
+    try {
+      const aggs = fields.reduce<Record<string, object>>((acc, field) => {
+        acc[field] = {
+          terms: {
+            field: `${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.${field}`,
+            size: 100,
+          },
+        };
+        return acc;
+      }, {});
+
+      const response = await savedObjectsClient.find({
+        type: WORKFLOW_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        aggs,
+      });
+
+      const aggregations = response.aggregations as any;
+
+      return fields.reduce<WorkflowAggsDto>((acc, field) => {
+        acc[field] = aggregations[field].buckets.map(({ key }: { key: string }) => ({
+          value: key,
+          name: key.charAt(0).toUpperCase() + key.slice(1),
+        }));
+        return acc;
+      }, {});
+    } catch (error: any) {
+      if (error.statusCode === 404) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  private async getWorkflowStatusStats(savedObjectsClient: SavedObjectsClientContract) {
+    const aggs: Record<string, AggregationsAggregationContainer> = {
+      by_status: {
+        terms: {
+          field: 'workflow.attributes.status',
+        },
+      },
+    };
+
+    const response = await savedObjectsClient.find<WorkflowSavedObjectAttributes>({
+      type: WORKFLOW_SAVED_OBJECT_TYPE,
+      perPage: 0, // we only want aggregations, no hits
+
+      // workflow SO does not have createdAt in mappings =(
+      // filter: `workflow.attributes.createdAt >= "now-30d/d" and workflow.attributes.createdAt <= "now/d"`,
+      aggs,
+    });
+
+    const { by_status: byStatus } = response.aggregations as any;
+
+    return byStatus.buckets.reduce(
+      (
+        acc: Record<string, number>,
+        { key, doc_count: count }: { key: string; doc_count: number }
+      ) => {
+        acc[key] = count;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+  }
+
+  private async getWorkflowExecutionStatusStats() {
+    if (!this.esClient) {
+      throw new Error('Elasticsearch client not initialized');
+    }
+
+    const query: SearchRequest = {
+      index: this.workflowsExecutionIndex,
+      size: 0, // no hits, just aggregations
+      query: {
+        range: {
+          startedAt: {
+            gte: 'now-30d/d',
+            lt: 'now+1d/d',
+          },
+        },
+      },
+      aggs: {
+        by_time: {
+          date_histogram: {
+            field: 'startedAt',
+            fixed_interval: '30s',
+          },
+          aggs: {
+            by_status: {
+              terms: {
+                field: 'status',
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const response = await this.esClient.search(query);
+    const { by_time: by30sec } = response.aggregations as any;
+
+    return by30sec.buckets.map((day: any) => {
+      // Default values
+      let completed = 0;
+      let failed = 0;
+      let cancelled = 0;
+
+      for (const statusBucket of day.by_status.buckets) {
+        switch (statusBucket.key) {
+          case 'completed':
+            completed = statusBucket.doc_count;
+            break;
+          case 'failed':
+            failed = statusBucket.doc_count;
+            break;
+          case 'cancelled':
+            cancelled = statusBucket.doc_count;
+            break;
+        }
+      }
+
+      return {
+        date: day.key_as_string,
+        timestamp: day.key,
+        completed,
+        failed,
+        cancelled,
+      };
+    });
   }
 }
