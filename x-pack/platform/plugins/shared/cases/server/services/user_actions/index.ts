@@ -14,7 +14,7 @@ import type {
 import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
 import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
-import { UserActionTypes } from '../../../common/types/domain';
+import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import { decodeOrThrow } from '../../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
@@ -719,16 +719,20 @@ export class CaseUserActionService {
       page: 1,
       perPage: 1,
       sortField: defaultSortField,
+      search: Object.keys(UserActionActions)
+        .filter((action) => action !== 'delete')
+        .join('|'),
+      searchFields: ['action'],
       aggs: CaseUserActionService.buildUserActionStatsAgg(),
     });
 
     const result = {
-      total: response.aggregations?.filtered.doc_count ?? 0,
+      total: response.total ?? 0,
       total_comments: 0,
       total_other_actions: 0,
     };
 
-    response.aggregations?.filtered.totals.buckets.forEach(({ key, doc_count: docCount }) => {
+    response.aggregations?.totals.buckets.forEach(({ key, doc_count: docCount }) => {
       if (key === 'user') {
         result.total_comments = docCount;
       }
@@ -744,21 +748,10 @@ export class CaseUserActionService {
     estypes.AggregationsAggregationContainer
   > {
     return {
-      filtered: {
-        filter: {
-          term: {
-            // We're only including `create` actions here because we don't want to count
-            // `create` and `delete` actions since we don't show both in the UI.
-            [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.action`]: 'create',
-          },
-        },
-        aggs: {
-          totals: {
-            terms: {
-              field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
-              size: 100,
-            },
-          },
+      totals: {
+        terms: {
+          field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
+          size: 100,
         },
       },
     };

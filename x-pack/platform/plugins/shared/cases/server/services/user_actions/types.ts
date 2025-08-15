@@ -230,14 +230,12 @@ export interface ConnectorFieldsBeforePushAggsResult {
 }
 
 export interface UserActionsStatsAggsResult {
-  filtered: {
-    doc_count: number;
-    totals: {
-      buckets: Array<{
-        key: string;
-        doc_count: number;
-      }>;
-    };
+  total: number;
+  totals: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
   };
 }
 
