@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TabsServices } from '../src/types';
+import type { TabsServices } from '../src/types';
 
 export const servicesMock: TabsServices = {
   core: {},

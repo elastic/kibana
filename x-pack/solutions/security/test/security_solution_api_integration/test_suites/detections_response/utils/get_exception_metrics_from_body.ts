@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExceptionMetricsSchema } from '@kbn/security-solution-plugin/server/usage/exceptions/types';
+import type { ExceptionMetricsSchema } from '@kbn/security-solution-plugin/server/usage/exceptions/types';
 
 /**
  * Given a body this will return the detection metrics from it.

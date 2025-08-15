@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ContentPackStream, ROOT_STREAM_ID } from '@kbn/content-packs-schema';
-import { FieldDefinition } from '@kbn/streams-schema';
+import type { ContentPackStream } from '@kbn/content-packs-schema';
+import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
+import type { FieldDefinition } from '@kbn/streams-schema';
 import { withoutRootPrefix } from './helpers';
-import { StreamTree } from './tree';
+import type { StreamTree } from './tree';
 
 export function prepareStreamsForExport({
   tree,

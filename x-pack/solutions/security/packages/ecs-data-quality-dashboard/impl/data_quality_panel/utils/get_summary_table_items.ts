@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
+import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { orderBy } from 'lodash/fp';
 
-import { DataQualityCheckResult, IndexSummaryTableItem, MeteringStatsIndex } from '../types';
+import type { DataQualityCheckResult, IndexSummaryTableItem, MeteringStatsIndex } from '../types';
 import { getIlmPhase } from './get_ilm_phase';
 import { getDocsCount, getIndexIncompatible, getSizeInBytes } from './stats';
 

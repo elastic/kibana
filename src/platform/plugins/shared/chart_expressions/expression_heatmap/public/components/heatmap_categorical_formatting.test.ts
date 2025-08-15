@@ -18,9 +18,9 @@ import {
 import { getFieldFormatsRegistry } from '@kbn/data-plugin/public/test_utils';
 import { type CoreSetup } from '@kbn/core/public';
 
-import { HeatmapArguments, HeatmapRenderProps } from '../../common/types';
+import type { HeatmapArguments, HeatmapRenderProps } from '../../common/types';
 import { getAggsFormats } from '@kbn/data-plugin/common';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';

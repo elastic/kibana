@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
-import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   createLegacyRuleAction,
   getSimpleRule,
@@ -21,7 +21,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
 } from '../../../../../config/services/detections_response';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

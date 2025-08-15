@@ -8,7 +8,7 @@
  */
 
 import { getPersistedSearchSessionSavedObjectAttributesMock } from '../../mocks';
-import { SearchSessionSavedObject } from '../types';
+import type { SearchSessionSavedObject } from '../types';
 
 export function getSearchSessionSavedObjectMock(
   overrides: Partial<SearchSessionSavedObject> = {}

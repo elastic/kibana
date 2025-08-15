@@ -7,20 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BinaryExpressionGroup, binaryExpressionGroup } from '../ast/grouping';
+import type { BinaryExpressionGroup } from '../ast/grouping';
+import { binaryExpressionGroup } from '../ast/grouping';
 import { isBinaryExpression } from '../ast/is';
 import type { ESQLAstBaseItem, ESQLAstQueryExpression } from '../types';
-import {
+import type {
   CommandOptionVisitorContext,
-  CommandVisitorContext,
   ExpressionVisitorContext,
   FunctionCallExpressionVisitorContext,
   ListLiteralExpressionVisitorContext,
   MapExpressionVisitorContext,
-  Visitor,
 } from '../visitor';
+import { CommandVisitorContext, Visitor } from '../visitor';
 import { children, singleItems } from '../visitor/utils';
-import { BasicPrettyPrinter, BasicPrettyPrinterOptions } from './basic_pretty_printer';
+import type { BasicPrettyPrinterOptions } from './basic_pretty_printer';
+import { BasicPrettyPrinter } from './basic_pretty_printer';
 import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
 import { getPrettyPrintStats } from './helpers';
 import { LeafPrinter } from './leaf_printer';

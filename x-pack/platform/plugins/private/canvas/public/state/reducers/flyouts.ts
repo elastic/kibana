@@ -6,11 +6,9 @@
  */
 
 import { handleActions } from 'redux-actions';
-import { State } from '../../../types';
-import {
-  SetKeyboardShortcutsDocVisibilityType,
-  SetKeyboardShortcutsDocVisibilityPayload,
-} from '../actions/flyouts';
+import type { State } from '../../../types';
+import type { SetKeyboardShortcutsDocVisibilityPayload } from '../actions/flyouts';
+import { SetKeyboardShortcutsDocVisibilityType } from '../actions/flyouts';
 
 export const flyoutsReducer = handleActions<
   State['transient'],
