@@ -15,22 +15,22 @@ import {
   isColumn,
   mutate,
   type ESQLCommand,
-  type ESQLColumn,
-  type ESQLCommandOption,
+  type ESQLFunction,
 } from '@kbn/esql-ast';
-import { isESQLAstBaseItem, isESQLFunction } from '@kbn/esql-ast/src/types';
+import type { StatsCommandSummary } from '@kbn/esql-ast/src/mutate/commands/stats';
+import { isESQLFunction } from '@kbn/esql-ast/src/types';
 
 type NodeType = 'group' | 'leaf';
 
 type StatsCommand = ESQLCommand<'stats'>;
 
-const isESQLCommandOption = (node: unknown): node is ESQLCommandOption =>
-  isESQLAstBaseItem(node) && (node as ESQLCommandOption).type === 'option';
-
 export interface AppliedStatsFunction {
   identifier: string;
   operator: string;
 }
+
+// helper for removing backticks from field names
+const removeBackticks = (str: string) => str.replace(/`/g, '');
 
 export const getESQLStatsQueryMeta = (queryString: string) => {
   const groupByFields: string[] = [];
@@ -39,34 +39,19 @@ export const getESQLStatsQueryMeta = (queryString: string) => {
   const esqlQuery = EsqlQuery.fromSrc(queryString);
 
   Array.from(mutate.commands.stats.list(esqlQuery.ast)).forEach((statsCommand) => {
-    (statsCommand as StatsCommand).args.forEach((statsArgNode) => {
-      if (isESQLFunction(statsArgNode)) {
-        const appliedFunctionMeta: Partial<AppliedStatsFunction> = {};
+    const { grouping, aggregates } = mutate.commands.stats.summarizeCommand(
+      esqlQuery,
+      statsCommand
+    );
 
-        statsArgNode.args.forEach((argNode) => {
-          if (isColumn(argNode)) {
-            appliedFunctionMeta.identifier = argNode.text;
-          } else if (Array.isArray(argNode)) {
-            argNode.forEach((node) => {
-              if (isESQLFunction(node)) {
-                appliedFunctionMeta.operator = node.operator?.name;
-              }
-            });
-          }
+    groupByFields.push(...Object.keys(grouping).map(removeBackticks));
 
-          if (Object.values(appliedFunctionMeta).length === 2) {
-            appliedFunctions.push(appliedFunctionMeta as AppliedStatsFunction);
-          }
-        });
-      } else if (isESQLCommandOption(statsArgNode) && statsArgNode.name === 'by') {
-        statsArgNode.args.forEach((byOptionNode) => {
-          if (isColumn(byOptionNode)) {
-            groupByFields.push(byOptionNode.text);
-          } else if (isESQLFunction(byOptionNode)) {
-            groupByFields.push(byOptionNode.text);
-          }
-        });
-      }
+    Object.values(aggregates).forEach((aggregate) => {
+      appliedFunctions.push({
+        identifier: removeBackticks(aggregate.field),
+        // @ts-expect-error -- validate if we could get scenarios where the aggregate isn't a function
+        operator: (aggregate.definition as ESQLFunction).operator?.name,
+      });
     });
   });
 
@@ -111,55 +96,54 @@ export const constructCascadeQuery = ({
 
   // Attempt to handle every stats query present appropriately
   statsCommands.forEach((statsCommand) => {
-    (statsCommand as StatsCommand).args.forEach((statsArgNode) => {
-      if (isESQLCommandOption(statsArgNode) && statsArgNode.name === 'by') {
-        let hasMultipleColumns: boolean;
+    let handled = false;
+    let hasMultipleColumns: boolean;
+    const { grouping } = mutate.commands.stats.summarizeCommand(ESQLQuery, statsCommand);
 
-        statsArgNode.args.forEach((byOptionArg, _, args) => {
-          if (isColumn(byOptionArg) && nodePath.includes(byOptionArg.name)) {
-            if (nodeType === 'leaf') {
-              handleStatsByColumnLeafOperation(ESQLQuery, {
-                [byOptionArg.name]: nodePathMap[byOptionArg.name],
-              });
-            } else if (
-              nodeType === 'group' &&
-              args.length > 1 &&
-              // it's not enough to check that we have multiple args for the stats by options
-              (typeof hasMultipleColumns === 'undefined'
-                ? (hasMultipleColumns = args.filter((arg) => isColumn(arg)).length > 1)
-                : hasMultipleColumns)
-            ) {
-              handleStatsByColumnGroupOperation(
-                ESQLQuery,
-                statsCommand as StatsCommand,
-                byOptionArg,
-                {
-                  [byOptionArg.name]: nodePathMap[byOptionArg.name],
-                }
-              );
-            }
-          } else if (isESQLFunction(byOptionArg)) {
-            switch (byOptionArg.name) {
-              case 'categorize': {
-                // TODO: handle categorize option
-                break;
-              }
-              case 'bucket': {
-                // TODO: handle bucket option
-                break;
-              }
-              default: {
-                // unsupported by function, nothing to do here
-                break;
-              }
-            }
+    Object.entries(grouping).forEach(([groupName, groupValue], _, groupingArr) => {
+      if (isColumn(groupValue.definition) && nodePath.includes(groupName)) {
+        if (nodeType === 'leaf') {
+          handleStatsByColumnLeafOperation(ESQLQuery, {
+            [groupName]: nodePathMap[groupName],
+          });
+          handled = true;
+        } else if (
+          nodeType === 'group' &&
+          groupingArr.length > 1 &&
+          // it's not enough to check that we have multiple args for the stats by options
+          (typeof hasMultipleColumns === 'undefined'
+            ? (hasMultipleColumns =
+                groupingArr.filter((arg) => isColumn(arg[1].definition)).length > 1)
+            : hasMultipleColumns)
+        ) {
+          handleStatsByColumnGroupOperation(ESQLQuery, statsCommand as StatsCommand, grouping, {
+            [groupName]: nodePathMap[groupName],
+          });
+          handled = true;
+        }
+      } else if (isESQLFunction(groupValue.definition)) {
+        switch (groupValue.definition.name) {
+          case 'categorize': {
+            // TODO: handle categorize option
+            break;
           }
-        });
+          case 'bucket': {
+            // TODO: handle bucket option
+            break;
+          }
+          default: {
+            // unsupported by function, nothing to do here
+            break;
+          }
+        }
       }
     });
 
-    // Add check to only remove the stats command if it has been fully handled
-    mutate.generic.commands.remove(ESQLQuery.ast, statsCommand);
+    if (handled) {
+      // remove the stats command if it has been fully handled,
+      // explore the possibility of scenarios where it might not be necessary to remove the command
+      mutate.generic.commands.remove(ESQLQuery.ast, statsCommand);
+    }
   });
 
   // open question: should we remove the limit command as well, seems a little naive to assume it's always safe?
@@ -204,12 +188,30 @@ function handleStatsByColumnLeafOperation(
 function handleStatsByColumnGroupOperation(
   query: EsqlQuery,
   statsCommand: StatsCommand,
-  byOptionArg: ESQLColumn,
+  statsGroupingSummary: StatsCommandSummary['grouping'],
   columnInterpolationRecord: Record<string, string>
 ) {
   // TODO: ideally we'd want to modify the passed stats command,
   // especially if for some reason it contains the column we want to group by
   // we should remove it from the stats command
+
+  // Modify existing stats command
+  // const modifiedStatsCommand = Builder.command({
+  //   name: 'stats',
+  //   args: [
+  //     Builder.expression.func.binary('==', [
+  //       Builder.expression.column({
+  //         args: [Builder.identifier({ name: byOptionArg.name })],
+  //       }),
+  //       Builder.expression.literal.string(columnInterpolationRecord[byOptionArg.name]),
+  //     ]),
+  //   ],
+  // });
+
+  // remove stats command
+  // mutate.generic.commands.remove(query.ast, statsCommand);
+  // insert modified stats command
+  // mutate.generic.commands.insert(query.ast, modifiedStatsCommand, 1);
 
   // Add where command with current value
   const newCommands = Object.entries(columnInterpolationRecord).map(([key, value]) => {
