@@ -147,8 +147,9 @@ export function LensEditConfigurationFlyout({
       if (savedObjectId) {
         updateByRefInput?.(savedObjectId);
       }
-      removeUserChartTypeFromLocalStorage();
     }
+    // Remove the user's preferred chart type from localStorage
+    removeUserChartTypeFromLocalStorage();
     onCancelCallback?.();
     closeFlyout?.();
   }, [
@@ -196,6 +197,7 @@ export function LensEditConfigurationFlyout({
     }
 
     onApplyCallback?.(currentAttributes);
+    // Remove the user's preferred chart type from localStorage
     removeUserChartTypeFromLocalStorage();
     closeFlyout?.();
   }, [
