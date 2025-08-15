@@ -40,96 +40,105 @@ export function createDiscoverLocator({
   const indexId = v4();
   const filters: Filter[] = [];
 
-  if (apmTransactionDurationIndicatorSchema.is(slo.indicator)) {
-    const { totalQuery } = getApmLatencyQueries(slo.indicator, esQueryConfig);
+  const indicatorType = slo.indicator.type;
+  switch (indicatorType) {
+    case 'sli.apm.transactionDuration':
+      if (apmTransactionDurationIndicatorSchema.is(slo.indicator)) {
+        const { totalQuery } = getApmLatencyQueries(slo.indicator, esQueryConfig);
+        filters.push({
+          $state: { store: FilterStateStore.APP_STATE },
+          meta: {
+            type: 'custom',
+            alias: TOTAL_EVENTS,
+            disabled: false,
+            index: indexId,
+          },
+          query: totalQuery,
+        });
+      }
+      break;
+    case 'sli.apm.transactionErrorRate':
+      if (apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) {
+        const { goodQuery, badQuery, totalQuery } = getApmAvailabilityQueries(
+          slo.indicator,
+          esQueryConfig
+        );
 
-    filters.push({
-      $state: { store: FilterStateStore.APP_STATE },
-      meta: {
-        type: 'custom',
-        alias: TOTAL_EVENTS,
-        disabled: false,
-        index: indexId,
-      },
-      query: totalQuery,
-    });
-  }
+        filters.push({
+          $state: { store: FilterStateStore.APP_STATE },
+          meta: {
+            type: 'custom',
+            alias: TOTAL_EVENTS,
+            disabled: showGood || showBad,
+            index: indexId,
+          },
+          query: totalQuery,
+        });
 
-  if (apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) {
-    const { goodQuery, badQuery, totalQuery } = getApmAvailabilityQueries(
-      slo.indicator,
-      esQueryConfig
-    );
+        filters.push({
+          $state: { store: FilterStateStore.APP_STATE },
+          meta: {
+            type: 'custom',
+            alias: GOOD_EVENTS,
+            disabled: !showGood,
+            index: indexId,
+          },
+          query: goodQuery,
+        });
 
-    filters.push({
-      $state: { store: FilterStateStore.APP_STATE },
-      meta: {
-        type: 'custom',
-        alias: TOTAL_EVENTS,
-        disabled: showGood || showBad,
-        index: indexId,
-      },
-      query: totalQuery,
-    });
+        filters.push({
+          $state: { store: FilterStateStore.APP_STATE },
+          meta: {
+            type: 'custom',
+            alias: BAD_EVENTS,
+            disabled: !showBad,
+            index: indexId,
+          },
+          query: badQuery,
+        });
+      }
+      break;
+    case 'sli.kql.custom':
+      if (kqlCustomIndicatorSchema.is(slo.indicator)) {
+        const { goodQuery, badQuery, totalQuery } = getCustomKqlQueries(
+          slo.indicator,
+          esQueryConfig
+        );
 
-    filters.push({
-      $state: { store: FilterStateStore.APP_STATE },
-      meta: {
-        type: 'custom',
-        alias: GOOD_EVENTS,
-        disabled: !showGood,
-        index: indexId,
-      },
-      query: goodQuery,
-    });
+        filters.push({
+          $state: { store: FilterStateStore.APP_STATE },
+          meta: {
+            type: 'custom',
+            alias: GOOD_EVENTS,
+            disabled: !showGood,
+            index: indexId,
+          },
+          query: goodQuery,
+        });
 
-    filters.push({
-      $state: { store: FilterStateStore.APP_STATE },
-      meta: {
-        type: 'custom',
-        alias: BAD_EVENTS,
-        disabled: !showBad,
-        index: indexId,
-      },
-      query: badQuery,
-    });
-  }
+        filters.push({
+          $state: { store: FilterStateStore.APP_STATE },
+          meta: {
+            type: 'custom',
+            alias: BAD_EVENTS,
+            disabled: !showBad,
+            index: indexId,
+          },
+          query: badQuery,
+        });
 
-  if (kqlCustomIndicatorSchema.is(slo.indicator)) {
-    const { goodQuery, badQuery, totalQuery } = getCustomKqlQueries(slo.indicator, esQueryConfig);
-
-    filters.push({
-      $state: { store: FilterStateStore.APP_STATE },
-      meta: {
-        type: 'custom',
-        alias: GOOD_EVENTS,
-        disabled: !showGood,
-        index: indexId,
-      },
-      query: goodQuery,
-    });
-
-    filters.push({
-      $state: { store: FilterStateStore.APP_STATE },
-      meta: {
-        type: 'custom',
-        alias: BAD_EVENTS,
-        disabled: !showBad,
-        index: indexId,
-      },
-      query: badQuery,
-    });
-
-    filters.push({
-      $state: { store: FilterStateStore.APP_STATE },
-      meta: {
-        type: 'custom',
-        alias: TOTAL_EVENTS,
-        disabled: showGood || showBad,
-        index: indexId,
-      },
-      query: totalQuery,
-    });
+        filters.push({
+          $state: { store: FilterStateStore.APP_STATE },
+          meta: {
+            type: 'custom',
+            alias: TOTAL_EVENTS,
+            disabled: showGood || showBad,
+            index: indexId,
+          },
+          query: totalQuery,
+        });
+      }
+      break;
   }
 
   if (!isEmpty(slo.groupings)) {
