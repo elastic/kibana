@@ -13,3 +13,5 @@ canvas-confetti
 @types/canvas-confetti
 undici
 liquidjs
+@tanstack/react-table
+@tanstack/react-virtual
