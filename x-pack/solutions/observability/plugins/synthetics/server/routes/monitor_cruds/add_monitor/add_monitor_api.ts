@@ -230,38 +230,32 @@ export class AddEditMonitorAPI {
     }
   }
 
-  async initDefaultAlerts(name: string) {
+  /**
+   * Initialize default alerts for the monitor.
+   * @param name The name of the monitor.
+   * @returns A promise that resolves when the alerts have been initialized.
+   * @throws LockAcquisitionError if the function attempts to modify the default rules and fails. Calling code must handle this error.
+   */
+  async initDefaultAlerts() {
     const { server, savedObjectsClient, context, request } = this.routeContext;
     const activeSpace = await server.spaces?.spacesService.getActiveSpace(request);
-    console.log('INIT MONITOR ALERTS WITH ', activeSpace);
     const { gettingStarted } = request.query;
     if (!gettingStarted) {
       return;
     }
 
-    try {
-      // we do this async, so we don't block the user, error handling will be done on the UI via separate api
-      const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
-      console.log('IN CALL');
-      const [statusRule, tlsRule] = await Promise.all([
-        defaultAlertService.getExistingAlert(SYNTHETICS_STATUS_RULE),
-        defaultAlertService.getExistingAlert(SYNTHETICS_TLS_RULE),
-      ]);
-      if (statusRule && tlsRule) {
-        console.log('DEFAULT ALERTS ALREADY SETUP, RETURNING EARLY');
-        return {
-          statusRule,
-          tlsRule,
-        };
-      }
-      const ret = await defaultAlertService.setupDefaultAlerts(activeSpace?.id ?? 'default');
-      console.log('after DEBUGGING TESTING!!!!!!!!!!!!', ret);
-      server.logger.debug(`Successfully created default alert for monitor: ${name}`);
-      console.log('IN CATCH');
-      return ret;
-    } catch (error) {
-      server.logger.error(`Error creating default alert: ${error} for monitor: ${name}`, { error });
+    const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
+    const [statusRule, tlsRule] = await Promise.all([
+      defaultAlertService.getExistingAlert(SYNTHETICS_STATUS_RULE),
+      defaultAlertService.getExistingAlert(SYNTHETICS_TLS_RULE),
+    ]);
+    if (statusRule && tlsRule) {
+      return {
+        statusRule,
+        tlsRule,
+      };
     }
+    return await defaultAlertService.setupDefaultAlerts(activeSpace?.id ?? 'default');
   }
 
   setupGettingStarted = (configId: string) => {

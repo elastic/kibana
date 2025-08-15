@@ -10,7 +10,7 @@ import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/comm
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '@kbn/synthetics-plugin/common/constants/settings_defaults';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { type DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -53,8 +53,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(responses).to.have.length(REQUEST_COUNT);
 
-      const successResponses = responses.filter((response: any) => response.status === 200);
+      // bucket requests by success/failure. We can't deterministically predict how many
+      // will succeed or fail, but they should all be either 200 or 409
+      const { successResponses, errorResponses } = responses.reduce(
+        (
+          acc: { successResponses: typeof responses; errorResponses: typeof responses },
+          response
+        ) => {
+          if (response.status === 200) {
+            acc.successResponses.push(response);
+          } else {
+            acc.errorResponses.push(response);
+          }
+          return acc;
+        },
+        { successResponses: [], errorResponses: [] }
+      );
+
       expect(successResponses.length).to.be.greaterThan(0);
+      // there should be no responses with codes other than 200 or 409
+      expect(successResponses.length + errorResponses.length).to.be(REQUEST_COUNT);
 
       // All the alerting responses should match
       const {
@@ -70,6 +88,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         } = response;
         expect(curStatusId).to.be(statusId);
         expect(response.status).to.be(200);
+      });
+      errorResponses.forEach((response: any) => {
+        expect(response.body).to.be.ok();
+        expect(response.body.error).to.be('Conflict');
+        expect(response.body.message).to.be(
+          'Another process is already modifying the default rules.'
+        );
+        expect(response.status).to.be(409);
       });
 
       // fetch all the rules, there should be two

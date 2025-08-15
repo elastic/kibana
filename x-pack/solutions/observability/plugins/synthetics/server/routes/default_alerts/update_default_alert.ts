@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { IKibanaResponse } from '@kbn/core/server';
+import { LockAcquisitionError } from '@kbn/lock-manager';
 import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
 import { DefaultAlertService } from './default_alert_service';
 import { SyntheticsRestApiRouteFactory } from '../types';
@@ -20,8 +22,8 @@ export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
     server,
     savedObjectsClient,
     request,
-  }): Promise<DEFAULT_ALERT_RESPONSE> => {
-    console.log('PUT ALERTING')
+    response,
+  }): Promise<DEFAULT_ALERT_RESPONSE | IKibanaResponse<{}>> => {
     const currentSpacePromise = server.spaces?.spacesService.getActiveSpace(request);
     const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
     const { defaultTLSRuleEnabled, defaultStatusRuleEnabled } = await getSyntheticsDynamicSettings(
@@ -31,26 +33,24 @@ export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
     const activeSpace = await currentSpacePromise;
 
     try {
-      console.log('sending the requests to create the rules');
       const [statusRule, tlsRule] = await defaultAlertService.updateDefaultRules(
         activeSpace?.id ?? 'default',
         defaultStatusRuleEnabled,
         defaultTLSRuleEnabled
       );
-      // const [statusRule, tlsRule] = await Promise.all([
-      //   defaultAlertService.updateStatusRule(
-      //     activeSpace?.id ?? 'default',
-      //     defaultStatusRuleEnabled
-      //   ),
-      //   defaultAlertService.updateTlsRule(activeSpace?.id ?? 'default', defaultTLSRuleEnabled),
-      // ]);
-      console.log('HAPPY PATH SUCCESSFUL')
       return {
         statusRule: statusRule || null,
         tlsRule: tlsRule || null,
       };
     } catch (error) {
-      console.error('ERROR CAUGH ', error);
+      if (error instanceof LockAcquisitionError) {
+        server.logger.error('Simultaneous request to update default Synthetics rules', { error });
+        return response.conflict({
+          body: {
+            message: `Lock acquisition failed for monitor: ${name}`,
+          },
+        });
+      }
       server.logger.error(`Error updating default alerting rules, Error: ${error.message}`, {
         error,
       });

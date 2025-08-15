@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { LockAcquisitionError } from '@kbn/lock-manager';
+import { IKibanaResponse } from '@kbn/core/server';
 import { DefaultAlertService } from './default_alert_service';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -23,26 +25,33 @@ export const enableDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
     server,
     savedObjectsClient,
     request,
-  }): Promise<DEFAULT_ALERT_RESPONSE> => {
-    console.log('POST ALERTING');
-    const activeSpace = await server.spaces?.spacesService.getActiveSpace(request);
-    const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
+    response,
+  }): Promise<DEFAULT_ALERT_RESPONSE | IKibanaResponse<{}>> => {
+    try {
+      const activeSpace = await server.spaces?.spacesService.getActiveSpace(request);
+      const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
 
-    console.log('CALLING THE SERVICE TO SETUP DEFAULT ALERTS');
-    console.log('ACTIVE SPACE ID: ', activeSpace?.id ?? 'default');
-    const [statusRule, tlsRule] = await Promise.all([
-      defaultAlertService.getExistingAlert(SYNTHETICS_STATUS_RULE),
-      defaultAlertService.getExistingAlert(SYNTHETICS_TLS_RULE),
-    ]);
-    if (statusRule && tlsRule) {
-      console.log('DEFAULT ALERTS ALREADY SETUP, RETURNING EARLY');
-      return {
-        statusRule,
-        tlsRule,
-      };
+      const [statusRule, tlsRule] = await Promise.all([
+        defaultAlertService.getExistingAlert(SYNTHETICS_STATUS_RULE),
+        defaultAlertService.getExistingAlert(SYNTHETICS_TLS_RULE),
+      ]);
+      if (statusRule && tlsRule) {
+        return {
+          statusRule,
+          tlsRule,
+        };
+      }
+      // do not delete this `await`, or we will skip the custom exception handling
+      return await defaultAlertService.setupDefaultAlerts(activeSpace?.id ?? 'default');
+    } catch (error) {
+      if (error instanceof LockAcquisitionError) {
+        return response.conflict({
+          body: {
+            message: `Another process is already modifying the default rules.`,
+          },
+        });
+      }
+      throw error;
     }
-    const result = defaultAlertService.setupDefaultAlerts(activeSpace?.id ?? 'default');
-    console.log('HI I AM FINISHED AND IT IS HAPPY PLEASE SEND A 200');
-    return result;
   },
 });
