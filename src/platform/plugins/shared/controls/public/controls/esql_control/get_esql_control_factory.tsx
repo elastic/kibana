@@ -10,10 +10,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, merge } from 'rxjs';
-import { apiPublishesESQLVariables, ESQLControlState } from '@kbn/esql-types';
+import { apiPublishesESQLVariables, ESQLControlState, EsqlControlType } from '@kbn/esql-types';
 import { initializeStateManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import { omit } from 'lodash';
 import { OptionsListSelection } from '../../../common/options_list';
 import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
 import { ControlFactory } from '../types';
@@ -54,11 +55,18 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
       };
 
       function serializeState() {
+        const latestState = {
+          ...defaultControlManager.getLatestState(),
+          ...selections.getLatestState(),
+        };
+
+        const rawState =
+          latestState.controlType === EsqlControlType.VALUES_FROM_QUERY
+            ? omit(latestState, 'availableOptions')
+            : latestState;
+
         return {
-          rawState: {
-            ...defaultControlManager.getLatestState(),
-            ...selections.getLatestState(),
-          },
+          rawState,
           references: [],
         };
       }
