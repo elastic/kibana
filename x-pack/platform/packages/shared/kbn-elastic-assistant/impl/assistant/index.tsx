@@ -587,7 +587,7 @@ const AssistantComponent: React.FC<Props> = ({
                     flex-direction: column;
                   `}
                 >
-                  {isConversationOwner ? (
+                  {isConversationOwner || isInitialLoad ? (
                     <>
                       <EuiPanel
                         paddingSize="m"

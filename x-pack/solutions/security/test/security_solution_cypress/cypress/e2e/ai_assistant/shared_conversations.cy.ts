@@ -8,6 +8,7 @@
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { IS_SERVERLESS } from '../../env_var_names_constants';
 import {
+  assertConversationTitle,
   assertMessageSent,
   assertMessageUser,
   assertNoSharedCallout,
@@ -21,9 +22,14 @@ import {
   assertShareModalType,
   assertShareUser,
   closeShareModal,
+  copyUrlFromConversationSideContextMenu,
+  copyUrlFromMenu,
+  copyUrlFromShareModal,
   createAndTitleConversation,
   dismissSharedCallout,
   duplicateConversation,
+  duplicateFromConversationSideContextMenu,
+  duplicateFromMenu,
   openAssistant,
   openShareMenu,
   selectConnector,
@@ -42,7 +48,7 @@ import { deleteConversations, waitForConversation } from '../../tasks/api_calls/
 import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../tasks/api_calls/common';
 import { login, logout } from '../../tasks/login';
-import { visitGetStartedPage } from '../../tasks/navigation';
+import { visit, visitGetStartedPage } from '../../tasks/navigation';
 
 describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => {
   const isServerless = Cypress.env(IS_SERVERLESS);
@@ -94,7 +100,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     waitForConversation(mockConvo1);
     waitForConversation(mockConvo2);
   });
-  it.skip('Share modal works to not share, share globally, and share selected', () => {
+  it('Share modal works to not share, share globally, and share selected', () => {
     visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo1.title);
@@ -146,7 +152,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     assertShareModalType('global');
     selectShareType('selected');
     // Select secondaryUser to share the conversation
-    shareConversationWithUser(secondaryUser);
+    shareConversationWithUser(isServerless ? 'test_user' : secondaryUser);
     submitShareModal();
     assertOwnerSharedCallout();
     openShareMenu();
@@ -154,22 +160,13 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     // Opens to selected share since conversation is shared with selected users
     selectShareModal();
     assertShareModalType('selected');
-    assertShareUser(secondaryUser);
+    assertShareUser(isServerless ? 'test_user' : secondaryUser);
     closeShareModal();
 
     toggleConversationSideMenu();
     assertSharedConversationIcon(mockConvo2.title);
   });
-  it.only('Shared conversations appear for the user they were shared with', () => {
-    // cy.log('hello 1');
-    // logout();
-    // cy.log('hello 2');
-    // login(secondaryUser === 'test_user' ? ROLES.soc_manager : secondaryUser);
-    // cy.log('hello 3');
-    // logout();
-    // cy.log('hello 4');
-    // login('admin');
-    // cy.log('hello 5');
+  it('Shared conversations appear for the user they were shared with', () => {
     shareConversations([
       {
         title: mockConvo1.title,
@@ -177,7 +174,10 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       },
       {
         title: mockConvo2.title,
-        share: 'test_user',
+        // In serverless environments, we use 'test_user' instead of the regular secondary user due to configuration limitations.
+        // We can only create conversations via API with the primary user, so to minimize manual conversation creation in the UI,
+        // we're testing the 'selected user' sharing functionality only from the secondary user perspective.
+        share: isServerless ? 'test_user' : secondaryUser,
       },
     ]);
     // First logout admin user
@@ -226,7 +226,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       },
       {
         title: mockConvo2.title,
-        share: secondaryUser,
+        share: 'global',
       },
     ]);
     logout();
@@ -245,7 +245,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     selectConversation(mockConvo1.title);
     assertNoSharedCallout();
   });
-  it('Duplicate conversation works as expected', () => {
+  it('Duplicate conversation allows user to continue a shared conversation', () => {
     shareConversations([
       {
         title: mockConvo1.title,
@@ -255,7 +255,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
 
     logout();
 
-    login(secondaryUser === 'test_user' ? 'system_indices_superuser' : secondaryUser);
+    login(secondaryUser);
     visitGetStartedPage();
     openAssistant();
 
@@ -265,5 +265,46 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     typeAndSendMessage('goodbye');
     assertMessageUser(primaryUser, 0);
     assertMessageUser(`${isServerless ? 'test ' : ''}${secondaryUser}`, 2);
+  });
+
+  it('Duplicate conversation from conversation menu creates a duplicate', () => {
+    openAssistant();
+    selectConversation(mockConvo1.title);
+    duplicateFromMenu(mockConvo1.title);
+  });
+
+  it('Duplicate conversation from conversation side menu creates a duplicate', () => {
+    openAssistant();
+    toggleConversationSideMenu();
+    duplicateFromConversationSideContextMenu(mockConvo2.title);
+  });
+
+  it('Copy URL copies the proper url from conversation menu', () => {
+    openAssistant();
+    selectConversation(mockConvo1.title);
+    selectConnector(azureConnectorAPIPayload.name);
+    copyUrlFromMenu();
+    // Cypress paste (doc.execCommand('paste')) is flaky, so skipping that assertion
+  });
+  it('Copy URL copies the proper url from conversation side menu', () => {
+    openAssistant();
+    toggleConversationSideMenu();
+    copyUrlFromConversationSideContextMenu();
+    // Cypress paste (doc.execCommand('paste')) is flaky, so skipping that assertion
+  });
+
+  it('Copy URL copies the proper url from share modal', () => {
+    openAssistant();
+    selectConversation(mockConvo1.title);
+    selectConnector(azureConnectorAPIPayload.name);
+    copyUrlFromShareModal();
+    // Cypress paste (doc.execCommand('paste')) is flaky, so skipping that assertion
+  });
+
+  it('Visiting a copied URL opens the assistant to the proper conversation', () => {
+    cy.location('origin').then((origin) => {
+      visit(`${origin}/app/security/get_started?assistant=${mockConvo1.id}`);
+    });
+    assertConversationTitle(mockConvo1.title);
   });
 });

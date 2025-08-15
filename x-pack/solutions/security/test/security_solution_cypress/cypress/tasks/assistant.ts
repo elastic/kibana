@@ -63,7 +63,15 @@ import {
   DISMISS_CALLOUT_BUTTON,
   USER_PROFILES_LIST,
   DUPLICATE_CONVERSATION,
+  CONVERSATION_SETTINGS_MENU,
+  COPY_URL,
+  CONVO_CONTEXT_MENU_BUTTON,
+  CONVO_CONTEXT_MENU_COPY_URL,
+  SHARE_MODAL_COPY_URL,
+  DUPLICATE,
+  CONVO_CONTEXT_MENU_DUPLICATE,
 } from '../screens/ai_assistant';
+import { SUCCESS_TOASTER_HEADER } from '../screens/alerts_detection_rules';
 
 export const openAssistant = (context?: 'rule' | 'alert') => {
   if (!context) {
@@ -369,6 +377,52 @@ export const toggleConversationSideMenu = () => {
   cy.get(FLYOUT_NAV_TOGGLE).click();
 };
 
+export const duplicateFromMenu = (title: string) => {
+  cy.get(CONVERSATION_SETTINGS_MENU).click();
+  cy.get(DUPLICATE).click();
+  assertConversationTitle(`[Duplicate] ${title}`);
+  assertDuplicateSuccessToastShown(title);
+};
+
+export const assertDuplicateSuccessToastShown = (title: string) => {
+  cy.get(SUCCESS_TOASTER_HEADER)
+    .should('be.visible')
+    .should('have.text', `[Duplicate] ${title} created successfully`);
+};
+
+export const copyUrlFromMenu = () => {
+  cy.get(CONVERSATION_SETTINGS_MENU).click();
+  cy.get(COPY_URL).click();
+  assertCopyUrlSuccessToastShown();
+};
+
+export const copyUrlFromConversationSideContextMenu = () => {
+  cy.get(CONVO_CONTEXT_MENU_BUTTON).eq(0).click();
+  cy.get(CONVO_CONTEXT_MENU_COPY_URL).click();
+  assertCopyUrlSuccessToastShown();
+};
+
+export const duplicateFromConversationSideContextMenu = (title: string) => {
+  cy.get(CONVO_CONTEXT_MENU_BUTTON).eq(0).click();
+  cy.get(CONVO_CONTEXT_MENU_DUPLICATE).click();
+  assertConversationTitle(`[Duplicate] ${title}`);
+  assertDuplicateSuccessToastShown(title);
+};
+
+export const copyUrlFromShareModal = () => {
+  openShareMenu();
+  selectShareModal();
+  cy.get(SHARE_MODAL_COPY_URL).click();
+  assertCopyUrlSuccessToastShown();
+  closeShareModal();
+};
+
+export const assertCopyUrlSuccessToastShown = () => {
+  cy.get(SUCCESS_TOASTER_HEADER)
+    .should('be.visible')
+    .should('have.text', `Conversation URL copied to clipboard`);
+};
+
 export const assertSharedConversationIcon = (title: string) => {
   cy.get(CONVERSATION_LIST_ICON(title)).should('exist');
 };
@@ -404,6 +458,7 @@ export const shareConversations = (convos: Array<{ title: string; share: string 
 export const duplicateConversation = (conversationName: string) => {
   cy.get(SHARED_CALLOUT).find(DUPLICATE_CONVERSATION).click();
   assertConversationTitle(`[Duplicate] ${conversationName}`);
+  assertDuplicateSuccessToastShown(conversationName);
   closeToast();
 };
 
