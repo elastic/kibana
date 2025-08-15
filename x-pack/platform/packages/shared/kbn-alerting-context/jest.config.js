@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/private/kbn-alerting-context'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-alerting-context'],
 };
