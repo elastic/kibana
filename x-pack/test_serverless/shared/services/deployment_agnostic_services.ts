@@ -7,8 +7,6 @@
 
 import { services as apiIntegrationServices } from '@kbn/test-suites-xpack/api_integration/services';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { SecuritySolutionApiProvider } from '@kbn/test-suites-xpack/api_integration/services/security_solution_api.gen';
-import { SecuritySolutionApiProvider as SecuritySolutionExceptionsApiProvider } from '@kbn/test-suites-xpack/api_integration/services/security_solution_exceptions_api.gen';
 import { services as platformApiIntegrationServices } from '@kbn/test-suites-xpack-platform/api_integration/services';
 import { AlertingApiProvider } from './alerting_api';
 import { UsageAPIProvider } from './usage_api';
@@ -45,7 +43,5 @@ export const services = {
   security,
   usageAPI: UsageAPIProvider,
   console,
-  securitySolutionApi: SecuritySolutionApiProvider,
   alertingApi: AlertingApiProvider,
-  securitySolutionExceptionsApi: SecuritySolutionExceptionsApiProvider,
 };
