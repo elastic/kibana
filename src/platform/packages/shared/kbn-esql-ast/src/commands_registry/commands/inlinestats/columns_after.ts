@@ -9,8 +9,8 @@
 import uniqBy from 'lodash/uniqBy';
 import type { ESQLCommand } from '../../../types';
 import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
-import { ICommandContext } from '../../types';
-import { FieldType } from '../../../definitions/types';
+import type { ICommandContext } from '../../types';
+import type { FieldType } from '../../../definitions/types';
 
 function transformMapToESQLFields(
   inputMap: Map<string, ESQLUserDefinedColumn[]>
