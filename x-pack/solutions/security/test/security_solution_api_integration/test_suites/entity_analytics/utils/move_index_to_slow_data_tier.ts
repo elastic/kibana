@@ -8,8 +8,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import type { Client } from '@elastic/elasticsearch';
-import { RetryService } from '@kbn/ftr-common-functional-services';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 const TIMEOUT_MS: number = 300000; // 5 minutes
 

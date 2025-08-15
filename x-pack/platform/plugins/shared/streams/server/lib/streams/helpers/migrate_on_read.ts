@@ -6,7 +6,7 @@
  */
 
 import { Streams } from '@kbn/streams-schema';
-import { BaseStream } from '@kbn/streams-schema/src/models/base';
+import type { BaseStream } from '@kbn/streams-schema/src/models/base';
 import {
   migrateRoutingIfConditionToStreamlang,
   migrateOldProcessingArrayToStreamlang,

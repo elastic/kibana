@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiText, IconType } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import type { IconType } from '@elastic/eui';
+import { EuiBadge, EuiText } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React from 'react';
 import type { QualityIndicators, InfoIndicators } from '../../../common/types';
 
 export function QualityIndicator({

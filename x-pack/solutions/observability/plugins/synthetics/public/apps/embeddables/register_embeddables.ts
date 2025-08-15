@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core-lifecycle-browser';
+import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 
-import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
+import type { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
 import { SYNTHETICS_MONITORS_EMBEDDABLE, SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from './constants';
 
 export const registerSyntheticsEmbeddables = (

@@ -7,7 +7,7 @@
 
 import type SuperTest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
-import {
+import type {
   CopyTimelineRequestBody,
   CopyTimelineResponse,
   CreateTimelinesRequestBody,
@@ -22,8 +22,8 @@ import {
   PersistPinnedEventResponse,
   ResolveTimelineResponse,
   SavedTimeline,
-  TimelineTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/security-solution-plugin/common/api/timeline';
 import {
   TIMELINE_URL,
   TIMELINES_URL,

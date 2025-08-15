@@ -24,9 +24,9 @@ import { EXTENDED_DATA_LAYER, LayerTypes, SeriesTypes, XScaleTypes } from '../..
 import { getFieldFormatsRegistry } from '@kbn/data-plugin/public/test_utils';
 import { type CoreSetup } from '@kbn/core/public';
 
-import { ExtendedDataLayerConfig } from '../../common/types';
+import type { ExtendedDataLayerConfig } from '../../common/types';
 import { getAggsFormats } from '@kbn/data-plugin/common';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 // these are used within the DSL terms aggs custom format
 const OTHER_BUCKET_LABEL = '[OTHER LABEL]';

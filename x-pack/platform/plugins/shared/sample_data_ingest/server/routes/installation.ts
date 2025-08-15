@@ -14,7 +14,7 @@ import {
   type StatusResponse,
   type InstallResponse,
 } from '../../common';
-import { InternalServices } from '../types';
+import type { InternalServices } from '../types';
 
 export const registerInstallationRoutes = ({
   router,
