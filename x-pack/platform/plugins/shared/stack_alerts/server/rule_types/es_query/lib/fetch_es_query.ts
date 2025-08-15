@@ -21,7 +21,7 @@ import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
 import { getComparatorScript } from '../../../../common';
 import type { OnlyEsQueryRuleParams } from '../types';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
-import { getParsedQuery, checkForShardFailures } from '../util';
+import { getParsedQuery, checkForShardFailures, getSourceFields } from '../util';
 
 export interface FetchEsQueryOpts {
   ruleId: string;
@@ -116,7 +116,6 @@ export async function fetchEsQuery({
       aggField: params.aggField,
       termField: params.termField,
       termSize: params.termSize,
-      sourceFieldsParams: params.sourceFields,
       condition: {
         resultLimit: alertLimit,
         conditionScript: getComparatorScript(
@@ -150,6 +149,7 @@ export async function fetchEsQuery({
   }
 
   const link = generateLink(params, filter, discoverLocator, dateStart, dateEnd, spacePrefix);
+  const sourceFields = getSourceFields();
 
   return {
     parsedResults: parseAggregationResults({
@@ -157,7 +157,8 @@ export async function fetchEsQuery({
       isGroupAgg,
       esResult: searchResult,
       resultLimit: alertLimit,
-      sourceFieldsParams: params.sourceFields,
+      sourceFieldsParams: sourceFields,
+      generateSourceFieldsFromHits: true,
       termField: params.termField,
     }),
     link,

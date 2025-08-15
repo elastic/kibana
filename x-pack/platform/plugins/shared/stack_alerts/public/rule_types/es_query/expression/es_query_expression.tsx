@@ -29,7 +29,7 @@ import { Comparator } from '../../../../common/comparator_types';
 import { getComparatorScript } from '../../../../common';
 import { hasExpressionValidationErrors } from '../validation';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
-import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType, SourceField } from '../types';
+import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
@@ -58,7 +58,6 @@ export const EsQueryExpression: React.FC<
     termSize,
     termField,
     excludeHitsFromPreviousRun,
-    sourceFields,
   } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<EsQueryRuleParams<SearchType.esQuery>>(
@@ -76,7 +75,8 @@ export const EsQueryExpression: React.FC<
       searchType: SearchType.esQuery,
       excludeHitsFromPreviousRun:
         excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
-      sourceFields,
+      // The sourceFields param is ignored
+      sourceFields: [],
     }
   );
 
@@ -362,11 +362,6 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
-        onChangeSourceFields={useCallback(
-          (selectedSourceFields: SourceField[]) => setParam('sourceFields', selectedSourceFields),
-          [setParam]
-        )}
-        sourceFields={sourceFields}
       />
 
       <EuiSpacer />
