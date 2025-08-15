@@ -16,10 +16,6 @@ export interface AlertDetailsAppSectionProps {
   setSources: React.Dispatch<React.SetStateAction<AlertDetailsSource[] | undefined>>;
 }
 
-export interface AlertAnnotationForDashboard {
-  start: string;
-}
-
 export const TAB_IDS = [
   'overview',
   'metadata',

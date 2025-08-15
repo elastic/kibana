@@ -19,7 +19,6 @@ import {
 import type { SavedObjectsReference } from '@kbn/content-management-content-editor';
 import type { RelatedDashboard } from '@kbn/observability-schema';
 import { useKibana } from '../../../../utils/kibana_react';
-import { AlertAnnotationForDashboard } from '../../types';
 
 export interface ActionButtonProps {
   onClick: (dashboard: RelatedDashboard) => void;
@@ -33,12 +32,12 @@ export function DashboardTile({
   dashboard,
   actionButtonProps,
   timeRange,
-  alertAnnotation,
+  alertStartedAt,
 }: {
   dashboard: RelatedDashboard;
   actionButtonProps?: ActionButtonProps;
   timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
-  alertAnnotation: AlertAnnotationForDashboard;
+  alertStartedAt: string;
 }) {
   const {
     services: {
@@ -64,7 +63,7 @@ export function DashboardTile({
               timeRange,
               passThroughContext: {
                 alert: {
-                  start: alertAnnotation.start,
+                  start: alertStartedAt,
                 },
               },
             })}

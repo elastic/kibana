@@ -318,9 +318,7 @@ export function AlertDetails() {
         rule={rule}
         onSuccessAddSuggestedDashboard={onSuccessAddSuggestedDashboard}
         timeRange={dashboardTimeRange}
-        alertAnnotation={{
-          start: moment(alertDetail.formatted.start).toISOString(),
-        }}
+        alertStartedAt={moment(alertDetail.formatted.start).toISOString()}
       />
     ) : (
       <EuiLoadingSpinner />

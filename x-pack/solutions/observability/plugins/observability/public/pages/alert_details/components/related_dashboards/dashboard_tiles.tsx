@@ -20,7 +20,6 @@ import type { RelatedDashboard } from '@kbn/observability-schema';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { ActionButtonProps } from './dashboard_tile';
 import { DashboardTile } from './dashboard_tile';
-import { AlertAnnotationForDashboard } from '../../types';
 
 export function DashboardTiles({
   title,
@@ -28,14 +27,14 @@ export function DashboardTiles({
   dashboards,
   dataTestSubj,
   timeRange,
-  alertAnnotation,
+  alertStartedAt,
 }: {
   title: string;
   isLoadingDashboards: boolean;
   dashboards?: Array<RelatedDashboard & { actionButtonProps?: ActionButtonProps }>;
   dataTestSubj: string;
   timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
-  alertAnnotation: AlertAnnotationForDashboard;
+  alertStartedAt: string;
 }) {
   const wrapWithHeader = (component: React.ReactNode) => {
     return (
@@ -73,7 +72,7 @@ export function DashboardTiles({
         dashboard={rest}
         actionButtonProps={actionButtonProps}
         timeRange={timeRange}
-        alertAnnotation={alertAnnotation}
+        alertStartedAt={alertStartedAt}
       />
     ))
   );
