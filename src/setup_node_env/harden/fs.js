@@ -35,7 +35,6 @@ const getRealTmpPath = () => {
 
 const realTmpPath = getRealTmpPath();
 
-
 let hardeningConfig = null;
 
 // TODO: propagate here file specified for file logger (it can change in the runtime)
@@ -65,7 +64,7 @@ const patchWriteStream = (target, thisArg, argumentsList) => {
   const safePath = getSafePath(userPath);
 
   return target.apply(thisArg, [safePath, ...args]);
-}
+};
 
 const patchSingleMethod = (target, thisArg, argumentsList) => {
   if (!shouldEnableHardenedFs()) {
