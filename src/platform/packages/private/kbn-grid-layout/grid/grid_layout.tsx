@@ -73,7 +73,6 @@ export const GridLayout = ({
    */
   useEffect(() => {
     const orderedLayout = getOrderedLayout(layout);
-    console.log({ orderedLayout });
     if (!isOrderedLayoutEqual(orderedLayout, gridLayoutStateManager.gridLayout$.getValue())) {
       const newLayout = cloneDeep(orderedLayout);
       /**
@@ -83,7 +82,6 @@ export const GridLayout = ({
       Object.entries(newLayout).forEach(([sectionId, row]) => {
         newLayout[sectionId].panels = resolveGridSection(row.panels);
       });
-      console.log('new layout', newLayout);
       gridLayoutStateManager.gridLayout$.next(newLayout);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

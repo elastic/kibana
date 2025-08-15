@@ -7,26 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { distinctUntilChanged, map, mergeMap, type Observable } from 'rxjs';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { GridPanelData, GridSectionData } from '@kbn/grid-layout';
-import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
+import type { GridLayoutData, GridPanelData } from '@kbn/grid-layout';
+import { GridLayout } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { asyncForEach } from '@kbn/std';
 
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
 import type { GridData } from '../../../server/content_management';
 import { areLayoutsEqual, type DashboardLayout } from '../../dashboard_api/layout_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
-import { getPanelSettings } from '../../panel_placement/get_panel_placement_settings';
-import type { PanelResizeSettings } from '../../panel_placement/types';
 import {
   DASHBOARD_GRID_HEIGHT,
   DASHBOARD_MARGIN_SIZE,
@@ -48,11 +43,11 @@ export const DashboardGrid = ({
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
 
   const [topOffset, setTopOffset] = useState(DEFAULT_DASHBOARD_DRAG_TOP_OFFSET);
-  const [expandedPanelId, layout, useMargins, viewMode] = useBatchedPublishingSubjects(
+  const [expandedPanelId, useMargins, viewMode, layout] = useBatchedPublishingSubjects(
     dashboardApi.expandedPanelId$,
-    dashboardInternalApi.layout$,
     dashboardApi.settings.useMargins$,
-    dashboardApi.viewMode$
+    dashboardApi.viewMode$,
+    dashboardInternalApi.gridLayout$
   );
 
   useEffect(() => {
@@ -63,81 +58,6 @@ export const DashboardGrid = ({
   }, [dashboardContainerRef]);
 
   const appFixedViewport = useAppFixedViewport();
-
-  const [panelResizeSettings, setPanelResizeSettings] = useState<{
-    [panelType: string]: PanelResizeSettings;
-  }>({});
-
-  // useEffect(() => {}, [layout, panelResizeSettings]);
-
-  useEffect(() => {
-    const panelTypes$: Observable<string[]> = dashboardInternalApi.layout$.pipe(
-      map(({ panels }) => {
-        return [...new Set(Object.values(panels).map((panel) => panel.type))];
-      }),
-      distinctUntilChanged(deepEqual)
-    );
-
-    panelTypes$
-      .pipe(
-        mergeMap(async (panelTypes) => {
-          const settingsByPanelType: { [panelType: string]: PanelResizeSettings } = {};
-          await asyncForEach(panelTypes, async (type) => {
-            const panelSettings = await getPanelSettings(type);
-            if (panelSettings?.panelResizeSettings)
-              settingsByPanelType[type] = panelSettings.panelResizeSettings;
-          });
-          return settingsByPanelType;
-        }),
-        distinctUntilChanged(deepEqual)
-      )
-      .subscribe((panelSettings) => {
-        console.log(panelSettings);
-        setPanelResizeSettings(panelSettings);
-      });
-  }, [dashboardInternalApi.layout$]);
-
-  const currentLayout: GridLayoutData = useMemo(() => {
-    const newLayout: GridLayoutData = {};
-    Object.keys(layout.sections).forEach((sectionId) => {
-      const section = layout.sections[sectionId];
-      newLayout[sectionId] = {
-        id: sectionId,
-        type: 'section',
-        row: section.gridData.y,
-        isCollapsed: Boolean(section.collapsed),
-        title: section.title,
-        panels: {},
-      };
-    });
-    Object.keys(layout.panels).forEach((panelId) => {
-      const gridData = layout.panels[panelId].gridData;
-      const type = layout.panels[panelId].type;
-      const basePanel = {
-        id: panelId,
-        row: gridData.y,
-        column: gridData.x,
-        width: gridData.w,
-        height: gridData.h,
-        resizeOptions: panelResizeSettings[type],
-      } as GridPanelData;
-      if (gridData.sectionId) {
-        (newLayout[gridData.sectionId] as GridSectionData).panels[panelId] = basePanel;
-      } else {
-        newLayout[panelId] = {
-          ...basePanel,
-          type: 'panel',
-        };
-      }
-      // update `data-grid-row` attribute for all panels because it is used for some styling
-      const panelRef = panelRefs.current[panelId];
-      if (typeof panelRef !== 'function' && panelRef?.current) {
-        panelRef.current.setAttribute('data-grid-row', `${gridData.y}`);
-      }
-    });
-    console.log(newLayout);
-    return newLayout;
-  }, [layout, panelResizeSettings]);
 
   const onLayoutChange = useCallback(
     (newLayout: GridLayoutData) => {
@@ -247,7 +167,7 @@ export const DashboardGrid = ({
     return (
       <GridLayout
         css={layoutStyles}
-        layout={currentLayout}
+        layout={layout}
         gridSettings={{
           gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
           rowHeight: DASHBOARD_GRID_HEIGHT,
@@ -263,7 +183,7 @@ export const DashboardGrid = ({
     );
   }, [
     layoutStyles,
-    currentLayout,
+    layout,
     useMargins,
     renderPanelContents,
     onLayoutChange,
