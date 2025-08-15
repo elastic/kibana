@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import moment from 'moment';
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';

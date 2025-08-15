@@ -7,25 +7,26 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRowProps, EuiSpacer, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiFormRowProps, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiSpacer, EuiComboBox } from '@elastic/eui';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DateRange } from '../../../../common/types';
 import type { OperationSupportMatrix } from './operation_support';
 import type { GenericIndexPatternColumn, OperationType } from '../form_based';
-import {
-  getOperationDisplay,
-  isOperationAllowedAsReference,
+import type {
   FieldBasedIndexPatternColumn,
   RequiredReference,
   IncompleteColumn,
   GenericOperationDefinition,
 } from '../operations';
-import { FieldChoiceWithOperationType, FieldSelect } from './field_select';
+import { getOperationDisplay, isOperationAllowedAsReference } from '../operations';
+import type { FieldChoiceWithOperationType } from './field_select';
+import { FieldSelect } from './field_select';
 import { hasField } from '../pure_utils';
 import type { FormBasedLayer } from '../types';
 import type { IndexPattern, IndexPatternField, ParamEditorCustomProps } from '../../../types';

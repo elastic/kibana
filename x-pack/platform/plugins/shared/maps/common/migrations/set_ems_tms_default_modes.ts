@@ -8,7 +8,7 @@
 import type { Writable } from '@kbn/utility-types';
 import { DEFAULT_EMS_ROADMAP_ID } from '@kbn/maps-ems-plugin/common';
 import { SOURCE_TYPES } from '../constants';
-import { LayerDescriptor, EMSTMSSourceDescriptor } from '../descriptor_types';
+import type { LayerDescriptor, EMSTMSSourceDescriptor } from '../descriptor_types';
 import type { MapAttributes } from '../content_management';
 
 // LightModeDefault added to EMSTMSSourceDescriptor in 8.0.0

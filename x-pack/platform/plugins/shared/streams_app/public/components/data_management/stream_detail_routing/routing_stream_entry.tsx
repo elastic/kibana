@@ -17,15 +17,16 @@ import {
   EuiButtonIcon,
   useEuiTheme,
 } from '@elastic/eui';
-import { DraggableProvided } from '@hello-pangea/dnd';
+import type { DraggableProvided } from '@hello-pangea/dnd';
 import { i18n } from '@kbn/i18n';
-import { isDescendantOf, isNeverCondition } from '@kbn/streams-schema';
+import { isDescendantOf } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
+import { isNeverCondition } from '@kbn/streamlang';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { RoutingConditionEditor } from '../condition_editor';
 import { ConditionMessage } from '../condition_message';
 import { EditRoutingRuleControls } from './control_bars';
-import { RoutingDefinitionWithUIAttributes } from './types';
+import type { RoutingDefinitionWithUIAttributes } from './types';
 
 export function RoutingStreamEntry({
   availableStreams,
@@ -90,7 +91,7 @@ export function RoutingStreamEntry({
             <EuiIcon type="grabOmnidirectional" />
           </EuiPanel>
         </EuiFlexItem>
-        {isNeverCondition(routingRule.if) && (
+        {isNeverCondition(routingRule.where) && (
           <EuiBadge color="hollow">
             {i18n.translate('xpack.streams.streamDetailRouting.disabled', {
               defaultMessage: 'Disabled',
@@ -111,7 +112,7 @@ export function RoutingStreamEntry({
           `}
         >
           <EuiText component="p" size="s" color="subdued" className="eui-textTruncate">
-            <ConditionMessage condition={routingRule.if} />
+            <ConditionMessage condition={routingRule.where} />
           </EuiText>
         </EuiFlexItem>
         {childrenCount > 0 && (
@@ -135,8 +136,8 @@ export function RoutingStreamEntry({
       {isEditing && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <RoutingConditionEditor
-            condition={routingRule.if}
-            onConditionChange={(condition) => onChange({ if: condition })}
+            condition={routingRule.where}
+            onConditionChange={(condition) => onChange({ where: condition })}
           />
           <EditRoutingRuleControls
             relatedStreams={availableStreams.filter(

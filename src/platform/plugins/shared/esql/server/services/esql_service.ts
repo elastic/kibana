@@ -9,8 +9,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { IndicesAutocompleteResult, IndexAutocompleteItem } from '@kbn/esql-types';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
 
 export interface EsqlServiceOptions {
   client: ElasticsearchClient;

@@ -8,7 +8,7 @@
  */
 
 import { sortBy, isNumber } from 'lodash';
-import { Unit } from '@kbn/datemath';
+import type { Unit } from '@kbn/datemath';
 
 /** @ts-ignore */
 import { INTERVAL_STRING_RE } from '../../../../common/interval_regexp';

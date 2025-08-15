@@ -6,10 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SLODefinitionResponse } from '@kbn/slo-schema';
+import type { SLODefinitionResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useBulkPurgeRollupData } from '../../../pages/slo_management/hooks/use_bulk_purge_rollup_data';
-import { PurgePolicyData, SloPurgeConfirmationModal } from './purge_confirmation_modal';
+import type { PurgePolicyData } from './purge_confirmation_modal';
+import { SloPurgeConfirmationModal } from './purge_confirmation_modal';
 
 export interface Props {
   onCancel: () => void;

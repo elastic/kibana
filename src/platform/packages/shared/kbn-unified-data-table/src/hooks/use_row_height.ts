@@ -12,13 +12,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useLatest from 'react-use/lib/useLatest';
 import { isValidRowHeight } from '../utils/validate_row_height';
-import {
-  DataGridOptionsRecord,
-  getStoredRowHeight,
-  updateStoredRowHeight,
-} from '../utils/row_heights';
+import type { DataGridOptionsRecord } from '../utils/row_heights';
+import { getStoredRowHeight, updateStoredRowHeight } from '../utils/row_heights';
 import { ROWS_HEIGHT_OPTIONS } from '../constants';
-import { RowHeightMode, RowHeightSettingsProps } from '../components/row_height_settings';
+import type { RowHeightSettingsProps } from '../components/row_height_settings';
+import { RowHeightMode } from '../components/row_height_settings';
 import { useRestorableRef } from '../restorable_state';
 
 export enum RowHeightType {

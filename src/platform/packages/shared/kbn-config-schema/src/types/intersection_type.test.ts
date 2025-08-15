@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '../..';
+import type { TypeOf } from '../..';
+import { schema } from '../..';
 
 describe('schema.allOf', () => {
   it('validates all parts of the intersection', () => {

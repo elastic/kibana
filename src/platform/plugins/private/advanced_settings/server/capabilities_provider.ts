@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AdvancedSettingsConfig } from './config';
+import type { AdvancedSettingsConfig } from './config';
 
 export const capabilitiesProvider = (config: AdvancedSettingsConfig, isServerless: boolean) => ({
   globalSettings: {

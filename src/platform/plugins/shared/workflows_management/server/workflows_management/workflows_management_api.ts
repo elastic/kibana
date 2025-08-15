@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   CreateWorkflowCommand,
   EsWorkflow,
-  transformWorkflowYamlJsontoEsWorkflow,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -19,10 +18,11 @@ import {
   WorkflowListDto,
   WorkflowYaml,
 } from '@kbn/workflows';
+import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
-import { SchedulerService } from '../scheduler/scheduler_service';
-import { WorkflowsService } from './workflows_management_service';
+import type { SchedulerService } from '../scheduler/scheduler_service';
+import type { WorkflowsService } from './workflows_management_service';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event';
