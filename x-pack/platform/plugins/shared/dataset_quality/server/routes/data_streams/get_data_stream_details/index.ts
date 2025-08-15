@@ -53,6 +53,10 @@ export async function getDataStreamDetails({
       ).dataStreams[0]
     : undefined;
 
+  if (!esDataStream && dataStreamPrivileges.monitor) {
+    return {};
+  }
+
   try {
     const dataStreamSummaryStats = await getDataStreamSummaryStats(
       esClientAsCurrentUser,
@@ -180,7 +184,7 @@ async function getMeteringAvgDocSizeInBytes(esClient: ElasticsearchClient, index
 }
 
 async function getAvgDocSizeInBytes(esClient: ElasticsearchClient, index: string) {
-  const indexStats = await esClient.indices.stats({ index });
+  const indexStats = await esClient.indices.stats({ index, forbid_closed_indices: false });
   const docCount = indexStats._all.total?.docs?.count ?? 0;
   const sizeInBytes = indexStats._all.total?.store?.size_in_bytes ?? 0;
 
@@ -188,6 +192,10 @@ async function getAvgDocSizeInBytes(esClient: ElasticsearchClient, index: string
 }
 
 function getTermsFromAgg(termAgg: TermAggregation, aggregations: any) {
+  if (!aggregations) {
+    return {};
+  }
+
   return Object.entries(termAgg).reduce((acc, [key, _value]) => {
     const values = aggregations[key]?.buckets.map((bucket: any) => bucket.key) as string[];
     return { ...acc, [key]: values };

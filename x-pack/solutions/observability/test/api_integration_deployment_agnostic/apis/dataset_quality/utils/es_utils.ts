@@ -57,3 +57,19 @@ export async function getDataStreamSettingsOfEarliestIndex(es: Client, name: str
 
   return matchingIndexesObj[matchingIndexes[0]].settings;
 }
+
+export async function closeDataStream(es: Client, name: string) {
+  const { data_streams: dataStreams } = await es.indices.getDataStream({ name });
+
+  if (!dataStreams || dataStreams.length === 0) {
+    throw new Error(`Data stream ${name} not found`);
+  }
+
+  if (dataStreams[0].indices.length === 0) {
+    throw new Error(`Data stream ${name} has no indices to close`);
+  }
+
+  for (const index of dataStreams[0].indices) {
+    await es.indices.close({ index: index.index_name });
+  }
+}
