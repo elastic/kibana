@@ -20,6 +20,10 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { mockEncryptedSO } from '../synthetics_service/utils/mocks';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorSavedObjectType,
+} from '../../common/types/saved_objects';
 
 const mockTaskManagerStart = taskManagerMock.createStart();
 const mockTaskManager = taskManagerMock.createSetup();
@@ -27,6 +31,8 @@ const mockTaskManager = taskManagerMock.createSetup();
 const mockSoClient = {
   find: jest.fn(),
   createInternalRepository: jest.fn(),
+  bulkCreate: jest.fn(),
+  bulkDelete: jest.fn(),
 };
 
 const mockEncryptedSoClient = mockEncryptedSO();
@@ -93,7 +99,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           title: 'Synthetics Sync Global Params Task',
           description:
             'This task is executed so that we can sync private location monitors for example when global params are updated',
-          timeout: '3m',
+          timeout: '5m',
           maxAttempts: 3,
           createTaskRunner: expect.any(Function),
         }),
@@ -428,6 +434,147 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(privateLocations).toHaveLength(0);
       expect(publicLocations).toHaveLength(0);
     });
+  });
+});
+
+describe('migrateMonitorsToMultiSpace', () => {
+  let task: SyncPrivateLocationMonitorsTask;
+  let mockFinder: any;
+  let mockEncryptedSOClient: any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockFinder = {
+      find: jest.fn(),
+      close: jest.fn().mockResolvedValue(undefined),
+    };
+    mockEncryptedSOClient = {
+      createPointInTimeFinderDecryptedAsInternalUser: jest.fn(() => mockFinder),
+    };
+    const mockServerSetupWithSO = {
+      ...mockServerSetup,
+      coreStart: {
+        ...mockServerSetup.coreStart,
+        savedObjects: {
+          getUnsafeInternalClient: jest.fn(() => mockSoClient),
+        },
+      },
+      encryptedSavedObjects: {
+        getClient: () => mockEncryptedSOClient,
+      },
+    };
+    task = new SyncPrivateLocationMonitorsTask(
+      mockServerSetupWithSO as any,
+      mockTaskManager as unknown as TaskManagerSetupContract,
+      mockSyntheticsMonitorClient as unknown as SyntheticsMonitorClient
+    );
+  });
+
+  it('should migrate monitors and delete legacy ones per space', async () => {
+    const legacyMonitors = [
+      {
+        id: 'monitor-1',
+        attributes: { foo: 'bar' },
+        namespaces: ['default'],
+      },
+      {
+        id: 'monitor-2',
+        attributes: { foo: 'baz' },
+        namespaces: ['space1'],
+      },
+    ];
+    mockFinder.find.mockImplementation(async function* () {
+      yield { saved_objects: legacyMonitors };
+    });
+    mockSoClient.bulkCreate.mockResolvedValue({
+      saved_objects: [
+        { id: 'monitor-1', namespaces: ['default'] },
+        { id: 'monitor-2', namespaces: ['space1'] },
+      ],
+    });
+    mockSoClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        { id: 'monitor-1', success: true },
+        { id: 'monitor-2', success: true },
+      ],
+    });
+
+    await task.migrateMonitorsToMultiSpace();
+
+    expect(mockSoClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          type: syntheticsMonitorSavedObjectType,
+          id: 'monitor-1',
+          attributes: { foo: 'bar' },
+          initialNamespaces: ['default'],
+        }),
+        expect.objectContaining({
+          type: syntheticsMonitorSavedObjectType,
+          id: 'monitor-2',
+          attributes: { foo: 'baz' },
+          initialNamespaces: ['space1'],
+        }),
+      ],
+      { overwrite: true }
+    );
+    // Should call bulkDelete per space
+    expect(mockSoClient.bulkDelete).toHaveBeenCalledWith(
+      [{ id: 'monitor-1', type: legacySyntheticsMonitorTypeSingle }],
+      { namespace: 'default' }
+    );
+    expect(mockSoClient.bulkDelete).toHaveBeenCalledWith(
+      [{ id: 'monitor-2', type: legacySyntheticsMonitorTypeSingle }],
+      { namespace: 'space1' }
+    );
+    expect(mockFinder.close).toHaveBeenCalled();
+  });
+
+  it('should only delete successfully recreated monitors', async () => {
+    const legacyMonitors = [
+      { id: 'monitor-1', attributes: {}, namespaces: ['default'] },
+      { id: 'monitor-2', attributes: {}, namespaces: ['space1'] },
+    ];
+    mockFinder.find.mockImplementation(async function* () {
+      yield { saved_objects: legacyMonitors };
+    });
+    mockSoClient.bulkCreate.mockResolvedValue({
+      saved_objects: [
+        { id: 'monitor-1', namespaces: ['default'] },
+        { id: 'monitor-2', namespaces: ['space1'], error: { message: 'fail' } },
+      ],
+    });
+    mockSoClient.bulkDelete.mockResolvedValue({
+      statuses: [{ id: 'monitor-1', success: true }],
+    });
+
+    await task.migrateMonitorsToMultiSpace();
+
+    expect(mockSoClient.bulkDelete).toHaveBeenCalledWith(
+      [{ id: 'monitor-1', type: legacySyntheticsMonitorTypeSingle }],
+      { namespace: 'default' }
+    );
+    // Should NOT call bulkDelete for monitor-2 (failed recreate)
+    expect(mockSoClient.bulkDelete).not.toHaveBeenCalledWith(
+      [{ id: 'monitor-2', type: legacySyntheticsMonitorTypeSingle }],
+      { namespace: 'space1' }
+    );
+    expect(mockFinder.close).toHaveBeenCalled();
+  });
+
+  it('should handle no legacy monitors gracefully', async () => {
+    mockFinder.find.mockImplementation(async function* () {
+      yield { saved_objects: [] };
+    });
+    mockSoClient.bulkCreate.mockResolvedValue({ saved_objects: [] });
+    mockSoClient.bulkDelete.mockResolvedValue({ statuses: [] });
+
+    await task.migrateMonitorsToMultiSpace();
+
+    expect(mockSoClient.bulkCreate).toHaveBeenCalledWith([], { overwrite: true });
+    // Should not call bulkDelete if nothing to delete
+    expect(mockSoClient.bulkDelete).not.toHaveBeenCalledWith(expect.anything(), expect.anything());
+    expect(mockFinder.close).toHaveBeenCalled();
   });
 });
 

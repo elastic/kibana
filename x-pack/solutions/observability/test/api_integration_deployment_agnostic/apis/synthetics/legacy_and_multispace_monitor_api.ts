@@ -12,6 +12,7 @@ import {
   syntheticsMonitorSavedObjectType,
   legacySyntheticsMonitorTypeSingle,
 } from '@kbn/synthetics-plugin/common/types/saved_objects';
+import { omit } from 'lodash';
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
@@ -24,6 +25,7 @@ const runTests = (
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestEditorWithApiKey: SupertestWithRoleScopeType;
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
   const privateLocationService = new PrivateLocationTestService(getService);
 
   const saveMonitor = async (monitor: any, type: string, spaceId?: string) => {
@@ -37,7 +39,17 @@ const runTests = (
     return res.body;
   };
 
-  const editMonitor = async (monitorId: string, monitor: any, type: string, spaceId?: string) => {
+  const getMonitor = async (monitorId: string, spaceId?: string) => {
+    let url = SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + `/${monitorId}?internal=true`;
+    if (spaceId) {
+      url = `/s/${spaceId}${url}`;
+    }
+    const res = await supertestEditorWithApiKey.get(url);
+    expect(res.status).eql(200, JSON.stringify(res.body));
+    return res.body;
+  };
+
+  const editMonitor = async (monitorId: string, monitor: any, spaceId?: string) => {
     let url = SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + `/${monitorId}?internal=true`;
     if (spaceId) {
       url = `/s/${spaceId}${url}`;
@@ -47,7 +59,7 @@ const runTests = (
     return res.body;
   };
 
-  const deleteMonitor = async (monitorId: string, type: string, spaceId?: string) => {
+  const deleteMonitor = async (monitorId: string, spaceId?: string) => {
     let url = SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + `/${monitorId}`;
     if (spaceId) {
       url = `/s/${spaceId}${url}`;
@@ -468,6 +480,125 @@ const runTests = (
       expect(resp.body.message).to.eql(
         'Invalid space ID provided in monitor configuration. It should always include the current space ID.'
       );
+    });
+  });
+
+  describe('MultiSpaceMigration', () => {
+    it('should migrate legacy monitor to multi-space type in default space', async () => {
+      const name = `legacy-migrate-${uuid}`;
+      const mon = await saveMonitor({ ...httpMonitor, name }, legacySyntheticsMonitorTypeSingle);
+      expect(mon.name).eql(name);
+
+      // adding a parameter to trigger the task
+      await supertestEditorWithApiKey
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .send({ key: 'test', value: 'http://proxy.com' })
+        .expect(200);
+
+      await retry.try(async () => {
+        // first verify the monitor has been created
+        // Verify migration
+        const response = await kibanaServer.savedObjects.find({
+          type: syntheticsMonitorSavedObjectType,
+        });
+        const found = response.saved_objects.find((obj: any) => obj.id === mon.id);
+        expect(found).not.to.be(undefined);
+        expect(found?.attributes.name).to.eql(name);
+        // Ensure the legacy monitor type is no longer present
+        const legacyResponse = await kibanaServer.savedObjects.find({
+          type: legacySyntheticsMonitorTypeSingle,
+        });
+        const legacyFound = legacyResponse.saved_objects.find((obj: any) => obj.id === mon.id);
+        expect(legacyFound).to.be(undefined);
+      });
+      // test decryption to make sure migration worked
+      const decryptedMonitor = await getMonitor(mon.id);
+      expect(decryptedMonitor.name).to.eql(name);
+      expect(omit(decryptedMonitor, ['created_at', 'updated_at', 'private_locations'])).to.eql(
+        omit(
+          {
+            ...httpMonitor,
+            name,
+            spaceId: 'default',
+            id: mon.id,
+            config_id: mon.id,
+            locations: mon.locations,
+          },
+          ['private_locations']
+        )
+      );
+      // verify that it can be edited
+      const editedMonitor = await editMonitor(mon.id, { name: `legacy-edited-${uuid}` });
+      expect(editedMonitor.name).to.eql(`legacy-edited-${uuid}`);
+    });
+
+    it('should migrate legacy monitor to multi-space type in a specific space', async () => {
+      const SPACE_ID = `migrate-space-${uuid}`;
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: `Migrate Space ${uuid}` });
+      spacesToDeleteIds.push(SPACE_ID);
+      // create a private location in the new space if using private locations
+      const otherSpacePrivateLocation = await privateLocationService.addTestPrivateLocation(
+        SPACE_ID
+      );
+
+      const name = `legacy-migrate-space-${uuid}`;
+
+      const mon = await saveMonitor(
+        {
+          ...httpMonitor,
+          name,
+          locations: [],
+          private_locations: [otherSpacePrivateLocation],
+        },
+        legacySyntheticsMonitorTypeSingle,
+        SPACE_ID
+      );
+      expect(mon.name).eql(name);
+
+      // adding a parameter to trigger the task
+      await supertestEditorWithApiKey
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .send({ key: 'test2', value: 'http://proxy.com' })
+        .expect(200);
+
+      await retry.try(async () => {
+        // Verify migration
+        const response = await kibanaServer.savedObjects.find({
+          type: syntheticsMonitorSavedObjectType,
+          space: SPACE_ID,
+        });
+        const found = response.saved_objects.find((obj: any) => obj.id === mon.id);
+        expect(found).not.to.be(undefined);
+        expect(found?.attributes.name).to.eql(name);
+
+        // Ensure the legacy monitor type is no longer present
+        const legacyResponse = await kibanaServer.savedObjects.find({
+          type: legacySyntheticsMonitorTypeSingle,
+        });
+        const legacyFound = legacyResponse.saved_objects.find((obj: any) => obj.id === mon.id);
+        expect(legacyFound).to.be(undefined);
+      });
+
+      // test decryption to make sure migration worked
+      const decryptedMonitor = await getMonitor(mon.id, SPACE_ID);
+      expect(decryptedMonitor.name).to.eql(name);
+      expect(omit(decryptedMonitor, ['created_at', 'updated_at', 'private_locations'])).to.eql(
+        omit(
+          {
+            ...httpMonitor,
+            name,
+            spaceId: SPACE_ID,
+            id: mon.id,
+            config_id: mon.id,
+            locations: mon.locations,
+            spaces: [SPACE_ID],
+          },
+          ['private_locations']
+        )
+      );
+      // verify that it can be edited in the new space
+      const editedMonitor = await editMonitor(mon.id, { name: `legacy-edited-${uuid}` }, SPACE_ID);
+      expect(editedMonitor.name).to.eql(`legacy-edited-${uuid}`);
     });
   });
 };
