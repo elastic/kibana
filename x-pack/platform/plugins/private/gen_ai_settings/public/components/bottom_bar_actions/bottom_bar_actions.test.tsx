@@ -1,0 +1,32 @@
+import { render, screen } from "@testing-library/react"
+import { BottomBarActions } from "./bottom_bar_actions"
+import React from 'react'
+
+describe("bottom_bar_actions", () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+    it("renders correctly", () => {
+        const onDiscardChanges = jest.fn();
+        const onSave = jest.fn();
+        render(<BottomBarActions
+            isLoading={true}
+            onDiscardChanges={onDiscardChanges}
+            onSave={onSave}
+            unsavedChangesCount={5}
+            saveLabel="Save Changes"
+            appTestSubj="genAiSettings"
+        />)
+
+        expect(screen.getByTestId("genAiSettingsBottomBar")).toBeInTheDocument();
+        expect(screen.getByText("5 unsaved changes")).toBeInTheDocument();
+        expect(screen.getByText("Save Changes")).toBeInTheDocument();
+        expect(screen.getByText("Discard changes")).toBeInTheDocument();
+
+        expect(onDiscardChanges).not.toHaveBeenCalled();
+        screen.getByText("Discard changes").click();
+        expect(onDiscardChanges).toHaveBeenCalled();
+
+        expect(onSave).not.toHaveBeenCalled();
+    })
+})

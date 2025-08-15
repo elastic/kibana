@@ -332,7 +332,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
             { defaultMessage: 'Save changes' }
           )}
           unsavedChangesCount={Object.keys(unsavedChanges).length}
-          appTestSubj="observabilityAiAssistantManagement"
+          appTestSubj="genAiSettingsSaveBar"
         />
       )}
     </>

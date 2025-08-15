@@ -63,10 +63,6 @@ const getOptions = (connectors: UseGenAiConnectorsResult): EuiComboBoxOptionOpti
 
 const getOptionsByValues = (value: string, options: EuiComboBoxOptionOption<string>[]): EuiComboBoxOptionOption<string>[] => {
 
-    if (value === null) {
-        return [NoDefaultOption];
-    }
-
     const getOptions = (option: EuiComboBoxOptionOption<string>): EuiComboBoxOptionOption<string>[] => {
         if (option.options === undefined && option.value === value) {
             // If the option has no sub-options and its value is in the selected values, include it
@@ -137,6 +133,7 @@ export const DefaultAIConnector: React.FC<Props> = ({ hasConnectorsAllPrivilege,
                 label={GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR}
             >
                 <EuiComboBox
+                    data-test-subj="defaultAiConnectorComboBox"
                     placeholder={i18n.translate(
                         'xpack.gen_ai_settings.settings.defaultLLm.select.placeholder',
                         { defaultMessage: "Select a single option" }
@@ -154,6 +151,7 @@ export const DefaultAIConnector: React.FC<Props> = ({ hasConnectorsAllPrivilege,
             <EuiFormRow>
                 <EuiCheckbox
                     id={"basicCheckboxId"}
+                    data-test-subj='defaultAiConnectorCheckbox'
                     disabled={!hasConnectorsAllPrivilege || fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]?.isReadOnly}
                     label={
                         <FormattedMessage

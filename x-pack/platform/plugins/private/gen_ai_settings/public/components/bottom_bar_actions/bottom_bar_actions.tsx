@@ -37,7 +37,7 @@ export const BottomBarActions = ({
   areChangesInvalid = false,
 }: Props) => {
   return (
-    <EuiBottomBar paddingSize="s">
+    <EuiBottomBar paddingSize="s" data-test-subj={`${appTestSubj}BottomBar`}>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem
           grow={false}

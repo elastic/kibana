@@ -21,7 +21,7 @@ const useSettingsContext = () => {
     const context = useContext(SettingsContext);
     if (!context) {
         throw new Error(
-            "useSettingsContext must be inside of a AuthenticationContext.Provider."
+            "useSettingsContext must be inside of a SettingsContextProvider.Provider."
         );
     }
     return context;
@@ -31,7 +31,7 @@ export const SettingsContextProvider = ({
     children,
     settingsKeys
 }: {
-    children: React.ReactElement;
+    children: React.ReactNode;
     settingsKeys: string[];
 }) => {
     const value = Settings({ settingsKeys });
@@ -52,6 +52,7 @@ function getSettingsFields({
     if (!uiSettings) {
         return {};
     }
+
     const uiSettingsDefinition = uiSettings.getAll();
     const normalizedSettings = normalizeSettings(uiSettingsDefinition);
 
@@ -67,7 +68,6 @@ function getSettingsFields({
         }
         return acc;
     }, {} as Record<string, FieldDefinition>);
-
 }
 
 const Settings = ({
@@ -111,8 +111,9 @@ const Settings = ({
                     updateErrorOccurred = true;
                 });
                 try {
-                    await Promise.all(Object.entries(unsavedChanges).map(([key, value]) =>
-                        settings.client.set(key, value.unsavedValue)
+                    await Promise.all(Object.entries(unsavedChanges).map(([key, value]) => {
+                        return settings.client.set(key, value.unsavedValue)
+                    }
                     ));
                     queryClient.invalidateQueries({ queryKey: ['settingsFields', settingsKeys] });
                     cleanUnsavedChanges();
