@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Condition, ProcessorDefinition } from '@kbn/streams-schema';
-import { type Ingest, IngestStream } from '@kbn/streams-schema/src/models/ingest';
+import type { Condition, ProcessorDefinition } from '@kbn/streams-schema';
+import type { IngestStream } from '@kbn/streams-schema/src/models/ingest';
+import { type Ingest } from '@kbn/streams-schema/src/models/ingest';
 import { WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
-import { KbnClient, ScoutLogger, measurePerformanceAsync } from '../../../../../../common';
-import { ScoutSpaceParallelFixture } from '../../scout_space';
+import type { KbnClient, ScoutLogger } from '../../../../../../common';
+import { measurePerformanceAsync } from '../../../../../../common';
+import type { ScoutSpaceParallelFixture } from '../../scout_space';
 
 export interface StreamsApiService {
   enable: () => Promise<void>;

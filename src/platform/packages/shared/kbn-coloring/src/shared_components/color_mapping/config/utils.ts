@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Config, CategoricalConfig, GradientConfig } from './types';
+import type { Config, CategoricalConfig, GradientConfig } from './types';
 
 export function isCategoricalColorConfig(config: Config): config is CategoricalConfig {
   return config.colorMode.type === 'categorical';

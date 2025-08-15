@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Optional } from 'utility-types';
-import { KbnBasePaletteConfig, KbnBasePalette } from './palette';
-import { IKbnPalette, KbnPaletteType } from './types';
+import type { Optional } from 'utility-types';
+import type { KbnBasePaletteConfig } from './palette';
+import { KbnBasePalette } from './palette';
+import type { IKbnPalette, KbnPaletteType } from './types';
 
 const DEFAULT_COLOR_COUNT = 10;
 

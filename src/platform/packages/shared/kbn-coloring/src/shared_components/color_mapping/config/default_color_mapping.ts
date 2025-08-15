@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KbnPalettes } from '@kbn/palettes';
-import { ColorMapping } from '.';
+import type { KbnPalettes } from '@kbn/palettes';
+import type { ColorMapping } from '.';
 import { getColor, getGradientColorScale } from '../color/color_handling';
 
 export const DEFAULT_NEUTRAL_PALETTE_INDEX = 1;

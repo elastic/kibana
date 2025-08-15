@@ -10,10 +10,12 @@
 import { Executor } from './executor';
 import * as expressionTypes from '../expression_types';
 import * as expressionFunctions from '../expression_functions';
-import { Execution, FunctionCacheItem } from '../execution';
-import { ExpressionAstFunction, parseExpression, formatExpression } from '../ast';
-import { MigrateFunction } from '@kbn/kibana-utils-plugin/common/persistable_state';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { FunctionCacheItem } from '../execution';
+import { Execution } from '../execution';
+import type { ExpressionAstFunction } from '../ast';
+import { parseExpression, formatExpression } from '../ast';
+import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common/persistable_state';
+import type { SavedObjectReference } from '@kbn/core/types';
 
 describe('Executor', () => {
   test('can instantiate', () => {
