@@ -155,11 +155,7 @@ const integrationSupportsDeploymentMode = (
 
   const integration = packageInfo.policy_templates?.find(({ name }) => name === integrationName);
 
-  if (!integration) {
-    return false;
-  }
-
-  if (integration.deployment_modes?.default) {
+  if (integration?.deployment_modes?.default) {
     return integration.deployment_modes?.default.enabled;
   }
 
