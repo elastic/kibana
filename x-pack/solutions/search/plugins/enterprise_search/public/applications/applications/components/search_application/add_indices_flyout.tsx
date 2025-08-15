@@ -29,9 +29,9 @@ import { Status } from '../../../../../common/types/api';
 import { isNotNullish } from '../../../../../common/utils/is_not_nullish';
 import { getErrorsFromHttpResponse } from '../../../shared/flash_messages/handle_api_errors';
 
+import type { IndicesSelectComboBoxOption } from '../search_applications/components/indices_select_combobox';
 import {
   IndicesSelectComboBox,
-  IndicesSelectComboBoxOption,
   indexToOption,
 } from '../search_applications/components/indices_select_combobox';
 

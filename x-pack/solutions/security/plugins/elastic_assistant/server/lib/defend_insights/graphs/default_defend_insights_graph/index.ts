@@ -9,8 +9,8 @@ import type { CompiledStateGraph } from '@langchain/langgraph';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import { END, START, StateGraph } from '@langchain/langgraph';
-import { DefendInsightType, Replacements } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { DefendInsightType, Replacements } from '@kbn/elastic-assistant-common';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 
 import type { DefendInsightsGraphState } from '../../../langchain/graphs';
 import {
@@ -22,7 +22,7 @@ import {
   getRetrieveAnonymizedDocsOrGenerateEdge,
 } from '../../../langchain/output_chunking';
 import { NodeType } from '../../../langchain/graphs/constants';
-import { DefendInsightsCombinedPrompts } from './prompts/incompatible_antivirus';
+import type { DefendInsightsCombinedPrompts } from './prompts/incompatible_antivirus';
 import { getCombinedDefendInsightsPrompt } from './prompts/get_combined_prompt';
 import { responseIsHallucinated } from './helpers/response_is_hallucinated';
 import { getRetrieveAnonymizedEventsNode } from './nodes/retriever';

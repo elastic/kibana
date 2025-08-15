@@ -8,15 +8,8 @@
  */
 
 // @ts-nocheck
-import {
-  Connector,
-  ConnectorStats,
-  ConnectorStatus,
-  ConnectorSyncJob,
-  SyncJobType,
-  SyncStatus,
-  TriggerMethod,
-} from '..';
+import type { Connector, ConnectorStats, ConnectorSyncJob } from '..';
+import { ConnectorStatus, SyncJobType, SyncStatus, TriggerMethod } from '..';
 
 const now = Date.now();
 

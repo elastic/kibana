@@ -5,13 +5,12 @@
  * 2.0.
  */
 
+import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
   kqlQuerySchema,
-  SLODefinitionResponse,
-  SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 
 export function convertSliApmParamsToApmAppDeeplinkUrl(

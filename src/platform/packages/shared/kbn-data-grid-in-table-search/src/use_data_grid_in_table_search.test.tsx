@@ -23,7 +23,7 @@ import {
   HIGHLIGHT_CLASS_NAME,
   BUTTON_PREV_TEST_SUBJ,
 } from './constants';
-import { RenderCellValuePropsWithInTableSearch } from './types';
+import type { RenderCellValuePropsWithInTableSearch } from './types';
 
 describe('useDataGridInTableSearch', () => {
   const testData = generateMockData(100, 2);

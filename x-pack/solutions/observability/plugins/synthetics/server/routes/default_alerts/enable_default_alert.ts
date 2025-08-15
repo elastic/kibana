@@ -6,11 +6,11 @@
  */
 
 import { LockAcquisitionError } from '@kbn/lock-manager';
-import { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { DefaultAlertService } from './default_alert_service';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { DEFAULT_ALERT_RESPONSE } from '../../../common/types/default_alerts';
+import type { DEFAULT_ALERT_RESPONSE } from '../../../common/types/default_alerts';
 import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
