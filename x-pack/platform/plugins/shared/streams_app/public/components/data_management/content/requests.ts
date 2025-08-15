@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { ContentPack, ContentPackIncludedObjects } from '@kbn/content-packs-schema';
+import {
+  ConflictResolution,
+  ContentPack,
+  ContentPackIncludedObjects,
+  StreamChanges,
+  StreamConflict,
+} from '@kbn/content-packs-schema';
 import { HttpSetup } from '@kbn/core/public';
 import { Streams } from '@kbn/streams-schema';
 
@@ -14,15 +20,18 @@ export async function importContent({
   http,
   definition,
   include,
+  resolutions,
 }: {
   file: File;
   http: HttpSetup;
   definition: Streams.ingest.all.GetResponse;
   include: ContentPackIncludedObjects;
+  resolutions: ConflictResolution[];
 }) {
   const body = new FormData();
   body.append('content', file);
   body.append('include', JSON.stringify(include));
+  body.append('resolutions', JSON.stringify(resolutions));
 
   const response = await http.post(`/api/streams/${definition.stream.name}/content/import`, {
     body,
@@ -59,4 +68,33 @@ export async function previewContent({
   );
 
   return contentPack;
+}
+
+export async function diffContent({
+  file,
+  http,
+  definition,
+  include,
+}: {
+  file: File;
+  http: HttpSetup;
+  definition: Streams.ingest.all.GetResponse;
+  include: ContentPackIncludedObjects;
+}) {
+  const body = new FormData();
+  body.append('content', file);
+  body.append('include', JSON.stringify(include));
+
+  const response = await http.post<{ changes: StreamChanges[]; conflicts: StreamConflict[] }>(
+    `/internal/streams/${definition.stream.name}/content/diff`,
+    {
+      body,
+      headers: {
+        // Important to be undefined, it forces proper headers to be set for FormData
+        'Content-Type': undefined,
+      },
+    }
+  );
+
+  return response;
 }
