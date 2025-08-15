@@ -11,6 +11,9 @@ export type * from './map_descriptor';
 export type * from './style_property_descriptor_types';
 
 export type {
+  //
+  // Source types
+  //
   AggDescriptor,
   CountAggDescriptor,
   FieldedAggDescriptor,
@@ -34,4 +37,45 @@ export type {
   TiledSingleLayerVectorSourceDescriptor,
   JoinSourceDescriptor,
   SourceDescriptor,
+
+  //
+  // Style types
+  //
+  Category,
+  CategoryColorStop,
+  ColorDynamicOptions,
+  ColorStaticOptions,
+  ColorDynamicStylePropertyDescriptor,
+  ColorStaticStylePropertyDescriptor,
+  ColorStylePropertyDescriptor,
+  DynamicStyleProperties,
+  DynamicStylePropertyOptions,
+  FieldMetaOptions,
+  HeatmapStyleDescriptor,
+  IconDynamicOptions,
+  IconStaticOptions,
+  IconStop,
+  IconStylePropertyDescriptor,
+  LabelDynamicOptions,
+  LabelBorderSizeOptions,
+  LabelPositionStylePropertyDescriptor,
+  LabelStaticOptions,
+  LabelStylePropertyDescriptor,
+  LabelZoomRangeStylePropertyDescriptor,
+  OrdinalColorStop,
+  OrientationDynamicOptions,
+  OrientationStaticOptions,
+  OrientationStylePropertyDescriptor,
+  PercentilesFieldMeta,
+  SizeDynamicOptions,
+  SizeStaticOptions,
+  SizeStylePropertyDescriptor,
+  StaticStylePropertyOptions,
+  StyleMetaDescriptor,
+  StylePropertyField,
+  StylePropertyOptions,
+  SymbolizeAsOptions,
+  RangeFieldMeta,
+  VectorStyleDescriptor,
+  VectorStylePropertiesDescriptor,
 } from '../../server';
