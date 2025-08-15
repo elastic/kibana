@@ -19,8 +19,8 @@ import {
   ChatCompleteMetadata,
   ChatCompleteOptions,
   ChatCompleteAPI,
-  ChatCompletionEventType,
 } from '@kbn/inference-common';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { correctCommonEsqlMistakes, generateFakeToolCallId } from '../../../../common';
 import { INLINE_ESQL_QUERY_REGEX } from '../../../../common/tasks/nl_to_esql/constants';
 import { EsqlDocumentBase } from '../doc_base';
@@ -42,6 +42,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   logger,
   system,
   metadata,
+  maxCallsAllowed = MAX_CALLS,
 }: {
   connectorId: string;
   systemMessage: string;
@@ -52,6 +53,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   logger: Pick<Logger, 'debug'>;
   metadata?: ChatCompleteMetadata;
   system?: string;
+  maxCallsAllowed?: number;
 } & Pick<ChatCompleteOptions, 'maxRetries' | 'retryConfiguration' | 'functionCalling'>) => {
   return function askLlmToRespond({
     documentationRequest: { commands, functions },
@@ -60,29 +62,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
     documentationRequest: { commands?: string[]; functions?: string[] };
     callCount?: number;
   }): Observable<NlToEsqlTaskEvent<TToolOptions>> {
-    // Ensure askLlmToRespond is not called more than MAX_CALLS times
-    if (callCount >= MAX_CALLS) {
-      const stringifiedRequest = JSON.stringify(
-        {
-          commands,
-          functions,
-        },
-        null,
-        2
-      );
-      logger.debug(`Maximum ${MAX_CALLS} calls reached for askLlmToRespond: ${stringifiedRequest}`);
-      return of({
-        type: ChatCompletionEventType.ChatCompletionMessage,
-        id: 'exit_loop',
-        content: `Reached the maximum number of documentation requests${
-          commands && commands.length > 0 ? ` for commands [${commands?.join(', ')}]` : ''
-        }${
-          functions && functions.length > 0 ? ` | functions [${functions?.join(', ')}]` : ''
-        } (${MAX_CALLS}).`,
-        toolCalls: [],
-      } as NlToEsqlTaskEvent<TToolOptions>);
-    }
-
+    const functionLimitReached = callCount >= maxCallsAllowed;
     const keywords = [...(commands ?? []), ...(functions ?? [])];
     const requestedDocumentation = docBase.getDocumentation(keywords);
     const fakeRequestDocsToolCall = createFakeTooCall(commands, functions);
@@ -135,22 +115,24 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
           When converting queries from one language to ES|QL, make sure that the functions are available
           and documented in ES|QL. E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
           ${system ? `## Additional instructions\n\n${system}` : ''}`,
-        messages: [
-          ...messages,
-          {
-            role: MessageRole.Assistant,
-            content: null,
-            toolCalls: [fakeRequestDocsToolCall],
-          },
-          {
-            name: fakeRequestDocsToolCall.function.name,
-            role: MessageRole.Tool,
-            response: {
-              documentation: requestedDocumentation,
-            },
-            toolCallId: fakeRequestDocsToolCall.toolCallId,
-          },
-        ],
+        messages: functionLimitReached
+          ? messages
+          : [
+              ...messages,
+              {
+                role: MessageRole.Assistant,
+                content: null,
+                toolCalls: [fakeRequestDocsToolCall],
+              },
+              {
+                name: fakeRequestDocsToolCall.function.name,
+                role: MessageRole.Tool,
+                response: {
+                  documentation: requestedDocumentation,
+                },
+                toolCallId: fakeRequestDocsToolCall.toolCallId,
+              },
+            ],
         toolChoice,
         tools: {
           ...tools,
@@ -179,15 +161,27 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
               generateEvent.toolCalls.length === 1 ? generateEvent.toolCalls[0] : undefined;
 
             if (onlyToolCall?.function.name === 'request_documentation') {
-              const args = onlyToolCall.function.arguments;
+              if (functionLimitReached) {
+                return of({
+                  ...generateEvent,
+                  content: `You have reached the maximum number of documentation requests. Do not try to request documentation again for commands ${commands?.join(
+                    ', '
+                  )} and functions ${functions?.join(
+                    ', '
+                  )}. Try to answer the user's question without using currently available information.`,
+                });
+              }
 
-              return askLlmToRespond({
-                documentationRequest: {
-                  commands: args.commands,
-                  functions: args.functions,
-                },
-                callCount: callCount + 1,
-              });
+              const args = onlyToolCall.function.arguments;
+              if (args && isPopulatedObject<string, string[]>(args, ['commands', 'functions'])) {
+                return askLlmToRespond({
+                  documentationRequest: {
+                    commands: args.commands,
+                    functions: args.functions,
+                  },
+                  callCount: callCount + 1,
+                });
+              }
             }
           }
 
