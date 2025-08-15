@@ -172,6 +172,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     field: 'cloud.provider',
                     eq: 'gcp',
                   },
+                  status: 'enabled',
                 },
               ],
             },

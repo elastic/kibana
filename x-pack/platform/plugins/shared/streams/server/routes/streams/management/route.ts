@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { conditionSchema } from '@kbn/streamlang';
+import { RoutingStatus } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
@@ -30,7 +31,11 @@ export const forkStreamsRoute = createServerRoute({
     path: z.object({
       name: z.string(),
     }),
-    body: z.object({ stream: z.object({ name: z.string() }), where: conditionSchema }),
+    body: z.object({
+      stream: z.object({ name: z.string() }),
+      where: conditionSchema,
+      status: RoutingStatus,
+    }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
     const { streamsClient } = await getScopedClients({
@@ -41,6 +46,7 @@ export const forkStreamsRoute = createServerRoute({
       parent: params.path.name,
       where: params.body.where,
       name: params.body.stream.name,
+      status: params.body.status,
     });
   },
 });

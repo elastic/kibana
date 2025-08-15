@@ -14,7 +14,7 @@ export { Group } from './src/models/group';
 
 export {
   type RoutingDefinition,
-  type RoutingStatus,
+  RoutingStatus,
   isRoutingEnabled,
   routingDefinitionListSchema,
 } from './src/models/ingest/routing';

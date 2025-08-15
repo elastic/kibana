@@ -13,7 +13,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { Streams, getAncestors, getParentId } from '@kbn/streams-schema';
+import { RoutingStatus, Streams, getAncestors, getParentId } from '@kbn/streams-schema';
 import { LockManagerService } from '@kbn/lock-manager';
 import { Condition } from '@kbn/streamlang';
 import { AssetClient } from './assets/asset_client';
@@ -296,10 +296,12 @@ export class StreamsClient {
     parent,
     name,
     where: condition,
+    status,
   }: {
     parent: string;
     name: string;
     where: Condition;
+    status: RoutingStatus;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = Streams.WiredStream.Definition.parse(await this.getStream(parent));
 
@@ -322,6 +324,7 @@ export class StreamsClient {
                 routing: parentDefinition.ingest.wired.routing.concat({
                   destination: name,
                   where: condition,
+                  status,
                 }),
               },
             },

@@ -212,6 +212,7 @@ export const streamRoutingMachine = setup({
                     definition: context.definition,
                     where: currentRoutingRule.where,
                     destination: currentRoutingRule.destination,
+                    status: currentRoutingRule.status,
                   };
                 },
                 onDone: {

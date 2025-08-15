@@ -9,7 +9,7 @@ import { Condition, conditionSchema } from '@kbn/streamlang';
 import { z } from '@kbn/zod';
 import { NonEmptyString, createIsNarrowSchema } from '@kbn/zod-helpers';
 
-const RoutingStatus = z.enum(['enabled', 'disabled']);
+export const RoutingStatus = z.enum(['enabled', 'disabled']);
 export type RoutingStatus = z.infer<typeof RoutingStatus>;
 
 export interface RoutingDefinition {

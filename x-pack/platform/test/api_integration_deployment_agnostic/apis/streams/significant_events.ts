@@ -109,6 +109,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     where: {
                       always: {},
                     },
+                    status: 'enabled',
                   },
                 ],
               },
@@ -139,6 +140,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       field: 'attributes.field',
                       lt: 15,
                     },
+                    status: 'enabled',
                   },
                   {
                     destination: 'logs.queries-test.child.second',
@@ -146,6 +148,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       field: 'attributes.field',
                       gt: 15,
                     },
+                    status: 'enabled',
                   },
                 ],
               },
