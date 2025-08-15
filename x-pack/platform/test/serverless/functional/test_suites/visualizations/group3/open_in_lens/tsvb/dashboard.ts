@@ -26,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Dashboard to TSVB to Lens', function describeIndexTests() {
     const fixture =
-      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/tsvb/dashboard.json';
+      'x-pack/platform/test/serverless/fixtures/kbn_archives/lens/open_in_lens/tsvb/dashboard.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);

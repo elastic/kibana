@@ -9,9 +9,9 @@ import {
   FlattenRecord,
   flattenRecord,
   namedFieldDefinitionConfigSchema,
-  processorWithIdDefinitionSchema,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { streamlangDSLSchema } from '@kbn/streamlang';
 import { STREAMS_API_PRIVILEGES, STREAMS_TIERED_ML_FEATURE } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
@@ -26,7 +26,7 @@ import {
 const paramsSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
-    processing: z.array(processorWithIdDefinitionSchema),
+    processing: streamlangDSLSchema,
     documents: z.array(flattenRecord),
     detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
   }),

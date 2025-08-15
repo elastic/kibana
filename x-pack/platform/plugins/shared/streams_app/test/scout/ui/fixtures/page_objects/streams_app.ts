@@ -8,7 +8,7 @@
 /* eslint-disable playwright/no-nth-methods */
 
 import { ScoutPage, expect } from '@kbn/scout';
-import { ProcessorType } from '@kbn/streams-schema';
+import { ProcessorType } from '@kbn/streamlang';
 import { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
