@@ -19,7 +19,7 @@ import {
 {{/each}}
 
 import { FtrProviderContext } from 'x-pack/test/api_integration/ftr_provider_context';
-import { routeWithNamespace } from 'x-pack/test/common/utils/security_solution';
+import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
