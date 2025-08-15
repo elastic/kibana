@@ -23,6 +23,10 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
+import {
+  useDeletePropertyAction,
+  DeleteAttachmentConfirmationModal,
+} from '@kbn/cases-plugin/public';
 import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
@@ -38,6 +42,7 @@ import { useKibana } from '../../utils/kibana_react';
 export function AlertActions({
   observabilityRuleTypeRegistry,
   alert,
+  caseData,
   tableId,
   refresh,
   openAlertInFlyout,
@@ -58,6 +63,20 @@ export function AlertActions({
 
   const userCasesPermissions = cases?.helpers.canUseCases([observabilityFeatureId]);
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
+
+  const alertAttachment = useMemo(() => {
+    return caseData?.comments?.find((comment) => {
+      if ('alertId' in comment && comment.alertId.includes(alert._id)) {
+        return comment.alertId.includes(alert._id);
+      }
+    });
+  }, [caseData, alert._id]);
+
+  const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
+    onDelete: () => {
+      removeAlertsFromCase();
+    },
+  });
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -95,14 +114,21 @@ export function AlertActions({
     [refresh, telemetryClient, tableId]
   );
 
-  const { isPopoverOpen, setIsPopoverOpen, handleAddToExistingCaseClick, handleAddToNewCaseClick } =
-    useCaseActions({
-      onAddToCase,
-      alerts: [alert],
-      services: {
-        cases,
-      },
-    });
+  const {
+    isPopoverOpen,
+    setIsPopoverOpen,
+    handleAddToExistingCaseClick,
+    handleAddToNewCaseClick,
+    removeAlertsFromCase,
+  } = useCaseActions({
+    onAddToCase,
+    alerts: [alert],
+    services: {
+      cases,
+    },
+    caseData,
+    alertAttachment,
+  });
 
   const closeActionsPopover = useCallback(() => {
     setIsPopoverOpen(false);
@@ -111,6 +137,23 @@ export function AlertActions({
   const toggleActionsPopover = () => {
     setIsPopoverOpen(!isPopoverOpen);
   };
+
+  const removeFromCaseAction = [
+    ...(alertAttachment
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="remove-from-case-action"
+            key="removeFromCase"
+            onClick={onModalOpen}
+            size="s"
+          >
+            {i18n.translate('xpack.observability.alerts.actions.removeFromCase', {
+              defaultMessage: 'Remove from case',
+            })}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+  ];
 
   const actionsMenuItems = [
     ...(userCasesPermissions?.createComment && userCasesPermissions?.read
@@ -135,6 +178,7 @@ export function AlertActions({
               defaultMessage: 'Add to new case',
             })}
           </EuiContextMenuItem>,
+          ...removeFromCaseAction,
         ]
       : []),
     useMemo(
@@ -157,11 +201,13 @@ export function AlertActions({
           alert={alert}
           openAlertInFlyout={openAlertInFlyout}
           services={services}
+          caseData={caseData}
           {...rest}
         />
       ),
       [
         alert,
+        caseData,
         closeActionsPopover,
         observabilityRuleTypeRegistry,
         openAlertInFlyout,
@@ -259,6 +305,21 @@ export function AlertActions({
           />
         </EuiPopover>
       </EuiFlexItem>
+      {showDeletionModal && (
+        <DeleteAttachmentConfirmationModal
+          onCancel={onCancel}
+          onConfirm={onConfirm}
+          confirmButtonText={i18n.translate(
+            'xpack.observability.alerts.actions.removeFromCaseConfirm',
+            {
+              defaultMessage: 'Remove',
+            }
+          )}
+          title={i18n.translate('xpack.observability.alerts.actions.removeFromCaseTitle', {
+            defaultMessage: 'Remove alert from case',
+          })}
+        />
+      )}
     </>
   );
 }
