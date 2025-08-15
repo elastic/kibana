@@ -119,11 +119,9 @@ export function ConditionEditor(props: ConditionEditorProps) {
   const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!isFilterCondition);
 
   const handleConditionChange = (updatedCondition: Condition) => {
-    const { status, onConditionChange } = props;
-
-    onConditionChange({
+    props.onConditionChange({
       where: emptyEqualsToAlways(updatedCondition),
-      status,
+      status: props.status,
     });
   };
 
@@ -141,7 +139,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
           compressed
           checked={usingSyntaxEditor}
           onChange={toggleSyntaxEditor}
-          disabled={status === 'disabled'}
+          disabled={props.status === 'disabled'}
         />
       }
       isInvalid={isInvalidCondition}
@@ -167,12 +165,12 @@ export function ConditionEditor(props: ConditionEditorProps) {
             }
           }}
           options={{
-            readOnly: status === 'disabled',
+            readOnly: props.status === 'disabled',
           }}
         />
       ) : isFilterCondition ? (
         <FilterForm
-          disabled={status === 'disabled'}
+          disabled={props.status === 'disabled'}
           condition={condition}
           onConditionChange={handleConditionChange}
         />
