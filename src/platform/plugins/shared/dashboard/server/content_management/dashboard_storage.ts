@@ -48,7 +48,7 @@ const searchArgsToSOFindOptions = (
     search: query.text,
     perPage: query.limit,
     page: query.cursor ? +query.cursor : undefined,
-    defaultSearchOperator: 'AND',
+    defaultSearchOperator: query.defaultSearchOperator ?? 'AND',
     namespaces: options?.spaces,
     ...tagsToFindOptions(query.tags),
   };

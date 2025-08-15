@@ -58,8 +58,7 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
       referencedPanelManager
     );
     try {
-      const { suggestedDashboards, linkedDashboards } =
-        await dashboardParser.fetchRelatedDashboards();
+      const { suggestedDashboards, linkedDashboards } = await dashboardParser.fetch();
       return {
         suggestedDashboards,
         linkedDashboards,
