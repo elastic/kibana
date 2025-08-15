@@ -83,7 +83,9 @@ export class ConfigurationService {
       } else if (error instanceof ArtifactNotFoundError) {
         this.logger.warn('Indices metadata configuration artifact not found');
       } else {
-        this.logger.error('Failed to get indices metadata configuration', { error } as LogMeta);
+        this.logger.error(`Failed to get indices metadata configuration: ${error}`, {
+          error,
+        } as LogMeta);
       }
       return undefined;
     }
