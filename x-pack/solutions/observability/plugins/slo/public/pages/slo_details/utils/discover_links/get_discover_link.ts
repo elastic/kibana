@@ -9,14 +9,21 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { buildEsQuery } from '@kbn/observability-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { kqlWithFiltersSchema } from '@kbn/slo-schema';
+import {
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
+  kqlCustomIndicatorSchema,
+  kqlWithFiltersSchema,
+} from '@kbn/slo-schema';
 import { isEmpty } from 'lodash';
 import { v4 } from 'uuid';
+import { getApmAvailabilityFilters as getApmAvailabilityQueries } from './get_apm_availability_queries';
+import { getApmLatencyQueries } from './get_apm_latency_queries';
+import { getCustomKqlQueries } from './get_custom_kql_queries';
+import { BAD_EVENTS, GOOD_EVENTS, TOTAL_EVENTS } from './i18n';
 
-function createDiscoverLocator({
+export function createDiscoverLocator({
   slo,
   showBad = false,
   showGood = false,
@@ -29,83 +36,99 @@ function createDiscoverLocator({
   timeRange: TimeRange;
   uiSettings?: IUiSettingsClient;
 }) {
+  const esQueryConfig = uiSettings && getEsQueryConfig(uiSettings);
   const indexId = v4();
   const filters: Filter[] = [];
 
-  if (kqlWithFiltersSchema.is(slo.indicator.params.filter)) {
-    slo.indicator.params.filter.filters.forEach((i) => filters.push(i));
+  if (apmTransactionDurationIndicatorSchema.is(slo.indicator)) {
+    const { totalQuery } = getApmLatencyQueries(slo.indicator, esQueryConfig);
+
+    filters.push({
+      $state: { store: FilterStateStore.APP_STATE },
+      meta: {
+        type: 'custom',
+        alias: TOTAL_EVENTS,
+        disabled: false,
+        index: indexId,
+      },
+      query: totalQuery,
+    });
   }
 
-  const filterKuery = kqlWithFiltersSchema.is(slo.indicator.params.filter)
-    ? slo.indicator.params.filter.kqlQuery
-    : slo.indicator.params.filter;
-
-  if (slo.indicator.type === 'sli.kql.custom') {
-    const goodKuery = kqlWithFiltersSchema.is(slo.indicator.params.good)
-      ? slo.indicator.params.good.kqlQuery
-      : slo.indicator.params.good;
-    const goodFilters = kqlWithFiltersSchema.is(slo.indicator.params.good)
-      ? slo.indicator.params.good.filters
-      : [];
-    const totalKuery = kqlWithFiltersSchema.is(slo.indicator.params.total)
-      ? slo.indicator.params.total.kqlQuery
-      : slo.indicator.params.total;
-    const totalFilters = kqlWithFiltersSchema.is(slo.indicator.params.total)
-      ? slo.indicator.params.total.filters
-      : [];
-
-    const customGoodFilter = buildEsQuery({
-      kuery: goodKuery,
-      filters: goodFilters,
-      ...(uiSettings && { config: getEsQueryConfig(uiSettings) }),
-    });
-    const customTotalFilter = buildEsQuery({
-      kuery: totalKuery,
-      filters: totalFilters,
-      ...(uiSettings && { config: getEsQueryConfig(uiSettings) }),
-    });
-    const customBadFilter = { bool: { filter: customTotalFilter, must_not: customGoodFilter } };
+  if (apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) {
+    const { goodQuery, badQuery, totalQuery } = getApmAvailabilityQueries(
+      slo.indicator,
+      esQueryConfig
+    );
 
     filters.push({
       $state: { store: FilterStateStore.APP_STATE },
       meta: {
         type: 'custom',
-        alias: i18n.translate('xpack.slo.sloDetails.goodFilterLabel', {
-          defaultMessage: 'Good events',
-        }),
-        disabled: !showGood,
-        value: JSON.stringify(customGoodFilter),
-        index: indexId,
-      },
-      query: customGoodFilter as Record<string, any>,
-    });
-
-    filters.push({
-      $state: { store: FilterStateStore.APP_STATE },
-      meta: {
-        type: 'custom',
-        alias: i18n.translate('xpack.slo.sloDetails.badFilterLabel', {
-          defaultMessage: 'Bad events',
-        }),
-        disabled: !showBad,
-        value: JSON.stringify(customBadFilter),
-        index: indexId,
-      },
-      query: customBadFilter as Record<string, any>,
-    });
-
-    filters.push({
-      $state: { store: FilterStateStore.APP_STATE },
-      meta: {
-        type: 'custom',
-        alias: i18n.translate('xpack.slo.sloDetails.totalFilterLabel', {
-          defaultMessage: 'Total events',
-        }),
+        alias: TOTAL_EVENTS,
         disabled: showGood || showBad,
-        value: JSON.stringify(customTotalFilter),
         index: indexId,
       },
-      query: customTotalFilter as Record<string, any>,
+      query: totalQuery,
+    });
+
+    filters.push({
+      $state: { store: FilterStateStore.APP_STATE },
+      meta: {
+        type: 'custom',
+        alias: GOOD_EVENTS,
+        disabled: !showGood,
+        index: indexId,
+      },
+      query: goodQuery,
+    });
+
+    filters.push({
+      $state: { store: FilterStateStore.APP_STATE },
+      meta: {
+        type: 'custom',
+        alias: BAD_EVENTS,
+        disabled: !showBad,
+        index: indexId,
+      },
+      query: badQuery,
+    });
+  }
+
+  if (kqlCustomIndicatorSchema.is(slo.indicator)) {
+    const { goodQuery, badQuery, totalQuery } = getCustomKqlQueries(slo.indicator, esQueryConfig);
+
+    filters.push({
+      $state: { store: FilterStateStore.APP_STATE },
+      meta: {
+        type: 'custom',
+        alias: GOOD_EVENTS,
+        disabled: !showGood,
+        index: indexId,
+      },
+      query: goodQuery,
+    });
+
+    filters.push({
+      $state: { store: FilterStateStore.APP_STATE },
+      meta: {
+        type: 'custom',
+        alias: BAD_EVENTS,
+        disabled: !showBad,
+        index: indexId,
+      },
+      query: badQuery,
+    });
+
+    filters.push({
+      $state: { store: FilterStateStore.APP_STATE },
+      meta: {
+        type: 'custom',
+        alias: TOTAL_EVENTS,
+        disabled: showGood || showBad,
+        index: indexId,
+      },
+      query: totalQuery,
     });
   }
 
@@ -138,6 +161,16 @@ function createDiscoverLocator({
 
   const timeFieldName =
     'timestampField' in slo.indicator.params ? slo.indicator.params.timestampField : '@timestamp';
+
+  // Add the filters from the main query filter as discover filters
+  if (kqlWithFiltersSchema.is(slo.indicator.params.filter)) {
+    slo.indicator.params.filter.filters.forEach((f: Filter) => filters.push(f));
+  }
+
+  // Add the kql filter from the main query filter as discover kql query
+  const filterKuery = kqlWithFiltersSchema.is(slo.indicator.params.filter)
+    ? slo.indicator.params.filter.kqlQuery
+    : slo.indicator.params.filter;
 
   return {
     timeRange,
