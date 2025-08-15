@@ -6,8 +6,7 @@
  */
 import type { ActorRefFrom, SnapshotFrom } from 'xstate5';
 import { assign, forwardTo, sendTo, setup } from 'xstate5';
-import type { ProcessorDefinition } from '@kbn/streams-schema';
-import { getProcessorType } from '@kbn/streams-schema';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import type { ProcessorInput, ProcessorContext, ProcessorEvent, ProcessorResources } from './types';
 
 export type ProcessorActorRef = ActorRefFrom<typeof processorMachine>;
@@ -21,13 +20,13 @@ export const processorMachine = setup({
   },
   actions: {
     changeProcessor: assign(
-      ({ context }, params: { processor: ProcessorDefinition; resources?: ProcessorResources }) => {
-        const type = getProcessorType(params.processor);
-
+      (
+        { context },
+        params: { processor: StreamlangProcessorDefinition; resources?: ProcessorResources }
+      ) => {
         return {
           processor: {
-            id: context.processor.id,
-            type,
+            customIdentifier: context.processor.customIdentifier,
             ...params.processor,
           },
           resources: params.resources,
@@ -46,14 +45,14 @@ export const processorMachine = setup({
       ({ context }) => context.parentRef,
       ({ context }) => ({
         type: 'processor.change',
-        id: context.processor.id,
+        id: context.processor.customIdentifier!,
       })
     ),
     notifyProcessorDelete: sendTo(
       ({ context }) => context.parentRef,
       ({ context }) => ({
         type: 'processor.delete',
-        id: context.processor.id,
+        id: context.processor.customIdentifier!,
       })
     ),
   },

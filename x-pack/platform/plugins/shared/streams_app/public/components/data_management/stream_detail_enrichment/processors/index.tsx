@@ -31,21 +31,15 @@ import type { SubmitHandler, DeepPartial } from 'react-hook-form';
 import { useForm, FormProvider, useWatch } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { DiscardPromptOptions } from '../../../../hooks/use_discard_confirm';
 import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
 import { ProcessorTypeSelector } from './processor_type_selector';
-import type { ProcessorFormState, ProcessorDefinitionWithUIAttributes } from '../types';
-import {
-  getFormStateFrom,
-  convertFormStateToProcessor,
-  isGrokProcessor,
-  isDissectProcessor,
-  isDateProcessor,
-  SPECIALISED_TYPES,
-} from '../utils';
+import type { ProcessorFormState } from '../types';
+import { getFormStateFrom, convertFormStateToProcessor, SPECIALISED_TYPES } from '../utils';
 import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
 import type { StreamEnrichmentContextType } from '../state_management/stream_enrichment_state_machine';
 import {
@@ -127,7 +121,7 @@ const ProcessorConfigurationListItem = ({
             <EuiIcon type="grab" size="m" />
           </EuiPanel>
         )}
-        <strong data-test-subj="streamsAppProcessorLegend">{processor.type.toUpperCase()}</strong>
+        <strong data-test-subj="streamsAppProcessorLegend">{processor.action.toUpperCase()}</strong>
         <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
           {processorDescription}
         </EuiText>
@@ -152,7 +146,7 @@ const ProcessorConfigurationListItem = ({
               size="xs"
               aria-label={i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorAction',
-                { defaultMessage: 'Edit {type} processor', values: { type: processor.type } }
+                { defaultMessage: 'Edit {type} processor', values: { type: processor.action } }
               )}
             />
           </EuiFlexGroup>
@@ -215,7 +209,7 @@ const ProcessorConfigurationEditor = ({
     (snapshot) => !isEqual(snapshot.context.previousProcessor, snapshot.context.processor)
   );
 
-  const type = useWatch({ control: methods.control, name: 'type' });
+  const type = useWatch({ control: methods.control, name: 'action' });
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasStreamChanges || hasProcessorChanges,
@@ -247,7 +241,7 @@ const ProcessorConfigurationEditor = ({
         arrowProps={{
           css: { display: 'none' },
         }}
-        buttonContent={<strong>{processor.type.toUpperCase()}</strong>}
+        buttonContent={<strong>{processor.action.toUpperCase()}</strong>}
         buttonElement="legend"
         buttonProps={{
           css: css`
@@ -349,13 +343,13 @@ const ProcessorPanel = (props: PropsWithChildren) => {
   );
 };
 
-const getProcessorDescription = (processor: ProcessorDefinitionWithUIAttributes) => {
-  if (isGrokProcessor(processor)) {
-    return processor.grok.patterns.join(' • ');
-  } else if (isDissectProcessor(processor)) {
-    return processor.dissect.pattern;
-  } else if (isDateProcessor(processor)) {
-    return `${processor.date.field} • ${processor.date.formats.join(' - ')}`;
+const getProcessorDescription = (processor: StreamlangProcessorDefinition) => {
+  if (processor.action === 'grok') {
+    return processor.patterns.join(' • ');
+  } else if (processor.action === 'dissect') {
+    return processor.pattern;
+  } else if (processor.action === 'date') {
+    return `${processor.from} • ${processor.formats.join(' - ')}`;
   }
 
   return '';

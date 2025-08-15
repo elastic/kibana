@@ -48,7 +48,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         description: '',
         ingest: {
           lifecycle: { inherit: {} },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           classic: {},
         },
       });
@@ -67,17 +69,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
-                processing: [
-                  {
-                    grok: {
-                      if: { always: {} },
-                      field: 'message',
+                processing: {
+                  steps: [
+                    {
+                      action: 'grok',
+                      where: { always: {} },
+                      from: 'message',
                       patterns: [
                         '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                       ],
                     },
-                  },
-                ],
+                  ],
+                },
+
                 classic: {},
               },
             },
@@ -114,17 +118,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         description: '',
         ingest: {
           lifecycle: { inherit: {} },
-          processing: [
-            {
-              grok: {
-                field: 'message',
+          processing: {
+            steps: [
+              {
+                action: 'grok' as const,
+                from: 'message',
                 patterns: [
                   '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                 ],
-                if: { always: {} },
+                where: { always: {} },
               },
-            },
-          ],
+            ],
+          },
           classic: {},
         },
       });
@@ -170,7 +175,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
-                processing: [],
+                processing: {
+                  steps: [],
+                },
                 classic: {},
               },
             },
@@ -276,17 +283,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [
-                {
-                  grok: {
-                    if: { always: {} },
-                    field: 'message',
+              processing: {
+                steps: [
+                  {
+                    action: 'grok',
+                    where: { always: {} },
+                    from: 'message',
                     patterns: [
                       '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                     ],
                   },
-                },
-              ],
+                ],
+              },
               classic: {},
             },
           },
@@ -340,17 +348,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [
-                {
-                  grok: {
-                    if: { always: {} },
-                    field: 'message',
+              processing: {
+                steps: [
+                  {
+                    action: 'grok',
+                    where: { always: {} },
+                    from: 'message',
                     patterns: [
                       '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                     ],
                   },
-                },
-              ],
+                ],
+              },
               classic: {},
             },
           },
@@ -374,7 +383,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: {
+                steps: [],
+              },
               classic: {},
             },
           },
@@ -395,7 +406,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: { steps: [] },
               classic: {},
             },
           },
@@ -439,7 +450,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
-                  processing: [],
+                  processing: { steps: [] },
                   classic: {},
                 },
               },

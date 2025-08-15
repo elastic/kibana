@@ -19,7 +19,9 @@ function createMockWiredStream(
     ingest: {
       lifecycle,
       wired: { fields: {}, routing: [] },
-      processing: [],
+      processing: {
+        steps: [],
+      },
     },
   };
 }

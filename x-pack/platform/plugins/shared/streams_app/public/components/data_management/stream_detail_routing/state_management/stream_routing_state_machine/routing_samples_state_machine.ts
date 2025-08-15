@@ -9,14 +9,15 @@ import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xst
 import { setup, assign, fromObservable, fromEventObservable } from 'xstate5';
 import { Observable, filter, map, switchMap, timeout, catchError, throwError } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
-import type { Condition, SampleDocument, Streams } from '@kbn/streams-schema';
-import { conditionToQueryDsl, getConditionFields, isAlwaysCondition } from '@kbn/streams-schema';
+import type { SampleDocument, Streams } from '@kbn/streams-schema';
 import { isEmpty, isNumber } from 'lodash';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
 import { i18n } from '@kbn/i18n';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { Condition } from '@kbn/streamlang';
+import { isAlwaysCondition, conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
 import { getPercentageFormatter } from '../../../../../util/formatters';
 import { emptyEqualsToAlways } from '../../../../../util/condition';
 

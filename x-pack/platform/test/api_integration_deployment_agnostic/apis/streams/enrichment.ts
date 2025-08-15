@@ -33,10 +33,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream: {
           name: 'logs.nginx',
         },
-        if: {
+        where: {
           field: 'resource.attributes.host.name',
-          operator: 'eq' as const,
-          value: 'routeme',
+          eq: 'routeme',
         },
       };
       // We use a forked stream as processing changes cannot be made to the root stream
@@ -55,28 +54,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: [
-              {
-                grok: {
-                  field: 'body.text',
+            processing: {
+              steps: [
+                {
+                  action: 'grok',
+                  from: 'body.text',
                   patterns: [
                     '%{TIMESTAMP_ISO8601:attributes.inner_timestamp} %{LOGLEVEL:severity_text} %{GREEDYDATA:attributes.message2}',
                   ],
-                  if: { always: {} },
+                  where: { always: {} },
                 },
-              },
-              {
-                dissect: {
-                  field: 'attributes.message2',
+                {
+                  action: 'dissect',
+                  from: 'attributes.message2',
                   pattern: '%{attributes.log.logger} %{attributes.message3}',
-                  if: {
+                  where: {
                     field: 'severity_text',
-                    operator: 'eq',
-                    value: 'info',
+                    eq: 'info',
                   },
                 },
-              },
-            ],
+              ],
+            },
             wired: {
               routing: [],
               fields: {
@@ -185,9 +183,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [
-                {
-                  manual_ingest_pipeline: {
+              processing: {
+                steps: [
+                  {
+                    action: 'manual_ingest_pipeline',
                     processors: [
                       {
                         // apply custom processor
@@ -217,10 +216,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                         },
                       },
                     ],
-                    if: { always: {} },
+                    where: { always: {} },
                   },
-                },
-              ],
+                ],
+              },
               wired: {
                 routing: [],
                 fields: {},
@@ -269,9 +268,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [
-                {
-                  manual_ingest_pipeline: {
+              processing: {
+                steps: [
+                  {
+                    action: 'manual_ingest_pipeline',
                     processors: [
                       {
                         // apply custom processor
@@ -280,10 +280,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                         },
                       } as any,
                     ],
-                    if: { always: {} },
+                    where: { always: {} },
                   },
-                },
-              ],
+                ],
+              },
+
               wired: {
                 routing: [],
                 fields: {},

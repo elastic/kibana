@@ -16,10 +16,11 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { Sample } from '@kbn/grok-ui';
-import type { FlattenRecord, GrokProcessorDefinition, SampleDocument } from '@kbn/streams-schema';
+import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import type { GrokProcessor } from '@kbn/streamlang';
 import { getPercentageFormatter } from '../../../util/formatters';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
@@ -41,8 +42,6 @@ import {
 } from './state_management/stream_enrichment_state_machine';
 import { isProcessorUnderEdit } from './state_management/processor_state_machine';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
-import type { WithUIAttributes } from './types';
-import { isGrokProcessor } from './utils';
 import { docViewJson } from './doc_viewer_json';
 import { DOC_VIEW_DIFF_ID, DocViewerContext, docViewDiff } from './doc_viewer_diff';
 import type { DataTableRecordWithIndex } from './preview_flyout';
@@ -251,20 +250,18 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const grokMode =
     draftProcessor?.processor &&
-    isGrokProcessor(draftProcessor.processor) &&
-    !isEmpty(draftProcessor.processor.grok.field) &&
+    draftProcessor.processor.action === 'grok' &&
+    !isEmpty(draftProcessor.processor.from) &&
     // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change) we defer to the standard preview table showing all columns
     !draftProcessor.resources?.grokExpressions.some((grokExpression) => {
-      if (draftProcessor.processor && !isGrokProcessor(draftProcessor.processor)) return false;
-      const fieldName = draftProcessor.processor?.grok.field;
+      if (draftProcessor.processor && !(draftProcessor.processor.action === 'grok')) return false;
+      const fieldName = draftProcessor.processor?.from;
       return Array.from(grokExpression.getFields().values()).some(
         (field) => field.name === fieldName
       );
     });
 
-  const grokField = grokMode
-    ? (draftProcessor.processor as WithUIAttributes<GrokProcessorDefinition>).grok.field
-    : undefined;
+  const grokField = grokMode ? (draftProcessor.processor as GrokProcessor).from : undefined;
   const validGrokField = grokField && allColumns.includes(grokField) ? grokField : undefined;
 
   const validCurrentProcessorSourceField =

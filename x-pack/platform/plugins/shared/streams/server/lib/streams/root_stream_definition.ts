@@ -16,7 +16,7 @@ export const rootStreamDefinition: Streams.WiredStream.Definition = {
   description: 'Root stream',
   ingest: {
     lifecycle: { dsl: {} },
-    processing: [],
+    processing: { steps: [] },
     wired: {
       routing: [],
       fields: {

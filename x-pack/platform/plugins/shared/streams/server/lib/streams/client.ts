@@ -14,9 +14,9 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import type { Condition } from '@kbn/streams-schema';
 import { Streams, getAncestors, getParentId } from '@kbn/streams-schema';
 import type { LockManagerService } from '@kbn/lock-manager';
+import type { Condition } from '@kbn/streamlang';
 import type { AssetClient } from './assets/asset_client';
 import { ASSET_ID, ASSET_TYPE } from './assets/fields';
 import type { QueryClient } from './assets/query/query_client';
@@ -296,11 +296,11 @@ export class StreamsClient {
   async forkStream({
     parent,
     name,
-    if: condition,
+    where: condition,
   }: {
     parent: string;
     name: string;
-    if: Condition;
+    where: Condition;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = Streams.WiredStream.Definition.parse(await this.getStream(parent));
 
@@ -322,7 +322,7 @@ export class StreamsClient {
                 ...parentDefinition.ingest.wired,
                 routing: parentDefinition.ingest.wired.routing.concat({
                   destination: name,
-                  if: condition,
+                  where: condition,
                 }),
               },
             },
@@ -335,7 +335,9 @@ export class StreamsClient {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: {
+                steps: [],
+              },
               wired: {
                 fields: {},
                 routing: [],
@@ -532,7 +534,9 @@ export class StreamsClient {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: {
+          steps: [],
+        },
         classic: {},
       },
     };
@@ -607,7 +611,7 @@ export class StreamsClient {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: { steps: [] },
         classic: {},
       },
     }));

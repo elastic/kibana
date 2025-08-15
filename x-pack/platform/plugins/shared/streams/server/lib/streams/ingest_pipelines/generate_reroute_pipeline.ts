@@ -6,8 +6,8 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
+import { conditionToPainless } from '@kbn/streamlang';
 import { ASSET_VERSION } from '../../../../common/constants';
-import { conditionToPainless } from '../helpers/condition_to_painless';
 import { getReroutePipelineName } from './name';
 
 interface GenerateReroutePipelineParams {
@@ -21,7 +21,7 @@ export function generateReroutePipeline({ definition }: GenerateReroutePipelineP
       return {
         reroute: {
           destination: child.destination,
-          if: conditionToPainless(child.if),
+          if: conditionToPainless(child.where),
         },
       };
     }),

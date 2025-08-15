@@ -23,8 +23,7 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     // Create a test stream with routing rules first
     await apiServices.streams.forkStream('logs', 'logs.edit-test', {
       field: 'service.name',
-      value: 'test-service',
-      operator: 'eq',
+      eq: 'test-service',
     });
 
     await pageObjects.streams.gotoPartitioningTab('logs');

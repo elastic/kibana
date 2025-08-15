@@ -6,22 +6,34 @@
  */
 
 import type { FieldDefinition } from '@kbn/streams-schema';
-import { getProcessorConfig } from '@kbn/streams-schema';
 import { uniq } from 'lodash';
-import type { ProcessorDefinitionWithUIAttributes } from '../../types';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
 import type { DetectedField, Simulation } from './types';
 import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 
-export function getSourceField(processor: ProcessorDefinitionWithUIAttributes) {
-  const config = getProcessorConfig(processor);
-  if ('field' in config) {
-    const trimmedField = config.field.trim();
-    return trimmedField.length > 0 ? trimmedField : undefined;
-  }
-  return undefined;
+export function getSourceField(processor: StreamlangProcessorDefinition): string | undefined {
+  const processorSourceField = (() => {
+    switch (processor.action) {
+      case 'append':
+      case 'set':
+        return processor.to;
+      case 'rename':
+      case 'grok':
+      case 'dissect':
+      case 'date':
+        return processor.from;
+      case 'manual_ingest_pipeline':
+        return undefined;
+      default:
+        return undefined;
+    }
+  })();
+
+  const trimmedSourceField = processorSourceField?.trim();
+  return trimmedSourceField && trimmedSourceField.length > 0 ? trimmedSourceField : undefined;
 }
 
 export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
