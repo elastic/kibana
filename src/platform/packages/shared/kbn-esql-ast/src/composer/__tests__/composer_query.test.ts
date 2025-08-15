@@ -181,6 +181,55 @@ describe('high-level helpers', () => {
     });
   });
 
+  describe('.grok()', () => {
+    test('can specify input column and pattern', () => {
+      const query = esql`FROM index`;
+
+      query.grok(['foo', 'bar'], '%{date} - %{msg} - %{ip}');
+
+      expect(query.print('basic')).toBe('FROM index | GROK foo.bar "%{date} - %{msg} - %{ip}"');
+    });
+  });
+
+  describe('.enrich()', () => {
+    test('basic command with just policy', () => {
+      const query = esql`FROM index`;
+
+      query.enrich('my_policy');
+
+      expect(query.print('basic')).toBe('FROM index | ENRICH my_policy');
+    });
+
+    test('with ON match_field', () => {
+      const query = esql`FROM index`;
+
+      query.enrich('my_policy', { on: 'match_field' });
+
+      expect(query.print('basic')).toBe('FROM index | ENRICH my_policy ON match_field');
+    });
+
+    test('with WITH fields', () => {
+      const query = esql`FROM index`;
+
+      query.enrich('my_policy', { with: { hello: 'world', foo: ['bar', 'baz'] } });
+
+      expect(query.print('basic')).toBe(
+        'FROM index | ENRICH my_policy WITH hello = world, foo = bar.baz'
+      );
+    });
+
+    test('with ON and WITH fields', () => {
+      const query = esql`FROM index`;
+
+      query.enrich('my_policy', {
+        on: ['a', 'b'],
+        with: { hello: 'world' },
+      });
+
+      expect(query.print('basic')).toBe('FROM index | ENRICH my_policy ON a.b WITH hello = world');
+    });
+  });
+
   describe('.limit()', () => {
     test('appends command to the end', () => {
       const query = esql`FROM kibana_ecommerce_index`;

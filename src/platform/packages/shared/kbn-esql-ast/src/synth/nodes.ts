@@ -9,6 +9,7 @@
 
 import { Builder } from '../builder';
 import {
+  ESQLColumn,
   ESQLDecimalLiteral,
   ESQLIntegerLiteral,
   ESQLParamLiteral,
@@ -77,4 +78,14 @@ export const par = (name: string): ESQLParamLiteral => {
   return SynthNode.from(node);
 };
 
-// TODO: Ability to create: (1) functions, (2) binary expressions
+/**
+ * Creates an ES|QL column node.
+ *
+ * @param name The name of the column.
+ * @returns ES|QL column node.
+ */
+export const col = (name: string | string[]): ESQLColumn => {
+  const node = Builder.expression.column(name);
+
+  return SynthNode.from(node);
+};

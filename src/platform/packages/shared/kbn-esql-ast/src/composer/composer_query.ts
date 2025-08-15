@@ -12,7 +12,12 @@ import * as synth from '../synth';
 import { BasicPrettyPrinter, WrappingPrettyPrinter } from '../pretty_print';
 import { processTemplateHoles, validateParamName } from './util';
 import { Builder } from '../builder';
-import type { ESQLAstQueryExpression, ESQLCommand, ESQLNamedParamLiteral } from '../types';
+import type {
+  ESQLAstExpression,
+  ESQLAstQueryExpression,
+  ESQLCommand,
+  ESQLNamedParamLiteral,
+} from '../types';
 import type {
   ComposerColumnShorthand,
   ComposerQueryTagHole,
@@ -263,14 +268,127 @@ export class ComposerQuery {
       APPEND_SEPARATOR?: string;
     } = {}
   ): ComposerQuery => {
-    const inputNode = Builder.expression.column(input);
+    const inputColumn = Builder.expression.column(input);
 
     if (options.APPEND_SEPARATOR) {
       return this
-        .pipe`DISSECT ${inputNode} ${pattern} APPEND_SEPARATOR = ${options.APPEND_SEPARATOR}`;
+        .pipe`DISSECT ${inputColumn} ${pattern} APPEND_SEPARATOR = ${options.APPEND_SEPARATOR}`;
     }
 
-    return this.pipe`DISSECT ${inputNode} ${pattern}`;
+    return this.pipe`DISSECT ${inputColumn} ${pattern}`;
+  };
+
+  /**
+   * Appends a `GROK` command to extract structured data from unstructured text using patterns.
+   * Equivalent to calling `.pipe` with a `GROK` command.
+   *
+   * The `GROK` command uses regular expression-based patterns to parse and extract fields
+   * from text data. It's particularly powerful for parsing log files, as it combines
+   * regular expressions with pre-built patterns for common data formats.
+   *
+   * ```typescript
+   * // Basic usage - extract fields using a grok pattern
+   * query.grok('message', '%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:level} %{GREEDYDATA:msg}');
+   * // Result: GROK message "%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:level} %{GREEDYDATA:msg}"
+   *
+   * // Extract from nested column
+   * query.grok(['log', 'entry'], '%{COMBINEDAPACHELOG}');
+   * // Result: GROK log.entry "%{COMBINEDAPACHELOG}"
+   * ```
+   *
+   * @param input The column containing the text to parse with grok. Can be a
+   *     string column name or an array of column parts for nested columns
+   *     (e.g., ['log', 'message'] for 'log.message').
+   * @param pattern The grok pattern that defines how to extract and name
+   *     fields from the input text. Use `%{PATTERN:field_name}` syntax to
+   *     extract and name fields.
+   * @returns The updated ComposerQuery instance.
+   */
+  public readonly grok = (input: ComposerColumnShorthand, pattern: string): ComposerQuery => {
+    const inputColumn = Builder.expression.column(input);
+
+    return this.pipe`GROK ${inputColumn} ${pattern}`;
+  };
+
+  /**
+   * Appends an `ENRICH` command to add data from an enrich policy to the query
+   * results. Equivalent to calling `.pipe` with an `ENRICH` command.
+   *
+   * The `ENRICH` command allows you to add fields from an enrich policy to your query results
+   * based on matching field values. Enrich policies are pre-configured datasets that can be
+   * used to supplement your query data with additional context or metadata.
+   *
+   * See docs: {@link https://www.elastic.co/docs/reference/query-languages/esql/commands/processing-commands#esql-enrich}
+   *
+   * ```typescript
+   * // Basic usage - enrich with a policy
+   * query.enrich('user_policy');
+   * // Result: ENRICH user_policy
+   *
+   * // Specify a match field using ON clause
+   * query.enrich('geo_policy', { on: 'ip_address' });
+   * // Result: ENRICH geo_policy ON ip_address
+   *
+   * // Select specific fields to add using WITH clause
+   * query.enrich('user_policy', {
+   *   with: {
+   *     full_name: 'user_name',
+   *     department: ['org', 'dept']
+   *   }
+   * });
+   * // Result: ENRICH user_policy WITH full_name = user_name, department = org.dept
+   *
+   * // Use both ON and WITH options
+   * query.enrich('geo_policy', {
+   *   on: 'client_ip',
+   *   with: {
+   *     country: 'geo_country',
+   *     city: 'geo_city'
+   *   }
+   * });
+   * // Result: ENRICH geo_policy ON client_ip WITH country = geo_country, city = geo_city
+   * ```
+   *
+   * @param policy The name of the enrich policy to use for enrichment.
+   * @param options Configuration options for the enrich operation.
+   * @param options.on Optional field to match against the enrich policy. Can be a string
+   *   column name or an array of column parts for nested columns. If not specified,
+   *   the policy's default match field will be used.
+   * @param options.with Optional mapping of output field names to policy field names.
+   *   Keys are the names for new fields in the result set, values are the field names
+   *   from the enrich policy to copy. Both keys and values can use nested column syntax.
+   * @returns The updated ComposerQuery instance.
+   */
+  public readonly enrich = (
+    policy: string,
+    options: {
+      on?: ComposerColumnShorthand;
+      with?: Record<string, ComposerColumnShorthand>;
+    } = {}
+  ): ComposerQuery => {
+    const index = Builder.expression.source.node({ sourceType: 'policy', index: policy });
+    const onArgs = options.on ? Builder.expression.column(options.on) : void 0;
+    const withArgs = options.with
+      ? Object.entries(options.with).reduce((acc, [key, value]) => {
+          const expression = synth.exp`${synth.col(key)} = ${synth.col(value)}`;
+          acc.push(expression);
+          return acc;
+        }, [] as ESQLAstExpression[])
+      : void 0;
+
+    if (onArgs && withArgs) {
+      return this.pipe`ENRICH ${index} ON ${onArgs} WITH ${withArgs}`;
+    }
+
+    if (onArgs) {
+      return this.pipe`ENRICH ${index} ON ${onArgs}`;
+    }
+
+    if (withArgs) {
+      return this.pipe`ENRICH ${index} WITH ${withArgs}`;
+    }
+
+    return this.pipe`ENRICH ${index}`;
   };
 
   /**
