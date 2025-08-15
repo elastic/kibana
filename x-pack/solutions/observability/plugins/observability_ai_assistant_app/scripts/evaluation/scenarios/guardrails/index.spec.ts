@@ -8,7 +8,7 @@
 /// <reference types="@kbn/ambient-ftr-types"/>
 import expect from '@kbn/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
+import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import { chatClient, kibanaClient, synthtraceEsClients, logger, esClient } from '../../services';
 import { apmTransactionRateAIAssistant } from '../../alert_templates/templates';
 import { generateApmData } from '../../data_generators/apm';
