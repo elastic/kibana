@@ -137,6 +137,13 @@ const readIngestRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
   }),
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({
     params,
     request,
@@ -181,6 +188,13 @@ const upsertIngestRoute = createServerRoute({
       ingest: Ingest.right,
     }),
   }),
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({ params, request, getScopedClients }) => {
     const { streamsClient, assetClient } = await getScopedClients({
       request,

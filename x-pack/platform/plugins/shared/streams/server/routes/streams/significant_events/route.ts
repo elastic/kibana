@@ -75,6 +75,13 @@ const previewSignificantEventsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({
     params,
     request,
@@ -137,6 +144,13 @@ const readSignificantEventsRoute = createServerRoute({
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
     },
   },
   handler: async ({
@@ -209,6 +223,13 @@ const generateSignificantEventsRoute = createServerRoute({
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
     },
   },
   handler: async ({

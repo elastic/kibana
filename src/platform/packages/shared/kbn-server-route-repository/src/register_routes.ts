@@ -26,9 +26,15 @@ import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { isZod } from '@kbn/zod';
 import { merge, omit } from 'lodash';
 import { Observable, isObservable } from 'rxjs';
-import { makeZodValidationObject } from './make_zod_validation_object';
+import {
+  makeZodValidationObject,
+  makeZodResponsesValidationObject,
+} from './make_zod_validation_object';
 import { validateAndDecodeParams } from './validate_and_decode_params';
-import { noParamsValidationObject, passThroughValidationObject } from './validation_objects';
+import {
+  passThroughValidationObject,
+  getNoParamsValidationObjectForRouteMethod,
+} from './validation_objects';
 
 const CLIENT_CLOSED_REQUEST = {
   statusCode: 499,
@@ -166,9 +172,9 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
 
     let validationObject;
     if (params === undefined) {
-      validationObject = noParamsValidationObject;
+      validationObject = getNoParamsValidationObjectForRouteMethod(method);
     } else if (isZod(params)) {
-      validationObject = makeZodValidationObject(params as ZodParamsObject);
+      validationObject = makeZodValidationObject(params as ZodParamsObject, method);
     } else {
       validationObject = passThroughValidationObject;
     }
@@ -185,7 +191,12 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
             access,
           },
           security,
-          validate: validationObject,
+          validate: {
+            request: validationObject,
+            response: route.responses
+              ? makeZodResponsesValidationObject(route.responses)
+              : undefined,
+          },
         },
         wrappedHandler
       );
@@ -202,6 +213,9 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
           version,
           validate: {
             request: validationObject,
+            response: route.responses
+              ? makeZodResponsesValidationObject(route.responses)
+              : undefined,
           },
         },
         wrappedHandler

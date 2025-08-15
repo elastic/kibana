@@ -182,3 +182,11 @@ export const is = (schema: unknown): boolean => {
   }
   return false;
 };
+
+export const isUndefined = (schema: unknown): boolean => {
+  if (!schema || !isConfigSchema(schema)) {
+    return true;
+  }
+
+  return false; // Implement further checks if needed
+};

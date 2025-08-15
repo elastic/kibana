@@ -1408,8 +1408,8 @@
     "yaml": "^2.5.1",
     "yauzl": "^3.2.0",
     "yazl": "^2.5.1",
-    "zod": "^3.22.3",
-    "zod-to-json-schema": "^3.23.0"
+    "zod": "^3.25.67",
+    "zod-to-json-schema": "^3.24.6"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^12.0.0",

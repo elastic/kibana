@@ -13,7 +13,7 @@ import {
   buildGlobalTags,
   getXsrfHeaderForMethod,
   mergeResponseContent,
-  prepareRoutes,
+  pickRoutesForOAS,
   getPathParameters,
   createOpIdGenerator,
   GetOpId,
@@ -129,7 +129,7 @@ describe('assignToPaths', () => {
   });
 });
 
-describe('prepareRoutes', () => {
+describe('pickRoutesForOAS', () => {
   const internal = 'internal' as const;
   const pub = 'public' as const;
   test.each([
@@ -182,7 +182,7 @@ describe('prepareRoutes', () => {
       filters: { excludePathsMatching: ['/api/bar'], access: pub },
     },
   ])('returns the expected routes #%#', ({ input, output, filters }) => {
-    expect(prepareRoutes(input, filters)).toEqual(output);
+    expect(pickRoutesForOAS(input, filters)).toEqual(output);
   });
 });
 

@@ -51,6 +51,13 @@ const listQueriesRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   async handler({ params, request, getScopedClients }): Promise<ListQueriesResponse> {
     const { assetClient, streamsClient, licensing } = await getScopedClients({ request });
     await assertEnterpriseLicense(licensing);
@@ -90,6 +97,13 @@ const upsertQueryRoute = createServerRoute({
     }),
     body: upsertStreamQueryRequestSchema,
   }),
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({ params, request, getScopedClients }): Promise<UpsertQueryResponse> => {
     const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
     const {
@@ -134,6 +148,13 @@ const deleteQueryRoute = createServerRoute({
       queryId: z.string(),
     }),
   }),
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({ params, request, getScopedClients }): Promise<DeleteQueryResponse> => {
     const { streamsClient, queryClient, licensing, assetClient } = await getScopedClients({
       request,
@@ -191,6 +212,13 @@ const bulkQueriesRoute = createServerRoute({
       ),
     }),
   }),
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({ params, request, getScopedClients }): Promise<BulkUpdateAssetsResponse> => {
     const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
     await assertEnterpriseLicense(licensing);

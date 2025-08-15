@@ -8,7 +8,7 @@
  */
 
 import type { Router } from '@kbn/core-http-router-server-internal';
-import { getResponseValidation } from '@kbn/core-http-server';
+import { getResponseValidation, RouteAccess } from '@kbn/core-http-server';
 import { BASE_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { OasConverter } from './oas_converter';
@@ -21,7 +21,7 @@ import {
   getPathParameters,
   getVersionedContentTypeString,
   mergeResponseContent,
-  prepareRoutes,
+  pickRoutesForOAS,
   setXState,
   GetOpId,
 } from './util';
@@ -47,7 +47,7 @@ export const processRouter = async ({
 }: ProcessRouterOptions) => {
   const paths: OpenAPIV3.PathsObject = {};
   if (filters?.version && filters.version !== SERVERLESS_VERSION_2023_10_31) return { paths };
-  const routes = prepareRoutes(appRouter.getRoutes({ excludeVersionedRoutes: true }), filters);
+  const routes = pickRoutesForOAS(appRouter.getRoutes({ excludeVersionedRoutes: true }), filters);
 
   for (const route of routes) {
     try {
@@ -89,19 +89,12 @@ export const processRouter = async ({
         ...(description ? { description } : {}),
         ...(hasDeprecations ? { deprecated: true } : {}),
         ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
-        requestBody: !!validationSchemas?.body
-          ? {
-              content: {
-                [getVersionedContentTypeString(
-                  SERVERLESS_VERSION_2023_10_31,
-                  'public',
-                  contentType
-                )]: {
-                  schema: converter.convert(validationSchemas.body),
-                },
-              },
-            }
-          : undefined,
+        requestBody: extractRequestBody(
+          validationSchemas?.body,
+          route.options.access ?? 'public',
+          converter,
+          contentType
+        ),
         responses: extractResponses(route, converter),
         parameters,
         operationId: getOpId({ path: route.path, method: route.method }),
@@ -124,6 +117,25 @@ export const processRouter = async ({
     }
   }
   return { paths };
+};
+
+export const extractRequestBody = (
+  requestBodySchema: unknown,
+  access: RouteAccess,
+  converter: OasConverter,
+  contentType: string[]
+) => {
+  if (!requestBodySchema || converter.isUndefined(requestBodySchema)) {
+    return undefined;
+  }
+
+  return {
+    content: {
+      [getVersionedContentTypeString(SERVERLESS_VERSION_2023_10_31, access, contentType)]: {
+        schema: converter.convert(requestBodySchema),
+      },
+    },
+  };
 };
 
 export const extractResponses = (route: InternalRouterRoute, converter: OasConverter) => {

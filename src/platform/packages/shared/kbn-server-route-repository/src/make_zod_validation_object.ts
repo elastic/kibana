@@ -9,15 +9,37 @@
 
 import { z } from '@kbn/zod';
 import { DeepStrict } from '@kbn/zod-helpers';
-import { ZodParamsObject } from '@kbn/server-route-repository-utils';
-import { noParamsValidationObject } from './validation_objects';
+import { parseEndpoint, ZodParamsObject } from '@kbn/server-route-repository-utils';
+import { RouteValidatorFullConfigResponse } from '@kbn/core-http-server';
+import { getNoParamsValidationObjectForRouteMethod } from './validation_objects';
 
-export function makeZodValidationObject(params: ZodParamsObject) {
+export function makeZodValidationObject(
+  params: ZodParamsObject,
+  method: ReturnType<typeof parseEndpoint>['method']
+) {
+  const noParams = getNoParamsValidationObjectForRouteMethod(method);
   return {
-    params: params.shape.path ? asStrict(params.shape.path) : noParamsValidationObject.params,
-    query: params.shape.query ? asStrict(params.shape.query) : noParamsValidationObject.query,
-    body: params.shape.body ? asStrict(params.shape.body) : noParamsValidationObject.body,
+    params: params.shape.path ? asStrict(params.shape.path) : noParams.params,
+    query: params.shape.query ? asStrict(params.shape.query) : noParams.query,
+    body: params.shape.body ? asStrict(params.shape.body) : noParams.body,
   };
+}
+
+export function makeZodResponsesValidationObject<T extends object, TReturnType = any>(
+  responseSchema: T
+): RouteValidatorFullConfigResponse {
+  const { ...statusCodes } = responseSchema;
+  const response: RouteValidatorFullConfigResponse = {};
+
+  for (const [statusCode, validation] of Object.entries(statusCodes)) {
+    response[parseInt(statusCode, 10)] = {
+      ...validation,
+      body: validation.body ? () => validation.body : validation.body,
+      bodyV4: validation?.body ?? z4.object({}),
+    };
+  }
+
+  return response;
 }
 
 function asStrict(schema: z.Schema) {

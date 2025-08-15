@@ -51,6 +51,8 @@ function parseStrict<TSchema extends z.Schema>(
 }
 
 export function DeepStrict<TSchema extends z.Schema>(schema: TSchema) {
+  return schema; // TODO: Need to handle for zod v4
+
   // We really only want to override _parse, but:
   // - it should not have the same identity as the wrapped schema
   // - all methods should be bound to the original schema
