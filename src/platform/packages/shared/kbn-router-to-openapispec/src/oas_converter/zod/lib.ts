@@ -35,6 +35,14 @@ function assertZodType<T extends z.ZodType>(
   }
 }
 
+// Keeps tracks of shared schemas that are used across multiple OpenAPI components.
+const openApiRefPathPrefix = '#/components/schemas/';
+const zodRefPathPrefix = '#/definitions/';
+type SharedSchemas = ReturnType<OpenAPIConverter['convert']>['shared'];
+let sharedSchemaKeyCounter = 0;
+const shared: SharedSchemas = {};
+const stringifiedSnapshots = new Map<string, string>(); // Keep a copy for performance
+
 function postProcessJsonOutput(json: z.core.JSONSchema.BaseSchema) {
   if (!json || typeof json !== 'object') {
     return json;
@@ -45,38 +53,70 @@ function postProcessJsonOutput(json: z.core.JSONSchema.BaseSchema) {
     delete json.$schema;
   }
 
-  // Replace Zod reference paths with OpenAPI reference paths
-  const zodRefPathPrefix = '#/definitions/';
-  const openApiRefPathPrefix = '#/components/schemas/';
-  json = JSON.parse(
-    JSON.stringify(json, (key, value) => {
-      // Replace Zod reference paths with OpenAPI reference paths
-      if (typeof value === 'string' && value.startsWith(zodRefPathPrefix)) {
-        return value.replace(zodRefPathPrefix, openApiRefPathPrefix);
-      }
+  // Convert to string once for all processing
+  let jsonString = JSON.stringify(json, (key, value) => {
+    // Remove the `const` property, not supported in OpenAPI 3.0
+    if (key === 'const') {
+      return undefined; // Remove the const property
+    }
+    return value;
+  });
 
-      // Remove the `const` property, not supported in OpenAPI 3.0
-      if (key === 'const') {
-        return undefined; // Remove the const property
+  // Process shared schemas if definitions exist
+  if (json.definitions) {
+    Object.entries(json.definitions).forEach(([defKey, defValue]) => {
+      // Check if the stringified defValue is already in shared schemas
+      const valueString = JSON.stringify(defValue);
+
+      // Look for existing matching schema by stringified content
+      const existingKey = stringifiedSnapshots.get(valueString);
+
+      if (existingKey) {
+        // Schema already exists, replace references with existing defKey
+        const oldRef = `${zodRefPathPrefix}${defKey}`;
+        const newRef = `${openApiRefPathPrefix}${existingKey}`;
+        jsonString = jsonString.replaceAll(`"${oldRef}"`, `"${newRef}"`);
+      } else {
+        // Schema doesn't exist, create new entry
+        const newKey = `__schema${sharedSchemaKeyCounter++}`;
+        const newRef = `${openApiRefPathPrefix}${newKey}`;
+
+        // Process the schema defValue to replace any internal references
+        let processedValue = defValue;
+        const valueJsonString = JSON.stringify(defValue);
+
+        // Replace any internal zod references in the schema defValue itself
+        const updatedValueString = valueJsonString.replaceAll(
+          `"${zodRefPathPrefix}`,
+          `"${openApiRefPathPrefix}`
+        );
+        if (updatedValueString !== valueJsonString) {
+          processedValue = JSON.parse(updatedValueString);
+        }
+
+        // Store in shared schemas and stringified snapshots
+        shared[newKey] = processedValue;
+        stringifiedSnapshots.set(valueString, newKey);
+
+        // Replace references with new defKey
+        const oldRef = `${zodRefPathPrefix}${defKey}`;
+        jsonString = jsonString.replaceAll(`"${oldRef}"`, `"${newRef}"`);
       }
-      return value;
-    })
-  );
+    });
+  }
+
+  // Parse back to object once
+  json = JSON.parse(jsonString);
+
+  // Remove definitions after processing
+  if (json.definitions) {
+    delete json.definitions;
+  }
 
   // Convert Zod nullability (OpenAPI 3.1) to OpenAPI 3.0 nullability
   json = toOpenAPI30Nullability(json);
 
-  // If the JSON has `definitions`, extract it from json and return it as a separate object
-  let definitions: ReturnType<OpenAPIConverter['convert']>['shared'] | undefined;
-  if (json.definitions) {
-    definitions = json.definitions as ReturnType<OpenAPIConverter['convert']>['shared'];
-    delete json.definitions;
-  }
-
-  return {
-    json,
-    definitions,
-  };
+  return json;
 }
 
 function getCustomOpenApiMetadata(schema: z.core.$ZodType) {
@@ -308,13 +348,13 @@ const convertObjectMembersToParameterObjects = (
     }
 
     const isOptional = !subShape.safeParse(undefined).success;
-    const { description: schemaDescription, ...json } = toJSON(subShape).json;
+    const { description: schemaDescription, ...json } = toJSON(subShape);
 
     return {
       name: shapeKey,
       in: isPathParameter ? 'path' : 'query',
       required: isPathParameter || isOptional,
-      schema: json,
+      schema: json as OpenAPIV3.SchemaObject,
       description: schemaDescription ?? subShape.description,
     };
   });
@@ -324,12 +364,11 @@ const convertObjectMembersToParameterObjects = (
  * Returns a z.ZodObject with keys from knownParameters respecting their optionality.
  */
 const getPassThroughParamObject = (knownParameters: KnownParameters, isPathParameter = false) => {
-  return z.object(
-    Object.entries(knownParameters).reduce((acc, [key, { optional }]) => {
-      acc[key] = !isPathParameter && optional ? z.string().optional() : z.string();
-      return acc;
-    }, {} as z.ZodRawShape)
-  );
+  const shape = Object.entries(knownParameters).reduce((acc, [key, { optional }]) => {
+    (acc as any)[key] = !isPathParameter && optional ? z.string().optional() : z.string();
+    return acc;
+  }, {} as z.ZodRawShape);
+  return z.object(shape);
 };
 
 /**
@@ -347,6 +386,8 @@ export const convertQuery = (schema: unknown) => {
   const unwrapped = isPassThroughAny(schema)
     ? getPassThroughParamObject({}, false)
     : getZodInnerType(schema);
+
+  assertZodType(unwrapped, z.ZodObject, 'Expected unwrapped schema to be a ZodObject');
 
   return {
     query: convertObjectMembersToParameterObjects(unwrapped, false),
@@ -390,20 +431,17 @@ export const convert = (schema: z.ZodType): ReturnType<OpenAPIConverter['convert
     convertionOutput = toJSON(schema);
   } catch (e) {
     // Use custom OpenAPI metadata if available, or fallback to a generic pass-through object
-    convertionOutput = {
-      json:
-        getCustomOpenApiMetadata(schema) ??
-        toJSON(
-          getPassThroughBodyObject(
-            'Could not convert the schema to OpenAPI equivalent, passing through as any.'
-          )
-        ).json,
-      definitions: {},
-    };
+    convertionOutput =
+      getCustomOpenApiMetadata(schema) ??
+      toJSON(
+        getPassThroughBodyObject(
+          'Could not convert the schema to OpenAPI equivalent, passing through as any.'
+        )
+      );
   }
 
   return {
-    shared: convertionOutput.definitions || {},
-    schema: convertionOutput.json as OpenAPIV3.SchemaObject,
+    shared,
+    schema: convertionOutput as OpenAPIV3.SchemaObject,
   };
 };
