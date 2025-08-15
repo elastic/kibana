@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { initializeDataViews } from '../../tasks/login';
+import { login } from '../../tasks/login';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { checkActionItemsInResults, loadRuleAlerts, navigateToRule } from '../../tasks/live_query';
 
@@ -19,7 +19,6 @@ describe(
     let ruleName: string;
 
     before(() => {
-      initializeDataViews();
       loadRule(true).then((data) => {
         ruleId = data.id;
         ruleName = data.name;
@@ -28,6 +27,7 @@ describe(
     });
 
     beforeEach(() => {
+      login();
       navigateToRule(ruleName);
     });
 

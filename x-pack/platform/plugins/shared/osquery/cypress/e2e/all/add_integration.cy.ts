@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { login } from '../../tasks/login';
 import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import {
   ADD_PACK_HEADER_BUTTON,
@@ -14,8 +15,8 @@ import {
   TABLE_ROWS,
 } from '../../screens/packs';
 import {
-  cleanupPack,
   cleanupAgentPolicy,
+  cleanupPack,
   cleanupSavedQuery,
   loadSavedQuery,
 } from '../../tasks/api_fixtures';
@@ -29,13 +30,13 @@ import {
 } from '../../tasks/navigation';
 import {
   addCustomIntegration,
+  checkDataStreamsInPolicyDetails,
   closeModalIfVisible,
   generateRandomStringName,
   integrationExistsWithinPolicyDetails,
-  interceptPackId,
   interceptAgentPolicyId,
+  interceptPackId,
   policyContainsIntegration,
-  checkDataStreamsInPolicyDetails,
 } from '../../tasks/integrations';
 import { ServerlessRoleName } from '../../support/roles';
 
@@ -50,7 +51,7 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
   });
 
   beforeEach(() => {
-    cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
+    login(ServerlessRoleName.PLATFORM_ENGINEER);
   });
 
   after(() => {
@@ -104,6 +105,7 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
       cy.contains(`version: ${oldVersion}`).should('not.exist');
     });
   });
+
   // FLAKY: https://github.com/elastic/kibana/issues/170593
   describe.skip('Add integration to policy', () => {
     const [integrationName, policyName] = generateRandomStringName(2);

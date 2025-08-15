@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
@@ -17,11 +18,10 @@ import {
 } from '../../tasks/live_query';
 import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
-import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
-    cy.login(ServerlessRoleName.SOC_MANAGER);
+    login();
     navigateTo('/app/osquery');
   });
 

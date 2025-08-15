@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { initializeDataViews } from '../../tasks/login';
+import { login } from '../../tasks/login';
 import {
   cleanupPack,
   cleanupRule,
@@ -15,8 +15,8 @@ import {
   packFixture,
 } from '../../tasks/api_fixtures';
 import {
-  RESPONSE_ACTIONS_ERRORS,
   OSQUERY_RESPONSE_ACTION_ADD_BUTTON,
+  RESPONSE_ACTIONS_ERRORS,
   RESPONSE_ACTIONS_ITEM_0,
   RESPONSE_ACTIONS_ITEM_1,
   RESPONSE_ACTIONS_ITEM_2,
@@ -36,10 +36,9 @@ describe(
     let packName: string;
     const packData = packFixture();
     const multiQueryPackData = multiQueryPackFixture();
-    before(() => {
-      initializeDataViews();
-    });
+
     beforeEach(() => {
+      login();
       loadPack(packData).then((data) => {
         packId = data.saved_object_id;
         packName = data.name;
@@ -53,6 +52,7 @@ describe(
         ruleName = data.name;
       });
     });
+
     afterEach(() => {
       cleanupPack(packId);
       cleanupPack(multiQueryPackId);

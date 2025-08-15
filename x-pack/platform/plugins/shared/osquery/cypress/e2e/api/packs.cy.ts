@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ServerlessRoleName } from '../../support/roles';
+import { login } from '../../tasks/login';
 import {
   addOsqueryToAgentPolicy,
   cleanupAgentPolicy,
@@ -20,7 +20,7 @@ describe('Packs', { tags: ['@ess', '@serverless'] }, () => {
   let policyId: string;
 
   beforeEach(() => {
-    cy.login(ServerlessRoleName.SOC_MANAGER);
+    login();
     loadAgentPolicy().then((item) => {
       policyId = item.id;
 
@@ -36,6 +36,7 @@ describe('Packs', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('Duplicate policy ids', () => {
     let packId: string;
+
     beforeEach(() => {
       createPack({
         policy_ids: Array(1000).fill(policyId),
@@ -44,6 +45,7 @@ describe('Packs', { tags: ['@ess', '@serverless'] }, () => {
         expect(response.status).to.eq(200);
       });
     });
+
     afterEach(() => {
       cleanupPack(packId);
     });
@@ -59,6 +61,7 @@ describe('Packs', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('Non existent policy id should return bad request error', () => {
     const nonExistentPolicyId = 'non-existent-policy-id';
+
     it('single non-existent policy id', () => {
       createPack({
         policy_ids: [nonExistentPolicyId],
@@ -67,6 +70,7 @@ describe('Packs', { tags: ['@ess', '@serverless'] }, () => {
         expect(response.body.message).to.contain(nonExistentPolicyId);
       });
     });
+
     it('multiple policy ids with one non-existent policy id', () => {
       createPack({
         policy_ids: [...Array(999).fill(policyId), nonExistentPolicyId],

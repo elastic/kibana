@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { login } from '../../tasks/login';
 import { customActionEditSavedQuerySelector, UPDATE_QUERY_BUTTON } from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
-import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
-import { ServerlessRoleName } from '../../support/roles';
+import { cleanupSavedQuery, loadSavedQuery } from '../../tasks/api_fixtures';
 
 describe('ALL - Edit saved query', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryName: string;
@@ -22,7 +22,7 @@ describe('ALL - Edit saved query', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   beforeEach(() => {
-    cy.login(ServerlessRoleName.SOC_MANAGER);
+    login();
     navigateTo('/app/osquery/saved_queries');
   });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { initializeDataViews } from '../../tasks/login';
+import { login } from '../../tasks/login';
 import { getAdvancedButton } from '../../screens/integrations';
 import { navigateTo } from '../../tasks/navigation';
 import {
@@ -21,7 +21,7 @@ import {
 // FLAKY: https://github.com/elastic/kibana/issues/218380
 describe.skip('EcsMapping', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
-    initializeDataViews();
+    login();
   });
 
   it('should properly show static values in form and results', () => {

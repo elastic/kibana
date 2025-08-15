@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { login } from '../../tasks/login';
 import { SAVED_QUERY_DROPDOWN_SELECT } from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
 import {
@@ -20,8 +21,7 @@ import {
 } from '../../tasks/live_query';
 import { LIVE_QUERY_EDITOR, RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
-import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
-import { ServerlessRoleName } from '../../support/roles';
+import { cleanupSavedQuery, loadSavedQuery } from '../../tasks/api_fixtures';
 
 describe(
   'ALL - Live Query run custom and saved',
@@ -42,7 +42,7 @@ describe(
     });
 
     beforeEach(() => {
-      cy.login(ServerlessRoleName.SOC_MANAGER);
+      login();
       navigateTo('/app/osquery');
     });
 

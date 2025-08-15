@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { login } from '../../tasks/login';
 import { closeToastIfVisible, generateRandomStringName } from '../../tasks/integrations';
 import {
   LIVE_QUERY_EDITOR,
@@ -33,14 +34,13 @@ import {
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
 import {
-  loadCase,
   cleanupCase,
-  loadPack,
   cleanupPack,
-  loadSavedQuery,
   cleanupSavedQuery,
+  loadCase,
+  loadPack,
+  loadSavedQuery,
 } from '../../tasks/api_fixtures';
-import { ServerlessRoleName } from '../../support/roles';
 import { getAdvancedButton } from '../../screens/integrations';
 
 describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
@@ -53,7 +53,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   beforeEach(() => {
-    cy.login(ServerlessRoleName.SOC_MANAGER);
+    login();
     navigateTo('/app/osquery');
   });
 
@@ -228,7 +228,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     beforeEach(() => {
-      cy.login(ServerlessRoleName.SOC_MANAGER);
+      login();
       navigateTo('/app/osquery/saved_queries');
       cy.getBySel('tablePaginationPopoverButton').click();
       cy.getBySel('tablePagination-50-rows').click();

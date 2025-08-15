@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
@@ -46,7 +47,7 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless', '@skipInServerles
       });
 
       beforeEach(() => {
-        cy.login(role as ServerlessRoleName);
+        login(role as ServerlessRoleName);
       });
 
       after(() => {

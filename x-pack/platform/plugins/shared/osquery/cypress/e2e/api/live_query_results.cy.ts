@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { login } from '../../tasks/login';
 import { request } from '../../tasks/common';
 import { loadLiveQuery } from '../../tasks/api_fixtures';
 import { API_VERSIONS } from '../../../common/constants';
-import { ServerlessRoleName } from '../../support/roles';
 
 describe('Live query', { tags: ['@ess', '@serverless'] }, () => {
   let liveQueryId: string;
   let queriesQueryActionId: string;
 
   beforeEach(() => {
-    cy.login(ServerlessRoleName.SOC_MANAGER);
+    login();
     loadLiveQuery().then((liveQuery) => {
       liveQueryId = liveQuery.action_id;
       queriesQueryActionId = liveQuery.queries?.[0].action_id;
@@ -34,6 +34,7 @@ describe('Live query', { tags: ['@ess', '@serverless'] }, () => {
       });
     });
   });
+
   context('GET getLiveQueryResultsRoute', () => {
     it('validates we get successful response', () => {
       request({
