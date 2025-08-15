@@ -1690,10 +1690,12 @@ describe('TaskStore', () => {
 
   describe('bulkSchedule', () => {
     let store: TaskStore;
+    let logger: ReturnType<typeof mockLogger>;
 
     beforeAll(() => {
+      logger = mockLogger();
       store = new TaskStore({
-        logger: mockLogger(),
+        logger,
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -1774,7 +1776,10 @@ describe('TaskStore', () => {
             },
           },
         ],
-        { refresh: false }
+        {
+          overwrite: true,
+          refresh: false,
+        }
       );
 
       expect(result).toEqual([
