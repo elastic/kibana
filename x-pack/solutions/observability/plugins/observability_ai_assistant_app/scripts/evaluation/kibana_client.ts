@@ -295,14 +295,16 @@ export class KibanaClient {
     >(): OperatorFunction<Buffer, Exclude<T, ChatCompletionErrorEvent>> {
       return (source$) => {
         const processed$ = source$.pipe(
-          concatMap((buffer: Buffer) =>
-            buffer
+          concatMap((buffer: Buffer) => {
+            return buffer
               .toString('utf-8')
               .split('\n')
               .map((line) => line.trim())
               .filter(Boolean)
-              .map((line) => JSON.parse(line) as T | BufferFlushEvent)
-          ),
+              .map((line) => {
+                return JSON.parse(line) as T | BufferFlushEvent;
+              });
+          }),
           throwSerializedChatCompletionErrors(),
           retry({
             count: 1,

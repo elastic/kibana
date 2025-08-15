@@ -14,7 +14,7 @@ import { versionSchema } from './constants';
 
 import type { ItemResult, ProcedureSchemas } from './types';
 
-export const updateSchemas: ProcedureSchemas = {
+export const updateSchemas = {
   in: schema.object(
     {
       contentTypeId: schema.string(),
@@ -33,7 +33,7 @@ export const updateSchemas: ProcedureSchemas = {
     },
     { unknowns: 'forbid' }
   ),
-};
+} satisfies ProcedureSchemas;
 
 export interface UpdateIn<
   T extends string = string,

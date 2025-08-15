@@ -44,6 +44,7 @@ import {
 } from './data_table_column_header';
 import { UnifiedDataTableProps } from './data_table';
 import { UnifiedDataTableSummaryColumnHeader } from './data_table_summary_column_header';
+import { isSortable } from '../hooks/use_sorting';
 
 export const getColumnDisplayName = (
   columnName: string,
@@ -202,14 +203,13 @@ function buildEuiGridColumn({
   }
 
   const columnType = dataViewField?.type;
+  const columnSchema = getSchemaByKbnType(columnType);
 
   const column: EuiDataGridColumn = {
     id: columnName,
-    schema: getSchemaByKbnType(columnType),
+    schema: columnSchema,
     isSortable:
-      isSortEnabled &&
-      // TODO: would be great to have something like `sortable` flag for text based columns too
-      ((isPlainRecord && columnName !== '_source') || dataViewField?.sortable === true),
+      isSortEnabled && isSortable({ isPlainRecord, columnName, columnSchema, dataViewField }),
     display:
       showColumnTokens || headerRowHeight !== 1 ? (
         <DataTableColumnHeaderMemoized
