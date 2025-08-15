@@ -217,10 +217,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx',
           },
-          if: {
+          where: {
             field: 'attributes.log.logger',
-            operator: 'eq' as const,
-            value: 'nginx',
+            eq: 'nginx',
           },
         };
         const response = await forkStream(apiClient, 'logs', body);
@@ -232,10 +231,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx',
           },
-          if: {
+          where: {
             field: 'log.logger',
-            operator: 'eq' as const,
-            value: 'nginx',
+            eq: 'nginx',
           },
         };
         const response = await forkStream(apiClient, 'logs', body, 409);
@@ -268,7 +266,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx.access',
           },
-          if: { field: 'severity_text', operator: 'eq' as const, value: 'info' },
+          where: { field: 'severity_text', eq: 'info' },
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
@@ -300,7 +298,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx.error',
           },
-          if: { field: 'attributes.log', operator: 'eq' as const, value: 'error' },
+          where: { field: 'attributes.log', eq: 'error' },
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
@@ -332,7 +330,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.number-test',
           },
-          if: { field: 'attributes.code', operator: 'gte' as const, value: '500' },
+          where: { field: 'attributes.code', gte: '500' },
         };
         const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
@@ -362,10 +360,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.string-test',
           },
-          if: {
+          where: {
             or: [
-              { field: 'body.text', operator: 'contains' as const, value: '500' },
-              { field: 'body.text', operator: 'contains' as const, value: 400 },
+              { field: 'body.text', contains: '500' },
+              { field: 'body.text', contains: 400 },
             ],
           },
         };
@@ -395,12 +393,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.weird-characters',
           },
-          if: {
+          where: {
             or: [
               {
                 field: 'attributes.@abc.weird fieldname',
-                operator: 'contains' as const,
-                value: 'route_it',
+                contains: 'route_it',
               },
             ],
           },
@@ -434,7 +431,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: {
+                steps: [],
+              },
               wired: {
                 fields: {
                   'attributes.myfield': {
@@ -479,7 +478,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: {
+                steps: [],
+              },
               wired: {
                 fields: {
                   'attributes.myfield': {
@@ -534,10 +535,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ).to.eql([
           {
             destination: 'logs.nginx.error',
-            if: {
+            where: {
               field: 'attributes.log',
-              operator: 'eq',
-              value: 'error',
+              eq: 'error',
             },
           },
         ]);
@@ -603,7 +603,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: {
+                steps: [],
+              },
               wired: { fields, routing: [] },
             },
           },
@@ -616,7 +618,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: {
+                steps: [],
+              },
               wired: { fields: {}, routing: [] },
             },
           },
@@ -648,7 +652,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
-                processing: [],
+                processing: {
+                  steps: [],
+                },
                 wired: { fields: {}, routing: [] },
               },
             },
@@ -665,9 +671,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: 'Should cause a failure due to invalid ingest pipeline',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [
-                {
-                  manual_ingest_pipeline: {
+              processing: {
+                steps: [
+                  {
+                    action: 'manual_ingest_pipeline',
                     processors: [
                       {
                         set: {
@@ -678,8 +685,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       },
                     ],
                   },
-                },
-              ],
+                ],
+              },
               wired: {
                 fields: {},
                 routing: [],
@@ -704,7 +711,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: {
+                steps: [],
+              },
               wired: { fields: {}, routing: [] },
             },
           },

@@ -1871,6 +1871,12 @@
                           "_meta": {
                             "description": "Number of threat match rules with exceptions"
                           }
+                        },
+                        "has_does_not_match_condition": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of threat match rules with does_not_match condition in threat mappings"
+                          }
                         }
                       }
                     },
@@ -2028,6 +2034,12 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of custom threat match rules with exceptions"
+                          }
+                        },
+                        "has_does_not_match_condition": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of threat match rules with does_not_match condition in threat mappings"
                           }
                         }
                       }
@@ -3432,6 +3444,12 @@
                         "type": "boolean",
                         "_meta": {
                           "description": "True if this rule has exceptions"
+                        }
+                      },
+                      "has_does_not_match_condition": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if Threat match rule has does_not_match condition in threat mappings"
                         }
                       }
                     }

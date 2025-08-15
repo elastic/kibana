@@ -36,7 +36,7 @@ export const SideNavLogoComponent = ({
    * `EuiIcon` supports `l` which is 24x24 and `m` which is 16x16.
    */
   const wrapperStyles = css`
-    border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
+    border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
     padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
     padding-bottom: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
 
