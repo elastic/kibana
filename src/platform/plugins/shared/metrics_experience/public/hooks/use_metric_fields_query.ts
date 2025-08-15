@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { QueryFunctionContext, useInfiniteQuery } from '@tanstack/react-query';
+import type { QueryFunctionContext } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
-import { MetricField } from '../../common/fields/types';
+import type { MetricField } from '../../common/fields/types';
 import { useMetricsExperience } from './use_metrics_experience';
 
 export const useMetricFieldsQuery = (params?: {

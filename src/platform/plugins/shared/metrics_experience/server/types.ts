@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 
 export type DataStreamFieldCapsMap = Map<
   string,

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiPopover,
   EuiSelectable,
-  EuiSelectableOption,
   EuiText,
   EuiSpacer,
   EuiFlexGroup,

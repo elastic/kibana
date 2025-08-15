@@ -8,11 +8,11 @@
  */
 
 import { type Logger } from '@kbn/core/server';
-import { ErrorResponseBase, MsearchRequestItem } from '@elastic/elasticsearch/lib/api/types';
-import { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { estypes } from '@elastic/elasticsearch';
-import { InferSearchResponseOf } from '@kbn/es-types';
-import { DataStreamFieldCapsMap } from '../../types';
+import type { ErrorResponseBase, MsearchRequestItem } from '@elastic/elasticsearch/lib/api/types';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import type { estypes } from '@elastic/elasticsearch';
+import type { InferSearchResponseOf } from '@kbn/es-types';
+import type { DataStreamFieldCapsMap } from '../../types';
 import type { Dimension } from '../../../common/dimensions/types';
 import type { MetricField } from '../../../common/fields/types';
 import { extractDimensions } from '../dimensions/extract_dimensions';

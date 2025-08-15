@@ -8,7 +8,7 @@
  */
 
 import type { Plugin as PluginClass } from '@kbn/core/public';
-import { MetricsExperienceRepositoryClient } from './api';
+import type { MetricsExperienceRepositoryClient } from './api';
 
 export interface MetricsExperienceService {
   callApi: MetricsExperienceRepositoryClient;

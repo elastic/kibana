@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Dimension } from '../dimensions/types';
+import type { Dimension } from '../dimensions/types';
 
 export interface MetricField {
   name: string;

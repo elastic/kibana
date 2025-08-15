@@ -10,7 +10,7 @@
 import type { Fields } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import { isNumber } from 'lodash';
-import { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import type { MetricField, MetricFieldsResponse } from '../../../common/fields/types';
 import { deduplicateFields } from '../../lib/fields/deduplicate_fields';
 import { getEcsFieldDescriptions } from '../../lib/fields/get_ecs_field_descriptions';

@@ -9,10 +9,10 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { createMetricsExperienceRepositoryClient } from './api';
-import { MetricsExperiencePluginClass, MetricsExperienceService } from './types';
+import type { MetricsExperiencePluginClass, MetricsExperienceService } from './types';
 
 const MetricsExperienceApplication = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.Application }))

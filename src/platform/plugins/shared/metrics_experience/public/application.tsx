@@ -8,14 +8,14 @@
  */
 
 import React from 'react';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MetricsGridSection } from './components/metrics_grid_section';
 import { store } from './store';
 import { MetricsExperienceProvider } from './context/metrics_experience_provider';
-import { MetricsExperienceService } from './types';
+import type { MetricsExperienceService } from './types';
 
 interface ApplicationProps {
   appMountParameters: AppMountParameters;

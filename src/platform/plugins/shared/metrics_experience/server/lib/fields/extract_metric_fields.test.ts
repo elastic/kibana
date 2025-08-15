@@ -8,7 +8,7 @@
  */
 
 import { extractMetricFields } from './extract_metric_fields';
-import { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 
 describe('extractMetricFields', () => {
   const createMockFieldCapability = (

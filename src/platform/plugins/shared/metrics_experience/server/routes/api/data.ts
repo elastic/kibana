@@ -14,7 +14,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { createRoute } from '../create_route';
 import { extractDimensionsFromESQL } from '../../lib/dimensions/extract_dimensions_from_esql';
 
