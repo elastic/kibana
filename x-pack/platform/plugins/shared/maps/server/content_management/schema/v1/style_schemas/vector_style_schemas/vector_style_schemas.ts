@@ -42,19 +42,19 @@ export const styleField = schema.object({
 
 export const vectorStylePropertiesSchema = schema.object({
   [VECTOR_STYLES.SYMBOLIZE_AS]: schema.maybe(symbolizeAsSchema),
-  [VECTOR_STYLES.FILL_COLOR]: fillColorSchema,
-  [VECTOR_STYLES.LINE_COLOR]: lineColorSchema,
-  [VECTOR_STYLES.LINE_WIDTH]: lineWidthSchema,
-  [VECTOR_STYLES.ICON]: iconSchema,
-  [VECTOR_STYLES.ICON_SIZE]: iconSizeSchema,
-  [VECTOR_STYLES.ICON_ORIENTATION]: orientationSchema,
-  [VECTOR_STYLES.LABEL_TEXT]: labelSchema,
-  [VECTOR_STYLES.LABEL_ZOOM_RANGE]: labelZoomRangeSchema,
-  [VECTOR_STYLES.LABEL_COLOR]: labelColorSchema,
-  [VECTOR_STYLES.LABEL_SIZE]: labelSizeSchema,
-  [VECTOR_STYLES.LABEL_BORDER_COLOR]: labelBorderColorSchema,
-  [VECTOR_STYLES.LABEL_BORDER_SIZE]: labelBorderSizeSchema,
-  [VECTOR_STYLES.LABEL_POSITION]: labelPositionSchema,
+  [VECTOR_STYLES.FILL_COLOR]: schema.maybe(fillColorSchema),
+  [VECTOR_STYLES.LINE_COLOR]: schema.maybe(lineColorSchema),
+  [VECTOR_STYLES.LINE_WIDTH]: schema.maybe(lineWidthSchema),
+  [VECTOR_STYLES.ICON]: schema.maybe(iconSchema),
+  [VECTOR_STYLES.ICON_SIZE]: schema.maybe(iconSizeSchema),
+  [VECTOR_STYLES.ICON_ORIENTATION]: schema.maybe(orientationSchema),
+  [VECTOR_STYLES.LABEL_TEXT]: schema.maybe(labelSchema),
+  [VECTOR_STYLES.LABEL_ZOOM_RANGE]: schema.maybe(labelZoomRangeSchema),
+  [VECTOR_STYLES.LABEL_COLOR]: schema.maybe(labelColorSchema),
+  [VECTOR_STYLES.LABEL_SIZE]: schema.maybe(labelSizeSchema),
+  [VECTOR_STYLES.LABEL_BORDER_COLOR]: schema.maybe(labelBorderColorSchema),
+  [VECTOR_STYLES.LABEL_BORDER_SIZE]: schema.maybe(labelBorderSizeSchema),
+  [VECTOR_STYLES.LABEL_POSITION]: schema.maybe(labelPositionSchema),
 });
 
 export const vectorStyleSchema = schema.object({
