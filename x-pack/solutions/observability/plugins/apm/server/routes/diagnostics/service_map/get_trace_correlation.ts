@@ -67,7 +67,7 @@ export async function getTraceCorrelation({
           },
         },
       },
-    }
+    },
   });
 
   const sourceNodeCount =

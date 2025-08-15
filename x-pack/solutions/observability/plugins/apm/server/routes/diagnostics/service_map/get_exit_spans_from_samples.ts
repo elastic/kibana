@@ -172,7 +172,7 @@ export async function getSourceSpanIds({
             },
           },
         },
-      }
+      },
     },
   });
 
