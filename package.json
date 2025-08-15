@@ -583,6 +583,7 @@
     "@kbn/index-management-plugin": "link:x-pack/platform/plugins/shared/index_management",
     "@kbn/index-management-shared-types": "link:x-pack/platform/packages/shared/index-management/index_management_shared_types",
     "@kbn/index-patterns-test-plugin": "link:test/plugin_functional/plugins/index_patterns",
+    "@kbn/indices-metadata-plugin": "link:x-pack/platform/plugins/private/indices_metadata",
     "@kbn/inference_integration_flyout": "link:x-pack/platform/packages/private/ml/inference_integration_flyout",
     "@kbn/inference-common": "link:x-pack/platform/packages/shared/ai-infra/inference-common",
     "@kbn/inference-endpoint-plugin": "link:x-pack/platform/plugins/shared/inference_endpoint",
