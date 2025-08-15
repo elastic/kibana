@@ -123,7 +123,7 @@ node scripts/playwright test --config x-pack/solutions/observability/packages/kb
 ## Regenerating Phoenix GraphQL types
 
 ```bash
-node x-pack/platform/packages/shared/kbn-evals/scripts/generate_schema
+node --require ./src/setup_node_env x-pack/platform/packages/shared/kbn-evals/scripts/generate_schema/index.ts
 ```
 
 The script temporarily installs GraphQL-Codegen, fetches the Phoenix schema, emits the artefacts into `kibana_phoenix_client/__generated__`, lints them, and finally removes the transient dependencies.

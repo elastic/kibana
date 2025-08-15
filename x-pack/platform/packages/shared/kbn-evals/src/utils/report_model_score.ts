@@ -13,6 +13,15 @@ import { table } from 'table';
 import chalk from 'chalk';
 import { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
 
+// Helper function to calculate standard deviation
+function standardDeviation(values: number[]): number {
+  if (values.length <= 1) return 0;
+  const avg = mean(values);
+  const squareDiffs = values.map((value) => Math.pow(value - avg, 2));
+  const avgSquareDiff = mean(squareDiffs);
+  return Math.sqrt(avgSquareDiff);
+}
+
 interface DatasetScore {
   id: string;
   name: string;
@@ -136,6 +145,8 @@ export async function reportModelScore({
   // Calculate average and weighted percentages for each evaluator
   const evaluatorAverages = new Map<string, number>();
   const evaluatorWeighted = new Map<string, number>();
+  const evaluatorMeans = new Map<string, number>();
+  const evaluatorStdDevs = new Map<string, number>();
   const totalExamples = sumBy(datasetScores, (d) => d.numExamples);
 
   evaluatorNames.forEach((evaluatorName) => {
@@ -151,6 +162,18 @@ export async function reportModelScore({
     });
     const weighted = totalExamples > 0 ? totalScore / totalExamples : 0;
     evaluatorWeighted.set(evaluatorName, weighted);
+
+    // Calculate mean and standard deviation of raw scores
+    const allScores = datasetScores.flatMap((d) => d.evaluatorScores.get(evaluatorName) || []);
+    if (allScores.length > 0) {
+      const scoreMean = mean(allScores);
+      const scoreStdDev = standardDeviation(allScores);
+      evaluatorMeans.set(evaluatorName, scoreMean);
+      evaluatorStdDevs.set(evaluatorName, scoreStdDev);
+    } else {
+      evaluatorMeans.set(evaluatorName, 0);
+      evaluatorStdDevs.set(evaluatorName, 0);
+    }
   });
 
   const header = [`Model: ${model.id} (${model.family}/${model.provider})`];
@@ -193,8 +216,24 @@ export async function reportModelScore({
       return chalk.bold.yellow((weighted * 100).toFixed(1) + '%');
     }),
   ];
+  const meanRow = [
+    'Mean Score',
+    '',
+    ...evaluatorNames.map((name) => {
+      const meanScore = evaluatorMeans.get(name) || 0;
+      return chalk.bold.cyan(meanScore.toFixed(3));
+    }),
+  ];
+  const stdDevRow = [
+    'Std Dev',
+    '',
+    ...evaluatorNames.map((name) => {
+      const stdDev = evaluatorStdDevs.get(name) || 0;
+      return chalk.bold.cyan(stdDev.toFixed(3));
+    }),
+  ];
 
-  const summaryRows = [emptyRow, averageRow, weightedRow];
+  const summaryRows = [emptyRow, averageRow, weightedRow, meanRow, stdDevRow];
 
   // Build column alignment configuration dynamically
   const columnConfig: Record<number, { alignment: 'right' }> = {};
