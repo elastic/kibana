@@ -11,9 +11,8 @@ import { fromPromise, ErrorActorEvent } from 'xstate5';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import { getFormattedError } from '../../../../../util/errors';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { processorConverter } from '../../utils';
 import { Simulation, SimulationMachineDeps } from './types';
 import { SchemaField } from '../../../schema_editor/types';
 import { getMappedSchemaFields } from './utils';
@@ -23,7 +22,7 @@ export interface SimulationRunnerInput {
   streamName: string;
   detectedFields?: SchemaField[];
   documents: FlattenRecord[];
-  processors: ProcessorDefinitionWithUIAttributes[];
+  processors: StreamlangProcessorDefinition[];
 }
 
 export function createSimulationRunnerActor({
@@ -46,14 +45,16 @@ export const simulateProcessing = ({
   streamsRepositoryClient: StreamsRepositoryClient;
   input: SimulationRunnerInput;
   signal?: AbortSignal | null;
-}) =>
-  streamsRepositoryClient.fetch('POST /internal/streams/{name}/processing/_simulate', {
+}) => {
+  return streamsRepositoryClient.fetch('POST /internal/streams/{name}/processing/_simulate', {
     signal,
     params: {
       path: { name: input.streamName },
       body: {
         documents: input.documents,
-        processing: input.processors.map(processorConverter.toSimulateDefinition),
+        processing: {
+          steps: input.processors,
+        },
         detected_fields:
           input.detectedFields && !isEmpty(input.detectedFields)
             ? getMappedSchemaFields(input.detectedFields).map((field) => ({
@@ -64,8 +65,9 @@ export const simulateProcessing = ({
       },
     },
   });
+};
 
-export function createSimulationRunFailureNofitier({
+export function createSimulationRunFailureNotifier({
   toasts,
 }: Pick<SimulationMachineDeps, 'toasts'>) {
   return (params: { event: unknown }) => {
