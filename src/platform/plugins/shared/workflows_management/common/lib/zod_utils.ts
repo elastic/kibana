@@ -65,6 +65,8 @@ export function getSchemaAtPath(
         // For unconstrained arrays, we allow any non-negative index for schema introspection
         // This is because we're validating schema paths, not runtime data
         current = current.element;
+      } else if (current instanceof z.ZodAny) {
+        return z.any();
       } else {
         return null;
       }

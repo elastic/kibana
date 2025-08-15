@@ -12,14 +12,14 @@ import { WorkflowContext, WorkflowYaml, getStepId } from '@kbn/workflows';
 import _ from 'lodash';
 import { getAllPredecessors } from '../../../shared/lib/graph_utils';
 import { WorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
-import { getOutputSchemaForStepType } from '../../../../common/schema';
-import { inferZodType } from '../../../../common/lib/zod_utils';
+import { EventSchema, getOutputSchemaForStepType } from '../../../../common/schema';
+import { getSchemaAtPath, inferZodType } from '../../../../common/lib/zod_utils';
 
 function getRootContextSchema(definition: WorkflowYaml) {
   return z.object({
     workflowRunId: z.string(),
     now: z.date(),
-    event: z.any(),
+    event: EventSchema,
     steps: z.object({}),
     consts: z.object({
       ...Object.fromEntries(
@@ -83,15 +83,23 @@ export function getContextSchemaForPath(
   if (!nearestStep) {
     throw new Error(`Invalid path: ${path.join('.')}`);
   }
-  if (nearestStep.foreach) {
-    contextSchema = contextSchema.extend({
-      foreach: z.object({ item: z.any() }),
-    });
-  }
   const outputsSchema = getAvailableOutputsSchema(definition, workflowGraph, nearestStep.name);
   if (Object.keys(outputsSchema.shape).length > 0) {
     contextSchema = contextSchema.extend({
       steps: outputsSchema,
+    });
+  }
+  if (nearestStep.foreach) {
+    // TODO: add foreach item type
+    let itemSchema: z.ZodType = z.any();
+    if (nearestStep.foreach.startsWith('steps.') || nearestStep.foreach.startsWith('consts.')) {
+      const schema = getSchemaAtPath(contextSchema, nearestStep.foreach);
+      if (schema instanceof z.ZodArray) {
+        itemSchema = schema.element;
+      }
+    }
+    contextSchema = contextSchema.extend({
+      foreach: z.object({ item: itemSchema }),
     });
   }
   return contextSchema satisfies z.ZodType<WorkflowContext>;
