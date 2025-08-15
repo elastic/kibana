@@ -7,7 +7,7 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { mergeSuggestionWithVisContext, injectESQLQueryIntoLensLayers } from './helpers';
 import { mockAllSuggestions } from '../mocks';
-import { TypedLensByValueInput, TypedLensSerializedState } from '../react_embeddable/types';
+import type { TypedLensByValueInput, TypedLensSerializedState } from '../react_embeddable/types';
 
 const context = {
   dataViewSpec: {

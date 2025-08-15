@@ -7,8 +7,9 @@
 
 import React from 'react';
 import moment from 'moment';
-import { Direction, EuiBasicTable } from '@elastic/eui';
-import { Cert, CertMonitor, CertResult } from '../../../../../common/runtime_types';
+import type { Direction } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
+import type { Cert, CertMonitor, CertResult } from '../../../../../common/runtime_types';
 import { useDateFormat } from '../../../../hooks/use_date_format';
 import { CertStatus } from './cert_status';
 import { CertMonitors } from './cert_monitors';

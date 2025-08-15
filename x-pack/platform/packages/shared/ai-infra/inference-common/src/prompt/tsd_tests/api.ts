@@ -16,12 +16,8 @@ import type {
   PromptStreamResponse,
 } from '../api';
 import type { Prompt, PromptVersion, MustachePromptTemplate } from '../types';
-import {
-  ToolCallsOf,
-  ToolChoiceType,
-  ToolDefinition,
-  ToolResponseOf,
-} from '../../chat_complete/tools';
+import type { ToolCallsOf, ToolDefinition, ToolResponseOf } from '../../chat_complete/tools';
+import { ToolChoiceType } from '../../chat_complete/tools';
 
 declare const mockApi: PromptAPI;
 

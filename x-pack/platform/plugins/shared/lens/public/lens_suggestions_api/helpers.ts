@@ -7,11 +7,11 @@
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { getDatasourceId } from '@kbn/visualization-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import type { VisualizeEditorContext, Suggestion, IndexPatternRef } from '../types';
-import { TypedLensByValueInput, TypedLensSerializedState } from '../react_embeddable/types';
-import { TextBasedPrivateState } from '../datasources/form_based/esql_layer/types';
+import type { TypedLensByValueInput, TypedLensSerializedState } from '../react_embeddable/types';
+import type { TextBasedPrivateState } from '../datasources/form_based/esql_layer/types';
 
 const datasourceHasIndexPatternRefs = (
   unknownDatasource: unknown

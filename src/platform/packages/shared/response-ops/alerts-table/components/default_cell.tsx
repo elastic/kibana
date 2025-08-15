@@ -8,7 +8,7 @@
  */
 
 import React, { memo } from 'react';
-import { CellComponent } from '../types';
+import type { CellComponent } from '../types';
 
 export const DefaultCell: CellComponent = memo(({ columnId, alert }) => {
   const value = (alert && alert[columnId]) ?? [];

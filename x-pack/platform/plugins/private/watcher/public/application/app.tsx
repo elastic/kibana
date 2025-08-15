@@ -6,8 +6,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Observable } from 'rxjs';
-import {
+import type { Observable } from 'rxjs';
+import type {
   DocLinksStart,
   HttpSetup,
   ToastsSetup,
@@ -20,14 +20,18 @@ import {
 } from '@kbn/core/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
-import { Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { Redirect, withRouter } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
-import { RegisterManagementAppArgs, ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type {
+  RegisterManagementAppArgs,
+  ManagementAppMountParams,
+} from '@kbn/management-plugin/public';
 
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { LicenseManagementLocator } from '@kbn/license-management-plugin/public/locator';
-import { LicenseStatus } from '../../common/types/license_status';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { LicenseManagementLocator } from '@kbn/license-management-plugin/public/locator';
+import type { LicenseStatus } from '../../common/types/license_status';
 import { WatchListPage, WatchEditPage, WatchStatusPage } from './sections';
 import { registerRouter } from './lib/navigation';
 import { AppContextProvider } from './app_context';

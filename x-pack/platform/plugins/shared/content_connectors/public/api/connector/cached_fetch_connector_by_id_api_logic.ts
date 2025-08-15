@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { isEqual } from 'lodash';
 
 import type { Connector } from '@kbn/search-connectors';
 
-import { HttpSetup } from '@kbn/core/public';
-import {
-  FetchConnectorByIdApiLogic,
+import type { HttpSetup } from '@kbn/core/public';
+import type {
   FetchConnectorByIdApiLogicArgs,
   FetchConnectorByIdApiLogicResponse,
 } from './fetch_connector_by_id_logic';
-import { Actions } from '../api_logic/create_api_logic';
+import { FetchConnectorByIdApiLogic } from './fetch_connector_by_id_logic';
+import type { Actions } from '../api_logic/create_api_logic';
 import { Status } from '../../../common/types/api';
 
 const FETCH_CONNECTOR_POLLING_DURATION = 5000; // 5 seconds

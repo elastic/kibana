@@ -14,7 +14,7 @@ import {
   BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
   CSP_INGEST_TIMESTAMP_PIPELINE,
 } from '../../common/constants';
-import { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/types';
 
 const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
 

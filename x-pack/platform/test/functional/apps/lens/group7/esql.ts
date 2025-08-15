@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 // Maximum number of initial ESQL columns loaded
 // This is a temporary limit to avoid overwhelming the UI with too many columns
