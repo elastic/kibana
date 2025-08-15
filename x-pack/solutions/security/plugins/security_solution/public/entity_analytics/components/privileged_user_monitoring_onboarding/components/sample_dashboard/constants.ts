@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import type { EuiSuperSelectOption } from '@elastic/eui';
 import type { UserRowData } from './types';
 import type { VisualizationStackByOption } from '../esql_dashboard_panel/esql_dashboard_panel';
 
@@ -71,21 +72,21 @@ export const GRANTED_RIGHTS_DATA: UserRowData[] = [
   },
 ];
 
-export const GRANTED_RIGHTS_STACK_BY_OPTIONS: VisualizationStackByOption[] = [
+export const GRANTED_RIGHTS_STACK_BY_OPTIONS: EuiSuperSelectOption<string>[] = [
   {
-    text: 'Privileged User',
+    inputDisplay: 'Privileged User',
     value: 'privileged_user',
   },
   {
-    text: 'Target user',
+    inputDisplay: 'Target user',
     value: 'target_user',
   },
   {
-    text: 'Granted right',
+    inputDisplay: 'Granted right',
     value: 'right',
   },
   {
-    text: 'Source IP',
+    inputDisplay: 'Source IP',
     value: 'ip',
   },
 ];

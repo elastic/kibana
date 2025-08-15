@@ -81,7 +81,7 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
         id={PRIVILEGED_USER_ACTIVITY_QUERY_ID}
         showInspectButton={false}
         title={TITLE}
-        titleSize="s"
+        titleSize="m"
         outerDirection="column"
         hideSubtitle
       >
