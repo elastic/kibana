@@ -99,7 +99,18 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
         ],
         run_as: [],
       },
-      kibana: [{ base: ['read'], feature: {}, spaces: ['*'] }],
+      kibana: [
+        {
+          base: [],
+          feature: {
+            discover: ['minimal_read'],
+            dashboard: ['minimal_read'],
+            canvas: ['minimal_read'],
+            visualize: ['minimal_read'],
+          },
+          spaces: ['default'],
+        },
+      ],
     });
   };
 
@@ -126,7 +137,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
             canvas: ['minimal_read', 'generate_report'],
             visualize: ['minimal_read', 'generate_report'],
           },
-          spaces: ['*'],
+          spaces: ['default'],
         },
       ],
     });
@@ -156,7 +167,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
             canvas: ['minimal_read', 'generate_report'],
             visualize: ['minimal_read', 'generate_report'],
           },
-          spaces: ['*'],
+          spaces: ['default'],
         },
       ],
     });
