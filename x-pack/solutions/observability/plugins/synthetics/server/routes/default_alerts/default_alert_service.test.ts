@@ -13,8 +13,8 @@ import {
 } from '../../../common/constants/synthetics_alerts';
 import { DefaultAlertService } from './default_alert_service';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../constants/settings';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../../types';
+import { type SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../../types';
 
 // Mock the LockManagerService
 jest.mock('@kbn/lock-manager', () => ({
@@ -179,6 +179,15 @@ describe('DefaultAlertService', () => {
       // @ts-expect-error accessing protected method for testing
       expect(service.getMinimumRuleInterval()).toBe('5m');
     });
+
+    it('returns 1m when minimum interval equals 1m', () => {
+      const server = {
+        alerting: { getConfig: () => ({ minimumScheduleInterval: { value: '1m' } }) },
+      } as any;
+      const service = new DefaultAlertService({} as any, server, {} as any);
+      // @ts-expect-error accessing protected method for testing
+      expect(service.getMinimumRuleInterval()).toBe('1m');
+    });
   });
 
   describe('setupStatusRule', () => {
@@ -243,7 +252,8 @@ describe('DefaultAlertService', () => {
     it('upserts both rules when enabled and returns their results', async () => {
       const service = new TestableDefaultAlertService({} as any, {} as any, {} as any);
       // pass-through the lock
-      (service as any).acquireLockOrFail = (cb: () => Promise<any>) => cb();
+      const withLock = jest.fn((cb: () => Promise<any>) => cb());
+      (service as any).acquireLockOrFail = withLock;
       service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
       service.upsertDefaultAlert = jest
         .fn()
@@ -251,6 +261,8 @@ describe('DefaultAlertService', () => {
         .mockResolvedValueOnce({ id: 'tls', type: 'tls' });
 
       const result = await service.updateDefaultRules('default', true, true);
+
+      expect(withLock).toHaveBeenCalledTimes(1);
 
       expect(service.upsertDefaultAlert).toHaveBeenNthCalledWith(
         1,
@@ -281,9 +293,12 @@ describe('DefaultAlertService', () => {
         {} as any
       );
       // pass-through the lock
-      (service as any).acquireLockOrFail = (cb: () => Promise<any>) => cb();
+      const withLock = jest.fn((cb: () => Promise<any>) => cb());
+      (service as any).acquireLockOrFail = withLock;
 
       const result = await service.updateDefaultRules('default', false, false);
+
+      expect(withLock).toHaveBeenCalledTimes(1);
 
       expect(bulkDeleteRules).toHaveBeenCalledTimes(2);
       expect(bulkDeleteRules).toHaveBeenCalledWith({

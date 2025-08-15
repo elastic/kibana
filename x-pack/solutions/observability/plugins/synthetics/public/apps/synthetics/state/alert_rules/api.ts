@@ -38,15 +38,23 @@ export async function updateDefaultAlertingAPI(): Promise<DEFAULT_ALERT_RESPONSE
   return retry(() => apiService.put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING));
 }
 
-async function retry<T>(fn: () => Promise<T>, retries = 2, delay = 10): Promise<T> {
-  for (let i = 0; i < retries; i++) {
+export async function retry<T>(
+  fn: () => Promise<T>,
+  retries = 2,
+  delay = 100,
+  backoff = 1.2
+): Promise<T> {
+  let currentDelay = delay;
+  for (let i = 0; ; i++) {
     try {
       return await fn();
     } catch (error) {
-      if (i === retries - 1) throw error;
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      if (i >= retries - 1) {
+        if (error instanceof Error) throw error;
+        throw new Error(String(error));
+      }
+      await new Promise((resolve) => setTimeout(resolve, currentDelay));
+      currentDelay *= backoff;
     }
   }
-  // unreachable
-  throw new Error();
 }

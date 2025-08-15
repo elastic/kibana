@@ -44,10 +44,11 @@ export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
       };
     } catch (error) {
       if (error instanceof LockAcquisitionError) {
-        server.logger.error('Simultaneous request to update default Synthetics rules', { error });
+        const message = 'Simultaneous request to update default Synthetics rules';
+        server.logger.error(message, { error });
         return response.conflict({
           body: {
-            message: `Lock acquisition failed for monitor: ${name}`,
+            message,
           },
         });
       }

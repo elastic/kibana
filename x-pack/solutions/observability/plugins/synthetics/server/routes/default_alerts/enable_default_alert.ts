@@ -42,7 +42,8 @@ export const enableDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
         };
       }
       // do not delete this `await`, or we will skip the custom exception handling
-      return await defaultAlertService.setupDefaultAlerts(activeSpace?.id ?? 'default');
+      const result = await defaultAlertService.setupDefaultAlerts(activeSpace?.id ?? 'default');
+      return result;
     } catch (error) {
       if (error instanceof LockAcquisitionError) {
         return response.conflict({

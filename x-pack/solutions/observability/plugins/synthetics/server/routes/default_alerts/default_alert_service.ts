@@ -58,9 +58,9 @@ export class DefaultAlertService {
    * @returns The result of the callback function.
    * @throws LockAcquisitionError if the lock cannot be acquired.
    */
-  protected acquireLockOrFail<T>(cb: () => Promise<T>): Promise<T> {
+  protected acquireLockOrFail<T>(cb: () => Promise<T>, spaceId: string): Promise<T> {
     const lockService = new LockManagerService(this.server.coreSetup, this.server.logger);
-    return lockService.withLock(`synthetics-default-alerts-lock`, cb);
+    return lockService.withLock(`synthetics-default-alerts-lock-${spaceId}`, cb);
   }
 
   /**
@@ -88,7 +88,7 @@ export class DefaultAlertService {
         statusRule: statusRule.status === 'fulfilled' && statusRule.value ? statusRule.value : null,
         tlsRule: tlsRule.status === 'fulfilled' && tlsRule.value ? tlsRule.value : null,
       };
-    });
+    }, spaceId);
   }
 
   protected getMinimumRuleInterval() {
@@ -188,7 +188,7 @@ export class DefaultAlertService {
         this.updateStatusRule(spaceId, statusEnabled),
         this.updateTlsRule(spaceId, tlsEnabled),
       ]);
-    });
+    }, spaceId);
   }
 
   protected async updateStatusRule(spaceId: string, enabled?: boolean) {
