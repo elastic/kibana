@@ -364,6 +364,7 @@ git clean -fdx -e /config -e /.vscode
 - Maintain backward compatibility for public APIs
 
 ## Code Review Guidelines
+These guidelines are in addition to the Development Best Practices section
 
 ### Review Focus Areas
 **Architecture & Design**
@@ -373,8 +374,6 @@ git clean -fdx -e /config -e /.vscode
 - Accessibility: Verify ARIA labels, keyboard navigation, and screen reader compatibility
 
 **Code Quality Checks**
-- TypeScript usage: Prefer TypeScript over JavaScript for new code
-- Testing coverage: Unit tests co-located with source, integration tests in dedicated directories
 - Error handling: Proper error boundaries and user-friendly error messages
 - Security considerations: Input validation, privilege escalation prevention
 
@@ -394,9 +393,6 @@ git clean -fdx -e /config -e /.vscode
 
 ### Review Tools & Commands
 ```bash
-# Check bundle size impact
-yarn build --analyze
-
 # Run affected tests only
 yarn test:jest --config path/to/jest.config.js
 
