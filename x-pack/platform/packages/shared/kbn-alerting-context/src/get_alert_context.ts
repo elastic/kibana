@@ -7,7 +7,7 @@
 
 import { apiSupportsPassThroughContext } from '@kbn/presentation-containers';
 import { isAlertInPassThroughContext } from './type_guards';
-import { AlertContext } from './types';
+import type { AlertContext } from './types';
 
 export function getAlertContext(api: unknown): AlertContext | undefined {
   if (!apiSupportsPassThroughContext(api)) return;

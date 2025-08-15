@@ -17,7 +17,7 @@ import type {
   LensComponentForwardedProps,
   LensPublicCallbacks,
 } from './types';
-import { XYLayerConfig } from '../visualizations/xy/types';
+import type { XYLayerConfig } from '../visualizations/xy/types';
 
 function apiHasLensCallbacks(api: unknown): api is LensApiCallbacks {
   const fns = [

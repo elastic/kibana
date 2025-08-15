@@ -9,8 +9,8 @@ import { getAlertContext, type AlertContext } from '@kbn/alerting-context';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { hasXYState } from './type_guards';
-import { LensSerializedState } from '..';
-import { XYByValueAnnotationLayerConfig } from '../visualizations/xy/types';
+import type { LensSerializedState } from '..';
+import type { XYByValueAnnotationLayerConfig } from '../visualizations/xy/types';
 
 function buildAnnotationLayer(
   annotationData: AlertContext,
