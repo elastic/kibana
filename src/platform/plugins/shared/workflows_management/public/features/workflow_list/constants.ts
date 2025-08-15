@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const WORKFLOWS_TABLE_INITIAL_PAGE_SIZE = 10;
-export const WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
+export const WORKFLOWS_TABLE_INITIAL_PAGE_SIZE = 20;
+export const WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS = [10, 20, 50, 100];

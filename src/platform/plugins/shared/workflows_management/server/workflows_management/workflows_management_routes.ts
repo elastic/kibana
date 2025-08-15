@@ -143,7 +143,8 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
     },
     async (context, request, response) => {
       try {
-        const { limit, page, status, createdBy, query } = request.body as GetWorkflowsParams;
+        const { limit, page, status, createdBy, query } =
+          request.body as unknown as GetWorkflowsParams;
         return response.ok({
           body: await api.getWorkflows({
             limit,
