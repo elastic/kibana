@@ -8,7 +8,7 @@ The final goal of this workflow is to produce an OpenAPI bundle containing all K
 
 ### Step 0
 
-OAS from Kibana's APIs are continuously extracted and captured in `bundle.json` and `bundle.serverless.json` as fully formed OAS documentation. See `node scripts/capture_oas_snapshot --help` for more info.
+OAS from Kibana's APIs are continuously extracted and captured in `bundle.json` and `bundle.serverless.json` as fully formed OAS documentation. See `node scripts/capture_oas_snapshot --help` and [how it works](oas_docs/how_it_works.md) for more info.
 
 These bundles form the basis of our OpenAPI bundles to which we append and layer extra information before publishing.
 

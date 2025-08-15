@@ -1,0 +1,23 @@
+openapi: 3.0.0
+info:
+  title: Valid Test API
+  description: A valid test API for integration testing
+  version: 1.0.0
+servers:
+  - url: /api/test
+paths:
+  /test:
+    get:
+      summary: Test endpoint
+      description: A simple test endpoint
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Hello World"

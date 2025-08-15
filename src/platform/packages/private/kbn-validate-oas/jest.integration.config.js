@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Enhanced Jest configuration for integration tests
+ * Addresses timeout issues and async operation handling
+ */
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test/jest_integration_node',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/packages/private/kbn-validate-oas'],
 };

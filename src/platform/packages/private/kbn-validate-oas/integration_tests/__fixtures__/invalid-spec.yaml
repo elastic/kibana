@@ -1,0 +1,28 @@
+openapi: 3.0.0
+info:
+  title: Invalid Test API
+  version: 1.0.0
+  # Missing required description field
+servers:
+  - url: /api/test
+paths:
+  /test:
+    get:
+      summary: Test endpoint
+      # Missing description field
+      responses:
+        '200':
+          # Missing required description field
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: invalid_type  # Invalid schema type

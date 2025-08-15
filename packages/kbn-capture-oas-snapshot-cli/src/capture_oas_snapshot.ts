@@ -104,14 +104,14 @@ export async function captureOasSnapshot({
       throw new Error(`Failed to fetch OAS: ${result.status}`);
     }
     const currentOas = await result.json();
-    log.info(`Recieved OAS, writing to ${outputFile}...`);
+    log.info(`Received OAS, writing to ${outputFile}...`);
     if (update) {
       await fs.writeFile(outputFile, sortAndPrettyPrint(currentOas));
       const { size: sizeBytes } = await fs.stat(outputFile);
       log.success(`OAS written to ${outputFile}. File size ~${twoDeci(sizeBytes / MB)} MB.`);
     } else {
       log.success(
-        `OAS recieved, not writing to file. Got OAS for ${
+        `OAS received, not writing to file. Got OAS for ${
           Object.keys(currentOas.paths).length
         } paths.`
       );
