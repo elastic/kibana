@@ -6,8 +6,8 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ProcessorDefinition } from '@kbn/streams-schema';
-import {
+import type { ProcessorDefinition } from '@kbn/streams-schema';
+import type {
   ConfigDrivenProcessorFormState,
   ConfigDrivenProcessorType,
   FieldConfiguration,

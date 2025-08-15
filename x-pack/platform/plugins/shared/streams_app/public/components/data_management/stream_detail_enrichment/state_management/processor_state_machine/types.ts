@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ProcessorDefinition } from '@kbn/streams-schema';
-import { ActorRef, Snapshot } from 'xstate5';
-import { DraftGrokExpression } from '@kbn/grok-ui';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
+import type { ProcessorDefinition } from '@kbn/streams-schema';
+import type { ActorRef, Snapshot } from 'xstate5';
+import type { DraftGrokExpression } from '@kbn/grok-ui';
+import type { ProcessorDefinitionWithUIAttributes } from '../../types';
 
 export type ProcessorToParentEvent =
   | { type: 'processor.cancel'; id: string }

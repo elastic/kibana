@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { MachineImplementationsFrom, ActorRefFrom, SnapshotFrom } from 'xstate5';
 import {
-  MachineImplementationsFrom,
   assign,
   enqueueActions,
   forwardTo,
@@ -13,17 +13,15 @@ import {
   sendTo,
   stopChild,
   and,
-  ActorRefFrom,
   raise,
   cancel,
   stateIn,
-  SnapshotFrom,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { ProcessorDefinition, Streams } from '@kbn/streams-schema';
+import type { ProcessorDefinition, Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
-import { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
-import {
+import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
+import type {
   StreamEnrichmentContextType,
   StreamEnrichmentEvent,
   StreamEnrichmentInput,

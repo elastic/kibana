@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { DraggableProvidedDragHandleProps } from '@elastic/eui';
 import {
-  DraggableProvidedDragHandleProps,
   EuiButton,
   EuiForm,
   EuiSpacer,
@@ -25,16 +25,19 @@ import {
 import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, isEqual } from 'lodash';
-import React, { PropsWithChildren, useEffect, useState } from 'react';
-import { useForm, SubmitHandler, FormProvider, useWatch, DeepPartial } from 'react-hook-form';
+import type { PropsWithChildren } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { SubmitHandler, DeepPartial } from 'react-hook-form';
+import { useForm, FormProvider, useWatch } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { DiscardPromptOptions, useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
+import type { DiscardPromptOptions } from '../../../../hooks/use_discard_confirm';
+import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
 import { ProcessorTypeSelector } from './processor_type_selector';
-import { ProcessorFormState, ProcessorDefinitionWithUIAttributes } from '../types';
+import type { ProcessorFormState, ProcessorDefinitionWithUIAttributes } from '../types';
 import {
   getFormStateFrom,
   convertFormStateToProcessor,
@@ -44,15 +47,15 @@ import {
   SPECIALISED_TYPES,
 } from '../utils';
 import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
+import type { StreamEnrichmentContextType } from '../state_management/stream_enrichment_state_machine';
 import {
   useStreamEnrichmentSelector,
-  StreamEnrichmentContextType,
   useGetStreamEnrichmentState,
 } from '../state_management/stream_enrichment_state_machine';
-import { ProcessorMetrics } from '../state_management/simulation_state_machine';
+import type { ProcessorMetrics } from '../state_management/simulation_state_machine';
 import { DateProcessorForm } from './date';
 import { ConfigDrivenProcessorFields } from './config_driven/components/fields';
-import { ConfigDrivenProcessorType } from './config_driven/types';
+import type { ConfigDrivenProcessorType } from './config_driven/types';
 import { selectPreviewRecords } from '../state_management/simulation_state_machine/selectors';
 import { ManualIngestPipelineProcessorForm } from './manual_ingest_pipeline';
 import { isProcessorUnderEdit } from '../state_management/processor_state_machine';

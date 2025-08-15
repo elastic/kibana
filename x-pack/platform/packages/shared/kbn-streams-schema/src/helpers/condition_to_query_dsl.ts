@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import {
-  FilterCondition,
-  isAlwaysCondition,
-  Condition,
-  isFilterCondition,
-  isAndCondition,
-  isOrCondition,
-} from '../conditions';
+import type { FilterCondition, Condition } from '../conditions';
+import { isAlwaysCondition, isFilterCondition, isAndCondition, isOrCondition } from '../conditions';
 
 function conditionToClause(condition: FilterCondition) {
   switch (condition.operator) {

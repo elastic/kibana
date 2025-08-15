@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { FieldDefinition, getProcessorConfig } from '@kbn/streams-schema';
+import type { FieldDefinition } from '@kbn/streams-schema';
+import { getProcessorConfig } from '@kbn/streams-schema';
 import { uniq } from 'lodash';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { PreviewDocsFilterOption } from './simulation_documents_search';
-import { DetectedField, Simulation } from './types';
-import { MappedSchemaField, SchemaField, isSchemaFieldTyped } from '../../../schema_editor/types';
+import type { ProcessorDefinitionWithUIAttributes } from '../../types';
+import type { PreviewDocsFilterOption } from './simulation_documents_search';
+import type { DetectedField, Simulation } from './types';
+import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 
 export function getSourceField(processor: ProcessorDefinitionWithUIAttributes) {

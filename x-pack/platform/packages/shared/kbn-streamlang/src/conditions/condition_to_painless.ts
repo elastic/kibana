@@ -6,14 +6,14 @@
  */
 
 import { isBoolean, isString, uniq } from 'lodash';
-import {
+import type {
   Condition,
   FilterCondition,
-  OPERATORS,
   RangeCondition,
   ShorthandBinaryFilterCondition,
   ShorthandUnaryFilterCondition,
 } from '../../types/conditions';
+import { OPERATORS } from '../../types/conditions';
 
 // Utility: get the field name from a filter condition
 function safePainlessField(conditionOrField: FilterCondition | string) {

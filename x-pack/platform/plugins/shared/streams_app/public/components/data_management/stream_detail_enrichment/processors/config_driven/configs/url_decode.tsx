@@ -9,10 +9,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
-import { UrlDecodeProcessorConfig, UrlDecodeProcessorDefinition } from '@kbn/streams-schema';
-import { DocLinksStart } from '@kbn/core/public';
+import type { UrlDecodeProcessorConfig, UrlDecodeProcessorDefinition } from '@kbn/streams-schema';
+import type { DocLinksStart } from '@kbn/core/public';
 import { ALWAYS_CONDITION } from '../../../../../../util/condition';
-import { ConfigDrivenProcessorConfiguration, FieldConfiguration, FieldOptions } from '../types';
+import type {
+  ConfigDrivenProcessorConfiguration,
+  FieldConfiguration,
+  FieldOptions,
+} from '../types';
 import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../utils';
 
 export type UrlDecodeProcessorFormState = UrlDecodeProcessorConfig & { type: 'urldecode' };

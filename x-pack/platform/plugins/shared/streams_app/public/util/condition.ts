@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { NeverCondition } from '@kbn/streams-schema';
 import {
   isAlwaysCondition,
   type AlwaysCondition,
   type BinaryFilterCondition,
   type Condition,
-  NeverCondition,
 } from '@kbn/streams-schema';
 import { cloneDeep, isEqual } from 'lodash';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { Condition } from '@kbn/streams-schema';
 import {
-  Condition,
   isAlwaysCondition,
   isAndCondition,
   isBinaryFilterCondition,

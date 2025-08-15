@@ -7,20 +7,18 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import {
+import type {
   FlattenRecord,
   ProcessorDefinition,
   ProcessorDefinitionWithId,
   ProcessorType,
-  getProcessorType,
-  isSchema,
-  processorDefinitionSchema,
 } from '@kbn/streams-schema';
+import { getProcessorType, isSchema, processorDefinitionSchema } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
 import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import { DraftGrokExpression } from '@kbn/grok-ui';
-import { EnrichmentDataSource } from '../../../../common/url_schema';
-import {
+import type { EnrichmentDataSource } from '../../../../common/url_schema';
+import type {
   DissectFormState,
   ProcessorDefinitionWithUIAttributes,
   GrokFormState,
@@ -33,12 +31,12 @@ import {
 } from './types';
 import { ALWAYS_CONDITION } from '../../../util/condition';
 import { configDrivenProcessors } from './processors/config_driven';
-import {
+import type {
   ConfigDrivenProcessorType,
   ConfigDrivenProcessors,
 } from './processors/config_driven/types';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
-import { ProcessorResources } from './state_management/processor_state_machine';
+import type { ProcessorResources } from './state_management/processor_state_machine';
 
 /**
  * These are processor types with specialised UI. Other processor types are handled by a generic config-driven UI.
