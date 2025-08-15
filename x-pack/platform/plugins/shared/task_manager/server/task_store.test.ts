@@ -1774,7 +1774,10 @@ describe('TaskStore', () => {
             },
           },
         ],
-        { refresh: false }
+        {
+          overwrite: true,
+          refresh: false,
+        }
       );
 
       expect(result).toEqual([
