@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IKibanaResponse } from '@kbn/core/server';
+import { type IKibanaResponse } from '@kbn/core/server';
 import { LockAcquisitionError } from '@kbn/lock-manager';
 import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
 import { DefaultAlertService } from './default_alert_service';

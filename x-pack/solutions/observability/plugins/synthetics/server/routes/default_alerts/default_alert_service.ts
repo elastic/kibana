@@ -16,6 +16,7 @@ import {
   SyntheticsMonitorStatusTranslations,
   TlsTranslations,
 } from '../../../common/rules/synthetics/translations';
+
 import type { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../../types';
 import {
   ACTION_GROUP_DEFINITIONS,
@@ -50,22 +51,22 @@ export class DefaultAlertService {
   }
 
   /**
-   * The class will use this method to lock before persisting any data.
+   * The class requests a lock before persisting default rules.
    * If the lock cannot be acquired, it will throw an error.
-   * This is to ensure that no two processes can modify the default alerts at the same time.
+   * This is to ensure that no two processes can modify the default rules at the same time.
    * @param cb A callback function that will be executed within the lock.
    * @returns The result of the callback function.
    * @throws LockAcquisitionError if the lock cannot be acquired.
    */
-  private acquireLockOrFail<T>(cb: () => Promise<T>): Promise<T> {
+  protected acquireLockOrFail<T>(cb: () => Promise<T>): Promise<T> {
     const lockService = new LockManagerService(this.server.coreSetup, this.server.logger);
     return lockService.withLock(`synthetics-default-alerts-lock`, cb);
   }
 
   /**
-   * Sets up the default alerts for the specified space.
-   * @param spaceId The ID of the space to set up alerts for.
-   * @returns A promise that resolves when the alerts have been set up.
+   * Sets up the default rules for the specified space.
+   * @param spaceId The ID of the space to set up rules for.
+   * @returns A promise that resolves when the rules have been set up.
    * @throws LockAcquisitionError if a lock cannot be acquired to modify the shared resource. Calling code must handle this error.
    */
   public async setupDefaultAlerts(spaceId: string) {
@@ -98,7 +99,7 @@ export class DefaultAlertService {
     return interval;
   }
 
-  private async setupStatusRule(spaceId: string) {
+  protected async setupStatusRule(spaceId: string) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (this.settings?.defaultStatusRuleEnabled === false) {
       return;
@@ -111,18 +112,17 @@ export class DefaultAlertService {
     );
   }
 
-  private async setupTlsRule(spaceId: string) {
+  protected async setupTlsRule(spaceId: string) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (this.settings?.defaultTLSRuleEnabled === false) {
       return;
     }
-    const result = await this.createDefaultRuleIfNotExist(
+    return this.createDefaultRuleIfNotExist(
       SYNTHETICS_TLS_RULE,
       `Synthetics internal TLS rule`,
       minimumRuleInterval,
       spaceId
     );
-    return result;
   }
 
   public async getExistingAlert(
@@ -145,7 +145,7 @@ export class DefaultAlertService {
     return { ...alert, actions: [...actions, ...systemActions], ruleTypeId: alert.alertTypeId };
   }
 
-  private async createDefaultRuleIfNotExist(
+  protected async createDefaultRuleIfNotExist(
     ruleType: DefaultRuleType,
     name: string,
     interval: string,
@@ -191,7 +191,7 @@ export class DefaultAlertService {
     });
   }
 
-  private async updateStatusRule(spaceId: string, enabled?: boolean) {
+  protected async updateStatusRule(spaceId: string, enabled?: boolean) {
     if (enabled) {
       const minimumRuleInterval = this.getMinimumRuleInterval();
       return this.upsertDefaultAlert(
@@ -208,7 +208,7 @@ export class DefaultAlertService {
     }
   }
 
-  private async updateTlsRule(spaceId: string, enabled?: boolean) {
+  protected async updateTlsRule(spaceId: string, enabled?: boolean) {
     if (enabled) {
       const minimumRuleInterval = this.getMinimumRuleInterval();
       return this.upsertDefaultAlert(
@@ -225,7 +225,7 @@ export class DefaultAlertService {
     }
   }
 
-  private async upsertDefaultAlert(
+  protected async upsertDefaultAlert(
     ruleType: DefaultRuleType,
     name: string,
     interval: string,
