@@ -12,7 +12,7 @@ import { ReactNode } from 'react';
 import { GeoJsonProperties } from 'geojson';
 import { Geometry } from 'geojson';
 import { DRAW_SHAPE } from '../constants';
-import { CustomIcon } from './style_property_descriptor_types';
+import { CustomIcon } from '.';
 import { INITIAL_LOCATION } from '../constants';
 
 export type MapExtent = {

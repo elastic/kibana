@@ -47,6 +47,7 @@ export type {
   ColorDynamicStylePropertyDescriptor,
   ColorStaticStylePropertyDescriptor,
   ColorStylePropertyDescriptor,
+  CustomIcon,
   DynamicStyleProperties,
   DynamicStylePropertyOptions,
   EMSVectorTileStyleDescriptor,
