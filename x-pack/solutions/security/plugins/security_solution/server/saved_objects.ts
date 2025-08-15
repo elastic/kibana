@@ -8,6 +8,8 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 
 import { promptType } from '@kbn/security-ai-prompts';
+import { exceptionListType } from '@kbn/lists-plugin/server/saved_objects';
+
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { referenceDataSavedObjectType } from './endpoint/lib/reference_data';
 import { protectionUpdatesNoteType } from './endpoint/lib/protection_updates_note/saved_object_mappings';
@@ -45,12 +47,15 @@ const types = [
   protectionUpdatesNoteType,
   promptType,
   referenceDataSavedObjectType,
+  // exceptionListType,
 ];
 
 export const savedObjectTypes = types.map((type) => type.name);
 
 export const savedObjectTypesWithoutTimelineAndWithoutNotes = savedObjectTypes.filter((type) => {
   switch (type) {
+    // case exceptionListType.name:
+    //   return false;
     case noteType.name:
     case pinnedEventType.name:
     case timelineType.name:
@@ -67,6 +72,7 @@ export const notesSavedObjectTypes = [noteType.name];
 export const initSavedObjects = (savedObjects: CoreSetup['savedObjects']) => {
   types.forEach((type) => savedObjects.registerType(type));
 };
+export const exceptionsSavedObjectTypes = [exceptionListType.name];
 
 export const initEncryptedSavedObjects = ({
   encryptedSavedObjects,

@@ -10,7 +10,7 @@ import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
 
 import { SecuritySubFeatureId } from '../../product_features_keys';
-import { APP_ID, SECURITY_FEATURE_ID_V4 } from '../../constants';
+import { APP_ID } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 
 const TRANSLATIONS = Object.freeze({
@@ -54,7 +54,6 @@ const endpointListSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['endpoint_list_all'] }],
           api: [`${APP_ID}-writeEndpointList`, `${APP_ID}-readEndpointList`],
           id: 'endpoint_list_all',
           includeIn: 'none',
@@ -66,8 +65,6 @@ const endpointListSubFeature = (): SubFeatureConfig => ({
           ui: ['writeEndpointList', 'readEndpointList'],
         },
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['endpoint_list_read'] }],
-
           api: [`${APP_ID}-readEndpointList`],
           id: 'endpoint_list_read',
           includeIn: 'none',
@@ -109,18 +106,6 @@ const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [
-            {
-              feature: SECURITY_FEATURE_ID_V4,
-              privileges: [
-                'trusted_applications_all',
-
-                // Writing global (not per-policy) Artifacts is gated with Global Artifact Management:ALL starting with siemV3.
-                // Users who have been able to write ANY Artifact before are now granted with this privilege to keep existing behavior.
-                'global_artifact_management_all',
-              ],
-            },
-          ],
           api: [
             'lists-all',
             'lists-read',
@@ -138,9 +123,6 @@ const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
           ui: ['writeTrustedApplications', 'readTrustedApplications'],
         },
         {
-          replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V4, privileges: ['trusted_applications_read'] },
-          ],
           api: ['lists-read', 'lists-summary', `${APP_ID}-readTrustedApplications`],
           id: 'trusted_applications_read',
           includeIn: 'none',
@@ -155,65 +137,6 @@ const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
     },
   ],
 });
-
-const trustedDevicesSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.trustedDevices.privilegesTooltip',
-    {
-      defaultMessage: 'All Spaces is required for Trusted Devices access.',
-    }
-  ),
-  name: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.trustedDevices',
-    {
-      defaultMessage: 'Trusted Devices',
-    }
-  ),
-  description: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.trustedDevices.description',
-    {
-      defaultMessage:
-        'Allows management of trusted USB and external devices that bypass device control protections.',
-    }
-  ),
-  privilegeGroups: [
-    {
-      groupType: 'mutually_exclusive',
-      privileges: [
-        {
-          api: [
-            'lists-all',
-            'lists-read',
-            'lists-summary',
-            `${APP_ID}-writeTrustedDevices`,
-            `${APP_ID}-readTrustedDevices`,
-          ],
-          id: 'trusted_devices_all',
-          includeIn: 'none',
-          name: TRANSLATIONS.all,
-          savedObject: {
-            all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
-            read: [],
-          },
-          ui: ['writeTrustedDevices', 'readTrustedDevices'],
-        },
-        {
-          api: ['lists-read', 'lists-summary', `${APP_ID}-readTrustedDevices`],
-          id: 'trusted_devices_read',
-          includeIn: 'none',
-          name: TRANSLATIONS.read,
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: ['readTrustedDevices'],
-        },
-      ],
-    },
-  ],
-});
-
 const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
@@ -240,18 +163,6 @@ const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [
-            {
-              feature: SECURITY_FEATURE_ID_V4,
-              privileges: [
-                'host_isolation_exceptions_all',
-
-                // Writing global (not per-policy) Artifacts is gated with Global Artifact Management:ALL starting with siemV3.
-                // Users who have been able to write ANY Artifact before are now granted with this privilege to keep existing behavior.
-                'global_artifact_management_all',
-              ],
-            },
-          ],
           api: [
             'lists-all',
             'lists-read',
@@ -269,9 +180,6 @@ const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
           ui: ['readHostIsolationExceptions', 'deleteHostIsolationExceptions'],
         },
         {
-          replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V4, privileges: ['host_isolation_exceptions_read'] },
-          ],
           api: ['lists-read', 'lists-summary', `${APP_ID}-readHostIsolationExceptions`],
           id: 'host_isolation_exceptions_read',
           includeIn: 'none',
@@ -309,18 +217,6 @@ const blocklistSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [
-            {
-              feature: SECURITY_FEATURE_ID_V4,
-              privileges: [
-                'blocklist_all',
-
-                // Writing global (not per-policy) Artifacts is gated with Global Artifact Management:ALL starting with siemV3.
-                // Users who have been able to write ANY Artifact before are now granted with this privilege to keep existing behavior.
-                'global_artifact_management_all',
-              ],
-            },
-          ],
           api: [
             'lists-all',
             'lists-read',
@@ -338,7 +234,6 @@ const blocklistSubFeature = (): SubFeatureConfig => ({
           ui: ['writeBlocklist', 'readBlocklist'],
         },
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['blocklist_read'] }],
           api: ['lists-read', 'lists-summary', `${APP_ID}-readBlocklist`],
           id: 'blocklist_read',
           includeIn: 'none',
@@ -379,18 +274,6 @@ const eventFiltersSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [
-            {
-              feature: SECURITY_FEATURE_ID_V4,
-              privileges: [
-                'event_filters_all',
-
-                // Writing global (not per-policy) Artifacts is gated with Global Artifact Management:ALL starting with siemV3.
-                // Users who have been able to write ANY Artifact before are now granted with this privilege to keep existing behavior.
-                'global_artifact_management_all',
-              ],
-            },
-          ],
           api: [
             'lists-all',
             'lists-read',
@@ -408,8 +291,6 @@ const eventFiltersSubFeature = (): SubFeatureConfig => ({
           ui: ['writeEventFilters', 'readEventFilters'],
         },
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['event_filters_read'] }],
-
           api: ['lists-read', 'lists-summary', `${APP_ID}-readEventFilters`],
           id: 'event_filters_read',
           includeIn: 'none',
@@ -450,8 +331,6 @@ const policyManagementSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['policy_management_all'] }],
-
           api: [`${APP_ID}-writePolicyManagement`, `${APP_ID}-readPolicyManagement`],
           id: 'policy_management_all',
           includeIn: 'none',
@@ -463,8 +342,6 @@ const policyManagementSubFeature = (): SubFeatureConfig => ({
           ui: ['writePolicyManagement', 'readPolicyManagement'],
         },
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['policy_management_read'] }],
-
           api: [`${APP_ID}-readPolicyManagement`],
           id: 'policy_management_read',
           includeIn: 'none',
@@ -505,9 +382,6 @@ const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V4, privileges: ['actions_log_management_all'] },
-          ],
           api: [`${APP_ID}-writeActionsLogManagement`, `${APP_ID}-readActionsLogManagement`],
           id: 'actions_log_management_all',
           includeIn: 'none',
@@ -519,9 +393,6 @@ const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
           ui: ['writeActionsLogManagement', 'readActionsLogManagement'],
         },
         {
-          replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V4, privileges: ['actions_log_management_read'] },
-          ],
           api: [`${APP_ID}-readActionsLogManagement`],
           id: 'actions_log_management_read',
           includeIn: 'none',
@@ -559,8 +430,6 @@ const hostIsolationSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['host_isolation_all'] }],
-
           api: [`${APP_ID}-writeHostIsolationRelease`],
           id: 'host_isolation_all',
           includeIn: 'none',
@@ -601,8 +470,6 @@ const processOperationsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['process_operations_all'] }],
-
           api: [`${APP_ID}-writeProcessOperations`],
           id: 'process_operations_all',
           includeIn: 'none',
@@ -642,8 +509,6 @@ const fileOperationsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['file_operations_all'] }],
-
           api: [`${APP_ID}-writeFileOperations`],
           id: 'file_operations_all',
           includeIn: 'none',
@@ -686,8 +551,6 @@ const executeActionSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['execute_operations_all'] }],
-
           api: [`${APP_ID}-writeExecuteOperations`],
           id: 'execute_operations_all',
           includeIn: 'none',
@@ -729,8 +592,6 @@ const scanActionSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['scan_operations_all'] }],
-
           api: [`${APP_ID}-writeScanOperations`],
           id: 'scan_operations_all',
           includeIn: 'none',
@@ -772,8 +633,6 @@ const workflowInsightsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['workflow_insights_all'] }],
-
           api: [`${APP_ID}-writeWorkflowInsights`, `${APP_ID}-readWorkflowInsights`],
           id: 'workflow_insights_all',
           includeIn: 'none',
@@ -785,8 +644,6 @@ const workflowInsightsSubFeature = (): SubFeatureConfig => ({
           ui: ['writeWorkflowInsights', 'readWorkflowInsights'],
         },
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['workflow_insights_read'] }],
-
           api: [`${APP_ID}-readWorkflowInsights`],
           id: 'workflow_insights_read',
           includeIn: 'none',
@@ -827,19 +684,6 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [
-            {
-              feature: SECURITY_FEATURE_ID_V4,
-              privileges: [
-                'endpoint_exceptions_all',
-
-                // Writing global (not per-policy) Artifacts is gated with Global Artifact Management:ALL starting with siemV3.
-                // Users who have been able to write ANY Artifact before are now granted with this privilege to keep existing behavior.
-                // This migration is for the serverless offering, where endpoint exception privilege exists.
-                'global_artifact_management_all',
-              ],
-            },
-          ],
           id: 'endpoint_exceptions_all',
           includeIn: 'all',
           name: TRANSLATIONS.all,
@@ -851,9 +695,6 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`],
         },
         {
-          replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V4, privileges: ['endpoint_exceptions_read'] },
-          ],
           id: 'endpoint_exceptions_read',
           includeIn: 'read',
           name: TRANSLATIONS.read,
@@ -916,9 +757,6 @@ const globalArtifactManagementSubFeature = (
         groupType: 'mutually_exclusive',
         privileges: [
           {
-            replacedBy: [
-              { feature: SECURITY_FEATURE_ID_V4, privileges: ['global_artifact_management_all'] },
-            ],
             api: [`${APP_ID}-writeGlobalArtifacts`],
             id: 'global_artifact_management_all',
             includeIn: 'none',
@@ -939,7 +777,7 @@ const globalArtifactManagementSubFeature = (
  * Sub-features that will always be available for Security
  * regardless of the product type.
  */
-export const getSecurityV3BaseKibanaSubFeatureIds = (
+export const getSecurityV4BaseKibanaSubFeatureIds = (
   { experimentalFeatures }: SecurityFeatureParams // currently un-used, but left here as a convenience for possible future use
 ): SecuritySubFeatureId[] => [];
 
@@ -948,7 +786,7 @@ export const getSecurityV3BaseKibanaSubFeatureIds = (
  * The order of the subFeatures is the order they will be displayed
  */
 
-export const getSecurityV3SubFeaturesMap = ({
+export const getSecurityV4SubFeaturesMap = ({
   experimentalFeatures,
 }: SecurityFeatureParams): Map<SecuritySubFeatureId, SubFeatureConfig> => {
   const enableSpaceAwarenessIfNeeded = (subFeature: SubFeatureConfig): SubFeatureConfig => {
@@ -976,14 +814,6 @@ export const getSecurityV3SubFeaturesMap = ({
       SecuritySubFeatureId.trustedApplications,
       enableSpaceAwarenessIfNeeded(trustedApplicationsSubFeature()),
     ],
-    ...((experimentalFeatures.trustedDevices
-      ? [
-          [
-            SecuritySubFeatureId.trustedDevices,
-            enableSpaceAwarenessIfNeeded(trustedDevicesSubFeature()),
-          ],
-        ]
-      : []) as Array<[SecuritySubFeatureId, SubFeatureConfig]>),
     [
       SecuritySubFeatureId.hostIsolationExceptionsBasic,
       enableSpaceAwarenessIfNeeded(hostIsolationExceptionsBasicSubFeature()),

@@ -16,6 +16,8 @@ import { getAttackDiscoveryProductFeaturesConfigurator } from './attack_discover
 import { getTimelineProductFeaturesConfigurator } from './timeline_product_features_config';
 import { getNotesProductFeaturesConfigurator } from './notes_product_features_config';
 import { getSiemMigrationsProductFeaturesConfigurator } from './siem_migrations_product_features_config';
+import { getRulesProductFeaturesConfigurator } from './rules_product_features_config';
+// import { getExceptionsProductFeaturesConfigurator } from './exceptions_product_features_config';
 
 export const getProductProductFeaturesConfigurator = (
   enabledProductFeatureKeys: ProductFeatureKeys
@@ -28,5 +30,7 @@ export const getProductProductFeaturesConfigurator = (
     timeline: getTimelineProductFeaturesConfigurator(enabledProductFeatureKeys),
     notes: getNotesProductFeaturesConfigurator(enabledProductFeatureKeys),
     siemMigrations: getSiemMigrationsProductFeaturesConfigurator(enabledProductFeatureKeys),
+    // exceptions: getExceptionsProductFeaturesConfigurator(enabledProductFeatureKeys),
+    rules: getRulesProductFeaturesConfigurator(enabledProductFeatureKeys),
   };
 };
