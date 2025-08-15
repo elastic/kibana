@@ -75,10 +75,7 @@ function OverallDataQualityIndicator() {
       isLoading={isSummaryPanelLoading}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        <QualityIndicator
-          quality={quality}
-          description={translatedQuality}
-        />
+        <QualityIndicator quality={quality} description={translatedQuality} />
       </EuiFlexGroup>
     </EuiSkeletonRectangle>
   );
