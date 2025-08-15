@@ -126,7 +126,14 @@ export default function QualitySummaryCards({
         {!dataStreamSettingsLoading && !hasFailureStore && canUserReadFailureStore ? (
           <Card
             isDisabled={true}
-            title={overviewPanelDatasetQualityIndicatorFailedDocs}
+            title={
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem>{overviewPanelDatasetQualityIndicatorFailedDocs}</EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiIconTip content={failedDocTooltip} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
             kpiValue={i18n.translate('xpack.datasetQuality.noFailureStoreTitle', {
               defaultMessage: 'No failure store',
             })}
