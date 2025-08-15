@@ -18,7 +18,7 @@ import {
 } from '@kbn/slo-schema';
 import { isEmpty } from 'lodash';
 import { v4 } from 'uuid';
-import { getApmAvailabilityFilters as getApmAvailabilityQueries } from './get_apm_availability_queries';
+import { getApmAvailabilityQueries as getApmAvailabilityQueries } from './get_apm_availability_queries';
 import { getApmLatencyQueries } from './get_apm_latency_queries';
 import { getCustomKqlQueries } from './get_custom_kql_queries';
 import { BAD_EVENTS, GOOD_EVENTS, TOTAL_EVENTS } from './i18n';

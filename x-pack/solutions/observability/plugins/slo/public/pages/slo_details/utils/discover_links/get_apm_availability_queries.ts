@@ -13,7 +13,7 @@ import {
   type APMTransactionErrorRateIndicator,
 } from '@kbn/slo-schema';
 
-export function getApmAvailabilityFilters(
+export function getApmAvailabilityQueries(
   indicator: APMTransactionErrorRateIndicator,
   esQueryConfig?: EsQueryConfig
 ) {
