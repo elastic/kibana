@@ -235,15 +235,8 @@ yarn test:ftr --config path/to/config.ts --grep "my test pattern"
 yarn test:ftr --config path/to/config.ts --debug --bail
 ```
 
-**3. FTR Configuration Examples:**
-- Core functional: `test/functional/config.js`
-- X-Pack functional: `x-pack/test/functional/config.ts`
-- API integration: `x-pack/test/api_integration/config.ts`
-- Serverless: `x-pack/test_serverless/functional/config.ts`
-- Solution-specific: `x-pack/solutions/*/test/functional/config.ts`
-
 ### Common FTR Issues
-- **Build Required:** Always run `yarn kbn bootstrap` before FTR tests
+- **Bootstrap Required:** Always run `yarn kbn bootstrap` before FTR tests
 - **Server Conflicts:** Ensure no other Kibana instances running on 5601
 - **ES Dependencies:** Some tests require specific Elasticsearch setup
 - **Browser Dependencies:** UI tests need proper display/browser setup
@@ -256,36 +249,36 @@ yarn test:ftr --config path/to/config.ts --debug --bail
 ### Directory Structure
 ```
 kibana/
-├── src/                    # Core Kibana platform
-│   ├── cli/               # CLI command implementations
-│   ├── cli_encryption_keys/  # Encryption key CLI tools
-│   ├── cli_health_gateway/   # Health gateway CLI
-│   ├── cli_keystore/      # Keystore CLI tools
-│   ├── cli_plugin/        # Plugin CLI tools
-│   ├── cli_setup/         # Setup CLI tools
+├── src/                        # Core Kibana platform
+│   ├── cli/                    # CLI command implementations
+│   ├── cli_encryption_keys/    # Encryption key CLI tools
+│   ├── cli_health_gateway/     # Health gateway CLI
+│   ├── cli_keystore/           # Keystore CLI tools
+│   ├── cli_plugin/             # Plugin CLI tools
+│   ├── cli_setup/              # Setup CLI tools
 │   ├── cli_verification_code/  # Verification code CLI
-│   ├── core/              # Core services and APIs
-│   ├── dev/               # Development tools and utilities
-│   ├── platform/          # Platform-level packages/plugins
-│   └── setup_node_env/    # Node.js environment setup
-├── x-pack/                # Commercial/licensed features
-│   ├── build_chromium/    # Chromium build artifacts
-│   ├── dev-tools/         # X-Pack development tools
-│   ├── examples/          # X-Pack development examples
-│   ├── packages/          # X-Pack specific packages
-│   ├── performance/       # Performance testing tools
-│   ├── platform/          # X-Pack platform plugins
-│   ├── scripts/           # X-Pack specific scripts
-│   ├── solutions/         # Solution-specific plugins (Security, Observability, Search, Chat)
-│   ├── test/              # X-Pack functional and API integration tests
-│   └── test_serverless/   # Serverless-specific tests
-├── examples/              # Core platform development examples
-├── packages/              # Shared packages
-├── config/                # Configuration files (kibana.yml, etc.)
-├── scripts/               # Build and utility scripts
-├── .buildkite/            # CI/CD pipeline definitions
-├── .devcontainer/         # Development container configuration
-└── dev_docs/              # Development documentation
+│   ├── core/                   # Core services and APIs
+│   ├── dev/                    # Development tools and utilities
+│   ├── platform/               # Platform-level packages/plugins
+│   └── setup_node_env/         # Node.js environment setup
+├── x-pack/                     # Commercial/licensed features
+│   ├── build_chromium/         # Chromium build artifacts
+│   ├── dev-tools/              # X-Pack development tools
+│   ├── examples/               # X-Pack development examples
+│   ├── packages/               # X-Pack specific packages
+│   ├── performance/            # Performance testing tools
+│   ├── platform/               # X-Pack platform plugins
+│   ├── scripts/                # X-Pack specific scripts
+│   ├── solutions/              # Solution-specific plugins (Security, Observability, Search, Chat)
+│   ├── test/                   # X-Pack functional and API integration tests
+│   └── test_serverless/        # Serverless-specific tests
+├── dev_docs/                   # Development documentation
+├── .buildkite/                 # CI/CD pipeline definitions
+├── .devcontainer/              # Development container configuration
+├── config/                     # Configuration files (kibana.yml, etc.)
+├── examples/                   # Core platform development examples
+├── packages/                   # Shared packages
+├── scripts/                    # Build and utility scripts
 ```
 
 ### Plugin Organization
