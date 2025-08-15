@@ -8,10 +8,10 @@
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 
-import { APIClientRequestParamsOf } from '@kbn/dataset-quality-plugin/common/rest';
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import { RoleCredentials, SupertestWithRoleScopeType } from '../../services';
+import type { APIClientRequestParamsOf } from '@kbn/dataset-quality-plugin/common/rest';
+import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { RoleCredentials, SupertestWithRoleScopeType } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');

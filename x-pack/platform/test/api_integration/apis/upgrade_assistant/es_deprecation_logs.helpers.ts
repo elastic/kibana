@@ -11,7 +11,7 @@ import {
   DEPRECATION_LOGS_INDEX,
   DEPRECATION_LOGS_ORIGIN_FIELD,
 } from '@kbn/upgrade-assistant-plugin/common/constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const chance = new Chance();
 const CHARS_POOL = 'abcdefghijklmnopqrstuvwxyz';

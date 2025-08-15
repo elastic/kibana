@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { ATTACK_DISCOVERY_SCHEDULES } from '@kbn/elastic-assistant-common';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllAttackDiscoverySchedules,
   enableAttackDiscoverySchedulesFeature,

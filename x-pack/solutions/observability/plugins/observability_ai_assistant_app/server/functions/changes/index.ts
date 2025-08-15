@@ -10,10 +10,8 @@ import type { AggregationsAutoDateHistogramAggregation } from '@elastic/elastics
 import { CHANGES_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/common';
 import { createElasticsearchClient } from '../../clients/elasticsearch';
 import type { FunctionRegistrationParameters } from '..';
-import {
-  changesFunctionParameters,
-  ChangesFunctionResponse,
-} from '../../../common/functions/changes';
+import type { ChangesFunctionResponse } from '../../../common/functions/changes';
+import { changesFunctionParameters } from '../../../common/functions/changes';
 import { getMetricChanges } from './get_metric_changes';
 import { getLogChanges } from './get_log_changes';
 

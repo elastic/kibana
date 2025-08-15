@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import {
-  BulkInstallPackageInfo,
-  BulkInstallPackagesResponse,
-  epmRouteService,
-} from '@kbn/fleet-plugin/common';
+import type { BulkInstallPackageInfo, BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
+import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { Client } from '@elastic/elasticsearch';
-import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
+import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import type SuperTest from 'supertest';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 import expect from 'expect';
 import { refreshSavedObjectIndices } from '../../refresh_index';
 

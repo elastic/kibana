@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import type { DetailViewData } from './types';
 import { getNextTab } from './get_next_tab';
-import { Request } from '../../../../common/adapters/request/types';
+import type { Request } from '../../../../common/adapters/request/types';
 
 import {
   ClustersView,

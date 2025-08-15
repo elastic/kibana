@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
-import { Document, isPair, isSeq, parseDocument, Scalar, visit } from 'yaml';
+import type { z } from '@kbn/zod';
+import type { Scalar } from 'yaml';
+import { Document, isPair, isSeq, parseDocument, visit } from 'yaml';
 
 const YAML_STRINGIFY_OPTIONS = {
   indent: 2,

@@ -8,15 +8,9 @@
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from 'expect';
 import { Readable } from 'node:stream';
-import {
-  serviceMap,
-  timerange,
-  apm,
-  ApmFields,
-  httpExitSpan,
-  Serializable,
-} from '@kbn/apm-synthtrace-client';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { ApmFields, Serializable } from '@kbn/apm-synthtrace-client';
+import { serviceMap, timerange, apm, httpExitSpan } from '@kbn/apm-synthtrace-client';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
