@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { identifyDependencyOwnership } from './dependency_ownership';
+import { DependenciesByOwner, identifyDependencyOwnership } from './dependency_ownership';
 import { parseConfig } from './parse_config';
+import { ruleFilter } from './rule';
 
 jest.mock('./parse_config', () => ({
   parseConfig: jest.fn(),
@@ -18,22 +19,25 @@ describe('identifyDependencyOwnership', () => {
   const mockConfig = {
     renovateRules: [
       {
+        groupName: 'core-libs',
         reviewers: ['team:elastic', 'team:infra'],
         matchPackageNames: ['lodash', 'react'],
         enabled: true,
       },
       {
+        groupName: 'testing-libs',
         reviewers: ['team:ui'],
-        matchPackageNames: ['@testing-library/react'],
+        matchPackageNames: ['@testing-library/react', 'undefined-package'],
         enabled: true,
       },
       {
+        groupName: 'disabled-libs',
         reviewers: ['team:disabled-team'],
         matchPackageNames: ['disabled-package'],
         enabled: false, // Disabled rule
       },
-    ],
-    packageDependencies: ['lodash', 'react'],
+    ].filter(ruleFilter),
+    packageDependencies: ['lodash', 'react', 'disabled-package'],
     packageDevDependencies: ['jest', '@testing-library/react'],
   };
 
@@ -80,11 +84,24 @@ describe('identifyDependencyOwnership', () => {
   });
 
   it('returns uncovered dependencies when missingOwner is true', () => {
-    const result = identifyDependencyOwnership({ missingOwner: true });
-    expect(result).toEqual({
-      prodDependencies: [],
+    const { prodDependencies, devDependencies } = identifyDependencyOwnership({
+      missingOwner: true,
+    }) as DependenciesByOwner;
+    expect({ prodDependencies, devDependencies }).toEqual({
+      prodDependencies: ['disabled-package'],
       devDependencies: ['jest'],
     });
+  });
+
+  it('returns renovate rule errors for undeclared dependencies', () => {
+    const { invalidRenovateRules } = identifyDependencyOwnership({
+      missingOwner: true,
+    }) as DependenciesByOwner;
+    expect(invalidRenovateRules).toMatchInlineSnapshot(`
+      Array [
+        "Invalid renovate rule: 'testing-libs' declares package 'undefined-package', which is not found in package.json.",
+      ]
+    `);
   });
 
   it('returns comprehensive ownership coverage, considering only enabled rules', () => {
@@ -94,15 +111,13 @@ describe('identifyDependencyOwnership', () => {
         '@elastic/elastic': ['lodash', 'react'],
         '@elastic/infra': ['lodash', 'react'],
         '@elastic/ui': [],
-        '@elastic/disabled-team': [],
       },
       devDependenciesByOwner: {
         '@elastic/elastic': [],
         '@elastic/infra': [],
         '@elastic/ui': ['@testing-library/react'],
-        '@elastic/disabled-team': [],
       },
-      uncoveredProdDependencies: [],
+      uncoveredProdDependencies: ['disabled-package'],
       uncoveredDevDependencies: ['jest'],
       coveredProdDependencies: ['lodash', 'react'],
       coveredDevDependencies: ['@testing-library/react'],
