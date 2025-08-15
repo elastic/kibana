@@ -143,7 +143,7 @@ export class WorkflowsService {
 
     if (query) {
       filters.push(
-        `(${SO_ATTRIBUTES_PREFIX}.name:"${query}" OR ${SO_ATTRIBUTES_PREFIX}.description:"${query}")`
+        `(${SO_ATTRIBUTES_PREFIX}.name:"*${query}*" OR ${SO_ATTRIBUTES_PREFIX}.description:"*${query}*")`
       );
     }
 
