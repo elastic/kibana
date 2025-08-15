@@ -49093,6 +49093,13 @@
                                                           "minLength": 1,
                                                           "type": "string"
                                                         },
+                                                        "status": {
+                                                          "enum": [
+                                                            "enabled",
+                                                            "disabled"
+                                                          ],
+                                                          "type": "string"
+                                                        },
                                                         "where": {
                                                           "anyOf": [
                                                             {
@@ -49372,7 +49379,8 @@
                                                       },
                                                       "required": [
                                                         "destination",
-                                                        "where"
+                                                        "where",
+                                                        "status"
                                                       ],
                                                       "type": "object"
                                                     },
@@ -61509,6 +61517,13 @@
                                           "minLength": 1,
                                           "type": "string"
                                         },
+                                        "status": {
+                                          "enum": [
+                                            "enabled",
+                                            "disabled"
+                                          ],
+                                          "type": "string"
+                                        },
                                         "where": {
                                           "anyOf": [
                                             {
@@ -61788,7 +61803,8 @@
                                       },
                                       "required": [
                                         "destination",
-                                        "where"
+                                        "where",
+                                        "status"
                                       ],
                                       "type": "object"
                                     },
