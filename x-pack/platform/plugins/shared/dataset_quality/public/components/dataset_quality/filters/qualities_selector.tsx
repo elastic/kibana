@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import { QualityIndicators } from '../../../../common/types';
+import type { QualityIndicators } from '../../../../common/types';
 
 const QualityIndicator = dynamic(() => import('../../quality_indicator/indicator'));
 

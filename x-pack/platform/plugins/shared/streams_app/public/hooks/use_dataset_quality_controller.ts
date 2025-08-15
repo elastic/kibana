@@ -6,9 +6,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { useHistory } from 'react-router-dom';
-import {
+import type {
   DatasetQualityDetailsController,
   DatasetQualityView,
 } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';

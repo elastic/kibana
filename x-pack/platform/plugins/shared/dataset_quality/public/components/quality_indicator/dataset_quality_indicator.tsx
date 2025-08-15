@@ -10,7 +10,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { QualityIndicators } from '../../../common/types';
+import type { QualityIndicators } from '../../../common/types';
 
 const QualityIndicator = dynamic(() => import('./indicator'));
 
