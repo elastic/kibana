@@ -63,13 +63,27 @@ export const ASSET_INVENTORY_STATUS: Record<string, string> = {
 // AssetInventoryDataClient is responsible for managing the asset inventory,
 // including initializing and cleaning up resources such as Elasticsearch ingest pipelines.
 export class AssetInventoryDataClient {
-  constructor(private readonly options: AssetInventoryClientOpts) {}
+  private static usageCollectorRegistered = false;
+  constructor(private readonly options: AssetInventoryClientOpts) {
+    this.init().catch((e) => this.options.logger.error(`Init error: ${e.message}`));
+  }
 
   // Initializes the asset inventory by validating experimental feature flags and triggering asynchronous setup.
   public async init() {
-    const { logger } = this.options;
+    const { logger, coreStartPromise, usageCollection } = this.options;
 
     logger.debug(`Initializing asset inventory`);
+
+    if (!AssetInventoryDataClient.usageCollectorRegistered && usageCollection) {
+      try {
+        logger.debug('Registering Asset Inventory Telemetry');
+        registerAssetInventoryUsageCollector(logger, coreStartPromise, usageCollection);
+        AssetInventoryDataClient.usageCollectorRegistered = true;
+        logger.debug('Asset Inventory Telemetry Registered');
+      } catch (e) {
+        logger.error(`Failed to register usage collector: ${e.message}`);
+      }
+    }
 
     this.asyncSetup().catch((e) =>
       logger.error(`Error during async setup of asset inventory: ${e.message}`)
@@ -142,13 +156,9 @@ export class AssetInventoryDataClient {
     secSolutionContext: SecuritySolutionApiRequestHandlerContext,
     requestBodyOverrides: InitEntityStoreRequestBody
   ) {
-    const { logger, usageCollection, coreStartPromise } = this.options;
+    const { logger } = this.options;
 
     logger.debug(`Enabling asset inventory`);
-
-    logger.debug('Registering Asset Inventory Telemetry');
-    registerAssetInventoryUsageCollector(logger, coreStartPromise, usageCollection);
-    logger.debug('Asset Inventory Telemetry Registered');
 
     try {
       if (!(await this.checkUISettingEnabled())) {
