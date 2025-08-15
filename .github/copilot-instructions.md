@@ -132,15 +132,6 @@ FTR tests are critical for Kibana QA and come in two main flavors: `api_integrat
 Build Kibana Plugins → Start Test Server → Run Test Config → Execute Tests
 ```
 
-**Critical Build Step:** FTR tests require building Kibana plugins first:
-```bash
-# Build all platform plugins (required for FTR tests)
-node scripts/build_kibana_platform_plugins
-
-# Build specific plugins by name, including any dependencies (faster for targeted testing)
-node scripts/build_kibana_platform_plugins --focus securitySolution
-```
-
 ### Core FTR Commands
 ```bash
 # Main FTR commands
@@ -211,15 +202,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 ### FTR Development Workflow
 
 **1. Build and Start:**
+**Critical Build Step:** FTR tests require building Kibana plugins first
 ```bash
-# Build Kibana plugins first (REQUIRED)
+# Build Option A: Build all platform plugins (required for FTR tests)
 node scripts/build_kibana_platform_plugins
 
-# Option A: Start server and run tests separately
+# Build Option B: Build specific plugins by name, including any dependencies (faster for targeted testing)
+node scripts/build_kibana_platform_plugins --focus securitySolution
+
+# Start Option A: Start server and run tests separately
 yarn test:ftr:server --config path/to/config.ts
 yarn test:ftr:runner --config path/to/config.ts
 
-# Option B: Run everything together
+# Start Option B: Run server and runner together
 yarn test:ftr --config path/to/config.ts
 ```
 
@@ -321,12 +316,6 @@ node scripts/eslint_all_files --no-cache
 node scripts/stylelint
 node scripts/type_check
 ```
-
-### GitHub Actions (.github/workflows/)
-- Auto-approve backports
-- Documentation builds
-- Security scanning (CodeQL)
-- Dependency health evaluation
 
 ## Common Issues & Solutions
 
