@@ -8,7 +8,7 @@
  */
 
 import { castDraft, produce } from 'immer';
-import type { TableState, ExpandedState, Updater } from '@tanstack/react-table';
+import type { TableState, ExpandedState } from '@tanstack/react-table';
 export type { TableState } from '@tanstack/react-table';
 import { getLeafIdFromCacheKey } from '../lib/utils';
 
@@ -105,10 +105,9 @@ export function createStoreReducers<G extends GroupNode, L extends LeafNode>() {
         draft.leafNodes.set(cacheKey, castDraft(data));
       });
     },
-    setExpandedRows(state: IStoreState<G, L>, payload: Updater<ExpandedState>) {
+    setExpandedRows(state: IStoreState<G, L>, expandedState: ExpandedState) {
       return produce(state, (draft) => {
-        draft.table.expanded =
-          typeof payload === 'function' ? payload(draft.table.expanded) : payload;
+        draft.table.expanded = expandedState;
       });
     },
   } as const;
