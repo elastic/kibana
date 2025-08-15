@@ -41,7 +41,7 @@ describe('postDefendInsightsRoute', () => {
 
   function getDefaultUser(): AuthenticatedUser {
     return {
-      username: 'elastic',
+      username: 'my_username',
       authentication_realm: {
         type: 'my_realm_type',
         name: 'my_realm_name',
