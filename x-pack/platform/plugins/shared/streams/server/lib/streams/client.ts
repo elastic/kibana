@@ -14,10 +14,11 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { RoutingStatus, Streams, getAncestors, getParentId } from '@kbn/streams-schema';
-import { LockManagerService } from '@kbn/lock-manager';
-import { Condition } from '@kbn/streamlang';
-import { AssetClient } from './assets/asset_client';
+import type { RoutingStatus } from '@kbn/streams-schema';
+import { Streams, getAncestors, getParentId } from '@kbn/streams-schema';
+import type { LockManagerService } from '@kbn/lock-manager';
+import type { Condition } from '@kbn/streamlang';
+import type { AssetClient } from './assets/asset_client';
 import { ASSET_ID, ASSET_TYPE } from './assets/fields';
 import type { QueryClient } from './assets/query/query_client';
 import {
