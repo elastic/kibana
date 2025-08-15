@@ -7,7 +7,7 @@
 
 import { Frequency } from '@kbn/rrule';
 import { transformScheduledReport } from './utils';
-import { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
+import type { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
 import { RecurrenceEnd } from '@kbn/response-ops-recurring-schedule-form/constants';
 
 const baseReport = {

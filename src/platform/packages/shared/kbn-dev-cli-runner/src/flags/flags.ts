@@ -9,7 +9,7 @@
 
 import getopts from 'getopts';
 import { LOG_LEVEL_FLAGS, DEFAULT_LOG_LEVEL } from '@kbn/tooling-log';
-import { FlagOptions, Flags } from './types';
+import type { FlagOptions, Flags } from './types';
 
 export function mergeFlagOptions(global: FlagOptions = {}, local: FlagOptions = {}): FlagOptions {
   return {

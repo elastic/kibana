@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { LensDocumentService } from './lens_document_service';
 
 describe('LensStore', () => {

@@ -21,16 +21,11 @@ import { css } from '@emotion/react';
 import { EsqlToolFieldType } from '@kbn/onechat-common';
 import { capitalize } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
-import {
-  Controller,
-  FieldArrayWithId,
-  FieldError,
-  useFormContext,
-  useWatch,
-} from 'react-hook-form';
+import type { FieldArrayWithId, FieldError } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useEsqlParamsValidation } from '../hooks/use_esql_params_validation';
 import { i18nMessages } from '../i18n';
-import { OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
+import type { OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
 
 interface EsqlParamRowProps {
   index: number;
@@ -88,7 +83,6 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
             size="m"
           />
         ) : (
-          !isMobile &&
           warning && (
             <EuiIconTip
               content={warning}
@@ -116,7 +110,7 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFieldText
                 compressed
-                fullWidth={isMobile}
+                fullWidth
                 placeholder={i18nMessages.paramNamePlaceholder}
                 inputRef={ref}
                 isInvalid={invalid}
@@ -159,7 +153,7 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFieldText
                 compressed
-                fullWidth={isMobile}
+                fullWidth
                 placeholder={i18nMessages.paramDescriptionPlaceholder}
                 inputRef={ref}
                 isInvalid={invalid}
@@ -188,7 +182,7 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiSelect
                 compressed
-                fullWidth={isMobile}
+                fullWidth
                 options={Object.values(EsqlToolFieldType).map((option) => ({
                   value: option,
                   text: capitalize(option),

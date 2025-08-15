@@ -77,27 +77,6 @@ describe('SettingsTab', () => {
     prependMock.mockReset();
   });
 
-  it('should render a “Go to spaces” button with the correct href', () => {
-    const expectedSpacesUrl = '/app/management/kibana/spaces';
-    getUrlForAppMock.mockReturnValue(expectedSpacesUrl);
-
-    const { getAllByTestId } = render(<SettingsTab />);
-    const [firstSpacesButton] = getAllByTestId('settingsTabGoToSpacesButton');
-
-    expect(firstSpacesButton).toHaveAttribute('href', expectedSpacesUrl);
-  });
-
-  it('should render a “Manage connectors” button with the correct href', () => {
-    const expectedConnectorsUrl =
-      '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors';
-    prependMock.mockReturnValue(expectedConnectorsUrl);
-
-    const { getByTestId } = render(<SettingsTab />);
-    const connectorsButton = getByTestId('settingsTabGoToConnectorsButton');
-
-    expect(connectorsButton).toHaveAttribute('href', expectedConnectorsUrl);
-  });
-
   it('should show knowledge base model section when the knowledge base is enabled and connectors exist', () => {
     const { getByTestId } = render(<SettingsTab />, {
       coreStart: {

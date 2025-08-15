@@ -8,9 +8,9 @@
  */
 
 import React, { useEffect, useMemo, useCallback } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,7 +21,8 @@ import {
   EuiToolTip,
   EuiBadge,
 } from '@elastic/eui';
-import { EsWorkflowStepExecution, ExecutionStatus } from '@kbn/workflows';
+import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
@@ -93,7 +94,10 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     }
 
     const intervalId = setInterval(() => {
-      if (workflowExecution.status === ExecutionStatus.RUNNING) {
+      if (
+        workflowExecution.status === ExecutionStatus.RUNNING ||
+        workflowExecution.status === ExecutionStatus.PENDING
+      ) {
         refetch();
         return;
       }

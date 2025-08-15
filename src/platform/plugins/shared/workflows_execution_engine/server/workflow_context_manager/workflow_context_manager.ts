@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { graphlib } from '@dagrejs/dagre';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { WorkflowSchema } from '@kbn/workflows';
-import { z } from '@kbn/zod';
-import { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
+import type { graphlib } from '@dagrejs/dagre';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { WorkflowSchema } from '@kbn/workflows';
+import type { z } from '@kbn/zod';
+import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 
 export interface ContextManagerInit {
   workflowRunId: string;
@@ -35,6 +35,7 @@ export class WorkflowContextManager {
       workflowRunId: init.workflowRunId,
       workflow: init.workflow,
       event: init.event,
+      consts: init.workflow.consts || {},
     };
 
     this.workflowExecutionGraph = init.workflowExecutionGraph;
@@ -77,5 +78,20 @@ export class WorkflowContextManager {
 
   public getContextKey(key: string): any {
     return this.context[key];
+  }
+
+  public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {
+    const propertyPathSegments = propertyPath.split('.');
+    let result: any = this.getContext();
+
+    for (const segment of propertyPathSegments) {
+      if (!(segment in result)) {
+        return { pathExists: false, value: undefined }; // Path not found in context
+      }
+
+      result = result[segment];
+    }
+
+    return { pathExists: true, value: result };
   }
 }

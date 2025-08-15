@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { getRoutePaths } from '@kbn/profiling-plugin/common';
-import { ProfilingStatus } from '@kbn/profiling-utils';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ProfilingStatus } from '@kbn/profiling-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import Path from 'path';
-import { BetterTest } from '../common/bettertest';
+import type { BetterTest } from '../common/bettertest';
 import { deletePackagePolicy, getProfilingPackagePolicyIds } from './fleet';
 
 const profilingRoutePaths = getRoutePaths();

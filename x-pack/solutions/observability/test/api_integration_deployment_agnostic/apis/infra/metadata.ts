@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
+import type {
   InfraMetadata,
   InfraMetadataRequest,
 } from '@kbn/infra-plugin/common/http_api/metadata_api';

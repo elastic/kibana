@@ -15,8 +15,8 @@ import { DEFAULT_FLAG_ALIASES, getFlags } from '../flags/flags';
 import { FlagsReader } from '../flags/flags_reader';
 import { getHelp } from '../help';
 import { Metrics } from '../metrics';
-import { RunFn, RunOptions } from './types';
-import { FlagOptions, Flags, FlagsOf } from '../flags/types';
+import type { RunFn, RunOptions } from './types';
+import type { FlagOptions, Flags, FlagsOf } from '../flags/types';
 
 export async function run<T, TFlagOptions extends FlagOptions = FlagOptions>(
   fn: RunFn<T, FlagsOf<TFlagOptions>>,
