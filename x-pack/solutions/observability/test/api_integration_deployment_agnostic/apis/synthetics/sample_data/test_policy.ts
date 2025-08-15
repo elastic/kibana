@@ -15,7 +15,7 @@ interface PolicyProps {
   id: string;
   configId?: string;
   projectId?: string;
-  location: { name?: string; id?: string };
+  location: { name?: string; id: string };
   namespace?: string;
   isTLSEnabled?: boolean;
   proxyUrl?: string;
@@ -29,7 +29,7 @@ export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
   return {
     id: '2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
     version: 'WzE2MjYsMV0=',
-    name: 'test-monitor-name-Test private location 0-default',
+    name: `test-monitor-name-Test private location ${props.location.id}-default`,
     namespace: namespace ?? 'testnamespace',
     spaceIds: ['default'],
     package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
@@ -53,7 +53,7 @@ export const getHttpInput = ({
   proxyUrl,
   isTLSEnabled,
   spaceId,
-  name = 'check if title is present-Test private location 0',
+  name = `check if title is present-Test private location ${location.id}`,
 }: PolicyProps) => {
   const enabled = true;
   const baseVars: PackagePolicyConfigRecord = {
@@ -165,7 +165,7 @@ export const getHttpInput = ({
       value: location.id ?? 'aaa3c150-f94d-11ed-9895-d36d5472fafd',
     },
     location_name: {
-      value: JSON.stringify(location.name) ?? '"Test private location 0"',
+      value: JSON.stringify(location.name) ?? `"Test private location ${location.id}"`,
       type: 'text',
     },
     ...commonVars,
@@ -194,8 +194,8 @@ export const getHttpInput = ({
     tags: ['tag1', 'tag2'],
     username: 'test-username',
     password: 'test',
-    'run_from.geo.name': location?.name ?? 'Test private location 0',
-    'run_from.id': location?.id ?? 'Test private location 0',
+    'run_from.geo.name': location?.name ?? `Test private location ${location.id}`,
+    'run_from.id': location?.id ?? `Test private location ${location.id}`,
     'response.include_headers': true,
     'response.include_body': 'never',
     'response.include_body_max_bytes': 1024,
@@ -264,7 +264,7 @@ export const getHttpInput = ({
   };
 };
 
-export const getBrowserInput = ({ id, params, isBrowser }: PolicyProps) => {
+export const getBrowserInput = ({ id, params, isBrowser, location }: PolicyProps) => {
   const compiledBrowser = {
     __ui: {
       script_source: { is_generated_script: false, file_name: '' },
@@ -274,8 +274,8 @@ export const getBrowserInput = ({ id, params, isBrowser }: PolicyProps) => {
     name: 'Test HTTP Monitor 03',
     id,
     origin: 'ui',
-    'run_from.id': 'Test private location 0',
-    'run_from.geo.name': 'Test private location 0',
+    'run_from.id': `Test private location ${location.id}`,
+    'run_from.geo.name': `Test private location ${location.id}`,
     enabled: true,
     schedule: '@every 3m',
     timeout: '16s',
@@ -344,7 +344,7 @@ export const getBrowserInput = ({ id, params, isBrowser }: PolicyProps) => {
           type: 'text',
           value: 'fleet_managed',
         },
-        location_name: { value: 'Test private location 0', type: 'text' },
+        location_name: { value: `Test private location ${location.id}`, type: 'text' },
         id: { value: id, type: 'text' },
         origin: { value: 'ui', type: 'text' },
       }

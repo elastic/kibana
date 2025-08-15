@@ -9,7 +9,7 @@ import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import {
   ConfigKey,
   HTTPFields,
-  LocationStatus,
+  BrowserFields,
   PrivateLocation,
   ServiceLocation,
   SyntheticsParams,
@@ -24,27 +24,16 @@ import { PrivateLocationTestService } from '../../services/synthetics_private_lo
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
 
-export const LOCAL_LOCATION = {
-  id: 'dev',
-  label: 'Dev Service',
-  geo: {
-    lat: 0,
-    lon: 0,
-  },
-  isServiceManaged: true,
-};
-
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe.skip('SyncGlobalParams', function () {
-    this.tags('skipCloud');
+  describe('SyncGlobalParams', function () {
     const supertestAPI = getService('supertestWithoutAuth');
     const supertestWithAuth = getService('supertest');
     const kServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
 
     let testFleetPolicyID: string;
-    let _browserMonitorJson: HTTPFields;
-    let browserMonitorJson: HTTPFields;
+    let _browserMonitorJson: BrowserFields;
+    let browserMonitorJson: BrowserFields;
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
@@ -87,41 +76,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('add a test private location', async () => {
       privateLocations = await testPrivateLocations.setTestLocations([testFleetPolicyID]);
 
-      const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
+      const apiResponse = await supertestAPI
+        .get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
 
-      const testLocations: Array<PrivateLocation | ServiceLocation> = [
-        {
-          id: 'dev',
-          label: 'Dev Service',
-          geo: { lat: 0, lon: 0 },
-          url: 'mockDevUrl',
-          isServiceManaged: true,
-          status: LocationStatus.EXPERIMENTAL,
-          isInvalid: false,
-        },
-        {
-          id: 'dev2',
-          label: 'Dev Service 2',
-          geo: { lat: 0, lon: 0 },
-          url: 'mockDevUrl',
-          isServiceManaged: true,
-          status: LocationStatus.EXPERIMENTAL,
-          isInvalid: false,
-        },
-        {
-          id: testFleetPolicyID,
-          isInvalid: false,
-          isServiceManaged: false,
-          label: privateLocations[0].label,
-          geo: {
-            lat: 0,
-            lon: 0,
-          },
-          agentPolicyId: testFleetPolicyID,
-        },
-      ];
-
-      expect(apiResponse.body.locations).eql(testLocations);
+      expect(
+        apiResponse.body.locations.some(
+          (loc: PrivateLocation | ServiceLocation) => loc.id === privateLocations[0].id
+        )
+      ).to.eql(true);
     });
 
     it('adds a monitor in private location', async () => {
@@ -138,25 +103,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       };
 
-      newMonitor.locations.push(pvtLoc);
+      newMonitor.locations = [pvtLoc];
 
       const apiResponse = await addMonitorAPI(newMonitor);
 
       expect(apiResponse.body).eql(
         omitMonitorKeys({
           ...newMonitor,
+          [ConfigKey.KIBANA_SPACES]: ['default'],
           [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
           [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-          locations: [LOCAL_LOCATION, pvtLoc],
+          locations: [pvtLoc],
         })
       );
       newMonitorId = apiResponse.rawBody.id;
     });
 
     it('added an integration for previously added monitor', async () => {
-      const apiResponse = await supertestAPI.get(
-        '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
-      );
+      const apiResponse = await supertestWithAuth
+        .get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        )
+        .expect(200);
 
       const packagePolicy = apiResponse.body.items.find(
         (pkgPolicy: PackagePolicy) =>
@@ -239,7 +207,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           lon: 0,
         },
       };
-      newMonitor.locations.push(pvtLoc);
+      newMonitor.locations = [pvtLoc];
 
       newMonitor.proxy_url = '${test}';
 
@@ -250,7 +218,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...newMonitor,
           [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
           [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-          locations: [LOCAL_LOCATION, pvtLoc],
         })
       );
       newHttpMonitorId = apiResponse.rawBody.id;
