@@ -19,9 +19,8 @@ import {
 } from '@elastic/eui';
 import { DraggableProvided } from '@hello-pangea/dnd';
 import { i18n } from '@kbn/i18n';
-import { isDescendantOf } from '@kbn/streams-schema';
+import { isDescendantOf, isRoutingEnabled } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
-import { isNeverCondition } from '@kbn/streamlang';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { RoutingConditionEditor } from '../condition_editor';
 import { ConditionMessage } from '../condition_message';
@@ -91,7 +90,7 @@ export function RoutingStreamEntry({
             <EuiIcon type="grabOmnidirectional" />
           </EuiPanel>
         </EuiFlexItem>
-        {isNeverCondition(routingRule.where) && (
+        {!isRoutingEnabled(routingRule.status) && (
           <EuiBadge color="hollow">
             {i18n.translate('xpack.streams.streamDetailRouting.disabled', {
               defaultMessage: 'Disabled',
@@ -136,8 +135,9 @@ export function RoutingStreamEntry({
       {isEditing && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <RoutingConditionEditor
-            condition={routingRule.where}
-            onConditionChange={(condition) => onChange({ where: condition })}
+            where={routingRule.where}
+            status={routingRule.status}
+            onConditionChange={({ where, status }) => onChange({ where, status })}
           />
           <EditRoutingRuleControls
             relatedStreams={availableStreams.filter(

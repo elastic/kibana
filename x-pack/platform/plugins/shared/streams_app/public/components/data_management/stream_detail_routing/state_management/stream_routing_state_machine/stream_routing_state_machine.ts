@@ -58,6 +58,7 @@ export const streamRoutingMachine = setup({
       const newRule = routingConverter.toUIDefinition({
         destination: `${context.definition.stream.name}.child`,
         where: ALWAYS_CONDITION,
+        status: 'enabled',
         isNew: true,
       });
 
