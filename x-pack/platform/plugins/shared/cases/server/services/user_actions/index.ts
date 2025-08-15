@@ -723,12 +723,12 @@ export class CaseUserActionService {
     });
 
     const result = {
-      total: response.total,
+      total: response.aggregations?.filtered.doc_count ?? 0,
       total_comments: 0,
       total_other_actions: 0,
     };
 
-    response.aggregations?.totals.buckets.forEach(({ key, doc_count: docCount }) => {
+    response.aggregations?.filtered.totals.buckets.forEach(({ key, doc_count: docCount }) => {
       if (key === 'user') {
         result.total_comments = docCount;
       }
@@ -744,10 +744,21 @@ export class CaseUserActionService {
     estypes.AggregationsAggregationContainer
   > {
     return {
-      totals: {
-        terms: {
-          field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
-          size: 100,
+      filtered: {
+        filter: {
+          term: {
+            // We're only including `create` actions here because we don't want to count
+            // `create` and `delete` actions since we don't show both in the UI.
+            [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.action`]: 'create',
+          },
+        },
+        aggs: {
+          totals: {
+            terms: {
+              field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
+              size: 100,
+            },
+          },
         },
       },
     };
