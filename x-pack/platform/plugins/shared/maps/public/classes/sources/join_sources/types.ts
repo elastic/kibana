@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { FeatureCollection, GeoJsonProperties } from 'geojson';
+import type { FeatureCollection, GeoJsonProperties } from 'geojson';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { Query } from '@kbn/data-plugin/common/query';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { IField } from '../../fields/field';
-import { DataFilters, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
-import { PropertiesMap } from '../../../../common/elasticsearch_util';
-import { ITooltipProperty } from '../../tooltips/tooltip_property';
-import { ISource } from '../source';
+import type { Query } from '@kbn/data-plugin/common/query';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { IField } from '../../fields/field';
+import type { DataFilters, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
+import type { PropertiesMap } from '../../../../common/elasticsearch_util';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
+import type { ISource } from '../source';
 
 export interface IJoinSource extends ISource {
   hasCompleteConfig(): boolean;

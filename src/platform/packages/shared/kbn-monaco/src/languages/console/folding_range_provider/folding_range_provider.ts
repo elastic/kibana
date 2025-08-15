@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '../../../..';
+import type { monaco } from '../../../..';
 import { getFoldingRanges } from './folding_range_utils';
 
 export const foldingRangeProvider: monaco.languages.FoldingRangeProvider = {

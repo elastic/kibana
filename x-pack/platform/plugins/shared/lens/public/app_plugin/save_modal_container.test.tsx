@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SaveProps } from './app';
+import type { SaveProps } from './app';
 import { type SaveVisualizationProps, runSaveLensVisualization } from './save_modal_container';
 import { defaultDoc, makeDefaultServices } from '../mocks';
 import { faker } from '@faker-js/faker';

@@ -8,8 +8,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from '../types';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from '../types';
 import { dataService } from '../../services/kibana_services';
 import { startDashboardSearchSessionIntegration } from './start_dashboard_search_session_integration';
 

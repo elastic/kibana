@@ -6,10 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { LicenseType } from '@kbn/licensing-types';
+import type { LicenseType } from '@kbn/licensing-types';
 
 import { uniq } from 'lodash';
-import { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import {
   isAssignment,
   isColumn,
@@ -23,27 +23,22 @@ import {
   commaCompleteItem,
   listCompleteItem,
 } from '../../../commands_registry/complete_items';
-import {
+import type {
   ESQLFieldWithMetadata,
   GetColumnsByTypeFn,
   ICommandCallbacks,
   ICommandContext,
   ISuggestionItem,
   ItemKind,
-  Location,
-  getLocationFromCommandOrOptionName,
 } from '../../../commands_registry/types';
+import { Location, getLocationFromCommandOrOptionName } from '../../../commands_registry/types';
 import { parse } from '../../../parser';
-import { ESQLAstItem, ESQLCommand, ESQLCommandOption, ESQLFunction } from '../../../types';
+import type { ESQLAstItem, ESQLCommand, ESQLCommandOption, ESQLFunction } from '../../../types';
 import { Walker } from '../../../walker';
 import { comparisonFunctions } from '../../all_operators';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../constants';
-import {
-  FunctionDefinitionTypes,
-  FunctionParameter,
-  FunctionParameterType,
-  isNumericType,
-} from '../../types';
+import type { FunctionParameter, FunctionParameterType } from '../../types';
+import { FunctionDefinitionTypes, isNumericType } from '../../types';
 import { correctQuerySyntax, findAstPosition } from '../ast';
 import { getColumnExists } from '../columns';
 import { getExpressionType } from '../expressions';

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, ReactNode, useContext } from 'react';
-import { ChromeLayoutSlots, LayoutState } from './layout.types';
+import type { ReactNode } from 'react';
+import React, { createContext, useContext } from 'react';
+import type { ChromeLayoutSlots, LayoutState } from './layout.types';
 import { useLayoutConfig } from './layout_config_context';
 
 export interface LayoutStateProps extends ChromeLayoutSlots {

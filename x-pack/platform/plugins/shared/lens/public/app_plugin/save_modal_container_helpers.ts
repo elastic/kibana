@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { v4 as generateId } from 'uuid';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
 import type { ControlPanelsState } from '@kbn/controls-plugin/common';
@@ -17,10 +16,11 @@ import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
 } from '@kbn/controls-constants';
 import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
+import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { LensAppServices } from './types';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 import { extract } from '../../common/embeddable_factory';
-import { LensSerializedState } from '../react_embeddable/types';
+import type { LensSerializedState } from '../react_embeddable/types';
 
 export const redirectToDashboard = ({
   embeddableInput: rawState,
