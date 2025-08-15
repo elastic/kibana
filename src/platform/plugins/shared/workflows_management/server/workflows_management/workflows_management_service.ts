@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  ElasticsearchClient,
+  Logger,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import {
   CreateWorkflowCommand,
   EsWorkflow,
@@ -26,7 +31,7 @@ import {
   WorkflowSavedObjectAttributes,
 } from '../saved_objects/workflow';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
-import { createIndexWithMappings } from './lib/create_index';
+import { createOrUpdateIndex } from './lib/create_index';
 import { getWorkflowExecution } from './lib/get_workflow_execution';
 import {
   WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
@@ -39,10 +44,10 @@ import { GetWorkflowsParams } from './workflows_management_api';
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
   private taskScheduler: WorkflowTaskScheduler | null = null;
-  private logger: Logger;
-  private getSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
-  private workflowsExecutionIndex: string;
-  private stepsExecutionIndex: string;
+  private readonly logger: Logger;
+  private readonly getSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
+  private readonly workflowsExecutionIndex: string;
+  private readonly stepsExecutionIndex: string;
   private workflowEventLoggerService: SimpleWorkflowLogger | null = null;
   private workflowExecutionLogsIndex: string;
 
@@ -80,13 +85,13 @@ export class WorkflowsService {
 
     // Create required indices with proper mappings (workflows are now saved objects)
     await Promise.all([
-      createIndexWithMappings({
+      createOrUpdateIndex({
         esClient: this.esClient,
         indexName: this.workflowsExecutionIndex,
         mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
         logger: this.logger,
       }),
-      createIndexWithMappings({
+      createOrUpdateIndex({
         esClient: this.esClient,
         indexName: this.stepsExecutionIndex,
         mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
@@ -99,10 +104,14 @@ export class WorkflowsService {
     );
   }
 
-  public async searchWorkflows(params: GetWorkflowsParams): Promise<WorkflowListDto> {
+  public async searchWorkflows(
+    params: GetWorkflowsParams,
+    spaceId: string
+  ): Promise<WorkflowListDto> {
     const savedObjectsClient = await this.getSavedObjectsClient();
     const response = await savedObjectsClient.find<WorkflowSavedObjectAttributes>({
       type: WORKFLOW_SAVED_OBJECT_TYPE,
+      filter: `${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.spaceId: "${spaceId}"`,
       perPage: 100,
       sortField: 'updated_at',
       sortOrder: 'desc',
@@ -114,10 +123,11 @@ export class WorkflowsService {
     // Fetch execution history for all workflows in parallel
     const executionHistoryPromises = workflowIds.map(async (workflowId) => {
       try {
-        const executions = await this.searchWorkflowExecutions({ workflowId });
+        const executions = await this.searchWorkflowExecutions({ workflowId }, spaceId);
         return {
           workflowId,
           history: executions.results.map((execution) => ({
+            spaceId: execution.spaceId,
             id: execution.id,
             workflowId: execution.workflowId,
             workflowName: '', // Will be filled from workflow data
@@ -138,7 +148,7 @@ export class WorkflowsService {
 
     const executionHistoryResults = await Promise.all(executionHistoryPromises);
 
-    // Create a map for quick lookup
+    // Create a map for a quick lookup
     const historyByWorkflowId = executionHistoryResults.reduce((acc, result) => {
       acc[result.workflowId] = result.history;
       return acc;
@@ -157,6 +167,7 @@ export class WorkflowsService {
       );
 
       return {
+        spaceId: so.id,
         id: so.id,
         name: so.attributes.name,
         description: so.attributes.description || '',
@@ -181,7 +192,10 @@ export class WorkflowsService {
     };
   }
 
-  public async getWorkflowExecution(id: string): Promise<WorkflowExecutionDto | null> {
+  public async getWorkflowExecution(
+    id: string,
+    spaceId: string
+  ): Promise<WorkflowExecutionDto | null> {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
     }
@@ -191,10 +205,11 @@ export class WorkflowsService {
       workflowExecutionIndex: this.workflowsExecutionIndex,
       stepsExecutionIndex: this.stepsExecutionIndex,
       workflowExecutionId: id,
+      spaceId,
     });
   }
 
-  public async getWorkflow(id: string): Promise<WorkflowDetailDto | null> {
+  public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
     const savedObjectsClient = await this.getSavedObjectsClient();
     try {
       const response = await savedObjectsClient.get<WorkflowSavedObjectAttributes>(
@@ -202,7 +217,12 @@ export class WorkflowsService {
         id
       );
 
+      if (response.attributes.spaceId !== spaceId) {
+        return null;
+      }
+
       return {
+        spaceId: response.attributes.spaceId,
         id: response.id,
         name: response.attributes.name,
         description: response.attributes.description,
@@ -222,7 +242,10 @@ export class WorkflowsService {
     }
   }
 
-  public async createWorkflow(workflow: CreateWorkflowCommand): Promise<WorkflowDetailDto> {
+  public async createWorkflow(
+    workflow: CreateWorkflowCommand,
+    spaceId: string
+  ): Promise<WorkflowDetailDto> {
     const savedObjectsClient = await this.getSavedObjectsClient();
     const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
     if (!parsedYaml.success) {
@@ -232,6 +255,7 @@ export class WorkflowsService {
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
 
     const savedObjectData: WorkflowSavedObjectAttributes = {
+      spaceId,
       name: workflowToCreate.name,
       description: workflowToCreate.description,
       status: workflowToCreate.status,
@@ -257,6 +281,7 @@ export class WorkflowsService {
     }
 
     return {
+      spaceId,
       id: response.id,
       name: response.attributes.name,
       description: response.attributes.description,
@@ -272,10 +297,24 @@ export class WorkflowsService {
 
   public async updateWorkflow(
     id: string,
-    workflow: Partial<EsWorkflow>
-  ): Promise<UpdatedWorkflowResponseDto> {
+    workflow: Partial<EsWorkflow>,
+    spaceId: string
+  ): Promise<UpdatedWorkflowResponseDto | null> {
     const savedObjectsClient = await this.getSavedObjectsClient();
     const { yaml, definition, ...rest } = workflow;
+
+    try {
+      const existed = await savedObjectsClient.get<WorkflowSavedObjectAttributes>(
+        WORKFLOW_SAVED_OBJECT_TYPE,
+        id
+      );
+      if (existed.attributes.spaceId !== spaceId) {
+        return null;
+      }
+    } catch (error) {
+      this.logger.error(`Can't read workflow ${id}: ${error}`);
+      return null;
+    }
 
     let updateData: Partial<WorkflowSavedObjectAttributes>;
 
@@ -328,24 +367,45 @@ export class WorkflowsService {
     };
   }
 
-  public async deleteWorkflows(workflowIds: string[]): Promise<void> {
+  public async deleteWorkflows(workflowIds: string[], spaceId: string): Promise<void> {
     const savedObjectsClient = await this.getSavedObjectsClient();
 
-    // Remove scheduled tasks for deleted workflows
+    const savedObjects = await savedObjectsClient.bulkGet<WorkflowSavedObjectAttributes>(
+      workflowIds.map((id) => ({
+        type: WORKFLOW_SAVED_OBJECT_TYPE,
+        id,
+      }))
+    );
+
+    const existedWorkflows: Array<SavedObject<WorkflowSavedObjectAttributes>> =
+      savedObjects.saved_objects;
+
+    const filteredWorkflows = await Promise.all(
+      existedWorkflows.filter(async (existed) => {
+        return existed.attributes.spaceId === spaceId;
+      })
+    );
+
+    // Remove scheduled tasks from deleted workflows
     if (this.taskScheduler) {
-      for (const workflowId of workflowIds) {
-        await this.taskScheduler.unscheduleWorkflowTasks(workflowId);
+      for (const workflow of filteredWorkflows) {
+        await this.taskScheduler.unscheduleWorkflowTasks(workflow.id);
       }
     }
 
     await Promise.all(
-      workflowIds.map((id) => savedObjectsClient.delete(WORKFLOW_SAVED_OBJECT_TYPE, id))
+      filteredWorkflows.map((workflow) =>
+        savedObjectsClient.delete(WORKFLOW_SAVED_OBJECT_TYPE, workflow.id)
+      )
     );
   }
 
-  public async searchWorkflowExecutions(params: {
-    workflowId: string;
-  }): Promise<WorkflowExecutionListDto> {
+  public async searchWorkflowExecutions(
+    params: {
+      workflowId: string;
+    },
+    spaceId: string
+  ): Promise<WorkflowExecutionListDto> {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
     }
@@ -354,7 +414,23 @@ export class WorkflowsService {
       esClient: this.esClient,
       logger: this.logger,
       workflowExecutionIndex: this.workflowsExecutionIndex,
-      query: { match: { workflowId: params.workflowId } },
+      query: {
+        bool: {
+          must: [
+            { term: { workflowId: params.workflowId } },
+            {
+              bool: {
+                should: [
+                  { term: { spaceId } },
+                  // Backward compatibility for objects without spaceId
+                  { bool: { must_not: { exists: { field: 'spaceId' } } } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
     });
   }
 
@@ -424,7 +500,7 @@ export class WorkflowsService {
     }
   }
 
-  public async getExecutionLogs(executionId: string): Promise<LogSearchResult> {
+  public async getExecutionLogs(executionId: string, spaceId: string): Promise<LogSearchResult> {
     const query = {
       bool: {
         must: [

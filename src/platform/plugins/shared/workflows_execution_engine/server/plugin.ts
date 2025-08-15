@@ -74,6 +74,7 @@ export class WorkflowsExecutionEnginePlugin
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution = {
+        spaceId: workflow.spaceId,
         id: workflowRunId,
         workflowId: workflow.id,
         workflowDefinition: workflow.definition,
@@ -116,6 +117,7 @@ export class WorkflowsExecutionEnginePlugin
       });
 
       const contextManager = new WorkflowContextManager({
+        spaceId: workflow.spaceId,
         workflowRunId,
         workflow: workflow.definition,
         event: context.event,

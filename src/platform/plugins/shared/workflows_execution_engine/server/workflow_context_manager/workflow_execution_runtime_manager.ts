@@ -423,6 +423,7 @@ export class WorkflowExecutionRuntimeManager {
       }
 
       const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
+        spaceId: this.workflowExecution.spaceId,
         id: this.workflowExecution.id,
         status: ExecutionStatus.RUNNING,
         startedAt: new Date().toISOString(),
@@ -521,6 +522,7 @@ export class WorkflowExecutionRuntimeManager {
 
   private async updateWorkflowState(error?: any): Promise<void> {
     const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
+      spaceId: this.workflowExecution.spaceId,
       id: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
       startedAt: this.workflowExecution.startedAt,
@@ -583,11 +585,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   private isWorkflowFinished(): boolean {
-    if (this.currentStepIndex === this.topologicalOrder.length - 1) {
-      return true;
-    }
-
-    return false;
+    return this.currentStepIndex === this.topologicalOrder.length - 1;
   }
 
   private getCurrentStepError(): any | undefined {

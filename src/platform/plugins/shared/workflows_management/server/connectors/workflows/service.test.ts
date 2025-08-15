@@ -85,6 +85,7 @@ describe('Workflows Service', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
         inputs: { test: 'data' },
       };
 
@@ -97,6 +98,7 @@ describe('Workflows Service', () => {
 
       expect(mockWorkflowService).toHaveBeenCalledWith(
         'test-workflow-id',
+        'default',
         { test: 'data' },
         mockRequest
       );
@@ -121,6 +123,7 @@ describe('Workflows Service', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
         inputs: { test: 'data' },
       };
 
@@ -150,6 +153,7 @@ describe('Workflows Service', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
         inputs: { test: 'data' },
       };
 
@@ -177,6 +181,7 @@ describe('Workflows Service', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
         inputs: { test: 'data' },
       };
 
@@ -202,6 +207,7 @@ describe('Workflows Service', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
       };
 
       const result = await service.runWorkflow(params);
@@ -211,7 +217,12 @@ describe('Workflows Service', () => {
         status: 'executed',
       });
 
-      expect(mockWorkflowService).toHaveBeenCalledWith('test-workflow-id', {}, mockRequest);
+      expect(mockWorkflowService).toHaveBeenCalledWith(
+        'test-workflow-id',
+        'default',
+        {},
+        mockRequest
+      );
     });
   });
 });

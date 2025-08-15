@@ -10,9 +10,10 @@
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 
 export const extractConnectorIds = async (
-  actionsClient: IUnsecuredActionsClient
+  actionsClient: IUnsecuredActionsClient,
+  spaceId: string
 ): Promise<Record<string, Record<string, any>>> => {
-  const allConnectors = await actionsClient.getAll('default');
+  const allConnectors = await actionsClient.getAll(spaceId);
   const connectorNameIdMap = new Map<string, string>(
     allConnectors.map((connector) => [connector.name, connector.id])
   );
