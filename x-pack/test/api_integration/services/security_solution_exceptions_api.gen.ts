@@ -19,7 +19,6 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
-import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
 import type { CreateExceptionListRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/create_exception_list/create_exception_list.gen';
 import type { CreateExceptionListItemRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/create_exception_list_item/create_exception_list_item.gen';
@@ -29,17 +28,29 @@ import type {
 } from '@kbn/securitysolution-exceptions-common/api/create_rule_exceptions/create_rule_exceptions.gen';
 import type { CreateSharedExceptionListRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/create_shared_exceptions_list/create_shared_exceptions_list.gen';
 import type { DeleteExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/delete_exception_list/delete_exception_list.gen';
+import {} from '@kbn/securitysolution-exceptions-common/api/delete_exception_list/delete_exception_list.gen';
 import type { DeleteExceptionListItemRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/delete_exception_list_item/delete_exception_list_item.gen';
+import {} from '@kbn/securitysolution-exceptions-common/api/delete_exception_list_item/delete_exception_list_item.gen';
 import type { DuplicateExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/duplicate_exception_list/duplicate_exception_list.gen';
+import {} from '@kbn/securitysolution-exceptions-common/api/duplicate_exception_list/duplicate_exception_list.gen';
 import type { ExportExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/export_exception_list/export_exception_list.gen';
+import {} from '@kbn/securitysolution-exceptions-common/api/export_exception_list/export_exception_list.gen';
 import type { FindExceptionListItemsRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/find_exception_list_items/find_exception_list_items.gen';
+import {} from '@kbn/securitysolution-exceptions-common/api/find_exception_list_items/find_exception_list_items.gen';
 import type { FindExceptionListsRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/find_exception_lists/find_exception_lists.gen';
+import {} from '@kbn/securitysolution-exceptions-common/api/find_exception_lists/find_exception_lists.gen';
 import type { ImportExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/import_exceptions/import_exceptions.gen';
+import {} from '@kbn/securitysolution-exceptions-common/api/import_exceptions/import_exceptions.gen';
 import type { ReadExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list/read_exception_list.gen';
+import {} from '@kbn/securitysolution-exceptions-common/api/read_exception_list/read_exception_list.gen';
 import type { ReadExceptionListItemRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list_item/read_exception_list_item.gen';
+import {} from '@kbn/securitysolution-exceptions-common/api/read_exception_list_item/read_exception_list_item.gen';
 import type { ReadExceptionListSummaryRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list_summary/read_exception_list_summary.gen';
+import {} from '@kbn/securitysolution-exceptions-common/api/read_exception_list_summary/read_exception_list_summary.gen';
 import type { UpdateExceptionListRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/update_exception_list/update_exception_list.gen';
 import type { UpdateExceptionListItemRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/update_exception_list_item/update_exception_list_item.gen';
+
+import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
