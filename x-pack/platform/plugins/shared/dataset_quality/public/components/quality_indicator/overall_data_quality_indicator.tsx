@@ -76,10 +76,8 @@ function OverallDataQualityIndicator() {
     >
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <QualityIndicator
-          textSize="s"
           quality={quality}
           description={translatedQuality}
-          isColoredDescription
         />
       </EuiFlexGroup>
     </EuiSkeletonRectangle>
