@@ -62,25 +62,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(200);
     });
 
-    // it('enables alert when new monitor is added', async () => {
-    //   const newMonitor = httpMonitorJson;
-
-    //   const { body: apiResponse } = await addMonitorAPI(newMonitor);
-
-    //   expect(apiResponse).eql(omitMonitorKeys({ ...newMonitor, spaceId: 'default' }));
-
-    //   const res = await supertest
-    //     .get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
-    //     .set(editorUser.apiKeyHeader)
-    //     .set(samlAuth.getInternalRequestHeader())
-    //     .expect(200);
-
-    //   console.log('res', res);
-
-    //   expect(res.body.statusRule.ruleTypeId).eql('xpack.synthetics.alerts.monitorStatus');
-    //   expect(res.body.tlsRule.ruleTypeId).eql('xpack.synthetics.alerts.tls');
-    // });
-
     it('returns the created alerted when called', async () => {
       const apiResponse = await supertest
         .post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
