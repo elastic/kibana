@@ -204,8 +204,9 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
         items: [{ index: { error: { errorMsg } } }],
       } as unknown as BulkResponse);
 
-      await indexSyncService.syncUsernamesFromIndex({
+      await indexSyncService._syncUsernamesFromIndex({
         indexName: 'test-index',
+        sourceId: 'source-id',
       });
 
       expect(deps.logger.error).toHaveBeenCalledWith(expect.stringContaining(errorMsg));
