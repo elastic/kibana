@@ -33,7 +33,7 @@ export interface AppliedStatsFunction {
 const removeBackticks = (str: string) => str.replace(/`/g, '');
 
 export const getESQLStatsQueryMeta = (queryString: string) => {
-  const groupByFields: string[] = [];
+  const groupByFields: Array<{ field: string; type: string }> = [];
   const appliedFunctions: AppliedStatsFunction[] = [];
 
   const esqlQuery = EsqlQuery.fromSrc(queryString);
@@ -44,13 +44,18 @@ export const getESQLStatsQueryMeta = (queryString: string) => {
       statsCommand
     );
 
-    groupByFields.push(...Object.keys(grouping).map(removeBackticks));
+    groupByFields.push(
+      ...Object.values(grouping).map((group) => ({
+        field: removeBackticks(group.field),
+        type: group.definition.type === 'function' ? group.definition.name : group.definition.type,
+      }))
+    );
 
     Object.values(aggregates).forEach((aggregate) => {
       appliedFunctions.push({
         identifier: removeBackticks(aggregate.field),
-        // @ts-expect-error -- validate if we could get scenarios where the aggregate isn't a function
-        operator: (aggregate.definition as ESQLFunction).operator?.name,
+        operator:
+          (aggregate.definition as ESQLFunction).operator?.name ?? aggregate.definition.text,
       });
     });
   });
