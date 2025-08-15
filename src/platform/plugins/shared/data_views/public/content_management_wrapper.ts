@@ -12,7 +12,6 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { DataViewSavedObjectConflictError } from '../common/errors';
 import {
   DataViewAttributes,
-  SavedObject,
   PersistenceAPI,
   SavedObjectsClientCommonFindArgs,
 } from '../common/types';
@@ -43,11 +42,29 @@ export class ContentMagementWrapper implements PersistenceAPI {
         fields: options.fields,
       },
     });
-    return results.hits;
+    console.log('ContentMagementWrapper find results:', JSON.stringify(results, null, 2));
+
+    const response = results.hits.map((hit) => {
+      const {
+        data: soAttributes,
+        id: savedObjectId,
+        type,
+        meta: { references, ...meta },
+      } = hit;
+      return {
+        attributes: soAttributes,
+        id: savedObjectId,
+        type,
+        references: references ?? [],
+        ...meta,
+      };
+    });
+
+    return response;
   }
 
   async get(id: string) {
-    let response: DataViewCrudTypes['GetOut'];
+    let response;
     try {
       response = await this.contentManagementClient.get<
         DataViewCrudTypes['GetIn'],
@@ -68,7 +85,20 @@ export class ContentMagementWrapper implements PersistenceAPI {
       throw new DataViewSavedObjectConflictError(id);
     }
 
-    return response.item;
+    console.log('ContentMagementWrapper------', JSON.stringify(response, null, 2));
+    const {
+      data: soAttributes,
+      id: savedObjectId,
+      type,
+      meta: { references, ...meta },
+    } = response;
+    return {
+      attributes: soAttributes,
+      id: savedObjectId,
+      type,
+      references: references ?? [],
+      ...meta,
+    };
   }
 
   async update(
@@ -85,9 +115,14 @@ export class ContentMagementWrapper implements PersistenceAPI {
       data: attributes,
       options,
     });
-
-    // cast is necessary since its the full object and not just the changes
-    return response.item as SavedObject<DataViewAttributes>;
+    console.log('ContentMagementWrapper update response:', JSON.stringify(response, null, 2));
+    const {
+      data: soAttributes,
+      id: savedObjectId,
+      type,
+      meta: { references, ...meta } = { references: [] },
+    } = response;
+    return { attributes: soAttributes, id: savedObjectId, type, references, ...meta };
   }
 
   async create(attributes: DataViewAttributes, options: DataViewCrudTypes['CreateOptions']) {
@@ -100,7 +135,13 @@ export class ContentMagementWrapper implements PersistenceAPI {
       options,
     });
 
-    return result.item;
+    const {
+      data: { ...soAttributes },
+      id: savedObjectId,
+      type,
+      meta: { references, ...meta } = { references: [] },
+    } = result;
+    return { attributes: soAttributes, id: savedObjectId, type, references, ...meta };
   }
 
   async delete(id: string) {

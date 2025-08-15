@@ -255,17 +255,29 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       outcome,
     } = await soClient.resolve<Types['Attributes']>(this.savedObjectType, id);
 
-    const response: Types['GetOut'] = {
-      item: savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false),
+    const item = savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false);
+
+    const { id: savedObjectId, type, attributes, ...meta } = item;
+    const response = {
+      id: savedObjectId,
+      type,
+      data: attributes,
       meta: {
+        ...meta,
         aliasPurpose,
         aliasTargetId,
         outcome,
       },
     };
+    console.log('saved object get-----', JSON.stringify(response, null, 2));
 
     const validationError = transforms.get.out.result.validate(response);
     if (validationError) {
+      console.log(
+        'validationError---',
+        this.throwOnResultValidationError,
+        JSON.stringify(validationError, null, 2)
+      );
       if (this.throwOnResultValidationError) {
         throw Boom.badRequest(`Invalid response. ${validationError.message}`);
       } else {
@@ -286,6 +298,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
+    console.log('saved object content storage get-----', JSON.stringify(value, null, 2));
 
     return value;
   }
@@ -367,13 +380,14 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
   ): Promise<Types['UpdateOut']> {
     const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
-
+    console.log('SOContentStorage update called with-----', JSON.stringify(data, null, 2));
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
       Types['Attributes'],
       Types['Attributes']
     >(data);
     if (dataError) {
+      console.error('Data error in update:', dataError);
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
     }
 
@@ -382,6 +396,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       Types['UpdateOptions']
     >(options);
     if (optionsError) {
+      console.log('Options error in update:', optionsError);
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
@@ -395,13 +410,17 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       updateOptions
     );
 
+    const item = savedObjectToItem(partialSavedObject, this.allowedSavedObjectAttributes, true);
+    const { id: savedObjectId, type, attributes: savedObjectData, ...meta } = item;
     const result = {
-      item: savedObjectToItem(partialSavedObject, this.allowedSavedObjectAttributes, true),
+      item: { id: savedObjectId, type, data: savedObjectData, meta },
     };
+    console.log('SOContentStorage update result-----', JSON.stringify(result, null, 2));
 
     const validationError = transforms.update.out.result.validate(result);
     if (validationError) {
       if (this.throwOnResultValidationError) {
+        console.error('Validation error in update 1 --------:', validationError);
         throw Boom.badRequest(`Invalid response. ${validationError.message}`);
       } else {
         this.logger.warn(`Invalid response. ${validationError.message}`);
@@ -413,15 +432,17 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       Types['UpdateOut'],
       Types['UpdateOut']
     >(
-      result,
+      result.item,
       undefined, // do not override version
       { validate: false } // validation is done above
     );
 
     if (resultError) {
+      console.error('Result error in update 2 --------:', resultError);
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
 
+    console.log('SOContentStorage update value-----', JSON.stringify(value, null, 2));
     return value;
   }
 
@@ -461,9 +482,12 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     // Execute the query in the DB
     const soResponse = await soClient.find<Types['Attributes']>(soQuery);
     const response = {
-      hits: soResponse.saved_objects.map((so) =>
-        savedObjectToItem(so, this.allowedSavedObjectAttributes, false)
-      ),
+      hits: soResponse.saved_objects.map((so) => {
+        const item = savedObjectToItem(so, this.allowedSavedObjectAttributes, false);
+        const { id: savedObjectId, type, attributes: savedObjectData, ...meta } = item;
+
+        return { id: savedObjectId, type, data: savedObjectData, meta };
+      }),
       pagination: {
         total: soResponse.total,
       },
@@ -491,7 +515,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
-
+    console.log('SOContentStorage search value-----', JSON.stringify(value, null, 2));
     return value;
   }
 }

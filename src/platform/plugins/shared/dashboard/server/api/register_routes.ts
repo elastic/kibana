@@ -16,12 +16,15 @@ import type { Logger } from '@kbn/logging';
 import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
 import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
 import {
-  dashboardAttributesSchema,
   dashboardGetResultSchema,
   dashboardCreateResultSchema,
   dashboardSearchResultsSchema,
-  referenceSchema,
+  DashboardItem,
 } from '../content_management/v1';
+import {
+  dashboardAttributesSchemaRequest,
+  dashboardCreateRequestAttributesSchema,
+} from '../content_management/v1/cm_services';
 
 interface RegisterAPIRoutesArgs {
   http: HttpServiceSetup;
@@ -83,11 +86,7 @@ export function registerAPIRoutes({
               })
             ),
           }),
-          body: schema.object({
-            attributes: dashboardAttributesSchema,
-            references: schema.maybe(schema.arrayOf(referenceSchema)),
-            spaces: schema.maybe(schema.arrayOf(schema.string())),
-          }),
+          body: dashboardCreateRequestAttributesSchema,
         },
         response: {
           200: {
@@ -98,10 +97,10 @@ export function registerAPIRoutes({
     },
     async (ctx, req, res) => {
       const { id } = req.params;
-      const { attributes, references, spaces: initialNamespaces } = req.body;
+      const { references, spaces: initialNamespaces, ...attributes } = req.body;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for(CONTENT_ID, LATEST_VERSION);
+        .for<DashboardItem>(CONTENT_ID, LATEST_VERSION);
       let result;
       try {
         ({ result } = await client.create(attributes, {
@@ -122,7 +121,7 @@ export function registerAPIRoutes({
           return res.forbidden();
         }
 
-        return res.badRequest();
+        return res.badRequest({ body: e });
       }
 
       return res.ok({ body: result });
@@ -147,10 +146,7 @@ export function registerAPIRoutes({
               meta: { description: 'A unique identifier for the dashboard.' },
             }),
           }),
-          body: schema.object({
-            attributes: dashboardAttributesSchema,
-            references: schema.maybe(schema.arrayOf(referenceSchema)),
-          }),
+          body: dashboardAttributesSchemaRequest,
         },
         response: {
           200: {
@@ -160,7 +156,7 @@ export function registerAPIRoutes({
       },
     },
     async (ctx, req, res) => {
-      const { attributes, references } = req.body;
+      const { references, ...attributes } = req.body;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for(CONTENT_ID, LATEST_VERSION);
@@ -178,7 +174,7 @@ export function registerAPIRoutes({
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();
         }
-        return res.badRequest(e.message);
+        return res.badRequest({ body: e.output.payload });
       }
       return res.ok({ body: result });
     }

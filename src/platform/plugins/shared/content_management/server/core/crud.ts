@@ -46,7 +46,7 @@ export interface DeleteItemResponse {
 
 export interface SearchResponse<T = unknown> {
   contentTypeId: string;
-  result: SearchResult<T>;
+  result: SearchResult<GetResult<T>>;
 }
 
 export class ContentCrud<T = unknown> {
@@ -82,7 +82,7 @@ export class ContentCrud<T = unknown> {
 
     try {
       const result = await this.storage.get(ctx, contentId, options);
-
+      console.log('content crud get-----', JSON.stringify(result, null, 2));
       this.eventBus.emit({
         type: 'getItemSuccess',
         contentId,
@@ -196,6 +196,8 @@ export class ContentCrud<T = unknown> {
     });
 
     try {
+      console.log('content crud update data-----', JSON.stringify(data, null, 2));
+
       const result = await this.storage.update(ctx, id, data, options);
 
       this.eventBus.emit({
@@ -205,8 +207,18 @@ export class ContentCrud<T = unknown> {
         data: result,
         options,
       });
+      console.log('content crud update-----', JSON.stringify(result, null, 2));
+      const { id: savedObjectId, type, data: savedObjectData, meta } = result;
 
-      return { contentTypeId: this.contentTypeId, result };
+      return {
+        contentTypeId: this.contentTypeId,
+        result: {
+          id: savedObjectId,
+          type,
+          data: savedObjectData,
+          meta,
+        },
+      };
     } catch (e) {
       this.eventBus.emit({
         type: 'updateItemError',
@@ -271,7 +283,6 @@ export class ContentCrud<T = unknown> {
 
     try {
       const result = await this.storage.search(ctx, query, options);
-
       this.eventBus.emit({
         type: 'searchItemSuccess',
         contentTypeId: this.contentTypeId,
@@ -280,7 +291,12 @@ export class ContentCrud<T = unknown> {
         options,
       });
 
-      return { contentTypeId: this.contentTypeId, result };
+      console.log('content crud search-----', JSON.stringify(result, null, 2));
+
+      return {
+        contentTypeId: this.contentTypeId,
+        result,
+      };
     } catch (e) {
       this.eventBus.emit({
         type: 'searchItemError',

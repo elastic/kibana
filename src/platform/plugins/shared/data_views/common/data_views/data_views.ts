@@ -804,25 +804,22 @@ export class DataViewsService {
    */
 
   savedObjectToSpec = (savedObject: SavedObject<DataViewAttributes>): DataViewSpec => {
+    console.log('savedobjecttospec------', JSON.stringify(savedObject, null, 2));
+
+    const { id, type, version, attributes, namespaces } = savedObject;
     const {
-      id,
-      version,
-      namespaces,
-      attributes: {
-        title,
-        timeFieldName,
-        fields,
-        sourceFilters,
-        fieldFormatMap,
-        runtimeFieldMap,
-        typeMeta,
-        type,
-        fieldAttrs,
-        allowNoIndex,
-        name,
-        allowHidden,
-      },
-    } = savedObject;
+      title,
+      timeFieldName,
+      sourceFilters,
+      fields,
+      typeMeta,
+      fieldFormatMap,
+      fieldAttrs,
+      allowNoIndex = true,
+      allowHidden = false,
+      name,
+      runtimeFieldMap,
+    } = attributes;
 
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
@@ -868,7 +865,7 @@ export class DataViewsService {
     refreshFields: boolean = false
   ): Promise<DataView> => {
     const savedObject = await this.savedObjectsClient.get(id);
-
+    console.log('getSavedObjectAndInit------', JSON.stringify(savedObject, null, 2));
     return this.initFromSavedObject(savedObject, displayErrors, refreshFields);
   };
 
@@ -1065,16 +1062,21 @@ export class DataViewsService {
   ): Promise<DataView> => {
     const dataViewFromCache = this.dataViewCache.get(id)?.then(async (dataView) => {
       if (dataView && refreshFields) {
+        console.log('get index pattern refreshFields-----', id);
         await this.refreshFields(dataView, displayErrors);
       }
+      console.log('get index pattern refreshFields 2-----', dataView);
       return dataView;
     });
 
     let indexPatternPromise: Promise<DataView>;
     if (dataViewFromCache) {
+      console.log('get index pattern dataViewFromCache-----', dataViewFromCache);
       indexPatternPromise = dataViewFromCache;
     } else {
+      console.log('get index pattern from saved object-----', id);
       indexPatternPromise = this.getSavedObjectAndInit(id, displayErrors, refreshFields);
+      console.log('get index pattern from saved object 2-----', indexPatternPromise);
       this.dataViewCache.set(id, indexPatternPromise);
     }
 
@@ -1082,7 +1084,6 @@ export class DataViewsService {
     indexPatternPromise.catch(() => {
       this.dataViewCache.delete(id);
     });
-
     return indexPatternPromise;
   };
 
@@ -1314,6 +1315,7 @@ export class DataViewsService {
         indexPattern.version = response.version;
       })
       .catch(async (err) => {
+        console.error('Error updating saved object:', err);
         if (err?.response?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
           const samePattern = await this.getDataViewLazy(indexPattern.id!);
           // What keys changed from now and what the server returned

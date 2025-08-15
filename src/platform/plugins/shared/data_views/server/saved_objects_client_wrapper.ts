@@ -36,6 +36,8 @@ export class SavedObjectsClientWrapper implements PersistenceAPI {
     if (response.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
     }
+
+    console.log('SavedObjectsClientWrapper------', JSON.stringify(response.saved_object, null, 2));
     return response.saved_object;
   }
 

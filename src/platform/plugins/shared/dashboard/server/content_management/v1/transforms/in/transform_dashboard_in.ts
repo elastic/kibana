@@ -56,7 +56,7 @@ export const transformDashboardIn = async ({
     const { searchSourceJSON, references: searchSourceReferences } =
       transformSearchSourceIn(kibanaSavedObjectMeta);
 
-    const attributes = {
+    const attributes: DashboardSavedObjectAttributes = {
       ...rest,
       ...(controlGroupInput && {
         controlGroupInput: transformControlGroupIn(controlGroupInput),
