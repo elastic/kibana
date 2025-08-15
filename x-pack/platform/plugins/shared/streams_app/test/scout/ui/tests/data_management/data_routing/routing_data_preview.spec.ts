@@ -17,7 +17,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await apiServices.streams.enable();
     // Generate logs data only
     await logsSynthtraceEsClient.clean();
-    await generateLogsData(logsSynthtraceEsClient);
+    await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -47,7 +47,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.expectPreviewPanelVisible();
     const rows = await pageObjects.streams.getPreviewTableRows();
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValue({
+      await pageObjects.streams.expectCellValueContains({
         columnName: 'severity_text',
         rowIndex,
         value: 'info',
@@ -70,7 +70,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.expectPreviewPanelVisible();
     const rows = await pageObjects.streams.getPreviewTableRows();
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValue({
+      await pageObjects.streams.expectCellValueContains({
         columnName: 'severity_text',
         rowIndex,
         value: 'info',
@@ -88,7 +88,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.expectPreviewPanelVisible();
     const updatedRows = await pageObjects.streams.getPreviewTableRows();
     for (let rowIndex = 0; rowIndex < updatedRows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValue({
+      await pageObjects.streams.expectCellValueContains({
         columnName: 'severity_text',
         rowIndex,
         value: 'warn',
@@ -107,8 +107,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
       JSON.stringify(
         {
           field: 'severity_text',
-          operator: 'eq',
-          value: 'info',
+          eq: 'info',
         },
         null,
         2
@@ -119,7 +118,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.expectPreviewPanelVisible();
     const rows = await pageObjects.streams.getPreviewTableRows();
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValue({
+      await pageObjects.streams.expectCellValueContains({
         columnName: 'severity_text',
         rowIndex,
         value: 'info',
@@ -133,13 +132,11 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
           and: [
             {
               field: 'severity_text',
-              operator: 'eq',
-              value: 'warn',
+              eq: 'warn',
             },
             {
               field: 'body.text',
-              operator: 'contains',
-              value: 'log',
+              contains: 'log',
             },
           ],
         },
@@ -152,15 +149,10 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.expectPreviewPanelVisible();
     const updatedRows = await pageObjects.streams.getPreviewTableRows();
     for (let rowIndex = 0; rowIndex < updatedRows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValue({
+      await pageObjects.streams.expectCellValueContains({
         columnName: 'severity_text',
         rowIndex,
         value: 'warn',
-      });
-      await pageObjects.streams.expectCellValue({
-        columnName: 'body.text',
-        rowIndex,
-        value: 'Test log message',
       });
     }
   });

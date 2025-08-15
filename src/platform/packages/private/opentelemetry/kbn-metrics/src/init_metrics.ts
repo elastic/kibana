@@ -68,14 +68,27 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
     } = otlpConfig;
 
     if (url) {
+      const temporalityPreference =
+        (process.env.OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE as 'cumulative' | 'delta') ??
+        'cumulative';
+
       // We just need to push it as another grpc config
-      exporters.push({ grpc: { url, headers, exportIntervalMillis } });
+      exporters.push({
+        grpc: { url, headers, exportIntervalMillis, temporalityPreference },
+      });
     }
   }
 
   readers.push(
     ...exporters.map((exporterConfig) => {
       const variant = fromExternalVariant(exporterConfig);
+
+      const commonConfig = {
+        temporalityPreference:
+          variant.value.temporalityPreference === 'delta'
+            ? metrics.AggregationTemporality.DELTA
+            : metrics.AggregationTemporality.CUMULATIVE,
+      };
 
       let exporter: metrics.PushMetricExporter;
       switch (variant.type) {
@@ -85,17 +98,17 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
             metadata.add(key, value);
           });
           exporter = new OTLPMetricExporterGrpc({
+            ...commonConfig,
             metadata,
             url: variant.value.url,
-            temporalityPreference: metrics.AggregationTemporality.DELTA,
           });
           break;
         }
         case 'http':
           exporter = new OTLPMetricExporterHttp({
+            ...commonConfig,
             headers: variant.value.headers,
             url: variant.value.url,
-            temporalityPreference: metrics.AggregationTemporality.DELTA,
           });
           break;
       }

@@ -29,20 +29,14 @@ import React, { PropsWithChildren, useEffect, useState } from 'react';
 import { useForm, SubmitHandler, FormProvider, useWatch, DeepPartial } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { DiscardPromptOptions, useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
 import { ProcessorTypeSelector } from './processor_type_selector';
-import { ProcessorFormState, ProcessorDefinitionWithUIAttributes } from '../types';
-import {
-  getFormStateFrom,
-  convertFormStateToProcessor,
-  isGrokProcessor,
-  isDissectProcessor,
-  isDateProcessor,
-  SPECIALISED_TYPES,
-} from '../utils';
+import { ProcessorFormState } from '../types';
+import { getFormStateFrom, convertFormStateToProcessor, SPECIALISED_TYPES } from '../utils';
 import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
 import {
   useStreamEnrichmentSelector,
@@ -56,6 +50,7 @@ import { ConfigDrivenProcessorType } from './config_driven/types';
 import { selectPreviewRecords } from '../state_management/simulation_state_machine/selectors';
 import { ManualIngestPipelineProcessorForm } from './manual_ingest_pipeline';
 import { isProcessorUnderEdit } from '../state_management/processor_state_machine';
+import { SetProcessorForm } from './set';
 
 export interface ProcessorConfigurationProps {
   dragHandleProps: DraggableProvidedDragHandleProps | null;
@@ -113,6 +108,7 @@ const ProcessorConfigurationListItem = ({
       <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
         {canDragAndDrop && (
           <EuiPanel
+            data-test-subj="streamsAppProcessorDragHandle"
             grow={false}
             hasShadow={false}
             color="transparent"
@@ -122,7 +118,7 @@ const ProcessorConfigurationListItem = ({
             <EuiIcon type="grab" size="m" />
           </EuiPanel>
         )}
-        <strong>{processor.type.toUpperCase()}</strong>
+        <strong data-test-subj="streamsAppProcessorLegend">{processor.action.toUpperCase()}</strong>
         <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
           {processorDescription}
         </EuiText>
@@ -147,7 +143,7 @@ const ProcessorConfigurationListItem = ({
               size="xs"
               aria-label={i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorAction',
-                { defaultMessage: 'Edit {type} processor', values: { type: processor.type } }
+                { defaultMessage: 'Edit {type} processor', values: { type: processor.action } }
               )}
             />
           </EuiFlexGroup>
@@ -210,7 +206,7 @@ const ProcessorConfigurationEditor = ({
     (snapshot) => !isEqual(snapshot.context.previousProcessor, snapshot.context.processor)
   );
 
-  const type = useWatch({ control: methods.control, name: 'type' });
+  const type = useWatch({ control: methods.control, name: 'action' });
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasStreamChanges || hasProcessorChanges,
@@ -242,7 +238,7 @@ const ProcessorConfigurationEditor = ({
         arrowProps={{
           css: { display: 'none' },
         }}
-        buttonContent={<strong>{processor.type.toUpperCase()}</strong>}
+        buttonContent={<strong>{processor.action.toUpperCase()}</strong>}
         buttonElement="legend"
         buttonProps={{
           css: css`
@@ -299,6 +295,7 @@ const ProcessorConfigurationEditor = ({
             {type === 'grok' && <GrokProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
             {type === 'manual_ingest_pipeline' && <ManualIngestPipelineProcessorForm />}
+            {type === 'set' && <SetProcessorForm />}
             {!SPECIALISED_TYPES.includes(type) && (
               <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
             )}
@@ -333,6 +330,7 @@ const ProcessorPanel = (props: PropsWithChildren) => {
   return (
     <EuiPanel
       hasBorder
+      data-test-subj="streamsAppProcessorConfigurationListItem"
       css={css`
         border: ${euiTheme.border.thin};
         padding: ${euiTheme.size.m};
@@ -342,13 +340,13 @@ const ProcessorPanel = (props: PropsWithChildren) => {
   );
 };
 
-const getProcessorDescription = (processor: ProcessorDefinitionWithUIAttributes) => {
-  if (isGrokProcessor(processor)) {
-    return processor.grok.patterns.join(' • ');
-  } else if (isDissectProcessor(processor)) {
-    return processor.dissect.pattern;
-  } else if (isDateProcessor(processor)) {
-    return `${processor.date.field} • ${processor.date.formats.join(' - ')}`;
+const getProcessorDescription = (processor: StreamlangProcessorDefinition) => {
+  if (processor.action === 'grok') {
+    return processor.patterns.join(' • ');
+  } else if (processor.action === 'dissect') {
+    return processor.pattern;
+  } else if (processor.action === 'date') {
+    return `${processor.from} • ${processor.formats.join(' - ')}`;
   }
 
   return '';

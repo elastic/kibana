@@ -91,6 +91,11 @@ export interface RecentlyClosedTabState extends TabState {
   closedAt: number;
 }
 
+export enum TabsBarVisibility {
+  default = 'default',
+  hidden = 'hidden',
+}
+
 export interface DiscoverInternalState {
   initializationState: { hasESData: boolean; hasUserDataView: boolean };
   savedDataViews: DataViewListItem[];
@@ -98,6 +103,7 @@ export interface DiscoverInternalState {
   expandedDoc: DataTableRecord | undefined;
   initialDocViewerTabId?: string;
   isESQLToDataViewTransitionModalVisible: boolean;
+  tabsBarVisibility: TabsBarVisibility;
   tabs: {
     byId: Record<string, TabState | RecentlyClosedTabState>;
     allIds: string[];

@@ -52,6 +52,7 @@ describe('Elasticsearch function', () => {
 
         await esClient.index({
           index: 'kb',
+          refresh: true,
           document: {
             date: '2024-01-23T12:30:00.000Z',
             kb_doc: 'document_1',

@@ -9,7 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import type { httpServiceMock } from '@kbn/core/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { SecurityNavControlService } from './nav_control_service';

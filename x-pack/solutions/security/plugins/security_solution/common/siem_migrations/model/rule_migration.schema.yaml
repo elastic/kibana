@@ -290,6 +290,7 @@ components:
                 - result
                 - installable
                 - prebuilt
+                - missing_index
               properties:
                 total:
                   type: integer
@@ -317,6 +318,9 @@ components:
                 prebuilt:
                   type: integer
                   description: The number of rules that have been successfully translated and matched Elastic prebuilt rules.
+                missing_index:
+                  type: integer
+                  description: The number of rules that have the placeholder for the missing index pattern in the query.
             failed:
               type: integer
               description: The number of rules that have failed translation.

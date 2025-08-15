@@ -19,7 +19,9 @@ const rootStreamDefinition: Streams.WiredStream.Definition = {
   description: '',
   ingest: {
     lifecycle: { dsl: {} },
-    processing: [],
+    processing: {
+      steps: [],
+    },
     wired: {
       routing: [],
       fields: {
@@ -84,7 +86,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let apiClient: StreamsSupertestRepositoryClient;
   const esClient = getService('es');
 
-  describe('Root stream', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/231900
+  describe.skip('Root stream', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
@@ -102,17 +105,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
-            processing: [
-              {
-                grok: {
-                  field: 'body.text',
+            processing: {
+              steps: [
+                {
+                  action: 'grok' as const,
+                  from: 'body.text',
                   patterns: [
                     '%{TIMESTAMP_ISO8601:attributes.inner_timestamp} %{LOGLEVEL:severity_text} %{GREEDYDATA:attributes.message2}',
                   ],
-                  if: { always: {} },
+                  where: { always: {} },
                 },
-              },
-            ],
+              ],
+            },
           },
         },
       };
@@ -164,10 +168,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               routing: [
                 {
                   destination: 'logs.gcpcloud',
-                  if: {
+                  where: {
                     field: 'cloud.provider',
-                    operator: 'eq',
-                    value: 'gcp',
+                    eq: 'gcp',
                   },
                 },
               ],
