@@ -387,16 +387,10 @@ describe('fs_validations', () => {
     );
 
     it('should pass validation for text files with allowed extensions', async () => {
-      expect(
-        () => validations.validateFileContent(jsonContent, 'file.json')
-      ).not.toThrow();
+      expect(() => validations.validateFileContent(jsonContent, 'file.json')).not.toThrow();
       expect(() => validations.validateFileContent(yamlContent, 'file.yml')).not.toThrow();
-      expect(
-        () => validations.validateFileContent(markdownContent, 'file.md')
-      ).not.toThrow();
-      expect(
-        () => validations.validateFileContent(plainTextContent, 'file.txt')
-      ).not.toThrow();
+      expect(() => validations.validateFileContent(markdownContent, 'file.md')).not.toThrow();
+      expect(() => validations.validateFileContent(plainTextContent, 'file.txt')).not.toThrow();
       expect(() => validations.validateFileContent(csvContent, 'file.csv')).not.toThrow();
     });
 
@@ -571,15 +565,9 @@ describe('fs_validations', () => {
     });
 
     it('should reject unsupported data types', async () => {
-      expect(() => validations.validateAndSanitizeFileData(123)).toThrow(
-        'Unsupported data type'
-      );
-      expect(() => validations.validateAndSanitizeFileData({})).toThrow(
-        'Unsupported data type'
-      );
-      expect(() => validations.validateAndSanitizeFileData(null)).toThrow(
-        'Unsupported data type'
-      );
+      expect(() => validations.validateAndSanitizeFileData(123)).toThrow('Unsupported data type');
+      expect(() => validations.validateAndSanitizeFileData({})).toThrow('Unsupported data type');
+      expect(() => validations.validateAndSanitizeFileData(null)).toThrow('Unsupported data type');
     });
 
     it('should validate file size', async () => {

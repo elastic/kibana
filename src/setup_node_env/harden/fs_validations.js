@@ -61,7 +61,7 @@ const devOrCIPaths = [
   'cache-test',
   join(REPO_ROOT, 'target'),
   join(REPO_ROOT, 'x-pack'),
-  join(REPO_ROOT, 'scripts')
+  join(REPO_ROOT, 'scripts'),
 ];
 
 const safePaths = [...baseSafePaths, ...(isDevOrCI ? devOrCIPaths : [])];
