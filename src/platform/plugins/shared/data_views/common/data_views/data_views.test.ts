@@ -419,7 +419,7 @@ describe('IndexPatterns', () => {
   test('savedObjectCache pre-fetches title, type, typeMeta', async () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
-      fields: ['title', 'type', 'typeMeta', 'name'],
+      fields: ['title', 'type', 'typeMeta', 'name', 'timeFieldName'],
       perPage: 10000,
     });
   });

@@ -111,6 +111,7 @@ describe('TabsStorageManager', () => {
   const toStoredTab = (tab: TabState | RecentlyClosedTabState) => ({
     id: tab.id,
     label: tab.label,
+    internalState: mockGetInternalState(),
     appState: mockGetAppState(tab.id),
     globalState: tab.globalState,
     ...('closedAt' in tab ? { closedAt: tab.closedAt } : {}),
