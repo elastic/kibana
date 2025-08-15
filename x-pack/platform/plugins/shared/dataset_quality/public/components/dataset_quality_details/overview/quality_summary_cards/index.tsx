@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiCode, EuiIconTip } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   overviewPanelDatasetQualityIndicatorDegradedDocs,
   overviewPanelDatasetQualityIndicatorFailedDocs,
@@ -18,6 +19,27 @@ import { useDatasetQualityDetailsState } from '../../../../hooks/use_dataset_qua
 import { DatasetQualityIndicator, QualityPercentageIndicator } from '../../../quality_indicator';
 import { useKibanaContextForPlugin } from '../../../../utils/use_kibana';
 import { Card } from './card';
+
+const degradedDocTooltip = (
+  <FormattedMessage
+    id="xpack.datasetQuality.details.degradedDocTooltip"
+    defaultMessage="Documents with the {ignoredProperty} property"
+    values={{
+      ignoredProperty: (
+        <EuiCode language="json" transparentBackground>
+          _ignored
+        </EuiCode>
+      ),
+    }}
+  />
+);
+
+const failedDocTooltip = (
+  <FormattedMessage
+    id="xpack.datasetQuality.details.failedDocTooltip"
+    defaultMessage="Documents that were rejected during ingestion — usually due to issues like mapping errors or pipeline failures"
+  />
+);
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -61,7 +83,14 @@ export default function QualitySummaryCards({
         <Card
           isDisabled={false}
           isSelected={selectedCard === 'degraded'}
-          title={overviewPanelDatasetQualityIndicatorDegradedDocs}
+          title={
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem>{overviewPanelDatasetQualityIndicatorDegradedDocs}</EuiFlexItem>
+              <EuiFlexItem>
+                <EuiIconTip content={degradedDocTooltip} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
           kpiValue={totalDegradedDocsCount}
           footer={
             <EuiFlexGroup direction="row" gutterSize="s">
@@ -117,7 +146,14 @@ export default function QualitySummaryCards({
           <Card
             isDisabled={false}
             isSelected={selectedCard === 'failed'}
-            title={overviewPanelDatasetQualityIndicatorFailedDocs}
+            title={
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem>{overviewPanelDatasetQualityIndicatorFailedDocs}</EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiIconTip content={failedDocTooltip} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
             kpiValue={totalFailedDocsCount}
             footer={
               <EuiFlexGroup direction="row" gutterSize="s">
