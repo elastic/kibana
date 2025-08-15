@@ -7,7 +7,7 @@
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { getDatasourceId } from '@kbn/visualization-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
+import { AggregateQuery } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import type { VisualizeEditorContext, Suggestion, IndexPatternRef } from '../types';
 import { TypedLensByValueInput, TypedLensSerializedState } from '../react_embeddable/types';
@@ -113,19 +113,6 @@ export function mergeSuggestionWithVisContext({
   }
 
   const datasourceState = Object.assign({}, visAttributes.state.datasourceStates[datasourceId]);
-
-  // Check if index patterns match when context has a query
-  if (context && 'query' in context && context.query && 'esql' in context.query) {
-    const contextIndexPattern = getIndexPatternFromESQLQuery(context.query.esql);
-    const visQuery = visAttributes.state.query;
-    const visIndexPattern = isOfAggregateQueryType(visQuery)
-      ? getIndexPatternFromESQLQuery(visQuery.esql)
-      : null;
-
-    if (contextIndexPattern !== visIndexPattern) {
-      return suggestion;
-    }
-  }
 
   // Verify that all layer columns exist in the query result
   if (!datasourceState?.layers) {

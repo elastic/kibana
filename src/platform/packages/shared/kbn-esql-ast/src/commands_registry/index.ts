@@ -25,6 +25,7 @@ import { mvExpandCommand } from './commands/mv_expand';
 import { rowCommand } from './commands/row';
 import { sortCommand } from './commands/sort';
 import { statsCommand } from './commands/stats';
+import { inlineStatsCommand } from './commands/inlinestats';
 import { sampleCommand } from './commands/sample';
 import { showCommand } from './commands/show';
 import { timeseriesCommand } from './commands/timeseries';
@@ -57,6 +58,7 @@ const baseCommands = [
   timeseriesCommand,
   whereCommand,
   fuseCommand,
+  inlineStatsCommand,
 ];
 
 baseCommands.forEach((command) => {
