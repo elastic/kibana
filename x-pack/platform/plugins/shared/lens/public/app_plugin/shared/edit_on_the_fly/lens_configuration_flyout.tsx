@@ -33,8 +33,7 @@ import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/sugg
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { useCurrentAttributes } from './use_current_attributes';
-
-const LOCAL_STORAGE_USER_CHART_TYPE = 'LENS_USER_CHART_TYPE';
+import { removeUserChartTypeFromLocalStorage } from '../../../settings_storage';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -148,7 +147,7 @@ export function LensEditConfigurationFlyout({
       if (savedObjectId) {
         updateByRefInput?.(savedObjectId);
       }
-      localStorage.removeItem(LOCAL_STORAGE_USER_CHART_TYPE);
+      removeUserChartTypeFromLocalStorage();
     }
     onCancelCallback?.();
     closeFlyout?.();
@@ -197,7 +196,7 @@ export function LensEditConfigurationFlyout({
     }
 
     onApplyCallback?.(currentAttributes);
-    localStorage.removeItem(LOCAL_STORAGE_USER_CHART_TYPE);
+    removeUserChartTypeFromLocalStorage();
     closeFlyout?.();
   }, [
     visualization.activeId,

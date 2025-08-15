@@ -21,6 +21,7 @@ import {
 } from '../types';
 import { PanelManagementApi } from './panel_management';
 import { getStateManagementForInlineEditing } from './state_management';
+import { setUserChartTypeToLocalStorage } from '../../settings_storage';
 
 export function prepareInlineEditPanel(
   initialState: LensRuntimeState,
@@ -62,7 +63,13 @@ export function prepareInlineEditPanel(
     Pick<EditConfigPanelProps, 'closeFlyout' | 'onApply' | 'onCancel' | 'hideTimeFilterInfo'>
   > = {}) {
     const currentState = getState();
+    const isNewPanel = initialState.isNewPanel;
+
     const attributes = currentState.attributes as TypedLensSerializedState['attributes'];
+    // Save the user's preferred chart type to localStorage
+    if (!isNewPanel && attributes) {
+      setUserChartTypeToLocalStorage(attributes.visualizationType);
+    }
     const activeDatasourceId = (getActiveDatasourceIdFromDoc(attributes) ||
       'formBased') as EditLensConfigurationProps['datasourceId'];
 
