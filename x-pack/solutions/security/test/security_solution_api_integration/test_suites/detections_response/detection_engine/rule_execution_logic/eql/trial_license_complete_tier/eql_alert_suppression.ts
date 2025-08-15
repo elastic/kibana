@@ -3179,7 +3179,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it.skip('does not suppress alerts outside of duration when query with 3 sequences', async () => {
+      it.only('does not suppress alerts outside of duration when query with 3 sequences', async () => {
         const id = uuidv4();
         const dateNow = Date.now();
         const timestampSequenceEvent1 = new Date(dateNow - 5000).toISOString();
@@ -3235,10 +3235,12 @@ export default ({ getService }: FtrProviderContext) => {
           ],
           [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         });
+        // disable the rule
+        await patchRule(supertest, log, { id: createdRule.id, enabled: false });
 
         const dateNow2 = Date.now();
-        const secondTimestampEventSequence = new Date(dateNow2 - 2000).toISOString();
-        const secondTimestampEventSequence2 = new Date(dateNow2 - 1000).toISOString();
+        const secondTimestampEventSequence = new Date(dateNow2 - 200).toISOString();
+        const secondTimestampEventSequence2 = new Date(dateNow2 - 100).toISOString();
         const secondTimestampEventSequence3 = new Date(dateNow2).toISOString();
 
         const secondSequenceEvent = {
@@ -3251,7 +3253,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         // Add a new document, then disable and re-enable to trigger another rule run.
         // the second rule run should generate a new alert
-        await patchRule(supertest, log, { id: createdRule.id, enabled: false });
 
         await indexListOfSourceDocuments([
           secondSequenceEvent,
@@ -3259,7 +3260,7 @@ export default ({ getService }: FtrProviderContext) => {
           { ...secondSequenceEvent, '@timestamp': secondTimestampEventSequence3 },
         ]);
         await patchRule(supertest, log, { id: createdRule.id, enabled: true });
-        const afterTimestamp2 = new Date(dateNow2 + 55000);
+        const afterTimestamp2 = new Date(dateNow2);
         const secondAlerts = await getOpenAlerts(
           supertest,
           log,
@@ -3274,6 +3275,7 @@ export default ({ getService }: FtrProviderContext) => {
           secondAlerts.hits.hits
         );
 
+        console.log('seqqquence', JSON.stringify(sequenceAlert2, null, 2));
         // two sequence alerts because the second one happened
         // outside of the rule's suppression duration
         expect(sequenceAlert2).toHaveLength(2);
