@@ -9,6 +9,16 @@ import { FlattenRecord } from '@kbn/streams-schema';
 import { useAbortController } from '@kbn/react-hooks';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
+import {
+  getUsefulTokens,
+  getReviewFields,
+  getGrokProcessor,
+  mergeGrokProcessors,
+  groupMessagesByPattern,
+  syncExtractTemplate,
+  type GrokProcessorResult,
+} from '@kbn/grok-heuristics';
+import { get } from 'lodash';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { showErrorToast } from '../../../../../hooks/use_streams_app_fetch';
 import {
@@ -75,40 +85,102 @@ export function useGrokPatternSuggestion() {
         });
       }
 
+      const messages = samples.reduce<string[]>((acc, sample) => {
+        const value = get(sample, params.fieldName);
+        if (typeof value === 'string') {
+          acc.push(value);
+        }
+        return acc;
+      }, []);
+
+      const groupedMessages = groupMessagesByPattern(messages);
+
       const finishTrackingAndReport = telemetryClient.startTrackingAIGrokSuggestionLatency({
         name: params.streamName,
         field: params.fieldName,
         connector_id: params.connectorId,
       });
 
-      return streamsRepositoryClient
-        .fetch('POST /internal/streams/{name}/processing/_suggestions', {
+      const result = await Promise.allSettled(
+        groupedMessages.map((group) => {
+          const { roots, delimiter } = syncExtractTemplate(group.messages);
+          const { usefulTokens, usefulColumns } = getUsefulTokens(roots, delimiter);
+          const reviewFields = getReviewFields(usefulColumns, 10);
+
+          return streamsRepositoryClient
+            .fetch('POST /internal/streams/{name}/processing/_suggestions/grok', {
+              signal: abortController.signal,
+              params: {
+                path: { name: params.streamName },
+                body: {
+                  connector_id: params.connectorId,
+                  sample_messages: messages.slice(0, 10),
+                  review_fields: reviewFields,
+                },
+              },
+            })
+            .then(
+              (response) => {
+                const grokProcessor = getGrokProcessor(usefulTokens, reviewFields, response);
+
+                finishTrackingAndReport(1, [1]);
+
+                return grokProcessor;
+              },
+              (error: Error) => {
+                showErrorToast(notifications, error);
+                throw error;
+              }
+            );
+        })
+      );
+
+      // If all promises failed, throw the first error
+      if (
+        result.every(
+          (settledState): settledState is PromiseRejectedResult =>
+            settledState.status === 'rejected'
+        )
+      ) {
+        throw result[0].reason;
+      }
+
+      // Otherwise, ignore errors and continue with fulfilled results
+      const grokProcessors = result.reduce<GrokProcessorResult[]>((acc, settledState) => {
+        if (settledState.status === 'fulfilled') {
+          acc.push(settledState.value);
+        }
+        return acc;
+      }, []);
+
+      // Combine all grok processors into a single one with fallback patterns
+      const combinedGrokProcessor = mergeGrokProcessors(grokProcessors);
+
+      // Run simulation to get fields and metrics
+      const simulationResult = await streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/processing/_simulate',
+        {
           signal: abortController.signal,
           params: {
             path: { name: params.streamName },
             body: {
-              field: params.fieldName,
-              connectorId: params.connectorId,
-              samples,
+              documents: samples,
+              processing: [
+                {
+                  id: 'grok-processor',
+                  grok: {
+                    field: params.fieldName,
+                    patterns: combinedGrokProcessor.patterns,
+                    pattern_definitions: combinedGrokProcessor.pattern_definitions,
+                  },
+                },
+              ],
             },
           },
-        })
-        .then(
-          (response) => {
-            finishTrackingAndReport(
-              response.length || 0,
-              response.map(
-                ({ simulationResult }) =>
-                  simulationResult.processors_metrics['grok-processor'].parsed_rate
-              )
-            );
-            return response;
-          },
-          (error: Error) => {
-            showErrorToast(notifications, error);
-            throw error;
-          }
-        );
+        }
+      );
+
+      return { grokProcessor: combinedGrokProcessor, simulationResult };
     },
     [
       abortController,
