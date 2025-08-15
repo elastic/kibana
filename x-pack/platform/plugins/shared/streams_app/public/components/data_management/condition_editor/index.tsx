@@ -230,12 +230,7 @@ function FilterForm(props: {
   };
 
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      alignItems="center"
-      data-test-subj="streamsAppConditionEditor"
-      direction="column"
-    >
+    <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="streamsAppConditionEditor">
       <EuiFieldText
         data-test-subj="streamsAppConditionEditorFieldText"
         aria-label={i18n.translate('xpack.streams.filter.field', { defaultMessage: 'Field' })}
