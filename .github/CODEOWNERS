@@ -1715,17 +1715,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/fixtures/es_archives/large_arrays @elastic/ml-ui # Assigned per usages
 /x-pack/platform/test/functional/services/transform @elastic/ml-ui @elastic/kibana-management
 /x-pack/platform/test/functional/services/aiops @elastic/ml-ui
-
-# Transforms maintained by the Kibana Management team.
-/x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/transform_rule_types/ @elastic/kibana-management
-/x-pack/platform/test/serverless/**/test_suites/management/transforms/ @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group2/transform.ts @elastic/kibana-management
-/x-pack/platform/test/api_integration/apis/transform/ @elastic/kibana-management
-/x-pack/platform/test/api_integration_basic/apis/transform/ @elastic/kibana-management
-/x-pack/test/api_integration/services/transform.ts @elastic/kibana-management
-/x-pack/platform/test/functional/apps/transform/ @elastic/kibana-management
-/x-pack/platform/test/functional/services/transform @elastic/kibana-management
-/x-pack/platform/test/functional_basic/apps/transform/ @elastic/kibana-management
+/x-pack/platform/test/functional_basic/apps/transform/ @elastic/ml-ui @elastic/kibana-management
 
 # Operations
 /src/platform/test/package @elastic/kibana-operations
@@ -2146,8 +2136,9 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/saved_object_api_integration/ @elastic/kibana-security
 /x-pack/solutions/**/test/serverless/**/test_suites/platform_security/ @elastic/kibana-security
 /x-pack/platform/test/serverless/**/test_suites/platform_security/ @elastic/kibana-security
+/x-pack/test_serverless/**/test_suites/observability/platform_security/ @elastic/kibana-security
 /src/core/packages/http/server-internal/src/cdn_config/ @elastic/kibana-security @elastic/kibana-core
-/x-pack/solutions/observability/test/serverless/api_integration/configs/config.feature_flags.ts @elastic/kibana-security
+/x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts @elastic/kibana-security
 /x-pack/platform/test/serverless/functional/test_suites/spaces/multiple_spaces_enabled.ts @elastic/kibana-security
 /x-pack/platform/test/serverless/functional/page_objects/svl_management_page.ts @elastic/kibana-security
 
@@ -2211,11 +2202,11 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/solutions/search/test/serverless/functional/test_suites/cases/ @elastic/kibana-cases
 /x-pack/solutions/security/test/serverless/functional/test_suites/ftr/cases/ @elastic/kibana-cases
 /x-pack/solutions/search/test/serverless/api_integration/cases/ @elastic/kibana-cases
-/x-pack/solutions/observability/test/serverless/api_integration/test_suites/cases/ @elastic/kibana-cases
+/x-pack/test_serverless/api_integration/test_suites/observability/cases/ @elastic/kibana-cases
 /x-pack/solutions/security/test/serverless/api_integration/test_suites/cases/ @elastic/kibana-cases
 /x-pack/solutions/search/test/serverless/functional/test_suites/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/solutions/security/test/serverless/functional/test_suites/screenshot_creation/response_ops_docs @elastic/response-ops
-/x-pack/solutions/observability/test/serverless/functional/test_suites/screenshot_creation/response_ops_docs @elastic/response-ops
+/x-pack/test_serverless/functional/test_suites/observability/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/platform/test/serverless/api_integration/test_suites/alerting/ @elastic/response-ops
 /x-pack/platform/test/fixtures/es_archives/action_task_params @elastic/response-ops
 /x-pack/platform/test/fixtures/es_archives/actions @elastic/response-ops
