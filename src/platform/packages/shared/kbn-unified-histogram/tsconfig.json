@@ -21,7 +21,6 @@
     "@kbn/es-query",
     "@kbn/presentation-publishing",
     "@kbn/inspector-plugin",
-    "@kbn/search-types",
     "@kbn/discover-utils",
     "@kbn/ui-actions-plugin",
     "@kbn/core-ui-settings-browser-mocks",
