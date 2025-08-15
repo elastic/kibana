@@ -199,7 +199,6 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 iconType={isRowExpanded ? 'arrowDown' : 'arrowRight'}
-                disabled={!rowInstance.getCanExpand()}
                 onClick={onCascadeRowClick}
                 aria-label={i18n.translate('sharedUXPackages.dataCascade.removeRowButtonLabel', {
                   defaultMessage: 'expand row',

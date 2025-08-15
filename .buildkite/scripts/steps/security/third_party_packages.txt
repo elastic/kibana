@@ -9,3 +9,5 @@ inversify
 @types/d3-color
 canvas-confetti
 @types/canvas-confetti
+@tanstack/react-table
+@tanstack/react-virtual
