@@ -35,11 +35,16 @@ describe('maybeAddCloudLinks', () => {
     );
     const core = coreMock.createStart();
     const { chrome } = core;
+    const cloud = {
+      ...cloudMock.createStart(),
+      isCloudEnabled: true,
+      getPrivilegedUrls: jest.fn().mockResolvedValue({ billingUrl: 'billing-url' }),
+    };
     maybeAddCloudLinks({
       security,
       core,
       share: sharePluginMock.createStartContract(),
-      cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
+      cloud,
       isServerless: false,
     });
     // Since there's a promise, let's wait for the next tick
@@ -110,11 +115,16 @@ describe('maybeAddCloudLinks', () => {
     security.authc.getCurrentUser.mockRejectedValue(new Error('Something went terribly wrong'));
     const core = coreMock.createStart();
     const { chrome } = core;
+    const cloud = {
+      ...cloudMock.createStart(),
+      isCloudEnabled: true,
+      getPrivilegedUrls: jest.fn().mockResolvedValue({ billingUrl: 'billing-url' }),
+    };
     maybeAddCloudLinks({
       security,
       core,
       share: sharePluginMock.createStartContract(),
-      cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
+      cloud,
       isServerless: false,
     });
     // Since there's a promise, let's wait for the next tick
