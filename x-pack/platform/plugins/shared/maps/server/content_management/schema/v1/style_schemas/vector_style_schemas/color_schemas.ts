@@ -76,7 +76,8 @@ export const fillColorSchema = schema.oneOf([colorStaticSchema, colorDynamicSche
     },
   },
   meta: {
-    description: 'Configure to set feature filled color',
+    description:
+      'Configure to set feature filled color. Line features do not have filled area and are not effected by this configuration.',
   },
 });
 export const lineColorSchema = schema.oneOf([colorStaticSchema, colorDynamicSchema], {

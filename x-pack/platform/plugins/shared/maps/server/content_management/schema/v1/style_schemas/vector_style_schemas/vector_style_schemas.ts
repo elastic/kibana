@@ -20,7 +20,14 @@ import {
   labelSchema,
   labelZoomRangeSchema,
 } from './label_schemas';
-import { iconSchema, orientationSchema, sizeSchema, symbolizeAsSchema } from './marker_schemas';
+import {
+  iconSchema,
+  iconSizeSchema,
+  labelSizeSchema,
+  lineWidthSchema,
+  orientationSchema,
+  symbolizeAsSchema,
+} from './marker_schemas';
 
 export const fieldMetaOptions = schema.object({
   isEnabled: schema.boolean(),
@@ -37,14 +44,14 @@ export const vectorStylePropertiesSchema = schema.object({
   [VECTOR_STYLES.SYMBOLIZE_AS]: schema.maybe(symbolizeAsSchema),
   [VECTOR_STYLES.FILL_COLOR]: fillColorSchema,
   [VECTOR_STYLES.LINE_COLOR]: lineColorSchema,
-  [VECTOR_STYLES.LINE_WIDTH]: sizeSchema,
+  [VECTOR_STYLES.LINE_WIDTH]: lineWidthSchema,
   [VECTOR_STYLES.ICON]: iconSchema,
-  [VECTOR_STYLES.ICON_SIZE]: sizeSchema,
+  [VECTOR_STYLES.ICON_SIZE]: iconSizeSchema,
   [VECTOR_STYLES.ICON_ORIENTATION]: orientationSchema,
   [VECTOR_STYLES.LABEL_TEXT]: labelSchema,
   [VECTOR_STYLES.LABEL_ZOOM_RANGE]: labelZoomRangeSchema,
   [VECTOR_STYLES.LABEL_COLOR]: labelColorSchema,
-  [VECTOR_STYLES.LABEL_SIZE]: sizeSchema,
+  [VECTOR_STYLES.LABEL_SIZE]: labelSizeSchema,
   [VECTOR_STYLES.LABEL_BORDER_COLOR]: labelBorderColorSchema,
   [VECTOR_STYLES.LABEL_BORDER_SIZE]: labelBorderSizeSchema,
   [VECTOR_STYLES.LABEL_POSITION]: labelPositionSchema,

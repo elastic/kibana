@@ -6,7 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ICON_SOURCE, STYLE_TYPE, SYMBOLIZE_AS_TYPES } from '../../../../../../common/constants';
+import {
+  DEFAULT_ICON,
+  ICON_SOURCE,
+  STYLE_TYPE,
+  SYMBOLIZE_AS_TYPES,
+} from '../../../../../../common/constants';
 import { fieldMetaOptions, styleField } from './vector_style_schemas';
 
 export const symbolizeAsOptions = schema.object({
@@ -70,16 +75,29 @@ export const iconStaticOptions = schema.object({
   iconSource: schema.maybe(iconSource),
 });
 
-export const iconSchema = schema.oneOf([
-  schema.object({
-    type: schema.literal(STYLE_TYPE.STATIC),
-    options: iconStaticOptions,
-  }),
-  schema.object({
-    type: schema.literal(STYLE_TYPE.DYNAMIC),
-    options: iconDynamicOptions,
-  }),
-]);
+export const iconSchema = schema.oneOf(
+  [
+    schema.object({
+      type: schema.literal(STYLE_TYPE.STATIC),
+      options: iconStaticOptions,
+    }),
+    schema.object({
+      type: schema.literal(STYLE_TYPE.DYNAMIC),
+      options: iconDynamicOptions,
+    }),
+  ],
+  {
+    defaultValue: {
+      type: STYLE_TYPE.STATIC,
+      options: {
+        value: DEFAULT_ICON,
+      },
+    },
+    meta: {
+      description: 'Configure to set Point feature icon',
+    },
+  }
+);
 
 export const orientationDynamicOptions = schema.object({
   field: schema.maybe(styleField),
@@ -90,16 +108,30 @@ export const orientationStaticOptions = schema.object({
   orientation: schema.number(),
 });
 
-export const orientationSchema = schema.oneOf([
-  schema.object({
-    type: schema.literal(STYLE_TYPE.STATIC),
-    options: orientationStaticOptions,
-  }),
-  schema.object({
-    type: schema.literal(STYLE_TYPE.DYNAMIC),
-    options: orientationDynamicOptions,
-  }),
-]);
+export const orientationSchema = schema.oneOf(
+  [
+    schema.object({
+      type: schema.literal(STYLE_TYPE.STATIC),
+      options: orientationStaticOptions,
+    }),
+    schema.object({
+      type: schema.literal(STYLE_TYPE.DYNAMIC),
+      options: orientationDynamicOptions,
+    }),
+  ],
+  {
+    defaultValue: {
+      type: STYLE_TYPE.STATIC,
+      options: {
+        orientation: 0,
+      },
+    },
+    meta: {
+      description:
+        'Configure to rotate the icon clockwise. Ignored when Point features are symbolized as circle markers',
+    },
+  }
+);
 
 export const sizeDynamicOptions = schema.object({
   minSize: schema.number(),
@@ -113,13 +145,46 @@ export const sizeStaticOptions = schema.object({
   size: schema.number(),
 });
 
-export const sizeSchema = schema.oneOf([
-  schema.object({
-    type: schema.literal(STYLE_TYPE.STATIC),
-    options: sizeStaticOptions,
-  }),
-  schema.object({
-    type: schema.literal(STYLE_TYPE.DYNAMIC),
-    options: sizeDynamicOptions,
-  }),
-]);
+const sizeStaticSchema = schema.object({
+  type: schema.literal(STYLE_TYPE.STATIC),
+  options: sizeStaticOptions,
+});
+
+const sizeDynamiceSchema = schema.object({
+  type: schema.literal(STYLE_TYPE.DYNAMIC),
+  options: sizeDynamicOptions,
+});
+export const sizeSchema = schema.oneOf([sizeStaticSchema, sizeDynamiceSchema]);
+export const lineWidthSchema = schema.oneOf([sizeStaticSchema, sizeDynamiceSchema], {
+  defaultValue: {
+    type: STYLE_TYPE.STATIC,
+    options: {
+      size: 1,
+    },
+  },
+  meta: {
+    description: 'Configure to set feature border width',
+  },
+});
+export const iconSizeSchema = schema.oneOf([sizeStaticSchema, sizeDynamiceSchema], {
+  defaultValue: {
+    type: STYLE_TYPE.STATIC,
+    options: {
+      size: 6,
+    },
+  },
+  meta: {
+    description: 'Configure to set Point feature radius size in pixels',
+  },
+});
+export const labelSizeSchema = schema.oneOf([sizeStaticSchema, sizeDynamiceSchema], {
+  defaultValue: {
+    type: STYLE_TYPE.STATIC,
+    options: {
+      size: 14,
+    },
+  },
+  meta: {
+    description: 'Configure to set label text size',
+  },
+});
