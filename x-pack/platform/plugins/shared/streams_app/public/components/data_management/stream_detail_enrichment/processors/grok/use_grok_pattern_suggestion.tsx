@@ -28,6 +28,8 @@ import {
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
 import { simulateProcessing } from '../../state_management/simulation_state_machine/simulation_runner_actor';
 
+export const SUGGESTED_GROK_PROCESSOR_ID = 'grok-processor';
+
 export interface GrokPatternSuggestionParams {
   streamName: string;
   connectorId: string;
@@ -122,10 +124,15 @@ export function useGrokPatternSuggestion() {
             .then(
               (response) => {
                 const grokProcessor = getGrokProcessor(usefulTokens, reviewFields, response);
+                const inlinedGrokPatterns = inlineGrokPatterns(combinedGrokProcessor);
 
                 finishTrackingAndReport(1, [1]);
 
-                return grokProcessor;
+                return {
+                  ...grokProcessor,
+                  patterns: inlinedGrokPatterns,
+                  pattern_definitions: {},
+                };
               },
               (error: Error) => {
                 showErrorToast(notifications, error);
@@ -165,16 +172,16 @@ export function useGrokPatternSuggestion() {
             path: { name: params.streamName },
             body: {
               documents: samples,
-              processing: [
-                {
-                  id: 'grok-processor',
-                  grok: {
-                    field: params.fieldName,
+              processing: {
+                steps: [
+                  {
+                    action: 'grok',
+                    customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
+                    from: params.fieldName,
                     patterns: combinedGrokProcessor.patterns,
-                    pattern_definitions: combinedGrokProcessor.pattern_definitions,
                   },
-                },
-              ],
+                ],
+              },
             },
           },
         }
@@ -192,4 +199,37 @@ export function useGrokPatternSuggestion() {
       telemetryClient,
     ]
   );
+}
+
+function inlineGrokPatterns(grokProcessor: GrokProcessorResult): string[] {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { patterns, pattern_definitions } = grokProcessor;
+
+  if (!pattern_definitions || Object.keys(pattern_definitions).length === 0) {
+    return patterns;
+  }
+
+  // Recursively inline a single pattern
+  function inlinePattern(pattern: string, seen: Set<string> = new Set()): string {
+    // Match %{PATTERN_NAME} or %{PATTERN_NAME:field}
+    return pattern.replace(/%{([A-Z0-9_]+)(:[^}]*)?}/g, (match, key, fieldName) => {
+      if (pattern_definitions && pattern_definitions[key]) {
+        if (seen.has(key)) {
+          // Prevent infinite recursion on cyclic definitions
+          return match;
+        }
+        seen.add(key);
+        const inlined = inlinePattern(pattern_definitions[key], seen);
+        seen.delete(key);
+        if (fieldName) {
+          // Named capture group
+          return `(?<${fieldName.substring(1)}>${inlined})`;
+        }
+        return `(${inlined})`;
+      }
+      return match; // Leave as is if not in patternDefs
+    });
+  }
+
+  return patterns.map((pattern) => inlinePattern(pattern));
 }

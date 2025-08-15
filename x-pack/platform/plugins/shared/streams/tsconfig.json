@@ -58,6 +58,7 @@
     "@kbn/sse-utils",
     "@kbn/ai-tools",
     "@kbn/grok-heuristics",
+    "@kbn/streamlang",
     "@kbn/licensing-types"
   ]
 }

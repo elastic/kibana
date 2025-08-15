@@ -14,7 +14,7 @@ import {
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { Streams, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
-import { ALWAYS_CONDITION } from '../../../../../util/condition';
+import { ALWAYS_CONDITION } from '@kbn/streamlang';
 import {
   StreamRoutingContext,
   StreamRoutingEvent,
@@ -57,7 +57,7 @@ export const streamRoutingMachine = setup({
     addNewRoutingRule: assign(({ context }) => {
       const newRule = routingConverter.toUIDefinition({
         destination: `${context.definition.stream.name}.child`,
-        if: ALWAYS_CONDITION,
+        where: ALWAYS_CONDITION,
         isNew: true,
       });
 
@@ -166,7 +166,7 @@ export const streamRoutingMachine = setup({
             src: 'routingSamplesMachine',
             input: ({ context }) => ({
               definition: context.definition,
-              condition: selectCurrentRule(context).if,
+              condition: selectCurrentRule(context).where,
             }),
           },
           states: {
@@ -181,10 +181,10 @@ export const streamRoutingMachine = setup({
                     enqueue({ type: 'patchRule', params: { routingRule: event.routingRule } });
 
                     // Trigger samples collection only on condition change
-                    if (event.routingRule.if) {
+                    if (event.routingRule.where) {
                       enqueue.sendTo('routingSamplesMachine', {
                         type: 'routingSamples.updateCondition',
-                        condition: event.routingRule.if,
+                        condition: event.routingRule.where,
                       });
                     }
                   }),
@@ -209,7 +209,7 @@ export const streamRoutingMachine = setup({
 
                   return {
                     definition: context.definition,
-                    if: currentRoutingRule.if,
+                    where: currentRoutingRule.where,
                     destination: currentRoutingRule.destination,
                   };
                 },

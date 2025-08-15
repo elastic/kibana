@@ -51,7 +51,7 @@ export const GrokPatternAISuggestions = ({
 
   const [suggestionsState, refreshSuggestions] = useGrokPatternSuggestion();
 
-  const fieldValue = useWatch<ProcessorFormState, 'field'>({ name: 'field' });
+  const fieldValue = useWatch<ProcessorFormState, 'from'>({ name: 'from' });
   const isValidField = useMemo(() => {
     return Boolean(
       fieldValue &&
@@ -74,13 +74,6 @@ export const GrokPatternAISuggestions = ({
                 (value) => new DraftGrokExpression(grokCollection, value)
               ),
               { shouldValidate: true }
-            );
-            setValue(
-              'pattern_definitions',
-              suggestionsState.value.grokProcessor.pattern_definitions,
-              {
-                shouldValidate: true,
-              }
             );
           }
           refreshSuggestions(null);

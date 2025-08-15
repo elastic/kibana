@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
+import { StreamlangDSL, streamlangDSLSchema } from '@kbn/streamlang';
 import { ModelValidation, modelValidation } from '../validation/model_validation';
 import { Validation, validation } from '../validation/validation';
 import { IngestStreamLifecycle, ingestStreamLifecycleSchema } from './lifecycle';
-import { ProcessorDefinition, processorDefinitionSchema } from './processors';
 import { BaseStream } from '../base';
 
 interface IngestStreamPrivileges {
@@ -34,14 +34,14 @@ const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object(
 
 export interface IngestBase {
   lifecycle: IngestStreamLifecycle;
-  processing: ProcessorDefinition[];
+  processing: StreamlangDSL;
 }
 
 export const IngestBase: Validation<unknown, IngestBase> = validation(
   z.unknown(),
   z.object({
     lifecycle: ingestStreamLifecycleSchema,
-    processing: z.array(processorDefinitionSchema),
+    processing: streamlangDSLSchema,
   })
 );
 
