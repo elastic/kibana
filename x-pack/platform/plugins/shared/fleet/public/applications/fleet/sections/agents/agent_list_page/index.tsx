@@ -102,14 +102,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     managedAgentsOnCurrentPage,
     showUpgradeable,
     setShowUpgradeable,
-    search,
     setSearch,
     selectedAgentPolicies,
     setSelectedAgentPolicies,
-    sortField,
-    setSortField,
-    sortOrder,
-    setSortOrder,
+    sort,
     selectedStatus,
     setSelectedStatus,
     selectedTags,
@@ -117,9 +113,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     allAgentPolicies,
     agentPoliciesRequest,
     agentPoliciesIndexedById,
-    pagination,
+    page,
     pageSizeOptions,
-    setPagination,
     kuery,
     draftKuery,
     setDraftKuery,
@@ -127,59 +122,25 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     currentRequestRef,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
+    isUsingFilter,
+    onTableChange,
+    clearFilters: clearFiltersFromSession,
   } = useFetchAgentsData();
 
   const onSubmitSearch = useCallback(
     (newKuery: string) => {
       setSearch(newKuery);
-      setPagination({
-        ...pagination,
-        currentPage: 1,
+      onTableChange({
+        page: { index: 0, size: page.size },
       });
     },
-    [setSearch, pagination, setPagination]
-  );
-
-  const isUsingFilter = !!(
-    search.trim() ||
-    selectedAgentPolicies.length ||
-    selectedStatus.length ||
-    selectedTags.length ||
-    showUpgradeable
+    [setSearch, onTableChange, page.size]
   );
 
   const clearFilters = useCallback(() => {
     setDraftKuery('');
-    setSearch('');
-    setSelectedAgentPolicies([]);
-    setSelectedStatus([]);
-    setSelectedTags([]);
-    setShowUpgradeable(false);
-  }, [
-    setDraftKuery,
-    setSearch,
-    setSelectedAgentPolicies,
-    setSelectedStatus,
-    setSelectedTags,
-    setShowUpgradeable,
-  ]);
-
-  const onTableChange = ({
-    page,
-    sort,
-  }: {
-    page?: { index: number; size: number };
-    sort?: { field: keyof Agent; direction: 'asc' | 'desc' };
-  }) => {
-    const newPagination = {
-      ...pagination,
-      currentPage: page!.index + 1,
-      pageSize: page!.size,
-    };
-    setPagination(newPagination);
-    setSortField(sort!.field);
-    setSortOrder(sort!.direction);
-  };
+    clearFiltersFromSession();
+  }, [setDraftKuery, clearFiltersFromSession]);
 
   const openMigrateFlyout = (agents: Agent[]) => {
     const protectedAgents = agents.filter(
@@ -496,8 +457,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onClickAgentActivity={onClickAgentActivity}
         showAgentActivityTour={showAgentActivityTour}
         latestAgentActionErrors={latestAgentActionErrors.length}
-        sortField={sortField}
-        sortOrder={sortOrder}
+        sortField={sort.field}
+        sortOrder={sort.direction}
         onBulkMigrateClicked={(agents: Agent[]) => openMigrateFlyout(agents)}
       />
       <EuiSpacer size="m" />
@@ -522,9 +483,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {/* Agent list table */}
       <AgentListTable
         agents={agentsOnCurrentPage}
-        sortField={sortField}
-        pageSizeOptions={pageSizeOptions}
-        sortOrder={sortOrder}
+        sortField={sort.field}
+        sortOrder={sort.direction}
         isLoading={isLoading}
         agentPoliciesIndexedById={agentPoliciesIndexedById}
         renderActions={renderActions}
@@ -532,7 +492,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selected={selectedAgents}
         showUpgradeable={showUpgradeable}
         onTableChange={onTableChange}
-        pagination={pagination}
+        pagination={{
+          currentPage: page.index + 1, // Convert from 0-based to 1-based
+          pageSize: page.size,
+        }}
+        pageSizeOptions={pageSizeOptions}
         totalAgents={Math.min(nAgentsInTable, SO_SEARCH_LIMIT)}
         isUsingFilter={isUsingFilter}
         setEnrollmentFlyoutState={setEnrollmentFlyoutState}
