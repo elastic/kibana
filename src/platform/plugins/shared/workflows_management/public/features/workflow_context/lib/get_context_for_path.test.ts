@@ -12,6 +12,7 @@ import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_g
 import { getContextSchemaForPath } from './get_context_for_path';
 import { z } from '@kbn/zod';
 import { expectZodSchemaEqual } from '../../../../common/lib/zod_utils';
+import { EventSchema } from '../../../../common/schema';
 
 describe('getContextSchemaForPath', () => {
   const definition = {
@@ -88,7 +89,7 @@ describe('getContextSchemaForPath', () => {
       z.object({
         workflowRunId: z.string(),
         now: z.date(),
-        event: z.any(),
+        event: EventSchema,
         steps: z.object({}),
         consts: z.object({
           test: z.string(),
@@ -110,7 +111,7 @@ describe('getContextSchemaForPath', () => {
       z.object({
         workflowRunId: z.string(),
         now: z.date(),
-        event: z.any(),
+        event: EventSchema,
         steps: z.object({
           'first-step': z.object({
             output: z.string(),
