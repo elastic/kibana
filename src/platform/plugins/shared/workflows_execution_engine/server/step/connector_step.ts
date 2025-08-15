@@ -92,7 +92,13 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
         renderedInputs
       );
 
-      return { output, error: undefined };
+      const { data, status, message } = output;
+
+      if (status === 'ok') {
+        return { output: data, error: undefined };
+      } else {
+        return await this.handleFailure(message);
+      }
     } catch (error) {
       return await this.handleFailure(error);
     }
