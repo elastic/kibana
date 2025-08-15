@@ -72,10 +72,9 @@ export const ESQLDataCascade = ({
   type ESQLDataGroupNode = DataTableRecord['flattened'] & { id: string };
 
   const fetchCascadeData = useCallback(
-    async ({ nodeType, nodePath, nodePathMap, operation }: Omit<CascadeQueryArgs, 'query'>) => {
+    async ({ nodeType, nodePath, nodePathMap }: Omit<CascadeQueryArgs, 'query'>) => {
       const newQuery = constructCascadeQuery({
         query: query as AggregateQuery,
-        operation,
         nodeType,
         nodePath,
         nodePathMap,
@@ -84,9 +83,7 @@ export const ESQLDataCascade = ({
       const inspectorAdapters = { requests: new RequestAdapter() };
 
       const { records } = await fetchEsql({
-        query: {
-          esql: newQuery,
-        } as AggregateQuery,
+        query: newQuery,
         dataView,
         data,
         expressions,
@@ -129,7 +126,6 @@ export const ESQLDataCascade = ({
         nodePath,
         nodePathMap,
         nodeType: 'group',
-        operation: 'stats',
       });
     },
     [fetchCascadeData]
@@ -145,7 +141,6 @@ export const ESQLDataCascade = ({
         nodePath,
         nodePathMap,
         nodeType: 'leaf',
-        operation: 'stats',
       });
     },
     [fetchCascadeData]
