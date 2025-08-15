@@ -30,7 +30,7 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { estypes } from '@elastic/elasticsearch';
-import { ControlPanelsState } from '@kbn/controls-plugin/common';
+import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import { Histogram } from './histogram';
 import type {
   UnifiedHistogramSuggestionContext,
