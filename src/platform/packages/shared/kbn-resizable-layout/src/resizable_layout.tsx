@@ -34,6 +34,21 @@ export interface ResizableLayoutProps {
    * Minimum size of the fixed panel in pixels
    */
   minFixedPanelSize: number;
+
+  /**
+   * Initial size of the fixed panel in percentage
+   */
+  fixedPanelSizePct?: number;
+  /**
+   * Initial size of the flex panel in percentage
+   */
+  flexPanelSizePct?: number;
+
+  /**
+   * Whether to keep the panel size ratios constant when resizing
+   */
+  keepPanelsPctRatio?: boolean;
+
   /**
    * Minimum size of the flex panel in pixels
    */
@@ -72,6 +87,9 @@ export const ResizableLayout = ({
   fixedPanel,
   flexPanel,
   resizeButtonClassName,
+  fixedPanelSizePct,
+  flexPanelSizePct,
+  keepPanelsPctRatio,
   ['data-test-subj']: dataTestSubj,
   onFixedPanelSizeChange,
 }: ResizableLayoutProps) => {
@@ -92,6 +110,9 @@ export const ResizableLayout = ({
       resizeButtonClassName={resizeButtonClassName}
       data-test-subj={dataTestSubj}
       onFixedPanelSizeChange={onFixedPanelSizeChange}
+      fixedPanelSizePct={fixedPanelSizePct}
+      flexPanelSizePct={flexPanelSizePct}
+      keepPanelsPctRatio={keepPanelsPctRatio}
       {...panelsProps}
     />
   );

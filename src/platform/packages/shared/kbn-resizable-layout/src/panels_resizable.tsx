@@ -32,6 +32,9 @@ export const PanelsResizable = ({
   fixedPanel,
   flexPanel,
   resizeButtonClassName,
+  fixedPanelSizePct = 50,
+  flexPanelSizePct = 50,
+  keepPanelsPctRatio = false,
   ['data-test-subj']: dataTestSubj = 'resizableLayout',
   onFixedPanelSizeChange,
 }: {
@@ -43,13 +46,16 @@ export const PanelsResizable = ({
   fixedPanel: ReactNode;
   flexPanel: ReactNode;
   resizeButtonClassName?: string;
+  fixedPanelSizePct?: number;
+  flexPanelSizePct?: number;
+  keepPanelsPctRatio?: boolean;
   ['data-test-subj']?: string;
   onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
 }) => {
   const fixedPanelId = useGeneratedHtmlId({ prefix: 'fixedPanel' });
   const containerRef = useRef<HTMLDivElement | null>(null);
   const containerSizeRef = useRef(0);
-  const [panelSizes, setPanelSizes] = useState({ fixedPanelSizePct: 50, flexPanelSizePct: 50 });
+  const [panelSizes, setPanelSizes] = useState({ fixedPanelSizePct, flexPanelSizePct });
 
   // The resize overlay makes it so that other mouse events (e.g. tooltip hovers, etc)
   // don't occur when mouse dragging
@@ -92,8 +98,8 @@ export const PanelsResizable = ({
       return;
     }
 
-    let fixedPanelSizePct: number;
-    let flexPanelSizePct: number;
+    let newFixedPanelSizePct: number;
+    let newFlexPanelSizePct: number;
 
     // If the container size is less than the minimum main content size
     // plus the current fixed panel size, then we need to make some adjustments.
@@ -103,20 +109,20 @@ export const PanelsResizable = ({
       // Try to make the fixed panel size fit within the container, but if it
       // doesn't then just use the minimum sizes.
       if (newFixedPanelSize < minFixedPanelSize) {
-        fixedPanelSizePct = pixelsToPercent(containerSize, minFixedPanelSize);
-        flexPanelSizePct = pixelsToPercent(containerSize, minFlexPanelSize);
+        newFixedPanelSizePct = pixelsToPercent(containerSize, minFixedPanelSize);
+        newFlexPanelSizePct = pixelsToPercent(containerSize, minFlexPanelSize);
       } else {
-        fixedPanelSizePct = pixelsToPercent(containerSize, newFixedPanelSize);
-        flexPanelSizePct = 100 - fixedPanelSizePct;
+        newFixedPanelSizePct = pixelsToPercent(containerSize, newFixedPanelSize);
+        newFlexPanelSizePct = 100 - newFixedPanelSizePct;
       }
     } else {
-      fixedPanelSizePct = pixelsToPercent(containerSize, fixedPanelSize);
-      flexPanelSizePct = 100 - fixedPanelSizePct;
+      newFixedPanelSizePct = pixelsToPercent(containerSize, fixedPanelSize);
+      newFlexPanelSizePct = 100 - newFixedPanelSizePct;
     }
 
     const newPanelSizes = {
-      fixedPanelSizePct: round(fixedPanelSizePct, 4),
-      flexPanelSizePct: round(flexPanelSizePct, 4),
+      fixedPanelSizePct: round(newFixedPanelSizePct, 4),
+      flexPanelSizePct: round(newFlexPanelSizePct, 4),
     };
 
     // Skip updating the panel sizes if they haven't changed
@@ -135,7 +141,7 @@ export const PanelsResizable = ({
   useLayoutEffect(() => {
     const container = containerRef.current;
 
-    if (!container) {
+    if (!container || keepPanelsPctRatio) {
       return;
     }
 
@@ -152,7 +158,7 @@ export const PanelsResizable = ({
     return () => {
       observer.disconnect();
     };
-  }, [adjustPanelsOnResize]);
+  }, [adjustPanelsOnResize, keepPanelsPctRatio]);
 
   // Adjusts the panel sizes when the relevant props change,
   // such as the fixed panel size or minimum sizes

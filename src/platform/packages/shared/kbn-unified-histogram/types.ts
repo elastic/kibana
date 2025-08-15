@@ -240,10 +240,29 @@ export interface ChartSectionProps {
  */
 export type ChartSectionConfiguration =
   | {
+      /**
+       * The component to render for the chart section
+       */
       Component: React.ComponentType<ChartSectionProps>;
+      /**
+       * Whether to replace the default histogram
+       */
       replaceDefaultHistogram: true;
-      localStorageKeyPrefix: string;
-      containerInitialHeight: number;
+      /**
+       * Prefix for the local storage keys used by custom component
+       */
+      localStorageKeyPrefix?: string;
+      /**
+       * The height ratio of the top panel, relative to the total container height.
+       * For example, a value of 30 means the top panel takes up 30% of the height.
+       */
+      topPanelHeightRatio?: number;
+
+      /**
+       * The height ratio of the main panel, relative to the total container height.
+       * For example, a value of 70 means the main panel takes up 70% of the height.
+       */
+      mainPanelHeightRatio?: number;
     }
   | {
       replaceDefaultHistogram: false;

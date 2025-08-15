@@ -196,10 +196,6 @@ const CustomChartSectionWrapper = ({
   const { setUnifiedHistogramApi, ...restProps } = unifiedHistogramProps;
   const { api, stateProps, requestParams } = useServicesBootstrap({
     ...restProps,
-    initialState: {
-      ...unifiedHistogramProps.initialState,
-      topPanelHeight: chartSectionConfig.containerInitialHeight,
-    },
     localStorageKeyPrefix:
       chartSectionConfig.localStorageKeyPrefix ?? unifiedHistogramProps.localStorageKeyPrefix,
   });
@@ -216,8 +212,16 @@ const CustomChartSectionWrapper = ({
       isChartAvailable: true,
       chart: stateProps.chart,
       topPanelHeight: stateProps.topPanelHeight,
+      topPanelHeightRatio: chartSectionConfig.topPanelHeightRatio,
+      mainPanelHeightRatio: chartSectionConfig.mainPanelHeightRatio,
     }),
-    [stateProps.onTopPanelHeightChange, stateProps.chart, stateProps.topPanelHeight]
+    [
+      stateProps.onTopPanelHeightChange,
+      stateProps.chart,
+      stateProps.topPanelHeight,
+      chartSectionConfig.topPanelHeightRatio,
+      chartSectionConfig.mainPanelHeightRatio,
+    ]
   );
 
   const { isEsqlMode, renderCustomChartToggleActions } = useUnifiedHistogramCommon({
