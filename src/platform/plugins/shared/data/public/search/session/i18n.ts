@@ -8,14 +8,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isBackgroundSearchEnabled } from './constants';
 
 /**
  * Message to display in case storing
  * session session is disabled due to turned off capability
  */
-export const noSearchSessionStorageCapabilityMessage = i18n.translate(
-  'data.searchSessionIndicator.noCapability',
-  {
-    defaultMessage: "You don't have permissions to create search sessions.",
-  }
-);
+export const noSearchSessionStorageCapabilityMessage = isBackgroundSearchEnabled()
+  ? i18n.translate('data.searchSessionIndicator.backgroundSearchNoCapability', {
+      defaultMessage: "You don't have permissions to create background searches.",
+    })
+  : i18n.translate('data.searchSessionIndicator.noCapability', {
+      defaultMessage: "You don't have permissions to create search sessions.",
+    });

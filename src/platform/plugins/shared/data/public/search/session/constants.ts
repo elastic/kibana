@@ -8,5 +8,5 @@
  */
 
 export const SEARCH_SESSIONS_MANAGEMENT_ID = 'search_sessions';
-export const BACKGROUND_SEARCH_ENABLED =
+export const isBackgroundSearchEnabled = () =>
   window.localStorage.getItem('backgroundSearchEnabled') === 'true' || false;
