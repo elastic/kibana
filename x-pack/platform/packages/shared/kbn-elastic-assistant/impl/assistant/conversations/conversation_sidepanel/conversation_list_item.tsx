@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiListGroupItem } from '@elastic/eui';
+import { EuiListGroupItemExtraActionProps, EuiFlexGroup, EuiListGroupItem } from '@elastic/eui';
 import { ConversationWithOwner } from '../../api';
 import { Conversation } from '../../../..';
 import { ConversationSidePanelContextMenu } from './context_menu';
@@ -18,6 +18,7 @@ interface Props {
   conversation: ConversationWithOwner;
   handleCopyUrl: (conversation: Conversation) => Promise<void>;
   handleDuplicateConversation: (conversation: Conversation) => Promise<void>;
+  isAssistantSharingEnabled?: boolean;
   isActiveConversation: boolean;
   lastConversationId: string;
   onConversationSelected: ({ cId }: { cId: string }) => void;
@@ -29,6 +30,7 @@ export const ConversationListItem: FunctionComponent<Props> = ({
   conversation,
   handleCopyUrl,
   handleDuplicateConversation,
+  isAssistantSharingEnabled = false,
   isActiveConversation,
   lastConversationId,
   onConversationSelected,
@@ -88,7 +90,25 @@ export const ConversationListItem: FunctionComponent<Props> = ({
     [handleCopyUrl, handleDuplicateConversation, setDeleteConversationItem, conversation]
   );
 
-  const shouldShowIcon = useMemo(() => conversation.users.length !== 1, [conversation.users]);
+  const shouldShowIcon = useMemo(
+    () => isAssistantSharingEnabled && conversation.users.length !== 1,
+    [isAssistantSharingEnabled, conversation.users]
+  );
+
+  const extraAction = useMemo<EuiListGroupItemExtraActionProps | undefined>(
+    () =>
+      isAssistantSharingEnabled
+        ? undefined
+        : {
+            color: 'danger',
+            onClick: () => setDeleteConversationItem(conversation),
+            iconType: 'trash',
+            iconSize: 's',
+            'aria-label': i18n.DELETE_CONVERSATION,
+            'data-test-subj': 'delete-option',
+          },
+    [conversation, isAssistantSharingEnabled, setDeleteConversationItem]
+  );
 
   return (
     <span key={conversation.id + conversation.title}>
@@ -119,8 +139,9 @@ export const ConversationListItem: FunctionComponent<Props> = ({
           }}
           data-test-subj={`conversation-select-${conversation.title}`}
           isActive={isActiveConversation}
+          extraAction={extraAction}
         />
-        <ConversationSidePanelContextMenu actions={actions} />
+        {isAssistantSharingEnabled && <ConversationSidePanelContextMenu actions={actions} />}
       </EuiFlexGroup>
       {/* Observer element for infinite scrolling pagination of conversations */}
       {conversation.id === lastConversationId && (

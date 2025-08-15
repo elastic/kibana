@@ -37,6 +37,7 @@ interface Props {
   currentConversation?: Conversation;
   onConversationSelected: ({ cId }: { cId: string }) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
+  isAssistantSharingEnabled?: boolean;
   isDisabled?: boolean;
   isFetchingCurrentUserConversations: boolean;
   conversations: Record<string, ConversationWithOwner>;
@@ -85,6 +86,7 @@ export const ConversationSidePanel = React.memo<Props>(
     currentConversation,
     onConversationSelected,
     shouldDisableKeyboardShortcut = () => false,
+    isAssistantSharingEnabled,
     isDisabled = false,
     isFetchingCurrentUserConversations,
     conversations,
@@ -228,6 +230,7 @@ export const ConversationSidePanel = React.memo<Props>(
                         : conversation.title === currentConversation?.title
                     }
                     key={conversation.id}
+                    isAssistantSharingEnabled={isAssistantSharingEnabled}
                     handleDuplicateConversation={handleDuplicateConversation}
                     handleCopyUrl={handleCopyUrl}
                     lastConversationId={lastConversationId}

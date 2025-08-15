@@ -38,6 +38,7 @@ interface OwnProps {
   isConversationOwner: boolean;
   isDisabled: boolean;
   isLoading: boolean;
+  isAssistantSharingEnabled?: boolean;
   isSettingsModalVisible: boolean;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   onChatCleared: () => void;
@@ -82,6 +83,7 @@ export const AssistantHeader: React.FC<Props> = ({
   defaultConnector,
   isConversationOwner,
   isAssistantEnabled,
+  isAssistantSharingEnabled = false,
   isDisabled,
   isLoading,
   isSettingsModalVisible,
@@ -197,7 +199,7 @@ export const AssistantHeader: React.FC<Props> = ({
                 )}
               </EuiFlexItem>
 
-              {!isNewConversation && (
+              {!isNewConversation && isAssistantSharingEnabled && (
                 <EuiFlexItem grow={false}>
                   <ShareBadge
                     isConversationOwner={isConversationOwner}

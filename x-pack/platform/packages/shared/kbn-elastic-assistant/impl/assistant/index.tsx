@@ -89,7 +89,7 @@ const AssistantComponent: React.FC<Props> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const {
-    assistantAvailability: { isAssistantEnabled },
+    assistantAvailability: { isAssistantEnabled, isAssistantSharingEnabled },
     assistantTelemetry,
     currentAppId,
     augmentMessageCodeBlocks,
@@ -507,6 +507,7 @@ const AssistantComponent: React.FC<Props> = ({
                     conversationsLoaded={isFetchedCurrentUserConversations}
                     defaultConnector={defaultConnector}
                     isAssistantEnabled={isAssistantEnabled}
+                    isAssistantSharingEnabled={isAssistantSharingEnabled}
                     isConversationOwner={isConversationOwner}
                     isDisabled={isDisabled || isLoadingChatSend}
                     isLoading={isInitialLoad}
