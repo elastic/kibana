@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RoutingDefinition, RoutingStatus, Streams } from '@kbn/streams-schema';
+import type { RoutingDefinition, RoutingStatus, Streams } from '@kbn/streams-schema';
 import type { ErrorActorEvent } from 'xstate5';
 import { fromPromise } from 'xstate5';
 import type { errors as esErrors } from '@elastic/elasticsearch';

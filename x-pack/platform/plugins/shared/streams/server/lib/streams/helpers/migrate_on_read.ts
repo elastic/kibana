@@ -7,9 +7,10 @@
 
 import { get, isObject } from 'lodash';
 import { Streams } from '@kbn/streams-schema';
-import { BaseStream } from '@kbn/streams-schema/src/models/base';
+import type { BaseStream } from '@kbn/streams-schema/src/models/base';
 import { set } from '@kbn/safer-lodash-set';
-import { Condition, isNeverCondition } from '@kbn/streamlang';
+import type { Condition } from '@kbn/streamlang';
+import { isNeverCondition } from '@kbn/streamlang';
 import {
   migrateRoutingIfConditionToStreamlang,
   migrateOldProcessingArrayToStreamlang,

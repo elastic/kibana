@@ -23,9 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import type { Condition, FilterCondition, OperatorKeys } from '@kbn/streamlang';
 import {
-  Condition,
-  FilterCondition,
-  OperatorKeys,
   getDefaultFormValueForOperator,
   getFilterOperator,
   getFilterValue,
@@ -34,7 +31,8 @@ import {
 } from '@kbn/streamlang';
 import { isPlainObject } from 'lodash';
 
-import { RoutingDefinition, RoutingStatus, isRoutingEnabled } from '@kbn/streams-schema';
+import type { RoutingDefinition, RoutingStatus } from '@kbn/streams-schema';
+import { isRoutingEnabled } from '@kbn/streams-schema';
 import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
 
 export type RoutingConditionEditorProps = ConditionEditorProps;
