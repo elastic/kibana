@@ -219,7 +219,7 @@ export interface MetricVisConfiguration {
   // computed by collapsing all rows
   collapseFn?: CollapseFunction;
   subtitle?: string;
-  secondaryPrefix?: string;
+  secondaryLabel?: string;
   progressDirection?: LayoutDirection;
   showBar?: boolean;
   color?: string;

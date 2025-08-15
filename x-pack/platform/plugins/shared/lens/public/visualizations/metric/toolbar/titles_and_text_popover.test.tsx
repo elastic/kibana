@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+
 import { fireEvent, render, screen } from '@testing-library/react';
+import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
+import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+
 import { MetricVisualizationState } from '../types';
 import { TitlesAndTextPopover } from './titles_and_text_popover';
-import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
 
 describe('TitlesAndTextPopover', () => {
   const palette: PaletteOutput<CustomPaletteParams> = {
@@ -30,7 +32,7 @@ describe('TitlesAndTextPopover', () => {
     breakdownByAccessor: 'breakdown-col-id',
     collapseFn: 'sum',
     subtitle: 'subtitle',
-    secondaryPrefix: 'extra-text',
+    secondaryLabel: 'extra-text',
     progressDirection: 'vertical',
     maxCols: 5,
     color: 'static-color',
@@ -44,10 +46,15 @@ describe('TitlesAndTextPopover', () => {
     trendlineTimeAccessor: 'trendline-time-col-id',
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
     titlesTextAlign: 'left',
-    valuesTextAlign: 'right',
+    primaryAlign: 'right',
+    secondaryAlign: 'right',
+    primaryPosition: 'bottom',
+    titleWeight: 'bold',
     iconAlign: 'left',
     valueFontMode: 'default',
     secondaryTrend: { type: 'none' },
+    secondaryLabelPosition: 'before',
+    applyColorTo: 'background',
   };
 
   const mockSetState = jest.fn();
@@ -128,22 +135,51 @@ describe('TitlesAndTextPopover', () => {
     ]);
   });
 
-  it('should set valuesTextAlign', async () => {
+  it('should set primaryAlign', async () => {
     renderToolbarOptions({ ...fullState });
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
     textOptionsButton.click();
 
-    const valueAlignBtnGroup = new EuiButtonGroupTestHarness('lens-values-alignment-btn');
+    const primaryAlignBtnGroup = new EuiButtonGroupTestHarness('lens-primary-metric-alignment-btn');
 
-    valueAlignBtnGroup.select('Center');
-    valueAlignBtnGroup.select('Left');
-    valueAlignBtnGroup.select('Right');
+    primaryAlignBtnGroup.select('Center');
+    primaryAlignBtnGroup.select('Left');
+    primaryAlignBtnGroup.select('Right');
 
-    expect(mockSetState.mock.calls.map(([s]) => s.valuesTextAlign)).toEqual([
+    expect(mockSetState.mock.calls.map(([s]) => s.primaryAlign)).toEqual([
       'center',
       'left',
       'right',
     ]);
+  });
+
+  it('should set secondaryAlign and hide secondaryAlign option when no secondary metric', async () => {
+    const { rerender } = renderToolbarOptions({ ...fullState });
+    const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
+    textOptionsButton.click();
+
+    const secondaryAlignBtnGroup = new EuiButtonGroupTestHarness(
+      'lens-secondary-metric-alignment-btn'
+    );
+
+    secondaryAlignBtnGroup.select('Center');
+    secondaryAlignBtnGroup.select('Left');
+    secondaryAlignBtnGroup.select('Right');
+
+    expect(mockSetState.mock.calls.map(([s]) => s.secondaryAlign)).toEqual([
+      'center',
+      'left',
+      'right',
+    ]);
+
+    rerender(
+      <TitlesAndTextPopover
+        state={{ ...fullState, secondaryMetricAccessor: undefined }}
+        setState={mockSetState}
+      />
+    );
+
+    expect(screen.queryByTestId('lens-secondary-metric-alignment-btn')).not.toBeInTheDocument();
   });
 
   it('should set valueFontMode', async () => {
@@ -176,11 +212,60 @@ describe('TitlesAndTextPopover', () => {
     expect(mockSetState.mock.calls.map(([s]) => s.iconAlign)).toEqual(['right', 'left']);
   });
 
+  it('should set titleWeight', async () => {
+    renderToolbarOptions({ ...fullState, icon: 'sortUp' });
+    const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
+    textOptionsButton.click();
+
+    const buttonGroup = new EuiButtonGroupTestHarness('lens-title-weight-btn');
+
+    expect(buttonGroup.selected.textContent).toBe('Bold');
+
+    buttonGroup.select('Normal');
+    buttonGroup.select('Bold');
+
+    expect(mockSetState.mock.calls.map(([s]) => s.titleWeight)).toEqual(['normal', 'bold']);
+  });
+
   it.each([undefined, 'empty'])('should hide iconAlign option when icon is %j', async (icon) => {
     renderToolbarOptions({ ...fullState, icon });
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
     textOptionsButton.click();
 
     expect(screen.queryByTestId('lens-icon-alignment-btn')).not.toBeInTheDocument();
+  });
+
+  it('should set title weight normal when primary metric postion is selected to top', () => {
+    renderToolbarOptions({ ...fullState });
+    const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
+    textOptionsButton.click();
+
+    const positionBtnGroup = new EuiButtonGroupTestHarness('lens-primary-position-btn');
+
+    positionBtnGroup.select('Top');
+
+    expect(mockSetState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        primaryPosition: 'top',
+        titleWeight: 'normal',
+      })
+    );
+  });
+
+  it('should set title weight bold when primary metric postion is selected to bottom', () => {
+    renderToolbarOptions({ ...fullState });
+    const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
+    textOptionsButton.click();
+
+    const positionBtnGroup = new EuiButtonGroupTestHarness('lens-primary-position-btn');
+
+    positionBtnGroup.select('Bottom');
+
+    expect(mockSetState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        primaryPosition: 'bottom',
+        titleWeight: 'bold',
+      })
+    );
   });
 });

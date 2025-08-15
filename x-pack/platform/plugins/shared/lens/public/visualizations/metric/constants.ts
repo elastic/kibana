@@ -6,7 +6,7 @@
  */
 
 import { OptionalKeys } from 'utility-types';
-import { MetricVisualizationState } from './types';
+import type { MetricVisualizationState } from './types';
 
 export const LENS_METRIC_ID = 'lnsMetric';
 
@@ -32,13 +32,26 @@ type MetricVisualizationStateOptionals = Pick<
 export const metricStateDefaults: Required<
   Pick<
     MetricVisualizationStateOptionals,
-    'titlesTextAlign' | 'valuesTextAlign' | 'iconAlign' | 'valueFontMode'
+    | 'titlesTextAlign'
+    | 'primaryAlign'
+    | 'secondaryAlign'
+    | 'iconAlign'
+    | 'valueFontMode'
+    | 'primaryPosition'
+    | 'titleWeight'
+    | 'secondaryLabelPosition'
+    | 'applyColorTo'
   >
 > = {
   titlesTextAlign: 'left',
-  valuesTextAlign: 'right',
+  primaryAlign: 'right',
+  secondaryAlign: 'right',
   iconAlign: 'left',
   valueFontMode: 'default',
+  primaryPosition: 'bottom',
+  titleWeight: 'bold',
+  secondaryLabelPosition: 'before',
+  applyColorTo: 'background',
 };
 
 export const SECONDARY_DEFAULT_STATIC_COLOR = '#E4E8F1';
