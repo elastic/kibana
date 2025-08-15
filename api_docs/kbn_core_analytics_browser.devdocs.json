@@ -1128,6 +1128,10 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/async_sender.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/diagnostic/health_diagnostic_service.ts"
+              },
+              {
                 "plugin": "securitySolutionServerless",
                 "path": "x-pack/solutions/security/plugins/security_solution_serverless/server/task_manager/nlp_cleanup_task/nlp_cleanup_task.ts"
               },
@@ -1738,6 +1742,26 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/diagnostic/health_diagnostic_service.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/diagnostic/health_diagnostic_service.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/diagnostic/health_diagnostic_service.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/diagnostic/health_diagnostic_service.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/diagnostic/health_diagnostic_service.test.ts"
               },
               {
                 "plugin": "@kbn/core",
