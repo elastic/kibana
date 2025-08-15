@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type LensContentType = 'lens';
+export type * from './api/types';

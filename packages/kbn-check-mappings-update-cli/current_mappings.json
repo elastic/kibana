@@ -2610,6 +2610,9 @@
       "title": {
         "type": "text"
       },
+      "version": {
+        "type": "integer"
+      },
       "visualizationType": {
         "type": "keyword"
       }
