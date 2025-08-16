@@ -22,7 +22,7 @@ const PREBUILT_RULES_PACKAGE_INSTALLATION_TIMEOUT_MS = 120000; // 2 minutes
 
 // Failing: See https://github.com/elastic/kibana/issues/228945
 describe.skip(
-  'Detection rules, Prebuilt Rules Installation and Update workflow',
+  'Detection rules, Prebuilt Rules Installation Workflow (Real package)',
   { tags: ['@ess', '@serverless'] },
   () => {
     describe('Installation of prebuilt rules package via Fleet', () => {
@@ -36,7 +36,7 @@ describe.skip(
         login();
       });
 
-      it('should install prebuilt rules from the Fleet package', () => {
+      it('installs prebuilt rules from the "security_detection_engine" Fleet package', () => {
         visitAddRulesPage();
 
         // Expect the package to be installed

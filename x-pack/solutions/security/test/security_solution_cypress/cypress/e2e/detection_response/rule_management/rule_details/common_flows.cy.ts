@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
 import { deleteRuleFromDetailsPage } from '../../../../tasks/alerts_detection_rules';
 import {
   CUSTOM_RULES_BTN,
@@ -57,6 +58,10 @@ describe(
   'Common rule detail flows',
   { tags: ['@ess', '@serverless', '@serverlessQA'] },
   function () {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     beforeEach(() => {
       login();
       deleteAlertsAndRules();

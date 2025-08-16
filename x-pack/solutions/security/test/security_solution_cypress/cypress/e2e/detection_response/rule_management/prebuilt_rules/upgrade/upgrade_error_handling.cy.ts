@@ -17,9 +17,9 @@ import {
   UPGRADE_SELECTED_RULES_BUTTON,
 } from '../../../../../screens/alerts_detection_rules';
 import { selectRulesByName } from '../../../../../tasks/alerts_detection_rules';
-import { preventPrebuiltRulesPackageInstallation } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { setUpRuleUpgrades } from '../../../../../tasks/prebuilt_rules/setup_rule_upgrades';
 import { login } from '../../../../../tasks/login';
+import { installMockPrebuiltRulesPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
 import {
   interceptUpgradeRequestToFail,
   assertUpgradeRequestIsComplete,
@@ -33,10 +33,13 @@ describe(
   'Detection rules, Prebuilt Rules Upgrade - Error handling',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     beforeEach(() => {
       deletePrebuiltRulesAssets();
       deleteAlertsAndRules();
-      preventPrebuiltRulesPackageInstallation();
       login();
     });
 
