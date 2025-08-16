@@ -9,7 +9,7 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { appContextService } from '../../../app_context';
 
-import { buildDefaultSettings } from './default_settings';
+import { buildDefaultSettings, LEGACY_DEFAULT_ILM_POLICY_NAMES } from './default_settings';
 
 jest.mock('../../../app_context');
 
@@ -34,4 +34,39 @@ describe('buildDefaultSettings', () => {
       }
     `);
   });
+
+  it('should use @lifecycle suffix for non legacy ILM policy names ', () => {
+    const settings = buildDefaultSettings({
+      type: 'traces',
+    });
+
+    expect(settings).toMatchInlineSnapshot(`
+      Object {
+        "index": Object {
+          "lifecycle": Object {
+            "name": "traces@lifecycle",
+          },
+        },
+      }
+    `);
+  });
+
+  test.each(LEGACY_DEFAULT_ILM_POLICY_NAMES)(
+    'should use @lifecycle suffix for non legacy ILM policy names ',
+    (ilmPolicyName) => {
+      const settings = buildDefaultSettings({
+        type: ilmPolicyName,
+      });
+
+      expect(settings).toMatchInlineSnapshot(`
+      Object {
+        "index": Object {
+          "lifecycle": Object {
+            "name": "${ilmPolicyName}",
+          },
+        },
+      }
+    `);
+    }
+  );
 });
