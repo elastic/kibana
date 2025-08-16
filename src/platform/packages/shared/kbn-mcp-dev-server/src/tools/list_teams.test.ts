@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { listTeams } from '.';
+import { listKibanaTeamsTool } from './list_teams';
 import { getPackages } from '@kbn/repo-packages';
 
 jest.mock('@kbn/repo-packages', () => ({ getPackages: jest.fn() }));
@@ -15,7 +15,7 @@ jest.mock('@kbn/repo-info', () => ({ REPO_ROOT: '/repo/root' }));
 
 const mockedGetPackages = getPackages as jest.MockedFunction<typeof getPackages>;
 
-describe('listTeams', () => {
+describe('listKibanaTeamsTool', () => {
   const createPkg = (name: string, owners: string[]) => ({
     directory: `/pkg/${name}`,
     name,
@@ -30,14 +30,15 @@ describe('listTeams', () => {
     jest.clearAllMocks();
   });
 
-  it('aggregates unique team owners across packages', () => {
+  it('aggregates unique team owners across packages', async () => {
     mockedGetPackages.mockReturnValue([
       createPkg('pkg-a', ['team-a', 'team-b']),
       createPkg('pkg-b', ['team-b', 'team-c']),
     ] as any);
 
-    const result = listTeams();
+    const result = await listKibanaTeamsTool.handler({});
+    const resultObject = JSON.parse(result.content[0].text as string);
 
-    expect(result.teams.sort()).toEqual(['team-a', 'team-b', 'team-c'].sort());
+    expect(resultObject.teams.sort()).toEqual(['team-a', 'team-b', 'team-c'].sort());
   });
 });

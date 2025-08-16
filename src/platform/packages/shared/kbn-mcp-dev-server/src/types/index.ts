@@ -6,16 +6,5 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { getPackages } from '@kbn/repo-packages';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { uniq } from 'lodash';
 
-export function listTeams() {
-  const packages = getPackages(REPO_ROOT);
-
-  const teams = uniq(packages.flatMap((pkg) => pkg.manifest.owner));
-
-  return {
-    teams,
-  };
-}
+export type * from './tool_definition';

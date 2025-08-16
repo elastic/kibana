@@ -6,12 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { z } from '@kbn/zod';
 import { exec } from 'child_process';
 import execa from 'execa';
 import path from 'path';
 import { promisify } from 'util';
 import fs from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
+
+import type { ToolDefinition } from '../types';
 
 const execAsync = promisify(exec);
 
@@ -28,6 +32,8 @@ const IGNORED_EXTENSIONS = [
   '.lock',
   '.txt',
 ];
+
+const runUnitTestsInputSchema = z.object({});
 
 async function getChangedFiles(): Promise<string[]> {
   const [{ stdout: modifiedFiles }, { stdout: untrackedFiles }] = await Promise.all([
@@ -84,7 +90,7 @@ async function runJestAndCollectFailures(pkgDir: string, files: string[]): Promi
   }
 }
 
-export async function runUnitTests() {
+async function runUnitTests() {
   const changedFiles = await getChangedFiles();
   const changedFilesGroupedByPkg: Record<string, string[]> = {};
   for (const file of changedFiles) {
@@ -115,3 +121,20 @@ export async function runUnitTests() {
   const success = results.every((r) => r.status === 'passed');
   return { success, results };
 }
+
+export const runUnitTestsTool: ToolDefinition<typeof runUnitTestsInputSchema> = {
+  name: 'run_unit_tests',
+  description: 'Run unit tests for changed files',
+  inputSchema: runUnitTestsInputSchema,
+  handler: async () => {
+    const result = await runUnitTests();
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(result),
+        },
+      ],
+    };
+  },
+};
