@@ -19,7 +19,7 @@ export const apiError = schema.object({
 
 export const referenceSchema = schema.object(
   {
-    name: schema.maybe(schema.string()),
+    name: schema.string(),
     type: schema.string(),
     id: schema.string(),
   },
@@ -28,7 +28,7 @@ export const referenceSchema = schema.object(
 
 export const referencesSchema = schema.arrayOf(referenceSchema);
 
-export const savedObjectSchema = (attributesSchema: ObjectType<any>) =>
+export const savedObjectSchema = <T extends ObjectType<any>>(attributesSchema: T) =>
   schema.object(
     {
       id: schema.string(),
@@ -36,16 +36,19 @@ export const savedObjectSchema = (attributesSchema: ObjectType<any>) =>
       version: schema.maybe(schema.string()),
       createdAt: schema.maybe(schema.string()),
       updatedAt: schema.maybe(schema.string()),
+      createdBy: schema.maybe(schema.string()),
+      updatedBy: schema.maybe(schema.string()),
       error: schema.maybe(apiError),
       attributes: attributesSchema,
       references: referencesSchema,
       namespaces: schema.maybe(schema.arrayOf(schema.string())),
       originId: schema.maybe(schema.string()),
+      managed: schema.maybe(schema.boolean()),
     },
     { unknowns: 'allow' }
   );
 
-export const objectTypeToGetResultSchema = (soSchema: ObjectType<any>) =>
+export const objectTypeToGetResultSchema = <T extends ObjectType<any>>(soSchema: T) =>
   schema.object(
     {
       item: soSchema,
@@ -112,15 +115,34 @@ export const updateOptionsSchema = {
   references: schema.maybe(referencesSchema),
   version: schema.maybe(schema.string()),
   refresh: schema.maybe(schema.oneOf([schema.boolean(), schema.literal('wait_for')])),
-  upsert: (attributesSchema: ObjectType<any>) => schema.maybe(savedObjectSchema(attributesSchema)),
+  upsert: <T extends ObjectType<any>>(attributesSchema: T) =>
+    schema.maybe(savedObjectSchema(attributesSchema)),
   retryOnConflict: schema.maybe(schema.number()),
   mergeAttributes: schema.maybe(schema.boolean()),
 };
 
-export const createResultSchema = (soSchema: ObjectType<any>) =>
+export const createResultSchema = <T extends ObjectType<any>>(soSchema: T) =>
   schema.object(
     {
       item: soSchema,
+    },
+    { unknowns: 'forbid' }
+  );
+
+export const searchResultSchema = <T extends ObjectType<any>, M extends ObjectType<any> = never>(
+  soSchema: T,
+  meta?: M
+) =>
+  schema.object(
+    {
+      hits: schema.arrayOf(soSchema),
+      pagination: schema.object({
+        total: schema.number(),
+        cursor: schema.maybe(schema.string()),
+      }),
+      ...(meta && {
+        meta,
+      }),
     },
     { unknowns: 'forbid' }
   );
