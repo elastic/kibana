@@ -1998,7 +1998,10 @@ export const runActionTestSuite = ({
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
-          "right": "bulk_index_succeeded",
+          "right": Object {
+            "type": "bulk_index_succeeded",
+            "versionConflictErrors": Array [],
+          },
         }
       `);
     });
@@ -2018,7 +2021,10 @@ export const runActionTestSuite = ({
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
-          "right": "bulk_index_succeeded",
+          "right": Object {
+            "type": "bulk_index_succeeded",
+            "versionConflictErrors": Array [],
+          },
         }
       `);
     });
