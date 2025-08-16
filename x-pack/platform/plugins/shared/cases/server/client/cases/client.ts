@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { Case, CaseCustomField, Cases, User } from '../../../common/types/domain';
+import type {
+  Case,
+  CaseCustomField,
+  CaseMetadata,
+  Cases,
+  User,
+} from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CasesFindResponse,
@@ -26,14 +32,21 @@ import type {
   UpdateObservableRequest,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
-import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';
 import { bulkGet } from './bulk_get';
 import { create } from './create';
 import { deleteCases } from './delete';
 import { search } from './search';
-import type { CasesByAlertIDParams, GetParams } from './get';
-import { get, resolve, getCasesByAlertID, getReporters, getTags, getCategories } from './get';
+import type { CasesByAlertIDParams, GetMetadataParams, GetParams } from './get';
+import {
+  get,
+  resolve,
+  getCasesByAlertID,
+  getReporters,
+  getTags,
+  getCategories,
+  getMetadata,
+} from './get';
 import type { PushParams } from './push';
 import { push } from './push';
 import { bulkUpdate } from './bulk_update';
@@ -128,6 +141,10 @@ export interface CasesSubClient {
    * Removes observable
    */
   deleteObservable(caseId: string, observableId: string): Promise<void>;
+  /**
+   * Retrieves the metadata for a case
+   */
+  getMetadata(params: GetMetadataParams): Promise<CaseMetadata>;
 }
 
 /**
@@ -137,8 +154,7 @@ export interface CasesSubClient {
  */
 export const createCasesSubClient = (
   clientArgs: CasesClientArgs,
-  casesClient: CasesClient,
-  casesClientInternal: CasesClientInternal
+  casesClient: CasesClient
 ): CasesSubClient => {
   const casesSubClient: CasesSubClient = {
     create: (data: CasePostRequest) => create(data, clientArgs, casesClient),
@@ -164,6 +180,7 @@ export const createCasesSubClient = (
       updateObservable(caseId, observableId, params, clientArgs, casesClient),
     deleteObservable: (caseId: string, observableId: string) =>
       deleteObservable(caseId, observableId, clientArgs, casesClient),
+    getMetadata: (params: GetMetadataParams) => getMetadata(params, clientArgs),
   };
 
   return Object.freeze(casesSubClient);
