@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import type { Streams } from '@kbn/streams-schema';
+import type { RoutingStatus, Streams } from '@kbn/streams-schema';
 import {
   disableStreams,
   enableStreams,
@@ -37,6 +37,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           field: 'resource.attributes.host.name',
           eq: 'routeme',
         },
+        status: 'enabled' as RoutingStatus,
       };
       // We use a forked stream as processing changes cannot be made to the root stream
       await forkStream(apiClient, 'logs', body);

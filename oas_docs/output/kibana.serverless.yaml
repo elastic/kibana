@@ -46341,6 +46341,11 @@ paths:
                                                       destination:
                                                         minLength: 1
                                                         type: string
+                                                      status:
+                                                        enum:
+                                                          - enabled
+                                                          - disabled
+                                                        type: string
                                                       where:
                                                         anyOf:
                                                           - anyOf:
@@ -46474,6 +46479,7 @@ paths:
                                                     required:
                                                       - destination
                                                       - where
+                                                      - status
                                                   type: array
                                               required:
                                                 - fields
@@ -51066,6 +51072,11 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                status:
+                  enum:
+                    - enabled
+                    - disabled
+                  type: string
                 stream:
                   additionalProperties: false
                   type: object
@@ -51207,6 +51218,7 @@ paths:
               required:
                 - stream
                 - where
+                - status
       responses: {}
       summary: Fork a stream
       tags:
@@ -52800,6 +52812,11 @@ paths:
                                       destination:
                                         minLength: 1
                                         type: string
+                                      status:
+                                        enum:
+                                          - enabled
+                                          - disabled
+                                        type: string
                                       where:
                                         anyOf:
                                           - anyOf:
@@ -52933,6 +52950,7 @@ paths:
                                     required:
                                       - destination
                                       - where
+                                      - status
                                   type: array
                               required:
                                 - fields
