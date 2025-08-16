@@ -13,6 +13,7 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
@@ -46,6 +47,8 @@ const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
   const jobIds = getMachineLearningJobId(rule);
 
+  const popoverTitleId = useGeneratedHtmlId();
+
   if (!isMlRule(rule.type) || loadingJobs || !jobIds) {
     return null;
   }
@@ -73,8 +76,9 @@ const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       anchorPosition="leftCenter"
+      aria-labelledby={popoverTitleId}
     >
-      <EuiPopoverTitle>{popoverTitle}</EuiPopoverTitle>
+      <EuiPopoverTitle id={popoverTitleId}>{popoverTitle}</EuiPopoverTitle>
       <div css={{ width: POPOVER_WIDTH }}>
         <EuiText size="s">
           <p>{i18n.ML_RULE_JOBS_WARNING_DESCRIPTION}</p>
