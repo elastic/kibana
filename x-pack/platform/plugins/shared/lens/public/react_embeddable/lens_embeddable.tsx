@@ -35,6 +35,7 @@ import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
+import { annotateAlertFromContext } from './annotate_alert';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
@@ -64,6 +65,8 @@ export const createLensEmbeddableFactory = (
         () => titleManager.api.title$.getValue(),
         initialState
       );
+
+      annotateAlertFromContext(parentApi, initialState.rawState);
 
       const initialRuntimeState = await deserializeState(
         services,
