@@ -20,6 +20,7 @@ import { DataSourceCategory, type DataSourceProfileProvider } from '../../../../
 import { extendProfileProvider } from '../../../extend_profile_provider';
 import { extractIndexPatternFrom } from '../../../extract_index_pattern_from';
 import { reContainsTracesApm, reContainsTracesOtel } from './reg_exps';
+import { getModifiedVisAttributes } from '../get_modified_vis_attrivutes';
 
 export const createTracesAPMDataSourceProfileProvider = (
   tracesDataSourceProfileProvider: DataSourceProfileProvider
@@ -61,6 +62,34 @@ export const createTracesAPMDataSourceProfileProvider = (
           ],
           rowHeight: 1,
         };
+      },
+      getModifiedVisAttributes: (prev) => (params) => {
+        const prevAttributes = prev(params);
+
+        const esql =
+          'esql' in prevAttributes.state.query ? prevAttributes.state.query.esql : undefined;
+        // for now, just show heatmap when esql mode
+        if (!esql) {
+          return prevAttributes;
+        }
+        const commands = esql.split('|').map((command) => command.trim());
+        const from = commands[0];
+        const timestampDateTruncCommand = commands.find((command) =>
+          command.startsWith('EVAL timestamp=DATE_TRUNC')
+        );
+        const whereCommands = commands.filter((command) => command.startsWith('WHERE'));
+
+        const heatmapQuery = `${from}
+      | ${timestampDateTruncCommand}
+       ${whereCommands.length ? `| ${whereCommands.join('\n |')}` : ''}
+        | EVAL duration = COALESCE(span.duration.us, transaction.duration.us)
+        | EVAL duration_ms = FLOOR(duration / 1000)
+        | EVAL duration_bucket = FLOOR(duration_ms / 1000) * 1000
+        | DROP duration, duration_ms
+        | STATS results = COUNT(*) BY timestamp, duration_bucket
+        | SORT duration_bucket DESC, timestamp ASC
+      `;
+        return getModifiedVisAttributes(heatmapQuery, prevAttributes);
       },
     },
     resolve,
