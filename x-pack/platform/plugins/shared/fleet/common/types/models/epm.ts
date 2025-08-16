@@ -151,7 +151,10 @@ export interface PackageInstallContext {
 
 export type ArchivePackage = PackageSpecManifest &
   // should an uploaded package be able to specify `internal`?
-  Pick<RegistryPackage, 'readme' | 'assets' | 'data_streams' | 'internal' | 'elasticsearch'>;
+  Pick<
+    RegistryPackage,
+    'readme' | 'assets' | 'data_streams' | 'internal' | 'elasticsearch' | 'knowledge_base'
+  >;
 
 export interface BundledPackage {
   name: string;
@@ -181,6 +184,7 @@ interface RegistryAdditionalProperties {
   readme?: string;
   internal?: boolean; // Registry addition[0] and EPM uses it[1] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L63 [1]
   data_streams?: RegistryDataStream[]; // Registry addition [0] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L65
+  knowledge_base?: KnowledgeBaseItem[]; // Added to support knowledge base content in packages
   elasticsearch?: {
     privileges?: {
       cluster?: string[];
@@ -646,6 +650,7 @@ export enum INSTALL_STATES {
   INSTALL_TRANSFORMS = 'install_transforms',
   DELETE_PREVIOUS_PIPELINES = 'delete_previous_pipelines',
   SAVE_ARCHIVE_ENTRIES = 'save_archive_entries_from_assets_map',
+  SAVE_KNOWLEDGE_BASE = 'save_knowledge_base',
   RESOLVE_KIBANA_PROMISE = 'resolve_kibana_promise',
   UPDATE_SO = 'update_so',
 }
@@ -802,6 +807,20 @@ export type TemplateMap = Record<string, TemplateMapEntry>;
 export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;
+}
+
+export interface KnowledgeBaseItem {
+  filename: string;
+  content: string;
+  path?: string;
+  installed_at?: string;
+}
+
+export interface PackageKnowledgeBase {
+  package_name: string;
+  version: string;
+  installed_at: string;
+  knowledge_base_content: KnowledgeBaseItem[];
 }
 
 // Experimental support for Otel integrations

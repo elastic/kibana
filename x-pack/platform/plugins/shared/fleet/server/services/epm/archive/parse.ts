@@ -29,6 +29,7 @@ import type {
   RegistryDataStreamRoutingRules,
   RegistryDataStreamLifecycle,
   PackageSpecTags,
+  KnowledgeBaseItem,
 } from '../../../../common/types';
 import {
   RegistryInputKeys,
@@ -324,6 +325,17 @@ export function parseAndVerifyArchive(
     } catch (error) {
       throw new PackageInvalidArchiveError(`Could not parse tags file kibana/tags.yml: ${error}.`);
     }
+  }
+
+  // Extract knowledge base files
+  const knowledgeBaseFiles = extractKnowledgeBaseFiles(
+    paths,
+    assetsMap,
+    parsed.name,
+    parsed.version
+  );
+  if (knowledgeBaseFiles) {
+    parsed.knowledge_base = knowledgeBaseFiles;
   }
 
   return parsed;
@@ -756,4 +768,39 @@ export function parseDefaultIngestPipeline(fullDataStreamPath: string, paths: st
   if (!defaultIngestPipelinePaths.length) return undefined;
 
   return DEFAULT_INGEST_PIPELINE_VALUE;
+}
+
+/**
+ * Extracts knowledge base files from the docs/knowledge_base directory
+ * @param paths - List of package file paths
+ * @param assetsMap - Map of file paths to file content buffers
+ * @param pkgName - Package name
+ * @param pkgVersion - Package version
+ * @returns Array of KnowledgeBaseItem objects or null if no knowledge base files exist
+ */
+export function extractKnowledgeBaseFiles(
+  paths: string[],
+  assetsMap: Record<string, Buffer>,
+  pkgName: string,
+  pkgVersion: string
+): KnowledgeBaseItem[] | null {
+  const knowledgeBasePrefix = `${pkgName}-${pkgVersion}/docs/knowledge_base/`;
+  const knowledgeBasePaths = paths.filter(
+    (p) => p.startsWith(knowledgeBasePrefix) && p.endsWith('.md')
+  );
+
+  if (knowledgeBasePaths.length === 0) {
+    return null;
+  }
+
+  return knowledgeBasePaths.map((p) => {
+    const buffer = assetsMap[p];
+    const content = buffer ? buffer.toString('utf8') : '';
+    const filename = p.substring(knowledgeBasePrefix.length);
+
+    return {
+      filename,
+      content,
+    };
+  });
 }
