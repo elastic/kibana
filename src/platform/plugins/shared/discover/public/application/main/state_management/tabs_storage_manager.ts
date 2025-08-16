@@ -15,6 +15,8 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { ControlPanelsState } from '@kbn/controls-plugin/public';
+import type { ESQLControlState } from '@kbn/esql-types';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
 import type { TabState, RecentlyClosedTabState } from './redux/types';
 import { createTabItem } from './redux/utils';
@@ -26,6 +28,7 @@ export const RECENTLY_CLOSED_TABS_LIMIT = 50;
 type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
   appState: DiscoverAppState | undefined;
   globalState: TabState['lastPersistedGlobalState'] | undefined;
+  controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
 };
 
 type RecentlyClosedTabStateInLocalStorage = TabStateInLocalStorage &
@@ -67,6 +70,10 @@ export interface TabsStorageManager {
   updateTabStateLocally: (
     tabId: string,
     tabState: Pick<TabStateInLocalStorage, 'appState' | 'globalState'>
+  ) => void;
+  updateTabControlStateLocally: (
+    tabId: string,
+    tabState: Pick<TabStateInLocalStorage, 'controlGroupState'>
   ) => void;
   loadLocally: (props: {
     userId: string;
@@ -151,6 +158,7 @@ export const createTabsStorageManager = ({
       label: tabState.label,
       appState: getAppStateForTabWithoutRuntimeState(tabState.id),
       globalState: tabState.lastPersistedGlobalState || tabState.initialGlobalState,
+      controlGroupState: tabState.controlGroupState,
     };
   };
 
@@ -180,12 +188,16 @@ export const createTabsStorageManager = ({
     const globalState = getDefinedStateOnly(
       tabStateInStorage.globalState || defaultTabState.lastPersistedGlobalState
     );
+    const controlGroupState = getDefinedStateOnly(
+      tabStateInStorage.controlGroupState || defaultTabState.controlGroupState
+    );
     return {
       ...defaultTabState,
       ...pick(tabStateInStorage, 'id', 'label'),
       initialAppState: appState,
       initialGlobalState: globalState,
       lastPersistedGlobalState: globalState || {},
+      controlGroupState,
     };
   };
 
@@ -309,6 +321,34 @@ export const createTabsStorageManager = ({
     }
   };
 
+  const updateTabControlStateLocally: TabsStorageManager['updateTabControlStateLocally'] = (
+    tabId,
+    tabStatePartial
+  ) => {
+    if (!enabled) {
+      return;
+    }
+    let hasModifications = false;
+    const storedTabsState = readFromLocalStorage();
+    const updatedTabsState = {
+      ...storedTabsState,
+      openTabs: storedTabsState.openTabs.map((tab) => {
+        if (tab.id === tabId) {
+          hasModifications = true;
+          return {
+            ...tab,
+            controlGroupState: tabStatePartial.controlGroupState,
+          };
+        }
+        return tab;
+      }),
+    };
+
+    if (hasModifications) {
+      storage.set(TABS_LOCAL_STORAGE_KEY, updatedTabsState);
+    }
+  };
+
   const loadLocally: TabsStorageManager['loadLocally'] = ({ userId, spaceId, defaultTabState }) => {
     const selectedTabId = enabled ? getSelectedTabIdFromURL() : undefined;
     let storedTabsState: TabsStateInLocalStorage = enabled
@@ -373,6 +413,7 @@ export const createTabsStorageManager = ({
   return {
     startUrlSync,
     persistLocally,
+    updateTabControlStateLocally,
     updateTabStateLocally,
     loadLocally,
     getNRecentlyClosedTabs,

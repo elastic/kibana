@@ -225,10 +225,12 @@ describe('embeddable state transfer', () => {
       },
     });
     const fetchedState = stateTransfer.getIncomingEmbeddablePackage(testAppId);
-    expect(fetchedState).toEqual({
-      type: 'skisEmbeddable',
-      serializedState: { rawState: { savedObjectId: '123' } },
-    });
+    expect(fetchedState).toEqual([
+      {
+        type: 'skisEmbeddable',
+        serializedState: { rawState: { savedObjectId: '123' } },
+      },
+    ]);
   });
 
   it('can fetch an incoming embeddable package state and ignore state for other apps', async () => {
@@ -245,16 +247,20 @@ describe('embeddable state transfer', () => {
       },
     });
     const fetchedState = stateTransfer.getIncomingEmbeddablePackage(testAppId);
-    expect(fetchedState).toEqual({
-      type: 'skisEmbeddable',
-      serializedState: { rawState: { savedObjectId: '123' } },
-    });
+    expect(fetchedState).toEqual([
+      {
+        type: 'skisEmbeddable',
+        serializedState: { rawState: { savedObjectId: '123' } },
+      },
+    ]);
 
     const fetchedState2 = stateTransfer.getIncomingEmbeddablePackage('testApp2');
-    expect(fetchedState2).toEqual({
-      type: 'crossCountryEmbeddable',
-      serializedState: { rawState: { savedObjectId: '456' } },
-    });
+    expect(fetchedState2).toEqual([
+      {
+        type: 'crossCountryEmbeddable',
+        serializedState: { rawState: { savedObjectId: '456' } },
+      },
+    ]);
   });
 
   it('embeddable package state returns undefined when state is not in the right shape', async () => {

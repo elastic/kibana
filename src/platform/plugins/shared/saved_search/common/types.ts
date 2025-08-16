@@ -70,7 +70,7 @@ export interface SavedSearchAttributes {
   breakdownField?: string;
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
-
+  controlGroupJson?: string; // JSON string of ControlPanelsState<ESQLControlState>
   tabs: DiscoverSessionTab[];
 }
 

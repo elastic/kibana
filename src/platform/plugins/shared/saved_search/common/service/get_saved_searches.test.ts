@@ -107,6 +107,7 @@ describe('getSavedSearch', () => {
         "columns": Array [
           "_source",
         ],
+        "controlGroupJson": undefined,
         "density": undefined,
         "description": "description",
         "grid": Object {},
@@ -257,6 +258,7 @@ describe('getSavedSearch', () => {
         "columns": Array [
           "_source",
         ],
+        "controlGroupJson": undefined,
         "density": undefined,
         "description": "description",
         "grid": Object {},
