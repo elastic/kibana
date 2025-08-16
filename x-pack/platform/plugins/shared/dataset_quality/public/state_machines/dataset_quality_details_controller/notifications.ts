@@ -77,3 +77,20 @@ export const rolloverDataStreamFailedNotifier = (
     text: error.message,
   });
 };
+
+export const updateFailureStoreFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.details.updateFailureStoreFailed', {
+      defaultMessage: "We couldn't update the failure store settings.",
+    }),
+    text: error.message,
+  });
+};
+
+export const updateFailureStoreSuccessNotifier = (toasts: IToasts) => {
+  toasts.addSuccess({
+    title: i18n.translate('xpack.datasetQuality.details.updateFailureStoreSuccess', {
+      defaultMessage: 'Failure store settings saved',
+    }),
+  });
+};

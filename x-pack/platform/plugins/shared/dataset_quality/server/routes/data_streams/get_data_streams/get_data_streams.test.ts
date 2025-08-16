@@ -51,6 +51,7 @@ describe('getDataStreams', () => {
       esClient: esClientMock,
       types: ['logs', 'metrics'],
       uncategorisedOnly: true,
+      esClientInternalUser: esClientMock,
     });
     expect(dataStreamService.getMatchingDataStreams).toHaveBeenCalledWith(
       expect.anything(),
@@ -67,6 +68,7 @@ describe('getDataStreams', () => {
       esClient: esClientMock,
       datasetQuery: 'logs-nginx-*',
       uncategorisedOnly: true,
+      esClientInternalUser: esClientMock,
     });
     expect(dataStreamService.getMatchingDataStreams).toHaveBeenCalledWith(
       expect.anything(),
@@ -83,6 +85,7 @@ describe('getDataStreams', () => {
         esClient: esClientMock,
         types: ['logs'],
         uncategorisedOnly: true,
+        esClientInternalUser: esClientMock,
       });
       expect(results.dataStreams.length).toBe(1);
     });
@@ -92,6 +95,7 @@ describe('getDataStreams', () => {
         esClient: esClientMock,
         types: ['logs'],
         uncategorisedOnly: false,
+        esClientInternalUser: esClientMock,
       });
       expect(results.dataStreams.length).toBe(5);
     });
