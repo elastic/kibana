@@ -11,11 +11,11 @@ import { buildQueryFromFilters } from '@kbn/es-query';
 import { first, last, meanBy } from 'lodash';
 import moment from 'moment';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
-import {
+import type {
   APIClientRequestParamsOf,
   APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import type { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';

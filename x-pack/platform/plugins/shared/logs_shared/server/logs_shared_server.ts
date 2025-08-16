@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogsSharedBackendLibs } from './lib/logs_shared_types';
+import type { LogsSharedBackendLibs } from './lib/logs_shared_types';
 
 import { initLogViewRoutes } from './routes/log_views';
 import { initMigrateLogViewSettingsRoute } from './routes/deprecations';

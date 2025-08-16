@@ -7,10 +7,10 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
-import { Feature, FeatureCollection } from 'geojson';
+import type { Feature, FeatureCollection } from 'geojson';
 import type { FilterSpecification, Map as MbMap, GeoJSONSource } from '@kbn/mapbox-gl';
 import {
   EMPTY_FEATURE_COLLECTION,
@@ -19,17 +19,19 @@ import {
   LAYER_TYPE,
   SOURCE_BOUNDS_DATA_REQUEST_ID,
 } from '../../../../../common/constants';
-import {
+import type {
   StyleMetaDescriptor,
   Timeslice,
   VectorLayerDescriptor,
 } from '../../../../../common/descriptor_types';
-import { TimesliceMaskConfig } from '../../../util/mb_filter_expressions';
-import { DataRequestContext } from '../../../../actions';
-import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
-import { ISource } from '../../../sources/source';
-import { IVectorSource } from '../../../sources/vector_source';
-import { AbstractLayer, LayerMessage, LayerIcon } from '../../layer';
+import type { TimesliceMaskConfig } from '../../../util/mb_filter_expressions';
+import type { DataRequestContext } from '../../../../actions';
+import type { IVectorStyle } from '../../../styles/vector/vector_style';
+import { VectorStyle } from '../../../styles/vector/vector_style';
+import type { ISource } from '../../../sources/source';
+import type { IVectorSource } from '../../../sources/vector_source';
+import type { LayerMessage, LayerIcon } from '../../layer';
+import { AbstractLayer } from '../../layer';
 import {
   AbstractVectorLayer,
   noResultsIcon,

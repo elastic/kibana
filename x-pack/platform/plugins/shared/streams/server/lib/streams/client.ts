@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { DiagnosticResult, errors } from '@elastic/elasticsearch';
-import {
+import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
+import type {
   IndicesDataStream,
   QueryDslQueryContainer,
   Result,
@@ -14,11 +15,11 @@ import {
 import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import { Streams, getAncestors, getParentId } from '@kbn/streams-schema';
-import { LockManagerService } from '@kbn/lock-manager';
-import { Condition } from '@kbn/streamlang';
-import { AssetClient } from './assets/asset_client';
+import type { LockManagerService } from '@kbn/lock-manager';
+import type { Condition } from '@kbn/streamlang';
+import type { AssetClient } from './assets/asset_client';
 import { ASSET_ID, ASSET_TYPE } from './assets/fields';
-import { QueryClient } from './assets/query/query_client';
+import type { QueryClient } from './assets/query/query_client';
 import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
@@ -26,7 +27,7 @@ import {
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
 import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
-import { StreamsStorageClient } from './service';
+import type { StreamsStorageClient } from './service';
 import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';

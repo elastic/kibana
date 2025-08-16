@@ -12,12 +12,12 @@ import {
   getCreateMinimalListSchemaMock,
   getCreateMinimalListSchemaMockWithoutId,
 } from '@kbn/lists-plugin/common/schemas/request/create_list_schema.mock';
-import { ValueListMetricsSchema } from '@kbn/security-solution-plugin/server/usage/value_lists/types';
+import type { ValueListMetricsSchema } from '@kbn/security-solution-plugin/server/usage/value_lists/types';
 import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
 import { getCreateMinimalListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_list_item_schema.mock';
 import { deleteAllEventLogExecutionEvents } from '../../../utils';
 import { createListsIndex, deleteListsIndex } from '../../../../lists_and_exception_lists/utils';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getValueListStats } from '../../../utils/get_value_list_metrics_stats';
 
 export default ({ getService }: FtrProviderContext) => {

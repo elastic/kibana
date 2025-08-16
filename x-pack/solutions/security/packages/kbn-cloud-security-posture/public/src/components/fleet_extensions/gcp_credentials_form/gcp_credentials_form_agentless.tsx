@@ -8,7 +8,11 @@
 import React from 'react';
 import { EuiAccordion, EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackageInfo,
+} from '@kbn/fleet-plugin/common';
 import {
   getTemplateUrlFromPackageInfo,
   updatePolicyWithInputs,
@@ -24,7 +28,7 @@ import { GCPSetupInfoContent } from './gcp_setup_info';
 import { GcpInputVarFields } from './gcp_input_var_fields';
 import { ReadDocumentation } from '../common';
 import { GoogleCloudShellCredentialsGuide } from './gcp_credentials_guide';
-import { UpdatePolicy } from '../types';
+import type { UpdatePolicy } from '../types';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 interface GcpFormAgentlessProps {

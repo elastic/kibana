@@ -11,8 +11,9 @@ import React from 'react';
 
 import { fireEvent, render } from '@testing-library/react';
 
-import { RangeSliderControl, Props as RangeSliderControlProps } from './range_slider_control';
-import { RangeValue } from '../types';
+import type { Props as RangeSliderControlProps } from './range_slider_control';
+import { RangeSliderControl } from './range_slider_control';
+import type { RangeValue } from '../types';
 
 describe('RangeSliderControl', () => {
   const defaultProps: RangeSliderControlProps = {

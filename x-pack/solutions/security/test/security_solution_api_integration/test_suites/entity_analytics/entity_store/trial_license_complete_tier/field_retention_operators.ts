@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { fieldOperatorToIngestProcessor } from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/field_retention';
-import { FieldDescription } from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/installation/types';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FieldDescription } from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/installation/types';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { applyIngestProcessorToDoc } from '../utils/ingest';
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');

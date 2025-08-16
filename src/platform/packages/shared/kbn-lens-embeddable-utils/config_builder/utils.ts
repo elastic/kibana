@@ -21,8 +21,8 @@ import type {
 } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { DataViewsCommon } from './config_builder';
-import {
+import type { DataViewsCommon } from './config_builder';
+import type {
   FormulaValueConfig,
   LensAnnotationLayer,
   LensAttributes,
@@ -34,7 +34,7 @@ import {
   LensDatatableDataset,
   LensESQLDataset,
 } from './types';
-import { LensApiState } from './schema';
+import type { LensApiState } from './schema';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)

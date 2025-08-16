@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { ConfigEntryView } from '../../types/types';
+import type { ConfigEntryView } from '../../types/types';
 import { ConfigurationField } from './configuration_field';
 import { ConfigFieldTitularComponent } from './titular_component_registry';
 import * as LABELS from '../../translations';

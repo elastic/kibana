@@ -5,24 +5,30 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from '@kbn/core/server';
-import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import {
+import type {
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+  Logger,
+} from '@kbn/core/server';
+import type { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type {
   PluginStart as DataPluginStart,
   PluginSetup as DataPluginSetup,
 } from '@kbn/data-plugin/server';
-import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 
-import {
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { SharePluginSetup } from '@kbn/share-plugin/server';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import { setupSavedObjects } from './saved_objects';
 import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
