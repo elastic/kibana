@@ -30,12 +30,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Importing an existing dashboard', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole('developer');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.uiSettings.replace({});
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();
     });
 

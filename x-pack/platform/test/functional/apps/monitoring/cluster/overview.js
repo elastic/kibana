@@ -21,10 +21,13 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_green_gold', {
-          from: 'Aug 23, 2017 @ 21:29:35.267',
-          to: 'Aug 23, 2017 @ 21:47:25.556',
-        });
+        await setup(
+          'x-pack/platform/test/fixtures/es_archives/monitoring/singlecluster_green_gold',
+          {
+            from: 'Aug 23, 2017 @ 21:29:35.267',
+            to: 'Aug 23, 2017 @ 21:47:25.556',
+          }
+        );
 
         await overview.closeAlertsModal();
       });
@@ -74,10 +77,13 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_platinum', {
-          from: 'Aug 29, 2017 @ 17:23:47.528',
-          to: 'Aug 29, 2017 @ 17:25:50.701',
-        });
+        await setup(
+          'x-pack/platform/test/fixtures/es_archives/monitoring/singlecluster_yellow_platinum',
+          {
+            from: 'Aug 29, 2017 @ 17:23:47.528',
+            to: 'Aug 29, 2017 @ 17:25:50.701',
+          }
+        );
 
         await overview.closeAlertsModal();
       });
@@ -118,10 +124,13 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_basic', {
-          from: 'Aug 29, 2017 @ 17:55:43.879',
-          to: 'Aug 29, 2017 @ 18:01:34.958',
-        });
+        await setup(
+          'x-pack/platform/test/fixtures/es_archives/monitoring/singlecluster_yellow_basic',
+          {
+            from: 'Aug 29, 2017 @ 17:55:43.879',
+            to: 'Aug 29, 2017 @ 18:01:34.958',
+          }
+        );
 
         await overview.closeAlertsModal();
       });
@@ -161,10 +170,13 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_green_gold', {
-          from: 'Aug 23, 2017 @ 21:29:35.267',
-          to: 'Aug 23, 2017 @ 21:47:25.556',
-        });
+        await setup(
+          'x-pack/platform/test/fixtures/es_archives/monitoring/singlecluster_green_gold',
+          {
+            from: 'Aug 23, 2017 @ 21:29:35.267',
+            to: 'Aug 23, 2017 @ 21:47:25.556',
+          }
+        );
       });
 
       after(async () => {

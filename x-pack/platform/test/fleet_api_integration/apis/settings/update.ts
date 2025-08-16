@@ -22,7 +22,7 @@ export default function (providerContext: FtrProviderContext) {
   describe.skip('Settings - update', function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await fleetAndAgents.setup();
     });
 
@@ -35,7 +35,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ agentPolicyId })
       );
       await Promise.all(deletedPromises);
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
     it('should explicitly set port on fleet_server_hosts', async function () {

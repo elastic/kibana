@@ -28,7 +28,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
         const getPkRes = await supertest
           .get(`/api/fleet/epm/packages/fleet_server`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
@@ -69,7 +69,9 @@ export default function (providerContext: FtrProviderContext) {
 
       afterEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
+        );
       });
 
       it(`Should return waiting_for_result when installed kspm, has no findings and it has been less than 10 minutes since the installation`, async () => {

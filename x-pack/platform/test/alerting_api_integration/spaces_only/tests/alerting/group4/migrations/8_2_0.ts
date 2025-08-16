@@ -21,11 +21,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     let testStart: null | number = null;
     before(async () => {
       testStart = Date.now();
-      await esArchiver.load('x-pack/test/functional/es_archives/alerting/8_2_0');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/alerting/8_2_0');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/alerting/8_2_0');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/alerting/8_2_0');
     });
 
     describe('rule with null snoozeEndTime value', () => {

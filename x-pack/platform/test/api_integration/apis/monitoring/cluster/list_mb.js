@@ -19,7 +19,7 @@ export default function ({ getService }) {
         // Archive contains non-cgroup data which collides with the in-cgroup services present by default on cloud deployments
         this.tags(['skipCloud']);
 
-        const archive = `x-pack/test/functional/es_archives/monitoring/multicluster_${source}`;
+        const archive = `x-pack/platform/test/fixtures/es_archives/monitoring/multicluster_${source}`;
 
         describe('with trial license clusters', () => {
           const timeRange = {

@@ -18,7 +18,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   let remoteEsArchiver;
 
   describe('lens app - group 5', () => {
-    const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
+    const esArchive = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
     const localFixtures = {
