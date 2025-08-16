@@ -11,6 +11,7 @@ import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import { useTimelineChartTheme } from '../../../hooks/use_timeline_chart_theme';
@@ -39,16 +40,18 @@ interface Props {
   sourceId: string;
   accountId?: string;
   region?: string;
+  schema?: DataSchemaFormat | null;
 }
 
-export const ExpressionChart: React.FC<Props> = ({
+export const ExpressionChart = ({
   expression,
   kuery,
   nodeType,
   sourceId,
   accountId = '',
   region = '',
-}) => {
+  schema,
+}: Props) => {
   const chartTheme = useTimelineChartTheme();
   const timerange = useMemo(
     () => ({
@@ -80,6 +83,7 @@ export const ExpressionChart: React.FC<Props> = ({
     accountId,
     region,
     timerange,
+    schema,
   });
 
   const metric = {

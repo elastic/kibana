@@ -99,8 +99,7 @@ const InvalidDisplay = ({ value }: { value: string }) => {
     </EuiFlexGroup>
   );
 };
-
-const schemaTranslationMap = {
+export const schemaTranslationMap = {
   [DataSchemaFormatEnum.ECS]: i18n.translate('xpack.infra.schemaSelector.ecsDisplay', {
     defaultMessage: 'Elastic System Integration',
   }),

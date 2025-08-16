@@ -9,10 +9,15 @@ import { renderHook, act } from '@testing-library/react';
 import type { WaffleOptionsState } from './use_waffle_options';
 import { useWaffleOptions } from './use_waffle_options';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
+import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 
 jest.mock('@kbn/observability-shared-plugin/public');
+jest.mock('../../../../alerting/use_alert_prefill');
 
 const mockUseUrlState = useUrlState as jest.MockedFunction<typeof useUrlState>;
+const mockUseAlertPrefillContext = useAlertPrefillContext as jest.MockedFunction<
+  typeof useAlertPrefillContext
+>;
 
 // Mock useUrlState hook
 jest.mock('react-router-dom', () => ({
@@ -28,44 +33,17 @@ jest.mock('./use_inventory_views', () => ({
   }),
 }));
 
-// Jest can't access variables outside the scope of the mock factory function except to
-// reassign them, so we can't make these both part of the same object
-let PREFILL_NODETYPE: WaffleOptionsState['nodeType'] | undefined;
-let PREFILL_METRIC: WaffleOptionsState['metric'] | undefined;
-let PREFILL_CUSTOM_METRICS: WaffleOptionsState['customMetrics'] | undefined;
-let PREFILL_ACCOUNT_ID: WaffleOptionsState['accountId'] | undefined;
-let PREFILL_REGION: WaffleOptionsState['region'] | undefined;
-jest.mock('../../../../alerting/use_alert_prefill', () => ({
-  useAlertPrefillContext: () => ({
-    inventoryPrefill: {
-      setNodeType(nodeType: WaffleOptionsState['nodeType']) {
-        PREFILL_NODETYPE = nodeType;
-      },
-      setMetric(metric: WaffleOptionsState['metric']) {
-        PREFILL_METRIC = metric;
-      },
-      setCustomMetrics(customMetrics: WaffleOptionsState['customMetrics']) {
-        PREFILL_CUSTOM_METRICS = customMetrics;
-      },
-      setAccountId(accountId: WaffleOptionsState['accountId']) {
-        PREFILL_ACCOUNT_ID = accountId;
-      },
-      setRegion(region: WaffleOptionsState['region']) {
-        PREFILL_REGION = region;
-      },
-    },
-  }),
-}));
-
 const renderUseWaffleOptionsHook = () => renderHook(() => useWaffleOptions());
+
+const setPrefillState = jest.fn((args: Partial<WaffleOptionsState>) => args);
 
 describe('useWaffleOptions', () => {
   beforeEach(() => {
-    PREFILL_NODETYPE = undefined;
-    PREFILL_METRIC = undefined;
-    PREFILL_CUSTOM_METRICS = undefined;
-    PREFILL_ACCOUNT_ID = undefined;
-    PREFILL_REGION = undefined;
+    mockUseAlertPrefillContext.mockReturnValue({
+      inventoryPrefill: {
+        setPrefillState,
+      },
+    } as unknown as ReturnType<typeof useAlertPrefillContext>);
 
     mockUseUrlState.mockReturnValue([{}, jest.fn()]);
   });
@@ -91,31 +69,50 @@ describe('useWaffleOptions', () => {
       mockUseUrlState.mockReturnValue([newOptions, jest.fn()]);
       result.current.changeNodeType(newOptions.nodeType);
     });
+
     rerender();
-    expect(PREFILL_NODETYPE).toEqual(newOptions.nodeType);
+    expect(setPrefillState).toHaveBeenCalledWith(
+      expect.objectContaining({ nodeType: newOptions.nodeType })
+    );
+
     act(() => {
       mockUseUrlState.mockReturnValue([newOptions, jest.fn()]);
       result.current.changeMetric(newOptions.metric);
     });
+
     rerender();
-    expect(PREFILL_METRIC).toEqual(newOptions.metric);
+    expect(setPrefillState).toHaveBeenCalledWith(
+      expect.objectContaining({ metric: newOptions.metric })
+    );
+
     act(() => {
       mockUseUrlState.mockReturnValue([newOptions, jest.fn()]);
       result.current.changeCustomMetrics(newOptions.customMetrics);
     });
+
     rerender();
-    expect(PREFILL_CUSTOM_METRICS).toEqual(newOptions.customMetrics);
+    expect(setPrefillState).toHaveBeenCalledWith(
+      expect.objectContaining({ customMetrics: newOptions.customMetrics })
+    );
+
     act(() => {
       mockUseUrlState.mockReturnValue([newOptions, jest.fn()]);
       result.current.changeAccount(newOptions.accountId);
     });
+
     rerender();
-    expect(PREFILL_ACCOUNT_ID).toEqual(newOptions.accountId);
+    expect(setPrefillState).toHaveBeenCalledWith(
+      expect.objectContaining({ accountId: newOptions.accountId })
+    );
+
     act(() => {
       mockUseUrlState.mockReturnValue([newOptions, jest.fn()]);
       result.current.changeRegion(newOptions.region);
     });
+
     rerender();
-    expect(PREFILL_REGION).toEqual(newOptions.region);
+    expect(setPrefillState).toHaveBeenCalledWith(
+      expect.objectContaining({ region: newOptions.region })
+    );
   });
 });
