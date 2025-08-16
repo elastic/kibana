@@ -9,16 +9,28 @@
 
 import { EncryptionConfig } from './encryption_config';
 import { generate } from './generate';
+import mockFs from 'mock-fs';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { Logger } from '../cli/logger';
 import * as prompt from '../cli/keystore/utils/prompt';
 import fs from 'fs';
 import crypto from 'crypto';
+import { join } from 'path';
+
+const saveLocation = join(REPO_ROOT, 'data/interactive_setup');
 
 describe('encryption key generation interactive', () => {
   const encryptionConfig = new EncryptionConfig();
   beforeEach(() => {
     Logger.prototype.log = jest.fn();
+    mockFs({
+      [saveLocation]: mockFs.directory(),
+    });
+  });
+
+  afterEach(() => {
+    mockFs.restore();
   });
 
   it('should prompt the user to write keys if the interactive flag is set', async () => {
@@ -47,11 +59,13 @@ describe('encryption key generation interactive', () => {
       .mockResolvedValueOnce(false)
       .mockResolvedValueOnce(false)
       .mockResolvedValueOnce(true);
-    jest.spyOn(prompt, 'question').mockResolvedValue('/foo/bar');
+    jest.spyOn(prompt, 'question').mockResolvedValue(saveLocation);
     jest.spyOn(crypto, 'randomBytes').mockReturnValue('random-key');
-    fs.writeFileSync = jest.fn();
+
     await generate(encryptionConfig, { interactive: true });
-    expect(fs.writeFileSync.mock.calls).toMatchSnapshot();
+    const content = fs.readFileSync(saveLocation, 'utf8');
+
+    expect(content).toMatchSnapshot();
   });
   afterEach(() => {
     jest.restoreAllMocks();

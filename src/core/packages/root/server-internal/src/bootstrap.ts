@@ -12,6 +12,7 @@ import { getPackages } from '@kbn/repo-packages';
 import type { CliArgs } from '@kbn/config';
 import { Env, RawConfigService } from '@kbn/config';
 import { CriticalError } from '@kbn/core-base-server-internal';
+import { fsEventBus, FS_CONFIG_EVENT } from '@kbn/security-hardening';
 import { Root } from './root';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 
@@ -52,6 +53,22 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   const root = new Root(rawConfigService, env, onRootShutdown);
   const cliLogger = root.logger.get('cli');
   const rootLogger = root.logger.get('root');
+
+  rawConfigService.getConfig$().subscribe((config) => {
+    const loggerFilePath = Object.values(config?.logging?.appenders ?? {})
+      // @ts-expect-error
+      .filter((appender) => appender.type === 'file')
+      // @ts-expect-error
+      .map((appender) => appender.fileName);
+
+    const fsHardeningConfig = config?.xpack?.security?.hardening?.fs;
+    const safePaths = fsHardeningConfig?.safe_paths ?? [];
+
+    fsEventBus.emit(FS_CONFIG_EVENT, {
+      ...fsHardeningConfig,
+      safe_paths: [...loggerFilePath, ...safePaths],
+    });
+  });
 
   rootLogger.info('Kibana is starting');
 
