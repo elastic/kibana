@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { LockAcquisitionError } from '@kbn/lock-manager';
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
@@ -140,8 +141,21 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
           id: newMonitor.id,
         };
       }
-      addMonitorAPI.initDefaultAlerts(newMonitor.attributes.name);
       addMonitorAPI.setupGettingStarted(newMonitor.id);
+
+      // nested try...catch because we do not want to cancel the returned monitor data if we fail to edit
+      // the default rules. This likely means they are being instantiated by a simultaneous request from
+      // elsewhere in the UI.
+      try {
+        await addMonitorAPI.initDefaultAlerts();
+      } catch (error) {
+        if (error instanceof LockAcquisitionError) {
+          server.logger.error(
+            `Attempted to initialize default Synthetics rules, but failed because of a simultaneous request`,
+            { error }
+          );
+        } else throw error;
+      }
 
       return mapSavedObjectToMonitor({ monitor: newMonitor, internal });
     } catch (error) {

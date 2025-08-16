@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { LockManagerService } from '@kbn/lock-manager';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
+import { type SavedObjectsClientContract } from '@kbn/core/server';
 import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
 import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
@@ -15,13 +16,17 @@ import {
   SyntheticsMonitorStatusTranslations,
   TlsTranslations,
 } from '../../../common/rules/synthetics/translations';
+
 import type { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../../types';
 import {
   ACTION_GROUP_DEFINITIONS,
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../common/constants/synthetics_alerts';
-import type { DefaultRuleType } from '../../../common/types/default_alerts';
+import {
+  type DefaultRuleType,
+  type SyntheticsDefaultRule,
+} from '../../../common/types/default_alerts';
 export class DefaultAlertService {
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
@@ -38,35 +43,55 @@ export class DefaultAlertService {
     this.soClient = soClient;
   }
 
-  async getSettings() {
+  protected async getSettings() {
     if (!this.settings) {
       this.settings = await getSyntheticsDynamicSettings(this.soClient);
     }
     return this.settings;
   }
 
-  async setupDefaultAlerts() {
-    this.settings = await this.getSettings();
-
-    const [statusRule, tlsRule] = await Promise.allSettled([
-      this.setupStatusRule(),
-      this.setupTlsRule(),
-    ]);
-
-    if (statusRule.status === 'rejected') {
-      throw statusRule.reason;
-    }
-    if (tlsRule.status === 'rejected') {
-      throw tlsRule.reason;
-    }
-
-    return {
-      statusRule: statusRule.status === 'fulfilled' && statusRule.value ? statusRule.value : null,
-      tlsRule: tlsRule.status === 'fulfilled' && tlsRule.value ? tlsRule.value : null,
-    };
+  /**
+   * The class requests a lock before persisting default rules.
+   * If the lock cannot be acquired, it will throw an error.
+   * This is to ensure that no two processes can modify the default rules at the same time.
+   * @param cb A callback function that will be executed within the lock.
+   * @returns The result of the callback function.
+   * @throws LockAcquisitionError if the lock cannot be acquired.
+   */
+  protected acquireLockOrFail<T>(cb: () => Promise<T>, spaceId: string): Promise<T> {
+    const lockService = new LockManagerService(this.server.coreSetup, this.server.logger);
+    return lockService.withLock(`synthetics-default-alerts-lock-${spaceId}`, cb);
   }
 
-  getMinimumRuleInterval() {
+  /**
+   * Sets up the default rules for the specified space.
+   * @param spaceId The ID of the space to set up rules for.
+   * @returns A promise that resolves when the rules have been set up.
+   * @throws LockAcquisitionError if a lock cannot be acquired to modify the shared resource. Calling code must handle this error.
+   */
+  public async setupDefaultAlerts(spaceId: string) {
+    this.settings = await this.getSettings();
+    return this.acquireLockOrFail(async () => {
+      const [statusRule, tlsRule] = await Promise.allSettled([
+        this.setupStatusRule(spaceId),
+        this.setupTlsRule(spaceId),
+      ]);
+
+      if (statusRule.status === 'rejected') {
+        throw statusRule.reason;
+      }
+      if (tlsRule.status === 'rejected') {
+        throw tlsRule.reason;
+      }
+
+      return {
+        statusRule: statusRule.status === 'fulfilled' && statusRule.value ? statusRule.value : null,
+        tlsRule: tlsRule.status === 'fulfilled' && tlsRule.value ? tlsRule.value : null,
+      };
+    }, spaceId);
+  }
+
+  protected getMinimumRuleInterval() {
     const minimumInterval = this.server.alerting.getConfig().minimumScheduleInterval;
     const minimumIntervalInMs = parseDuration(minimumInterval.value);
     const defaultIntervalInMs = parseDuration('1m');
@@ -74,7 +99,7 @@ export class DefaultAlertService {
     return interval;
   }
 
-  setupStatusRule() {
+  protected async setupStatusRule(spaceId: string) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (this.settings?.defaultStatusRuleEnabled === false) {
       return;
@@ -82,11 +107,12 @@ export class DefaultAlertService {
     return this.createDefaultRuleIfNotExist(
       SYNTHETICS_STATUS_RULE,
       `Synthetics status internal rule`,
-      minimumRuleInterval
+      minimumRuleInterval,
+      spaceId
     );
   }
 
-  setupTlsRule() {
+  protected async setupTlsRule(spaceId: string) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (this.settings?.defaultTLSRuleEnabled === false) {
       return;
@@ -94,11 +120,14 @@ export class DefaultAlertService {
     return this.createDefaultRuleIfNotExist(
       SYNTHETICS_TLS_RULE,
       `Synthetics internal TLS rule`,
-      minimumRuleInterval
+      minimumRuleInterval,
+      spaceId
     );
   }
 
-  async getExistingAlert(ruleType: DefaultRuleType) {
+  public async getExistingAlert(
+    ruleType: DefaultRuleType
+  ): Promise<SyntheticsDefaultRule | undefined> {
     const rulesClient = await (await this.context.alerting)?.getRulesClient();
 
     const { data } = await rulesClient.find({
@@ -116,19 +145,21 @@ export class DefaultAlertService {
     return { ...alert, actions: [...actions, ...systemActions], ruleTypeId: alert.alertTypeId };
   }
 
-  async createDefaultRuleIfNotExist(ruleType: DefaultRuleType, name: string, interval: string) {
-    const alert = await this.getExistingAlert(ruleType);
-    if (alert) {
-      return alert;
-    }
-
-    const actions = await this.getAlertActions(ruleType);
+  protected async createDefaultRuleIfNotExist(
+    ruleType: DefaultRuleType,
+    name: string,
+    interval: string,
+    spaceId: string
+  ): Promise<SyntheticsDefaultRule | undefined> {
+    const actions = await this.getRuleActions(ruleType);
     const rulesClient = await (await this.context.alerting)?.getRulesClient();
+    // create the rule with hardcoded ID (we only ever want one of these)
+    // the request will fail if the rule already exists
     const {
       actions: actionsFromRules = [],
       systemActions = [],
       ...newAlert
-    } = await rulesClient.create<{}>({
+    } = await rulesClient.create({
       data: {
         actions,
         params: {},
@@ -140,8 +171,10 @@ export class DefaultAlertService {
         enabled: true,
         throttle: null,
       },
+      options: {
+        id: `SYNTHETICS_DEFAULT_ALERT-${ruleType}-${spaceId}`,
+      },
     });
-
     return {
       ...newAlert,
       actions: [...actionsFromRules, ...systemActions],
@@ -149,13 +182,23 @@ export class DefaultAlertService {
     };
   }
 
-  async updateStatusRule(enabled?: boolean) {
-    const minimumRuleInterval = this.getMinimumRuleInterval();
+  public async updateDefaultRules(spaceId: string, statusEnabled?: boolean, tlsEnabled?: boolean) {
+    return this.acquireLockOrFail(async () => {
+      return Promise.all([
+        this.updateStatusRule(spaceId, statusEnabled),
+        this.updateTlsRule(spaceId, tlsEnabled),
+      ]);
+    }, spaceId);
+  }
+
+  protected async updateStatusRule(spaceId: string, enabled?: boolean) {
     if (enabled) {
+      const minimumRuleInterval = this.getMinimumRuleInterval();
       return this.upsertDefaultAlert(
         SYNTHETICS_STATUS_RULE,
         `Synthetics status internal rule`,
-        minimumRuleInterval
+        minimumRuleInterval,
+        spaceId
       );
     } else {
       const rulesClient = await (await this.context.alerting)?.getRulesClient();
@@ -165,13 +208,14 @@ export class DefaultAlertService {
     }
   }
 
-  async updateTlsRule(enabled?: boolean) {
-    const minimumRuleInterval = this.getMinimumRuleInterval();
+  protected async updateTlsRule(spaceId: string, enabled?: boolean) {
     if (enabled) {
+      const minimumRuleInterval = this.getMinimumRuleInterval();
       return this.upsertDefaultAlert(
         SYNTHETICS_TLS_RULE,
         `Synthetics internal TLS rule`,
-        minimumRuleInterval
+        minimumRuleInterval,
+        spaceId
       );
     } else {
       const rulesClient = await (await this.context.alerting)?.getRulesClient();
@@ -181,14 +225,19 @@ export class DefaultAlertService {
     }
   }
 
-  async upsertDefaultAlert(ruleType: DefaultRuleType, name: string, interval: string) {
+  protected async upsertDefaultAlert(
+    ruleType: DefaultRuleType,
+    name: string,
+    interval: string,
+    spaceId: string
+  ) {
     const rulesClient = await (await this.context.alerting)?.getRulesClient();
 
     const alert = await this.getExistingAlert(ruleType);
     if (alert) {
       const currentIntervalInMs = parseDuration(alert.schedule.interval);
       const minimumIntervalInMs = parseDuration(interval);
-      const actions = await this.getAlertActions(ruleType);
+      const actions = await this.getRuleActions(ruleType);
       const {
         actions: actionsFromRules = [],
         systemActions = [],
@@ -213,10 +262,10 @@ export class DefaultAlertService {
       };
     }
 
-    return await this.createDefaultRuleIfNotExist(ruleType, name, interval);
+    return this.createDefaultRuleIfNotExist(ruleType, name, interval, spaceId);
   }
 
-  async getAlertActions(ruleType: DefaultRuleType) {
+  protected async getRuleActions(ruleType: DefaultRuleType) {
     const { actionConnectors, settings } = await this.getActionConnectors();
 
     const defaultActions = (actionConnectors ?? []).filter((act) =>
@@ -251,7 +300,7 @@ export class DefaultAlertService {
     }
   }
 
-  async getActionConnectors() {
+  protected async getActionConnectors() {
     const actionsClient = (await this.context.actions)?.getActionsClient();
     if (!this.settings) {
       this.settings = await getSyntheticsDynamicSettings(this.soClient);
