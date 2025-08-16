@@ -102,15 +102,17 @@ export default function QualitySummaryCards({
               defaultMessage: 'No failure store',
             })}
             footer={
-              <EuiLink
-                href={locator?.getRedirectUrl(locatorParams)}
-                target="_blank"
-                external={false}
-              >
-                {i18n.translate('xpack.datasetQuality.enableFailureStore', {
-                  defaultMessage: 'Enable failure store',
-                })}
-              </EuiLink>
+              canUserReadFailureStore && (
+                <EuiLink
+                  href={locator?.getRedirectUrl(locatorParams)}
+                  target="_blank"
+                  external={false}
+                >
+                  {i18n.translate('xpack.datasetQuality.enableFailureStore', {
+                    defaultMessage: 'Enable failure store',
+                  })}
+                </EuiLink>
+              )
             }
           />
         ) : (
