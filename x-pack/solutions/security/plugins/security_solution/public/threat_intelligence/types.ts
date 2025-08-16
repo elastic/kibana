@@ -19,6 +19,15 @@ import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public
 import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public/types';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { Policy } from './modules/block_list/hooks/use_policies';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { BrowserField } from '@kbn/rule-registry-plugin/common';
+import { Store } from 'redux';
+import { DataProvider } from '@kbn/timelines-plugin/common';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public/types';
+import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { Policy } from './modules/block_list/hooks/use_policies';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ThreatIntelligencePluginSetup {}
@@ -42,6 +51,7 @@ export interface Services extends CoreStart, ThreatIntelligencePluginStartDeps {
 
 export interface LicenseAware {
   isEnterprise(): boolean;
+
   isPlatinumPlus(): boolean;
 }
 
@@ -116,6 +126,11 @@ export interface SecuritySolutionPluginContext {
    * Add to blocklist feature
    */
   blockList: Blocking;
+
+  /**
+   * Allow to open/close the expandable flyout
+   */
+  useExpandableFlyoutApi: () => ExpandableFlyoutApi;
 }
 
 /**
