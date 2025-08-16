@@ -24,8 +24,7 @@ describe('Workflows Service', () => {
 
   describe('createExternalService', () => {
     const actionId = 'test-action-id';
-    const config = {};
-    const secrets = {};
+
     const mockConfigurationUtilities = actionsConfigMock.create();
     const mockConnectorUsageCollector = {} as any;
 
@@ -34,7 +33,6 @@ describe('Workflows Service', () => {
 
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -49,7 +47,6 @@ describe('Workflows Service', () => {
     it('should create external service without workflow service', () => {
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -63,8 +60,6 @@ describe('Workflows Service', () => {
 
   describe('runWorkflow', () => {
     const actionId = 'test-action-id';
-    const config = {};
-    const secrets = {};
     const mockConfigurationUtilities = actionsConfigMock.create();
     const mockConnectorUsageCollector = {} as any;
 
@@ -75,7 +70,6 @@ describe('Workflows Service', () => {
 
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -112,7 +106,6 @@ describe('Workflows Service', () => {
     it('should handle missing workflow service', async () => {
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -140,7 +133,6 @@ describe('Workflows Service', () => {
 
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -167,7 +159,6 @@ describe('Workflows Service', () => {
 
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -192,7 +183,6 @@ describe('Workflows Service', () => {
 
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
