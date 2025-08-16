@@ -15,10 +15,12 @@ import type { RunnerFactory } from './runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
 import type { ChatService } from './chat';
+import type { DataServiceSetup, DataServiceStart } from './data';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
   agents: AgentsServiceSetup;
+  data: DataServiceSetup;
 }
 
 export interface InternalStartServices {
@@ -27,6 +29,7 @@ export interface InternalStartServices {
   conversations: ConversationService;
   chat: ChatService;
   runnerFactory: RunnerFactory;
+  data: DataServiceStart;
 }
 
 export interface ServiceSetupDeps {
