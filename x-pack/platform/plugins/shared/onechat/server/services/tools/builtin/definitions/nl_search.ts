@@ -10,6 +10,7 @@ import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import { naturalLanguageSearch } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { getToolResultId } from '../../utils/tool_result_id';
 
 const searchDslSchema = z.object({
   query: z.string().describe('A natural language query expressing the search request'),
@@ -33,7 +34,7 @@ export const naturalLanguageSearchTool = (): BuiltinToolDefinition<typeof search
     schema: searchDslSchema,
     handler: async ({ query: nlQuery, index, context }, { esClient, modelProvider }) => {
       const model = await modelProvider.getDefaultModel();
-      const result = await naturalLanguageSearch({
+      const { esqlQuery, esqlResult } = await naturalLanguageSearch({
         nlQuery,
         context,
         index,
@@ -44,8 +45,9 @@ export const naturalLanguageSearchTool = (): BuiltinToolDefinition<typeof search
       return {
         results: [
           {
+            toolResultId: getToolResultId(),
             type: ToolResultType.tabularData,
-            data: result,
+            data: { esqlQuery, esqlResult },
           },
         ],
       };

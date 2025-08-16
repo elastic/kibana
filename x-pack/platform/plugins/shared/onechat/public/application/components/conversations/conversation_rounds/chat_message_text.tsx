@@ -22,6 +22,11 @@ import {
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
 } from '@elastic/eui';
+import { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
+import { vizLanguagePlugin } from './markdown_plugins/viz_code_block';
+import { useConversationRounds } from '../../../hooks/use_conversation';
+import { VisualizeESQL } from '../../tools/esql/visualize_esql';
+import { useOnechatServices } from '../../../hooks/use_onechat_service';
 
 interface Props {
   content: string;
@@ -117,6 +122,9 @@ export function ChatMessageText({ content }: Props) {
     overflow-wrap: anywhere;
   `;
 
+  const conversationRounds = useConversationRounds();
+  const { pluginsStart } = useOnechatServices();
+
   const { parsingPluginList, processingPluginList } = useMemo(() => {
     const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
     const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
@@ -168,13 +176,49 @@ export function ChatMessageText({ content }: Props) {
           </EuiTableRowCell>
         );
       },
+      viz: (props) => {
+        const { toolResultId } = props.spec;
+
+        if (!toolResultId) {
+          return <p>Visualization requires a tool result ID.</p>;
+        }
+
+        const toolResult = conversationRounds
+          .flatMap((r) => r.steps || [])
+          .filter((s) => s.type === 'tool_call')
+          .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
+          .find((r) => r.toolResultId === toolResultId && r.type === 'tabular_data') as
+          | TabularDataResult
+          | undefined;
+
+        if (!toolResult) {
+          return <p>Unable to find visualization for tool result ID: {toolResultId}</p>;
+        }
+
+        const { esqlQuery, esqlResult } = toolResult.data;
+
+        return (
+          <VisualizeESQL
+            lens={pluginsStart.lens}
+            dataViews={pluginsStart.dataViews}
+            uiActions={pluginsStart.uiActions}
+            esqlQuery={esqlQuery}
+            esqlResult={esqlResult}
+          />
+        );
+      },
     };
 
     return {
-      parsingPluginList: [loadingCursorPlugin, esqlLanguagePlugin, ...parsingPlugins],
+      parsingPluginList: [
+        loadingCursorPlugin,
+        esqlLanguagePlugin,
+        vizLanguagePlugin,
+        ...parsingPlugins,
+      ],
       processingPluginList: processingPlugins,
     };
-  }, []);
+  }, [conversationRounds, pluginsStart.dataViews, pluginsStart.lens, pluginsStart.uiActions]);
 
   return (
     <EuiText size="s" className={containerClassName}>

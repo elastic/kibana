@@ -20,6 +20,7 @@ export enum ToolResultType {
 }
 
 export interface ResourceResult {
+  toolResultId: string;
   type: ToolResultType.resource;
   data: {
     reference: {
@@ -34,24 +35,31 @@ export interface ResourceResult {
 }
 
 export interface TabularDataResult {
+  toolResultId: string;
   type: ToolResultType.tabularData;
   data: {
-    columns: EsqlEsqlColumnInfo[];
-    values: FieldValue[][];
+    esqlQuery: string;
+    esqlResult: {
+      columns: EsqlEsqlColumnInfo[];
+      values: FieldValue[][];
+    };
   };
 }
 
 export interface QueryResult {
+  toolResultId: string;
   type: ToolResultType.query;
   data: { dsl: SearchRequest } | { esql: string };
 }
 
 export interface OtherResult {
+  toolResultId: string;
   type: ToolResultType.other;
   data: unknown;
 }
 
 export interface ErrorResult {
+  toolResultId: string;
   type: ToolResultType.error;
   data: {
     message: string;

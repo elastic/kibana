@@ -469,6 +469,10 @@ export function registerVisualizeQueryRenderFunction({
 
       const trimmedQuery = correctedQuery.trim();
 
+      console.log('trimmedQuery', trimmedQuery);
+      console.log('rows', rows);
+      console.log('columns', columns);
+
       return (
         <VisualizeESQL
           ObservabilityAIAssistantMultipaneFlyoutContext={

@@ -11,6 +11,7 @@ import { relevanceSearch } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { getToolResultId } from '../../utils/tool_result_id';
 
 const relevanceSearchSchema = z.object({
   term: z.string().describe('Term to search for'),
@@ -66,6 +67,7 @@ export const relevanceSearchTool = (): BuiltinToolDefinition<typeof relevanceSea
       });
 
       const results: ToolResult[] = searchResult.results.map((result) => ({
+        toolResultId: getToolResultId(),
         type: ToolResultType.resource,
         data: {
           reference: {
