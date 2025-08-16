@@ -8,11 +8,19 @@
 import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import React from 'react';
+import { DEGRADED_DOCS_QUERY, FAILURE_STORE_SELECTOR } from '../../../../../common/constants';
 import {
   overviewDegradedFieldsTableLoadingText,
   qualityIssuesTableNoData,
 } from '../../../../../common/translations';
-import { useQualityIssues } from '../../../../hooks/use_quality_issues';
+import {
+  useDatasetDetailsRedirectLinkTelemetry,
+  useDatasetQualityDetailsState,
+  useQualityIssues,
+  useRedirectLink,
+} from '../../../../hooks';
+import { NavigationSource } from '../../../../services/telemetry';
+import { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
 import { getQualityIssuesColumns } from './columns';
 
 export const QualityIssuesTable = () => {
@@ -23,17 +31,48 @@ export const QualityIssuesTable = () => {
     onTableChange,
     sort,
     fieldFormats,
-    expandedDegradedField,
     openDegradedFieldFlyout,
   } = useQualityIssues();
+  const { datasetDetails, timeRange } = useDatasetQualityDetailsState();
+
+  const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
+    navigationSource: NavigationSource.Header,
+  });
+
   const dateFormatter = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [
     ES_FIELD_TYPES.DATE,
   ]);
+
+  const degradedRedirectLinkProps = useRedirectLink({
+    dataStreamStat: datasetDetails,
+    timeRangeConfig: timeRange,
+    query: {
+      language: 'kuery',
+      query: DEGRADED_DOCS_QUERY,
+    },
+    sendTelemetry,
+  });
+
+  const failedRedirectLinkProps = useRedirectLink({
+    dataStreamStat: datasetDetails,
+    timeRangeConfig: timeRange,
+    query: {
+      language: 'kuery',
+      query: '',
+    },
+    selector: FAILURE_STORE_SELECTOR,
+    sendTelemetry,
+  });
+
+  const getRedirectLinkProps = (name: string, type: QualityIssueType) => {
+    return type === 'degraded' ? degradedRedirectLinkProps : failedRedirectLinkProps;
+  };
+
   const columns = getQualityIssuesColumns({
     dateFormatter,
     isLoading: isDegradedFieldsLoading,
-    expandedQualityIssue: expandedDegradedField,
     openQualityIssueFlyout: openDegradedFieldFlyout,
+    getRedirectLinkProps,
   });
 
   return (
