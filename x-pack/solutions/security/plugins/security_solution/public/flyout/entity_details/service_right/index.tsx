@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { noop } from 'lodash/fp';
+import { useAssetInventoryRefresh } from '../../../asset_inventory/hooks/use_asset_inventory_refresh';
 import { buildEntityNameFilter } from '../../../../common/search_strategy';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
@@ -48,6 +49,8 @@ export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelPr
     () => (serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined),
     [serviceName]
   );
+
+  const { assetInventoryRefresh } = useAssetInventoryRefresh();
 
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.service,
@@ -99,6 +102,11 @@ export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelPr
     [openDetailsPanel]
   );
 
+  const onAssetCriticalityChange = useCallback(() => {
+    calculateEntityRiskScore();
+    assetInventoryRefresh();
+  }, [assetInventoryRefresh, calculateEntityRiskScore]);
+
   if (observedService.isLoading) {
     return <FlyoutLoading />;
   }
@@ -116,7 +124,7 @@ export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelPr
         observedService={observedService}
         riskScoreState={riskScoreState}
         recalculatingScore={recalculatingScore}
-        onAssetCriticalityChange={calculateEntityRiskScore}
+        onAssetCriticalityChange={onAssetCriticalityChange}
         contextID={contextID}
         scopeId={scopeId}
         openDetailsPanel={openDetailsPanel}
