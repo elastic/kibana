@@ -14,7 +14,7 @@ import type {
 import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
 import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
-import { UserActionTypes } from '../../../common/types/domain';
+import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import { decodeOrThrow } from '../../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
@@ -719,11 +719,15 @@ export class CaseUserActionService {
       page: 1,
       perPage: 1,
       sortField: defaultSortField,
+      search: Object.keys(UserActionActions)
+        .filter((action) => action !== 'delete')
+        .join('|'),
+      searchFields: ['action'],
       aggs: CaseUserActionService.buildUserActionStatsAgg(),
     });
 
     const result = {
-      total: response.total,
+      total: response.total ?? 0,
       total_comments: 0,
       total_other_actions: 0,
     };
