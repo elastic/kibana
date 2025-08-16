@@ -18,7 +18,7 @@ import {
 import {
   installAllPrebuiltRulesRequest,
   installPrebuiltRuleAssets,
-  installMockEmptyPrebuiltRulesPackage,
+  installMockPrebuiltRulesPackage,
   installSpecificPrebuiltRulesRequest,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState } from '../../../../../tasks/common';
@@ -26,11 +26,11 @@ import { login } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 describe(
-  'Detection rules, Prebuilt Rules Installation and Update Notifications',
+  'Detection rules, Prebuilt Rules Install Notifications',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     before(() => {
-      installMockEmptyPrebuiltRulesPackage();
+      installMockPrebuiltRulesPackage();
     });
 
     beforeEach(() => {
@@ -43,7 +43,7 @@ describe(
     });
 
     describe('No notifications', () => {
-      it('does NOT display install notifications when no prebuilt assets and no rules are installed', () => {
+      it('does NOT display install notifications when no rules are installed', () => {
         visitRulesManagementTable();
 
         cy.get(ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN).should('be.visible');

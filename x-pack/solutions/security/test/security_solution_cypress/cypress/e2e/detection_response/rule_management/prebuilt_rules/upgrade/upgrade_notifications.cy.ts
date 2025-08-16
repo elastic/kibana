@@ -23,7 +23,7 @@ import {
 } from '../../../../../tasks/api_calls/common';
 import {
   installPrebuiltRuleAssets,
-  installMockEmptyPrebuiltRulesPackage,
+  installMockPrebuiltRulesPackage,
   installSpecificPrebuiltRulesRequest,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState } from '../../../../../tasks/common';
@@ -39,7 +39,7 @@ describe(
   () => {
     before(() => {
       // Prevent the real package installation
-      installMockEmptyPrebuiltRulesPackage();
+      installMockPrebuiltRulesPackage();
     });
 
     beforeEach(() => {
