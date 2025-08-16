@@ -1780,6 +1780,29 @@
       }
     }
   },
+  "fleet-cloud-connector": {
+    "dynamic": false,
+    "properties": {
+      "cloudProvider": {
+        "type": "keyword"
+      },
+      "created_at": {
+        "type": "date"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "packagePolicyCount": {
+        "type": "integer"
+      },
+      "updated_at": {
+        "type": "date"
+      },
+      "vars": {
+        "type": "flattened"
+      }
+    }
+  },
   "fleet-fleet-server-host": {
     "dynamic": false,
     "properties": {
