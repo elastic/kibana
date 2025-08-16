@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteEndpointExceptionList } from '../../../../../tasks/api_calls/exceptions';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
   expandFirstAlert,
@@ -40,8 +41,7 @@ import {
 } from '../../../../../tasks/rule_details';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
-// See https://github.com/elastic/kibana/issues/163967
-describe.skip(
+describe(
   'Endpoint Exceptions workflows from Alert',
   { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
@@ -53,6 +53,7 @@ describe.skip(
       cy.task('esArchiverUnload', { archiveName: 'endpoint' });
       login();
       deleteAlertsAndRules();
+      deleteEndpointExceptionList();
 
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
       createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
@@ -63,6 +64,7 @@ describe.skip(
 
     after(() => {
       cy.task('esArchiverUnload', { archiveName: 'endpoint' });
+      deleteEndpointExceptionList();
     });
 
     it('Should be able to create and close single Endpoint exception from overflow menu', () => {
