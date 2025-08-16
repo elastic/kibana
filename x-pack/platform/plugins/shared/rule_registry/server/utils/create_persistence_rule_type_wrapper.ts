@@ -32,6 +32,7 @@ import {
 import { mapKeys, snakeCase } from 'lodash/fp';
 
 import type { UntypedRuleTypeAlerts } from '@kbn/alerting-plugin/server/types';
+import { SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING } from '@kbn/management-settings-ids';
 import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import type { CreatePersistenceRuleTypeWrapper } from './persistence_types';
@@ -422,6 +423,14 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   };
                 }
 
+                const suppressionBehaviorOnAlertClosure =
+                  await options.services.uiSettingsClient.get(
+                    SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING
+                  );
+
+                const shouldExcludeClosedAlerts =
+                  suppressionBehaviorOnAlertClosure !== 'continue-until-window-ends';
+
                 const suppressionAlertSearchRequest = {
                   size: filteredDuplicates.length,
                   query: {
@@ -441,15 +450,19 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                             ),
                           },
                         },
-                        {
-                          bool: {
-                            must_not: {
-                              term: {
-                                [ALERT_WORKFLOW_STATUS]: 'closed',
+                        ...(shouldExcludeClosedAlerts
+                          ? [
+                              {
+                                bool: {
+                                  must_not: {
+                                    term: {
+                                      [ALERT_WORKFLOW_STATUS]: 'closed',
+                                    },
+                                  },
+                                },
                               },
-                            },
-                          },
-                        },
+                            ]
+                          : []),
                       ],
                     },
                   },
