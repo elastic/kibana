@@ -113,8 +113,7 @@ export class ProductDocBasePlugin
       licensing,
       taskManager,
     };
-
-    documentationManager.update({ inferenceId: defaultInferenceEndpoints.ELSER }).catch((err) => {
+    documentationManager.updateAllToLatestVersion().catch((err) => {
       this.logger.error(`Error scheduling product documentation update task: ${err.message}`);
     });
 
