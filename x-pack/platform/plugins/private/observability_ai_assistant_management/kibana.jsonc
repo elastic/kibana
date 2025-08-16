@@ -9,7 +9,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "observabilityAiAssistantManagement"],
-    "requiredPlugins": ["actions", "management", "observabilityAIAssistant", "ml"],
+    "requiredPlugins": ["actions", "management", "observabilityAIAssistant", "ml", "licensing"],
     "optionalPlugins": ["home", "serverless", "productDocBase", "spaces", "cloud"],
     "requiredBundles": ["kibanaReact", "logsDataAccess"]
   }
