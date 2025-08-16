@@ -94,7 +94,7 @@ export default function QualitySummaryCards({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
-        {!dataStreamSettingsLoading && !hasFailureStore && canUserReadFailureStore ? (
+        {!dataStreamSettingsLoading && !(hasFailureStore && canUserReadFailureStore) ? (
           <Card
             isDisabled={true}
             title={overviewPanelDatasetQualityIndicatorFailedDocs}
