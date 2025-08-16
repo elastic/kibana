@@ -106,10 +106,12 @@ describe('unsavedChangesManager', () => {
           getReferences,
         });
 
-        unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasUnsavedChanges) => {
-          expect(hasUnsavedChanges).toBe(true);
-          done();
-        });
+        unsavedChangesManager.api.hasUnsavedChanges$
+          .pipe(skip(1))
+          .subscribe((hasUnsavedChanges) => {
+            expect(hasUnsavedChanges).toBe(true);
+            done();
+          });
 
         settingsManager.api.setTags(['New tag']);
       });
