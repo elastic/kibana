@@ -4221,6 +4221,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/case-suggestion-registry-example-plugin@link:x-pack/examples/case_suggestion_registry_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/case-suggestion-registry-plugin@link:x-pack/platform/plugins/shared/case_suggestion_registry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cases-api-integration-test-plugin@link:x-pack/platform/test/cases_api_integration/common/plugins/cases":
   version "0.0.0"
   uid ""

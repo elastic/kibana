@@ -20,6 +20,7 @@ pageLoadAssetSize:
   console: 31337
   contentConnectors: 33036
   contentManagement: 8350
+  contextRegistry: 4000
   controls: 13000
   core: 602071
   crossClusterReplication: 12662
