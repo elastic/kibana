@@ -4,10 +4,7 @@
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
-      "pretty": "__flag__",
-      "application": "",
-      "priviledge": "",
-      "username": []
+      "pretty": "__flag__"
     },
     "methods": [
       "GET"
