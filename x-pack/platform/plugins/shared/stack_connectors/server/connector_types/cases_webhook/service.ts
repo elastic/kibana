@@ -17,6 +17,7 @@ import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { buildConnectorAuth, validateConnectorAuthConfiguration } from '../../../common/auth/utils';
 import { WebhookMethods } from '../../../common/auth/constants';
 import { validateAndNormalizeUrl, validateJson } from './validators';
+import { mergeConfigHeadersWithSecretHeaders } from '../webhook';
 import {
   createServiceError,
   getObjectValueByKeyAsString,
@@ -87,10 +88,12 @@ export const createExternalService = (
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
+  const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets.secretHeaders);
+
   const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
     username: basicAuth.auth?.username,
     password: basicAuth.auth?.password,
-    headers,
+    headers: mergedHeaders,
   });
 
   const axiosInstance = axios.create({

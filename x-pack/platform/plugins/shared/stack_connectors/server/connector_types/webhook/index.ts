@@ -143,6 +143,16 @@ function validateConnectorTypeConfig(
   }
 }
 
+export function mergeConfigHeadersWithSecretHeaders(
+  configHeaders?: Record<string, string> | null,
+  secretHeaders?: Record<string, string> | null
+): Record<string, string> {
+  return {
+    ...(configHeaders ?? {}),
+    ...(secretHeaders ?? {}),
+  };
+}
+
 // action executor
 export async function executor(
   execOptions: WebhookConnectorTypeExecutorOptions
@@ -153,6 +163,7 @@ export async function executor(
   const { body: data } = params;
 
   const secrets: ConnectorTypeSecretsType = execOptions.secrets;
+
   const { basicAuth, sslOverrides } = buildConnectorAuth({
     hasAuth,
     authType,
@@ -163,10 +174,12 @@ export async function executor(
 
   const axiosInstance = axios.create();
 
+  const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets.secretHeaders);
+
   const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
     username: basicAuth.auth?.username,
     password: basicAuth.auth?.password,
-    headers,
+    headers: mergedHeaders,
   });
 
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
