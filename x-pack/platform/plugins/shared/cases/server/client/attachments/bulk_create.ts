@@ -27,7 +27,7 @@ export const bulkCreate = async (
   args: BulkCreateArgs,
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
-  const { attachments, caseId } = args;
+  const { attachments, caseId, isGeneratedByAssistant } = args;
 
   const {
     logger,
@@ -75,6 +75,7 @@ export const bulkCreate = async (
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
     const updatedModel = await model.bulkCreate({
+      isGeneratedByAssistant,
       attachments: attachmentsWithIds,
     });
 

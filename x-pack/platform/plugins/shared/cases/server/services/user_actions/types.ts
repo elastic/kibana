@@ -113,6 +113,7 @@ export interface CommonArguments {
   attachmentId?: string;
   connectorId?: string;
   action?: UserActionAction;
+  isGeneratedByAssistant?: boolean;
 }
 
 export interface Attributes {

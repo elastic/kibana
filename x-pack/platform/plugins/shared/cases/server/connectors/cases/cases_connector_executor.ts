@@ -729,9 +729,12 @@ export class CasesConnectorExecutor {
     /**
      * cases.bulkCreate throws an error on errors
      */
-    const bulkCreateCasesResponse = await this.casesClient.cases.bulkCreate({
-      cases: bulkCreateReq,
-    });
+    const bulkCreateCasesResponse = await this.casesClient.cases.bulkCreate(
+      {
+        cases: bulkCreateReq,
+      },
+      params.isGeneratedByAssistant ?? false
+    );
 
     this.logger.debug(
       `[CasesConnector][CasesConnectorExecutor][upsertCases] The total number of created cases is ${bulkCreateCasesResponse.cases.length}`,
@@ -1079,9 +1082,12 @@ export class CasesConnectorExecutor {
     /**
      * cases.bulkCreate throws an error on errors
      */
-    const bulkCreateCasesResponse = await this.casesClient.cases.bulkCreate({
-      cases: bulkCreateReq,
-    });
+    const bulkCreateCasesResponse = await this.casesClient.cases.bulkCreate(
+      {
+        cases: bulkCreateReq,
+      },
+      params.isGeneratedByAssistant ?? false
+    );
 
     this.logger.debug(
       `[CasesConnector][CasesConnectorExecutor][createNewCasesOutOfClosedCases] The total number of created cases is ${bulkCreateCasesResponse.cases.length}`,
@@ -1112,7 +1118,7 @@ export class CasesConnectorExecutor {
       this.getLogMetadata(params, { tags: ['case-connector:attachAlertsToCases'] })
     );
 
-    const { internallyManagedAlerts, rule } = params;
+    const { internallyManagedAlerts, isGeneratedByAssistant, rule } = params;
 
     const [casesUnderAlertLimit, casesOverAlertLimit] = partition(
       Array.from(groupedAlertsWithCases.values()),
@@ -1151,6 +1157,7 @@ export class CasesConnectorExecutor {
           })) ?? [];
         return {
           caseId: theCase.id,
+          isGeneratedByAssistant: isGeneratedByAssistant ?? false,
           attachments: [
             ...extraComments,
             {

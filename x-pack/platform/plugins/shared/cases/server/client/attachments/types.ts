@@ -30,6 +30,7 @@ export interface AddArgs {
 export interface BulkCreateArgs {
   caseId: string;
   attachments: BulkCreateAttachmentsRequest;
+  isGeneratedByAssistant?: boolean;
 }
 
 /**
