@@ -16,6 +16,8 @@ import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 import { useFetchAlertData } from '../../../hooks/use_fetch_alert_data';
 import { ObservabilityAlertsTable } from '../../..';
 import { CASES_PATH, paths } from '../../../../common/locators/paths';
+import { CaseViewAlertsTableProps } from '@kbn/cases-plugin/public/components/case_view/types';
+import { EuiConfirmModal } from '@elastic/eui';
 
 export interface CasesProps {
   permissions: CasesPermissions;
@@ -25,13 +27,7 @@ export function Cases({ permissions }: CasesProps) {
   const {
     application: { navigateToUrl },
     cases,
-    data,
-    http,
-    notifications,
-    fieldFormats,
-    application,
-    licensing,
-    settings,
+    http
   } = useKibana().services;
 
   const { observabilityRuleTypeRegistry } = usePluginContext();
@@ -82,21 +78,7 @@ export function Cases({ permissions }: CasesProps) {
         }}
         showAlertDetails={handleShowAlertDetails}
         useFetchAlertData={useFetchAlertData}
-        renderAlertsTable={(props) => (
-          <ObservabilityAlertsTable
-            {...props}
-            services={{
-              data,
-              http,
-              notifications,
-              fieldFormats,
-              application,
-              licensing,
-              cases,
-              settings,
-            }}
-          />
-        )}
+        renderAlertsTable={(props) => <InvertedAlertsTable props={props} />}
       />
 
       {alertDetail && selectedAlertId !== '' && !alertLoading ? (
@@ -108,4 +90,75 @@ export function Cases({ permissions }: CasesProps) {
       ) : null}
     </>
   );
+}
+
+function InvertedAlertsTable({ props }: { props: CaseViewAlertsTableProps }) {
+  const [isRemoveAlertModalOpen, setIsRemoveAlertModalOpen] = useState<boolean>(false);
+  const [activeAlertId, setActiveAlertId] = useState<string | number | null>(null);
+
+  const {
+    application,
+    cases,
+    data,
+    http,
+    notifications,
+    fieldFormats,
+    licensing,
+    settings,
+  } = useKibana().services;
+
+  return (
+    <>
+      <ObservabilityAlertsTable
+        {...props}
+        services={{
+          data,
+          http,
+          notifications,
+          fieldFormats,
+          application,
+          licensing,
+          cases,
+          settings,
+        }}
+        additionalContext={{
+          extraRowActions: [
+            {
+              label: 'Remove from case',
+              key: 'remove-alert-from-case',
+              callback: ({ alert }) => {
+                const id = String(alert['kibana.alert.instance.id']?.[0]);
+                
+                if (id) {
+                  setActiveAlertId(id);
+                  setIsRemoveAlertModalOpen(true);
+                }
+              }
+            }
+          ]
+        }}
+      />
+      {isRemoveAlertModalOpen
+        ? <EuiConfirmModal
+            aria-labelledby={'confirmRemoveAlert'}
+            title="Remove alert from this case?"
+            titleProps={{ id: 'confirmRemoveAlert' }}
+            onCancel={() => setIsRemoveAlertModalOpen(false)}
+            onConfirm={() => {
+              // call new cases.api.removeAlertFromCase() method, giving it the
+              // case ID and the active alert ID stored in state
+              console.log(`Removing alert ID ${activeAlertId} from case ${props.caseId}`);
+              setIsRemoveAlertModalOpen(false);
+            }}
+            cancelButtonText="Cancel"
+            confirmButtonText="Remove alert"
+            buttonColor="danger"
+            defaultFocusedButton="confirm"
+          >
+            <p>This alert will be permanently removed from this case.</p>
+          </EuiConfirmModal>
+        : null
+      }
+    </>
+  )
 }

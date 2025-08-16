@@ -86,6 +86,7 @@ export const CaseViewAlerts = ({
             ? SECURITY_SOLUTION_RULE_TYPE_IDS
             : alertData?.ruleTypeIds ?? []
         }
+        caseId={caseData.id}
         consumers={alertData?.featureIds}
         query={alertIdsQuery}
         showAlertStatusWithFlapping={caseData.owner !== SECURITY_SOLUTION_OWNER}

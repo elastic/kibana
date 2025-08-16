@@ -22,7 +22,7 @@ import { ObservabilityRuleTypeRegistry } from '../../../rules/create_observabili
 import type { TopAlert } from '../../../typings/alerts';
 
 export const parseAlert =
-  (observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry) =>
+  (observabilityRuleTypeRegistry?: ObservabilityRuleTypeRegistry) =>
   (alert: Record<string, unknown>): TopAlert => {
     const experimentalFields = Object.keys(legacyExperimentalFieldMap);
     const alertWithExperimentalFields = experimentalFields.reduce((acc, key) => {
@@ -37,7 +37,7 @@ export const parseAlert =
       ...parseExperimentalFields(alertWithExperimentalFields, true),
     };
 
-    const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[ALERT_RULE_TYPE_ID]!);
+    const formatter = observabilityRuleTypeRegistry?.getFormatter(parsedFields[ALERT_RULE_TYPE_ID]!);
     let formattedFields = {};
     try {
       formattedFields =

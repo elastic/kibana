@@ -8,11 +8,20 @@
 import { SetOptional } from 'type-fest';
 import type { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/types';
 import type { ConfigSchema, ObservabilityRuleTypeRegistry, TopAlert } from '../..';
+import { Alert } from '@kbn/alerting-types';
 
 export interface ObservabilityAlertsTableContext {
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
-  config: ConfigSchema;
+  observabilityRuleTypeRegistry?: ObservabilityRuleTypeRegistry;
+  config?: ConfigSchema;
   parentAlert?: TopAlert;
+  extraRowActions?: AlertRowAction[];
+}
+
+export interface AlertRowAction {
+  label: string;
+  key: string;
+  dataTestSubj?: string;
+  callback: ({ alert }: { alert: Alert }) => void;
 }
 
 export type ObservabilityAlertsTableProps = SetOptional<
