@@ -73,7 +73,8 @@ export default ({ getService }: FtrProviderContext) => {
   ) => partition(alerts, (alert) => alert?._source?.['kibana.alert.group.index'] == null);
 
   // NOTE: Add to second quality gate after feature is GA
-  describe('@ess @serverless Alert Suppression for EQL rules', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/202940
+  describe.skip('@ess @serverless Alert Suppression for EQL rules', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
