@@ -544,6 +544,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ).to.eql([
           {
             destination: 'logs.nginx.error',
+            status: 'enabled',
             where: {
               field: 'attributes.log',
               eq: 'error',
