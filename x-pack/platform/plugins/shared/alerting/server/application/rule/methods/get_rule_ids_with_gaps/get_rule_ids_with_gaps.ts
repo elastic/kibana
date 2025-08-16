@@ -71,6 +71,16 @@ export async function getRuleIdsWithGaps(
             terms: {
               field: 'rule.id',
               size: 10000,
+              order: {
+                oldest_gap_timestamp: 'asc',
+              },
+            },
+            aggs: {
+              oldest_gap_timestamp: {
+                min: {
+                  field: '@timestamp',
+                },
+              },
             },
           },
         },
