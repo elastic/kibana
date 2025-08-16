@@ -13,12 +13,12 @@ import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_clie
 import {
   SiemMigrationStatus,
   RuleTranslationResult,
+  SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
 } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import type { AddRuleMigrationRulesInput } from './rule_migrations_data_rules_client';
 import type { StoredRuleMigration } from '../types';
-import { SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../constants';
 import { conditions } from './search';
 
 describe('RuleMigrationsDataRulesClient', () => {
