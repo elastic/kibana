@@ -95,7 +95,7 @@ describe('Editor actions provider', () => {
 
     const setEditorActionsCssMock = jest.fn();
 
-    editorActionsProvider = new MonacoEditorActionsProvider(editor, setEditorActionsCssMock, true);
+    editorActionsProvider = new MonacoEditorActionsProvider(editor, setEditorActionsCssMock);
   });
 
   describe('getCurl', () => {
