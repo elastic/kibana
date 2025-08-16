@@ -22,6 +22,7 @@ interface GetDependencyOwnershipParams {
 export interface DependenciesByOwner {
   prodDependencies: string[];
   devDependencies: string[];
+  invalidRenovateRules?: string[];
 }
 
 interface DependenciesByOwners {
@@ -107,6 +108,31 @@ const getDependenciesByOwner = (): DependenciesByOwners => {
   return dependenciesByOwner;
 };
 
+const getInvalidRenovateRules = (): string[] => {
+  const { renovateRules, packageDependencies, packageDevDependencies, packageResolutions } =
+    parseConfig();
+  const declaredDependencies = new Set([...packageDependencies, ...packageDevDependencies]);
+
+  const errors: string[] = [];
+
+  renovateRules.forEach((rule) => {
+    const { matchPackageNames = [], matchDepNames = [] } = rule;
+    const allMatchedNames = [...matchPackageNames, ...matchDepNames];
+    allMatchedNames.forEach((name) => {
+      if (
+        !declaredDependencies.has(name) &&
+        !packageResolutions.some((resolution) => resolution.includes(name))
+      ) {
+        errors.push(
+          `Invalid renovate rule: '${rule.groupName}' declares package '${name}', which is not found in package.json.`
+        );
+      }
+    });
+  });
+
+  return errors;
+};
+
 const getDependenciesCoverage = (): DependenciesCoverage => {
   const { renovateRules, packageDependencies, packageDevDependencies } = parseConfig();
 
@@ -169,10 +195,13 @@ export const identifyDependencyOwnership = ({
     coveredProdDependencies,
   } = getDependenciesCoverage();
 
+  const invalidRenovateRules = getInvalidRenovateRules();
+
   if (missingOwner) {
     return {
       prodDependencies: uncoveredProdDependencies,
       devDependencies: uncoveredDevDependencies,
+      invalidRenovateRules,
     };
   }
 
