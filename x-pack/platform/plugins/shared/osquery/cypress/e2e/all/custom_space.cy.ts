@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { initializeDataViews } from '../../tasks/login';
+import { login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
@@ -14,8 +14,7 @@ import {
   selectAllAgents,
   submitQuery,
 } from '../../tasks/live_query';
-import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_fixtures';
-import { ServerlessRoleName } from '../../support/roles';
+import { cleanupPack, cleanupSpace, loadPack, loadSpace } from '../../tasks/api_fixtures';
 
 const testSpaces = [
   { name: 'default', tags: ['@ess', '@serverless', '@brokenInServerless'] },
@@ -29,7 +28,6 @@ describe('ALL - Custom space', () => {
       let spaceId: string;
 
       before(() => {
-        initializeDataViews();
         cy.wrap(
           new Promise<string>((resolve) => {
             if (testSpace.name !== 'default') {
@@ -62,7 +60,7 @@ describe('ALL - Custom space', () => {
       });
 
       beforeEach(() => {
-        cy.login(ServerlessRoleName.SOC_MANAGER);
+        login();
         navigateTo(`/s/${spaceId}/app/osquery`);
       });
 

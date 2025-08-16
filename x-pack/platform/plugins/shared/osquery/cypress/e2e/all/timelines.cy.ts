@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { initializeDataViews } from '../../tasks/login';
+import { login } from '../../tasks/login';
 import { takeOsqueryActionWithParams } from '../../tasks/live_query';
-import { ServerlessRoleName } from '../../support/roles';
 import { disableNewFeaturesTours } from '../../tasks/navigation';
 
 describe('ALL - Timelines', { tags: ['@ess'] }, () => {
-  before(() => {
-    initializeDataViews();
-  });
   beforeEach(() => {
-    cy.login(ServerlessRoleName.SOC_MANAGER);
+    login();
   });
 
   it('should substitute osquery parameter on non-alert event take action', () => {

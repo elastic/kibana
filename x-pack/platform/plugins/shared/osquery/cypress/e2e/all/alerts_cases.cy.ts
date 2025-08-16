@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { initializeDataViews } from '../../tasks/login';
+import { login } from '../../tasks/login';
 import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 import {
   cleanupCase,
@@ -36,7 +36,7 @@ describe.skip(
     const packData = packFixture();
 
     beforeEach(() => {
-      initializeDataViews();
+      login();
       loadPack(packData).then((data) => {
         packId = data.saved_object_id;
         packName = data.name;
