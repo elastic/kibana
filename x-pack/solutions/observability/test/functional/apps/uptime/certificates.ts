@@ -10,7 +10,7 @@ import { getSha256 } from '../../../api_integration/apis/uptime/rest/helper/make
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { UPTIME_HEARTBEAT_DATA } from './overview';
 
-const BLANK_INDEX_PATH = 'x-pack/test/functional/es_archives/uptime/blank';
+const BLANK_INDEX_PATH = 'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime } = getPageObjects(['uptime']);

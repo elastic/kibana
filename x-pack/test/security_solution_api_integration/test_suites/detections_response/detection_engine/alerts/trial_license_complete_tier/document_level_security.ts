@@ -105,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await deleteAllAlerts(supertest, log, es);
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/security_solution/alerts/8.8.0_multiple_docs',
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/8.8.0_multiple_docs',
         {
           useCreate: true,
           docsOnly: true,
@@ -119,7 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
       await security.role.delete(roleToAccessSecuritySolution.name);
       await security.role.delete(roleToAccessSecuritySolutionWithDls.name);
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/security_solution/alerts/8.8.0_multiple_docs'
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/8.8.0_multiple_docs'
       );
     });
 

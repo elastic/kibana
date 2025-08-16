@@ -45,7 +45,9 @@ export default ({ getService }: FtrProviderContext) => {
           id: soId2.saved_objects[0].id,
         });
       }
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+      );
     });
 
     after(async () => {
@@ -69,7 +71,9 @@ export default ({ getService }: FtrProviderContext) => {
           id: soId2.saved_objects[0].id,
         });
       }
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+      );
     });
 
     it('should include the right keys as per the update', async () => {
