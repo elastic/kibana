@@ -21,7 +21,12 @@
     "@kbn/server-route-repository-utils",
     "@kbn/server-route-repository-client",
     "@kbn/inference-common",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/management-settings-ids",
+    "@kbn/management-settings-types",
+    "@kbn/management-settings-utilities",
+    "@kbn/management-settings-field-definition",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": ["target/**/*"]
 }
