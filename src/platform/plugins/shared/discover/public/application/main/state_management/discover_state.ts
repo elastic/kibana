@@ -112,6 +112,37 @@ export interface DiscoverStateContainer {
    */
   appState: DiscoverAppStateContainer;
   /**
+  // When Discover loads with a persisted saved search, track an initial view (once)
+  useEffect(() => {
+    const current = savedSearchContainer.getState();
+    if (current.id) {
+      (async () => {
+        try {
+          const { ContentInsightsClient } = await import(
+            '@kbn/content-management-content-insights-public'
+          );
+            const noopLogger = {
+              get: () => noopLogger,
+              info: () => {},
+              warn: () => {},
+              error: () => {},
+              debug: () => {},
+              trace: () => {},
+              fatal: () => {},
+              log: () => {},
+              isLevelEnabled: () => false,
+            } as any;
+            const insightsClient = new ContentInsightsClient(
+              { http: services.core.http, logger: noopLogger },
+              { domainId: 'discover' }
+            );
+            insightsClient.track(current.id, 'viewed');
+        } catch {}
+      })();
+    }
+  // run once after first state initialization
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
    * Data fetching related state
    **/
   dataState: DiscoverDataStateContainer;
@@ -361,6 +392,31 @@ export function getDiscoverStateContainer({
       services.locator.navigate({
         savedSearchId: newSavedSearchId,
       });
+      // Track a view for content insights (no await to avoid delaying navigation)
+      try {
+        // lazy import to avoid adding to initial discover bundle if content insights unused
+        const { ContentInsightsClient } = await import(
+          '@kbn/content-management-content-insights-public'
+        );
+        const noopLogger = {
+          get: () => noopLogger,
+          info: () => {},
+          warn: () => {},
+          error: () => {},
+          debug: () => {},
+          trace: () => {},
+          fatal: () => {},
+          log: () => {},
+          isLevelEnabled: () => false,
+        } as any;
+        const insightsClient = new ContentInsightsClient(
+          { http: services.core.http, logger: noopLogger },
+          { domainId: 'discover' }
+        );
+        insightsClient.track(newSavedSearchId, 'viewed');
+      } catch (e) {
+        // silently ignore
+      }
     }
   };
 

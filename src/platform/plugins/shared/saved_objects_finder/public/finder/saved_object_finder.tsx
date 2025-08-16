@@ -89,6 +89,8 @@ interface BaseSavedObjectFinder {
   children?: ReactElement | ReactElement[];
   helpText?: string;
   getTooltipText?: (item: SavedObjectFinderItem) => string | undefined;
+  /** Optional additional columns appended to the right (POC extension) */
+  extraColumns?: Array<EuiTableFieldDataColumnType<SavedObjectFinderItem>>;
 }
 
 interface SavedObjectFinderFixedPage extends BaseSavedObjectFinder {
@@ -108,12 +110,13 @@ class SavedObjectFinderUiClass extends React.Component<
   SavedObjectFinderState
 > {
   public static propTypes = {
-    onChoose: PropTypes.func,
+  onChoose: PropTypes.func,
     noItemsMessage: PropTypes.node,
     savedObjectMetaData: PropTypes.array.isRequired,
     initialPageSize: PropTypes.oneOf([5, 10, 15, 25]),
     fixedPageSize: PropTypes.number,
     showFilter: PropTypes.bool,
+  extraColumns: PropTypes.array,
   };
   private isComponentMounted: boolean = false;
 
@@ -282,7 +285,7 @@ class SavedObjectFinderUiClass extends React.Component<
             },
           }
         : undefined;
-    const columns: Array<EuiTableFieldDataColumnType<SavedObjectFinderItem>> = [
+  let columns: Array<EuiTableFieldDataColumnType<SavedObjectFinderItem>> = [
       ...(typeColumn ? [typeColumn] : []),
       {
         field: 'title',
@@ -343,6 +346,9 @@ class SavedObjectFinderUiClass extends React.Component<
       },
       ...(tagColumn ? [tagColumn] : []),
     ];
+    if (this.props.extraColumns?.length) {
+      columns = [...columns, ...this.props.extraColumns];
+    }
     const pagination = {
       initialPageSize: !!this.props.fixedPageSize ? this.props.fixedPageSize : pageSize ?? 10,
       pageSize: !!this.props.fixedPageSize ? undefined : pageSize,
