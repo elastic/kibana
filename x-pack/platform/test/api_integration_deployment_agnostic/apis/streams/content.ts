@@ -374,6 +374,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(updatedStream.stream.ingest.wired.routing).to.eql([
           {
             destination: 'logs.branch_c.nested',
+            status: 'enabled',
             where: {
               field: 'resource.attributes.hello',
               eq: 'yes',
