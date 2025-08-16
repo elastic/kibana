@@ -137,6 +137,7 @@ interface DetectionEngineAlertTableProps
   sourcererScope?: SourcererScopeName;
   isLoading?: boolean;
   onRuleChange?: () => void;
+  disableAdditionalToolbarControls?: boolean;
 }
 
 const initialSort: GetSecurityAlertsTableProp<'initialSort'> = [
@@ -155,6 +156,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   sourcererScope = SourcererScopeName.detections,
   isLoading,
   onRuleChange,
+  disableAdditionalToolbarControls,
   ...tablePropsOverrides
 }) => {
   const { id } = tablePropsOverrides;
@@ -473,6 +475,14 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     [count, isEventRenderedView]
   );
 
+  /**
+   * We want to hide additional controls (like grouping) if the table is being rendered
+   * in the cases page OR if the user of the table explicitly set `disableAdditionalToolbarControls`
+   * to true
+   */
+  const shouldRenderAdditionalToolbarControls =
+    disableAdditionalToolbarControls || tableType === TableId.alertsOnCasePage;
+
   if (isLoading) {
     return null;
   }
@@ -511,7 +521,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
                 renderCellValue={CellValue}
                 renderActionsCell={ActionsCell}
                 renderAdditionalToolbarControls={
-                  tableType !== TableId.alertsOnCasePage ? AdditionalToolbarControls : undefined
+                  shouldRenderAdditionalToolbarControls ? undefined : AdditionalToolbarControls
                 }
                 actionsColumnWidth={leadingControlColumn.width}
                 additionalBulkActions={bulkActions}
