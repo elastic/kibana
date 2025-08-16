@@ -8,7 +8,7 @@
 import type { Logger, ISavedObjectsRepository } from '@kbn/core/server';
 import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { chunk } from 'lodash';
+import { chunk, groupBy } from 'lodash';
 import type { BackfillClient } from '../../../backfill_client/backfill_client';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 import type { Gap } from '../gap';
@@ -81,6 +81,14 @@ export const updateGaps = async (params: UpdateGapsParams) => {
           hasErrors = true;
         }
       }
+      // Return an object indicating how many gaps were processed per rule id
+      return Object.entries(groupBy(fetchedGaps, 'ruleId')).reduce<Record<string, number>>(
+        (acc, [currentRuleId, currentRuleGaps]) => {
+          acc[currentRuleId] = currentRuleGaps.length;
+          return acc;
+        },
+        {}
+      );
     };
 
     if (gaps) {
@@ -91,7 +99,7 @@ export const updateGaps = async (params: UpdateGapsParams) => {
     } else {
       // Otherwise fetch and update them
       await processAllRuleGaps({
-        ruleId,
+        ruleIds: [ruleId],
         start: start.toISOString(),
         end: end.toISOString(),
         logger,
