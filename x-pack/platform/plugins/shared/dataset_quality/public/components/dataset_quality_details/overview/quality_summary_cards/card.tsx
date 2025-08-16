@@ -19,7 +19,7 @@ export function Card({
 }: {
   isDisabled?: boolean;
   isSelected?: boolean;
-  title: string;
+  title: React.ReactNode;
   kpiValue: string;
   footer: React.ReactNode;
   onClick?: () => void;
