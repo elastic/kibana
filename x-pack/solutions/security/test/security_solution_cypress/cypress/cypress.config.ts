@@ -9,36 +9,27 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
 import { esClient } from './support/es_client';
 
-// eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
-  reporter: '../../../node_modules/cypress-multi-reporters',
-  reporterOptions: {
-    configFile: './cypress/reporter_config.json',
-  },
   chromeWebSecurity: false,
-  defaultCommandTimeout: 150000,
+  defaultCommandTimeout: 60000,
   env: {
     grepFilterSpecs: true,
-    grepOmitFiltered: true,
     grepTags: '@ess --@skipInEss',
   },
-  execTimeout: 150000,
-  pageLoadTimeout: 150000,
-  numTestsKeptInMemory: 0,
-  retries: {
-    runMode: 1,
-  },
-  screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
+  execTimeout: 60000,
+  pageLoadTimeout: 60000,
+  responseTimeout: 60000,
+  screenshotsFolder: '../../../../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
-  videosFolder: '../../../target/kibana-security-solution/cypress/videos',
+  videosFolder: '../../../../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 1200,
   viewportWidth: 1920,
+  numTestsKeptInMemory: 10,
   e2e: {
-    baseUrl: 'http://localhost:5601',
+    experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
-    specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
       esArchiver(on, config);
       esClient(on, config);

@@ -11,6 +11,7 @@ import { EsArchiver } from '@kbn/es-archiver';
 import { createEsClientForTesting, KbnClient, systemIndicesSuperuser } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { fromRoot } from '@kbn/repo-info';
 
 interface ClientOptions {
   url: string;
@@ -70,14 +71,14 @@ export const esArchiver = (
     log,
     client,
     kbnClient,
-    baseDir: '../es_archives',
+    baseDir: fromRoot('x-pack/solutions/security/test/security_solution_cypress/es_archives'),
   });
 
   const ftrEsArchiverInstance = new EsArchiver({
     log,
     client,
     kbnClient,
-    baseDir: '../../functional/es_archives/security_solution',
+    baseDir: fromRoot('x-pack/test/functional/es_archives/security_solution'),
   });
 
   on('task', {
