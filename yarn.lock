@@ -4236,6 +4236,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/bench@link:src/platform/packages/shared/kbn-bench":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cache-cli@link:src/platform/packages/shared/kbn-cache-cli":
   version "0.0.0"
   uid ""
@@ -5321,6 +5325,10 @@
   uid ""
 
 "@kbn/core-security-server@link:src/core/packages/security/server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-server-benchmarks@link:src/platform/packages/shared/kbn-core-server-benchmarks":
   version "0.0.0"
   uid ""
 
@@ -6420,6 +6428,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/jest-benchmarks@link:src/platform/packages/shared/kbn-jest-benchmarks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/jest-serializers@link:src/platform/packages/private/kbn-jest-serializers":
   version "0.0.0"
   uid ""
@@ -7129,6 +7141,10 @@
   uid ""
 
 "@kbn/profiler-cli@link:x-pack/platform/packages/shared/kbn-profiler-cli":
+  version "0.0.0"
+  uid ""
+
+"@kbn/profiler@link:src/platform/packages/shared/kbn-profiler":
   version "0.0.0"
   uid ""
 
@@ -8669,6 +8685,10 @@
   uid ""
 
 "@kbn/workflows@link:src/platform/packages/shared/kbn-workflows":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workspaces@link:src/platform/packages/shared/kbn-workspaces":
   version "0.0.0"
   uid ""
 
