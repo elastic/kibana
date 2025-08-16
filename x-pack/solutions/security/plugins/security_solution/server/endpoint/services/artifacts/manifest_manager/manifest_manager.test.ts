@@ -46,6 +46,7 @@ import {
 } from '@kbn/fleet-plugin/server/services/artifacts/mocks';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 const getArtifactObject = (artifact: InternalArtifactSchema) =>
   JSON.parse(Buffer.from(artifact.body!, 'base64').toString());
@@ -1374,7 +1375,10 @@ describe('ManifestManager', () => {
           },
         }),
       ]);
-      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({});
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+        updatedPolicies: [],
+        failedPolicies: [],
+      });
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
 
@@ -1445,7 +1449,10 @@ describe('ManifestManager', () => {
           },
         }),
       ]);
-      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({});
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+        updatedPolicies: [],
+        failedPolicies: [],
+      });
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
 
@@ -1513,7 +1520,10 @@ describe('ManifestManager', () => {
           },
         }),
       ]);
-      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({});
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+        updatedPolicies: [],
+        failedPolicies: [],
+      });
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
 
@@ -1548,19 +1558,20 @@ describe('ManifestManager', () => {
       const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
-      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([
-        createPackagePolicyWithConfigMock({
-          id: TEST_POLICY_ID_1,
-          config: {
-            artifact_manifest: {
-              value: {
-                artifacts: {},
-                manifest_version: '1.0.0',
-                schema_version: 'v1',
-              },
+      const policy1 = createPackagePolicyWithConfigMock({
+        id: TEST_POLICY_ID_1,
+        config: {
+          artifact_manifest: {
+            value: {
+              artifacts: {},
+              manifest_version: '1.0.0',
+              schema_version: 'v1',
             },
           },
-        }),
+        },
+      });
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([
+        policy1,
         createPackagePolicyWithConfigMock({
           id: TEST_POLICY_ID_2,
           config: {
@@ -1574,13 +1585,133 @@ describe('ManifestManager', () => {
           },
         }),
       ]);
-      context.packagePolicyService.bulkUpdate = jest
-        .fn()
-        .mockResolvedValue({ updatedPolicies: [{}], failedPolicies: [{ error }] });
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+        updatedPolicies: [{}],
+        failedPolicies: [{ packagePolicy: policy1, error }],
+      });
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([error]);
 
       expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(1);
+    });
+
+    test('Should retry policy update if a Conflict error is encountered', async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+      const error = SavedObjectsErrorHelpers.createConflictError('update failed', TEST_POLICY_ID_1);
+      const policy = createPackagePolicyWithConfigMock({
+        id: TEST_POLICY_ID_1,
+        config: {
+          artifact_manifest: {
+            value: {
+              artifacts: {},
+              manifest_version: '1.0.0',
+              schema_version: 'v1',
+            },
+          },
+        },
+      });
+      const latestPolicy = createPackagePolicyWithConfigMock({
+        id: TEST_POLICY_ID_1,
+        description: 'updated policy',
+        config: {
+          artifact_manifest: {
+            value: {
+              artifacts: {},
+              manifest_version: '1.0.0',
+              schema_version: 'v1',
+            },
+          },
+        },
+      });
+
+      const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+
+      context.packagePolicyService.get = jest.fn().mockResolvedValue(latestPolicy);
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([policy]);
+      context.packagePolicyService.bulkUpdate = jest
+        .fn()
+        .mockResolvedValueOnce({
+          updatedPolicies: [],
+          failedPolicies: [{ error, packagePolicy: policy }],
+        })
+        .mockResolvedValueOnce({ updatedPolicies: [policy], failedPolicies: [] });
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
+
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(2);
+      expect(context.packagePolicyService.get).toHaveBeenCalledTimes(1);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.anything(),
+        [
+          {
+            ...latestPolicy,
+            inputs: [
+              {
+                config: {
+                  artifact_manifest: {
+                    value: {
+                      artifacts: {
+                        'endpoint-exceptionlist-macos-v1': {
+                          compression_algorithm: 'none',
+                          decoded_sha256:
+                            '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+                          decoded_size: 432,
+                          encoded_sha256:
+                            '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+                          encoded_size: 432,
+                          encryption_algorithm: 'none',
+                          relative_url:
+                            '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+                        },
+                      },
+                      manifest_version: '1.0.1',
+                      schema_version: 'v1',
+                    },
+                  },
+                },
+                enabled: true,
+                streams: [],
+                type: 'endpoint',
+              },
+            ],
+          },
+        ]
+      );
+    });
+
+    test('Should only attempt a retry of conflict error once', async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+      const error = SavedObjectsErrorHelpers.createConflictError('update failed', TEST_POLICY_ID_1);
+      const policy = createPackagePolicyWithConfigMock({
+        id: TEST_POLICY_ID_1,
+        config: {
+          artifact_manifest: {
+            value: {
+              artifacts: {},
+              manifest_version: '1.0.0',
+              schema_version: 'v1',
+            },
+          },
+        },
+      });
+
+      const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+
+      context.packagePolicyService.get = jest.fn().mockResolvedValue(policy);
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([policy]);
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+        updatedPolicies: [],
+        failedPolicies: [{ error, packagePolicy: policy }],
+      });
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([error]);
+
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(2);
     });
   });
 

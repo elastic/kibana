@@ -259,6 +259,9 @@ export const getPackagePolicyUpdateCallback = (
 
     const endpointIntegrationData = newPackagePolicy as NewPolicyData;
 
+    // Make sure policy includes general expected data
+    validateEndpointPackagePolicy(endpointIntegrationData.inputs);
+
     // Validate that Endpoint Security policy is valid against current license
     validatePolicyAgainstLicense(
       // The cast below is needed in order to ensure proper typing for
@@ -270,8 +273,6 @@ export const getPackagePolicyUpdateCallback = (
 
     // Validate that Endpoint Security policy uses only enabled App Features
     validatePolicyAgainstProductFeatures(endpointIntegrationData.inputs, productFeatures);
-
-    validateEndpointPackagePolicy(endpointIntegrationData.inputs);
 
     if (endpointIntegrationData.id) {
       await notifyProtectionFeatureUsage(
