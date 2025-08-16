@@ -177,7 +177,7 @@ ${
   isEnrichPolicyExists
     ? `| ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type
 | ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type
-// Contact actor and target entities data
+// Construct actor and target entities data
 | EVAL actorDocData = CONCAT("{",
     "\\"id\\":\\"", actor.entity.id, "\\"",
     ",\\"type\\":\\"", "entity", "\\"",

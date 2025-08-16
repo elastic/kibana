@@ -204,21 +204,23 @@ describe('GraphInvestigation Component', () => {
       expect(showDetailsItem).not.toBeInTheDocument();
     });
 
-    it('shows `Show entity details` list item when entity node has documentsData', () => {
+    it('shows the option `Show entity details` as enabled when entity node has documentsData', () => {
       const { container, getByTestId } = renderStory();
 
       expandNode(container, 'projects/your-project-id/roles/customRole');
 
       const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
       expect(showDetailsItem).toHaveTextContent('Show entity details');
+      expect(showDetailsItem).not.toHaveAttribute('disabled');
     });
 
-    it('should not show `Show entity details` list item when entity node misses documentsData', () => {
+    it('show the option `Show entity details` as disabled when entity node has no documentsData', () => {
       const { container, queryByTestId } = renderStory();
 
       expandNode(container, 'admin@example.com');
       const showDetailsItem = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
-      expect(showDetailsItem).not.toBeInTheDocument();
+      expect(showDetailsItem).toHaveTextContent('Show entity details');
+      expect(showDetailsItem).toHaveAttribute('disabled');
     });
   });
 

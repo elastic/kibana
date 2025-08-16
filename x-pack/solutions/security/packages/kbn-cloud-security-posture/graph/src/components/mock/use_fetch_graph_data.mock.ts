@@ -40,7 +40,7 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
             documentsData: [
               {
                 id: '1',
-                type: 'entity',
+                type: 'single-entity',
               },
             ],
           },

@@ -688,7 +688,7 @@ export const GraphWithAssetInventoryData: Story = {
             documentsData: [
               {
                 id: node.id,
-                type: 'event' as 'event' | 'alert',
+                type: 'single-entity' as 'event' | 'alert' | 'single-entity',
               },
             ],
           };
@@ -700,7 +700,7 @@ export const GraphWithAssetInventoryData: Story = {
             documentsData: [
               {
                 id: node.id,
-                type: 'event' as 'event' | 'alert',
+                type: 'single-entity' as 'event' | 'alert' | 'single-entity',
               },
             ],
           };
@@ -712,7 +712,7 @@ export const GraphWithAssetInventoryData: Story = {
             documentsData: [
               {
                 id: node.id,
-                type: 'event' as 'event' | 'alert',
+                type: 'single-entity' as 'event' | 'alert' | 'single-entity',
               },
             ],
           };
