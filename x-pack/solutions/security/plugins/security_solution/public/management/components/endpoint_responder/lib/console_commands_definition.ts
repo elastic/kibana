@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { CancelActionResult } from '../command_render_components/cancel_action';
 import { CustomScriptSelector } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { RunScriptActionResult } from '../command_render_components/run_script_action';
 import type { CommandArgDefinition } from '../../console/types';
@@ -175,6 +176,7 @@ export const getEndpointConsoleCommands = ({
     responseActionUploadEnabled: isUploadEnabled,
     crowdstrikeRunScriptEnabled,
     microsoftDefenderEndpointRunScriptEnabled,
+    microsoftDefenderEndpointCancelEnabled,
   } = featureFlags;
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
@@ -562,6 +564,51 @@ export const getEndpointConsoleCommands = ({
       (agentType !== 'crowdstrike' && agentType !== 'microsoft_defender_endpoint'),
   });
 
+  if (microsoftDefenderEndpointCancelEnabled) {
+    consoleCommands.push({
+      name: 'cancel',
+      about: getCommandAboutInfo({
+        aboutInfo: CONSOLE_COMMANDS.cancel.about,
+        isSupported: doesEndpointSupportCommand('cancel'),
+      }),
+      RenderComponent: CancelActionResult,
+      meta: {
+        agentType,
+        endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
+      },
+      exampleUsage: 'cancel --id 12345',
+      exampleInstruction: i18n.translate(
+        'xpack.securitySolution.endpointConsoleCommands.cancel.exampleInstruction',
+        { defaultMessage: 'Enter the id of the action to cancel' }
+      ),
+      mustHaveArgs: true,
+      args: {
+        id: {
+          required: true,
+          allowMultiples: false,
+          about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.cancel.id.about', {
+            defaultMessage: 'The id of the action to cancel',
+          }),
+          mustHaveValue: 'non-empty-string',
+          validate: emptyArgumentValidator,
+        },
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 10,
+      helpDisabled:
+        !doesEndpointSupportCommand('cancel') || agentType !== 'microsoft_defender_endpoint',
+      helpHidden:
+        !getRbacControl({
+          commandName: 'cancel',
+          privileges: endpointPrivileges,
+        }) || agentType !== 'microsoft_defender_endpoint',
+      validate: capabilitiesAndPrivilegesValidator(agentType),
+    });
+  }
+
   switch (agentType) {
     case 'sentinel_one':
       return adjustCommandsForSentinelOne({ commandList: consoleCommands, platform });
@@ -574,6 +621,7 @@ export const getEndpointConsoleCommands = ({
       return adjustCommandsForMicrosoftDefenderEndpoint({
         commandList: consoleCommands,
         microsoftDefenderEndpointRunScriptEnabled,
+        microsoftDefenderEndpointCancelEnabled,
       });
     default:
       // agentType === endpoint: just returns the defined command list
@@ -735,6 +783,7 @@ const adjustCommandsForCrowdstrike = ({
 const adjustCommandsForMicrosoftDefenderEndpoint = ({
   commandList,
   microsoftDefenderEndpointRunScriptEnabled,
+  microsoftDefenderEndpointCancelEnabled,
 }: {
   commandList: CommandDefinition[];
   microsoftDefenderEndpointRunScriptEnabled: boolean;
@@ -755,6 +804,11 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
       disableCommand(command, 'microsoft_defender_endpoint');
     }
 
+    if (command.name === 'cancel') {
+      if (!microsoftDefenderEndpointCancelEnabled) {
+        disableCommand(command, 'microsoft_defender_endpoint');
+      }
+    }
     if (command.name === 'runscript') {
       if (!microsoftDefenderEndpointRunScriptEnabled) {
         disableCommand(command, 'microsoft_defender_endpoint');
