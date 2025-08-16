@@ -11,7 +11,9 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import type { QualityIndicators, InfoIndicators } from '../../../common/types';
 
-export function QualityIndicator({
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default function QualityIndicator({
   quality,
   description,
 }: {

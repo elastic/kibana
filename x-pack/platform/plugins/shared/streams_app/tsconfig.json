@@ -17,6 +17,7 @@
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/dataset-quality-plugin",
+    "@kbn/data-quality-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/kibana-react-plugin",
