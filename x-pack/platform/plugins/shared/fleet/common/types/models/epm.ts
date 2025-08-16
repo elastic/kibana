@@ -484,7 +484,8 @@ export type RegistryVarType =
   | 'text'
   | 'yaml'
   | 'string'
-  | 'textarea';
+  | 'textarea'
+  | 'url';
 export enum RegistryVarsEntryKeys {
   name = 'name',
   title = 'title',
@@ -499,6 +500,7 @@ export enum RegistryVarsEntryKeys {
   secret = 'secret',
   hide_in_deployment_modes = 'hide_in_deployment_modes',
   full_width = 'full_width',
+  url_allowed_schemes = 'url_allowed_schemes',
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -522,6 +524,7 @@ export interface RegistryVarsEntry {
   };
   [RegistryVarsEntryKeys.hide_in_deployment_modes]?: string[];
   [RegistryVarsEntryKeys.full_width]?: boolean;
+  [RegistryVarsEntryKeys.url_allowed_schemes]?: string[];
 }
 
 // Deprecated as part of the removing public references to saved object schemas
