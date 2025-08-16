@@ -74,6 +74,7 @@ import { ASSISTANT_ELSER_INFERENCE_ID } from './field_maps_configuration';
 import type { BulkOperationError } from '../../lib/data_stream/documents_data_writer';
 import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from './audit_events';
 import { findDocuments } from '../find';
+import { ensureIntegrationKnowledgeIndexEntry } from '../../ai_assistant_service/integration_knowledge_helper';
 
 /**
  * Params for when creating KbDataClient in Request Context Factory. Useful if needing to modify
@@ -94,6 +95,7 @@ export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientPara
   manageGlobalKnowledgeBaseAIAssistant: boolean;
   getTrainedModelsProvider: () => ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
   elserInferenceId?: string;
+  telemetry: AnalyticsServiceSetup;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
@@ -292,6 +294,19 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             `Inference endpoint for ELSER model '${elserId}' is already deployed`
           );
         }
+      }
+
+      // Ensure integration knowledge index entry exists first (synchronous)
+      try {
+        await ensureIntegrationKnowledgeIndexEntry(
+          this,
+          this.options.logger.get('integrationKnowledge'),
+          this.options.telemetry
+        );
+      } catch (error) {
+        this.options.logger.error(
+          `Failed to ensure integration knowledge index entry: ${error.message}`
+        );
       }
 
       if (!ignoreSecurityLabs) {
