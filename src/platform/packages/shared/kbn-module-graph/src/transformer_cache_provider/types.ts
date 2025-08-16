@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const babelJest = require('babel-jest');
-const transformerConfig = require('./transformer_config');
+export type TransformerCache<T> = Map<string, T>;
 
-/** @type {import('@jest/transform').SyncTransformer} */
-module.exports = babelJest.default.createTransformer(transformerConfig);
+export interface TransformResult {
+  path: string;
+}

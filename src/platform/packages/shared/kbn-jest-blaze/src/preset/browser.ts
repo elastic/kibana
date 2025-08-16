@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const babelJest = require('babel-jest');
-const transformerConfig = require('./transformer_config');
+import { Config } from '@jest/types';
+import { base } from './base';
 
-/** @type {import('@jest/transform').SyncTransformer} */
-module.exports = babelJest.default.createTransformer(transformerConfig);
+/**
+ * Browser variant of {@link base}. Uses `jest-environment-jsdom`.
+ */
+export const browser: Config.InitialOptions = {
+  ...base,
+  testEnvironment: 'jest-environment-jsdom',
+};

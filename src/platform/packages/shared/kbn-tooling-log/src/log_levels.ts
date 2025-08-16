@@ -75,3 +75,14 @@ export function parseLogLevel(name: LogLevel) {
     flags: flags as { [key in LogLevel]: boolean },
   };
 }
+
+export function parseEnvLogLevel(env?: string) {
+  const i = (LEVELS as readonly string[]).indexOf(env ?? 'info');
+
+  if (i === -1) {
+    const msg = `Invalid log level "${env}" ` + `(expected one of ${LEVELS.join(',')})`;
+    throw new Error(msg);
+  }
+
+  return LEVELS[i];
+}
