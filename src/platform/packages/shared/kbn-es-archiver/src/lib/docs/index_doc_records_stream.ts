@@ -37,20 +37,22 @@ export function createIndexDocRecordsStream(
       {
         retries: 5,
         concurrency: performance?.concurrency || DEFAULT_PERFORMANCE_OPTIONS.concurrency,
-        datasource: docs.map((doc) => {
-          const body = doc.source;
-          const op = doc.data_stream ? BulkOperation.Create : operation;
-          const index = doc.data_stream || doc.index;
-          // generate id for valid targets if it doesn't exist yet
-          const id = targetsWithoutIdGeneration.includes(index) ? doc.id : doc.id ?? uuidv4();
-          ops.set(body, {
-            [op]: {
-              _index: index,
-              _id: id,
-            },
-          });
-          return body;
-        }),
+        datasource: docs
+          .filter((doc) => !!doc)
+          .map((doc) => {
+            const body = doc.source;
+            const op = doc.data_stream ? BulkOperation.Create : operation;
+            const index = doc.data_stream || doc.index;
+            // generate id for valid targets if it doesn't exist yet
+            const id = targetsWithoutIdGeneration.includes(index) ? doc.id : doc.id ?? uuidv4();
+            ops.set(body, {
+              [op]: {
+                _index: index,
+                _id: id,
+              },
+            });
+            return body;
+          }),
         onDocument(doc) {
           return ops.get(doc);
         },
@@ -70,7 +72,9 @@ export function createIndexDocRecordsStream(
     }
 
     for (const doc of docs) {
-      stats.indexedDoc(doc.data_stream || doc.index);
+      if (doc != null) {
+        stats.indexedDoc(doc.data_stream || doc.index);
+      }
     }
   }
 
