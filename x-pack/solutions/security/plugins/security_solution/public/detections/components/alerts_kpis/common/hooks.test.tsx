@@ -11,7 +11,11 @@ import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import type { GetAggregatableFields, UseInspectButtonParams } from './hooks';
 import { getAggregatableFields, useInspectButton, useStackByFields } from './hooks';
-import { mockBrowserFields } from '../../../../common/containers/source/mock';
+import {
+  mockBrowserFields,
+  mockIndexFields,
+  mockIndexFieldsByName,
+} from '../../../../common/containers/source/mock';
 import { TestProviders } from '../../../../common/mock';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 
@@ -164,7 +168,11 @@ describe('hooks', () => {
       });
       const aggregateableFields = result.current();
       unmount();
-      expect(aggregateableFields).toHaveLength(0);
+      expect(aggregateableFields.length).toBeGreaterThan(0);
+      expect(mockIndexFields.length).toBeGreaterThan(aggregateableFields.length);
+      expect(mockIndexFieldsByName[aggregateableFields[0].value as string]?.aggregatable).toEqual(
+        true
+      );
     });
   });
 });
