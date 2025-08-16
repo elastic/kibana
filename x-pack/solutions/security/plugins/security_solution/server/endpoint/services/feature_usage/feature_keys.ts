@@ -12,6 +12,7 @@ export const FEATURE_KEYS = {
   HOST_ISOLATION_EXCEPTION: 'Host isolation exception',
   HOST_ISOLATION_EXCEPTION_BY_POLICY: 'Host isolation exception by policy',
   TRUSTED_APP_BY_POLICY: 'Trusted app by policy',
+  TRUSTED_DEVICE_BY_POLICY: 'Trusted device by policy',
   EVENT_FILTERS_BY_POLICY: 'Event filters by policy',
   BLOCKLIST_BY_POLICY: 'Blocklists by policy',
   RANSOMWARE_PROTECTION: 'Ransomeware protection',
