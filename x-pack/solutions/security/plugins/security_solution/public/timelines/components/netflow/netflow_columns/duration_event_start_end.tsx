@@ -33,13 +33,11 @@ TimeIcon.displayName = 'TimeIcon';
  * - `event.end`
  */
 export const DurationEventStartEnd = React.memo<{
-  contextId: string;
   eventDuration?: string[] | null;
-  eventId: string;
   eventEnd?: string[] | null;
   eventStart?: string[] | null;
   scopeId: string;
-}>(({ contextId, eventDuration, eventId, eventEnd, eventStart, scopeId }) => (
+}>(({ eventDuration, eventEnd, eventStart, scopeId }) => (
   <EuiFlexGroup
     alignItems="flexStart"
     data-test-subj="duration-and-start-group"
@@ -53,9 +51,6 @@ export const DurationEventStartEnd = React.memo<{
             <DefaultDraggable
               scopeId={scopeId}
               field={EVENT_DURATION_FIELD_NAME}
-              id={`duration-event-start-end-default-draggable-${contextId}-${eventId}-${EVENT_DURATION_FIELD_NAME}-${duration}`}
-              // @ts-expect-error
-              name={name}
               tooltipContent={null}
               value={duration}
             >
@@ -76,7 +71,6 @@ export const DurationEventStartEnd = React.memo<{
             <DefaultDraggable
               scopeId={scopeId}
               field={EVENT_START_FIELD_NAME}
-              id={`duration-event-start-end-default-draggable-${contextId}-${eventId}-${EVENT_START_FIELD_NAME}-${start}`}
               tooltipContent={null}
               value={start}
             >
@@ -94,7 +88,6 @@ export const DurationEventStartEnd = React.memo<{
             <DefaultDraggable
               scopeId={scopeId}
               field={EVENT_END_FIELD_NAME}
-              id={`duration-event-start-end-default-draggable-${contextId}-${eventId}-${EVENT_END_FIELD_NAME}-${end}`}
               tooltipContent={null}
               value={end}
             >
