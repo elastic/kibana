@@ -12,11 +12,11 @@ This document outlines best practices and patterns for testing Kibana Plugins.
 ## Strategy
 
 In general, we recommend three tiers of tests:
-- Unit tests: small, fast, exhaustive, make heavy use of mocks for external dependencies 
+- Unit tests: small, fast, exhaustive, make heavy use of mocks for external dependencies
 - Integration tests: higher-level tests that verify interactions between systems (eg. HTTP APIs, Elasticsearch API calls, calling other plugin contracts).
 - End-to-end tests (e2e): tests that verify user-facing behavior through the browser
 
-These tiers should roughly follow the traditional ["testing pyramid"](https://martinfowler.com/articles/practical-test-pyramid.html), where there are more exhaustive testing at the unit level, fewer at the integration level, and very few at the functional level. 
+These tiers should roughly follow the traditional ["testing pyramid"](https://martinfowler.com/articles/practical-test-pyramid.html), where there are more exhaustive testing at the unit level, fewer at the integration level, and very few at the functional level.
 
 ## Core Integrations
 
@@ -60,7 +60,7 @@ The plugin has *thin* route controllers isolating all the network layer dependen
 class TextFormatter {
   public static async format(text: string, sanitizer: Deps['sanitizer']) {
     // sanitizer.sanitize throws MisformedTextError when passed text contains HTML markup
-    const sanitizedText = await sanitizer.sanitize(text); 
+    const sanitizedText = await sanitizer.sanitize(text);
     return sanitizedText;
   }
 
@@ -146,7 +146,7 @@ router.get(
 ```
 
 #### Unit testing
-Unit tests provide the simplest and fastest way to test the logic in your route controllers and plugin models. 
+Unit tests provide the simplest and fastest way to test the logic in your route controllers and plugin models.
 Use them whenever adding an integration test is hard and slow due to complex setup or the number of logic permutations.
 Since all external core and plugin dependencies are mocked, you don't have the guarantee that the whole system works as
 expected.
@@ -166,7 +166,7 @@ You can leverage existing unit-test infrastructure for this. You should add `*.t
 - expected exception
 - interaction with dependencies
 ```typescript
-// src/plugins/my_plugin/server/formatter.test.ts
+// src/platform/plugins/shared/my_plugin/server/formatter.test.ts
 describe('TextFormatter', () => {
   describe('format()', () => {
     const sanitizer = sanitizerMock.createSetup();
@@ -192,7 +192,7 @@ describe('TextFormatter', () => {
 ```
 
 #### Integration tests
-Depending on the number of external dependencies, you can consider implementing several high-level integration tests. 
+Depending on the number of external dependencies, you can consider implementing several high-level integration tests.
 They would work as a set of [smoke tests](https://en.wikipedia.org/wiki/Smoke_testing_(software)) for the most important functionality.
 
 Main subjects for tests should be:
@@ -202,7 +202,7 @@ Main subjects for tests should be:
 - dependencies on other plugins.
 
 ##### Functional Test Runner
-If your plugin relies on the elasticsearch server to store data and supports additional configuration, you can leverage the Functional Test Runner(FTR) to implement integration tests. 
+If your plugin relies on the elasticsearch server to store data and supports additional configuration, you can leverage the Functional Test Runner(FTR) to implement integration tests.
 FTR bootstraps an elasticsearch and a Kibana instance and runs the test suite against it.
 
 Pros:
@@ -217,14 +217,14 @@ Cons:
 - brittle tests
 
 ###### Example
-You can reuse existing [api_integration](https://github.com/elastic/kibana/blob/main/test/api_integration/config.js) setup by registering a test file within a
-[test loader](https://github.com/elastic/kibana/blob/main/test/api_integration/apis/index.ts). More about the existing FTR setup in the
+You can reuse existing [api_integration](https://github.com/elastic/kibana/blob/main/src/platform/test/api_integration/config.js) setup by registering a test file within a
+[test loader](https://github.com/elastic/kibana/blob/main/src/platform/test/api_integration/apis/index.ts). More about the existing FTR setup in the
 [contribution guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md#running-specific-kibana-tests)
 
 The tests cover:
 - authenticated / non-authenticated user access (when applicable)
 ```typescript
-// test/api_integration/apis/my_plugin/something.ts
+// src/platform/test/api_integration/apis/my_plugin/something.ts
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const security = getService('security');
@@ -236,7 +236,7 @@ export default function({ getService }: FtrProviderContext) {
         .get('/myPlugin/health')
         .set('content-type', 'application/json')
         .expect(200);
-    
+
       expect(response.body).to.have.property('basicInfo');
       expect(response.body).not.to.have.property('detailedInfo');
     });
@@ -247,7 +247,7 @@ export default function({ getService }: FtrProviderContext) {
         .get('/myPlugin/health')
         .set('content-type', 'application/json')
         .expect(200);
-    
+
       expect(response.body).to.have.property('basicInfo');
       expect(response.body).to.have.property('detailedInfo');
     });
@@ -255,7 +255,7 @@ export default function({ getService }: FtrProviderContext) {
 ```
 - request validation
 ```typescript
-// test/api_integration/apis/my_plugin/something.ts
+// src/platform/test/api_integration/apis/my_plugin/something.ts
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
@@ -324,14 +324,14 @@ Cons:
 ###### Example
 To have access to Kibana TestUtils, you should create `integration_tests` folder and import `test_utils` within a test file:
 ```typescript
-// src/plugins/my_plugin/server/integration_tests/formatter.test.ts
-import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
+// src/platform/plugins/my_plugin/server/integration_tests/formatter.test.ts
+import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 
 describe('myPlugin', () => {
   describe('GET /myPlugin/formatter', () => {
-    let root: ReturnType<typeof kbnTestServer.createRoot>;
+    let root: ReturnType<typeof createRoot>;
     beforeAll(async () => {
-      root = kbnTestServer.createRoot();
+      root = createRoot();
       await root.preboot();
       await root.setup();
       await root.start();
@@ -339,7 +339,7 @@ describe('myPlugin', () => {
 
     afterAll(async () => await root.shutdown());
     it('validates given text', async () => {
-      const response = await kbnTestServer.request
+      const response = await request
         .get(root, '/myPlugin/formatter')
         .query({ text: 'input string'.repeat(100) })
         .expect(400);
@@ -348,7 +348,7 @@ describe('myPlugin', () => {
     });
 
     it('formats given text', async () => {
-      const response = await kbnTestServer.request
+      const response = await request
         .get(root, '/myPlugin/formatter')
         .query({ text: 'input string' })
         .expect(200);
@@ -357,7 +357,7 @@ describe('myPlugin', () => {
     });
 
     it('returns BadRequest if passed string contains banned symbols', async () => {
-      await kbnTestServer.request
+      await request
         .get(root, '/myPlugin/formatter')
         .query({ text: '<script>' })
         .expect(400, 'Text cannot contain unescaped HTML markup.');
@@ -365,7 +365,7 @@ describe('myPlugin', () => {
   });
 });
 ```
-Sometimes we want to test a route controller logic and don't rely on the internal logic of the platform or a third-party plugin. 
+Sometimes we want to test a route controller logic and don't rely on the internal logic of the platform or a third-party plugin.
 Then we can apply a hybrid approach and mock the necessary method of `TextFormatter` model to test how `MisformedTextError`
 handled in the route handler without calling `sanitizer` dependency directly.
 ```typescript
@@ -375,9 +375,9 @@ import { MisformedTextError } from '../path/to/sanitizer'
 
 describe('myPlugin', () => {
   describe('GET /myPlugin/formatter', () => {
-    let root: ReturnType<typeof kbnTestServer.createRoot>;
+    let root: ReturnType<typeof createRoot>;
     beforeAll(async () => {
-      root = kbnTestServer.createRoot();
+      root = createRoot();
       await root.preboot();
       await root.setup();
       await root.start();
@@ -387,7 +387,7 @@ describe('myPlugin', () => {
     it('returns BadRequest if Sanitizer throws MisformedTextError', async () => {
       TextFormatter.format.mockRejectedValueOnce(new MisformedTextError());
 
-      await kbnTestServer.request
+      await request
         .get(root, '/myPlugin/formatter')
         .query({ text: 'any text' })
         .expect(400, 'bad bad request');
@@ -398,7 +398,7 @@ describe('myPlugin', () => {
 
 ### Applications
 
-Kibana Platform applications have less control over the page than legacy applications did. It is important that your app is built to handle it's co-habitance with other plugins in the browser. Applications are mounted and unmounted from the DOM as the user navigates between them, without full-page refreshes, as a single-page application (SPA). 
+Kibana Platform applications have less control over the page than legacy applications did. It is important that your app is built to handle it's co-habitance with other plugins in the browser. Applications are mounted and unmounted from the DOM as the user navigates between them, without full-page refreshes, as a single-page application (SPA).
 
 These long-lived sessions make cleanup more important than before. It's entirely possible a user has a single browsing session open for weeks at a time, without ever doing a full-page refresh. Common things that need to be cleaned up (and tested!) when your application is unmounted:
 - Subscriptions and polling (eg. `uiSettings.get$()`)
@@ -438,7 +438,7 @@ We _could_ still write tests for this logic, but you may find that you're just a
 ```typescript
 /** public/plugin.test.ts */
 jest.mock('./application', () => ({ renderApp: jest.fn() }));
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { renderApp: renderAppMock } from './application';
 import { Plugin } from './plugin';
 
@@ -481,7 +481,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { switchMap } from 'rxjs';
 
-import { AppMountParameters, CoreStart } from 'src/core/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { AppRoot } from './components/app_root';
 
 export const renderApp = (
@@ -523,8 +523,8 @@ In testing `renderApp` you should be verifying that:
 ```typescript
 /** public/application.test.ts */
 import { createMemoryHistory } from 'history';
-import { ScopedHistory } from 'src/core/public';
-import { coreMock } from 'src/core/public/mocks';
+import { ScopedHistory } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { renderApp } from './application';
 
 describe('renderApp', () => {
@@ -589,8 +589,8 @@ Below is an example of a Jest Unit test suite that mocks the server-side Saved
 Objects client:
 
 ```typescript
-// src/plugins/myplugin/server/lib/short_url_lookup.ts
-import crypto from 'crypto';
+// src/platform/plugins/myplugin/server/lib/short_url_lookup.ts
+import crypto from 'node:crypto';
 import { SavedObjectsClientContract } from '@kbn/core/server';
 
 export const shortUrlLookup = {
@@ -625,9 +625,9 @@ export const shortUrlLookup = {
 ```
 
 ```typescript
-// src/plugins/myplugin/server/lib/short_url_lookup.test.ts
+// src/platform/plugins/myplugin/server/lib/short_url_lookup.test.ts
 import { shortUrlLookup } from './short_url_lookup';
-import { savedObjectsClientMock } from '../../../../../core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 describe('shortUrlLookup', () => {
   const ID = 'bf00ad16941fc51420f91a93428b27a0';
@@ -686,11 +686,11 @@ client API which returns `SimpleSavedObject` instances which needs to be
 reflected in the mock.
 
 ```typescript
-// src/plugins/myplugin/public/saved_query_service.ts
+// src/platform/plugins/myplugin/public/saved_query_service.ts
 import {
   SavedObjectsClientContract,
   SimpleSavedObject,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
 export type SavedQueryAttributes = {
   title: string;
@@ -721,10 +721,10 @@ export const createSavedQueryService = (savedObjectsClient: SavedObjectsClientCo
 ```
 
 ```typescript
-// src/plugins/myplugin/public/saved_query_service.test.ts
+// src/platform/plugins/myplugin/public/saved_query_service.test.ts
 import { createSavedQueryService, SavedQueryAttributes } from './saved_query_service';
-import { savedObjectsServiceMock } from '../../../../../core/public/mocks';
-import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
+import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
+import { SavedObjectsClientContract, SimpleSavedObject } from '@kbn/core/public';
 
 describe('saved query service', () => {
   const savedQueryAttributes: SavedQueryAttributes = {
@@ -805,32 +805,32 @@ with model version and their associated transformations.
 
 #### Tooling for unit tests
 
-For unit tests, the package exposes utilities to easily test the impact of transforming documents 
+For unit tests, the package exposes utilities to easily test the impact of transforming documents
 from a model version to another one, either upward or backward.
 
 ##### Model version test migrator
 
-The `createModelVersionTestMigrator` helper allows to create a test migrator that can be used to 
+The `createModelVersionTestMigrator` helper allows to create a test migrator that can be used to
 test model version changes between versions, by transforming documents the same way the migration
 algorithm would during an upgrade.
 
 **Example:**
 
 ```ts
-import { 
-  createModelVersionTestMigrator, 
-  type ModelVersionTestMigrator 
+import {
+  createModelVersionTestMigrator,
+  type ModelVersionTestMigrator
 } from '@kbn/core-test-helpers-model-versions';
 
 const mySoTypeDefinition = someSoType();
 
 describe('mySoTypeDefinition model version transformations', () => {
   let migrator: ModelVersionTestMigrator;
-  
+
   beforeEach(() => {
     migrator = createModelVersionTestMigrator({ type: mySoTypeDefinition });
   });
-  
+
   describe('Model version 2', () => {
     it('properly backfill the expected fields when converting from v1 to v2', () => {
       const obj = createSomeSavedObject();
@@ -864,7 +864,7 @@ describe('mySoTypeDefinition model version transformations', () => {
 During integration tests, we can boot a real Elasticsearch cluster, allowing us to manipulate SO
 documents in a way almost similar to how it would be done on production runtime. With integration
 tests, we can even simulate the cohabitation of two Kibana instances with different model versions
-to assert the behavior of their interactions. 
+to assert the behavior of their interactions.
 
 ##### Model version test bed
 
@@ -875,7 +875,7 @@ and to initiate the migration between the two versions we're testing.
 **Example:**
 
 ```ts
-import { 
+import {
   createModelVersionTestBed,
   type ModelVersionTestKit
 } from '@kbn/core-test-helpers-model-versions';
@@ -941,7 +941,7 @@ test bed currently has some limitations:
 ## Limitations and edge cases in serverless environments
 
 The serverless environment, and the fact that upgrade in such environments are performed in a way
-where, at some point, the old and new version of the application are living in cohabitation, leads 
+where, at some point, the old and new version of the application are living in cohabitation, leads
 to some particularities regarding the way the SO APIs works, and to some limitations / edge case
 that we need to document
 
@@ -980,16 +980,16 @@ _How to test ES clients_
 ## Plugin integrations
 
 In the Kibana Platform, all plugin's dependencies to other plugins are explicitly declared in their `kibana.json`
-manifest. As for `core`, the dependencies `setup` and `start` contracts are injected in your plugin's respective 
+manifest. As for `core`, the dependencies `setup` and `start` contracts are injected in your plugin's respective
 `setup` and `start` phases. One of the upsides with testing is that every usage of the dependencies is explicit,
-and that the plugin's contracts must be propagated to the parts of the code using them, meaning that isolating a 
+and that the plugin's contracts must be propagated to the parts of the code using them, meaning that isolating a
 specific logical component for unit testing is way easier than in legacy.
 
 The approach to test parts of a plugin's code that is relying on other plugins is quite similar to testing
 code using `core` APIs: it's expected to mock the dependency, and make it return the value the test is expecting.
 
-Most plugins are defining mocks for their contracts. The convention is to expose them in a `mocks` file  in 
-`my_plugin/server` and/or `my_plugin/public`. For example for the `data` plugin, the client-side mocks are located in 
+Most plugins are defining mocks for their contracts. The convention is to expose them in a `mocks` file  in
+`my_plugin/server` and/or `my_plugin/public`. For example for the `data` plugin, the client-side mocks are located in
 `src/plugins/data/public/mocks.ts`. When such mocks are present, it's strongly recommended to use them
 when testing against dependencies. Otherwise, one should create it's own mocked implementation of the dependency's
 contract (and should probably ping the plugin's owner to ask them to add proper contract mocks).
@@ -997,15 +997,15 @@ contract (and should probably ping the plugin's owner to ask them to add proper 
 ### Preconditions
 
 For these examples, we are going to see how we should test the `myPlugin` plugin.
- 
-This plugin declares the `data` plugin as  a `required` dependency and the `usageCollection` plugin as an `optional` 
+
+This plugin declares the `data` plugin as  a `required` dependency and the `usageCollection` plugin as an `optional`
 one. It also exposes a `getSpecialSuggestions` API in it's start contract, which relies on the `data` plugin to retrieve
 data.
 
 `MyPlugin` plugin definition:
 
 ```typescript
-// src/plugins/myplugin/public/plugin.ts
+// src/platform/plugins/myplugin/public/plugin.ts
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
@@ -1055,8 +1055,8 @@ export type MyPluginStart = ReturnType<MyPlugin['start']>;
 The underlying `SuggestionsService` implementation:
 
 ```typescript
-// src/plugins/myplugin/public/suggestions/suggestion_service.ts
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../data/public';
+// src/platform/plugins/myplugin/public/suggestions/suggestion_service.ts
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 // stubs for testing purposes
 const suggestDependingOn = (...args: any[]) => [];
@@ -1101,17 +1101,17 @@ A plugin should test expected usage and calls on it's dependency plugins' API.
 Some calls, such as 'registration' APIs exposed from dependency plugins, should be checked,
 to ensure both that they are actually executed, and performed with the correct parameters.
 
-For our example plugin's `SuggestionsService`, we should assert that the suggestion provider is correctly 
-registered to the `data` plugin during the `setup` phase, and that `getSuggestions` calls 
+For our example plugin's `SuggestionsService`, we should assert that the suggestion provider is correctly
+registered to the `data` plugin during the `setup` phase, and that `getSuggestions` calls
 `autocomplete.getQuerySuggestions` with the correct parameters.
 
 ```typescript
-// src/plugins/myplugin/public/suggestions/suggestion_service.test.ts
+// src/platformplugins/myplugin/public/suggestions/suggestion_service.test.ts
 import {
   dataPluginMock,
   Setup as DataPluginSetupMock,
   Start as DataPluginStartMock,
-} from '../../../data/public/mocks';
+} from '@kbn/data-plugin/public/mocks';
 import { SuggestionsService } from './suggestion_service';
 
 describe('SuggestionsService', () => {
@@ -1162,11 +1162,11 @@ describe('SuggestionsService', () => {
 When testing parts of your plugin code that depends on the dependency plugin's data, the best approach
 is to mock the dependency to be able to get the behavior expected for the test.
 
-In this example, we are going to mock the results of `autocomplete.getQuerySuggestions` to be able to test 
+In this example, we are going to mock the results of `autocomplete.getQuerySuggestions` to be able to test
 the service's `getSuggestions` method.
 
 ```typescript
-// src/plugins/myplugin/public/suggestions/suggestion_service.ts
+// src/platform/plugins/myplugin/public/suggestions/suggestion_service.ts
 
 describe('#start', () => {
   describe('#getSuggestions', () => {
@@ -1216,9 +1216,9 @@ A basic test would be to ensure that the plugin properly initialize without erro
 dependency is missing:
 
 ```typescript
-// src/plugins/myplugin/public/plugin.test.ts
-import { coreMock } from '../../../core/public/mocks';
-import { dataPluginMock } from '../../data/public/mocks';
+// src/platform/plugins/myplugin/public/plugin.test.ts
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { MyPlugin } from './plugin';
 
 describe('Plugin', () => {
@@ -1229,12 +1229,12 @@ describe('Plugin', () => {
       data: dataPluginMock.createSetupContract(),
       // optional usageCollector dependency is not available
     };
-  
+
     const coreStart = coreMock.createStart();
     const startDeps = {
       data: dataPluginMock.createStartContract(),
     };
-  
+
     expect(() => {
       plugin.setup(coreSetup, setupDeps);
     }).not.toThrow();
@@ -1248,10 +1248,10 @@ describe('Plugin', () => {
 Then we should test that when optional dependency is properly used when present:
 
 ```typescript
-// src/plugins/myplugin/public/plugin.test.ts
-import { coreMock } from '../../../core/public/mocks';
-import { dataPluginMock } from '../../data/public/mocks';
-import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
+// src/platform/plugins/myplugin/public/plugin.test.ts
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 
@@ -1281,7 +1281,7 @@ describe('Plugin', () => {
 
 ### Testing RXJS observables with marble
 
-Testing observable based APIs can be challenging, specially when asynchronous operators or sources are used, 
+Testing observable based APIs can be challenging, specially when asynchronous operators or sources are used,
 or when trying to assert against emission's timing.
 
 Fortunately, RXJS comes with it's own `marble` testing module to greatly facilitate that kind of testing.
@@ -1363,7 +1363,7 @@ Marble testing would allow to get rid of these limitations. An equivalent and im
 
 Notes:
 - the test is now synchronous
-- the second parameter of `expectObservable` (`'301ms !'`) is used to perform manual unsubscription to the observable, as 
+- the second parameter of `expectObservable` (`'301ms !'`) is used to perform manual unsubscription to the observable, as
   `interval` never ends.
 - an emission is considered a time frame, meaning that after the initial `a` emission, we are at the frame `101`, not `100`
   which is why we are then only using a `99ms` gap between a->b and b->c.
@@ -1381,7 +1381,7 @@ class FooService {
       // is, most of the time, a better solution. This is only used for the example purpose.
       getUpdate$: ({ abort$ = EMPTY }: { abort$?: Observable<undefined> } = {}) => {
         return interval(100).pipe(
-            takeUntil(abort$), 
+            takeUntil(abort$),
             map((count) => `update-${count + 1}`)
         );
       },
@@ -1408,8 +1408,8 @@ it('getUpdate$ completes when `abort$` emits', () => {
 Notes:
   - the `|` symbol represents the completion of the observable.
   - we are here using the `hot` testing utility to create the `abort$` observable to ensure correct emission timing.
- 
-#### Testing observable errors 
+
+#### Testing observable errors
 
 Testing errors thrown by the observable is very close to the previous examples and is done using
 the third parameter of `expectObservable`.
@@ -1441,9 +1441,9 @@ class BarService {
   }
 }
 ```
- 
+
 We could write a test that asserts the service properly emit processed results until an invalid data is encountered:
- 
+
 ```typescript
 it('processDataStream throw an error when processing invalid data', () => {
   getTestScheduler().run(({ expectObservable, hot }) => {
@@ -1472,7 +1472,7 @@ Notes:
  - the `#` symbol represents an error.
  - when throwing custom `Error` classes, the assertion can be against an error instance, but this doesn't work
    with base errors.
- 
+
 #### Testing promise based observables
 
 In some cases, the observable we want to test is based on a Promise (like `of(somePromise).pipe(...)`). This can occur
@@ -1507,7 +1507,7 @@ Testing that kind of promise based observable does not work out of the box with 
 is not handled by the test scheduler's 'sandbox'.
 
 Fortunately, there are workarounds for this problem. The most common one being to mock the promise-returning API to return
-an observable instead for testing, as `of(observable)` also works and returns the input observable. 
+an observable instead for testing, as `of(observable)` also works and returns the input observable.
 
 Note that when doing so, the test suite must also include tests using a real promise value to ensure correct behavior in real situation.
 
