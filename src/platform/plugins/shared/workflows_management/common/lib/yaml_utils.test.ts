@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SafeParseReturnType, z } from '@kbn/zod';
+import type { SafeParseReturnType } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import { parseWorkflowYamlToJSON } from './yaml_utils';
-import { ConnectorContract, generateYamlSchemaFromConnectors } from '@kbn/workflows';
+import type { ConnectorContract } from '@kbn/workflows';
+import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 
 describe('parseWorkflowYamlToJSON', () => {
   const mockConnectors: ConnectorContract[] = [

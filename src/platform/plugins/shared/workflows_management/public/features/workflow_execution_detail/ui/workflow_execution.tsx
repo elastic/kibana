@@ -22,7 +22,8 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 
-import { EsWorkflowStepExecution, ExecutionStatus, WorkflowYaml } from '@kbn/workflows';
+import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';

@@ -12,7 +12,7 @@ import type { z } from '@kbn/zod';
 import { useCallback, useRef, useState } from 'react';
 import { parseDocument } from 'yaml';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
+import type { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
 import { MUSTACHE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { MarkerSeverity, getSeverityString } from './utils';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';

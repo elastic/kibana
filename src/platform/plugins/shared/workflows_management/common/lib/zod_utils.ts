@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ZodFirstPartySchemaTypes, z } from '@kbn/zod';
+import type { ZodFirstPartySchemaTypes } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 export function parsePath(path: string) {

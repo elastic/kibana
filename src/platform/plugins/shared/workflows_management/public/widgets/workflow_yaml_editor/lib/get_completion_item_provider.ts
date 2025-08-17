@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Scalar, YAMLParseError, isScalar, parseDocument } from 'yaml';
+import type { Scalar } from 'yaml';
+import { YAMLParseError, isScalar, parseDocument } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';

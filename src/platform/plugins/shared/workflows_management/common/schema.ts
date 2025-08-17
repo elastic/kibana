@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConnectorContract, generateYamlSchemaFromConnectors } from '@kbn/workflows';
+import type { ConnectorContract } from '@kbn/workflows';
+import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
 // TODO: replace with dynamically fetching connectors actions and subactions via ActionsClient or other service once we decide on that.

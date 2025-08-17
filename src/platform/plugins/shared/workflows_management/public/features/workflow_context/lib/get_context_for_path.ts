@@ -8,10 +8,11 @@
  */
 
 import { z } from '@kbn/zod';
-import { WorkflowContext, WorkflowYaml, getStepId } from '@kbn/workflows';
+import type { WorkflowContext, WorkflowYaml } from '@kbn/workflows';
+import { getStepId } from '@kbn/workflows';
 import _ from 'lodash';
 import { getAllPredecessors } from '../../../shared/lib/graph_utils';
-import { WorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
+import type { WorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 import { EventSchema, getOutputSchemaForStepType } from '../../../../common/schema';
 import { getSchemaAtPath, inferZodType } from '../../../../common/lib/zod_utils';
 
