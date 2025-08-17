@@ -12,14 +12,13 @@ import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { ruleDetailsUrl } from '../../../../urls/rule_details';
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   goToExecutionLogTab,
   getExecutionLogTableRow,
   refreshRuleExecutionTable,
   filterByRunType,
 } from '../../../../tasks/rule_details';
-import { getNewRule } from '../../../../objects/rule';
+import { getCustomQueryRuleParams } from '../../../../objects/rule';
 import { EXECUTION_SHOWING } from '../../../../screens/rule_details';
 import { manualRuleRun } from '../../../../tasks/api_calls/backfill';
 
@@ -37,7 +36,9 @@ describe(
       login();
       deleteAlertsAndRules();
       createRule({
-        ...getNewRule(),
+        ...getCustomQueryRuleParams({
+          enabled: true,
+        }),
       }).then((rule) => {
         cy.wrap(rule.body.id).as('ruleId');
       });
@@ -45,11 +46,23 @@ describe(
 
     it('should display the execution log', function () {
       visit(ruleDetailsUrl(this.ruleId));
-      waitForAlertsToPopulate();
       goToExecutionLogTab();
+
+      cy.waitUntil(
+        () => {
+          cy.log('Waiting for execution logs to appear in execution log table');
+          refreshRuleExecutionTable();
+          return getExecutionLogTableRow().then((rows) => {
+            return rows.length > 0;
+          });
+        },
+        { interval: 5000, timeout: 20000 }
+      );
 
       cy.get(EXECUTION_SHOWING).contains('Showing 1 rule execution');
       getExecutionLogTableRow().should('have.length', 1);
+
+      cy.log('Scheduling a manual rule run');
       manualRuleRun({
         ruleId: this.ruleId,
         start: moment().subtract(5, 'm').toISOString(),
@@ -61,14 +74,16 @@ describe(
           cy.log('Waiting for execution logs to appear in execution log table');
           refreshRuleExecutionTable();
           return getExecutionLogTableRow().then((rows) => {
-            return rows.length === 2;
+            return rows.length > 1;
           });
         },
         { interval: 5000, timeout: 20000 }
       );
-      cy.get(EXECUTION_SHOWING).contains('Showing 2 rule executions');
-      filterByRunType('Manual');
 
+      cy.get(EXECUTION_SHOWING).contains('Showing 2 rule executions');
+      getExecutionLogTableRow().should('have.length', 2);
+
+      filterByRunType('Manual');
       getExecutionLogTableRow().should('have.length', 1);
     });
   }
