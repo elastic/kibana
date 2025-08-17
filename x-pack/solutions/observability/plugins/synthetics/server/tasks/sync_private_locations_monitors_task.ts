@@ -5,28 +5,29 @@
  * 2.0.
  */
 
-import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
-import {
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
+import type {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
+import pRetry from 'p-retry';
 import { syntheticsParamType } from '../../common/types/saved_objects';
 import { normalizeSecrets } from '../synthetics_service/utils';
 import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
-import {
+import type {
   HeartbeatConfig,
   MonitorFields,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../common/runtime_types';
 import { MonitorConfigRepository } from '../services/monitor_config_repository';
-import { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
-import { SyntheticsServerSetup } from '../types';
+import type { SyntheticsServerSetup } from '../types';
 import {
   formatHeartbeatRequest,
   mixParamsWithGlobalParams,
@@ -92,7 +93,7 @@ export class SyncPrivateLocationMonitorsTask {
       const soClient = savedObjects.createInternalRepository([
         MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       ]);
-      const allPrivateLocations = await getPrivateLocations(soClient);
+      const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
       const { totalMWs, totalParams, hasDataChanged } = await this.hasAnyDataChanged({
         soClient,
         taskInstance,
@@ -384,19 +385,28 @@ export class SyncPrivateLocationMonitorsTask {
 
 export const runSynPrivateLocationMonitorsTaskSoon = async ({
   server,
+  retries = 5,
 }: {
   server: SyntheticsServerSetup;
+  retries?: number;
 }) => {
-  const {
-    logger,
-    pluginsStart: { taskManager },
-  } = server;
   try {
-    logger.debug(`Scheduling Synthetics sync private location monitors task soon`);
-    await taskManager.runSoon(TASK_ID);
-    logger.debug(`Synthetics sync private location task scheduled successfully`);
+    await pRetry(
+      async () => {
+        const {
+          logger,
+          pluginsStart: { taskManager },
+        } = server;
+        logger.debug(`Scheduling Synthetics sync private location monitors task soon`);
+        await taskManager.runSoon(TASK_ID);
+        logger.debug(`Synthetics sync private location task scheduled successfully`);
+      },
+      {
+        retries,
+      }
+    );
   } catch (error) {
-    logger.error(
+    server.logger.error(
       `Error scheduling Synthetics sync private location monitors task: ${error.message}`,
       { error }
     );

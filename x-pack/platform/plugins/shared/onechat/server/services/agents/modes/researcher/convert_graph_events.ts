@@ -6,10 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
+import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
 import type { AIMessageChunk } from '@langchain/core/messages';
-import { EMPTY, mergeMap, of, OperatorFunction } from 'rxjs';
-import { MessageChunkEvent, MessageCompleteEvent, ReasoningEvent } from '@kbn/onechat-common';
+import type { OperatorFunction } from 'rxjs';
+import { EMPTY, mergeMap, of } from 'rxjs';
+import type { MessageChunkEvent, MessageCompleteEvent, ReasoningEvent } from '@kbn/onechat-common';
+import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
 import {
   matchGraphName,
   matchEvent,
@@ -19,15 +21,10 @@ import {
   createMessageEvent,
   createReasoningEvent,
   extractTextContent,
-  ToolIdMapping,
 } from '@kbn/onechat-genai-utils/langchain';
 import type { StateType } from './graph';
-import {
-  lastReflectionResult,
-  firstResearchGoalResult,
-  ResearchGoalResult,
-  ReflectionResult,
-} from './backlog';
+import type { ResearchGoalResult, ReflectionResult } from './backlog';
+import { lastReflectionResult, firstResearchGoalResult } from './backlog';
 
 export type ResearcherAgentEvents = MessageChunkEvent | MessageCompleteEvent | ReasoningEvent;
 

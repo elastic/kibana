@@ -6,7 +6,7 @@
  */
 import expect from 'expect';
 import { omit, sortBy } from 'lodash';
-import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { INSTALLED_VERSION } from '../services/private_location_test_service';
 
 interface PolicyProps {
@@ -27,6 +27,10 @@ const commonVars = {
   max_attempts: {
     type: 'integer',
     value: 2,
+  },
+  maintenance_windows: {
+    type: 'yaml',
+    value: [],
   },
 };
 
@@ -212,6 +216,7 @@ export const getHttpInput = ({
     'check.response.status': ['200', '201'],
     ipv4: true,
     ipv6: true,
+    maintenance_windows: null,
     mode: 'any',
     ...(isTLSEnabled
       ? {

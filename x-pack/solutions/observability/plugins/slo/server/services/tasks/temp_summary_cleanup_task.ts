@@ -7,9 +7,12 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { type CoreSetup, type Logger, type LoggerFactory } from '@kbn/core/server';
-import { ConcreteTaskInstance, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type {
+  ConcreteTaskInstance,
+  TaskManagerSetupContract,
+} from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import { SLOConfig, SLOPluginStartDependencies } from '../../types';
+import type { SLOConfig, SLOPluginStartDependencies } from '../../types';
 import { CleanUpTempSummary } from '../management/clean_up_temp_summary';
 
 export const TYPE = 'slo:temp-summary-cleanup-task';

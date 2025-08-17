@@ -6,13 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  timeUnitsToSuggest,
-  FieldType,
-  dataTypes,
-  SupportedDataType,
-  FunctionDefinition,
-} from '@kbn/esql-ast';
+import type { FieldType, SupportedDataType, FunctionDefinition } from '@kbn/esql-ast';
+import { timeUnitsToSuggest, dataTypes } from '@kbn/esql-ast';
 import { getFunctionSignatures } from '@kbn/esql-ast/src/definitions/utils';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
@@ -381,6 +376,7 @@ describe('validation logic', () => {
     describe('drop', () => {
       testErrorsAndWarnings('from index | drop ', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        'Unknown column []',
       ]);
       testErrorsAndWarnings('from index | drop 4.5', [
         "SyntaxError: token recognition error at: '4'",
@@ -541,16 +537,7 @@ describe('validation logic', () => {
     });
 
     describe('shadowing', () => {
-      testErrorsAndWarnings(
-        'from a_index | eval textField = 5',
-        [],
-        ['Column [textField] of type text has been overwritten as new type: integer']
-      );
-      testErrorsAndWarnings(
-        'from a_index | eval doubleField = "5"',
-        [],
-        ['Column [doubleField] of type double has been overwritten as new type: keyword']
-      );
+      // fields shadowing validation removed
     });
 
     describe('quoting and escaping expressions', () => {

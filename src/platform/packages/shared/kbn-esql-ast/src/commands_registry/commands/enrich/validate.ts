@@ -12,10 +12,6 @@ import { ENRICH_MODES } from './util';
 import type { ESQLPolicy, ICommandContext, ICommandCallbacks } from '../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 
-function hasWildcard(name: string) {
-  return /\*/.test(name);
-}
-
 export const validate = (
   command: ESQLCommand,
   ast: ESQLAst,
@@ -28,24 +24,14 @@ export const validate = (
   const index = source.index;
   const policies = context?.policies || new Map<string, ESQLPolicy>();
 
-  if (index) {
-    if (hasWildcard(index.valueUnquoted)) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'wildcardNotSupportedForCommand',
-          values: { command: 'ENRICH', value: index.valueUnquoted },
-          locations: index.location,
-        })
-      );
-    } else if (!policies.has(index.valueUnquoted)) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownPolicy',
-          values: { name: index.valueUnquoted },
-          locations: index.location,
-        })
-      );
-    }
+  if (index && !policies.has(index.valueUnquoted)) {
+    messages.push(
+      getMessageFromId({
+        messageId: 'unknownPolicy',
+        values: { name: index.valueUnquoted },
+        locations: index.location,
+      })
+    );
   }
 
   if (cluster) {

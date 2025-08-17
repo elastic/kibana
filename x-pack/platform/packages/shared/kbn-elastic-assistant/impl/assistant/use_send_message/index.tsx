@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useRef, useState } from 'react';
-import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
 import { useAssistantContext } from '../../assistant_context';
-import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
+import type { FetchConnectorExecuteResponse } from '../api';
+import { fetchConnectorExecuteAction } from '../api';
 
 interface SendMessageProps {
   apiConfig: ApiConfig;

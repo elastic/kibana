@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { RemoteEsArchiverProvider } from './services/remote_es/remote_es_archiver';
 import { RemoteEsProvider } from './services/remote_es/remote_es';
 

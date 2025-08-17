@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { from, filter, shareReplay } from 'rxjs';
 import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
 import { allToolsSelection } from '@kbn/onechat-common';
-import { AgentHandlerContext } from '@kbn/onechat-server';
+import type { AgentHandlerContext } from '@kbn/onechat-server';
 import {
   addRoundCompleteEvent,
   extractRound,
@@ -18,7 +18,7 @@ import {
 } from '../utils';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
-import { RunAgentParams, RunAgentResponse } from '../run_agent';
+import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 
 const chatAgentGraphName = 'default-onechat-agent';
 
@@ -45,6 +45,7 @@ export const runChatAgent: RunChatAgentFn = async (
   { logger, request, modelProvider, toolProvider, events }
 ) => {
   const model = await modelProvider.getDefaultModel();
+  logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
 
   const selectedTools = await selectProviderTools({
     provider: toolProvider,
@@ -62,12 +63,15 @@ export const runChatAgent: RunChatAgentFn = async (
     nextInput,
     previousRounds: conversation,
   });
+
   const agentGraph = createAgentGraph({
     logger,
     chatModel: model.chatModel,
     tools: langchainTools,
     customInstructions,
   });
+
+  logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
 
   const eventStream = agentGraph.streamEvents(
     { initialMessages },
@@ -90,6 +94,7 @@ export const runChatAgent: RunChatAgentFn = async (
     convertGraphEvents({
       graphName: chatAgentGraphName,
       toolIdMapping,
+      logger,
     }),
     addRoundCompleteEvent({ userInput: nextInput }),
     shareReplay()

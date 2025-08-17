@@ -12,7 +12,7 @@ import { EventEmitter } from 'events';
 import { Observable } from 'rxjs';
 
 import { useVisualizeAppState } from './use_visualize_app_state';
-import { VisualizeServices, SavedVisInstance } from '../../types';
+import type { VisualizeServices, SavedVisInstance } from '../../types';
 import { visualizeAppStateStub } from '../stubs';
 import { VisualizeConstants } from '../../../../common/constants';
 import { createVisualizeServicesMock } from '../mocks';
