@@ -16,8 +16,8 @@ import {
   updateAgentPolicy,
   updateIntegrationPolicy,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
-import { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
-import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
+import type { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
+import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');

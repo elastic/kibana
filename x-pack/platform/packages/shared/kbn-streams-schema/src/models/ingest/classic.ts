@@ -6,13 +6,14 @@
  */
 import { z } from '@kbn/zod';
 import { IngestBase, IngestBaseStream } from './base';
-import {
-  ClassicIngestStreamEffectiveLifecycle,
-  classicIngestStreamEffectiveLifecycleSchema,
-} from './lifecycle';
-import { ElasticsearchAssets, elasticsearchAssetsSchema } from './common';
-import { Validation, validation } from '../validation/validation';
-import { ModelValidation, modelValidation } from '../validation/model_validation';
+import type { ClassicIngestStreamEffectiveLifecycle } from './lifecycle';
+import { classicIngestStreamEffectiveLifecycleSchema } from './lifecycle';
+import type { ElasticsearchAssets } from './common';
+import { elasticsearchAssetsSchema } from './common';
+import type { Validation } from '../validation/validation';
+import { validation } from '../validation/validation';
+import type { ModelValidation } from '../validation/model_validation';
+import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
 
 /* eslint-disable @typescript-eslint/no-namespace */

@@ -10,8 +10,8 @@
 import { useState, useEffect } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
-import { SolutionView } from '@kbn/spaces-plugin/common';
+import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
 import { useServices } from '../services';
 
 /**

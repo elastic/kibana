@@ -31,7 +31,8 @@ import { useDeprecationLogging } from './use_deprecation_logging';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 import { loadLogsCheckpoint, saveLogsCheckpoint } from '../../../lib/logs_checkpoint';
 import { DEPRECATION_LOGS_INDEX } from '../../../../../common/constants';
-import { WithPrivileges, MissingPrivileges } from '../../../../shared_imports';
+import type { MissingPrivileges } from '../../../../shared_imports';
+import { WithPrivileges } from '../../../../shared_imports';
 import { uiMetricService, UIM_ES_DEPRECATION_LOGS_PAGE_LOAD } from '../../../lib/ui_metric';
 
 const i18nTexts = {

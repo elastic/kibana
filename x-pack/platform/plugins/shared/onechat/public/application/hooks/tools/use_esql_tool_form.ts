@@ -7,7 +7,7 @@
 
 import { useForm } from 'react-hook-form';
 import { useEsqlToolFormValidationResolver } from '../../components/tools/esql/form/validation/esql_tool_form_validation';
-import { OnechatEsqlToolFormData } from '../../components/tools/esql/form/types/esql_tool_form_types';
+import type { OnechatEsqlToolFormData } from '../../components/tools/esql/form/types/esql_tool_form_types';
 
 const getDefaultValues = (): OnechatEsqlToolFormData => ({
   name: '',

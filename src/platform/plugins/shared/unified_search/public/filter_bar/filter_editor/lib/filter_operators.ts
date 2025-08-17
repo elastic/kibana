@@ -10,8 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import { FILTERS } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
 import { isRangeParams } from '../range_value_input';
 
 export const strings = {

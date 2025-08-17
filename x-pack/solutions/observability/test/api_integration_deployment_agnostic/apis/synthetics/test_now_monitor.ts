@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
 

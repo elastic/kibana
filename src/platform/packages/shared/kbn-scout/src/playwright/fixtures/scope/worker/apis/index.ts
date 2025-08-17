@@ -8,9 +8,12 @@
  */
 
 import { coreWorkerFixtures } from '../core_fixtures';
-import { CoreApiService, getCoreApiHelper } from './core';
-import { FleetApiService, getFleetApiHelper } from './fleet';
-import { StreamsApiService, getStreamsApiService } from './streams';
+import type { CoreApiService } from './core';
+import { getCoreApiHelper } from './core';
+import type { FleetApiService } from './fleet';
+import { getFleetApiHelper } from './fleet';
+import type { StreamsApiService } from './streams';
+import { getStreamsApiService } from './streams';
 
 export interface ApiServicesFixture {
   fleet: FleetApiService;

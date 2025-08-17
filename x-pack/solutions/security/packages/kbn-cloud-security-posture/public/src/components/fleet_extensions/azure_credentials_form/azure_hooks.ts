@@ -6,14 +6,18 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackageInfo,
+} from '@kbn/fleet-plugin/common';
 import { updatePolicyWithInputs, getArmTemplateUrlFromPackage } from '../utils';
 import {
   getAzureCredentialsFormOptions,
   getInputVarsFields,
 } from './get_azure_credentials_form_options';
 import { AZURE_SETUP_FORMAT, AZURE_CREDENTIALS_TYPE } from '../constants';
-import { AzureCredentialsType, AzureSetupFormat, UpdatePolicy } from '../types';
+import type { AzureCredentialsType, AzureSetupFormat, UpdatePolicy } from '../types';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 const getSetupFormatFromInput = (
