@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
+import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import { registerUISettings } from './ui_settings';
 
