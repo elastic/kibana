@@ -12,7 +12,12 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
+import { resetRulesTableState } from '../../../../../tasks/common';
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
+import {
+  deleteAlertsAndRules,
+  deletePrebuiltRulesAssets,
+} from '../../../../../tasks/api_calls/common';
 import {
   createAndInstallMockedPrebuiltRules,
   installMockPrebuiltRulesPackage,
@@ -72,10 +77,13 @@ describe(
   () => {
     before(() => {
       installMockPrebuiltRulesPackage();
+      preventPrebuiltRulesPackageInstallation();
     });
 
     beforeEach(() => {
-      preventPrebuiltRulesPackageInstallation();
+      deletePrebuiltRulesAssets();
+      deleteAlertsAndRules();
+      resetRulesTableState();
     });
 
     describe('User with read privileges on Security Solution', () => {
@@ -113,15 +121,15 @@ describe(
         cy.get(RULES_UPDATES_TAB).should('not.exist');
 
         // Navigate to Rule Update tab anyways via URL
-        // and assert that rules cannot be selected and all
-        // upgrade buttons are disabled
         cy.visit(`${APP_PATH}${RULES_UPDATES}`);
-        cy.get(UPGRADE_ALL_RULES_BUTTON).should('be.disabled');
 
-        // Upgrade button and selection checkbox should not be visible
+        // Check that upgrade buttons are not visible
+        cy.get(UPGRADE_ALL_RULES_BUTTON).should('not.exist');
         cy.get(getUpgradeSingleRuleButtonByRuleId(OUTDATED_RULE_1['security-rule'].rule_id)).should(
           'not.exist'
         );
+
+        // Check that rule selection checkbox is not visible
         cy.get(RULE_CHECKBOX).should('not.exist');
       });
     });
