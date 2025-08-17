@@ -91,7 +91,7 @@ Workflow plugins use this package for shared functionality:
 import { WorkflowDefinition } from '@kbn/workflows';
 
 // In workflows management
-import { WorkflowSpec, WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 ```
 
 ### Type Safety
