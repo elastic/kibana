@@ -7,7 +7,7 @@
 
 import type { AppDeepLinkId, EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 
-import { ADD, UPDATE } from './constants/operations';
+import type { ADD, UPDATE } from './constants/operations';
 
 export type TOperation = typeof ADD | typeof UPDATE;
 

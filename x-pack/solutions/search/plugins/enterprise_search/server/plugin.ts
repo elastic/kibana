@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   Plugin,
   PluginInitializerContext,
   CoreSetup,
   Logger,
   SavedObjectsServiceStart,
-  DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ENTERPRISE_SEARCH_APP_ID } from '@kbn/deeplinks-search';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
@@ -62,7 +62,7 @@ import { getConnectorsSearchResultProvider } from './utils/connectors_search_res
 import { getIndicesSearchResultProvider } from './utils/indices_search_result_provider';
 import { getSearchResultProvider } from './utils/search_result_provider';
 
-import { ConfigType } from '.';
+import type { ConfigType } from '.';
 
 export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, PluginsStart> {
   private readonly config: ConfigType;

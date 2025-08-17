@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { MessageRole, Model, Prompt, PromptVersion } from '@kbn/inference-common';
-import { ChatCompleteOptions } from '@kbn/inference-common';
+import type { Model, Prompt, PromptVersion } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
+import type { ChatCompleteOptions } from '@kbn/inference-common';
 import { omitBy, orderBy } from 'lodash';
 import Mustache from 'mustache';
 import { format } from 'util';

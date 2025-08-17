@@ -19,7 +19,7 @@ import {
   getSpanDocumentOverview,
 } from '@kbn/discover-utils';
 import { getFlattenedSpanDocumentOverview } from '@kbn/discover-utils/src';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';

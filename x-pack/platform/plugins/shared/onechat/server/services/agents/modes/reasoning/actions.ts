@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { BaseMessage, isBaseMessage } from '@langchain/core/messages';
+import type { BaseMessage } from '@langchain/core/messages';
+import { isBaseMessage } from '@langchain/core/messages';
 
 export interface ReasoningStep {
   type: 'reasoning';

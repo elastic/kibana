@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { RecommendedQuery, RecommendedField } from '@kbn/esql-types';
-import { GetColumnsByTypeFn, ISuggestionItem } from '../../types';
+import type { GetColumnsByTypeFn, ISuggestionItem } from '../../types';
 import { METADATA_FIELDS } from '../metadata';
 
 export interface EditorExtensions {

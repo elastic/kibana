@@ -16,7 +16,7 @@ import {
   SAME_FAMILY,
 } from '../../../../../../translations';
 import { useIndicesCheckContext } from '../../../../../../contexts/indices_check_context';
-import { IlmPhase, PatternRollup } from '../../../../../../types';
+import type { IlmPhase, PatternRollup } from '../../../../../../types';
 import { EMPTY_METADATA } from '../../../../../../constants';
 import {
   ALL_TAB_ID,

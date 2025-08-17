@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessorActorSnapshot } from './processor_state_machine';
+import type { ProcessorActorSnapshot } from './processor_state_machine';
 
 export const isProcessorUnderEdit = (processorSnapshot: ProcessorActorSnapshot) => {
   return processorSnapshot.matches('draft') || processorSnapshot.matches({ configured: 'editing' });

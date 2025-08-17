@@ -6,9 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
-import { isSchema } from '@kbn/streams-schema';
-import { Condition, conditionSchema } from './conditions';
-import { StreamlangProcessorDefinition, streamlangProcessorSchema } from './processors';
+import { isSchema } from '@kbn/zod-helpers';
+import type { Condition } from './conditions';
+import { conditionSchema } from './conditions';
+import type { StreamlangProcessorDefinition } from './processors';
+import { streamlangProcessorSchema } from './processors';
 
 // Recursive schema for ConditionWithSteps
 export const conditionWithStepsSchema: z.ZodType<ConditionWithSteps> = z.lazy(() =>
