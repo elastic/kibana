@@ -23,8 +23,7 @@ import { getNewRule } from '../../../../objects/rule';
 import { EXECUTION_SHOWING } from '../../../../screens/rule_details';
 import { manualRuleRun } from '../../../../tasks/api_calls/backfill';
 
-// FLAKY: https://github.com/elastic/kibana/issues/184360
-describe.skip(
+describe(
   'Event log',
   {
     tags: ['@ess', '@serverless'],
