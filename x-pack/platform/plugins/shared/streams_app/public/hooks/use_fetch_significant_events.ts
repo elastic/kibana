@@ -7,7 +7,7 @@
 
 import { calculateAuto } from '@kbn/calculate-auto';
 import moment from 'moment';
-import { SignificantEventsResponse, StreamQuery } from '@kbn/streams-schema';
+import type { SignificantEventsResponse, StreamQuery } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 

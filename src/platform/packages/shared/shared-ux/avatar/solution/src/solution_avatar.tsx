@@ -10,16 +10,10 @@
 import { css } from '@emotion/react';
 import React from 'react';
 
-import {
-  DistributiveOmit,
-  EuiAvatar,
-  EuiAvatarProps,
-  IconType,
-  useEuiShadow,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { DistributiveOmit, EuiAvatarProps, IconType } from '@elastic/eui';
+import { EuiAvatar, useEuiShadow, useEuiTheme } from '@elastic/eui';
 
-import { SolutionNameType } from './types';
+import type { SolutionNameType } from './types';
 
 import textureImage from './assets/texture.svg';
 

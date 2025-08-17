@@ -57,6 +57,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 match_all: {},
               },
             ],
+            schema: 'ecs',
           })
         )
         .expect(200);

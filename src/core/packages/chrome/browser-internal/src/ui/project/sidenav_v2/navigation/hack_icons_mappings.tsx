@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppDeepLinkId } from '@kbn/core-chrome-browser';
-import { IconType } from '@elastic/eui';
+import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import type { IconType } from '@elastic/eui';
 
 // TODO: Remove this once the navigation is fully migrated to the new system.
 export const AppDeepLinkIdToIcon: Record<AppDeepLinkId | string, IconType | ''> = {

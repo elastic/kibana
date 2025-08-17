@@ -15,7 +15,8 @@ import {
   type PartitionChartProps,
   type PartitionVisParams,
 } from '../types/expression_renderers';
-import { ChartTypes, MosaicVisExpressionFunctionDefinition } from '../types';
+import type { MosaicVisExpressionFunctionDefinition } from '../types';
+import { ChartTypes } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
   PARTITION_LABELS_VALUE,

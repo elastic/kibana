@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { RouteInitializerDeps } from '..';
+import type { RouteInitializerDeps } from '..';
 import { CUSTOM_ELEMENT_TYPE, API_ROUTE_CUSTOM_ELEMENT } from '../../../common/lib/constants';
 import { getId } from '../../../common/lib/get_id';
 import { CustomElementSchema } from './custom_element_schema';
-import { CustomElementAttributes } from './custom_element_attributes';
+import type { CustomElementAttributes } from './custom_element_attributes';
 import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';
 

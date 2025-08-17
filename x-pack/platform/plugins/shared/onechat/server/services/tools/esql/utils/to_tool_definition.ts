@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EsqlToolConfig, ToolType } from '@kbn/onechat-common';
+import type { EsqlToolConfig } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/onechat-common';
 import { z } from '@kbn/zod';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import { FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolPersistedDefinition } from '../../client';
-import { InternalToolDefinition } from '../../tool_provider';
+import type { InternalToolDefinition } from '../../tool_provider';
 
 export function toToolDefinition<TSchema extends z.ZodObject<any> = z.ZodObject<any>>(
   esqlTool: ToolPersistedDefinition<EsqlToolConfig>

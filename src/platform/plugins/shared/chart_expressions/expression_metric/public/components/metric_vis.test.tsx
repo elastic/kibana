@@ -10,15 +10,16 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { MetricVis, MetricVisComponentProps } from './metric_vis';
-import { MetricWTrend } from '@elastic/charts';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
-import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
-import { MetricVisParam } from '../../common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { MetricVisComponentProps } from './metric_vis';
+import { MetricVis } from './metric_vis';
+import type { MetricWTrend } from '@elastic/charts';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
+import type { MetricVisParam } from '../../common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import { PaletteOutput } from '@kbn/coloring';
+import type { PaletteOutput } from '@kbn/coloring';
 import { faker } from '@faker-js/faker';
 import {
   setupResizeObserverMock,

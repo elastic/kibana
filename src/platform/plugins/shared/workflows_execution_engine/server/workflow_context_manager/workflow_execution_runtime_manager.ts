@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsWorkflowExecution, EsWorkflowStepExecution, ExecutionStatus } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { graphlib } from '@dagrejs/dagre';
 import { withSpan } from '@kbn/apm-utils';
 import agent from 'elastic-apm-node';
-import { RunStepResult } from '../step/step_base';
-import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import { StepExecutionRepository } from '../repositories/step_execution_repository';
-import { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { RunStepResult } from '../step/step_base';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecution: EsWorkflowExecution;
