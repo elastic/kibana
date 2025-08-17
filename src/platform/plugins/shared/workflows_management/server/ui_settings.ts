@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { i18n } from '@kbn/i18n';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
   uiSettings.register({
