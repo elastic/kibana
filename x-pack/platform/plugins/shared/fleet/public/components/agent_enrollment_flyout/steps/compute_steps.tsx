@@ -106,6 +106,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         installCommand: standaloneInstallCommands,
         isK8s,
         cloudSecurityIntegration,
+        agentPolicy: selectedPolicy,
         rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
       })
     );
@@ -258,6 +259,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           cloudSecurityIntegration,
           fleetServerHost,
           enrollToken,
+          agentPolicy: selectedPolicy,
           rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
         })
       );

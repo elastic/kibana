@@ -69,6 +69,7 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
       installCommand: installManagedCommands,
       isComplete: yaml && commandCopied,
       fullCopyButton: true,
+      agentPolicy,
       onCopy: () => setCommandCopied(true),
       rootIntegrations: getRootIntegrations(agentPolicy?.package_policies ?? []),
     }),
