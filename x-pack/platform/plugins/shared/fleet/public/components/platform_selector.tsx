@@ -98,6 +98,17 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     />
   );
 
+  const systemPackageCloudbeatCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.systemPackageCloudbeatCallout', {
+        defaultMessage:
+          'Cloudbeat does not support RPM and DEB system packages. This integration can only be deployed on Linux and Kubernetes environments. Please use the Linux TAR installer instead.',
+      })}
+      color="warning"
+      iconType="warning"
+    />
+  );
+
   const k8sCallout = (
     <EuiCallOut
       title={i18n.translate('xpack.fleet.enrollmentInstructions.k8sCallout', {
@@ -124,7 +135,18 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     <EuiCallOut
       title={i18n.translate('xpack.fleet.enrollmentInstructions.macCallout', {
         defaultMessage:
-          'We recommend against deploying this integration within Mac as it is currently not being supported.',
+          'Cloudbeat does not support macOS. This integration can only be deployed on Linux and Kubernetes environments.',
+      })}
+      color="warning"
+      iconType="warning"
+    />
+  );
+
+  const windowsCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.windowsCallout', {
+        defaultMessage:
+          'Cloudbeat does not support Windows. This integration can only be deployed on Linux and Kubernetes environments.',
       })}
       color="warning"
       iconType="warning"
@@ -210,7 +232,12 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
         <EuiSpacer size="m" />
         {['deb_aarch64', 'deb_x86_64', 'rpm_aarch64', 'rpm_x86_64'].includes(platform) && (
           <>
-            {systemPackageCallout}
+            {(cloudSecurityIntegration?.integrationType ===
+              FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
+              cloudSecurityIntegration?.integrationType ===
+                FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) 
+              ? systemPackageCloudbeatCallout 
+              : systemPackageCallout}
             <EuiSpacer size="m" />
           </>
         )}
@@ -221,6 +248,16 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) && (
             <>
               {macCallout}
+              <EuiSpacer size="m" />
+            </>
+          )}
+        {['windows', 'windows_msi'].includes(platform) &&
+          (cloudSecurityIntegration?.integrationType ===
+            FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
+            cloudSecurityIntegration?.integrationType ===
+              FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) && (
+            <>
+              {windowsCallout}
               <EuiSpacer size="m" />
             </>
           )}
