@@ -31,7 +31,9 @@ import {
   VISIBLE_PLATFORM_OPTIONS,
   EXTENDED_PLATFORM_OPTIONS,
   KUBERNETES_PLATFORM_OPTION,
+  useIsCloudBeatIntegration,
 } from '../hooks';
+import type { AgentPolicy } from '../types';
 
 import type { CommandsByPlatform } from '../applications/fleet/components/fleet_server_instructions/utils';
 
@@ -48,6 +50,7 @@ interface Props {
   enrollToken?: string | undefined;
   fullCopyButton?: boolean;
   fleetServerHost?: string;
+  agentPolicy?: AgentPolicy;
   onCopy?: () => void;
 }
 
@@ -61,10 +64,12 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   hasFleetServer,
   fleetServerHost,
   fullCopyButton,
+  agentPolicy,
   onCopy,
 }) => {
   const { platform, setPlatform } = usePlatform();
   const [showExtendedPlatforms, setShowExtendedPlatforms] = useState(false);
+  const { isCloudBeat } = useIsCloudBeatIntegration(agentPolicy);
 
   useEffect(() => {
     if (
@@ -127,6 +132,18 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
           'We recommend against deploying this integration within Mac as it is currently not being supported.',
       })}
       color="warning"
+      iconType="warning"
+    />
+  );
+
+  const cloudBeatUnsupportedPlatformCallout = (platformName: string) => (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.cloudBeatUnsupportedPlatformCallout', {
+        defaultMessage:
+          'Cloudbeat integrations do not support {platformName}. This integration only supports Linux and Kubernetes environments. Deploying on {platformName} will result in a failed installation.',
+        values: { platformName },
+      })}
+      color="danger"
       iconType="warning"
     />
   );
@@ -224,6 +241,31 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               <EuiSpacer size="m" />
             </>
           )}
+        {/* Cloudbeat-specific warnings for unsupported platforms */}
+        {isCloudBeat && ['mac_aarch64', 'mac_x86_64'].includes(platform) && (
+          <>
+            {cloudBeatUnsupportedPlatformCallout('macOS')}
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {isCloudBeat && platform === 'windows' && (
+          <>
+            {cloudBeatUnsupportedPlatformCallout('Windows')}
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {isCloudBeat && ['deb_aarch64', 'deb_x86_64'].includes(platform) && (
+          <>
+            {cloudBeatUnsupportedPlatformCallout('DEB package systems')}
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {isCloudBeat && ['rpm_aarch64', 'rpm_x86_64'].includes(platform) && (
+          <>
+            {cloudBeatUnsupportedPlatformCallout('RPM package systems')}
+            <EuiSpacer size="m" />
+          </>
+        )}
         {platform === 'kubernetes' &&
           cloudSecurityIntegration?.integrationType ===
             FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE && (

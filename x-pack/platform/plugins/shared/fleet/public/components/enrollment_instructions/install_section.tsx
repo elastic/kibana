@@ -12,6 +12,7 @@ import type { CommandsByPlatform } from '../../applications/fleet/components/fle
 import { InstallationMessage } from '../agent_enrollment_flyout/installation_message';
 
 import type { K8sMode, CloudSecurityIntegration } from '../agent_enrollment_flyout/types';
+import type { AgentPolicy } from '../../types';
 import { PlatformSelector } from '../platform_selector';
 
 import { RootPrivilegesCallout } from './root_privileges_callout';
@@ -25,6 +26,7 @@ interface Props {
   fleetServerHost?: string;
   fullCopyButton?: boolean;
   isManaged?: boolean;
+  agentPolicy?: AgentPolicy;
   onCopy?: () => void;
   rootIntegrations?: Array<{ name: string; title: string }>;
 }
@@ -37,6 +39,7 @@ export const InstallSection: React.FunctionComponent<Props> = ({
   fleetServerHost,
   fullCopyButton = false,
   isManaged = true,
+  agentPolicy,
   onCopy,
   rootIntegrations,
 }) => {
@@ -55,6 +58,7 @@ export const InstallSection: React.FunctionComponent<Props> = ({
         isManaged={isManaged}
         enrollToken={enrollToken}
         fleetServerHost={fleetServerHost}
+        agentPolicy={agentPolicy}
       />
     </>
   );

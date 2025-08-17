@@ -87,6 +87,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       isComplete: commandCopied || !!enrolledAgentIds.length,
       fullCopyButton: true,
       fleetServerHost,
+      agentPolicy,
       onCopy: () => setCommandCopied(true),
       rootIntegrations: getRootIntegrations(agentPolicy?.package_policies ?? []),
     }),

@@ -28,6 +28,7 @@ export const InstallManagedAgentStep = ({
   fleetServerHost,
   isComplete,
   fullCopyButton,
+  agentPolicy,
   onCopy,
   rootIntegrations,
 }: {
@@ -40,6 +41,7 @@ export const InstallManagedAgentStep = ({
   installCommand: CommandsByPlatform;
   isComplete?: boolean;
   fullCopyButton?: boolean;
+  agentPolicy?: any; // Using any for now to avoid type import issues
   onCopy?: () => void;
   rootIntegrations?: Array<{ name: string; title: string }>;
 }): EuiContainedStepProps => {
@@ -60,6 +62,7 @@ export const InstallManagedAgentStep = ({
           onCopy={onCopy}
           fullCopyButton={fullCopyButton}
           fleetServerHost={fleetServerHost}
+          agentPolicy={agentPolicy}
           rootIntegrations={rootIntegrations}
         />
       ) : (

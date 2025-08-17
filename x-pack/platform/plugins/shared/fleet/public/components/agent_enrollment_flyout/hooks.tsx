@@ -22,6 +22,7 @@ import {
   FLEET_KUBERNETES_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
   FLEET_CLOUD_SECURITY_ASSET_PACKAGE,
+  FLEET_CLOUD_BEAT_PACKAGE,
 } from '../../../common';
 
 import {
@@ -106,31 +107,63 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
     return getCloudSecurityPackagePolicyFromAgentPolicy(agentPolicy);
   }, [agentPolicy]);
 
-  const integrationVersion = cloudSecurityPackagePolicy?.package?.version;
+  const cloudBeatPackagePolicy = useMemo(() => {
+    return getCloudBeatPackagePolicyFromAgentPolicy(agentPolicy);
+  }, [agentPolicy]);
+
+  // Use either Cloud Security Posture or Cloudbeat package policy
+  const activePackagePolicy = cloudSecurityPackagePolicy || cloudBeatPackagePolicy;
+
+  const integrationVersion = activePackagePolicy?.package?.version;
   const packageName =
-    cloudSecurityPackagePolicy?.package?.name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE
+    activePackagePolicy?.package?.name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE
       ? FLEET_CLOUD_SECURITY_POSTURE_PACKAGE
-      : FLEET_CLOUD_SECURITY_ASSET_PACKAGE;
+      : activePackagePolicy?.package?.name === FLEET_CLOUD_SECURITY_ASSET_PACKAGE
+      ? FLEET_CLOUD_SECURITY_ASSET_PACKAGE
+      : activePackagePolicy?.package?.name;
 
   // Fetch the package info to get the CloudFormation template URL only
-  // if the package policy is a Cloud Security policy
+  // if the package policy is a Cloud Security policy or Cloudbeat policy
   const { data: packageInfoData, isLoading } = useGetPackageInfoByKeyQuery(
     packageName,
     integrationVersion,
     { full: true },
-    { enabled: Boolean(cloudSecurityPackagePolicy) }
+    { enabled: Boolean(activePackagePolicy) }
   );
 
   const AWS_ACCOUNT_TYPE = 'aws.account_type';
   const AZURE_ACCOUNT_TYPE = 'azure.account_type';
 
   const cloudSecurityIntegration: CloudSecurityIntegration | undefined = useMemo(() => {
-    if (!agentPolicy || !cloudSecurityPackagePolicy) {
+    if (!agentPolicy || !activePackagePolicy) {
       return undefined;
     }
 
-    const integrationType = cloudSecurityPackagePolicy.inputs?.find((input) => input.enabled)
-      ?.policy_template as CloudSecurityIntegrationType;
+    // For Cloudbeat integrations, extract the integration type from the input type
+    let integrationType: CloudSecurityIntegrationType | undefined;
+    
+    if (cloudBeatPackagePolicy) {
+      // Look for enabled Cloudbeat inputs to determine integration type
+      const enabledCloudBeatInput = cloudBeatPackagePolicy.inputs?.find((input) => 
+        input.enabled && input.type?.startsWith('cloudbeat/')
+      );
+      
+      if (enabledCloudBeatInput?.type) {
+        // Map cloudbeat input types to integration types
+        if (enabledCloudBeatInput.type.includes('cis_k8s') || enabledCloudBeatInput.type.includes('cis_eks')) {
+          integrationType = 'kspm';
+        } else if (enabledCloudBeatInput.type.includes('vuln_mgmt')) {
+          integrationType = 'vuln_mgmt';
+        } else if (enabledCloudBeatInput.type.includes('cis_')) {
+          // Other CIS checks are typically CSPM
+          integrationType = 'cspm';
+        }
+      }
+    } else if (cloudSecurityPackagePolicy) {
+      // For Cloud Security Posture packages, use the existing logic
+      integrationType = cloudSecurityPackagePolicy.inputs?.find((input) => input.enabled)
+        ?.policy_template as CloudSecurityIntegrationType;
+    }
 
     if (!integrationType) return undefined;
 
@@ -158,7 +191,7 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
       : cloudFormationTemplateFromAgentPolicy;
 
     const cloudFormationAwsAccountType: CloudSecurityIntegrationAwsAccountType | undefined =
-      cloudSecurityPackagePolicy?.inputs?.find((input) => input.enabled)?.streams?.[0]?.vars?.[
+      activePackagePolicy?.inputs?.find((input) => input.enabled)?.streams?.[0]?.vars?.[
         AWS_ACCOUNT_TYPE
       ]?.value;
 
@@ -171,7 +204,7 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
       : azureArmTemplateFromAgentPolicy;
 
     const azureArmTemplateAccountType: CloudSecurityIntegrationAzureAccountType | undefined =
-      cloudSecurityPackagePolicy?.inputs?.find((input) => input.enabled)?.streams?.[0]?.vars?.[
+      activePackagePolicy?.inputs?.find((input) => input.enabled)?.streams?.[0]?.vars?.[
         AZURE_ACCOUNT_TYPE
       ]?.value;
 
@@ -191,9 +224,17 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
       },
       cloudShellUrl,
     };
-  }, [agentPolicy, packageInfoData?.item, isLoading, cloudSecurityPackagePolicy]);
+  }, [agentPolicy, packageInfoData?.item, isLoading, activePackagePolicy, cloudBeatPackagePolicy, cloudSecurityPackagePolicy]);
 
   return { cloudSecurityIntegration };
+}
+
+export function useIsCloudBeatIntegration(agentPolicy?: AgentPolicy) {
+  const isCloudBeat = useMemo(() => {
+    return Boolean(getCloudBeatPackagePolicyFromAgentPolicy(agentPolicy));
+  }, [agentPolicy]);
+
+  return { isCloudBeat };
 }
 
 const isK8sPackage = (pkg: PackagePolicy) => {
@@ -210,6 +251,16 @@ const getCloudSecurityPackagePolicyFromAgentPolicy = (
       input.package?.name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE ||
       input.package?.name === FLEET_CLOUD_SECURITY_ASSET_PACKAGE
   );
+};
+
+const getCloudBeatPackagePolicyFromAgentPolicy = (
+  agentPolicy?: AgentPolicy
+): PackagePolicy | undefined => {
+  return agentPolicy?.package_policies?.find((packagePolicy) => {
+    return packagePolicy.inputs?.some(
+      (input) => input.type?.startsWith('cloudbeat/') && input.enabled
+    );
+  });
 };
 
 export function useGetCreateApiKey() {

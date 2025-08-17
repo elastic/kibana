@@ -22,6 +22,7 @@ export const InstallStandaloneAgentStep = ({
   cloudSecurityIntegration,
   isComplete,
   fullCopyButton,
+  agentPolicy,
   onCopy,
   rootIntegrations,
 }: {
@@ -30,6 +31,7 @@ export const InstallStandaloneAgentStep = ({
   cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
   isComplete?: boolean;
   fullCopyButton?: boolean;
+  agentPolicy?: any; // Using any for now to avoid type import issues
   onCopy?: () => void;
   rootIntegrations?: Array<{ name: string; title: string }>;
 }): EuiContainedStepProps => {
@@ -45,6 +47,7 @@ export const InstallStandaloneAgentStep = ({
         onCopy={onCopy}
         fullCopyButton={fullCopyButton}
         isManaged={false}
+        agentPolicy={agentPolicy}
         rootIntegrations={rootIntegrations}
       />
     ),
