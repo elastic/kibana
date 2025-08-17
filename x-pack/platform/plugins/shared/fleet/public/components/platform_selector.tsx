@@ -126,7 +126,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     <EuiCallOut
       title={i18n.translate('xpack.fleet.enrollmentInstructions.unsupportedPlatformCallout', {
         defaultMessage:
-          'Cloudbeat does not support macOS and Windows platforms. This integration only works on Linux and Kubernetes environments.',
+          'Cloudbeat cannot be deployed on macOS and Windows platforms. This integration only works on Linux and Kubernetes environments.',
       })}
       color="warning"
       iconType="warning"
