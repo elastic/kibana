@@ -25,13 +25,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 
 import { MANAGE_API_KEYS_URL } from '../../../../../../common/constants';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
-import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
+import type { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
 import { CONNECTOR_DETAIL_PATH } from '../../../routes';
 import { ConnectorViewIndexLink } from '../../shared/connector_view_search_indices_details/connector_view_search_indices_details';
 

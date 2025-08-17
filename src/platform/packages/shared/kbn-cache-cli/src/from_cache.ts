@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Cache } from 'cache-manager';
+import type { Cache } from 'cache-manager';
 
 export async function fromCache<T>(
   key: string,
