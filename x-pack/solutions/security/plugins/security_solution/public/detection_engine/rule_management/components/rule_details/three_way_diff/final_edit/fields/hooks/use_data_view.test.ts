@@ -16,10 +16,6 @@ const mockedUseKibana = mockUseKibana();
 (useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
 
 describe('useDataView', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('should set isLoading to false if a dataView already exists', async () => {
     const { result, rerender } = renderHook((props) => useDataView(props), {
       initialProps: { dataViewId: 'test-data-view-id' },
