@@ -25,6 +25,7 @@ import { css } from '@emotion/react';
 import {
   FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
   FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE,
 } from '../../common/constants/epm';
 import {
   usePlatform,
@@ -124,7 +125,18 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     <EuiCallOut
       title={i18n.translate('xpack.fleet.enrollmentInstructions.macCallout', {
         defaultMessage:
-          'We recommend against deploying this integration within Mac as it is currently not being supported.',
+          'macOS is not supported by Cloudbeat. Cloudbeat integrations (CSPM, KSPM, CNVM) only support Linux and Kubernetes platforms.',
+      })}
+      color="warning"
+      iconType="warning"
+    />
+  );
+
+  const windowsCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.windowsCallout', {
+        defaultMessage:
+          'Windows is not supported by Cloudbeat. Cloudbeat integrations (CSPM, KSPM, CNVM) only support Linux and Kubernetes platforms.',
       })}
       color="warning"
       iconType="warning"
@@ -218,9 +230,23 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
           (cloudSecurityIntegration?.integrationType ===
             FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
             cloudSecurityIntegration?.integrationType ===
-              FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) && (
+              FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE ||
+            cloudSecurityIntegration?.integrationType ===
+              FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE) && (
             <>
               {macCallout}
+              <EuiSpacer size="m" />
+            </>
+          )}
+        {['windows', 'windows_msi'].includes(platform) &&
+          (cloudSecurityIntegration?.integrationType ===
+            FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
+            cloudSecurityIntegration?.integrationType ===
+              FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE ||
+            cloudSecurityIntegration?.integrationType ===
+              FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE) && (
+            <>
+              {windowsCallout}
               <EuiSpacer size="m" />
             </>
           )}
