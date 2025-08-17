@@ -12,8 +12,9 @@ import type {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { formatRequest } from '@kbn/server-route-repository';
 import supertest from 'supertest';
-import { Subtract } from 'utility-types';
-import { format, UrlObject } from 'url';
+import type { Subtract } from 'utility-types';
+import type { UrlObject } from 'url';
+import { format } from 'url';
 import { kbnTestConfig } from '@kbn/test';
 
 export function getScopedApiClient(kibanaServer: UrlObject, username: string) {

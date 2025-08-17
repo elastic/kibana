@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { OBSERVABILITY_ONBOARDING_APP_ID } from '@kbn/deeplinks-observability';
 
 export function buildOnboardingPath({

@@ -6,15 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  type CoreSetup,
-  Plugin,
-  type CoreStart,
-  type PluginInitializerContext,
-} from '@kbn/core/public';
+import type { Plugin } from '@kbn/core/public';
+import { type CoreSetup, type CoreStart, type PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { GenAiSettingsConfigType } from '../common/config';
+import type { GenAiSettingsConfigType } from '../common/config';
 
 export interface GenAiSettingsStartDeps {
   spaces?: SpacesPluginStart;
