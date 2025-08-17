@@ -33,7 +33,7 @@ export const bulkUpsertOperationsFactory =
       if (user.existingUserId) {
         // Update user with painless script
         dataClient.log(
-          'info',
+          'debug',
           `Updating existing user: ${user.username} with ID: ${user.existingUserId}`
         );
         ops.push(
@@ -77,6 +77,6 @@ export const bulkUpsertOperationsFactory =
         );
       }
     }
-    dataClient.log('info', `Built ${ops.length} bulk operations for users`);
+    dataClient.log('debug', `Built ${ops.length} bulk operations for users`);
     return ops;
   };

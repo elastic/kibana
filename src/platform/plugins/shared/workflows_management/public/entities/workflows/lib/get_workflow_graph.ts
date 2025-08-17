@@ -8,7 +8,7 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import { WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowYaml } from '@kbn/workflows';
 
 export type WorkflowGraphNodeType =
   | 'if'

@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import { useCallback, useRef, useState } from 'react';
 import { parseDocument } from 'yaml';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';

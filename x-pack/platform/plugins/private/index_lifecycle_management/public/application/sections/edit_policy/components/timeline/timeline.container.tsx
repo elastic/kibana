@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
 import { useFormData } from '../../../../../shared_imports';
 
@@ -13,7 +14,7 @@ import { formDataToAbsoluteTimings } from '../../lib';
 
 import { useConfiguration } from '../../form';
 
-import { FormInternal } from '../../types';
+import type { FormInternal } from '../../types';
 
 import { Timeline as ViewComponent } from './timeline';
 

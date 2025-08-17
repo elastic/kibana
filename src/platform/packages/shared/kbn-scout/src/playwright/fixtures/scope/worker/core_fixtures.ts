@@ -8,20 +8,22 @@
  */
 
 import { test as base } from '@playwright/test';
-import { KbnClient, SamlSessionManager } from '@kbn/test';
-import { Client } from '@elastic/elasticsearch';
+import type { KbnClient, SamlSessionManager } from '@kbn/test';
+import type { Client } from '@elastic/elasticsearch';
+import type {
+  KibanaUrl,
+  ElasticsearchRoleDescriptor,
+  KibanaRole,
+} from '../../../../common/services';
 import {
   createKbnUrl,
   getEsClient,
   getKbnClient,
   createSamlSessionManager,
   createScoutConfig,
-  KibanaUrl,
   ScoutLogger,
   createElasticsearchCustomRole,
   createCustomRole,
-  ElasticsearchRoleDescriptor,
-  KibanaRole,
 } from '../../../../common/services';
 import type { ScoutTestOptions } from '../../../types';
 import type { ScoutTestConfig } from '.';

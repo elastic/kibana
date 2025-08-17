@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SynonymsPutSynonymRuleResponse } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { SynonymsPutSynonymRuleResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 export const putSynonymsRule = async (
   client: ElasticsearchClient,

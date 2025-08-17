@@ -9,7 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-types';
-import { ESQLControlVariable, ESQLVariableType, RecommendedField } from '@kbn/esql-types';
+import type { ESQLControlVariable, RecommendedField } from '@kbn/esql-types';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import {
   type FunctionDefinition,
@@ -24,11 +25,11 @@ import { aggFunctionDefinitions } from '../generated/aggregation_functions';
 import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
-import { ESQLFieldWithMetadata, ISuggestionItem } from '../../commands_registry/types';
+import type { ESQLFieldWithMetadata, ISuggestionItem } from '../../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
-import { ESQLAstItem, ESQLFunction } from '../../types';
+import type { ESQLAstItem, ESQLFunction } from '../../types';
 import { removeFinalUnknownIdentiferArg, isParamExpressionType } from './shared';
 import { getTestFunctions } from './test_functions';
 

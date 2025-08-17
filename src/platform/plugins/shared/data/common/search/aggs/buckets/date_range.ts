@@ -10,9 +10,11 @@
 import { i18n } from '@kbn/i18n';
 
 import { inferTimeZone } from '../../..';
-import { DateRange, dateRangeToAst } from '../../expressions';
+import type { DateRange } from '../../expressions';
+import { dateRangeToAst } from '../../expressions';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
+import type { IBucketAggConfig } from './bucket_agg_type';
+import { BucketAggType } from './bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 import { aggDateRangeFnName } from './date_range_fn';
 

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonGroup,
-  EuiButtonGroupOptionProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowYaml } from '@kbn/workflows';
 import React, { useEffect, useMemo, useState } from 'react';
 import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common/schema';

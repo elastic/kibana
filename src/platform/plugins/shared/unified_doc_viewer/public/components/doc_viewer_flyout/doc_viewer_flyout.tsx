@@ -11,6 +11,7 @@ import React, { useMemo, useCallback, type ComponentType } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,14 +25,13 @@ import {
   keys,
   useEuiTheme,
   useIsWithinMinBreakpoint,
-  EuiFlyoutProps,
   isDOMNode,
 } from '@elastic/eui';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { DocViewerProps } from '@kbn/unified-doc-viewer';
+import type { DocViewerProps } from '@kbn/unified-doc-viewer';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
 

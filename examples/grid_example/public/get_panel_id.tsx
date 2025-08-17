@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
 

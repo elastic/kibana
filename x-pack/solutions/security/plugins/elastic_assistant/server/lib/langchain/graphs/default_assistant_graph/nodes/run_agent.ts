@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Runnable, RunnableConfig } from '@langchain/core/runnables';
-import { AIMessageChunk } from '@langchain/core/messages';
-import { BaseChatModelCallOptions } from '@langchain/core/language_models/chat_models';
-import { BaseLanguageModelInput } from '@langchain/core/language_models/base';
-import { AgentState, NodeParamsBase } from '../types';
+import type { Runnable, RunnableConfig } from '@langchain/core/runnables';
+import type { AIMessageChunk } from '@langchain/core/messages';
+import type { BaseChatModelCallOptions } from '@langchain/core/language_models/chat_models';
+import type { BaseLanguageModelInput } from '@langchain/core/language_models/base';
+import type { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 
 export interface RunAgentParams extends Pick<NodeParamsBase, 'logger'> {
