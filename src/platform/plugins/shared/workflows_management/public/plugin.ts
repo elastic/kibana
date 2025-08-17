@@ -8,7 +8,7 @@
  */
 
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { getWorkflowsConnectorType } from './connectors/workflows';
 import type {
