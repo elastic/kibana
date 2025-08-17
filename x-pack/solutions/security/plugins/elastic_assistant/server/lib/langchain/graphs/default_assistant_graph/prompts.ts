@@ -6,19 +6,16 @@
  */
 
 import { ChatPromptTemplate, MessagesPlaceholder, PromptTemplate } from '@langchain/core/prompts';
-import { BaseMessage } from '@langchain/core/messages';
-import {
-  ContentReferencesStore,
-  DocumentEntry,
-  enrichDocument,
-} from '@kbn/elastic-assistant-common';
+import type { BaseMessage } from '@langchain/core/messages';
+import type { ContentReferencesStore, DocumentEntry } from '@kbn/elastic-assistant-common';
+import { enrichDocument } from '@kbn/elastic-assistant-common';
 import type { Logger } from '@kbn/logging';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { ChatPromptValueInterface } from '@langchain/core/prompt_values';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { ChatPromptValueInterface } from '@langchain/core/prompt_values';
 import { enrichConversation } from '../../utils/enrich_graph_input_messages';
-import { AIAssistantKnowledgeBaseDataClient } from '../../../../ai_assistant_data_clients/knowledge_base';
+import type { AIAssistantKnowledgeBaseDataClient } from '../../../../ai_assistant_data_clients/knowledge_base';
 import { INCLUDE_CITATIONS } from '../../../prompt/prompts';
 
 interface ChatPromptTemplateInputValues {

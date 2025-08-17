@@ -20,7 +20,7 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { getOrElse, isRight } from 'fp-ts/Either';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
-import { LinkAnchor } from '../../../../../common/components/links';
+import { LinkButton } from '../../../../../common/components/links';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { PAGE_SIZE, PRIVILEGED_USER_ACTIVITY_QUERY_ID } from './constants';
 import { EsqlDashboardPanel } from '../../../privileged_user_monitoring_onboarding/components/esql_dashboard_panel/esql_dashboard_panel';
@@ -86,7 +86,7 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
         hideSubtitle
       >
         {isRight(tableQuery) && (
-          <LinkAnchor
+          <LinkButton
             href={getAppUrl({
               appId: 'discover',
               path: discoverPath,
@@ -96,7 +96,7 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
               id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.linkDescription"
               defaultMessage="View all events"
             />
-          </LinkAnchor>
+          </LinkButton>
         )}
       </HeaderSection>
       {toggleStatus && (
