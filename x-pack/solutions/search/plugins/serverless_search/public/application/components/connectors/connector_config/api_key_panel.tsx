@@ -18,7 +18,8 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Connector, CONNECTORS_INDEX } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
+import { CONNECTORS_INDEX } from '@kbn/search-connectors';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OPTIONAL_LABEL } from '../../../../../common/i18n_string';

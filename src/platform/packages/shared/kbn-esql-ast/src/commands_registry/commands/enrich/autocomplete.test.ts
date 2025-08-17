@@ -13,7 +13,7 @@ import {
   getFieldNamesByType,
   getPolicyFields,
 } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
 import { camelCase } from 'lodash';
 

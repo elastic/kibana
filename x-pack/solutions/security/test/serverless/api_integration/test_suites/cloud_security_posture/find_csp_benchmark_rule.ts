@@ -12,8 +12,8 @@ import type {
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 
 import { createPackagePolicy } from './helper';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { RoleCredentials } from '../../services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { RoleCredentials } from '../../services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

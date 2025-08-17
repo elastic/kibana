@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import type React from 'react';
 
 /**
  * I18nStart.Context is required by any localizable React component from \@kbn/i18n and \@elastic/eui packages

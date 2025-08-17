@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Duration } from 'moment';
-import { CoreSetup, ISavedObjectsRepository, SavedObjectsBulkDeleteObject } from '@kbn/core/server';
-import { Logger } from '@kbn/logging';
-import { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { Duration } from 'moment';
+import type {
+  CoreSetup,
+  ISavedObjectsRepository,
+  SavedObjectsBulkDeleteObject,
+} from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
+import type { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { SAVED_OBJECT_TYPE, TASK_ID } from './constants';
 

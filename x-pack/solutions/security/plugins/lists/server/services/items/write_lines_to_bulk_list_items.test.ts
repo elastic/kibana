@@ -8,11 +8,8 @@
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 import { createListIfItDoesNotExist } from '../lists/create_list_if_it_does_not_exist';
 
-import {
-  LinesResult,
-  importListItemsToStream,
-  writeBufferToItems,
-} from './write_lines_to_bulk_list_items';
+import type { LinesResult } from './write_lines_to_bulk_list_items';
+import { importListItemsToStream, writeBufferToItems } from './write_lines_to_bulk_list_items';
 import {
   getImportListItemsToStreamOptionsMock,
   getWriteBufferToItemsOptionsMock,

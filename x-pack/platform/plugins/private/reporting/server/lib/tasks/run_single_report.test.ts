@@ -10,16 +10,16 @@ import type { estypes } from '@elastic/elasticsearch';
 import { omit } from 'lodash';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { KibanaShuttingDownError } from '@kbn/reporting-common';
-import { ReportDocument } from '@kbn/reporting-common/types';
+import type { ReportDocument } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { cryptoFactory, type ExportType, type ReportingConfigType } from '@kbn/reporting-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import { RunSingleReportTask, REPORTING_EXECUTE_TYPE } from '.';
-import { ReportingCore } from '../..';
+import type { ReportingCore } from '../..';
 import { createMockReportingCore } from '../../test_helpers';
-import { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
+import type { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
 
 interface StreamMock {
   getSeqNo: () => number;

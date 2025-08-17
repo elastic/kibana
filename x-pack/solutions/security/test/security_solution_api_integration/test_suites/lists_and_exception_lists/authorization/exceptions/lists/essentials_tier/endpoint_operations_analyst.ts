@@ -6,12 +6,12 @@
  */
 
 import expect from 'expect';
-import TestAgent from 'supertest/lib/agent';
+import type TestAgent from 'supertest/lib/agent';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { getUpdateMinimalExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/request/update_exception_list_schema.mock';
-import { UpdateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { UpdateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { deleteAllExceptions } from '../../../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
