@@ -7,7 +7,7 @@
 
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import * as React from 'react';
-import { SyntheticsJourneyApiResponse } from '../../../../../../common/runtime_types';
+import type { SyntheticsJourneyApiResponse } from '../../../../../../common/runtime_types';
 import { StdErrorLogs } from '../../common/components/stderr_logs';
 import {
   ERROR_RUNNING_TEST,

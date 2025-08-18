@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FormulaIndexPatternColumn, FormulaPublicApi } from '@kbn/lens-plugin/public';
+import type { FormulaIndexPatternColumn, FormulaPublicApi } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 export function getDistributionInPercentageColumn({
