@@ -26,7 +26,7 @@ Elastic is proactively auditing its products and publishing Voluntary Product Ac
 
 ## Measures to support accessibility
 Elastic takes the following measures to ensure accessibility across Kibana:
-- Maintains and incorporates an accessible component library
+- Maintains and incorporates an accessible component library.
 - Provides continual accessibility training to staff
 - Conducts continuous accessibility audits and ensures that any found issues get fixed in a reasonable timeframe.
 - We value and prioritize accessibility feedback from our users and customers. Their input plays a critical role in shaping our accessibility roadmap and helps us address real-world barriers more effectively.
