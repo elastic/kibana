@@ -19,7 +19,7 @@ import {
   cleanupElasticsearch,
   createEsClientForTesting,
 } from '@kbn/test';
-import { Config } from '../config';
+import type { Config } from '../config';
 
 interface RunElasticsearchOptions {
   log: ToolingLog;

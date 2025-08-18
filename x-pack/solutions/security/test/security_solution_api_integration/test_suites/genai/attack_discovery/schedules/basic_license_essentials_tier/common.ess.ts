@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { enableAttackDiscoverySchedulesFeature } from '../utils/helpers';
 import { getAttackDiscoverySchedulesApis } from '../utils/apis';
 import { getSimpleAttackDiscoverySchedule } from '../mocks';

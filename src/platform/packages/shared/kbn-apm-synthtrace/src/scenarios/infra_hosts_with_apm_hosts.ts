@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { InfraDocument, apm, Instance, infra, ApmFields } from '@kbn/apm-synthtrace-client';
+import type { InfraDocument, Instance, ApmFields } from '@kbn/apm-synthtrace-client';
+import { apm, infra } from '@kbn/apm-synthtrace-client';
 import { random, times } from 'lodash';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 

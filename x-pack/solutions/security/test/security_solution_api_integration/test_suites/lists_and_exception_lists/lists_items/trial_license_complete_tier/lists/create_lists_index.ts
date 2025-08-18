@@ -9,10 +9,10 @@ import expect from '@kbn/expect';
 
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
-import TestAgent from 'supertest/lib/agent';
+import type TestAgent from 'supertest/lib/agent';
 import { deleteListsIndex } from '../../../utils';
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');

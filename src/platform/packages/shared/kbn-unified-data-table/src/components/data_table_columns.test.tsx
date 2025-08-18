@@ -9,13 +9,13 @@
 
 import React from 'react';
 import { getVisibleColumns } from '@kbn/discover-utils';
-import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { deserializeHeaderRowHeight, getEuiGridColumns } from './data_table_columns';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { dataTableContextMock } from '../../__mocks__/table_context';
 import { servicesMock } from '../../__mocks__/services';
 import { ROWS_HEIGHT_OPTIONS, kibanaJSON } from '../constants';
-import { UnifiedDataTableSettingsColumn } from '../types';
+import type { UnifiedDataTableSettingsColumn } from '../types';
 
 const columns = ['extension', 'message'];
 const columnsWithTimeCol = getVisibleColumns(

@@ -6,11 +6,15 @@
  */
 import { useCallback } from 'react';
 import semverGte from 'semver/functions/gte';
-import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
-import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
-import { SetupTechnology } from '@kbn/fleet-plugin/common/types';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackageInfo,
+} from '@kbn/fleet-plugin/common';
+import type { SetupTechnology } from '@kbn/fleet-plugin/common/types';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   getCloudConnectorRemoteRoleTemplate,
   getInputHiddenVars,
@@ -18,7 +22,7 @@ import {
   hasErrors,
 } from '../utils';
 import { useSetupTechnology } from './use_setup_technology';
-import { CloudProviders, CloudSetupConfig, UpdatePolicy } from '../types';
+import type { CloudProviders, CloudSetupConfig, UpdatePolicy } from '../types';
 import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '../constants';
 
 const getSelectedInput = (options: NewPackagePolicyInput[], defaultProviderType: string) => {

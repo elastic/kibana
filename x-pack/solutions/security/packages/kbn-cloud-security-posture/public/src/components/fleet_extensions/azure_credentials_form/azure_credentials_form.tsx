@@ -7,14 +7,15 @@
 import React, { useRef } from 'react';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getAzureCredentialsFormManualOptions } from './get_azure_credentials_form_options';
 import { useAzureCredentialsForm } from './azure_hooks';
 import { updatePolicyWithInputs } from '../utils';
-import { CspRadioOption, RadioGroup } from '../../csp_boxed_radio_group';
+import type { CspRadioOption } from '../../csp_boxed_radio_group';
+import { RadioGroup } from '../../csp_boxed_radio_group';
 import { AZURE_SETUP_FORMAT, ARM_TEMPLATE_EXTERNAL_DOC_URL } from '../constants';
 import {
   AZURE_SETUP_FORMAT_TEST_SUBJECTS,
@@ -22,7 +23,7 @@ import {
 } from './azure_test_subjects';
 import { AzureSetupInfoContent } from './azure_setup_info';
 import { AzureInputVarFields } from './azure_input_var_fields';
-import { AzureCredentialsType, AzureSetupFormat, UpdatePolicy } from '../types';
+import type { AzureCredentialsType, AzureSetupFormat, UpdatePolicy } from '../types';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
