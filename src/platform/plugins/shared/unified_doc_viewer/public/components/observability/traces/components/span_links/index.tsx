@@ -27,6 +27,7 @@ import { Duration } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync, type AbortableAsyncState } from '@kbn/react-hooks';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { ServiceNameWithIcon } from '../service_name_with_icon';
 
@@ -116,7 +117,6 @@ const columns: EuiDataGridProps['columns'] = [
 
 export function SpanLinksComponent({ data }: SpanLinksComponentProps) {
   const { loading, error, value } = data;
-  const [searchValue, setSearchValue] = useState('');
   const [type, setType] = useState<SpanLinkType>('incoming');
   const [pageIndex, setPageIndex] = useState(0);
 
@@ -133,17 +133,8 @@ export function SpanLinksComponent({ data }: SpanLinksComponentProps) {
 
   const filteredItems = useMemo(() => {
     const items = type === 'incoming' ? value?.incomingSpanLinks : value?.outgoingSpanLinks;
-    if (searchValue.trim() === '' || items === undefined) {
-      return items || [];
-    }
-
-    return items.filter(
-      (item) =>
-        item.details?.spanName?.toLowerCase().includes(searchValue.toLowerCase()) ||
-        item.details?.serviceName?.toLowerCase().includes(searchValue.toLowerCase()) ||
-        item.traceId.toLowerCase().includes(searchValue.toLowerCase())
-    );
-  }, [searchValue, type, value?.incomingSpanLinks, value?.outgoingSpanLinks]);
+    return items || [];
+  }, [type, value?.incomingSpanLinks, value?.outgoingSpanLinks]);
 
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useCallback(
     ({ rowIndex, columnId }) => {
@@ -242,27 +233,11 @@ export function SpanLinksComponent({ data }: SpanLinksComponentProps) {
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>
-              <EuiFieldSearch
-                data-test-subj="spanLinkSearch"
-                fullWidth
-                placeholder={i18n.translate(
-                  'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks.search.placeholder',
-                  {
-                    defaultMessage: 'Search...',
-                  }
-                )}
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                aria-label={i18n.translate(
-                  'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks.search.ariaLabel',
-                  {
-                    defaultMessage: 'Search span links',
-                  }
-                )}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem
+              css={css`
+                align-items: flex-end;
+              `}
+            >
               <EuiSelect
                 aria-label={i18n.translate(
                   'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks.select.ariaLabel',

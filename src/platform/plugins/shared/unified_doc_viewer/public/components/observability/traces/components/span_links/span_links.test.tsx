@@ -120,24 +120,6 @@ describe('SpanLinksComponent', () => {
     expect(getByTestId('spanLinkTypeSelect-outgoing').textContent).toEqual('Outgoing links (1)');
   });
 
-  it('filters span links by search value', () => {
-    const { getByTestId, getByText } = render(
-      <SpanLinksComponent
-        data={
-          {
-            loading: false,
-            error: null,
-            value: { incomingSpanLinks, outgoingSpanLinks },
-          } as unknown as AbortableAsyncState<SpanLinks | null>
-        }
-      />
-    );
-    fireEvent.change(getByTestId('spanLinkSearch'), { target: { value: 'spanA' } });
-    expect(getByTestId('incoming-spanName-spanAId')).toBeInTheDocument();
-    fireEvent.change(getByTestId('spanLinkSearch'), { target: { value: 'notfound' } });
-    expect(getByText(/No span links found/i)).toBeInTheDocument();
-  });
-
   it('switches to outgoing type if incoming links are empty', () => {
     const { getByTestId } = render(
       <SpanLinksComponent
