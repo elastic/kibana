@@ -7,17 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { debounce } from 'lodash';
-import {
-  EuiRangeTick,
-  EuiDualRange,
-  EuiDualRangeProps,
-  EuiToken,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
-import { RangeValue } from '../types';
+import type { EuiRangeTick, EuiDualRangeProps } from '@elastic/eui';
+import { EuiDualRange, EuiToken, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import type { RangeValue } from '../types';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { RangeSliderStrings } from '../range_slider_strings';
 import { rangeSliderControlStyles } from './range_slider.styles';

@@ -6,9 +6,9 @@
  */
 import React, { useMemo } from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 
 interface IntegrationInfoFieldsProps {
   newPolicy: NewPackagePolicy;

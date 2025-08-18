@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FetchParameters, FetchExecution, MonitoredProduct } from '../types';
+import type { FetchParameters, FetchExecution } from '../types';
+import { MonitoredProduct } from '../types';
 
 import type { Products } from '../errors_helpers/build_errors';
 

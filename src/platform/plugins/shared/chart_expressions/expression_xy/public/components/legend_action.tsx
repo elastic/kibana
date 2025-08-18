@@ -10,17 +10,17 @@
 import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import { CellValueContext } from '@kbn/embeddable-plugin/public';
+import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import type { LayerCellValueActions, FilterEvent } from '../types';
 import type { CommonXYDataLayerConfig } from '../../common';
-import { LegendActionPopover, LegendCellValueActions } from './legend_action_popover';
-import {
+import type { LegendCellValueActions } from './legend_action_popover';
+import { LegendActionPopover } from './legend_action_popover';
+import type {
   DatatablesWithFormatInfo,
-  getSeriesName,
-  hasMultipleLayersWithSplits,
   LayersAccessorsTitles,
   LayersFieldFormats,
 } from '../helpers';
+import { getSeriesName, hasMultipleLayersWithSplits } from '../helpers';
 
 export const getLegendAction = (
   dataLayers: CommonXYDataLayerConfig[],

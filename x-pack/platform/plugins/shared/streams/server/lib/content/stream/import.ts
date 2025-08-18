@@ -6,8 +6,9 @@
  */
 
 import { omit } from 'lodash';
-import { ContentPackStream } from '@kbn/content-packs-schema';
-import { StreamTree, mergeTrees } from './tree';
+import type { ContentPackStream } from '@kbn/content-packs-schema';
+import type { StreamTree } from './tree';
+import { mergeTrees } from './tree';
 
 export function prepareStreamsForImport({
   existing,

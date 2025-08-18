@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
-import {
+import type { Dispatch, SetStateAction } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type {
   InfiniteData,
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
 } from '@tanstack/react-query';
-import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { FetchConversationsResponse } from '../api';
-import { AIConnector } from '../../connectorland/connector_selector';
+import type { FetchConversationsResponse } from '../api';
+import type { AIConnector } from '../../connectorland/connector_selector';
 import { getDefaultNewSystemPrompt, getDefaultSystemPrompt } from '../use_conversation/helpers';
 import { useConversation } from '../use_conversation';
 import { sleep } from '../helpers';
-import { Conversation } from '../../..';
+import type { Conversation } from '../../..';
 import type { LastConversation } from '../use_space_aware_context';
 
 export interface Props {
