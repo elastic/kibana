@@ -38,7 +38,6 @@ export const ConversationListItem: React.FC<Props> = ({
   setDeleteConversationItem,
   setPaginationObserver,
 }) => {
-  console.log('isAssistantSharingEnabled', isAssistantSharingEnabled);
   const internalSetObserver = useCallback(
     (ref: HTMLDivElement | null) => {
       if (conversation.id === lastConversationId && ref) {
