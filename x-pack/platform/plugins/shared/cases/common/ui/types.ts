@@ -55,6 +55,7 @@ export interface CasesContextFeatures {
   alerts: { sync?: boolean; enabled?: boolean; isExperimental?: boolean };
   metrics: SingleCaseMetricsFeature[];
   observables?: { enabled: boolean };
+  events?: { enabled: boolean };
 }
 
 export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
