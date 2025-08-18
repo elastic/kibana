@@ -387,4 +387,44 @@ describe('WorkflowsParamsFields', () => {
     // The component should render correctly with existing params
     expect(screen.getByTestId('workflowIdSelect')).toBeInTheDocument();
   });
+
+  test('should revert input value when cleared but no new selection is made', async () => {
+    const propsWithSelectedWorkflow = {
+      ...defaultProps,
+      actionParams: {
+        subAction: 'run',
+        subActionParams: {
+          workflowId: 'workflow-1',
+        },
+      } as WorkflowsActionParams,
+    };
+
+    await act(async () => {
+      render(<WorkflowsParamsFields {...propsWithSelectedWorkflow} />);
+    });
+
+    // Wait for workflows to load
+    await waitFor(() => {
+      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search');
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('workflowIdSelect')).toBeInTheDocument();
+    });
+
+    // Click on the input to open the popover
+    const input = screen.getByRole('searchbox');
+    fireEvent.click(input);
+
+    // Clear the input value
+    fireEvent.change(input, { target: { value: '' } });
+
+    // Simulate closing the popover without selecting anything (e.g., by pressing Escape)
+    fireEvent.keyDown(input, { key: 'Escape' });
+
+    // The input should revert back to the selected workflow name
+    await waitFor(() => {
+      expect(input).toHaveValue('Test Workflow 1');
+    });
+  });
 });

@@ -21,7 +21,6 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { WorkflowListDto } from '@kbn/workflows';
-import { WorkflowStatus } from '@kbn/workflows';
 import React, { useCallback, useEffect, useState } from 'react';
 import * as i18n from './translations';
 import type { WorkflowsActionParams } from './types';
@@ -91,6 +90,20 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
     [editSubActionParams]
   );
 
+  const handlePopoverClose = useCallback(() => {
+    setIsPopoverOpen(false);
+
+    // If the user cleared the input but didn't select anything new,
+    // revert to the currently selected workflow
+    if (workflowId && workflows.length > 0 && isSearching) {
+      const selectedWorkflow = workflows.find((w) => w.id === workflowId);
+      if (selectedWorkflow) {
+        setInputValue(selectedWorkflow.name);
+        setIsSearching(false);
+      }
+    }
+  }, [workflowId, workflows, isSearching]);
+
   const handleCreateNewWorkflow = useCallback(() => {
     const url = application?.getUrlForApp
       ? application.getUrlForApp('workflows')
@@ -113,9 +126,8 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
         const workflowsMap = response as WorkflowListDto;
 
         const workflowOptions: WorkflowOption[] = workflowsMap.results.map((workflow) => {
-          const isDisabled =
-            workflow.status === WorkflowStatus.INACTIVE ||
-            workflow.status === WorkflowStatus.DELETED;
+          // TODO: remove this once we have a way to disable workflows
+          const isDisabled = false;
           const isSelected = workflow.id === workflowId;
           const wasSelectedButNowDisabled = isSelected && isDisabled;
 
@@ -208,7 +220,8 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               setIsSearching(true);
             },
             onKeyDown: (event) => {
-              if (event.key === 'Tab') return setIsPopoverOpen(false);
+              if (event.key === 'Tab') return handlePopoverClose();
+              if (event.key === 'Escape') return handlePopoverClose();
               if (event.key !== 'Escape') return setIsPopoverOpen(true);
             },
             onClick: () => setIsPopoverOpen(true),
@@ -223,7 +236,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
         >
           {(list, search) => (
             <EuiInputPopover
-              closePopover={() => setIsPopoverOpen(false)}
+              closePopover={handlePopoverClose}
               disableFocusTrap
               closeOnScroll
               isOpen={isPopoverOpen}
