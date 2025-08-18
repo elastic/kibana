@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  CaseAttachmentsWithoutOwner,
-  useDeleteComment,
-  useUpdateAlertComment,
-} from '@kbn/cases-plugin/public';
+import { CaseAttachmentsWithoutOwner, useRemoveAlertFromCase } from '@kbn/cases-plugin/public';
 import { useCallback, useState } from 'react';
 import { AttachmentType, CaseUI } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -43,38 +39,25 @@ export const useCaseActions = ({
     onAddToCase?.({ isNewCase: false });
   }, [onAddToCase]);
 
-  const { mutateAsync: deleteComment } = useDeleteComment();
-  const { mutateAsync: updateComment } = useUpdateAlertComment();
+  const { mutateAsync: removeAlertsFromCase } = useRemoveAlertFromCase();
 
   const removalSuccessToast = i18n.translate(
     'xpack.observability.alerts.actions.removeFromCaseSuccess',
     { defaultMessage: 'Alert removed from case' }
   );
 
-  const removeAlertsFromCase = () => {
+  const handleRemoveAlertsFromCase = () => {
     alerts.forEach((alert) => {
-      if (caseData?.id && alertAttachment?.id && 'alertId' in alertAttachment) {
-        const { alertId, index } = alertAttachment;
-        if (Array.isArray(alertId) && Array.isArray(index) && alertId.length > 1) {
-          const alertIdx = alertId.indexOf(alert._id);
-          alertId.splice(alertIdx, 1);
-          index.splice(alertIdx, 1);
-          updateComment({
-            caseId: caseData.id,
-            commentUpdate: alertAttachment,
-            successToasterTitle: removalSuccessToast,
-          });
-        } else {
-          deleteComment({
-            caseId: caseData.id,
-            commentId: alertAttachment.id,
-            successToasterTitle: removalSuccessToast,
-          });
-        }
-        closeActionsPopover();
+      if (caseData?.id && alert._id) {
+        removeAlertsFromCase({
+          caseId: caseData?.id,
+          alertId: alert._id,
+          successToasterTitle: removalSuccessToast,
+        });
       }
     });
   };
+
   const onAddToNewCase = useCallback(() => {
     onAddToCase?.({ isNewCase: true });
   }, [onAddToCase]);
@@ -121,6 +104,6 @@ export const useCaseActions = ({
     setIsPopoverOpen,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
-    removeAlertsFromCase,
+    handleRemoveAlertsFromCase,
   };
 };

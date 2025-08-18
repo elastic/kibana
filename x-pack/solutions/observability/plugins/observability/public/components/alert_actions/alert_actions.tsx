@@ -74,7 +74,7 @@ export function AlertActions({
 
   const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
     onDelete: () => {
-      removeAlertsFromCase();
+      handleRemoveAlertsFromCase();
     },
   });
 
@@ -119,7 +119,7 @@ export function AlertActions({
     setIsPopoverOpen,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
-    removeAlertsFromCase,
+    handleRemoveAlertsFromCase,
   } = useCaseActions({
     onAddToCase,
     alerts: [alert],
