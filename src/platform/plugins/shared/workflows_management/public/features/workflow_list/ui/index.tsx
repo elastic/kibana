@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
-import { WorkflowStatus } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -153,10 +152,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
           id: item.id,
           workflow: {
             ...item,
-            status:
-              item.status === WorkflowStatus.ACTIVE
-                ? WorkflowStatus.INACTIVE
-                : WorkflowStatus.ACTIVE,
+            enabled: item.enabled,
           },
         },
         {
@@ -222,12 +218,12 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
       },
       {
         name: 'Enabled',
-        field: 'status',
+        field: 'enabled',
         render: (value, item) => {
           return (
             <EuiSwitch
               disabled={!canUpdateWorkflow}
-              checked={item.status === WorkflowStatus.ACTIVE}
+              checked={item.enabled}
               onChange={() => handleToggleWorkflow(item)}
               label={'Enabled'}
             />
@@ -239,7 +235,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
         actions: [
           {
             isPrimary: true,
-            enabled: (item) => !!canExecuteWorkflow && item.status === WorkflowStatus.ACTIVE,
+            enabled: (item) => !!canExecuteWorkflow && item.enabled,
             type: 'icon',
             color: 'primary',
             name: 'Run',

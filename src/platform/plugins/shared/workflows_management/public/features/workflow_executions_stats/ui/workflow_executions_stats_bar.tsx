@@ -9,11 +9,11 @@
 
 import { EuiPageTemplate, useEuiTheme } from '@elastic/eui';
 import React from 'react';
+import type { Color } from '@elastic/charts';
 import {
   Axis,
   BarSeries,
   Chart,
-  Color,
   niceTimeFormatter,
   Position,
   ScaleType,
@@ -35,6 +35,10 @@ export function WorkflowExecutionStatsBar({ height }: WorkflowExecutionStatsBarP
 
   if (isLoading || data === undefined) {
     return <EuiPageTemplate offset={0} />;
+  }
+
+  if (data.executions.length === 0) {
+    return null;
   }
 
   const executionStats: any[] = [];

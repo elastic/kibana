@@ -44,7 +44,7 @@ steps:
 
 export function WorkflowsPage() {
   const { application, chrome, notifications } = useKibana().services;
-  const { data: filtersData } = useWorkflowFiltersOptions(['status', 'createdBy']);
+  const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy']);
   const { createWorkflow } = useWorkflowActions();
   const [search, setSearch] = useState<WorkflowsSearchParams>({
     limit: WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
@@ -129,13 +129,13 @@ export function WorkflowsPage() {
           <EuiFlexItem grow={false}>
             <EuiFilterGroup>
               <WorkflowsFilterPopover
-                filter="status"
-                title="Status"
-                values={filtersData?.status || []}
-                selectedValues={search.status || []}
+                filter="enabled"
+                title="Enabled"
+                values={filtersData?.enabled || []}
+                selectedValues={search.enabled || []}
                 onSelectedValuesChanged={(newValues) => {
                   setSearch((prevState) => {
-                    return { ...prevState, status: newValues };
+                    return { ...prevState, enabled: newValues };
                   });
                 }}
               />

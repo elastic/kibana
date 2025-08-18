@@ -37,7 +37,6 @@ export type {
 // exported full to use enum as values
 export {
   ExecutionStatus,
-  WorkflowStatus,
 
   // command schemas
   CreateWorkflowCommandSchema,

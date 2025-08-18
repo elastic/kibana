@@ -10,16 +10,15 @@
 import React, { useEffect, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
-import { FieldValueOptionType } from '@elastic/eui/src/components/search_bar/filters/field_value_selection_filter';
 
 const WORKFLOW_POPOVER_WIDTH = 500;
 
 interface WorkflowFilterPopoverProps {
   filter: string;
   title: string;
-  selectedValues: string[];
-  values: FieldValueOptionType[];
-  onSelectedValuesChanged: (newValues: string[]) => void;
+  selectedValues: any[];
+  values: EuiSelectableOption[];
+  onSelectedValuesChanged: (newValues: any[]) => void;
 }
 
 export const toggleSelectedGroup = (
@@ -49,29 +48,30 @@ const WorkflowsFilterPopoverComponent = ({
     const selectedValuesSet = new Set(selectedValues);
 
     return values.map(
-      ({ value }): EuiSelectableOption => ({
-        label: value as string,
-        checked: selectedValuesSet.has(value as string) ? 'on' : undefined,
+      ({ label, key }): EuiSelectableOption => ({
+        label,
+        key,
+        checked: selectedValuesSet.has(key!) ? 'on' : undefined,
       })
     );
   });
 
-  const handleSelectableOptionsChange = (
-    newOptions: EuiSelectableOption[],
-    _: unknown,
-    changedOption: EuiSelectableOption
-  ) => {
-    setSelectableOptions(newOptions);
-    toggleSelectedGroup(changedOption.label, selectedValues, onSelectedValuesChanged);
+  const handleSelectableOptionsChange = (newOptions: EuiSelectableOption[]) => {
+    onSelectedValuesChanged(
+      newOptions
+        .map(({ key, checked }: any): string | number | boolean | null => (checked ? key : null))
+        .filter((value) => value !== null)
+    );
   };
 
   useEffect(() => {
     const selectedValuesSet = new Set(selectedValues);
     const newSelectableOptions: EuiSelectableOption[] = values.map(
-      ({ value }): EuiSelectableOption => {
+      ({ label, key }): EuiSelectableOption => {
         return {
-          label: value as string,
-          checked: selectedValuesSet.has(value as string) ? 'on' : undefined,
+          label,
+          key,
+          checked: selectedValuesSet.has(key!) ? 'on' : undefined,
         };
       }
     );
@@ -107,7 +107,6 @@ const WorkflowsFilterPopoverComponent = ({
       }}
     >
       <EuiSelectable
-        searchable
         searchProps={{
           placeholder: 'Search',
         }}

@@ -31,5 +31,5 @@ export interface WorkflowsSearchParams {
   page: number;
   query?: string;
   createdBy?: string[];
-  status?: string[];
+  enabled?: boolean[];
 }

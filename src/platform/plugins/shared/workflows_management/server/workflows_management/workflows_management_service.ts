@@ -25,14 +25,15 @@ import type {
   WorkflowExecutionListDto,
   WorkflowListDto,
 } from '@kbn/workflows';
-import { WorkflowStatus } from '@kbn/workflows';
 import type { WorkflowAggsDto, WorkflowStatsDto } from '@kbn/workflows/types/v1';
+import { EsWorkflowSchema } from '@kbn/workflows/types/v1';
 import type {
   AggregationsAggregationContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
+import { parseDocument } from 'yaml';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
@@ -125,7 +126,7 @@ export class WorkflowsService {
     params: GetWorkflowsParams,
     spaceId: string
   ): Promise<WorkflowListDto> {
-    const { limit, page, query, createdBy, status } = params;
+    const { limit, page, query, createdBy, enabled } = params;
     const baseSavedObjectsClient = await this.getSavedObjectsClient();
     const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
 
@@ -138,8 +139,8 @@ export class WorkflowsService {
       filters.push(`(${createdByFilter})`);
     }
 
-    if (status && status.length > 0) {
-      const statusFilter = status.map((s) => `${SO_ATTRIBUTES_PREFIX}.status:"${s}"`).join(' OR ');
+    if (enabled !== undefined) {
+      const statusFilter = `${SO_ATTRIBUTES_PREFIX}.enabled:"${enabled}"`;
       filters.push(`(${statusFilter})`);
     }
 
@@ -214,7 +215,7 @@ export class WorkflowsService {
         id: so.id,
         name: so.attributes.name,
         description: so.attributes.description || '',
-        status: so.attributes.status,
+        enabled: so.attributes.enabled,
         tags: so.attributes.tags,
         createdAt: new Date(so.created_at!),
         createdBy: so.attributes.createdBy,
@@ -265,7 +266,7 @@ export class WorkflowsService {
         id: response.id,
         name: response.attributes.name,
         description: response.attributes.description,
-        status: response.attributes.status,
+        enabled: response.attributes.enabled,
         createdAt: new Date(response.created_at!),
         createdBy: response.attributes.createdBy,
         lastUpdatedAt: new Date(response.updated_at!),
@@ -304,7 +305,7 @@ export class WorkflowsService {
           })}`
         : workflowToCreate.name,
       description: workflowToCreate.description,
-      status: workflowToCreate.status,
+      enabled: workflowToCreate.enabled,
       tags: workflowToCreate.tags || [],
       yaml: workflow.yaml,
       definition: workflowToCreate.definition,
@@ -331,7 +332,7 @@ export class WorkflowsService {
       id: response.id,
       name: response.attributes.name,
       description: response.attributes.description,
-      status: response.attributes.status,
+      enabled: response.attributes.enabled,
       createdAt: new Date(response.created_at!),
       createdBy: response.attributes.createdBy,
       lastUpdatedAt: new Date(response.updated_at!),
@@ -344,6 +345,7 @@ export class WorkflowsService {
   public async updateWorkflow(
     id: string,
     workflow: Partial<EsWorkflow>,
+    originalWorkflow: WorkflowDetailDto,
     spaceId: string,
     request: KibanaRequest
   ): Promise<UpdatedWorkflowResponseDto | null> {
@@ -376,7 +378,7 @@ export class WorkflowsService {
       updateData = {
         name: updatedWorkflow.name,
         description: updatedWorkflow.description,
-        status: updatedWorkflow.status,
+        enabled: updatedWorkflow.enabled,
         tags: updatedWorkflow.tags || [],
         yaml,
         definition: updatedWorkflow.definition,
@@ -396,9 +398,23 @@ export class WorkflowsService {
         }
       }
     } else {
+      const doc = parseDocument(originalWorkflow.yaml);
+
+      Object.entries(rest).forEach(([key, value]) => {
+        if (doc.hasIn([key])) {
+          const currentValue: any = doc.getIn([key as string]);
+          if (currentValue !== value) {
+            doc.setIn([key], value);
+          }
+        }
+      });
+
+      const updatedYAML = doc.toString();
+
       updateData = {
         ...rest,
         lastUpdatedBy: getAuthenticatedUser(request, this.security),
+        yaml: updatedYAML,
       };
     }
 
@@ -620,9 +636,8 @@ export class WorkflowsService {
 
       return {
         workflows: {
-          [WorkflowStatus.ACTIVE]: workflowStatusStats.active,
-          [WorkflowStatus.DRAFT]: workflowStatusStats.draft,
-          [WorkflowStatus.INACTIVE]: workflowStatusStats.inactive,
+          enabled: workflowStatusStats.enabled,
+          disabled: workflowStatusStats.enabled,
         },
         executions: workflowExecutionStatusStats,
       };
@@ -655,11 +670,30 @@ export class WorkflowsService {
 
       const aggregations = response.aggregations as any;
 
+      type Keys = keyof typeof EsWorkflowSchema.shape; // "id" | "name" | ...
+      function fieldKind<K extends Keys>(key: K): string {
+        return EsWorkflowSchema.shape[key]._def.typeName;
+      }
+
       return fields.reduce<WorkflowAggsDto>((acc, field) => {
-        acc[field] = aggregations[field].buckets.map(({ key }: { key: string }) => ({
-          value: key,
-          name: key.charAt(0).toUpperCase() + key.slice(1),
-        }));
+        acc[field] = aggregations[field].buckets.map(
+          ({ key }: { key: string | boolean | number }) => {
+            const typeName = fieldKind(field as Keys);
+            let label: string;
+            if (typeName === 'ZodBoolean') {
+              label = key ? 'Enabled' : 'Disabled';
+              key = key !== 0;
+            } else if (typeName === 'ZodNumber') {
+              label = key.toString();
+            } else {
+              label = key.toString().charAt(0).toUpperCase() + key.toString().slice(1);
+            }
+            return {
+              key,
+              label,
+            };
+          }
+        );
         return acc;
       }, {});
     } catch (error: any) {
@@ -672,9 +706,9 @@ export class WorkflowsService {
 
   private async getWorkflowStatusStats(savedObjectsClient: SavedObjectsClientContract) {
     const aggs: Record<string, AggregationsAggregationContainer> = {
-      by_status: {
+      by_enabled: {
         terms: {
-          field: 'workflow.attributes.status',
+          field: 'workflow.attributes.enabled',
         },
       },
     };
@@ -688,9 +722,9 @@ export class WorkflowsService {
       aggs,
     });
 
-    const { by_status: byStatus } = response.aggregations as any;
+    const { by_enabled: byEnabled } = response.aggregations as any;
 
-    return byStatus.buckets.reduce(
+    return byEnabled.buckets.reduce(
       (
         acc: Record<string, number>,
         { key, doc_count: count }: { key: string; doc_count: number }

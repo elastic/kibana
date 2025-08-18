@@ -30,7 +30,7 @@ export interface GetWorkflowsParams {
   limit: number;
   page: number;
   createdBy: string[];
-  status: string[];
+  enabled: boolean;
   query: string;
   _full?: boolean;
 }
@@ -98,7 +98,11 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<UpdatedWorkflowResponseDto | null> {
-    return await this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
+    const originalWorkflow = await this.workflowsService.getWorkflow(id);
+    if (!originalWorkflow) {
+      throw new Error(`Workflow with id ${id} not found`);
+    }
+    return await this.workflowsService.updateWorkflow(id, workflow, originalWorkflow, spaceId, request);
   }
 
   public async deleteWorkflows(
@@ -142,7 +146,7 @@ export class WorkflowsManagementApi {
       {
         id: 'test-workflow',
         name: workflowToCreate.name,
-        status: workflowToCreate.status,
+        enabled: workflowToCreate.enabled,
         definition: workflowToCreate.definition,
       },
       spaceId,

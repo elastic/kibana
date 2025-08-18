@@ -73,13 +73,6 @@ export interface EsWorkflowStepExecution {
   state?: Record<string, any>;
 }
 
-export enum WorkflowStatus {
-  DRAFT = 'draft',
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  DELETED = 'deleted',
-}
-
 export interface WorkflowExecutionHistoryModel {
   id: string;
   workflowId?: string;
@@ -129,7 +122,7 @@ export const EsWorkflowSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().optional(),
-  status: z.nativeEnum(WorkflowStatus),
+  enabled: z.boolean(),
   tags: z.array(z.string()),
   createdAt: z.date(),
   createdBy: z.string(),
@@ -151,7 +144,7 @@ export const SearchWorkflowCommandSchema = z.object({
   limit: z.number().default(100),
   page: z.number().default(0),
   createdBy: z.array(z.string()).optional(),
-  status: z.array(z.string()).optional(),
+  enabled: z.boolean().optional(),
   query: z.string().optional(),
   _full: z.boolean().default(false),
 });
@@ -168,7 +161,7 @@ export interface WorkflowDetailDto {
   id: string;
   name: string;
   description?: string;
-  status: WorkflowStatus;
+  enabled: boolean;
   createdAt: Date;
   createdBy: string;
   lastUpdatedAt: Date;
@@ -181,7 +174,7 @@ export interface WorkflowListItemDto {
   id: string;
   name: string;
   description: string;
-  status: WorkflowStatus;
+  enabled: boolean;
   definition: WorkflowYaml;
   createdAt: Date;
   history: WorkflowExecutionHistoryModel[];
@@ -199,7 +192,7 @@ export interface WorkflowListDto {
   results: WorkflowListItemDto[];
 }
 export interface WorkflowExecutionEngineModel
-  extends Pick<EsWorkflow, 'id' | 'name' | 'status' | 'definition'> {
+  extends Pick<EsWorkflow, 'id' | 'name' | 'enabled' | 'definition'> {
   /** Serialized graphlib.Graph */
   executionGraph?: any;
 }
@@ -224,16 +217,15 @@ export interface WorkflowExecutionsHistoryStats {
 
 export interface WorkflowStatsDto {
   workflows: {
-    active: number;
-    draft: number;
-    inactive: number;
+    enabled: number;
+    disabled: number;
   };
   executions: WorkflowExecutionsHistoryStats[];
 }
 
 export interface WorkflowAggsDto {
   [key: string]: {
-    value: string;
-    name: string;
+    key: string;
+    label: string;
   }[];
 }

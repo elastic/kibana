@@ -8,14 +8,14 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import type { WorkflowStatus, WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowYaml } from '@kbn/workflows';
 
 export const WORKFLOW_SAVED_OBJECT_TYPE = 'workflow';
 
 export interface WorkflowSavedObjectAttributes {
   name: string;
   description?: string;
-  status: WorkflowStatus;
+  enabled: boolean;
   tags: string[];
   yaml: string;
   definition: WorkflowYaml;
@@ -49,8 +49,8 @@ export const workflowSavedObjectType: SavedObjectsType<WorkflowSavedObjectAttrib
           },
         },
       },
-      status: {
-        type: 'keyword',
+      enabled: {
+        type: 'boolean',
       },
       tags: {
         type: 'keyword',
