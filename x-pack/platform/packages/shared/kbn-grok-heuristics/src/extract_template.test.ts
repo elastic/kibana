@@ -8,7 +8,8 @@
 import { syncExtractTemplate } from './extract_template';
 import { getUsefulTokens } from './get_useful_tokens';
 import { ToolingLog } from '@kbn/tooling-log';
-import { SampleParserClient, StreamLogGenerator } from '@kbn/sample-log-parser';
+import type { StreamLogGenerator } from '@kbn/sample-log-parser';
+import { SampleParserClient } from '@kbn/sample-log-parser';
 
 describe('extractTemplate', () => {
   it('generates a consistent root template structure', async () => {

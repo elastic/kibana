@@ -6,11 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { ReviewFieldsPrompt } from '@kbn/grok-heuristics';
-import { InferenceClient } from '@kbn/inference-common';
+import type { InferenceClient } from '@kbn/inference-common';
 import { Streams } from '@kbn/streams-schema';
-import { StreamsClient } from '../../../../../lib/streams/client';
+import type { StreamsClient } from '../../../../../lib/streams/client';
 import { getOtelFieldName } from '../convert_ecs_fields_to_otel';
 
 export interface ProcessingGrokSuggestionsParams {

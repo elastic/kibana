@@ -55,8 +55,8 @@
     "@kbn/inference-plugin",
     "@kbn/security-plugin",
     "@kbn/task-manager-plugin",
-    "@kbn/sse-utils",
     "@kbn/ai-tools",
+    "@kbn/logging-mocks",
     "@kbn/grok-heuristics",
     "@kbn/streamlang",
     "@kbn/licensing-types"

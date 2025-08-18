@@ -42,6 +42,7 @@ import {
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
 import { registerFeatures } from './features';
+import { registerUISettings } from './ui_settings';
 
 export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
   private readonly logger: Logger;
@@ -60,6 +61,8 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
   public setup(core: CoreSetup, plugins: WorkflowsManagementPluginServerDependenciesSetup) {
     this.logger.debug('Workflows Management: Setup');
+
+    registerUISettings({ uiSettings: core.uiSettings });
 
     // Register workflows connector if actions plugin is available
     if (plugins.actions) {
@@ -214,7 +217,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.schedulerService = new SchedulerService(
       this.logger,
       this.workflowsService!,
-      this.unsecureActionsClient!,
       plugins.taskManager
     );
     this.api!.setSchedulerService(this.schedulerService!);
