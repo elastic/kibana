@@ -68,7 +68,7 @@ This document outlines our accessibility schedule for the 2026 fiscal year. We i
 
 | Quarter   | Timeline         | Audit Items |
 |-----------|------------------|-------------|
-| **Q1 FY26** | By July 2025     | - ![Completed](../../images/checkInCircleFilled.svg) Cloud Console (Serverless + Stateful)<br>- ![Completed](../../images/checkInCircleFilled.svg) Observability Solution (Serverless + Stateful)<br>- ![Completed](../../images/checkInCircleFilled.svg) Security Solution (Serverless + Stateful) |
+| **Q1 FY26** | By July 2025     | - {icon}`checkCircle` Cloud Console (Serverless + Stateful)<br>- {icon}`checkCircle` Observability Solution (Serverless + Stateful)<br>- {icon}`checkCircle` Security Solution (Serverless + Stateful) |
 | **Q2 FY26** | By October 2025  | - Search Solution (Serverless + Stateful)<br>- Platform A & AA |
 | **Q3 FY26** | By January 2026  | - Search Solution (AA)<br>- Security Solution (AA)<br>- Observability Solution (AA) |
 | **Q4 FY26** | By April 2026    | - Cloud Console (AA) |
