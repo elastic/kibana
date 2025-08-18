@@ -16,7 +16,7 @@ import {
   getAttackDiscoveryScheduleMock,
   getFindAttackDiscoverySchedulesMock,
 } from '../../../__mocks__/attack_discovery_schedules.mock';
-import { AttackDiscoveryScheduleDataClient } from '../../../lib/attack_discovery/schedules/data_client';
+import type { AttackDiscoveryScheduleDataClient } from '../../../lib/attack_discovery/schedules/data_client';
 
 const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();

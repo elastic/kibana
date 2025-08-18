@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
@@ -105,18 +105,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'is',
         value: 'nestedValue',
       });
+
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+
       expect(await filterBar.hasFilter('nestedField.child', 'nestedValue')).to.be(true);
       await retry.try(async function () {
         expect(await discover.getHitCount()).to.be('1');
       });
       await filterBar.removeFilter('nestedField.child');
 
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+
       await queryBar.setQuery('test');
       await queryBar.submitQuery();
+
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+
       await retry.try(async () => expect(await discover.getHitCount()).to.be('22'));
 
       await queryBar.clearQuery();
       await queryBar.submitQuery();
+
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
     });
 
     it('should not update data view id when saving search first time', async () => {

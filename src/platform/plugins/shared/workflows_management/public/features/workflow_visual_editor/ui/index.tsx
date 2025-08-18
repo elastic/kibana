@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
-import { Background, Controls, NodeTypes, ReactFlow } from '@xyflow/react';
+import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
+import type { NodeTypes } from '@xyflow/react';
+import { Background, Controls, ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import React, { useMemo } from 'react';
 import { getLayoutedNodesAndEdges } from '../lib/get_layouted_nodes_and_edges';

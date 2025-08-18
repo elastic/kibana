@@ -10,7 +10,8 @@
 import { mockInitializer, mockPlugin, mockPluginReader } from './plugin.test.mocks';
 
 import { ContainerModule } from 'inversify';
-import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
+import type { DiscoveredPlugin } from '@kbn/core-base-common';
+import { PluginType } from '@kbn/core-base-common';
 import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-browser';

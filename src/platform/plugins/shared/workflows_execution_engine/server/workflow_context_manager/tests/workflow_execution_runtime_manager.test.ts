@@ -9,10 +9,11 @@
 
 import { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
 
-import { EsWorkflowExecution, EsWorkflowStepExecution, ExecutionStatus } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { graphlib } from '@dagrejs/dagre';
-import { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import { WorkflowExecutionState } from '../workflow_execution_state';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { WorkflowExecutionState } from '../workflow_execution_state';
 
 describe('WorkflowExecutionRuntimeManager', () => {
   let underTest: WorkflowExecutionRuntimeManager;
