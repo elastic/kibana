@@ -59,6 +59,7 @@ import type {
   GetInputsRequestSchema,
   CustomIntegrationRequestSchema,
   RollbackPackageRequestSchema,
+  GetKnowledgeBaseRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -650,7 +651,7 @@ export const getInputsHandler: FleetRequestHandler<
 };
 
 export const getKnowledgeBaseHandler: FleetRequestHandler<
-  TypeOf<typeof GetInfoRequestSchema.params>
+  TypeOf<typeof GetKnowledgeBaseRequestSchema.query>
 > = async (context, request, response) => {
   const { pkgName } = request.params;
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
