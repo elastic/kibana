@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Capabilities } from '@kbn/core/public';
+import type { Capabilities } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ShareContext } from '@kbn/share-plugin/public';
 import React from 'react';
