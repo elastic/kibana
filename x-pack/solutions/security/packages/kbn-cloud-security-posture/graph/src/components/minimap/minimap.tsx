@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { MiniMap, type Node, type MiniMapNodeProps } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
 import {
@@ -31,10 +31,13 @@ const MiniMapNode = ({
 }: MiniMapNodeRenderedProps) => {
   const { euiTheme } = useEuiTheme();
 
-  const getEuiColor = (fill: string) =>
-    typeof fill === 'string' && fill in euiTheme.colors
-      ? (euiTheme.colors[fill as keyof typeof euiTheme.colors] as string)
-      : euiTheme.colors.primary;
+  const getEuiColor = useCallback(
+    (color: string) =>
+      typeof color === 'string' && color in euiTheme.colors
+        ? (euiTheme.colors[color as keyof typeof euiTheme.colors] as string)
+        : euiTheme.colors.primary,
+    [euiTheme]
+  );
 
   // If we don't have node data, we can't render anything useful
   if (!data) return null;
