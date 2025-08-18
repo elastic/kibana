@@ -29,7 +29,8 @@ import {
   PreprocessDataPanel,
 } from '@kbn/search-api-panels';
 
-import React, { useEffect, useMemo, useState, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type {
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,

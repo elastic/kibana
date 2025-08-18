@@ -9,8 +9,8 @@
 
 import type { Logger } from '@kbn/core/server';
 import { eqlSearchStrategyProvider } from './eql_search_strategy';
-import { SearchStrategyDependencies } from '../../types';
-import { EqlSearchStrategyRequest } from '../../../../common';
+import type { SearchStrategyDependencies } from '../../types';
+import type { EqlSearchStrategyRequest } from '../../../../common';
 import { firstValueFrom } from 'rxjs';
 import { getMockSearchConfig } from '../../../../config.mock';
 

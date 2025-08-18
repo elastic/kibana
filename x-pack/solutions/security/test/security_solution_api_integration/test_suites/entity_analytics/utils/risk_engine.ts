@@ -7,7 +7,7 @@
 
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { v4 as uuidv4 } from 'uuid';
-import SuperTest from 'supertest';
+import type SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { EcsRiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
@@ -23,15 +23,15 @@ import {
   RISK_ENGINE_SCHEDULE_NOW_URL,
   RISK_ENGINE_CONFIGURE_SO_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import {
+import type {
   IndicesIndexSettings,
   IndicesIndexTemplateSummary,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
-import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
-import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
+import type { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
+import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 
-import { RiskEngineStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
+import type { RiskEngineStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import {
   createRule,
   waitForAlertsToBePresent,

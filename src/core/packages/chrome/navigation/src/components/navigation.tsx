@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { KeyboardEvent } from 'react';
+import type { KeyboardEvent } from 'react';
+import React from 'react';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { MenuItem, NavigationStructure, SecondaryMenuItem, SideNavLogo } from '../../types';
+import type { MenuItem, NavigationStructure, SecondaryMenuItem, SideNavLogo } from '../../types';
 import { NestedSecondaryMenu } from './nested_secondary_menu';
 import { SecondaryMenu } from './secondary_menu';
 import { SideNav } from './side_nav';

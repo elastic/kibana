@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../configs/ftr_provider_context';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export function IngestManagerCreatePackagePolicy({
   getService,

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ServiceLocationErrors } from '../../common/runtime_types/monitor_management';
-import { MONITOR_ERROR_EVENTS_CHANNEL } from './constants';
+import type { ServiceLocationErrors } from '../../common/runtime_types/monitor_management';
+import type { MONITOR_ERROR_EVENTS_CHANNEL } from './constants';
 
 export interface MonitorSyncEvent {
   total: number;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { services, pageObjects } from './ftr_provider_context';
 

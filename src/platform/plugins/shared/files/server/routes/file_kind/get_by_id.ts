@@ -10,7 +10,8 @@
 import { schema } from '@kbn/config-schema';
 import type { FileJSON, FileKind } from '../../../common/types';
 import type { FilesClient } from '../../../common/files_client';
-import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
+import type { CreateRouteDefinition } from '../api_routes';
+import { FILES_API_ROUTES } from '../api_routes';
 import { getById } from './helpers';
 import type { CreateHandler, FileKindRouter } from './types';
 

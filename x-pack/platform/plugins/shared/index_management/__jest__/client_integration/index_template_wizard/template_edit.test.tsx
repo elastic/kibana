@@ -20,7 +20,7 @@ import {
   INDEX_PATTERNS,
 } from './constants';
 import { setup } from './template_edit.helpers';
-import { TemplateFormTestBed } from './template_form.helpers';
+import type { TemplateFormTestBed } from './template_form.helpers';
 
 const UPDATED_INDEX_PATTERN = ['updatedIndexPattern'];
 const UPDATED_MAPPING_TEXT_FIELD_NAME = 'updated_text_datatype';

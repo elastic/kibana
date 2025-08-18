@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsImportUnknownError } from '@kbn/core/public';
+import type { SavedObjectsImportUnknownError } from '@kbn/core/public';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { resolveImportErrors } from './resolve_import_errors';
 

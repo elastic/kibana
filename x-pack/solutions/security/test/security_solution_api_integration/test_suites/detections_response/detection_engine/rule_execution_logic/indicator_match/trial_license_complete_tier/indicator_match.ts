@@ -26,12 +26,12 @@ import {
   ALERT_RULE_EXECUTION_TYPE,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
-import { ThreatMapping } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
+import type { ThreatMapping } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 
-import { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { ENRICHMENT_TYPES } from '@kbn/security-solution-plugin/common/cti/constants';
-import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
+import type { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -57,7 +57,7 @@ import {
   deleteAllRules,
   createRule,
 } from '../../../../../../config/services/detections_response';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 const createThreatMatchRule = ({
