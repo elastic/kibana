@@ -27,6 +27,7 @@ export const functions = {
         defaultMessage: 'ADD (+)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -38,7 +39,6 @@ export const functions = {
               defaultMessage: `
   ### ADD \`+\`
   Add two numbers together. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
-
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -54,6 +54,7 @@ export const functions = {
         defaultMessage: 'CAST (::)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -84,6 +85,7 @@ export const functions = {
         defaultMessage: 'DIVIDE (/)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -112,6 +114,7 @@ export const functions = {
         defaultMessage: 'EQUALS (==)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -140,6 +143,7 @@ export const functions = {
         defaultMessage: 'GREATER_THAN (>)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -168,6 +172,7 @@ export const functions = {
         defaultMessage: 'GREATER_THAN_OR_EQUAL (>=)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -196,6 +201,7 @@ export const functions = {
         defaultMessage: 'IN (IN)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -227,6 +233,7 @@ export const functions = {
         defaultMessage: 'IS_NOT_NULL (IS NOT NULL)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -237,7 +244,9 @@ export const functions = {
             {
               defaultMessage: `
   ### IS NOT NULL
-  Use \`IS NOT NULL\` to filter data based on whether the field exists or not.
+  Returns \`false\` if the value is \`NULL\`, \`true\` otherwise.
+
+  Note: If a field is only in some documents it will be \`NULL\` in the documents that did not contain it.
 
   \`\`\`esql
   FROM employees
@@ -259,6 +268,7 @@ export const functions = {
         defaultMessage: 'IS_NULL (IS NULL)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -269,7 +279,9 @@ export const functions = {
             {
               defaultMessage: `
   ### IS NULL
-  Use \`IS NULL\` to filter data based on whether the field exists or not.
+  Returns \`true\` if the value is \`NULL\`, \`false\` otherwise.
+
+  Note: If a field is only in some documents it will be \`NULL\` in the documents that did not contain it.
 
   \`\`\`esql
   FROM employees
@@ -290,6 +302,7 @@ export const functions = {
         defaultMessage: 'LESS_THAN (<)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -318,6 +331,7 @@ export const functions = {
         defaultMessage: 'LESS_THAN_OR_EQUAL (<=)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -346,6 +360,7 @@ export const functions = {
         defaultMessage: 'LIKE (LIKE)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -359,8 +374,7 @@ export const functions = {
   Use \`LIKE\` to filter data based on string patterns using wildcards. \`LIKE\`
   usually acts on a field placed on the left-hand side of the operator, but it can
   also act on a constant (literal) expression. The right-hand side of the operator
-  represents the pattern or a list of patterns. If a list of patterns is provided,
-  the expression will return true if any of the patterns match.
+  represents the pattern.
 
   The following wildcard characters are supported:
 
@@ -386,7 +400,8 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.match_operator (:)', {
         defaultMessage: 'MATCH_OPERATOR (:)',
       }),
-      preview: true,
+      preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -426,6 +441,7 @@ export const functions = {
         defaultMessage: 'MODULO (%)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -437,7 +453,6 @@ export const functions = {
               defaultMessage: `
   ### MODULO \`%\`
   Divide one number by another and return the remainder. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
-
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -453,6 +468,7 @@ export const functions = {
         defaultMessage: 'MULTIPLY (*)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -464,7 +480,6 @@ export const functions = {
               defaultMessage: `
   ### MULTIPLY \`*\`
   Multiply two numbers together. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
-
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -480,6 +495,7 @@ export const functions = {
         defaultMessage: 'NEGATE (-)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -491,7 +507,6 @@ export const functions = {
               defaultMessage: `
   ### NEGATE \`-\`
   Returns the negation of the argument.
-
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -507,6 +522,7 @@ export const functions = {
         defaultMessage: 'NOT_EQUALS (!=)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -535,6 +551,7 @@ export const functions = {
         defaultMessage: 'RLIKE (RLIKE)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -570,6 +587,7 @@ export const functions = {
         defaultMessage: 'SUBTRACT (-)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -581,7 +599,6 @@ export const functions = {
               defaultMessage: `
   ### SUBTRACT \`-\`
   Subtract one number from another. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
-
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',

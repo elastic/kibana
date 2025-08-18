@@ -13,8 +13,7 @@ import { getLegacyApmHref } from '../../../shared/links/apm/apm_link_hooks';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { InspectorHeaderLink } from './inspector_header_link';
-import { AddDataContextMenu } from './add_data_context_menu';
-import { useEntityCentricExperienceSetting } from '../../../../hooks/use_entity_centric_experience_setting';
+import { GiveFeedbackHeaderLink } from './give_feedback_header_link';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins, config } = useApmPluginContext();
@@ -29,7 +28,6 @@ export function ApmHeaderActionMenu() {
     capabilities
   );
   const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
-  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
 
   function apmHref(path: string) {
     return getLegacyApmHref({ basePath, path, search });
@@ -41,6 +39,8 @@ export function ApmHeaderActionMenu() {
 
   return (
     <EuiHeaderLinks gutterSize="xs">
+      <GiveFeedbackHeaderLink />
+
       {featureFlags.storageExplorerAvailable && (
         <EuiHeaderLink
           color="primary"
@@ -50,7 +50,7 @@ export function ApmHeaderActionMenu() {
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               {i18n.translate('xpack.apm.storageExplorerLinkLabel', {
-                defaultMessage: 'Storage Explorer',
+                defaultMessage: 'Storage explorer',
               })}
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -74,20 +74,18 @@ export function ApmHeaderActionMenu() {
           defaultMessage: 'Settings',
         })}
       </EuiHeaderLink>
+
       <InspectorHeaderLink />
-      {isEntityCentricExperienceEnabled ? (
-        <AddDataContextMenu />
-      ) : (
-        <EuiHeaderLink
-          color="primary"
-          href={kibanaHref('/app/apm/tutorial')}
-          data-test-subj="apmAddDataHeaderLink"
-        >
-          {i18n.translate('xpack.apm.addDataButtonLabel', {
-            defaultMessage: 'Add data',
-          })}
-        </EuiHeaderLink>
-      )}
+
+      <EuiHeaderLink
+        color="primary"
+        href={kibanaHref('/app/apm/tutorial')}
+        data-test-subj="apmAddDataHeaderLink"
+      >
+        {i18n.translate('xpack.apm.addDataButtonLabel', {
+          defaultMessage: 'Add data',
+        })}
+      </EuiHeaderLink>
     </EuiHeaderLinks>
   );
 }

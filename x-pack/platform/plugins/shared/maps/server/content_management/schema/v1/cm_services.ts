@@ -11,9 +11,10 @@ import {
   objectTypeToGetResultSchema,
   createOptionsSchemas,
   createResultSchema,
+  updateOptionsSchema,
 } from '@kbn/content-management-utils';
 
-const mapAttributesSchema = schema.object(
+export const mapAttributesSchema = schema.object(
   {
     title: schema.string(),
     description: schema.maybe(schema.nullable(schema.string())),
@@ -24,9 +25,9 @@ const mapAttributesSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-const mapSavedObjectSchema = savedObjectSchema(mapAttributesSchema);
+export const mapSavedObjectSchema = savedObjectSchema(mapAttributesSchema);
 
-const searchOptionsSchema = schema.maybe(
+export const searchOptionsSchema = schema.maybe(
   schema.object(
     {
       onlyTitle: schema.maybe(schema.boolean()),
@@ -35,9 +36,30 @@ const searchOptionsSchema = schema.maybe(
   )
 );
 
-const createOptionsSchema = schema.object({
+export const mapsSearchOptionsSchema = schema.maybe(
+  schema.object(
+    {
+      onlyTitle: schema.maybe(schema.boolean()),
+    },
+    { unknowns: 'forbid' }
+  )
+);
+
+export const createOptionsSchema = schema.object({
   references: schema.maybe(createOptionsSchemas.references),
 });
+
+export const mapsCreateOptionsSchema = schema.object({
+  references: schema.maybe(createOptionsSchemas.references),
+});
+
+export const mapsUpdateOptionsSchema = schema.object({
+  references: updateOptionsSchema.references,
+});
+
+export const mapsGetResultSchema = objectTypeToGetResultSchema(mapSavedObjectSchema);
+
+export const mapsCreateResultSchema = createResultSchema(mapSavedObjectSchema);
 
 // Content management service definition.
 // We need it for BWC support between different versions of the content
@@ -60,14 +82,14 @@ export const serviceDefinition: ServicesDefinition = {
     },
     out: {
       result: {
-        schema: createResultSchema(mapSavedObjectSchema),
+        schema: mapsCreateResultSchema,
       },
     },
   },
   update: {
     in: {
       options: {
-        schema: createOptionsSchema, // same as create
+        schema: mapsUpdateOptionsSchema, // Is still the same as create?
       },
       data: {
         schema: mapAttributesSchema,

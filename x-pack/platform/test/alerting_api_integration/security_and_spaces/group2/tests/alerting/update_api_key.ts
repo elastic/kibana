@@ -18,7 +18,6 @@ import {
   getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function createUpdateApiKeyTests({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const supertest = getService('supertest');

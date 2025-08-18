@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React, {
   useState,
   createContext,
@@ -14,12 +15,10 @@ import React, {
   useCallback,
   useMemo,
   useLayoutEffect,
-  FC,
-  PropsWithChildren,
 } from 'react';
-import { EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
-
-import './flyout_panels.scss';
+import { css } from '@emotion/react';
+import type { EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 
 interface Panel {
   width?: number;
@@ -106,7 +105,7 @@ export const Panels: FC<PropsWithChildren<Props>> = ({ maxWidth, flyoutClassName
 
   return (
     <flyoutPanelsContext.Provider value={ctx}>
-      <EuiFlexGroup className="fieldEditor__flyoutPanels" gutterSize="none" {...props} />
+      <EuiFlexGroup css={styles.flyoutPanels} gutterSize="none" {...props} />
     </flyoutPanelsContext.Provider>
   );
 };
@@ -119,4 +118,10 @@ export const useFlyoutPanelsContext = (): Context => {
   }
 
   return ctx;
+};
+
+const styles = {
+  flyoutPanels: css({
+    height: '100%',
+  }),
 };

@@ -9,11 +9,12 @@ import { of } from 'rxjs';
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
-import { ApplicationStart, Capabilities } from '@kbn/core/public';
+import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
+import { searchNavigationMock } from '@kbn/search-navigation/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
@@ -46,7 +47,6 @@ export const mockKibanaValues = {
   },
   getChromeStyle$: jest.fn().mockReturnValue(of('classic')),
   getNavLinks: jest.fn().mockReturnValue([]),
-  guidedOnboarding: {},
   history: mockHistory,
   indexMappingComponent: null,
   isAgentlessEnabled: false,
@@ -69,6 +69,7 @@ export const mockKibanaValues = {
     hasWebCrawler: true,
   },
   renderHeaderActions: jest.fn(),
+  searchNavigation: searchNavigationMock.createStart(),
   security: securityMock.createStart(),
   setBreadcrumbs: jest.fn(),
   setChromeIsVisible: jest.fn(),

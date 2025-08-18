@@ -7,19 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CSSProperties, Dispatch } from 'react';
+import type { CSSProperties, Dispatch } from 'react';
 import { debounce, range } from 'lodash';
-import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from '@kbn/monaco';
+import type { ConsoleParsedRequestsProvider } from '@kbn/monaco';
+import { getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
-import { isInsideTripleQuotes } from '@kbn/monaco/src/languages/console/utils';
+import type { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
+import { checkForTripleQuotesAndQueries } from '@kbn/monaco/src/languages/console/utils';
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
 import { sendRequest } from '../../hooks';
-import { Actions } from '../../stores/request';
+import type { Actions } from '../../stores/request';
 
 import {
   AutocompleteType,
@@ -44,7 +45,7 @@ import {
 import type { AdjustedParsedRequest } from './types';
 import { type RequestToRestore, RestoreMethod } from '../../../types';
 import { StorageQuotaError } from '../../components/storage_quota_error';
-import { ContextValue } from '../../contexts';
+import type { ContextValue } from '../../contexts';
 import { containsComments, indentData } from './utils/requests_utils';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
@@ -354,7 +355,8 @@ export class MonacoEditorActionsProvider {
       // track the requests
       setTimeout(() => trackSentRequests(requests, trackUiMetric), 0);
 
-      const results = await sendRequest({ http, requests });
+      const selectedHost = settings.getSelectedHost();
+      const results = await sendRequest({ http, requests, host: selectedHost || undefined });
 
       let saveToHistoryError: undefined | Error;
       const isHistoryEnabled = settings.getIsHistoryEnabled();
@@ -782,7 +784,7 @@ export class MonacoEditorActionsProvider {
     return this.editor.getPosition() ?? { lineNumber: 1, column: 1 };
   }
 
-  private async isPositionInsideTripleQuotes(
+  private async isPositionInsideTripleQuotesAndQuery(
     model: monaco.editor.ITextModel,
     position: monaco.Position
   ): Promise<{ insideTripleQuotes: boolean; insideQuery: boolean }> {
@@ -800,7 +802,12 @@ export class MonacoEditorActionsProvider {
           endColumn: position.column,
         });
 
-        return isInsideTripleQuotes(requestContentBefore);
+        const { insideTripleQuotes, insideSingleQuotesQuery, insideTripleQuotesQuery } =
+          checkForTripleQuotesAndQueries(requestContentBefore);
+        return {
+          insideTripleQuotes,
+          insideQuery: insideSingleQuotesQuery || insideTripleQuotesQuery,
+        };
       }
       if (request.startLineNumber > position.lineNumber) {
         // Stop iteration once we pass the cursor position
@@ -818,7 +825,7 @@ export class MonacoEditorActionsProvider {
     if (!model || !position) {
       return;
     }
-    this.isPositionInsideTripleQuotes(model, position).then(
+    this.isPositionInsideTripleQuotesAndQuery(model, position).then(
       ({ insideTripleQuotes, insideQuery }) => {
         if (insideTripleQuotes && !insideQuery) {
           // Don't trigger autocomplete suggestions inside scripts and strings

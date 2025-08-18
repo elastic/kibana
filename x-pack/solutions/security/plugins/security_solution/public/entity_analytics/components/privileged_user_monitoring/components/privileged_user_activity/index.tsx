@@ -15,33 +15,48 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useNavigation } from '@kbn/security-solution-navigation';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { getOrElse, isRight } from 'fp-ts/Either';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
-import { LinkAnchor } from '../../../../../common/components/links';
+import { LinkButton } from '../../../../../common/components/links';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { PAGE_SIZE, PRIVILEGED_USER_ACTIVITY_QUERY_ID } from './constants';
 import { EsqlDashboardPanel } from '../../../privileged_user_monitoring_onboarding/components/esql_dashboard_panel/esql_dashboard_panel';
-import { usePrivilegedUserActivityParams, useStackByOptions, useToggleOptions } from './hooks';
+import {
+  usePrivilegedUserActivityParams,
+  useStackByOptions,
+  useToggleOptions,
+  useDiscoverPath,
+} from './hooks';
 import type { TableItemType } from './types';
 import { VisualizationToggleOptions } from './types';
+import { useNavigation } from '../../../../../common/lib/kibana';
+
+const PICK_VISUALIZATION_LEGEND = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.pickVisualizationLegend',
+  { defaultMessage: 'Select a visualization to display' }
+);
 
 const TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.title',
   { defaultMessage: 'Privileged user activity' }
 );
 
-export const UserActivityPrivilegedUsersPanel: React.FC = () => {
+export const UserActivityPrivilegedUsersPanel: React.FC<{
+  sourcererDataView: DataViewSpec;
+}> = ({ sourcererDataView }) => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(PRIVILEGED_USER_ACTIVITY_QUERY_ID);
   const { from, to } = useGlobalTime();
   const [selectedToggleOption, setToggleOption] = useState<VisualizationToggleOptions>(
     VisualizationToggleOptions.GRANTED_RIGHTS
   );
-  const { getLensAttributes, columns, generateVisualizationQuery, generateTableQuery } =
-    usePrivilegedUserActivityParams(selectedToggleOption);
-  const stackByOptions = useStackByOptions(selectedToggleOption);
 
+  const { getAppUrl } = useNavigation();
+  const { getLensAttributes, columns, generateVisualizationQuery, generateTableQuery } =
+    usePrivilegedUserActivityParams(selectedToggleOption, sourcererDataView);
+  const stackByOptions = useStackByOptions(selectedToggleOption);
   const setSelectedChartOptionCallback = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedStackByOption(
@@ -53,7 +68,10 @@ export const UserActivityPrivilegedUsersPanel: React.FC = () => {
   const defaultStackByOption = stackByOptions[0];
   const [selectedStackByOption, setSelectedStackByOption] = useState(defaultStackByOption);
   const toggleOptions = useToggleOptions();
-  const { getAppUrl } = useNavigation();
+
+  const tableQuery = generateTableQuery('@timestamp', 'DESC', 100);
+  const getOrEmptyString = getOrElse(() => '');
+  const discoverPath = useDiscoverPath(getOrEmptyString(tableQuery));
 
   return (
     <EuiPanel hasBorder hasShadow={false} data-test-subj="severity-level-panel">
@@ -67,18 +85,18 @@ export const UserActivityPrivilegedUsersPanel: React.FC = () => {
         outerDirection="column"
         hideSubtitle
       >
-        {generateTableQuery && (
-          <LinkAnchor
+        {isRight(tableQuery) && (
+          <LinkButton
             href={getAppUrl({
               appId: 'discover',
-              path: `#/?&_a=(query:(esql:'${generateTableQuery('@timestamp', 'DESC', 100)}'))`,
+              path: discoverPath,
             })}
           >
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.linkDescription"
               defaultMessage="View all events"
             />
-          </LinkAnchor>
+          </LinkButton>
         )}
       </HeaderSection>
       {toggleStatus && (
@@ -92,7 +110,7 @@ export const UserActivityPrivilegedUsersPanel: React.FC = () => {
                   setToggleOption(id as VisualizationToggleOptions);
                   setSelectedStackByOption(defaultStackByOption);
                 }}
-                legend={'ABOUT_CONTROL_LEGEND'}
+                legend={PICK_VISUALIZATION_LEGEND}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -109,19 +127,18 @@ export const UserActivityPrivilegedUsersPanel: React.FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          {generateVisualizationQuery && generateTableQuery && (
-            <EsqlDashboardPanel<TableItemType>
-              title={TITLE}
-              stackByField={selectedStackByOption.value}
-              timerange={{ from, to }}
-              getLensAttributes={getLensAttributes}
-              generateVisualizationQuery={generateVisualizationQuery}
-              generateTableQuery={generateTableQuery}
-              columns={columns}
-              pageSize={PAGE_SIZE}
-              showInspectTable={true}
-            />
-          )}
+
+          <EsqlDashboardPanel<TableItemType>
+            title={TITLE}
+            stackByField={selectedStackByOption.value}
+            timerange={{ from, to }}
+            getLensAttributes={getLensAttributes}
+            generateVisualizationQuery={generateVisualizationQuery}
+            generateTableQuery={generateTableQuery}
+            columns={columns}
+            pageSize={PAGE_SIZE}
+            showInspectTable={true}
+          />
         </>
       )}
     </EuiPanel>

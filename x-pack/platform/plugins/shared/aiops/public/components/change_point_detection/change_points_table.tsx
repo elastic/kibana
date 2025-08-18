@@ -8,9 +8,7 @@
 import {
   EuiBadge,
   EuiEmptyPrompt,
-  EuiIcon,
   EuiInMemoryTable,
-  EuiToolTip,
   type DefaultItemAction,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -181,21 +179,15 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       id: 'pValue',
       'data-test-subj': 'aiopsChangePointPValue',
       field: 'p_value',
-      name: (
-        <EuiToolTip
-          content={i18n.translate('xpack.aiops.changePointDetection.pValueTooltip', {
-            defaultMessage:
-              'Indicates how extreme the change is. Lower values indicate greater change.',
-          })}
-        >
-          <span>
-            {i18n.translate('xpack.aiops.changePointDetection.pValueLabel', {
-              defaultMessage: 'p-value',
-            })}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
-      ),
+      name: i18n.translate('xpack.aiops.changePointDetection.pValueColumn', {
+        defaultMessage: 'p-value',
+      }),
+      nameTooltip: {
+        content: i18n.translate('xpack.aiops.changePointDetection.pValueTooltip', {
+          defaultMessage:
+            'Indicates how extreme the change is. Lower values indicate greater change.',
+        }),
+      },
       sortable: true,
       truncateText: false,
       render: (pValue: ChangePointAnnotation['p_value']) =>

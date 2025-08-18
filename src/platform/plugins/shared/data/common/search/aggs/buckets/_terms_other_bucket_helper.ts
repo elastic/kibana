@@ -7,20 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
+import { isNumber, keys, values, find, each, flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  buildExistsFilter,
-  buildPhrasesFilter,
-  buildQueryFromFilters,
-  Filter,
-} from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
 import { lastValueFrom } from 'rxjs';
 import { AggGroupNames } from '../agg_groups';
-import { IAggConfigs } from '../agg_configs';
-import { IAggType } from '../agg_type';
-import { IAggConfig } from '../agg_config';
+import type { IAggConfigs } from '../agg_configs';
+import type { IAggType } from '../agg_type';
+import type { IAggConfig } from '../agg_config';
 import { createSamplerAgg } from '../utils/sampler';
 
 const MISSING_KEY_STRING = '__missing__';
@@ -227,7 +223,7 @@ export const buildOtherBucketAgg = (
           bucket,
           isNumber(bucketObjKey) ? undefined : bucketObjKey
         );
-        const filter = cloneDeep(bucket.filters) || currentAgg.createFilter(bucketKey);
+        const filter = structuredClone(bucket.filters) || currentAgg.createFilter(bucketKey);
         const newFilters = flatten([...filters, filter]);
         walkBucketTree(
           newAggIndex,
@@ -306,8 +302,12 @@ export const mergeOtherBucketAggResponse = (
   requestAgg: Record<string, any>,
   otherFilterBuilder: (requestAgg: Record<string, any>, key: string, otherAgg: IAggConfig) => Filter
 ): estypes.SearchResponse<any> => {
-  const updatedResponse = cloneDeep(response);
-  const aggregationsRoot = getCorrectAggregationsCursorFromResponse(otherResponse, aggsConfig);
+  const updatedResponse = structuredClone(response);
+  const updatedOtherResponse = structuredClone(otherResponse);
+  const aggregationsRoot = getCorrectAggregationsCursorFromResponse(
+    updatedOtherResponse,
+    aggsConfig
+  );
   const updatedAggregationsRoot = getCorrectAggregationsCursorFromResponse(
     updatedResponse,
     aggsConfig
@@ -349,7 +349,7 @@ export const updateMissingBucket = (
   aggConfigs: IAggConfigs,
   agg: IAggConfig
 ) => {
-  const updatedResponse = cloneDeep(response);
+  const updatedResponse = structuredClone(response);
   const aggResultBuckets = getAggConfigResultMissingBuckets(
     getCorrectAggregationsCursorFromResponse(updatedResponse, aggConfigs),
     agg.id

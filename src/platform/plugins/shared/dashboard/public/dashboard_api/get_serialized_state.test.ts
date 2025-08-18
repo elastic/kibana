@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardPanelState } from '../../common';
+import type { DashboardPanel } from '../../server';
 
 import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import { getSampleDashboardState } from '../mocks';
@@ -50,7 +50,6 @@ describe('getSerializedState', () => {
       generateNewIds: false,
       dashboardState,
       panelReferences: [],
-      searchSourceReferences: [],
     });
 
     expect(result.attributes).toMatchInlineSnapshot(`
@@ -59,7 +58,7 @@ describe('getSerializedState', () => {
         "description": "",
         "kibanaSavedObjectMeta": Object {
           "searchSource": Object {
-            "filter": Array [],
+            "filters": Array [],
             "query": Object {
               "language": "kuery",
               "query": "hi",
@@ -79,7 +78,7 @@ describe('getSerializedState', () => {
         "timeRestore": false,
         "timeTo": undefined,
         "title": "My Dashboard",
-        "version": 3,
+        "version": 1,
       }
     `);
     expect(result.references).toEqual([]);
@@ -88,7 +87,7 @@ describe('getSerializedState', () => {
   it('should generate new IDs for panels and references when generateNewIds is true', () => {
     const dashboardState = {
       ...getSampleDashboardState(),
-      panels: { oldPanelId: { type: 'visualization' } as unknown as DashboardPanelState },
+      panels: [{ panelIndex: 'oldPanelId', type: 'visualization' } as DashboardPanel],
     };
     const result = getSerializedState({
       controlGroupReferences: [],
@@ -101,7 +100,6 @@ describe('getSerializedState', () => {
           id: 'bizzbuzz',
         },
       ],
-      searchSourceReferences: [],
     });
 
     expect(result.attributes.panels).toMatchInlineSnapshot(`
@@ -110,7 +108,6 @@ describe('getSerializedState', () => {
           "gridData": Object {
             "i": "54321",
           },
-          "panelConfig": Object {},
           "panelIndex": "54321",
           "type": "visualization",
         },
@@ -137,7 +134,6 @@ describe('getSerializedState', () => {
       generateNewIds: false,
       dashboardState,
       panelReferences: [],
-      searchSourceReferences: [],
     });
 
     expect(result.references).toEqual(controlGroupReferences);
@@ -153,74 +149,8 @@ describe('getSerializedState', () => {
       generateNewIds: false,
       dashboardState,
       panelReferences,
-      searchSourceReferences: [],
     });
 
     expect(result.references).toEqual(panelReferences);
-  });
-
-  it('should serialize sections', () => {
-    const dashboardState = {
-      ...getSampleDashboardState(),
-      panels: {
-        oldPanelId: {
-          type: 'visualization',
-          gridData: { sectionId: 'section1' },
-        } as unknown as DashboardPanelState,
-      },
-      sections: {
-        section1: {
-          id: 'section1',
-          title: 'Section One',
-          collapsed: false,
-          gridData: { y: 1, i: 'section1' },
-        },
-        section2: {
-          id: 'section2',
-          title: 'Section Two',
-          collapsed: true,
-          gridData: { y: 2, i: 'section2' },
-        },
-      },
-    };
-    const result = getSerializedState({
-      controlGroupReferences: [],
-      generateNewIds: true,
-      dashboardState,
-      panelReferences: [],
-      searchSourceReferences: [],
-    });
-
-    expect(result.attributes.panels).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "collapsed": false,
-          "gridData": Object {
-            "i": "section1",
-            "y": 1,
-          },
-          "panels": Array [
-            Object {
-              "gridData": Object {
-                "i": "54321",
-              },
-              "panelConfig": Object {},
-              "panelIndex": "54321",
-              "type": "visualization",
-            },
-          ],
-          "title": "Section One",
-        },
-        Object {
-          "collapsed": true,
-          "gridData": Object {
-            "i": "section2",
-            "y": 2,
-          },
-          "panels": Array [],
-          "title": "Section Two",
-        },
-      ]
-    `);
   });
 });

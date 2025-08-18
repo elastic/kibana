@@ -15,8 +15,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import type { DataViewSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
+import { RELATED_INTEGRATION } from '../../constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { KPIsSection } from './kpis/kpis_section';
 import { IntegrationSection } from './integrations/integration_section';
 import { SearchBarSection } from './search_bar/search_bar_section';
@@ -36,24 +37,20 @@ export const DATA_VIEW_ERROR_TEST_ID = 'alert-summary-data-view-error';
 export const SKELETON_TEST_ID = 'alert-summary-skeleton';
 export const CONTENT_TEST_ID = 'alert-summary-content';
 
+const RUNTIME_FIELD_MAP: Record<string, RuntimeFieldSpec> = {
+  [RELATED_INTEGRATION]: {
+    type: 'keyword',
+    script: {
+      source: `if (params._source.containsKey('kibana.alert.rule.parameters') && params._source['kibana.alert.rule.parameters'].containsKey('related_integrations')) { def integrations = params._source['kibana.alert.rule.parameters']['related_integrations']; if (integrations != null && integrations.size() > 0 && integrations[0].containsKey('package')) { emit(integrations[0]['package']); } }`,
+    },
+  },
+};
+
 export interface WrapperProps {
   /**
    * List of installed AI for SOC integrations
    */
   packages: PackageListItem[];
-  /**
-   * Result from the useQuery to fetch all rules
-   */
-  ruleResponse: {
-    /**
-     * Result from fetching all rules
-     */
-    rules: RuleResponse[];
-    /**
-     * True while rules are being fetched
-     */
-    isLoading: boolean;
-  };
 }
 
 /**
@@ -62,10 +59,16 @@ export interface WrapperProps {
  * Once the dataView is correctly created, we render the content.
  * If the creation fails, we show an error message.
  */
-export const Wrapper = memo(({ packages, ruleResponse }: WrapperProps) => {
+export const Wrapper = memo(({ packages }: WrapperProps) => {
   const spaceId = useSpaceId();
-  const signalIndexName = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
-  const dataViewSpec = useMemo(() => ({ title: signalIndexName }), [signalIndexName]);
+  const oldSignalIndexName = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+  const dataViewSpec: DataViewSpec = useMemo(
+    () => ({
+      title: oldSignalIndexName,
+      runtimeFieldMap: RUNTIME_FIELD_MAP,
+    }),
+    [oldSignalIndexName]
+  );
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
@@ -74,9 +77,10 @@ export const Wrapper = memo(({ packages, ruleResponse }: WrapperProps) => {
     skip: newDataViewPickerEnabled, // skip data view creation if the new data view picker is enabled
   });
 
-  // TODO: use alert only data view when it is ready
-  // https://github.com/elastic/security-team/issues/12589
   const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
+  const signalIndexName = newDataViewPickerEnabled
+    ? experimentalDataView?.getIndexPattern() ?? ''
+    : oldSignalIndexName;
   const loading = newDataViewPickerEnabled ? status !== 'ready' : oldDataViewLoading;
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
@@ -108,15 +112,11 @@ export const Wrapper = memo(({ packages, ruleResponse }: WrapperProps) => {
             <div data-test-subj={CONTENT_TEST_ID}>
               <IntegrationSection packages={packages} />
               <EuiHorizontalRule />
-              <SearchBarSection
-                dataView={dataView}
-                packages={packages}
-                ruleResponse={ruleResponse}
-              />
+              <SearchBarSection dataView={dataView} packages={packages} />
               <EuiSpacer />
               <KPIsSection signalIndexName={signalIndexName} />
               <EuiSpacer />
-              <TableSection dataView={dataView} packages={packages} ruleResponse={ruleResponse} />
+              <TableSection dataView={dataView} packages={packages} />
             </div>
           )}
         </>

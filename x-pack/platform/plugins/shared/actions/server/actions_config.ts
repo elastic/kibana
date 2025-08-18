@@ -63,6 +63,7 @@ export interface ActionsConfigurationUtilities {
     };
   };
   getAwsSesConfig: () => AwsSesConfig;
+  getEnabledEmailServices: () => string[];
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -176,11 +177,16 @@ function validateEmails(
   addresses: string[],
   options: ValidateEmailAddressesOptions
 ): string | undefined {
-  if (config.email?.domain_allowlist == null) {
+  if (config.email?.domain_allowlist == null && config.email?.recipient_allowlist == null) {
     return;
   }
 
-  const validated = validateEmailAddresses(config.email.domain_allowlist, addresses, options);
+  const validated = validateEmailAddresses(
+    config.email.domain_allowlist,
+    addresses,
+    options,
+    config.email.recipient_allowlist
+  );
   return invalidEmailsAsMessage(validated);
 }
 
@@ -243,15 +249,23 @@ export function getActionsConfigurationUtilities(
       };
     },
     getAwsSesConfig: () => {
-      if (config.email?.services?.ses.host && config.email?.services?.ses.port) {
+      if (config.email?.services?.ses?.host && config.email?.services?.ses?.port) {
         return {
-          host: config.email?.services?.ses.host,
-          port: config.email?.services?.ses.port,
+          host: config.email?.services?.ses?.host,
+          port: config.email?.services?.ses?.port,
           secure: true,
         };
       }
 
       return null;
+    },
+    getEnabledEmailServices() {
+      const emailServices = config.email?.services?.enabled;
+      if (emailServices) {
+        return Array.from(new Set(Array.from(emailServices)));
+      }
+
+      return ['*'];
     },
   };
 }

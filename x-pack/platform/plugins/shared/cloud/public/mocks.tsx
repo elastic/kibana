@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
 import type { CloudSetup, CloudStart } from './types';
 
@@ -34,6 +35,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
       projectId: undefined,
       projectName: undefined,
       projectType: undefined,
+      productTier: undefined,
     },
   };
 }

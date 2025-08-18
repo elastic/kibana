@@ -90,7 +90,7 @@ export function WelcomeMessageConnectors({
             css: { verticalAlign: 'text-bottom' },
           }}
           size="s"
-          type="iInCircle"
+          type="info"
           position="top"
         />
       </EuiText>

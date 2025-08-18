@@ -5,42 +5,43 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   KibanaRequest,
   Logger,
   Plugin,
   PluginConfigDescriptor,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { schema } from '@kbn/config-schema';
-import { OBSERVABILITY_ENABLE_STREAMS_UI } from '@kbn/management-settings-ids';
-import { StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
+import type { StreamsConfig } from '../common/config';
+import { configSchema, exposeToBrowserConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
   STREAMS_FEATURE_ID,
+  STREAMS_TIERED_FEATURES,
   STREAMS_UI_PRIVILEGES,
 } from '../common/constants';
+import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/rules/register_rules';
 import { AssetService } from './lib/streams/assets/asset_service';
+import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
 import { StreamsTelemetryService } from './lib/telemetry/service';
 import { streamsRouteRepository } from './routes';
-import { RouteHandlerScopedClients } from './routes/types';
-import {
+import type { RouteHandlerScopedClients } from './routes/types';
+import type {
   StreamsPluginSetupDependencies,
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
-import { QueryService } from './lib/streams/assets/query/query_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -84,22 +85,17 @@ export class StreamsPlugin
 
     this.telemetryService.setup(core.analytics);
 
-    const isSignificantEventsEnabled = this.config.experimental?.significantEventsEnabled === true;
-    const alertingFeatures = isSignificantEventsEnabled
-      ? STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
-          ruleTypeId,
-          consumers: [STREAMS_CONSUMER],
-        }))
-      : [];
+    const alertingFeatures = STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
+      ruleTypeId,
+      consumers: [STREAMS_CONSUMER],
+    }));
 
-    if (isSignificantEventsEnabled) {
-      registerRules({ plugins, logger: this.logger.get('rules') });
-    }
+    registerRules({ plugins, logger: this.logger.get('rules') });
 
     const assetService = new AssetService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     const contentService = new ContentService(core, this.logger);
-    const queryService = new QueryService(core, this.logger, this.config);
+    const queryService = new QueryService(core, this.logger);
 
     plugins.features.registerKibanaFeature({
       id: STREAMS_FEATURE_ID,
@@ -154,6 +150,8 @@ export class StreamsPlugin
       },
     });
 
+    core.pricing.registerProductFeatures(STREAMS_TIERED_FEATURES);
+
     registerRoutes({
       repository: streamsRouteRepository,
       dependencies: {
@@ -204,29 +202,7 @@ export class StreamsPlugin
       runDevModeChecks: this.isDev,
     });
 
-    const isObservabilityServerless =
-      plugins.cloud?.isServerlessEnabled &&
-      plugins.cloud?.serverless.projectType === 'observability';
-    core.uiSettings.register({
-      [OBSERVABILITY_ENABLE_STREAMS_UI]: {
-        category: ['observability'],
-        name: 'Streams UI',
-        value: isObservabilityServerless,
-        description: i18n.translate('xpack.streams.enableStreamsUIDescription', {
-          defaultMessage: '{technicalPreviewLabel} Enable the {streamsLink}.',
-          values: {
-            technicalPreviewLabel: `<em>[${i18n.translate('xpack.streams.technicalPreviewLabel', {
-              defaultMessage: 'Technical Preview',
-            })}]</em>`,
-            streamsLink: `<a href="https://www.elastic.co/docs/solutions/observability/logs/streams/streams">Streams UI</href>`,
-          },
-        }),
-        type: 'boolean',
-        schema: schema.boolean(),
-        requiresPageReload: true,
-        solution: 'oblt',
-      },
-    });
+    registerFeatureFlags(core, plugins, this.logger);
 
     return {};
   }

@@ -8,9 +8,9 @@
 import React, { useState, Fragment, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiInMemoryTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiLink,
   EuiIcon,
@@ -21,15 +21,16 @@ import {
   EuiSwitch,
   EuiIconTip,
 } from '@elastic/eui';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
-import { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/components/context_menu/context_menu';
 import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
-import { DataStream } from '../../../../../../common/types';
+import type { DataStream } from '../../../../../../common/types';
 import { getLifecycleValue } from '../../../../lib/data_streams';
-import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
+import type { UseRequestResponse } from '../../../../../shared_imports';
+import { reactRouterNavigate } from '../../../../../shared_imports';
 import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/routing';
 import { DataHealth } from '../../../../components';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
@@ -38,7 +39,8 @@ import { DataStreamsBadges } from '../data_stream_badges';
 import { ConditionalWrap } from '../data_stream_detail_panel';
 import { isDataStreamFullyManagedByILM } from '../../../../lib/data_streams';
 import { indexModeLabels } from '../../../../lib/index_mode_labels';
-import { FilterListButton, Filters } from '../../components';
+import type { Filters } from '../../components';
+import { FilterListButton } from '../../components';
 import { type DataStreamFilterName } from '../data_stream_list';
 import { DataStreamActionsMenu } from '../data_stream_actions_menu';
 import { EditDataRetentionModal } from '../edit_data_retention_modal';
@@ -219,7 +221,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
           {i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTitle', {
             defaultMessage: 'Data retention',
           })}{' '}
-          <EuiIcon size="s" color="subdued" type="questionInCircle" />
+          <EuiIcon size="s" color="subdued" type="question" />
         </span>
       </EuiToolTip>
     ),
@@ -247,12 +249,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
                   }
                 )}
               >
-                <EuiIcon
-                  size="s"
-                  color="subdued"
-                  type="iInCircle"
-                  data-test-subj="usingMaxRetention"
-                />
+                <EuiIcon size="s" color="subdued" type="info" data-test-subj="usingMaxRetention" />
               </EuiToolTip>
             </>
           )}
@@ -293,7 +290,11 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   const dataStreamActions: EuiContextMenuPanelItemDescriptor[] = [];
 
   if (
-    selection.every((dataStream: DataStream) => dataStream.privileges.manage_data_stream_lifecycle)
+    selection.every(
+      (dataStream: DataStream) =>
+        dataStream.privileges.manage_data_stream_lifecycle &&
+        !isDataStreamFullyManagedByILM(dataStream)
+    )
   ) {
     dataStreamActions.push({
       name: i18n.translate('xpack.idxMgmt.dataStreamList.table.bulkEditDataRetentionButtonLabel', {

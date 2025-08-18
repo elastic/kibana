@@ -117,7 +117,7 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
     aria-label="Toggle custom extents"
     buttonContent="Custom extents"
     buttonContentClassName="euiText euiText--small"
-    className="visEditorSidebar__section visEditorSidebar__collapsible"
+    css="unknown styles"
     id="yAxisOptionsAccordionValueAxis-1"
     initialIsOpen={false}
   >

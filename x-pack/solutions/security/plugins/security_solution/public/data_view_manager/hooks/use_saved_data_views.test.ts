@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { useSelector } from 'react-redux';
 import { useSavedDataViews } from './use_saved_data_views';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
+import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../common/constants';
 
 jest.mock('react-redux', () => ({
   useSelector: jest.fn(),
@@ -19,13 +20,18 @@ describe('useSavedDataViews', () => {
     jest.clearAllMocks();
   });
 
-  it('should filter out the default data view and transform the remaining ones', () => {
+  it('should not filter out the default data view and transform the remaining ones', () => {
     // Mock data to be returned by the selector
     const mockDataViews = [
       {
-        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, // This should be filtered out
+        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, // This should not be filtered out
         title: 'Default View',
         name: 'default_view',
+      },
+      {
+        id: DEFAULT_ALERT_DATA_VIEW_ID, // This should be filtered out
+        title: 'Default Alert View',
+        name: 'default_alert_view',
       },
       {
         id: 'custom-view-1',
@@ -43,19 +49,26 @@ describe('useSavedDataViews', () => {
     (useSelector as jest.Mock).mockReturnValue({
       dataViews: mockDataViews,
       defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+      alertDataViewId: DEFAULT_ALERT_DATA_VIEW_ID,
     });
 
     // Render the hook
     const { result } = renderHook(() => useSavedDataViews());
 
-    // Expect the default view to be filtered out
-    expect(result.current).toHaveLength(2);
+    // Expect the alert view to be filtered out
+    expect(result.current).toHaveLength(3);
     expect(
       result.current.find((item) => item.id === DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID)
-    ).toBeUndefined();
+    ).not.toBeUndefined();
+    expect(result.current.find((item) => item.id === DEFAULT_ALERT_DATA_VIEW_ID)).toBeUndefined();
 
     // Expect the custom views to be correctly transformed
     expect(result.current).toEqual([
+      {
+        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, // This should not be filtered out
+        title: 'Default View',
+        name: 'default_view',
+      },
       {
         id: 'custom-view-1',
         title: 'Custom View 1',
@@ -102,6 +115,7 @@ describe('useSavedDataViews', () => {
     (useSelector as jest.Mock).mockReturnValue({
       dataViews: mockDataViews,
       defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+      alertDataViewId: DEFAULT_ALERT_DATA_VIEW_ID,
     });
 
     // Render the hook

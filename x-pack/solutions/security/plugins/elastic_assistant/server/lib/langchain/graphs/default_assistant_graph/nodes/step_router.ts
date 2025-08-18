@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { containsToolCalls } from '@kbn/langchain/server/utils/tools';
 import { NodeType } from '../constants';
-import { AgentState } from '../types';
-import { NEW_CHAT } from '../../../../../routes/helpers';
+import type { AgentState } from '../types';
 
 /*
  * We use a single router endpoint for common conditional edges.
@@ -18,19 +18,11 @@ import { NEW_CHAT } from '../../../../../routes/helpers';
 export function stepRouter(state: AgentState): string {
   switch (state.lastNode) {
     case NodeType.AGENT:
-      if (state.agentOutcome && 'returnValues' in state.agentOutcome) {
-        return state.hasRespondStep ? NodeType.RESPOND : NodeType.END;
+      const lastMessage = state.messages[state.messages.length - 1];
+      if (containsToolCalls(lastMessage)) {
+        return NodeType.TOOLS;
       }
-      return NodeType.TOOLS;
-
-    case NodeType.GET_PERSISTED_CONVERSATION:
-      if (state.conversation?.title?.length && state.conversation?.title !== NEW_CHAT) {
-        return NodeType.PERSIST_CONVERSATION_CHANGES;
-      }
-      return NodeType.GENERATE_CHAT_TITLE;
-
-    case NodeType.MODEL_INPUT:
-      return state.conversationId ? NodeType.GET_PERSISTED_CONVERSATION : NodeType.AGENT;
+      return NodeType.END;
 
     default:
       return NodeType.END;

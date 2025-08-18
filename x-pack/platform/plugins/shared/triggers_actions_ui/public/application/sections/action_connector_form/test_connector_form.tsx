@@ -17,18 +17,17 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiErrorBoundary,
+  EuiCodeBlock,
+  EuiTitle,
 } from '@elastic/eui';
-import { Option, map, getOrElse } from 'fp-ts/Option';
+import type { Option } from 'fp-ts/Option';
+import { map, getOrElse } from 'fp-ts/Option';
 import { pipe } from 'fp-ts/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import {
-  ActionConnector,
-  ActionConnectorMode,
-  ActionTypeRegistryContract,
-  IErrorObject,
-} from '../../../types';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
+import { ActionConnectorMode } from '../../../types';
 
 export interface TestConnectorFormProps {
   connector: ActionConnector;
@@ -157,7 +156,7 @@ export const TestConnectorForm = ({
         executionResult,
         map((result) =>
           result?.status === 'ok' ? (
-            <SuccessfulExecution />
+            <SuccessfulExecution executionResult={result} />
           ) : (
             <FailedExecussion executionResult={result} />
           )
@@ -181,25 +180,56 @@ const AwaitingExecution = () => (
   </EuiCallOut>
 );
 
-const SuccessfulExecution = () => (
-  <EuiCallOut
-    title={i18n.translate(
-      'xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulTitle',
-      {
-        defaultMessage: 'Test was successful',
-      }
+const SuccessfulExecution = ({
+  executionResult,
+}: {
+  executionResult: ActionTypeExecutorResult<unknown> | undefined;
+}) => (
+  <>
+    <EuiCallOut
+      title={i18n.translate(
+        'xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulTitle',
+        {
+          defaultMessage: 'Test was successful',
+        }
+      )}
+      color="success"
+      data-test-subj="executionSuccessfulResult"
+      iconType="check"
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="Ensure the results are what you expect."
+          id="xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulDescription"
+        />
+      </p>
+    </EuiCallOut>
+    {executionResult && (
+      <>
+        <EuiSpacer size="s" />
+        <EuiTitle size="xs">
+          <h4>
+            {i18n.translate(
+              'xpack.triggersActionsUI.sections.testConnectorForm.executionResultDetails',
+              {
+                defaultMessage: 'Response',
+              }
+            )}
+          </h4>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiCodeBlock
+          language="json"
+          paddingSize="m"
+          overflowHeight={300}
+          isCopyable
+          data-test-subj="executionResultCodeBlock"
+        >
+          {JSON.stringify(executionResult, null, 2)}
+        </EuiCodeBlock>
+      </>
     )}
-    color="success"
-    data-test-subj="executionSuccessfulResult"
-    iconType="check"
-  >
-    <p>
-      <FormattedMessage
-        defaultMessage="Ensure the results are what you expect."
-        id="xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulDescription"
-      />
-    </p>
-  </EuiCallOut>
+  </>
 );
 
 const FailedExecussion = ({

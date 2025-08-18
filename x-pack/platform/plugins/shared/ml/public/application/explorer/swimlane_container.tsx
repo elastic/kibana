@@ -16,6 +16,7 @@ import {
   EuiLoadingChart,
   EuiResizeObserver,
   EuiText,
+  transparentize,
 } from '@elastic/eui';
 
 import { throttle } from 'lodash';
@@ -37,11 +38,7 @@ import { i18n } from '@kbn/i18n';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
-import {
-  getFormattedSeverityScore,
-  ML_ANOMALY_THRESHOLD,
-  ML_SEVERITY_COLORS,
-} from '@kbn/ml-anomaly-utils';
+import { getThemeResolvedSeverityColor, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import type { TimeBuckets as TimeBucketsClass } from '@kbn/ml-time-buckets';
 import { SwimLanePagination } from './swimlane_pagination';
@@ -74,6 +71,7 @@ const BORDER_WIDTH = 1;
 export const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
 const X_AXIS_HEIGHT = 24;
+const MAX_ANOMALY_SCORE_LEGEND = 100;
 
 export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
   return arg && Object.hasOwn(arg, 'cardinality');
@@ -333,7 +331,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         },
         brushMask: {
           visible: showBrush,
-          fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
+          fill: isDarkTheme
+            ? transparentize(euiTheme.colors.backgroundBaseSubdued, 0.65)
+            : 'rgb(247,247,247,50%)',
         },
         brushArea: {
           visible: showBrush,
@@ -495,27 +495,42 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                               {
                                 start: ML_ANOMALY_THRESHOLD.LOW,
                                 end: ML_ANOMALY_THRESHOLD.WARNING,
-                                color: ML_SEVERITY_COLORS.LOW,
+                                color: getThemeResolvedSeverityColor(
+                                  ML_ANOMALY_THRESHOLD.LOW,
+                                  euiTheme
+                                ),
                               },
                               {
                                 start: ML_ANOMALY_THRESHOLD.WARNING,
                                 end: ML_ANOMALY_THRESHOLD.MINOR,
-                                color: ML_SEVERITY_COLORS.WARNING,
+                                color: getThemeResolvedSeverityColor(
+                                  ML_ANOMALY_THRESHOLD.WARNING,
+                                  euiTheme
+                                ),
                               },
                               {
                                 start: ML_ANOMALY_THRESHOLD.MINOR,
                                 end: ML_ANOMALY_THRESHOLD.MAJOR,
-                                color: ML_SEVERITY_COLORS.MINOR,
+                                color: getThemeResolvedSeverityColor(
+                                  ML_ANOMALY_THRESHOLD.MINOR,
+                                  euiTheme
+                                ),
                               },
                               {
                                 start: ML_ANOMALY_THRESHOLD.MAJOR,
                                 end: ML_ANOMALY_THRESHOLD.CRITICAL,
-                                color: ML_SEVERITY_COLORS.MAJOR,
+                                color: getThemeResolvedSeverityColor(
+                                  ML_ANOMALY_THRESHOLD.MAJOR,
+                                  euiTheme
+                                ),
                               },
                               {
                                 start: ML_ANOMALY_THRESHOLD.CRITICAL,
-                                end: Infinity,
-                                color: ML_SEVERITY_COLORS.CRITICAL,
+                                end: MAX_ANOMALY_SCORE_LEGEND,
+                                color: getThemeResolvedSeverityColor(
+                                  ML_ANOMALY_THRESHOLD.CRITICAL,
+                                  euiTheme
+                                ),
                               },
                             ],
                           }}
@@ -523,8 +538,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                           xAccessor="time"
                           yAccessor="laneLabel"
                           valueAccessor="value"
+                          valueFormatter={(score: number) => String(Math.floor(score))}
                           highlightedData={highlightedData}
-                          valueFormatter={getFormattedSeverityScore}
                           xScale={{
                             type: ScaleType.Time,
                             interval: {

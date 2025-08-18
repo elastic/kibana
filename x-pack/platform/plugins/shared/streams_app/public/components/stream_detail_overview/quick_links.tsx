@@ -10,7 +10,7 @@ import React from 'react';
 import { css } from '@emotion/css';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 import { AssetImage } from '../asset_image';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
@@ -33,7 +33,7 @@ export function QuickLinks({ definition }: { definition: Streams.ingest.all.GetR
             `}
           >
             <EuiFlexGroup direction="column" gutterSize="s">
-              <AssetImage type="welcome" />
+              <AssetImage type="quickLinksEmpty" />
               <EuiText size="xs" textAlign="center" color="subdued">
                 {i18n.translate('xpack.streams.entityDetailOverview.linkDashboardsText', {
                   defaultMessage: 'Link dashboards to this stream for quick access',

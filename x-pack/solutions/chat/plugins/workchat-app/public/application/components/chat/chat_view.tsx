@@ -9,7 +9,7 @@ import { css } from '@emotion/css';
 import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { ConversationEventChanges } from '../../../../common/chat_events';
+import type { ConversationEventChanges } from '../../../../common/chat_events';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useConversationList } from '../../hooks/use_conversation_list';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -35,7 +35,7 @@ export const WorkchatChatView: React.FC<WorkchatChatViewProps> = ({ agentId, con
     padding-top: 0;
     padding-bottom: 0;
     height: 100%;
-    max-block-size: calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)));
+    max-block-size: var(--kbn-application--content-height);
     background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
 

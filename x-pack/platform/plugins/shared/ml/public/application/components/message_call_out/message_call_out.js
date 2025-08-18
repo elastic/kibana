@@ -26,7 +26,7 @@ function getCallOutAttributes(message, status) {
     case MESSAGE_LEVEL.SUCCESS:
       return { title: message, iconType: 'check', color: 'success' };
     case MESSAGE_LEVEL.INFO:
-      return { title: message, iconType: 'iInCircle', color: 'primary' };
+      return { title: message, iconType: 'info', color: 'primary' };
   }
 }
 

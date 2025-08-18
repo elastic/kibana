@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const PUBLIC_API_VERSION = '2023-10-31';
-export const PUBLIC_API_CONTENT_MANAGEMENT_VERSION = 3;
 export const PUBLIC_API_PATH = '/api/dashboards/dashboard';
+/**
+ * INTERNAL_API_VERSION is the temporary version for the internal API until the
+ * public API is fully implemented and stable. When the public API is ready, this
+ * const will be removed and a PUBLIC_API_VERSION (ex. 2023-10-31) will be introduced.
+ */
 export const INTERNAL_API_VERSION = '1';

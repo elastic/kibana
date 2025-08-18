@@ -8,7 +8,7 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { Capabilities } from '@kbn/core/types';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ExperimentalFeatures } from '../../../common';
@@ -54,13 +54,6 @@ class ApplicationLinksUpdater {
     const processedAppLinks = this.processAppLinks(appLinksToUpdate, params);
     this.linksSubject$.next(Object.freeze(processedAppLinks));
     this.normalizedLinksSubject$.next(Object.freeze(this.getNormalizedLinks(processedAppLinks)));
-  }
-
-  /**
-   * Returns the current links value
-   */
-  public getLinksValue(): AppLinkItems {
-    return this.linksSubject$.getValue();
   }
 
   /**

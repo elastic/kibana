@@ -10,6 +10,8 @@ import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { FindLiveQueryRequestQuerySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
@@ -24,7 +26,10 @@ import { OsqueryQueries } from '../../../common/search_strategy';
 import { findLiveQueryRequestQuerySchema } from '../../../common/api';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 
-export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) => {
+export const findLiveQueryRoute = (
+  router: IRouter<DataRequestHandlerContext>,
+  osqueryContext: OsqueryAppContext
+) => {
   router.versioned
     .get({
       access: 'public',
@@ -52,6 +57,10 @@ export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) =
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const spaceId = osqueryContext?.service?.getActiveSpace
+            ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+            : DEFAULT_SPACE_ID;
+
           const search = await context.search;
           const res = await lastValueFrom(
             search.search<ActionsRequestOptions, ActionsStrategyResponse>(
@@ -66,6 +75,7 @@ export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) =
                   direction: (request.query.sortOrder ?? 'desc') as Direction,
                   field: request.query.sort ?? 'created_at',
                 },
+                spaceId,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
             )

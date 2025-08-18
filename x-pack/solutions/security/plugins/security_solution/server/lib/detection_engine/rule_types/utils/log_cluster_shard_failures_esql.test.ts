@@ -42,7 +42,7 @@ describe('logClusterShardFailuresEsql', () => {
   it('should add warning message when shard failures exist in a single cluster', () => {
     const shardFailure: EsqlEsqlShardFailure = {
       reason: { type: 'test_failure', reason: 'test failure' },
-      shard: '0',
+      shard: 0,
       index: 'test-index',
     };
 
@@ -70,13 +70,13 @@ describe('logClusterShardFailuresEsql', () => {
   it('should add warning message when shard failures exist in multiple clusters', () => {
     const shardFailure1: EsqlEsqlShardFailure = {
       reason: { type: 'test_failure_1', reason: 'test failure 1' },
-      shard: '0',
+      shard: 0,
       index: 'test-index-1',
     };
 
     const shardFailure2: EsqlEsqlShardFailure = {
       reason: { type: 'test_failure_2', reason: 'test failure 2' },
-      shard: '1',
+      shard: 1,
       index: 'test-index-2',
     };
 

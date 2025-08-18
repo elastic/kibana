@@ -18,7 +18,6 @@
     "requiredPlugins": [
       "actions",
       "alerting",
-      "cases",
       "data",
       "fleet",
       "embeddable",

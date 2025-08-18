@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useEffect } from 'react';
 import { get } from 'lodash';
 
+import type { EuiFieldNumberProps } from '@elastic/eui';
 import {
   EuiFieldNumber,
-  EuiFieldNumberProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -19,7 +20,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 
-import { PhaseWithTiming } from '../../../../../../../../common/types';
+import type { PhaseWithTiming } from '../../../../../../../../common/types';
 import { getFieldValidityAndErrorMessage, useFormData } from '../../../../../../../shared_imports';
 import { UseField, useConfiguration, useGlobalFields } from '../../../../form';
 import { getPhaseMinAgeInMilliseconds } from '../../../../lib';
@@ -108,7 +109,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                             {/* This element is rendered for testing purposes only */}
                             <div data-test-subj={`${phase}-rolloverMinAgeInputIconTip`} />
                             <EuiIconTip
-                              type="iInCircle"
+                              type="info"
                               aria-label={i18nTexts.editPolicy.rolloverToolTipDescription}
                               content={i18nTexts.editPolicy.rolloverToolTipDescription}
                             />

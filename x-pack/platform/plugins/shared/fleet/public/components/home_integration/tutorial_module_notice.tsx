@@ -39,7 +39,7 @@ const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }
               values={{
                 notePrefix: (
                   <EuiIcon
-                    type="iInCircle"
+                    type="info"
                     style={{ verticalAlign: 'baseline' }}
                     aria-label={i18n.translate(
                       'xpack.fleet.homeIntegration.tutorialModule.noticeText.notePrefix',

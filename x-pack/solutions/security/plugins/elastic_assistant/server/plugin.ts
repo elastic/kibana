@@ -13,18 +13,19 @@ import type {
   FeatureFlagsStart,
 } from '@kbn/core/server';
 
+import type { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import {
   ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
   ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
   ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
-  AssistantFeatures,
 } from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject, exhaustMap, takeWhile, takeUntil } from 'rxjs';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
-import { Dataset, IRuleDataClient, IndexOptions } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataClient, IndexOptions } from '@kbn/rule-registry-plugin/server';
+import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { events } from './lib/telemetry/event_based_telemetry';
-import {
+import type {
   AssistantTool,
   ElasticAssistantPluginCoreSetupDependencies,
   ElasticAssistantPluginSetup,
@@ -39,7 +40,8 @@ import { createEventLogger } from './create_event_logger';
 import { PLUGIN_ID } from '../common/constants';
 import { registerEventLogProvider } from './register_event_log_provider';
 import { registerRoutes } from './routes/register_routes';
-import { CallbackIds, appContextService } from './services/app_context';
+import type { CallbackIds } from './services/app_context';
+import { appContextService } from './services/app_context';
 import { removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
 import { getAttackDiscoveryScheduleType } from './lib/attack_discovery/schedules/register_schedule/definition';
 import type { ConfigSchema } from './config_schema';
@@ -136,7 +138,7 @@ export class ElasticAssistantPlugin
     const featureFlagDefinitions: FeatureFlagDefinition[] = [
       {
         featureFlagName: ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
-        fallbackValue: false,
+        fallbackValue: true,
         fn: (assistantAttackDiscoverySchedulingEnabled) => {
           if (assistantAttackDiscoverySchedulingEnabled) {
             // Register Attack Discovery Schedule type
@@ -153,7 +155,7 @@ export class ElasticAssistantPlugin
       },
       {
         featureFlagName: ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
-        fallbackValue: false,
+        fallbackValue: true,
         fn: (attackDiscoveryAlertsEnabled) => {
           let adhocAttackDiscoveryDataClient: IRuleDataClient | undefined;
           if (attackDiscoveryAlertsEnabled) {
@@ -194,7 +196,7 @@ export class ElasticAssistantPlugin
       getRegisteredFeatures: (pluginName: string) => {
         return appContextService.getRegisteredFeatures(pluginName);
       },
-      getRegisteredTools: (pluginName: string) => {
+      getRegisteredTools: (pluginName: string | string[]) => {
         return appContextService.getRegisteredTools(pluginName);
       },
     };
@@ -220,7 +222,7 @@ export class ElasticAssistantPlugin
       getRegisteredFeatures: (pluginName: string) => {
         return appContextService.getRegisteredFeatures(pluginName);
       },
-      getRegisteredTools: (pluginName: string) => {
+      getRegisteredTools: (pluginName: string | string[]) => {
         return appContextService.getRegisteredTools(pluginName);
       },
       registerFeatures: (pluginName: string, features: Partial<AssistantFeatures>) => {

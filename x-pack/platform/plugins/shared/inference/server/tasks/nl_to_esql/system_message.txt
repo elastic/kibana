@@ -49,8 +49,12 @@ The following processing commands are available:
   function and can group using grouping functions.
 - SORT: sorts the row in a table by a column. Expressions are not supported.
 - WHERE: Filters rows based on a boolean condition. WHERE supports the same functions as EVAL.
+- LOOKUP JOIN: Joins data from a query results table with matching records from a specified lookup index.
 
 ## Functions and operators
+
+### Join functions
+
 
 ### Grouping functions
 
@@ -358,4 +362,16 @@ FROM personal_info
 | EVAL birth=DATE_PARSE("yyyy-MM-dd", birth_date)
 | KEEP user_name, birth
 | SORT birth
+```
+
+
+**Look up and join the `source.ip` field in `firewall_logs` with the `source.ip` field in `threat_list`, filters rows to include only those with non-null `threat_level`, sorts the results by `timestamp`, and keeps only the `source.ip`, `action`, `threat_level`, and `threat_type` fields.**
+
+```esql
+FROM firewall_logs
+| LOOKUP JOIN threat_list ON source.ip
+| WHERE threat_level IS NOT NULL
+| SORT timestamp
+| KEEP source.ip, action, threat_level, threat_type
+| LIMIT 10
 ```

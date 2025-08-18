@@ -1,0 +1,207 @@
+{
+  "id": "@kbn/presentation-util",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/presentation-util",
+        "id": "def-public.openLazyFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "openLazyFlyout",
+        "description": [
+          "\nOpens a flyout panel with lazily loaded content.\n\nThis helper handles:\n- Mounting a flyout panel with async content.\n- Automatically focusing the flyout when content is ready.\n- Closing the flyout when the user navigates to a different app.\n- Tracking the flyout if `parentApi` supports overlay tracking.\n- Returning focus to a trigger element when the flyout closes.\n"
+        ],
+        "signature": [
+          "(params: OpenLazyFlyoutParams) => ",
+          "OverlayRef"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_util/src/open_lazy_flyout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-util",
+            "id": "def-public.openLazyFlyout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [
+              "- Configuration object."
+            ],
+            "signature": [
+              "OpenLazyFlyoutParams"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_util/src/open_lazy_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A handle to the opened flyout (`OverlayRef`)."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-util",
+        "id": "def-public.tracksOverlays",
+        "type": "Function",
+        "tags": [],
+        "label": "tracksOverlays",
+        "description": [
+          "\nType guard to check if an object implements {@link TracksOverlays}.\n"
+        ],
+        "signature": [
+          "(root: unknown) => root is ",
+          {
+            "pluginId": "@kbn/presentation-util",
+            "scope": "public",
+            "docId": "kibKbnPresentationUtilPluginApi",
+            "section": "def-public.TracksOverlays",
+            "text": "TracksOverlays"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_util/src/tracks_overlays.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-util",
+            "id": "def-public.tracksOverlays.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "root",
+            "description": [
+              "- The object to check."
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_util/src/tracks_overlays.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "`true` if the object has `openOverlay` and `clearOverlays` methods."
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/presentation-util",
+        "id": "def-public.TracksOverlays",
+        "type": "Interface",
+        "tags": [],
+        "label": "TracksOverlays",
+        "description": [
+          "\nAPI for tracking overlays.\n\nUsed by parent containers (like dashboards) to track opened overlays (e.g. flyouts) and clear them when needed.\n"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_util/src/tracks_overlays.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-util",
+            "id": "def-public.TracksOverlays.openOverlay",
+            "type": "Function",
+            "tags": [],
+            "label": "openOverlay",
+            "description": [
+              "\nRegisters an overlay.\n"
+            ],
+            "signature": [
+              "(ref: ",
+              "OverlayRef",
+              ", options?: ",
+              "TracksOverlaysOptions",
+              " | undefined) => void"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_util/src/tracks_overlays.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-util",
+                "id": "def-public.TracksOverlays.openOverlay.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ref",
+                "description": [
+                  "- The overlay reference to track."
+                ],
+                "signature": [
+                  "OverlayRef"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_util/src/tracks_overlays.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/presentation-util",
+                "id": "def-public.TracksOverlays.openOverlay.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- Optional options such as `focusedPanelId` for context."
+                ],
+                "signature": [
+                  "TracksOverlaysOptions",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_util/src/tracks_overlays.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/presentation-util",
+            "id": "def-public.TracksOverlays.clearOverlays",
+            "type": "Function",
+            "tags": [],
+            "label": "clearOverlays",
+            "description": [
+              "\nClears all tracked overlays.\n\nTypically called when the container is destroyed or when overlays should be force-closed."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_util/src/tracks_overlays.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

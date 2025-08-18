@@ -18,7 +18,7 @@ export const App: React.FC = () => {
   } = useKibana();
   return (
     <UsageTrackerContextProvider usageCollection={usageCollection}>
-      <SearchHomepageHeader showEndpointsAPIKeys={false} />
+      <SearchHomepageHeader />
       <SearchHomepageBody />
     </UsageTrackerContextProvider>
   );

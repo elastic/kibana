@@ -12,15 +12,29 @@ const userPrivilegesRt = rt.type({
   canReadFailureStore: rt.boolean,
 });
 
-const datasetUserPrivilegesRt = rt.intersection([
-  userPrivilegesRt,
-  rt.type({
-    canRead: rt.boolean,
-    canViewIntegrations: rt.boolean,
-  }),
-]);
+const datasetPrivilegeRt = rt.record(
+  rt.string,
+  rt.intersection([
+    userPrivilegesRt,
+    rt.type({
+      canRead: rt.boolean,
+    }),
+  ])
+);
+
+const datasetUserPrivilegesRt = rt.type({
+  datasetsPrivilages: datasetPrivilegeRt,
+  canViewIntegrations: rt.boolean,
+});
 
 export type DatasetUserPrivileges = rt.TypeOf<typeof datasetUserPrivilegesRt>;
+export type DatasetTypesPrivileges = rt.TypeOf<typeof datasetPrivilegeRt>;
+
+export const getDataStreamsTypesPrivilegesResponseRt = rt.exact(
+  rt.type({
+    datasetTypesPrivileges: datasetPrivilegeRt,
+  })
+);
 
 export const dataStreamStatRt = rt.intersection([
   rt.type({
@@ -34,6 +48,7 @@ export const dataStreamStatRt = rt.intersection([
     integration: rt.string,
     totalDocs: rt.number,
     creationDate: rt.number,
+    hasFailureStore: rt.boolean,
   }),
 ]);
 
@@ -236,6 +251,7 @@ export const dataStreamSettingsRt = rt.partial({
 export type DataStreamSettings = rt.TypeOf<typeof dataStreamSettingsRt>;
 
 export const dataStreamDetailsRt = rt.partial({
+  hasFailureStore: rt.boolean,
   lastActivity: rt.number,
   degradedDocsCount: rt.number,
   failedDocsCount: rt.number,
@@ -275,3 +291,20 @@ export const getNonAggregatableDatasetsRt = rt.exact(
 );
 
 export type NonAggregatableDatasets = rt.TypeOf<typeof getNonAggregatableDatasetsRt>;
+
+export const getPreviewChartResponseRt = rt.type({
+  series: rt.array(
+    rt.type({
+      name: rt.string,
+      data: rt.array(
+        rt.type({
+          x: rt.number,
+          y: rt.union([rt.number, rt.null]),
+        })
+      ),
+    })
+  ),
+  totalGroups: rt.number,
+});
+
+export type PreviewChartResponse = rt.TypeOf<typeof getPreviewChartResponseRt>;

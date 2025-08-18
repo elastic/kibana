@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { CommonFields, ConfigKey, SourceType } from '../../../../common/runtime_types';
+import type { CommonFields } from '../../../../common/runtime_types';
+import { ConfigKey, SourceType } from '../../../../common/runtime_types';
+import type { FormatterFn } from './formatting_utils';
 import {
   arrayToJsonFormatter,
   stringToJsonFormatter,
-  FormatterFn,
   secondsToCronFormatter,
 } from './formatting_utils';
 
@@ -39,6 +40,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.PARAMS]: null,
   [ConfigKey.MAX_ATTEMPTS]: null,
   [ConfigKey.MAINTENANCE_WINDOWS]: null,
+  [ConfigKey.KIBANA_SPACES]: null,
   retest_on_failure: null,
   [ConfigKey.SCHEDULE]: (fields) =>
     JSON.stringify(

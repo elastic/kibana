@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import {
+import type { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import { DashboardDrilldownsService } from './services';
+import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
+import { EmbeddableToDashboardDrilldown } from './services/drilldowns/embeddable_to_dashboard_drilldown';
 
 export interface SetupDependencies {
   uiActionsEnhanced: AdvancedUiActionsSetup;
@@ -23,6 +27,7 @@ export interface SetupDependencies {
 
 export interface StartDependencies {
   uiActionsEnhanced: AdvancedUiActionsStart;
+  dashboard: DashboardStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
@@ -37,19 +42,44 @@ export interface StartContract {}
 export class DashboardEnhancedPlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies>
 {
-  public readonly drilldowns = new DashboardDrilldownsService();
-
   constructor(protected readonly context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
-    this.drilldowns.bootstrap(core, plugins, {
-      enableDrilldowns: true,
-    });
+    const start = createStartServicesGetter(core.getStartServices);
+
+    const dashboardToDashboardDrilldown = new EmbeddableToDashboardDrilldown({ start });
+    plugins.uiActionsEnhanced.registerDrilldown(dashboardToDashboardDrilldown);
 
     return {};
   }
 
   public start(core: CoreStart, plugins: StartDependencies): StartContract {
+    setKibanaServices(core, plugins);
+
+    untilPluginStartServicesReady().then(() => {
+      plugins.uiActionsEnhanced.addTriggerActionAsync(
+        CONTEXT_MENU_TRIGGER,
+        'OPEN_FLYOUT_ADD_DRILLDOWN',
+        async () => {
+          const { flyoutCreateDrilldownAction } = await import(
+            './services/drilldowns/actions/flyout_create_drilldown'
+          );
+          return flyoutCreateDrilldownAction;
+        }
+      );
+
+      plugins.uiActionsEnhanced.addTriggerActionAsync(
+        CONTEXT_MENU_TRIGGER,
+        'OPEN_FLYOUT_EDIT_DRILLDOWN',
+        async () => {
+          const { flyoutEditDrilldownAction } = await import(
+            './services/drilldowns/actions/flyout_edit_drilldown'
+          );
+          return flyoutEditDrilldownAction;
+        }
+      );
+    });
+
     return {};
   }
 

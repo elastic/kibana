@@ -11,7 +11,8 @@
 // Splitting classes across files runs into issues with circular dependencies
 // and makes it harder to understand the code structure.
 
-import { type GlobalVisitorContext, SharedData } from './global_visitor_context';
+import type { SharedData } from './global_visitor_context';
+import { type GlobalVisitorContext } from './global_visitor_context';
 import { children, firstItem, singleItems } from './utils';
 import type {
   ESQLAstChangePointCommand,
@@ -35,7 +36,6 @@ import type {
   ESQLOrderExpression,
   ESQLSource,
   ESQLStringLiteral,
-  ESQLTimeInterval,
 } from '../types';
 import type {
   CommandVisitorInput,
@@ -49,7 +49,7 @@ import type {
   VisitorOutput,
 } from './types';
 import { Builder } from '../builder';
-import { isProperNode } from '../ast/helpers';
+import { isProperNode } from '../ast/is';
 
 export class VisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
@@ -513,8 +513,8 @@ export class SampleCommandVisitorContext<
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
-// RRF
-export class RrfCommandVisitorContext<
+// FUSE
+export class FuseCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
@@ -583,11 +583,6 @@ export class ListLiteralExpressionVisitorContext<
     }
   }
 }
-
-export class TimeIntervalLiteralExpressionVisitorContext<
-  Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
-> extends ExpressionVisitorContext<Methods, Data, ESQLTimeInterval> {}
 
 export class InlineCastExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,

@@ -198,81 +198,81 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     expect(option1).toBeChecked();
   });
 
-  // it('selects default CSP input selector', async () => {
-  //   const policy = getMockPolicyAWS();
-  //   // enable all inputs of a policy template, same as fleet does
-  //   policy.inputs = policy.inputs.map((input) => ({
-  //     ...input,
-  //     enabled: input.policy_template === 'asset_inventory',
-  //   }));
-  //   policy.name = 'cloud_asset_inventory-1';
+  it.skip('selects default CSP input selector', async () => {
+    const policy = getMockPolicyAWS();
+    // enable all inputs of a policy template, same as fleet does
+    policy.inputs = policy.inputs.map((input) => ({
+      ...input,
+      enabled: input.policy_template === 'asset_inventory',
+    }));
+    policy.name = 'cloud_asset_inventory-1';
 
-  //   (useParams as jest.Mock).mockReturnValue({
-  //     integration: 'cloud_asset_inventory',
-  //   });
+    (useParams as jest.Mock).mockReturnValue({
+      integration: 'cloud_asset_inventory',
+    });
 
-  //   render(<WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfo()} />);
+    render(<WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfo()} />);
 
-  //   const updatedPolicy = {
-  //     ...getMockPolicyAWS(),
-  //     name: 'cloud_asset_inventory-1',
-  //     inputs: policy.inputs.map((input) => {
-  //       if (input.type === CLOUDBEAT_AWS) {
-  //         return {
-  //           ...input,
-  //           enabled: true,
-  //         };
-  //       }
-  //       return input;
-  //     }),
-  //   };
+    const updatedPolicy = {
+      ...getMockPolicyAWS(),
+      name: 'cloud_asset_inventory-1',
+      inputs: policy.inputs.map((input) => {
+        if (input.type === CLOUDBEAT_AWS) {
+          return {
+            ...input,
+            enabled: true,
+          };
+        }
+        return input;
+      }),
+    };
 
-  //   // 1st call happens on mount and selects the CloudFormation template
-  //   await waitFor(() => {
-  //     expect(onChange).toHaveBeenCalledWith({
-  //       isValid: true,
-  //       updatedPolicy,
-  //     });
-  //   });
+    // 1st call happens on mount and selects the CloudFormation template
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: true,
+        updatedPolicy,
+      });
+    });
 
-  //   // // 2nd call happens on mount and increments cspm template enabled input
-  //   // expect(onChange).toHaveBeenCalledWith({
-  //   //   isValid: true,
-  //   //   updatedPolicy: {
-  //   //     ...getMockPolicyAWS(),
-  //   //     inputs: policy.inputs.map((input) => {
-  //   //       if (input.type === CLOUDBEAT_AWS) {
-  //   //         return {
-  //   //           ...input,
-  //   //           enabled: true,
-  //   //           config: { cloud_formation_template_url: { value: 's3_url' } },
-  //   //         };
-  //   //       }
-  //   //       return input;
-  //   //     }),
-  //   //     name: 'cloud_asset_inventory-1',
-  //   //   },
-  //   // });
+    // 2nd call happens on mount and increments cspm template enabled input
+    expect(onChange).toHaveBeenCalledWith({
+      isValid: true,
+      updatedPolicy: {
+        ...getMockPolicyAWS(),
+        inputs: policy.inputs.map((input) => {
+          if (input.type === CLOUDBEAT_AWS) {
+            return {
+              ...input,
+              enabled: true,
+              config: { cloud_formation_template_url: { value: 's3_url' } },
+            };
+          }
+          return input;
+        }),
+        name: 'cloud_asset_inventory-1',
+      },
+    });
 
-  //   // const updatedPolicy2 = {
-  //   //   ...getMockPolicyAWS(),
-  //   //   inputs: policy.inputs.map((input) => ({
-  //   //     ...input,
-  //   //     enabled: input.policy_template === 'cloud_asset_inventory',
-  //   //   })),
-  //   //   name: 'cloud_asset_inventory-2',
-  //   // };
+    const updatedPolicy2 = {
+      ...getMockPolicyAWS(),
+      inputs: policy.inputs.map((input) => ({
+        ...input,
+        enabled: input.policy_template === 'cloud_asset_inventory',
+      })),
+      name: 'cloud_asset_inventory-2',
+    };
 
-  //   // onChange({
-  //   //   isValid: true,
-  //   //   updatedPolicy: updatedPolicy2,
-  //   // });
+    onChange({
+      isValid: true,
+      updatedPolicy: updatedPolicy2,
+    });
 
-  //   // expect(onChange).toHaveBeenCalledWith({
-  //   //   isValid: true,
-  //   //   updatedPolicy: updatedPolicy2,
-  //   // });
-  // });
+    expect(onChange).toHaveBeenCalledWith({
+      isValid: true,
+      updatedPolicy: updatedPolicy2,
+    });
+  });
 
   describe('AWS Credentials input fields', () => {
     it(`renders ${CLOUDBEAT_AWS} Account Type field, AWS Single account is enabled`, () => {
@@ -948,11 +948,13 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for AWS and allow to select cloud connector in ess environnement', async () => {
+    it('should render setup technology selector for AWS and allow to select cloud connector in ess  aws environnement', async () => {
       const newPackagePolicy = getMockPolicyAWS();
       (useKibana as jest.Mock).mockReturnValue({
         services: {
           cloud: {
+            cloudId:
+              'cloud_connector_cspm:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm86NDQzJDYyMjExNzI5MDhjZTQ0YmE5YWNkOGFmN2NlYmUyYmVjJGZmYmUyNDc2NGFkNTQwODJhZTkyYjU1NDQ0ZDI3NzA5',
             deploymentUrl: 'https://cloud.elastic.co/deployments/bfdad4ef99a24212a06d387593686d63',
             isCloudEnabled: true,
             isServerlessEnabled: false,
@@ -1008,6 +1010,8 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {
           cloud: {
+            cloudId:
+              'cloud_connector_cspm:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm86NDQzJDYyMjExNzI5MDhjZTQ0YmE5YWNkOGFmN2NlYmUyYmVjJGZmYmUyNDc2NGFkNTQwODJhZTkyYjU1NDQ0ZDI3NzA5',
             deploymentUrl: 'https://cloud.elastic.co/deployments/bfdad4ef99a24212a06d387593686d63',
             isCloudEnabled: true,
             isServerlessEnabled: false,
@@ -1062,6 +1066,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {
           cloud: {
+            cloudId: undefined,
             cloudHost: 'eu-west-1.aws.qa.elastic.cloud',
             deploymentUrl: undefined,
             isCloudEnabled: true,
@@ -1122,6 +1127,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {
           cloud: {
+            cloudId: undefined,
             cloudHost: 'eu-west-1.gcp.qa.elastic.cloud',
             deploymentUrl: undefined,
             isCloudEnabled: true,
@@ -1182,6 +1188,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {
           cloud: {
+            cloudId: undefined,
             cloudHost: 'eu-west-1.azure.qa.elastic.cloud',
             deploymentUrl: undefined,
             isCloudEnabled: true,

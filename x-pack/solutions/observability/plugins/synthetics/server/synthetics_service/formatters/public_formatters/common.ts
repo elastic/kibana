@@ -7,12 +7,8 @@
 
 import { maxAttemptsFormatter, secondsToCronFormatter } from '../formatting_utils';
 import { arrayFormatter, stringToObjectFormatter } from './formatting_utils';
-import {
-  CommonFields,
-  ConfigKey,
-  MonitorFields,
-  SourceType,
-} from '../../../../common/runtime_types';
+import type { CommonFields, MonitorFields } from '../../../../common/runtime_types';
+import { ConfigKey, SourceType } from '../../../../common/runtime_types';
 
 export type FormattedValue =
   | boolean
@@ -48,6 +44,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.MONITOR_QUERY_ID]: null,
   retest_on_failure: null,
   [ConfigKey.MAX_ATTEMPTS]: maxAttemptsFormatter,
+  [ConfigKey.KIBANA_SPACES]: null,
   [ConfigKey.TIMEOUT]: secondsToCronFormatter,
   [ConfigKey.MONITOR_SOURCE_TYPE]: (fields) =>
     fields[ConfigKey.MONITOR_SOURCE_TYPE] || SourceType.UI,

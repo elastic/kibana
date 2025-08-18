@@ -7,7 +7,7 @@
 
 import type { History } from 'history';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type {
@@ -29,13 +29,13 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import {
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type {
   VisualizeFieldContext,
   ACTION_VISUALIZE_LENS_FIELD,
   UiActionsStart,
 } from '@kbn/ui-actions-plugin/public';
-import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
+import type { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -58,9 +58,9 @@ import type {
 import type { LensAttributesService } from '../lens_attribute_service';
 import type { LensInspector } from '../lens_inspector_service';
 import type { IndexPatternServiceAPI } from '../data_views_service/service';
-import type { LensDocument, SavedObjectIndexStore } from '../persistence/saved_object_store';
+import type { LensDocument, LensDocumentService } from '../persistence';
 import type { LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
-import { LensSerializedState } from '../react_embeddable/types';
+import type { LensSerializedState } from '../react_embeddable/types';
 
 export interface RedirectToOriginProps {
   state?: LensSerializedState;
@@ -81,7 +81,6 @@ export interface LensAppProps {
   // State passed in by the container which is used to determine the id of the Originating App.
   incomingState?: EmbeddableEditorState;
   datasourceMap: DatasourceMap;
-  savedObjectStore: SavedObjectIndexStore;
   visualizationMap: VisualizationMap;
   initialContext?: VisualizeEditorContext | VisualizeFieldContext;
   contextOriginatingApp?: string;
@@ -94,7 +93,7 @@ export type RunSave = (
   saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
     returnToOrigin: boolean;
     dashboardId?: string | null;
-    onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
+    onTitleDuplicate: OnSaveProps['onTitleDuplicate'];
     newDescription?: string;
     newTags?: string[];
     panelTimeRange?: TimeRange;
@@ -169,7 +168,7 @@ export interface LensAppServices extends StartServices {
   dataViewEditor: DataViewEditorStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   locator?: LensAppLocator;
-  savedObjectStore: SavedObjectIndexStore;
+  lensDocumentService: LensDocumentService;
   serverless?: ServerlessPluginStart;
 }
 

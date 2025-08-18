@@ -17,7 +17,8 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
-import { runV2Migration, RunV2MigrationOpts } from './run_v2_migration';
+import type { RunV2MigrationOpts } from './run_v2_migration';
+import { runV2Migration } from './run_v2_migration';
 import { DocumentMigrator } from './document_migrator';
 import { ALLOWED_CONVERT_VERSION } from './kibana_migrator_constants';
 import { buildTypesMappings, createIndexMap } from './core';
@@ -33,6 +34,7 @@ import {
   indexTypesMapMock,
   savedObjectTypeRegistryMock,
 } from './run_resilient_migrator.fixtures';
+import { getIndexDetails } from './core/get_index_details';
 
 jest.mock('./core', () => {
   const actual = jest.requireActual('./core');
@@ -42,13 +44,33 @@ jest.mock('./core', () => {
   };
 });
 
+jest.mock('./core/get_index_details', () => {
+  const actual = jest.requireActual('./core/get_index_details');
+  return {
+    ...actual,
+    getIndexDetails: jest.fn(() =>
+      Promise.resolve({
+        mappings: {
+          _meta: {
+            indexTypesMap: {
+              '.my_index': ['testtype', 'testtype2', 'testtype3'],
+              '.task_index': ['testtasktype'],
+            },
+          },
+        },
+        aliases: ['.my_index', '.my_index_9.1.0'],
+      })
+    ),
+  };
+});
+
 jest.mock('./kibana_migrator_utils', () => {
   const actual = jest.requireActual('./kibana_migrator_utils');
   return {
     ...actual,
     indexMapToIndexTypesMap: jest.fn(actual.indexMapToIndexTypesMap),
     createWaitGroupMap: jest.fn(actual.createWaitGroupMap),
-    getIndicesInvolvedInRelocation: jest.fn(() => Promise.resolve(['.my_index', '.other_index'])),
+    getIndicesInvolvedInRelocation: jest.fn(actual.getIndicesInvolvedInRelocation),
   };
 });
 
@@ -93,6 +115,8 @@ const mockRunResilientMigrator = runResilientMigrator as jest.MockedFunction<
   typeof runResilientMigrator
 >;
 
+const mockGetIndexDetails = getIndexDetails as jest.MockedFunction<typeof getIndexDetails>;
+
 describe('runV2Migration', () => {
   beforeEach(() => {
     mockCreateIndexMap.mockClear();
@@ -106,6 +130,31 @@ describe('runV2Migration', () => {
     const options = mockOptions();
     await expect(runV2Migration(options)).rejects.toEqual(
       new Error('Migrations are not ready. Make sure prepareMigrations is called first.')
+    );
+  });
+
+  it('executes normally if the .kibana index does not exist', async () => {
+    mockGetIndexDetails.mockRejectedValueOnce({
+      meta: {
+        statusCode: 404,
+      },
+    });
+    const options = mockOptions();
+    options.documentMigrator.prepareMigrations();
+    await runV2Migration(options);
+  });
+
+  it('rejects if it detects we are upgrading from a version <8.18.0', async () => {
+    mockGetIndexDetails.mockResolvedValueOnce({
+      mappings: {},
+      aliases: ['.kibana', '.kibana_8.17.0'],
+    });
+    const options = mockOptions('9.1.0');
+    options.documentMigrator.prepareMigrations();
+    await expect(runV2Migration(options)).rejects.toEqual(
+      new Error(
+        'Kibana 8.17.0 deployment detected. Please upgrade to Kibana 8.18.0 or newer before upgrading to 9.x series.'
+      )
     );
   });
 
@@ -135,11 +184,12 @@ describe('runV2Migration', () => {
     await runV2Migration(options);
     expect(getIndicesInvolvedInRelocation).toBeCalledTimes(1);
     expect(getIndicesInvolvedInRelocation).toBeCalledWith(
-      expect.objectContaining({
-        client: options.elasticsearchClient,
-        indexTypesMap: mockIndexMapToIndexTypesMap.mock.results[0].value,
-        logger: options.logger,
-      })
+      { '.my_index': ['testtype', 'testtype2', 'testtype3'], '.task_index': ['testtasktype'] },
+      {
+        '.my_index': ['testtype', 'testtype3'],
+        '.other_index': ['testtype2'],
+        '.task_index': ['testtasktype'],
+      }
     );
   });
 
@@ -279,5 +329,6 @@ const mockOptions = (kibanaVersion = '8.2.3'): RunV2MigrationOpts => {
     serializer: new SavedObjectsSerializer(typeRegistry),
     mappingProperties: buildTypesMappings(typeRegistry.getAllTypes()),
     esCapabilities: elasticsearchServiceMock.createCapabilities(),
+    kibanaVersionCheck: '8.18.0',
   };
 };

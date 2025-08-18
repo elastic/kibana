@@ -14,7 +14,7 @@ describe('common utils', () => {
       configIds: ['1 4', '2 6', '5'],
     });
     expect(filters.filtersStr).toMatchInlineSnapshot(
-      `"synthetics-monitor.attributes.config_id:(\\"1 4\\" OR \\"2 6\\" OR \\"5\\")"`
+      `"synthetics-monitor-multi-space.attributes.config_id:(\\"1 4\\" OR \\"2 6\\" OR \\"5\\")"`
     );
   });
   it('tests parseArrayFilters with tags and configIds', () => {
@@ -23,7 +23,7 @@ describe('common utils', () => {
       tags: ['tag1', 'tag2'],
     });
     expect(filters.filtersStr).toMatchInlineSnapshot(
-      `"synthetics-monitor.attributes.tags:(\\"tag1\\" OR \\"tag2\\") AND synthetics-monitor.attributes.config_id:(\\"1\\" OR \\"2\\")"`
+      `"synthetics-monitor-multi-space.attributes.tags:(\\"tag1\\" OR \\"tag2\\") AND synthetics-monitor-multi-space.attributes.config_id:(\\"1\\" OR \\"2\\")"`
     );
   });
   it('tests parseArrayFilters with all options', () => {
@@ -37,7 +37,7 @@ describe('common utils', () => {
       schedules: ['schedule1', 'schedule2'],
     });
     expect(filters.filtersStr).toMatchInlineSnapshot(
-      `"synthetics-monitor.attributes.tags:(\\"tag1\\" OR \\"tag2\\") AND synthetics-monitor.attributes.project_id:(\\"project1\\" OR \\"project2\\") AND synthetics-monitor.attributes.type:(\\"type1\\" OR \\"type2\\") AND synthetics-monitor.attributes.locations.id:(\\"loc1\\" OR \\"loc2\\") AND synthetics-monitor.attributes.schedule.number:(\\"schedule1\\" OR \\"schedule2\\") AND synthetics-monitor.attributes.id:(\\"query1\\" OR \\"query2\\") AND synthetics-monitor.attributes.config_id:(\\"1\\" OR \\"2\\")"`
+      `"synthetics-monitor-multi-space.attributes.tags:(\\"tag1\\" OR \\"tag2\\") AND synthetics-monitor-multi-space.attributes.project_id:(\\"project1\\" OR \\"project2\\") AND synthetics-monitor-multi-space.attributes.type:(\\"type1\\" OR \\"type2\\") AND synthetics-monitor-multi-space.attributes.locations.id:(\\"loc1\\" OR \\"loc2\\") AND synthetics-monitor-multi-space.attributes.schedule.number:(\\"schedule1\\" OR \\"schedule2\\") AND synthetics-monitor-multi-space.attributes.id:(\\"query1\\" OR \\"query2\\") AND synthetics-monitor-multi-space.attributes.config_id:(\\"1\\" OR \\"2\\")"`
     );
   });
 });
@@ -49,7 +49,7 @@ describe('getSavedObjectKqlFilter', () => {
 
   it('returns KQL string if values are provided', () => {
     expect(getSavedObjectKqlFilter({ field: 'tags', values: 'apm' })).toBe(
-      'synthetics-monitor.attributes.tags:"apm"'
+      'synthetics-monitor-multi-space.attributes.tags:"apm"'
     );
   });
 
@@ -61,13 +61,13 @@ describe('getSavedObjectKqlFilter', () => {
 
   it('handles array values', () => {
     expect(getSavedObjectKqlFilter({ field: 'tags', values: ['apm', 'synthetics'] })).toBe(
-      'synthetics-monitor.attributes.tags:("apm" OR "synthetics")'
+      'synthetics-monitor-multi-space.attributes.tags:("apm" OR "synthetics")'
     );
   });
 
   it('escapes quotes', () => {
     expect(getSavedObjectKqlFilter({ field: 'tags', values: ['"apm', 'synthetics'] })).toBe(
-      'synthetics-monitor.attributes.tags:("\\"apm" OR "synthetics")'
+      'synthetics-monitor-multi-space.attributes.tags:("\\"apm" OR "synthetics")'
     );
   });
 });

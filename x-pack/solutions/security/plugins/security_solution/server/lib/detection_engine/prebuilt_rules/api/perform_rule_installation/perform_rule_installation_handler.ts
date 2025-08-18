@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { SkipRuleInstallReason } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   PerformRuleInstallationResponseBody,
@@ -22,11 +22,13 @@ import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_ru
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import type { RuleSignatureId, RuleVersion } from '../../../../../../common/api/detection_engine';
+import { excludeLicenseRestrictedRules } from '../../logic/utils';
 
 export const performRuleInstallationHandler = async (
   context: SecuritySolutionRequestHandlerContext,
   request: KibanaRequest<unknown, unknown, PerformRuleInstallationRequestBody>,
-  response: KibanaResponseFactory
+  response: KibanaResponseFactory,
+  logger: Logger
 ) => {
   const siemResponse = buildSiemResponse(response);
 
@@ -38,6 +40,7 @@ export const performRuleInstallationHandler = async (
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const exceptionsListClient = ctx.securitySolution.getExceptionListClient();
+    const mlAuthz = ctx.securitySolution.getMlAuthz();
 
     const { mode } = request.body;
 
@@ -46,7 +49,7 @@ export const performRuleInstallationHandler = async (
 
     // If this API is used directly without hitting any detection engine
     // pages first, the rules package might be missing.
-    await ensureLatestRulesPackageInstalled(ruleAssetsClient, ctx.securitySolution);
+    await ensureLatestRulesPackageInstalled(ruleAssetsClient, ctx.securitySolution, logger);
 
     const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
     const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
@@ -54,10 +57,9 @@ export const performRuleInstallationHandler = async (
       currentRuleVersions.map((version) => [version.rule_id, version])
     );
 
-    const allInstallableRules = allLatestVersions.filter((latestVersion) => {
-      const currentVersion = currentRuleVersionsMap.get(latestVersion.rule_id);
-      return !currentVersion;
-    });
+    const allInstallableRules = allLatestVersions.filter(
+      (latestVersion) => !currentRuleVersionsMap.has(latestVersion.rule_id)
+    );
 
     const ruleInstallQueue: Array<{
       rule_id: RuleSignatureId;
@@ -94,7 +96,7 @@ export const performRuleInstallationHandler = async (
         ruleInstallQueue.push(rule);
       });
     } else if (mode === 'ALL_RULES') {
-      ruleInstallQueue.push(...allInstallableRules);
+      ruleInstallQueue.push(...(await excludeLicenseRestrictedRules(allInstallableRules, mlAuthz)));
     }
 
     const BATCH_SIZE = 100;
@@ -102,7 +104,11 @@ export const performRuleInstallationHandler = async (
       const rulesToInstall = ruleInstallQueue.splice(0, BATCH_SIZE);
       const ruleAssets = await ruleAssetsClient.fetchAssetsByVersion(rulesToInstall);
 
-      const { results, errors } = await createPrebuiltRules(detectionRulesClient, ruleAssets);
+      const { results, errors } = await createPrebuiltRules(
+        detectionRulesClient,
+        ruleAssets,
+        logger
+      );
       installedRules.push(...results);
       ruleErrors.push(...errors);
     }
@@ -135,6 +141,7 @@ export const performRuleInstallationHandler = async (
 
     return response.ok({ body });
   } catch (err) {
+    logger.error(`performRuleInstallationHandler: Caught error:`, err);
     const error = transformError(err);
     return siemResponse.error({
       body: error.message,

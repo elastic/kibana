@@ -22,24 +22,23 @@ Composable React layout primitives for Kibana's Chrome application shell. Provid
 All regions are passed as props to `ChromeLayout` Component. Each slot can be a React node or a function that receives the current layout state.
 
 Available slots:
+
 - `header`
 - `footer`
 - `navigation`
-- `navigationPanel`
 - `sidebar`
 - `sidebarPanel`
 - `banner`
-- `children` (application content)
+- `applicationTopBar`
+- `applicationBottomBar`
+- `children` (main application content)
 
 ### Layout Configuration
 
 Wrap your layout in a `LayoutConfigProvider` to set region sizes:
 
 ```tsx
-import {
-  ChromeLayout,
-  ChromeLayoutConfigProvider,
-} from '@kbn/core-chrome-layout-components';
+import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
 
 <ChromeLayoutConfigProvider
   value={{
@@ -47,19 +46,21 @@ import {
     headerHeight: 48,
     footerHeight: 24,
     navigationWidth: 200,
-    navigationPanelWidth: 240,
     sidebarWidth: 300,
     sidebarPanelWidth: 280,
+    applicationTopBarHeight: 40,
+    applicationBottomBarHeight: 36,
   }}
 >
   <ChromeLayout
     header={<MyHeader />}
     footer={<MyFooter />}
     navigation={<MyNav />}
-    navigationPanel={<MyNavPanel />}
     sidebar={<MySidebar />}
     sidebarPanel={<MySidebarPanel />}
     banner={<MyBanner />}
+    applicationTopBar={<MyAppTopBar />}
+    applicationBottomBar={<MyAppBottomBar />}
   >
     <AppContent />
   </ChromeLayout>
@@ -77,37 +78,25 @@ This package exposes layout dimensions and positions as global CSS variables (cu
 **Available CSS variables:**
 
 - **Banner**
-  - `--kbn-layout--banner-top`
-  - `--kbn-layout--banner-left`
-  - `--kbn-layout--banner-height`
-  - `--kbn-layout--banner-width`
+  - `--kbn-layout--banner-[top|left|height|width]`
 - **Header**
-  - `--kbn-layout--header-top`
-  - `--kbn-layout--header-left`
-  - `--kbn-layout--header-height`
-  - `--kbn-layout--header-width`
-- **Navigation**
-  - `--kbn-layout--navigation-top`
-  - `--kbn-layout--navigation-height`
-  - `--kbn-layout--navigation-width`
-  - `--kbn-layout--navigation-panel-width`
-- **Sidebar**
-  - `--kbn-layout--sidebar-top`
-  - `--kbn-layout--sidebar-height`
-  - `--kbn-layout--sidebar-width`
-  - `--kbn-layout--sidebar-panel-width`
-- **Application**
-  - `--kbn-layout--application-top`
-  - `--kbn-layout--application-bottom`
-  - `--kbn-layout--application-left`
-  - `--kbn-layout--application-right`
-  - `--kbn-layout--application-height`
-  - `--kbn-layout--application-width`
+  - `--kbn-layout--header-[top|left|right|height|width]`
 - **Footer**
-  - `--kbn-layout--footer-top`
-  - `--kbn-layout--footer-left`
-  - `--kbn-layout--footer-height`
-  - `--kbn-layout--footer-width`
+  - `--kbn-layout--footer-[height|top|bottom|left|width]`
+- **Navigation**
+  - `--kbn-layout--navigation-[top|bottom|height|width]`
+- **Sidebar**
+  - `--kbn-layout--sidebar-[top|bottom|height|width|panel-width]`
+- **Application**
+  - `--kbn-layout--application-[top|bottom|left|right|height|width]`
+- **Application Top Bar**
+  - `--kbn-application--top-bar-[height|top|left|width|right|bottom]`
+- **Application Bottom Bar**
+  - `--kbn-application--bottom-bar-[height|top|left|width|right|bottom]`
+- **Application Content**
+  - `--kbn-application--content-[top|bottom|left|right|height|width]`
+- **Common**
+  - `--kbn-layout--aboveFlyoutLevel`
 
 These variables are set at the `:root` level and update automatically based on the current layout state.
 

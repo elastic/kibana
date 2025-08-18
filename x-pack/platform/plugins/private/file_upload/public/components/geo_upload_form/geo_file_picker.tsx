@@ -151,6 +151,7 @@ export class GeoFilePicker extends Component<Props, State> {
           helpText={this._renderHelpText()}
         >
           <EuiFilePicker
+            isInvalid={!!this.state.error}
             initialPromptText={i18n.translate('xpack.fileUpload.geoFilePicker.filePicker', {
               defaultMessage: 'Select or drag and drop a file',
             })}

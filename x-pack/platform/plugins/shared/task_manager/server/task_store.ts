@@ -27,6 +27,8 @@ import type {
   ISavedObjectsRepository,
   SavedObjectsUpdateResponse,
   ElasticsearchClient,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkUpdateObject,
 } from '@kbn/core/server';
 
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core/server';
@@ -62,6 +64,7 @@ import { BulkUpdateError } from './lib/bulk_update_error';
 import { TASK_SO_NAME } from './saved_objects';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
 import { getFirstRunAt } from './lib/get_first_run_at';
+import { isInterval } from './lib/intervals';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -78,6 +81,7 @@ export interface StoreOpts {
   security: SecurityServiceStart;
   canEncryptSavedObjects?: boolean;
   esoClient?: EncryptedSavedObjectsClient;
+  getIsSecurityEnabled: () => boolean;
 }
 
 export interface SearchOpts {
@@ -138,7 +142,6 @@ export class TaskStore {
 
   private esClient: ElasticsearchClient;
   private esoClient?: EncryptedSavedObjectsClient;
-  private esClientWithoutRetries: ElasticsearchClient;
   private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
   private savedObjectsService: SavedObjectsServiceStart;
@@ -147,6 +150,7 @@ export class TaskStore {
   private requestTimeouts: RequestTimeoutsConfig;
   private security: SecurityServiceStart;
   private canEncryptSavedObjects?: boolean;
+  private getIsSecurityEnabled: () => boolean;
   private logger: Logger;
 
   /**
@@ -173,14 +177,10 @@ export class TaskStore {
       definitions: opts.definitions,
       allowReadingInvalidState: opts.allowReadingInvalidState,
     });
-    this.esClientWithoutRetries = opts.esClient.child({
-      // Timeouts are retried and make requests timeout after (requestTimeout * (1 + maxRetries))
-      // The poller doesn't need retry logic because it will try again at the next polling cycle
-      maxRetries: 0,
-    });
     this.requestTimeouts = opts.requestTimeouts;
     this.security = opts.security;
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
+    this.getIsSecurityEnabled = opts.getIsSecurityEnabled;
     this.logger = opts.logger;
   }
 
@@ -204,7 +204,7 @@ export class TaskStore {
   }
 
   private getSoClientForCreate(options: ApiKeyOptions) {
-    if (options.request) {
+    if (options.request && this.getIsSecurityEnabled()) {
       return this.savedObjectsService.getScopedClient(options.request, {
         includedHiddenTypes: [TASK_SO_NAME],
         excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
@@ -214,6 +214,10 @@ export class TaskStore {
   }
 
   private async getApiKeyFromRequest(taskInstances: TaskInstance[], request?: KibanaRequest) {
+    if (!this.getIsSecurityEnabled()) {
+      return null;
+    }
+
     if (!request) {
       return null;
     }
@@ -346,6 +350,13 @@ export class TaskStore {
     }
 
     const result = savedObjectToConcreteTaskInstance(savedObject);
+
+    if (options?.request && !this.getIsSecurityEnabled()) {
+      this.logger.info(
+        `Trying to schedule task ${result.id} with user scope but security is disabled. Task will run without user scope.`
+      );
+    }
+
     return this.taskValidator.getValidatedTaskInstanceFromReading(result);
   }
 
@@ -369,29 +380,44 @@ export class TaskStore {
 
     const soClient = this.getSoClientForCreate(options || {});
 
-    const objects = taskInstances.map((taskInstance) => {
-      const { apiKey, userScope } = apiKeyAndUserScopeMap.get(taskInstance.id) || {};
-      const id = taskInstance.id || v4();
-      this.definitions.ensureHas(taskInstance.taskType);
-      const validatedTaskInstance =
-        this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
+    const objects = taskInstances.reduce(
+      (acc: Array<SavedObjectsBulkCreateObject<SerializedConcreteTaskInstance>>, taskInstance) => {
+        const { apiKey, userScope } = apiKeyAndUserScopeMap.get(taskInstance.id) || {};
+        const id = taskInstance.id || v4();
+        this.definitions.ensureHas(taskInstance.taskType);
 
-      return {
-        type: 'task',
-        attributes: {
-          ...taskInstanceToAttributes(validatedTaskInstance, id),
-          ...(apiKey ? { apiKey } : {}),
-          ...(userScope ? { userScope } : {}),
-          runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
-        },
-        id,
-      };
-    });
+        try {
+          const validatedTaskInstance =
+            this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
+
+          return [
+            ...acc,
+            {
+              type: 'task',
+              attributes: {
+                ...taskInstanceToAttributes(validatedTaskInstance, id),
+                ...(apiKey ? { apiKey } : {}),
+                ...(userScope ? { userScope } : {}),
+                runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
+              },
+              id,
+            },
+          ];
+        } catch (e) {
+          this.logger.error(
+            `[TaskStore] An error occured. Task ${taskInstance.id} will not be updated. Error: ${e.message}`
+          );
+          return acc;
+        }
+      },
+      []
+    );
 
     let savedObjects;
     try {
       savedObjects = await soClient.bulkCreate<SerializedConcreteTaskInstance>(objects, {
         refresh: false,
+        overwrite: true,
       });
       this.adHocTaskCounter.increment(
         taskInstances.filter((task) => {
@@ -401,6 +427,14 @@ export class TaskStore {
     } catch (e) {
       this.errors$.next(e);
       throw e;
+    }
+
+    if (options?.request && !this.getIsSecurityEnabled()) {
+      this.logger.info(
+        `Trying to bulk schedule tasks ${JSON.stringify(
+          savedObjects.saved_objects.map((so) => so.id)
+        )} with user scope but security is disabled. Tasks will run without user scope.`
+      );
     }
 
     return savedObjects.saved_objects.map((so) => {
@@ -433,13 +467,13 @@ export class TaskStore {
     doc: ConcreteTaskInstance,
     options: { validate: boolean }
   ): Promise<ConcreteTaskInstance> {
-    const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
-      validate: options.validate,
-    });
-    const attributes = taskInstanceToAttributes(taskInstance, doc.id);
-
     let updatedSavedObject;
+    let attributes;
     try {
+      const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
+        validate: options.validate,
+      });
+      attributes = taskInstanceToAttributes(taskInstance, doc.id);
       updatedSavedObject = await this.savedObjectsRepository.update<SerializedConcreteTaskInstance>(
         'task',
         doc.id,
@@ -477,24 +511,33 @@ export class TaskStore {
     docs: ConcreteTaskInstance[],
     { validate }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
-    const attributesByDocId = docs.reduce((attrsById, doc) => {
-      const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
-        validate,
-      });
-      attrsById.set(doc.id, taskInstanceToAttributes(taskInstance, doc.id));
-      return attrsById;
-    }, new Map());
+    const newDocs = docs.reduce(
+      (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
+        try {
+          const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
+            validate,
+          });
+          acc.set(doc.id, {
+            type: 'task',
+            id: doc.id,
+            version: doc.version,
+            attributes: taskInstanceToAttributes(taskInstance, doc.id),
+          });
+        } catch (e) {
+          this.logger.error(
+            `[TaskStore] An error occured. Task ${doc.id} will not be updated. Error: ${e.message}`
+          );
+        }
+        return acc;
+      },
+      new Map()
+    );
 
     let updatedSavedObjects: Array<SavedObjectsUpdateResponse<SerializedConcreteTaskInstance>>;
     try {
       ({ saved_objects: updatedSavedObjects } =
         await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
-          docs.map((doc) => ({
-            type: 'task',
-            id: doc.id,
-            version: doc.version,
-            attributes: attributesByDocId.get(doc.id)!,
-          })),
+          Array.from(newDocs.values()),
           {
             refresh: false,
           }
@@ -517,7 +560,7 @@ export class TaskStore {
         ...updatedSavedObject,
         attributes: defaults(
           updatedSavedObject.attributes,
-          attributesByDocId.get(updatedSavedObject.id)!
+          newDocs.get(updatedSavedObject.id)?.attributes as SerializedConcreteTaskInstance
         ),
       });
       const result = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance, {
@@ -536,6 +579,12 @@ export class TaskStore {
 
     const bulkBody = [];
     for (const doc of docs) {
+      if (doc.schedule?.interval && !isInterval(doc.schedule.interval)) {
+        this.logger.error(
+          `[TaskStore] Invalid interval "${doc.schedule.interval}". Task ${doc.id} will not be updated.`
+        );
+        continue;
+      }
       bulkBody.push({
         update: {
           _id: `task:${doc.id}`,
@@ -580,7 +629,7 @@ export class TaskStore {
 
       if (item.update?.error) {
         const err = new BulkUpdateError({
-          message: item.update.error.reason,
+          message: item.update.error.reason ?? undefined, // reason can be null, and we want to keep `message` as string | undefined
           type: item.update.error.type,
           statusCode: item.update.status,
         });
@@ -728,11 +777,14 @@ export class TaskStore {
   public async bulkGetVersions(ids: string[]): Promise<ConcreteTaskInstanceVersion[]> {
     let taskVersions: estypes.MgetResponse<never>;
     try {
-      taskVersions = await this.esClientWithoutRetries.mget<never>({
-        index: this.index,
-        _source: false,
-        ids,
-      });
+      taskVersions = await this.esClient.mget<never>(
+        {
+          index: this.index,
+          _source: false,
+          ids,
+        },
+        { retryOnTimeout: false }
+      );
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -791,11 +843,14 @@ export class TaskStore {
     );
     const searches = queries.flatMap((query) => [{}, query]);
 
-    const result = await this.esClientWithoutRetries.msearch<SavedObjectsRawDoc['_source']>({
-      index: this.index,
-      ignore_unavailable: true,
-      searches,
-    });
+    const result = await this.esClient.msearch<SavedObjectsRawDoc['_source']>(
+      {
+        index: this.index,
+        ignore_unavailable: true,
+        searches,
+      },
+      { retryOnTimeout: false }
+    );
     const { responses } = result;
 
     const versionMap = this.createVersionMap([]);
@@ -828,13 +883,16 @@ export class TaskStore {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
     try {
-      const result = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
-        index: this.index,
-        ignore_unavailable: true,
-        ...opts,
-        query,
-        ...(limitResponse ? { _source_excludes: ['task.state', 'task.params'] } : {}),
-      });
+      const result = await this.esClient.search<SavedObjectsRawDoc['_source']>(
+        {
+          index: this.index,
+          ignore_unavailable: true,
+          ...opts,
+          query,
+          ...(limitResponse ? { _source_excludes: ['task.state', 'task.params'] } : {}),
+        },
+        { retryOnTimeout: false }
+      );
 
       const {
         hits: { hits: tasks },
@@ -928,7 +986,7 @@ export class TaskStore {
     const { sort, ...rest } = opts;
     try {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery(
+      const { total, updated, version_conflicts } = await this.esClient.updateByQuery(
         {
           index: this.index,
           ignore_unavailable: true,
@@ -941,7 +999,7 @@ export class TaskStore {
           // However, this one is using a "body" format?
           body: { sort },
         },
-        { requestTimeout: this.requestTimeouts.update_by_query }
+        { requestTimeout: this.requestTimeouts.update_by_query, retryOnTimeout: false }
       );
 
       const conflictsCorrectedForContinuation = correctVersionConflictsForContinuation(

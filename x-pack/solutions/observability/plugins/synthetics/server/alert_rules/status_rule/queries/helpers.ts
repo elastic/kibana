@@ -6,15 +6,16 @@
  */
 
 import moment from 'moment';
-import { SavedObjectsFindResult } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
-import { MonitorData } from '../../../saved_objects/synthetics_monitor/get_all_monitors';
-import {
+import type { SavedObjectsFindResult } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import type { MonitorData } from '../../../saved_objects/synthetics_monitor/process_monitors';
+import type {
   AlertStatusConfigs,
   AlertPendingStatusConfigs,
   MissingPingMonitorInfo,
 } from '../../../../common/runtime_types/alert_rules/common';
-import { EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
+import type { EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 export interface ConfigStats {
   up: number;
@@ -31,7 +32,10 @@ export const getMissingPingMonitorInfo = ({
   configId: string;
   locationId: string;
 }): (MissingPingMonitorInfo & { createdAt?: string }) | undefined => {
-  const monitor = monitors.find((m) => m.id === configId);
+  const monitor = monitors.find(
+    // for project monitors, we can match by id or by monitor query id
+    (m) => m.id === configId || m.attributes[ConfigKey.MONITOR_QUERY_ID] === configId
+  );
   if (!monitor) {
     // This should never happen
     return;

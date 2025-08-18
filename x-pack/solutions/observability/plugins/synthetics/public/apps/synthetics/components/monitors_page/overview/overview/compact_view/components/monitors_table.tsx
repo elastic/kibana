@@ -5,11 +5,12 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import { EuiBasicTable, EuiTableRowProps } from '@elastic/eui';
+import type { EuiTableRowProps } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
-import { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 import { useOverviewStatus } from '../../../../hooks/use_overview_status';
-import { FlyoutParamProps } from '../../types';
+import type { FlyoutParamProps } from '../../types';
 import { useMonitorsTableColumns } from '../hooks/use_monitors_table_columns';
 import { useMonitorsTablePagination } from '../hooks/use_monitors_table_pagination';
 
@@ -33,7 +34,7 @@ export const MonitorsTable = ({
 
   const getRowProps = useCallback(
     (monitor: OverviewStatusMetaData): EuiTableRowProps => {
-      const { configId, locationLabel, locationId, spaceId } = monitor;
+      const { configId, locationLabel, locationId, spaces } = monitor;
       return {
         onClick: (e) => {
           // This is a workaround to prevent the flyout from opening when clicking on the action buttons
@@ -49,7 +50,7 @@ export const MonitorsTable = ({
                 id: configId,
                 location: locationLabel,
                 locationId,
-                spaceId,
+                spaces,
               })
             );
           }

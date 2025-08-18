@@ -8,10 +8,14 @@
  */
 
 import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-ast';
+import { isColumn, isFunctionExpression } from '@kbn/esql-ast';
+import { getExpressionType } from '@kbn/esql-ast/src/definitions/utils';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
 import { Visitor } from '@kbn/esql-ast/src/visitor';
-import type { ESQLUserDefinedColumn, ESQLFieldWithMetadata } from '../validation/types';
-import { EDITOR_MARKER } from './constants';
-import { isColumnItem, isFunctionItem, getExpressionType } from './helpers';
+import type {
+  ESQLUserDefinedColumn,
+  ESQLFieldWithMetadata,
+} from '@kbn/esql-ast/src/commands_registry/types';
 
 function addToUserDefinedColumnOccurrences(
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>,
@@ -30,7 +34,7 @@ function addToUserDefinedColumns(
   fields: Map<string, ESQLFieldWithMetadata>,
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>
 ) {
-  if (isColumnItem(oldArg) && isColumnItem(newArg)) {
+  if (isColumn(oldArg) && isColumn(newArg)) {
     const newUserDefinedColumn: ESQLUserDefinedColumn = {
       name: newArg.parts.join('.'),
       type: 'double' /* fallback to number */,
@@ -73,7 +77,7 @@ function addUserDefinedColumnFromAssignment(
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>,
   fields: Map<string, ESQLFieldWithMetadata>
 ) {
-  if (isColumnItem(assignOperation.args[0])) {
+  if (isColumn(assignOperation.args[0])) {
     const rightHandSideArgType = getExpressionType(
       assignOperation.args[1],
       fields,
@@ -141,7 +145,7 @@ export function collectUserDefinedColumns(
         return [...ctx.visitArguments()];
       } else if (ctx.node.name === 'with') {
         for (const assignFn of ctx.node.args) {
-          if (isFunctionItem(assignFn)) {
+          if (isFunctionExpression(assignFn)) {
             const [newArg, oldArg] = assignFn?.args || [];
             // TODO why is oldArg an array?
             if (Array.isArray(oldArg)) {

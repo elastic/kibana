@@ -3785,6 +3785,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.KIND",
+        "type": "string",
+        "tags": [],
+        "label": "KIND",
+        "description": [],
+        "signature": [
+          "\"kind\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.KUBERNETES",
         "type": "string",
         "tags": [],
@@ -4536,6 +4551,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.OTEL_EVENT_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_EVENT_NAME",
+        "description": [],
+        "signature": [
+          "\"event_name\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.OTEL_SPAN_LINKS",
         "type": "string",
         "tags": [],
@@ -5274,6 +5304,21 @@
           "\"status.code\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.StatusCode",
+        "type": "Type",
+        "tags": [],
+        "label": "StatusCode",
+        "description": [],
+        "signature": [
+          "\"Error\" | \"Ok\" | \"Unset\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/otel/status_code.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

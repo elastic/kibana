@@ -13,7 +13,8 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { ProjectHeader, Props as ProjectHeaderProps } from './header';
+import type { Props as ProjectHeaderProps } from './header';
+import { ProjectHeader } from './header';
 
 const mockApplication = applicationServiceMock.createInternalStartContract();
 
@@ -36,9 +37,7 @@ describe('Header', () => {
     navControlsCenter$: Rx.of([]),
     navControlsRight$: Rx.of([]),
     customBranding$: Rx.of({}),
-    isSideNavCollapsed$: Rx.of(false),
     prependBasePath: (str) => `hello/world/${str}`,
-    toggleSideNav: jest.fn(),
     isServerless: false,
   };
 
@@ -49,7 +48,6 @@ describe('Header', () => {
       </ProjectHeader>
     );
 
-    expect(await screen.findByTestId('euiCollapsibleNavButton')).toBeVisible();
     expect(await screen.findByText('Hello, world!')).toBeVisible();
     expect(screen.queryByTestId(/customLogo/)).toBeNull();
   });

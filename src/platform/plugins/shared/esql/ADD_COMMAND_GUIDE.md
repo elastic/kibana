@@ -145,7 +145,7 @@ You can read how suggestions work [here](https://github.com/elastic/kibana/blob/
     ```ts
     export async function suggest(
       params: CommandSuggestParams<'where'>
-    ): Promise<SuggestionRawDefinition[]> {
+    ): Promise<ISuggestionItem[]> {
       const expressionRoot = params.command.args[0] as ESQLSingleAstItem | undefined;
       const suggestions = await suggestForExpression({
         ...params,

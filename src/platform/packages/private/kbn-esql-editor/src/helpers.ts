@@ -9,10 +9,12 @@
 
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { UseEuiTheme, euiShadow } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
 import type { CoreStart } from '@kbn/core/public';
+import type { ILicense } from '@kbn/licensing-types';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { MapCache } from 'lodash';
@@ -264,8 +266,11 @@ const getIntegrations = async (core: Pick<CoreStart, 'application' | 'http'>) =>
 export const getESQLSources = async (
   dataViews: DataViewsPublicPluginStart,
   core: Pick<CoreStart, 'application' | 'http'>,
-  areRemoteIndicesAvailable: boolean
+  getLicense: (() => Promise<ILicense | undefined>) | undefined
 ) => {
+  const ls = await getLicense?.();
+  const ccrFeature = ls?.getFeature('ccr');
+  const areRemoteIndicesAvailable = ccrFeature?.isAvailable ?? false;
   const [remoteIndices, localIndices, integrations] = await Promise.all([
     getRemoteIndicesList(dataViews, areRemoteIndicesAvailable),
     getIndicesList(dataViews),

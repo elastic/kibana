@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Serializable } from '@kbn/utility-types';
-import { TypeOf } from '@kbn/config-schema';
-import { dashboardAttributesSchema, gridDataSchema } from './v2';
+import type { Serializable } from '@kbn/utility-types';
+import type { TypeOf } from '@kbn/config-schema';
+import type { dashboardAttributesSchema, gridDataSchema } from './v2';
 
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
 export type GridData = TypeOf<typeof gridDataSchema>;
@@ -19,12 +19,9 @@ export type GridData = TypeOf<typeof gridDataSchema>;
  */
 export interface SavedDashboardPanel {
   embeddableConfig: { [key: string]: Serializable }; // parsed into the panel's explicitInput
-  id?: string; // the saved object id for by reference panels
   type: string; // the embeddable type
-  panelRefName?: string;
   gridData: GridData;
   panelIndex: string;
-  title?: string;
 
   /**
    * This version key was used to store Kibana version information from versions 7.3.0 -> 8.11.0.
@@ -32,4 +29,12 @@ export interface SavedDashboardPanel {
    * embeddable's input. (embeddableConfig in this type).
    */
   version?: string;
+
+  /**
+   * Legacy keys that are not longer populated.
+   * Legacy saved objects may still include keys
+   */
+  id?: string; // the saved object id for by reference panels
+  panelRefName?: string;
+  title?: string;
 }

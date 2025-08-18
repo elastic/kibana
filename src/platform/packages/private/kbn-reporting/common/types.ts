@@ -11,11 +11,11 @@ import type {
   LayoutParams,
   PerformanceMetrics as ScreenshotMetrics,
 } from '@kbn/screenshotting-plugin/common';
-import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { JOB_STATUS } from './constants';
+import type { ConcreteTaskInstance, RruleSchedule } from '@kbn/task-manager-plugin/server';
+import type { JOB_STATUS } from './constants';
 import type { LocatorParams } from './url';
 
-export * from './url';
+export type * from './url';
 
 export interface CsvMetrics {
   rows: number;
@@ -210,4 +210,25 @@ export interface LicenseCheckResults {
   enableLinks: boolean;
   showLinks: boolean;
   message: string;
+}
+
+export interface ScheduledReportApiJSON {
+  id: string;
+  created_at: string;
+  created_by: string;
+  enabled: boolean;
+  jobtype: string;
+  last_run: string | undefined;
+  next_run: string | undefined;
+  notification?: {
+    email?: {
+      to?: string[];
+      cc?: string[];
+      bcc?: string[];
+    };
+  };
+  payload?: ReportApiJSON['payload'];
+  schedule: RruleSchedule;
+  space_id: string;
+  title: string;
 }

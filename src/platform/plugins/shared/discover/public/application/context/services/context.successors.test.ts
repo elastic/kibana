@@ -88,7 +88,9 @@ describe('context successors', function () {
           [],
           dataPluginMock,
           discoverServiceMock,
-          discoverServiceMock.profilesManager.createScopedProfilesManager()
+          discoverServiceMock.profilesManager.createScopedProfilesManager({
+            scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+          })
         );
       };
     });
@@ -241,7 +243,9 @@ describe('context successors', function () {
           [],
           dataPluginMock,
           discoverServiceMock,
-          discoverServiceMock.profilesManager.createScopedProfilesManager()
+          discoverServiceMock.profilesManager.createScopedProfilesManager({
+            scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+          })
         );
       };
     });
@@ -316,7 +320,9 @@ describe('context successors', function () {
             ...discoverServiceMock,
             data: dataPluginMock,
           },
-          discoverServiceMock.profilesManager.createScopedProfilesManager()
+          discoverServiceMock.profilesManager.createScopedProfilesManager({
+            scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+          })
         );
       };
     });

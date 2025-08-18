@@ -12,7 +12,9 @@
     "**/*.ts",
     "**/*.tsx",
   ],
-  "kbn_references": [],
+  "kbn_references": [
+    "@kbn/core-chrome-layout",
+  ],
   "exclude": [
     "target/**/*",
   ]

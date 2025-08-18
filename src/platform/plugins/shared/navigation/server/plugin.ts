@@ -42,7 +42,7 @@ export class NavigationServerPlugin
     core: CoreSetup<NavigationServerStartDependencies>,
     plugins: NavigationServerSetupDependencies
   ) {
-    core.uiSettings.register(getUiSettings(core, this.logger));
+    core.uiSettings.register(getUiSettings(core, plugins, this.logger));
 
     return {};
   }

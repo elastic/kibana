@@ -26,7 +26,6 @@ import '../jest_matchers';
 const logFilePath = Path.join(__dirname, 'v2_md5_to_mv.test.log');
 
 const SOME_TYPE = createType({
-  switchToModelVersionAt: '8.10.0',
   name: 'some-type',
   modelVersions: {
     1: {
@@ -42,7 +41,6 @@ const SOME_TYPE = createType({
 });
 
 const ANOTHER_TYPE = createType({
-  switchToModelVersionAt: '8.10.0',
   name: 'another-type',
   modelVersions: {
     '1': {
@@ -57,7 +55,6 @@ const ANOTHER_TYPE = createType({
   },
 });
 const ANOTHER_TYPE_UPDATED = createType({
-  switchToModelVersionAt: '8.10.0',
   name: 'another-type',
   modelVersions: {
     '1': {
@@ -99,7 +96,7 @@ const HASH_TO_VERSION_MAP: Record<string, string> = {};
 HASH_TO_VERSION_MAP[`some-type|${SOME_TYPE_HASH}`] = '10.1.0';
 // simulate that transition to modelVersion happened before 'another-type' was updated
 HASH_TO_VERSION_MAP[`another-type|${ANOTHER_TYPE_HASH}`] = '10.1.0';
-HASH_TO_VERSION_MAP[`no-mv-type|${A_THIRD_HASH}`] = '0.0.0';
+HASH_TO_VERSION_MAP[`no-mv-type|${A_THIRD_HASH}`] = '10.0.0';
 
 describe('V2 algorithm', () => {
   let esServer: TestElasticsearchUtils['es'];
@@ -140,7 +137,7 @@ describe('V2 algorithm', () => {
         },
         mappingVersions: {
           'another-type': '10.1.0',
-          'no-mv-type': '0.0.0',
+          'no-mv-type': '10.0.0',
           'some-type': '10.1.0',
         },
       });
@@ -172,7 +169,7 @@ describe('V2 algorithm', () => {
         expect(indexMetaAfterMigration?.mappingVersions).toEqual({
           'some-type': '10.1.0',
           'another-type': '10.2.0',
-          'no-mv-type': '0.0.0',
+          'no-mv-type': '10.0.0',
         });
       });
 
@@ -250,7 +247,7 @@ describe('V2 algorithm', () => {
     it('adds the mappingVersions with the current modelVersions', () => {
       expect(indexMetaAfterMigration?.mappingVersions).toEqual({
         'another-type': '10.2.0',
-        'no-mv-type': '0.0.0',
+        'no-mv-type': '10.0.0',
         'some-type': '10.1.0',
       });
     });

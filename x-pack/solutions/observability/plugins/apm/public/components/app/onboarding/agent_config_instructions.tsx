@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
+
+import { EuiSpacer } from '@elastic/eui';
 import {
   getApmAgentCommands,
   getApmAgentVariables,
@@ -15,6 +15,10 @@ import {
   getApmAgentHighlightLang,
 } from './commands/get_apm_agent_commands';
 import { AgentConfigurationTable } from './agent_config_table';
+import { CommandsInstructionsCodeblock } from '../../../tutorial/config_agent/commands_instructions_codeblock';
+
+const API_KEY_COMMAND_PLACEHOLDER = '<API_KEY>';
+const SECRET_TOKEN_COMMAND_PLACEHOLDER = '<SECRET_TOKEN>';
 
 export function AgentConfigInstructions({
   variantId,
@@ -32,6 +36,12 @@ export function AgentConfigInstructions({
   createApiKeyLoading?: boolean;
 }) {
   const commands = getApmAgentCommands({
+    variantId,
+    apmServerUrl,
+    secretToken: `${SECRET_TOKEN_COMMAND_PLACEHOLDER}`,
+    apiKey: ` ${API_KEY_COMMAND_PLACEHOLDER}`,
+  });
+  const commandsWithSecrets = getApmAgentCommands({
     variantId,
     apmServerUrl,
     secretToken,
@@ -52,23 +62,13 @@ export function AgentConfigInstructions({
         createApiKeyLoading={createApiKeyLoading}
       />
       <EuiSpacer />
-
-      <EuiCodeBlock
-        isCopyable
-        copyAriaLabel={i18n.translate(
-          'xpack.apm.onboarding.agentConfigInstructions.euiCodeBlock.copyAriaLabel',
-          {
-            defaultMessage: 'Copy {variantId} agent configuration code',
-            values: { variantId },
-          }
-        )}
-        language={highlightLang || 'bash'}
-        data-test-subj="commands"
+      <CommandsInstructionsCodeblock
+        variantId={variantId}
         lineNumbers={lineNumbers}
-        whiteSpace="pre"
-      >
-        {commands}
-      </EuiCodeBlock>
+        highlightLang={highlightLang}
+        commands={commands}
+        commandsWithSecrets={commandsWithSecrets}
+      />
     </>
   );
 }

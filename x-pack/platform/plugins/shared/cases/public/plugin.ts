@@ -38,6 +38,7 @@ import type {
   CasesPublicStartDependencies,
 } from './types';
 import { registerSystemActions } from './components/system_actions';
+import { registerAnalytics } from './analytics';
 
 /**
  * @public
@@ -116,6 +117,8 @@ export class CasesUiPlugin
     }
 
     registerSystemActions(plugins.triggersActionsUi);
+
+    registerAnalytics({ analyticsService: core.analytics });
 
     return {
       attachmentFramework: {

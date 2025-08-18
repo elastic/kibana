@@ -18,6 +18,8 @@ import {
   PRIVILEGE_ESCALATION,
   RECONNAISSANCE,
   replaceNewlineLiterals,
+  getOriginalAlertIds,
+  transformInternalReplacements,
 } from './attack_discovery_helpers';
 import * as i18n from './translations';
 import type { AttackDiscovery } from '../..';
@@ -126,6 +128,63 @@ describe('helpers', () => {
       const result = replaceNewlineLiterals(input);
 
       expect(result).toEqual(input);
+    });
+  });
+
+  describe('getOriginalAlertIds', () => {
+    const alertIds = ['alert1', 'alert2', 'alert3'];
+
+    it('returns the original alertIds when no replacements are provided', () => {
+      const result = getOriginalAlertIds({ alertIds });
+
+      expect(result).toEqual(alertIds);
+    });
+
+    it('returns the replaced alertIds when replacements are provided', () => {
+      const replacements = {
+        alert1: 'replaced1',
+        alert3: 'replaced3',
+      };
+      const expected = ['replaced1', 'alert2', 'replaced3'];
+
+      const result = getOriginalAlertIds({ alertIds, replacements });
+
+      expect(result).toEqual(expected);
+    });
+
+    it('returns the original alertIds when replacements are provided but no replacement is found', () => {
+      const replacements = {
+        alert4: 'replaced4',
+        alert5: 'replaced5',
+      };
+
+      const result = getOriginalAlertIds({ alertIds, replacements });
+
+      expect(result).toEqual(alertIds);
+    });
+  });
+
+  describe('transformInternalReplacements', () => {
+    it('returns empty object if empty array passed as internal replacements', () => {
+      const result = transformInternalReplacements([]);
+
+      expect(result).toEqual({});
+    });
+
+    it('returns correctly transformed replacements object', () => {
+      const internalReplacements = [
+        { uuid: 'e56f5c52-ebb0-4ec8-aad5-2659df2e0206', value: 'root' },
+        { uuid: '99612aef-0a5a-41da-9da4-b5b5ece226a4', value: 'SRVMAC08' },
+        { uuid: '6f53c297-f5cb-48c3-8aff-2e2d7a390169', value: 'Administrator' },
+      ];
+
+      const result = transformInternalReplacements(internalReplacements);
+
+      expect(result).toEqual({
+        'e56f5c52-ebb0-4ec8-aad5-2659df2e0206': 'root',
+        '99612aef-0a5a-41da-9da4-b5b5ece226a4': 'SRVMAC08',
+        '6f53c297-f5cb-48c3-8aff-2e2d7a390169': 'Administrator',
+      });
     });
   });
 });

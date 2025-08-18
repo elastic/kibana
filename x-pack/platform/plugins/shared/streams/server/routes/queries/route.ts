@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
-import {
-  StreamQuery,
-  streamQuerySchema,
-  upsertStreamQueryRequestSchema,
-} from '@kbn/streams-schema';
+import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
+import type { StreamQuery } from '@kbn/streams-schema';
+import { streamQuerySchema, upsertStreamQueryRequestSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
+import { QueryNotFoundError } from '../../lib/streams/errors/query_not_found_error';
 import { createServerRoute } from '../create_server_route';
 import { assertEnterpriseLicense } from '../utils/assert_enterprise_license';
 
@@ -59,7 +57,7 @@ const listQueriesRoute = createServerRoute({
       path: { name: streamName },
     } = params;
 
-    const queryAssets = await assetClient.getAssetLinks(streamName, ['query']);
+    const { [streamName]: queryAssets } = await assetClient.getAssetLinks([streamName], ['query']);
 
     return {
       queries: queryAssets.map((queryAsset) => queryAsset.query),
@@ -134,7 +132,9 @@ const deleteQueryRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<DeleteQueryResponse> => {
-    const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
+    const { streamsClient, queryClient, licensing, assetClient } = await getScopedClients({
+      request,
+    });
     await assertEnterpriseLicense(licensing);
 
     const {
@@ -142,6 +142,12 @@ const deleteQueryRoute = createServerRoute({
     } = params;
 
     await streamsClient.ensureStream(streamName);
+
+    const queryLink = await assetClient.bulkGetByIds(streamName, 'query', [queryId]);
+    if (queryLink.length === 0) {
+      throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
+    }
+
     await queryClient.delete(streamName, queryId);
 
     return {

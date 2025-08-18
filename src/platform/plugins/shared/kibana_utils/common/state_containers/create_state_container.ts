@@ -10,7 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs';
 import deepFreeze from 'deep-freeze-strict';
-import {
+import type {
   PureTransitionsToTransitions,
   PureTransition,
   ReduxLikeStateContainer,
@@ -26,7 +26,7 @@ const isProduction =
     ? process.env.NODE_ENV === 'production'
     : !process.env.NODE_ENV || process.env.NODE_ENV === 'production';
 
-const defaultFreeze: <T>(value: T) => T = isProduction
+export const defaultFreeze: <T>(value: T) => T = isProduction
   ? <T>(value: T) => value as T
   : <T>(value: T): T => {
       const isFreezable = value !== null && typeof value === 'object';

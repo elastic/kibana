@@ -49,7 +49,8 @@ import { BrandedLoadingIndicator } from './branded_loading_indicator';
 import { RedirectWhenSavedObjectNotFound } from './redirect_not_found';
 import { DiscoverMainApp } from './main_app';
 import { useAsyncFunction } from '../../hooks/use_async_function';
-import { ScopedProfilesManagerProvider } from '../../../../context_awareness';
+import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
+import { HideTabsBar } from '../tabs_view/hide_tabs_bar';
 
 export interface DiscoverSessionViewProps {
   customizationContext: DiscoverCustomizationContext;
@@ -139,6 +140,10 @@ export const DiscoverSessionView = ({
     runtimeStateManager,
     (tab) => tab.scopedProfilesManager$
   );
+  const scopedEbtManager = useCurrentTabRuntimeState(
+    runtimeStateManager,
+    (tab) => tab.scopedEbtManager$
+  );
   const currentDataView = useCurrentTabRuntimeState(
     runtimeStateManager,
     (tab) => tab.currentDataView$
@@ -190,36 +195,33 @@ export const DiscoverSessionView = ({
 
   if (initializeSessionState.value.showNoDataPage) {
     return (
-      <NoDataPage
-        {...initializationState}
-        onDataViewCreated={async (dataViewUnknown) => {
-          await dispatch(internalStateActions.loadDataViewList());
-          dispatch(
-            internalStateActions.setInitializationState({
-              hasESData: true,
-              hasUserDataView: true,
-            })
-          );
-          const dataView = dataViewUnknown as DataView;
-          initializeSession({
-            defaultUrlState: dataView.id
-              ? { dataSource: createDataViewDataSource({ dataViewId: dataView.id }) }
-              : undefined,
-          });
-        }}
-        onESQLNavigationComplete={() => {
-          initializeSession();
-        }}
-      />
+      <HideTabsBar>
+        <NoDataPage
+          {...initializationState}
+          onDataViewCreated={async (dataViewUnknown) => {
+            await dispatch(internalStateActions.loadDataViewList());
+            dispatch(
+              internalStateActions.setInitializationState({
+                hasESData: true,
+                hasUserDataView: true,
+              })
+            );
+            const dataView = dataViewUnknown as DataView;
+            initializeSession({
+              defaultUrlState: dataView.id
+                ? { dataSource: createDataViewDataSource({ dataViewId: dataView.id }) }
+                : undefined,
+            });
+          }}
+          onESQLNavigationComplete={() => {
+            initializeSession();
+          }}
+        />
+      </HideTabsBar>
     );
   }
 
-  if (
-    !currentStateContainer ||
-    !currentCustomizationService ||
-    !scopedProfilesManager ||
-    !currentDataView
-  ) {
+  if (!currentStateContainer || !currentCustomizationService || !currentDataView) {
     return <BrandedLoadingIndicator />;
   }
 
@@ -227,9 +229,12 @@ export const DiscoverSessionView = ({
     <DiscoverCustomizationProvider value={currentCustomizationService}>
       <DiscoverMainProvider value={currentStateContainer}>
         <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
-          <ScopedProfilesManagerProvider scopedProfilesManager={scopedProfilesManager}>
+          <ScopedServicesProvider
+            scopedProfilesManager={scopedProfilesManager}
+            scopedEBTManager={scopedEbtManager}
+          >
             <DiscoverMainApp stateContainer={currentStateContainer} />
-          </ScopedProfilesManagerProvider>
+          </ScopedServicesProvider>
         </RuntimeStateProvider>
       </DiscoverMainProvider>
     </DiscoverCustomizationProvider>

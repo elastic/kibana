@@ -7,11 +7,11 @@
 
 import { useCallback } from 'react';
 import { useSelector } from '@xstate/react';
-import { OnRefreshProps } from '@elastic/eui';
+import type { OnRefreshProps } from '@elastic/eui';
 import { DEFAULT_DATEPICKER_REFRESH } from '../../common/constants';
 import { useDatasetQualityDetailsContext } from '../components/dataset_quality_details/context';
 import { indexNameToDataStreamParts } from '../../common/utils';
-import { BasicDataStream } from '../../common/types';
+import type { BasicDataStream } from '../../common/types';
 import { useKibanaContextForPlugin } from '../utils';
 
 export const useDatasetQualityDetailsState = () => {
@@ -100,7 +100,7 @@ export const useDatasetQualityDetailsState = () => {
   );
 
   const canUserReadFailureStore = Boolean(
-    dataStreamSettings?.datasetUserPrivileges?.canReadFailureStore
+    dataStreamSettings?.datasetUserPrivileges?.datasetsPrivilages?.[dataStream]?.canReadFailureStore
   );
 
   const dataStreamDetails = useSelector(service, (state) =>
@@ -160,6 +160,9 @@ export const useDatasetQualityDetailsState = () => {
     [service]
   );
 
+  const hasFailureStore = Boolean(dataStreamDetails?.hasFailureStore);
+  const canShowFailureStoreInfo = canUserReadFailureStore && hasFailureStore;
+
   return {
     service,
     telemetryClient,
@@ -182,6 +185,8 @@ export const useDatasetQualityDetailsState = () => {
     canUserAccessDashboards,
     canUserViewIntegrations,
     canUserReadFailureStore,
+    hasFailureStore,
+    canShowFailureStoreInfo,
     expandedQualityIssue,
     isQualityIssueFlyoutOpen,
   };

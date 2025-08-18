@@ -1,6 +1,6 @@
 # HASH
 
-The HASH function computes the hash of a given input using a specified algorithm.
+Computes the hash of the input using various algorithms such as MD5, SHA, SHA-224, SHA-256, SHA-384, and SHA-512.
 
 ## Syntax
 
@@ -8,23 +8,21 @@ The HASH function computes the hash of a given input using a specified algorithm
 
 ### Parameters
 
-#### algorithm
+#### `algorithm`
 
-The hash algorithm to be used.
+Hash algorithm to use.
 
-The supported algorithms are:
-- "MD5"
-- "SHA-1"
-- "SHA-256"
+#### `input`
 
-#### input
-
-The value to be hashed.
+Input to hash.
 
 ## Examples
 
 ```esql
-FROM messages
-| EVAL hashed_content = HASH("SHA-1", content)
-| KEEP message_id, hashed_content
+FROM sample_data
+| WHERE message != "Connection error"
+| EVAL md5 = hash("md5", message), sha256 = hash("sha256", message)
+| KEEP message, md5, sha256
 ```
+
+This example computes the MD5 and SHA-256 hashes of the `message` field for rows where the `message` is not "Connection error".

@@ -76,6 +76,21 @@ describe('Assets for rule monitoring', () => {
         },
       ]);
     });
+
+    describe('Rule gap histogram', () => {
+      it('should contain the correct title', () => {
+        const panelsConfig = JSON.parse(sourceRuleMonitoringDashboard.attributes.panelsJSON);
+        expect(panelsConfig).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              embeddableConfig: expect.objectContaining({
+                title: 'Rule gap histogram',
+              }),
+            }),
+          ])
+        );
+      });
+    });
   });
 
   describe('Data view: ".kibana-event-log-*"', () => {

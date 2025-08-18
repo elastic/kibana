@@ -9,13 +9,14 @@
 
 import React, { useState } from 'react';
 
-import { EuiButtonEmpty, EuiPopover, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface ControlErrorProps {
   error: Error | string;
@@ -51,7 +52,7 @@ export const ControlError = ({ error }: ControlErrorProps) => {
   const errorTextStyle = useErrorTextStyle();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const errorMessage = error instanceof Error ? error.message : error || defaultMessage;
-  const styles = useMemoizedStyles(controlErrorStyles);
+  const styles = useMemoCss(controlErrorStyles);
 
   const popoverButton = (
     <EuiButtonEmpty
@@ -61,9 +62,8 @@ export const ControlError = ({ error }: ControlErrorProps) => {
       iconType="error"
       data-test-subj="control-frame-error"
       onClick={() => setPopoverOpen((open) => !open)}
-      className="errorEmbeddableCompact__button controlErrorButton"
+      className="controlErrorButton"
       css={styles.button}
-      textProps={{ className: 'errorEmbeddableCompact__text' }}
       contentProps={{ css: styles.buttonContentCss }}
     >
       <FormattedMessage
@@ -77,7 +77,6 @@ export const ControlError = ({ error }: ControlErrorProps) => {
     <EuiPopover
       button={popoverButton}
       isOpen={isPopoverOpen}
-      className="errorEmbeddableCompact__popover"
       closePopover={() => setPopoverOpen(false)}
       css={styles.popover}
     >

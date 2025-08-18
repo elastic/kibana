@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { getQueryFromSavedSearchObject, getEsQueryFromSavedSearch } from './saved_search_utils';
-import type { SavedSearchSavedObject } from '../../../../common/types';
+import { getEsQueryFromSavedSearch } from './saved_search_utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -120,108 +119,6 @@ const luceneSavedSearch: SavedSearch = {
     ],
   }),
 } as unknown as SavedSearch;
-
-// @ts-expect-error We don't need the full object here
-const luceneSavedSearchObj: SavedSearchSavedObject = {
-  attributes: {
-    title: 'farequote_filter_and_lucene',
-    columns: ['_source'],
-    sort: ['@timestamp', 'desc'],
-    kibanaSavedObjectMeta: {
-      searchSourceJSON:
-        '{"highlightAll":true,"version":true,"query":{"query":"responsetime:>50","language":"lucene"},"filter":[{"meta":{"index":"90a978e0-1c80-11ec-b1d7-f7e5cf21b9e0","negate":false,"disabled":false,"alias":null,"type":"phrase","key":"airline","value":"ASA","params":{"query":"ASA","type":"phrase"}},"query":{"match":{"airline":{"query":"ASA","type":"phrase"}}},"$state":{"store":"appState"}}],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
-    },
-  },
-  id: '93fc4d60-1c80-11ec-b1d7-f7e5cf21b9e0',
-  type: 'search',
-};
-
-// @ts-expect-error We don't need the full object here
-const luceneInvalidSavedSearchObj: SavedSearchSavedObject = {
-  attributes: {
-    kibanaSavedObjectMeta: {
-      searchSourceJSON: null,
-    },
-  },
-  id: '93fc4d60-1c80-11ec-b1d7-f7e5cf21b9e0',
-  type: 'search',
-};
-
-const kqlSavedSearch: SavedSearch = {
-  title: 'farequote_filter_and_kuery',
-  description: '',
-  columns: ['_source'],
-  searchSource: createSearchSourceMock({
-    index: mockDataView,
-    query: { query: 'responsetime > 49', language: 'kuery' } as Query,
-    filter: [
-      {
-        meta: {
-          index: '90a978e0-1c80-11ec-b1d7-f7e5cf21b9e0',
-          negate: false,
-          disabled: false,
-          alias: null,
-          type: 'phrase',
-          key: 'airline',
-          value: 'ASA',
-          params: { query: 'ASA', type: 'phrase' },
-        },
-        query: { match: { airline: { query: 'ASA', type: 'phrase' } } },
-        $state: { store: FilterStateStore.APP_STATE },
-      },
-    ],
-  }),
-} as unknown as SavedSearch;
-
-describe('getQueryFromSavedSearchObject()', () => {
-  it('should return parsed searchSourceJSON with query and filter', () => {
-    expect(getQueryFromSavedSearchObject(luceneSavedSearchObj)).toEqual({
-      filter: [
-        {
-          $state: { store: 'appState' },
-          meta: {
-            alias: null,
-            disabled: false,
-            index: '90a978e0-1c80-11ec-b1d7-f7e5cf21b9e0',
-            key: 'airline',
-            negate: false,
-            params: { query: 'ASA', type: 'phrase' },
-            type: 'phrase',
-            value: 'ASA',
-          },
-          query: { match: { airline: { query: 'ASA', type: 'phrase' } } },
-        },
-      ],
-      highlightAll: true,
-      indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-      query: { language: 'lucene', query: 'responsetime:>50' },
-      version: true,
-    });
-    expect(getQueryFromSavedSearchObject(kqlSavedSearch)).toEqual({
-      query: { query: 'responsetime > 49', language: 'kuery' },
-      index: 'test-mock-data-view',
-      filter: [
-        {
-          meta: {
-            index: '90a978e0-1c80-11ec-b1d7-f7e5cf21b9e0',
-            negate: false,
-            disabled: false,
-            alias: null,
-            type: 'phrase',
-            key: 'airline',
-            value: 'ASA',
-            params: { query: 'ASA', type: 'phrase' },
-          },
-          query: { match: { airline: { query: 'ASA', type: 'phrase' } } },
-          $state: { store: 'appState' },
-        },
-      ],
-    });
-  });
-  it('should return undefined if invalid searchSourceJSON', () => {
-    expect(getQueryFromSavedSearchObject(luceneInvalidSavedSearchObj)).toEqual(undefined);
-  });
-});
 
 describe('getEsQueryFromSavedSearch()', () => {
   it('return undefined if saved search is not provided', () => {

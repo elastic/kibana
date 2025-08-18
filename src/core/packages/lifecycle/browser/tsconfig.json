@@ -32,7 +32,8 @@
     "@kbn/core-user-profile-browser",
     "@kbn/core-feature-flags-browser",
     "@kbn/core-rendering-browser",
-    "@kbn/core-pricing-browser"
+    "@kbn/core-pricing-browser",
+    "@kbn/core-di",
   ],
   "exclude": [
     "target/**/*",

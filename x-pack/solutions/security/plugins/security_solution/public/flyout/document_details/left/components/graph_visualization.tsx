@@ -10,6 +10,13 @@ import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import dateMath from '@kbn/datemath';
+import { i18n } from '@kbn/i18n';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import {
+  getNodeDocumentMode,
+  getSingleDocumentData,
+  type NodeViewModel,
+} from '@kbn/cloud-security-posture-graph';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -19,6 +26,9 @@ import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
+import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from '../../preview/constants';
+import { useToasts } from '../../../../common/lib/kibana';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -32,6 +42,7 @@ export const GRAPH_ID = 'graph-visualization' as const;
  * Graph visualization view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const GraphVisualization: React.FC = memo(() => {
+  const toasts = useToasts();
   const oldDataView = useGetScopedSourcererDataView({
     sourcererScope: SourcererScopeName.default,
   });
@@ -41,7 +52,7 @@ export const GraphVisualization: React.FC = memo(() => {
 
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
-  const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser } =
+  const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser, scopeId } =
     useDocumentDetailsContext();
   const {
     eventIds,
@@ -53,6 +64,39 @@ export const GraphVisualization: React.FC = memo(() => {
     dataFormattedForFieldBrowser,
   });
 
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+  const onOpenEventPreview = useCallback(
+    (node: NodeViewModel) => {
+      const documentData = getSingleDocumentData(node);
+      if (
+        (getNodeDocumentMode(node) === 'single-event' ||
+          getNodeDocumentMode(node) === 'single-alert') &&
+        documentData
+      ) {
+        openPreviewPanel({
+          id: DocumentDetailsPreviewPanelKey,
+          params: {
+            id: documentData.id,
+            indexName: documentData.index,
+            scopeId,
+            banner: documentData.type === 'alert' ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
+            isPreviewMode: true,
+          },
+        });
+      } else {
+        toasts.addDanger({
+          title: i18n.translate(
+            'xpack.securitySolution.flyout.document_details.left.components.graphVisualization.errorOpenNodePreview',
+            {
+              defaultMessage: 'Failed showing preview',
+            }
+          ),
+        });
+      }
+    },
+    [toasts, openPreviewPanel, scopeId]
+  );
+
   const originEventIds = eventIds.map((id) => ({ id, isAlert }));
   const { investigateInTimeline } = useInvestigateInTimeline();
   const openTimelineCallback = useCallback(
@@ -61,7 +105,20 @@ export const GraphVisualization: React.FC = memo(() => {
       const to = dateMath.parse(timeRange.to);
 
       if (!from || !to) {
-        // TODO: show error message
+        toasts.addDanger({
+          title: i18n.translate(
+            'xpack.securitySolution.flyout.document_details.left.components.graphVisualization.errorInvalidTimeRange',
+            {
+              defaultMessage: 'Invalid time range',
+            }
+          ),
+          text: i18n.translate(
+            'xpack.securitySolution.flyout.document_details.left.components.graphVisualization.errorInvalidTimeRangeDescription',
+            {
+              defaultMessage: 'Please select a valid time range.',
+            }
+          ),
+        });
         return;
       }
 
@@ -82,7 +139,7 @@ export const GraphVisualization: React.FC = memo(() => {
         },
       });
     },
-    [investigateInTimeline]
+    [investigateInTimeline, toasts]
   );
 
   return (
@@ -108,6 +165,7 @@ export const GraphVisualization: React.FC = memo(() => {
             showInvestigateInTimeline={true}
             showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
+            onOpenEventPreview={onOpenEventPreview}
           />
         </React.Suspense>
       )}

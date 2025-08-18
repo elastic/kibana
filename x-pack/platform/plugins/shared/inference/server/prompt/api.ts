@@ -5,20 +5,29 @@
  * 2.0.
  */
 
-import {
-  getConnectorProvider,
-  getConnectorFamily,
-  PromptOptions,
-  PromptAPI,
-  getConnectorModel,
-} from '@kbn/inference-common';
-import { CreateChatCompleteApiOptions } from '../chat_complete/types';
+import type { PromptOptions, PromptAPI } from '@kbn/inference-common';
+import { getConnectorProvider, getConnectorFamily, getConnectorModel } from '@kbn/inference-common';
+import type { CreateChatCompleteApiOptions } from '../chat_complete/types';
 import { createChatCompleteCallbackApi } from '../chat_complete/callback_api';
 import { promptToMessageOptions } from '../../common/prompt/prompt_to_message_options';
 
 export function createPromptApi(options: CreateChatCompleteApiOptions): PromptAPI;
-export function createPromptApi({ request, actions, logger }: CreateChatCompleteApiOptions) {
-  const callbackApi = createChatCompleteCallbackApi({ request, actions, logger });
+export function createPromptApi({
+  request,
+  actions,
+  logger,
+  anonymizationRulesPromise,
+  regexWorker,
+  esClient,
+}: CreateChatCompleteApiOptions) {
+  const callbackApi = createChatCompleteCallbackApi({
+    request,
+    actions,
+    logger,
+    anonymizationRulesPromise,
+    regexWorker,
+    esClient,
+  });
 
   return (options: PromptOptions) => {
     const {

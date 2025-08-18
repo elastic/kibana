@@ -23,16 +23,23 @@ import {
   EuiIcon,
   EuiTextColor,
 } from '@elastic/eui';
-import SemVer from 'semver/classes/semver';
+import type SemVer from 'semver/classes/semver';
 
 import { useFormIsModified } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { documentationService } from '../../../../../../services/documentation';
-import { Form, FormHook, FormDataProvider } from '../../../../shared_imports';
+import type { FormHook } from '../../../../shared_imports';
+import { Form, FormDataProvider } from '../../../../shared_imports';
 import { TYPE_DEFINITION } from '../../../../constants';
-import { Field, NormalizedField, NormalizedFields, MainType, SubType } from '../../../../types';
+import type {
+  Field,
+  NormalizedField,
+  NormalizedFields,
+  MainType,
+  SubType,
+} from '../../../../types';
 import { CodeBlock } from '../../../code_block';
 import { getParametersFormForType } from '../field_types';
-import { UpdateFieldFunc } from './use_update_field';
+import type { UpdateFieldFunc } from './use_update_field';
 import { EditFieldHeaderForm } from './edit_field_header_form';
 
 const limitStringLength = (text: string, limit = 18): string => {
@@ -120,7 +127,7 @@ export const EditField = React.memo(
                       flush="right"
                       href={linkDocumentation}
                       target="_blank"
-                      iconType="help"
+                      iconType="question"
                       data-test-subj="documentationLink"
                     >
                       {i18n.translate('xpack.idxMgmt.mappingsEditor.editField.typeDocumentation', {
@@ -221,7 +228,7 @@ export const EditField = React.memo(
                               }
                             )}
                           </EuiTextColor>
-                          <EuiIcon type="questionInCircle" />
+                          <EuiIcon type="question" />
                         </span>
                       </EuiToolTip>
                     </p>

@@ -68,9 +68,11 @@ export const ExpandableBadgeGroup = ({
         >
           <div
             style={{
-              maxWidth: 700,
               maxHeight: maxHeight ? `${maxHeight}px` : 'none',
               overflowY: maxHeight ? 'auto' : 'visible',
+            }}
+            css={{
+              maxWidth: 700,
               display: 'flex',
               flexWrap: 'wrap',
               gap: '4px',

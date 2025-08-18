@@ -111,7 +111,7 @@ export const ConnectorDetailOverview: React.FC = () => {
       {!!connector && !connector.index_name && (
         <>
           <EuiCallOut
-            iconType="iInCircle"
+            iconType="info"
             color="warning"
             title={i18n.translate(
               'xpack.contentConnectors.content.connectors.overview.connectorNoIndexCallOut.title',
@@ -153,7 +153,7 @@ export const ConnectorDetailOverview: React.FC = () => {
       {!!connector?.index_name && !indexData && (
         <>
           <EuiCallOut
-            iconType="iInCircle"
+            iconType="info"
             title={i18n.translate(
               'xpack.contentConnectors.content.connectors.overview.connectorIndexDoesntExistCallOut.title',
               {

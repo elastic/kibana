@@ -6,10 +6,11 @@
  */
 
 export enum SiemMigrationsEventTypes {
-  TranslationFailure = 'siem_migrations_rule_translation_failure',
   MigrationSuccess = 'siem_migrations_migration_success',
+  MigrationAborted = 'siem_migrations_migration_aborted',
+  MigrationFailure = 'siem_migrations_migration_failure',
+  TranslationSuccess = 'siem_migrations_rule_translation_success',
+  TranslationFailure = 'siem_migrations_rule_translation_failure',
   PrebuiltRulesMatch = 'siem_migrations_prebuilt_rules_match',
   IntegrationsMatch = 'siem_migrations_integration_match',
-  MigrationFailure = 'siem_migrations_migration_failure',
-  TranslationSucess = 'siem_migrations_rule_translation_success',
 }

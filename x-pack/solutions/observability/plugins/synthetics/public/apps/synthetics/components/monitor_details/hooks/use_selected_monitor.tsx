@@ -55,7 +55,7 @@ export const useSelectedMonitor = ({
     : null;
 
   const isMonitorMissing =
-    error?.body.statusCode === 404 &&
+    error?.body?.statusCode === 404 &&
     (error.getPayload as { monitorId: string })?.monitorId === monitorId;
 
   useEffect(() => {

@@ -84,6 +84,13 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsCrowdstrikeManualHostIsolationEnabled: true,
 
   /**
+   * `runscript` response actions for SentinelOne hosts.
+   *
+   * Release: 9.2.0 (earlier for serverless)
+   */
+  responseActionsSentinelOneRunScriptEnabled: false,
+
+  /**
    * Space awareness for Elastic Defend management.
    * Feature depends on Fleet's corresponding features also being enabled:
    * - `subfeaturePrivileges`
@@ -91,7 +98,7 @@ export const allowedExperimentalValues = Object.freeze({
    * and Fleet must set it runtime mode to spaces by calling the following API:
    * - `POST /internal/fleet/enable_space_awareness`
    */
-  endpointManagementSpaceAwarenessEnabled: false,
+  endpointManagementSpaceAwarenessEnabled: true,
 
   /**
    * Disables new notes
@@ -102,11 +109,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
-
-  /**
-   * Enables advanced ESQL generation for the Assistant.
-   */
-  advancedEsqlGeneration: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
@@ -166,7 +168,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Response actions telemetry collection
    * Should be enabled in 8.17.0
    */
-  responseActionsTelemetryEnabled: false,
+  responseActionsTelemetryEnabled: true,
 
   /**
    * Enables experimental JAMF integration data to be available in Analyzer
@@ -191,7 +193,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the storing of gaps in the event log
    */
-  storeGapsInEventLogEnabled: false,
+  storeGapsInEventLogEnabled: true,
+
+  /**
+   * Enables scheduling gap fills for rules
+   */
+  bulkFillRuleGapsEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
@@ -201,7 +208,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the rule's bulk action to manage alert suppression
    */
-  bulkEditAlertSuppressionEnabled: false,
+  bulkEditAlertSuppressionEnabled: true,
+
+  /**
+   * Enables the ability to use does not match condition for indicator match rules
+   */
+  doesNotMatchForIndicatorMatchRuleEnabled: false,
 
   /**
    * Enables the new data ingestion hub
@@ -222,7 +234,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables Privilege Monitoring
    */
-  privilegeMonitoringEnabled: false,
+  privilegedUserMonitoringDisabled: false,
 
   /**
    * Disables the siem migrations feature
@@ -233,6 +245,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Defend Insights feature
    */
   defendInsights: true,
+
+  /**
+   * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
+   */
+  endpointExceptionsMovedUnderManagement: false,
 
   /**
    * Disables flyout history and new preview navigation
@@ -265,20 +282,26 @@ export const allowedExperimentalValues = Object.freeze({
   newDataViewPickerEnabled: false,
 
   /**
-   * Automatically installs the security AI prompts package
-   */
-  securityAIPromptsEnabled: false,
-
-  /**
    * Enables Microsoft Defender for  Endpoint's RunScript RTR command
    * Release: 8.19/9.1
    */
-  microsoftDefenderEndpointRunScriptEnabled: false,
+  microsoftDefenderEndpointRunScriptEnabled: true,
 
   /**
    * Enables advanced mode for Trusted Apps creation and update
    */
-  trustedAppsAdvancedMode: false,
+  trustedAppsAdvancedMode: true,
+
+  /**
+   * Enables Trusted Devices artifact management for device control protections.
+   * Allows users to manage trusted USB and external devices
+   */
+  trustedDevices: false,
+
+  /**
+   * Enables the ability to import and migration dashboards through automatic migration service
+   */
+  automaticDashboardsMigration: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -294,7 +317,6 @@ const disableExperimentalPrefix = 'disable:' as const;
  * Use the `disable:` prefix to disable a feature.
  *
  * @param configValue
- * @throws SecuritySolutionInvalidExperimentalValue
  */
 export const parseExperimentalConfigValue = (
   configValue: string[]

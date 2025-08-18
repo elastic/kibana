@@ -75,7 +75,7 @@ const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps
       anchorPosition="leftCenter"
     >
       <EuiPopoverTitle>{popoverTitle}</EuiPopoverTitle>
-      <div style={{ width: POPOVER_WIDTH }}>
+      <div css={{ width: POPOVER_WIDTH }}>
         <EuiText size="s">
           <p>{i18n.ML_RULE_JOBS_WARNING_DESCRIPTION}</p>
         </EuiText>

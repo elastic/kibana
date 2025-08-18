@@ -12,11 +12,11 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
 import type { IContextProvider, IRouter } from '@kbn/core-http-server';
-import { PluginInitializerContext, PluginManifest } from '@kbn/core-plugins-server';
-import { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
+import type { PluginInitializerContext, PluginManifest } from '@kbn/core-plugins-server';
+import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { PluginWrapper } from './plugin';
-import {
+import type { PluginWrapper } from './plugin';
+import type {
   PluginsServicePrebootSetupDeps,
   PluginsServiceSetupDeps,
   PluginsServiceStartDeps,
@@ -220,6 +220,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       getAsLabels: deps.executionContext.getAsLabels,
     },
     featureFlags: {
+      setInitialFeatureFlagsGetter: deps.featureFlags.setInitialFeatureFlagsGetter,
       setProvider: deps.featureFlags.setProvider,
       appendContext: deps.featureFlags.appendContext,
     },
@@ -292,6 +293,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
     pricing: {
+      isFeatureAvailable: deps.pricing.isFeatureAvailable,
       registerProductFeatures: deps.pricing.registerProductFeatures,
     },
     security: {
@@ -301,6 +303,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     userProfile: {
       registerUserProfileDelegate: (delegate) =>
         deps.userProfile.registerUserProfileDelegate(delegate),
+    },
+    injection: {
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
     },
   };
 }
@@ -364,6 +369,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     savedObjects: {
       getScopedClient: deps.savedObjects.getScopedClient,
+      getUnsafeInternalClient: deps.savedObjects.getUnsafeInternalClient,
       createInternalRepository: deps.savedObjects.createInternalRepository,
       createScopedRepository: deps.savedObjects.createScopedRepository,
       createSerializer: deps.savedObjects.createSerializer,
@@ -394,5 +400,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       audit: deps.security.audit,
     },
     userProfile: deps.userProfile,
+    injection: {
+      fork: () => deps.injection.fork(plugin.opaqueId),
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
+    },
   };
 }

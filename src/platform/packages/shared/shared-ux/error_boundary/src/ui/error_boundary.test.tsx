@@ -9,11 +9,12 @@
 
 import { render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { apm } from '@elastic/apm-rum';
 
 import { BadComponent, ChunkLoadErrorComponent, getServicesMock } from '../../mocks';
-import { KibanaErrorBoundaryServices } from '../../types';
+import type { KibanaErrorBoundaryServices } from '../../types';
 import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
 import { KibanaErrorService } from '../services/error_service';
 import { KibanaErrorBoundary } from './error_boundary';
@@ -135,7 +136,7 @@ describe('<KibanaErrorBoundary>', () => {
     expect(apm.captureError).toHaveBeenCalledTimes(1);
     expect(apm.captureError).toHaveBeenCalledWith(
       new Error('This is an error to show the test user!'),
-      { labels: { errorType: 'PageFatalReactError' } }
+      { labels: { error_type: 'PageFatalReactError' } }
     );
   });
 });

@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { KbnPalette, getKbnPalettes } from '@kbn/palettes';
 import type { CoreTheme } from '@kbn/core/public';
-import { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
-import { VisualizationDimensionEditorProps } from '../../types';
+import type { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
+import type { VisualizationDimensionEditorProps } from '../../types';
 import { SECONDARY_DEFAULT_STATIC_COLOR } from './constants';
 
 export function getColorMode(
@@ -27,7 +27,11 @@ export function getColorMode(
 
 export function getPrefixSelected(
   state: VisualizationDimensionEditorProps<MetricVisualizationState>['state'],
-  { defaultPrefix, colorMode }: { defaultPrefix: string; colorMode: SecondaryTrendType }
+  {
+    defaultPrefix,
+    colorMode,
+    isPrimaryMetricNumeric,
+  }: { defaultPrefix: string; colorMode: SecondaryTrendType; isPrimaryMetricNumeric: boolean }
 ): { mode: 'auto' | 'none' } | { mode: 'custom'; label: string } {
   const isAutoPrefix = state.secondaryPrefix === undefined;
   const hasPrefixOverride =
@@ -36,7 +40,8 @@ export function getPrefixSelected(
     // it is not enabled due to other conflicts (i.e. primary metric is not numeric)
     colorMode === 'dynamic' &&
     state.secondaryTrend?.type === 'dynamic' &&
-    state.secondaryTrend.baselineValue === 'primary';
+    state.secondaryTrend.baselineValue === 'primary' &&
+    isPrimaryMetricNumeric;
 
   if (isAutoPrefix) {
     return hasPrefixOverride
@@ -93,4 +98,26 @@ export function getTrendPalette(
   const palette = getKbnPalettes(theme).get(secondaryTrend.paletteId);
   const colors = palette?.colors(3);
   return (secondaryTrend.reversed ? colors.reverse() : colors) as [string, string, string];
+}
+
+export function getSecondaryDynamicTrendBaselineValue(
+  isPrimaryMetricNumeric: boolean,
+  baselineValue: number | 'primary'
+) {
+  // If primary is not numeric, reset baseline value to 0
+  if (!isPrimaryMetricNumeric && baselineValue === 'primary') return 0;
+  return baselineValue;
+}
+
+export function isSecondaryTrendConfigInvalid(
+  secondaryTrend: MetricVisualizationState['secondaryTrend'],
+  colorMode: SecondaryTrendType,
+  isPrimaryMetricNumeric: boolean
+): boolean {
+  return (
+    colorMode !== secondaryTrend?.type ||
+    (secondaryTrend?.type === 'dynamic' &&
+      secondaryTrend?.baselineValue === 'primary' &&
+      !isPrimaryMetricNumeric)
+  );
 }

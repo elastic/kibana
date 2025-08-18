@@ -13,6 +13,7 @@ import type {
   NodeDefinition,
   EuiSideNavItemTypeEnhanced,
 } from '@kbn/core-chrome-browser';
+import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
@@ -71,7 +72,7 @@ export const getNavigationTreeDefinition = ({
 }): AddSolutionNavigationArg => {
   return {
     dataTestSubj: 'searchSideNav',
-    homePage: 'enterpriseSearch',
+    homePage: SEARCH_HOMEPAGE,
     icon,
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
@@ -89,25 +90,31 @@ export const getNavigationTreeDefinition = ({
                       pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
                     );
                   },
-                  link: 'enterpriseSearch',
+                  link: SEARCH_HOMEPAGE,
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.home', {
+                    defaultMessage: 'Home',
+                  }),
                 },
-
+                {
+                  link: 'discover',
+                },
+                {
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+                  },
+                  link: 'dashboards',
+                },
                 {
                   children: [
-                    {
-                      link: 'discover',
-                    },
-                    {
-                      getIsActive: ({ pathNameSerialized, prepend }) => {
-                        return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-                      },
-                      link: 'dashboards',
-                    },
+                    { link: 'onechat:conversations' },
+                    { link: 'onechat:tools' },
+                    { link: 'onechat:agents' },
                   ],
-                  id: 'analyze',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.analyze', {
-                    defaultMessage: 'Analyze',
+                  id: 'chat',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.chat', {
+                    defaultMessage: 'Chat',
                   }),
+                  renderAs: 'accordion',
                 },
                 {
                   children: [
@@ -121,30 +128,11 @@ export const getNavigationTreeDefinition = ({
                       },
                       link: 'elasticsearchIndexManagement',
                     },
-                    { link: 'enterpriseSearchContent:connectors' },
-                    { link: 'enterpriseSearchContent:webCrawlers' },
-                  ],
-                  id: 'data',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.data', {
-                    defaultMessage: 'Data',
-                  }),
-                },
-                {
-                  children: [
-                    {
-                      getIsActive: ({ pathNameSerialized, prepend }) => {
-                        return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
-                      },
-                      id: 'dev_tools',
-                      link: 'dev_tools',
-                      title: i18n.translate('xpack.enterpriseSearch.searchNav.devTools', {
-                        defaultMessage: 'Dev Tools',
-                      }),
-                    },
                     {
                       breadcrumbStatus: 'hidden',
                       link: 'searchPlayground',
                     },
+                    { link: 'enterpriseSearchContent:connectors' },
                     {
                       getIsActive: ({ pathNameSerialized, prepend }) => {
                         const someSubItemSelected = searchApps?.some((app) =>
@@ -160,12 +148,6 @@ export const getNavigationTreeDefinition = ({
                       },
                       link: 'enterpriseSearchApplications:searchApplications',
                       renderAs: 'item',
-                      title: i18n.translate(
-                        'xpack.enterpriseSearch.searchNav.build.searchApplications',
-                        {
-                          defaultMessage: 'Search applications',
-                        }
-                      ),
                       ...(searchApps
                         ? {
                             children: searchApps.map(euiItemTypeToNodeDefinition),
@@ -208,21 +190,13 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   children: [
-                    { link: 'searchInferenceEndpoints:inferenceEndpoints' },
                     { link: 'searchSynonyms:synonyms' },
                     { link: 'searchQueryRules' },
+                    { link: 'searchInferenceEndpoints:inferenceEndpoints' },
                   ],
                   id: 'relevance',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.relevance', {
                     defaultMessage: 'Relevance',
-                  }),
-                },
-                {
-                  children: [{ link: 'maps' }, { link: 'canvas' }, { link: 'graph' }],
-                  id: 'otherTools',
-                  renderAs: 'accordion',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.otherTools', {
-                    defaultMessage: 'Other tools',
                   }),
                 },
               ],
@@ -237,6 +211,16 @@ export const getNavigationTreeDefinition = ({
           footer: [
             {
               children: [
+                {
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+                  },
+                  id: 'dev_tools',
+                  link: 'dev_tools',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.devTools', {
+                    defaultMessage: 'Dev Tools',
+                  }),
+                },
                 {
                   breadcrumbStatus: 'hidden',
                   children: [
@@ -303,11 +287,17 @@ export const getNavigationTreeDefinition = ({
                             { link: 'management:objects' },
                             { link: 'management:tags' },
                             { link: 'management:search_sessions' },
-                            { link: 'management:aiAssistantManagementSelection' },
                             { link: 'management:spaces' },
                             { link: 'management:settings' },
                           ],
                           title: 'Kibana',
+                        },
+                        {
+                          children: [
+                            { link: 'management:genAiSettings' },
+                            { link: 'management:aiAssistantManagementSelection' },
+                          ],
+                          title: 'AI',
                         },
                         {
                           children: [

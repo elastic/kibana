@@ -8,7 +8,7 @@
  */
 
 import type { IRouter } from '@kbn/core-http-server';
-import type { ProductFeaturesRegistry } from '@kbn/core-pricing-common';
+import type { GetPricingResponse, ProductFeaturesRegistry } from '@kbn/core-pricing-common';
 import type { PricingConfigType } from '../pricing_config';
 
 export function registerPricingRoutes(
@@ -32,7 +32,7 @@ export function registerPricingRoutes(
       validate: false,
     },
     async (_context, _req, res) => {
-      return res.ok({
+      return res.ok<GetPricingResponse>({
         body: {
           tiers: params.pricingConfig.tiers,
           product_features: params.productFeaturesRegistry.asObject(),

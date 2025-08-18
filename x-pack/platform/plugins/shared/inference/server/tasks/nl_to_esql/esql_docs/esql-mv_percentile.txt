@@ -1,6 +1,6 @@
 # MV_PERCENTILE
 
-This function converts a multivalued field into a single-valued field. The single-valued field it produces contains the value at which a specified percentage of observed values occur.
+Converts a multivalued field into a single-valued field containing the value at which a certain percentage of observed values occur.
 
 ## Syntax
 
@@ -8,19 +8,19 @@ This function converts a multivalued field into a single-valued field. The singl
 
 ### Parameters
 
-#### number
+#### `number`
 
-This refers to a multivalue expression.
+A multivalue expression.
 
-#### percentile
+#### `percentile`
 
-Value for the percentile to calculate. The value should range from 0 and 100. Values outside this range return null.
+The percentile to calculate. Must be a number between 0 and 100. Numbers outside this range will return `null`.
 
 ## Examples
-
-Consider an instance where you want to calculate the 50th percentile (or median) of a set of numbers - `[5, 5, 10, 12, 5000]`. This can be done using the following statement.
 
 ```esql
 ROW values = [5, 5, 10, 12, 5000]
 | EVAL p50 = MV_PERCENTILE(values, 50), median = MV_MEDIAN(values)
 ```
+
+This example calculates the 50th percentile (median) of the multivalued field `values` and compares it to the result of the `MV_MEDIAN` function.

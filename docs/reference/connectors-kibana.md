@@ -41,6 +41,7 @@ Actions are instantiations of a connector that are linked to rules and run as ba
 * [{{webhook}}](/reference/connectors-kibana/webhook-action-type.md): Send a request to a web service.
 * [{{webhook-cm}}](/reference/connectors-kibana/cases-webhook-action-type.md): Send a request to a Case Management web service.
 * [xMatters](/reference/connectors-kibana/xmatters-action-type.md): Send actionable alerts to on-call xMatters resources.
+* [{{xsoar}}](/reference/connectors-kibana/xsoar-action-type.md): Create an incident in Cortex {{xsoar}}.
 
 ::::{note}
 Some connector types are paid commercial features, while others are free. For a comparison of the Elastic subscription levels, go to [the subscription page](https://www.elastic.co/subscriptions).

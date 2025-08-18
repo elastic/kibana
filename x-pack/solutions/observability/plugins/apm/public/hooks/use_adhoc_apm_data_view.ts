@@ -20,7 +20,7 @@ export async function getApmDataViewIndexPattern() {
 }
 
 export function useAdHocApmDataView() {
-  const { services, notifications } = useKibana<ApmPluginStartDeps>();
+  const { services } = useKibana<ApmPluginStartDeps>();
   const [dataView, setDataView] = useState<DataView | undefined>();
 
   useEffect(() => {
@@ -40,11 +40,11 @@ export function useAdHocApmDataView() {
           return;
         }
 
-        notifications.toasts.danger({
+        services.notifications.toasts.addDanger({
           title: i18n.translate('xpack.apm.data_view.creation_failed', {
             defaultMessage: 'An error occurred while creating the data view',
           }),
-          body: e.message,
+          text: e.message,
         });
 
         throw e;
@@ -52,7 +52,7 @@ export function useAdHocApmDataView() {
     }
 
     fetchDataView().then(setDataView);
-  }, [notifications.toasts, services.dataViews]);
+  }, [services.notifications.toasts, services.dataViews]);
 
   return { dataView };
 }

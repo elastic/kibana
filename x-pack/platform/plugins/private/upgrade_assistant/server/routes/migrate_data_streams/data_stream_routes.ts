@@ -9,13 +9,13 @@ import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { error } from '../../lib/data_streams/error';
 import { API_BASE_PATH } from '../../../common/constants';
-import { DataStreamReindexStatusResponse } from '../../../common/types';
-import { versionCheckHandlerWrapper } from '../../lib/es_version_precheck';
+import type { DataStreamReindexStatusResponse } from '../../../common/types';
 import { dataStreamMigrationServiceFactory } from '../../lib/data_streams';
 
-import { RouteDependencies } from '../../types';
+import type { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 
 export function registerMigrateDataStreamRoutes({
@@ -23,6 +23,7 @@ export function registerMigrateDataStreamRoutes({
   licensing,
   log,
   lib: { handleEsError },
+  current,
 }: RouteDependencies) {
   const BASE_PATH = `${API_BASE_PATH}/migrate_data_stream`;
 
@@ -35,17 +36,13 @@ export function registerMigrateDataStreamRoutes({
           reason: 'Relies on elasticsearch for authorization',
         },
       },
-      options: {
-        access: 'public',
-        summary: `Get data stream status`,
-      },
       validate: {
         params: schema.object({
           dataStreamName: schema.string(),
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       const {
         elasticsearch: { client: esClient },
       } = await core;
@@ -90,17 +87,13 @@ export function registerMigrateDataStreamRoutes({
           reason: 'Relies on elasticsearch for authorization',
         },
       },
-      options: {
-        access: 'public',
-        summary: `Start the data stream reindexing`,
-      },
       validate: {
         params: schema.object({
           dataStreamName: schema.string(),
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       const {
         elasticsearch: { client: esClient },
       } = await core;
@@ -143,17 +136,13 @@ export function registerMigrateDataStreamRoutes({
           reason: 'Relies on elasticsearch for authorization',
         },
       },
-      options: {
-        access: 'public',
-        summary: `Get data stream metadata`,
-      },
       validate: {
         params: schema.object({
           dataStreamName: schema.string(),
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       const {
         elasticsearch: { client: esClient },
       } = await core;
@@ -190,17 +179,13 @@ export function registerMigrateDataStreamRoutes({
           reason: 'Relies on elasticsearch for authorization',
         },
       },
-      options: {
-        access: 'public',
-        summary: `Cancel Data Stream reindexing`,
-      },
       validate: {
         params: schema.object({
           dataStreamName: schema.string(),
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       const {
         elasticsearch: { client: esClient },
       } = await core;
@@ -247,7 +232,7 @@ export function registerMigrateDataStreamRoutes({
       },
       options: {
         access: 'public',
-        summary: `Mark Data Stream indices as read only`,
+        summary: `Set data stream indices as read-only`,
       },
       validate: {
         body: schema.object({
@@ -258,7 +243,7 @@ export function registerMigrateDataStreamRoutes({
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       const {
         elasticsearch: { client: esClient },
       } = await core;

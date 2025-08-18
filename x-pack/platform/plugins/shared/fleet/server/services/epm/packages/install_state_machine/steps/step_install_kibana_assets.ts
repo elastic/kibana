@@ -52,6 +52,7 @@ export async function stepInstallKibanaAssetsWithStreaming(context: InstallConte
         pkgName,
         packageInstallContext,
         spaceId,
+        assetTags: packageInfo?.asset_tags,
       })
   );
 
@@ -82,7 +83,12 @@ export async function cleanUpKibanaAssetsStep(context: InstallContext) {
     logger.debug('Retry transition - clean up Kibana assets first');
 
     await withPackageSpan('Retry transition - clean up Kibana assets first', async () => {
-      await deleteKibanaAssets({ installedObjects, spaceId, packageInfo });
+      await deleteKibanaAssets({
+        installedObjects,
+        spaceId,
+        packageSpecConditions: packageInfo?.conditions,
+        logger,
+      });
     });
   }
 }
@@ -124,6 +130,11 @@ export async function cleanUpUnusedKibanaAssetsStep(context: InstallContext) {
   }
 
   await withPackageSpan('Clean up Kibana assets that are no longer in the package', async () => {
-    await deleteKibanaAssets({ installedObjects: assetsToRemove, spaceId, packageInfo });
+    await deleteKibanaAssets({
+      installedObjects: assetsToRemove,
+      spaceId,
+      packageSpecConditions: packageInfo?.conditions,
+      logger,
+    });
   });
 }

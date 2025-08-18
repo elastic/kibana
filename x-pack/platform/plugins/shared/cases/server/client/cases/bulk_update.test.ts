@@ -53,7 +53,9 @@ describe('update', () => {
         saved_objects: [{ ...mockCases[0], attributes: { assignees: cases.cases[0].assignees } }],
       });
 
-      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
     });
 
     it('notifies an assignee', async () => {
@@ -437,7 +439,9 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
-      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
     });
 
     it(`does not throw error when category is non empty string less than ${MAX_CATEGORY_LENGTH} characters`, async () => {
@@ -571,7 +575,9 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
-      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
     });
 
     it(`does not throw error when title is non empty string less than ${MAX_TITLE_LENGTH} characters`, async () => {
@@ -706,7 +712,9 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
-      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
     });
 
     it(`does not throw error when description is non empty string less than ${MAX_DESCRIPTION_LENGTH} characters`, async () => {
@@ -848,7 +856,7 @@ describe('update', () => {
       const caseCommentsStats = new Map();
       caseCommentsStats.set(mockCases[0].id, { userComments: 1, alerts: 2 });
       caseCommentsStats.set(mockCases[1].id, { userComments: 3, alerts: 4 });
-      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         caseCommentsStats
       );
     });
@@ -972,7 +980,9 @@ describe('update', () => {
         ]
       `);
 
-      expect(clientArgs.services.attachmentService.getter.getCaseCommentStats).toHaveBeenCalledWith(
+      expect(
+        clientArgs.services.attachmentService.getter.getCaseAttatchmentStats
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           caseIds: [mockCases[0].id, mockCases[1].id],
         })
@@ -992,7 +1002,9 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
-      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
     });
 
     it('does not throw error when tags array is empty', async () => {
@@ -1197,7 +1209,9 @@ describe('update', () => {
           customFields: defaultCustomFieldsConfiguration,
         },
       ]);
-      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
     });
 
     it('can update customFields', async () => {
@@ -1587,7 +1601,7 @@ describe('update', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      clientArgsMock.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(
+      clientArgsMock.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         new Map()
       );
     });
@@ -1807,7 +1821,7 @@ describe('update', () => {
           per_page: 10,
           page: 1,
         });
-        clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(
+        clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
           new Map()
         );
       });
@@ -1915,7 +1929,9 @@ describe('update', () => {
         saved_objects: mockCases,
       });
 
-      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
     });
 
     it('calculates metrics correctly', async () => {

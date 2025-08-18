@@ -7,59 +7,86 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { useMemo } from 'react';
+import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
+import { WaterfallLegendType } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
-import type { IWaterfallLegend } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
-import { WaterfallLegendType } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 export interface TraceWaterfallItem extends TraceItem {
   depth: number;
   offset: number;
   skew: number;
   color: string;
+  isOrphan?: boolean;
 }
 
 export function useTraceWaterfall({ traceItems }: { traceItems: TraceItem[] }) {
   const waterfall = useMemo(() => {
-    const serviceColors = getServiceColors(traceItems);
+    const legends = getLegends(traceItems);
+    const colorBy =
+      legends.filter(({ type }) => type === WaterfallLegendType.ServiceName).length > 1
+        ? WaterfallLegendType.ServiceName
+        : WaterfallLegendType.Type;
+    const colorMap = createColorLookupMap(legends);
     const traceParentChildrenMap = getTraceParentChildrenMap(traceItems);
-    const rootItem = traceParentChildrenMap.root?.[0];
+    const { rootItem, traceState, orphans } = getRootItemOrFallback(
+      traceParentChildrenMap,
+      traceItems
+    );
     const traceWaterfall = rootItem
-      ? getTraceWaterfall(rootItem, traceParentChildrenMap, serviceColors)
+      ? getTraceWaterfall({
+          rootItem,
+          parentChildMap: traceParentChildrenMap,
+          orphans,
+          colorMap,
+          colorBy,
+        })
       : [];
 
     return {
       rootItem,
+      traceState,
       traceWaterfall,
       duration: getTraceWaterfallDuration(traceWaterfall),
       maxDepth: Math.max(...traceWaterfall.map((item) => item.depth)),
+      legends,
+      colorBy,
     };
   }, [traceItems]);
 
   return waterfall;
 }
 
-export function getServiceColors(traceItems: TraceItem[]) {
-  const allServiceNames = new Set(traceItems.map((item) => item.serviceName));
+export function getLegends(traceItems: TraceItem[]): IWaterfallLegend[] {
+  const serviceNames = Array.from(new Set(traceItems.map((item) => item.serviceName)));
+  const types = Array.from(new Set(traceItems.map((item) => item.type ?? '')));
+
   const palette = euiPaletteColorBlind({
-    rotations: Math.ceil(allServiceNames.size / 10),
+    rotations: Math.ceil((serviceNames.length + types.length) / 10),
   });
-  return Array.from(allServiceNames).reduce<Record<string, string>>((acc, serviceName, idx) => {
-    acc[serviceName] = palette[idx];
-    return acc;
-  }, {});
+
+  let colorIndex = 0;
+  const legends: IWaterfallLegend[] = [];
+
+  serviceNames.forEach((serviceName) => {
+    legends.push({
+      type: WaterfallLegendType.ServiceName,
+      value: serviceName,
+      color: palette[colorIndex++],
+    });
+  });
+
+  types.forEach((type) => {
+    legends.push({
+      type: WaterfallLegendType.Type,
+      value: type,
+      color: palette[colorIndex++],
+    });
+  });
+  return legends;
 }
 
-export function getServiceLegends(traceItems: TraceItem[]): IWaterfallLegend[] {
-  const allServiceNames = new Set(traceItems.map((item) => item.serviceName));
-  const palette = euiPaletteColorBlind({
-    rotations: Math.ceil(allServiceNames.size / 10),
-  });
-
-  return Array.from(allServiceNames).map((serviceName, index) => ({
-    type: WaterfallLegendType.ServiceName,
-    value: serviceName,
-    color: palette[index],
-  }));
+export function createColorLookupMap(legends: IWaterfallLegend[]): Map<string, string> {
+  return new Map(legends.map((legend) => [`${legend.type}:${legend.value}`, legend.color]));
 }
 
 export function getTraceParentChildrenMap(traceItems: TraceItem[]) {
@@ -78,30 +105,102 @@ export function getTraceParentChildrenMap(traceItems: TraceItem[]) {
   return traceMap;
 }
 
-export function getTraceWaterfall(
+export enum TraceDataState {
+  Full = 'full',
+  Partial = 'partial',
+  Empty = 'empty',
+}
+
+export function getRootItemOrFallback(
+  traceParentChildrenMap: Record<string, TraceItem[]>,
+  traceItems: TraceItem[]
+) {
+  if (traceItems.length === 0) {
+    return {
+      traceState: TraceDataState.Empty,
+    };
+  }
+
+  const rootItem = traceParentChildrenMap.root?.[0];
+
+  const parentIds = new Set(traceItems.map(({ id }) => id));
+  // TODO: Reuse waterfall util methods where possible or if logic is the same
+  const orphans = traceItems.filter((item) => item.parentId && !parentIds.has(item.parentId));
+
+  if (rootItem) {
+    return {
+      traceState: orphans.length === 0 ? TraceDataState.Full : TraceDataState.Partial,
+      rootItem,
+      orphans,
+    };
+  }
+
+  const [fallbackRootItem, ...remainingOrphans] = orphans;
+
+  return {
+    traceState: TraceDataState.Partial,
+    rootItem: fallbackRootItem,
+    orphans: remainingOrphans,
+  };
+}
+
+// TODO: Reuse waterfall util methods where possible or if logic is the same
+function reparentOrphansToRoot(
   rootItem: TraceItem,
   parentChildMap: Record<string, TraceItem[]>,
-  serviceColorsMap: Record<string, string>
-): TraceWaterfallItem[] {
-  const rootStartMicroseconds = toMicroseconds(rootItem.timestamp);
+  orphans: TraceItem[]
+) {
+  // Some cases with orphans, the root item has no direct link or children, so this
+  // might be not initialised. This assigns the array in case of undefined/null to the
+  // map.
+  const children = (parentChildMap[rootItem.id] ??= []);
 
-  function getTraceWaterfallItem(item: TraceItem, depth: number, parent?: TraceWaterfallItem) {
-    const startMicroseconds = toMicroseconds(item.timestamp);
+  children.push(...orphans.map((orphan) => ({ ...orphan, parentId: rootItem.id, isOrphan: true })));
+}
+
+export function getTraceWaterfall({
+  rootItem,
+  parentChildMap,
+  orphans,
+  colorMap,
+  colorBy,
+}: {
+  rootItem: TraceItem;
+  parentChildMap: Record<string, TraceItem[]>;
+  orphans: TraceItem[];
+  colorMap: Map<string, string>;
+  colorBy: WaterfallLegendType;
+}): TraceWaterfallItem[] {
+  const rootStartMicroseconds = rootItem.timestampUs;
+
+  reparentOrphansToRoot(rootItem, parentChildMap, orphans);
+
+  function getTraceWaterfallItem(
+    item: TraceItem,
+    depth: number,
+    parent?: TraceWaterfallItem
+  ): TraceWaterfallItem[] {
+    const startMicroseconds = item.timestampUs;
+    const color =
+      colorBy === WaterfallLegendType.ServiceName && item.serviceName
+        ? colorMap.get(`${WaterfallLegendType.ServiceName}:${item.serviceName}`)!
+        : colorMap.get(`${WaterfallLegendType.Type}:${item.type ?? ''}`)!;
     const traceWaterfallItem: TraceWaterfallItem = {
       ...item,
       depth,
       offset: startMicroseconds - rootStartMicroseconds,
       skew: getClockSkew({ itemTimestamp: startMicroseconds, itemDuration: item.duration, parent }),
-      color: serviceColorsMap[item.serviceName],
+      color,
     };
-    const result = [traceWaterfallItem];
-    const sortedChildren =
-      parentChildMap[item.id]?.sort((a, b) => a.timestamp.localeCompare(b.timestamp)) || [];
 
-    sortedChildren.forEach((child) => {
-      result.push(...getTraceWaterfallItem(child, depth + 1, traceWaterfallItem));
-    });
-    return result;
+    const sortedChildren =
+      parentChildMap[item.id]?.sort((a, b) => a.timestampUs - b.timestampUs) || [];
+
+    const flattenedChildren = sortedChildren.flatMap((child) =>
+      getTraceWaterfallItem(child, depth + 1, traceWaterfallItem)
+    );
+
+    return [traceWaterfallItem, ...flattenedChildren];
   }
 
   return getTraceWaterfallItem(rootItem, 0);
@@ -118,7 +217,7 @@ export function getClockSkew({
 }) {
   let skew = 0;
   if (parent) {
-    const parentTimestamp = toMicroseconds(parent.timestamp);
+    const parentTimestamp = parent.timestampUs;
     const parentStart = parentTimestamp + parent.skew;
 
     const offsetStart = parentStart - itemTimestamp;
@@ -136,5 +235,3 @@ export function getTraceWaterfallDuration(flattenedTraceWaterfall: TraceWaterfal
     0
   );
 }
-
-const toMicroseconds = (ts: string) => new Date(ts).getTime() * 1000; // Convert ms to us

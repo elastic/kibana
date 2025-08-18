@@ -28,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MetaDataProps } from './result_types';
+import type { MetaDataProps } from './result_types';
 
 interface Props {
   metaData: MetaDataProps;
@@ -69,7 +69,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
     <EuiButtonIcon
       display="empty"
       size="s"
-      iconType="iInCircle"
+      iconType="info"
       color="primary"
       data-test-subj="documentMetadataButton"
       onClick={(e: React.MouseEvent<HTMLElement>) => {

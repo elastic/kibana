@@ -4,19 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import {
-  FindSLOGroupsParams,
-  FindSLOGroupsResponse,
-  findSLOGroupsResponseSchema,
-  Pagination,
-  sloGroupWithSummaryResponseSchema,
-} from '@kbn/slo-schema';
+import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { FindSLOGroupsParams, FindSLOGroupsResponse, Pagination } from '@kbn/slo-schema';
+import { findSLOGroupsResponseSchema, sloGroupWithSummaryResponseSchema } from '@kbn/slo-schema';
 import { getSummaryIndices, getSloSettings } from './slo_settings';
 import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../common/constants';
 import { IllegalArgumentError } from '../errors';
 import { typedSearch } from '../utils/queries';
-import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
+import type { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
 
 const DEFAULT_PAGE = 1;
@@ -38,7 +33,7 @@ function toPagination(params: FindSLOGroupsParams): Pagination {
 
 export class FindSLOGroups {
   constructor(
-    private esClient: ElasticsearchClient,
+    private scopedClusterClient: IScopedClusterClient,
     private soClient: SavedObjectsClientContract,
     private logger: Logger,
     private spaceId: string
@@ -53,11 +48,11 @@ export class FindSLOGroups {
     const parsedFilters = parseStringFilters(filters, this.logger);
 
     const settings = await getSloSettings(this.soClient);
-    const { indices } = await getSummaryIndices(this.esClient, settings);
+    const { indices } = await getSummaryIndices(this.scopedClusterClient.asInternalUser, settings);
 
     const hasSelectedTags = groupBy === 'slo.tags' && groupsFilter.length > 0;
 
-    const response = await typedSearch(this.esClient, {
+    const response = await typedSearch(this.scopedClusterClient.asCurrentUser, {
       index: indices,
       size: 0,
       query: {

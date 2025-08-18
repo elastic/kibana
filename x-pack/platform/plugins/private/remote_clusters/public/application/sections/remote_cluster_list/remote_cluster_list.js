@@ -228,7 +228,7 @@ export class RemoteClusterList extends Component {
               <EuiButtonEmpty
                 href={remoteClustersUrl}
                 target="_blank"
-                iconType="help"
+                iconType="question"
                 data-test-subj="documentationLink"
               >
                 <FormattedMessage

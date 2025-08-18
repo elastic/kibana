@@ -9,8 +9,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { IndicesAutocompleteResult, IndexAutocompleteItem } from '@kbn/esql-types';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
 
 export interface EsqlServiceOptions {
   client: ElasticsearchClient;
@@ -51,16 +51,17 @@ export class EsqlService {
   ): Promise<IndicesAutocompleteResult> {
     const { client } = this.options;
 
-    // Execute: GET /_all/_settings/index.mode,aliases?flat_settings=true
+    // Execute: GET /_all/_settings/index.mode,index.hidden,aliases?flat_settings=true
     interface IndexModeResponse {
       [indexName: string]: {
         settings: {
           'index.mode': string;
+          'index.hidden': boolean;
         };
       };
     }
     const queryByIndexModeResponse = (await client.indices.getSettings({
-      name: 'index.mode',
+      name: ['index.hidden', 'index.mode'],
       flat_settings: true,
     })) as IndexModeResponse;
 
@@ -68,7 +69,7 @@ export class EsqlService {
     const indexNames: string[] = [];
 
     for (const [name, { settings }] of Object.entries(queryByIndexModeResponse)) {
-      if (settings['index.mode'] === mode) {
+      if (settings['index.mode'] === mode && !settings['index.hidden']) {
         indexNames.push(name);
         indices.push({ name, mode, aliases: [] });
       }

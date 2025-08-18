@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IRouter } from '@kbn/core/server';
-import { CustomIntegrationRegistry } from '../custom_integration_registry';
+import type { IRouter } from '@kbn/core/server';
+import type { CustomIntegrationRegistry } from '../custom_integration_registry';
 import {
   ROUTES_APPEND_CUSTOM_INTEGRATIONS,
   ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,

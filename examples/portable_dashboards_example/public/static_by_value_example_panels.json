@@ -1,5 +1,5 @@
-{
-  "a514e5f6-1d0d-4fe9-85a9-f7ba40665033": {
+[
+  {
     "type": "visualization",
     "gridData": {
       "x": 0,
@@ -8,8 +8,8 @@
       "h": 10,
       "i": "a514e5f6-1d0d-4fe9-85a9-f7ba40665033"
     },
-    "explicitInput": {
-      "id": "a514e5f6-1d0d-4fe9-85a9-f7ba40665033",
+    "panelIndex": "a514e5f6-1d0d-4fe9-85a9-f7ba40665033",
+    "panelConfig": {
       "savedVis": {
         "id": "",
         "title": "",
@@ -35,7 +35,7 @@
       "enhancements": {}
     }
   },
-  "b06b849e-f4fd-423c-a582-5c4bfec812c9": {
+  {
     "type": "lens",
     "gridData": {
       "x": 30,
@@ -44,8 +44,8 @@
       "h": 21,
       "i": "b06b849e-f4fd-423c-a582-5c4bfec812c9"
     },
-    "explicitInput": {
-      "id": "b06b849e-f4fd-423c-a582-5c4bfec812c9",
+    "panelIndex": "b06b849e-f4fd-423c-a582-5c4bfec812c9",
+    "panelConfig": {
       "title": "Destinations",
       "attributes": {
         "title": "",
@@ -142,7 +142,7 @@
       "enhancements": {}
     }
   },
-  "a4121cab-b6f2-4de3-af71-ec9b5a6f0a2a": {
+  {
     "type": "lens",
     "gridData": {
       "x": 0,
@@ -151,8 +151,8 @@
       "h": 11,
       "i": "a4121cab-b6f2-4de3-af71-ec9b5a6f0a2a"
     },
+    "panelIndex": "a4121cab-b6f2-4de3-af71-ec9b5a6f0a2a",
     "explicitInput": {
-      "id": "a4121cab-b6f2-4de3-af71-ec9b5a6f0a2a",
       "enhancements": {},
       "attributes": {
         "visualizationType": "lnsXY",
@@ -332,4 +332,4 @@
       "title": "[Logs] Bytes distribution"
     }
   }
-}
+]

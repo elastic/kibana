@@ -188,6 +188,7 @@ describe('getNetworkEvents', () => {
       Array [
         Array [
           Object {
+            "ignore_unavailable": true,
             "index": "synthetics-*",
             "query": Object {
               "bool": Object {
@@ -214,6 +215,11 @@ describe('getNetworkEvents', () => {
             "track_total_hits": true,
           },
           Object {
+            "context": Object {
+              "loggingOptions": Object {
+                "loggerName": "synthetics",
+              },
+            },
             "meta": true,
           },
         ],

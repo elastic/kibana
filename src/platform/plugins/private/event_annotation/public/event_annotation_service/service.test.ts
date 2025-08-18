@@ -7,20 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart, SimpleSavedObject } from '@kbn/core/public';
-import { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type {
+  ContentClient,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { getEventAnnotationService } from './service';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-components';
-import { EventAnnotationGroupSavedObjectAttributes } from '../../common';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-components';
+import type { EventAnnotationGroupSavedObjectAttributes } from '../../common';
+import type { EventAnnotationGroupSavedObject } from '../../common/content_management';
 
-// TODO - I think applying this saved object type is no longer correct - since we migrated to content management,
-// there is no longer a single interchange format. Instead, the tests should use the operation-specific
-// CM types such as EventAnnotationGroupUpdateOut and EventAnnotationGroupCreateOut.
-type AnnotationGroupSavedObject = SimpleSavedObject<EventAnnotationGroupSavedObjectAttributes>;
-
-const annotationGroupResolveMocks: Record<string, AnnotationGroupSavedObject> = {
+const annotationGroupResolveMocks = {
   nonExistingGroup: {
     attributes: {} as EventAnnotationGroupSavedObjectAttributes,
     references: [],
@@ -30,7 +29,7 @@ const annotationGroupResolveMocks: Record<string, AnnotationGroupSavedObject> = 
       statusCode: 404,
       message: 'Not found',
     },
-  } as Partial<AnnotationGroupSavedObject> as AnnotationGroupSavedObject,
+  } as unknown as EventAnnotationGroupSavedObject,
   noAnnotations: {
     attributes: {
       title: 'groupTitle',
@@ -53,7 +52,7 @@ const annotationGroupResolveMocks: Record<string, AnnotationGroupSavedObject> = 
         type: 'tag',
       },
     ],
-  } as Partial<AnnotationGroupSavedObject> as AnnotationGroupSavedObject,
+  } as unknown as EventAnnotationGroupSavedObject,
   multiAnnotations: {
     attributes: {
       title: 'groupTitle',
@@ -67,7 +66,7 @@ const annotationGroupResolveMocks: Record<string, AnnotationGroupSavedObject> = 
         type: 'index-pattern',
       },
     ],
-  } as Partial<AnnotationGroupSavedObject> as AnnotationGroupSavedObject,
+  } as unknown as EventAnnotationGroupSavedObject,
   withAdHocDataView: {
     attributes: {
       title: 'groupTitle',
@@ -78,63 +77,35 @@ const annotationGroupResolveMocks: Record<string, AnnotationGroupSavedObject> = 
     id: 'multiAnnotations',
     type: 'event-annotation-group',
     references: [],
-  } as Partial<AnnotationGroupSavedObject> as AnnotationGroupSavedObject,
+  } as unknown as EventAnnotationGroupSavedObject,
 };
 
-const annotationResolveMocks = {
-  nonExistingGroup: { savedObjects: [] },
-  noAnnotations: { savedObjects: [] },
-  multiAnnotations: {
-    savedObjects: [
-      {
-        id: 'annotation1',
-        attributes: {
-          id: 'annotation1',
-          type: 'manual',
-          key: { type: 'point_in_time' as const, timestamp: '2022-03-18T08:25:00.000Z' },
-          label: 'Event',
-          icon: 'triangle' as const,
-          color: 'red',
-          lineStyle: 'dashed' as const,
-          lineWidth: 3,
-        } as EventAnnotationConfig,
-        type: 'event-annotation',
-        references: [
-          {
-            id: 'multiAnnotations',
-            name: 'event_annotation_group_ref',
-            type: 'event-annotation-group',
-          },
-        ],
-      },
-      {
-        id: 'annotation2',
-        attributes: {
-          id: 'ann2',
-          label: 'Query based event',
-          icon: 'triangle',
-          color: 'red',
-          type: 'query',
-          timeField: 'timestamp',
-          key: {
-            type: 'point_in_time',
-          },
-          lineStyle: 'dashed',
-          lineWidth: 3,
-          filter: { type: 'kibana_query', query: '', language: 'kuery' },
-        } as EventAnnotationConfig,
-        type: 'event-annotation',
-        references: [
-          {
-            id: 'multiAnnotations',
-            name: 'event_annotation_group_ref',
-            type: 'event-annotation-group',
-          },
-        ],
-      },
-    ],
+const annotationResolveMocks: EventAnnotationConfig[] = [
+  {
+    id: 'annotation1',
+    type: 'manual',
+    key: { type: 'point_in_time', timestamp: '2022-03-18T08:25:00.000Z' },
+    label: 'Event',
+    icon: 'triangle',
+    color: 'red',
+    lineStyle: 'dashed',
+    lineWidth: 3,
   },
-};
+  {
+    id: 'ann2',
+    label: 'Query based event',
+    icon: 'triangle',
+    color: 'red',
+    type: 'query',
+    timeField: 'timestamp',
+    key: {
+      type: 'point_in_time',
+    },
+    lineStyle: 'dashed',
+    lineWidth: 3,
+    filter: { type: 'kibana_query', query: '', language: 'kuery' },
+  },
+];
 
 const contentClient = {
   get: jest.fn(),
@@ -148,6 +119,7 @@ let core: CoreStart;
 
 describe('Event Annotation Service', () => {
   let eventAnnotationService: EventAnnotationServiceType;
+
   beforeEach(() => {
     core = coreMock.createStart();
     (contentClient.create as jest.Mock).mockImplementation(() => {
@@ -166,6 +138,7 @@ describe('Event Annotation Service', () => {
       client: contentClient,
     } as ContentManagementPublicStart);
   });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -558,17 +531,13 @@ describe('Event Annotation Service', () => {
   });
   describe('createAnnotationGroup', () => {
     it('creates annotation group along with annotations', async () => {
-      const annotations = [
-        annotationResolveMocks.multiAnnotations.savedObjects[0].attributes,
-        annotationResolveMocks.multiAnnotations.savedObjects[1].attributes,
-      ];
       await eventAnnotationService.createAnnotationGroup({
         title: 'newGroupTitle',
         description: 'my description',
         tags: ['tag1', 'tag2', 'tag3'],
         indexPatternId: 'ipid',
         ignoreGlobalFilters: false,
-        annotations,
+        annotations: annotationResolveMocks,
       });
       expect(contentClient.create).toHaveBeenCalledWith({
         contentTypeId: 'event-annotation-group',
@@ -577,7 +546,7 @@ describe('Event Annotation Service', () => {
           description: 'my description',
           ignoreGlobalFilters: false,
           dataViewSpec: null,
-          annotations,
+          annotations: annotationResolveMocks,
         },
         options: {
           references: [

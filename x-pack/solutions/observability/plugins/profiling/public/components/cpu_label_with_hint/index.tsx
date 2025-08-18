@@ -51,7 +51,7 @@ export function CPULabelWithHint({ iconSize, labelSize, labelStyle, type }: Prop
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={hint}>
-          <EuiIcon type="questionInCircle" size={iconSize} />
+          <EuiIcon type="question" size={iconSize} />
         </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>

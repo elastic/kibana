@@ -107,7 +107,7 @@ async function checkProdNativeModules(log: ToolingLog) {
 
   try {
     // Gets all production dependencies based on package.json and then searches across transient dependencies using lock file
-    const rawProductionDependencies = findProductionDependencies(log, await readYarnLock());
+    const rawProductionDependencies = findProductionDependencies(log, await readYarnLock(), true);
 
     // Converts rawProductionDependencies into a simple Map of production dependencies
     const productionDependencies: Map<string, boolean> = new Map();

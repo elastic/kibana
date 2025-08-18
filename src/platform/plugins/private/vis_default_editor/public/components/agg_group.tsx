@@ -8,10 +8,10 @@
  */
 
 import React, { useEffect, useReducer, useMemo, useCallback } from 'react';
+import type { DragDropContextProps } from '@elastic/eui';
 import {
   EuiTitle,
   EuiDragDropContext,
-  DragDropContextProps,
   EuiDroppable,
   EuiDraggable,
   EuiSpacer,
@@ -21,11 +21,12 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import type { TimeRange } from '@kbn/es-query';
-import { AggGroupNames, AggGroupLabels, IAggConfig } from '@kbn/data-plugin/public';
+import type { IAggConfig } from '@kbn/data-plugin/public';
+import { AggGroupNames, AggGroupLabels } from '@kbn/data-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
-import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from './agg_common_props';
+import type { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from './agg_common_props';
 import {
   isInvalidAggsTouched,
   isAggRemovable,
@@ -33,6 +34,7 @@ import {
   getEnabledMetricAggsCount,
 } from './agg_group_helper';
 import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './agg_group_state';
+import { visEditorSidebarStyles } from '../_sidebar.styles';
 
 export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
   schemas: Schema[];
@@ -150,6 +152,7 @@ function DefaultEditorAggGroup({
         <EuiDroppable
           droppableId={`agg_group_dnd_${groupName}`}
           className="visEditorSidebar__collapsible--marginBottom"
+          css={visEditorSidebarStyles.collapsibleMarginBottom}
         >
           <>
             {group.map((agg: IAggConfig, index: number) => (

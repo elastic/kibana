@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StreamQueryKql } from '../../queries';
+import type { StreamQueryKql } from '../../queries';
 
 /**
  * SignificantEvents Get Response
@@ -35,4 +35,13 @@ type SignificantEventsResponse = StreamQueryKql & {
 
 type SignificantEventsGetResponse = SignificantEventsResponse[];
 
-export type { SignificantEventsResponse, SignificantEventsGetResponse };
+type SignificantEventsPreviewResponse = Pick<
+  SignificantEventsResponse,
+  'occurrences' | 'change_points' | 'kql'
+>;
+
+export type {
+  SignificantEventsResponse,
+  SignificantEventsGetResponse,
+  SignificantEventsPreviewResponse,
+};

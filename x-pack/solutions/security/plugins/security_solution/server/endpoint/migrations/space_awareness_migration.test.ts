@@ -14,8 +14,7 @@ import {
   migrateEndpointDataToSupportSpaces,
 } from './space_awareness_migration';
 import { ExceptionsListItemGenerator } from '../../../common/endpoint/data_generators/exceptions_list_item_generator';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { REFERENCE_DATA_SAVED_OBJECT_TYPE } from '../lib/reference_data';
+import { type ReferenceDataClientInterface } from '../lib/reference_data';
 import { GLOBAL_ARTIFACT_TAG } from '../../../common/endpoint/service/artifacts';
 import {
   buildPerPolicyTag,
@@ -33,6 +32,8 @@ import type { LogsEndpointAction, PolicyData } from '../../../common/endpoint/ty
 import type { Agent } from '@kbn/fleet-plugin/common';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ALLOWED_ACTION_REQUEST_TAGS } from '../services/actions/constants';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 describe('Space awareness migration', () => {
   let endpointServiceMock: ReturnType<typeof createMockEndpointAppContextService>;
@@ -68,24 +69,15 @@ describe('Space awareness migration', () => {
       },
     };
 
-    const soClientMock =
-      endpointServiceMock.savedObjects.createInternalScopedSoClient() as jest.Mocked<SavedObjectsClientContract>;
+    const refDataMock =
+      endpointServiceMock.getReferenceDataClient() as DeeplyMockedKeys<ReferenceDataClientInterface>;
 
-    // @ts-expect-error
-    soClientMock.get.mockImplementation(async (type, id) => {
-      if (type === REFERENCE_DATA_SAVED_OBJECT_TYPE) {
-        return { attributes: migrationsState[id as keyof typeof migrationsState] };
-      }
-
-      return { attributes: {} };
+    refDataMock.get.mockImplementation(async (id) => {
+      return migrationsState[id as keyof typeof migrationsState];
     });
-    // @ts-expect-error
-    soClientMock.update.mockImplementation(async (type, _id, update) => {
-      if (type === REFERENCE_DATA_SAVED_OBJECT_TYPE) {
-        return { attributes: update };
-      }
 
-      return { attributes: {} };
+    refDataMock.update.mockImplementation(async (id, data) => {
+      return data;
     });
   });
 
@@ -155,13 +147,15 @@ describe('Space awareness migration', () => {
           executeFunctionOnStream: expect.any(Function),
           listId: [
             'endpoint_trusted_apps',
+            'endpoint_trusted_devices',
             'endpoint_event_filters',
             'endpoint_host_isolation_exceptions',
             'endpoint_blocklists',
             'endpoint_list',
           ],
-          namespaceType: ['agnostic', 'agnostic', 'agnostic', 'agnostic', 'agnostic'],
+          namespaceType: ['agnostic', 'agnostic', 'agnostic', 'agnostic', 'agnostic', 'agnostic'],
           filter: [
+            `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
             `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
             `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
             `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
@@ -210,13 +204,9 @@ describe('Space awareness migration', () => {
         migrateEndpointDataToSupportSpaces(endpointServiceMock)
       ).resolves.toBeUndefined();
 
-      expect(
-        endpointServiceMock.savedObjects.createInternalScopedSoClient().update
-      ).toHaveBeenCalledWith(
-        REFERENCE_DATA_SAVED_OBJECT_TYPE,
+      expect(endpointServiceMock.getReferenceDataClient().update).toHaveBeenCalledWith(
         ARTIFACTS_MIGRATION_REF_DATA_ID,
-        expect.objectContaining({ metadata: expect.objectContaining({ status: 'complete' }) }),
-        expect.anything()
+        expect.objectContaining({ metadata: expect.objectContaining({ status: 'complete' }) })
       );
     });
   });
@@ -360,6 +350,7 @@ describe('Space awareness migration', () => {
                 ],
               },
               originSpaceId: 'default',
+              tags: [ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted],
             },
           },
         ],
@@ -390,6 +381,7 @@ describe('Space awareness migration', () => {
                 ],
               },
               originSpaceId: 'default',
+              tags: [ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted],
             },
           },
         ],
@@ -400,13 +392,9 @@ describe('Space awareness migration', () => {
       await expect(
         migrateEndpointDataToSupportSpaces(endpointServiceMock)
       ).resolves.toBeUndefined();
-      expect(
-        endpointServiceMock.savedObjects.createInternalScopedSoClient().update
-      ).toHaveBeenCalledWith(
-        REFERENCE_DATA_SAVED_OBJECT_TYPE,
+      expect(endpointServiceMock.getReferenceDataClient().update).toHaveBeenCalledWith(
         RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID,
-        expect.objectContaining({ metadata: expect.objectContaining({ status: 'complete' }) }),
-        expect.anything()
+        expect.objectContaining({ metadata: expect.objectContaining({ status: 'complete' }) })
       );
     });
   });

@@ -112,6 +112,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
           }
         >
           <EuiRadioGroup
+            name="entitySortBy"
             options={sortOptions}
             idSelected={forceSortByName ? 'name' : config?.sort?.by}
             onChange={(id) => {
@@ -132,6 +133,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
           }
         >
           <EuiRadioGroup
+            name="entitySortOrder"
             options={orderOptions}
             idSelected={config?.sort?.order}
             onChange={(id) => {
@@ -205,7 +207,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
                   />
                 }
               >
-                <EuiIcon tabIndex={0} type="iInCircle" color={'subdued'} />
+                <EuiIcon tabIndex={0} type="info" color={'subdued'} />
               </EuiToolTip>
             ) : null}
 
@@ -219,7 +221,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
                   />
                 }
               >
-                <EuiIcon tabIndex={0} type="iInCircle" color={'subdued'} />
+                <EuiIcon tabIndex={0} type="info" color={'subdued'} />
               </EuiToolTip>
             ) : null}
           </EuiFlexItem>

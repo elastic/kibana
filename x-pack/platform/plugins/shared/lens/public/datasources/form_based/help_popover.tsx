@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type { EuiLinkButtonProps, EuiPopoverProps, EuiWrappingPopoverProps } from '@elastic/eui';
 import {
   EuiIcon,
   EuiLink,
-  EuiLinkButtonProps,
   EuiPopover,
-  EuiPopoverProps,
   EuiWrappingPopover,
-  EuiWrappingPopoverProps,
   EuiPopoverTitle,
   EuiText,
   type UseEuiTheme,
@@ -21,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { css } from '@emotion/react';
-import { StartServices } from '../../types';
+import type { StartServices } from '../../types';
 
 export const HelpPopoverButton = ({
   children,
@@ -34,7 +33,7 @@ export const HelpPopoverButton = ({
   return (
     <EuiText size="xs">
       <EuiLink onClick={onClick}>
-        <EuiIcon size="s" type="help" css={helpPopoverStyles.button(euiThemeContext)} />
+        <EuiIcon size="s" type="question" css={helpPopoverStyles.button(euiThemeContext)} />
         {children}
       </EuiLink>
     </EuiText>

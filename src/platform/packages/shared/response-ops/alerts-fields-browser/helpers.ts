@@ -174,11 +174,11 @@ export const getIconFromType = (type: string | null | undefined) => {
     case 'geo_point':
       return 'globe';
     case 'object':
-      return 'questionInCircle';
+      return 'question';
     case 'float':
       return 'number';
     default:
-      return 'questionInCircle';
+      return 'question';
   }
 };
 

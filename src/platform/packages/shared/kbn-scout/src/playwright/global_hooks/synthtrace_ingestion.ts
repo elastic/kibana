@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FullConfig } from 'playwright/test';
-import Url from 'url';
+import type { FullConfig } from 'playwright/test';
 import { Readable } from 'node:stream';
 import type {
   ApmFields,
@@ -18,19 +17,11 @@ import type {
   Serializable,
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
-import {
-  getLogger,
-  createScoutConfig,
-  measurePerformanceAsync,
-  getEsClient,
-  ScoutLogger,
-  EsClient,
-} from '../../common';
-import { ScoutTestOptions } from '../types';
-import {
-  getApmSynthtraceEsClient,
-  getInfraSynthtraceEsClient,
-} from '../../common/services/synthtrace';
+import type { SynthtraceClientTypes } from '@kbn/apm-synthtrace';
+import { createScoutConfig, measurePerformanceAsync, getEsClient } from '../../common';
+import { ScoutLogger } from '../../common/services/logger';
+import type { ScoutTestOptions } from '../types';
+import { getSynthtraceClient } from '../../common/services/synthtrace';
 
 export type SynthtraceEvents<T extends Fields> = SynthtraceGenerator<T> | Array<Serializable<T>>;
 
@@ -39,33 +30,16 @@ interface SynthtraceIngestionData {
   infra: Array<SynthtraceEvents<InfraDocument>>;
 }
 
-const getSynthtraceClient = (
-  key: keyof SynthtraceIngestionData,
-  esClient: EsClient,
-  kbnUrl: string,
-  auth: { username: string; password: string },
-  log: ScoutLogger
-) => {
-  switch (key) {
-    case 'apm':
-      const kibanaUrl = new URL(kbnUrl);
-      const kibanaUrlWithAuth = Url.format({
-        protocol: kibanaUrl.protocol,
-        hostname: kibanaUrl.hostname,
-        port: kibanaUrl.port,
-        auth: `${auth.username}:${auth.password}`,
-      });
-      return getApmSynthtraceEsClient(esClient, kibanaUrlWithAuth, log);
-    case 'infra':
-      return getInfraSynthtraceEsClient(esClient, kbnUrl, auth, log);
-  }
+const INGESTION_CLIENT_MAP: Record<string, SynthtraceClientTypes> = {
+  apm: 'apmEsClient',
+  infra: 'infraEsClient',
 };
 
 /**
  * @deprecated Use `globalSetupHook` and synthtrace fixtures instead
  */
 export async function ingestSynthtraceDataHook(config: FullConfig, data: SynthtraceIngestionData) {
-  const log = getLogger();
+  const log = new ScoutLogger('scout: global hook');
 
   const { apm, infra } = data;
   const hasApmData = apm.length > 0;
@@ -90,14 +64,20 @@ export async function ingestSynthtraceDataHook(config: FullConfig, data: Synthtr
     for (const key of Object.keys(data)) {
       const typedKey = key as keyof SynthtraceIngestionData;
       if (data[typedKey].length > 0) {
-        const client = await getSynthtraceClient(typedKey, esClient, kbnUrl, scoutConfig.auth, log);
+        const clientType = INGESTION_CLIENT_MAP[typedKey];
+        const clients = await getSynthtraceClient(clientType, {
+          esClient,
+          kbnUrl,
+          log,
+          config: scoutConfig,
+        });
 
         log.debug(`[setup] ingesting ${key} synthtrace data`);
 
         try {
           await Promise.all(
             data[typedKey].map((event) => {
-              return client.index(Readable.from(Array.from(event).flatMap((e) => e.serialize())));
+              return clients[clientType].index(Readable.from(Array.from(event)));
             })
           );
         } catch (e) {

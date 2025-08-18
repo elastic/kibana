@@ -5,22 +5,34 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiBetaBadge, EuiLink, EuiPageHeader, EuiCode } from '@elastic/eui';
+import { EuiBetaBadge, EuiButton, EuiCode, EuiLink, EuiPageHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { DEFAULT_DATASET_TYPE, KNOWN_TYPES } from '../../../common/constants';
-import { datasetQualityAppTitle } from '../../../common/translations';
+import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { default as React, useMemo, useState } from 'react';
+import { createAlertText, datasetQualityAppTitle } from '../../../common/translations';
+import { AlertFlyout } from '../../alerts/alert_flyout';
+import { getAlertingCapabilities } from '../../alerts/get_alerting_capabilities';
+import { useKibanaContextForPlugin } from '../../utils';
+import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import { useDatasetQualityFilters } from '../../hooks/use_dataset_quality_filters';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function Header() {
-  const { isDatasetQualityAllSignalsAvailable } = useDatasetQualityFilters();
+  const {
+    services: { application, alerting },
+  } = useKibanaContextForPlugin();
+  const { capabilities } = application;
+
+  const [ruleType, setRuleType] = useState<typeof DEGRADED_DOCS_RULE_TYPE_ID | null>(null);
+
+  const { isAlertingAvailable } = getAlertingCapabilities(alerting, capabilities);
+  const { isDatasetQualityAllSignalsAvailable, authorizedDatasetTypes } =
+    useDatasetQualityFilters();
   const validTypes = useMemo(
-    () => (isDatasetQualityAllSignalsAvailable ? KNOWN_TYPES : [DEFAULT_DATASET_TYPE]),
-    [isDatasetQualityAllSignalsAvailable]
+    () => (isDatasetQualityAllSignalsAvailable ? authorizedDatasetTypes : [DEFAULT_DATASET_TYPE]),
+    [isDatasetQualityAllSignalsAvailable, authorizedDatasetTypes]
   );
 
   return (
@@ -65,6 +77,26 @@ export default function Header() {
             ),
           }}
         />
+      }
+      rightSideItems={
+        isAlertingAvailable && validTypes.length
+          ? [
+              <>
+                <EuiButton
+                  data-test-subj="datasetQualityDetailsHeaderButton"
+                  onClick={() => {
+                    setRuleType(DEGRADED_DOCS_RULE_TYPE_ID);
+                  }}
+                  iconType="bell"
+                >
+                  {createAlertText}
+                </EuiButton>
+                {ruleType === DEGRADED_DOCS_RULE_TYPE_ID && (
+                  <AlertFlyout closeFlyout={() => setRuleType(null)} />
+                )}
+              </>,
+            ]
+          : undefined
       }
     />
   );

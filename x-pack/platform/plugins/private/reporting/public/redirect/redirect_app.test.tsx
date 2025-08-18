@@ -14,6 +14,7 @@ import { scopedHistoryMock } from '@kbn/core/public/mocks';
 
 const mockApiClient = {
   getInfo: jest.fn(),
+  getScheduledReportInfo: jest.fn(),
 };
 const mockScreenshotMode = {
   getScreenshotContext: jest.fn(),
@@ -56,10 +57,64 @@ describe('RedirectApp', () => {
     });
   });
 
+  it('navigates using share.navigate when apiClient.getScheduledReportInfo returns locatorParams', async () => {
+    setLocationSearch('?page=2&perPage=50&scheduledReportId=happy');
+    const locatorParams = { id: 'LENS_APP_LOCATOR', params: { foo: 'bar' } };
+    mockApiClient.getScheduledReportInfo.mockResolvedValue({
+      payload: { locatorParams: [locatorParams] },
+    });
+
+    render(
+      <EuiProvider>
+        <RedirectApp
+          apiClient={mockApiClient as any}
+          screenshotMode={mockScreenshotMode as any}
+          share={mockShare}
+          history={historyMock}
+        />
+      </EuiProvider>
+    );
+
+    await waitFor(() => {
+      expect(mockApiClient.getScheduledReportInfo).toHaveBeenCalledWith('happy', 2, 50);
+      expect(mockShare.navigate).toHaveBeenCalledWith(locatorParams);
+    });
+  });
+
   it('displays error when apiClient.getInfo throws', async () => {
     setLocationSearch('?jobId=fail');
     const error = new Error('API failure');
     mockApiClient.getInfo.mockRejectedValue(error);
+
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    render(
+      <EuiProvider>
+        <RedirectApp
+          apiClient={mockApiClient as any}
+          screenshotMode={mockScreenshotMode as any}
+          share={mockShare}
+          history={historyMock}
+        />
+      </EuiProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Redirect error')).toBeInTheDocument();
+      expect(screen.getByText(error.message)).toBeInTheDocument();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Redirect page error:'),
+        error.message
+      );
+    });
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('displays error when apiClient.getScheduledReportInfo throws', async () => {
+    setLocationSearch('?scheduledReportId=fail&page=1&perPage=50');
+    const error = new Error('API failure');
+    mockApiClient.getScheduledReportInfo.mockRejectedValue(error);
 
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 

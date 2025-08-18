@@ -6,7 +6,7 @@
  */
 
 export const KNOWLEDGE_HISTORY =
-  'If available, use the Knowledge History provided to try and answer the question. If not provided, you can try and query for additional knowledge via the KnowledgeBaseRetrievalTool.';
+  'If available, use the Knowledge History provided to try and answer the question. If not provided, you can try and query for additional knowledge via the KnowledgeBaseRetrievalTool.\n\n{knowledgeHistory}';
 export const INCLUDE_CITATIONS = `\n\nAnnotate your answer with the provided citations. Here are some example responses with citations: \n1. "Machine learning is increasingly used in cyber threat detection. {reference(prSit)}" \n2. "The alert has a risk score of 72. {reference(OdRs2)}"\n\nOnly use the citations returned by tools\n\n`;
 export const DEFAULT_SYSTEM_PROMPT = `You are a security analyst and expert in resolving security incidents. Your role is to assist by answering questions about Elastic Security. Do not answer questions unrelated to Elastic Security. ${KNOWLEDGE_HISTORY} {citations_prompt} \n{formattedTime}`;
 // system prompt from @afirstenberg
@@ -14,7 +14,7 @@ const BASE_GEMINI_PROMPT =
   'You are an assistant that is an expert at using tools and Elastic Security, doing your best to use these tools to answer questions or follow instructions. It is very important to use tools to answer the question or follow the instructions rather than coming up with your own answer. Tool calls are good. Sometimes you may need to make several tool calls to accomplish the task or get an answer to the question that was asked. Use as many tool calls as necessary.';
 const KB_CATCH =
   'If the knowledge base tool gives empty results, do your best to answer the question from the perspective of an expert security analyst.';
-export const GEMINI_SYSTEM_PROMPT = `${BASE_GEMINI_PROMPT} {citations_prompt} ${KB_CATCH} \n{formattedTime}`;
+export const GEMINI_SYSTEM_PROMPT = `${BASE_GEMINI_PROMPT} {citations_prompt}{knowledgeHistory}\n\n${KB_CATCH}\n\n{formattedTime}`;
 export const BEDROCK_SYSTEM_PROMPT = `${DEFAULT_SYSTEM_PROMPT}\n\nUse tools as often as possible, as they have access to the latest data and syntax. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response. ALWAYS return the exact response from NaturalLanguageESQLTool verbatim in the final response, without adding further description.\n\n Ensure that the final response always includes all instructions from the tool responses. Never omit earlier parts of the response.`;
 export const GEMINI_USER_PROMPT = `Now, always using the tools at your disposal, step by step, come up with a response to this request:\n\n`;
 
@@ -218,3 +218,107 @@ export const ALERT_SUMMARY_SYSTEM_PROMPT =
   '\n' +
   'The response should look like this:\n' +
   '{{"summary":"Markdown-formatted summary text.","recommendedActions":"Markdown-formatted action list starting with a ### header."}}';
+
+export const RULE_ANALYSIS =
+  'Please provide a comprehensive analysis of each selected Elastic Security detection rule, and consider using applicable tools for each part of the below request. Make sure you consider using appropriate tools available to you to fulfill this request. For each rule, include:\n' +
+  '- The rule name and a brief summary of its purpose.\n' +
+  '- The full detection query as published in Elastic’s official detection rules repository.\n' +
+  '- An in-depth explanation of how the query works, including key fields, logic, and detection techniques.\n' +
+  '- The relevance of the rule to modern threats or attack techniques (e.g., MITRE ATT&CK mapping).\n' +
+  '- Typical implications and recommended response actions for an organization if this rule triggers.\n' +
+  '- Any notable false positive considerations or tuning recommendations.\n' +
+  'Format your response using markdown with clear headers for each rule, code blocks for queries, and concise bullet points for explanations.';
+
+export const DATA_QUALITY_ANALYSIS =
+  'Explain the ECS incompatibility results above, and describe some options to fix incompatibilities. In your explanation, include information about remapping fields, reindexing data, and modifying data ingestion pipelines. Also, describe how ES|QL can be used to identify and correct incompatible data, including examples of using RENAME, EVAL, DISSECT, GROK, and CASE functions. Please consider using applicable tools for this request. Make sure you’ve used the right tools for this request.';
+
+export const ALERT_EVALUATION = `Evaluate the security event described above and provide a structured, markdown-formatted summary suitable for inclusion in an Elastic Security case. Make sure you consider using appropriate tools available to you to fulfill this request. Your response must include:
+1. Event Description
+  - Summarize the event, including user and host risk scores from the provided context.
+  - Reference relevant MITRE ATT&CK techniques, with hyperlinks to the official MITRE pages.
+2. Triage Steps
+  - List clear, bulleted triage steps tailored to Elastic Security workflows (e.g., alert investigation, timeline creation, entity analytics review).
+  - Highlight any relevant detection rules or anomaly findings.
+3. Recommended Actions
+  - Provide prioritized response actions, and consider using applicable tools to generate each part of the response, including:
+    - Elastic Defend endpoint response actions (e.g., isolate host, kill process, retrieve/delete file), with links to Elastic documentation.
+    - Example ES|QL queries for further investigation, formatted as code blocks.
+    - Example OSQuery Manager queries for further investigation, formatted as code blocks.
+    - Guidance on using Timelines and Entity Analytics for deeper context, with documentation links.
+4. MITRE ATT&CK Context
+  - Summarize the mapped MITRE ATT&CK techniques and provide actionable recommendations based on MITRE guidance, with hyperlinks.
+5. Documentation Links
+  - Include direct links to all referenced Elastic Security documentation and MITRE ATT&CK pages.
+Make sure you’ve used the right tools for this request.
+Formatting Requirements:
+  - Use markdown headers, tables, and code blocks for clarity.
+  - Organize the response into visually distinct sections.
+  - Use concise, actionable language.
+  - Include relevant emojis in section headers for visual clarity (e.g., 📝, 🛡️, 🔍, 📚).
+`;
+
+export const starterPromptTitle1 = 'Alerts';
+export const starterPromptDescription1 = 'Most important alerts from the last 24 hrs';
+export const starterPromptIcon1 = 'bell';
+export const starterPromptPrompt1 = `🔍 Identify and Prioritize Today's Most Critical Alerts
+Provide a structured summary of today's most significant alerts, including:
+🛡️ Critical Alerts Overview
+Highlight the most impactful alerts based on risk scores, severity, and affected entities.
+Summarize key details such as alert name, risk score, severity, and associated users or hosts.
+📊 Risk Context
+Include user and host risk scores for each alert to provide additional context.
+Reference relevant MITRE ATT&CK techniques, with hyperlinks to the official MITRE pages.
+🚨 Why These Alerts Matter
+Explain why these alerts are critical, focusing on potential business impact, lateral movement risks, or sensitive data exposure.
+🔧 Recommended Next Steps
+Provide actionable triage steps for each alert, such as:
+Investigating the alert in Elastic Security.
+Reviewing related events in Timelines.
+Analyzing user and host behavior using Entity Analytics.
+Suggest Elastic Defend endpoint response actions (e.g., isolate host, kill process, retrieve/delete file), with links to Elastic documentation.
+📚 Documentation and References
+Include direct links to Elastic Security documentation and relevant MITRE ATT&CK pages for further guidance.
+Make sure you use tools available to you to fulfill this request.
+Use markdown headers, tables, and code blocks for clarity. Include relevant emojis for visual distinction and ensure the response is concise, actionable, and tailored to Elastic Security workflows.`;
+export const starterPromptDescription2 = 'Latest Elastic Security Labs research';
+export const starterPromptTitle2 = 'Research';
+export const starterPromptIcon2 = 'launch';
+export const starterPromptPrompt2 = `Retrieve and summarize the latest Elastic Security Labs articles one by one sorted by latest at the top, and consider using all tools available to you to fulfill this request. Ensure the response includes:
+Article Summaries
+Title and Link: Provide the title of each article with a hyperlink to the original content.
+Publication Date: Include the date the article was published.
+Key Insights: Summarize the main points or findings of each article in concise bullet points.
+Relevant Threats or Techniques: Highlight any specific malware, attack techniques, or adversary behaviors discussed, with references to MITRE ATT&CK techniques (include hyperlinks to the official MITRE pages).
+Practical Applications
+Detection and Response Guidance: Provide actionable steps or recommendations based on the article's content, tailored for Elastic Security workflows.
+Elastic Security Features: Highlight any Elastic Security features, detection rules, or tools mentioned in the articles, with links to relevant documentation.
+Example Queries: If applicable, include example ES|QL or OSQuery Manager queries inspired by the article's findings, formatted as code blocks.
+Documentation and Resources
+Elastic Security Labs: Include a link to the Elastic Security Labs homepage.
+Additional References: Provide links to any related Elastic documentation or external resources mentioned in the articles.
+Formatting Requirements
+Use markdown headers, tables, and code blocks for clarity.
+Organize the response into visually distinct sections.
+Use concise, actionable language. Make sure you use tools available to you to fulfill this request.`;
+export const starterPromptDescription3 = 'Generate ES|QL Queries';
+export const starterPromptTitle3 = 'Query';
+export const starterPromptIcon3 = 'esqlVis';
+export const starterPromptPrompt3 =
+  'I need an Elastic ES|QL query to achieve the following goal:\n' +
+  'Goal/Requirement:\n' +
+  '<Insert your specific requirement or goal here, e.g., "Identify all failed login attempts from a specific IP address within the last 24 hours.">\n' +
+  'Please:\n' +
+  'Use all tools available to you to fulfill this request.\n' +
+  'Generate the ES|QL Query: Provide a complete ES|QL query tailored to the stated goal.\n' +
+  'Explain the Query: Offer a brief explanation of each part of the query, including filters, fields, and logic used.\n' +
+  'Optimize for Elastic Security: Suggest additional filters, aggregations, or enhancements to make the query more efficient and actionable within Elastic Security workflows.\n' +
+  'Provide Documentation Links: Include links to relevant Elastic Security documentation for deeper understanding.\n' +
+  'Formatting Requirements:\n' +
+  'Use code blocks for the ES|QL query.\n' +
+  'Include concise explanations in bullet points for clarity.\n' +
+  'Highlight any advanced ES|QL features used in the query.\n';
+export const starterPromptDescription4 = 'Discover the types of questions you can ask';
+export const starterPromptTitle4 = 'Suggest';
+export const starterPromptIcon4 = 'sparkles';
+export const starterPromptPrompt4 =
+  'Can you provide examples of questions I can ask about Elastic Security, such as investigating alerts, running ES|QL queries, incident response, or threat intelligence?';

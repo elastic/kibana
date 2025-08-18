@@ -7,6 +7,7 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 import type { ProductName } from '@kbn/product-doc-common';
+import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { productDocInstallStatusSavedObjectTypeName } from '../../common/consts';
 import type { InstallationStatus } from '../../common/install_status';
 
@@ -22,7 +23,18 @@ export interface ProductDocInstallStatusAttributes {
   last_installation_date?: number;
   last_installation_failure_reason?: string;
   index_name?: string;
+  inference_id?: string;
 }
+const modelVersion1: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        inference_id: { type: 'keyword' },
+      },
+    },
+  ],
+};
 
 export const productDocInstallStatusSavedObjectType: SavedObjectsType<ProductDocInstallStatusAttributes> =
   {
@@ -37,10 +49,11 @@ export const productDocInstallStatusSavedObjectType: SavedObjectsType<ProductDoc
         installation_status: { type: 'keyword' },
         last_installation_date: { type: 'date' },
         index_name: { type: 'keyword' },
+        inference_id: { type: 'keyword' },
       },
     },
     management: {
       importableAndExportable: false,
     },
-    modelVersions: {},
+    modelVersions: { '1': modelVersion1 },
   };

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiContextMenu,
-  EuiFlyoutProps,
   EuiIcon,
   EuiPanel,
   EuiPopover,
@@ -201,7 +201,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
                   <EuiToolTip position="top" content={flyoutCustomProps?.pushVsOverlay?.tooltip}>
                     <EuiIcon
                       data-test-subj={SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID}
-                      type="iInCircle"
+                      type="info"
                     />
                   </EuiToolTip>
                 )}
@@ -224,7 +224,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
                   <EuiToolTip position="top" content={flyoutCustomProps?.resize?.tooltip}>
                     <EuiIcon
                       data-test-subj={SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID}
-                      type="iInCircle"
+                      type="info"
                     />
                   </EuiToolTip>
                 )}

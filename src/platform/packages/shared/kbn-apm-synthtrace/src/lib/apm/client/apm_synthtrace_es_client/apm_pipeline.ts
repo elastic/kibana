@@ -8,10 +8,11 @@
  */
 
 import semver from 'semver';
-import { PassThrough, pipeline, Readable } from 'stream';
+import type { Readable } from 'stream';
+import { PassThrough, pipeline } from 'stream';
 import { getDedotTransform } from '../../../shared/get_dedot_transform';
 import { getSerializeTransform } from '../../../shared/get_serialize_transform';
-import { Logger } from '../../../utils/create_logger';
+import type { Logger } from '../../../utils/create_logger';
 import { fork } from '../../../utils/stream_utils';
 import { deleteSummaryFieldTransform } from '../../../utils/transform_helpers';
 import { createBreakdownMetricsAggregator } from '../../aggregators/create_breakdown_metrics_aggregator';
@@ -23,10 +24,16 @@ import { getApmServerMetadataTransform } from './get_apm_server_metadata_transfo
 import { getIntakeDefaultsTransform } from './get_intake_defaults_transform';
 import { getRoutingTransform } from './get_routing_transform';
 
-export function apmPipeline(logger: Logger, version: string, includeSerialization: boolean = true) {
+export function apmPipeline(
+  logger: Logger,
+  includeSerialization: boolean = true,
+  version: string = 'latest'
+) {
   return (base: Readable) => {
     const continousRollupSupported =
-      !version || semver.gte(semver.coerce(version)?.version ?? version, '8.7.0');
+      !version ||
+      version === 'latest' ||
+      semver.gte(semver.coerce(version)?.version ?? version, '8.7.0');
 
     const aggregators = [
       createTransactionMetricsAggregator('1m'),

@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { SlmPolicy } from '../../../../../../../common/types';
+import type { SlmPolicy } from '../../../../../../../common/types';
 import { useServices } from '../../../../../app_context';
 import { FormattedDateTime, CollapsibleIndicesList } from '../../../../../components';
 import { linkToSnapshots, linkToRepository } from '../../../../../services/navigation';
@@ -64,7 +64,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
           <EuiCallOut
             size="s"
             color="warning"
-            iconType="iInCircle"
+            iconType="info"
             title={
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.managedPolicyWarningTitle"

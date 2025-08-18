@@ -28,6 +28,7 @@ const {
   contextRecordMock,
   contextRecordMock2,
   profilesManagerMock,
+  scopedEbtManagerMock,
 } = createContextAwarenessMocks({ shouldRegisterProviders: false });
 
 rootProfileServiceMock.registerProvider({
@@ -46,7 +47,9 @@ rootProfileServiceMock.registerProvider(rootProfileProviderMock);
 dataSourceProfileServiceMock.registerProvider(dataSourceProfileProviderMock);
 documentProfileServiceMock.registerProvider(documentProfileProviderMock);
 
-const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager();
+const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager({
+  scopedEbtManager: scopedEbtManagerMock,
+});
 const record = scopedProfilesManager.resolveDocumentProfile({ record: contextRecordMock });
 const record2 = scopedProfilesManager.resolveDocumentProfile({ record: contextRecordMock2 });
 const services = createDiscoverServicesMock();

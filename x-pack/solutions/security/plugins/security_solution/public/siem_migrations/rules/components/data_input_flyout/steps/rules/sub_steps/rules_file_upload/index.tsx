@@ -18,13 +18,17 @@ import * as i18n from './translations';
 
 export interface RulesFileUploadStepProps {
   status: EuiStepStatus;
-  migrationStats?: RuleMigrationTaskStats;
+  migrationStats: RuleMigrationTaskStats | undefined;
+  migrationName: string | undefined;
   onMigrationCreated: OnMigrationCreated;
+  onRulesFileChanged: (files: FileList | null) => void;
 }
 export const useRulesFileUploadStep = ({
   status,
   migrationStats,
+  migrationName,
   onMigrationCreated,
+  onRulesFileChanged,
 }: RulesFileUploadStepProps): EuiStepProps => {
   const [isCreated, setIsCreated] = useState<boolean>(!!migrationStats);
   const onSuccess = useCallback<OnSuccess>(
@@ -52,9 +56,11 @@ export const useRulesFileUploadStep = ({
     children: (
       <RulesFileUpload
         createMigration={createMigration}
+        migrationName={migrationName}
         isLoading={isLoading}
         isCreated={isCreated}
         apiError={error?.message}
+        onRulesFileChanged={onRulesFileChanged}
       />
     ),
   };

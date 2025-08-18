@@ -12,8 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 
 import { RequestStatus } from '../../../../common/adapters';
-import { Request } from '../../../../common/adapters/request/types';
-import { InspectorViewProps } from '../../../types';
+import type { Request } from '../../../../common/adapters/request/types';
+import type { InspectorViewProps } from '../../../types';
 
 import { RequestSelector } from './request_selector';
 import { RequestDetails } from './request_details';
@@ -193,7 +193,3 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
     );
   }
 }
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export { RequestsViewComponent as default };

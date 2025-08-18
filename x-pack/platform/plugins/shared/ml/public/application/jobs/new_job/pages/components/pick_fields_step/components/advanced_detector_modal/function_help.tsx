@@ -31,7 +31,7 @@ export const FunctionHelpPopover = memo(() => {
   const helpButton = (
     <EuiButtonIcon
       onClick={onHelpClick}
-      iconType="help"
+      iconType="question"
       aria-label={i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelpAriaLabel',
         {

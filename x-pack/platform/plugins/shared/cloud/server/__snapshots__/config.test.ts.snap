@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Cloud plugin config Serverless config Fails on invalid project_type 1`] = `
+"[serverless.project_type]: types that failed validation:
+- [serverless.project_type.0]: expected value to equal [observability]
+- [serverless.project_type.1]: expected value to equal [security]
+- [serverless.project_type.2]: expected value to equal [search]
+- [serverless.project_type.3]: expected value to equal [chat]"
+`;
+
+exports[`Cloud plugin config Serverless config For Kibana Solution "chat" Throws when any other product tier is provided 1`] = `"[serverless.product_tier]: a value wasn't expected to be present"`;
+
+exports[`Cloud plugin config Serverless config For Kibana Solution "observability" Throws when any other product tier is provided 1`] = `
+"[serverless.product_tier]: types that failed validation:
+- [serverless.product_tier.0]: expected value to equal [complete]
+- [serverless.product_tier.1]: expected value to equal [logs_essentials]"
+`;
+
+exports[`Cloud plugin config Serverless config For Kibana Solution "search" Throws when any other product tier is provided 1`] = `"[serverless.product_tier]: a value wasn't expected to be present"`;
+
+exports[`Cloud plugin config Serverless config For Kibana Solution "security" Throws when any other product tier is provided 1`] = `
+"[serverless.product_tier]: types that failed validation:
+- [serverless.product_tier.0]: expected value to equal [complete]
+- [serverless.product_tier.1]: expected value to equal [essentials]
+- [serverless.product_tier.2]: expected value to equal [search_ai_lake]"
+`;

@@ -22,24 +22,22 @@ import {
   SiemMigrationStatus,
   RuleTranslationResult,
 } from '../../../../../common/siem_migrations/constants';
-import type {
-  RuleMigrationAllIntegrationsStats,
-  RuleMigrationRule,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   type RuleMigrationTaskStats,
   type RuleMigrationTranslationStats,
+  type RuleMigrationAllIntegrationsStats,
+  type RuleMigrationRule,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { conditions as searchConditions } from './search';
-import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
-import { MAX_ES_SEARCH_SIZE } from '../constants';
+import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
+import { MAX_ES_SEARCH_SIZE, SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../constants';
 
 export type AddRuleMigrationRulesInput = Omit<
   RuleMigrationRule,
   '@timestamp' | 'id' | 'status' | 'created_by'
 >;
-export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
+export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'name' | 'status'>;
 export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 
 export interface RuleMigrationGetRulesOptions {
@@ -56,7 +54,7 @@ const BULK_MAX_SIZE = 500 as const;
  * when retrieving search results in batches. */
 const DEFAULT_SEARCH_BATCH_SIZE = 500 as const;
 
-export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient {
+export class RuleMigrationsDataRulesClient extends SiemMigrationsDataBaseClient {
   /** Indexes an array of rule migrations to be processed */
   async create(ruleMigrations: AddRuleMigrationRulesInput[]): Promise<void> {
     const index = await this.getIndexName();
@@ -240,6 +238,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
           result: { terms: { field: 'translation_result' } },
           installable: { filter: { bool: { must: searchConditions.isInstallable() } } },
           prebuilt: { filter: searchConditions.isPrebuilt() },
+          missing_index: { filter: searchConditions.isMissingIndex() },
         },
       },
       failed: { filter: { term: { status: SiemMigrationStatus.FAILED } } },
@@ -265,6 +264,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
           result: this.translationResultAggCount(translationResultsAgg),
           installable: (successAgg.installable as AggregationsFilterAggregate)?.doc_count ?? 0,
           prebuilt: (successAgg.prebuilt as AggregationsFilterAggregate)?.doc_count ?? 0,
+          missing_index: (successAgg.missing_index as AggregationsFilterAggregate)?.doc_count ?? 0,
         },
         failed: (aggs.failed as AggregationsFilterAggregate)?.doc_count ?? 0,
       },
@@ -397,6 +397,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     filters: RuleMigrationFilters = {}
   ): QueryDslQueryContainer {
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
+
     if (filters.status) {
       if (Array.isArray(filters.status)) {
         filter.push({ terms: { status: filters.status } });
@@ -404,12 +405,15 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
         filter.push({ term: { status: filters.status } });
       }
     }
+
     if (filters.ids) {
       filter.push({ terms: { _id: filters.ids } });
     }
+
     if (filters.searchTerm?.length) {
       filter.push(searchConditions.matchTitle(filters.searchTerm));
     }
+
     if (filters.installed === true) {
       filter.push(searchConditions.isInstalled());
     } else if (filters.installed === false) {
@@ -445,6 +449,10 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     } else if (filters.untranslatable === false) {
       filter.push(searchConditions.isNotUntranslatable());
     }
+    if (filters.missingIndex === true) {
+      filter.push(searchConditions.isMissingIndex());
+    }
+
     return { bool: { filter } };
   }
 
@@ -464,5 +472,38 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
         _index: index,
       },
     }));
+  }
+
+  async updateIndexPattern(
+    id: string,
+    indexPattern: string,
+    translatedRuleIds?: string[]
+  ): Promise<number | undefined> {
+    const index = await this.getIndexName();
+    const additionalFilter: RuleMigrationFilters = { missingIndex: true };
+    if (translatedRuleIds) {
+      additionalFilter.ids = translatedRuleIds;
+    }
+    const query = this.getFilterQuery(id, additionalFilter);
+
+    const result = await this.esClient
+      .updateByQuery({
+        index,
+        script: {
+          source: `
+                def originalQuery = ctx._source.elastic_rule.query;
+                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', '${indexPattern}');
+                ctx._source.elastic_rule.query = newQuery;
+              `,
+          lang: 'painless',
+        },
+        query,
+      })
+      .catch((error) => {
+        this.logger.error(`Error updating index pattern for migration ${id}: ${error}`);
+        throw error;
+      });
+
+    return result.updated;
   }
 }

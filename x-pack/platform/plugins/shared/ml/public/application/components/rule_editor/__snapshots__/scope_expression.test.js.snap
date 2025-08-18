@@ -1,455 +1,259 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] = `
-<EuiFlexGroup
-  alignItems="center"
-  gutterSize="m"
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row"
 >
-  <EuiFlexItem
-    grow={false}
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
-    <EuiCheckbox
-      checked={true}
-      id="scope_cb_domain"
-      onChange={[Function]}
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  >
-    <EuiExpression
-      css="unknown styles"
-      description={
-        <Memo(MemoizedFormattedMessage)
-          defaultMessage="when"
-          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
+    <div
+      class="euiCheckbox emotion-euiCheckbox"
+    >
+      <div
+        class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="check"
         />
-      }
-      isActive={false}
-      onClick={[Function]}
-      value="domain"
-    />
-  </EuiFlexItem>
-</EuiFlexGroup>
+        <input
+          checked=""
+          class="euiCheckbox__input emotion-euiCheckbox__input"
+          id="scope_cb_domain"
+          type="checkbox"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <button
+      class="euiExpression emotion-euiExpression-isClickable-success-ScopeExpression"
+    >
+      <span
+        class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+      >
+        when
+      </span>
+       
+      <span
+        class="euiExpression__value emotion-euiExpression__value"
+      >
+        domain
+      </span>
+    </button>
+  </div>
+</div>
 `;
 
 exports[`ScopeExpression renders when enabled set to false 1`] = `
-<EuiFlexGroup
-  alignItems="center"
-  gutterSize="m"
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row"
 >
-  <EuiFlexItem
-    grow={false}
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
-    <EuiCheckbox
-      checked={false}
-      id="scope_cb_domain"
-      onChange={[Function]}
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  >
-    <EuiExpression
-      css="unknown styles"
-      description={
-        <Memo(MemoizedFormattedMessage)
-          defaultMessage="when"
-          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
-        />
-      }
-      isActive={false}
-      onClick={[Function]}
-      value="domain"
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  >
-    <EuiPopover
-      anchorPosition="downLeft"
-      button={
-        <EuiExpression
-          description={
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="is {filterType}"
-              id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
-              values={
-                Object {
-                  "filterType": "in",
-                }
-              }
-            />
-          }
-          isActive={false}
-          onClick={[Function]}
-          value="safe_domains"
-        />
-      }
-      closePopover={[Function]}
-      display="inline-block"
-      hasArrow={true}
-      id="operatorValuePopover"
-      isOpen={false}
-      ownFocus={true}
-      panelPaddingSize="s"
-      repositionToCrossAxis={true}
+    <div
+      class="euiCheckbox emotion-euiCheckbox"
     >
-      <div>
-        <EuiPopoverTitle>
-          <MemoizedFormattedMessage
-            defaultMessage="Is"
-            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
-          />
-        </EuiPopoverTitle>
-        <div
-          className="euiExpression"
-        >
-          <EuiFlexGroup
-            style={
-              Object {
-                "maxWidth": 450,
-              }
-            }
-          >
-            <EuiFlexItem
-              grow={false}
-              style={
-                Object {
-                  "width": 150,
-                }
-              }
-            >
-              <EuiSelect
-                onChange={[Function]}
-                options={
-                  Array [
-                    Object {
-                      "text": "in",
-                      "value": "include",
-                    },
-                    Object {
-                      "text": "not in",
-                      "value": "exclude",
-                    },
-                  ]
-                }
-                value="include"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-              style={
-                Object {
-                  "width": 300,
-                }
-              }
-            >
-              <EuiSelect
-                onChange={[Function]}
-                options={
-                  Array [
-                    Object {
-                      "text": "web_domains",
-                      "value": "web_domains",
-                    },
-                    Object {
-                      "text": "safe_domains",
-                      "value": "safe_domains",
-                    },
-                    Object {
-                      "text": "uk_domains",
-                      "value": "uk_domains",
-                    },
-                  ]
-                }
-                value="safe_domains"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
+      <div
+        class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="empty"
+        />
+        <input
+          class="euiCheckbox__input emotion-euiCheckbox__input"
+          id="scope_cb_domain"
+          type="checkbox"
+        />
       </div>
-    </EuiPopover>
-  </EuiFlexItem>
-</EuiFlexGroup>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <button
+      class="euiExpression emotion-euiExpression-isClickable-success-ScopeExpression"
+    >
+      <span
+        class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+      >
+        when
+      </span>
+       
+      <span
+        class="euiExpression__value emotion-euiExpression__value"
+      >
+        domain
+      </span>
+    </button>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <div
+      class="euiPopover emotion-euiPopover-inline-block"
+      id="operatorValuePopover"
+    >
+      <button
+        class="euiExpression emotion-euiExpression-isClickable-success"
+      >
+        <span
+          class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+        >
+          is in
+        </span>
+         
+        <span
+          class="euiExpression__value emotion-euiExpression__value"
+        >
+          safe_domains
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
 `;
 
 exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
-<EuiFlexGroup
-  alignItems="center"
-  gutterSize="m"
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row"
 >
-  <EuiFlexItem
-    grow={false}
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
-    <EuiCheckbox
-      checked={true}
-      id="scope_cb_domain"
-      onChange={[Function]}
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  >
-    <EuiExpression
-      css="unknown styles"
-      description={
-        <Memo(MemoizedFormattedMessage)
-          defaultMessage="when"
-          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
-        />
-      }
-      isActive={false}
-      onClick={[Function]}
-      value="domain"
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  >
-    <EuiPopover
-      anchorPosition="downLeft"
-      button={
-        <EuiExpression
-          description={
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="is {filterType}"
-              id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
-              values={
-                Object {
-                  "filterType": "in",
-                }
-              }
-            />
-          }
-          isActive={false}
-          onClick={[Function]}
-          value="safe_domains"
-        />
-      }
-      closePopover={[Function]}
-      display="inline-block"
-      hasArrow={true}
-      id="operatorValuePopover"
-      isOpen={false}
-      ownFocus={true}
-      panelPaddingSize="s"
-      repositionToCrossAxis={true}
+    <div
+      class="euiCheckbox emotion-euiCheckbox"
     >
-      <div>
-        <EuiPopoverTitle>
-          <MemoizedFormattedMessage
-            defaultMessage="Is"
-            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
-          />
-        </EuiPopoverTitle>
-        <div
-          className="euiExpression"
-        >
-          <EuiFlexGroup
-            style={
-              Object {
-                "maxWidth": 450,
-              }
-            }
-          >
-            <EuiFlexItem
-              grow={false}
-              style={
-                Object {
-                  "width": 150,
-                }
-              }
-            >
-              <EuiSelect
-                onChange={[Function]}
-                options={
-                  Array [
-                    Object {
-                      "text": "in",
-                      "value": "include",
-                    },
-                    Object {
-                      "text": "not in",
-                      "value": "exclude",
-                    },
-                  ]
-                }
-                value="include"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-              style={
-                Object {
-                  "width": 300,
-                }
-              }
-            >
-              <EuiSelect
-                onChange={[Function]}
-                options={
-                  Array [
-                    Object {
-                      "text": "web_domains",
-                      "value": "web_domains",
-                    },
-                    Object {
-                      "text": "safe_domains",
-                      "value": "safe_domains",
-                    },
-                    Object {
-                      "text": "uk_domains",
-                      "value": "uk_domains",
-                    },
-                  ]
-                }
-                value="safe_domains"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
+      <div
+        class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="check"
+        />
+        <input
+          checked=""
+          class="euiCheckbox__input emotion-euiCheckbox__input"
+          id="scope_cb_domain"
+          type="checkbox"
+        />
       </div>
-    </EuiPopover>
-  </EuiFlexItem>
-</EuiFlexGroup>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <button
+      class="euiExpression emotion-euiExpression-isClickable-success-ScopeExpression"
+    >
+      <span
+        class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+      >
+        when
+      </span>
+       
+      <span
+        class="euiExpression__value emotion-euiExpression__value"
+      >
+        domain
+      </span>
+    </button>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <div
+      class="euiPopover emotion-euiPopover-inline-block"
+      id="operatorValuePopover"
+    >
+      <button
+        class="euiExpression emotion-euiExpression-isClickable-success"
+      >
+        <span
+          class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+        >
+          is in
+        </span>
+         
+        <span
+          class="euiExpression__value emotion-euiExpression__value"
+        >
+          safe_domains
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
 `;
 
 exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
-<EuiFlexGroup
-  alignItems="center"
-  gutterSize="m"
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row"
 >
-  <EuiFlexItem
-    grow={false}
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
-    <EuiCheckbox
-      checked={true}
-      id="scope_cb_domain"
-      onChange={[Function]}
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  >
-    <EuiExpression
-      css="unknown styles"
-      description={
-        <Memo(MemoizedFormattedMessage)
-          defaultMessage="when"
-          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
-        />
-      }
-      isActive={false}
-      onClick={[Function]}
-      value="domain"
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  >
-    <EuiPopover
-      anchorPosition="downLeft"
-      button={
-        <EuiExpression
-          description={
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="is {filterType}"
-              id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
-              values={
-                Object {
-                  "filterType": "",
-                }
-              }
-            />
-          }
-          isActive={false}
-          onClick={[Function]}
-          value=""
-        />
-      }
-      closePopover={[Function]}
-      display="inline-block"
-      hasArrow={true}
-      id="operatorValuePopover"
-      isOpen={false}
-      ownFocus={true}
-      panelPaddingSize="s"
-      repositionToCrossAxis={true}
+    <div
+      class="euiCheckbox emotion-euiCheckbox"
     >
-      <div>
-        <EuiPopoverTitle>
-          <MemoizedFormattedMessage
-            defaultMessage="Is"
-            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
-          />
-        </EuiPopoverTitle>
-        <div
-          className="euiExpression"
-        >
-          <EuiFlexGroup
-            style={
-              Object {
-                "maxWidth": 450,
-              }
-            }
-          >
-            <EuiFlexItem
-              grow={false}
-              style={
-                Object {
-                  "width": 150,
-                }
-              }
-            >
-              <EuiSelect
-                onChange={[Function]}
-                options={
-                  Array [
-                    Object {
-                      "text": "in",
-                      "value": "include",
-                    },
-                    Object {
-                      "text": "not in",
-                      "value": "exclude",
-                    },
-                  ]
-                }
-              />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-              style={
-                Object {
-                  "width": 300,
-                }
-              }
-            >
-              <EuiSelect
-                onChange={[Function]}
-                options={
-                  Array [
-                    Object {
-                      "text": "web_domains",
-                      "value": "web_domains",
-                    },
-                    Object {
-                      "text": "safe_domains",
-                      "value": "safe_domains",
-                    },
-                    Object {
-                      "text": "uk_domains",
-                      "value": "uk_domains",
-                    },
-                  ]
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
+      <div
+        class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="check"
+        />
+        <input
+          checked=""
+          class="euiCheckbox__input emotion-euiCheckbox__input"
+          id="scope_cb_domain"
+          type="checkbox"
+        />
       </div>
-    </EuiPopover>
-  </EuiFlexItem>
-</EuiFlexGroup>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <button
+      class="euiExpression emotion-euiExpression-isClickable-success-ScopeExpression"
+    >
+      <span
+        class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+      >
+        when
+      </span>
+       
+      <span
+        class="euiExpression__value emotion-euiExpression__value"
+      >
+        domain
+      </span>
+    </button>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <div
+      class="euiPopover emotion-euiPopover-inline-block"
+      id="operatorValuePopover"
+    >
+      <button
+        class="euiExpression emotion-euiExpression-isClickable-success"
+      >
+        <span
+          class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+        >
+          is 
+        </span>
+         
+      </button>
+    </div>
+  </div>
+</div>
 `;

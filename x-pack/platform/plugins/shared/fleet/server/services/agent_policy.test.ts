@@ -49,6 +49,7 @@ import { licenseService } from './license';
 import type { UninstallTokenServiceInterface } from './security/uninstall_token_service';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
+import { createAgentPolicyWithPackages } from './agent_policy_create';
 
 jest.mock('./spaces/helpers');
 
@@ -130,6 +131,7 @@ jest.mock('./audit_logging');
 jest.mock('./agent_policies/full_agent_policy');
 jest.mock('./agent_policies/outputs_helpers');
 jest.mock('./agent_policies/deploy_agent_policies_task');
+jest.mock('./agent_policy_create');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
@@ -146,6 +148,9 @@ const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof pa
 
 const mockedGetFullAgentPolicy = getFullAgentPolicy as jest.Mock<
   ReturnType<typeof getFullAgentPolicy>
+>;
+const mockedCreateAgentPolicyWithPackages = createAgentPolicyWithPackages as jest.MockedFunction<
+  typeof createAgentPolicyWithPackages
 >;
 
 function getAgentPolicyCreateMock() {
@@ -405,6 +410,7 @@ describe('Agent policy', () => {
         updated_by: 'system',
         schema_version: '1.1.1',
         is_protected: false,
+        fleet_server_host_id: 'default-fleet-server',
       });
     });
 
@@ -441,6 +447,46 @@ describe('Agent policy', () => {
         updated_by: 'system',
         schema_version: '1.1.1',
         is_protected: false,
+        fleet_server_host_id: 'fleet-default-fleet-server-host',
+      });
+    });
+
+    it('should create an agentless policy with a fallback fleet_server_host_id if not provided', async () => {
+      jest
+        .spyOn(appContextService, 'getConfig')
+        .mockReturnValue({ agentless: { enabled: true } } as any);
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: true } as any);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.find.mockResolvedValueOnce({
+        total: 0,
+        saved_objects: [],
+        per_page: 0,
+        page: 1,
+      });
+
+      const res = await agentPolicyService.create(soClient, esClient, {
+        name: 'test',
+        namespace: 'default',
+        supports_agentless: true,
+      });
+      expect(res).toEqual({
+        id: 'mocked',
+        name: 'test',
+        namespace: 'default',
+        supports_agentless: true,
+        status: 'active',
+        is_managed: false,
+        revision: 1,
+        updated_at: expect.anything(),
+        updated_by: 'system',
+        schema_version: '1.1.1',
+        is_protected: false,
+        fleet_server_host_id: 'default-fleet-server',
       });
     });
 
@@ -491,6 +537,135 @@ describe('Agent policy', () => {
         new AgentPolicyInvalidError(
           'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
         )
+      );
+    });
+  });
+
+  describe('createWithPackagePolicies', () => {
+    let deleteSpy: any;
+    beforeEach(() => {
+      deleteSpy = jest.spyOn(agentPolicyService, 'delete');
+    });
+
+    afterEach(() => {
+      deleteSpy.mockRestore();
+    });
+    it('should create an agent policy with package policies', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockAgentPolicy = {
+        name: 'Test Agent Policy',
+        namespace: 'default',
+        description: 'A test agent policy with package policies',
+        is_managed: false,
+        supports_agentless: true,
+      };
+      const mockPackagePolicy = {
+        name: 'Test Package Policy',
+        policy_ids: [],
+        package: { name: 'test-package', title: 'Test Package', version: '1.0.0' },
+        inputs: [],
+        enabled: true,
+      };
+
+      mockedCreateAgentPolicyWithPackages.mockResolvedValue(mockAgentPolicy as any);
+      mockedPackagePolicyService.create.mockResolvedValue(mockPackagePolicy as any);
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'test-agent-policy',
+            attributes: {
+              name: mockAgentPolicy.name,
+            },
+          },
+        ],
+      } as any);
+      const agentPolicy = await agentPolicyService.createWithPackagePolicies({
+        soClient,
+        esClient,
+        agentPolicy: mockAgentPolicy,
+        packagePolicies: [mockPackagePolicy],
+        options: { withSysMonitoring: true, spaceId: 'default' },
+      });
+
+      expect(agentPolicy.name).toEqual(mockAgentPolicy.name);
+    });
+
+    it('should throw error if a package policy creation fails and delete all policies', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedAppContextService.getInternalUserSOClient.mockReturnValue(soClient);
+      mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
+
+      const mockAgentPolicy = {
+        name: 'Test Agent Policy',
+        namespace: 'default',
+        description: 'A test agent policy with package policies',
+        is_managed: false,
+        supports_agentless: true,
+      };
+      const mockAgentPolicyId = 'test-agent-policy-id';
+      const mockPackagePolicy1 = {
+        name: 'Test Package Policy 1',
+        policy_ids: [],
+        package: { name: 'test-package1', title: 'Test Package1', version: '1.0.0' },
+        inputs: [],
+        enabled: true,
+      };
+      const packagePolicy1Id = 'package-policy-1-id';
+
+      const mockPackagePolicy2 = {
+        name: 'Test Package Policy 2',
+        policy_ids: [],
+        package: { name: 'test-package2', title: 'Test Package2', version: '1.0.0' },
+        inputs: [],
+        enabled: true,
+      };
+
+      const mockError = new Error('Package policy creation failed');
+
+      mockedCreateAgentPolicyWithPackages.mockResolvedValue({
+        id: mockAgentPolicyId,
+        ...mockAgentPolicy,
+      } as any);
+      mockedPackagePolicyService.create.mockImplementation(
+        (_soClient, _esClient, packagePolicy) => {
+          if (packagePolicy.name === 'Test Package Policy 2') {
+            throw mockError;
+          } else {
+            return Promise.resolve({ id: packagePolicy1Id, ...packagePolicy } as any);
+          }
+        }
+      );
+
+      deleteSpy.mockResolvedValueOnce({ id: mockAgentPolicyId, name: mockAgentPolicy.name });
+
+      let error;
+
+      try {
+        await agentPolicyService.createWithPackagePolicies({
+          soClient,
+          esClient,
+          agentPolicy: mockAgentPolicy,
+          packagePolicies: [mockPackagePolicy1, mockPackagePolicy2],
+          options: { withSysMonitoring: true, spaceId: 'default' },
+        });
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error).toEqual(mockError);
+      expect(deleteSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        mockAgentPolicyId,
+        expect.anything()
+      );
+      expect(mockedPackagePolicyService.delete).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        [packagePolicy1Id],
+        expect.anything()
       );
     });
   });

@@ -6,10 +6,10 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useAddSuggestedDashboards } from './use_add_suggested_dashboard';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
-import { DashboardMetadata } from '../components/related_dashboards/dashboard_tile';
+import type { RelatedDashboard } from '@kbn/observability-schema';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 let capturedOnSuccess: (data: Rule) => Promise<void> | undefined;
@@ -54,11 +54,11 @@ const mockRule = {
 
 const mockOnSuccessAddSuggestedDashboard = jest.fn();
 
-const mockDashboard: DashboardMetadata = {
+const mockDashboard = {
   id: TEST_DASHBOARD.id,
   title: TEST_DASHBOARD.title,
   description: TEST_DASHBOARD.description,
-};
+} as RelatedDashboard;
 
 describe('useAddSuggestedDashboards', () => {
   beforeEach(() => {
@@ -143,7 +143,7 @@ describe('useAddSuggestedDashboards', () => {
     // Check that notifications.toasts.addSuccess was called
     expect(mockUseKibanaReturnValue.services.notifications.toasts.addSuccess).toHaveBeenCalledWith({
       title: 'Added to linked dashboard',
-      text: `From now on this dashboard will be linked to all alerts related to ${TEST_RULE_NAME}`,
+      text: `From now on, this dashboard will be linked to all alerts triggered by this rule`,
     });
   });
 

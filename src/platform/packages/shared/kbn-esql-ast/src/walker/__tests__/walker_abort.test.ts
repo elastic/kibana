@@ -8,7 +8,7 @@
  */
 
 import { EsqlQuery } from '../../query';
-import { ESQLIntegerLiteral } from '../../types';
+import type { ESQLIntegerLiteral } from '../../types';
 import { Walker } from '../walker';
 
 describe('aborting traversal', () => {
@@ -115,5 +115,38 @@ describe('aborting traversal', () => {
     });
 
     expect(commands).toStrictEqual(['from']);
+  });
+
+  test('can abort traversal in the middle of source component', () => {
+    const { ast } = EsqlQuery.fromSrc('FROM a:b, c::d');
+    const components: string[] = [];
+
+    Walker.walk(ast, {
+      visitLiteral: (node, parent, walker) => {
+        components.push(node.value as string);
+        if (components.length === 1) {
+          walker.abort();
+        }
+      },
+    });
+
+    expect(components).toStrictEqual(['a']);
+  });
+
+  test('can abort traversal in the middle of source component (backward)', () => {
+    const { ast } = EsqlQuery.fromSrc('FROM a:b, c::d');
+    const components: string[] = [];
+
+    Walker.walk(ast, {
+      visitLiteral: (node, parent, walker) => {
+        components.push(node.value as string);
+        if (components.length === 3) {
+          walker.abort();
+        }
+      },
+      order: 'backward',
+    });
+
+    expect(components).toStrictEqual(['d', 'c', 'b']);
   });
 });

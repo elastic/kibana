@@ -6,18 +6,18 @@
  */
 
 import { isEmpty, isNil, omitBy } from 'lodash';
-import { Logger } from '@kbn/logging';
-import { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import type { Logger } from '@kbn/logging';
+import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
 import { formatMWs, replaceStringWithParams } from '../formatting_utils';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
-import {
+import type {
   BrowserFields,
-  ConfigKey,
   HeartbeatConfig,
   MonitorFields,
   SyntheticsMonitor,
   TLSFields,
 } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 import { publicFormatters } from '.';
 
 const UI_KEYS_TO_SKIP = [
@@ -113,7 +113,8 @@ export const formatHeartbeatRequest = (
   const heartbeatIdT = heartbeatId ?? monitor[ConfigKey.MONITOR_QUERY_ID];
 
   const paramsString = params ?? (monitor as BrowserFields)[ConfigKey.PARAMS];
-  const { labels } = monitor;
+  const { labels, spaces } = monitor;
+  const monSpaces = spaces ? Array.from(new Set([...(spaces ?? []), spaceId])) : spaceId;
 
   return {
     ...monitor,
@@ -125,7 +126,7 @@ export const formatHeartbeatRequest = (
       run_once: runOnce,
       test_run_id: testRunId,
       meta: {
-        space_id: spaceId,
+        space_id: monSpaces,
       },
       ...(isEmpty(labels) ? {} : { labels }),
     },

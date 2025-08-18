@@ -4,19 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ActorRefFrom,
-  MachineImplementationsFrom,
-  SnapshotFrom,
-  assertEvent,
-  assign,
-  sendTo,
-  setup,
-} from 'xstate5';
-import { SampleDocument } from '@kbn/streams-schema';
+import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
+import { assertEvent, assign, sendTo, setup } from 'xstate5';
+import type { SampleDocument } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isEqual, omit } from 'lodash';
-import {
+import { euiPaletteColorBlindBehindText } from '@elastic/eui';
+import type {
   DataSourceInput,
   DataSourceContext,
   DataSourceEvent,
@@ -27,10 +21,20 @@ import {
   createDataCollectionFailureNofitier,
   createDataCollectorActor,
 } from './data_collector_actor';
-import { EnrichmentDataSourceWithUIAttributes } from '../../types';
+import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
 export type DataSourceActorRef = ActorRefFrom<typeof dataSourceMachine>;
 export type DataSourceActorSnapshot = SnapshotFrom<typeof dataSourceMachine>;
+
+const dataSourceColors = euiPaletteColorBlindBehindText();
+let colorCounter = 0;
+
+// Retain a global state for assigning unique colors to data sources
+function getNewColor() {
+  const color = dataSourceColors[colorCounter % dataSourceColors.length];
+  colorCounter += 1;
+  return color;
+}
 
 export const dataSourceMachine = setup({
   types: {
@@ -84,6 +88,9 @@ export const dataSourceMachine = setup({
     parentRef: input.parentRef,
     dataSource: input.dataSource,
     streamName: input.streamName,
+    uiAttributes: {
+      color: getNewColor(),
+    },
     data: [],
   }),
   initial: 'determining',

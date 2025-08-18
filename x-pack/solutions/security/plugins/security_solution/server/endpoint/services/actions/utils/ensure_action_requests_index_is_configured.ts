@@ -6,6 +6,7 @@
  */
 
 import type { MappingPropertyBase } from '@elastic/elasticsearch/lib/api/types';
+import { get } from 'lodash';
 import { stringify } from '../../../utils/stringify';
 import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
@@ -44,19 +45,20 @@ export const ensureActionRequestsIndexIsConfigured = async (
     `Checking field mappings for index [${ENDPOINT_ACTIONS_INDEX}] in support of space awareness`
   );
 
-  const agentPolicyMapping = await esClient.indices
-    .getFieldMapping({
+  const indexMapping = await esClient.indices
+    .getMapping({
       index: ENDPOINT_ACTIONS_INDEX,
-      fields: 'agent.policy.integrationPolicyId',
     })
     .catch(catchAndWrapError);
 
   logger.debug(
-    () =>
-      `Index [${ENDPOINT_ACTIONS_INDEX}] existing mapping for [agent.policy.integrationPolicyId]: ${stringify(
-        agentPolicyMapping
-      )}`
+    () => `Index [${ENDPOINT_ACTIONS_INDEX}] existing mappings: ${stringify(indexMapping)}`
   );
+
+  const newRootMappings: MappingPropertyBase['properties'] = {
+    originSpaceId: { type: 'keyword', ignore_above: 1024 },
+    tags: { type: 'keyword', ignore_above: 1024 },
+  };
 
   const newAgentPolicyMappings: MappingPropertyBase['properties'] = {
     agentId: { type: 'keyword', ignore_above: 1024 },
@@ -64,9 +66,13 @@ export const ensureActionRequestsIndexIsConfigured = async (
     integrationPolicyId: { type: 'keyword', ignore_above: 1024 },
     agentPolicyId: { type: 'keyword', ignore_above: 1024 },
   };
-  const backingIndexName = Object.keys(agentPolicyMapping)[0];
+  const backingIndexName = Object.keys(indexMapping)[0];
 
-  if (!agentPolicyMapping[backingIndexName].mappings['agent.policy.integrationPolicyId']) {
+  if (
+    !get(indexMapping[backingIndexName], 'mappings.properties.originSpaceId') ||
+    !get(indexMapping[backingIndexName], 'mappings.properties.tags') ||
+    !get(indexMapping[backingIndexName], 'mappings.properties.agent.properties.policy')
+  ) {
     logger.debug(
       `adding mappings to index [${ENDPOINT_ACTIONS_INDEX}] - Endpoint package v9.1.x not yet installed`
     );
@@ -75,7 +81,7 @@ export const ensureActionRequestsIndexIsConfigured = async (
       .putMapping({
         index: ENDPOINT_ACTIONS_INDEX,
         properties: {
-          originSpaceId: { type: 'keyword', ignore_above: 1024 },
+          ...newRootMappings,
           agent: {
             properties: {
               policy: {
@@ -117,11 +123,13 @@ export const ensureActionRequestsIndexIsConfigured = async (
     if (
       componentMappings &&
       componentMappings.properties &&
-      !componentMappings.properties.originSpaceId
+      (!get(componentMappings, 'properties.originSpaceId') ||
+        !get(componentMappings, 'properties.tags') ||
+        !get(componentMappings, 'properties.agent.properties.policy'))
     ) {
       logger.debug(`Adding mappings to component template [${COMPONENT_TEMPLATE_NAME}]`);
 
-      componentMappings.properties.originSpaceId = { type: 'keyword', ignore_above: 1024 };
+      Object.assign(componentMappings.properties, newRootMappings);
 
       if (
         componentMappings.properties.agent &&

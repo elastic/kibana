@@ -15,6 +15,7 @@ import { FlowTargetSourceDest } from '../../../../common/search_strategy/securit
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
 import { NetworkDetailsLink } from '../../../common/components/links';
 import { NetworkPanelKey } from '../../../flyout/network_details';
+import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 
 const tryStringify = (value: string | object | null | undefined): string => {
   try {
@@ -55,8 +56,6 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   const { openFlyout } = useExpandableFlyoutApi();
 
   const eventContext = useContext(StatefulEventContext);
-  const isInTimelineContext =
-    address && eventContext?.enableIpDetailsFlyout && eventContext?.timelineID;
 
   const openNetworkDetailsSidePanel = useCallback(
     (ip: string) => {
@@ -64,7 +63,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         onClick();
       }
 
-      if (eventContext && isInTimelineContext) {
+      if (eventContext) {
         openFlyout({
           right: {
             id: NetworkPanelKey,
@@ -79,7 +78,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         });
       }
     },
-    [onClick, eventContext, isInTimelineContext, fieldName, openFlyout]
+    [onClick, eventContext, fieldName, openFlyout]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -91,19 +90,26 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           Component={Component}
           ip={address}
           isButton={isButton}
-          onClick={isInTimelineContext ? openNetworkDetailsSidePanel : undefined}
+          onClick={openNetworkDetailsSidePanel}
           title={title}
         />
       ) : (
-        <NetworkDetailsLink
-          Component={Component}
-          ip={address}
-          isButton={isButton}
-          onClick={isInTimelineContext ? openNetworkDetailsSidePanel : undefined}
-          title={title}
+        <FlyoutLink
+          field={fieldName}
+          value={address}
+          scopeId={eventContext?.timelineID ?? ''}
+          data-test-subj="network-details"
         />
       ),
-    [Component, address, isButton, isInTimelineContext, openNetworkDetailsSidePanel, title]
+    [
+      Component,
+      address,
+      isButton,
+      openNetworkDetailsSidePanel,
+      title,
+      eventContext?.timelineID,
+      fieldName,
+    ]
   );
 
   return content;

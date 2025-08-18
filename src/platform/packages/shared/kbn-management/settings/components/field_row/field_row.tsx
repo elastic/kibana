@@ -50,6 +50,7 @@ type Definition<T extends SettingType = SettingType> = Pick<
   | 'name'
   | 'savedValue'
   | 'type'
+  | 'technicalPreview'
   | 'unsavedFieldId'
 >;
 

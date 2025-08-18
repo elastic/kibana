@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { RulesTableHeader } from './rules_table_header';
-import { CspBenchmarkRulesWithStates } from './rules_container';
+import type { CspBenchmarkRulesWithStates } from './rules_container';
 import { TestProvider } from '../../test/test_provider';
 import { coreMock } from '@kbn/core/public/mocks';
 import { RULES_TABLE_HEADER_TEST_SUBJ } from './test_subjects';
@@ -16,6 +17,7 @@ import userEvent from '@testing-library/user-event';
 import { useChangeCspRuleState } from './use_change_csp_rule_state';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { selectRulesMock } from './__mocks__';
+import { SECURITY_FEATURE_ID } from '../../test/constants';
 
 jest.mock('./use_change_csp_rule_state');
 
@@ -37,7 +39,7 @@ const getWrapper =
         ...coreStart.application,
         capabilities: {
           ...coreStart.application.capabilities,
-          siemV2: { crud: canUpdate },
+          [SECURITY_FEATURE_ID]: { crud: canUpdate },
         },
       },
     };

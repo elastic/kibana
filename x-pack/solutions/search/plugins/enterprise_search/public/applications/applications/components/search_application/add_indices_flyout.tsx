@@ -21,6 +21,7 @@ import {
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -28,9 +29,9 @@ import { Status } from '../../../../../common/types/api';
 import { isNotNullish } from '../../../../../common/utils/is_not_nullish';
 import { getErrorsFromHttpResponse } from '../../../shared/flash_messages/handle_api_errors';
 
+import type { IndicesSelectComboBoxOption } from '../search_applications/components/indices_select_combobox';
 import {
   IndicesSelectComboBox,
-  IndicesSelectComboBoxOption,
   indexToOption,
 } from '../search_applications/components/indices_select_combobox';
 
@@ -42,6 +43,8 @@ export interface AddIndicesFlyoutProps {
 }
 
 export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { searchApplicationData } = useValues(SearchApplicationViewLogic);
   const { selectedIndices, updateSearchApplicationStatus, updateSearchApplicationError } =
     useValues(AddIndicesLogic);
@@ -61,10 +64,10 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
   );
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>
+          <h2 id={modalTitleId}>
             {i18n.translate(
               'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.title',
               { defaultMessage: 'Add new indices' }

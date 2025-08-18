@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useState } from 'react';
+import type { MouseEvent } from 'react';
+import React, { useState } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiBadgeProps } from '@elastic/eui/src/components/badge/badge';
+import type { EuiBadgeProps } from '@elastic/eui/src/components/badge/badge';
 
 export interface TagsListProps {
   onClick?: (tag: string) => void;
@@ -52,7 +53,7 @@ const TagsList = ({
   const tagsToDisplay = tags.slice(0, toDisplay);
 
   return (
-    <EuiFlexGroup wrap gutterSize="m" css={{ maxWidth: 400 }} alignItems="baseline">
+    <EuiFlexGroup wrap gutterSize="xs" css={{ maxWidth: 400 }} alignItems="baseline">
       {tagsToDisplay.map((tag) => (
         // filtering only makes sense in monitor list, where we have summary
         <EuiFlexItem key={tag} grow={false}>

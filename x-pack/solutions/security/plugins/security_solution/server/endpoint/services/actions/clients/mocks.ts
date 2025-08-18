@@ -107,25 +107,26 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
 
   esClient.search.mockImplementation(async (payload) => {
     if (payload) {
-      switch (payload.index) {
-        case ENDPOINT_ACTIONS_INDEX:
-          return createActionRequestsEsSearchResultsMock();
-        case ACTION_RESPONSE_INDICES:
-          return createActionResponsesEsSearchResultsMock();
+      if (
+        !Array.isArray(payload.index) &&
+        (payload.index ?? '').startsWith(
+          ENDPOINT_ACTIONS_INDEX.substring(0, ENDPOINT_ACTIONS_INDEX.length - 1)
+        )
+      ) {
+        return createActionRequestsEsSearchResultsMock();
+      }
+
+      if (payload.index === ACTION_RESPONSE_INDICES) {
+        return createActionResponsesEsSearchResultsMock();
       }
     }
 
     return BaseDataGenerator.toEsSearchResponse([]);
   });
 
-  esClient.indices.getFieldMapping.mockResolvedValue({
+  esClient.indices.getMapping.mockResolvedValue({
     '.ds-.logs-endpoint.actions-default-2025.06.13-000001': {
-      mappings: {
-        'agent.policy.integrationPolicyId': {
-          full_name: 'agent.policy.elasticAgentId',
-          mapping: { elasticAgentId: { type: 'keyword', ignore_above: 1024 } },
-        },
-      },
+      mappings: { properties: {} },
     },
   });
 
@@ -212,6 +213,13 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     ...endpointServiceStartContract,
     esClient,
   });
+
+  // Enable the mocking of internal fleet services
+  const fleetServices = endpointService.getInternalFleetServices();
+  jest.spyOn(fleetServices, 'ensureInCurrentSpace');
+
+  const getInternalFleetServicesMock = jest.spyOn(endpointService, 'getInternalFleetServices');
+  getInternalFleetServicesMock.mockReturnValue(fleetServices);
 
   return {
     esClient,
@@ -343,9 +351,11 @@ const createScanOptionsMock = (
   return merge(options, overrides);
 };
 
-const createRunScriptOptionsMock = (
-  overrides: Partial<RunScriptActionRequestBody> = {}
-): RunScriptActionRequestBody => {
+const createRunScriptOptionsMock = <
+  TParams extends RunScriptActionRequestBody['parameters'] = RunScriptActionRequestBody['parameters']
+>(
+  overrides: Partial<RunScriptActionRequestBody<TParams>> = {}
+): RunScriptActionRequestBody<TParams> => {
   const options: RunScriptActionRequestBody = {
     ...createNoParamsResponseActionOptionsMock(),
     parameters: {

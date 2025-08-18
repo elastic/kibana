@@ -22,7 +22,7 @@ export const MwsCalloutContent = ({ activeMWs }: { activeMWs: MaintenanceWindow[
             }
           )}
           color="warning"
-          iconType="iInCircle"
+          iconType="info"
           data-test-subj="maintenanceWindowCallout"
         >
           {i18n.translate(

@@ -21,16 +21,12 @@ export function SuppressionInfoIcon(): JSX.Element {
   const { docLinks } = useKibana().services;
 
   const button = (
-    <EuiButtonIcon
-      iconType="questionInCircle"
-      onClick={togglePopover}
-      aria-label="Open help popover"
-    />
+    <EuiButtonIcon iconType="question" onClick={togglePopover} aria-label="Open help popover" />
   );
 
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
-      <EuiText style={{ width: POPOVER_WIDTH }} size="s">
+      <EuiText css={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsTooltipContent"
           defaultMessage="Choose how to handle events with missing {suppressBy} fields. Either group events with missing fields together, or create a separate alert for each event. {learnMoreLink}"

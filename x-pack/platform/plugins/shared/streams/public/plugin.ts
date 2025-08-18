@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { Logger } from '@kbn/logging';
+import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import { OBSERVABILITY_ENABLE_STREAMS_UI } from '@kbn/management-settings-ids';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
-import { Observable, from, shareReplay, startWith } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of, from, shareReplay, startWith } from 'rxjs';
 import { once } from 'lodash';
 import type { StreamsPublicConfig } from '../common/config';
-import {
+import type {
   StreamsPluginClass,
   StreamsPluginSetup,
   StreamsPluginSetupDependencies,
@@ -20,7 +21,7 @@ import {
   StreamsPluginStartDependencies,
   StreamsStatus,
 } from './types';
-import { StreamsRepositoryClient } from './api';
+import type { StreamsRepositoryClient } from './api';
 
 export class Plugin implements StreamsPluginClass {
   public config: StreamsPublicConfig;
@@ -42,6 +43,7 @@ export class Plugin implements StreamsPluginClass {
     return {
       streamsRepositoryClient: this.repositoryClient,
       status$: createStreamsStatusObservable(core, this.repositoryClient, this.logger),
+      config$: of(this.config),
     };
   }
 
@@ -63,11 +65,11 @@ const createStreamsStatusObservable = once(
     const isUIEnabled = uiSettings.get(OBSERVABILITY_ENABLE_STREAMS_UI);
 
     if (!hasCapabilities) {
-      return from([DISABLED_STATUS]);
+      return of(DISABLED_STATUS);
     }
 
     if (isUIEnabled) {
-      return from([ENABLED_STATUS]);
+      return of(ENABLED_STATUS);
     }
 
     return from(

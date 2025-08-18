@@ -129,7 +129,7 @@ Array [
                       class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
                     >
                       <span
-                        data-euiicon-type="help"
+                        data-euiicon-type="question"
                       />
                     </span>
                   </span>

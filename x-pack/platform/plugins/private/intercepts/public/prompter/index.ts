@@ -6,3 +6,4 @@
  */
 
 export { InterceptPrompter } from './prompter';
+export type { Intercept } from './prompter';

@@ -10,25 +10,28 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import type {
+  EuiDataGridProps,
+  EuiDataGridCellPopoverElementProps,
+  EuiSwitchEvent,
+} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiSelectableMessage,
   EuiDataGrid,
-  EuiDataGridProps,
-  EuiDataGridCellPopoverElementProps,
   EuiI18n,
   EuiText,
   EuiCallOut,
   useResizeObserver,
   EuiSwitch,
-  EuiSwitchEvent,
   type UseEuiTheme,
+  euiFontSize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   SHOW_MULTIFIELDS,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -38,7 +41,7 @@ import {
   canPrependTimeFieldColumn,
 } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import { getUnifiedDocViewerServices } from '../../plugin';
 import {
@@ -51,12 +54,8 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
-import {
-  LOCAL_STORAGE_KEY_SEARCH_TERM,
-  TableFilters,
-  TableFiltersProps,
-  useTableFilters,
-} from './table_filters';
+import type { TableFiltersProps } from './table_filters';
+import { LOCAL_STORAGE_KEY_SEARCH_TERM, TableFilters, useTableFilters } from './table_filters';
 import { TableCell } from './table_cell';
 import { getPinColumnControl } from './get_pin_control';
 import { FieldRow } from './field_row';
@@ -73,7 +72,7 @@ const PAGE_SIZE_OPTIONS = [25, 50, 100, 250, 500];
 const DEFAULT_PAGE_SIZE = 25;
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 const PAGE_SIZE = 'discover:pageSize';
-const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
+export const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
 export const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedFields';
 
 const GRID_COLUMN_FIELD_NAME = 'name';
@@ -136,7 +135,7 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
@@ -556,8 +555,11 @@ const componentStyles = {
         },
       },
     }),
-  fieldsGrid: ({ euiTheme }: UseEuiTheme) =>
-    css({
+  fieldsGrid: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+    const { fontSize } = euiFontSize(themeContext, 's');
+
+    return css({
       '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
         borderTop: 'none',
       },
@@ -575,6 +577,27 @@ const componentStyles = {
         padding: `calc(${euiTheme.size.xs} / 2) 0 0 ${euiTheme.size.xs}`,
       },
 
+      '.kbnDocViewer__fieldName': {
+        padding: euiTheme.size.xs,
+        paddingLeft: 0,
+        lineHeight: euiTheme.font.lineHeightMultiplier,
+
+        '.euiDataGridRowCell__popover &': {
+          fontSize,
+        },
+      },
+
+      '.kbnDocViewer__fieldName_icon': {
+        paddingTop: `calc(${euiTheme.size.xs} * 1.5)`,
+        lineHeight: euiTheme.font.lineHeightMultiplier,
+      },
+
+      '.kbnDocViewer__fieldName_multiFieldBadge': {
+        margin: `${euiTheme.size.xs} 0`,
+        fontWeight: euiTheme.font.weight.regular,
+        fontFamily: euiTheme.font.family,
+      },
+
       '.kbnDocViewer__fieldsGrid__pinAction': {
         opacity: 0,
       },
@@ -588,7 +611,8 @@ const componentStyles = {
       '.euiDataGridRow:hover .kbnDocViewer__fieldsGrid__pinAction': {
         opacity: 1,
       },
-    }),
+    });
+  },
   noFieldsFound: css({
     minHeight: 300,
   }),

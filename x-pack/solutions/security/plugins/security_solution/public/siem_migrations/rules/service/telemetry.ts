@@ -68,6 +68,15 @@ export class SiemRulesMigrationsTelemetry {
     });
   };
 
+  reportSetupMigrationDeleted = (params: { migrationId: string; error?: Error }) => {
+    const { migrationId, error } = params;
+    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupMigrationDeleted, {
+      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupMigrationDeleted],
+      migrationId,
+      ...this.getBaseResultParams(error),
+    });
+  };
+
   reportSetupResourceUploaded = (params: {
     migrationId: string;
     type: RuleMigrationResourceType;
@@ -124,6 +133,15 @@ export class SiemRulesMigrationsTelemetry {
       skipPrebuiltRulesMatching,
       eventName: siemMigrationEventNames[SiemMigrationsEventTypes.StartMigration],
       ...(retry && { retryFilter: retry }),
+      ...this.getBaseResultParams(error),
+    });
+  };
+
+  reportStopTranslation = (params: { migrationId: string; error?: Error }) => {
+    const { migrationId, error } = params;
+    this.telemetryService.reportEvent(SiemMigrationsEventTypes.StopMigration, {
+      migrationId,
+      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.StopMigration],
       ...this.getBaseResultParams(error),
     });
   };

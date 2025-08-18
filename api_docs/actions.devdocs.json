@@ -199,6 +199,20 @@
         },
         {
           "parentPluginId": "actions",
+          "id": "def-public.ActionsPublicPluginSetup.enabledEmailServices",
+          "type": "Array",
+          "tags": [],
+          "label": "enabledEmailServices",
+          "description": [],
+          "signature": [
+            "string[]"
+          ],
+          "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "actions",
           "id": "def-public.ActionsPublicPluginSetup.isWebhookSslWithPfxEnabled",
           "type": "CompoundType",
           "tags": [],
@@ -4722,7 +4736,7 @@
             "section": "def-common.ValidateEmailAddressesOptions",
             "text": "ValidateEmailAddressesOptions"
           },
-          ") => ",
+          ", recipientAllowlist: string[] | null) => ",
           {
             "pluginId": "actions",
             "scope": "common",
@@ -4786,6 +4800,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.validateEmailAddresses.$4",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "recipientAllowlist",
+            "description": [],
+            "signature": [
+              "string[] | null"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/common/validate_email_addresses.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -5625,6 +5654,20 @@
             "description": [
               "treat any address which contains a mustache template as valid"
             ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/common/validate_email_addresses.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ValidateEmailAddressesOptions.isSender",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSender",
+            "description": [],
             "signature": [
               "boolean | undefined"
             ],

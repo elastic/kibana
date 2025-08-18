@@ -8,7 +8,7 @@
 import { EuiIconTip } from '@elastic/eui';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
-import { ActionVariable } from '@kbn/alerting-types';
+import type { ActionVariable } from '@kbn/alerting-types';
 import { isEmpty } from 'lodash';
 import * as i18n from './translations';
 
@@ -40,7 +40,7 @@ export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             data-test-subj="otherFieldsHelpTooltip"
             aria-label={i18n.ADDITIONAL_FIELDS_HELP}

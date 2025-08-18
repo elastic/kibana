@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { combineAgentProviders } from './combine_providers';
-export { createInternalRegistry } from './create_registry';
+export { agentToDescriptor } from './to_descriptor';

@@ -6,14 +6,14 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  ILM_LOCATOR_ID,
+import type {
   IlmLocatorParams,
   Phases,
   PolicyFromES,
 } from '@kbn/index-lifecycle-management-common-shared';
+import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import {
-  IngestStreamLifecycle,
   getAncestors,
   isIlmLifecycle,
   findInheritedLifecycle,
@@ -21,6 +21,7 @@ import {
   isDslLifecycle,
   Streams,
 } from '@kbn/streams-schema';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -41,10 +42,10 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSelectable,
-  EuiSelectableOption,
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
@@ -91,6 +92,8 @@ const isInvalidRetention = (value: string) => {
 };
 
 function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }: ModalOptions) {
+  const modalTitleId = useGeneratedHtmlId();
+
   const timeUnits = [
     { name: 'Days', value: 'd' },
     { name: 'Hours', value: 'h' },
@@ -118,9 +121,9 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
   );
 
   return (
-    <EuiModal onClose={closeModal}>
+    <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.streams.streamDetailLifecycle.editRetention', {
             defaultMessage: 'Edit data retention for stream',
           })}
@@ -227,6 +230,8 @@ function IlmModal({
   getIlmPolicies,
   definition,
 }: ModalOptions) {
+  const modalTitleId = useGeneratedHtmlId();
+
   const {
     dependencies: {
       start: { share },
@@ -294,9 +299,9 @@ function IlmModal({
   }, []);
 
   return (
-    <EuiModal onClose={closeModal}>
+    <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.streams.streamDetailLifecycle.attachIlm', {
             defaultMessage: 'Attach a lifecycle policy to this stream',
           })}
@@ -374,8 +379,8 @@ function IlmModal({
 function InheritModal({ definition, ...options }: ModalOptions) {
   if (Streams.WiredStream.GetResponse.is(definition)) {
     return <InheritModalWired definition={definition} {...options} />;
-  } else if (Streams.UnwiredStream.GetResponse.is(definition)) {
-    return <InheritModalUnwired definition={definition} {...options} />;
+  } else if (Streams.ClassicStream.GetResponse.is(definition)) {
+    return <InheritModalClassic definition={definition} {...options} />;
   }
 }
 
@@ -385,6 +390,8 @@ function InheritModalWired({
   updateInProgress,
   updateLifecycle,
 }: ModalOptions & { definition: Streams.WiredStream.GetResponse }) {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { wiredStreams, isLoading: wiredStreamsLoading } = useWiredStreams();
 
   const parents = useMemo(() => {
@@ -397,9 +404,9 @@ function InheritModalWired({
   }, [definition, wiredStreams, wiredStreamsLoading]);
 
   return (
-    <EuiModal onClose={closeModal}>
+    <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleTitle', {
             defaultMessage: 'Set data retention to default',
           })}
@@ -447,16 +454,18 @@ function InheritModalWired({
   );
 }
 
-function InheritModalUnwired({
+function InheritModalClassic({
   definition,
   closeModal,
   updateInProgress,
   updateLifecycle,
-}: ModalOptions & { definition: Streams.UnwiredStream.GetResponse }) {
+}: ModalOptions & { definition: Streams.ClassicStream.GetResponse }) {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiModal onClose={closeModal}>
+    <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleTitle', {
             defaultMessage: 'Set data retention to default',
           })}
@@ -464,9 +473,9 @@ function InheritModalUnwired({
       </EuiModalHeader>
 
       <EuiModalBody>
-        {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleUnwiredDesc', {
+        {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleClassicDesc', {
           defaultMessage:
-            'All custom retention settings for this stream will be removed, resetting it to use the configuration of the data stream.',
+            'All custom retention settings for this stream will be removed, resetting it to use the configuration of the template.',
         })}
       </EuiModalBody>
 

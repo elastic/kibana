@@ -18,4 +18,9 @@ export type {
   EntityNodeViewModel,
   NodeProps,
 } from './types';
-export { isEntityNode } from './utils';
+export {
+  isEntityNode,
+  getNodeDocumentMode,
+  hasNodeDocumentsData,
+  getSingleDocumentData,
+} from './utils';

@@ -8,4 +8,4 @@
  */
 
 // Latest version is 3
-export * from './v3';
+export * from './v1';

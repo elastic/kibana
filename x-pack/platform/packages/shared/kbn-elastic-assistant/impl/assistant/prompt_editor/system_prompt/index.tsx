@@ -6,13 +6,14 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import { SelectSystemPrompt } from './select_system_prompt';
 
 interface Props {
   allSystemPrompts: PromptResponse[];
   currentSystemPromptId: string | undefined;
   isSettingsModalVisible: boolean;
+  compressed?: boolean;
   onSystemPromptSelectionChange: (systemPromptId: string | undefined) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -21,6 +22,7 @@ const SystemPromptComponent: React.FC<Props> = ({
   allSystemPrompts,
   currentSystemPromptId,
   isSettingsModalVisible,
+  compressed = false,
   onSystemPromptSelectionChange,
   setIsSettingsModalVisible,
 }) => {
@@ -43,6 +45,7 @@ const SystemPromptComponent: React.FC<Props> = ({
       data-test-subj="systemPrompt"
       isClearable={true}
       isSettingsModalVisible={isSettingsModalVisible}
+      compressed={compressed}
       onSystemPromptSelectionChange={onSystemPromptSelectionChange}
       selectedPrompt={selectedPrompt}
       setIsSettingsModalVisible={setIsSettingsModalVisible}

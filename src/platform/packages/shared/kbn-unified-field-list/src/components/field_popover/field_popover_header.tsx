@@ -8,12 +8,11 @@
  */
 
 import React from 'react';
+import type { EuiButtonIconProps, EuiPopoverProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiButtonIconProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopoverProps,
   EuiToolTip,
   EuiTitle,
   EuiSpacer,
@@ -119,7 +118,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
         )}
         {onAddBreakdownField && (
           <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_addBreakdownField">
-            <EuiToolTip content={addBreakdownFieldTooltip}>
+            <EuiToolTip content={addBreakdownFieldTooltip} disableScreenReaderOutput>
               <EuiButtonIcon
                 data-test-subj={`fieldPopoverHeader_addBreakdownField-${field.name}`}
                 aria-label={addBreakdownFieldTooltip}

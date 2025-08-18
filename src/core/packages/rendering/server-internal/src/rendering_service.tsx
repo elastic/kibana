@@ -28,7 +28,7 @@ import {
   DEFAULT_THEME_NAME,
 } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
-import {
+import type {
   IRenderOptions,
   RenderingPrebootDeps,
   RenderingSetupDeps,
@@ -298,6 +298,7 @@ export class RenderingService {
         env,
         featureFlags: {
           overrides: featureFlags?.getOverrides() || {},
+          initialFeatureFlags: (await featureFlags?.getInitialFeatureFlags()) || {},
         },
         clusterInfo,
         apmConfig,

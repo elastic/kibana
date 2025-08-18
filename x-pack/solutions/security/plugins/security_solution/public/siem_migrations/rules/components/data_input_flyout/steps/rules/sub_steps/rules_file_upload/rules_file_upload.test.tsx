@@ -20,13 +20,17 @@ import { splunkTestRules } from './splunk_rules.test.data';
 import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 
 const mockCreateMigration: CreateMigration = jest.fn();
+const mockOnRulesFileChanged = jest.fn();
 const mockApiError = 'Some Mock API Error';
+const migrationName = 'test migration name';
 
 const defaultProps: RulesFileUploadProps = {
   createMigration: mockCreateMigration,
+  onRulesFileChanged: mockOnRulesFileChanged,
   apiError: undefined,
   isLoading: false,
   isCreated: false,
+  migrationName,
 };
 
 const renderTestComponent = (props: Partial<RulesFileUploadProps> = {}) => {
@@ -84,6 +88,8 @@ describe('RulesFileUpload', () => {
       });
     });
 
+    expect(mockOnRulesFileChanged).toHaveBeenCalledWith([testFile]);
+
     await waitFor(() => {
       expect(filePicker).toHaveAttribute('data-loading', 'true');
     });
@@ -110,7 +116,7 @@ describe('RulesFileUpload', () => {
       severity: rule['alert.severity'] as OriginalRule['severity'],
     }));
 
-    expect(mockCreateMigration).toHaveBeenNthCalledWith(1, rulesToExpect);
+    expect(mockCreateMigration).toHaveBeenNthCalledWith(1, migrationName, rulesToExpect);
   });
 
   describe('Error Handling', () => {

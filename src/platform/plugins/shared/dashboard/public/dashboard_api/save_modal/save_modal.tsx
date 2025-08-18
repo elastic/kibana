@@ -13,7 +13,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiSwitch } from '@e
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
-
 import { savedObjectsTaggingService } from '../../services/kibana_services';
 import type { DashboardSaveOptions } from './types';
 
@@ -60,7 +59,13 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   const [persistSelectedTimeInterval, setPersistSelectedTimeInterval] = React.useState(timeRestore);
 
   const saveDashboard = React.useCallback<SaveDashboardHandler>(
-    ({ newTitle, newDescription, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+    async ({
+      newTitle,
+      newDescription,
+      newCopyOnSave,
+      isTitleDuplicateConfirmed,
+      onTitleDuplicate,
+    }) => {
       onSave({
         newTitle,
         newDescription,

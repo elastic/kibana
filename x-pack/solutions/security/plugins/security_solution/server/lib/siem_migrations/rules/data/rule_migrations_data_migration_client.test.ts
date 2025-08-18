@@ -6,13 +6,13 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { SiemRuleMigrationsClientDependencies } from '../types';
 import { RuleMigrationsDataMigrationClient } from './rule_migrations_data_migration_client';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type IndexApi from '@elastic/elasticsearch/lib/api/api';
 import type GetApi from '@elastic/elasticsearch/lib/api/api/get';
 import type SearchApi from '@elastic/elasticsearch/lib/api/api/search';
+import type { RuleMigrationsClientDependencies } from '../types';
 
 describe('RuleMigrationsDataMigrationClient', () => {
   let ruleMigrationsDataMigrationClient: RuleMigrationsDataMigrationClient;
@@ -25,7 +25,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
     userName: 'testUser',
     profile_uid: 'testProfileUid',
   } as unknown as AuthenticatedUser;
-  const dependencies = {} as unknown as SiemRuleMigrationsClientDependencies;
+  const dependencies = {} as unknown as RuleMigrationsClientDependencies;
 
   beforeEach(() => {
     ruleMigrationsDataMigrationClient = new RuleMigrationsDataMigrationClient(
@@ -44,8 +44,9 @@ describe('RuleMigrationsDataMigrationClient', () => {
   describe('create', () => {
     test('should create a new migration', async () => {
       const index = '.kibana-siem-rule-migrations';
+      const name = 'test name';
 
-      const result = await ruleMigrationsDataMigrationClient.create();
+      const result = await ruleMigrationsDataMigrationClient.create(name);
 
       expect(result).not.toBeFalsy();
       expect(esClient.asInternalUser.create).toHaveBeenCalledWith({
@@ -55,6 +56,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         document: {
           created_by: currentUser.profile_uid,
           created_at: expect.any(String),
+          name,
         },
       });
     });
@@ -64,7 +66,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         esClient.asInternalUser.create as unknown as jest.MockedFn<typeof IndexApi>
       ).mockRejectedValueOnce(new Error('Test error'));
 
-      await expect(ruleMigrationsDataMigrationClient.create()).rejects.toThrow('Test error');
+      await expect(ruleMigrationsDataMigrationClient.create('test')).rejects.toThrow('Test error');
 
       expect(esClient.asInternalUser.create).toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalled();

@@ -6,97 +6,213 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Subject, Observable } from 'rxjs';
-import { ServerSentEvent } from '@kbn/sse-utils';
-import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
-import type { ChatAgentEvent } from '@kbn/onechat-common';
-import type { CallAgentResponse } from '../../common/http_api/agents';
-import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
+import { apiPrivileges } from '../../common/features';
+import type {
+  GetAgentResponse,
+  CreateAgentResponse,
+  UpdateAgentResponse,
+  DeleteAgentResponse,
+  ListAgentResponse,
+} from '../../common/http_api/agents';
+import { getTechnicalPreviewWarning, supportedToolTypes } from './utils';
+
+const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Agent API');
+
+const TOOL_SELECTION_SCHEMA = schema.arrayOf(
+  schema.object({
+    type: schema.maybe(supportedToolTypes),
+    tool_ids: schema.arrayOf(schema.string()),
+  })
+);
 
 export function registerAgentRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  router.post(
-    {
-      path: '/internal/onechat/agents/invoke',
+  // List agents
+  router.versioned
+    .get({
+      path: '/api/chat/agents',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
-      validate: {
-        body: schema.object({
-          agentId: schema.string({}),
-          agentParams: schema.recordOf(schema.string(), schema.any()),
-        }),
+      access: 'public',
+      summary: 'List agents',
+      description: TECHNICAL_PREVIEW_WARNING,
+      options: {
+        tags: ['agent'],
+        availability: {
+          stability: 'experimental',
+        },
       },
-    },
-    wrapHandler(async (ctx, request, response) => {
-      const { agents } = getInternalServices();
-      const { agentId, agentParams } = request.body;
-      const agentRegistry = agents.registry.asPublicRegistry();
-
-      const agent = await agentRegistry.get({ agentId, request });
-      const agentResult = await agent.execute({
-        agentParams: agentParams as any,
-      });
-
-      return response.ok<CallAgentResponse>({
-        body: agentResult,
-      });
     })
-  );
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: false,
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { agents: agentsService } = getInternalServices();
+        const service = await agentsService.getScopedClient({ request });
+        const agents = await service.list();
+        return response.ok<ListAgentResponse>({ body: { results: agents } });
+      })
+    );
 
-  // stream agent events endpoint
-  router.post(
-    {
-      path: '/internal/onechat/agents/stream',
+  // Get agent by id
+  router.versioned
+    .get({
+      path: '/api/chat/agents/{id}',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
-      validate: {
-        body: schema.object({
-          agentId: schema.string({}),
-          agentParams: schema.recordOf(schema.string(), schema.any()),
-        }),
+      access: 'public',
+      summary: 'Get an agent',
+      description: TECHNICAL_PREVIEW_WARNING,
+      options: {
+        tags: ['agent'],
+        availability: {
+          stability: 'experimental',
+        },
       },
-    },
-    wrapHandler(async (ctx, request, response) => {
-      const { agents } = getInternalServices();
-      const { agentId, agentParams } = request.body;
-      const agentRegistry = agents.registry.asPublicRegistry();
-
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
-
-      const subject$ = new Subject<ChatAgentEvent>();
-
-      const agent = await agentRegistry.get({ agentId, request });
-      agent
-        .execute({
-          agentParams: agentParams as any,
-          onEvent: (event) => {
-            subject$.next(event);
-          },
-        })
-        .then(
-          (result) => {
-            // TODO: should we emit an event with the final result?
-            subject$.complete();
-          },
-          (error) => {
-            subject$.error(error);
-          }
-        );
-
-      return response.ok({
-        body: observableIntoEventSourceStream(subject$ as unknown as Observable<ServerSentEvent>, {
-          signal: abortController.signal,
-          logger,
-        }),
-      });
     })
-  );
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: { params: schema.object({ id: schema.string() }) },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { agents } = getInternalServices();
+        const service = await agents.getScopedClient({ request });
+
+        const profile = await service.get(request.params.id);
+        return response.ok<GetAgentResponse>({ body: profile });
+      })
+    );
+
+  // Create agent
+  router.versioned
+    .post({
+      path: '/api/chat/agents',
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+      },
+      access: 'public',
+      summary: 'Create an agent',
+      description: TECHNICAL_PREVIEW_WARNING,
+      options: {
+        tags: ['agent'],
+        availability: {
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            body: schema.object({
+              id: schema.string(),
+              name: schema.string(),
+              description: schema.string(),
+              configuration: schema.object({
+                instructions: schema.maybe(schema.string()),
+                tools: TOOL_SELECTION_SCHEMA,
+              }),
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { agents } = getInternalServices();
+        const service = await agents.getScopedClient({ request });
+        const profile = await service.create(request.body);
+        return response.ok<CreateAgentResponse>({ body: profile });
+      })
+    );
+
+  // Update agent
+  router.versioned
+    .put({
+      path: '/api/chat/agents/{id}',
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+      },
+      access: 'public',
+      summary: 'Update an agent',
+      description: TECHNICAL_PREVIEW_WARNING,
+      options: {
+        tags: ['agent'],
+        availability: {
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({ id: schema.string() }),
+            body: schema.object({
+              name: schema.maybe(schema.string()),
+              description: schema.maybe(schema.string()),
+              configuration: schema.maybe(
+                schema.object({
+                  instructions: schema.maybe(schema.string()),
+                  tools: schema.maybe(TOOL_SELECTION_SCHEMA),
+                })
+              ),
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { agents } = getInternalServices();
+        const service = await agents.getScopedClient({ request });
+        const profile = await service.update(request.params.id, request.body);
+        return response.ok<UpdateAgentResponse>({ body: profile });
+      })
+    );
+
+  // Delete agent
+  router.versioned
+    .delete({
+      path: '/api/chat/agents/{id}',
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+      },
+      access: 'public',
+      summary: 'Delete an agent',
+      description: TECHNICAL_PREVIEW_WARNING,
+      options: {
+        tags: ['agent'],
+        availability: {
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: { params: schema.object({ id: schema.string() }) },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { agents } = getInternalServices();
+        const service = await agents.getScopedClient({ request });
+
+        const result = await service.delete({ id: request.params.id });
+        return response.ok<DeleteAgentResponse>({
+          body: {
+            success: result,
+          },
+        });
+      })
+    );
 }

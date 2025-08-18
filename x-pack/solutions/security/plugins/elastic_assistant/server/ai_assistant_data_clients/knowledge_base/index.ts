@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   MlTrainedModelDeploymentNodesStats,
   MlTrainedModelStats,
   SearchTotalHits,
@@ -13,8 +13,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { Document } from 'langchain/document';
-import {
-  DocumentEntryType,
+import type {
   DocumentEntry,
   IndexEntry,
   KnowledgeBaseEntryCreateProps,
@@ -23,10 +22,11 @@ import {
   ContentReferencesStore,
   KnowledgeBaseEntryUpdateProps,
 } from '@kbn/elastic-assistant-common';
+import { DocumentEntryType } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
-import { StructuredTool } from '@langchain/core/tools';
+import type { StructuredTool } from '@langchain/core/tools';
 import { v4 as uuidv4 } from 'uuid';
-import {
+import type {
   AnalyticsServiceSetup,
   AuditLogger,
   ElasticsearchClient,
@@ -35,18 +35,20 @@ import {
 } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
-import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
+import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import type { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 import { getMlNodeCount } from '@kbn/ml-plugin/server/lib/node_utils';
-import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
-import { GetElser } from '../../types';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import type { AIAssistantDataClientParams } from '..';
+import { AIAssistantDataClient } from '..';
+import type { GetElser } from '../../types';
 import {
   createKnowledgeBaseEntry,
   getUpdateScript,
   transformToCreateSchema,
   transformToUpdateSchema,
 } from './create_knowledge_base_entry';
-import {
+import type {
   EsDocumentEntry,
   EsIndexEntry,
   EsKnowledgeBaseEntrySchema,
@@ -68,11 +70,8 @@ import {
   loadSecurityLabs,
   getSecurityLabsDocsCount,
 } from '../../lib/langchain/content_loaders/security_labs_loader';
-import {
-  ASSISTANT_ELSER_INFERENCE_ID,
-  ELASTICSEARCH_ELSER_INFERENCE_ID,
-} from './field_maps_configuration';
-import { BulkOperationError } from '../../lib/data_stream/documents_data_writer';
+import { ASSISTANT_ELSER_INFERENCE_ID } from './field_maps_configuration';
+import type { BulkOperationError } from '../../lib/data_stream/documents_data_writer';
 import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from './audit_events';
 import { findDocuments } from '../find';
 
@@ -849,7 +848,7 @@ export const getInferenceEndpointId = async ({ esClient }: { esClient: Elasticse
   }
 
   // Fallback to the default inference endpoint
-  return ELASTICSEARCH_ELSER_INFERENCE_ID;
+  return defaultInferenceEndpoints.ELSER;
 };
 
 /**

@@ -13,12 +13,18 @@ import { packagePolicyService } from '../package_policy';
 
 import { updateAgentPolicySpaces } from './agent_policy';
 import { isSpaceAwarenessEnabled } from './helpers';
+import { validatePackagePoliciesUniqueNameAcrossSpaces } from './policy_namespaces';
 
+jest.mock('./policy_namespaces');
 jest.mock('./helpers');
 jest.mock('../agent_policy');
 jest.mock('../package_policy');
 jest.mock('../agents');
 
+const mockValidatePackagePoliciesUniqueNameAcrossSpaces =
+  validatePackagePoliciesUniqueNameAcrossSpaces as jest.Mocked<
+    typeof validatePackagePoliciesUniqueNameAcrossSpaces
+  >;
 describe('updateAgentPolicySpaces', () => {
   beforeEach(() => {
     jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
@@ -63,7 +69,11 @@ describe('updateAgentPolicySpaces', () => {
     } as any);
   });
 
-  it('does nothings if agent policy already in correct space', async () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('does nothings if agent policy is already in correct space', async () => {
     await updateAgentPolicySpaces({
       agentPolicyId: 'policy1',
       currentSpaceId: 'default',
@@ -183,5 +193,31 @@ describe('updateAgentPolicySpaces', () => {
         authorizedSpaces: ['test'],
       })
     ).rejects.toThrowError(/Not enough permissions to remove policies from space default/);
+  });
+
+  it('throw when validateUniqueName is true and policy name already exists on another space', async () => {
+    jest
+      .mocked(mockValidatePackagePoliciesUniqueNameAcrossSpaces)
+      .mockRejectedValueOnce(new Error('Name already exists'));
+    await expect(
+      updateAgentPolicySpaces({
+        agentPolicyId: 'policy1',
+        currentSpaceId: 'default',
+        newSpaceIds: ['test'],
+        authorizedSpaces: ['test'],
+        options: { validateUniqueName: true },
+      })
+    ).rejects.toThrowError(/Name already exists/);
+  });
+
+  it('do not call validatePackagePoliciesUniqueNameAcrossSpaces when validateUniqueName is false', async () => {
+    await updateAgentPolicySpaces({
+      agentPolicyId: 'policy1',
+      currentSpaceId: 'default',
+      newSpaceIds: ['default'],
+      authorizedSpaces: ['default'],
+      options: { validateUniqueName: false },
+    });
+    expect(validatePackagePoliciesUniqueNameAcrossSpaces).not.toHaveBeenCalled();
   });
 });

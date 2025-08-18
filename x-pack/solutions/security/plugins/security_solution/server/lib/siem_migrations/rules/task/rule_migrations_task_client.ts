@@ -14,7 +14,7 @@ import type { RuleMigrationTaskStats } from '../../../../../common/siem_migratio
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
-import type { SiemRuleMigrationsClientDependencies, StoredSiemMigration } from '../types';
+import type { RuleMigrationsClientDependencies, StoredSiemMigration } from '../types';
 import type {
   RuleMigrationTaskEvaluateParams,
   RuleMigrationTaskStartParams,
@@ -32,7 +32,7 @@ export class RuleMigrationsTaskClient {
     private logger: Logger,
     private data: RuleMigrationsDataClient,
     private currentUser: AuthenticatedUser,
-    private dependencies: SiemRuleMigrationsClientDependencies
+    private dependencies: RuleMigrationsClientDependencies
   ) {}
 
   /** Starts a rule migration task */
@@ -135,7 +135,7 @@ export class RuleMigrationsTaskClient {
     }
     const dataStats = await this.data.rules.getStats(migrationId);
     const taskStats = this.getTaskStats(migration, dataStats.rules);
-    return { ...taskStats, ...dataStats };
+    return { ...taskStats, ...dataStats, name: migration.name };
   }
 
   /** Returns the stats of all migrations */
@@ -151,8 +151,8 @@ export class RuleMigrationsTaskClient {
     for (const dataStats of allDataStats) {
       const migration = allMigrationsMap.get(dataStats.id);
       if (migration) {
-        const taksStats = this.getTaskStats(migration, dataStats.rules);
-        allStats.push({ ...taksStats, ...dataStats });
+        const tasksStats = this.getTaskStats(migration, dataStats.rules);
+        allStats.push({ ...tasksStats, ...dataStats, name: migration.name });
       }
     }
     return allStats;
@@ -193,7 +193,7 @@ export class RuleMigrationsTaskClient {
     try {
       const migrationRunning = this.migrationsRunning.get(migrationId);
       if (migrationRunning) {
-        migrationRunning.abortController.abort();
+        migrationRunning.abortController.abort('Stopped by user');
         await this.data.migrations.setIsStopped({ id: migrationId });
         return { exists: true, stopped: true };
       }

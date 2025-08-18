@@ -12,7 +12,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'fs';
 import path from 'path';
-import { Journey } from './run_performance_cli';
+import type { Journey } from './run_performance_cli';
 
 run(
   async ({ log, flagsReader, procRunner }) => {
@@ -41,7 +41,7 @@ run(
           })
       : [{ name: path.parse(journeyPath).name, path: journeyPath }];
 
-    const skippedFilePath = 'x-pack/test/scalability/disabled_scalability_tests.json';
+    const skippedFilePath = 'x-pack/platform/test/scalability/disabled_scalability_tests.json';
     const skipped: string[] = JSON.parse(
       fs.readFileSync(path.resolve(REPO_ROOT, skippedFilePath), 'utf8')
     ).map((relativePath: string) => path.resolve(REPO_ROOT, relativePath));
@@ -89,7 +89,7 @@ run(
         cmd: 'node',
         args: [
           'scripts/functional_tests',
-          ['--config', 'x-pack/test/scalability/config.ts'],
+          ['--config', 'x-pack/platform/test/scalability/config.ts'],
           kibanaBuildDir ? ['--kibana-install-dir', kibanaBuildDir] : [],
           '--debug',
           '--logToFile',

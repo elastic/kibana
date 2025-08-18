@@ -19,7 +19,7 @@ export const LogRateAnalysisInfoPopoverButton: FC<{
 }> = ({ onClick, label }) => {
   return (
     <EuiBadge
-      iconType="help"
+      iconType="question"
       iconSide="right"
       color="hollow"
       // Defining both iconOnClick and onClick so the mouse cursor changes for cases.

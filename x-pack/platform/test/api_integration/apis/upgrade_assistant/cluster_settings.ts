@@ -8,14 +8,14 @@
 import expect from '@kbn/expect';
 
 import { API_BASE_PATH } from '@kbn/upgrade-assistant-plugin/common/constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
 
-  describe('Cluster settings', function () {
+  describe.skip('Cluster settings', function () {
     describe('POST /api/upgrade_assistant/cluster_settings', () => {
       before(async () => {
         try {

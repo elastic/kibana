@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { Global, css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { ChromeLayout, ChromeLayoutConfigProvider } from '..';
@@ -30,16 +30,18 @@ interface StoryArgs {
   footerHeight: number;
   headerHeight: number;
   navigationWidth: number;
-  navigationPanelWidth: number;
   sidebarPanelWidth: number;
   sidebarWidth: number;
+  applicationTopBarHeight: number;
+  applicationBottomBarHeight: number;
   includeSidebar: boolean;
   includeSidebarPanel: boolean;
   includeBanner: boolean;
   includeFooter: boolean;
-  includeNavigationPanel: boolean;
   includeNavigation: boolean;
   includeHeader: boolean;
+  includeApplicationTopBar: boolean;
+  includeApplicationBottomBar: boolean;
 }
 
 type PropsAndArgs = React.ComponentProps<typeof ChromeLayout> & StoryArgs;
@@ -66,9 +68,10 @@ const LayoutExample = ({
   includeFooter,
   includeSidebar,
   includeSidebarPanel,
-  includeNavigationPanel,
   includeNavigation,
   includeHeader,
+  includeApplicationBottomBar,
+  includeApplicationTopBar,
   ...props
 }: StoryArgs) => {
   const {
@@ -119,35 +122,6 @@ const LayoutExample = ({
               />
             ) : null
           }
-          navigationPanel={
-            includeNavigationPanel ? (
-              <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
-                <EuiFlexItem
-                  grow={false}
-                  style={{ height: props.headerHeight }}
-                  css={css`
-                    white-space: nowrap;
-                  `}
-                >
-                  <Box
-                    label="Nav Header"
-                    color={colors.textPrimary}
-                    backgroundColor={colors.primary}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={true}>
-                  <Box
-                    label="Navigation Panel"
-                    color={colors.textPrimary}
-                    backgroundColor={colors.primary}
-                    labelCSS={css`
-                      text-align: center;
-                    `}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : null
-          }
           sidebar={
             includeSidebar ? (
               <Box
@@ -186,12 +160,23 @@ const LayoutExample = ({
               </EuiFlexGroup>
             ) : null
           }
+          applicationTopBar={
+            includeApplicationTopBar && (
+              <Box label="AppBar" color={colors.text} backgroundColor={colors.success} />
+            )
+          }
+          applicationBottomBar={
+            includeApplicationBottomBar && (
+              <Box label="BottomBar" color={colors.text} backgroundColor={colors.accent} />
+            )
+          }
         >
           <Box
             label="Application"
             color={colors.textWarning}
             backgroundColor={colors.warning}
             rootCSS={css`
+              /* demo to make the application area scrollable */
               height: 1000px;
             `}
           />
@@ -206,18 +191,20 @@ export const Layout: StoryObj<PropsAndArgs> = {
     debug: false,
     includeBanner: true,
     includeFooter: true,
-    includeNavigationPanel: true,
     includeNavigation: true,
     includeHeader: true,
     includeSidebar: true,
     includeSidebarPanel: true,
+    includeApplicationBottomBar: true,
+    includeApplicationTopBar: true,
     bannerHeight: 48,
     footerHeight: 48,
     headerHeight: 48,
     navigationWidth: 48,
-    navigationPanelWidth: 240,
     sidebarPanelWidth: 368,
     sidebarWidth: 48,
+    applicationTopBarHeight: 48,
+    applicationBottomBarHeight: 48,
   },
   argTypes: {
     debug: {
@@ -231,10 +218,6 @@ export const Layout: StoryObj<PropsAndArgs> = {
     includeFooter: {
       control: 'boolean',
       description: 'Whether to include the footer in the layout',
-    },
-    includeNavigationPanel: {
-      control: 'boolean',
-      description: 'Whether to include the navigation panel in the layout',
     },
     includeSidebar: {
       control: 'boolean',
@@ -252,13 +235,28 @@ export const Layout: StoryObj<PropsAndArgs> = {
       control: 'boolean',
       description: 'Whether to include the header in the layout',
     },
+    includeApplicationTopBar: {
+      control: 'boolean',
+      description: 'Whether to include the application top bar (appbar) in the layout',
+    },
+    includeApplicationBottomBar: {
+      control: 'boolean',
+      description: 'Whether to include the application bottom bar (bottombar) in the layout',
+    },
     bannerHeight: { control: 'number', description: 'Height of the banner' },
     footerHeight: { control: 'number', description: 'Height of the footer' },
     headerHeight: { control: 'number', description: 'Height of the header' },
     navigationWidth: { control: 'number', description: 'Width of the navigation' },
-    navigationPanelWidth: { control: 'number', description: 'Width of the navigation panel' },
     sidebarPanelWidth: { control: 'number', description: 'Width of the sidebar panel' },
     sidebarWidth: { control: 'number', description: 'Width of the sidebar' },
+    applicationTopBarHeight: {
+      control: 'number',
+      description: 'Height of the application top bar (appbar)',
+    },
+    applicationBottomBarHeight: {
+      control: 'number',
+      description: 'Height of the application bottom bar (bottombar)',
+    },
   },
   render: (args) => <LayoutExample {...args} />,
 };

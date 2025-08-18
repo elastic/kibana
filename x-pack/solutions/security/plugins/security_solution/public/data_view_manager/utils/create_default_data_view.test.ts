@@ -12,7 +12,11 @@ import {
 import { initDataView } from '../../sourcerer/store/model';
 import * as helpersAccess from '../../helpers_access';
 import * as createSourcererDataViewModule from '../../sourcerer/containers/create_sourcerer_data_view';
-import { DEFAULT_DATA_VIEW_ID, DETECTION_ENGINE_INDEX_URL } from '../../../common/constants';
+import {
+  DEFAULT_ALERT_DATA_VIEW_ID,
+  DEFAULT_DATA_VIEW_ID,
+  DETECTION_ENGINE_INDEX_URL,
+} from '../../../common/constants';
 
 jest.mock('../../helpers_access');
 jest.mock('../../sourcerer/containers/create_sourcerer_data_view');
@@ -52,6 +56,7 @@ describe('createDefaultDataView', () => {
     mockHttp.fetch.mockResolvedValue({ name: 'signal-index', index_mapping_outdated: false });
     (createSourcererDataViewModule.createSourcererDataView as jest.Mock).mockResolvedValue({
       defaultDataView: { id: 'dv1', title: 'title1' },
+      alertDataView: { id: 'dv2', title: 'title2' },
       kibanaDataViews: [{ id: 'dv1', title: 'title1' }],
     });
   });
@@ -74,9 +79,12 @@ describe('createDefaultDataView', () => {
         body: { patternList: ['pattern-*', 'signal-index'] },
         dataViewService: mockDataViewService,
         dataViewId: `${DEFAULT_DATA_VIEW_ID}-space1`,
+        alertDataViewId: `${DEFAULT_ALERT_DATA_VIEW_ID}-space1`,
+        signalIndexName: 'signal-index',
       })
     );
     expect(result.defaultDataView).toMatchObject({ id: 'dv1', title: 'title1' });
+    expect(result.alertDataView).toMatchObject({ id: 'dv2', title: 'title2' });
     expect(result.kibanaDataViews[0]).toMatchObject({ id: 'dv1', title: 'title1' });
     expect(result.signal).toEqual({ name: 'signal-index', index_mapping_outdated: false });
   });

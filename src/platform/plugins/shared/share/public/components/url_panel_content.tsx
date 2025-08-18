@@ -8,6 +8,7 @@
  */
 
 import React, { Component } from 'react';
+import type { EuiSwitchEvent, WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiCopy,
@@ -20,9 +21,7 @@ import {
   EuiLoadingSpinner,
   EuiRadioGroup,
   EuiSwitch,
-  EuiSwitchEvent,
   withEuiTheme,
-  WithEuiThemeProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -33,8 +32,8 @@ import { i18n } from '@kbn/i18n';
 import type { Capabilities } from '@kbn/core/public';
 
 import type { LocatorPublic } from '../../common';
-import { UrlParamExtension } from '../types';
-import {
+import type { UrlParamExtension } from '../types';
+import type {
   AnonymousAccessServiceContract,
   AnonymousAccessState,
 } from '../../common/anonymous_access';
@@ -411,7 +410,7 @@ class UrlPanelContentComponent extends Component<UrlPanelContentProps, State, Wi
     <EuiCopy
       beforeMessage={this.state.showWarningButton ? this.props.snapshotShareWarning : undefined}
       textToCopy={this.state.url || ''}
-      anchorClassName="eui-displayBlock"
+      tooltipProps={{ anchorClassName: 'eui-displayBlock' }}
     >
       {(copy) => (
         <EuiButton
@@ -498,6 +497,7 @@ class UrlPanelContentComponent extends Component<UrlPanelContentProps, State, Wi
     return (
       <EuiFormRow helpText={generateLinkAsHelp}>
         <EuiRadioGroup
+          name="exportUrlAs"
           options={this.renderExportUrlAsOptions()}
           idSelected={this.state.exportUrlAs}
           onChange={this.handleExportUrlAs}

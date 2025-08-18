@@ -14,6 +14,8 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/tracing-config",
     "@kbn/config-schema",
+    "@kbn/metrics-config",
   ]
 }

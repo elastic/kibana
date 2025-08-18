@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { DataSourceActorRef } from '../state_management/data_source_state_machine';
+import type { DataSourceActorRef } from '../state_management/data_source_state_machine';
 import { DataSourceCard } from './data_source_card';
 import { DATA_SOURCES_I18N } from './translations';
 
@@ -24,7 +24,7 @@ export const RandomSamplesDataSourceCard = ({
       title={DATA_SOURCES_I18N.randomSamples.name}
       subtitle={DATA_SOURCES_I18N.randomSamples.subtitle}
     >
-      <EuiCallOut iconType="iInCircle" size="s" title={DATA_SOURCES_I18N.randomSamples.callout} />
+      <EuiCallOut iconType="info" size="s" title={DATA_SOURCES_I18N.randomSamples.callout} />
       <EuiSpacer size="m" />
     </DataSourceCard>
   );

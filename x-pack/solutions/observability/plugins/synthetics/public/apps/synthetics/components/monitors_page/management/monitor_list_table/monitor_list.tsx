@@ -5,30 +5,26 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import {
-  Criteria,
-  EuiBasicTable,
-  EuiTableSortingType,
-  EuiPanel,
-  EuiHorizontalRule,
-  useIsWithinMinBreakpoint,
-} from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { Criteria, EuiTableSortingType } from '@elastic/eui';
+import { EuiBasicTable, EuiPanel, EuiHorizontalRule, useIsWithinMinBreakpoint } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { MonitorListHeader } from './monitor_list_header';
 import type { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 import { DeleteMonitor } from './delete_monitor';
-import { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
-import { MonitorListPageState } from '../../../../state';
-import {
-  ConfigKey,
+import type { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
+import type { MonitorListPageState } from '../../../../state';
+import type {
   EncryptedSyntheticsSavedMonitor,
   OverviewStatusState,
-  SourceType,
 } from '../../../../../../../common/runtime_types';
+import { ConfigKey, SourceType } from '../../../../../../../common/runtime_types';
 import { useMonitorListColumns } from './columns';
 import * as labels from './labels';
+import type { ClientPluginsStart } from '../../../../../../plugin';
 
 interface Props {
   pageState: MonitorListPageState;
@@ -40,6 +36,7 @@ interface Props {
   reloadPage: () => void;
   overviewStatus: OverviewStatusState | null;
 }
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const MonitorList = ({
   pageState: { pageIndex, pageSize, sortField, sortOrder },
@@ -108,9 +105,16 @@ export const MonitorList = ({
     onSelectionChange,
     initialSelected: selectedItems,
   };
+  const { spaces: spacesApi } = useKibana<ClientPluginsStart>().services;
+
+  const ContextWrapper = useMemo(
+    () =>
+      spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
+    [spacesApi]
+  );
 
   return (
-    <>
+    <ContextWrapper>
       <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
         <MonitorListHeader
           recordRangeLabel={recordRangeLabel}
@@ -152,6 +156,6 @@ export const MonitorList = ({
           reloadPage={reloadPage}
         />
       )}
-    </>
+    </ContextWrapper>
   );
 };

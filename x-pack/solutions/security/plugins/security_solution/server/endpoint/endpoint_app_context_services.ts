@@ -28,6 +28,8 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { Space } from '@kbn/spaces-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { ReferenceDataClientInterface } from './lib/reference_data';
+import { ReferenceDataClient } from './lib/reference_data';
 import type { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
 import { SavedObjectsClientFactory } from './services/saved_objects';
 import type { ResponseActionsClient } from './services';
@@ -161,6 +163,7 @@ export class EndpointAppContextService {
       licenseService,
       telemetryConfigProvider,
       productFeaturesService,
+      experimentalFeatures,
     } = this.startDependencies;
     const logger = this.createLogger('endpointFleetExtension');
 
@@ -185,7 +188,8 @@ export class EndpointAppContextService {
         licenseService,
         this.setupDependencies.cloud,
         productFeaturesService,
-        telemetryConfigProvider
+        telemetryConfigProvider,
+        experimentalFeatures
       )
     );
 
@@ -193,7 +197,12 @@ export class EndpointAppContextService {
 
     registerFleetCallback(
       'packagePolicyUpdate',
-      getPackagePolicyUpdateCallback(this, this.setupDependencies.cloud, productFeaturesService)
+      getPackagePolicyUpdateCallback(
+        this,
+        this.setupDependencies.cloud,
+        productFeaturesService,
+        experimentalFeatures
+      )
     );
 
     registerFleetCallback('packagePolicyPostUpdate', getPackagePolicyPostUpdateCallback(this));
@@ -432,5 +441,16 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.spacesService.getActiveSpace(httpRequest);
+  }
+
+  public getReferenceDataClient(): ReferenceDataClientInterface {
+    if (!this.startDependencies?.savedObjectsServiceStart) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return new ReferenceDataClient(
+      this.savedObjects.createInternalScopedSoClient({ readonly: false }),
+      this.createLogger('ReferenceDataClient')
+    );
   }
 }

@@ -20,6 +20,8 @@ import {
   EuiSpacer,
   type UseEuiTheme,
 } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+
 import { ActionBarWarning } from './action_bar_warning';
 import { SurrDocType } from '../../services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../services/constants';
@@ -70,6 +72,8 @@ export function ActionBar({
   onChangeCount,
   type,
 }: ActionBarProps) {
+  const styles = useMemoCss(componentStyles);
+
   const showWarning = !isDisabled && !isLoading && docCountAvailable < docCount;
   const isSuccessor = type === SurrDocType.SUCCESSORS;
   const [newDocCount, setNewDocCount] = useState(docCount);
@@ -122,7 +126,7 @@ export function ActionBar({
                     })
               }
               compressed
-              css={cxtSizePickerCss}
+              css={styles.cxtSizePicker}
               data-test-subj={`${type}CountPicker`}
               disabled={isDisabled}
               min={MIN_CONTEXT_SIZE}
@@ -163,13 +167,15 @@ export function ActionBar({
   );
 }
 
-const cxtSizePickerCss = ({ euiTheme }: UseEuiTheme) => css`
-  text-align: center;
-  width: calc(${euiTheme.size.base} * 5);
+const componentStyles = {
+  cxtSizePicker: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      textAlign: 'center',
+      width: `calc(${euiTheme.size.base} * 5)`,
 
-  &::-webkit-outer-spin-button,
-  &::-webkit-inner-spin-button {
-    appearance: none; // Hide increment and decrement buttons for type="number" input.
-    margin: 0;
-  }
-`;
+      '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
+        appearance: 'none', // Hide increment and decrement buttons for type="number" input.
+        margin: 0,
+      },
+    }),
+};

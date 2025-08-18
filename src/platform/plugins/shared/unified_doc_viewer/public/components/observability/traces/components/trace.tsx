@@ -11,17 +11,19 @@ import React, { useCallback, useState } from 'react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { spanTraceFields } from '../doc_viewer_span_overview/resources/fields';
 import { transactionTraceFields } from '../doc_viewer_transaction_overview/resources/fields';
 import { SpanSummaryField } from '../doc_viewer_span_overview/sub_components/span_summary_field';
 import { TransactionSummaryField } from '../doc_viewer_transaction_overview/sub_components/transaction_summary_field';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
-import { FieldConfiguration } from '../resources/get_field_configuration';
+import type { FieldConfiguration } from '../resources/get_field_configuration';
 import { FullScreenWaterfall } from './full_screen_waterfall';
 
 export interface TraceProps {
   fields: Record<string, FieldConfiguration>;
+  fieldMappings: Record<string, DataViewField | undefined>;
   traceId: string;
   displayType: 'span' | 'transaction';
   docId: string;
@@ -34,6 +36,7 @@ export interface TraceProps {
 export const Trace = ({
   traceId,
   fields,
+  fieldMappings,
   displayType,
   docId,
   dataView,
@@ -67,6 +70,7 @@ export const Trace = ({
             key={fieldId}
             fieldId={fieldId}
             fieldConfiguration={fields[fieldId]}
+            fieldMapping={fieldMappings[fieldId]}
             showActions={showActions}
           />
         ))
@@ -75,6 +79,7 @@ export const Trace = ({
             key={fieldId}
             fieldId={fieldId}
             fieldConfiguration={fields[fieldId]}
+            fieldMapping={fieldMappings[fieldId]}
             showActions={showActions}
           />
         ));

@@ -163,6 +163,7 @@ function FlyoutActions({
                 content={i18n.translate('discover.grid.tableRow.moreFlyoutActionsButton', {
                   defaultMessage: 'More actions',
                 })}
+                disableScreenReaderOutput
               >
                 <EuiButtonIcon
                   size="s"

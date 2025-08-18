@@ -7,20 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PureComponent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { PureComponent } from 'react';
 import { isEmpty } from 'lodash';
 import classNames from 'classnames';
-import { css } from '@emotion/react';
 
 import useRafState from 'react-use/lib/useRafState';
-import { QuerySuggestion } from '../autocomplete';
+import type { UseEuiTheme } from '@elastic/eui';
+import { euiShadow, euiShadowFlat } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { EmotionStyles } from '../use_memo_css';
+import { useMemoCss } from '../use_memo_css';
+import type { QuerySuggestion } from '../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
 import {
   SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE,
   SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET,
   SUGGESTIONS_LIST_REQUIRED_WIDTH,
 } from './constants';
-import { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
+import type { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
 import { onRaf, shallowEqual } from '../utils';
 
 interface SuggestionsComponentProps {
@@ -35,7 +40,7 @@ interface SuggestionsComponentProps {
 }
 
 export interface SuggestionsAbstraction {
-  type: 'alerts' | 'rules' | 'cases';
+  type: 'alerts' | 'rules' | 'cases' | 'endpoints';
   fields: Record<
     string,
     {
@@ -167,6 +172,7 @@ const ResizableSuggestionsListDiv: React.FC<{
   const inputContainer = props.inputContainer;
 
   const [{ documentHeight }, { pageYOffset }, containerRect] = useDimensions(inputContainer);
+  const styles = useMemoCss(suggestionsStyles);
 
   if (!containerRect) return null;
 
@@ -175,26 +181,25 @@ const ResizableSuggestionsListDiv: React.FC<{
     documentHeight - (containerRect.top + containerRect.height) >
     SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE;
   const verticalListPosition = isSuggestionsListFittable
-    ? `top: ${pageYOffset + containerRect.bottom - SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET}px;`
-    : `bottom: ${documentHeight - (pageYOffset + containerRect.top)}px;`;
-
-  const divPosition = css`
-    position: absolute;
-    z-index: 4001;
-    left: ${containerRect.left}px;
-    width: ${containerRect.width}px;
-    ${verticalListPosition}
-  `;
+    ? { top: `${pageYOffset + containerRect.bottom - SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET}px` }
+    : { bottom: `${documentHeight - (pageYOffset + containerRect.top)}px` };
 
   return (
-    <div css={divPosition}>
+    <div
+      css={styles.container}
+      style={{
+        left: `${containerRect.left}px`,
+        width: `${containerRect.width}px`,
+        ...verticalListPosition,
+      }}
+    >
       <div
         className={classNames('kbnTypeahead', {
           'kbnTypeahead--small': props.suggestionsSize === 's',
         })}
       >
         <div
-          className={classNames('kbnTypeahead__popover', {
+          className={classNames('kbnTypeahead__popover', 'eui-scrollBar', {
             ['kbnTypeahead__popover--bottom']: isSuggestionsListFittable,
             ['kbnTypeahead__popover--top']: !isSuggestionsListFittable,
           })}
@@ -278,3 +283,46 @@ function useDimensions(
 
   return [{ documentHeight }, pageOffset, containerRect];
 }
+
+const suggestionsStyles: EmotionStyles = {
+  container: (context: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      zIndex: 4001,
+      '.kbnTypeahead': {
+        maxHeight: '60vh',
+        '&.kbnTypeahead--small': {
+          maxHeight: '20vh',
+        },
+      },
+      '.kbnTypeahead__popover': {
+        maxHeight: 'inherit',
+        border: `1px solid ${context.euiTheme.colors.borderBaseSubdued}`,
+        color: context.euiTheme.colors.text,
+        backgroundColor: context.euiTheme.colors.emptyShade,
+        position: 'relative',
+        zIndex: context.euiTheme.levels.menu,
+        width: '100%',
+        overflowY: 'auto',
+
+        '&.kbnTypeahead__popover--top': css([
+          euiShadowFlat(context),
+          {
+            borderTopLeftRadius: context.euiTheme.border.radius.medium,
+            borderTopRightRadius: context.euiTheme.border.radius.medium,
+            // Clips the shadow so it doesn't show above the input (below)
+            clipPath: `polygon(-50px -50px, calc(100% + 50px) -50px, calc(100% + 50px) 100%, -50px 100%)`,
+          },
+        ]),
+        '&.kbnTypeahead__popover--bottom': css([
+          euiShadow(context),
+          {
+            borderBottomLeftRadius: context.euiTheme.border.radius.medium,
+            borderBottomRightRadius: context.euiTheme.border.radius.medium,
+            // Clips the shadow so it doesn't show above the input (top)
+            clipPath: `polygon(-50px 1px, calc(100% + 50px) 1px, calc(100% + 50px) calc(100% + 50px), -50px calc(100% + 50px))`,
+          },
+        ]),
+      },
+    }),
+};

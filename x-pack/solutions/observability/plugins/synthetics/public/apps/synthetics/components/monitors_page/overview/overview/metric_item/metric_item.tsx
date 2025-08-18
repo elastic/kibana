@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
-import { EuiPanel, EuiSpacer, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,8 +14,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import React, { useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
-import { ClientPluginsStart } from '../../../../../../../plugin';
+import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import type { ClientPluginsStart } from '../../../../../../../plugin';
 import { useLocationName, useStatusByLocationOverview } from '../../../../../hooks';
 import {
   selectErrorPopoverState,
@@ -31,9 +32,9 @@ import { ActionsPopover } from '../actions_popover';
 import { MetricItemBody } from './metric_item_body';
 import { MetricItemExtra } from './metric_item_extra';
 import { MetricItemIcon } from './metric_item_icon';
-import { FlyoutParamProps } from '../types';
+import type { FlyoutParamProps } from '../types';
 
-const METRIC_ITEM_HEIGHT = 160;
+const METRIC_ITEM_HEIGHT = 170;
 
 export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?: string) => {
   if (!isEnabled) {
@@ -93,7 +94,7 @@ export const MetricItem = ({
       });
     }
 
-    if (trendData === null) {
+    if (!trendData) {
       return i18n.translate('xpack.synthetics.overview.metricItem.trendMessage.noData', {
         defaultMessage: 'No data available for the selected time window.',
       });
@@ -171,7 +172,7 @@ export const MetricItem = ({
                   id: monitor.configId,
                   location: locationName,
                   locationId: monitor.locationId,
-                  spaceId: monitor.spaceId,
+                  spaces: monitor.spaces,
                 });
               }
             }}

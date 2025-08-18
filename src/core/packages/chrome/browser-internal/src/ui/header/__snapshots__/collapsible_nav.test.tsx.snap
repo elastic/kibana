@@ -816,7 +816,6 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   }
   navigateToApp={[Function]}
   navigateToUrl={[Function]}
-  onIsLockedUpdate={[Function]}
   recentlyAccessed$={
     BehaviorSubject {
       "_value": Array [],
@@ -1083,7 +1082,6 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   }
   navigateToApp={[Function]}
   navigateToUrl={[Function]}
-  onIsLockedUpdate={[Function]}
   recentlyAccessed$={
     BehaviorSubject {
       "_value": Array [],

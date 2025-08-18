@@ -153,7 +153,9 @@ describe('AssistantSettings', () => {
     expect(onSave).toHaveBeenCalled();
     expect(mockSystemUpdater.saveSystemPromptSettings).toHaveBeenCalled();
     expect(mockConversationsUpdater.saveConversationsSettings).toHaveBeenCalledWith({
-      updates: [],
+      bulkActions: {
+        updates: [],
+      },
     });
   });
 

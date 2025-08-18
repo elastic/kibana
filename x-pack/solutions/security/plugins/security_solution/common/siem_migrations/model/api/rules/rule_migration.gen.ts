@@ -37,6 +37,15 @@ import { RelatedIntegration } from '../../../../api/detection_engine/model/rule_
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import { LangSmithOptions } from '../../common.gen';
 
+export type CreateRuleMigrationRequestBody = z.infer<typeof CreateRuleMigrationRequestBody>;
+export const CreateRuleMigrationRequestBody = z.object({
+  /**
+   * The rule migration name
+   */
+  name: NonEmptyString,
+});
+export type CreateRuleMigrationRequestBodyInput = z.input<typeof CreateRuleMigrationRequestBody>;
+
 export type CreateRuleMigrationResponse = z.infer<typeof CreateRuleMigrationResponse>;
 export const CreateRuleMigrationResponse = z.object({
   /**
@@ -313,8 +322,52 @@ export type UpdateRuleMigrationRequestParamsInput = z.input<
   typeof UpdateRuleMigrationRequestParams
 >;
 
-export type UpdateRuleMigrationResponse = z.infer<typeof UpdateRuleMigrationResponse>;
-export const UpdateRuleMigrationResponse = RuleMigration;
+export type UpdateRuleMigrationRequestBody = z.infer<typeof UpdateRuleMigrationRequestBody>;
+export const UpdateRuleMigrationRequestBody = z.object({
+  /**
+   * The rule migration name
+   */
+  name: NonEmptyString.optional(),
+  /**
+   * The index pattern to update
+   */
+  index_pattern: NonEmptyString.optional(),
+});
+export type UpdateRuleMigrationRequestBodyInput = z.input<typeof UpdateRuleMigrationRequestBody>;
+
+export type UpdateRuleMigrationIndexPatternRequestParams = z.infer<
+  typeof UpdateRuleMigrationIndexPatternRequestParams
+>;
+export const UpdateRuleMigrationIndexPatternRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type UpdateRuleMigrationIndexPatternRequestParamsInput = z.input<
+  typeof UpdateRuleMigrationIndexPatternRequestParams
+>;
+
+export type UpdateRuleMigrationIndexPatternRequestBody = z.infer<
+  typeof UpdateRuleMigrationIndexPatternRequestBody
+>;
+export const UpdateRuleMigrationIndexPatternRequestBody = z.object({
+  ids: z.array(NonEmptyString).optional(),
+  /**
+   * The index pattern to update
+   */
+  index_pattern: NonEmptyString,
+});
+export type UpdateRuleMigrationIndexPatternRequestBodyInput = z.input<
+  typeof UpdateRuleMigrationIndexPatternRequestBody
+>;
+
+export type UpdateRuleMigrationIndexPatternResponse = z.infer<
+  typeof UpdateRuleMigrationIndexPatternResponse
+>;
+export const UpdateRuleMigrationIndexPatternResponse = z.object({
+  /**
+   * Indicates the number of rules that have been updated.
+   */
+  updated: z.number(),
+});
 
 export type UpdateRuleMigrationRulesRequestParams = z.infer<
   typeof UpdateRuleMigrationRulesRequestParams

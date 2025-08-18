@@ -10,11 +10,11 @@ import React from 'react';
 import { tableHasFormulas } from '@kbn/data-plugin/common';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
 import { exporters } from '@kbn/data-plugin/public';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { ExportShare } from '@kbn/share-plugin/public/types';
-import { FormatFactory } from '../../../common/types';
+import type { ExportShare } from '@kbn/share-plugin/public/types';
+import type { FormatFactory } from '../../../common/types';
 
 export interface CSVSharingData {
   title: string;
@@ -136,7 +136,7 @@ export const downloadCsvLensShareProvider = ({
       return {
         id: 'csvDownloadLens',
         name: panelTitle,
-        icon: 'document',
+        icon: 'tableDensityNormal',
         sortOrder: 1,
         label: 'CSV',
         exportType: 'lens_csv',

@@ -33,7 +33,6 @@ const webhook = {
   secret: 'secret',
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function tinesTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');

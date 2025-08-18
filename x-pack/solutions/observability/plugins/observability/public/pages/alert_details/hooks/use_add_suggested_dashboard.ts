@@ -7,12 +7,13 @@
 
 import { useCallback } from 'react';
 import { useUpdateRule } from '@kbn/response-ops-rule-form/src/common/hooks';
-import { UpdateRuleBody } from '@kbn/response-ops-rule-form/src/common/apis';
-import { Rule, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { IHttpFetchError } from '@kbn/core/public';
+import type { UpdateRuleBody } from '@kbn/response-ops-rule-form/src/common/apis';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import type { IHttpFetchError } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useState } from 'react';
-import { DashboardMetadata } from '../components/related_dashboards/dashboard_tile';
+import type { RelatedDashboard } from '@kbn/observability-schema';
 
 export const useAddSuggestedDashboards = ({
   rule,
@@ -39,35 +40,26 @@ export const useAddSuggestedDashboards = ({
     [notifications.toasts]
   );
 
-  const onSuccess = useCallback(
-    async (data: Rule) => {
-      if (!addingDashboardId)
-        throw new Error('Adding dashboard id not defined, this should never occur');
-      await onSuccessAddSuggestedDashboard();
-      setAddingDashboardId(undefined);
-      notifications.toasts.addSuccess({
-        title: i18n.translate(
-          'xpack.observability.alertDetails.addSuggestedDashboardSuccess.title',
-          {
-            defaultMessage: 'Added to linked dashboard',
-          }
-        ),
-        text: i18n.translate('xpack.observability.alertDetails.addSuggestedDashboardSuccess.text', {
-          defaultMessage:
-            'From now on this dashboard will be linked to all alerts related to {ruleName}',
-          values: {
-            ruleName: data.name,
-          },
-        }),
-      });
-    },
-    [addingDashboardId, notifications.toasts, onSuccessAddSuggestedDashboard]
-  );
+  const onSuccess = useCallback(async () => {
+    if (!addingDashboardId)
+      throw new Error('Adding dashboard id not defined, this should never occur');
+    await onSuccessAddSuggestedDashboard();
+    setAddingDashboardId(undefined);
+    notifications.toasts.addSuccess({
+      title: i18n.translate('xpack.observability.alertDetails.addSuggestedDashboardSuccess.title', {
+        defaultMessage: 'Added to linked dashboard',
+      }),
+      text: i18n.translate('xpack.observability.alertDetails.addSuggestedDashboardSuccess.text', {
+        defaultMessage:
+          'From now on, this dashboard will be linked to all alerts triggered by this rule',
+      }),
+    });
+  }, [addingDashboardId, notifications.toasts, onSuccessAddSuggestedDashboard]);
 
   const { mutateAsync: updateRule } = useUpdateRule({ http, onError, onSuccess });
 
   const onClickAddSuggestedDashboard = useCallback(
-    (d: DashboardMetadata) => {
+    (d: RelatedDashboard) => {
       const updatedRule: UpdateRuleBody = {
         ...rule,
         artifacts: {
