@@ -8,6 +8,7 @@ import { FieldDefinition, UnsavedFieldChange } from '@kbn/management-settings-ty
 import { UiSettingsType } from '@kbn/core/public';
 import { UseGenAiConnectorsResult } from '../../hooks/use_genai_connectors';
 import { i18n } from '@kbn/i18n';
+import { NO_DEFAULT_CONNECTOR } from '@kbn/gen-ai-settings-plugin/common/constants';
 
 
 type Props = {
