@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { SavedPlaygroundLoadErrors } from '../../types';
+import type { SavedPlaygroundLoadErrors } from '../../types';
 
 export interface SavedPlaygroundInvalidStateModalProps {
   errors: SavedPlaygroundLoadErrors;

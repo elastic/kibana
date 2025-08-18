@@ -2722,6 +2722,43 @@ describe('TaskManagerRunner', () => {
         tags: ['task:end', 'foo', 'bar'],
       });
     });
+
+    test('Disables task if shouldDisableTask: true is returned', async () => {
+      const { runner, store, logger } = await readyToRunStageSetup({
+        instance: {
+          schedule: {
+            interval: `1m`,
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return {
+                  state: {},
+                  shouldDisableTask: true,
+                };
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+      expect(store.partialUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          enabled: false,
+          id: 'foo',
+          status: 'idle',
+        }),
+        expect.anything()
+      );
+      expect(logger.warn).toBeCalledTimes(1);
+      expect(logger.warn).toBeCalledWith(
+        'Disabling task bar:foo as it indicated it should disable itself',
+        { tags: ['bar'] }
+      );
+    });
   });
 
   describe('isAdHocTaskAndOutOfAttempts', () => {

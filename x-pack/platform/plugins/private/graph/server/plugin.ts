@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
+import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { LicenseState } from './lib/license_state';
 import { registerSearchRoute } from './routes/search';

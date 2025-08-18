@@ -9,7 +9,7 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
-import { DataViewListItemEnhanced } from './dataview_list';
+import type { DataViewListItemEnhanced } from './dataview_list';
 
 const DEFAULT_WIDTH = 350;
 

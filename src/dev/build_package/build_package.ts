@@ -14,7 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import execa from 'execa';
 import globby from 'globby';
 import { run } from '@kbn/dev-cli-runner';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 const PATH_TO_WEBPACK_CLI = 'node_modules/.bin/webpack-cli';
 

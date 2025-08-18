@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { Observable } from 'rxjs';
 import {
   filter,
   map,
@@ -19,9 +20,8 @@ import {
   merge,
   catchError,
   throwError,
-  Observable,
 } from 'rxjs';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
@@ -38,8 +38,8 @@ import {
 } from '../../../common/conversation_events';
 import type { ChatEvent, ToolResultEvent, MessageEvent } from '../../../common/chat_events';
 import type { Conversation } from '../../../common/conversations';
-import { AgentFactory } from '../orchestration';
-import { ConversationService, ConversationClient } from '../conversations';
+import type { AgentFactory } from '../orchestration';
+import type { ConversationService, ConversationClient } from '../conversations';
 import { generateConversationTitle } from './generate_conversation_title';
 
 interface ChatServiceOptions {

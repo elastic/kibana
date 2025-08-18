@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BaseStep } from '@kbn/workflows'; // Adjust path as needed
-import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
-import { StepImplementation } from './step_base';
+import type { BaseStep } from '@kbn/workflows'; // Adjust path as needed
+import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { StepImplementation } from './step_base';
 // Import schema and inferred types
-import { ConnectorExecutor } from '../connector_executor';
+import type { ConnectorExecutor } from '../connector_executor';
 import {
   EnterConditionBranchNodeImpl,
   EnterIfNodeImpl,
   ExitIfNodeImpl,
   ExitConditionBranchNodeImpl,
 } from './if_step';
-import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
-import { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import { WaitStepImpl } from './wait_step/wait_step';
-import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created

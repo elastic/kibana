@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsWorkflowExecution, EsWorkflowStepExecution, ExecutionStatus } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { graphlib } from '@dagrejs/dagre';
 import { withSpan } from '@kbn/apm-utils';
 import agent from 'elastic-apm-node';
-import { RunStepResult } from '../step/step_base';
-import { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import { WorkflowExecutionState } from './workflow_execution_state';
+import type { RunStepResult } from '../step/step_base';
+import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { WorkflowExecutionState } from './workflow_execution_state';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
@@ -202,7 +203,6 @@ export class WorkflowExecutionRuntimeManager {
 
         this.workflowExecutionState.upsertStep(stepExecution);
         this.logStepStart(stepId);
-        // TODO: To think what to do here
         await this.workflowExecutionState.flush();
       }
     );

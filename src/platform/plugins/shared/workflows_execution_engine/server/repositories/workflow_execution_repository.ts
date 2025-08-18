@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { EsWorkflowExecution } from '@kbn/workflows';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { EsWorkflowExecution } from '@kbn/workflows';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
 export class WorkflowExecutionRepository {
