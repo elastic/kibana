@@ -42,7 +42,7 @@ export const ConfigSchema = schema.oneOf([
     ),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     contextWindowLength: schema.maybe(schema.number({})),
-    useNativeFunctionCalling: schema.maybe(schema.boolean()),
+    enableNativeFunctionCalling: schema.maybe(schema.boolean()),
   }),
 ]);
 
