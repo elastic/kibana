@@ -20,7 +20,6 @@ import React from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { ExecutionStatus, WorkflowDetailDto } from '@kbn/workflows';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/useWorkflowExecutions';
-import { WorkflowExecution } from '../../workflow_execution_detail/ui/workflow_execution';
 import { StatusBadge } from '../../../shared/ui/status_badge';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
@@ -125,14 +124,15 @@ export function WorkflowExecutionList({ workflow }: { workflow: WorkflowDetailDt
         <EuiBasicTable
           columns={columns}
           items={tableItems}
-          responsiveBreakpoint={false}
+          responsiveBreakpoint={true}
+          // responsiveBreakpoint={false}
           rowProps={(item) => ({
             onClick: () => handleViewWorkflowExecution(item),
             className: item.id === selectedExecutionId ? 'euiTableRow--marked' : undefined,
           })}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
+      {/* <EuiFlexItem>
         {selectedExecutionId ? (
           <WorkflowExecution
             workflowExecutionId={selectedExecutionId}
@@ -151,7 +151,7 @@ export function WorkflowExecutionList({ workflow }: { workflow: WorkflowDetailDt
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-      </EuiFlexItem>
+      </EuiFlexItem> */}
     </EuiFlexGroup>
   );
 }

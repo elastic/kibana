@@ -23,8 +23,9 @@ import {
 } from '@elastic/eui';
 
 import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
@@ -44,12 +45,18 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
   workflowYaml,
   fields = ['stepId', 'workflowId', 'status', 'executionTimeMs'],
 }) => {
+  const { uiSettings } = useKibana().services;
   const {
     data: workflowExecution,
     isLoading,
     error,
     refetch,
   } = useWorkflowExecution(workflowExecutionId);
+
+  const isVisualEditorEnabled = uiSettings?.get<boolean>(
+    WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
+    false
+  );
 
   const columns = useMemo<Array<EuiBasicTableColumn<EsWorkflowStepExecution>>>(
     () =>
@@ -236,7 +243,7 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiDescriptionList type="column" listItems={executionProps} compressed />
-      {workflowYamlObject && (
+      {isVisualEditorEnabled && workflowYamlObject && (
         <>
           <EuiSpacer size="s" />
           <div css={{ height: '500px' }}>

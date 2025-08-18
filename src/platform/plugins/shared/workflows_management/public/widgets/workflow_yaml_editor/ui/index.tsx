@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -56,6 +56,8 @@ export const WorkflowYAMLEditor = ({
   onValidationErrors,
   ...props
 }: WorkflowYAMLEditorProps) => {
+  const { euiTheme } = useEuiTheme();
+
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor | null>(
     null
   );
@@ -121,6 +123,17 @@ export const WorkflowYAMLEditor = ({
     return getCompletionItemProvider(WORKFLOW_ZOD_SCHEMA_LOOSE);
   }, []);
 
+  useEffect(() => {
+    monaco.editor.defineTheme('workflows-yaml-light', {
+      base: 'vs',
+      inherit: true,
+      rules: [],
+      colors: {
+        'editor.background': euiTheme.colors.backgroundBaseSubdued,
+      },
+    });
+  }, [euiTheme]);
+
   const editorOptions = useMemo<monaco.editor.IStandaloneEditorConstructionOptions>(
     () => ({
       readOnly,
@@ -137,7 +150,10 @@ export const WorkflowYAMLEditor = ({
       wordWrap: 'on',
       wordWrapColumn: 80,
       wrappingIndent: 'indent',
-      theme: 'vs-light',
+      theme: 'workflows-yaml-light',
+      padding: {
+        top: 24,
+      },
       quickSuggestions: {
         other: true,
         comments: false,

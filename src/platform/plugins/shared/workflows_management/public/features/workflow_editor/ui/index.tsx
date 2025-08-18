@@ -24,19 +24,22 @@ interface WorkflowEditorProps {
 }
 
 export function WorkflowEditor({ workflowId, value, onChange, hasChanges }: WorkflowEditorProps) {
-  useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiFlexGroup
       direction="column"
       css={{
-        border: '1px solid lightgray',
-        borderRadius: '4px',
-        height: 'calc(100vh - 300px)',
+        width: '100%',
+        height: 'calc(100vh - 200px)',
+        position: 'relative',
       }}
       gutterSize="none"
     >
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem
+        grow={false}
+        css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
+      >
         {hasChanges ? (
           <div
             css={{
@@ -45,7 +48,6 @@ export function WorkflowEditor({ workflowId, value, onChange, hasChanges }: Work
               alignItems: 'center',
               gap: '4px',
               padding: '4px 6px',
-              borderBottom: '1px solid lightgray',
             }}
           >
             <div
@@ -66,7 +68,6 @@ export function WorkflowEditor({ workflowId, value, onChange, hasChanges }: Work
               alignItems: 'center',
               gap: '4px',
               padding: '4px 6px',
-              borderBottom: '1px solid lightgray',
             }}
           >
             <div
