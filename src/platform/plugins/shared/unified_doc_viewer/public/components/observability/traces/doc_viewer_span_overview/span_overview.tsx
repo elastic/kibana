@@ -21,18 +21,19 @@ import {
 import { getFlattenedSpanDocumentOverview } from '@kbn/discover-utils/src';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo } from 'react';
-import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { useDataViewFields } from '../../../../hooks/use_data_view_fields';
+import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { SpanLinks } from '../components/span_links';
 import { Trace } from '../components/trace';
+import { RootTransactionProvider } from '../doc_viewer_transaction_overview/hooks/use_root_transaction';
+import { DataSourcesProvider } from '../hooks/use_data_sources';
 import { RootSpanProvider } from './hooks/use_root_span';
-import { spanFields, allSpanFields } from './resources/fields';
+import { allSpanFields, spanFields } from './resources/fields';
 import { getSpanFieldConfiguration } from './resources/get_span_field_configuration';
 import { SpanDurationSummary } from './sub_components/span_duration_summary';
 import { SpanSummaryField } from './sub_components/span_summary_field';
 import { SpanSummaryTitle } from './sub_components/span_summary_title';
-import { RootTransactionProvider } from '../doc_viewer_transaction_overview/hooks/use_root_transaction';
-import { DataSourcesProvider } from '../hooks/use_data_sources';
 
 export type SpanOverviewProps = DocViewRenderProps & {
   indexes: {
@@ -81,6 +82,7 @@ export function SpanOverview({
 
   const traceId = flattenedDoc[TRACE_ID_FIELD];
   const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
+  const spanId = flattenedDoc[SPAN_ID_FIELD];
 
   return (
     <DataSourcesProvider indexes={indexes}>
@@ -103,7 +105,7 @@ export function SpanOverview({
                   <SpanSummaryTitle
                     spanName={flattenedDoc[SPAN_NAME_FIELD]}
                     formattedSpanName={formattedDoc[SPAN_NAME_FIELD]}
-                    spanId={flattenedDoc[SPAN_ID_FIELD]}
+                    spanId={spanId}
                     formattedSpanId={formattedDoc[SPAN_ID_FIELD]}
                     showActions={showActions}
                   />
@@ -135,14 +137,17 @@ export function SpanOverview({
                   <Trace
                     fields={fieldConfigurations}
                     fieldMappings={dataViewFields}
-                    traceId={flattenedDoc[TRACE_ID_FIELD]}
-                    docId={flattenedDoc[SPAN_ID_FIELD]}
+                    traceId={traceId}
+                    docId={spanId}
                     displayType="span"
                     dataView={dataView}
                     tracesIndexPattern={indexes.apm.traces}
                     showWaterfall={showWaterfall}
                     showActions={showActions}
                   />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <SpanLinks traceId={traceId} spanId={spanId} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>

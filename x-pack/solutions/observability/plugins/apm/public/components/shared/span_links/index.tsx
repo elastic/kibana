@@ -22,12 +22,12 @@ interface Props {
   spanLinksCount: SpanLinksCount;
   traceId: string;
   spanId: string;
-  processorEvent: ProcessorEvent;
+  processorEvent: ProcessorEvent; // TODO: caue remove this
 }
 
 type LinkType = 'children' | 'parents';
 
-export function SpanLinks({ spanLinksCount, traceId, spanId, processorEvent }: Props) {
+export function SpanLinks({ spanLinksCount, traceId, spanId }: Props) {
   const {
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams(
@@ -62,11 +62,11 @@ export function SpanLinks({ spanLinksCount, traceId, spanId, processorEvent }: P
       return callApmApi('GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents', {
         params: {
           path: { traceId, spanId },
-          query: { kuery, start, end, processorEvent },
+          query: { kuery, start, end },
         },
       });
     },
-    [selectedLinkType, kuery, traceId, spanId, start, end, processorEvent]
+    [selectedLinkType, kuery, traceId, spanId, start, end]
   );
 
   const selectOptions: EuiSelectOption[] = useMemo(
