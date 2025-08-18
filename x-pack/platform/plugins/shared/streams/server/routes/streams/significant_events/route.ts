@@ -6,15 +6,16 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import { ServerSentEventBase } from '@kbn/sse-utils';
-import {
+import type { ServerSentEventBase } from '@kbn/sse-utils';
+import type {
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
 import moment from 'moment';
-import { Observable, from as fromRxjs, map } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { from as fromRxjs, map } from 'rxjs';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import {
   STREAMS_API_PRIVILEGES,
@@ -149,11 +150,7 @@ const readSignificantEventsRoute = createServerRoute({
       request,
     });
     await assertLicenseAndPricingTier(server, licensing);
-
-    const isStreamEnabled = await streamsClient.isStreamsEnabled();
-    if (!isStreamEnabled) {
-      throw badRequest('Streams are not enabled');
-    }
+    await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
     const { from, to, bucketSize } = params.query;
@@ -227,11 +224,7 @@ const generateSignificantEventsRoute = createServerRoute({
     const { streamsClient, scopedClusterClient, licensing, inferenceClient } =
       await getScopedClients({ request });
     await assertLicenseAndPricingTier(server, licensing);
-
-    const isStreamEnabled = await streamsClient.isStreamsEnabled();
-    if (!isStreamEnabled) {
-      throw badRequest('Streams are not enabled');
-    }
+    await streamsClient.ensureStream(params.path.name);
 
     const generatedSignificantEventDefinitions = await generateSignificantEventDefinitions(
       {

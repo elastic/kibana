@@ -7,7 +7,7 @@
 
 import { registerDataHandler, getDataHandler } from './data_handler';
 import moment from 'moment';
-import { ApmIndicesConfig } from '../../../common/typings';
+import type { ApmIndicesConfig } from '../../../common/typings';
 
 const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 

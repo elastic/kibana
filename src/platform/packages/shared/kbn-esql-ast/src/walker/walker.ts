@@ -8,7 +8,8 @@
  */
 
 import type * as types from '../types';
-import { NodeMatchTemplate, templateToPredicate } from './helpers';
+import type { NodeMatchTemplate } from './helpers';
+import { templateToPredicate } from './helpers';
 
 type Node = types.ESQLAstNode | types.ESQLAstNode[];
 
@@ -251,6 +252,25 @@ export class Walker {
     return Walker.findAll(tree, predicate, options);
   };
 
+  /**
+   * Replaces a single node in the AST with a new value. Replaces the first
+   * node that matches the template with the new value. Replacement happens
+   * in-place, so the original AST is modified.
+   *
+   * For example, replace "?my_param" parameter with an inlined string literal:
+   *
+   * ```typescript
+   * Walker.replace(ast,
+   *  { type: 'literal', literalType: 'param', paramType: 'named',
+   *      value: 'my_param' },
+   *  Builder.expression.literal.string('This is my string'));
+   * ```
+   *
+   * @param tree AST node to search in.
+   * @param matcher A function or template object to match against the node.
+   * @param newValue The new value to replace the matched node.
+   * @returns The updated node, if a match was found and replaced.
+   */
   public static readonly replace = (
     tree: WalkerAstNode,
     matcher: NodeMatchTemplate | ((node: types.ESQLProperNode) => boolean),
@@ -259,13 +279,23 @@ export class Walker {
     const node =
       typeof matcher === 'function' ? Walker.find(tree, matcher) : Walker.match(tree, matcher);
     if (!node) return;
-    for (const key in node)
+    for (const key in node) {
       if (typeof key === 'string' && Object.prototype.hasOwnProperty.call(node, key))
         delete (node as any)[key];
+    }
     Object.assign(node, newValue);
     return node;
   };
 
+  /**
+   * Replaces all nodes in the AST that match the given template with the new
+   * value. Works same as {@link Walker.replace}, but replaces all matching nodes.
+   *
+   * @param tree AST node to search in.
+   * @param matcher A function or template object to match against the node.
+   * @param newValue The new value to replace the matched nodes.
+   * @returns The updated nodes, if any matches were found and replaced.
+   */
   public static readonly replaceAll = (
     tree: WalkerAstNode,
     matcher: NodeMatchTemplate | ((node: types.ESQLProperNode) => boolean),
@@ -277,9 +307,10 @@ export class Walker {
         : Walker.matchAll(tree, matcher);
     if (nodes.length === 0) return [];
     for (const node of nodes) {
-      for (const key in node)
+      for (const key in node) {
         if (typeof key === 'string' && Object.prototype.hasOwnProperty.call(node, key))
           delete (node as any)[key];
+      }
       Object.assign(node, newValue);
     }
     return nodes;

@@ -6,18 +6,14 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import {
-  type UserIdAndName,
-  type Conversation,
-  ConversationWithoutRounds,
-  ConversationRound,
-} from '@kbn/onechat-common';
-import { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { ConversationWithoutRounds, ConversationRound } from '@kbn/onechat-common';
+import { type UserIdAndName, type Conversation } from '@kbn/onechat-common';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
 } from '../../../common/conversations';
-import { ConversationProperties } from './storage';
+import type { ConversationProperties } from './storage';
 
 export type Document = Pick<GetResponse<ConversationProperties>, '_source' | '_id'>;
 
