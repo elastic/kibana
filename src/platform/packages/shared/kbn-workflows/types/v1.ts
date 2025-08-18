@@ -28,7 +28,11 @@ export interface EsWorkflowExecution {
   id: string;
   workflowId: string;
   status: ExecutionStatus;
+  context: Record<string, string>;
   workflowDefinition: WorkflowYaml;
+  /** Serialized graphlib.Graph */
+  executionGraph?: any;
+  currentNodeId?: string; // The node currently being executed
   createdAt: string;
   error: string | null;
   createdBy: string;
@@ -62,8 +66,9 @@ export interface EsWorkflowStepExecution {
   completedAt?: string;
   executionTimeMs?: number;
   topologicalIndex: number;
-  error?: string;
-  output?: Record<string, any>;
+  error?: string | null;
+  output?: Record<string, any> | null;
+  state?: Record<string, any>;
 }
 
 export enum WorkflowStatus {

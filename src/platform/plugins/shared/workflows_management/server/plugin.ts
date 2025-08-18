@@ -220,7 +220,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.schedulerService = new SchedulerService(
       this.logger,
       this.workflowsService!,
-      this.unsecureActionsClient!,
       plugins.taskManager
     );
     this.api!.setSchedulerService(this.schedulerService!);
