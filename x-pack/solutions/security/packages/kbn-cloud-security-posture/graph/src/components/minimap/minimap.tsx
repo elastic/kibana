@@ -28,6 +28,7 @@ const MiniMapNode = ({
   width = NODE_WIDTH,
   height = NODE_HEIGHT,
   data,
+  id,
 }: MiniMapNodeRenderedProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -80,7 +81,7 @@ const MiniMapNode = ({
   // Fallback for unknown types
   return (
     <rect
-      data-id={`unknown-${x}-${y}`}
+      data-id={`unknown-${id}`}
       data-test-subj={GRAPH_MINIMAP_UNKNOWN_NODE_ID}
       x={x}
       y={y}
