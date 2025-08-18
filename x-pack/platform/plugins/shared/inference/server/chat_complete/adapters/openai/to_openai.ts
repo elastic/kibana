@@ -57,7 +57,7 @@ export function toolChoiceToOpenAI(
       : undefined;
 
   // For OpenAI-compatible ("Other") providers:
-  // - When native function/tool calling is enabled (useNativeFunctionCalling), and
+  // - When native tool calling is enabled (useNativeFunctionCalling), and
   // - There is exactly one tool defined, and
   // - The caller explicitly selected that same tool by name (named toolChoice),
   // some providers expect `tool_choice: 'required'` instead of the named-function variant.
