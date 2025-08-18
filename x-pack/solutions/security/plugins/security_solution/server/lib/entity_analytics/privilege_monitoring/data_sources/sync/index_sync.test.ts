@@ -160,22 +160,13 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
 
     it('should log errors when the bulk upload response contains errors', async () => {
       const errorMsg = 'Bulk operation failed';
-      const mockHits = [
-        {
-          _source: { user: { name: 'frodo' } },
-          _id: '1',
-          sort: [1],
-        },
-      ];
+      const mockUsers = [{ name: 'frodo' }];
 
       mockSearchUsernamesInIndex
-        .mockResolvedValueOnce({ hits: { hits: mockHits } }) // first batch
-        .mockResolvedValueOnce({ hits: { hits: [] } }); // second batch = end
-      mockGetMonitoredUsers.mockResolvedValue({
-        hits: {
-          hits: [],
-        },
-      });
+        .mockResolvedValueOnce({ users: mockUsers, searchAfter: undefined }) // first batch
+        .mockResolvedValueOnce({ users: [], searchAfter: undefined }); // second batch = end
+
+      mockGetMonitoredUsers.mockResolvedValue(new Map([]));
       mockBulkUpsertOperations.mockReturnValue([{ index: { _id: '1' } }]);
       esClientMock.bulk.mockResolvedValue({
         errors: true,

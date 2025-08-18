@@ -11,8 +11,8 @@ import type { SourceMap } from '@kbn/apm-plugin/server/routes/source_maps/route'
 import expect from '@kbn/expect';
 import { first, last, times } from 'lodash';
 import { promisify } from 'util';
-import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const unzip = promisify(unzipAsyncCallback);
 

@@ -6,11 +6,11 @@
  */
 
 import expect from 'expect';
-import { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/list.gen';
-import { CreateEntitySourceResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
-import { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
+import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/list.gen';
+import type { CreateEntitySourceResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { getPrivilegedMonitorUsersIndex } from '@kbn/security-solution-plugin/common/entity_analytics/privilege_monitoring/utils';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { PrivMonUtils } from './utils';
 import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 

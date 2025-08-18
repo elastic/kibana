@@ -27,11 +27,8 @@ import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
-import {
-  GetObservabilityAlertsTableProp,
-  ObservabilityAlertsTableContext,
-  observabilityFeatureId,
-} from '../..';
+import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../..';
+import { observabilityFeatureId } from '../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
 import { useKibana } from '../../utils/kibana_react';
 

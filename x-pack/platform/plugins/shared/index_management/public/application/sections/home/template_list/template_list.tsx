@@ -6,11 +6,11 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 import {
   EuiEmptyPrompt,
   EuiSpacer,
@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
-import { TemplateListItem } from '../../../../../common';
+import type { TemplateListItem } from '../../../../../common';
 import {
   APP_WRAPPER_CLASS,
   PageLoading,
@@ -43,7 +43,8 @@ import {
   getTemplateCloneLink,
 } from '../../../services/routing';
 import { getIsLegacyFromQueryParams } from '../../../lib/index_templates';
-import { FilterListButton, Filters } from '../components';
+import type { Filters } from '../components';
+import { FilterListButton } from '../components';
 import { TemplateTable } from './template_table';
 import { TemplateDetails } from './template_details';
 import { LegacyTemplateTable } from './legacy_templates/template_table';

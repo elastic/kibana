@@ -11,7 +11,7 @@ import { Builder } from '../../builder';
 import { parse } from '../../parser';
 import { BasicPrettyPrinter } from '../../pretty_print';
 import { EsqlQuery } from '../../query';
-import { ESQLAstRerankCommand } from '../../types';
+import type { ESQLAstRerankCommand } from '../../types';
 import { Walker } from '../walker';
 
 describe('Walker static methods', () => {

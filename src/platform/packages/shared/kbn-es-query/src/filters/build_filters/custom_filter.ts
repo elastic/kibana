@@ -8,7 +8,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { Filter, FilterMeta, FILTERS, FilterStateStore } from './types';
+import type { Filter, FilterMeta, FilterStateStore } from './types';
+import { FILTERS } from './types';
 
 /** @public */
 export type CustomFilter = Filter;

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
 import { type ExistsFilter, type Query, type Filter, isExistsFilter } from '@kbn/es-query';
-import {
+import type {
   AvgIndexPatternColumn,
   CardinalityIndexPatternColumn,
   CountIndexPatternColumn,
@@ -37,10 +37,10 @@ import {
   MetricState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { PersistableFilter } from '@kbn/lens-plugin/common';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { PersistableFilter } from '@kbn/lens-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
 import {
   FILTER_RECORDS,
@@ -55,7 +55,7 @@ import {
   TERMS_COLUMN,
   USE_BREAK_DOWN_COLUMN,
 } from './constants';
-import {
+import type {
   ColumnFilter,
   MetricOption,
   ParamFilter,
