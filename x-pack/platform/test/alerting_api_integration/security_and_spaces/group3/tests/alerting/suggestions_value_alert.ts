@@ -18,11 +18,15 @@ export default function createRuleSuggestionValuesTests({ getService }: FtrProvi
     const supertest = getService('supertest');
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
     });
 

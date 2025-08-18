@@ -1280,7 +1280,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test_serverless/functional/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 /x-pack/test_serverless/functional/page_objects/svl_data_usage.ts @elastic/obs-ai-assistant @elastic/security-solution
 /x-pack/solutions/observability/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
-/x-pack/test/functional/es_archives/observability/ai_assistant @elastic/obs-ai-assistant
+/x-pack/solutions/observability/test/fixtures/es_archives/observability/ai_assistant @elastic/obs-ai-assistant
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant @elastic/obs-ai-assistant
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.index.ts @elastic/obs-ai-assistant
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.serverless.config.ts @elastic/obs-ai-assistant
@@ -1311,7 +1311,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test/functional/page_objects/asset_details.ts @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/page_objects/infra_* @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/functional/page_objects/infra_* @elastic/obs-ux-infra_services-team
-/x-pack/test/functional/es_archives/infra @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/fixtures/es_archives/infra @elastic/obs-ux-infra_services-team
 /x-pack/test_serverless/**/test_suites/observability/infra/ @elastic/obs-ux-infra_services-team
 ^/src/platform/test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/plugins/infra/common @elastic/obs-ux-infra_services-team
@@ -1464,7 +1464,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/functional_with_es_ssl/config.ts @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/functional_with_es_ssl/ftr_provider_context.ts @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/functional/apps/uptime @elastic/obs-ux-management-team
-/x-pack/test/functional/es_archives/uptime @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/fixtures/es_archives/uptime @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/functional/services/uptime @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/api_integration/apis/uptime @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/api_integration/apis/synthetics @elastic/obs-ux-management-team
@@ -1477,7 +1477,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 ^/src/platform/test/functional/apps/discover/observability @elastic/observability-ui
 
 # obs-ux-logs-team
-/x-pack/test/functional/es_archives/observability_logs_explorer @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/fixtures/es_archives/observability_logs_explorer @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/config.* @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/landing_page.ts @elastic/obs-ux-logs-team
@@ -2152,7 +2152,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/functional/es_archives/alerting @elastic/response-ops
 /x-pack/test/functional/es_archives/alerts @elastic/response-ops
 /x-pack/test/functional/es_archives/alerts_legacy @elastic/response-ops
-/x-pack/test/functional/es_archives/observability/alerts @elastic/response-ops
+/x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts @elastic/response-ops
 /x-pack/test/functional/es_archives/actions @elastic/response-ops
 /x-pack/test/functional/es_archives/rules_scheduled_task_id @elastic/response-ops
 /x-pack/test/functional/es_archives/alerting/8_2_0 @elastic/response-ops

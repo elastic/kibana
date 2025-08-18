@@ -45,11 +45,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('logs', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       it('should return alerts from log rules', async () => {
@@ -119,12 +123,16 @@ export default ({ getService }: FtrProviderContext) => {
       ];
 
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/alerts/8.1.0'
         );
@@ -213,11 +221,15 @@ export default ({ getService }: FtrProviderContext) => {
       const apmRuleTypeIds = ['apm.transaction_error_rate', 'apm.error_rate'];
 
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       it('should return alerts from apm rules', async () => {
@@ -705,11 +717,15 @@ export default ({ getService }: FtrProviderContext) => {
       const apmRuleTypeIds = ['apm.transaction_error_rate', 'apm.error_rate'];
 
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       it('should omit alerts when score is less than min score', async () => {
@@ -891,10 +907,14 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('discover', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       it('should return alerts from .es-query rule type with consumer discover with access only to stack rules', async () => {
