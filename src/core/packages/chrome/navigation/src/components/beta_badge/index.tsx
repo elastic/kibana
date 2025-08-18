@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiBetaBadge, EuiThemeProvider } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { BadgeType } from '../../../types';
+import type { BadgeType } from '../../../types';
 
 interface BetaBadgeProps {
   type: BadgeType;

@@ -12,8 +12,8 @@ import expect from '@kbn/expect';
 import { GenericFtrService } from '@kbn/test';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export interface SendOptions {
   supertestWithoutAuth: SupertestWithoutAuthProviderType;

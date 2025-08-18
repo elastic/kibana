@@ -6,7 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
-import {
+import type {
   DeleteNoteRequestBody,
   GetNotesResult,
   Note,

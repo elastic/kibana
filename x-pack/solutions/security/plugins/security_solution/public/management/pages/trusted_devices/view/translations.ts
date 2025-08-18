@@ -139,11 +139,9 @@ export const OPERATOR_TITLES = {
 };
 
 export const INPUT_ERRORS = {
-  name: (itemName: string) =>
-    i18n.translate('xpack.securitySolution.trustedDevices.form.errors.nameRequired', {
-      defaultMessage: '{itemName} name is required',
-      values: { itemName },
-    }),
+  name: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.nameRequired', {
+    defaultMessage: 'Trusted device name is required',
+  }),
   entries: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.entriesRequired', {
     defaultMessage: 'At least one condition is required',
   }),

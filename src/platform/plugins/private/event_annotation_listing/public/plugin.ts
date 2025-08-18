@@ -12,13 +12,13 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public/types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
+import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { EventAnnotationListingPageServices } from './get_table_list';
 

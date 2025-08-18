@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { type UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { AggParamEditorProps } from '../../agg_param_props';
+import type { AggParamEditorProps } from '../../agg_param_props';
 
 const containerStyles = {
   base: ({ euiTheme }: UseEuiTheme) =>

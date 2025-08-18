@@ -11,8 +11,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { TableWithoutPersist as Table } from './table';
-import { ScriptedFieldItem } from '../../types';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { ScriptedFieldItem } from '../../types';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as DataView);
 

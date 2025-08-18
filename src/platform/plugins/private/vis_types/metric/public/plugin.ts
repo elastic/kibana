@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { createMetricVisTypeDefinition } from './metric_vis_type';
 import type { MetricPublicConfig } from '../server/config';
 import { setDataViewsStart } from './services';

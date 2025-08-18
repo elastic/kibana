@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { tracing } from '@elastic/opentelemetry-node/sdk';
-import { InferenceTracingLangfuseExportConfig } from '@kbn/inference-tracing-config';
+import type { tracing } from '@elastic/opentelemetry-node/sdk';
+import type { InferenceTracingLangfuseExportConfig } from '@kbn/inference-tracing-config';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { memoize, omit, partition } from 'lodash';
 import { diag } from '@opentelemetry/api';

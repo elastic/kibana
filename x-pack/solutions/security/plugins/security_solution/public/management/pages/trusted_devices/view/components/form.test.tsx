@@ -181,7 +181,7 @@ describe('Trusted devices form', () => {
 
     it('should show name required on blur', () => {
       setTextFieldValue(getNameField(), '  ');
-      expect(renderResult.getByText(INPUT_ERRORS.name('trusted device'))).toBeTruthy();
+      expect(renderResult.getByText(INPUT_ERRORS.name)).toBeTruthy();
     });
 
     it('should default OS to Windows and Mac', async () => {

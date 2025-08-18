@@ -25,7 +25,7 @@ import {
 } from '../../../../../../config/services/detections_response';
 import { searchAlerts } from '../../../../../../config/services/detections_response/alerts/search_alerts';
 import { getPreviewAlerts, previewRule } from '../../../../utils';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

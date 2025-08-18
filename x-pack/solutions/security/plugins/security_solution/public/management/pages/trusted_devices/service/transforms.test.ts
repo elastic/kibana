@@ -164,6 +164,58 @@ describe('trusted devices transforms', () => {
 
       expect(transformed.entries as unknown as ConditionEntry[]).toEqual(expectedConditions);
     });
+
+    it('preserves all item properties unchanged while transforming entries', () => {
+      const entries: EntriesArray = [
+        makeMatch(TrustedDeviceConditionEntryField.USERNAME, 'test-user'),
+      ];
+
+      const item = {
+        id: 'test-id-123',
+        name: 'Test Trusted Device',
+        description: 'Test device description',
+        os_types: ['windows', 'macos'],
+        tags: ['tag1', 'tag2'],
+        meta: {
+          created_by: 'test-user',
+          updated_by: 'admin',
+          custom_field: 'custom_value',
+        },
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-02T00:00:00Z',
+        created_by: 'test-creator',
+        updated_by: 'test-updater',
+        tie_breaker_id: 'tie-breaker-123',
+        version: 1,
+        entries,
+      } as unknown as ExceptionListItemSchema;
+
+      const transformed = readTransform(item);
+
+      // Test that all properties except entries are preserved exactly
+      expect(transformed.id).toBe(item.id);
+      expect(transformed.name).toBe(item.name);
+      expect(transformed.description).toBe(item.description);
+      expect(transformed.os_types).toBe(item.os_types);
+      expect(transformed.tags).toBe(item.tags);
+      expect(transformed.meta).toBe(item.meta);
+      expect(transformed.created_at).toBe(item.created_at);
+      expect(transformed.updated_at).toBe(item.updated_at);
+      expect(transformed.created_by).toBe(item.created_by);
+      expect(transformed.updated_by).toBe(item.updated_by);
+      expect(transformed.tie_breaker_id).toBe(item.tie_breaker_id);
+
+      // Test that entries are transformed (not preserved)
+      expect(transformed.entries).not.toBe(item.entries);
+      expect(transformed.entries as unknown as ConditionEntry[]).toEqual([
+        {
+          field: TrustedDeviceConditionEntryField.USERNAME as unknown as AllConditionEntryFields,
+          value: 'test-user',
+          type: 'match',
+          operator: 'included',
+        },
+      ]);
+    });
   });
 
   describe('writeTransform', () => {
@@ -192,6 +244,48 @@ describe('trusted devices transforms', () => {
       ];
 
       expect(updated.entries).toEqual(expected);
+    });
+
+    it('preserves all item properties unchanged while transforming entries', () => {
+      const conditions: ConditionEntry[] = [
+        {
+          field: TrustedDeviceConditionEntryField.HOST as unknown as AllConditionEntryFields,
+          value: 'test-host',
+          type: 'match',
+          operator: 'included',
+        },
+      ];
+
+      const item = {
+        name: 'Create Test Device',
+        description: 'Device for creation test',
+        os_types: ['linux'],
+        tags: ['create-tag'],
+        meta: {
+          source: 'api',
+          priority: 'high',
+        },
+        comments: [{ comment: 'Test comment' }],
+        item_id: 'create-item-id',
+        entries: conditions,
+      } as unknown as CreateExceptionListItemSchema;
+
+      const transformed = writeTransform(item);
+
+      // Test that all properties except entries are preserved exactly
+      expect(transformed.name).toBe(item.name);
+      expect(transformed.description).toBe(item.description);
+      expect(transformed.os_types).toBe(item.os_types);
+      expect(transformed.tags).toBe(item.tags);
+      expect(transformed.meta).toBe(item.meta);
+      expect(transformed.comments).toBe(item.comments);
+      expect(transformed.item_id).toBe(item.item_id);
+
+      // Test that entries are transformed (not preserved)
+      expect(transformed.entries).not.toBe(item.entries);
+      expect(transformed.entries).toEqual([
+        makeMatch(TrustedDeviceConditionEntryField.HOST, 'test-host'),
+      ]);
     });
   });
 });

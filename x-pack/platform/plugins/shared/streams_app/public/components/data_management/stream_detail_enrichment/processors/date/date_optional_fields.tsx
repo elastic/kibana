@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 export const DateTargetField = () => {
   const { register } = useFormContext();
-  const { ref, ...inputProps } = register('target_field');
+  const { ref, ...inputProps } = register('to');
 
   return (
     <EuiFormRow
