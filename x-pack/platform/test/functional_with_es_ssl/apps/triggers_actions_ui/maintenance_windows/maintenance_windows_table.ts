@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
 import { createMaintenanceWindow } from './utils';
@@ -263,13 +263,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('paginates maintenance windows correctly', async () => {
-      new Array(12).fill(null).map(async (_, index) => {
-        const mw = await createMaintenanceWindow({
-          name: index + '-pagination',
-          getService,
-        });
-        objectRemover.add(mw.id, 'rules/maintenance_window', 'alerting', true);
-      });
+      await Promise.all(
+        new Array(12).fill(null).map(async (_, index) => {
+          const mw = await createMaintenanceWindow({
+            name: index + '-pagination',
+            getService,
+          });
+          objectRemover.add(mw.id, 'rules/maintenance_window', 'alerting', true);
+        })
+      );
       await browser.refresh();
 
       await pageObjects.maintenanceWindows.searchMaintenanceWindows('pagination');

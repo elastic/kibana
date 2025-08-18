@@ -23,23 +23,35 @@ const meta = {
 export default meta;
 type Story = StoryObj<Args>;
 
+/**
+ * Simplest possible APM span.
+ */
 export const MinimalApm: Story = {
   name: 'Minimal APM span',
   args: {
     hit: minimalAPMFixture,
   },
+  tags: ['apm', 'span'],
 };
 
+/**
+ * Simplest possible OpenTelemetry span.
+ */
 export const MinimalOtel: Story = {
   name: 'Minimal Otel span',
   args: {
     hit: minimalOtelFixture,
   },
+  tags: ['otel', 'span'],
 };
 
+/**
+ * Redis client database span, processed by the elasticapmprocessor to add APM attributes.
+ */
 export const RedisClientOtel: Story = {
   name: 'Redis client span (processed Otel)',
   args: {
     hit: redisClientOtelFixture,
   },
+  tags: ['otel', 'db', 'redis', 'client', 'span'],
 };

@@ -8,7 +8,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { WorkflowYaml, WorkflowYamlSchema } from '../spec/schema';
+import type { WorkflowYaml } from '../spec/schema';
+import { WorkflowSchema } from '../spec/schema';
 
 export enum ExecutionStatus {
   // In progress
@@ -27,7 +28,11 @@ export interface EsWorkflowExecution {
   id: string;
   workflowId: string;
   status: ExecutionStatus;
+  context: Record<string, string>;
   workflowDefinition: WorkflowYaml;
+  /** Serialized graphlib.Graph */
+  executionGraph?: any;
+  currentNodeId?: string; // The node currently being executed
   createdAt: string;
   error: string | null;
   createdBy: string;
@@ -35,6 +40,8 @@ export interface EsWorkflowExecution {
   finishedAt: string;
   duration: number;
   triggeredBy?: string; // 'manual' or 'scheduled'
+  traceId?: string; // APM trace ID for observability
+  entryTransactionId?: string; // APM root transaction ID for trace embeddable
 }
 
 export interface ProviderInput {
@@ -58,8 +65,10 @@ export interface EsWorkflowStepExecution {
   startedAt: string;
   completedAt?: string;
   executionTimeMs?: number;
-  error?: string;
-  output?: Record<string, any>;
+  topologicalIndex: number;
+  error?: string | null;
+  output?: Record<string, any> | null;
+  state?: Record<string, any>;
 }
 
 export enum WorkflowStatus {
@@ -122,7 +131,7 @@ export const EsWorkflowSchema = z.object({
   createdBy: z.string(),
   lastUpdatedAt: z.date(),
   lastUpdatedBy: z.string(),
-  definition: WorkflowYamlSchema,
+  definition: WorkflowSchema,
   yaml: z.string(),
 });
 
@@ -174,8 +183,18 @@ export interface WorkflowListDto {
   };
   results: WorkflowListItemDto[];
 }
+export interface WorkflowExecutionEngineModel
+  extends Pick<EsWorkflow, 'id' | 'name' | 'status' | 'definition'> {
+  /** Serialized graphlib.Graph */
+  executionGraph?: any;
+}
 
-export type WorkflowExecutionEngineModel = Pick<
-  EsWorkflow,
-  'id' | 'name' | 'status' | 'definition'
->;
+export interface WorkflowListItemAction {
+  isPrimary?: boolean;
+  type: string;
+  color: string;
+  name: string;
+  icon: string;
+  description: string;
+  onClick: (item: WorkflowListItemDto) => void;
+}

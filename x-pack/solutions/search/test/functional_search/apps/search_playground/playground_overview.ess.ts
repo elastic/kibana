@@ -9,7 +9,8 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { createOpenAIConnector } from './utils/create_openai_connector';
 
-import { createLlmProxy, LlmProxy } from './utils/create_llm_proxy';
+import type { LlmProxy } from './utils/create_llm_proxy';
+import { createLlmProxy } from './utils/create_llm_proxy';
 
 const COMMON_REQUEST_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -62,14 +63,14 @@ export default function (ftrContext: FtrProviderContext) {
     });
   };
 
-  describe('Playground', () => {
+  describe('Unsaved Playground', () => {
     before(async () => {
       proxy = await createLlmProxy(log);
-      await pageObjects.common.navigateToApp('searchPlayground');
+      await pageObjects.common.navigateToApp('searchPlayground', { path: 'chat' });
     });
 
     beforeEach(async () => {
-      await pageObjects.common.navigateToApp('searchPlayground');
+      await pageObjects.common.navigateToApp('searchPlayground', { path: 'chat' });
     });
 
     after(async () => {

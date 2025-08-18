@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as http from 'http';
+import type * as http from 'http';
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupMockServer } from '../agents/helpers/mock_agentless_api';
 
@@ -24,7 +24,9 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       mockApiServer = await mockAgentlessApiService.listen(8089); // Start the agentless api mock server on port 8089
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
+      );
       await fleetAndAgents.setup();
 
       // Set up default Fleet Server host, needed during agentless agent creation
@@ -43,7 +45,7 @@ export default function (providerContext: FtrProviderContext) {
       await supertest
         .delete(`/api/fleet/fleet_server_hosts/fleet-default-fleet-server-host`)
         .set('kbn-xsrf', 'xxxx');
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       mockApiServer.close();
     });
 

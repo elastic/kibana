@@ -75,6 +75,7 @@ export const PrivilegedUserMonitoring = ({
         )}
         {callout && !dismissCallout && (
           <EuiCallOut
+            data-test-subj="privilegedUserMonitoringOnboardingCallout"
             title={
               callout.userCount > 0 ? (
                 <FormattedMessage
@@ -104,8 +105,8 @@ export const PrivilegedUserMonitoring = ({
 
             <EuiButton iconType="gear" color="success" fill size="s" onClick={onManageUserClicked}>
               <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboard.callout.manageUsersButton"
-                defaultMessage="Manage users"
+                id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboard.callout.manageDataSources"
+                defaultMessage="Manage data sources"
               />
             </EuiButton>
           </EuiCallOut>

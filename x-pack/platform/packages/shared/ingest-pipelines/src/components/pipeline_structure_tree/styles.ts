@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 export const getStyles = (euiTheme: EuiThemeComputed, isExtension: boolean) => css`
   [class*='cssTreeNode-'] {
@@ -40,6 +40,7 @@ export const getStyles = (euiTheme: EuiThemeComputed, isExtension: boolean) => c
   .cssTreeNode-morePipelines {
     margin-left: ${euiTheme.size.base};
     background-color: ${euiTheme.colors.backgroundLightPrimary};
+    color: ${euiTheme.colors.textPrimary} !important;
     border: none;
   }
 `;

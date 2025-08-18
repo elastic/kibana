@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { EsWorkflowStepExecution } from '@kbn/workflows';
 
 interface SearchStepExectionsParams {
   esClient: ElasticsearchClient;
@@ -37,7 +37,13 @@ export const searchStepExecutions = async ({
       `Found ${response.hits.hits.length} workflows, ${response.hits.hits.map((hit) => hit._id)}`
     );
 
-    return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);
+    return (
+      response.hits.hits
+        .map((hit) => hit._source as EsWorkflowStepExecution)
+        // TODO: It should be sorted on ES side
+        // This sort is needed to ensure steps are returned in the execution order
+        .sort((fst, scd) => fst.topologicalIndex - scd.topologicalIndex)
+    );
   } catch (error) {
     logger.error(`Failed to search workflows: ${error}`);
     throw error;

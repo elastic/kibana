@@ -10,10 +10,10 @@ import { useFormContext } from 'react-hook-form';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { PLUGIN_ID } from '../../common';
 import { useKibana } from '../hooks/use_kibana';
 import { LOCAL_STORAGE_KEY as PLAYGROUND_SESSION_LOCAL_STORAGE_KEY } from '../providers/unsaved_form_provider';
-import { PlaygroundForm, PlaygroundPageMode } from '../types';
+import type { PlaygroundForm } from '../types';
+import { PlaygroundPageMode } from '../types';
 import { hasSavedPlaygroundFormErrors } from '../utils/saved_playgrounds';
 import { SavePlaygroundModal } from './saved_playground/save_playground_modal';
 
@@ -27,7 +27,7 @@ export const SaveNewPlaygroundButton = ({
   storage = localStorage,
 }: SaveNewPlaygroundButtonProps) => {
   const [showSavePlaygroundModal, setShowSavePlaygroundModal] = useState<boolean>(false);
-  const { application } = useKibana().services;
+  const { history } = useKibana().services;
   const {
     formState: { errors: formErrors },
   } = useFormContext<PlaygroundForm>();
@@ -42,9 +42,9 @@ export const SaveNewPlaygroundButton = ({
       setShowSavePlaygroundModal(false);
       const path = `/p/${id}/${PlaygroundPageMode.Chat}`;
       storage.removeItem(PLAYGROUND_SESSION_LOCAL_STORAGE_KEY);
-      application.navigateToApp(PLUGIN_ID, { path });
+      history.push(path);
     },
-    [application, storage]
+    [history, storage]
   );
 
   return (

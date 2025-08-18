@@ -9,6 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
+import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
@@ -31,7 +32,7 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
-import { TABS_ENABLED } from '../../../../constants';
+import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -60,6 +61,10 @@ export const DiscoverTopNav = ({
   const dataView = useCurrentDataView();
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
+  );
+  const tabsEnabled = services.core.featureFlags.getBooleanValue(
+    TABS_ENABLED_FEATURE_FLAG_KEY,
+    false
   );
   const savedSearch = useSavedSearchInitial();
   const isEsqlMode = useIsEsqlMode();
@@ -216,7 +221,7 @@ export const DiscoverTopNav = ({
 
   const searchDraftUiState = useCurrentTabSelector((state) => state.uiState.searchDraft);
   const setSearchDraftUiState = useCurrentTabAction(internalStateActions.setSearchDraftUiState);
-  const onDraftChange = useCallback(
+  const onSearchDraftChange = useCallback(
     (newSearchDraftUiState: UnifiedSearchDraft | undefined) => {
       dispatch(
         setSearchDraftUiState({
@@ -225,6 +230,19 @@ export const DiscoverTopNav = ({
       );
     },
     [dispatch, setSearchDraftUiState]
+  );
+
+  const esqlEditorUiState = useCurrentTabSelector((state) => state.uiState.esqlEditor);
+  const setEsqlEditorUiState = useCurrentTabAction(internalStateActions.setESQLEditorUiState);
+  const onEsqlEditorInitialStateChange = useCallback(
+    (newEsqlEditorUiState: Partial<ESQLEditorRestorableState>) => {
+      dispatch(
+        setEsqlEditorUiState({
+          esqlEditorUiState: newEsqlEditorUiState,
+        })
+      );
+    },
+    [dispatch, setEsqlEditorUiState]
   );
 
   const shouldHideDefaultDataviewPicker =
@@ -265,7 +283,9 @@ export const DiscoverTopNav = ({
         }
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         draft={searchDraftUiState}
-        onDraftChange={TABS_ENABLED ? onDraftChange : undefined}
+        onDraftChange={tabsEnabled ? onSearchDraftChange : undefined}
+        esqlEditorInitialState={esqlEditorUiState}
+        onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

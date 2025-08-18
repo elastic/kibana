@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
-import { POD_FIELD, HOST_FIELD, CONTAINER_FIELD } from '../constants';
+import { KUBERNETES_POD_UID, HOST_NAME, CONTAINER_ID } from '../constants';
 import { host } from './host';
 import { pod } from './kubernetes/pod';
 import { awsEC2 } from './aws_ec2';
@@ -27,13 +27,13 @@ const catalog = {
   awsRDS,
   awsSQS,
 } as const;
-
 export const inventoryModels = Object.values(catalog);
+export type InventoryModels = typeof catalog;
 
-export type InventoryModels<T extends InventoryItemType> = (typeof catalog)[T];
-
-export const findInventoryModel = <T extends InventoryItemType>(type: T): InventoryModels<T> => {
-  const model = inventoryModels.find((m) => m.id === type);
+export const findInventoryModel = <TType extends keyof InventoryModels>(
+  type: TType
+): InventoryModels[TType] => {
+  const model = catalog[type];
   if (!model) {
     throw new Error(
       i18n.translate('xpack.metricsData.inventoryModels.findInventoryModel.error', {
@@ -42,7 +42,7 @@ export const findInventoryModel = <T extends InventoryItemType>(type: T): Invent
     );
   }
 
-  return model as InventoryModels<T>;
+  return model;
 };
 
 const LEGACY_TYPES = ['host', 'pod', 'container'];
@@ -50,11 +50,11 @@ const LEGACY_TYPES = ['host', 'pod', 'container'];
 export const getFieldByType = (type: InventoryItemType) => {
   switch (type) {
     case 'pod':
-      return POD_FIELD;
+      return KUBERNETES_POD_UID;
     case 'host':
-      return HOST_FIELD;
+      return HOST_NAME;
     case 'container':
-      return CONTAINER_FIELD;
+      return CONTAINER_ID;
   }
 };
 

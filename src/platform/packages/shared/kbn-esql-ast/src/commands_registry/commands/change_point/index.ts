@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ICommandMethods } from '../../registry';
+import type { ICommand, ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import { columnsAfter } from './columns_after';
 import { validate } from './validate';
@@ -19,7 +19,7 @@ const changePointCommandMethods: ICommandMethods<ICommandContext> = {
   columnsAfter,
 };
 
-export const changePointCommand = {
+export const changePointCommand: ICommand = {
   name: 'change_point',
   methods: changePointCommandMethods,
   metadata: {
