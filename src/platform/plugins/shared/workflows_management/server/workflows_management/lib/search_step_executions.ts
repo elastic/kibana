@@ -46,7 +46,7 @@ export const searchStepExecutions = async ({
           ],
         },
       },
-      sort: 'startedAt:dsc',
+      sort: 'startedAt:desc',
     });
 
     logger.info(

@@ -176,7 +176,7 @@ export class WorkflowsService {
       );
 
       return {
-        spaceId: so.id,
+        spaceId: so.attributes.spaceId,
         id: so.id,
         name: so.attributes.name,
         description: so.attributes.description || '',
@@ -403,7 +403,7 @@ export class WorkflowsService {
       })
     );
 
-    // Remove scheduled tasks from deleted workflows
+    // Remove tasks scheduled for deleted workflows
     if (this.taskScheduler) {
       for (const workflow of filteredWorkflows) {
         await this.taskScheduler.unscheduleWorkflowTasks(workflow.id);
