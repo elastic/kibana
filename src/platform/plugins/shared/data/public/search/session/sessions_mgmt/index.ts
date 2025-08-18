@@ -81,8 +81,10 @@ export function registerSearchSessionsMgmt(
 
 export async function updateSearchSessionMgmtSectionTitle(
   getStartServices: StartServicesAccessor,
-  app: ManagementApp
+  app: ManagementApp | undefined
 ) {
+  if (!app) return;
+
   const [coreStart] = await getStartServices();
   const hasBackgroundSearchEnabled = coreStart.featureFlags.getBooleanValue(
     BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
