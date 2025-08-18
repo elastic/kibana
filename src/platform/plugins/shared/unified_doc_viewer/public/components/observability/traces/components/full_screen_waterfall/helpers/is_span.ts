@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataTableRecord, PROCESSOR_EVENT_FIELD } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { PROCESSOR_EVENT_FIELD } from '@kbn/discover-utils';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
 
 export const isSpanHit = (hit: DataTableRecord | null): boolean => {

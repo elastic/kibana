@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 export const logsSynthMappings = (dataset: string): MappingTypeMapping => ({
   properties: {
