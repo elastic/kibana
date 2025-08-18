@@ -21,7 +21,7 @@ describe('getContextSchemaForPath', () => {
     enabled: true,
     triggers: [
       {
-        type: 'triggers.elastic.manual' as const,
+        type: 'manual' as const,
         enabled: true,
       },
     ],

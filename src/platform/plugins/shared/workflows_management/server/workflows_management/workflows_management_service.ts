@@ -249,7 +249,7 @@ export class WorkflowsService {
     // Schedule the workflow if it has triggers
     if (this.taskScheduler && workflowToCreate.definition.triggers) {
       for (const trigger of workflowToCreate.definition.triggers) {
-        if (trigger.type === 'triggers.elastic.scheduled' && trigger.enabled) {
+        if (trigger.type === 'scheduled' && trigger.enabled) {
           await this.taskScheduler.scheduleWorkflowTask(response.id, 'default', trigger);
         }
       }
@@ -302,7 +302,7 @@ export class WorkflowsService {
 
         // Add new scheduled tasks
         for (const trigger of updatedWorkflow.definition.workflow.triggers) {
-          if (trigger.type === 'triggers.elastic.scheduled') {
+          if (trigger.type === 'scheduled') {
             await this.taskScheduler.scheduleWorkflowTask(id, 'default', trigger);
           }
         }
