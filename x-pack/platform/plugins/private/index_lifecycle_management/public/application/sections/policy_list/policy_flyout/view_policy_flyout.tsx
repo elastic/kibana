@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { PolicyFromES } from '../../../../../common/types';
+import type { PolicyFromES } from '../../../../../common/types';
 import { trackUiMetric } from '../../../services/ui_metric';
 import { hasLinkedIndices } from '../../../lib/policies';
 import { getPoliciesListPath, getPolicyEditPath } from '../../../services/navigation';

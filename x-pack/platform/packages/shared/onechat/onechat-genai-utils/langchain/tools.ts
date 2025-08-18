@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { StructuredTool, tool as toTool } from '@langchain/core/tools';
-import { Logger } from '@kbn/logging';
+import type { StructuredTool } from '@langchain/core/tools';
+import { tool as toTool } from '@langchain/core/tools';
+import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolProvider, ExecutableTool, RunToolReturn } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';

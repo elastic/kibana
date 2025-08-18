@@ -16,16 +16,16 @@ import {
   SIEM_DASHBOARD_MIGRATION_STATS_PATH,
   SIEM_DASHBOARD_MIGRATIONS_PATH,
 } from '@kbn/security-solution-plugin/common/siem_migrations/dashboards/constants';
-import {
+import type {
   CreateDashboardMigrationDashboardsRequestBody,
   CreateDashboardMigrationRequestBody,
   CreateDashboardMigrationResponse,
   GetDashboardMigrationStatsResponse,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
-import SuperTest from 'supertest';
+import type SuperTest from 'supertest';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { assertStatusCode } from './asserts';
-import { RequestParams, MigrationRequestParams } from './types';
+import type { RequestParams, MigrationRequestParams } from './types';
 
 export type CreateDashboardMigrationRequestBodyInput = RequestParams & {
   body?: CreateDashboardMigrationRequestBody;

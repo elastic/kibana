@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import TestAgent from 'supertest/lib/agent';
-import {
-  ENDPOINT_ARTIFACT_LISTS,
-  ENDPOINT_ARTIFACT_LIST_IDS,
-  ENDPOINT_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
-import { Role } from '@kbn/security-plugin-types-common';
+import type TestAgent from 'supertest/lib/agent';
+import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import type { Role } from '@kbn/security-plugin-types-common';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
-import { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
-import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
+import type { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
+import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
   const utils = getService('securitySolutionUtils');

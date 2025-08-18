@@ -8,10 +8,10 @@
  */
 
 import { EnterIfNodeImpl } from '../enter_if_node_impl';
-import { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { EnterConditionBranchNode, EnterIfNode } from '@kbn/workflows';
-import { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
-import { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { EnterConditionBranchNode, EnterIfNode } from '@kbn/workflows';
+import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
+import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
 
 describe('EnterIfNodeImpl', () => {
   let step: EnterIfNode;

@@ -20,36 +20,16 @@ import {
 
 export interface ConnectorContract {
   type: string;
-  params: Array<{
-    name: string;
-    type: 'string' | 'number' | 'boolean' | 'object';
-  }>;
-}
-
-function getZodTypeForParam(param: ConnectorContract['params'][number]) {
-  switch (param.type) {
-    case 'string':
-      return z.string();
-    case 'number':
-      return z.number();
-    case 'boolean':
-      return z.boolean();
-    case 'object':
-      return z.record(z.string(), z.any());
-    default:
-      return z.string();
-  }
+  paramsSchema: z.ZodType;
+  connectorIdRequired?: boolean;
+  outputSchema: z.ZodType;
 }
 
 function generateStepSchemaForConnector(connector: ConnectorContract) {
-  const paramSchema = connector.params.reduce((acc, param) => {
-    acc[param.name] = getZodTypeForParam(param);
-    return acc;
-  }, {} as Record<string, z.ZodType>);
-
   return BaseConnectorStepSchema.extend({
     type: z.literal(connector.type),
-    with: z.object(paramSchema),
+    'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
+    with: connector.paramsSchema,
   });
 }
 

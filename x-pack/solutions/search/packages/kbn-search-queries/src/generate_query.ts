@@ -13,7 +13,7 @@ import type {
   KnnQuery,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import {
+import type {
   IndexFields,
   QueryGenerationFieldDescriptors,
   GenerateQueryOptions,

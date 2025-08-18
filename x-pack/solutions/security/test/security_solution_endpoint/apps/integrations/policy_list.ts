@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { FtrProviderContext } from '../../configs/ftr_provider_context';
-import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
+import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import type { FtrProviderContext } from '../../configs/ftr_provider_context';
+import type { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 import { targetTags } from '../../target_tags';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

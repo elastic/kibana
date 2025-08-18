@@ -19,17 +19,17 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { RuleUpgradeAssets } from '../../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
 import {
   DEFAULT_RULE_UPDATE_VERSION,
   DEFAULT_TEST_RULE_ID,
-  RuleUpgradeAssets,
   setUpRuleUpgrade,
 } from '../../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
 import {
   fetchFirstPrebuiltRuleUpgradeReviewDiff,
   performUpgradePrebuiltRules,
 } from '../../../../../utils';
-import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 export interface TestFieldRuleUpgradeAssets extends RuleUpgradeAssets {
   removeInstalledAssets?: boolean;
