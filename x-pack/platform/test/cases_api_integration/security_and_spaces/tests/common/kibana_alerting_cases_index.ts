@@ -31,11 +31,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('Kibana index: Alerting & Cases', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/8.8.0');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/8.8.0');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/8.8.0');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/cases/migrations/8.8.0');
       await deleteAllCaseItems(es);
     });
 

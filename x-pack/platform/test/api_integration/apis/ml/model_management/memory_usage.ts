@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.api.createTestTrainedModels('regression', 2);
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await createMockJobs();
     });
 

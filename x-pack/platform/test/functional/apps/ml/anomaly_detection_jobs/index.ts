@@ -29,10 +29,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
 
-      await esNode.unload('x-pack/test/functional/es_archives/ml/farequote');
-      await esNode.unload('x-pack/test/functional/es_archives/ml/ecommerce');
-      await esNode.unload('x-pack/test/functional/es_archives/ml/categorization_small');
-      await esNode.unload('x-pack/test/functional/es_archives/ml/event_rate_nanos');
+      await esNode.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
+      await esNode.unload('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
+      await esNode.unload('x-pack/platform/test/fixtures/es_archives/ml/categorization_small');
+      await esNode.unload('x-pack/platform/test/fixtures/es_archives/ml/event_rate_nanos');
 
       await ml.testResources.resetKibanaTimeZone();
     });

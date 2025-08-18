@@ -27,14 +27,14 @@ export default function ({
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
   const loadEcommerce = async () => {
-    await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+    await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce');
     await kibanaServer.importExport.load(ecommerceSOPath);
     await kibanaServer.uiSettings.replace({
       defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
     });
   };
   const unloadEcommerce = async () => {
-    await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+    await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce');
     await kibanaServer.importExport.unload(ecommerceSOPath);
   };
 
@@ -273,7 +273,7 @@ export default function ({
           defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
         });
 
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_76');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce_76');
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
         );
@@ -298,7 +298,7 @@ export default function ({
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_76');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce_76');
         await kibanaServer.importExport.unload(
           'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
         );
