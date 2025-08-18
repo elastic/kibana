@@ -83,7 +83,7 @@ function mapInputType(inputType: string): string | undefined {
     gcs: 'Google Cloud Storage',
     'iis/metrics': 'Windows Performance Counters',
     journald: 'journald',
-    kafka: 'kafka',
+    kafka: 'Kafka',
     lumberjack: 'Lumberjack',
     netflow: 'NetFlow',
     'prometheus/metrics': 'Prometheus',
