@@ -11,14 +11,25 @@ import { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiment
 import { sumBy, keyBy, uniq } from 'lodash';
 import { table } from 'table';
 import chalk from 'chalk';
-import { mean, median, deviation } from 'd3';
+import { mean, median, deviation, min, max } from 'd3';
 import { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
 
 interface DatasetScore {
   id: string;
   name: string;
   numExamples: number;
-  evaluatorScores: Map<string, number[]>; // Map of evaluator name to array of scores
+  evaluatorScores: Map<string, number[]>;
+  evaluatorStats?: Map<string, EvaluatorStats>;
+}
+
+interface EvaluatorStats {
+  mean: number;
+  median: number;
+  stdDev: number;
+  min: number;
+  max: number;
+  count: number;
+  percentage: number;
 }
 
 export async function reportModelScore({
@@ -58,7 +69,6 @@ export async function reportModelScore({
     const datasetScore = datasetScoresMap.get(datasetId)!;
     datasetScore.numExamples += numExamplesForExperiment;
 
-    // Process evaluation runs
     if (evaluationRuns) {
       evaluationRuns.forEach((evalRun) => {
         const score = evalRun.result?.score ?? 0;
@@ -68,29 +78,9 @@ export async function reportModelScore({
           datasetScore.evaluatorScores.set(evalRun.name, []);
         }
 
-        // Add the score to the array
         datasetScore.evaluatorScores.get(evalRun.name)!.push(score);
       });
     }
-  }
-
-  // Also log detailed evaluatorScores for each dataset (evaluator -> scores[])
-  for (const [datasetId, dataset] of datasetScoresMap.entries()) {
-    const evaluatorEntries = Array.from(dataset.evaluatorScores.entries());
-    if (evaluatorEntries.length === 0) {
-      log.info(`Dataset ${datasetId} (${dataset.name}) has no evaluator scores`);
-      continue;
-    }
-
-    log.info(`Dataset ${datasetId} (${dataset.name}) evaluatorScores:`);
-    evaluatorEntries.forEach(([evaluatorName, scores]) => {
-      const total = scores.reduce((s, v) => s + v, 0);
-      log.info(
-        `  - ${evaluatorName}: scores=${JSON.stringify(scores)}, total=${total}, count=${
-          scores.length
-        }`
-      );
-    });
   }
 
   // Get all unique evaluator names across all datasets
@@ -104,11 +94,36 @@ export async function reportModelScore({
 
   const datasetScores = Array.from(datasetScoresMap.values()).map((dataset) => ({
     ...dataset,
-    evaluatorPercents: new Map(
+    evaluatorStats: new Map(
       evaluatorNames.map((evaluatorName) => {
         const scores = dataset.evaluatorScores.get(evaluatorName) || [];
+        if (scores.length === 0) {
+          return [
+            evaluatorName,
+            {
+              mean: 0,
+              median: 0,
+              stdDev: 0,
+              min: 0,
+              max: 0,
+              count: 0,
+              percentage: 0,
+            } as EvaluatorStats,
+          ];
+        }
         const totalScore = scores.reduce((sum, score) => sum + score, 0);
-        return [evaluatorName, dataset.numExamples > 0 ? totalScore / dataset.numExamples : 0];
+        return [
+          evaluatorName,
+          {
+            mean: mean(scores) ?? 0,
+            median: median(scores) ?? 0,
+            stdDev: deviation(scores) ?? 0,
+            min: min(scores) ?? 0,
+            max: max(scores) ?? 0,
+            count: scores.length,
+            percentage: dataset.numExamples > 0 ? totalScore / dataset.numExamples : 0,
+          } as EvaluatorStats,
+        ];
       })
     ),
   }));
@@ -118,122 +133,108 @@ export async function reportModelScore({
     return;
   }
 
-  log.info(`The following dataset scores were calculated: ${JSON.stringify(datasetScores)}`);
-
-  // Calculate average and weighted percentages for each evaluator
-  const evaluatorAverages = new Map<string, number>();
-  const evaluatorWeighted = new Map<string, number>();
-  const evaluatorMeans = new Map<string, number>();
-  const evaluatorMedians = new Map<string, number>();
-  const evaluatorStdDevs = new Map<string, number>();
+  // Calculate overall statistics for each evaluator
+  const overallEvaluatorStats = new Map<string, EvaluatorStats>();
   const totalExamples = sumBy(datasetScores, (d) => d.numExamples);
 
   evaluatorNames.forEach((evaluatorName) => {
-    // Calculate average percentage (unweighted)
-    const percentages = datasetScores.map((d) => d.evaluatorPercents.get(evaluatorName) || 0);
-    const average = mean(percentages);
-    evaluatorAverages.set(evaluatorName, average);
+    // Get all scores across all datasets for this evaluator
+    const allScores = datasetScores.flatMap((d) => d.evaluatorScores.get(evaluatorName) || []);
 
-    // Calculate weighted percentage
+    if (allScores.length === 0) {
+      overallEvaluatorStats.set(evaluatorName, {
+        mean: 0,
+        median: 0,
+        stdDev: 0,
+        min: 0,
+        max: 0,
+        count: 0,
+        percentage: 0,
+      });
+      return;
+    }
+
+    // Calculate weighted percentage (total score across all datasets / total examples)
     const totalScore = sumBy(datasetScores, (d) => {
       const scores = d.evaluatorScores.get(evaluatorName) || [];
       return scores.reduce((sum, score) => sum + score, 0);
     });
-    const weighted = totalExamples > 0 ? totalScore / totalExamples : 0;
-    evaluatorWeighted.set(evaluatorName, weighted);
 
-    // Calculate mean, median, and standard deviation of raw scores
-    const allScores = datasetScores.flatMap((d) => d.evaluatorScores.get(evaluatorName) || []);
-    if (allScores.length > 0) {
-      const scoreMean = mean(allScores);
-      const scoreMedian = median(allScores) ?? 0;
-      const scoreStdDev = deviation(allScores) ?? 0;
-      evaluatorMeans.set(evaluatorName, scoreMean);
-      evaluatorMedians.set(evaluatorName, scoreMedian);
-      evaluatorStdDevs.set(evaluatorName, scoreStdDev);
-    } else {
-      evaluatorMeans.set(evaluatorName, 0);
-      evaluatorMedians.set(evaluatorName, 0);
-      evaluatorStdDevs.set(evaluatorName, 0);
-    }
+    overallEvaluatorStats.set(evaluatorName, {
+      mean: mean(allScores) ?? 0,
+      median: median(allScores) ?? 0,
+      stdDev: deviation(allScores) ?? 0,
+      min: min(allScores) ?? 0,
+      max: max(allScores) ?? 0,
+      count: allScores.length,
+      percentage: totalExamples > 0 ? totalScore / totalExamples : 0,
+    });
   });
 
   const header = [`Model: ${model.id} (${model.family}/${model.provider})`];
 
-  // Build table headers dynamically
-  const tableHeader = ['Dataset', '# Examples', ...evaluatorNames.map((name) => `${name} %`)];
+  // Create summary table with dataset-level and overall descriptive statistics
+  const createSummaryTable = () => {
+    const tableHeaders = ['Dataset', '# Examples', ...evaluatorNames];
 
-  const datasetRows = datasetScores.map((dataset) => {
-    const values = [dataset.name, dataset.numExamples.toString()];
+    const datasetRows = datasetScores.map((dataset) => {
+      const row = [dataset.name, dataset.numExamples.toString()];
 
-    // Add percentage values for each evaluator, or "-" if not available
+      evaluatorNames.forEach((evaluatorName) => {
+        const stats = dataset.evaluatorStats.get(evaluatorName);
+        if (stats && stats.count > 0) {
+          // Combine all statistics in a single cell with multiple lines
+          const cellContent = [
+            chalk.bold.yellow(`${(stats.percentage * 100).toFixed(1)}%`),
+            chalk.cyan(`mean: ${stats.mean.toFixed(3)}`),
+            chalk.cyan(`median: ${stats.median.toFixed(3)}`),
+            chalk.cyan(`std: ${stats.stdDev.toFixed(3)}`),
+            chalk.cyan(`min: ${stats.min.toFixed(3)}`),
+            chalk.cyan(`max: ${stats.max.toFixed(3)}`),
+          ].join('\n');
+          row.push(cellContent);
+        } else {
+          row.push(chalk.gray('-'));
+        }
+      });
+
+      return row;
+    });
+
+    // Add overall statistics row
+    const overallRow = [chalk.bold.green('Overall'), totalExamples.toString()];
     evaluatorNames.forEach((evaluatorName) => {
-      const percent = dataset.evaluatorPercents.get(evaluatorName);
-      const scores = dataset.evaluatorScores.get(evaluatorName);
-      if (percent !== undefined && scores && scores.length > 0) {
-        values.push(chalk.bold.yellow((percent * 100).toFixed(1) + '%'));
+      const stats = overallEvaluatorStats.get(evaluatorName);
+      if (stats && stats.count > 0) {
+        const cellContent = [
+          chalk.bold.yellow(`${(stats.percentage * 100).toFixed(1)}%`),
+          chalk.bold.green(`mean: ${stats.mean.toFixed(3)}`),
+          chalk.bold.green(`median: ${stats.median.toFixed(3)}`),
+          chalk.bold.green(`std: ${stats.stdDev.toFixed(3)}`),
+          chalk.bold.green(`min: ${stats.min.toFixed(3)}`),
+          chalk.bold.green(`max: ${stats.max.toFixed(3)}`),
+        ].join('\n');
+        overallRow.push(cellContent);
       } else {
-        values.push('-');
+        overallRow.push(chalk.bold.green('-'));
       }
     });
 
-    return values;
-  });
+    // Build column alignment configuration
+    const columnConfig: Record<number, { alignment: 'right' | 'left' }> = {
+      0: { alignment: 'left' },
+    };
+    for (let i = 1; i < tableHeaders.length; i++) {
+      columnConfig[i] = { alignment: 'right' };
+    }
 
-  // Build summary rows dynamically
-  const emptyRow = Array(tableHeader.length).fill('');
-  const averageRow = [
-    'Average %',
-    '',
-    ...evaluatorNames.map((name) => {
-      const avg = evaluatorAverages.get(name) || 0;
-      return chalk.bold.yellow((avg * 100).toFixed(1) + '%');
-    }),
-  ];
-  const weightedRow = [
-    'Weighted %',
-    '',
-    ...evaluatorNames.map((name) => {
-      const weighted = evaluatorWeighted.get(name) || 0;
-      return chalk.bold.yellow((weighted * 100).toFixed(1) + '%');
-    }),
-  ];
-  const meanRow = [
-    'Mean Score',
-    '',
-    ...evaluatorNames.map((name) => {
-      const meanScore = evaluatorMeans.get(name) || 0;
-      return chalk.bold.cyan(meanScore.toFixed(3));
-    }),
-  ];
-  const medianRow = [
-    'Median Score',
-    '',
-    ...evaluatorNames.map((name) => {
-      const medianScore = evaluatorMedians.get(name) || 0;
-      return chalk.bold.cyan(medianScore.toFixed(3));
-    }),
-  ];
-  const stdDevRow = [
-    'Std Dev',
-    '',
-    ...evaluatorNames.map((name) => {
-      const stdDev = evaluatorStdDevs.get(name) || 0;
-      return chalk.bold.cyan(stdDev.toFixed(3));
-    }),
-  ];
+    return table([tableHeaders, ...datasetRows, overallRow], {
+      columns: columnConfig,
+    });
+  };
 
-  const summaryRows = [emptyRow, averageRow, weightedRow, meanRow, medianRow, stdDevRow];
+  const summaryTable = createSummaryTable();
 
-  // Build column alignment configuration dynamically
-  const columnConfig: Record<number, { alignment: 'right' }> = {};
-  for (let i = 1; i < tableHeader.length; i++) {
-    columnConfig[i] = { alignment: 'right' };
-  }
-
-  const output = table([tableHeader, ...datasetRows, ...summaryRows], {
-    columns: columnConfig,
-  });
-
-  log.info(`\n\n${header[0]}\n${output}`);
+  log.info(`\n\n${header[0]}`);
+  log.info(`\n${chalk.bold.blue('═══ EVALUATION RESULTS ═══')}\n${summaryTable}`);
 }
