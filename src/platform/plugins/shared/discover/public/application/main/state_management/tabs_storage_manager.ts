@@ -85,6 +85,7 @@ export interface TabsStorageManager {
     previousRecentlyClosedTabs: RecentlyClosedTabState[],
     newClosedTabs: TabState[]
   ) => RecentlyClosedTabState[];
+  cleanOpenTabs: () => void;
 }
 
 export const createTabsStorageManager = ({
@@ -312,6 +313,7 @@ export const createTabsStorageManager = ({
     if (!enabled) {
       return;
     }
+
     let hasModifications = false;
     const storedTabsState = readFromLocalStorage();
     const updatedTabsState = {
@@ -428,6 +430,14 @@ export const createTabsStorageManager = ({
       recentlyClosedTabs: getNRecentlyClosedTabs(closedTabs, openTabs),
     };
   };
+  const cleanOpenTabs = () => {
+    const storedTabsState = readFromLocalStorage();
+    const updatedTabsState = {
+      ...storedTabsState,
+      openTabs: [],
+    };
+    storage.set(TABS_LOCAL_STORAGE_KEY, updatedTabsState);
+  };
 
   return {
     startUrlSync,
@@ -436,5 +446,6 @@ export const createTabsStorageManager = ({
     updateDiscoverSessionIdLocally,
     loadLocally,
     getNRecentlyClosedTabs,
+    cleanOpenTabs,
   };
 };

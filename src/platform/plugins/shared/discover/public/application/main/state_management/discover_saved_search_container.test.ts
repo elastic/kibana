@@ -14,7 +14,7 @@ import {
   createSavedSearchAdHocMock,
   createSavedSearchMock,
   savedSearchMock,
-  savedSearchMockWithTimeField,
+  discoverSessionMock,
 } from '../../../__mocks__/saved_search';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewComplexMock } from '../../../__mocks__/data_view_complex';
@@ -107,126 +107,16 @@ describe('DiscoverSavedSearchContainer', () => {
     });
   });
 
-  describe('persist', () => {
-    const saveOptions = { confirmOverwrite: false };
-
-    it('calls saveSavedSearch with the given saved search and save options', async () => {
-      const savedSearchContainer = getSavedSearchContainer({
-        services: discoverServiceMock,
-        internalState,
-        getCurrentTab,
-      });
-      const savedSearchToPersist = {
-        ...savedSearchMockWithTimeField,
-        title: 'My updated saved search',
-      };
-
-      await savedSearchContainer.persist(savedSearchToPersist, saveOptions);
-      expect(discoverServiceMock.savedSearch.save).toHaveBeenCalledWith(
-        savedSearchToPersist,
-        saveOptions
-      );
-    });
-
-    it('sets the initial and current saved search to the persisted saved search', async () => {
-      const title = 'My updated saved search';
-      const persistedSavedSearch = {
-        ...savedSearch,
-        title,
-      };
-
-      discoverServiceMock.savedSearch.save = jest.fn().mockResolvedValue('123');
-
-      const savedSearchContainer = getSavedSearchContainer({
-        services: discoverServiceMock,
-        internalState,
-        getCurrentTab,
-      });
-
-      const result = await savedSearchContainer.persist(persistedSavedSearch, saveOptions);
-      expect(savedSearchContainer.getInitial$().getValue().title).toBe(title);
-      expect(savedSearchContainer.getCurrent$().getValue().title).toBe(title);
-      expect(result).toEqual({ id: '123' });
-    });
-
-    it('emits false to the hasChanged$ BehaviorSubject', async () => {
-      const savedSearchContainer = getSavedSearchContainer({
-        services: discoverServiceMock,
-        internalState,
-        getCurrentTab,
-      });
-      const savedSearchToPersist = {
-        ...savedSearchMockWithTimeField,
-        title: 'My updated saved search',
-      };
-
-      await savedSearchContainer.persist(savedSearchToPersist, saveOptions);
-      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
-    });
-
-    it('takes care of persisting timeRestore correctly ', async () => {
-      discoverServiceMock.timefilter.getTime = jest.fn(() => ({ from: 'now-15m', to: 'now' }));
-      discoverServiceMock.timefilter.getRefreshInterval = jest.fn(() => ({
-        value: 0,
-        pause: true,
-      }));
-      const savedSearchContainer = getSavedSearchContainer({
-        services: discoverServiceMock,
-        internalState,
-        getCurrentTab,
-      });
-      const savedSearchToPersist = {
-        ...savedSearchMockWithTimeField,
-        title: 'My updated saved search',
-        timeRestore: true,
-      };
-      await savedSearchContainer.persist(savedSearchToPersist, saveOptions);
-      expect(discoverServiceMock.timefilter.getTime).toHaveBeenCalled();
-      expect(discoverServiceMock.timefilter.getRefreshInterval).toHaveBeenCalled();
-      expect(savedSearchToPersist.timeRange).toEqual({ from: 'now-15m', to: 'now' });
-      expect(savedSearchToPersist.refreshInterval).toEqual({
-        value: 0,
-        pause: true,
-      });
-    });
-
-    it('Error thrown on persistence layer bubbling up, no changes to the initial saved search ', async () => {
-      discoverServiceMock.savedSearch.save = jest.fn().mockImplementation(() => {
-        throw new Error('oh-noes');
-      });
-
-      const savedSearchContainer = getSavedSearchContainer({
-        services: discoverServiceMock,
-        internalState,
-        getCurrentTab,
-      });
-      savedSearchContainer.set(savedSearch);
-      savedSearchContainer.update({ nextState: { hideChart: true } });
-      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
-      try {
-        await savedSearchContainer.persist(savedSearch, saveOptions);
-      } catch (e) {
-        // intentional error
-      }
-      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
-      expect(savedSearchContainer.getInitial$().getValue().title).not.toBe(
-        'My updated saved search'
-      );
-    });
-  });
-
   describe('update', () => {
     it('updates a saved search by app state providing hideChart', async () => {
+      internalState.dispatch(
+        internalStateActions.setPersistedDiscoverSession({ discoverSession: discoverSessionMock })
+      );
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
         internalState,
         getCurrentTab,
       });
-      savedSearchContainer.set(savedSearch);
-      const updated = savedSearchContainer.update({ nextState: { hideChart: true } });
-      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
-      savedSearchContainer.set(updated);
-      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
       savedSearchContainer.update({ nextState: { hideChart: false } });
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
       savedSearchContainer.update({ nextState: { hideChart: true } });

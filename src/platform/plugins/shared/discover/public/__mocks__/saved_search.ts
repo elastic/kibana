@@ -13,6 +13,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from './data_view_with_timefield';
 import { dataViewAdHoc } from './data_view_complex';
 import { dataViewEsql } from './data_view_esql';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 
 export const createSavedSearchMock = () =>
   ({
@@ -24,6 +25,29 @@ export const createSavedSearchMock = () =>
   } as unknown as SavedSearch);
 
 export const savedSearchMock = createSavedSearchMock();
+
+export const discoverSessionMock: DiscoverSession = {
+  id: 'the-saved-search-id',
+  title: 'A saved search',
+  description: '',
+  managed: false,
+  tabs: [
+    {
+      id: 'testsession-tab-id',
+      label: 'test session tab',
+      columns: ['default_column'],
+      sort: [],
+      hideChart: true,
+      grid: { columns: {} },
+      isTextBasedQuery: false,
+      serializedSearchSource: {
+        index: dataViewMock.id,
+        query: { query: '', language: 'kuery' },
+        filter: [],
+      },
+    },
+  ],
+};
 
 export const savedSearchMockWithTimeField = {
   id: 'the-saved-search-id-with-timefield',

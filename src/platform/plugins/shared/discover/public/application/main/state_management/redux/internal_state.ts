@@ -9,7 +9,7 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { v4 as uuidv4 } from 'uuid';
-import { throttle } from 'lodash';
+import { throttle, isEqual } from 'lodash';
 import {
   type PayloadAction,
   type PayloadActionCreator,
@@ -22,8 +22,10 @@ import {
   createListenerMiddleware,
   createAction,
   isAnyOf,
+  current,
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import {
@@ -40,7 +42,6 @@ import {
 import { loadDataViewList, initializeTabs, saveDiscoverSession } from './actions';
 import { selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
-
 const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
 
@@ -49,6 +50,8 @@ const initialState: DiscoverInternalState = {
   userId: undefined,
   spaceId: undefined,
   persistedDiscoverSession: undefined,
+  editedDiscoverSession: undefined,
+  hasDiscoverSessionChanged: false,
   defaultProfileAdHocDataViewIds: [],
   savedDataViews: [],
   expandedDoc: undefined,
@@ -109,6 +112,57 @@ export const internalStateSlice = createSlice({
       state.tabs.allIds = action.payload.allTabs.map((tab) => tab.id);
       state.tabs.unsafeCurrentId = action.payload.selectedTabId;
       state.tabs.recentlyClosedTabIds = action.payload.recentlyClosedTabs.map((tab) => tab.id);
+      // in case there's a persisted discover session, check if tabs have the same labels, and if not create a updated version of the session
+      // also check if the order of tabs is the same, if not, create a new session
+      const discoverSessionToChange = state.editedDiscoverSession ?? state.persistedDiscoverSession;
+      if (discoverSessionToChange) {
+        const persistedTabs = discoverSessionToChange.tabs;
+        const currentTabs = action.payload.allTabs;
+
+        const idsOrOrderChanged = !isEqual(
+          persistedTabs.map((tab) => tab.id),
+          currentTabs.map((tab) => tab.id)
+        );
+
+        const labelsByIdPersisted = Object.fromEntries(
+          persistedTabs.map((tab) => [tab.id, tab.label])
+        );
+
+        const labelsChanged = currentTabs.some(
+          (tab) =>
+            labelsByIdPersisted[tab.id] !== undefined && labelsByIdPersisted[tab.id] !== tab.label
+        );
+
+        if (idsOrOrderChanged || labelsChanged) {
+          state.hasDiscoverSessionChanged = true;
+
+          const updatedTabs: DiscoverSession['tabs'] = currentTabs.map((tab) => {
+            const persistedTab = state.persistedDiscoverSession?.tabs.find((t) => t.id === tab.id);
+            if (persistedTab) {
+              return {
+                ...persistedTab,
+                id: tab.id || persistedTab.id,
+                label: tab.label,
+              };
+            }
+            // New tab not present in persisted session: provide minimal required fields
+            return {
+              id: tab.id,
+              label: tab.label,
+              sort: [] as [string, string][],
+            };
+          });
+
+          const nextDiscoverSession = { ...discoverSessionToChange, tabs: updatedTabs };
+          state.hasDiscoverSessionChanged = !isEqual(
+            nextDiscoverSession,
+            state.persistedDiscoverSession
+          );
+          state.editedDiscoverSession = state.hasDiscoverSessionChanged
+            ? nextDiscoverSession
+            : undefined;
+        }
+      }
     },
 
     setIsDataViewLoading: (state, action: TabAction<{ isDataViewLoading: boolean }>) =>
@@ -131,6 +185,45 @@ export const internalStateSlice = createSlice({
       state.initialDocViewerTabId = action.payload.initialDocViewerTabId;
     },
 
+    setEditedDiscoverSession: (
+      state,
+      action: PayloadAction<{
+        discoverSession: DiscoverSession | undefined;
+      }>
+    ) => {
+      const persistedDiscoverSession = !state.persistedDiscoverSession
+        ? undefined
+        : current(state.persistedDiscoverSession);
+      if (!persistedDiscoverSession) {
+        state.hasDiscoverSessionChanged = true;
+        state.editedDiscoverSession = action.payload.discoverSession;
+      } else {
+        state.hasDiscoverSessionChanged = !isEqual(
+          action.payload.discoverSession,
+          persistedDiscoverSession
+        );
+        state.editedDiscoverSession = state.hasDiscoverSessionChanged
+          ? action.payload.discoverSession
+          : undefined;
+      }
+    },
+
+    setPersistedDiscoverSession: (
+      state,
+      action: PayloadAction<{
+        discoverSession: DiscoverSession | undefined;
+      }>
+    ) => {
+      state.persistedDiscoverSession = action.payload.discoverSession;
+      state.hasDiscoverSessionChanged = false;
+      state.editedDiscoverSession = undefined;
+    },
+    undoDiscoverSessionChanges: (state) => {
+      if (state.persistedDiscoverSession) {
+        state.editedDiscoverSession = undefined;
+        state.hasDiscoverSessionChanged = false;
+      }
+    },
     setDataRequestParams: (
       state,
       action: TabAction<{ dataRequestParams: InternalStateDataRequestParams }>
@@ -246,11 +339,15 @@ export const internalStateSlice = createSlice({
       state.userId = action.payload.userId;
       state.spaceId = action.payload.spaceId;
       state.persistedDiscoverSession = action.payload.persistedDiscoverSession;
+      state.editedDiscoverSession = undefined;
+      state.hasDiscoverSessionChanged = false;
     });
 
     builder.addCase(saveDiscoverSession.fulfilled, (state, action) => {
       if (action.payload.discoverSession) {
         state.persistedDiscoverSession = action.payload.discoverSession;
+        state.editedDiscoverSession = undefined;
+        state.hasDiscoverSessionChanged = false;
       }
     });
 
@@ -281,6 +378,8 @@ const createMiddleware = (options: InternalStateDependencies) => {
     InternalStateDispatch,
     InternalStateDependencies
   >;
+
+  // listens for specific actions or state changes and performs side effects accordingly. The middleware is configured with throttling to optimize performance and avoid excessive execution.
 
   startListening({
     actionCreator: internalStateSlice.actions.setTabs,
@@ -326,6 +425,15 @@ const createMiddleware = (options: InternalStateDependencies) => {
       const { tabsStorageManager } = listenerApi.extra;
       const { persistedDiscoverSession } = listenerApi.getState();
       tabsStorageManager.updateDiscoverSessionIdLocally(persistedDiscoverSession?.id);
+    },
+  });
+
+  startListening({
+    predicate: (action) =>
+      action.type === internalStateSlice.actions.undoDiscoverSessionChanges.type,
+    effect: (_, listenerApi) => {
+      const { tabsStorageManager } = listenerApi.extra;
+      tabsStorageManager.cleanOpenTabs();
     },
   });
 

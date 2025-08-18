@@ -238,10 +238,11 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       services,
     });
     const globalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
+    const initialSavedSearch = persistedTabSavedSearch
+      ? copySavedSearch(persistedTabSavedSearch)
+      : services.savedSearch.getNew();
     const savedSearch = updateSavedSearch({
-      savedSearch: persistedTabSavedSearch
-        ? copySavedSearch(persistedTabSavedSearch)
-        : services.savedSearch.getNew(),
+      savedSearch: initialSavedSearch,
       dataView,
       appState: initialState,
       globalState: {
@@ -297,14 +298,11 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
      * Update state containers
      */
 
-    if (persistedTabSavedSearch) {
-      // Set the persisted tab saved search first, then assign the
-      // updated saved search to ensure unsaved changes are detected
-      stateContainer.savedSearchState.set(persistedTabSavedSearch);
-      stateContainer.savedSearchState.assignNextSavedSearch(savedSearch);
-    } else {
-      stateContainer.savedSearchState.set(savedSearch);
-    }
+    stateContainer.savedSearchState.set(initialSavedSearch);
+    stateContainer.savedSearchState.update({
+      nextDataView: dataView,
+      nextState: initialState,
+    });
 
     // Make sure app state container is completely reset
     stateContainer.appState.resetToState(initialState);
