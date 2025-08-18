@@ -17,4 +17,4 @@
 ## Increase the size of the semi-space to improve performance
 ## (recommended for apps that create and destroy large objects very often)
 ## https://nodejs.org/api/cli.html#--max-semi-space-sizesize-in-mib
---max-semi-space-size=16
+--max-semi-space-size=4
