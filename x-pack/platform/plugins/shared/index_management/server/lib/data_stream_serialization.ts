@@ -7,7 +7,7 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import { LOGSDB_INDEX_MODE, STANDARD_INDEX_MODE } from '../../common/constants';
-import { IndexMode } from '../../common/types/data_streams';
+import type { IndexMode } from '../../common/types/data_streams';
 import type { DataStream, EnhancedDataStreamFromEs, Health } from '../../common';
 
 export function deserializeDataStream(

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ConversationRoundStep, ConversationRoundStepType } from '@kbn/onechat-common';
+import type { ConversationRoundStep } from '@kbn/onechat-common';
+import { ConversationRoundStepType } from '@kbn/onechat-common';
 import React from 'react';
 import { ToolCallPanel } from './tool_call_panel';
 

@@ -8,8 +8,8 @@
  */
 
 import type { ComponentType } from 'react';
-import { ToastsStart } from '@kbn/core-notifications-browser';
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
+import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
 
 /**
  * Props provided to a `RegistryComponent`.

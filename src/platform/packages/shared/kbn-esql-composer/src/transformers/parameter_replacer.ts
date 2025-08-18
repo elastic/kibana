@@ -7,19 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  Builder,
+import type {
   ESQLAstBaseItem,
   ESQLColumn,
   ESQLFunction,
   ESQLLiteral,
   ESQLParamLiteral,
-  isColumn,
-  isFunctionExpression,
-  isParamLiteral,
 } from '@kbn/esql-ast';
-import { ESQLIdentifier, ESQLProperNode } from '@kbn/esql-ast/src/types';
-import { FieldValue, Params } from '../types';
+import { Builder, isColumn, isFunctionExpression, isParamLiteral } from '@kbn/esql-ast';
+import type { ESQLIdentifier, ESQLProperNode } from '@kbn/esql-ast/src/types';
+import type { FieldValue, Params } from '../types';
 
 type ReplaceableNodes = ESQLParamLiteral | ESQLLiteral | ESQLColumn | ESQLFunction;
 export class ParameterReplacer {

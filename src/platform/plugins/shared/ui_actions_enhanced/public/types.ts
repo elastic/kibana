@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
-import { ActionFactory } from './dynamic_actions';
+import type { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
+import type { ActionFactory } from './dynamic_actions';
 
 export interface CommonlyUsedRange {
   from: string;
