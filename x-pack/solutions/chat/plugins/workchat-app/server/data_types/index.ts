@@ -11,19 +11,19 @@ import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
 export const workChatDataTypes: DataTypeDefinition[] = [
   {
     id: 1,
-    name: 'WebCrawler',
-  },
-  {
-    id: 2,
-    name: 'Content Connector',
-  },
-  {
-    id: 3,
     name: 'Index',
   },
   {
+    id: 2,
+    name: 'WebCrawler',
+  },
+  {
+    id: 3,
+    name: 'Content Connector',
+  },
+  {
     id: 4,
-    name: 'WorkChat User Preferences',
+    name: 'Federated Content Connector',
   },
 ];
 

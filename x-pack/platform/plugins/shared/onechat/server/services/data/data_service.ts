@@ -41,6 +41,9 @@ export class DataService {
   setup(deps: DataServiceSetupDeps): DataServiceSetup {
     this.setupDeps = deps;
 
+    const { logger } = this.setupDeps;
+    logger.info('Setting up the OneChat data service...');
+
     return {
       register: (dataType) => this.dataTypeRegistry.register(dataType),
     };
@@ -48,7 +51,7 @@ export class DataService {
 
   start(deps: DataServiceStartDeps): DataServiceStart {
     const { logger } = this.setupDeps!;
-    logger.info('Starting data service...');
+    logger.info('Starting the OneChat data service...');
 
     const getRegistry: DataServiceStart['getRegistry'] = async ({ request }) => {
       return this.dataTypeRegistry;
