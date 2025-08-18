@@ -28,8 +28,8 @@ export function AddPageAttachmentToCaseModal({
   notifications,
   onCloseModal,
 }: AddPageAttachmentToCaseModalProps) {
-  const getCasesContext = cases?.ui.getCasesContext;
-  const canUseCases = cases?.helpers.canUseCases;
+  const getCasesContext = cases.ui.getCasesContext;
+  const canUseCases = cases.helpers.canUseCases;
 
   const casesPermissions: CasesPermissions = useMemo(() => {
     if (!canUseCases) {

@@ -8,12 +8,10 @@
 import React from 'react';
 import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from '@kbn/core/public';
 
 interface AddToCaseCommentProps {
   comment: string;
   onCommentChange: (comment: string) => void;
-  notifications: NotificationsStart;
 }
 
 export function AddToCaseComment({ comment, onCommentChange }: AddToCaseCommentProps) {
