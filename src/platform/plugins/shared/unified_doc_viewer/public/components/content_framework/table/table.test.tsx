@@ -85,7 +85,10 @@ describe('ContentFrameworkTable', () => {
   });
 
   it('returns null if hit.flattened is falsy', () => {
-    const props = { ...defaultProps, hit: {} };
+    const props = {
+      ...defaultProps,
+      hit: { id: 'test-id', flattened: {}, raw: {} },
+    };
     const { container } = render(<ContentFrameworkTable {...props} />);
     expect(container.firstChild).toBeNull();
   });
