@@ -6,22 +6,22 @@
  */
 
 export interface DataTypeDefinition {
-  id: string;
+  id: number;
   name: string;
 }
 
 export interface DataTypeRegistry {
-  get(dataTypeId: string): DataTypeDefinition | undefined;
+  get(dataTypeId: number): DataTypeDefinition | undefined;
   list(): DataTypeDefinition[];
   register(dataType: DataTypeDefinition): void;
 }
 
 class DataTypeRegistryImpl implements DataTypeRegistry {
-  private dataTypes: Map<string, DataTypeDefinition> = new Map();
+  private dataTypes: Map<number, DataTypeDefinition> = new Map();
 
   constructor() {}
 
-  get(dataTypeId: string) {
+  get(dataTypeId: number) {
     if (!this.dataTypes.has(dataTypeId)) {
       throw new Error(`Unknown data type: ${dataTypeId}`);
     }

@@ -20,7 +20,7 @@ import { IntegrationRegistry } from './services/integrations';
 import { createServices } from './services/create_services';
 import type { WorkChatAppConfig } from './config';
 import { AppLogger } from './utils';
-import { workChatDataTypes } from './data_types';
+import { registerWorkChatDataTypes } from './data_types';
 import type {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
@@ -70,9 +70,7 @@ export class WorkChatAppPlugin
     registerFeatures({ features: setupDeps.features });
 
     // Register custom data types with onechat
-    workChatDataTypes.slice(0, -1).forEach((dataType) => {
-      setupDeps.onechat.data.register(dataType);
-    });
+    registerWorkChatDataTypes({ oneChat: setupDeps.onechat });
 
     return {
       integrations: {

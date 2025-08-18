@@ -6,22 +6,29 @@
  */
 
 import type { DataTypeDefinition } from '@kbn/onechat-plugin/server/services/data';
+import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
 
 export const workChatDataTypes: DataTypeDefinition[] = [
   {
-    id: 'workchat-conversations',
-    name: 'WorkChat Conversations',
+    id: 1,
+    name: 'WebCrawler',
   },
   {
-    id: 'workchat-documents',
-    name: 'WorkChat Documents',
+    id: 2,
+    name: 'Content Connector',
   },
   {
-    id: 'workchat-knowledge-base',
-    name: 'WorkChat Knowledge Base',
+    id: 3,
+    name: 'Index',
   },
   {
-    id: 'workchat-user-preferences',
+    id: 4,
     name: 'WorkChat User Preferences',
   },
 ];
+
+export const registerWorkChatDataTypes = ({ oneChat }: { oneChat: OnechatPluginSetup }) => {
+  workChatDataTypes.forEach((dataType) => {
+    oneChat.data.register(dataType);
+  });
+};
