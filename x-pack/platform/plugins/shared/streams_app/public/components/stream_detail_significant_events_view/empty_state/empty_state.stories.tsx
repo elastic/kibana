@@ -10,11 +10,11 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
 import classNames from 'classnames';
-import { SignificantEventFlyout } from '.';
+import { SignificantEventsViewEmptyState } from './empty_state';
 
 const stories: Meta<{}> = {
-  title: 'Streams/SignificantEventFlyout',
-  component: SignificantEventFlyout,
+  title: 'Streams/SignificantEventsViewEmptyState',
+  component: SignificantEventsViewEmptyState,
 };
 
 export default stories;
@@ -29,7 +29,7 @@ export const Create: StoryFn<{}> = () => {
         `
       )}
     >
-      <SignificantEventFlyout name="logs" />
+      <SignificantEventsViewEmptyState onAddClick={() => {}} />
     </EuiPanel>
   );
 };
