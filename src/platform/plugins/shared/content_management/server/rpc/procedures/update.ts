@@ -24,10 +24,7 @@ export const update: ProcedureDefinition<Context, UpdateIn<string>> = {
       version,
     });
 
-    console.log('rpc update 0------', JSON.stringify(data, null, 2));
-
     const res = client.update(id, data, options);
-    console.log('rpc update-----', JSON.stringify(res, null, 2));
     return res;
   },
 };

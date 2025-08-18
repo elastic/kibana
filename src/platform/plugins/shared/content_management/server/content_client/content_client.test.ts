@@ -61,9 +61,9 @@ describe('ContentClient', () => {
       test('should create an item', async () => {
         const { contentClient } = setup();
         const itemCreated = await contentClient.create({ foo: 'bar' });
-        const { id } = itemCreated.result.item;
+        const { id } = itemCreated.result;
         const res = await contentClient.get(id);
-        expect(res.result.item).toEqual({ foo: 'bar', id });
+        expect(res.result).toEqual({ type: 'foo', id, data: { id, foo: 'bar' } });
       });
 
       test('should pass the options to the storage', async () => {
@@ -71,7 +71,7 @@ describe('ContentClient', () => {
 
         const options = { forwardInResponse: { option1: 'foo' } };
         const res = await contentClient.create({ field1: 123 }, options);
-        expect(res.result.item).toEqual({
+        expect(res.result.data).toEqual({
           field1: 123,
           id: expect.any(String),
           options: { option1: 'foo' }, // the options have correctly been passed to the storage
@@ -85,7 +85,7 @@ describe('ContentClient', () => {
       test('should return undefined if no item was found', async () => {
         const { contentClient } = setup();
         const res = await contentClient.get('hello');
-        expect(res.result.item).toBeUndefined();
+        expect(res.result.data).toBeUndefined();
       });
 
       test('should pass the options to the storage', async () => {
@@ -94,7 +94,7 @@ describe('ContentClient', () => {
         const options = { forwardInResponse: { foo: 'bar' } };
         const res = await contentClient.get('hello', options);
 
-        expect(res.result.item).toEqual({
+        expect(res.result.data).toEqual({
           // the options have correctly been passed to the storage
           options: { foo: 'bar' },
         });
@@ -107,21 +107,25 @@ describe('ContentClient', () => {
 
         const item1 = await contentClient.create({ name: 'item1' });
         const item2 = await contentClient.create({ name: 'item2' });
-        const ids = [item1.result.item.id, item2.result.item.id];
+        const ids = [item1.result.id, item2.result.id];
 
         const res = await contentClient.bulkGet(ids);
         expect(res.result.hits).toEqual([
           {
-            item: {
+            data: {
               name: 'item1',
               id: expect.any(String),
             },
+            id: item1.result.id,
+            type: 'foo',
           },
           {
-            item: {
+            data: {
               name: 'item2',
               id: expect.any(String),
             },
+            id: item2.result.id,
+            type: 'foo',
           },
         ]);
       });
@@ -131,25 +135,29 @@ describe('ContentClient', () => {
 
         const item1 = await contentClient.create({ name: 'item1' });
         const item2 = await contentClient.create({ name: 'item2' });
-        const ids = [item1.result.item.id, item2.result.item.id];
+        const ids = [item1.result.id, item2.result.id];
 
         const options = { forwardInResponse: { foo: 'bar' } };
         const res = await contentClient.bulkGet(ids, options);
 
         expect(res.result.hits).toEqual([
           {
-            item: {
+            data: {
               name: 'item1',
               id: expect.any(String),
               options: { foo: 'bar' }, // the options have correctly been passed to the storage
             },
+            id: item1.result.id,
+            type: 'foo',
           },
           {
-            item: {
+            data: {
               name: 'item2',
               id: expect.any(String),
               options: { foo: 'bar' }, // the options have correctly been passed to the storage
             },
+            id: item2.result.id,
+            type: 'foo',
           },
         ]);
       });
@@ -159,23 +167,23 @@ describe('ContentClient', () => {
       test('should update an item', async () => {
         const { contentClient } = setup();
         const itemCreated = await contentClient.create({ foo: 'bar' });
-        const { id } = itemCreated.result.item;
+        const { id } = itemCreated.result;
 
         await contentClient.update(id, { foo: 'changed' });
 
         const res = await contentClient.get(id);
-        expect(res.result.item).toEqual({ foo: 'changed', id });
+        expect(res.result.data).toEqual({ foo: 'changed', id });
       });
 
       test('should pass the options to the storage', async () => {
         const { contentClient } = setup();
         const itemCreated = await contentClient.create({ field1: 'bar' });
-        const { id } = itemCreated.result.item;
+        const { id } = itemCreated.result;
 
         const options = { forwardInResponse: { option1: 'foo' } };
         const res = await contentClient.update(id, { field1: 'changed' }, options);
 
-        expect(res.result.item).toEqual({
+        expect(res.result.data).toEqual({
           field1: 'changed',
           id,
           options: { option1: 'foo' }, // the options have correctly been passed to the storage
@@ -187,25 +195,25 @@ describe('ContentClient', () => {
       test('should delete an item', async () => {
         const { contentClient } = setup();
         const itemCreated = await contentClient.create({ foo: 'bar' });
-        const { id } = itemCreated.result.item;
+        const { id } = itemCreated.result;
 
         {
           const res = await contentClient.get(id);
-          expect(res.result.item).not.toBeUndefined();
+          expect(res.result.data).not.toBeUndefined();
         }
 
         await contentClient.delete(id);
 
         {
           const res = await contentClient.get(id);
-          expect(res.result.item).toBeUndefined();
+          expect(res.result.data).toBeUndefined();
         }
       });
 
       test('should pass the options to the storage', async () => {
         const { contentClient } = setup();
         const itemCreated = await contentClient.create({ field1: 'bar' });
-        const { id } = itemCreated.result.item;
+        const { id } = itemCreated.result;
 
         const options = { forwardInResponse: { option1: 'foo' } };
 
@@ -251,8 +259,12 @@ describe('ContentClient', () => {
           hits: [
             {
               id: expect.any(String),
-              title: 'hello',
-              options: { option1: 'foo' }, // the options have correctly been passed to the storage
+              type: 'foo',
+              data: {
+                id: '11',
+                title: 'hello',
+                options: { option1: 'foo' }, // the options have correctly been passed to the storage
+              },
             },
           ],
           pagination: {

@@ -24,7 +24,6 @@ export const search: ProcedureDefinition<Context, SearchIn<string>> = {
       version,
     });
     const result = await client.search(query, options);
-    console.log('----search result-----', JSON.stringify(result, null, 2));
     return result;
   },
 };

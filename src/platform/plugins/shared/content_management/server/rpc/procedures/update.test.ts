@@ -132,8 +132,10 @@ describe('RPC -> update()', () => {
         {
           contentTypeId: 'foo',
           result: {
-            item: {
-              any: 'object',
+            id: FOO_CONTENT_ID,
+            type: 'foo',
+            data: {
+              title: 'title',
             },
           },
         },
@@ -181,7 +183,9 @@ describe('RPC -> update()', () => {
       const { ctx, storage } = setup();
 
       const expected = {
-        item: 'UpdateResult',
+        id: FOO_CONTENT_ID,
+        type: 'foo',
+        data: 'UpdateResult',
       };
       storage.update.mockResolvedValueOnce(expected);
 
