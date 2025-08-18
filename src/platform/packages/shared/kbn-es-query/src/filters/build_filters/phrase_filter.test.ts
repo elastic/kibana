@@ -8,18 +8,18 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
+import type { PhraseFilter } from './phrase_filter';
 import {
   buildInlineScriptForPhraseFilter,
   buildPhraseFilter,
   getPhraseFilterField,
-  PhraseFilter,
   isPhraseFilter,
   isScriptedPhraseFilter,
 } from './phrase_filter';
 import { fields, getField } from '../stubs';
-import { DataViewBase } from '../../es_query';
+import type { DataViewBase } from '../../es_query';
 import type { estypes } from '@elastic/elasticsearch';
-import { Filter } from './types';
+import type { Filter } from './types';
 
 describe('Phrase filter builder', () => {
   let indexPattern: DataViewBase;

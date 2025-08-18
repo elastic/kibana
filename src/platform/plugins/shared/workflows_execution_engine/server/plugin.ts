@@ -14,7 +14,8 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { EsWorkflowExecution, ExecutionStatus, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 
 import { graphlib } from '@dagrejs/dagre';
 import { Client } from '@elastic/elasticsearch';
@@ -117,7 +118,7 @@ export class WorkflowsExecutionEnginePlugin
 
       const contextManager = new WorkflowContextManager({
         workflowRunId,
-        workflow: workflow as any,
+        workflow: workflow.definition,
         event: context.event,
         logger: this.logger,
         workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,
@@ -129,22 +130,33 @@ export class WorkflowsExecutionEnginePlugin
       // Log workflow execution start
       await workflowRuntime.start();
 
-      try {
-        do {
-          const currentNode = workflowRuntime.getCurrentStep();
+      do {
+        const currentNode = workflowRuntime.getCurrentStep();
 
-          const step = new StepFactory().create(
-            currentNode as any,
-            contextManager,
-            connectorExecutor,
-            workflowRuntime
-          );
+        const step = new StepFactory().create(
+          currentNode as any,
+          contextManager,
+          connectorExecutor,
+          workflowRuntime,
+          workflowLogger
+        );
 
+        try {
           await step.run();
-        } while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING);
-      } catch (error) {
-        await workflowRuntime.fail(error);
-      }
+        } catch (error) {
+          // If an unhandled error occurs in a step, the workflow execution is terminated
+          workflowLogger.logError(
+            `Error executing step ${currentNode.id} (${currentNode.name}): ${error.message}`
+          );
+          await workflowRuntime.setStepResult(currentNode.id, {
+            output: null,
+            error: String(error),
+          });
+          await workflowRuntime.finishStep(currentNode.id);
+          await workflowRuntime.fail(error);
+          break;
+        }
+      } while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING);
     };
 
     return {

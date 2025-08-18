@@ -7,20 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BaseStep } from '@kbn/workflows'; // Adjust path as needed
-import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
-import { StepImplementation } from './step_base';
+import type { BaseStep } from '@kbn/workflows'; // Adjust path as needed
+import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { StepImplementation } from './step_base';
 // Import schema and inferred types
-import { ConnectorExecutor } from '../connector_executor';
+import type { ConnectorExecutor } from '../connector_executor';
 import {
   EnterConditionBranchNodeImpl,
   EnterIfNodeImpl,
   ExitIfNodeImpl,
   ExitConditionBranchNodeImpl,
 } from './if_step';
-import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
+import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -33,7 +34,8 @@ export class StepFactory {
     step: TStep, // TODO: TStep must refer to a node type, not BaseStep (IfElseNode, ForeachNode, etc.)
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
-    workflowState: WorkflowExecutionRuntimeManager
+    workflowState: WorkflowExecutionRuntimeManager,
+    workflowLogger: IWorkflowEventLogger // Assuming you have a logger interface
   ): StepImplementation {
     const stepType = (step as any).type; // Use a more type-safe way to determine step type if possible
 
@@ -43,11 +45,11 @@ export class StepFactory {
 
     switch (stepType) {
       case 'enter-foreach':
-        return new EnterForeachNodeImpl(step as any, workflowState);
+        return new EnterForeachNodeImpl(step as any, workflowState, contextManager, workflowLogger);
       case 'exit-foreach':
-        return new ExitForeachNodeImpl(step as any, workflowState);
+        return new ExitForeachNodeImpl(step as any, workflowState, workflowLogger);
       case 'enter-if':
-        return new EnterIfNodeImpl(step as any, workflowState);
+        return new EnterIfNodeImpl(step as any, workflowState, contextManager, workflowLogger);
       case 'enter-condition-branch':
         return new EnterConditionBranchNodeImpl(workflowState);
       case 'exit-condition-branch':
@@ -55,7 +57,13 @@ export class StepFactory {
       case 'exit-if':
         return new ExitIfNodeImpl(step as any, workflowState);
       case 'atomic':
-        return new AtomicStepImpl(step as any, contextManager, connectorExecutor, workflowState);
+        return new AtomicStepImpl(
+          step as any,
+          contextManager,
+          connectorExecutor,
+          workflowState,
+          workflowLogger
+        );
       case 'parallel':
       // return new ParallelStepImpl(step as ParallelStep, contextManager);
       case 'merge':
