@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
 
 export const UPDATE_ESQL_QUERY_TRIGGER = 'UPDATE_ESQL_QUERY_TRIGGER';
 

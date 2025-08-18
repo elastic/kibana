@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import execa from 'execa';
-import { KibanaGroup } from '@kbn/projects-solutions-groups';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 export async function generatePackage({

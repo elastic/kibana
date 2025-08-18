@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionDefinition } from '../types';
+import type { FunctionDefinition } from '../types';
 import { getLicenseInfoForFunctions } from './get_license_info';
 
 describe('getLicenseInfo', () => {
@@ -20,7 +20,7 @@ describe('getLicenseInfo', () => {
       operator: '-',
       preview: false,
       signatures: [],
-      license: 'PLATINUM',
+      license: 'platinum',
     };
 
     const result = getLicenseInfoForFunctions(fn);
@@ -28,7 +28,7 @@ describe('getLicenseInfo', () => {
     expect(result).toEqual({
       licenses: [
         {
-          name: 'PLATINUM',
+          name: 'platinum',
           isSignatureSpecific: false,
           paramsWithLicense: [],
         },

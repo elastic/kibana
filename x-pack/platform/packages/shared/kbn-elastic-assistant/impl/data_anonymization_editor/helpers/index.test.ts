@@ -7,7 +7,7 @@
 
 import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common';
 import { getIsDataAnonymizable, updateSelectedPromptContext } from '.';
-import { SelectedPromptContext } from '../../assistant/prompt_context/types';
+import type { SelectedPromptContext } from '../../assistant/prompt_context/types';
 
 describe('helpers', () => {
   beforeEach(() => jest.clearAllMocks());

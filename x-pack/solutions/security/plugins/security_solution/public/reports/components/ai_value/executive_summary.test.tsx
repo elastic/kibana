@@ -26,7 +26,6 @@ jest.mock('../../../common/components/user_profiles/use_get_current_user_profile
 const defaultProps = {
   from: '2023-01-01T00:00:00Z',
   to: '2023-01-31T23:59:59Z',
-  attackAlertIds: ['1', '2'],
   hasAttackDiscoveries: true,
   valueMetrics: {
     costSavings: 1000,

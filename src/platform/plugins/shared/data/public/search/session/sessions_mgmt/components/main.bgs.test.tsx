@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import moment from 'moment';
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
@@ -46,7 +46,6 @@ const setup = async () => {
   const sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
 
   const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-    locators: mockShareStart.url.locators,
     notifications: mockCoreStart.notifications,
     application: mockCoreStart.application,
   });
@@ -71,6 +70,7 @@ const setup = async () => {
           config={mockConfig}
           kibanaVersion={'8.0.0'}
           searchUsageCollector={mockSearchUsageCollector}
+          share={mockShareStart}
         />
       </LocaleWrapper>
     );

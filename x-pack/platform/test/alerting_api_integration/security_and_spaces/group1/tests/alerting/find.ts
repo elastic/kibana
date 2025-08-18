@@ -608,5 +608,121 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         ]);
       });
     });
+
+    describe('Query params validation', () => {
+      const { user, space } = SuperuserAtSpace1;
+
+      it('should handle find alert request with string type fields appropriately', async () => {
+        const myTag = uuidv4();
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+              tags: [myTag],
+              rule_type_id: 'test.restricted-noop',
+              consumer: 'alertsRestrictedFixture',
+            })
+          )
+          .expect(200);
+        objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+
+        // create another type with same tag
+        const { body: createdSecondAlert } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              tags: [myTag],
+              rule_type_id: 'test.restricted-noop',
+              consumer: 'alertsRestrictedFixture',
+            })
+          )
+          .expect(200);
+        objectRemover.add(space.id, createdSecondAlert.id, 'rule', 'alerting');
+
+        const response = await supertestWithoutAuth
+          .get(
+            `${getUrlPrefix(
+              space.id
+            )}/api/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=tags&sort_field=createdAt`
+          )
+          .auth(user.username, user.password);
+
+        expect(response.statusCode).to.eql(200);
+        expect(response.body.page).to.equal(1);
+        expect(response.body.per_page).to.be.greaterThan(0);
+        expect(response.body.total).to.be.greaterThan(0);
+        const [matchFirst, matchSecond] = response.body.data;
+        expect(omit(matchFirst, 'updatedAt')).to.eql({
+          id: createdAlert.id,
+          actions: [],
+          tags: [myTag],
+        });
+        expect(omit(matchSecond, 'updatedAt')).to.eql({
+          id: createdSecondAlert.id,
+          actions: [],
+          tags: [myTag],
+        });
+      });
+
+      it('should handle find alert request with multiple string type fields appropriately', async () => {
+        const myTag = uuidv4();
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+              tags: [myTag],
+              rule_type_id: 'test.restricted-noop',
+              consumer: 'alertsRestrictedFixture',
+            })
+          )
+          .expect(200);
+        objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+
+        // create another type with same tag
+        const { body: createdSecondAlert } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              tags: [myTag],
+              rule_type_id: 'test.restricted-noop',
+              consumer: 'alertsRestrictedFixture',
+            })
+          )
+          .expect(200);
+        objectRemover.add(space.id, createdSecondAlert.id, 'rule', 'alerting');
+
+        const response = await supertestWithoutAuth
+          .get(
+            `${getUrlPrefix(
+              space.id
+            )}/api/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=name&fields=tags&sort_field=createdAt`
+          )
+          .auth(user.username, user.password);
+
+        expect(response.statusCode).to.eql(200);
+        expect(response.body.page).to.equal(1);
+        expect(response.body.per_page).to.be.greaterThan(0);
+        expect(response.body.total).to.be.greaterThan(0);
+        const [matchFirst, matchSecond] = response.body.data;
+        expect(omit(matchFirst, 'updatedAt')).to.eql({
+          id: createdAlert.id,
+          actions: [],
+          name: 'abc',
+          tags: [myTag],
+        });
+        expect(omit(matchSecond, 'updatedAt')).to.eql({
+          id: createdSecondAlert.id,
+          actions: [],
+          name: 'abc',
+          tags: [myTag],
+        });
+      });
+    });
   });
 }
