@@ -6,12 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SIEM_MIGRATIONS_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import {
-  SecurityPageName,
-  SECURITY_FEATURE_ID,
-  SIEM_MIGRATIONS_RULES_PATH,
-} from '../../common/constants';
+  SECURITY_UI_SHOW_PRIVILEGE,
+  SIEM_MIGRATIONS_FEATURE_ID,
+} from '@kbn/security-solution-features/constants';
+import { SecurityPageName, SIEM_MIGRATIONS_RULES_PATH } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import { SiemMigrationsIcon } from '../common/icons/siem_migrations';
 
@@ -26,7 +25,7 @@ export const siemMigrationsLinks: LinkItem = {
   }),
   landingIcon: SiemMigrationsIcon,
   path: SIEM_MIGRATIONS_RULES_PATH,
-  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+  capabilities: [[SECURITY_UI_SHOW_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
   skipUrlState: true,
   hideTimeline: true,
   hideWhenExperimentalKey: 'siemMigrationsDisabled',

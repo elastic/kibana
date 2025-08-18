@@ -17,7 +17,7 @@ import { useAlertsPrivileges } from './detections/containers/detection_engine/al
  * privileges
  */
 export function useReadonlyHeader(tooltip: string) {
-  const { hasKibanaREAD, hasKibanaCRUD } = useAlertsPrivileges();
+  const { hasSiemRead: hasKibanaREAD, hasSiemCRUD: hasKibanaCRUD } = useAlertsPrivileges();
   const chrome = useKibana().services.chrome;
 
   useEffect(() => {

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
+import { RULES_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import { useMemo } from 'react';
-import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
-import type { Privilege } from '../../../containers/detection_engine/alerts/types';
-import { useUserData } from '../../user_info';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import type { Privilege } from '../../../containers/detection_engine/alerts/types';
 
 const REQUIRED_INDEX_PRIVILEGES = ['read', 'write', 'view_index_metadata', 'manage'] as const;
 
@@ -41,17 +40,13 @@ export interface MissingPrivileges {
 
 export const useMissingPrivileges = (): MissingPrivileges => {
   const { detectionEnginePrivileges, listPrivileges } = useUserPrivileges();
-  const [{ canUserCRUD }] = useUserData();
+  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
 
   return useMemo<MissingPrivileges>(() => {
     const featurePrivileges: MissingFeaturePrivileges[] = [];
     const indexPrivileges: MissingIndexPrivileges[] = [];
 
-    if (
-      canUserCRUD == null ||
-      listPrivileges.result == null ||
-      detectionEnginePrivileges.result == null
-    ) {
+    if (listPrivileges.result == null || detectionEnginePrivileges.result == null) {
       /**
        * Do not check privileges till we get all the data. That helps to reduce
        * subsequent layout shift while loading and skip unneeded re-renders.
@@ -62,8 +57,8 @@ export const useMissingPrivileges = (): MissingPrivileges => {
       };
     }
 
-    if (canUserCRUD === false) {
-      featurePrivileges.push([SECURITY_FEATURE_ID, ['all']]);
+    if (canEditRules === false) {
+      featurePrivileges.push([RULES_FEATURE_ID, ['all']]);
     }
 
     const missingItemsPrivileges = getMissingIndexPrivileges(listPrivileges.result.listItems.index);
@@ -87,5 +82,5 @@ export const useMissingPrivileges = (): MissingPrivileges => {
       featurePrivileges,
       indexPrivileges,
     };
-  }, [canUserCRUD, listPrivileges, detectionEnginePrivileges]);
+  }, [listPrivileges.result, detectionEnginePrivileges.result, canEditRules]);
 };

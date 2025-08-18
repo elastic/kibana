@@ -6,7 +6,7 @@
  */
 
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
-import { SECURITY_FEATURE_ID_V3 } from '../../../constants';
+import { SECURITY_FEATURE_ID_V4 } from '../../../constants';
 import { SecuritySubFeatureId } from '../../product_features_keys';
 import type { SecurityFeatureParams } from '../types';
 import type { SubFeatureReplacements } from '../../types';
@@ -28,44 +28,44 @@ import {
 } from '../kibana_sub_features';
 
 const replacements: Partial<Record<SecuritySubFeatureId, SubFeatureReplacements>> = {
-  [SecuritySubFeatureId.endpointList]: [{ feature: SECURITY_FEATURE_ID_V3 }],
+  [SecuritySubFeatureId.endpointList]: [{ feature: SECURITY_FEATURE_ID_V4 }],
   [SecuritySubFeatureId.endpointExceptions]: [
     {
-      feature: SECURITY_FEATURE_ID_V3,
+      feature: SECURITY_FEATURE_ID_V4,
       additionalPrivileges: { endpoint_exceptions_all: ['global_artifact_management_all'] },
     },
   ],
   [SecuritySubFeatureId.trustedApplications]: [
     {
-      feature: SECURITY_FEATURE_ID_V3,
+      feature: SECURITY_FEATURE_ID_V4,
       additionalPrivileges: { trusted_applications_all: ['global_artifact_management_all'] },
     },
   ],
   [SecuritySubFeatureId.hostIsolationExceptionsBasic]: [
     {
-      feature: SECURITY_FEATURE_ID_V3,
+      feature: SECURITY_FEATURE_ID_V4,
       additionalPrivileges: { host_isolation_exceptions_all: ['global_artifact_management_all'] },
     },
   ],
   [SecuritySubFeatureId.blocklist]: [
     {
-      feature: SECURITY_FEATURE_ID_V3,
+      feature: SECURITY_FEATURE_ID_V4,
       additionalPrivileges: { blocklist_all: ['global_artifact_management_all'] },
     },
   ],
   [SecuritySubFeatureId.eventFilters]: [
     {
-      feature: SECURITY_FEATURE_ID_V3,
+      feature: SECURITY_FEATURE_ID_V4,
       additionalPrivileges: { event_filters_all: ['global_artifact_management_all'] },
     },
   ],
-  [SecuritySubFeatureId.policyManagement]: [{ feature: SECURITY_FEATURE_ID_V3 }],
-  [SecuritySubFeatureId.responseActionsHistory]: [{ feature: SECURITY_FEATURE_ID_V3 }],
-  [SecuritySubFeatureId.hostIsolation]: [{ feature: SECURITY_FEATURE_ID_V3 }],
-  [SecuritySubFeatureId.processOperations]: [{ feature: SECURITY_FEATURE_ID_V3 }],
-  [SecuritySubFeatureId.fileOperations]: [{ feature: SECURITY_FEATURE_ID_V3 }],
-  [SecuritySubFeatureId.executeAction]: [{ feature: SECURITY_FEATURE_ID_V3 }],
-  [SecuritySubFeatureId.scanAction]: [{ feature: SECURITY_FEATURE_ID_V3 }],
+  [SecuritySubFeatureId.policyManagement]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.responseActionsHistory]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.hostIsolation]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.processOperations]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.fileOperations]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.executeAction]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.scanAction]: [{ feature: SECURITY_FEATURE_ID_V4 }],
 };
 
 /**
