@@ -8,7 +8,7 @@
  */
 
 import { ContainerModule } from 'inversify';
-import type { RouteRegistrar } from '@kbn/core-http-server';
+import type { RequestHandler, RouteRegistrar } from '@kbn/core-http-server';
 import { CoreSetup, CoreStart, Request, Response, Route, Router } from '@kbn/core-di-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { cacheInScope, Global } from '@kbn/core-di-internal';
@@ -22,8 +22,7 @@ export const http = new ContainerModule(({ bind, onActivation }) => {
       typeof route.method,
       RequestHandlerContext
     >;
-
-    register(route, async (_context, request, response) => {
+    let handler: RequestHandler = async (_context, request, response) => {
       const scope = get(CoreStart('injection')).fork();
 
       scope.bind(Request).toConstantValue(request);
@@ -36,7 +35,13 @@ export const http = new ContainerModule(({ bind, onActivation }) => {
       } finally {
         scope.unbindAll();
       }
-    });
+    };
+
+    if (route.handleLegacyErrors) {
+      handler = router.handleLegacyErrors(handler);
+    }
+
+    register(route, handler);
 
     return route;
   });
