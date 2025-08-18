@@ -238,16 +238,16 @@ function handleStatsByColumnGroupOperation(
   });
 }
 
-function handleStatsByCategorizeLeafOperation(
-  query: EsqlQuery,
-  nodePathMap: Record<string, string>
-) {
-  throw new Error('Not yet implemented!');
-}
+// function handleStatsByCategorizeLeafOperation(
+//   query: EsqlQuery,
+//   nodePathMap: Record<string, string>
+// ) {
+//   throw new Error('Not yet implemented!');
+// }
 
-function handleStatsByCategorizeGroupOperation(
-  query: EsqlQuery,
-  nodePathMap: Record<string, string>
-) {
-  throw new Error('Not yet implemented!');
-}
+// function handleStatsByCategorizeGroupOperation(
+//   query: EsqlQuery,
+//   nodePathMap: Record<string, string>
+// ) {
+//   throw new Error('Not yet implemented!');
+// }
