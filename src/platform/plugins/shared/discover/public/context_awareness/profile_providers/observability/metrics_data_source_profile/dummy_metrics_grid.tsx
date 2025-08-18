@@ -10,13 +10,6 @@
 import React, { useCallback, useMemo } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { css } from '@emotion/react';
-import {
-  FieldIcon,
-  comboBoxFieldOptionMatcher,
-  fieldSupportsBreakdown,
-  getFieldIconProps,
-} from '@kbn/field-utils';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import type {
@@ -48,7 +41,7 @@ export const DummyMetricsGrid = ({
   const actions: IconButtonGroupProps['buttons'] = [
     {
       iconType: 'search',
-      label: i18n.translate('metricsExperience.searchButton', {
+      label: i18n.translate('discover.metricsExperience.searchButton', {
         defaultMessage: 'Search',
       }),
 
@@ -57,7 +50,7 @@ export const DummyMetricsGrid = ({
     },
     {
       iconType: 'fullScreen',
-      label: i18n.translate('metricsExperience.fullScreenButton', {
+      label: i18n.translate('discover.metricsExperience.fullScreenButton', {
         defaultMessage: 'Full screen',
       }),
 
@@ -66,7 +59,7 @@ export const DummyMetricsGrid = ({
     },
   ];
 
-  const fields = useMemo(() => dataView.fields.filter(fieldSupportsBreakdown), [dataView]);
+  const fields = useMemo(() => dataView.fields.filter((p) => p.timeSeriesDimension), [dataView]);
   const fieldOptions: SelectableEntry[] = useMemo(() => {
     const options: SelectableEntry[] = fields
       .map((field) => ({
@@ -78,26 +71,18 @@ export const DummyMetricsGrid = ({
           breakdownField?.name === field.name
             ? ('on' as EuiSelectableOption['checked'])
             : undefined,
-        prepend: (
-          <span
-            css={css`
-              .euiToken {
-                vertical-align: middle;
-              }
-            `}
-          >
-            <FieldIcon {...getFieldIconProps(field)} />
-          </span>
-        ),
       }))
       .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
 
     options.unshift({
       key: EMPTY_OPTION,
       value: EMPTY_OPTION,
-      label: i18n.translate('metricsExperience.breakdownFieldSelector.noBreakdownButtonLabel', {
-        defaultMessage: 'No breakdown',
-      }),
+      label: i18n.translate(
+        'discover.metricsExperience.breakdownFieldSelector.noBreakdownButtonLabel',
+        {
+          defaultMessage: 'No breakdown',
+        }
+      ),
       checked: !breakdownField ? ('on' as EuiSelectableOption['checked']) : undefined,
     });
 
@@ -123,12 +108,16 @@ export const DummyMetricsGrid = ({
         searchable
         buttonLabel="Metrics Experience Breakdown by"
         popoverTitle={i18n.translate(
-          'metricsExperience.breakdownFieldSelector.breakdownFieldPopoverTitle',
+          'discover.metricsExperience.breakdownFieldSelector.breakdownFieldPopoverTitle',
           {
             defaultMessage: 'Select breakdown field',
           }
         )}
-        optionMatcher={comboBoxFieldOptionMatcher}
+        optionMatcher={({ option, normalizedSearchValue }) => {
+          return 'name' in option
+            ? String(option.name ?? '').includes(normalizedSearchValue)
+            : option.label.includes(normalizedSearchValue);
+        }}
         options={fieldOptions}
         onChange={onChange}
       />,
