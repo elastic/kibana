@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowLogEvent } from '../workflow_event_logger/workflow_event_logger';
+import type { WorkflowLogEvent } from '../workflow_event_logger/workflow_event_logger';
 
 /**
  * Interface for workflow context manager logging capabilities

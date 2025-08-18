@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
-import { FtrProviderContext as InheritedFtrProviderContext } from '../../api_integration/ftr_provider_context';
-import { ObservabilityOnboardingServices } from './config';
+import type { GenericFtrProviderContext } from '@kbn/test';
+import type { FtrProviderContext as InheritedFtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { ObservabilityOnboardingServices } from './config';
 
 export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<
   infer TServices,

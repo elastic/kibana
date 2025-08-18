@@ -9,13 +9,13 @@ import moment from 'moment';
 import _ from 'lodash';
 import { createQuery } from '../create_query';
 import { ElasticsearchMetric } from '../metrics';
-import {
+import type {
   ElasticsearchResponse,
   ElasticsearchIndexRecoveryShard,
   ElasticsearchMetricbeatIndexRecoveryShard,
   ElasticsearchResponseHit,
 } from '../../../common/types/es';
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 

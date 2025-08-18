@@ -30,11 +30,12 @@ import {
   TRANSACTION_NAME,
 } from '@kbn/apm-types';
 import React from 'react';
-import { UnifiedDocViewerStorybookArgs } from '../../../../.storybook/preview';
+import type { UnifiedDocViewerStorybookArgs } from '../../../../.storybook/preview';
 import APMSpanFixture from '../../../__fixtures__/span_apm.json';
 import APMTransactionFixture from '../../../__fixtures__/transaction_apm.json';
 import SpanOtelRedisClientFixture from '../../../__fixtures__/span_otel_redis_client.json';
-import { ContentFrameworkTable, ContentFrameworkTableProps } from '.';
+import type { ContentFrameworkTableProps } from '.';
+import { ContentFrameworkTable } from '.';
 
 type Args = UnifiedDocViewerStorybookArgs<ContentFrameworkTableProps>;
 const meta = {

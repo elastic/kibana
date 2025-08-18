@@ -55,7 +55,7 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     await pageObjects.streams.clickAddProcessor();
     await pageObjects.streams.selectProcessorType('rename');
     await pageObjects.streams.fillFieldInput('message');
-    await page.locator('input[name="target_field"]').fill('message');
+    await page.locator('input[name="to"]').fill('message');
 
     const rows = await pageObjects.streams.getPreviewTableRows();
     expect(rows.length).toBeGreaterThan(0);
@@ -76,7 +76,7 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     await pageObjects.streams.clickAddProcessor();
     await pageObjects.streams.selectProcessorType('rename');
     await pageObjects.streams.fillFieldInput('message');
-    await page.locator('input[name="target_field"]').fill('message');
+    await page.locator('input[name="to"]').fill('message');
 
     const rows = await pageObjects.streams.getPreviewTableRows();
     expect(rows.length).toBeGreaterThan(0);
@@ -89,7 +89,7 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
       });
     }
 
-    await page.locator('input[name="target_field"]').fill('custom_message');
+    await page.locator('input[name="to"]').fill('custom_message');
 
     const updatedRows = await pageObjects.streams.getPreviewTableRows();
     expect(updatedRows.length).toBeGreaterThan(0);
@@ -109,7 +109,7 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     await pageObjects.streams.clickAddProcessor();
     await pageObjects.streams.selectProcessorType('rename');
     await pageObjects.streams.fillFieldInput('message');
-    await page.locator('input[name="target_field"]').fill('message');
+    await page.locator('input[name="to"]').fill('message');
 
     const rows = await pageObjects.streams.getPreviewTableRows();
     expect(rows.length).toBeGreaterThan(0);
@@ -144,7 +144,7 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     await pageObjects.streams.clickAddProcessor();
     await pageObjects.streams.selectProcessorType('rename');
     await pageObjects.streams.fillFieldInput('message');
-    await page.locator('input[name="target_field"]').fill('message');
+    await page.locator('input[name="to"]').fill('message');
     await pageObjects.streams.clickSaveProcessor();
 
     await pageObjects.streams.clickAddProcessor();
