@@ -322,10 +322,10 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
             placeholder: i18n.SELECT_WORKFLOW_PLACEHOLDER,
           }}
           isPreFiltered={isSearching ? false : { highlightSearch: false }}
-          listProps={{
-            css: { '.euiSelectableList__list': { maxBlockSize: 200 } },
-          }}
           data-test-subj="workflowIdSelect"
+          listProps={{
+            rowHeight: 40,
+          }}
         >
           {(list, search) => (
             <EuiInputPopover
@@ -336,7 +336,6 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               input={search!}
               panelPaddingSize="none"
               fullWidth
-              style={{ marginTop: '5px' }}
             >
               {list}
             </EuiInputPopover>
