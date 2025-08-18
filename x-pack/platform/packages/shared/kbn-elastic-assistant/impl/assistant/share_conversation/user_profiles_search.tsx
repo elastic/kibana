@@ -7,7 +7,8 @@
 
 import React, { useCallback, useState } from 'react';
 import { UserProfilesSelectable, type UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { UserProfile } from '@kbn/core-user-profile-common';
+import type { UserProfile } from '@kbn/core-user-profile-common';
+import { useUserProfiles } from './use_user_profiles';
 import { useSuggestUserProfiles } from './use_suggest_user_profiles';
 
 interface Props {
@@ -21,6 +22,7 @@ const UserProfilesSearchComponent: React.FC<Props> = ({
   onUsersSelect,
   selectedUsers,
 }) => {
+  const { data: selectedUserProfiles } = useUserProfiles(selectedUsers.map((user) => user.uid));
   const [searchTerm, setSearchTerm] = useState('');
   const { data: userProfiles, isLoading } = useSuggestUserProfiles({
     forbiddenUsers,
@@ -47,10 +49,13 @@ const UserProfilesSearchComponent: React.FC<Props> = ({
         options: Array.from(
           new Map(
             // always show selected users
-            [...(userProfiles ?? []), ...selectedUsers].map((user) => [user.uid, user])
+            [...(userProfiles ?? []), ...(selectedUserProfiles ?? [])].map((user) => [
+              user.uid,
+              user,
+            ])
           ).values()
         ),
-        selectedOptions: selectedUsers,
+        selectedOptions: selectedUserProfiles ?? [],
       }}
     />
   );

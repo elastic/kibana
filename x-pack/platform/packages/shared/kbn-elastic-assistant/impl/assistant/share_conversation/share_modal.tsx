@@ -25,7 +25,6 @@ import {
 import type { UserProfile } from '@kbn/core-user-profile-common';
 import type { DataStreamApis } from '../use_data_stream_apis';
 import { COPY_URL } from '../use_conversation/translations';
-import { UserProfilesList } from './user_profiles_list';
 import { useConversation } from '../use_conversation';
 import * as i18n from './translations';
 import type { Conversation } from '../../..';
@@ -65,8 +64,6 @@ const ShareModalComponent: React.FC<Props> = ({
     isSharedGlobal ? 'global' : 'selected'
   );
   const { currentUser } = useAssistantContext();
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const [nextSelectedUsers, setNextSelectedUsers] = useState<UserProfile[]>([]);
   const [nextUsers, setNextUsers] = useState<UserProfile[]>([]);
   useEffect(() => {
     const conversationUsers =
@@ -80,8 +77,7 @@ const ShareModalComponent: React.FC<Props> = ({
           user: { username: name ?? id ?? '' },
           data: {},
         })) || [];
-    setSelectedUsers(conversationUsers.map(({ uid }) => uid));
-    setNextSelectedUsers(conversationUsers);
+    setNextUsers(conversationUsers);
   }, [currentUser?.id, currentUser?.name, selectedConversation?.users]);
   const handleCopyUrl = useCallback(
     () => copyConversationUrl(selectedConversation),
@@ -90,10 +86,6 @@ const ShareModalComponent: React.FC<Props> = ({
 
   const onNextUsersSelect = useCallback((updatedUsers: UserProfile[]) => {
     setNextUsers(updatedUsers);
-  }, []);
-
-  const onNextSelectedUsersSelect = useCallback((updatedUsers: UserProfile[]) => {
-    setNextSelectedUsers(updatedUsers);
   }, []);
 
   const onCancelShare = useCallback(() => {
@@ -113,10 +105,6 @@ const ShareModalComponent: React.FC<Props> = ({
                   id: user?.uid ?? '',
                   name: user?.user?.username ?? '',
                 })),
-                ...nextSelectedUsers.map((user) => ({
-                  id: user?.uid ?? '',
-                  name: user?.user?.username ?? '',
-                })),
                 // readd current user
                 ...(currentUser ? [{ id: currentUser.id, name: currentUser.name }] : []),
               ],
@@ -126,7 +114,6 @@ const ShareModalComponent: React.FC<Props> = ({
     }
   }, [
     currentUser,
-    nextSelectedUsers,
     nextUsers,
     refetchCurrentConversation,
     refetchCurrentUserConversations,
@@ -163,29 +150,20 @@ const ShareModalComponent: React.FC<Props> = ({
             onChange={(id) => setSharingOption(id as 'global' | 'selected')}
           />
         </EuiPanel>
-        <EuiSpacer />
+        <EuiSpacer size="s" />
 
         {sharingOption === 'selected' && (
           <>
             <UserProfilesSearch
               onUsersSelect={onNextUsersSelect}
               selectedUsers={nextUsers}
-              forbiddenUsers={[...selectedUsers, ...(currentUser?.id ? [currentUser?.id] : [])]}
+              forbiddenUsers={[...(currentUser?.id ? [currentUser?.id] : [])]}
             />
-            <EuiSpacer size="m" />
           </>
         )}
 
         {sharingOption === 'global' && (
           <EuiCallOut size="s" title={i18n.EVERYONE} color="accent" iconType="info" />
-        )}
-
-        {sharingOption === 'selected' && (
-          <UserProfilesList
-            onUsersSelect={onNextSelectedUsersSelect}
-            allUsers={selectedUsers}
-            selectedUsers={nextSelectedUsers}
-          />
         )}
 
         <EuiSpacer size="m" />

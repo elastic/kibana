@@ -240,11 +240,6 @@ describe('UserProfilesSelectable', () => {
     expect(wrapper.find('input[type="search"]').prop('id')).toBe('testSearchField');
   });
 
-  it('should not render search input when searchable=false', () => {
-    const wrapper = mount(<UserProfilesSelectable searchable={false} />);
-    expect(wrapper.find('input[type="search"]').exists()).toBe(false);
-  });
-
   describe('with "no users" option', () => {
     it('should render `null` option correctly', () => {
       const [firstOption] = userProfiles;

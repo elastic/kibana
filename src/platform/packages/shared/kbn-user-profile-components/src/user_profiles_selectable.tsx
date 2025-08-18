@@ -126,11 +126,6 @@ export interface UserProfilesSelectableProps<Option extends UserProfileWithAvata
    * Label for default options group separator.
    */
   defaultOptionsLabel?: string;
-  /**
-   * If `true`, the component will render a search field.
-   * If `false`, the component will not render a search field.
-   */
-  searchable?: boolean;
 }
 
 /**
@@ -143,7 +138,6 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
   onChange,
   onSearchChange,
   isLoading = false,
-  searchable = true,
   singleSelection = false,
   limit,
   height,
@@ -312,8 +306,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
       }}
       css={{ maxHeight: height }}
       singleSelection={singleSelection}
-      // searchable can only be true per EuiSelectable type
-      {...(searchable ? { searchable: true } : {})}
+      searchable
       searchProps={{
         placeholder:
           searchPlaceholder ??
