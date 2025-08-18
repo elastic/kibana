@@ -92,7 +92,7 @@ describe('Observability AI Assistant Management plugin', () => {
       license$.next(makeLicense('gold'));
       expect(app.enabled).toBe(false);
 
-      // Switch to gold
+      // Switch to basic
       license$.next(makeLicense('basic'));
       expect(app.enabled).toBe(false);
     });
