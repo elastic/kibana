@@ -13,7 +13,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { SchemaEditorFlyout } from './flyout';
 import { useSchemaEditorContext } from './schema_editor_context';
-import { SchemaField } from './types';
+import type { SchemaField } from './types';
 import { UnpromoteFieldModal } from './unpromote_field_modal';
 import { useKibana } from '../../../hooks/use_kibana';
 

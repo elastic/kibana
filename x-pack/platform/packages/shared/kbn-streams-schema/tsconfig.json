@@ -13,7 +13,8 @@
   "kbn_references": [
     "@kbn/zod",
     "@kbn/zod-helpers",
-    "@kbn/esql-ast"
+    "@kbn/esql-ast",
+    "@kbn/streamlang"
   ],
   "exclude": [
     "target/**/*"

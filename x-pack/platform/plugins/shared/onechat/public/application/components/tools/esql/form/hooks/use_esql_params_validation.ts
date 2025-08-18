@@ -6,9 +6,10 @@
  */
 
 import { useCallback } from 'react';
-import { FieldPath, useFormContext } from 'react-hook-form';
+import type { FieldPath } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { OnechatEsqlParam, OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
+import type { OnechatEsqlParam, OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
 import { i18nMessages } from '../i18n';
 
 export const useEsqlParamsValidation = () => {

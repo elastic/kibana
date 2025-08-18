@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiPopover, EuiButton } from '@elastic/eui';
 import { IntegrationGroup } from './integration_group';
-import { MonitorSummary } from '../../../../../../../common/runtime_types';
-import { toggleIntegrationsPopover, PopoverState } from '../../../../../state/actions';
+import type { MonitorSummary } from '../../../../../../../common/runtime_types';
+import type { toggleIntegrationsPopover, PopoverState } from '../../../../../state/actions';
 
 export interface ActionsPopoverProps {
   summary: MonitorSummary;

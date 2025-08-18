@@ -9,8 +9,8 @@
 
 import moment from 'moment/moment';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { MORE_THAN_1024_CHARS, STACKTRACE_MESSAGE } from '../const';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

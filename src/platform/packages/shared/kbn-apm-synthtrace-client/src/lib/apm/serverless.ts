@@ -8,7 +8,7 @@
  */
 
 import { generateLongId, generateShortId } from '../utils/generate_id';
-import { ApmFields } from './apm_fields';
+import type { ApmFields } from './apm_fields';
 import { BaseSpan } from './base_span';
 import { Metricset } from './metricset';
 

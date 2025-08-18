@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   CoreSetup,
   CoreStart,
   KibanaRequest,
@@ -16,7 +16,7 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 
-import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import {
   WORKFLOWS_EXECUTION_LOGS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX,
@@ -42,6 +42,7 @@ import {
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
 import { registerFeatures } from './features';
+import { registerUISettings } from './ui_settings';
 
 export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
   private readonly logger: Logger;
@@ -60,6 +61,8 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
   public setup(core: CoreSetup, plugins: WorkflowsManagementPluginServerDependenciesSetup) {
     this.logger.debug('Workflows Management: Setup');
+
+    registerUISettings({ uiSettings: core.uiSettings });
 
     // Register workflows connector if actions plugin is available
     if (plugins.actions) {
