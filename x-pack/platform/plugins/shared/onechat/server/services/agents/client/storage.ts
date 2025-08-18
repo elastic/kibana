@@ -9,11 +9,12 @@ import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { AgentType, ToolSelection } from '@kbn/onechat-common';
+import { chatSystemIndex } from '@kbn/onechat-server';
 
-export const agentProfilesIndexName = '.kibana_onechat_agents';
+export const agentsIndexName = chatSystemIndex('agents');
 
 const storageSettings = {
-  name: agentProfilesIndexName,
+  name: agentsIndexName,
   schema: {
     properties: {
       name: types.keyword({}),
