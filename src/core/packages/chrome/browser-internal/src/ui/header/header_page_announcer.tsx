@@ -8,7 +8,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiSkipLink, EuiLiveAnnouncer, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +28,14 @@ export const HeaderPageAnnouncer: FC<{
   const breadcrumbs = useObservable(breadcrumbs$, []);
   const skipLinkRef = useRef<HTMLAnchorElement | null>(null);
   const shouldHandleTab = useRef<boolean>(false);
+
+  const handleTabFn: EventListener = useCallback((e) => {
+    if (shouldHandleTab.current && e instanceof KeyboardEvent && e.key === keys.TAB) {
+      skipLinkRef.current?.focus();
+      e.preventDefault?.();
+    }
+    shouldHandleTab.current = false;
+  }, []);
 
   useEffect(() => {
     if (!breadcrumbs.length) {
@@ -52,21 +60,12 @@ export const HeaderPageAnnouncer: FC<{
 
   useEffect(() => {
     const events: Array<keyof WindowEventMap> = ['keydown', 'mousedown'];
-
-    const handleFn = (e: KeyboardEvent | MouseEvent) => {
-      if (shouldHandleTab.current && e instanceof KeyboardEvent && e.key === keys.TAB) {
-        skipLinkRef.current?.focus();
-        e.preventDefault?.();
-      }
-      shouldHandleTab.current = false;
-    };
-
-    events.forEach((event) => window.addEventListener(event, handleFn));
+    events.forEach((event) => window.addEventListener(event, handleTabFn));
 
     return () => {
-      events.forEach((event) => window.removeEventListener(event, handleFn));
+      events.forEach((event) => window.removeEventListener(event, handleTabFn));
     };
-  }, []);
+  }, [handleTabFn]);
 
   return (
     <>
