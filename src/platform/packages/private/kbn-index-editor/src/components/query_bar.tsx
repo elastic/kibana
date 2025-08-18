@@ -20,7 +20,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FilePicker } from './file_picker';
-import { KibanaContextExtra } from '../types';
+import type { KibanaContextExtra } from '../types';
 import { isPlaceholderColumn } from '../utils';
 
 export const QueryBar = () => {

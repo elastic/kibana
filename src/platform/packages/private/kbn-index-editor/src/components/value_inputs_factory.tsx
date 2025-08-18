@@ -9,7 +9,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiFieldText, EuiFieldNumber } from '@elastic/eui';
-import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 export interface ValueInputProps {

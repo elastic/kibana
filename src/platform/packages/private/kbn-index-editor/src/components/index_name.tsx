@@ -11,10 +11,11 @@ import { EuiInlineEditTitle } from '@elastic/eui';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { FC, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import useMount from 'react-use/lib/useMount';
-import { KibanaContextExtra } from '../types';
+import type { KibanaContextExtra } from '../types';
 import { INDEX_NAME_INVALID_CHARS, INDEX_NAME_INVALID_START_CHARS } from '../constants';
 
 export const IndexName: FC = () => {
