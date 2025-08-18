@@ -36,7 +36,6 @@ describe('AI Assistant Management Selection Plugin', () => {
           management: {
             ai: {
               aiAssistantManagementSelection: true,
-              // Ensure at least one other AI app is visible for Option A gating
               securityAiAssistantManagement: true,
               observabilityAiAssistantManagement: false,
             },
