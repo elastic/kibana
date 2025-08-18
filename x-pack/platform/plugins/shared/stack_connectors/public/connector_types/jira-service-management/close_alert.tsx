@@ -115,7 +115,7 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
   return (
     <>
       <EuiFormRow
-        data-test-subj="jiraServiceManagement-alias-row"
+        data-test-subj="jsm-alias-row"
         fullWidth
         error={errors['subActionParams.alias'] as React.ReactNode}
         isInvalid={isAliasInvalid}

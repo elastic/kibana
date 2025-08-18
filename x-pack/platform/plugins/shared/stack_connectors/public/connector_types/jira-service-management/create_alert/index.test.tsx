@@ -101,7 +101,7 @@ describe('CreateAlert', () => {
     await waitFor(() => {
       expect(screen.getByTestId('actionJsonEditor')).toBeInTheDocument();
       expect(screen.queryByTestId('jsm-message-row')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('jiraServiceManagement-alias-row')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('jsm-alias-row')).not.toBeInTheDocument();
       expect(screen.queryByText('Description')).not.toBeInTheDocument();
     });
   });
@@ -109,21 +109,21 @@ describe('CreateAlert', () => {
   it('shows the additional options when clicking the more options button', async () => {
     render(<CreateAlert {...options} />);
 
-    await userEvent.click(screen.getByTestId('jiraServiceManagement-display-more-options'));
+    await userEvent.click(screen.getByTestId('jsm-display-more-options'));
 
-    expect(screen.getByTestId('jiraServiceManagement-entity-row')).toBeInTheDocument();
+    expect(screen.getByTestId('jsm-entity-row')).toBeInTheDocument();
   });
 
   it('sets the json editor error to undefined when the toggle is switched off', async () => {
     render(<CreateAlert {...options} />);
 
-    await userEvent.click(screen.getByTestId('jiraServiceManagement-show-json-editor-toggle'));
+    await userEvent.click(screen.getByTestId('jsm-show-json-editor-toggle'));
 
     await waitFor(() => {
       expect(screen.getByTestId('actionJsonEditor')).toBeInTheDocument();
     });
 
-    await userEvent.click(screen.getByTestId('jiraServiceManagement-show-json-editor-toggle'));
+    await userEvent.click(screen.getByTestId('jsm-show-json-editor-toggle'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('actionJsonEditor')).not.toBeInTheDocument();

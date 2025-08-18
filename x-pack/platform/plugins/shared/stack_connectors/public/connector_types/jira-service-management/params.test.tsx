@@ -121,7 +121,7 @@ describe('JiraServiceManagementParamFields', () => {
       />
     );
 
-    expect(screen.queryByTestId('jiraServiceManagement-subActionSelect')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('jsm-subActionSelect')).not.toBeInTheDocument();
   });
 
   it('calls editAction when the message field is changed', async () => {
@@ -185,7 +185,7 @@ describe('JiraServiceManagementParamFields', () => {
       <JiraServiceManagementParamFields {...{ ...defaultCreateAlertProps, actionParams: {} }} />
     );
 
-    expect(screen.queryByTestId('jiraServiceManagement-alias-row')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('jsm-alias-row')).not.toBeInTheDocument();
     expect(screen.queryByText('Message')).not.toBeInTheDocument();
   });
 
@@ -334,7 +334,7 @@ describe('JiraServiceManagementParamFields', () => {
     render(<JiraServiceManagementParamFields {...defaultCreateAlertProps} />);
 
     await userEvent.selectOptions(
-      screen.getByTestId('jiraServiceManagement-subActionSelect'),
+      screen.getByTestId('jsm-subActionSelect'),
       screen.getByText('Close alert')
     );
 

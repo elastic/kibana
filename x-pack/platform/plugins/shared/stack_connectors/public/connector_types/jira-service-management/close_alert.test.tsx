@@ -92,7 +92,7 @@ describe('CloseAlert', () => {
     async (field, dataTestSubj, input, callback) => {
       render(<CloseAlert {...options} />);
 
-      await userEvent.click(screen.getByTestId('jiraServiceManagement-display-more-options'));
+      await userEvent.click(screen.getByTestId('jsm-display-more-options'));
 
       fireEvent.change(screen.getByTestId(dataTestSubj), { target: { value: input } });
 
@@ -103,9 +103,9 @@ describe('CloseAlert', () => {
   it('shows the additional options when clicking the more options button', async () => {
     render(<CloseAlert {...options} />);
 
-    await userEvent.click(screen.getByTestId('jiraServiceManagement-display-more-options'));
+    await userEvent.click(screen.getByTestId('jsm-display-more-options'));
 
-    expect(screen.getByTestId('jiraServiceManagement-source-row')).toBeInTheDocument();
+    expect(screen.getByTestId('jsm-source-row')).toBeInTheDocument();
   });
 
   it('shows the message required error when showSaveError is true', async () => {
