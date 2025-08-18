@@ -25,6 +25,7 @@ import {
   installPrebuiltRuleAssets,
   createAndInstallMockedPrebuiltRules,
   preventPrebuiltRulesPackageInstallation,
+  installMockPrebuiltRulesPackage,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { login } from '../../../../../tasks/login';
 import {
@@ -44,11 +45,14 @@ import {
 } from '../../../../../tasks/prebuilt_rules';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
-// https://github.com/elastic/kibana/issues/179970
 describe(
   'Detection rules, Prebuilt Rules Installation - Error handling',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     beforeEach(() => {
       deletePrebuiltRulesAssets();
       deleteAlertsAndRules();

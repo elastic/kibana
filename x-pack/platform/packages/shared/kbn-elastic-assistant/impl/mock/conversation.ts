@@ -7,7 +7,7 @@
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { MOCK_CURRENT_USER } from '../assistant/use_conversation/sample_conversations';
-import { ClientMessage, Conversation } from '../..';
+import type { ClientMessage, Conversation } from '../..';
 
 export const alertConvo: Conversation = {
   id: 'alert-convo',

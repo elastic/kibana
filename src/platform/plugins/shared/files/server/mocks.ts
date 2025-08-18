@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import * as stream from 'stream';
 import { clone } from 'lodash';
-import { File, FileJSON } from '../common';
-import { FileClient, FileServiceFactory, FileServiceStart, FilesSetup } from '.';
+import type { File, FileJSON } from '../common';
+import type { FileClient, FileServiceFactory, FileServiceStart, FilesSetup } from '.';
 
 export const createFileServiceMock = (): DeeplyMockedKeys<FileServiceStart> => ({
   create: jest.fn(),

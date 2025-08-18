@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core-security-common';
-import {
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type {
   ConversationCreateProps,
   ConversationResponse,
   ConversationUpdateProps,
   Message,
 } from '@kbn/elastic-assistant-common';
-import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createConversation } from './create_conversation';
 import { updateConversation } from './update_conversation';
 import { getConversation } from './get_conversation';
 import { deleteConversation } from './delete_conversation';
 import { appendConversationMessages } from './append_conversation_messages';
-import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
+import type { AIAssistantDataClientParams } from '..';
+import { AIAssistantDataClient } from '..';
 import { deleteAllConversations } from './delete_all_conversations';
 
 /**

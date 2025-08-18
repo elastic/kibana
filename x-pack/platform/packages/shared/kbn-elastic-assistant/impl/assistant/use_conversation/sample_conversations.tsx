@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Conversation } from '../../assistant_context/types';
+import type { Conversation } from '../../assistant_context/types';
 import { WELCOME_CONVERSATION_TITLE } from './translations';
 export const MOCK_CURRENT_USER = { id: '123', name: 'elastic' };
 export const WELCOME_CONVERSATION: Conversation = {

@@ -6,11 +6,11 @@
  */
 
 import React, { useCallback } from 'react';
-import { ApiConfig, User } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, User } from '@kbn/elastic-assistant-common';
 import { DataStreamApis } from '../use_data_stream_apis';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
-import { Conversation, ClientMessage } from '../../assistant_context/types';
+import type { Conversation, ClientMessage } from '../../assistant_context/types';
 import { getDefaultSystemPrompt } from './helpers';
 import {
   createConversation as createConversationApi,

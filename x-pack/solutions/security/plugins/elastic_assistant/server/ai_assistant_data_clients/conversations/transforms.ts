@@ -6,13 +6,10 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  ConversationResponse,
-  Replacements,
-  replaceOriginalValuesWithUuidValues,
-} from '@kbn/elastic-assistant-common';
+import type { ConversationResponse, Replacements } from '@kbn/elastic-assistant-common';
+import { replaceOriginalValuesWithUuidValues } from '@kbn/elastic-assistant-common';
 import _ from 'lodash';
-import { EsConversationSchema } from './types';
+import type { EsConversationSchema } from './types';
 
 export const transformESSearchToConversations = (
   response: estypes.SearchResponse<EsConversationSchema>

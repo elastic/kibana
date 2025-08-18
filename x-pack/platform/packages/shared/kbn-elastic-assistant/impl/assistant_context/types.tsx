@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ApiConfig, User, Message, Replacements } from '@kbn/elastic-assistant-common';
-import { EuiCommentProps } from '@elastic/eui';
+import type { ApiConfig, Message, Replacements, User } from '@kbn/elastic-assistant-common';
+import type { EuiCommentProps } from '@elastic/eui';
 
 export interface MessagePresentation {
   delay?: number;

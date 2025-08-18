@@ -8,7 +8,7 @@
 import { findAllAttackDiscoveries } from './find_all_attack_discoveries';
 import { mockAuthenticatedUser } from '../../../../__mocks__/mock_authenticated_user';
 import type { estypes } from '@elastic/elasticsearch';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 describe('findAllAttackDiscoveries', () => {
   let esClient: jest.Mocked<ElasticsearchClient>;

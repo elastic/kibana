@@ -19,7 +19,6 @@ export { getDefendInsightsRoute } from './defend_insights/get_defend_insights';
 export { getDefendInsightRoute } from './defend_insights/get_defend_insight';
 
 // Knowledge Base
-export { getKnowledgeBaseIndicesRoute } from './knowledge_base/get_knowledge_base_indices';
 export { getKnowledgeBaseStatusRoute } from './knowledge_base/get_knowledge_base_status';
 export { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';
 

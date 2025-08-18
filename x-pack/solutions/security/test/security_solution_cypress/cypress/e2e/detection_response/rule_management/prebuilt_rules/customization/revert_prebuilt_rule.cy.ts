@@ -29,6 +29,7 @@ import {
 } from '../../../../../tasks/api_calls/common';
 import {
   createAndInstallMockedPrebuiltRules,
+  installMockPrebuiltRulesPackage,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { createRule, patchRule } from '../../../../../tasks/api_calls/rules';
@@ -36,6 +37,7 @@ import { createRule, patchRule } from '../../../../../tasks/api_calls/rules';
 import { login } from '../../../../../tasks/login';
 
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
+
 describe(
   'Detection rules, Prebuilt Rules reversion workflow',
   {
@@ -44,6 +46,10 @@ describe(
 
   () => {
     describe('Reverting prebuilt rules', () => {
+      before(() => {
+        installMockPrebuiltRulesPackage();
+      });
+
       const PREBUILT_RULE = createRuleAssetSavedObject({
         name: 'Non-customized prebuilt rule',
         rule_id: 'rule_1',
@@ -52,12 +58,13 @@ describe(
       });
 
       beforeEach(() => {
-        login();
         deleteAlertsAndRules();
         deletePrebuiltRulesAssets();
         preventPrebuiltRulesPackageInstallation();
         /* Create a new rule and install it */
         createAndInstallMockedPrebuiltRules([PREBUILT_RULE]);
+
+        login();
         visitRulesManagementTable();
       });
 

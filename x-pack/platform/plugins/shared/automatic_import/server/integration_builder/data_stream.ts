@@ -11,7 +11,7 @@ import { load } from 'js-yaml';
 import type { CelInput, DataStream } from '../../common';
 import { CEL_EXISTING_AUTH_CONFIG_FIELDS, DEFAULT_CEL_PROGRAM, DEFAULT_URL } from './constants';
 import { copySync, createSync, ensureDirSync, listDirSync, readSync } from '../util';
-import { Field } from '../util/samples';
+import type { Field } from '../util/samples';
 
 export function createDataStream(
   packageName: string,
