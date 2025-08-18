@@ -3179,7 +3179,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it.only('does not suppress alerts outside of duration when query with 3 sequences', async () => {
+      it('does not suppress alerts outside of duration when query with 3 sequences', async () => {
         const id = uuidv4();
 
         const SECOND = 1000;
