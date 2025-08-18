@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Type, TypeOf, schema } from '@kbn/config-schema';
 import type { Client, TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch';
 import type api from '@elastic/elasticsearch/lib/api/types';
 
@@ -30,33 +29,46 @@ import type api from '@elastic/elasticsearch/lib/api/types';
 const dataStream: DataStreamHelpers = {} as any; // static functions to help declare and manage data streams.
 const mappings: MappingsHelpers = {} as any; // static functions to help declare mappings for data streams.
 const searchRuntimeHelpers: SearchRuntimeMappingsHelpers = {} as any; // static functions to help declare mappings for data streams.
-const appendXSetup: AppendXServiceSetup = {} as any;
-const appendXStart: AppendXServiceStart = {} as any;
+const dataStreamsSetup: DataStreamsSetup = {} as any;
+const dataStreamsStart: DataStreamsStart = {} as any;
 const log: any = {} as any;
 
 const esClient: Client = {} as any;
 const integrationTestHelpers: JestIntegrationTestHelpers = {} as any;
 
-/**
- * A type checked schema and mappings declaration similar to SOs.
- *
- * My assumption is that this one declaration will/can only evolve in bwc ways. To "break" this data stream you will need
- * to create a new one, with a new name.
- */
-const myDocumentSchema = schema.object({
-  '@timestamp': schema.string(),
-  object: schema.object({
-    test: schema.string(),
+interface MyDocumentSchema {
+  '@timestamp': string;
+  object: {
+    test: string;
+  };
+  someField: string;
+  someFieldV2?: string;
+}
+
+const searchRuntimeMappings = {
+  someFieldV2: searchRuntimeHelpers.remap({
+    previousFieldName: 'someField',
+    fieldName: 'someFieldV2',
+    type: 'keyword',
   }),
-  someField: schema.string(),
-  someFieldV2: schema.maybe(schema.string()),
-});
+  // full declaration
+  someFieldV3: {
+    type: 'keyword',
+    script: {
+      source: `
+  // return what we have in source if there is something in source
+  if (params._source["someFieldV2"] != null) {
+    emit(params._source["someFieldV2"]);
+  } else  { // return the original value
+    emit(doc['someField'].value);
+  }
+`,
+    },
+  },
+} satisfies BaseSearchRuntimeMappings;
 
-type MyDocument = TypeOf<typeof myDocumentSchema>;
-
-const myDataStream = dataStream.createDefinition({
+const myDataStream: DataStreamDefinition<MyDocumentSchema, typeof searchRuntimeMappings> = {
   name: 'my-data-stream',
-  schema: myDocumentSchema,
   mappings: {
     dynamic: false,
     properties: {
@@ -70,28 +82,8 @@ const myDataStream = dataStream.createDefinition({
       },
     },
   },
-  searchRuntimeMappings: {
-    someFieldV2: searchRuntimeHelpers.remap({
-      previousFieldName: 'someField',
-      fieldName: 'someFieldV2',
-      type: 'keyword',
-    }),
-    // full declaration
-    someFieldV3: {
-      type: 'keyword',
-      script: {
-        source: `
-  // return what we have in source if there is something in source
-  if (params._source["someFieldV2"] != null) {
-    emit(params._source["someFieldV2"]);
-  } else  { // return the original value
-    emit(doc['someField'].value);
-  }
-`,
-      },
-    },
-  },
-});
+  searchRuntimeMappings,
+};
 
 // This could be a nice way to expose the "low-level" requests we are making so that
 // the data stream abstraction feels more like a thin helper or layer around the
@@ -100,14 +92,15 @@ const myDataStream = dataStream.createDefinition({
 esClient.indices.putIndexTemplate(dataStream.asPutIndexTemplateRequestArgs(myDataStream));
 esClient.indices.createDataStream(dataStream.asCreateDataStreamRequestArgs(myDataStream));
 
-// Register your data stream with the AppendX service
-appendXSetup.registerDataStream(myDataStream);
+// Register your data stream with the dataStreams service
+dataStreamsSetup.registerDataStream(myDataStream);
 
 //* ************************************************ Searching
-const client = appendXStart.getClient(myDataStream);
+// dataStream.getClient();
+const client = dataStreamsStart.getClient(myDataStream);
 const { helpers } = client;
 client
-  .search<{ test: {} }>({
+  .search({
     fields: ['someFieldV2'],
   })
   .then((result) => {
@@ -123,9 +116,8 @@ client
 
 //* ************************************************ Authoring integ tests
 // integration_tests/previous_datastreams.fixtures.ts
-const v1: DataStreamDefinition<MyDocument> = {
+const v1: DataStreamDefinition<MyDocumentSchema> = {
   name: 'my-data-stream',
-  schema: myDocumentSchema,
   mappings: {
     dynamic: false,
     properties: {
@@ -233,7 +225,7 @@ interface SearchRuntimeMappingsHelpers {
   }) => api.MappingRuntimeField;
 }
 
-type DataStreamDeclarationMappings<Schema extends Record<string, unknown>> = Pick<
+type DataStreamDeclarationMappings<Schema extends {}> = Pick<
   Omit<StrictMappingTypeMapping, 'properties'> & {
     properties: ObjectToPropertiesDefinition<Schema>;
   },
@@ -245,18 +237,13 @@ interface BaseSearchRuntimeMappings {
 }
 
 interface DataStreamDefinition<
-  Schema extends Record<string, unknown> = {},
+  Schema extends {} = {},
   SearchRuntimeMappings extends BaseSearchRuntimeMappings = {}
 > {
   /**
-   * @remark Once delcared this can never change.
+   * @remark Once released this should never change.
    */
   name: string;
-  /**
-   * @remark By default this schema is applied in a forward compatible way. Unknown
-   *         fields are stripped when read into Kibana memory from the client.
-   */
-  schema: Type<Schema>;
 
   mappings?: DataStreamDeclarationMappings<Schema>;
 
@@ -279,12 +266,12 @@ interface SearchRequestImproved<SearchRuntimeMappings extends BaseSearchRuntimeM
   fields?: Array<keyof SearchRuntimeMappings>;
 }
 
-export interface AppendXServiceSetup {
+export interface DataStreamsSetup {
   registerDataStream: (dataStream: DataStreamDefinition) => void;
 }
 
-export interface AppendXServiceStart {
-  getClient<S extends Record<string, unknown>, SRM extends BaseSearchRuntimeMappings>(
+export interface DataStreamsStart {
+  getClient<S extends {}, SRM extends BaseSearchRuntimeMappings>(
     dataStream: DataStreamDefinition<S, SRM>
   ): {
     search: <Agg extends Record<string, api.AggregationsAggregate> = {}>(

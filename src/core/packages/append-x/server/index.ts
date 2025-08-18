@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { AppendXServiceSetup } from './src/contracts';
+export { DataStreamSetup } from './src/contracts';
