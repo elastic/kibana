@@ -21,6 +21,7 @@ import {
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
+import { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -33,7 +34,8 @@ export class StepFactory {
     step: TStep, // TODO: TStep must refer to a node type, not BaseStep (IfElseNode, ForeachNode, etc.)
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
-    workflowState: WorkflowExecutionRuntimeManager
+    workflowState: WorkflowExecutionRuntimeManager,
+    workflowLogger: IWorkflowEventLogger // Assuming you have a logger interface
   ): StepImplementation {
     const stepType = (step as any).type; // Use a more type-safe way to determine step type if possible
 
@@ -47,7 +49,7 @@ export class StepFactory {
       case 'exit-foreach':
         return new ExitForeachNodeImpl(step as any, workflowState);
       case 'enter-if':
-        return new EnterIfNodeImpl(step as any, workflowState);
+        return new EnterIfNodeImpl(step as any, workflowState, contextManager, workflowLogger);
       case 'enter-condition-branch':
         return new EnterConditionBranchNodeImpl(workflowState);
       case 'exit-condition-branch':
@@ -55,7 +57,13 @@ export class StepFactory {
       case 'exit-if':
         return new ExitIfNodeImpl(step as any, workflowState);
       case 'atomic':
-        return new AtomicStepImpl(step as any, contextManager, connectorExecutor, workflowState);
+        return new AtomicStepImpl(
+          step as any,
+          contextManager,
+          connectorExecutor,
+          workflowState,
+          workflowLogger
+        );
       case 'parallel':
       // return new ParallelStepImpl(step as ParallelStep, contextManager);
       case 'merge':

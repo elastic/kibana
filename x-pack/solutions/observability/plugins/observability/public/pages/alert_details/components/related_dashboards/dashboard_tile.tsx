@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import {
   EuiText,
   EuiFlexGroup,
@@ -31,9 +31,11 @@ export interface ActionButtonProps {
 export function DashboardTile({
   dashboard,
   actionButtonProps,
+  timeRange,
 }: {
   dashboard: RelatedDashboard;
   actionButtonProps?: ActionButtonProps;
+  timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
 }) {
   const {
     services: {
@@ -56,6 +58,7 @@ export function DashboardTile({
             data-test-subj="o11yDashboardTileLink"
             href={dashboardLocator?.getRedirectUrl({
               dashboardId: dashboard.id,
+              timeRange,
             })}
             target="_blank"
           >

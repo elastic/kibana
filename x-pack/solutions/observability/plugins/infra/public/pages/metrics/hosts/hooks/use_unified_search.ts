@@ -152,20 +152,30 @@ export const useUnifiedSearch = () => {
     return { from, to };
   }, [parsedDateRange]);
 
-  const buildQuery = useCallback(() => {
-    return buildEsQuery(
+  const buildQuery = useCallback(
+    (
+      options: { includeControls?: boolean } = {
+        includeControls: true,
+      }
+    ) => {
+      return buildEsQuery(
+        metricsView?.dataViewReference,
+        searchCriteria.query,
+        [
+          ...searchCriteria.filters,
+          ...(options?.includeControls ? searchCriteria.panelFilters : []),
+        ],
+        kibanaQuerySettings
+      );
+    },
+    [
       metricsView?.dataViewReference,
       searchCriteria.query,
-      [...searchCriteria.filters, ...searchCriteria.panelFilters],
-      kibanaQuerySettings
-    );
-  }, [
-    metricsView?.dataViewReference,
-    searchCriteria.query,
-    searchCriteria.filters,
-    searchCriteria.panelFilters,
-    kibanaQuerySettings,
-  ]);
+      searchCriteria.filters,
+      searchCriteria.panelFilters,
+      kibanaQuerySettings,
+    ]
+  );
 
   useEffectOnce(() => {
     // Sync filtersService from the URL state
@@ -189,6 +199,9 @@ export const useUnifiedSearch = () => {
 
   useEffect(() => {
     const subscription = new Subscription();
+
+    queryStringService.clearQuery();
+
     subscription.add(
       filterManagerService
         .getUpdates$()

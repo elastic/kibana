@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
 import createContainer from 'constate';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { type InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import type {
   InventoryView,
@@ -21,6 +22,7 @@ import {
   type InventoryOptionsState,
   type InventorySortOption,
   inventoryOptionsStateRT,
+  staticInventoryViewId,
 } from '../../../../../common/inventory_views';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import type {
@@ -51,6 +53,7 @@ export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
   source: 'default',
   sort: { by: 'name', direction: 'desc' },
   timelineOpen: false,
+  preferredSchema: null,
 };
 
 function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
@@ -68,7 +71,15 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
     legend,
     sort,
     timelineOpen,
+    preferredSchema,
   } = savedView.attributes;
+
+  // forces the default view to be set with what the time range metadata endpoint returns
+  const preferredSchemaValue =
+    nodeType === 'host' && savedView.id === staticInventoryViewId
+      ? preferredSchema ?? null
+      : // otherwise, use the preferred schema from the saved view
+        preferredSchema;
 
   return {
     metric,
@@ -84,6 +95,7 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
     legend,
     sort,
     timelineOpen,
+    preferredSchema: preferredSchemaValue,
   };
 }
 
@@ -95,15 +107,29 @@ export const useWaffleOptions = () => {
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleOptions',
+    writeDefaultState: true,
   });
 
-  const previousViewId = useRef<string | undefined>(currentView?.id);
+  const [preferredSchema, setPreferredSchema] = useState<DataSchemaFormat | null>(null);
+
+  const previousViewId = useRef<string>(currentView?.id ?? staticInventoryViewId);
   useEffect(() => {
     if (currentView && currentView.id !== previousViewId.current) {
       setUrlState(mapInventoryViewToState(currentView));
       previousViewId.current = currentView.id;
+
+      setPreferredSchema(currentView?.attributes.preferredSchema ?? null);
     }
   }, [currentView, setUrlState]);
+
+  // there is a lot going on with the url state management on this hook
+  // when the state resets, many things need to be synchronized
+  // to avoid problems, we sync the url state manually.
+  useEffect(() => {
+    if (urlState.preferredSchema !== preferredSchema) {
+      setUrlState((previous) => ({ ...previous, preferredSchema }));
+    }
+  }, [preferredSchema, setUrlState, urlState.preferredSchema]);
 
   const changeMetric = useCallback(
     (metric: SnapshotMetricInput) => setUrlState((previous) => ({ ...previous, metric })),
@@ -174,6 +200,12 @@ export const useWaffleOptions = () => {
     [setUrlState]
   );
 
+  const changePreferredSchema = useCallback((schema: DataSchemaFormat | null) => {
+    // the URL state can't be patched here because when the page reloads via clicking on the side nav
+    // this will be called before the hydration of the URL state, causing the page to crash
+    setPreferredSchema(schema);
+  }, []);
+
   const { inventoryPrefill } = useAlertPrefillContext();
   useEffect(() => {
     const { setNodeType, setMetric, setCustomMetrics, setAccountId, setRegion } = inventoryPrefill;
@@ -206,6 +238,7 @@ export const useWaffleOptions = () => {
     changeLegend,
     changeSort,
     changeTimelineOpen,
+    changePreferredSchema,
     setWaffleOptionsState: setUrlState,
   };
 };
@@ -217,6 +250,7 @@ export type WaffleOptionsState = InventoryOptionsState;
 const encodeUrlState = (state: InventoryOptionsState) => {
   return inventoryOptionsStateRT.encode(state);
 };
+
 const decodeUrlState = (value: unknown) => {
   const state = pipe(inventoryOptionsStateRT.decode(value), fold(constant(undefined), identity));
   if (state) {

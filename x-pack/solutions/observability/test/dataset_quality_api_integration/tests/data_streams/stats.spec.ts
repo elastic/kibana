@@ -59,7 +59,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     ]);
   }
 
-  registry.when('Api Key privileges check', { config: 'basic' }, () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/230901
+  registry.when.skip('Api Key privileges check', { config: 'basic' }, () => {
     describe('index privileges', function () {
       // This disables the forward-compatibility test for Kibana 8.19 with ES upgraded to 9.0.
       // These versions are not expected to work together.

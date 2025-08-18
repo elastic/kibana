@@ -126,6 +126,7 @@ export default function (providerContext: FtrProviderContext) {
       it('Should successfully trigger a host transform', async () => {
         const hostName: string = 'host-transform-test-ip';
         const testDocs: EcsHost[] = [
+          { name: '', ip: '3.3.3.3' }, // empty value to be ignored
           { name: hostName, ip: '1.1.1.1' },
           { name: hostName, ip: '2.2.2.2' },
         ];

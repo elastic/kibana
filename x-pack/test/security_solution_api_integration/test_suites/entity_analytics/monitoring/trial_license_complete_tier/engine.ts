@@ -5,31 +5,63 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { dataViewRouteHelpersFactory } from '../../utils/data_view';
-import { enablePrivmonSetting } from '../../utils';
+import { disablePrivmonSetting, enablePrivmonSetting } from '../../utils';
+import { PrivMonUtils } from './privileged_users/utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
-  const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
+  const privMonUtils = PrivMonUtils(getService);
   const log = getService('log');
+  const es = getService('es');
+  const retry = getService('retry');
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
-    const dataView = dataViewRouteHelpersFactory(supertest);
-    const kibanaServer = getService('kibanaServer');
+  const createUserIndex = async (indexName: string) =>
+    es.indices.create({
+      index: indexName,
+      mappings: {
+        properties: {
+          user: {
+            properties: {
+              name: {
+                type: 'keyword',
+                fields: {
+                  text: { type: 'text' },
+                },
+              },
+              role: {
+                type: 'keyword',
+              },
+            },
+          },
+        },
+      },
+    });
+
+  const waitForPrivMonUsersToBeSynced = async (length = 1) =>
+    retry.waitForWithTimeout('Wait for PrivMon users to be synced', 90000, async () => {
+      const res = await api.listPrivMonUsers({ query: {} });
+      log.info(`PrivMon users sync check: found ${res.body.length} users`);
+      return res.body.length >= length; // wait until we have at least one user
+    });
+
+  describe('@ess Entity Privilege Monitoring APIs', () => {
     before(async () => {
-      await dataView.create('security-solution');
       await enablePrivmonSetting(kibanaServer);
     });
 
     after(async () => {
-      await dataView.delete('security-solution');
+      await disablePrivmonSetting(kibanaServer);
+    });
+
+    afterEach(async () => {
+      await api.deleteMonitoringEngine({ query: { data: true } });
     });
 
     describe('health', () => {
       it('should be healthy', async () => {
-        log.info(`Checking health of privilege monitoring`);
         const res = await api.privMonHealth();
 
         if (res.status !== 200) {
@@ -37,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
           log.error(JSON.stringify(res.body));
         }
 
-        expect(res.status).eql(200);
+        expect(res.status).toEqual(200);
       });
     });
 
@@ -51,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
           log.error(JSON.stringify(res1.body));
         }
 
-        expect(res1.status).eql(200);
+        expect(res1.status).toEqual(200);
 
         log.info(`Re-initializing Privilege Monitoring engine`);
         const res2 = await api.initMonitoringEngine();
@@ -60,7 +92,78 @@ export default ({ getService }: FtrProviderContext) => {
           log.error(JSON.stringify(res2.body));
         }
 
-        expect(res2.status).eql(200);
+        expect(res2.status).toEqual(200);
+      });
+    });
+
+    describe('plain index sync', () => {
+      const indexName = 'tatooine-privileged-users';
+      const entitySource = {
+        type: 'index',
+        name: 'StarWars',
+        managed: true,
+        indexPattern: indexName,
+        enabled: true,
+        matchers: [
+          {
+            fields: ['user.role'],
+            values: ['admin'],
+          },
+        ],
+        filter: {},
+      };
+
+      beforeEach(async () => {
+        await createUserIndex(indexName);
+      });
+
+      afterEach(async () => {
+        try {
+          await es.indices.delete({ index: indexName }, { ignore: [404] });
+        } catch (err) {
+          log.warning(`Failed to clean up in afterEach: ${err.message}`);
+        }
+      });
+
+      it('should sync plain index', async () => {
+        // Bulk insert documents
+        const uniqueUsers = [
+          'Luke Skywalker',
+          'Leia Organa',
+          'Han Solo',
+          'Chewbacca',
+          'Obi-Wan Kenobi',
+          'Yoda',
+          'R2-D2',
+          'C-3PO',
+          'Darth Vader',
+        ].flatMap((name) => [{ index: {} }, { user: { name, role: 'admin' } }]);
+        const repeatedUsers = Array.from({ length: 150 }).flatMap(() => [
+          { index: {} },
+          { user: { name: 'C-3PO', role: 'admin' } },
+        ]);
+
+        const bulkBody = [...uniqueUsers, ...repeatedUsers];
+        await es.bulk({ index: indexName, body: bulkBody, refresh: true });
+
+        // Call init to trigger the sync
+        await privMonUtils.initPrivMonEngine();
+
+        // register entity source
+        const response = await api.createEntitySource({ body: entitySource });
+        expect(response.status).toBe(200);
+
+        // default-monitoring-index should exist now
+        const sources = await api.listEntitySources({ query: {} });
+        const names = sources.body.map((s: any) => s.name);
+        expect(names).toContain('StarWars');
+        await waitForPrivMonUsersToBeSynced(9);
+        // Check if the users are indexed
+        const res = await api.listPrivMonUsers({ query: {} });
+        const userNames = res.body.map((u: any) => u.user.name);
+        expect(userNames).toContain('Luke Skywalker');
+        expect(userNames).toContain('C-3PO');
+        expect(userNames.filter((name: string) => name === 'C-3PO')).toHaveLength(1);
       });
     });
   });

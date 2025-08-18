@@ -193,7 +193,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         ),
       });
 
-      return PageObjects.common.navigateToUrlWithBrowserHistory(
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
         'management',
         '/data/data_quality',
         queryStringParams,
@@ -203,6 +203,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
           ensureCurrentUrl: false,
         }
       );
+      return await this.waitUntilTableLoaded();
     },
 
     async navigateToDetails(pageState: datasetQualityDetailsUrlSchemaV1.UrlSchema) {
