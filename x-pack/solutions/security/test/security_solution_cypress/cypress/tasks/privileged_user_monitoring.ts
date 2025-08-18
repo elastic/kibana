@@ -29,10 +29,6 @@ export const openFilePicker = () => {
   cy.get('[data-test-subj="privilegedUserMonitoringImportCSVCard"]').click();
 };
 
-export const clickFileUploaderBackButton = () => {
-  cy.get('[data-test-subj="privileged-user-monitoring-modal-back-button"]').click();
-};
-
 export const clickFileUploaderAssignButton = () => {
   cy.get('[data-test-subj="privileged-user-monitoring-assign-button"]').click();
 };

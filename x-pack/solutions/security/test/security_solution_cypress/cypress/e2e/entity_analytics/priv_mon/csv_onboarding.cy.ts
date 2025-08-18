@@ -6,12 +6,12 @@
  */
 
 import { getDataTestSubjectSelector } from '../../../helpers/common';
+
 import { togglePrivilegedUserMonitoring } from '../../../tasks/entity_analytics/enable_privmon';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
   clickFileUploaderAssignButton,
-  clickFileUploaderBackButton,
   deletePrivMonEngine,
   openFilePicker,
   uploadCSVFile,
@@ -26,7 +26,7 @@ describe(
   () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'all_users' });
-      deletePrivMonEngine();
+      deletePrivMonEngine(); // Just in case another test left it behind
     });
 
     beforeEach(() => {
@@ -36,14 +36,27 @@ describe(
 
     afterEach(() => {
       togglePrivilegedUserMonitoring();
+      deletePrivMonEngine();
     });
 
     after(() => {
       cy.task('esArchiverUnload', { archiveName: 'all_users' });
-      deletePrivMonEngine();
     });
 
-    it('renders page as expected', () => {
+    it('uploads a valid CSV file', () => {
+      visit(ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL);
+
+      openFilePicker();
+      uploadCSVFile('valid_file.txt', 'tet1,testLabel');
+      clickFileUploaderAssignButton();
+
+      cy.get('[data-test-subj="privilegedUserMonitoringOnboardingCallout"]').should(
+        'contain.text',
+        'Privileged user monitoring set up: 1 user added'
+      );
+    });
+
+    it('it validates an invalid CSV file', () => {
       visit(ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL);
 
       openFilePicker();
@@ -52,15 +65,6 @@ describe(
       cy.get(getDataTestSubjectSelector('privileged-user-monitoring-validation-step')).should(
         'contain.text',
         "1 row is invalid and won't be added"
-      );
-
-      clickFileUploaderBackButton();
-      uploadCSVFile('valid_file.txt', 'tet1,testLabel');
-      clickFileUploaderAssignButton();
-
-      cy.get('[data-test-subj="privilegedUserMonitoringOnboardingCallout"]').should(
-        'contain.text',
-        'Privileged user monitoring set up: 1 user added'
       );
     });
   }
