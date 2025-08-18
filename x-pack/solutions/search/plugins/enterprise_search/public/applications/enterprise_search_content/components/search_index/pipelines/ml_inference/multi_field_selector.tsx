@@ -9,9 +9,9 @@ import React, { useState } from 'react';
 
 import { useValues, useActions } from 'kea';
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiComboBox,
   EuiFieldText,
@@ -23,7 +23,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { FieldMapping } from '../../../../../../../common/ml_inference_pipeline';
+import type { FieldMapping } from '../../../../../../../common/ml_inference_pipeline';
 
 import { IndexViewLogic } from '../../index_view_logic';
 

@@ -17,7 +17,7 @@ import {
   buildCustomThresholdRule,
 } from '../../mocks/custom_threshold_rule';
 import { kibanaStartMock } from '../../../../utils/kibana_react.mock';
-import { CustomThresholdAlert } from '../types';
+import type { CustomThresholdAlert } from '../types';
 import { LogRateAnalysis } from './log_rate_analysis';
 
 describe('AlertDetailsAppSection', () => {

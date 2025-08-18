@@ -6,13 +6,12 @@
  */
 
 import { NodeType } from '@kbn/wc-framework-types-common';
-import { GraphWorkflowDefinition } from '@kbn/wc-framework-types-server';
+import type { GraphWorkflowDefinition } from '@kbn/wc-framework-types-server';
 import type { ScopedWorkflowRunnerFn } from './types';
+import type { MockedWorkflowRunnerInternalContext, MockedNodeTypeDefinition } from '../test_utils';
 import {
   createMockWorkflowRunnerInternalContext,
   getMockedPromptNodeTypeDefinition,
-  MockedWorkflowRunnerInternalContext,
-  MockedNodeTypeDefinition,
 } from '../test_utils';
 import { createWorkflowRunner } from './run_workflow';
 

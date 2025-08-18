@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ProvidedType } from '@kbn/test';
-import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
+import type { ProvidedType } from '@kbn/test';
+import type { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
 import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { savedSearches, dashboards } from './test_resources_data';
 import { getCommonRequestHeader } from './common_api';
-import { MlApi } from './api';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlApi } from './api';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export enum SavedObjectType {
   CONFIG = 'config',
@@ -244,11 +244,6 @@ export function MachineLearningTestResourcesProvider(
           return value;
         }
       });
-
-      // make searchSourceJSON node a string
-      const searchSourceJsonNode = updatedBody.attributes.kibanaSavedObjectMeta.searchSourceJSON;
-      const searchSourceJsonString = JSON.stringify(searchSourceJsonNode);
-      updatedBody.attributes.kibanaSavedObjectMeta.searchSourceJSON = searchSourceJsonString;
 
       return updatedBody;
     },

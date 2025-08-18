@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
+import type { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject, take } from 'rxjs';
-import { ShowConfigPanelAction, ShowConfigPanelActionApi } from './show_config_panel_action';
+import type { ShowConfigPanelActionApi } from './show_config_panel_action';
+import { ShowConfigPanelAction } from './show_config_panel_action';
 
 describe('Show config panel action', () => {
   let action: ShowConfigPanelAction;

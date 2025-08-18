@@ -6,8 +6,8 @@
  */
 
 import { epmRouteService } from '@kbn/fleet-plugin/common';
+import type { PerformRuleInstallationResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
-  PerformRuleInstallationResponseBody,
   PERFORM_RULE_INSTALLATION_URL,
   BOOTSTRAP_PREBUILT_RULES_URL,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -74,19 +74,24 @@ export const installSpecificPrebuiltRulesRequest = (rules: Array<typeof SAMPLE_P
     },
   });
 
-export const getAvailablePrebuiltRulesCount = () => {
-  cy.log('Get prebuilt rules count');
-  return getPrebuiltRulesStatus().then(({ body }) => {
-    const prebuiltRulesCount = body.rules_installed + body.rules_not_installed;
+export const getInstalledPrebuiltRulesCount = () => {
+  cy.log('Get installed prebuilt rules count');
 
-    return prebuiltRulesCount;
-  });
+  return getPrebuiltRulesStatus().then(({ body }) => body.rules_installed);
+};
+
+export const getAvailableToInstallPrebuiltRulesCount = () => {
+  cy.log('Get available to install prebuilt rules count');
+
+  return getPrebuiltRulesStatus().then(
+    ({ body }) => body.rules_installed + body.rules_not_installed
+  );
 };
 
 export const waitTillPrebuiltRulesReadyToInstall = () => {
   cy.waitUntil(
     () => {
-      return getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+      return getAvailableToInstallPrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
         return availablePrebuiltRulesCount > 0;
       });
     },
@@ -214,20 +219,12 @@ const installByUploadPrebuiltRulesPackage = (packagePath: string): void => {
 };
 
 /**
- * Installs an empty mock prebuilt rules package `security_detection_engine`.
- * It's convenient to test functionality when no prebuilt rules are installed nor rule assets are available.
- */
-export const installMockEmptyPrebuiltRulesPackage = (): void => {
-  installByUploadPrebuiltRulesPackage(
-    'security_detection_engine_packages/mock-empty-security_detection_engine-99.0.0.zip'
-  );
-};
-
-/**
  * Installs a prepared mock prebuilt rules package `security_detection_engine`.
  * Installing it up front prevents installing the real package when making API requests.
  */
 export const installMockPrebuiltRulesPackage = (): void => {
+  cy.log('Install mock prebuilt rules package');
+
   installByUploadPrebuiltRulesPackage(
     'security_detection_engine_packages/mock-security_detection_engine-99.0.0.zip'
   );

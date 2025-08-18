@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import { FormattedDate } from '@kbn/i18n-react';
 import { BadgesColumn } from '../../common/components/assistant_settings_management/badges';
-import { PromptContextTemplate } from '../../prompt_context/types';
+import type { PromptContextTemplate } from '../../prompt_context/types';
 import * as i18n from './translations';
 import { useInlineActions } from '../../common/components/assistant_settings_management/inline_actions';
 

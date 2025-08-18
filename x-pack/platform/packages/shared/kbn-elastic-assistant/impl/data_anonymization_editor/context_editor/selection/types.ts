@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
 
 export type HandlePageChecked = () => void;
 export type HandlePageUnchecked = () => void;
