@@ -8,15 +8,15 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
-  SerializedSearchSourceFields,
 } from '@kbn/data-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { isObject } from 'lodash';
-import { VisualizeSavedVisInputState } from '../../embeddable/types';
-import { SavedVisState, SerializedVis, VisSavedObject } from '../../types';
+import type { VisualizeSavedVisInputState } from '../../embeddable/types';
+import type { SavedVisState, SerializedVis, VisSavedObject } from '../../types';
 import type { SerializableAttributes } from '../../vis_types/vis_type_alias_registry';
 import { extractControlsReferences, injectControlsReferences } from './controls_references';
 import { extractTimeSeriesReferences, injectTimeSeriesReferences } from './timeseries_references';

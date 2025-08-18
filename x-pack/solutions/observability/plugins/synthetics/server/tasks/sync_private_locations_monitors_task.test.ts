@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
+import type { CustomTaskInstance } from './sync_private_locations_monitors_task';
 import {
   SyncPrivateLocationMonitorsTask,
   runSynPrivateLocationMonitorsTaskSoon,
-  CustomTaskInstance,
 } from './sync_private_locations_monitors_task';
-import { SyntheticsServerSetup } from '../types';
-import { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import type { SyntheticsServerSetup } from '../types';
+import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import * as getPrivateLocationsModule from '../synthetics_service/get_private_locations';
 import { coreMock } from '@kbn/core/server/mocks';
-import { CoreStart } from '@kbn/core-lifecycle-server';
+import type { CoreStart } from '@kbn/core-lifecycle-server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';

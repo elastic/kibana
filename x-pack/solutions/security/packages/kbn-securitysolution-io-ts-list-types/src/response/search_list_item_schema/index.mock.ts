@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchListItemSchema } from '.';
+import type { SearchListItemSchema } from '.';
 import { VALUE } from '../../constants/index.mock';
 import { getListItemResponseMock } from '../list_item_schema/index.mock';
 

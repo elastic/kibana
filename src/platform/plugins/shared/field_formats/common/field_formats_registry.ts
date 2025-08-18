@@ -9,12 +9,11 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { memoize, identity } from 'lodash';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 
-import {
+import type {
   FieldFormatsGetConfigFn,
   FieldFormatConfig,
-  FIELD_FORMAT_IDS,
   FieldFormatInstanceType,
   FieldFormatId,
   FieldFormatMetaParams,
@@ -22,6 +21,7 @@ import {
   FormatFactory,
   FieldFormatParams,
 } from './types';
+import { FIELD_FORMAT_IDS } from './types';
 import { baseFormatters } from './constants/base_formatters';
 import { FieldFormat } from './field_format';
 import { FORMATS_UI_SETTINGS } from './constants/ui_settings';

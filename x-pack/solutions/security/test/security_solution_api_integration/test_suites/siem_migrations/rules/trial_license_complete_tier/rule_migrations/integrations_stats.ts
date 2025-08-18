@@ -14,7 +14,7 @@ import {
   getMigrationRuleDocuments,
   ruleMigrationRouteHelpersFactory,
 } from '../../../utils';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');

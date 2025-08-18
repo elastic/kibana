@@ -10,12 +10,14 @@
 import { identity } from 'lodash';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 
-import { AggConfig, IAggConfig } from './agg_config';
-import { AggConfigs, CreateAggConfigParams } from './agg_configs';
+import type { IAggConfig } from './agg_config';
+import { AggConfig } from './agg_config';
+import type { CreateAggConfigParams } from './agg_configs';
+import { AggConfigs } from './agg_configs';
 import { AggType } from './agg_type';
-import { AggTypesRegistryStart } from './agg_types_registry';
+import type { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
-import { MetricAggType } from './metrics/metric_agg_type';
+import type { MetricAggType } from './metrics/metric_agg_type';
 import type {
   DataView,
   DataViewField,

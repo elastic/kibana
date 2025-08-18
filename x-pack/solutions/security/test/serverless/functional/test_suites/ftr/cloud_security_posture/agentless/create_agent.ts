@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as http from 'http';
+import type * as http from 'http';
 import expect from '@kbn/expect';
 import { setupMockServer } from './mock_agentless_api';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';

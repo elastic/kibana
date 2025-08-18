@@ -9,11 +9,11 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { errors } from '@elastic/elasticsearch';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { v4 as uuid } from 'uuid';
 import prettyMilliseconds from 'pretty-ms';
 import { duration } from 'moment';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { LOCKS_CONCRETE_INDEX_NAME, setupLockManagerIndex } from './setup_lock_manager_index';
 
 export type LockId = string;

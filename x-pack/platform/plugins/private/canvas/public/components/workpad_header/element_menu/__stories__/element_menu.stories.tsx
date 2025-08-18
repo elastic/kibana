@@ -7,7 +7,7 @@
 
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { ElementSpec } from '../../../../../types';
+import type { ElementSpec } from '../../../../../types';
 import { ElementMenu } from '../element_menu.component';
 
 const testElements: { [key: string]: ElementSpec } = {

@@ -7,16 +7,17 @@
 
 import { badData, badRequest } from '@hapi/boom';
 import { z } from '@kbn/zod';
-import { StreamQuery, Streams } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { Ingest } from '@kbn/streams-schema/src/models/ingest';
 import { WiredIngest } from '@kbn/streams-schema/src/models/ingest/wired';
-import { ClassicIngest } from '@kbn/streams-schema/src/models/ingest/classic';
+import type { ClassicIngest } from '@kbn/streams-schema/src/models/ingest/classic';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { ASSET_ID, ASSET_TYPE } from '../../../lib/streams/assets/fields';
-import { QueryAsset } from '../../../../common/assets';
-import { StreamsClient } from '../../../lib/streams/client';
-import { AssetClient } from '../../../lib/streams/assets/asset_client';
+import type { QueryAsset } from '../../../../common/assets';
+import type { StreamsClient } from '../../../lib/streams/client';
+import type { AssetClient } from '../../../lib/streams/assets/asset_client';
 
 async function getAssets({
   name,

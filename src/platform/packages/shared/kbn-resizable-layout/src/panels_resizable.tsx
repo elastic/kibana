@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiResizableContainer,
-  useGeneratedHtmlId,
-  mathWithUnits,
-  UseEuiTheme,
-} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiResizableContainer, useGeneratedHtmlId, mathWithUnits } from '@elastic/eui';
 import type { ResizeTrigger } from '@elastic/eui/src/components/resizable_container/types';
 import { css } from '@emotion/react';
 import { isEqual, round } from 'lodash';
@@ -20,7 +16,7 @@ import type { ReactNode } from 'react';
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import useLatest from 'react-use/lib/useLatest';
-import { ResizableLayoutDirection } from '../types';
+import type { ResizableLayoutDirection } from '../types';
 import { getContainerSize, percentToPixels, pixelsToPercent } from './utils';
 
 export const PanelsResizable = ({

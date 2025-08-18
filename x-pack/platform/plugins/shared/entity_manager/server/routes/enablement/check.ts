@@ -17,7 +17,7 @@ import { checkIfEntityDiscoveryAPIKeyIsValid, readEntityDiscoveryAPIKey } from '
 import { builtInDefinitions } from '../../lib/entities/built_in';
 import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
 import { getClientsFromAPIKey } from '../../lib/utils';
-import { EntityDefinitionWithState } from '../../lib/entities/types';
+import type { EntityDefinitionWithState } from '../../lib/entities/types';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
 /**
