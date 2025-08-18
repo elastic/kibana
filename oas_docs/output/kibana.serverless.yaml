@@ -55986,9 +55986,7 @@ paths:
         - streams
       x-state: Technical Preview
       x-metaTags:
-        - content: Kibana
-          name: product_name
-        - content: Elastic Cloud Serverless
+        - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/streams/{name}/significant_events/_preview:
     post:
