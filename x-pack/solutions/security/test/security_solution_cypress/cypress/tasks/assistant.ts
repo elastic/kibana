@@ -61,7 +61,6 @@ import {
   CONVERSATION_LIST_ICON,
   USER_PROFILES_SELECT_OPTION,
   DISMISS_CALLOUT_BUTTON,
-  USER_PROFILES_LIST,
   DUPLICATE_CONVERSATION,
   CONVERSATION_SETTINGS_MENU,
   COPY_URL,
@@ -281,7 +280,7 @@ export const assertNotSharedMenu = () => {
   cy.get(SHARED_SELECT_OPTION).should('have.attr', 'aria-checked', 'false');
   cy.get(SHARED_SELECT_OPTION)
     .find(OPTION_DESCRIPTION)
-    .should('have.text', 'All team members can view this conversation.');
+    .should('have.text', 'Selected team members can view this conversation.');
 };
 
 export const assertSharedMenu = (isGlobal = true) => {
@@ -299,7 +298,7 @@ export const assertSharedMenu = (isGlobal = true) => {
 };
 
 export const shareConversationWithUser = (user: string) => {
-  cy.get(SHARE_MODAL).find('input').type(user);
+  cy.get(USER_PROFILES_SEARCH).find('input').type(user);
   cy.get(USER_PROFILES_SEARCH)
     .find(USER_PROFILES_SELECT_OPTION(user))
     .should('have.attr', 'aria-checked', 'false');
@@ -319,18 +318,22 @@ export const selectShareModal = () => {
 };
 
 export const selectShareType = (shareType: 'global' | 'selected') => {
-  cy.get(SHARE_MODAL).find(`button[data-test-subj="${shareType}"]`).click();
+  const oppositeShareType = shareType === 'global' ? 'selected' : 'global';
+  cy.get(SHARE_MODAL)
+    .find(`button[data-test-subj="shareConversationSelect-${oppositeShareType}"]`)
+    .click();
+  cy.get(`[data-test-subj="select-option-${shareType}"]`).click();
   assertShareModalType(shareType);
 };
 
 export const assertShareModalType = (shareType: 'global' | 'selected') => {
   cy.get(SHARE_MODAL)
-    .find(`button[data-test-subj="${shareType}"]`)
-    .should('have.attr', 'aria-pressed', 'true');
+    .find(`button[data-test-subj="shareConversationSelect-${shareType}"]`)
+    .should('exist');
 };
 
 export const assertShareUser = (user: string) => {
-  cy.get(USER_PROFILES_LIST)
+  cy.get(USER_PROFILES_SEARCH)
     .find(USER_PROFILES_SELECT_OPTION(user))
     .should('have.attr', 'aria-checked', 'true');
 };
@@ -435,10 +438,10 @@ export const shareConversation = (share: string) => {
   openShareMenu();
   selectShareModal();
   if (share === 'global') {
+    selectShareType('global');
     submitShareModal();
     assertOwnerSharedCallout();
   } else {
-    selectShareType('selected');
     shareConversationWithUser(share);
     submitShareModal();
     assertOwnerSharedCallout();

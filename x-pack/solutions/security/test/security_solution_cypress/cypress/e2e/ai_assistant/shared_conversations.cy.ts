@@ -125,14 +125,14 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     assertNotSharedMenu();
     // Opening and closing the share modal should not change sharing settings
     selectShareModal();
-    assertShareModalType('global');
+    assertShareModalType('selected');
     closeShareModal();
     assertNotSharedCallout();
     openShareMenu();
     assertNotSharedMenu();
     // Opening the share menu and selecting global share changes sharing settings
     selectShareModal();
-    assertShareModalType('global');
+    selectShareType('global');
     submitShareModal();
     assertOwnerSharedCallout();
     openShareMenu();
@@ -149,16 +149,14 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     openShareMenu();
     assertNotSharedMenu();
     selectShareModal();
-    assertShareModalType('global');
-    selectShareType('selected');
+    assertShareModalType('selected');
     // Press save without selecting users
     submitShareModal();
     assertNotSharedCallout();
     openShareMenu();
     assertNotSharedMenu();
     selectShareModal();
-    assertShareModalType('global');
-    selectShareType('selected');
+    assertShareModalType('selected');
     // Select secondaryUser to share the conversation
     shareConversationWithUser(isServerless ? 'test_user' : secondaryUser);
     submitShareModal();

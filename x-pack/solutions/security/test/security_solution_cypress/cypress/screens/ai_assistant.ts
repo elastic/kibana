@@ -64,7 +64,6 @@ export const SHARE_BUTTON = `button[data-test-subj="shareConversation"]`;
 export const USER_PROFILES_SEARCH = '[data-test-subj="userProfilesSearch"]';
 export const USER_PROFILES_SELECT_OPTION = (user: string) =>
   `[data-test-subj="userProfileSelectableOption-${user}"]`;
-export const USER_PROFILES_LIST = '[data-test-subj="userProfilesList"]';
 export const CONVERSATION_LIST_ICON = (c: string) => `[data-test-subj="conversation-icon-${c}"]`;
 export const DISMISS_CALLOUT_BUTTON = '[data-test-subj="euiDismissCalloutButton"]';
 export const DUPLICATE_CONVERSATION = '[data-test-subj="duplicateConversation"]';

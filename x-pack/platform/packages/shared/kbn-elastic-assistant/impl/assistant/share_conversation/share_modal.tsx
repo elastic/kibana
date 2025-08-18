@@ -43,12 +43,12 @@ const shareOptions = [
   {
     value: 'global',
     inputDisplay: i18n.WITH_EVERYONE,
-    'data-test-subj': 'everyone',
+    'data-test-subj': 'select-option-global',
   },
   {
     value: 'selected',
     inputDisplay: i18n.WITH_SELECTED,
-    'data-test-subj': 'selected',
+    'data-test-subj': 'select-option-selected',
   },
 ];
 const ShareModalComponent: React.FC<Props> = ({
@@ -142,6 +142,7 @@ const ShareModalComponent: React.FC<Props> = ({
           </EuiText>
           <EuiSpacer size="s" />
           <EuiSuperSelect
+            data-test-subj={`shareConversationSelect-${sharingOption}`}
             hasDividers
             fullWidth
             prepend={<EuiIcon type={selectIcon} />}
