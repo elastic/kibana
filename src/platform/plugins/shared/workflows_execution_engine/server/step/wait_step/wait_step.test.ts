@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WaitGraphNode } from '@kbn/workflows';
+import type { WaitGraphNode } from '@kbn/workflows';
 import { WaitStepImpl } from './wait_step';
-import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
 
 describe('WaitStepImpl', () => {
   let underTest: WaitStepImpl;

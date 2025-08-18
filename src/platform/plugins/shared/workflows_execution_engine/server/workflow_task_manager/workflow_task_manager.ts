@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { ResumeWorkflowExecutionParams } from './types';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { ResumeWorkflowExecutionParams } from './types';
 
 export class WorkflowTaskManager {
   constructor(private taskManager: TaskManagerStartContract) {}

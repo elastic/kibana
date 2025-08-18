@@ -19,8 +19,8 @@ import { ExecutionStatus } from '@kbn/workflows';
 
 import { graphlib } from '@dagrejs/dagre';
 import { Client } from '@elastic/elasticsearch';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { WorkflowsExecutionEngineConfig } from './config';
 
 import type {
@@ -39,7 +39,7 @@ import { WorkflowContextManager } from './workflow_context_manager/workflow_cont
 import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
 import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
-import { ResumeWorkflowExecutionParams } from './workflow_task_manager/types';
+import type { ResumeWorkflowExecutionParams } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 
 export class WorkflowsExecutionEnginePlugin
