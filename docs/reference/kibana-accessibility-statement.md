@@ -48,7 +48,7 @@ Accessibility of Kibana relies on the following technologies to work with your w
 
 ## Testing Tools and Approach
 
-We use a combination of manual and automated testing methods across the development lifecycle, using:
+We use a combination of manual and automated testing methods across the development lifecycle, including:
 - NVDA (screen reader)
 - VoiceOver (macOS/iOS)
 - Manual keyboard navigation testing
