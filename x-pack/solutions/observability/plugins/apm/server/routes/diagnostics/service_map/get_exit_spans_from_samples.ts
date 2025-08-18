@@ -134,7 +134,7 @@ export async function getSourceSpanIds({
     apm: {
       events: [ProcessorEvent.span],
     },
-    body:{ 
+    body: {
       track_total_hits: false,
       size: 0,
       query: {
