@@ -53,7 +53,9 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const deploymentMode =
-    isAgentlessSelected && packagePolicy.supports_agentless ? 'agentless' : 'default';
+    (isEditPage || isAgentlessSelected) && packagePolicy.supports_agentless
+      ? 'agentless'
+      : 'default';
   const packagePolicyTemplates = useMemo(
     () =>
       showOnlyIntegration
