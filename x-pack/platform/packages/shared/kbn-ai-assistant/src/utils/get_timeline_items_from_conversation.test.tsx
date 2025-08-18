@@ -223,13 +223,15 @@ describe('getTimelineItemsFromConversation', () => {
       });
     });
 
-    it('treats the placeholder content as empty and does not collapse or allow copy', () => {
+    it('renders the function call preview and collapses the item, allowing copy', () => {
       // items[0] is the conversation start, items[1] is user message, items[2] is assistant suggestion
       const assistantSuggestion = items[2];
       expect(assistantSuggestion.role).toBe(MessageRole.Assistant);
-      expect(assistantSuggestion.content).toBeUndefined();
-      expect(assistantSuggestion.display.collapsed).toBe(false);
-      expect(assistantSuggestion.actions.canCopy).toBe(false);
+      expect(assistantSuggestion.content).toBe(
+        `\`\`\`\n{\n  "name": "my_function",\n  "args": {}\n}\n\`\`\``
+      );
+      expect(assistantSuggestion.display.collapsed).toBe(true);
+      expect(assistantSuggestion.actions.canCopy).toBe(true);
     });
   });
 

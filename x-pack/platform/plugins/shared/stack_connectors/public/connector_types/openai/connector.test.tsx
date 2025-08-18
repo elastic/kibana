@@ -59,6 +59,7 @@ const otherOpenAiConnector = {
     apiUrl: 'https://localhost/oss-llm',
     apiProvider: OpenAiProviderType.Other,
     defaultModel: 'local-model',
+    enableNativeFunctionCalling: false,
   },
   secrets: {
     apiKey: 'thats-a-nice-looking-key',
@@ -174,24 +175,21 @@ describe('ConnectorFields renders', () => {
       expect(onSubmit).toHaveBeenCalled();
     });
 
+    const testFormData = {
+      ...otherOpenAiConnector,
+      config: {
+        ...otherOpenAiConnector.config,
+        enableNativeFunctionCalling: true,
+      },
+      __internal__: {
+        hasHeaders: false,
+        hasPKI: false,
+      },
+    };
+
     expect(onSubmit).toHaveBeenCalledWith({
       data: {
-        actionTypeId: '.gen-ai',
-        name: 'OpenAI',
-        id: '123',
-        isDeprecated: false,
-        config: {
-          apiUrl: 'https://localhost/oss-llm',
-          apiProvider: OpenAiProviderType.Other,
-          defaultModel: 'local-model',
-          enableNativeFunctionCalling: true,
-        },
-        secrets: {
-          apiKey: 'thats-a-nice-looking-key',
-        },
-        __internal__: {
-          hasHeaders: false,
-        },
+        ...testFormData,
       },
       isValid: true,
     });
