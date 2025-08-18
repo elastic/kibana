@@ -4,11 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ElasticsearchClientMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import type { Streams } from '@kbn/streams-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
@@ -25,7 +22,7 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
     lifecycle: {
       inherit: {},
     },
-    processing: [],
+    processing: { steps: [] },
   },
 };
 
