@@ -7,7 +7,7 @@
 
 import { TableSource } from './table_source';
 import { FIELD_ORIGIN } from '../../../../../common/constants';
-import { VectorSourceRequestMeta } from '../../../../../common/descriptor_types';
+import type { VectorSourceRequestMeta } from '../../../../../common/descriptor_types';
 
 describe('TableSource', () => {
   describe('getName', () => {

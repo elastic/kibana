@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CommonWrapper } from 'enzyme';
+import type { CommonWrapper } from 'enzyme';
 
 /**
  * Quick and easy helper for re-rendering a React component in Enzyme

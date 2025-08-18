@@ -7,10 +7,11 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiSpacer, EuiLoadingSpinner, EuiEmptyPrompt, EuiCallOut } from '@elastic/eui';
-import { ISearchSource } from '@kbn/data-plugin/common';
-import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { SavedQuery } from '@kbn/data-plugin/public';
-import { EsQueryRuleMetaData, EsQueryRuleParams, SearchType } from '../types';
+import type { ISearchSource } from '@kbn/data-plugin/common';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SavedQuery } from '@kbn/data-plugin/public';
+import type { EsQueryRuleMetaData, EsQueryRuleParams } from '../types';
+import { SearchType } from '../types';
 import { SearchSourceExpressionForm } from './search_source_expression_form';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';

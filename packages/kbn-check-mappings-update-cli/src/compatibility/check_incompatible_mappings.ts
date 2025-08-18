@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SomeDevLog } from '@kbn/some-dev-log';
-import { Client } from '@elastic/elasticsearch';
+import type { SomeDevLog } from '@kbn/some-dev-log';
+import type { Client } from '@elastic/elasticsearch';
 import { createFailError } from '@kbn/dev-cli-errors';
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 
 import { getCapabilities } from './capabilities';
 import { API_ERROR } from '../../translations';
