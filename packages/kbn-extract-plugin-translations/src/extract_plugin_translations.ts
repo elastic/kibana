@@ -82,19 +82,4 @@ export function extractPluginTranslations({
       log.error(`Error processing ${fileName}: ${error}`);
     }
   }
-
-  log.info('Files created:');
-  const createdFiles = fs.readdirSync(outputDir).filter((file) => file.endsWith('.json'));
-
-  for (const fileName of createdFiles) {
-    const filePath = Path.join(outputDir, fileName);
-    try {
-      const content = fs.readFileSync(filePath, 'utf8');
-      const data: TranslationFile = JSON.parse(content);
-      const messageCount = Object.keys(data.messages).length;
-      log.info(`   - ${fileName} (${messageCount} messages)`);
-    } catch (error) {
-      log.info(`   - ${fileName}`);
-    }
-  }
 }
