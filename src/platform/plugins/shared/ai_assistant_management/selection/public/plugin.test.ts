@@ -197,7 +197,7 @@ describe('AI Assistant Management Selection Plugin', () => {
       expect(app).toBeDefined();
       expect(app.enabled).toBe(false);
 
-      // Start with non-enterprise, then move to enterprise; capability stays false
+      // Start with non-enterprise, then move to enterprise; aiAssistantManagementSelection capability stays false
       const license$ = new BehaviorSubject<any>(makeLicense('gold'));
       plugin.start(
         {
