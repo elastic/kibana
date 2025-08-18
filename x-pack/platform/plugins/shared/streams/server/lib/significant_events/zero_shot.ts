@@ -16,7 +16,6 @@ import {
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
-import { Observable } from 'rxjs';
 import { isKqlQueryValid } from '../../routes/internal/esql/query_helpers';
 import KQL_GUIDE from './prompts/kql_guide.text';
 
@@ -35,57 +34,52 @@ interface Dependencies {
   logger: Logger;
 }
 
-export function generateUsingZeroShot(
+export async function generateUsingZeroShot(
   params: Params,
   dependencies: Dependencies
-): Observable<GeneratedSignificantEventQuery[]> {
-  return new Observable<GeneratedSignificantEventQuery[]>((subscriber) => {
-    (async () => {
-      try {
-        const {
-          definition,
-          connectorId,
-          currentDate = new Date(),
-          shortLookback = DEFAULT_SHORT_LOOKBACK,
-        } = params;
-        const { inferenceClient, esClient, logger } = dependencies;
+): Promise<GeneratedSignificantEventQuery[]> {
+  const {
+    definition,
+    connectorId,
+    currentDate = new Date(),
+    shortLookback = DEFAULT_SHORT_LOOKBACK,
+  } = params;
+  const { inferenceClient, esClient, logger } = dependencies;
 
-        const identifiedSystem = definition.description;
-        if (isEmpty(identifiedSystem)) {
-          return;
-        }
+  const identifiedSystem = definition.description;
+  if (isEmpty(identifiedSystem)) {
+    return [];
+  }
 
-        const mend = moment(currentDate);
-        const mstart = mend.clone().subtract(shortLookback);
+  const mend = moment(currentDate);
+  const mstart = mend.clone().subtract(shortLookback);
 
-        const start = mstart.valueOf();
-        const end = mend.valueOf();
+  const start = mstart.valueOf();
+  const end = mend.valueOf();
 
-        const analysis = await describeDataset({
-          esClient: esClient.client,
-          start,
-          end,
-          index: getIndexPatternsForStream(definition),
-        });
+  const analysis = await describeDataset({
+    esClient: esClient.client,
+    start,
+    end,
+    index: getIndexPatternsForStream(definition),
+  });
 
-        const short = sortAndTruncateAnalyzedFields(analysis);
+  const short = sortAndTruncateAnalyzedFields(analysis);
 
-        const messageField = analysis.fields.find(
-          (f) => f.name === 'message' || f.name === 'body.text'
-        );
+  const messageField = analysis.fields.find((f) => f.name === 'message' || f.name === 'body.text');
 
-        if (!messageField) {
-          return;
-        }
+  if (!messageField) {
+    return [];
+  }
 
-        logger.debug(() => {
-          return `${JSON.stringify(short)}`;
-        });
+  logger.debug(() => {
+    return `${JSON.stringify(short)}`;
+  });
 
-        const { output: zeroShotQueries } = await inferenceClient.output({
-          id: 'generate_queries_from_system',
-          connectorId,
-          input: `You are an expert log analysis system. You previously identified the system that generated the logs as {identified_system}.
+  const { output: zeroShotQueries } = await inferenceClient.output({
+    id: 'generate_queries_from_system',
+    connectorId,
+    input: `You are an expert log analysis system. You previously identified the system that generated the logs as {identified_system}.
 
 ## Identified System
 ${identifiedSystem}
@@ -116,39 +110,30 @@ Generate KQL queries that identify **operationally significant patterns** - even
 
 Remember to focus exclusively on queries that are specific to the identified system.
 `,
-          schema: {
+    schema: {
+      type: 'object',
+      properties: {
+        queries: {
+          type: 'array',
+          items: {
             type: 'object',
             properties: {
-              queries: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    title: {
-                      type: 'string',
-                      description: 'A title for the significant event query',
-                    },
-                    kql: {
-                      type: 'string',
-                      description: 'The KQL of the specific significant event query',
-                    },
-                  },
-                  required: ['kql', 'title'],
-                },
+              title: {
+                type: 'string',
+                description: 'A title for the significant event query',
+              },
+              kql: {
+                type: 'string',
+                description: 'The KQL of the specific significant event query',
               },
             },
-            required: ['queries'],
-          } as const,
-        });
-
-        subscriber.next(zeroShotQueries.queries.filter((query) => isKqlQueryValid(query.kql)));
-      } catch (error) {
-        subscriber.error(error);
-      } finally {
-        subscriber.complete();
-      }
-    })().catch((error) => {
-      subscriber.error(error);
-    });
+            required: ['kql', 'title'],
+          },
+        },
+      },
+      required: ['queries'],
+    } as const,
   });
+
+  return zeroShotQueries.queries.filter((query) => isKqlQueryValid(query.kql));
 }
