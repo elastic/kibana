@@ -12,8 +12,6 @@ import type { KnowledgeBaseItem } from '../../../../common/types';
 
 import {
   INTEGRATION_KNOWLEDGE_INDEX,
-  INTEGRATION_KNOWLEDGE_INDEX_TEMPLATE,
-  ensureIntegrationKnowledgeIndex,
   saveKnowledgeBaseContentToIndex,
   getPackageKnowledgeBaseFromIndex,
   deletePackageKnowledgeBase,
@@ -26,91 +24,6 @@ describe('knowledge_base_index', () => {
   beforeEach(() => {
     mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     jest.clearAllMocks();
-  });
-
-  describe('INTEGRATION_KNOWLEDGE_INDEX_TEMPLATE', () => {
-    it('should have correct structure', () => {
-      expect(INTEGRATION_KNOWLEDGE_INDEX_TEMPLATE).toEqual({
-        index_patterns: ['.integration_knowledge*'],
-        template: {
-          settings: {
-            'index.hidden': true,
-          },
-          mappings: {
-            properties: {
-              filename: { type: 'keyword' },
-              content: { type: 'semantic_text' },
-              version: { type: 'version' },
-              package_name: { type: 'keyword' },
-              installed_at: { type: 'date' },
-            },
-          },
-        },
-        _meta: {
-          description: 'Integration package knowledge base content storage',
-          managed: true,
-        },
-      });
-    });
-  });
-
-  describe('ensureIntegrationKnowledgeIndex', () => {
-    it('should create index template and index when they do not exist', async () => {
-      (mockEsClient.indices.existsIndexTemplate as jest.Mock).mockResolvedValue(false);
-      (mockEsClient.indices.exists as jest.Mock).mockResolvedValue(false);
-
-      await ensureIntegrationKnowledgeIndex(mockEsClient);
-
-      expect(mockEsClient.indices.existsIndexTemplate).toHaveBeenCalledWith({
-        name: 'integration-knowledge-template',
-      });
-
-      expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalledWith({
-        name: 'integration-knowledge-template',
-        ...INTEGRATION_KNOWLEDGE_INDEX_TEMPLATE,
-      });
-
-      expect(mockEsClient.indices.exists).toHaveBeenCalledWith({
-        index: INTEGRATION_KNOWLEDGE_INDEX,
-      });
-
-      expect(mockEsClient.indices.create).toHaveBeenCalledWith({
-        index: INTEGRATION_KNOWLEDGE_INDEX,
-        settings: INTEGRATION_KNOWLEDGE_INDEX_TEMPLATE.template.settings,
-        mappings: INTEGRATION_KNOWLEDGE_INDEX_TEMPLATE.template.mappings,
-      });
-    });
-
-    it('should not create template when it already exists', async () => {
-      (mockEsClient.indices.existsIndexTemplate as jest.Mock).mockResolvedValue(true);
-      (mockEsClient.indices.exists as jest.Mock).mockResolvedValue(false);
-
-      await ensureIntegrationKnowledgeIndex(mockEsClient);
-
-      expect(mockEsClient.indices.putIndexTemplate).not.toHaveBeenCalled();
-      expect(mockEsClient.indices.create).toHaveBeenCalled();
-    });
-
-    it('should not create index when it already exists', async () => {
-      (mockEsClient.indices.existsIndexTemplate as jest.Mock).mockResolvedValue(true);
-      (mockEsClient.indices.exists as jest.Mock).mockResolvedValue(true);
-
-      await ensureIntegrationKnowledgeIndex(mockEsClient);
-
-      expect(mockEsClient.indices.putIndexTemplate).not.toHaveBeenCalled();
-      expect(mockEsClient.indices.create).not.toHaveBeenCalled();
-    });
-
-    it('should throw error when ES operations fail', async () => {
-      const errorMessage = 'Elasticsearch error';
-      (mockEsClient.indices.existsIndexTemplate as jest.Mock).mockRejectedValue(
-        new Error(errorMessage)
-      );
-
-      await expect(ensureIntegrationKnowledgeIndex(mockEsClient)).rejects.toThrow(
-        `Failed to ensure integration knowledge index: ${errorMessage}`
-      );
-    });
   });
 
   describe('saveKnowledgeBaseContentToIndex', () => {
