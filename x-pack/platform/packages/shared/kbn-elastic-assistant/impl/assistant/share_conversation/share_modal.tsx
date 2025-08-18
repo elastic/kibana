@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
+  EuiCallOut,
   EuiIcon,
   EuiModal,
   EuiModalHeader,
@@ -18,6 +19,8 @@ import {
   EuiSuperSelect,
   EuiText,
   EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import type { UserProfile } from '@kbn/core-user-profile-common';
 import type { DataStreamApis } from '../use_data_stream_apis';
@@ -83,10 +86,6 @@ const ShareModalComponent: React.FC<Props> = ({
   const handleCopyUrl = useCallback(
     () => copyConversationUrl(selectedConversation),
     [copyConversationUrl, selectedConversation]
-  );
-  const accessText = useMemo(
-    () => (sharingOption === 'global' ? i18n.EVERYONE : i18n.ONLY_SELECTED),
-    [sharingOption]
   );
 
   const onNextUsersSelect = useCallback((updatedUsers: UserProfile[]) => {
@@ -177,10 +176,10 @@ const ShareModalComponent: React.FC<Props> = ({
           </>
         )}
 
-        <EuiText size="s">
-          <strong>{i18n.WHO_HAS_ACCESS}</strong>
-          <p>{accessText}</p>
-        </EuiText>
+        {sharingOption === 'global' && (
+          <EuiCallOut size="s" title={i18n.EVERYONE} color="accent" iconType="info" />
+        )}
+
         {sharingOption === 'selected' && (
           <UserProfilesList
             onUsersSelect={onNextSelectedUsersSelect}
@@ -190,20 +189,25 @@ const ShareModalComponent: React.FC<Props> = ({
         )}
 
         <EuiSpacer size="m" />
-
-        <EuiButton
-          data-test-subj="copyConversationUrl"
-          iconType="copyClipboard"
-          onClick={handleCopyUrl}
-        >
-          {COPY_URL}
-        </EuiButton>
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButton data-test-subj="shareConversation" onClick={onSaveShare} fill>
-          {i18n.DONE}
-        </EuiButton>
+        <EuiFlexGroup justifyContent={'spaceBetween'}>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="copyConversationUrl"
+              iconType="copyClipboard"
+              onClick={handleCopyUrl}
+            >
+              {COPY_URL}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton data-test-subj="shareConversation" onClick={onSaveShare} fill>
+              {i18n.DONE}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalFooter>
     </EuiModal>
   ) : null;
