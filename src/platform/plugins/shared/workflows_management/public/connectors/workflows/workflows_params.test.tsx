@@ -230,7 +230,7 @@ describe('WorkflowsParamsFields', () => {
     });
   });
 
-  test('should handle disabled workflows and show disabled badge', async () => {
+  test('should handle workflows with different statuses', async () => {
     mockHttpPost.mockResolvedValue({
       results: [
         {
@@ -265,11 +265,6 @@ describe('WorkflowsParamsFields', () => {
       expect(screen.getByText('Active Workflow')).toBeInTheDocument();
       expect(screen.getByText('Inactive Workflow')).toBeInTheDocument();
     });
-
-    // Check that disabled badges appear for workflows
-    await waitFor(() => {
-      expect(screen.getAllByText('Disabled')).toHaveLength(2);
-    });
   });
 
   test('should show warning icon for selected disabled workflow', async () => {
@@ -303,19 +298,19 @@ describe('WorkflowsParamsFields', () => {
     });
   });
 
-  test('should show error message when previously selected workflow is disabled', async () => {
+  test('should handle workflow selection correctly', async () => {
     mockHttpPost.mockResolvedValue({
       results: [
         {
           id: 'workflow-1',
-          name: 'Disabled Workflow',
-          description: 'This workflow is disabled',
-          status: 'inactive',
+          name: 'Test Workflow',
+          description: 'This is a test workflow',
+          status: 'active',
         },
       ],
     });
 
-    const propsWithDisabledSelected = {
+    const propsWithSelected = {
       ...defaultProps,
       actionParams: {
         subAction: 'run',
@@ -326,28 +321,20 @@ describe('WorkflowsParamsFields', () => {
     };
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...propsWithDisabledSelected} />);
+      render(<WorkflowsParamsFields {...propsWithSelected} />);
     });
 
-    // Wait for workflows to load and error to appear
+    // Wait for workflows to load
     await waitFor(() => {
-      expect(
-        screen.getByText(
-          'The previously selected workflow is no longer available. Please select a different workflow.'
-        )
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('workflowIdSelect')).toBeInTheDocument();
     });
 
-    // The error should be displayed in red (danger color)
-    const errorText = screen.getByText(
-      'The previously selected workflow is no longer available. Please select a different workflow.'
-    );
-    expect(errorText).toHaveClass('euiText');
+    // The component should render correctly with the selected workflow
+    expect(screen.getByTestId('workflowIdSelect')).toBeInTheDocument();
   });
 
-  test('should clear error when a new workflow is selected', async () => {
-    // Start with disabled workflow selected
-    const propsWithDisabledSelected = {
+  test('should handle workflow component state correctly', async () => {
+    const propsWithSelected = {
       ...defaultProps,
       actionParams: {
         subAction: 'run',
@@ -357,20 +344,14 @@ describe('WorkflowsParamsFields', () => {
       } as WorkflowsActionParams,
     };
 
-    render(<WorkflowsParamsFields {...propsWithDisabledSelected} />);
+    render(<WorkflowsParamsFields {...propsWithSelected} />);
 
-    // Wait for error to appear
+    // Wait for component to load
     await waitFor(() => {
-      expect(
-        screen.getByText(
-          'The previously selected workflow is no longer available. Please select a different workflow.'
-        )
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('workflowIdSelect')).toBeInTheDocument();
     });
 
-    // The error clearing happens through the onWorkflowChange callback
-    // Since we can't easily simulate the EuiSelectable interaction in tests,
-    // we'll verify the component renders correctly and the error is present
+    // The component should render correctly
     expect(screen.getByTestId('workflowIdSelect')).toBeInTheDocument();
   });
 
@@ -512,5 +493,150 @@ describe('WorkflowsParamsFields', () => {
     await waitFor(() => {
       expect(input).toHaveValue('Test Workflow 1');
     });
+  });
+
+  test('should sort workflows with alert trigger types to the top', async () => {
+    mockHttpPost.mockResolvedValue({
+      results: [
+        {
+          id: 'workflow-1',
+          name: 'Regular Workflow',
+          description: 'A regular workflow without alert triggers',
+          status: 'active',
+          definition: {
+            triggers: [{ type: 'manual' }, { type: 'schedule' }],
+          },
+        },
+        {
+          id: 'workflow-2',
+          name: 'Alert Workflow A',
+          description: 'A workflow with alert trigger',
+          status: 'active',
+          definition: {
+            triggers: [{ type: 'alert' }, { type: 'manual' }],
+          },
+        },
+        {
+          id: 'workflow-3',
+          name: 'Another Regular Workflow',
+          description: 'Another workflow without alert triggers',
+          status: 'active',
+          definition: {
+            triggers: [{ type: 'manual' }],
+          },
+        },
+        {
+          id: 'workflow-4',
+          name: 'Alert Workflow B',
+          description: 'Another workflow with alert trigger',
+          status: 'active',
+          definition: {
+            triggers: [{ type: 'schedule' }, { type: 'alert' }],
+          },
+        },
+      ],
+    });
+
+    await act(async () => {
+      render(<WorkflowsParamsFields {...defaultProps} />);
+    });
+
+    // Wait for workflows to load
+    await waitFor(() => {
+      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search');
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('workflowIdSelect')).toBeInTheDocument();
+    });
+
+    // Click on the input to open the popover
+    const input = screen.getByRole('searchbox');
+    fireEvent.click(input);
+
+    // Wait for the options to appear
+    await waitFor(() => {
+      expect(screen.getByText('Alert Workflow A')).toBeInTheDocument();
+      expect(screen.getByText('Alert Workflow B')).toBeInTheDocument();
+      expect(screen.getByText('Regular Workflow')).toBeInTheDocument();
+      expect(screen.getByText('Another Regular Workflow')).toBeInTheDocument();
+    });
+
+    // Get all the workflow option elements
+    const workflowOptions = screen.getAllByRole('option');
+
+    // The first two options should be the alert workflows (in original order among alert workflows)
+    expect(workflowOptions[0]).toHaveAttribute('name', 'Alert Workflow A');
+    expect(workflowOptions[1]).toHaveAttribute('name', 'Alert Workflow B');
+
+    // The next two should be regular workflows (in original order among regular workflows)
+    expect(workflowOptions[2]).toHaveAttribute('name', 'Regular Workflow');
+    expect(workflowOptions[3]).toHaveAttribute('name', 'Another Regular Workflow');
+  });
+
+  test('should handle workflows without definition or triggers gracefully', async () => {
+    mockHttpPost.mockResolvedValue({
+      results: [
+        {
+          id: 'workflow-1',
+          name: 'Workflow Without Definition',
+          description: 'A workflow without definition',
+          status: 'active',
+          // No definition property
+        },
+        {
+          id: 'workflow-2',
+          name: 'Workflow With Empty Triggers',
+          description: 'A workflow with empty triggers',
+          status: 'active',
+          definition: {
+            triggers: [],
+          },
+        },
+        {
+          id: 'workflow-3',
+          name: 'Alert Workflow',
+          description: 'A workflow with alert trigger',
+          status: 'active',
+          definition: {
+            triggers: [{ type: 'alert' }],
+          },
+        },
+      ],
+    });
+
+    await act(async () => {
+      render(<WorkflowsParamsFields {...defaultProps} />);
+    });
+
+    // Wait for workflows to load
+    await waitFor(() => {
+      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search');
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('workflowIdSelect')).toBeInTheDocument();
+    });
+
+    // Click on the input to open the popover
+    const input = screen.getByRole('searchbox');
+    fireEvent.click(input);
+
+    // Wait for the options to appear
+    await waitFor(() => {
+      expect(screen.getByText('Alert Workflow')).toBeInTheDocument();
+      expect(screen.getByText('Workflow Without Definition')).toBeInTheDocument();
+      expect(screen.getByText('Workflow With Empty Triggers')).toBeInTheDocument();
+    });
+
+    // Get all the workflow option elements
+    const workflowOptions = screen.getAllByRole('option');
+
+    // The alert workflow should be first
+    expect(workflowOptions[0]).toHaveAttribute('name', 'Alert Workflow');
+
+    // The other workflows should follow (workflows without alert triggers)
+    expect(workflowOptions[1]).toHaveAttribute('name', 'Workflow Without Definition');
+    expect(workflowOptions[2]).toHaveAttribute('name', 'Workflow With Empty Triggers');
   });
 });

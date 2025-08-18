@@ -36,7 +36,6 @@ interface WorkflowOption {
   checked?: 'on' | 'off';
   toolTipContent?: string;
   prepend?: React.ReactNode;
-  hasAlertTriggerType?: boolean;
   [key: string]: any;
 }
 
@@ -137,7 +136,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
         // Check if the currently selected workflow is disabled
         let hasSelectedWorkflowDisabled = false;
 
-        const workflowOptions: WorkflowOption[] = workflowsMap.results.map((workflow) => {
+        const workflowOptionsWithSortInfo = workflowsMap.results.map((workflow) => {
           // TODO: remove this once we have a way to disable workflows
           const isDisabled = false;
           const isSelected = workflow.id === workflowId;
@@ -164,18 +163,30 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
           }
 
           return {
-            id: workflow.id,
-            name: workflow.name,
-            description: workflow.description,
-            status: workflow.status,
-            label: workflow.name,
-            disabled: isDisabled,
-            checked: isSelected ? 'on' : undefined,
-            toolTipContent: workflow.description,
+            workflowOption: {
+              id: workflow.id,
+              name: workflow.name,
+              description: workflow.description,
+              status: workflow.status,
+              label: workflow.name,
+              disabled: isDisabled,
+              checked: isSelected ? 'on' : undefined,
+              toolTipContent: workflow.description,
+              prepend: prependElement,
+            } as WorkflowOption,
             hasAlertTriggerType,
-            prepend: prependElement,
           };
         });
+
+        // Sort workflows by hasAlertTriggerType: if they have an alert trigger type, they should be at the top
+        const sortedWorkflowOptionsWithInfo = workflowOptionsWithSortInfo.sort((a, b) => {
+          if (a.hasAlertTriggerType && !b.hasAlertTriggerType) return -1;
+          if (!a.hasAlertTriggerType && b.hasAlertTriggerType) return 1;
+          return 0;
+        });
+
+        // Extract just the workflow options for the component
+        const workflowOptions = sortedWorkflowOptionsWithInfo.map((item) => item.workflowOption);
 
         // Set error state if selected workflow is disabled
         if (hasSelectedWorkflowDisabled) {
@@ -184,14 +195,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
           setSelectedWorkflowDisabledError(null);
         }
 
-        // Sort workflows by hasAlertTriggerType: if they have an alert trigger type, they should be at the top
-        const sortedWorkflowOptions = workflowOptions.sort((a, b) => {
-          if (a.hasAlertTriggerType && !b.hasAlertTriggerType) return -1;
-          if (!a.hasAlertTriggerType && b.hasAlertTriggerType) return 1;
-          return 0;
-        });
-
-        setWorkflows(sortedWorkflowOptions);
+        setWorkflows(workflowOptions);
       } catch (error) {
         setLoadError(i18n.FAILED_TO_LOAD_WORKFLOWS);
       } finally {
