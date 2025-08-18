@@ -1246,8 +1246,6 @@ module.exports = {
         'x-pack/platform/packages/shared/ml/**/*.{ts,tsx}',
         'x-pack/platform/packages/private/ml/**/*.{ts,tsx}',
         'x-pack/platform/plugins/private/file_upload/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/file-upload/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/file-upload-common/**/*.{ts,tsx}',
       ],
     },
 
