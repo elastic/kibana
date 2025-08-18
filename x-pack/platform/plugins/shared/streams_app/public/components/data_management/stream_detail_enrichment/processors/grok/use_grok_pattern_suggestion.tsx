@@ -19,7 +19,6 @@ import {
   type GrokProcessorResult,
 } from '@kbn/grok-heuristics';
 import { get } from 'lodash';
-import AggregateError from 'aggregate-error';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { showErrorToast } from '../../../../../hooks/use_streams_app_fetch';
 import {
