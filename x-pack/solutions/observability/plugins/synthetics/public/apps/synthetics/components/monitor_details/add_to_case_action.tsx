@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { PageAttachmentPersistedState } from '@kbn/page-attachment-schema';
 import { type CasesPermissions } from '@kbn/cases-plugin/common';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useGetUrlParams, useMonitorDetailLocator } from '../../hooks';
 
@@ -56,7 +56,11 @@ export function AddToCaseContextItem() {
   }
 
   return hasCasesPermissions ? (
-    <CasesContext permissions={casesPermissions} owner={['observability']}>
+    <CasesContext
+      owner={['observability']}
+      permissions={casesPermissions}
+      features={{ alerts: { sync: false } }}
+    >
       <AddToCaseButtonContent />
     </CasesContext>
   ) : null;

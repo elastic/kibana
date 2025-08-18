@@ -5,35 +5,33 @@
  * 2.0.
  */
 import React, { useEffect, useRef } from 'react';
-import semverLt from 'semver/functions/lt';
-import semverCoerce from 'semver/functions/coerce';
-import semverValid from 'semver/functions/valid';
 import { css } from '@emotion/react';
 import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { type NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
-import { fieldIsInvalid, getCspmCloudShellDefaultValue, getPosturePolicy } from '../utils';
+import type { CspRadioOption } from '../../csp_boxed_radio_group';
+import { RadioGroup } from '../../csp_boxed_radio_group';
 import {
-  cspIntegrationDocsNavigation,
-  CLOUDBEAT_GCP,
-  GCP_CREDENTIALS_TYPE,
-  GCP_ORGANIZATION_ACCOUNT,
-  GCP_SETUP_ACCESS,
-  MIN_VERSION_GCP_CIS,
-} from '../constants';
+  fieldIsInvalid,
+  getCloudShellDefaultValue,
+  updatePolicyWithInputs,
+  gcpField,
+  getGcpCredentialsType,
+  getGcpInputVarsFields,
+} from '../utils';
+import { GCP_CREDENTIALS_TYPE, GCP_ORGANIZATION_ACCOUNT, GCP_SETUP_ACCESS } from '../constants';
 import { ReadDocumentation } from '../common';
 import {
-  CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS,
+  GCP_INPUT_FIELDS_TEST_SUBJECTS,
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
 } from './gcp_test_subjects';
-import { GcpFields, GcpInputFields, NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
-import { gcpField, getGcpCredentialsType, getInputVarsFields } from './gcp_utils';
+import type { GcpFields, GcpInputFields, UpdatePolicy } from '../types';
 import { GcpInputVarFields } from './gcp_input_var_fields';
 import { GCPSetupInfoContent } from './gcp_setup_info';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 type SetupFormatGCP = typeof GCP_SETUP_ACCESS.CLOUD_SHELL | typeof GCP_SETUP_ACCESS.MANUAL;
 
@@ -69,7 +67,7 @@ const GoogleCloudShellSetup = ({
       <EuiText
         color="subdued"
         size="s"
-        data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.GOOGLE_CLOUD_SHELL_SETUP}
+        data-test-subj={GCP_INPUT_FIELDS_TEST_SUBJECTS.GOOGLE_CLOUD_SHELL_SETUP}
       >
         <ol
           css={css`
@@ -123,7 +121,7 @@ const GoogleCloudShellSetup = ({
           >
             <EuiFieldText
               disabled={disabled}
-              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
+              data-test-subj={GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
               id={organizationIdFields.id}
               fullWidth
               value={organizationIdFields.value || ''}
@@ -141,7 +139,7 @@ const GoogleCloudShellSetup = ({
           >
             <EuiFieldText
               disabled={disabled}
-              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
+              data-test-subj={GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
               id={projectIdFields.id}
               fullWidth
               value={projectIdFields.value || ''}
@@ -180,7 +178,7 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
 
 interface GcpFormProps {
   newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
+  input: NewPackagePolicyInput;
   updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
   disabled: boolean;
@@ -188,9 +186,7 @@ interface GcpFormProps {
   hasInvalidRequiredVars: boolean;
 }
 
-const getSetupFormatFromInput = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>
-): SetupFormatGCP => {
+const getSetupFormatFromInput = (input: NewPackagePolicyInput): SetupFormatGCP => {
   const credentialsType = getGcpCredentialsType(input);
 
   // Google Cloud shell is the default value
@@ -205,9 +201,12 @@ const getSetupFormatFromInput = (
   return GCP_SETUP_ACCESS.CLOUD_SHELL;
 };
 
-const getGoogleCloudShellUrl = (newPolicy: NewPackagePolicy) => {
-  const template: string | undefined = newPolicy?.inputs?.find((i) => i.type === CLOUDBEAT_GCP)
-    ?.config?.cloud_shell_url?.value;
+const getGoogleCloudShellUrl = (newPolicy: NewPackagePolicy, policyType?: string) => {
+  if (!policyType) {
+    return undefined;
+  }
+  const template: string | undefined = newPolicy?.inputs?.find((i) => i.type === policyType)?.config
+    ?.cloud_shell_url?.value;
 
   return template || undefined;
 };
@@ -215,13 +214,18 @@ const getGoogleCloudShellUrl = (newPolicy: NewPackagePolicy) => {
 const updateCloudShellUrl = (
   newPolicy: NewPackagePolicy,
   updatePolicy: UpdatePolicy,
-  templateUrl: string | undefined
+  templateUrl: string | undefined,
+  policyType?: string
 ) => {
+  if (!policyType) {
+    return;
+  }
+
   updatePolicy?.({
     updatedPolicy: {
       ...newPolicy,
       inputs: newPolicy.inputs.map((input) => {
-        if (input.type === CLOUDBEAT_GCP) {
+        if (input.type === policyType) {
           return {
             ...input,
             config: { cloud_shell_url: { value: templateUrl } },
@@ -244,16 +248,16 @@ const useCloudShellUrl = ({
   updatePolicy: UpdatePolicy;
   setupFormat: SetupFormatGCP;
 }) => {
+  const { gcpPolicyType, templateName } = useCloudSetup();
   useEffect(() => {
-    const policyInputCloudShellUrl = getGoogleCloudShellUrl(newPolicy);
-
+    const policyInputCloudShellUrl = getGoogleCloudShellUrl(newPolicy, gcpPolicyType);
     if (setupFormat === GCP_SETUP_ACCESS.MANUAL) {
       if (policyInputCloudShellUrl) {
-        updateCloudShellUrl(newPolicy, updatePolicy, undefined);
+        updateCloudShellUrl(newPolicy, updatePolicy, undefined, gcpPolicyType);
       }
       return;
     }
-    const templateUrl = getCspmCloudShellDefaultValue(packageInfo);
+    const templateUrl = getCloudShellDefaultValue(packageInfo, templateName);
 
     // If the template is not available, do not update the policy
     if (templateUrl === '') return;
@@ -261,9 +265,9 @@ const useCloudShellUrl = ({
     // If the template is already set, do not update the policy
     if (policyInputCloudShellUrl === templateUrl) return;
 
-    updateCloudShellUrl(newPolicy, updatePolicy, templateUrl);
+    updateCloudShellUrl(newPolicy, updatePolicy, templateUrl, gcpPolicyType);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newPolicy?.vars?.cloud_shell_url, newPolicy, packageInfo, setupFormat]);
+  }, [newPolicy?.vars?.cloud_shell_url, newPolicy, packageInfo, setupFormat, gcpPolicyType]);
 };
 
 export const GcpCredentialsForm = ({
@@ -275,6 +279,7 @@ export const GcpCredentialsForm = ({
   isEditPage,
   hasInvalidRequiredVars,
 }: GcpFormProps) => {
+  const { gcpEnabled, gcpPolicyType, gcpOverviewPath } = useCloudSetup();
   /* Create a subset of properties from GcpField to use for hiding value of credentials json and credentials file when user switch from Manual to Cloud Shell, we wanna keep Project and Organization ID */
   const { 'gcp.credentials.file': file, 'gcp.credentials.json': json } = gcpField.fields;
   const subsetOfGcpField = {
@@ -282,11 +287,8 @@ export const GcpCredentialsForm = ({
     'gcp.credentials.json': json,
   };
 
-  const fieldsToHide = getInputVarsFields(input, subsetOfGcpField);
-  const fields = getInputVarsFields(input, gcpField.fields);
-  const validSemantic = semverValid(packageInfo.version);
-  const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
-  const isInvalid = semverLt(integrationVersionNumberOnly, MIN_VERSION_GCP_CIS);
+  const fieldsToHide = getGcpInputVarsFields(input, subsetOfGcpField);
+  const fields = getGcpInputVarsFields(input, gcpField.fields);
   const fieldsSnapshot = useRef({});
   const lastCredentialsType = useRef<string | undefined>(undefined);
   const setupFormat = getSetupFormatFromInput(input);
@@ -309,7 +311,7 @@ export const GcpCredentialsForm = ({
       lastCredentialsType.current = getGcpCredentialsType(input);
 
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+        updatedPolicy: updatePolicyWithInputs(newPolicy, gcpPolicyType, {
           'gcp.credentials.type': {
             value: GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
             type: 'text',
@@ -321,7 +323,7 @@ export const GcpCredentialsForm = ({
       });
     } else {
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+        updatedPolicy: updatePolicyWithInputs(newPolicy, gcpPolicyType, {
           'gcp.credentials.type': {
             // Restoring last manual credentials type
             value: lastCredentialsType.current || GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
@@ -334,7 +336,7 @@ export const GcpCredentialsForm = ({
     }
   };
 
-  if (isInvalid) {
+  if (!gcpEnabled) {
     return (
       <>
         <EuiSpacer size="l" />
@@ -359,6 +361,7 @@ export const GcpCredentialsForm = ({
         onChange={(idSelected: SetupFormatGCP) =>
           idSelected !== setupFormat && onSetupFormatChange(idSelected)
         }
+        name="setupFormat"
       />
       <EuiSpacer size="l" />
       {setupFormat === GCP_SETUP_ACCESS.CLOUD_SHELL ? (
@@ -367,7 +370,9 @@ export const GcpCredentialsForm = ({
           fields={fields}
           onChange={(key, value) =>
             updatePolicy({
-              updatedPolicy: getPosturePolicy(newPolicy, input.type, { [key]: { value } }),
+              updatedPolicy: updatePolicyWithInputs(newPolicy, gcpPolicyType, {
+                [key]: { value },
+              }),
             })
           }
           input={input}
@@ -379,7 +384,9 @@ export const GcpCredentialsForm = ({
           fields={fields}
           onChange={(key, value) =>
             updatePolicy({
-              updatedPolicy: getPosturePolicy(newPolicy, input.type, { [key]: { value } }),
+              updatedPolicy: updatePolicyWithInputs(newPolicy, gcpPolicyType, {
+                [key]: { value },
+              }),
             })
           }
           isOrganization={isOrganization}
@@ -390,7 +397,7 @@ export const GcpCredentialsForm = ({
       )}
 
       <EuiSpacer size="s" />
-      <ReadDocumentation url={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} />
+      <ReadDocumentation url={gcpOverviewPath} />
       <EuiSpacer />
     </>
   );

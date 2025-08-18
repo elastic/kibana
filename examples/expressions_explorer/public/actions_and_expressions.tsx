@@ -21,8 +21,8 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ExpressionEditor } from './editor/expression_editor';
 import { NAVIGATE_TRIGGER_ID } from './actions/navigate_trigger';
 

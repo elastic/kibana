@@ -18,7 +18,8 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { GetTabMenuItems, TabItem, TabMenuItemName } from '../../types';
+import type { GetTabMenuItems, TabItem } from '../../types';
+import { TabMenuItemName } from '../../types';
 
 export interface TabMenuProps {
   item: TabItem;
