@@ -206,6 +206,7 @@ export const PolicyTemplateInputSelector = ({ input, disabled, setInput }: Props
       options={options}
       onChange={(inputType) => setInput(inputType as PostureInput)}
       size="m"
+      name="inputType"
     />
   );
 };
