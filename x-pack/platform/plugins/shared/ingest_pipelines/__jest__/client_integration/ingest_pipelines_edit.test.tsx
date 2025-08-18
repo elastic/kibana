@@ -10,7 +10,8 @@ import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, pageHelpers } from './helpers';
 import { API_BASE_PATH } from '../../common/constants';
-import { PIPELINE_TO_EDIT, PipelinesEditTestBed } from './helpers/pipelines_edit.helpers';
+import type { PipelinesEditTestBed } from './helpers/pipelines_edit.helpers';
+import { PIPELINE_TO_EDIT } from './helpers/pipelines_edit.helpers';
 
 const { setup } = pageHelpers.pipelinesEdit;
 

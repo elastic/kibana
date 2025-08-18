@@ -40,7 +40,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       // TODO: Loading this from `es_archives` in `test_serverless`
       // instead since minor modifications were required
       await esArchiver.loadIfNeeded(
-        'x-pack/test_serverless/functional/es_archives/pre_calculated_histogram'
+        'x-pack/platform/test/serverless/fixtures/es_archives/pre_calculated_histogram'
       );
       await PageObjects.common.navigateToApp('unifiedFieldListExamples');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -61,7 +61,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       // TODO: Loading this from `es_archives` in `test_serverless`
       // instead since minor modifications were required
       await esArchiver.unload(
-        'x-pack/test_serverless/functional/es_archives/pre_calculated_histogram'
+        'x-pack/platform/test/serverless/fixtures/es_archives/pre_calculated_histogram'
       );
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.unifiedFieldList.cleanSidebarLocalStorage();

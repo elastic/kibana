@@ -13,7 +13,7 @@ import type {
   AnnotationsRequestProcessorsFunction,
   AnnotationsRequestProcessorsParams,
 } from './types';
-import { DefaultSearchCapabilities } from '../../../search_strategies/capabilities/default_search_capabilities';
+import type { DefaultSearchCapabilities } from '../../../search_strategies/capabilities/default_search_capabilities';
 
 describe('query', () => {
   let req: AnnotationsRequestProcessorsParams['req'];
