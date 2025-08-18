@@ -40,7 +40,10 @@ export const registerSiemRuleMigrationsUpdateRoute = (
       },
       withLicense(
         withExistingMigration(async (context, req, res): Promise<IKibanaResponse> => {
-          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+            context.securitySolution,
+            'rules'
+          );
           const { migration_id: migrationId } = req.params;
           try {
             const ctx = await context.resolve(['securitySolution']);

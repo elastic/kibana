@@ -24,7 +24,7 @@ export {
   ItemTypeRT,
   SnapshotMetricTypeRT,
   SnapshotMetricTypeKeys,
-  DataSchemaFormat,
+  DataSchemaFormatEnum,
 } from './inventory_models/types';
 
 export type {
@@ -36,6 +36,7 @@ export type {
   SnapshotMetricType,
   TSVBMetricModelCreator,
   TSVBMetricModel,
+  DataSchemaFormat,
 } from './inventory_models/types';
 
 export { networkTraffic } from './inventory_models/shared/metrics/snapshot/network_traffic';

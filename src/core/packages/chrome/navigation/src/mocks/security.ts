@@ -10,8 +10,10 @@
 import { MenuItem } from '../../types';
 
 export const LOGO = {
+  href: '/security',
+  id: 'security',
   label: 'Security',
-  logoType: 'logoSecurity',
+  type: 'logoSecurity',
 };
 
 export const PRIMARY_MENU_ITEMS: MenuItem[] = [

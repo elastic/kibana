@@ -1,0 +1,77 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": ".entities.v1.latest.security_generic_default",
+    "source": {
+      "@timestamp": "2025-07-20T17:26:09.361Z",
+      "cloud": {
+        "account": {
+          "id": "704479110758",
+          "name": "elastic-security-cloud-security-dev"
+        },
+        "provider": "aws",
+        "region": "global",
+        "service": {
+          "name": "AWS IAM"
+        }
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "generic"
+        },
+        "id": "admin@example.com",
+        "name": "AdminExample",
+        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_aws_iam_user-default-2025.07.16-000005",
+        "sub_type": "AWS IAM User",
+        "type": "Identity"
+      },
+      "event": {
+        "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "user": {
+        "id": "admin@example.com",
+        "name": "AdminExample"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": ".entities.v1.latest.security_generic_test",
+    "source": {
+      "@timestamp": "2025-07-20T17:26:09.361Z",
+      "cloud": {
+        "account": {
+          "id": "704479110758",
+          "name": "elastic-security-cloud-security-dev"
+        },
+        "provider": "aws",
+        "region": "global",
+        "service": {
+          "name": "AWS IAM"
+        }
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "generic"
+        },
+        "id": "admin@example.com",
+        "name": "AdminExample",
+        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_aws_iam_user-test-2025.07.16-000005",
+        "sub_type": "AWS IAM User",
+        "type": "Identity"
+      },
+      "event": {
+        "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "user": {
+        "id": "admin@example.com",
+        "name": "AdminExample"
+      }
+    }
+  }
+}

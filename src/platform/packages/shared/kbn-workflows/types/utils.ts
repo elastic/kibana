@@ -16,10 +16,10 @@ export function transformWorkflowYamlJsontoEsWorkflow(
   // TODO: handle merge, if, foreach, etc.
 
   return {
-    name: workflowDefinition.workflow.name,
-    description: workflowDefinition.workflow.description,
-    tags: workflowDefinition.workflow.tags ?? [],
-    status: workflowDefinition.workflow.enabled ? WorkflowStatus.ACTIVE : WorkflowStatus.DRAFT,
+    name: workflowDefinition.name,
+    description: workflowDefinition.description,
+    tags: workflowDefinition.tags ?? [],
+    status: workflowDefinition.enabled ? WorkflowStatus.ACTIVE : WorkflowStatus.DRAFT,
     definition: workflowDefinition,
   };
 }

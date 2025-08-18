@@ -7,26 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo } from 'react';
 import {
-  EuiText,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiToolTip,
-  EuiDescriptionList,
-  EuiTitle,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
-import { ExecutionStatus, EsWorkflowStepExecution } from '@kbn/workflows';
+import { EsWorkflowStepExecution, ExecutionStatus } from '@kbn/workflows';
+import React, { useEffect, useMemo } from 'react';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
 import { StatusBadge } from '../../../shared/ui/status_badge';
-import { WorkflowVisualEditor } from '../../workflow_visual_editor/ui';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { WorkflowExecutionLogsTable } from '../../workflow_execution_logs/ui';
+import { WorkflowVisualEditor } from '../../workflow_visual_editor/ui';
 
 export interface WorkflowExecutionProps {
   workflowExecutionId: string;

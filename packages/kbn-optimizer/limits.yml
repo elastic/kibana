@@ -21,7 +21,7 @@ pageLoadAssetSize:
   contentConnectors: 33036
   contentManagement: 8350
   controls: 13000
-  core: 533948
+  core: 602071
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
@@ -120,6 +120,7 @@ pageLoadAssetSize:
   productDocBase: 3058
   productIntercept: 9860
   profiling: 20716
+  reindexService: 2781
   remoteClusters: 10170
   reporting: 58600
   rollup: 12709
@@ -197,4 +198,4 @@ pageLoadAssetSize:
   wciSalesforce: 8506
   workchatApp: 12411
   workchatFramework: 5706
-  workflowsManagement: 4657
+  workflowsManagement: 5768

@@ -15,7 +15,7 @@
 import { useMemo } from 'react';
 import createContainer from 'constate';
 import type { BoolQuery } from '@kbn/es-query';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search';
@@ -51,7 +51,7 @@ export const useHostsView = () => {
           dateRange: parsedDateRange,
           esQuery: buildQuery(),
           limit: searchCriteria.limit,
-          schema: searchCriteria?.preferredSchema || DataSchemaFormat.ECS,
+          schema: searchCriteria?.preferredSchema || 'ecs',
         })
       ),
     [buildQuery, parsedDateRange, searchCriteria.limit, searchCriteria.preferredSchema]
@@ -107,7 +107,10 @@ const createInfraMetricsRequest = ({
   query: esQuery,
   from: dateRange.from,
   to: dateRange.to,
-  metrics: HOST_TABLE_METRICS,
+  metrics:
+    schema === 'ecs'
+      ? HOST_TABLE_METRICS
+      : HOST_TABLE_METRICS.filter((metric) => !['rxV2', 'txV2'].includes(metric)),
   limit,
   schema,
 });

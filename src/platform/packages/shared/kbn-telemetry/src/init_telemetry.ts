@@ -14,7 +14,10 @@ import type { InstrumentaionsMap } from '@elastic/opentelemetry-node/types/instr
 import { resources, getInstrumentations } from '@elastic/opentelemetry-node/sdk';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
-import { ATTR_SERVICE_INSTANCE_ID, ATTR_SERVICE_NAMESPACE } from '@kbn/opentelemetry-attributes';
+import {
+  ATTR_SERVICE_INSTANCE_ID,
+  ATTR_DEPLOYMENT_ENVIRONMENT_NAME,
+} from '@opentelemetry/semantic-conventions/incubating';
 
 /**
  *
@@ -36,13 +39,16 @@ export const initTelemetry = (
 
   const apmConfig = apmConfigLoader.getConfig(serviceName);
   const telemetryConfig = apmConfigLoader.getTelemetryConfig();
+  const monitoringCollectionConfig = apmConfigLoader.getMonitoringCollectionConfig();
 
   // attributes.resource.*
   const resource = resources.resourceFromAttributes({
     [ATTR_SERVICE_NAME]: apmConfig.serviceName,
     [ATTR_SERVICE_VERSION]: apmConfig.serviceVersion,
     [ATTR_SERVICE_INSTANCE_ID]: apmConfig.serviceNodeName,
-    [ATTR_SERVICE_NAMESPACE]: apmConfig.environment,
+    // Reverse-mapping APM Server transformations:
+    // https://github.com/elastic/apm-data/blob/2f9cdbf722e5be5bf77d99fbcaab7a70a7e83fff/input/otlp/metadata.go#L69-L74
+    [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: apmConfig.environment,
     ...(apmConfig.globalLabels as Record<string, unknown>),
   });
 
@@ -53,8 +59,8 @@ export const initTelemetry = (
       initTracing({ resource, tracingConfig: telemetryConfig.tracing });
     }
 
-    if (telemetryConfig.metrics.enabled) {
-      initMetrics({ resource, metricsConfig: telemetryConfig.metrics });
+    if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {
+      initMetrics({ resource, metricsConfig: telemetryConfig.metrics, monitoringCollectionConfig });
 
       // Provides metrics about the Event Loop, GC Collector, and Heap stats.
       desiredInstrumentations.add('@opentelemetry/instrumentation-runtime-node');

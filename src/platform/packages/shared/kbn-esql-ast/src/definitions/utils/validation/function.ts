@@ -37,15 +37,10 @@ import {
   getParamAtPosition,
 } from '../expressions';
 import { isArrayType } from '../operators';
-import {
-  compareTypesWithLiterals,
-  doesLiteralMatchParameterType,
-  inKnownTimeInterval,
-} from '../literals';
+import { doesLiteralMatchParameterType } from '../literals';
 import { getQuotedColumnName, getColumnExists } from '../columns';
 import {
   isLiteral,
-  isTimeInterval,
   isFunctionExpression,
   isColumn,
   isList,
@@ -65,7 +60,7 @@ export function getAllArrayValues(arg: ESQLAstItem) {
       if (subArg.type === 'literal') {
         values.push(String(subArg.value));
       }
-      if (isColumn(subArg) || isTimeInterval(subArg)) {
+      if (isColumn(subArg)) {
         values.push(subArg.name);
       }
       if (subArg.type === 'function') {
@@ -99,9 +94,6 @@ export function getAllArrayTypes(
           userDefinedColumns: context.userDefinedColumns,
         });
         types.push(hit?.type || 'unsupported');
-      }
-      if (subArg.type === 'timeInterval') {
-        types.push('time_duration');
       }
       if (subArg.type === 'function') {
         if (isSupportedFunction(subArg.name, parentCommand).supported) {
@@ -163,9 +155,6 @@ export function checkFunctionArgMatchesDefinition(
           bothStringTypes(parameterType, signature.returnType)
       );
     }
-  }
-  if (arg.type === 'timeInterval') {
-    return parameterType === 'time_duration' && inKnownTimeInterval(arg.unit);
   }
   if (arg.type === 'column') {
     const hit = getColumnForASTNode(arg, {
@@ -530,9 +519,7 @@ export function validateFunction({
             const arg = enrichedArgs[idx];
 
             if (isLiteral(arg)) {
-              return (
-                dataType === arg.literalType || compareTypesWithLiterals(dataType, arg.literalType)
-              );
+              return dataType === arg.literalType;
             }
             return false; // Non-literal arguments don't match
           })
@@ -658,35 +645,7 @@ function validateFunctionLiteralArg(
       );
     }
   }
-  if (isTimeInterval(argument)) {
-    // check first if it's a valid interval string
-    if (!inKnownTimeInterval(argument.unit)) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownInterval',
-          values: {
-            value: argument.unit,
-          },
-          locations: argument.location,
-        })
-      );
-    } else {
-      if (!checkFunctionArgMatchesDefinition(argument, parameter, context, parentCommand)) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'wrongArgumentType',
-            values: {
-              name: astFunction.name,
-              argType: parameter.type as string,
-              value: argument.name,
-              givenType: 'duration',
-            },
-            locations: argument.location,
-          })
-        );
-      }
-    }
-  }
+
   return messages;
 }
 

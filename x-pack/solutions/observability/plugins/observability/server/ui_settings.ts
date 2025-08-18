@@ -32,7 +32,6 @@ import {
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
   searchExcludedDataTiers,
-  apmEnableServiceMapApiV2,
 } from '../common/ui_settings_keys';
 
 /**
@@ -186,21 +185,6 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     schema: schema.boolean(),
     value: true,
     requiresPageReload: true,
-    type: 'boolean',
-    solutionViews: ['classic', 'oblt'],
-    technicalPreview: true,
-  },
-  [apmEnableServiceMapApiV2]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableServiceMapApiV2', {
-      defaultMessage: 'Service map API v2',
-    }),
-    description: i18n.translate('xpack.observability.apmEnableServiceMapApiV2Description', {
-      defaultMessage: 'Enables the usage of the new Service map API v2.',
-    }),
-    schema: schema.boolean(),
-    value: false,
-    requiresPageReload: false,
     type: 'boolean',
     solutionViews: ['classic', 'oblt'],
     technicalPreview: true,

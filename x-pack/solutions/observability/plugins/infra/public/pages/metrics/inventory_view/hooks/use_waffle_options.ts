@@ -10,7 +10,8 @@ import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
 import createContainer from 'constate';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { type InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import type {
   InventoryView,
@@ -21,6 +22,7 @@ import {
   type InventoryOptionsState,
   type InventorySortOption,
   inventoryOptionsStateRT,
+  staticInventoryViewId,
 } from '../../../../../common/inventory_views';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import type {
@@ -51,6 +53,7 @@ export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
   source: 'default',
   sort: { by: 'name', direction: 'desc' },
   timelineOpen: false,
+  preferredSchema: null,
 };
 
 function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
@@ -68,7 +71,15 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
     legend,
     sort,
     timelineOpen,
+    preferredSchema,
   } = savedView.attributes;
+
+  // forces the default view to be set with what the time range metadata endpoint returns
+  const preferredSchemaValue =
+    savedView.id === staticInventoryViewId
+      ? preferredSchema ?? null
+      : // otherwise, use the preferred schema from the saved view
+        preferredSchema;
 
   return {
     metric,
@@ -84,6 +95,7 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
     legend,
     sort,
     timelineOpen,
+    preferredSchema: preferredSchemaValue,
   };
 }
 
@@ -95,6 +107,7 @@ export const useWaffleOptions = () => {
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleOptions',
+    writeDefaultState: true,
   });
 
   const previousViewId = useRef<string | undefined>(currentView?.id);
@@ -174,6 +187,16 @@ export const useWaffleOptions = () => {
     [setUrlState]
   );
 
+  const changePreferredSchema = useCallback(
+    (preferredSchema: DataSchemaFormat | null) => {
+      setUrlState((previous) => ({
+        ...previous,
+        preferredSchema,
+      }));
+    },
+    [setUrlState]
+  );
+
   const { inventoryPrefill } = useAlertPrefillContext();
   useEffect(() => {
     const { setNodeType, setMetric, setCustomMetrics, setAccountId, setRegion } = inventoryPrefill;
@@ -206,6 +229,7 @@ export const useWaffleOptions = () => {
     changeLegend,
     changeSort,
     changeTimelineOpen,
+    changePreferredSchema,
     setWaffleOptionsState: setUrlState,
   };
 };
@@ -217,6 +241,7 @@ export type WaffleOptionsState = InventoryOptionsState;
 const encodeUrlState = (state: InventoryOptionsState) => {
   return inventoryOptionsStateRT.encode(state);
 };
+
 const decodeUrlState = (value: unknown) => {
   const state = pipe(inventoryOptionsStateRT.decode(value), fold(constant(undefined), identity));
   if (state) {

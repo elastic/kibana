@@ -34,7 +34,10 @@ export const registerSiemRuleMigrationsIntegrationsStatsRoute = (
           _req,
           res
         ): Promise<IKibanaResponse<GetRuleMigrationIntegrationsStatsResponse>> => {
-          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+            context.securitySolution,
+            'rules'
+          );
           try {
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { KSPM_POLICY_TEMPLATE, CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import {
+  CSPM_POLICY_TEMPLATE,
+  KSPM_POLICY_TEMPLATE,
+} from '@kbn/cloud-security-posture-common/constants';
 
 import { AwsCredentialsTypeFieldMap, GcpCredentialsTypeFieldMap, PostureTypes } from './types_old';
 
@@ -167,3 +170,5 @@ export const SINGLE_ACCOUNT = 'single-account';
 export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
 // Cloud Credentials Template url was implemented in 1.10.0-preview01. See PR - https://github.com/elastic/integrations/pull/9828
 export const CLOUD_CREDENTIALS_PACKAGE_VERSION = '1.11.0-preview13';
+
+export const CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION = '1.0.0';

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { debounce } from 'lodash';
 import React, { useState, useCallback, useMemo, useEffect, useContext } from 'react';
 import {
   EuiButton,
@@ -32,6 +31,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FeatureFeedbackButton, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { css } from '@emotion/react';
+import type { Query } from '@kbn/es-query';
 import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { useMetricHostsModuleContext } from '../../../containers/ml/modules/metrics_hosts/module';
 import { useMetricK8sModuleContext } from '../../../containers/ml/modules/metrics_k8s/module';
@@ -40,7 +40,7 @@ import { DEFAULT_K8S_PARTITION_FIELD } from '../../../containers/ml/modules/metr
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { INFRA_ML_FLYOUT_FEEDBACK_LINK } from './flyout_home';
 import { KibanaEnvironmentContext, useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
+import { UnifiedSearchBar } from '../../shared/unified_search_bar';
 
 interface Props {
   jobType: 'hosts' | 'kubernetes';
@@ -157,19 +157,17 @@ export const JobSetupScreen = (props: Props) => {
   ]);
 
   const onFilterChange = useCallback(
-    (f: string) => {
-      setFilter(f || '');
-      setFilterQuery(convertKueryToElasticSearchQuery(f, metricsView?.dataViewReference) || '');
+    (payload: { query?: Query }) => {
+      const kuery = payload.query?.query as string;
+      setFilter(kuery);
+      setFilterQuery(convertKueryToElasticSearchQuery(kuery, metricsView?.dataViewReference) || '');
       telemetry.reportAnomalyDetectionFilterFieldChange({
         job_type: props.jobType,
-        filter_field: f ? f : undefined,
+        filter_field: kuery ? kuery : undefined,
       });
     },
     [metricsView?.dataViewReference, telemetry, props.jobType]
   );
-
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, 500), [onFilterChange]);
 
   const onPartitionFieldChange = useCallback(
     (value: Array<{ label: string }>) => {
@@ -394,10 +392,10 @@ export const JobSetupScreen = (props: Props) => {
                     />
                   }
                 >
-                  <MetricsExplorerKueryBar
-                    onSubmit={onFilterChange}
-                    onChange={debouncedOnFilterChange}
-                    value={filter}
+                  <UnifiedSearchBar
+                    onQuerySubmit={onFilterChange}
+                    useDefaultBehaviors={false}
+                    query={{ query: filter, language: 'kuery' }}
                   />
                 </EuiFormRow>
               </EuiDescribedFormGroup>
@@ -409,6 +407,9 @@ export const JobSetupScreen = (props: Props) => {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              aria-label={i18n.translate('xpack.infra.jobSetupScreen.cancelButton.ariaLabel', {
+                defaultMessage: 'Cancel',
+              })}
               data-test-subj="infraJobSetupScreenCancelButton"
               onClick={props.closeFlyout}
             >

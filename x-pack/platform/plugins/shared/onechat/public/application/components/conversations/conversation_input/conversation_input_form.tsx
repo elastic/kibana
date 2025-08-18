@@ -9,14 +9,13 @@ import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useMessages } from '../../../context/messages_context';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { ConversationContent } from '../conversation_grid';
 import { ConversationInputActions } from './conversation_input_actions';
 import { ConversationInputTextArea } from './conversation_input_text_area';
 
 interface ConversationInputFormProps {
-  message: string;
-  setMessage: (message: string) => void;
   onSubmit: () => void;
 }
 
@@ -24,19 +23,18 @@ const fullHeightStyles = css`
   height: 100%;
 `;
 
-export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
-  message,
-  setMessage,
-  onSubmit,
-}) => {
+export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
   const isSendingMessage = useIsSendingMessage();
+  const { input, setInput, sendMessage } = useMessages();
   const { euiTheme } = useEuiTheme();
-  const disabled = !message.trim() || isSendingMessage;
+  const disabled = !input.trim() || isSendingMessage;
 
   const handleSubmit = () => {
     if (disabled) {
       return;
     }
+    sendMessage({ message: input });
+    setInput('');
     onSubmit();
   };
 
@@ -70,8 +68,8 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
         })}
       >
         <ConversationInputTextArea
-          message={message}
-          setMessage={setMessage}
+          message={input}
+          setMessage={setInput}
           handleSubmit={handleSubmit}
         />
         <ConversationInputActions handleSubmit={handleSubmit} submitDisabled={disabled} />

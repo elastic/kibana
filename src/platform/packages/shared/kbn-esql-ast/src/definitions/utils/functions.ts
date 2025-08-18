@@ -14,6 +14,7 @@ import {
   ESQLVariableType,
   RecommendedField,
 } from '@kbn/esql-types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import {
   type FunctionDefinition,
   type FunctionFilterPredicates,
@@ -102,7 +103,8 @@ export const filterFunctionSignatures = (
 export const filterFunctionDefinitions = (
   functions: FunctionDefinition[],
   predicates: FunctionFilterPredicates | undefined,
-  hasMinimumLicenseRequired: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined
+  hasMinimumLicenseRequired: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined,
+  activeProduct?: PricingProduct | undefined
 ): FunctionDefinition[] => {
   if (!predicates) {
     return functions;
@@ -110,7 +112,7 @@ export const filterFunctionDefinitions = (
   const { location, returnTypes, ignored = [] } = predicates;
 
   return functions.filter(
-    ({ name, locationsAvailable, ignoreAsSuggestion, signatures, license }) => {
+    ({ name, locationsAvailable, ignoreAsSuggestion, signatures, license, observabilityTier }) => {
       if (ignoreAsSuggestion) {
         return false;
       }
@@ -119,6 +121,15 @@ export const filterFunctionDefinitions = (
         if (!hasMinimumLicenseRequired(license.toLocaleLowerCase() as ESQLLicenseType)) {
           return false;
         }
+      }
+
+      if (
+        observabilityTier &&
+        activeProduct &&
+        activeProduct.type === 'observability' &&
+        activeProduct.tier !== observabilityTier.toLowerCase()
+      ) {
+        return false;
       }
 
       if (ignored.includes(name)) {
@@ -280,11 +291,15 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
  */
 export const getFunctionSuggestions = (
   predicates?: FunctionFilterPredicates,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean,
+  activeProduct?: PricingProduct | undefined
 ): ISuggestionItem[] => {
-  return filterFunctionDefinitions(allFunctions(), predicates, hasMinimumLicenseRequired).map(
-    getFunctionSuggestion
-  );
+  return filterFunctionDefinitions(
+    allFunctions(),
+    predicates,
+    hasMinimumLicenseRequired,
+    activeProduct
+  ).map(getFunctionSuggestion);
 };
 
 export function checkFunctionInvocationComplete(
