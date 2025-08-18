@@ -59,6 +59,55 @@ interface FavoritesService {
 }
 ```
 
+### Enhanced Cross-App Functionality
+The FavoritesService now provides enhanced cross-app functionality for fetching favorites across multiple content types:
+
+```typescript
+interface FavoritesService {
+  // ... existing methods ...
+  
+  // Cross-app functionality
+  getAllFavorites(): Promise<FavoriteItem[]>;
+  getFavoritesForTypes(types: string[]): Promise<FavoriteItem[]>;
+}
+
+interface FavoriteItem {
+  id: string;
+  type: string; // 'dashboard' | 'search'
+}
+```
+
+#### Usage Example:
+```typescript
+// Get all favorites across all supported types
+const allFavorites = await favoritesService.getAllFavorites();
+// Returns: [{ id: 'abc123', type: 'dashboard' }, { id: 'def456', type: 'search' }]
+
+// Get favorites for specific types
+const dashboardAndSearchFavorites = await favoritesService.getFavoritesForTypes(['dashboard', 'search']);
+```
+
+#### Note for Consumers:
+While the FavoritesService provides the core favorites data, **each consumer is responsible for fetching the actual titles and metadata** for the favorited items. This allows for flexibility in how titles are displayed and cached.
+
+**Example implementation pattern:**
+```typescript
+// In a consumer plugin (e.g., Home plugin)
+const allFavorites = await favoritesService.getAllFavorites();
+const favoritesWithTitles = await Promise.all(
+  allFavorites.map(async (favorite) => {
+    const response = await http.get(`/api/saved_objects/${favorite.type}/${favorite.id}`);
+    return {
+      ...favorite,
+      title: response.attributes?.title || `${favorite.type} ${favorite.id}`,
+      link: `/app/${favorite.type === 'search' ? 'discover' : 'dashboard'}#/view/${favorite.id}`
+    };
+  })
+);
+```
+
+This pattern is currently implemented in the Home plugin's `useFavoritesPanel` hook and can be replicated by other consumers as needed.
+
 ### Component API
 ```typescript
 interface FavoriteStarButtonProps {

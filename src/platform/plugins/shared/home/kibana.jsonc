@@ -19,6 +19,7 @@
       "usageCollection",
       "customIntegrations",
       "cloud",
+      "favoritesPoc"
     ],
     "requiredBundles": [
       "kibanaReact"

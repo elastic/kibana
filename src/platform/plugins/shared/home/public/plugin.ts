@@ -44,6 +44,7 @@ export interface HomePluginStartDependencies {
   urlForwarding: UrlForwardingStart;
   cloud: CloudStart;
   share: SharePluginStart;
+  favoritesPoc?: { favoritesService: any };
 }
 
 export interface HomePluginSetupDependencies {
@@ -51,6 +52,7 @@ export interface HomePluginSetupDependencies {
   share: SharePluginSetup;
   usageCollection?: UsageCollectionSetup;
   urlForwarding: UrlForwardingSetup;
+  favoritesPoc?: { favoritesService: any };
 }
 
 export class HomePublicPlugin
@@ -72,7 +74,7 @@ export class HomePublicPlugin
 
   public setup(
     core: CoreSetup<HomePluginStartDependencies>,
-    { cloud, share, urlForwarding, usageCollection }: HomePluginSetupDependencies
+    { cloud, share, urlForwarding, usageCollection, favoritesPoc }: HomePluginSetupDependencies
   ): HomePublicPluginSetup {
     core.application.register({
       id: PLUGIN_ID,
@@ -84,7 +86,7 @@ export class HomePublicPlugin
           : () => {};
         const [
           coreStart,
-          { dataViews, urlForwarding: urlForwardingStart, share: shareStart, cloud: cloudStart },
+          { dataViews, urlForwarding: urlForwardingStart, share: shareStart, cloud: cloudStart, favoritesPoc },
         ] = await core.getStartServices();
 
         setServices({
@@ -114,6 +116,7 @@ export class HomePublicPlugin
           theme: core.theme,
           i18nStart: coreStart.i18n,
           shareStart,
+          favoritesPoc,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })

@@ -10,12 +10,16 @@
 import React from 'react';
 import {
   EuiPanel,
+  EuiIcon,
   EuiTitle,
   EuiListGroup,
   EuiLoadingSpinner,
   EuiText,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
+import type { EuiPanelProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
@@ -34,6 +38,13 @@ export interface RecentlyAccessedItemsPanelProps {
   filter?: RecentlyAccessedFilter;
   maxWidth?: number;
   width?: number;
+  // EuiPanel props
+  color?: EuiPanelProps['color'];
+  hasBorder?: EuiPanelProps['hasBorder'];
+  hasShadow?: EuiPanelProps['hasShadow'];
+  paddingSize?: EuiPanelProps['paddingSize'];
+  borderRadius?: EuiPanelProps['borderRadius'];
+  css?: EuiPanelProps['css'];
 }
 
 export const RecentlyAccessedItemsPanel: React.FC<RecentlyAccessedItemsPanelProps> = ({
@@ -47,6 +58,12 @@ export const RecentlyAccessedItemsPanel: React.FC<RecentlyAccessedItemsPanelProp
   filter = 'all',
   maxWidth,
   width,
+  color = 'subdued',
+  hasBorder,
+  hasShadow,
+  paddingSize = 'm',
+  borderRadius,
+  css,
 }) => {
   const handleItemClick = (itemId: string, link: string) => {
     if (onItemSelect) {
@@ -118,7 +135,12 @@ export const RecentlyAccessedItemsPanel: React.FC<RecentlyAccessedItemsPanelProp
   return (
     <EuiPanel
       className={className}
-      color="subdued"
+      color={color}
+      hasBorder={hasBorder}
+      hasShadow={hasShadow}
+      paddingSize={paddingSize}
+      borderRadius={borderRadius}
+      css={css}
       style={
         maxWidth || width
           ? {
@@ -128,18 +150,25 @@ export const RecentlyAccessedItemsPanel: React.FC<RecentlyAccessedItemsPanelProp
           : undefined
       }
       data-test-subj={dataTestSubj}
-      paddingSize="m"
     >
-      <EuiTitle size="xxs">
-        <h3>
-          {title || (
-            <FormattedMessage
-              id="contentManagement.recentlyAccessedItems.title"
-              defaultMessage="Recently viewed items"
-            />
-          )}
-        </h3>
-      </EuiTitle>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="clock" size="l" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h3>
+              {title || (
+                <FormattedMessage
+                  id="contentManagement.recentlyAccessedItems.title"
+                  defaultMessage="Recently viewed items"
+                />
+              )}
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <EuiSpacer size="m" />
       {renderPanelContent()}
     </EuiPanel>

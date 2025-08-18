@@ -29,6 +29,7 @@ import type { FeatureCatalogueRegistry } from '../services/feature_catalogue';
 import type { EnvironmentService } from '../services/environment';
 import type { ConfigSchema } from '../../server/config';
 import type { WelcomeService } from '../services/welcome';
+import type { FavoritesService } from '@kbn/favorites-poc-plugin/public';
 
 export interface HomeKibanaServices {
   dataViewsService: DataViewsContract;
@@ -57,6 +58,7 @@ export interface HomeKibanaServices {
   overlays: OverlayStart;
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
+  favoritesPoc?: { favoritesService: FavoritesService };
 }
 
 let services: HomeKibanaServices | null = null;

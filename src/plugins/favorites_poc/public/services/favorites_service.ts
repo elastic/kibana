@@ -222,7 +222,7 @@ export class FavoritesService {
 
     // For now, we'll check the types we know about
     // In a real implementation, we might want to get this from a registry
-    const knownTypes = ['dashboard', 'saved_search'];
+    const knownTypes = ['dashboard', 'search'];
 
     for (const type of knownTypes) {
       try {

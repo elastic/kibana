@@ -24,6 +24,7 @@ import { AddData } from './add_data';
 import { ManageData } from './manage_data';
 import { SolutionsSection } from './solutions_section';
 import { Welcome } from './welcome';
+import { HomeContentPanels } from '../panels/home_content_panels';
 
 export const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
@@ -148,6 +149,14 @@ export class Home extends Component<HomeProps, State> {
         }}
         panelled={false}
       >
+        <KibanaPageTemplate.Section
+          bottomBorder
+          paddingSize="xl"
+          aria-labelledby="homeContentPanels__title"
+        >
+          <HomeContentPanels />
+        </KibanaPageTemplate.Section>
+
         <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
 
         <AddData
