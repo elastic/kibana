@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import {
   OTEL_DURATION,
   SERVICE_NAME_FIELD,
@@ -19,8 +19,9 @@ import {
   getSpanDocumentOverview,
 } from '@kbn/discover-utils';
 import { getFlattenedSpanDocumentOverview } from '@kbn/discover-utils/src';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useMemo } from 'react';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import React, { useMemo, useRef } from 'react';
+import { css } from '@emotion/react';
 import { useDataViewFields } from '../../../../hooks/use_data_view_fields';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
@@ -34,6 +35,10 @@ import { getSpanFieldConfiguration } from './resources/get_span_field_configurat
 import { SpanDurationSummary } from './sub_components/span_duration_summary';
 import { SpanSummaryField } from './sub_components/span_summary_field';
 import { SpanSummaryTitle } from './sub_components/span_summary_title';
+import {
+  getTabContentAvailableHeight,
+  DEFAULT_MARGIN_BOTTOM,
+} from '../../../doc_viewer_source/get_height';
 
 export type SpanOverviewProps = DocViewRenderProps & {
   indexes: {
@@ -58,7 +63,9 @@ export function SpanOverview({
   showActions = true,
   dataView,
   columnsMeta,
+  decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
 }: SpanOverviewProps) {
+  const containerRef = useRef<HTMLElement>(null);
   const { fieldFormats } = getUnifiedDocViewerServices();
   const { formattedDoc, flattenedDoc } = useMemo(
     () => ({
@@ -84,6 +91,10 @@ export function SpanOverview({
   const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
   const spanId = flattenedDoc[SPAN_ID_FIELD];
 
+  const containerHeight = containerRef.current
+    ? getTabContentAvailableHeight(containerRef.current, decreaseAvailableHeightBy)
+    : 0;
+
   return (
     <DataSourcesProvider indexes={indexes}>
       <RootTransactionProvider traceId={traceId} indexPattern={indexes.apm.traces}>
@@ -98,59 +109,71 @@ export function SpanOverview({
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
           >
-            <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
-              <EuiSpacer size="m" />
-              <EuiFlexGroup direction="column" gutterSize="m">
-                <EuiFlexItem>
-                  <SpanSummaryTitle
-                    spanName={flattenedDoc[SPAN_NAME_FIELD]}
-                    formattedSpanName={formattedDoc[SPAN_NAME_FIELD]}
-                    spanId={spanId}
-                    formattedSpanId={formattedDoc[SPAN_ID_FIELD]}
+            <EuiFlexGroup
+              direction="column"
+              gutterSize="m"
+              ref={containerRef}
+              css={
+                containerHeight
+                  ? css`
+                      height: ${containerHeight}px;
+                      overflow: auto;
+                    `
+                  : css`
+                      display: block;
+                    `
+              }
+            >
+              <EuiFlexItem>
+                <EuiSpacer size="m" />
+                <SpanSummaryTitle
+                  spanName={flattenedDoc[SPAN_NAME_FIELD]}
+                  formattedSpanName={formattedDoc[SPAN_NAME_FIELD]}
+                  spanId={flattenedDoc[SPAN_ID_FIELD]}
+                  formattedSpanId={formattedDoc[SPAN_ID_FIELD]}
+                  showActions={showActions}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {spanFields.map((fieldId) => (
+                  <SpanSummaryField
+                    key={fieldId}
+                    fieldId={fieldId}
+                    fieldMapping={dataViewFields[fieldId]}
+                    fieldConfiguration={fieldConfigurations[fieldId]}
                     showActions={showActions}
                   />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  {spanFields.map((fieldId) => (
-                    <SpanSummaryField
-                      key={fieldId}
-                      fieldId={fieldId}
-                      fieldMapping={dataViewFields[fieldId]}
-                      fieldConfiguration={fieldConfigurations[fieldId]}
-                      showActions={showActions}
-                    />
-                  ))}
-                </EuiFlexItem>
+                ))}
+              </EuiFlexItem>
 
-                {spanDuration && (
-                  <EuiFlexItem>
-                    <EuiSpacer size="m" />
-                    <SpanDurationSummary
-                      spanDuration={spanDuration}
-                      spanName={flattenedDoc[SPAN_NAME_FIELD]}
-                      serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
-                      isOtelSpan={isOtelSpan}
-                    />
-                  </EuiFlexItem>
-                )}
+              {spanDuration && (
                 <EuiFlexItem>
-                  <Trace
-                    fields={fieldConfigurations}
-                    fieldMappings={dataViewFields}
-                    traceId={traceId}
-                    docId={spanId}
-                    displayType="span"
-                    dataView={dataView}
-                    tracesIndexPattern={indexes.apm.traces}
-                    showWaterfall={showWaterfall}
-                    showActions={showActions}
+                  <EuiSpacer size="m" />
+                  <SpanDurationSummary
+                    spanDuration={spanDuration}
+                    spanName={flattenedDoc[SPAN_NAME_FIELD]}
+                    serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
+                    isOtelSpan={isOtelSpan}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem>
-                  <SpanLinks traceId={traceId} spanId={spanId} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
+              )}
+              <EuiFlexItem>
+                <Trace
+                  fields={fieldConfigurations}
+                  fieldMappings={dataViewFields}
+                  traceId={flattenedDoc[TRACE_ID_FIELD]}
+                  docId={flattenedDoc[SPAN_ID_FIELD]}
+                  displayType="span"
+                  dataView={dataView}
+                  tracesIndexPattern={indexes.apm.traces}
+                  showWaterfall={showWaterfall}
+                  showActions={showActions}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <SpanLinks traceId={traceId} spanId={spanId} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </FieldActionsProvider>
         </RootSpanProvider>
       </RootTransactionProvider>

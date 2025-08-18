@@ -6,7 +6,7 @@
  */
 
 import type { Privileges } from '@kbn/es-ui-shared-plugin/public';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
 
 const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } = {}): string[] =>

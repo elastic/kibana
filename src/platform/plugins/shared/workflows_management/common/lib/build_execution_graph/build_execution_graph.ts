@@ -8,7 +8,7 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import {
+import type {
   BaseStep,
   IfStep,
   ForEachStep,
@@ -19,6 +19,7 @@ import {
   EnterConditionBranchNode,
   ExitConditionBranchNode,
   AtomicGraphNode,
+  WaitGraphNode,
   WorkflowYaml,
 } from '@kbn/workflows';
 import { omit } from 'lodash';
@@ -38,7 +39,28 @@ function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep
     return visitForeachStep(graph, previousStep, currentStep);
   }
 
+  if (currentStep.type === 'wait') {
+    return visitWaitStep(graph, previousStep, currentStep);
+  }
+
   return visitAtomicStep(graph, previousStep, currentStep);
+}
+
+export function visitWaitStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
+  const waitNode: WaitGraphNode = {
+    id: getNodeId(currentStep),
+    type: 'wait',
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(waitNode.id, waitNode);
+
+  if (previousStep) {
+    graph.setEdge(getNodeId(previousStep), waitNode.id);
+  }
+
+  return waitNode;
 }
 
 export function visitAtomicStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
@@ -140,18 +162,19 @@ function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep:
   const enterForeachNodeId = getNodeId(currentStep);
   const foreachStep = currentStep as ForEachStep;
   const foreachNestedSteps: BaseStep[] = foreachStep.steps || [];
-
+  const exitNodeId = `exitForeach(${enterForeachNodeId})`;
   const enterForeachNode: EnterForeachNode = {
     id: enterForeachNodeId,
     type: 'enter-foreach',
     itemNodeIds: [],
+    exitNodeId,
     configuration: {
       ...omit(foreachStep, ['steps']), // No need to include them as they will be represented in the graph
     },
   };
   const exitForeachNode: ExitForeachNode = {
     type: 'exit-foreach',
-    id: `exitForeach(${enterForeachNodeId})`,
+    id: exitNodeId,
     startNodeId: enterForeachNodeId,
   };
 

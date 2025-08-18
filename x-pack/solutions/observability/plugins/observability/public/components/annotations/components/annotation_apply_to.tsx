@@ -9,7 +9,7 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SLOApplyTo } from './slo_apply_to';
-import { Annotation } from '../../../../common/annotations';
+import type { Annotation } from '../../../../common/annotations';
 
 export function AnnotationApplyTo({ editAnnotation }: { editAnnotation?: Annotation | null }) {
   return (

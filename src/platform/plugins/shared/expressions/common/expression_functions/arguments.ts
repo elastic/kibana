@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KnownTypeToString, TypeString, UnmappedTypeStrings } from '../types/common';
+import type { KnownTypeToString, TypeString, UnmappedTypeStrings } from '../types/common';
 
 /**
  * This type represents all of the possible combinations of properties of an

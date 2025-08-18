@@ -8,25 +8,22 @@
 import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { noop } from 'lodash';
 import React, { createContext, useCallback, useContext } from 'react';
-import { OnechatEsqlToolFlyout } from '../components/tools/esql/esql_tool_flyout';
-import { OnechatEsqlToolFormMode } from '../components/tools/esql/form/esql_tool_form';
-import { OnechatEsqlToolFormData } from '../components/tools/esql/form/types/esql_tool_form_types';
-import { useCreateToolFlyout } from '../hooks/tools/use_create_tools';
-import { useDeleteToolModal, useDeleteToolsModal } from '../hooks/tools/use_delete_tools';
-import { useEditToolFlyout } from '../hooks/tools/use_edit_tools';
+import { appPaths } from '../utils/app_paths';
+import { useNavigation } from '../hooks/use_navigation';
+import { useDeleteTool, useDeleteTools } from '../hooks/tools/use_delete_tools';
 import { labels } from '../utils/i18n';
-import {
-  transformEsqlFormDataForCreate,
-  transformEsqlFormDataForUpdate,
-} from '../utils/transform_esql_form_data';
+import { TOOL_SOURCE_QUERY_PARAM } from '../components/tools/esql/create_esql_tool';
 
 export interface ToolsActionsContextType {
-  createTool: (toolId?: string | undefined) => void;
+  createTool: () => void;
   editTool: (toolId: string) => void;
   deleteTool: (toolId: string) => void;
   bulkDeleteTools: (toolIds: string[]) => void;
   cloneTool: (toolId: string) => void;
   testTool: (toolId: string) => void;
+  getCreateToolUrl: () => string;
+  getEditToolUrl: (toolId: string) => string;
+  getCloneToolUrl: (toolId: string) => string;
 }
 
 export const ToolsTableActionsContext = createContext<ToolsActionsContextType | undefined>(
@@ -34,6 +31,44 @@ export const ToolsTableActionsContext = createContext<ToolsActionsContextType | 
 );
 
 export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) => {
+  const { navigateToOnechatUrl, createOnechatUrl } = useNavigation();
+
+  const createTool = useCallback(() => {
+    navigateToOnechatUrl(appPaths.tools.new);
+  }, [navigateToOnechatUrl]);
+
+  const getCreateToolUrl = useCallback(() => {
+    return createOnechatUrl(appPaths.tools.new);
+  }, [createOnechatUrl]);
+
+  const editTool = useCallback(
+    (toolId: string) => {
+      navigateToOnechatUrl(appPaths.tools.edit({ toolId }));
+    },
+    [navigateToOnechatUrl]
+  );
+
+  const getEditToolUrl = useCallback(
+    (toolId: string) => {
+      return createOnechatUrl(appPaths.tools.edit({ toolId }));
+    },
+    [createOnechatUrl]
+  );
+
+  const cloneTool = useCallback(
+    (toolId: string) => {
+      navigateToOnechatUrl(appPaths.tools.new, { [TOOL_SOURCE_QUERY_PARAM]: toolId });
+    },
+    [navigateToOnechatUrl]
+  );
+
+  const getCloneToolUrl = useCallback(
+    (toolId: string) => {
+      return createOnechatUrl(appPaths.tools.new, { [TOOL_SOURCE_QUERY_PARAM]: toolId });
+    },
+    [createOnechatUrl]
+  );
+
   const {
     isOpen: isDeleteModalOpen,
     isLoading: isDeletingTool,
@@ -41,7 +76,7 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
     deleteTool,
     confirmDelete,
     cancelDelete,
-  } = useDeleteToolModal();
+  } = useDeleteTool();
 
   const {
     isOpen: isBulkDeleteToolsModalOpen,
@@ -50,58 +85,7 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
     deleteTools: bulkDeleteTools,
     confirmDelete: confirmBulkDeleteTools,
     cancelDelete: cancelBulkDeleteTools,
-  } = useDeleteToolsModal();
-
-  const {
-    isOpen: isCreateToolFlyoutOpen,
-    openFlyout: openCreateToolFlyout,
-    closeFlyout: closeCreateToolFlyout,
-    submit: createTool,
-    isSubmitting: isCreatingTool,
-    isLoading: isLoadingSourceTool,
-    sourceTool: sourceTool,
-  } = useCreateToolFlyout();
-
-  const {
-    isOpen: isEditToolFlyoutOpen,
-    tool: editingTool,
-    openFlyout: openEditToolFlyout,
-    closeFlyout: closeEditToolFlyout,
-    submit: updateTool,
-    isLoading: isLoadingEditTool,
-    isSubmitting: isUpdatingTool,
-  } = useEditToolFlyout();
-
-  const handleCreateTool = useCallback(
-    (data: OnechatEsqlToolFormData) => createTool(transformEsqlFormDataForCreate(data)),
-    [createTool]
-  );
-
-  const handleUpdateTool = useCallback(
-    (data: OnechatEsqlToolFormData) => updateTool(transformEsqlFormDataForUpdate(data)),
-    [updateTool]
-  );
-
-  const isEditingTool = isEditToolFlyoutOpen;
-  const esqlToolFlyoutProps = isEditingTool
-    ? {
-        isOpen: isEditToolFlyoutOpen,
-        onClose: closeEditToolFlyout,
-        mode: OnechatEsqlToolFormMode.Edit,
-        tool: editingTool,
-        submit: handleUpdateTool,
-        isSubmitting: isUpdatingTool,
-        isLoading: isLoadingEditTool,
-      }
-    : {
-        isOpen: isCreateToolFlyoutOpen,
-        onClose: closeCreateToolFlyout,
-        mode: OnechatEsqlToolFormMode.Create,
-        tool: sourceTool,
-        submit: handleCreateTool,
-        isSubmitting: isCreatingTool,
-        isLoading: isLoadingSourceTool,
-      };
+  } = useDeleteTools();
 
   const deleteEsqlToolTitleId = useGeneratedHtmlId({
     prefix: 'deleteEsqlToolTitle',
@@ -116,14 +100,16 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
       value={{
         deleteTool,
         bulkDeleteTools,
-        createTool: openCreateToolFlyout,
-        editTool: openEditToolFlyout,
-        cloneTool: openCreateToolFlyout,
+        createTool,
+        editTool,
+        cloneTool,
         testTool: noop, // TODO: integrate with tool testing modal
+        getCreateToolUrl,
+        getEditToolUrl,
+        getCloneToolUrl,
       }}
     >
       {children}
-      <OnechatEsqlToolFlyout {...esqlToolFlyoutProps} />
       {isDeleteModalOpen && (
         <EuiConfirmModal
           title={deleteToolId ? labels.tools.deleteEsqlToolTitle(deleteToolId) : ''}

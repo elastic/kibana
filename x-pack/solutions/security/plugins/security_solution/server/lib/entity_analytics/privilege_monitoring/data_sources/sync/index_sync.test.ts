@@ -19,6 +19,7 @@ import { createIndexSyncService } from './index_sync';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { AuditLogger } from '@kbn/core/server';
 import type { SearchService } from '../../users/search';
+import type { BulkResponse } from 'elasticsearch-8.x/lib/api/types';
 
 const mockFindByIndex = jest.fn();
 jest.mock('../../saved_objects', () => {
@@ -97,7 +98,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
       ];
       mockFindByIndex.mockResolvedValue(mockMonitoringSOSources);
 
-      indexSyncService.syncUsernamesFromIndex = jest.fn().mockResolvedValue(['user1', 'user2']);
+      indexSyncService._syncUsernamesFromIndex = jest.fn().mockResolvedValue(['user1', 'user2']);
       await indexSyncService.plainIndexSync(mockSavedObjectClient);
       expect(mockFindByIndex).toHaveBeenCalled();
       expect(mockSearchUsernamesInIndex).toHaveBeenCalledTimes(2);
@@ -167,8 +168,9 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
       mockBulkUpsertOperations.mockReturnValue([{ index: { _id: '1' } }]);
       dataClient.index = 'test-index';
 
-      const usernames = await indexSyncService.syncUsernamesFromIndex({
+      const usernames = await indexSyncService._syncUsernamesFromIndex({
         indexName: 'test-index',
+        sourceId: 'source-id',
       });
 
       expect(usernames).toEqual(['frodo', 'samwise']);
@@ -176,6 +178,38 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
       expect(esClientMock.bulk).toHaveBeenCalled();
       expect(mockGetMonitoredUsers).toHaveBeenCalledWith(['frodo', 'samwise']);
       expect(mockBulkUpsertOperations).toHaveBeenCalled();
+    });
+
+    it('should log errors when the bulk upload response contains errors', async () => {
+      const errorMsg = 'Bulk operation failed';
+      const mockHits = [
+        {
+          _source: { user: { name: 'frodo' } },
+          _id: '1',
+          sort: [1],
+        },
+      ];
+
+      mockSearchUsernamesInIndex
+        .mockResolvedValueOnce({ hits: { hits: mockHits } }) // first batch
+        .mockResolvedValueOnce({ hits: { hits: [] } }); // second batch = end
+      mockGetMonitoredUsers.mockResolvedValue({
+        hits: {
+          hits: [],
+        },
+      });
+      mockBulkUpsertOperations.mockReturnValue([{ index: { _id: '1' } }]);
+      esClientMock.bulk.mockResolvedValue({
+        errors: true,
+        items: [{ index: { error: { errorMsg } } }],
+      } as unknown as BulkResponse);
+
+      await indexSyncService._syncUsernamesFromIndex({
+        indexName: 'test-index',
+        sourceId: 'source-id',
+      });
+
+      expect(deps.logger.error).toHaveBeenCalledWith(expect.stringContaining(errorMsg));
     });
   });
 });

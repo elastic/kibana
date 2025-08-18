@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiDataGridProps, EuiSelectOption } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiDataGrid,
-  EuiDataGridProps,
-  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiSelect,
-  EuiSelectOption,
   EuiSelectableMessage,
   EuiSpacer,
   EuiText,

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { EuiSearchBar, EuiSearchBarOnChangeArgs, EuiSearchBarProps, Search } from '@elastic/eui';
-import { ToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
+import type { EuiSearchBarOnChangeArgs, EuiSearchBarProps, Search } from '@elastic/eui';
+import { EuiSearchBar } from '@elastic/eui';
+import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/onechat-common';
 import { countBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useToolsPreferences } from '../../../context/tools_preferences_provider';
-import { useToolTags } from '../../../hooks/tools/use_tool_tags';
-import { useOnechatTools } from '../../../hooks/tools/use_tools';
+import { useToolsTags } from '../../../hooks/tools/use_tool_tags';
+import { useToolsService } from '../../../hooks/tools/use_tools';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { labels } from '../../../utils/i18n';
 import { ToolFilterOption } from './tools_table_filter_option';
@@ -96,8 +98,8 @@ export interface ToolsTableSearch {
 
 export const useToolsTableSearch = (): ToolsTableSearch => {
   const { includeSystemTools } = useToolsPreferences();
-  const { tools } = useOnechatTools({ includeSystemTools });
-  const { tags } = useToolTags({ includeSystemTools });
+  const { tools } = useToolsService({ includeSystemTools });
+  const { tags } = useToolsTags({ includeSystemTools });
   const [results, setResults] = useState<ToolDefinitionWithSchema[]>(tools);
   const [searchQuery, setSearchQuery] = useQueryState('search', {
     defaultValue: '',
