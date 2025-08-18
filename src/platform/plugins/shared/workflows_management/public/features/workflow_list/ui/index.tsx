@@ -152,7 +152,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
           id: item.id,
           workflow: {
             ...item,
-            enabled: item.enabled,
+            enabled: !item.enabled,
           },
         },
         {

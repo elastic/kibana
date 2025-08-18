@@ -20,6 +20,7 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import { i18n } from '@kbn/i18n';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import type { SchedulerService } from '../scheduler/scheduler_service';
@@ -89,7 +90,12 @@ export class WorkflowsManagementApi {
   }
 
   public async cloneWorkflow(workflow: WorkflowDetailDto): Promise<WorkflowDetailDto> {
-    return await this.workflowsService.createWorkflow({ yaml: workflow.yaml }, true);
+    const clonedYaml = this.workflowsService.updateYAMLFields(workflow.yaml, {
+      name: `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
+        defaultMessage: 'Copy',
+      })}`,
+    });
+    return await this.workflowsService.createWorkflow({ yaml: clonedYaml });
   }
 
   public async updateWorkflow(

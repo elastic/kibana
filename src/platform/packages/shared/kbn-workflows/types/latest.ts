@@ -40,6 +40,8 @@ export {
 
   // command schemas
   CreateWorkflowCommandSchema,
+  UpdateWorkflowCommandSchema,
+  SearchWorkflowCommandSchema,
 } from './v1';
 
 export type {

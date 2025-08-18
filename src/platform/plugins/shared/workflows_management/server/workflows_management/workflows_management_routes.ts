@@ -9,8 +9,11 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import { CreateWorkflowCommandSchema } from '@kbn/workflows';
-import { SearchWorkflowCommandSchema } from '@kbn/workflows/types/v1';
+import {
+  CreateWorkflowCommandSchema,
+  SearchWorkflowCommandSchema,
+  UpdateWorkflowCommandSchema,
+} from '@kbn/workflows';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsManagementApi } from './workflows_management_api';
 import { type GetWorkflowsParams } from './workflows_management_api';
@@ -160,9 +163,9 @@ export function defineRoutes(
             {
               limit,
               page,
-            enabled,
-            createdBy,
-            query,
+              enabled,
+              createdBy,
+              query,
             },
             spaceId
           ),
@@ -230,7 +233,7 @@ export function defineRoutes(
         params: schema.object({
           id: schema.string(),
         }),
-        body: CreateWorkflowCommandSchema.partial(),
+        body: UpdateWorkflowCommandSchema.partial(),
       },
     },
     async (context, request, response) => {

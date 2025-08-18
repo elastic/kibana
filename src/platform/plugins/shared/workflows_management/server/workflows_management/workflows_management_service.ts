@@ -32,7 +32,6 @@ import type {
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
-import { i18n } from '@kbn/i18n';
 import { parseDocument } from 'yaml';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
@@ -139,9 +138,11 @@ export class WorkflowsService {
       filters.push(`(${createdByFilter})`);
     }
 
-    if (enabled !== undefined) {
-      const statusFilter = `${SO_ATTRIBUTES_PREFIX}.enabled:"${enabled}"`;
-      filters.push(`(${statusFilter})`);
+    if (enabled !== undefined && enabled.length > 0) {
+      const stateFilter = enabled
+        .map((state) => `${SO_ATTRIBUTES_PREFIX}.enabled:"${state}"`)
+        .join(' OR ');
+      filters.push(`(${stateFilter})`);
     }
 
     if (query) {
@@ -285,8 +286,7 @@ export class WorkflowsService {
   public async createWorkflow(
     workflow: CreateWorkflowCommand,
     spaceId: string,
-    request: KibanaRequest,
-    isClone: boolean = false
+    request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
     const baseSavedObjectsClient = await this.getSavedObjectsClient();
     const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
@@ -299,11 +299,7 @@ export class WorkflowsService {
 
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const savedObjectData: WorkflowSavedObjectAttributes = {
-      name: isClone
-        ? `${workflowToCreate.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
-            defaultMessage: 'Copy',
-          })}`
-        : workflowToCreate.name,
+      name: workflowToCreate.name,
       description: workflowToCreate.description,
       enabled: workflowToCreate.enabled,
       tags: workflowToCreate.tags || [],
@@ -398,18 +394,7 @@ export class WorkflowsService {
         }
       }
     } else {
-      const doc = parseDocument(originalWorkflow.yaml);
-
-      Object.entries(rest).forEach(([key, value]) => {
-        if (doc.hasIn([key])) {
-          const currentValue: any = doc.getIn([key as string]);
-          if (currentValue !== value) {
-            doc.setIn([key], value);
-          }
-        }
-      });
-
-      const updatedYAML = doc.toString();
+      const updatedYAML = this.updateYAMLFields(originalWorkflow.yaml, rest);
 
       updateData = {
         ...rest,
@@ -429,6 +414,21 @@ export class WorkflowsService {
       lastUpdatedAt: new Date(response.updated_at!),
       lastUpdatedBy: response.attributes.lastUpdatedBy,
     };
+  }
+
+  public updateYAMLFields(yaml: string, fields: Record<string, any>) {
+    const doc = parseDocument(yaml);
+
+    Object.entries(fields).forEach(([key, value]) => {
+      if (doc.hasIn([key])) {
+        const currentValue: any = doc.getIn([key as string]);
+        if (currentValue !== value) {
+          doc.setIn([key], value);
+        }
+      }
+    });
+
+    return doc.toString();
   }
 
   public async deleteWorkflows(

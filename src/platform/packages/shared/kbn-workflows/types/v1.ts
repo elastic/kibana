@@ -139,6 +139,14 @@ export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string(),
 });
 
+export const UpdateWorkflowCommandSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  enabled: z.boolean(),
+  tags: z.array(z.string()),
+  yaml: z.string(),
+});
+
 export const SearchWorkflowCommandSchema = z.object({
   triggerType: z.string().optional(),
   limit: z.number().default(100),
