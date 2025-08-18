@@ -127,6 +127,7 @@ export const EsWorkflowSchema = z.object({
   lastUpdatedAt: z.date(),
   lastUpdatedBy: z.string(),
   definition: WorkflowSchema,
+  deleted: z.boolean().default(false),
   yaml: z.string(),
 });
 
