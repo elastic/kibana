@@ -22,7 +22,6 @@ import { useSettingsContext } from '../../contexts/settings_context';
 import { NO_DEFAULT_CONNECTOR } from '../../../common/constants';
 
 interface Props {
-  hasConnectorsAllPrivilege: boolean;
   connectors: UseGenAiConnectorsResult;
 }
 
@@ -92,7 +91,7 @@ const getOptionsByValues = (
   return options.flatMap(getOptionsByValuesHelper);
 };
 
-export const DefaultAIConnector: React.FC<Props> = ({ hasConnectorsAllPrivilege, connectors }) => {
+export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
   const [options, setOptions] = useState<EuiComboBoxOptionOption<string>[]>(getOptions(connectors));
   const { handleFieldChange, fields, unsavedChanges } = useSettingsContext();
 
@@ -153,7 +152,7 @@ export const DefaultAIConnector: React.FC<Props> = ({ hasConnectorsAllPrivilege,
           selectedOptions={selectedOptions}
           onChange={onChangeDefaultLlm}
           isDisabled={
-            !hasConnectorsAllPrivilege || fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]?.isReadOnly
+            fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]?.isReadOnly
           }
           isLoading={connectors.loading}
           isInvalid={selectedOptions.length === 0}
@@ -165,7 +164,6 @@ export const DefaultAIConnector: React.FC<Props> = ({ hasConnectorsAllPrivilege,
           id={'basicCheckboxId'}
           data-test-subj="defaultAiConnectorCheckbox"
           disabled={
-            !hasConnectorsAllPrivilege ||
             fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]?.isReadOnly
           }
           label={

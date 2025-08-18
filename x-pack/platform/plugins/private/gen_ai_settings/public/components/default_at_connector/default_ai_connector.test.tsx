@@ -52,7 +52,7 @@ function setupTest() {
 
   const utils = render(
     <>
-      <DefaultAIConnector hasConnectorsAllPrivilege connectors={mockConnectors} />
+      <DefaultAIConnector connectors={mockConnectors} />
       <SettingsProbe onValue={(v) => (settingsValue = v)} />
     </>,
     {

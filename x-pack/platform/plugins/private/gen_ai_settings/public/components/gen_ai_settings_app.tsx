@@ -241,7 +241,6 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                 <EuiFlexGroup gutterSize="m" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <DefaultAIConnector
-                      hasConnectorsAllPrivilege={hasConnectorsAllPrivilege}
                       connectors={connectors}
                     />
                   </EuiFlexItem>
