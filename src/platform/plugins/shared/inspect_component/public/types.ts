@@ -7,23 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import type { Dispatch, SetStateAction } from 'react';
 
-export interface HighlightOptions {
-  overlay: HTMLElement;
-  euiTheme: EuiThemeComputed;
-}
-
 export interface GetElementFromPointOptions {
   event: PointerEvent;
-  overlay: HTMLElement;
-}
-
-export interface SetHighlightRectangleOptions {
-  target: HTMLElement;
-  highlight: HTMLElement;
 }
 
 export interface GetComponentDataOptions {
@@ -36,9 +24,4 @@ export interface GetComponentDataOptions {
 export type GetInspectedElementOptions = Omit<
   GetElementFromPointOptions & GetComponentDataOptions,
   'path'
->;
-
-export type CreateHighlightRectangleOptions = Omit<
-  GetElementFromPointOptions & SetHighlightRectangleOptions,
-  'target'
 >;

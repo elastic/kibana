@@ -7,19 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect } from 'react';
-import { EuiHeaderSectionItemButton, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiHeaderSectionItemButton, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
-import {
-  createHighlightRectangle,
-  createInspectHighlight,
-  createInspectOverlay,
-  getInspectedElementData,
-  isMac,
-  isKeyboardShortcut,
-} from './utils';
+import { isMac, isKeyboardShortcut } from './utils';
+import { InspectOverlay } from './overlay/inspect_overlay';
 
 const TOOLTIP_CONTENT = i18n.translate('kbnInspectComponent.inspectButton.tooltip', {
   values: { keyboardShortcut: isMac ? "⌘ '" : "Ctrl '" },
@@ -35,7 +29,6 @@ interface Props {
 }
 
 export const InspectButton = ({ core }: Props) => {
-  const { euiTheme } = useEuiTheme();
   const [isInspecting, setIsInspecting] = useState(false);
   const [flyoutRef, setFlyoutRef] = useState<OverlayRef | undefined>(undefined);
 
@@ -46,79 +39,38 @@ export const InspectButton = ({ core }: Props) => {
     }
   `;
 
-  /*
-    To inspect a component that is disabled, "pointerdown" event has to be used. This does not allow for intercepting the click event
-    on the element, so an overlay is needed, which captures the pointerdown event and then finds the element at the pointer position.
-    The overlay is removed after the click event is handled.
-  */
-  useEffect(() => {
-    if (!isInspecting) return;
-
-    const overlay = createInspectOverlay(euiTheme);
-    const highlight = createInspectHighlight({ overlay, euiTheme });
-
-    const handleClick = async (event: PointerEvent) => {
-      await getInspectedElementData({
-        event,
-        overlay,
-        core,
-        setFlyoutRef,
-        setIsInspecting,
-      });
-    };
-
-    const handlePointerMove = (event: PointerEvent) => {
-      createHighlightRectangle({
-        event,
-        overlay,
-        highlight,
-      });
-    };
-
-    overlay.addEventListener('pointerdown', handleClick);
-    document.addEventListener('pointermove', handlePointerMove);
-    document.body.appendChild(overlay);
-
-    return () => {
-      overlay.removeEventListener('pointerdown', handleClick);
-      document.removeEventListener('pointermove', handlePointerMove);
-      document.body.removeChild(overlay);
-    };
-  }, [isInspecting, flyoutRef, euiTheme, core]);
-
-  useEffect(() => {
-    const keyboardListener = (event: KeyboardEvent) => {
-      if (isKeyboardShortcut(event)) {
-        event.preventDefault();
-        setIsInspecting((prev) => !prev);
-      }
-    };
-
-    window.addEventListener('keydown', keyboardListener);
-    return () => {
-      window.removeEventListener('keydown', keyboardListener);
-    };
-  }, []);
+  const handleKeydown = (event: KeyboardEvent) => {
+    if (isKeyboardShortcut(event)) {
+      event.preventDefault();
+      setIsInspecting((prev) => !prev);
+    }
+  };
 
   const handleInspectClick = () => {
     if (flyoutRef) {
       flyoutRef.close();
       setFlyoutRef(undefined);
     }
-    setIsInspecting(true);
+    setIsInspecting((prev) => !prev);
   };
 
   return (
-    <EuiToolTip content={isInspecting ? '' : TOOLTIP_CONTENT} position="bottom">
-      <EuiHeaderSectionItemButton
-        onClick={handleInspectClick}
-        iconType="inspect"
-        isSelected={isInspecting}
-        aria-pressed={isInspecting}
-        css={buttonStyle}
-        aria-label={ARIA_LABEL}
-        data-test-subj="inspectComponentButton"
-      />
-    </EuiToolTip>
+    <>
+      <EuiWindowEvent event="keydown" handler={handleKeydown} />
+      <EuiToolTip content={isInspecting ? '' : TOOLTIP_CONTENT} position="bottom">
+        <EuiHeaderSectionItemButton
+          onClick={handleInspectClick}
+          iconType="inspect"
+          isSelected={isInspecting}
+          aria-pressed={isInspecting}
+          css={buttonStyle}
+          aria-label={ARIA_LABEL}
+          data-test-subj="inspectComponentButton"
+        />
+      </EuiToolTip>
+      {isInspecting && (
+        <InspectOverlay core={core} setFlyoutRef={setFlyoutRef} setIsInspecting={setIsInspecting} />
+      )}
+    </>
   );
 };

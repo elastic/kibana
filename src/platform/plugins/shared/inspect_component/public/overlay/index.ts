@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { INSPECT_COMPONENT_ROUTE, INSPECT_OVERLAY_ID } from './constants';
-
-export type { InspectComponentResponse } from './types';
+export { InspectOverlay } from './inspect_overlay';
+export { InspectHighlight } from './inspect_highlight';

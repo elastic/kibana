@@ -8,41 +8,28 @@
  */
 
 import { DATA_PATH_ATTRIBUTE_KEY, decodeAttribute } from '@kbn/babel-data-path';
-import { transparentize } from '@elastic/eui';
-import type { EuiThemeComputed } from '@elastic/eui';
+import { INSPECT_OVERLAY_ID } from '../common';
 import { getComponentData } from './get_component_data';
-import type {
-  CreateHighlightRectangleOptions,
-  GetElementFromPointOptions,
-  GetInspectedElementOptions,
-  HighlightOptions,
-  SetHighlightRectangleOptions,
-} from './types';
+import type { GetElementFromPointOptions, GetInspectedElementOptions } from './types';
 
-const getElementFromPoint = ({
+export const getElementFromPoint = ({
   event,
-  overlay,
-}: GetElementFromPointOptions): HTMLElement | undefined => {
-  overlay.style.display = 'none';
-  /*
-    Using elementFromPoint doesn't work for some cases, such as when trying to inspect an svg inside a button.
-    So elementsFromPoint is used to get all elements at the point and find the first one that is not the overlay.
-  */
-  const elements = document.elementsFromPoint(event.clientX, event.clientY) as HTMLElement[];
-  overlay.style.display = 'block';
+}: GetElementFromPointOptions): HTMLElement | SVGElement | undefined => {
+  const elements = document.elementsFromPoint(event.clientX, event.clientY);
 
-  return elements.find((el) => el !== overlay);
-};
+  for (const el of elements) {
+    const isSvg = el instanceof SVGElement;
+    const isOverlay = el.id === INSPECT_OVERLAY_ID;
+    const isPath = isSvg && el.tagName.toLowerCase() === 'path';
+    const isNotInspectable = !(el instanceof HTMLElement) && !isSvg;
 
-const setHighlightRectangle = ({ target, highlight }: SetHighlightRectangleOptions) => {
-  const rectangle = target.getBoundingClientRect();
-  Object.assign(highlight.style, {
-    transform: `translate(${rectangle.left + window.scrollX}px, ${
-      rectangle.top + window.scrollY
-    }px)`,
-    width: `${rectangle.width}px`,
-    height: `${rectangle.height}px`,
-  });
+    // Skip elements that are not inspectable, overlay, or <path> inside an SVG
+    if (isNotInspectable || isOverlay || isPath) continue;
+
+    return el;
+  }
+
+  return undefined;
 };
 
 const isSingleQuote = (event: KeyboardEvent) => event.code === 'Quote' || event.key === "'";
@@ -54,32 +41,8 @@ export const isMac = ((navigator as any)?.userAgentData?.platform || navigator.u
   .toLowerCase()
   .includes('mac');
 
-export const createInspectOverlay = (euiTheme: EuiThemeComputed) => {
-  const overlay = document.createElement('div');
-  Object.assign(overlay.style, {
-    position: 'fixed',
-    inset: '0',
-    zIndex: `calc(${euiTheme.levels.modal} + 1)`,
-    cursor: 'crosshair',
-    background: transparentize(euiTheme.colors.backgroundFilledText, 0.2),
-  });
-  return overlay;
-};
-
-export const createInspectHighlight = ({ overlay, euiTheme }: HighlightOptions) => {
-  const highlight = document.createElement('div');
-  Object.assign(highlight.style, {
-    position: 'absolute',
-    border: `2px solid ${euiTheme.colors.primary}`,
-    background: transparentize(euiTheme.colors.primary, 0.3),
-  });
-  overlay.appendChild(highlight);
-  return highlight;
-};
-
 export const getInspectedElementData = async ({
   event,
-  overlay,
   core,
   setFlyoutRef,
   setIsInspecting,
@@ -87,7 +50,7 @@ export const getInspectedElementData = async ({
   event.preventDefault();
   event.stopPropagation();
 
-  const target = getElementFromPoint({ event, overlay });
+  const target = getElementFromPoint({ event });
 
   if (!target) {
     setIsInspecting(false);
@@ -98,7 +61,7 @@ export const getInspectedElementData = async ({
     If the target doesn't have the data-path attribute, traverse up the DOM tree
     to find the closest element that does.
   */
-  let closestElementWithDataPath: HTMLElement | null = target;
+  let closestElementWithDataPath: HTMLElement | SVGElement | null = target;
   while (
     closestElementWithDataPath &&
     !closestElementWithDataPath.hasAttribute(DATA_PATH_ATTRIBUTE_KEY)
@@ -131,15 +94,4 @@ export const getInspectedElementData = async ({
     setFlyoutRef,
     setIsInspecting,
   });
-};
-
-export const createHighlightRectangle = ({
-  event,
-  overlay,
-  highlight,
-}: CreateHighlightRectangleOptions) => {
-  const target = getElementFromPoint({ event, overlay });
-  if (!target) return;
-
-  setHighlightRectangle({ target, highlight });
 };
