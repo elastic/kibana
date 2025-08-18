@@ -93,22 +93,6 @@ export class WorkChatAppPlugin
       integrationRegistry: this.integrationRegistry,
     });
 
-    // Log the contents of the DataTypeRegistry
-    const logger = this.loggerFactory.get('workchat.app.dataTypes');
-
-    // Create a mock request to access the registry (since we need a request object)
-    const mockRequest = {} as any; // In a real scenario, you'd use a proper request
-
-    pluginsDependencies.onechat.data
-      .getRegistry({ request: mockRequest })
-      .then((registry) => {
-        const registeredTypes = registry.list();
-        logger.info(`DataTypeRegistry contents: ${JSON.stringify(registeredTypes, null, 2)}`);
-      })
-      .catch((error) => {
-        logger.error(`Failed to get DataTypeRegistry: ${error.message}`);
-      });
-
     return {};
   }
 }
