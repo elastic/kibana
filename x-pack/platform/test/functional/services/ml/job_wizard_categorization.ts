@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
+import type { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlCommonFieldStatsFlyout } from './field_stats_flyout';
 import type { MlCommonUI } from './common_ui';

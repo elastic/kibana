@@ -8,18 +8,18 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/public';
-import {
+import type { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/public';
+import type {
   AggBasedColumn,
   CollapseFunction,
-  isCollapseFunction,
   SchemaConfig,
   SupportedAggregation,
 } from '../../common';
+import { isCollapseFunction } from '../../common';
 import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets';
 import { isSiblingPipeline } from '../../common/convert_to_lens/lib/utils';
-import { BucketColumn } from '../../common/convert_to_lens/lib';
-import { Schemas } from '../vis_schemas';
+import type { BucketColumn } from '../../common/convert_to_lens/lib';
+import type { Schemas } from '../vis_schemas';
 
 export const isReferenced = (columnId: string, references: string[]) =>
   references.includes(columnId);

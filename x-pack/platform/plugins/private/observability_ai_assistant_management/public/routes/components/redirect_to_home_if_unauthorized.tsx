@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { aiAssistantCapabilities } from '@kbn/observability-ai-assistant-plugin/public';
 

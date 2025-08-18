@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MultipleLicenseInfo } from '../types';
+import type { MultipleLicenseInfo } from '../types';
 import { getLicensesArray } from './get_license_array';
 
 describe('getLicensesArray', () => {

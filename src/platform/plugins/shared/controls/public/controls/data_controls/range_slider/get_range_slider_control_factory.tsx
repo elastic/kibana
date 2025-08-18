@@ -11,7 +11,8 @@ import React, { useEffect, useState } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, map, merge, skip } from 'rxjs';
 
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { Filter, RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
+import type { Filter, RangeFilterParams } from '@kbn/es-query';
+import { buildRangeFilter } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';

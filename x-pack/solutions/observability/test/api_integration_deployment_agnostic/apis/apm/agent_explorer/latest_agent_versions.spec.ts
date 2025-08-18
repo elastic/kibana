@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticApmAgentLatestVersion } from '@kbn/apm-plugin/common/agent_explorer';
+import type { ElasticApmAgentLatestVersion } from '@kbn/apm-plugin/common/agent_explorer';
 import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DebugState } from '@elastic/charts';
+import type { DebugState } from '@elastic/charts';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, visualize, lens } = getPageObjects(['common', 'visualize', 'lens']);

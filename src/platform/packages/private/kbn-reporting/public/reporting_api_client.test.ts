@@ -9,7 +9,7 @@
 
 import { tz } from 'moment-timezone';
 
-import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { httpServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { Job } from './job';
 import { ReportingAPIClient } from './reporting_api_client';

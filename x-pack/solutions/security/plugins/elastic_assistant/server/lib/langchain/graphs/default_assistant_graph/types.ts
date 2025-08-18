@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { BaseMessage } from '@langchain/core/messages';
+import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/logging';
-import { ContentReferencesStore } from '@kbn/elastic-assistant-common';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { AssistantStateAnnotation } from './state';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { AssistantStateAnnotation } from './state';
 
 export interface GraphInputs {
   connectorId: string;

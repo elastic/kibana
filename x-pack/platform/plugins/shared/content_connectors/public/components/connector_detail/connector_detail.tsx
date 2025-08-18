@@ -12,8 +12,9 @@ import { useActions, useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EuiButton, EuiPageTemplate, EuiTabProps } from '@elastic/eui';
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { EuiTabProps } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../routes';
 import { ConnectorScheduling } from '../search_index/connector/connector_scheduling';
 import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connector_rules';

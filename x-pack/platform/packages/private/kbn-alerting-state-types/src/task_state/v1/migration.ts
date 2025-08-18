@@ -7,7 +7,7 @@
 
 import { type TypeOf } from '@kbn/config-schema';
 import { isJSONObject, isString, isBoolean, isNumber, isStringArray, isBooleanArray } from '../lib';
-import {
+import type {
   versionSchema,
   throttledActionSchema,
   rawAlertInstanceSchema,
