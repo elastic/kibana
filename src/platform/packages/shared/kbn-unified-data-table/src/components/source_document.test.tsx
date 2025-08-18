@@ -8,7 +8,7 @@
  */
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import SourceDocument from './source_document';
@@ -52,7 +52,7 @@ describe('Unified data table source document cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<dl class=\\"euiDescriptionList unifiedDataTable__descriptionList unifiedDataTable__cellValue css-id58dh-euiDescriptionList-inline-left\\" data-test-subj=\\"discoverCellDescriptionList\\" data-type=\\"inline\\"><dt class=\\"euiDescriptionList__title unifiedDataTable__descriptionListTitle css-4yy33l-euiDescriptionList__title-inline-compressed\\">extension</dt><dd class=\\"euiDescriptionList__description unifiedDataTable__descriptionListDescription css-11rdew2-euiDescriptionList__description-inline-compressed\\">.gz</dd><dt class=\\"euiDescriptionList__title unifiedDataTable__descriptionListTitle css-4yy33l-euiDescriptionList__title-inline-compressed\\">_index</dt><dd class=\\"euiDescriptionList__description unifiedDataTable__descriptionListDescription css-11rdew2-euiDescriptionList__description-inline-compressed\\">test</dd><dt class=\\"euiDescriptionList__title unifiedDataTable__descriptionListTitle css-4yy33l-euiDescriptionList__title-inline-compressed\\">_score</dt><dd class=\\"euiDescriptionList__description unifiedDataTable__descriptionListDescription css-11rdew2-euiDescriptionList__description-inline-compressed\\">1</dd></dl>"`
+      `"<dl class=\\"euiDescriptionList unifiedDataTable__descriptionList unifiedDataTable__cellValue css-1he4oc9-euiDescriptionList-inline-left-descriptionList\\" data-test-subj=\\"discoverCellDescriptionList\\" data-type=\\"inline\\"><dt class=\\"euiDescriptionList__title unifiedDataTable__descriptionListTitle css-4yy33l-euiDescriptionList__title-inline-compressed\\">extension</dt><dd class=\\"euiDescriptionList__description unifiedDataTable__descriptionListDescription css-11rdew2-euiDescriptionList__description-inline-compressed\\">.gz</dd><dt class=\\"euiDescriptionList__title unifiedDataTable__descriptionListTitle css-4yy33l-euiDescriptionList__title-inline-compressed\\">_index</dt><dd class=\\"euiDescriptionList__description unifiedDataTable__descriptionListDescription css-11rdew2-euiDescriptionList__description-inline-compressed\\">test</dd><dt class=\\"euiDescriptionList__title unifiedDataTable__descriptionListTitle css-4yy33l-euiDescriptionList__title-inline-compressed\\">_score</dt><dd class=\\"euiDescriptionList__description unifiedDataTable__descriptionListDescription css-11rdew2-euiDescriptionList__description-inline-compressed\\">1</dd></dl>"`
     );
   });
 });

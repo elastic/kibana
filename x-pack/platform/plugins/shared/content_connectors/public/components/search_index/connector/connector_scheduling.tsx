@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -15,15 +16,12 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  ConnectorStatus,
-  SchedulingConfiguraton,
-  ConnectorSchedulingComponent,
-} from '@kbn/search-connectors';
+import type { SchedulingConfiguraton } from '@kbn/search-connectors';
+import { ConnectorStatus, ConnectorSchedulingComponent } from '@kbn/search-connectors';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHistory } from 'react-router-dom';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector/update_connector_scheduling_api_logic';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 import { ConnectorDetailTabId } from '../../connector_detail/connector_detail';

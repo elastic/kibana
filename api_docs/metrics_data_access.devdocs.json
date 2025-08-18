@@ -1981,10 +1981,10 @@
     "enums": [
       {
         "parentPluginId": "metricsDataAccess",
-        "id": "def-common.DataSchemaFormat",
+        "id": "def-common.DataSchemaFormatEnum",
         "type": "Enum",
         "tags": [],
-        "label": "DataSchemaFormat",
+        "label": "DataSchemaFormatEnum",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/shared/metrics/types.ts",
         "deprecated": false,
@@ -1993,6 +1993,126 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.CLOUD_PROVIDER",
+        "type": "string",
+        "tags": [],
+        "label": "CLOUD_PROVIDER",
+        "description": [],
+        "signature": [
+          "\"cloud.provider\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.CONTAINER_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONTAINER_ID",
+        "description": [],
+        "signature": [
+          "\"container.id\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.DataSchemaFormat",
+        "type": "Type",
+        "tags": [],
+        "label": "DataSchemaFormat",
+        "description": [],
+        "signature": [
+          "\"ecs\" | \"semconv\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/shared/metrics/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.DATASTREAM_DATASET",
+        "type": "string",
+        "tags": [],
+        "label": "DATASTREAM_DATASET",
+        "description": [],
+        "signature": [
+          "\"data_stream.dataset\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.EVENT_MODULE",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_MODULE",
+        "description": [],
+        "signature": [
+          "\"event.module\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.HOST_METRICS_RECEIVER_OTEL",
+        "type": "string",
+        "tags": [],
+        "label": "HOST_METRICS_RECEIVER_OTEL",
+        "description": [],
+        "signature": [
+          "\"hostmetricsreceiver.otel\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.HOST_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "HOST_NAME",
+        "description": [],
+        "signature": [
+          "\"host.name\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.HOST_OS_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "HOST_OS_NAME",
+        "description": [],
+        "signature": [
+          "\"host.os.name\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "metricsDataAccess",
         "id": "def-common.InventoryFormatterType",
@@ -2982,6 +3102,21 @@
       },
       {
         "parentPluginId": "metricsDataAccess",
+        "id": "def-common.KUBERNETES_POD_UID",
+        "type": "string",
+        "tags": [],
+        "label": "KUBERNETES_POD_UID",
+        "description": [],
+        "signature": [
+          "\"kubernetes.pod.uid\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
         "id": "def-common.METRICS_EXPLORER_API_MAX_METRICS",
         "type": "number",
         "tags": [],
@@ -3048,7 +3183,7 @@
         "label": "MetricsAPIRequest",
         "description": [],
         "signature": [
-          "Omit<{ timerange: { from: number; to: number; interval: string; }; indexPattern: string; metrics: { id: string; aggregations: { [key: string]: unknown; }; }[]; includeTimeseries: boolean | undefined; } & { groupBy?: (string | null | undefined)[] | undefined; groupInstance?: (string | null | undefined)[] | undefined; modules?: string[] | undefined; afterKey?: { [x: string]: string | null; } | null | undefined; limit?: number | null | undefined; filters?: { [key: string]: unknown; }[] | undefined; dropPartialBuckets?: boolean | undefined; alignDataToEnd?: boolean | undefined; }, \"metrics\"> & { metrics: ",
+          "Omit<{ timerange: { from: number; to: number; interval: string; }; indexPattern: string; metrics: { id: string; aggregations: { [key: string]: unknown; }; }[]; includeTimeseries: boolean | undefined; } & { groupBy?: (string | null | undefined)[] | undefined; groupInstance?: (string | null | undefined)[] | undefined; modules?: string[] | undefined; afterKey?: { [x: string]: string | null; } | null | undefined; limit?: number | null | undefined; filters?: { [key: string]: unknown; } | undefined; dropPartialBuckets?: boolean | undefined; alignDataToEnd?: boolean | undefined; }, \"filters\" | \"metrics\"> & { metrics: ",
           {
             "pluginId": "metricsDataAccess",
             "scope": "common",
@@ -3056,7 +3191,9 @@
             "section": "def-common.MetricsAPIMetric",
             "text": "MetricsAPIMetric"
           },
-          "[]; }"
+          "[]; filters?: { bool: ",
+          "QueryDslBoolQuery",
+          "; } | undefined; }"
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/http_api/metrics_api.ts",
         "deprecated": false,
@@ -3125,6 +3262,36 @@
       },
       {
         "parentPluginId": "metricsDataAccess",
+        "id": "def-common.METRICSET_MODULE",
+        "type": "string",
+        "tags": [],
+        "label": "METRICSET_MODULE",
+        "description": [],
+        "signature": [
+          "\"metricset.module\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.METRICSET_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "METRICSET_NAME",
+        "description": [],
+        "signature": [
+          "\"metricset.name\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
         "id": "def-common.MetricsUIAggregation",
         "type": "Type",
         "tags": [],
@@ -3142,6 +3309,36 @@
       },
       {
         "parentPluginId": "metricsDataAccess",
+        "id": "def-common.OS_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "OS_NAME",
+        "description": [],
+        "signature": [
+          "\"os.name\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.SERVICE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_NAME",
+        "description": [],
+        "signature": [
+          "\"service.name\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
         "id": "def-common.SnapshotMetricType",
         "type": "Type",
         "tags": [],
@@ -3151,6 +3348,36 @@
           "\"count\" | \"custom\" | \"memory\" | \"rx\" | \"logRate\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpuV2\" | \"cpu\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"txV2\" | \"rxV2\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"s3TotalRequests\" | \"s3NumberOfObjects\" | \"s3BucketSize\" | \"s3DownloadBytes\" | \"s3UploadBytes\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"rdsLatency\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesSent\" | \"sqsMessagesEmpty\" | \"sqsOldestMessage\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.SYSTEM_INTEGRATION",
+        "type": "string",
+        "tags": [],
+        "label": "SYSTEM_INTEGRATION",
+        "description": [],
+        "signature": [
+          "\"system\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.TIMESTAMP",
+        "type": "string",
+        "tags": [],
+        "label": "TIMESTAMP",
+        "description": [],
+        "signature": [
+          "\"@timestamp\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3577,10 +3804,8 @@
           ", ",
           "NullC",
           "]>; filters: ",
-          "ArrayC",
-          "<",
           "UnknownRecordC",
-          ">; dropPartialBuckets: ",
+          "; dropPartialBuckets: ",
           "BooleanC",
           "; alignDataToEnd: ",
           "BooleanC",

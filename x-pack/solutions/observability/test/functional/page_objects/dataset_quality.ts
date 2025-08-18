@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import {
   DATA_QUALITY_URL_STATE_KEY,
   datasetQualityDetailsUrlSchemaV1,
@@ -17,10 +17,10 @@ import {
   DEFAULT_QUALITY_ISSUE_SORT_FIELD,
 } from '@kbn/dataset-quality-plugin/common/constants';
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import rison from '@kbn/rison';
 import querystring from 'querystring';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
   v: 1,
@@ -77,7 +77,7 @@ type SummaryPanelKPI = Record<
 const texts = {
   noActivityText: 'No activity in the selected timeframe',
   datasetHealthPoor: 'Poor',
-  datasetHealthDegraded: 'Degraded',
+  datasetHealthWarning: 'Warning',
   datasetHealthGood: 'Good',
   activeDatasets: 'Active Data Sets',
   estimatedData: 'Estimated Data',
@@ -85,8 +85,8 @@ const texts = {
   size: 'Size',
   services: 'Services',
   hosts: 'Hosts',
-  degradedDocs: 'Degraded docs',
-  failedDocs: 'Failed docs',
+  degradedDocs: 'Degraded documents',
+  failedDocs: 'Failed documents',
   datasetNameColumn: 'Data set name',
   datasetNamespaceColumn: 'Namespace',
   datasetTypeColumn: 'Type',
@@ -117,8 +117,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     showFullDatasetNamesSwitch: 'button[aria-label="Show full data set names"]',
     showInactiveDatasetsNamesSwitch: 'button[aria-label="Show inactive data sets"]',
     superDatePickerApplyButton: '[data-test-subj="superDatePickerQuickSelectApplyButton"]',
-    qualityIssueDegradedChart: '.euiButtonGroupButton[data-test-subj="degraded"]',
-    qualityIssueFailedChart: '.euiButtonGroupButton[data-test-subj="failed"]',
   };
 
   const testSubjectSelectors = {
@@ -151,6 +149,9 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityDetailsEmptyPromptBody: 'datasetQualityDetailsEmptyPromptBody',
     datasetQualityDatasetHealthKpi: 'datasetQualityDatasetHealthKpi',
     datasetQualityDetailsSummaryKpiValue: 'datasetQualityDetailsSummaryKpiValue',
+    datasetQualityDetailsDegradedSummaryCard:
+      'datasetQualityDetailsSummaryKpiCard-Degraded documents',
+    datasetQualityDetailsFailedSummaryCard: 'datasetQualityDetailsSummaryKpiCard-Failed documents',
     datasetQualityDetailsIntegrationRowIntegration: 'datasetQualityDetailsFieldsList-integration',
     datasetQualityDetailsIntegrationRowVersion: 'datasetQualityDetailsFieldsList-version',
     datasetQualityDetailsLinkToDiscover: 'datasetQualityDetailsLinkToDiscover',
@@ -170,8 +171,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       'datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist',
     datasetQualityDetailsOverviewDegradedFieldToggleSwitch:
       'datasetQualityDetailsOverviewDegradedFieldToggleSwitch',
-    datasetQualityDetailsActionsDropdown: 'datasetQualityDetailsActionsDropdown',
-    openInDiscover: 'openInDiscover',
   };
 
   return {
@@ -193,7 +192,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         ),
       });
 
-      return PageObjects.common.navigateToUrlWithBrowserHistory(
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
         'management',
         '/data/data_quality',
         queryStringParams,
@@ -203,6 +202,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
           ensureCurrentUrl: false,
         }
       );
+      return await this.waitUntilTableLoaded();
     },
 
     async navigateToDetails(pageState: datasetQualityDetailsUrlSchemaV1.UrlSchema) {
@@ -280,7 +280,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       const kpiTitleAndKeys = [
         { title: texts.datasetHealthPoor, key: 'datasetHealthPoor' },
-        { title: texts.datasetHealthDegraded, key: 'datasetHealthDegraded' },
+        { title: texts.datasetHealthWarning, key: 'datasetHealthWarning' },
         { title: texts.datasetHealthGood, key: 'datasetHealthGood' },
         { title: texts.activeDatasets, key: 'activeDatasets' },
         { title: texts.estimatedData, key: 'estimatedData' },
@@ -440,12 +440,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       return testSubjects.find(testSubjectSelectors.datasetQualityDetailsHeaderButton);
     },
 
-    openDatasetQualityDetailsActionsButton() {
-      return testSubjects.click(testSubjectSelectors.datasetQualityDetailsActionsDropdown);
-    },
-
     getOpenInDiscoverButton() {
-      return testSubjects.find(testSubjectSelectors.openInDiscover);
+      return testSubjects.find(testSubjectSelectors.datasetQualityDetailsLinkToDiscover);
     },
 
     openIntegrationActionsMenu() {
@@ -509,9 +505,9 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     async selectQualityIssueChart(type: 'degraded' | 'failed') {
       const chartSelector =
         type === 'degraded'
-          ? selectors.qualityIssueDegradedChart
-          : selectors.qualityIssueFailedChart;
-      return find.clickByCssSelector(chartSelector);
+          ? testSubjectSelectors.datasetQualityDetailsDegradedSummaryCard
+          : testSubjectSelectors.datasetQualityDetailsFailedSummaryCard;
+      return testSubjects.click(chartSelector);
     },
 
     async openDegradedFieldFlyout(fieldName: string) {

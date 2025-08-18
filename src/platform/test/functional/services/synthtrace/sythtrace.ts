@@ -7,15 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { format, UrlObject } from 'url';
-import {
-  createLogger,
-  LogLevel,
-  SynthtraceClientsManager,
-  SynthtraceClientTypes,
-  GetClientsReturn,
-} from '@kbn/apm-synthtrace';
-import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
+import type { UrlObject } from 'url';
+import { format } from 'url';
+import type { SynthtraceClientTypes, GetClientsReturn } from '@kbn/apm-synthtrace';
+import { createLogger, LogLevel, SynthtraceClientsManager } from '@kbn/apm-synthtrace';
+import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 
 export function SynthtraceClientProvider({ getService }: FtrProviderContext) {
   const esClient = getService('es');

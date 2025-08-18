@@ -95,7 +95,12 @@ export const Layout = React.memo(({ reload, interval, nodes, loading }: Props) =
 
   const onDrilldown = useCallback(
     (expression: string) => {
-      applyFilterQuery(expression);
+      applyFilterQuery({
+        query: {
+          language: 'kuery',
+          query: expression,
+        },
+      });
     },
     [applyFilterQuery]
   );

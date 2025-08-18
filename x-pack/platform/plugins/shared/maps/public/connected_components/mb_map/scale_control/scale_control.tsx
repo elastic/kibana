@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useCallback } from 'react';
-import { UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import type { Map as MapboxMap } from '@kbn/mapbox-gl';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';

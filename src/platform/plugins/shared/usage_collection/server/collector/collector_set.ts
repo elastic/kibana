@@ -17,6 +17,7 @@ import type {
   KibanaExecutionContext,
   ExecutionContextSetup,
 } from '@kbn/core/server';
+import pMap from 'p-map';
 import { Collector } from './collector';
 import type { ICollector, CollectorOptions, CollectorFetchContext, ICollectorSet } from './types';
 import { UsageCollector, type UsageCollectorOptions } from './usage_collector';
@@ -44,6 +45,7 @@ export interface CollectorSetConfig {
   executionContext: ExecutionContextSetup;
   maximumWaitTimeForAllCollectorsInS?: number;
   collectors?: AnyCollector[];
+  maxCollectorConcurrency?: number;
 }
 
 export class CollectorSet implements ICollectorSet {
@@ -52,16 +54,19 @@ export class CollectorSet implements ICollectorSet {
   private readonly maximumWaitTimeForAllCollectorsInS: number;
   private readonly collectors: Map<string, AnyCollector>;
   private readonly fetchingCollectors = new WeakMap<AnyCollector, Promise<FetchCollectorOutput>>();
+  private readonly maxCollectorConcurrency;
   constructor({
     logger,
     executionContext,
     maximumWaitTimeForAllCollectorsInS = DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S,
     collectors = [],
+    maxCollectorConcurrency = 5,
   }: CollectorSetConfig) {
     this.logger = logger;
     this.executionContext = executionContext;
     this.collectors = new Map(collectors.map((collector) => [collector.type, collector]));
     this.maximumWaitTimeForAllCollectorsInS = maximumWaitTimeForAllCollectorsInS;
+    this.maxCollectorConcurrency = maxCollectorConcurrency;
   }
 
   /**
@@ -234,8 +239,9 @@ export class CollectorSet implements ICollectorSet {
     // freeze object to prevent collectors from mutating it.
     const context = Object.freeze({ esClient, soClient });
 
-    const fetchExecutions = await Promise.all(
-      readyCollectors.map(async (collector) => {
+    const fetchExecutions = await pMap(
+      readyCollectors,
+      async (collector) => {
         // If the collector is processing from a concurrent request, reuse it.
         let wrappedPromise = this.fetchingCollectors.get(collector);
 
@@ -252,8 +258,10 @@ export class CollectorSet implements ICollectorSet {
         void wrappedPromise.finally(() => this.fetchingCollectors.delete(collector));
 
         return await wrappedPromise;
-      })
+      },
+      { concurrency: this.maxCollectorConcurrency }
     );
+
     const durationMarks = getMarks();
 
     const isReadyExecutionDurationByType = [

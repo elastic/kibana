@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UpdateComment, UpdateCommentsArray } from '.';
+import type { UpdateComment, UpdateCommentsArray } from '.';
 import { ID } from '../../constants/index.mock';
 
 export const getUpdateCommentMock = (): UpdateComment => ({
