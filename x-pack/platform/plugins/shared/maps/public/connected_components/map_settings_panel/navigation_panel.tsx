@@ -262,6 +262,7 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
           options={initialLocationOptions}
           idSelected={settings.initialLocation}
           onChange={onInitialLocationChange}
+          name="initialMapLocation"
         />
       </EuiFormRow>
       {renderInitialLocationInputs()}
