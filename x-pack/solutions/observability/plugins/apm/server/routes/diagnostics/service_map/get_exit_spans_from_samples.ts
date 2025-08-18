@@ -232,7 +232,6 @@ export async function getDestinationParentIds({
         },
       },
     },
-
   });
 
   return { rawResponse: response, hasParent: response.hits.hits.length > 0 };
