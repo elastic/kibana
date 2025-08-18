@@ -639,4 +639,67 @@ describe('WorkflowsParamsFields', () => {
     expect(workflowOptions[1]).toHaveAttribute('name', 'Workflow Without Definition');
     expect(workflowOptions[2]).toHaveAttribute('name', 'Workflow With Empty Triggers');
   });
+
+  test('should render workflow links and handle click to open in new tab', async () => {
+    const originalOpen = window.open;
+    window.open = jest.fn();
+
+    // Mock the application service
+    const mockGetUrlForApp = jest.fn().mockReturnValue('/app/workflows/workflow-1');
+    mockUseKibana.mockReturnValue({
+      services: {
+        http: {
+          post: mockHttpPost,
+        },
+        application: {
+          getUrlForApp: mockGetUrlForApp,
+        },
+      },
+    } as any);
+
+    mockHttpPost.mockResolvedValue({
+      results: [
+        {
+          id: 'workflow-1',
+          name: 'Test Workflow',
+          description: 'A test workflow',
+          status: 'active',
+          definition: {
+            triggers: [{ type: 'manual' }],
+          },
+        },
+      ],
+    });
+
+    await act(async () => {
+      render(<WorkflowsParamsFields {...defaultProps} />);
+    });
+
+    // Wait for workflows to load
+    await waitFor(() => {
+      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search');
+    });
+
+    // Click on the input to open the popover
+    const input = screen.getByRole('searchbox');
+    fireEvent.click(input);
+
+    // Wait for the options to appear
+    await waitFor(() => {
+      expect(screen.getByText('Test Workflow')).toBeInTheDocument();
+    });
+
+    // Find the workflow link button
+    const workflowLinkButton = screen.getByRole('button', { name: 'Open workflow' });
+    expect(workflowLinkButton).toBeInTheDocument();
+
+    // Click the workflow link button directly
+    fireEvent.click(workflowLinkButton);
+
+    // Verify that the correct URL was opened in a new tab
+    expect(mockGetUrlForApp).toHaveBeenCalledWith('workflows', { path: '/workflow-1' });
+    expect(window.open).toHaveBeenCalledWith('/app/workflows/workflow-1', '_blank');
+
+    window.open = originalOpen;
+  });
 });

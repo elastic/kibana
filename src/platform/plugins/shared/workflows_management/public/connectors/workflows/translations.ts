@@ -94,3 +94,10 @@ export const SELECTED_WORKFLOW_DISABLED_ERROR = i18n.translate(
       'The previously selected workflow is no longer available. Please select a different workflow.',
   }
 );
+
+export const OPEN_WORKFLOW_LINK = i18n.translate(
+  'xpack.stackConnectors.components.workflows.openWorkflowLink',
+  {
+    defaultMessage: 'Open workflow',
+  }
+);

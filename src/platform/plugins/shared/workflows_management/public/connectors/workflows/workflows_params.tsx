@@ -9,6 +9,7 @@
 
 import {
   EuiBadge,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -36,6 +37,7 @@ interface WorkflowOption {
   checked?: 'on' | 'off';
   toolTipContent?: string;
   prepend?: React.ReactNode;
+  append?: React.ReactNode;
   [key: string]: any;
 }
 
@@ -119,6 +121,21 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
     window.open(url, '_blank');
   }, [application]);
 
+  const handleOpenWorkflow = useCallback(
+    (workflowIdToOpen: string, event: React.MouseEvent | React.KeyboardEvent) => {
+      // Prevent the click from selecting the workflow option
+      event.stopPropagation();
+      event.preventDefault();
+      event.nativeEvent.stopImmediatePropagation();
+
+      const url = application?.getUrlForApp
+        ? application.getUrlForApp('workflows', { path: `/${workflowIdToOpen}` })
+        : `/app/workflows/${workflowIdToOpen}`;
+      window.open(url, '_blank');
+    },
+    [application]
+  );
+
   // Fetch workflows from internal Kibana API
   useEffect(() => {
     const fetchWorkflows = async () => {
@@ -162,6 +179,29 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
             prependElement = <EuiBadge color="default">{i18n.DISABLED_BADGE_LABEL}</EuiBadge>;
           }
 
+          // Create the append element with the workflow link
+          const appendElement = (
+            <EuiButtonIcon
+              iconType="popout"
+              aria-label={i18n.OPEN_WORKFLOW_LINK}
+              title={i18n.OPEN_WORKFLOW_LINK}
+              size="s"
+              color="text"
+              style={{ flexShrink: 0 }}
+              onMouseDown={(event: React.MouseEvent) => {
+                event.stopPropagation();
+                event.preventDefault();
+                event.nativeEvent.stopImmediatePropagation();
+              }}
+              onClick={(event: React.MouseEvent) => {
+                event.stopPropagation();
+                event.preventDefault();
+                event.nativeEvent.stopImmediatePropagation();
+                handleOpenWorkflow(workflow.id, event);
+              }}
+            />
+          );
+
           return {
             workflowOption: {
               id: workflow.id,
@@ -173,6 +213,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               checked: isSelected ? 'on' : undefined,
               toolTipContent: workflow.description,
               prepend: prependElement,
+              append: appendElement,
             } as WorkflowOption,
             hasAlertTriggerType,
           };
@@ -204,7 +245,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
     };
 
     fetchWorkflows();
-  }, [http, workflowId]);
+  }, [http, workflowId, handleOpenWorkflow]);
 
   // Update input value when workflowId changes
   useEffect(() => {
