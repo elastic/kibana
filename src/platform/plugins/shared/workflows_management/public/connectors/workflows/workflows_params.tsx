@@ -178,7 +178,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
           const isDisabled = !workflow.definition.enabled;
           const isSelected = workflow.id === workflowId;
           const wasSelectedButNowDisabled = isSelected && isDisabled;
-          const hasAlertTriggerType = workflow.definition?.triggers.some(
+          const hasAlertTriggerType = (workflow.definition?.triggers ?? []).some(
             (trigger) => trigger.type === 'alert'
           );
 
