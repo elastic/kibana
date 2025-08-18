@@ -58,11 +58,6 @@ import {
 } from '@kbn/test-suites-xpack-platform/functional/services/monitoring';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
-
-// @ts-ignore not ts yet
-import { UptimeProvider } from './uptime';
-import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
-import { ObservabilityProvider } from './observability';
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
 // only the built-in services will be available
@@ -109,14 +104,11 @@ export const services = {
   canvasElement: CanvasElementProvider,
   grokDebugger: GrokDebuggerProvider,
   userMenu: UserMenuProvider,
-  uptime: UptimeProvider,
-  infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
   ml: MachineLearningProvider,
   transform: TransformProvider,
   reporting: ReportingFunctionalProvider,
   sampleData: SampleDataServiceProvider,
   searchSessions: SearchSessionsService,
-  observability: ObservabilityProvider,
   actions: ActionsServiceProvider,
   rules: RulesServiceProvider,
   cases: CasesServiceProvider,

@@ -131,7 +131,7 @@ report.asciidoc
 # Yarn local mirror content
 .yarn-local-mirror
 
-# Bazel
+# Bazel | TODO: Remove later
 .ijwb
 /bazel
 /bazel-*
@@ -169,11 +169,13 @@ oas_docs/output/kibana.new.yaml
 oas_docs/output/kibana.serverless.new.yaml
 
 # Security Solution Playwright
-x-pack/test/security_solution_playwright/test-results/
-x-pack/test/security_solution_playwright/playwright-report/
-x-pack/test/security_solution_playwright/blob-report/
-x-pack/test/security_solution_playwright/playwright/.cache/
-x-pack/test/security_solution_playwright/.auth/
-x-pack/test/security_solution_playwright/.env
+x-pack/solutions/security/test/security_solution_playwright/test-results/
+x-pack/solutions/security/test/security_solution_playwright/playwright-report/
+x-pack/solutions/security/test/security_solution_playwright/blob-report/
+x-pack/solutions/security/test/security_solution_playwright/playwright/.cache/
+x-pack/solutions/security/test/security_solution_playwright/.auth/
+x-pack/solutions/security/test/security_solution_playwright/.env
 .codeql
 .dependency-graph-log.json
+
+.moon/cache

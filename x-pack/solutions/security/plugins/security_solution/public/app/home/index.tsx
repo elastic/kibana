@@ -16,8 +16,6 @@ import { getScopeFromPath } from '../../sourcerer/containers/sourcerer_paths';
 import { GlobalHeader } from './global_header';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
 
-import { TourContextProvider } from '../../common/components/guided_onboarding_tour';
-
 import { useUrlState } from '../../common/hooks/use_url_state';
 import { useUpdateBrowserTitle } from '../../common/hooks/use_update_browser_title';
 import { useUpdateExecutionContext } from '../../common/hooks/use_update_execution_context';
@@ -68,16 +66,12 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   return (
     <SecuritySolutionAppWrapper id="security-solution-app" className="kbnAppWrapper">
       <ConsoleManager>
-        <TourContextProvider>
-          <>
-            <GlobalHeader />
-            <DragDropContextWrapper browserFields={browserFields}>
-              {children}
-            </DragDropContextWrapper>
-            <HelpMenu />
-            <TopValuesPopover />
-          </>
-        </TourContextProvider>
+        <>
+          <GlobalHeader />
+          <DragDropContextWrapper browserFields={browserFields}>{children}</DragDropContextWrapper>
+          <HelpMenu />
+          <TopValuesPopover />
+        </>
       </ConsoleManager>
     </SecuritySolutionAppWrapper>
   );

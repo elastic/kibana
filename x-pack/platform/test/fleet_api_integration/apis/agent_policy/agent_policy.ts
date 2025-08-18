@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '@kbn/fleet-plugin/server/constants';
 import { skipIfNoDockerRegistry, generateAgent } from '../../helpers';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -77,7 +77,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('GET /api/fleet/agent_policies', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
         await fleetAndAgents.setup();
         await createAgentPolicyWithPackagePolicy();
@@ -164,7 +164,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('POST /api/fleet/agent_policies', () => {
       let systemPkgVersion: string;
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
         await fleetAndAgents.setup();
       });
@@ -182,7 +182,9 @@ export default function (providerContext: FtrProviderContext) {
           });
         }
 
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
+        );
         await kibanaServer.savedObjects.cleanStandardList();
       });
       it('should work with valid minimum required values', async () => {
@@ -654,7 +656,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('POST /api/fleet/agent_policies/{agentPolicyId}/copy', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
+        await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/fleet/agents');
         await fleetAndAgents.setup();
         await createAgentPolicyWithPackagePolicy();
         createdPolicyIds.push(agentPolicyWithPPId!);
@@ -669,7 +671,7 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200)
         );
         await Promise.all(deletedPromises);
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
         if (systemPkgVersion) {
           await supertest.delete(`/api/fleet/epm/packages/system/${systemPkgVersion}`);
         }
@@ -1162,7 +1164,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('PUT /api/fleet/agent_policies/{agentPolicyId}', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
         await fleetAndAgents.setup();
         await createAgentPolicyWithPackagePolicy();
@@ -1178,7 +1180,9 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200)
         );
         await Promise.all(deletedPromises);
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
+        );
       });
       let agentPolicyId: undefined | string;
       it('should work with valid values', async () => {
@@ -1714,10 +1718,12 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('POST /api/fleet/agent_policies/delete', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       });
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
+        );
       });
       let hostedPolicy: any | undefined;
       it('should prevent hosted policies being deleted', async () => {
@@ -1865,7 +1871,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('POST /api/fleet/agent_policies/_bulk_get', () => {
       let policyId: string;
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
         await fleetAndAgents.setup();
         await createAgentPolicyWithPackagePolicy();
 
@@ -1899,7 +1905,9 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ agentPolicyId: agentPolicyWithPPId })
           .expect(200);
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
+        );
       });
 
       it('should allow to get valid ids', async () => {
@@ -2148,13 +2156,15 @@ export default function (providerContext: FtrProviderContext) {
     // FLAKY: https://github.com/elastic/kibana/issues/213370
     describe.skip('POST /internal/fleet/agent_and_package_policies', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
         await fleetAndAgents.setup();
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
+        );
       });
 
       afterEach(async () => {

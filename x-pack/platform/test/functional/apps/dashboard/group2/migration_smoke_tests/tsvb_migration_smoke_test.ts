@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -25,7 +25,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('TSVB - Export import saved objects between versions', () => {
     describe('From 7.12.1', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.loadIfNeeded(
+          'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+        );
         await kibanaServer.uiSettings.replace({});
         await settings.navigateTo();
         await settings.clickKibanaSavedObjects();
@@ -83,14 +85,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
         await kibanaServer.savedObjects.cleanStandardList();
       });
     });
 
     describe('from 7.13.3', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.loadIfNeeded(
+          'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+        );
         await kibanaServer.uiSettings.replace({});
         await settings.navigateTo();
         await settings.clickKibanaSavedObjects();
@@ -129,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
         await kibanaServer.savedObjects.cleanStandardList();
       });
     });

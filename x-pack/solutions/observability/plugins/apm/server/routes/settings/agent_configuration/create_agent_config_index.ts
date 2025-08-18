@@ -71,5 +71,9 @@ const mappings: Mappings = {
       type: 'keyword',
       ignore_above: 1024,
     },
+    error: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
   },
 };

@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const LOG_RATE_ANALYSYS_DATA_GENERATOR = {
   KIBANA_SAMPLE_DATA_LOGS: 'kibana_sample_data_logs',
@@ -233,7 +233,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           break;
 
         case 'farequote_with_spike':
-          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+          await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
 
           await es.updateByQuery({
             index: 'ft_farequote',
@@ -320,7 +320,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           break;
 
         case 'large_arrays':
-          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/large_arrays');
+          await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/large_arrays');
           break;
 
         default:
@@ -337,7 +337,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           break;
 
         case 'farequote_with_spike':
-          await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
           break;
 
         case 'artificial_logs_with_spike':
@@ -358,7 +358,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           break;
 
         case 'large_arrays':
-          await esArchiver.unload('x-pack/test/functional/es_archives/large_arrays');
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/large_arrays');
           break;
 
         default:

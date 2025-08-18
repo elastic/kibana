@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { canvas, maps } = getPageObjects(['canvas', 'maps']);
@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       // canvas application is only available when installation contains canvas workpads
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/default'
       );
       // open canvas home
       await canvas.goToListingPage();

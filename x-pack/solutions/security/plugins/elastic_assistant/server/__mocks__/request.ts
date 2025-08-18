@@ -14,6 +14,11 @@ import type {
   KnowledgeBaseEntryUpdateProps,
   UpdateAttackDiscoverySchedulesRequestBody,
   UpdateKnowledgeBaseEntryRequestParams,
+  AttackDiscoveryPostRequestBody,
+  ConversationCreateProps,
+  ConversationUpdateProps,
+  PerformKnowledgeBaseEntryBulkActionRequestBody,
+  PostEvaluateRequestBodyInput,
 } from '@kbn/elastic-assistant-common';
 import {
   ATTACK_DISCOVERY,
@@ -24,9 +29,6 @@ import {
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
   ATTACK_DISCOVERY_SCHEDULES_FIND,
-  AttackDiscoveryPostRequestBody,
-  ConversationCreateProps,
-  ConversationUpdateProps,
   DEFEND_INSIGHTS,
   DEFEND_INSIGHTS_BY_ID,
   ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION,
@@ -43,12 +45,9 @@ import {
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
-  PerformKnowledgeBaseEntryBulkActionRequestBody,
-  PostEvaluateRequestBodyInput,
   ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
 import {
@@ -58,7 +57,7 @@ import {
   getUpdateConversationSchemaMock,
 } from './conversations_schema.mock';
 import { getCreateKnowledgeBaseEntrySchemaMock } from './knowledge_base_entry_schema.mock';
-import {
+import type {
   AnonymizationFieldCreateProps,
   AnonymizationFieldUpdateProps,
   AlertSummaryCreateProps,
@@ -70,12 +69,6 @@ import {
 export const requestMock = {
   create: httpServerMock.createKibanaRequest,
 };
-
-export const getGetKnowledgeBaseIndicesRequest = () =>
-  requestMock.create({
-    method: 'get',
-    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
-  });
 
 export const getGetKnowledgeBaseStatusRequest = (resource?: string) =>
   requestMock.create({

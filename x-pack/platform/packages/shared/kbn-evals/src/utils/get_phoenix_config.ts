@@ -20,7 +20,7 @@ export interface PhoenixConfig {
 export function getPhoenixConfig(): PhoenixConfig {
   const config = loadConfiguration([], REPO_ROOT, false);
 
-  const phoenixExporter = castArray(config.getTelemetryConfig()?.tracing?.exporters ?? []).flatMap(
+  const phoenixExporter = castArray(config.getTelemetryConfig().tracing.exporters).flatMap(
     (exporter) => {
       const variant = fromExternalVariant(exporter);
       if (variant.type === 'phoenix') {

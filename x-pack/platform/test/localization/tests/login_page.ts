@@ -24,6 +24,8 @@ function getExpectedI18nTranslation(locale: string): string | undefined {
       return '欢迎使用 Elastic';
     case 'fr-FR':
       return 'Bienvenue dans Elastic';
+    case 'de-DE':
+      return 'Willkommen bei Elastic';
     default:
       return;
   }

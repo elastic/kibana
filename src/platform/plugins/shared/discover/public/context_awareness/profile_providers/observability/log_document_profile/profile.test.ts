@@ -69,6 +69,30 @@ describe('logDocumentProfileProvider', () => {
     ).toEqual(RESOLUTION_MATCH);
   });
 
+  it('matches records which have a stream.name set to logs', () => {
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSourceContext: DATA_SOURCE_CONTEXT,
+        record: buildMockRecord('another-index', {
+          'stream.name': 'logs.abc.def',
+        }),
+      })
+    ).toEqual(RESOLUTION_MATCH);
+  });
+
+  it('does not match records which have a different stream.name', () => {
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSourceContext: DATA_SOURCE_CONTEXT,
+        record: buildMockRecord('another-index', {
+          'stream.name': 'metrics',
+        }),
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
   it('does not match records where fields prefixed with "log." are null', () => {
     expect(
       logDocumentProfileProvider.resolve({

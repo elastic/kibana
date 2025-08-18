@@ -38,6 +38,213 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.AwsInputVarFields",
+        "type": "Function",
+        "tags": [],
+        "label": "AwsInputVarFields",
+        "description": [],
+        "signature": [
+          "({ fields, onChange, packageInfo, hasInvalidRequiredVars, }: { fields: ({ label: string; type?: \"text\" | \"password\" | undefined; isSecret?: boolean | undefined; dataTestSubj: string; } & { value: string; id: string; dataTestSubj: string; })[]; onChange: (key: string, value: string) => void; packageInfo: ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.PackageInfo",
+            "text": "PackageInfo"
+          },
+          "; hasInvalidRequiredVars?: boolean | undefined; }) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/aws_credentials_form/aws_input_var_fields.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.AwsInputVarFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  fields,\n  onChange,\n  packageInfo,\n  hasInvalidRequiredVars = false,\n}",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/aws_credentials_form/aws_input_var_fields.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cloud-security-posture",
+                "id": "def-public.AwsInputVarFields.$1.fields",
+                "type": "Array",
+                "tags": [],
+                "label": "fields",
+                "description": [],
+                "signature": [
+                  "({ label: string; type?: \"text\" | \"password\" | undefined; isSecret?: boolean | undefined; dataTestSubj: string; } & { value: string; id: string; dataTestSubj: string; })[]"
+                ],
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/aws_credentials_form/aws_input_var_fields.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/cloud-security-posture",
+                "id": "def-public.AwsInputVarFields.$1.onChange",
+                "type": "Function",
+                "tags": [],
+                "label": "onChange",
+                "description": [],
+                "signature": [
+                  "(key: string, value: string) => void"
+                ],
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/aws_credentials_form/aws_input_var_fields.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/cloud-security-posture",
+                    "id": "def-public.AwsInputVarFields.$1.onChange.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "key",
+                    "description": [],
+                    "signature": [
+                      "string"
+                    ],
+                    "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/aws_credentials_form/aws_input_var_fields.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  },
+                  {
+                    "parentPluginId": "@kbn/cloud-security-posture",
+                    "id": "def-public.AwsInputVarFields.$1.onChange.$2",
+                    "type": "string",
+                    "tags": [],
+                    "label": "value",
+                    "description": [],
+                    "signature": [
+                      "string"
+                    ],
+                    "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/aws_credentials_form/aws_input_var_fields.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/cloud-security-posture",
+                "id": "def-public.AwsInputVarFields.$1.packageInfo",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "packageInfo",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "fleet",
+                    "scope": "common",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-common.Installable",
+                    "text": "Installable"
+                  },
+                  "<Merge<",
+                  {
+                    "pluginId": "fleet",
+                    "scope": "common",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-common.RegistryPackage",
+                    "text": "RegistryPackage"
+                  },
+                  ", ",
+                  {
+                    "pluginId": "fleet",
+                    "scope": "common",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-common.EpmPackageAdditions",
+                    "text": "EpmPackageAdditions"
+                  },
+                  ">> | ",
+                  {
+                    "pluginId": "fleet",
+                    "scope": "common",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-common.Installable",
+                    "text": "Installable"
+                  },
+                  "<Merge<",
+                  {
+                    "pluginId": "fleet",
+                    "scope": "common",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-common.ArchivePackage",
+                    "text": "ArchivePackage"
+                  },
+                  ", ",
+                  {
+                    "pluginId": "fleet",
+                    "scope": "common",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-common.EpmPackageAdditions",
+                    "text": "EpmPackageAdditions"
+                  },
+                  ">>"
+                ],
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/aws_credentials_form/aws_input_var_fields.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/cloud-security-posture",
+                "id": "def-public.AwsInputVarFields.$1.hasInvalidRequiredVars",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "hasInvalidRequiredVars",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/aws_credentials_form/aws_input_var_fields.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.CloudSetup",
+        "type": "Function",
+        "tags": [],
+        "label": "CloudSetup",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<CloudSetupProps>"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/cloud_setup.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetup.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.createMisconfigurationFindingsQuery",
         "type": "Function",
         "tags": [],
@@ -851,6 +1058,41 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.RadioGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "RadioGroup",
+        "description": [],
+        "signature": [
+          "({ idSelected, size, options, disabled, onChange, name, }: ",
+          "CspRadioGroupProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/csp_boxed_radio_group.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.RadioGroup.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  idSelected,\n  size,\n  options,\n  disabled,\n  onChange,\n  name,\n}",
+            "description": [],
+            "signature": [
+              "CspRadioGroupProps"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/csp_boxed_radio_group.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.SeverityStatusBadge",
         "type": "Function",
         "tags": [],
@@ -989,6 +1231,145 @@
               "; } | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.CloudSetupConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudSetupConfig",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.policyTemplate",
+            "type": "string",
+            "tags": [],
+            "label": "policyTemplate",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.shortName",
+            "type": "string",
+            "tags": [],
+            "label": "shortName",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.defaultProvider",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "defaultProvider",
+            "description": [],
+            "signature": [
+              "\"aws\" | \"azure\" | \"gcp\""
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.namespaceSupportEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "namespaceSupportEnabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.overviewPath",
+            "type": "string",
+            "tags": [],
+            "label": "overviewPath",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.getStartedPath",
+            "type": "string",
+            "tags": [],
+            "label": "getStartedPath",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.cloudConnectorEnabledVersion",
+            "type": "string",
+            "tags": [],
+            "label": "cloudConnectorEnabledVersion",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.showCloudTemplates",
+            "type": "boolean",
+            "tags": [],
+            "label": "showCloudTemplates",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.providers",
+            "type": "Object",
+            "tags": [],
+            "label": "providers",
+            "description": [],
+            "signature": [
+              "{ aws: ",
+              "CloudProviderConfig",
+              "; azure: ",
+              "CloudProviderConfig",
+              "; gcp: ",
+              "CloudProviderConfig",
+              "; }"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2700,6 +3081,36 @@
     "misc": [
       {
         "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.AWS_ORGANIZATION_ACCOUNT",
+        "type": "string",
+        "tags": [],
+        "label": "AWS_ORGANIZATION_ACCOUNT",
+        "description": [],
+        "signature": [
+          "\"organization-account\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.AWS_SINGLE_ACCOUNT",
+        "type": "string",
+        "tags": [],
+        "label": "AWS_SINGLE_ACCOUNT",
+        "description": [],
+        "signature": [
+          "\"single-account\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.FindingsMisconfigurationPanelExpandableFlyoutProps",
         "type": "Type",
         "tags": [],
@@ -2840,6 +3251,36 @@
           " & { id: \"findings-vulnerability-panel-preview\"; params: BaseVulnerabilityFlyoutProps & PreviewModeProps; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.GCP_ORGANIZATION_ACCOUNT",
+        "type": "string",
+        "tags": [],
+        "label": "GCP_ORGANIZATION_ACCOUNT",
+        "description": [],
+        "signature": [
+          "\"organization-account\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.GCP_SINGLE_ACCOUNT",
+        "type": "string",
+        "tags": [],
+        "label": "GCP_SINGLE_ACCOUNT",
+        "description": [],
+        "signature": [
+          "\"single-account\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

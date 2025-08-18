@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { runPrivilegeTests } from '../../privileges_helpers';
 import { setupTestUsers, testUsers } from '../test_users';
 
@@ -210,7 +210,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('fleet_agent_policies_privileges', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
       await setupTestUsers(getService('security'));
 

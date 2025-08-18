@@ -7,24 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+} from '@kbn/core/server';
 
 import { capabilitiesProvider } from './capabilities_provider';
-import { AdvancedSettingsConfig } from './config';
+import type { AdvancedSettingsConfig } from './config';
 
 export class AdvancedSettingsServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;
   private readonly config: AdvancedSettingsConfig;
+  private readonly isServerless: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get();
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(core: CoreSetup) {
     this.logger.debug('advancedSettings: Setup');
 
-    core.capabilities.registerProvider(() => capabilitiesProvider(this.config));
+    core.capabilities.registerProvider(() => capabilitiesProvider(this.config, this.isServerless));
 
     return {};
   }

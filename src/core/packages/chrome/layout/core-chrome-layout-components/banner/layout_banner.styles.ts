@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import { EmotionFn } from '../types';
+import type { EmotionFn } from '../types';
 
 const root: EmotionFn = ({ euiTheme }) => css`
   grid-area: banner;

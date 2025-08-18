@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { SpanLink } from '@kbn/apm-plugin/typings/es_schemas/raw/fields/span_links';
+import type { SpanLink } from '@kbn/apm-plugin/typings/es_schemas/raw/fields/span_links';
 import { v4 as uuidv4 } from 'uuid';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import moment from 'moment';
 
 function getProducerInternalOnly({ start }: { start: Moment }) {

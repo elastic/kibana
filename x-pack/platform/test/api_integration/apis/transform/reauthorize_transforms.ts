@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ReauthorizeTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/reauthorize_transforms';
+import type { ReauthorizeTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/reauthorize_transforms';
 import expect from '@kbn/expect';
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getCommonRequestHeader } from '../../services/ml/common_api';
 import { USER } from '../../services/transform/security_common';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { asyncForEach, generateDestIndex, generateTransformConfig } from './common';
 
@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
     }
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
 
       const apiKeyForTransformUsers =

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand, ESQLCommandOption, ESQLMessage } from '../../../types';
-import { ICommandContext } from '../../../commands_registry/types';
+import type { ICommandCallbacks, ICommandContext } from '../../../commands_registry/types';
 import { isColumn, isFunctionExpression } from '../../../ast/is';
 import { validateColumnForCommand } from './column';
 import { validateFunction } from './function';
@@ -15,7 +15,8 @@ import { validateFunction } from './function';
 export function validateOption(
   option: ESQLCommandOption,
   command: ESQLCommand,
-  context: ICommandContext
+  context: ICommandContext,
+  callbacks: ICommandCallbacks
 ): ESQLMessage[] {
   // check if the arguments of the option are of the correct type
   const messages: ESQLMessage[] = [];
@@ -41,6 +42,7 @@ export function validateOption(
           parentCommand: command.name,
           parentOption: option.name,
           context,
+          callbacks,
         })
       );
     }

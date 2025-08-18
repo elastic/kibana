@@ -17,7 +17,13 @@
       "actions",
       "workflowsExecutionEngine",
       "features",
-      "security"
+      "security",
+      "triggersActionsUi",
+      "spaces",
+      "embeddable"
+    ],
+    "optionalPlugins": [
+      "alerting"
     ]
   }
 }

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import {
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type {
   IndicesDataStream,
   IndicesDataStreamsStatsDataStreamsStatsItem,
   SecurityHasPrivilegesResponse,
@@ -18,8 +19,8 @@ import {
   deserializeDataStream,
   deserializeDataStreamList,
 } from '../../../lib/data_stream_serialization';
-import { EnhancedDataStreamFromEs } from '../../../../common/types';
-import { RouteDependencies } from '../../../types';
+import type { EnhancedDataStreamFromEs } from '../../../../common/types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 interface MeteringStatsResponse {
