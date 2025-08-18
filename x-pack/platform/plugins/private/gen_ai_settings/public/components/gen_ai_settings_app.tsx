@@ -240,9 +240,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
               <EuiFormRow fullWidth>
                 <EuiFlexGroup gutterSize="m" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <DefaultAIConnector
-                      connectors={connectors}
-                    />
+                    <DefaultAIConnector connectors={connectors} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFormRow>
